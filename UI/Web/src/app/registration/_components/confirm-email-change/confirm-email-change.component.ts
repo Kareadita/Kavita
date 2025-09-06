@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from 'src/app/_services/account.service';
@@ -18,15 +18,21 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
     imports: [SplashContainerComponent, TranslocoDirective]
 })
 export class ConfirmEmailChangeComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private accountService = inject(AccountService);
+  private toastr = inject(ToastrService);
+  private themeService = inject(ThemeService);
+  private navService = inject(NavService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
 
   email: string = '';
   token: string = '';
 
   confirmed: boolean = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
-    private toastr: ToastrService, private themeService: ThemeService, private navService: NavService,
-    private readonly cdRef: ChangeDetectorRef) {
+  constructor() {
       this.navService.hideSideNav();
       this.themeService.setTheme(this.themeService.defaultTheme);
       const token = this.route.snapshot.queryParamMap.get('token');

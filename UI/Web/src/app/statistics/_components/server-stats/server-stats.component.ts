@@ -36,6 +36,14 @@ import {AccountService} from "../../../_services/account.service";
     imports: [IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective]
 })
 export class ServerStatsComponent {
+  private statService = inject(StatisticsService);
+  private router = inject(Router);
+  private imageService = inject(ImageService);
+  private metadataService = inject(MetadataService);
+  private modalService = inject(NgbModal);
+  private utilityService = inject(UtilityService);
+  private filterUtilityService = inject(FilterUtilitiesService);
+
 
   private readonly destroyRef = inject(DestroyRef);
   protected readonly accountService = inject(AccountService);
@@ -65,9 +73,7 @@ export class ServerStatsComponent {
 
   get Breakpoint() { return Breakpoint; }
 
-  constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService,
-    private metadataService: MetadataService, private modalService: NgbModal, private utilityService: UtilityService,
-    private filterUtilityService: FilterUtilitiesService) {
+  constructor() {
     this.seriesImage = (data: PieDataItem) => {
       if (data.extra) return this.imageService.getSeriesCoverImage(data.extra.id);
       return '';

@@ -29,6 +29,9 @@ import {RatingAuthority} from "../../_models/rating";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewCardComponent implements OnInit {
+  private readonly modalService = inject(NgbModal);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   private readonly accountService = inject(AccountService);
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
@@ -36,8 +39,6 @@ export class ReviewCardComponent implements OnInit {
   @Output() refresh = new EventEmitter<ReviewModalCloseEvent>();
 
   isMyReview: boolean = false;
-
-  constructor(private readonly modalService: NgbModal, private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.accountService.currentUser$.subscribe(u => {

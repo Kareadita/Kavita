@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -17,6 +17,13 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
     imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
 })
 export class ConfirmResetPasswordComponent {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private accountService = inject(AccountService);
+  private toastr = inject(ToastrService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private navService = inject(NavService);
+
 
   token: string = '';
   registerForm: FormGroup = new FormGroup({
@@ -24,9 +31,7 @@ export class ConfirmResetPasswordComponent {
     password: new FormControl('', [Validators.required, Validators.maxLength(256), Validators.minLength(6)]),
   });
 
-  constructor(private route: ActivatedRoute, private router: Router,
-    private accountService: AccountService, private toastr: ToastrService,
-    private readonly cdRef: ChangeDetectorRef, private navService: NavService) {
+  constructor() {
 
       this.navService.showNavBar();
       this.navService.hideSideNav();

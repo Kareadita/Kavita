@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
@@ -10,10 +10,11 @@ import { Series } from '../_models/series';
   providedIn: 'root'
 })
 export class RecommendationService {
+  private httpClient = inject(HttpClient);
+  private utilityService = inject(UtilityService);
+
 
   private baseUrl = environment.apiUrl;
-
-  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
   getQuickReads(libraryId: number, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();

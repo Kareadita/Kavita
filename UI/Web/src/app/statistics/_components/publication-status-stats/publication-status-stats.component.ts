@@ -25,6 +25,8 @@ import {TranslocoDirective} from "@jsverse/transloco";
     imports: [ReactiveFormsModule, PieChartModule, SortableHeader_1, AsyncPipe, DecimalPipe, TranslocoDirective]
 })
 export class PublicationStatusStatsComponent {
+  private statService = inject(StatisticsService);
+
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
 
@@ -40,7 +42,7 @@ export class PublicationStatusStatsComponent {
   formControl: FormControl = new FormControl(true, []);
 
 
-  constructor(private statService: StatisticsService) {
+  constructor() {
     this.publicationStatues$ = combineLatest([this.currentSort$, this.statService.getPublicationStatus()]).pipe(
       map(([sortConfig, data]) => {
         return (sortConfig.column) ? data.sort((a: PieDataItem, b: PieDataItem) => {

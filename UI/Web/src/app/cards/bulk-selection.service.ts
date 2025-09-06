@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {ReplaySubject} from 'rxjs';
 import {filter} from 'rxjs/operators';
@@ -16,6 +16,8 @@ type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'si
   providedIn: 'root'
 })
 export class BulkSelectionService {
+  private actionFactory = inject(ActionFactoryService);
+
 
   private debug: boolean = false;
   private prevIndex: number = 0;
@@ -33,7 +35,9 @@ export class BulkSelectionService {
    */
   public selections$ = this.selectionsSource.asObservable();
 
-  constructor(router: Router, private actionFactory: ActionFactoryService) {
+  constructor() {
+    const router = inject(Router);
+
     router.events
       .pipe(filter(event => event instanceof NavigationStart))
       .subscribe(() => {

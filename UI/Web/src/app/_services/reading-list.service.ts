@@ -1,5 +1,5 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {map} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
 import {UtilityService} from '../shared/_services/utility.service';
@@ -14,10 +14,11 @@ import {Action, ActionItem} from './action-factory.service';
   providedIn: 'root'
 })
 export class ReadingListService {
+  private httpClient = inject(HttpClient);
+  private utilityService = inject(UtilityService);
+
 
   baseUrl = environment.apiUrl;
-
-  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
   getReadingList(readingListId: number) {
     return this.httpClient.get<ReadingList | null>(this.baseUrl + 'readinglist?readingListId=' + readingListId);

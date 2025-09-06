@@ -1,16 +1,5 @@
 import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  EventEmitter,
-  inject,
-  Inject,
-  Input,
-  OnInit,
-  Output
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import {combineLatest, filter, map, Observable, of, shareReplay, tap} from 'rxjs';
 import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
 import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
@@ -35,6 +24,11 @@ import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
     imports: [NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
+  private readonly cdRef = inject(ChangeDetectorRef);
+  mangaReaderService = inject(MangaReaderService);
+  private document = inject<Document>(DOCUMENT);
+  readerService = inject(ReaderService);
+
 
 
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
@@ -81,11 +75,6 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
   get ReaderMode() {return ReaderMode;}
   get FITTING_OPTION() {return FITTING_OPTION;}
   get LayoutMode() {return LayoutMode;}
-
-
-
-  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: MangaReaderService,
-    @Inject(DOCUMENT) private document: Document, public readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(

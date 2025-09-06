@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, NgZone, OnDestroy, Pipe, PipeTransform} from '@angular/core';
+import { ChangeDetectorRef, NgZone, OnDestroy, Pipe, PipeTransform, inject } from '@angular/core';
 import {TranslocoService} from "@jsverse/transloco";
 
 /**
@@ -34,10 +34,12 @@ and modified
   standalone: true
 })
 export class TimeAgoPipe implements PipeTransform, OnDestroy {
+	private readonly changeDetectorRef = inject(ChangeDetectorRef);
+	private ngZone = inject(NgZone);
+	private translocoService = inject(TranslocoService);
+
 
 	private timer: number | null = null;
-	constructor(private readonly changeDetectorRef: ChangeDetectorRef, private ngZone: NgZone,
-              private translocoService: TranslocoService) {}
 
 	transform(value: string | Date | null) {
     if (value === '' || value === null || value === undefined || (typeof value === 'string' && value.split('T')[0] === '0001-01-01'))  {

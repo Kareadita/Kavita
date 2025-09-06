@@ -1,4 +1,4 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import {SortField} from "../_models/metadata/series-filter";
 import {TranslocoService} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../metadata-filter/filter-settings";
@@ -9,9 +9,8 @@ import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
   standalone: true
 })
 export class SortFieldPipe implements PipeTransform {
+  private translocoService = inject(TranslocoService);
 
-  constructor(private translocoService: TranslocoService) {
-  }
 
   transform<T extends number>(value: T, entityType: ValidFilterEntity): string {
 

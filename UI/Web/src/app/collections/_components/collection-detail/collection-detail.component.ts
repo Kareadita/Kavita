@@ -1,17 +1,5 @@
 import {AsyncPipe, DatePipe, DOCUMENT} from '@angular/common';
-import {
-  AfterContentChecked,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  ElementRef,
-  EventEmitter,
-  inject,
-  Inject,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, EventEmitter, inject, OnInit, ViewChild } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgbModal, NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
@@ -75,6 +63,8 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
     DatePipe, DefaultDatePipe, ProviderImagePipe, AsyncPipe, ScrobbleProviderNamePipe, PromotedIconComponent]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
+  private document = inject<Document>(DOCUMENT);
+
 
   public readonly imageService = inject(ImageService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
@@ -181,7 +171,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  constructor(@Inject(DOCUMENT) private document: Document) {
+  constructor() {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
       const routeId = this.route.snapshot.paramMap.get('id');

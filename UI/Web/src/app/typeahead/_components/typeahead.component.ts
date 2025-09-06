@@ -1,24 +1,6 @@
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AsyncPipe, DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ContentChild,
-  DestroyRef,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  inject,
-  Inject,
-  Input,
-  OnInit,
-  Output,
-  Renderer2,
-  RendererStyleFlags2,
-  TemplateRef,
-  ViewChild
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, DestroyRef, ElementRef, EventEmitter, HostListener, inject, Input, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Observable, ReplaySubject} from 'rxjs';
 import {auditTime, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
@@ -52,6 +34,8 @@ const ANIMATION_SPEED = 200;
   ]
 })
 export class TypeaheadComponent implements OnInit {
+  private document = inject<Document>(DOCUMENT);
+
   /**
    * Settings for the typeahead
    */
@@ -101,8 +85,6 @@ export class TypeaheadComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly renderer2 = inject(Renderer2);
   private readonly cdRef = inject(ChangeDetectorRef);
-
-  constructor(@Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit() {
     this.reset.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((resetToEmpty: boolean) => {

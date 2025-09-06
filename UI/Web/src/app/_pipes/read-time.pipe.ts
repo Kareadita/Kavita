@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import {IHasReadingTime} from "../_models/common/i-has-reading-time";
 import {TranslocoService} from "@jsverse/transloco";
 
@@ -7,7 +7,8 @@ import {TranslocoService} from "@jsverse/transloco";
   standalone: true
 })
 export class ReadTimePipe implements PipeTransform {
-  constructor(private translocoService: TranslocoService) {}
+  private translocoService = inject(TranslocoService);
+
 
   transform(readingTime: IHasReadingTime): string {
     if (readingTime.maxHoursToRead === 0 || readingTime.minHoursToRead === 0) {

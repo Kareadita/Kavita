@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, Injectable} from '@angular/core';
+import { DestroyRef, Injectable, inject } from '@angular/core';
 import {of} from 'rxjs';
 import {filter, map, tap} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
@@ -14,13 +14,17 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   providedIn: 'root'
 })
 export class LibraryService {
+  private httpClient = inject(HttpClient);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly destroyRef = inject(DestroyRef);
+
 
   baseUrl = environment.apiUrl;
 
   private libraryNames: {[key:number]: string} | undefined = undefined;
   private libraryTypes: {[key: number]: LibraryType} | undefined = undefined;
 
-  constructor(private httpClient: HttpClient, private readonly messageHub: MessageHubService, private readonly destroyRef: DestroyRef) {
+  constructor() {
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(e => e.event === EVENTS.LibraryModified),
       tap((e) => {
         console.log('LibraryModified event came in, clearing library name cache');

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { NgbActiveModal, NgbTypeahead, NgbHighlight } from '@ng-bootstrap/ng-bootstrap';
 import { catchError, debounceTime, distinctUntilChanged, filter, map, merge, Observable, of, OperatorFunction, Subject, switchMap, tap } from 'rxjs';
 import { Stack } from 'src/app/shared/data-structures/stack';
@@ -22,6 +22,9 @@ export interface DirectoryPickerResult {
     imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgClass, TranslocoDirective]
 })
 export class DirectoryPickerComponent implements OnInit {
+  modal = inject(NgbActiveModal);
+  private libraryService = inject(LibraryService);
+
 
   @Input() startingFolder: string = '';
   /**
@@ -63,10 +66,6 @@ export class DirectoryPickerComponent implements OnInit {
       ),
       tap(() => this.searching = false)
     )
-  }
-
-  constructor(public modal: NgbActiveModal, private libraryService: LibraryService) {
-
   }
 
   ngOnInit(): void {

@@ -1,5 +1,5 @@
 import {HttpParams} from '@angular/common/http';
-import {Inject, Injectable, signal, Signal} from '@angular/core';
+import { Injectable, signal, Signal, inject } from '@angular/core';
 import {Chapter} from 'src/app/_models/chapter';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
@@ -65,6 +65,8 @@ export enum UserBreakpoint {
   providedIn: 'root'
 })
 export class UtilityService {
+  private document = inject<Document>(DOCUMENT);
+
 
   public readonly activeBreakpointSource = new ReplaySubject<Breakpoint>(1);
   public readonly activeBreakpoint$ = this.activeBreakpointSource.asObservable().pipe(debounceTime(60), shareReplay({bufferSize: 1, refCount: true}));
@@ -78,9 +80,6 @@ export class UtilityService {
 
 
   mangaFormatKeys: string[] = [];
-
-  constructor(@Inject(DOCUMENT) private document: Document) {
-  }
 
 
   sortChapters = (a: Chapter, b: Chapter) => {

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { SearchResultGroup } from '../_models/search/search-result-group';
@@ -9,10 +9,10 @@ import { Series } from '../_models/series';
   providedIn: 'root'
 })
 export class SearchService {
+  private httpClient = inject(HttpClient);
+
 
   baseUrl = environment.apiUrl;
-
-  constructor(private httpClient: HttpClient) { }
 
   search(term: string, includeChapterAndFiles: boolean = false) {
     if (term === '') {

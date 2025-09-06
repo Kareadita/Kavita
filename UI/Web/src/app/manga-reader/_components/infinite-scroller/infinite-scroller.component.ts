@@ -1,23 +1,5 @@
 import {AsyncPipe, DOCUMENT} from '@angular/common';
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, computed,
-  DestroyRef, effect,
-  ElementRef,
-  EventEmitter,
-  inject,
-  Inject, Injector,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-  Renderer2, signal, Signal,
-  SimpleChanges,
-  ViewChild
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, effect, ElementRef, EventEmitter, inject, Injector, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, signal, Signal, SimpleChanges, ViewChild } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
 import {ScrollService} from 'src/app/_services/scroll.service';
@@ -81,6 +63,8 @@ const enum DEBUG_MODES {
     imports: [AsyncPipe, TranslocoDirective, InfiniteScrollModule, SafeStylePipe]
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
+  private readonly document = inject<Document>(DOCUMENT);
+
 
   private readonly mangaReaderService = inject(MangaReaderService);
   private readonly readerService = inject(ReaderService);
@@ -212,7 +196,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     return this.webtoonImageWidth > (innerWidth || document.body.clientWidth);
   }
 
-  constructor(@Inject(DOCUMENT) private readonly document: Document) {
+  constructor() {
+    const document = this.document;
+
     // This will always exist at this point in time since this is used within manga reader
     const reader = document.querySelector('.reading-area');
     if (reader !== null) {

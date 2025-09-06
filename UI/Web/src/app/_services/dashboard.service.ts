@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {TextResonse} from "../_types/text-response";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
@@ -8,8 +8,9 @@ import {DashboardStream} from "../_models/dashboard/dashboard-stream";
   providedIn: 'root'
 })
 export class DashboardService {
+  private httpClient = inject(HttpClient);
+
   baseUrl = environment.apiUrl;
-  constructor(private httpClient: HttpClient) { }
 
   getDashboardStreams(visibleOnly = true) {
     return this.httpClient.get<Array<DashboardStream>>(this.baseUrl + 'stream/dashboard?visibleOnly=' + visibleOnly);

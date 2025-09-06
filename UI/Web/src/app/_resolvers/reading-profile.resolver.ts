@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from '@angular/router';
 import {Observable} from 'rxjs';
 import {ReadingProfileService} from "../_services/reading-profile.service";
@@ -7,8 +7,8 @@ import {ReadingProfileService} from "../_services/reading-profile.service";
   providedIn: 'root'
 })
 export class ReadingProfileResolver implements Resolve<any> {
+  private readingProfileService = inject(ReadingProfileService);
 
-  constructor(private readingProfileService: ReadingProfileService) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
     // Extract seriesId from route params or parent route

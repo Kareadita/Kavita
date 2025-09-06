@@ -1,5 +1,5 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {Inject, inject, Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {environment} from 'src/environments/environment';
 import {UserReadStatistics} from '../statistics/_models/user-read-statistics';
 import {PublicationStatusPipe} from '../_pipes/publication-status.pipe';
@@ -34,13 +34,14 @@ export enum DayOfWeek
   providedIn: 'root'
 })
 export class StatisticsService {
+  private httpClient = inject(HttpClient);
+  private save = inject<Saver>(SAVER);
+
 
   baseUrl = environment.apiUrl;
   translocoService = inject(TranslocoService);
-  publicationStatusPipe = new PublicationStatusPipe(this.translocoService);
-  mangaFormatPipe = new MangaFormatPipe(this.translocoService);
-
-  constructor(private httpClient: HttpClient, @Inject(SAVER) private save: Saver) { }
+  publicationStatusPipe = new PublicationStatusPipe();
+  mangaFormatPipe = new MangaFormatPipe();
 
   getUserStatistics(userId: number, libraryIds: Array<number> = []) {
     const url = `${this.baseUrl}stats/user/${userId}/read`;

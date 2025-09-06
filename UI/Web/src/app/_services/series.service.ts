@@ -1,5 +1,5 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
@@ -26,12 +26,13 @@ import {FilterField} from "../_models/metadata/v2/filter-field";
   providedIn: 'root'
 })
 export class SeriesService {
+  private httpClient = inject(HttpClient);
+  private utilityService = inject(UtilityService);
+
 
   baseUrl = environment.apiUrl;
   paginatedResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
   paginatedSeriesForTagsResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
-
-  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
   getAllSeriesV2(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>, context: QueryContext = QueryContext.None) {
     let params = new HttpParams();

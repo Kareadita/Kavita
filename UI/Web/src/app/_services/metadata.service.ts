@@ -38,6 +38,8 @@ import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
   providedIn: 'root'
 })
 export class MetadataService {
+  private httpClient = inject(HttpClient);
+
 
   private readonly translocoService = inject(TranslocoService);
   private readonly libraryService = inject(LibraryService);
@@ -47,10 +49,8 @@ export class MetadataService {
   baseUrl = environment.apiUrl;
   private validLanguages: Array<Language> = [];
   private ageRatingPipe = new AgeRatingPipe();
-  private mangaFormatPipe = new MangaFormatPipe(this.translocoService);
+  private mangaFormatPipe = new MangaFormatPipe();
   private personRolePipe = new PersonRolePipe();
-
-  constructor(private httpClient: HttpClient) { }
 
   getSeriesMetadataFromPlus(seriesId: number, libraryType: LibraryType) {
     return this.httpClient.get<SeriesDetailPlus | null>(this.baseUrl + 'metadata/series-detail-plus?seriesId=' + seriesId + '&libraryType=' + libraryType);

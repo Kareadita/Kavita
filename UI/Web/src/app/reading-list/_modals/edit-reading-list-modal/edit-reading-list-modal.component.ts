@@ -35,6 +35,15 @@ enum TabID {
     imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, AsyncPipe, TranslocoDirective]
 })
 export class EditReadingListModalComponent implements OnInit {
+  private ngModal = inject(NgbActiveModal);
+  private readingListService = inject(ReadingListService);
+  utilityService = inject(UtilityService);
+  private uploadService = inject(UploadService);
+  private toastr = inject(ToastrService);
+  private imageService = inject(ImageService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  accountService = inject(AccountService);
+
 
   @Input({required: true}) readingList!: ReadingList;
   private readonly destroyRef = inject(DestroyRef);
@@ -51,10 +60,6 @@ export class EditReadingListModalComponent implements OnInit {
 
   get Breakpoint() { return Breakpoint; }
   get TabID() { return TabID; }
-
-  constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService,
-    public utilityService: UtilityService, private uploadService: UploadService, private toastr: ToastrService,
-    private imageService: ImageService, private readonly cdRef: ChangeDetectorRef, public accountService: AccountService) { }
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({

@@ -23,6 +23,10 @@ export enum ADD_FLOW {
     imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective]
 })
 export class AddToListModalComponent implements OnInit, AfterViewInit {
+  private modal = inject(NgbActiveModal);
+  private readingListService = inject(ReadingListService);
+  private toastr = inject(ToastrService);
+
 
   @Input({required: true}) title!: string;
   /**
@@ -69,9 +73,6 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
   }
 
   translocoService = inject(TranslocoService);
-
-
-  constructor(private modal: NgbActiveModal, private readingListService: ReadingListService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
 

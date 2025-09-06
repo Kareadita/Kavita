@@ -1,4 +1,4 @@
-import { Directive, Input, HostListener, OnInit, ElementRef, Inject } from '@angular/core';
+import { Directive, Input, HostListener, OnInit, ElementRef, inject } from '@angular/core';
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
@@ -6,10 +6,10 @@ import { Directive, Input, HostListener, OnInit, ElementRef, Inject } from '@ang
   standalone: true
 })
 export class A11yClickDirective implements OnInit {
+  private element = inject<ElementRef>(ElementRef);
+
   @Input('a11y-click') keyCodes!: string;
   keyCodeArray!: string[];
-
-  constructor(@Inject(ElementRef) private element : ElementRef){}
 
   ngOnInit(){
     if(this.keyCodes) {
