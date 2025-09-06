@@ -102,6 +102,11 @@ $action-bar-height: 38px;
   max-height: $action-bar-height;
   height: $action-bar-height;
 
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 0.5rem;
+
   .book-title-text {
     text-align: center;
     text-overflow: ellipsis;
@@ -127,6 +132,14 @@ $action-bar-height: 38px;
   .next-page-highlight {
     color: var(--primary-color);
   }
+}
+
+.action-bar > div:nth-child(2) {
+  justify-self: center;
+}
+
+.action-bar > div:nth-child(3) {
+  justify-self: end;
 }
 
 .reader-container {
