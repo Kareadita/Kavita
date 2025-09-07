@@ -32,7 +32,7 @@ export class ViewAnnotationsDrawerComponent {
   formGroup = new FormGroup({
     filter: new FormControl('', [])
   });
-  readonly FilterAfter = 6;
+  readonly FilterAfter = 4;
 
   handleDelete(annotation: Annotation) {
     this.annotationService.delete(annotation.id).subscribe();

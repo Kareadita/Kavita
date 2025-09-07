@@ -14,7 +14,7 @@
 
   <div class="offcanvas-body">
     <form [formGroup]="formGroup">
-      @if (annotations.length > FilterAfter) {
+      @if (annotations().length > FilterAfter) {
         <div class="row g-0 mb-3">
           <div class="col-md-12">
             <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>

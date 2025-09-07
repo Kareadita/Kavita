@@ -388,7 +388,7 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<AppUserAnnotation, AnnotationDto>()
             .ForMember(dest => dest.OwnerUsername, opt => opt.MapFrom(src => src.AppUser.UserName))
-            .ForMember(dest => dest.OwnerUserId, opt => opt.MapFrom(src => src.AppUserId));
+            .ForMember(dest => dest.OwnerUserId, opt => opt.MapFrom(src => src.AppUserId)) ;
 
         CreateMap<OidcConfigDto, OidcPublicConfigDto>();
     }
