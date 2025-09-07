@@ -12,7 +12,7 @@ import {
 import {Annotation} from "../../../_models/annotations/annotation";
 import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {QuillViewComponent} from "ngx-quill";
-import {DatePipe, NgStyle} from "@angular/common";
+import {DatePipe, NgClass, NgStyle} from "@angular/common";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmService} from "../../../../shared/confirm.service";
 import {AnnotationService} from "../../../../_services/annotation.service";
@@ -31,7 +31,8 @@ import {ActivatedRoute, Router, RouterLink} from "@angular/router";
     TranslocoDirective,
     DefaultValuePipe,
     NgStyle,
-    RouterLink
+    RouterLink,
+    NgClass
   ],
   templateUrl: './annotation-card.component.html',
   styleUrl: './annotation-card.component.scss',

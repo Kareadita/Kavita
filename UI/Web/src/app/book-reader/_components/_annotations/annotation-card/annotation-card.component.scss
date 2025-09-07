@@ -12,6 +12,10 @@
   -webkit-box-orient: vertical;
 }
 
+.spoilers {
+  filter: blur(3px);
+}
+
 :host ::ng-deep quill-view {
   color: var(--drawer-text-color);
 }

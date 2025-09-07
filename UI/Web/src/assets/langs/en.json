@@ -964,7 +964,9 @@
 
     "highlight-bar": {
         "add-new-color-alt": "Add Custom Color",
-        "slot-label": "Highlight slot {{slot}}"
+        "slot-label": "Highlight slot {{slot}}",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}"
     },
 
     "book-reader": {
