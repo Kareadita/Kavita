@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace API.Extensions;
@@ -79,6 +80,17 @@ public static class StringExtensions
         }
 
         return input[0] + new string('*', atIdx - 1) + input[atIdx..];
+    }
+
+    /// <summary>
+    /// Repeat returns a string that is equal to the original string repeat n times
+    /// </summary>
+    /// <param name="input">String to repeat</param>
+    /// <param name="n">Amount of times to repeat</param>
+    /// <returns></returns>
+    public static string Repeat(this string? input, int n)
+    {
+        return string.IsNullOrEmpty(input) ? string.Empty : string.Concat(Enumerable.Repeat(input, n));
     }
 
 }
