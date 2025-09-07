@@ -930,6 +930,10 @@
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
     },
 
+    "quil-wrapper": {
+        "clean-tooltip": "Remove all styles"
+    },
+
     "view-bookmark-drawer": {
         "title": "Bookmarks",
         "close": "{{common.close}}",
