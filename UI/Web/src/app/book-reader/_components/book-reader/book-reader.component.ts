@@ -642,7 +642,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
-
   }
 
   /**
@@ -2067,7 +2066,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.clearTimeout(this.updateImageSizeTimeout);
     this.updateImageSizeTimeout = setTimeout( () => {
-      this.updateImageSizes()
+      this.updateImageSizes();
+      this.injectImageBookmarkIndicators(true);
     }, 200);
 
     this.updateSingleImagePageStyles();
