@@ -19,5 +19,6 @@ import {
 export class AnnotationsTabComponent {
 
   annotations = input.required<Annotation[]>();
+  displaySeries = input<boolean>(false);
 
 }

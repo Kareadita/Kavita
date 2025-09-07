@@ -198,7 +198,7 @@
             </a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
-                <app-annotations-tab [annotations]="annotations()" />
+                <app-annotations-tab [annotations]="annotations()"/>
               }
             </ng-template>
           </li>

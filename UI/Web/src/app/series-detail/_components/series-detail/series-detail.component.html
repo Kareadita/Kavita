@@ -263,6 +263,20 @@
             </li>
           }
 
+          @if (annotations().length > 0) {
+            <li [ngbNavItem]="TabID.Annotations">
+              <a ngbNavLink>
+                {{t(TabID.Annotations)}}
+                <span class="badge rounded-pill text-bg-secondary">{{annotations().length}}</span>
+              </a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
+                  <app-annotations-tab [annotations]="annotations()" [displaySeries]="true" />
+                }
+              </ng-template>
+            </li>
+          }
+
           @if (hasRelations || readingLists.length > 0 || collections.length > 0 || bookmarks.length > 0) {
             <li [ngbNavItem]="TabID.Related">
               <a ngbNavLink>
