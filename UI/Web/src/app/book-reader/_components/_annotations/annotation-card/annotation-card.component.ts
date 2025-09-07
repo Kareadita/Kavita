@@ -60,6 +60,7 @@ export class AnnotationCardComponent {
   @Output() navigate = new EventEmitter<Annotation>();
 
   titleColor: Signal<string>;
+  hasClicked = model<boolean>(false);
 
   constructor() {
 

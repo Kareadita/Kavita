@@ -7,7 +7,7 @@
       <div  [style.color]="colorscapeService.getContrastingTextColor(username)" class="ms-2">{{ annotation().createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
     </div>
 
-    <div class="card-body px-3 py-2" [ngClass]="{'spoilers': annotation().containsSpoiler}">
+    <div class="card-body px-3 py-2" [ngClass]="{'spoilers': annotation().containsSpoiler && !hasClicked()}" (click)="hasClicked.set(true)">
 
       <blockquote class="mb-2 text-muted small fst-italic fw-lighter">
         <p class="content-quote">{{annotation().selectedText}}</p>
