@@ -41,7 +41,7 @@
           </div>
         }
 
-        @if (desktopLayout()) {
+        @if (desktopLayout() && canChangeEditMode()) {
           <button class="btn btn-icon ms-2 color" (click)="toggleEditMode()">
             @if (!isEditMode()) {
               <i class="fa-solid fa-pencil-alt" aria-hidden="true"></i>
