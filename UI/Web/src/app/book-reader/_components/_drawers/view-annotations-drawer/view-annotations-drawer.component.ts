@@ -6,6 +6,7 @@ import {Annotation} from "../../../_models/annotations/annotation";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {FilterPipe} from "../../../../_pipes/filter.pipe";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {ResizeDirective, ResizeMode} from "../../../../_directives/resize.directive";
 
 @Component({
   selector: 'app-view-annotations-drawer',
@@ -13,7 +14,8 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
     TranslocoDirective,
     AnnotationCardComponent,
     FilterPipe,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ResizeDirective
   ],
   templateUrl: './view-annotations-drawer.component.html',
   styleUrl: './view-annotations-drawer.component.scss',
@@ -50,4 +52,6 @@ export class ViewAnnotationsDrawerComponent {
     return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.pageNumber.toString().indexOf(query) >= 0
       || (listItem.selectedText ?? '').toLowerCase().indexOf(query) >= 0;
   }
+  protected readonly ResizeMode = ResizeMode;
+  protected readonly window = window;
 }

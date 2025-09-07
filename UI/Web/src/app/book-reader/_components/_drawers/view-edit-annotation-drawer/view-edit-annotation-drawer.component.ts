@@ -31,8 +31,8 @@ import {UserBreakpoint, UtilityService} from "../../../../shared/_services/utili
 import {QuillTheme, QuillWrapperComponent} from "../../quill-wrapper/quill-wrapper.component";
 import {ContentChange, QuillViewComponent} from "ngx-quill";
 import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
-import {ColorscapeService} from "../../../../_services/colorscape.service";
 import {AccountService} from "../../../../_services/account.service";
+import {ResizeDirective, ResizeMode} from "../../../../_directives/resize.directive";
 
 export enum AnnotationMode {
   View = 0,
@@ -54,7 +54,8 @@ const INIT_HIGHLIGHT_DELAY = 200;
     QuillWrapperComponent,
     QuillViewComponent,
     DatePipe,
-    UtcToLocaleDatePipe
+    UtcToLocaleDatePipe,
+    ResizeDirective
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',
@@ -343,4 +344,6 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   protected readonly AnnotationMode = AnnotationMode;
   protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly QuillTheme = QuillTheme;
+  protected readonly ResizeMode = ResizeMode;
+  protected readonly window = window;
 }
