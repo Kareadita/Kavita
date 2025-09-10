@@ -1,6 +1,15 @@
-import {computed, DestroyRef, Directive, ElementRef, inject, input, OnInit, Renderer2, signal} from '@angular/core';
-import {filter, fromEvent, merge, tap} from "rxjs";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  input, OnInit,
+  Renderer2
+} from '@angular/core';
 import {DOCUMENT} from "@angular/common";
+import {filter, fromEvent, merge, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 interface Dimensions {
@@ -13,16 +22,14 @@ export enum ResizeMode {
   Height = "height",
 }
 
-/**
- * Use this directive in an offcanvas drawer to add a resize handler
- * Example:
- *  <div appResize [resizeMode]="ResizeMode.Width" canvasPosition="end" [minWidth]="200" [maxWidth]="window.innerWidth*0.9">
- *  </div>
- */
-@Directive({
-  selector: '[appResize]'
+@Component({
+  selector: 'app-off-canvas-resize',
+  imports: [],
+  templateUrl: './off-canvas-resize.component.html',
+  styleUrl: './off-canvas-resize.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ResizeDirective implements OnInit {
+export class OffCanvasResizeComponent implements OnInit {
 
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
@@ -65,6 +72,8 @@ export class ResizeDirective implements OnInit {
 
   signMul = computed(() => this.canvasPosition() === 'top' || this.canvasPosition() === 'start' ? -1 : 1);
 
+  dragIndicatorClass = computed(() => this.resizeMode() === ResizeMode.Height  ? 'drag-indicator-horizontal' : 'drag-indicator-vertical');
+
 
   canvasElement!: HTMLElement;
 
@@ -89,7 +98,6 @@ export class ResizeDirective implements OnInit {
 
   ngOnInit(): void {
     this.canvasElement = this.document.querySelector(".offcanvas-" + this.canvasPosition()) as HTMLElement;
-    this.injectDragHandler();
 
     const mouseMove$ = fromEvent<MouseEvent>(this.document, 'mousemove');
     const touchMove$ = fromEvent<TouchEvent>(this.document, 'touchmove');
@@ -145,24 +153,6 @@ export class ResizeDirective implements OnInit {
     ).subscribe();
   }
 
-  private injectDragHandler() {
-    const position = this.canvasPosition();
-    this.renderer.addClass(this.el.nativeElement, `drag-handle-${position}`);
-
-    if (position === 'top' || position === 'bottom') {
-      const indicator = this.renderer.createElement('div');
-      this.renderer.addClass(indicator, 'drag-indicator-horizontal');
-      this.renderer.appendChild(this.el.nativeElement, indicator);
-
-      this.renderer.setStyle(this.el.nativeElement, 'background', 'transparent');
-      this.renderer.setStyle(this.el.nativeElement, 'border', 'none');
-    } else {
-      const indicator = this.renderer.createElement('div');
-      this.renderer.addClass(indicator, 'drag-indicator-vertical');
-      this.renderer.appendChild(this.el.nativeElement, indicator);
-    }
-  }
-
   private clampHeight(height: number): number {
     return Math.min(Math.max(height, this.minHeight()), this.maxHeight());
   }
@@ -185,4 +175,5 @@ export class ResizeDirective implements OnInit {
     }
   }
 
+  protected readonly ResizeMode = ResizeMode;
 }

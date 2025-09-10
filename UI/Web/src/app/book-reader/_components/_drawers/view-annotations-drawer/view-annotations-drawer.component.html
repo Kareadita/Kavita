@@ -1,7 +1,11 @@
 <ng-container *transloco="let t; prefix: 'view-annotations-drawer'">
 
-  <div appResize [resizeMode]="ResizeMode.Width" canvasPosition="end" [minWidth]="200" [maxWidth]="window.innerWidth*0.9">
-  </div>
+  <app-off-canvas-resize
+    [resizeMode]="ResizeMode.Width"
+    canvasPosition="end"
+    [minWidth]="200"
+    [maxWidth]="window.innerWidth*0.9"
+  />
 
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">

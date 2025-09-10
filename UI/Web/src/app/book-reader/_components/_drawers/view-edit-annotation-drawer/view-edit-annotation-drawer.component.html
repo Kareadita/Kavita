@@ -1,7 +1,11 @@
 <ng-container *transloco="let t; prefix: 'view-edit-annotation-drawer'">
 
-  <div appResize [resizeMode]="ResizeMode.Height" canvasPosition="bottom" [minHeight]="200" [maxHeight]="window.innerHeight*0.9">
-  </div>
+  <app-off-canvas-resize
+    [resizeMode]="ResizeMode.Height"
+    canvasPosition="bottom"
+    [minHeight]="200"
+    [maxHeight]="window.innerHeight*0.9"
+  />
 
   <div class="offcanvas-header d-flex flex-column p-2 p-sm-3 pt-0" [ngStyle]="{'border-bottom': '2px solid ' + titleColor()}">
     <div class="d-flex flex-row align-items-center w-100 mb-2 mb-sm-0">
