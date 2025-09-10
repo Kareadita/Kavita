@@ -23,7 +23,7 @@ import {
 import {DOCUMENT, NgClass, NgStyle, NgTemplateOutlet, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
-import {forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
+import {firstValueFrom, forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, filter, take, tap} from 'rxjs/operators';
 import {Chapter} from 'src/app/_models/chapter';
 import {NavService} from 'src/app/_services/nav.service';
@@ -296,7 +296,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       pageNumber: this.pageNum(),
     }),
     loader: async ({params}) => {
-      return this.readerService.getTimeLeftForChapter(params.seriesId, params.chapterId).toPromise();
+      return firstValueFrom(this.readerService.getTimeLeftForChapter(params.seriesId, params.chapterId));
     }
   });
 
@@ -1935,7 +1935,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.applyWritingStyle();
         break;
       case "layoutMode":
-        this.applyLayoutMode(res.object as BookPageLayoutMode);
+        this.applyLayoutMode(res.object as BookPageLayoutMode, true);
         break;
       case "readingDirection":
         // No extra functionality needs to be done
@@ -2061,9 +2061,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  applyLayoutMode(mode: BookPageLayoutMode) {
-    //const layoutModeChanged = mode !== this.layoutMode(); // TODO: This functionality wont work on the new signal-based logic
-
+  applyLayoutMode(mode: BookPageLayoutMode, isChange: boolean = false) {
     this.clearTimeout(this.updateImageSizeTimeout);
     this.updateImageSizeTimeout = setTimeout( () => {
       this.updateImageSizes();
@@ -2084,11 +2082,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    // When I switch layout, I might need to resume the progress point.
-    // if (mode === BookPageLayoutMode.Default && layoutModeChanged) {
-    //   const lastSelector = this.lastSeenScrollPartPath;
-    //   setTimeout(() => this.scrollTo(lastSelector));
-    // }
+    const lastSelector = this.lastSeenScrollPartPath;
+    if (isChange && lastSelector !== '') {
+      setTimeout(() => this.scrollTo(lastSelector), SCROLL_DELAY);
+    }
   }
 
   applyImmersiveMode(immersiveMode: boolean) {
