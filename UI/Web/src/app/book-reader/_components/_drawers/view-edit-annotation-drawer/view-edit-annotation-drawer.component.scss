@@ -45,4 +45,9 @@ $green-color: rgba(34, 197, 94);
   background-color: $green-color;
 }
 
+::ng-deep .ql-editor {
+  height: calc(var(--drawer-height) - 278px);
+  overflow: auto;
+}
+
 
