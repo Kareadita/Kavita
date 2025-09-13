@@ -1395,7 +1395,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // we need to click the document before arrow keys will scroll down.
     this.reader.nativeElement.focus();
-    this.saveProgress();
+    this.scroll(() => this.handleScrollEvent()); // Will set lastSeenXPath and save progress
     this.isLoading.set(false);
     this.cdRef.markForCheck();
 
@@ -1485,9 +1485,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    setTimeout(() => {
-      afterFrame(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
-    }, SCROLL_DELAY);
+    // setTimeout(() => {
+    //   afterFrame(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
+    // }, SCROLL_DELAY);
 
     console.log('Scrolling via x axis to 0: ', 0, ' via ', this.bookContentElemRef.nativeElement);
     this.scroll(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
