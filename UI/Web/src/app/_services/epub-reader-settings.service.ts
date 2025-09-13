@@ -482,7 +482,7 @@ export class EpubReaderSettingsService {
     ).subscribe(fontName => {
       this.isUpdatingFromForm = true;
 
-      const familyName = this._epubFonts().find(f => f.name === fontName) || 'default';
+      const familyName = this._epubFonts().find(f => f.name === fontName)?.name || 'default';
       const currentStyles = this._pageStyles();
 
       const newStyles = { ...currentStyles };

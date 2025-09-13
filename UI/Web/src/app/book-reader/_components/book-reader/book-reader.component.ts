@@ -768,12 +768,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async ngOnInit() {
     this.fontService.getFonts().subscribe(fonts => {
-      fonts.forEach(font => {
+      fonts.filter(f => f.name !== 'Default').forEach(font => {
         this.fontService.getFontFace(font).load().then(loadedFace => {
           console.log('loaded font: ', loadedFace);
           (this.document as any).fonts.add(loadedFace);
         });
-      })
+      });
     });
 
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
