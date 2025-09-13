@@ -16,8 +16,8 @@
                     <div class="mb-3">
                       <label for="library-type" class="form-label">{{t('font-family-label')}}</label>
                       <select class="form-select" id="library-type" formControlName="bookReaderFontFamily">
-                        @for(opt of fontOptions; track opt) {
-                          <option [value]="opt">{{opt | titlecase}}</option>
+                        @for(opt of epubFonts(); track opt) {
+                          <option [value]="opt.name">{{opt.name | titlecase}}</option>
                         }
                       </select>
                     </div>

@@ -2640,8 +2640,7 @@
         "theme-already-in-use": "Theme already exists by that name",
         "delete-font-in-use": "Font is currently in use by at least one user, cannot delete",
         "font-manual-upload": "There was an issue creating Font from manual upload",
-        "font-already-in-use": "Font already exists by that name"
-        "theme-already-in-use": "Theme already exists by that name",
+        "font-already-in-use": "Font already exists by that name",
         "import-fields": {
             "non-unique-age-ratings": "Age rating mapping keys aren't unique, please correct your import file",
             "non-unique-fields": "Field mappings do not have a unique id, please correct your import file"

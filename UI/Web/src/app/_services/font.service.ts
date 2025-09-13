@@ -1,5 +1,5 @@
 import {DestroyRef, inject, Injectable} from "@angular/core";
-import {map, ReplaySubject} from "rxjs";
+import {map, ReplaySubject, tap} from "rxjs";
 import {EpubFont, FontProvider} from "../_models/preferences/epub-font";
 import {environment} from 'src/environments/environment';
 import {HttpClient} from "@angular/common/http";
@@ -12,17 +12,17 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   providedIn: 'root'
 })
 export class FontService {
+
+  private readonly httpClient = inject(HttpClient);
+  private readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
   public defaultEpubFont: string = 'default';
-
-  private fontsSource = new ReplaySubject<EpubFont[]>(1);
-  public fonts$ = this.fontsSource.asObservable();
 
   baseUrl: string = environment.apiUrl;
   apiKey: string = '';
   encodedKey: string = '';
 
-  constructor(private httpClient: HttpClient, messageHub: MessageHubService, private accountService: AccountService) {
+  constructor() {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (user) {
         this.apiKey = user.apiKey;
@@ -32,13 +32,8 @@ export class FontService {
   }
 
   getFonts() {
-    return this.httpClient.get<Array<EpubFont>>(this.baseUrl + 'font/all').pipe(map(fonts => {
-      this.fontsSource.next(fonts);
-      return fonts;
-    }));
+    return this.httpClient.get<Array<EpubFont>>(this.baseUrl + 'font/all');
   }
-
-
 
   getFontFace(font: EpubFont): FontFace {
     // TODO: We need to refactor this so that we loadFonts with an array, fonts have an id to remove them, and we don't keep populating the document

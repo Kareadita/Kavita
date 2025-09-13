@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, Inject, inject, OnInit} from '@angular/core';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {FontService} from "src/app/_services/font.service";
 import {AccountService} from "../../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
@@ -19,25 +18,20 @@ import {CarouselReelComponent} from "../../../carousel/_components/carousel-reel
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
   selector: 'app-font-manager',
   imports: [
-    TranslocoDirective,
-    AsyncPipe,
     LoadingComponent,
     NgxFileDropModule,
     FormsModule,
-    NgIf,
     ReactiveFormsModule,
     SentenceCasePipe,
     SiteThemeProviderPipe,
     NgTemplateOutlet,
     NgStyle,
-    CarouselReelComponent,
-    DefaultValuePipe,
-    ImageComponent,
-    SafeUrlPipe
+    TranslocoDirective,
   ],
   templateUrl: './font-manager.component.html',
   styleUrl: './font-manager.component.scss',
@@ -45,6 +39,7 @@ import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
   standalone: true,
 })
 export class FontManagerComponent implements OnInit {
+  private document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly fontService = inject(FontService);
   private readonly accountService = inject(AccountService);
@@ -73,9 +68,6 @@ export class FontManagerComponent implements OnInit {
   mode: 'file' | 'url' | 'all' = 'all';
   isUploadingFont: boolean = false;
 
-
-  constructor(@Inject(DOCUMENT) private document: Document) {}
-
   ngOnInit() {
     this.loadFonts();
   }
@@ -88,9 +80,13 @@ export class FontManagerComponent implements OnInit {
   }
 
   selectFont(font: EpubFont) {
-    this.fontService.getFontFace(font).load().then(loadedFace => {
-      (this.document as any).fonts.add(loadedFace);
-    });
+    if (font.name !== 'Default') {
+      this.fontService.getFontFace(font).load().then(loadedFace => {
+        (this.document as any).fonts.add(loadedFace);
+      });
+    }
+
+
     this.selectedFont = font;
     this.cdRef.markForCheck();
   }

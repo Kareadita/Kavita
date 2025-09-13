@@ -73,93 +73,83 @@ public static class Seed
 
     public static readonly ImmutableArray<EpubFont> DefaultFonts =
     [
-        ..new List<EpubFont>
+        new ()
         {
-            new ()
-            {
-                Name = "Default",
-                NormalizedName = Parser.Normalize("Default"),
-                Provider = FontProvider.System,
-                FileName = string.Empty,
-            },
-            new ()
-            {
-                Name = "Merriweather",
-                NormalizedName = Parser.Normalize("Merriweather"),
-                Provider = FontProvider.System,
-                FileName = "Merriweather-Regular.woff2",
-            },
-            new ()
-            {
-                Name = "EB Garamond",
-                NormalizedName = Parser.Normalize("EB Garamond"),
-                Provider = FontProvider.System,
-                FileName = "EBGaramond-VariableFont_wght.woff2",
-            },
-            new ()
-            {
-                Name = "Fira Sans",
-                NormalizedName = Parser.Normalize("Fira Sans"),
-                Provider = FontProvider.System,
-                FileName = "FiraSans-Regular.woff2",
-            },
-            new ()
-            {
-                Name = "Lato",
-                NormalizedName = Parser.Normalize("Lato"),
-                Provider = FontProvider.System,
-                FileName = "Lato-Regular.woff2",
-            },
-            new ()
-            {
-                Name = "Libre Baskerville",
-                NormalizedName = Parser.Normalize("Libre Baskerville"),
-                Provider = FontProvider.System,
-                FileName = "LibreBaskerville-Regular.woff2",
-            },
-            new ()
-            {
-                Name = "Libre Caslon",
-                NormalizedName = Parser.Normalize("Libre Caslon"),
-                Provider = FontProvider.System,
-                FileName = "LibreCaslonText-Regular.woff2",
-            },
-            new ()
-            {
-                Name = "Nanum Gothic",
-                NormalizedName = Parser.Normalize("Nanum Gothic"),
-                Provider = FontProvider.System,
-                FileName = "NanumGothic-Regular.woff2",
-            },
-            new ()
-            {
-                Name = "Open Dyslexic 2",
-                NormalizedName = Parser.Normalize("Open Dyslexic 2"),
-                Provider = FontProvider.System,
-                FileName = "OpenDyslexic-Regular.woff2",
-            },
-            new ()
-            {
-                Name = "Oswald",
-                NormalizedName = Parser.Normalize("Oswald"),
-                Provider = FontProvider.System,
-                FileName = "Oswald-VariableFont_wght.woff2",
-            },
-            new ()
-            {
-                Name = "RocknRoll One",
-                NormalizedName = Parser.Normalize("RocknRoll One"),
-                Provider = FontProvider.System,
-                FileName = "RocknRollOne-Regular.woff2",
-            },
-            new ()
-            {
-                Name = "Spartan",
-                NormalizedName = Parser.Normalize("Spartan"),
-                Provider = FontProvider.System,
-                FileName = "Spartan-VariableFont_wght.woff2",
-            },
-        } // TODO: Add those new fonts in here
+            Name = "Default",
+            NormalizedName = Parser.Normalize("Default"),
+            Provider = FontProvider.System,
+            FileName = string.Empty,
+        },
+        new ()
+        {
+            Name = "Merriweather",
+            NormalizedName = Parser.Normalize("Merriweather"),
+            Provider = FontProvider.System,
+            FileName = "Merriweather-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "EB Garamond",
+            NormalizedName = Parser.Normalize("EB Garamond"),
+            Provider = FontProvider.System,
+            FileName = "EBGaramond-VariableFont_wght.woff2",
+        },
+        new ()
+        {
+            Name = "Fira Sans",
+            NormalizedName = Parser.Normalize("Fira Sans"),
+            Provider = FontProvider.System,
+            FileName = "FiraSans-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "Lato",
+            NormalizedName = Parser.Normalize("Lato"),
+            Provider = FontProvider.System,
+            FileName = "Lato-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "Libre Baskerville",
+            NormalizedName = Parser.Normalize("Libre Baskerville"),
+            Provider = FontProvider.System,
+            FileName = "LibreBaskerville-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "Nanum Gothic",
+            NormalizedName = Parser.Normalize("Nanum Gothic"),
+            Provider = FontProvider.System,
+            FileName = "NanumGothic-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "Open Dyslexic",
+            NormalizedName = Parser.Normalize("Open Dyslexic"),
+            Provider = FontProvider.System,
+            FileName = "OpenDyslexic-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "RocknRoll One",
+            NormalizedName = Parser.Normalize("RocknRoll One"),
+            Provider = FontProvider.System,
+            FileName = "RocknRollOne-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "Fast Font Serif",
+            NormalizedName = Parser.Normalize("Fast Font Serif"),
+            Provider = FontProvider.System,
+            FileName = "Fast_Serif.woff2",
+        },
+        new ()
+        {
+            Name = "Fast Font Sans",
+            NormalizedName = Parser.Normalize("Fast Font Sans"),
+            Provider = FontProvider.System,
+            FileName = "Fast_Sans.woff2",
+        }
     ];
 
     public static readonly ImmutableArray<SiteTheme> DefaultThemes = [

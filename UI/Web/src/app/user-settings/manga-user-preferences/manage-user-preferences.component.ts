@@ -46,7 +46,6 @@ export class ManageUserPreferencesComponent implements OnInit {
   protected readonly licenseService = inject(LicenseService);
 
 
-  fontFamilies: Array<string> = [];
   locales: Array<KavitaLocale> = [];
 
   settingsForm: FormGroup = new FormGroup({});
@@ -65,9 +64,6 @@ export class ManageUserPreferencesComponent implements OnInit {
 
 
   constructor() {
-    this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
-    this.cdRef.markForCheck();
-
     this.localizationService.getLocales().subscribe(res => {
       this.locales = res;
 
