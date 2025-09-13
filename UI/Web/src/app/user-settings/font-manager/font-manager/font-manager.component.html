@@ -1,7 +1,10 @@
 <ng-container *transloco="let t; prefix:'font-manager'">
   <div class="container-fluid">
-    <div class="row mb-2">
-      <h3>{{t('title')}}</h3>
+
+    <div class="position-relative">
+      <button class="btn btn-outline-primary position-absolute custom-position" (click)="selectFont(undefined)" [title]="t('add')">
+        <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
+      </button>
     </div>
 
     <p>{{t('description')}}</p>
@@ -12,8 +15,10 @@
         <div class="pe-2">
           <ul style="height: 100%" class="list-group list-group-flush">
 
-            @for (font of fonts; track font.name) {
+            @for (font of fonts(); track font.id) {
               <ng-container [ngTemplateOutlet]="fontOption" [ngTemplateOutletContext]="{ $implicit: font}"></ng-container>
+            } @empty {
+              <app-loading [loading]="true"></app-loading>
             }
           </ul>
         </div>
@@ -22,8 +27,8 @@
       <div class="col-lg-9 col-md-7 col-sm-4 col-xs-4 ps-3">
         <div class="card p-3">
 
-          @if (selectedFont === undefined) {
-
+          @let currentFont = selectedFont();
+          @if (currentFont === undefined) {
             <div class="row pb-4">
               <div class="mx-auto">
                 <div class="d-flex justify-content-center">
@@ -34,9 +39,8 @@
               </div>
             </div>
 
-
             @if (files && files.length > 0) {
-              <app-loading [loading]="isUploadingFont"></app-loading>
+              <app-loading [loading]="isUploadingFont()"></app-loading>
             } @else {
               <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
                              dropZoneClassName="file-upload" contentClassName="file-upload-zone">
@@ -89,19 +93,18 @@
 
               </ngx-file-drop>
             }
-
-          } @else if (selectedFont) {
+          } @else {
             <h4>
-              {{selectedFont.name | sentenceCase}}
+              {{currentFont.name | sentenceCase}}
               <div class="float-end">
-                @if (selectedFont.provider !== FontProvider.System && selectedFont.name !== 'Default') {
-                  <button class="btn btn-danger me-1" (click)="deleteFont(selectedFont.id)">{{t('delete')}}</button>
+                @if (currentFont.provider !== FontProvider.System && currentFont.name !== 'Default') {
+                  <button class="btn btn-danger me-1" (click)="deleteFont(currentFont.id)">{{t('delete')}}</button>
                 }
               </div>
             </h4>
 
             <div>
-              <ng-container [ngTemplateOutlet]="availableFont" [ngTemplateOutletContext]="{ $implicit: selectedFont}"></ng-container>
+              <ng-container [ngTemplateOutlet]="availableFont" [ngTemplateOutletContext]="{ $implicit: currentFont}"></ng-container>
             </div>
           }
         </div>
@@ -111,7 +114,8 @@
 
   <ng-template #fontOption let-item>
     @if (item !== undefined) {
-      <li class="list-group-item d-flex justify-content-between align-items-start {{selectedFont && selectedFont?.name === item.name ? 'active' : ''}}" (click)="selectFont(item)">
+      @let currentFont = selectedFont();
+      <li [@loadNewFontAnimation]="animationState(item)" class="list-group-item d-flex justify-content-between align-items-start {{currentFont && currentFont?.name === item.name ? 'active' : ''}}" (click)="selectFont(item)">
         <div class="ms-2 me-auto">
           <div class="fw-bold">{{item.name | sentenceCase}}</div>
         </div>
@@ -125,19 +129,13 @@
       <div class="d-flex justify-content-between w-100">
         @if (item.name === 'Default') {
           <div class="ms-2 me-auto fs-6">
-            This font cannot be previewed. This will take the default style from the book.
+            {{t('no-preview')}}
           </div>
         }
-
-        <div class="d-flex justify-content-end">
-          @if (item.hasOwnProperty('provider') && item.provider === FontProvider.User && item.hasOwnProperty('id')) {
-            <button class="btn btn-danger me-1" (click)="deleteFont(item.id)">{{t('delete')}}</button>
-          }
-        </div>
       </div>
 
       <div class="p-1 me-1 preview mt-2 flex-grow-1 text-center w-100 fs-4 fs-lg-3 mt-2" [ngStyle]="{'font-family': item.name, 'word-break': 'keep-all'}">
-        The quick brown fox jumps over the lazy dog
+        {{t('brown-fox')}}
       </div>
     }
   </ng-template>

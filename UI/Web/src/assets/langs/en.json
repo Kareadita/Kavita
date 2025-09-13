@@ -259,10 +259,10 @@
     },
 
     "font-manager": {
-        "title": "Font Manager",
         "description": "Kavita comes with a few fonts, but you can add your own. This page is for adding and removing fonts, use the book reading settings to choose the font you want to use.",
         "enter-an-url-pre-title": "Enter an {{url}}",
         "url": "url",
+        "add": "Add",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "a font file",
@@ -270,7 +270,9 @@
         "delete": "{{common.delete}}",
         "url-label": "Url",
         "back": "Back",
-        "load": "Load"
+        "load": "Load",
+        "no-preview": "This font cannot be previewed. This will take the default style from the book.",
+        "brown-fox": "The quick brown fox jumps over the lazy dog"
     },
 
     "theme": {
@@ -1895,6 +1897,7 @@
         "user-stats": "Stats",
         "scrobbling": "Scrobbling",
         "theme": "Theme",
+        "font": "Font",
         "customize": "Customize",
         "cbl-import": "CBL Reading List",
         "mal-stack-import": "MAL Stack",
