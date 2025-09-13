@@ -122,6 +122,7 @@ public class ReaderService : IReaderService
         var seenVolume = new Dictionary<int, bool>();
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         if (series == null) throw new KavitaException("series-doesnt-exist");
+
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -135,10 +136,6 @@ public class ReaderService : IReaderService
                     SeriesId = seriesId,
                     ChapterId = chapter.Id,
                     LibraryId = series.LibraryId,
-                    Created = DateTime.Now,
-                    CreatedUtc = DateTime.UtcNow,
-                    LastModified = DateTime.Now,
-                    LastModifiedUtc = DateTime.UtcNow
                 });
             }
             else
@@ -206,7 +203,7 @@ public class ReaderService : IReaderService
     /// <param name="user">Must have Progresses populated</param>
     /// <param name="chapter"></param>
     /// <returns></returns>
-    private static AppUserProgress? GetUserProgressForChapter(AppUser user, Chapter chapter)
+    private AppUserProgress? GetUserProgressForChapter(AppUser user, Chapter chapter)
     {
         AppUserProgress? userProgress = null;
 
@@ -226,11 +223,12 @@ public class ReaderService : IReaderService
             var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
             if (progresses.Count > 1)
             {
-                user.Progresses = new List<AppUserProgress>
-                {
-                    user.Progresses.First()
-                };
+                var highestProgress = progresses.Max(x => x.PagesRead);
+                var firstProgress = progresses.OrderBy(p => p.LastModifiedUtc).First();
+                firstProgress.PagesRead = highestProgress;
+                user.Progresses = [firstProgress];
                 userProgress = user.Progresses.First();
+                _logger.LogInformation("Trying to save progress and multiple progress entries exist, deleting and rewriting with highest progress rate: {@Progress}", userProgress);
             }
         }
 
@@ -274,10 +272,6 @@ public class ReaderService : IReaderService
                     ChapterId = progressDto.ChapterId,
                     LibraryId = progressDto.LibraryId,
                     BookScrollId = progressDto.BookScrollId,
-                    Created = DateTime.Now,
-                    CreatedUtc = DateTime.UtcNow,
-                    LastModified = DateTime.Now,
-                    LastModifiedUtc = DateTime.UtcNow
                 });
                 _unitOfWork.UserRepository.Update(userWithProgress);
             }
@@ -291,6 +285,7 @@ public class ReaderService : IReaderService
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
+            _logger.LogDebug("Saving Progress on Chapter {ChapterId} from Series {SeriesId} to {PageNum}", progressDto.ChapterId, progressDto.SeriesId, progressDto.PageNum);
             userProgress?.MarkModified();
 
             if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
@@ -361,7 +356,7 @@ public class ReaderService : IReaderService
         return page;
     }
 
-    private int GetNextSpecialChapter(VolumeDto volume, ChapterDto currentChapter)
+    private static int GetNextSpecialChapter(VolumeDto volume, ChapterDto currentChapter)
     {
         if (volume.IsSpecial())
         {
@@ -698,21 +693,23 @@ public class ReaderService : IReaderService
         {
             var minHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 0);
             var maxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 0);
+
             return new HourEstimateRangeDto
             {
                 MinHours = Math.Min(minHours, maxHours),
                 MaxHours = Math.Max(minHours, maxHours),
-                AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour))
+                AvgHours = wordCount / AvgWordsPerHour
             };
         }
 
         var minHoursPages = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 0);
         var maxHoursPages = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 0);
+
         return new HourEstimateRangeDto
         {
             MinHours = Math.Min(minHoursPages, maxHoursPages),
             MaxHours = Math.Max(minHoursPages, maxHoursPages),
-            AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
+            AvgHours = pageCount / AvgPagesPerMinute / 60F
         };
     }
 
@@ -808,6 +805,7 @@ public class ReaderService : IReaderService
     {
         switch(libraryType)
         {
+            case LibraryType.Image:
             case LibraryType.Manga:
                 return "Chapter" + (includeSpace ? " " : string.Empty);
             case LibraryType.Comic:

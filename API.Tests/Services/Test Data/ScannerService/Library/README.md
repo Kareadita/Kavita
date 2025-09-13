@@ -1,1 +1,0 @@
-This is an example of a layout. All files in here have non-copyrighted data but emulate real series to ensure the Process series Works as expected.

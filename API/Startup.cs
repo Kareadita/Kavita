@@ -41,6 +41,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API;
@@ -54,6 +55,9 @@ public class Startup
     {
         _config = config;
         _env = env;
+
+        // Disable Hangfire Automatic Retry
+        GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
     }
 
     // This method gets called by the runtime. Use this method to add services to the container.
@@ -132,14 +136,14 @@ public class Startup
             }
         });
         services.AddCors();
-        services.AddIdentityServices(_config);
+        services.AddIdentityServices(_config, _env);
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo
             {
-                Version = "3.1.0",
-                Title = "Kavita",
-                Description = $"Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v{BuildInfo.Version.ToString()}",
+                Version = BuildInfo.Version.ToString(),
+                Title = $"Kavita",
+                Description = $"Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v{BuildInfo.Version}",
                 License = new OpenApiLicense
                 {
                     Name = "GPL-3.0",
@@ -222,7 +226,7 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env,
         IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider, ICacheService cacheService,
-        IDirectoryService directoryService, IUnitOfWork unitOfWork, IBackupService backupService, IImageService imageService)
+        IDirectoryService directoryService, IUnitOfWork unitOfWork, IBackupService backupService, IImageService imageService, IVersionUpdaterService versionService)
     {
 
         var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
@@ -234,8 +238,9 @@ public class Startup
                     // Apply all migrations on startup
                     var dataContext = serviceProvider.GetRequiredService<DataContext>();
 
-
                     logger.LogInformation("Running Migrations");
+
+                    #region Migrations
 
                     // v0.7.9
                     await MigrateUserLibrarySideNavStream.Migrate(unitOfWork, dataContext, logger);
@@ -271,13 +276,47 @@ public class Startup
                     await MigrateInitialInstallData.Migrate(dataContext, logger, directoryService);
                     await MigrateSeriesLowestFolderPath.Migrate(dataContext, logger, directoryService);
 
+                    // v0.8.4
+                    await MigrateLowestSeriesFolderPath2.Migrate(dataContext, unitOfWork, logger);
+                    await ManualMigrateRemovePeople.Migrate(dataContext, logger);
+                    await MigrateDuplicateDarkTheme.Migrate(dataContext, logger);
+                    await ManualMigrateUnscrobbleBookLibraries.Migrate(dataContext, logger);
+
+                    // v0.8.5
+                    await ManualMigrateBlacklistTableToSeries.Migrate(dataContext, logger);
+                    await ManualMigrateInvalidBlacklistSeries.Migrate(dataContext, logger);
+                    await ManualMigrateScrobbleErrors.Migrate(dataContext, logger);
+                    await ManualMigrateNeedsManualMatch.Migrate(dataContext, logger);
+                    await MigrateProgressExportForV085.Migrate(dataContext, directoryService, logger);
+
+                    // v0.8.6
+                    await ManualMigrateScrobbleSpecials.Migrate(dataContext, logger);
+                    await ManualMigrateScrobbleEventGen.Migrate(dataContext, logger);
+
+                    // v0.8.7
+                    await ManualMigrateReadingProfiles.Migrate(dataContext, logger);
+
+                    // v0.8.8
+                    await ManualMigrateEnableMetadataMatchingDefault.Migrate(dataContext, unitOfWork, logger);
+                    await ManualMigrateBookReadingProgress.Migrate(dataContext, unitOfWork, logger);
+
+                    #endregion
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
+                    var isVersionDifferent = installVersion.Value != BuildInfo.Version.ToString();
                     installVersion.Value = BuildInfo.Version.ToString();
                     unitOfWork.SettingsRepository.Update(installVersion);
                     await unitOfWork.CommitAsync();
 
                     logger.LogInformation("Running Migrations - complete");
+
+                    if (isVersionDifferent)
+                    {
+                        // Clear the Github cache so update stuff shows correctly
+                        versionService.BustGithubCache();
+                    }
+
                 }).GetAwaiter()
                 .GetResult();
         }
@@ -383,6 +422,11 @@ public class Startup
             opts.IncludeQueryInRequestPath = true;
         });
 
+        if (Configuration.AllowIFraming)
+        {
+            logger.LogCritical("appsetting.json has allow iframing on! This may allow for clickjacking on the server. User beware");
+        }
+
         app.Use(async (context, next) =>
         {
             context.Response.Headers[HeaderNames.Vary] =
@@ -395,11 +439,7 @@ public class Startup
                 context.Response.Headers.XFrameOptions = "SAMEORIGIN";
 
                 // Setup CSP to ensure we load assets only from these origins
-                context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors 'none';");
-            }
-            else
-            {
-                logger.LogCritical("appsetting.json has allow iframing on! This may allow for clickjacking on the server. User beware");
+                context.Response.Headers.ContentSecurityPolicy = "frame-ancestors 'none';";
             }
 
             await next();
@@ -448,9 +488,7 @@ public class Startup
         }
         catch (Exception ex)
         {
-            if ((ex.Message.Contains("Permission denied")
-                 || ex.Message.Contains("UnauthorizedAccessException"))
-                && baseUrl.Equals(Configuration.DefaultBaseUrl) && OsInfo.IsDocker)
+            if (ex is UnauthorizedAccessException && baseUrl.Equals(Configuration.DefaultBaseUrl) && OsInfo.IsDocker)
             {
                 // Swallow the exception as the install is non-root and Docker
                 return;

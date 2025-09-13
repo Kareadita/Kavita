@@ -1,6 +1,8 @@
+
 .modal-content {
-    background-color: var(--bs-body-bg);
     color: var(--body-text-color);
+    background-color: var(--modal-bg-color);
+    font-size: .9rem;
 }
 
 .modal-title {
@@ -10,4 +12,8 @@
 .scrollable-modal {
     max-height: calc(var(--vh) * 100 - 198px);
     overflow: auto;
+}
+
+input, textarea {
+    font-size: 0.9rem !important;
 }

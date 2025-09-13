@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Scrobbling;
 
-public class ScrobbleErrorDto
+public sealed record ScrobbleErrorDto
 {
     /// <summary>
     /// Developer defined string

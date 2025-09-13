@@ -1,0 +1,191 @@
+<ng-container *transloco="let t; prefix: 'details-tab'">
+<div class="details pb-3">
+
+  @if (readingTime) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('read-time-title')}}</h4>
+      <div class="ms-3">
+        {{readingTime | readTime}}
+      </div>
+    </div>
+  }
+
+  @if (releaseYear) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('release-title')}}</h4>
+      <div class="ms-3">
+        {{releaseYear}}
+      </div>
+    </div>
+  }
+
+  @if (language) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('language-title')}}</h4>
+      <div class="ms-3">
+        {{language | languageName | async}}
+      </div>
+    </div>
+  }
+
+  @if (ageRating) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('age-rating-title')}}</h4>
+      <div class="ms-3">
+        <app-age-rating-image [rating]="ageRating" />
+      </div>
+    </div>
+  }
+
+  @if (format) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('format-title')}}</h4>
+      <div class="ms-3">
+        <app-series-format [format]="format"></app-series-format> {{format | mangaFormat }}
+      </div>
+    </div>
+  }
+
+
+  @if (!suppressEmptyGenres || genres.length > 0) {
+    <div class="setting-section-break" aria-hidden="true"></div>
+
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('genres-title')}}</h4>
+      <div class="ms-3">
+        <app-badge-expander [includeComma]="true" [items]="genres" [itemsTillExpander]="3" [defaultExpanded]="true">
+          <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+            <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Genres, item.id)">{{item.title}}</a>
+          </ng-template>
+        </app-badge-expander>
+      </div>
+    </div>
+  }
+
+  @if (!suppressEmptyTags || tags.length > 0) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('tags-title')}}</h4>
+      <div class="ms-3">
+        <app-badge-expander [includeComma]="true" [items]="tags" [itemsTillExpander]="3" [defaultExpanded]="true">
+          <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+            <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Tags, item.id)">{{item.title}}</a>
+          </ng-template>
+        </app-badge-expander>
+      </div>
+    </div>
+  }
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="webLinks" [title]="t('weblinks-title')">
+      <ng-template #carouselItem let-item>
+        <a class="me-1" [href]="item | safeUrl"  target="_blank" rel="noopener noreferrer" [title]="item">
+          <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(item)"
+                     [errorImage]="imageService.errorWebLinkImage"></app-image>
+        </a>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  @if (genres.length > 0 || tags.length > 0 || webLinks.length > 0) {
+    <div class="setting-section-break" aria-hidden="true"></div>
+  }
+
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.writers" [title]="t('writers-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.colorists" [title]="t('colorists-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.editors" [title]="t('editors-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.coverArtists" [title]="t('cover-artists-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.inkers" [title]="t('inkers-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.letterers" [title]="t('letterers-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.pencillers" [title]="t('pencillers-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.translators" [title]="t('translators-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.characters" [title]="t('characters-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.locations" [title]="t('locations-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.teams" [title]="t('teams-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+
+  <div class="mb-3">
+    <app-carousel-reel [items]="metadata.imprints" [title]="t('imprints-title')">
+      <ng-template #carouselItem let-item>
+        <app-person-badge [person]="item"></app-person-badge>
+      </ng-template>
+    </app-carousel-reel>
+  </div>
+</div>
+</ng-container>

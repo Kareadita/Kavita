@@ -1,0 +1,74 @@
+@use '../../../theme/variables' as theme;
+
+// TODO: Move this to a common file so it applies both ways
+.side-nav {
+  // For firefox
+  @supports (-moz-appearance:none) {
+    scrollbar-color: transparent transparent;
+    scrollbar-width: thin;
+  }
+
+  &::-webkit-scrollbar {
+    background-color: transparent; /*make scrollbar space invisible */
+    width: inherit;
+    display: none;
+    visibility: hidden;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: transparent; /*makes it invisible when not hovering*/
+  }
+
+  &:hover {
+    scrollbar-width: thin;
+    overflow-y: auto;
+    // For firefox
+    @supports (-moz-appearance:none) {
+      scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      visibility: visible;
+      background-color: rgba(255,255,255,0.3); /*On hover, it will turn grey*/
+    }
+  }
+}
+
+@media (max-width: theme.$grid-breakpoints-lg) {
+  .side-nav {
+    padding: 10px 0;
+    width: 55vw;
+    background-color: var(--side-nav-mobile-bg-color);
+    height: 100dvh;
+    position: fixed;
+    margin: 0;
+    left: 0;
+    top: 0;
+    transition: width var(--side-nav-openclose-transition);
+    z-index: 999;
+    overflow: auto;
+    border: var(--side-nav-mobile-border);
+
+    &.closed {
+      width: 0;
+      overflow: hidden;
+      box-shadow: none;
+    }
+
+    .side-nav-item:first-child {
+      border-top-left-radius: var(--side-nav-border-radius);
+      border-top-right-radius: var(--side-nav-border-radius);
+    }
+
+    &.no-donate {
+      height: calc((var(--vh)*100) - var(--nav-mobile-offset));
+    }
+  }
+}
+
+.side-nav-header {
+  color: #d5d5d5;
+  font-weight: bold;
+  margin-left: 5px;
+}

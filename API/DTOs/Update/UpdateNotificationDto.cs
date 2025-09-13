@@ -1,9 +1,12 @@
-﻿namespace API.DTOs.Update;
+﻿using System.Collections.Generic;
+using System.Runtime.InteropServices.JavaScript;
+
+namespace API.DTOs.Update;
 
 /// <summary>
 /// Update Notification denoting a new release available for user to update to
 /// </summary>
-public class UpdateNotificationDto
+public sealed record UpdateNotificationDto
 {
     /// <summary>
     /// Current installed Version
@@ -21,11 +24,11 @@ public class UpdateNotificationDto
     /// <summary>
     /// Title of the release
     /// </summary>
-    public required string UpdateTitle { get; init; }
+    public required string UpdateTitle { get; set; }
     /// <summary>
     /// Github Url
     /// </summary>
-    public required string UpdateUrl { get; init; }
+    public required string UpdateUrl { get; set; }
     /// <summary>
     /// If this install is within Docker
     /// </summary>
@@ -37,7 +40,7 @@ public class UpdateNotificationDto
     /// <summary>
     /// Date of the publish
     /// </summary>
-    public required string PublishDate { get; init; }
+    public required string PublishDate { get; set; }
     /// <summary>
     /// Is the server on a nightly within this release
     /// </summary>
@@ -50,4 +53,18 @@ public class UpdateNotificationDto
     /// Is the server on this version
     /// </summary>
     public bool IsReleaseEqual { get; set; }
+
+    public IList<string> Added { get; set; }
+    public IList<string> Removed { get; set; }
+    public IList<string> Changed { get; set; }
+    public IList<string> Fixed { get; set; }
+    public IList<string> Theme { get; set; }
+    public IList<string> Developer { get; set; }
+    public IList<string> Api { get; set; }
+    public IList<string> FeatureRequests { get; set; }
+    public IList<string> KnownIssues { get; set; }
+    /// <summary>
+    /// The part above the changelog part
+    /// </summary>
+    public string BlogPart { get; set; }
 }

@@ -2,7 +2,7 @@
 
 namespace API.DTOs.SideNav;
 
-public class ExternalSourceDto
+public sealed record ExternalSourceDto
 {
     public required int Id { get; set; } = 0;
     public required string Name { get; set; }

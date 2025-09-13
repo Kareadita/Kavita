@@ -1,9 +1,10 @@
-import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
+import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray} from '@angular/cdk/drag-drop';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild, DestroyRef,
+  ContentChild,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -11,11 +12,10 @@ import {
   TemplateRef,
   TrackByFunction
 } from '@angular/core';
-import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
-import {NgIf, NgFor, NgTemplateOutlet, NgClass} from '@angular/common';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
+import {NgClass, NgTemplateOutlet} from '@angular/common';
+import {TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
-import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
 import {FormsModule} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
@@ -32,15 +32,19 @@ export interface ItemRemoveEvent {
 }
 
 @Component({
-    selector: 'app-draggable-ordered-list',
-    templateUrl: './draggable-ordered-list.component.html',
-    styleUrls: ['./draggable-ordered-list.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
-    CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent, FormsModule]
+  selector: 'app-draggable-ordered-list',
+  templateUrl: './draggable-ordered-list.component.html',
+  styleUrls: ['./draggable-ordered-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [VirtualScrollerModule, NgTemplateOutlet, CdkDropList, CdkDrag,
+    CdkDragHandle, TranslocoDirective, NgClass, FormsModule]
 })
 export class DraggableOrderedListComponent {
+
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
 
   /**
    * After this many elements, drag and drop is disabled and we use a virtualized list instead
@@ -61,6 +65,10 @@ export class DraggableOrderedListComponent {
    */
   @Input() disabled: boolean = false;
   /**
+   * Disables remove button
+   */
+  @Input() disableRemove: boolean = false;
+  /**
    * When enabled, draggability is disabled and a checkbox renders instead of order box or drag handle
    */
   @Input() bulkMode: boolean = false;
@@ -72,14 +80,12 @@ export class DraggableOrderedListComponent {
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
 
-  public readonly bulkSelectionService = inject(BulkSelectionService);
-  public readonly destroyRef = inject(DestroyRef);
 
   get BufferAmount() {
-    return Math.min(this.items.length / 20, 20);
+    return Math.floor(Math.min(this.items.length / 20, 20));
   }
 
-  constructor(private readonly cdRef: ChangeDetectorRef) {
+  constructor() {
     this.bulkSelectionService.selections$.pipe(
         takeUntilDestroyed(this.destroyRef)
     ).subscribe((s) => {

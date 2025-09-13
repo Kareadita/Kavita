@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.DTOs.Account;
+using API.Entities.Enums;
 
 namespace API.DTOs;
 #nullable enable
@@ -8,7 +9,7 @@ namespace API.DTOs;
 /// <summary>
 /// Represents a member of a Kavita server.
 /// </summary>
-public class MemberDto
+public sealed record MemberDto
 {
     public int Id { get; init; }
     public string? Username { get; init; }
@@ -24,4 +25,5 @@ public class MemberDto
     public DateTime LastActiveUtc { get; init; }
     public IEnumerable<LibraryDto>? Libraries { get; init; }
     public IEnumerable<string>? Roles { get; init; }
+    public IdentityProvider IdentityProvider { get; init; }
 }

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using API.Entities.Enums;
 using API.Services;
 
 namespace API.DTOs.Settings;
+#nullable enable
 
-public class ServerSettingDto
+public sealed record ServerSettingDto
 {
 
     public string CacheDirectory { get; set; } = default!;
@@ -44,6 +46,7 @@ public class ServerSettingDto
     /// <summary>
     /// Represents a unique Id to this Kavita installation. Only used in Stats to identify unique installs.
     /// </summary>
+
     public string InstallId { get; set; } = default!;
     /// <summary>
     /// The format that should be used when saving media for Kavita
@@ -89,6 +92,11 @@ public class ServerSettingDto
     /// SMTP Configuration
     /// </summary>
     public SmtpConfigDto SmtpConfig { get; set; }
+    /// <summary>
+    /// OIDC Configuration
+    /// </summary>
+    public OidcConfigDto OidcConfig { get; set; }
+
     /// <summary>
     /// The Date Kavita was first installed
     /// </summary>

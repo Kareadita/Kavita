@@ -1,0 +1,55 @@
+$image-height: 160px;
+@use '../../../card-item-common';
+
+// Override so we can have square cards
+
+.bulk-mode {
+  &.always-show {
+    height: $image-height;
+  }
+}
+
+.card-item-container {
+  background-color: unset;
+  border: 1px solid transparent;
+  transition: all ease-in-out 300ms;
+
+  .overlay {
+    height: $image-height;
+    position: relative;
+    display: flex;
+    background-color: hsl(0deg 0% 0% / 12%);
+    /* TODO: Robbie fix this hack */
+    .missing-img {
+      align-self: center;
+      display: flex;
+    }
+
+    .card-overlay {
+      height: 100%;
+    }
+  }
+
+  .card-body {
+    bottom: 0;
+    background-color: transparent;
+    position: unset !important;
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+
+    .card-title {
+      margin: 0 auto;
+    }
+  }
+
+  &:hover {
+    cursor: pointer;
+
+    .overlay {
+      .missing-img {
+      }
+    }
+  }
+}
+

@@ -1,0 +1,33 @@
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+}
+
+.highlight-bar {
+  background: var(--accordion-body-bg-color);
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.highlight-bar-toggle {
+  background: var(--accordion-body-bg-color);
+  border-color: transparent;
+  &.open {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}
+
+.highlight-bar .btn.btn-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.color-picker-container {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}

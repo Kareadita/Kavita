@@ -3,7 +3,7 @@
 /// <summary>
 /// A range of time to read a selection (series, chapter, etc)
 /// </summary>
-public record HourEstimateRangeDto
+public sealed record HourEstimateRangeDto
 {
     /// <summary>
     /// Min hours to read the selection
@@ -16,5 +16,5 @@ public record HourEstimateRangeDto
     /// <summary>
     /// Estimated average hours to read the selection
     /// </summary>
-    public int AvgHours { get; init; } = 1;
+    public float AvgHours { get; init; } = 1f;
 }

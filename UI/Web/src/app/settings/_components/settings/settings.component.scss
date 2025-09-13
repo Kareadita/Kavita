@@ -1,0 +1,30 @@
+@use '../../../../theme/variables' as theme;
+
+h2 {
+  color: white;
+  font-weight: bold;
+}
+
+.main-container {
+  margin-top: 10px;
+  max-width: 1920px;
+  padding: 0 20px;
+}
+
+::ng-deep .content-wrapper:not(.closed) {
+  .scale {
+    width: calc(100dvw - 200px) !important;
+
+
+  }
+}
+
+
+@media (max-width: theme.$grid-breakpoints-lg) {
+  ::ng-deep .content-wrapper:not(.closed) {
+    .scale {
+      width: 100% !important;
+      overflow-x: auto;
+    }
+  }
+}

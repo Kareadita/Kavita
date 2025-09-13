@@ -1,5 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using API.Constants;
+using API.Data;
 using API.Data.ManualMigrations;
+using API.DTOs;
 using API.DTOs.Progress;
 using API.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -27,18 +31,7 @@ public class AdminController : BaseApiController
     [HttpGet("exists")]
     public async Task<ActionResult<bool>> AdminExists()
     {
-        var users = await _userManager.GetUsersInRoleAsync("Admin");
+        var users = await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
         return users.Count > 0;
-    }
-
-    /// <summary>
-    /// Set the progress information for a particular user
-    /// </summary>
-    /// <returns></returns>
-    [Authorize("RequireAdminRole")]
-    [HttpPost("update-chapter-progress")]
-    public async Task<ActionResult<bool>> UpdateChapterProgress(UpdateUserProgressDto dto)
-    {
-        return Ok(await Task.FromResult(false));
     }
 }

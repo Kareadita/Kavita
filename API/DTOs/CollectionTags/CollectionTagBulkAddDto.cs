@@ -2,7 +2,7 @@
 
 namespace API.DTOs.CollectionTags;
 
-public class CollectionTagBulkAddDto
+public sealed record CollectionTagBulkAddDto
 {
     /// <summary>
     /// Collection Tag Id

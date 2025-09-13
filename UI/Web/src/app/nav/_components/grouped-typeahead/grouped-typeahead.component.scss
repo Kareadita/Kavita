@@ -1,8 +1,3 @@
-form {
-    max-height: 38px;
-}
-
-
 .search-result img {
     width: 100% !important;
 }
@@ -14,77 +9,102 @@ form {
     right: 5px;
 }
 
+.input-hint {
+  font-size: 0.8rem;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  margin-right: 9px;
+  border: 1px solid var(--input-hint-border-color, lightgrey);
+  color: var(--input-hint-text-color);
+  border-radius: 4px;
+  padding: 2px;
+}
+
 
 .typeahead-input {
-    border: 1px solid transparent;
-    border-radius: 4px;
-    padding: 0px 6px;
-    display: inline-block;
-    overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  box-shadow: none;
+  cursor: text;
+  background-color: var(--searchbar-bg-color);
+  color: var(--body-text-color);
+  min-height: 32px;
+  transition-property: all;
+  transition-duration: 0.3s;
+  display: block;
+  width: 50%;
+
+  .search {
+    display: flex;
     position: relative;
-    z-index: 1;
-    box-sizing: border-box;
-    box-shadow: none;
-    cursor: text;
-    background-color: var(--input-bg-color);
-    color: var(--body-text-color);
-    min-height: 38px;
+    min-height: 32px;
+
+    .btn-close {
+      position: unset;
+      margin-top: unset;
+      align-self: center;
+      margin: 0 8px;
+    }
+  }
+
+
+  input {
+    width: 100%;
+    padding: 0px 6px;
+    outline: 0 !important;
+    border-radius: .28571429rem;
+    margin: 0px !important;
+    text-indent: 0 !important;
+    line-height: inherit !important;
+    box-shadow: none !important;
     transition-property: all;
     transition-duration: 0.3s;
     display: block;
+    opacity: 1;
+    position: relative;
+    left: 4px;
+    border: none;
+    background-color: transparent;
 
-    .search {
-        display: flex;
-        position: relative;
+    &:focus-visible {
+      width: 100%;
     }
+  }
 
+  &.focused {
+    width: 100%;
+    border-color: var(--primary-color);
 
     input {
-        outline: 0 !important;
-        border-radius: .28571429rem;
-        padding: 0px !important;
-        min-height: 0px !important;
-        max-width: 100% !important;
-        margin: 0px !important;
-        text-indent: 0 !important;
-        line-height: inherit !important;
-        box-shadow: none !important;
-        width: 300px;
-        transition-property: all;
-        transition-duration: 0.3s;
-        display: block;
-        opacity: 1;
-        position: relative;
-        left: 4px;
-        border: none;
-
-        &:focus-visible {
-            width: calc(100vw - 180px);
-        }
-
-        &:empty {
-            padding-top: 6px !important;
-        }
+      color: #fff;
     }
-
-    &.focused {
-        width: 99%;
-        border-color: var(--input-focused-border-color);
-    }
-
+  }
 }
 
+
+@media only screen and (max-width: 980px) {
+  .typeahead-input {
+    width: 65%;
+  }
+}
 
 
 /* small devices (phones, 650px and down) */
 @media only screen and (max-width:650px) {
-    input {
-        width: 100%
+    .typeahead-input {
+        width: 75%;
+        margin: 0 auto;
     }
+}
 
-    input:focus-visible {
-        width: 100% !important;
-    }
+@media only screen and (max-width: 500px) {
+  .typeahead-input {
+    width: 100%;
+  }
 }
 
 
@@ -92,15 +112,19 @@ form {
     color: var(--body-text-color);
 
     &:hover {
-        background-color: var(--list-group-item-bg-color) !important;
+        background-color: var(--search-list-group-item-bg-color, black) !important;
         cursor: default;
     }
 }
 
+.list-group-item {
+  background-color: var(--search-list-group-item-bg-color, black);
+}
+
+
 .dropdown {
     width: 100vw;
-    height: calc(var(--vh)*100 - 56px); //header offset
-    background: var(--dropdown-overlay-color);
+    top: 55px; //header offset
     position: fixed;
     justify-content: center;
     left: 0;
@@ -117,7 +141,7 @@ form {
     overflow-x: hidden;
     display: block;
     flex: auto;
-    max-height: calc(100vh - 58px);
+    max-height: calc((var(--vh) * 100) - var(--nav-offset));
     height: fit-content;
 }
 
@@ -153,4 +177,13 @@ ul ul {
     margin: auto;
     cursor: pointer;
     top: 30%;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0,0,0,0.4);
+    width: 100vw;
+    height: 100vh;
 }

@@ -1,0 +1,37 @@
+@mixin quill-white-theme {
+  :host ::ng-deep .ql-snow {
+    .ql-stroke {
+      stroke: white;
+    }
+    .ql-fill {
+      fill: white;
+    }
+    .ql-picker {
+      color: white;
+    }
+    .ql-editor.ql-blank::before {
+      color: white;
+    }
+
+    // This doesn't work
+    .ql-toolbar {
+      *:hover, *:focus, ql-toolbar button:hover {
+        color: var(--primary-color);
+      }
+
+      .ql-picker-item.ql-selected, .ql-toolbar .ql-picker-label.ql-active {
+        color: var(--primary-color);
+      }
+    }
+
+  }
+
+  //.ql-snow.ql-toolbar button:hover, .ql-snow .ql-toolbar button:hover, .ql-snow.ql-toolbar button:focus,
+  //.ql-snow .ql-toolbar button:focus, .ql-snow.ql-toolbar button.ql-active, .ql-snow .ql-toolbar button.ql-active,
+  //.ql-snow.ql-toolbar .ql-picker-label:hover, .ql-snow .ql-toolbar .ql-picker-label:hover, .ql-snow.ql-toolbar
+  //.ql-picker-label.ql-active, .ql-snow .ql-toolbar .ql-picker-label.ql-active, .ql-snow.ql-toolbar .ql-picker-item:hover,
+  //.ql-snow .ql-toolbar .ql-picker-item:hover, .ql-snow.ql-toolbar .ql-picker-item.ql-selected, .ql-snow .ql-toolbar
+  //.ql-picker-item.ql-selected {
+  //  color: var(--primary-color);
+  //}
+}

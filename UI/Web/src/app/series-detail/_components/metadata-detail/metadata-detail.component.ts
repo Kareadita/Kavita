@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, ContentChild, inject, Input, TemplateRef} from '@angular/core';
-import {CommonModule, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
 import {TagBadgeComponent, TagBadgeCursor} from "../../../shared/tag-badge/tag-badge.component";
@@ -9,12 +9,11 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
-  selector: 'app-metadata-detail',
-  standalone: true,
-  imports: [A11yClickDirective, BadgeExpanderComponent, TagBadgeComponent, NgTemplateOutlet],
-  templateUrl: './metadata-detail.component.html',
-  styleUrls: ['./metadata-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-metadata-detail',
+    imports: [A11yClickDirective, BadgeExpanderComponent, TagBadgeComponent, NgTemplateOutlet],
+    templateUrl: './metadata-detail.component.html',
+    styleUrls: ['./metadata-detail.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataDetailComponent {
 
@@ -28,6 +27,7 @@ export class MetadataDetailComponent {
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) heading!: string;
   @Input() queryParam: FilterField = FilterField.None;
+  @Input() includeComma: boolean = true;
   @ContentChild('titleTemplate') titleTemplate!: TemplateRef<any>;
   @ContentChild('itemTemplate') itemTemplate?: TemplateRef<any>;
 

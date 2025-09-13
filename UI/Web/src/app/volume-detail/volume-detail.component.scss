@@ -1,0 +1,24 @@
+@use '../../series-detail-common';
+
+.virtual-scroller, virtual-scroller {
+  width: 100%;
+  max-height: calc(var(--vh)*100 - 170px);
+}
+
+// This is responsible for ensuring we scroll down and only tabs and companion bar is visible
+.main-container {
+  // Height set dynamically by get ScrollingBlockHeight()
+  overflow-y: auto;
+  position: relative;
+  overscroll-behavior-y: none;
+}
+.card-container{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 160px);
+  grid-gap: 0.5rem;
+  justify-content: space-around;
+  padding-bottom: 20px;
+}
+
+
+

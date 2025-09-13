@@ -1,37 +1,45 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
-  HostListener,
   inject,
   OnInit
 } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
-import { take, debounceTime } from 'rxjs/operators';
-import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
-import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { UtilityService, KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
-import { Pagination } from 'src/app/_models/pagination';
-import { Series } from 'src/app/_models/series';
-import { FilterEvent } from 'src/app/_models/metadata/series-filter';
-import { Action, ActionItem } from 'src/app/_services/action-factory.service';
-import { ActionService } from 'src/app/_services/action.service';
-import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { MessageHubService, Message, EVENTS } from 'src/app/_services/message-hub.service';
-import { SeriesService } from 'src/app/_services/series.service';
+import {Title} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
+import {debounceTime, take} from 'rxjs/operators';
+import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
+import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
+import {Pagination} from 'src/app/_models/pagination';
+import {Series} from 'src/app/_models/series';
+import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
+import {Action, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionService} from 'src/app/_services/action.service';
+import {JumpbarService} from 'src/app/_services/jumpbar.service';
+import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
+import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SeriesCardComponent } from '../../../cards/series-card/series-card.component';
-import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
-import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
-import { NgIf, DecimalPipe } from '@angular/common';
-import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
-
+import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
+import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
+import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
+import {DecimalPipe} from '@angular/common';
+import {
+  SideNavCompanionBarComponent
+} from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {BrowseTitlePipe} from "../../../_pipes/browse-title.pipe";
+import {MetadataService} from "../../../_services/metadata.service";
+import {Observable} from "rxjs";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {Select2Option} from "ng-select2-component";
 
 
 @Component({
@@ -39,22 +47,36 @@ import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
   templateUrl: './all-series.component.html',
   styleUrls: ['./all-series.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
+  imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent,
+    DecimalPipe, TranslocoDirective],
 })
 export class AllSeriesComponent implements OnInit {
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly seriesService = inject(SeriesService);
+  private readonly titleService = inject(Title);
+  private readonly actionService = inject(ActionService);
+  private readonly hubService = inject(MessageHubService);
+  private readonly utilityService = inject(UtilityService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly jumpbarService = inject(JumpbarService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
+  protected readonly metadataService = inject(MetadataService);
 
   title: string = translate('side-nav.all-series');
   series: Series[] = [];
   loadingSeries = false;
   pagination: Pagination = new Pagination();
-  filter: SeriesFilterV2 | undefined = undefined;
-  filterSettings: FilterSettings = new FilterSettings();
+  filter: FilterV2<FilterField, SortField> | undefined = undefined;
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-  filterActiveCheck!: SeriesFilterV2;
+  filterActiveCheck!: FilterV2<FilterField>;
   filterActive: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
-  private readonly destroyRef = inject(DestroyRef);
+  browseTitlePipe = new BrowseTitlePipe();
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -104,22 +126,48 @@ export class AllSeriesComponent implements OnInit {
     }
   }
 
-  constructor(private router: Router, private seriesService: SeriesService,
-    private titleService: Title, private actionService: ActionService,
-    public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService, private route: ActivatedRoute,
-    private filterUtilityService: FilterUtilitiesService, private jumpbarService: JumpbarService,
-    private readonly cdRef: ChangeDetectorRef) {
 
+
+
+  constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-    this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-      this.filter = filter;
-      this.title = this.route.snapshot.queryParamMap.get('title') || this.filter.name || this.title;
+
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+
+      if (this.filter == null) {
+        this.filter = this.metadataService.createDefaultFilterDto('series');
+        this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+      }
+
+      this.title = this.route.snapshot.queryParamMap.get('title') || this.filter!.name || this.title;
       this.titleService.setTitle('Kavita - ' + this.title);
-      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-      this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-      this.filterSettings.presetsV2 =  this.filter;
+
+      // To provide a richer experience, when we are browsing just a Genre/Tag/etc, we regenerate the title (if not explicitly passed) to "Browse {GenreName}"
+      if (this.shouldRewriteTitle()) {
+        const field = this.filter!.statements[0].field;
+
+        // This api returns value as string and number, it will complain without the casting
+        (this.metadataService.getOptionsForFilterField<FilterField>(field, 'series') as Observable<Select2Option[]>).subscribe((opts: Select2Option[]) => {
+
+          const matchingOpts = opts.filter(m => `${m.value}` === `${this.filter!.statements[0].value}`);
+          if (matchingOpts.length === 0) return;
+
+          const value = matchingOpts[0].label;
+          const newTitle = this.browseTitlePipe.transform(field, value);
+          if (newTitle !== '') {
+            this.title = newTitle;
+            this.titleService.setTitle('Kavita - ' + this.title);
+            this.cdRef.markForCheck();
+          }
+        });
+
+      }
+
+      this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
+      this.filterActiveCheck.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+      this.filterSettings.presetsV2 = this.filter;
 
       this.cdRef.markForCheck();
     });
@@ -132,22 +180,11 @@ export class AllSeriesComponent implements OnInit {
     });
   }
 
-  @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = true;
-    }
+  shouldRewriteTitle() {
+    return this.title === translate('side-nav.all-series') && this.filter && this.filter.statements.length === 1 && this.filter.statements[0].comparison === FilterComparison.Equal
   }
 
-  @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = false;
-    }
-  }
-
-
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 
@@ -156,7 +193,7 @@ export class AllSeriesComponent implements OnInit {
       return;
     }
 
-    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((encodedFilter) => {
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((_) => {
       this.loadPage();
     });
   }
@@ -179,5 +216,5 @@ export class AllSeriesComponent implements OnInit {
     });
   }
 
-  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
+  trackByIdentity = (_: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 }

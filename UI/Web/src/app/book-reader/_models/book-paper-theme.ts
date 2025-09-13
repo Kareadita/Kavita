@@ -32,63 +32,66 @@ export const BookPaperTheme = `
     --accordion-active-body-bg-color: #F1E4D5;
 
     /* Buttons */
-      --btn-focus-boxshadow-color: rgb(255 255 255 / 50%);
-      --btn-primary-text-color: white;
-      --btn-primary-bg-color: var(--primary-color);
-      --btn-primary-border-color: var(--primary-color);
-      --btn-primary-hover-text-color: white;
-      --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
-      --btn-primary-hover-border-color: var(--primary-color-darker-shade);
-      --btn-alt-bg-color: #424c72;
-      --btn-alt-border-color: #444f75;
-      --btn-alt-hover-bg-color: #3b4466;
-      --btn-alt-focus-bg-color: #343c59;
-      --btn-alt-focus-boxshadow-color: rgb(255 255 255 / 50%);
-      --btn-fa-icon-color: black;
-      --btn-disabled-bg-color: #343a40;
-      --btn-disabled-text-color: #efefef;
-      --btn-disabled-border-color: #6c757d;
+    --btn-focus-boxshadow-color: rgb(255 255 255 / 50%);
+    --btn-primary-text-color: white;
+    --btn-primary-bg-color: var(--primary-color);
+    --btn-primary-border-color: var(--primary-color);
+    --btn-primary-hover-text-color: white;
+    --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
+    --btn-primary-hover-border-color: var(--primary-color-darker-shade);
+    --btn-alt-bg-color: #424c72;
+    --btn-alt-border-color: #444f75;
+    --btn-alt-hover-bg-color: #3b4466;
+    --btn-alt-focus-bg-color: #343c59;
+    --btn-alt-focus-boxshadow-color: rgb(255 255 255 / 50%);
+    --btn-fa-icon-color: black;
+    --btn-disabled-bg-color: #343a40;
+    --btn-disabled-text-color: #efefef;
+    --btn-disabled-border-color: #6c757d;
+    --btn-outline-primary-text-color: black;
 
-      /* Inputs */
-      --input-bg-color: white;
-      --input-bg-readonly-color: #F1E4D5;
-      --input-focused-border-color: #ccc;
-      --input-placeholder-color: black;
-      --input-border-color: #ccc;
-      --input-text-color: black;
-      --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
+    /* Inputs */
+    --input-bg-color: white;
+    --input-bg-readonly-color: #F1E4D5;
+    --input-focused-border-color: #ccc;
+    --input-placeholder-color: black;
+    --input-border-color: #ccc;
+    --input-text-color: black;
+    --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
 
-      /* Nav (Tabs) */
-      --nav-tab-border-color: rgba(44, 118, 88, 0.7);
-      --nav-tab-text-color: var(--body-text-color);
-      --nav-tab-bg-color: var(--primary-color);
-      --nav-tab-hover-border-color: var(--primary-color);
-      --nav-tab-active-text-color: white;
-      --nav-tab-border-hover-color: transparent;
-      --nav-tab-hover-text-color: var(--body-text-color);
-      --nav-tab-hover-bg-color: transparent;
-      --nav-tab-border-top: rgba(44, 118, 88, 0.7);
-      --nav-tab-border-left: rgba(44, 118, 88, 0.7);
-      --nav-tab-border-bottom: rgba(44, 118, 88, 0.7);
-      --nav-tab-border-right: rgba(44, 118, 88, 0.7);
-      --nav-tab-hover-border-top: rgba(44, 118, 88, 0.7);
-      --nav-tab-hover-border-left: rgba(44, 118, 88, 0.7);
-      --nav-tab-hover-border-bottom: var(--bs-body-bg);
-      --nav-tab-hover-border-right: rgba(44, 118, 88, 0.7);
-      --nav-tab-active-hover-bg-color: var(--primary-color);
-      --nav-link-bg-color: var(--primary-color);
-      --nav-link-active-text-color: white;
-      --nav-link-text-color: white;
+    /* Nav (Tabs) */
+    --nav-tab-border-color: rgba(44, 118, 88, 0.7);
+    --nav-tab-text-color: var(--body-text-color);
+    --nav-tab-bg-color: var(--primary-color);
+    --nav-tab-hover-border-color: var(--primary-color);
+    --nav-tab-active-text-color: white;
+    --nav-tab-border-hover-color: transparent;
+    --nav-tab-hover-text-color: var(--body-text-color);
+    --nav-tab-hover-bg-color: transparent;
+    --nav-tab-border-top: rgba(44, 118, 88, 0.7);
+    --nav-tab-border-left: rgba(44, 118, 88, 0.7);
+    --nav-tab-border-bottom: rgba(44, 118, 88, 0.7);
+    --nav-tab-border-right: rgba(44, 118, 88, 0.7);
+    --nav-tab-hover-border-top: rgba(44, 118, 88, 0.7);
+    --nav-tab-hover-border-left: rgba(44, 118, 88, 0.7);
+    --nav-tab-hover-border-bottom: var(--bs-body-bg);
+    --nav-tab-hover-border-right: rgba(44, 118, 88, 0.7);
+    --nav-tab-active-hover-bg-color: var(--primary-color);
+    --nav-link-bg-color: var(--primary-color);
+    --nav-link-active-text-color: white;
+    --nav-link-text-color: white;
 
-    /* Reading Bar */
-    --br-actionbar-button-hover-border-color: #6c757d;
-    --br-actionbar-bg-color: #F1E4D5;
+  /* Reading Bar */
+  --br-actionbar-button-hover-border-color: #6c757d;
+  --br-actionbar-bg-color: #F1E4D5;
 
-    /* Drawer */
-    --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(0 0 0 / 13%);
+  /* Drawer */
+  --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(0 0 0 / 13%);
 
-    /* Custom variables */
-    --theme-bg-color: #fff3c9;
+  /* Custom variables */
+  --theme-bg-color: #fff3c9;
+
+  --bs-secondary-bg: darkgrey;
 }
 
 .reader-container {
@@ -115,9 +118,8 @@ export const BookPaperTheme = `
 }
 
 .book-content img, .book-content img[src] {
-z-index: 1;
-filter: brightness(0.85) !important;
-background-color: initial !important;
+  z-index: 1;
+  background-color: initial !important;
 }
 
 
@@ -129,8 +131,12 @@ background-color: initial !important;
     color: #dcdcdc !important;
 }
 
-.book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(240, 50, 50) !important}
-.book-content :link:not(cite), :link .book-content *:not(cite) {color: #00f !important}
+.book-content :visited, .book-content :visited *, .book-content :visited *[class] {
+  color: rgb(240, 50, 50) !important;
+}
+.book-content :link:not(cite), :link .book-content *:not(cite) {
+  color: #00f !important;
+}
 
 .btn-check:checked + .btn {
   color: white;

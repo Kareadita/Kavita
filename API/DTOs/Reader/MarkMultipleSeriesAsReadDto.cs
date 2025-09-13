@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Reader;
 
-public class MarkMultipleSeriesAsReadDto
+public sealed record MarkMultipleSeriesAsReadDto
 {
     public IReadOnlyList<int> SeriesIds { get; init; } = default!;
 }

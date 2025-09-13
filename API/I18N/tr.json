@@ -3,7 +3,7 @@
     "permission-denied": "Bu operasyona izniniz yok",
     "confirm-email": "İlk olarak E-Posta'nı onaylaman gerek",
     "register-user": "Kullanıcıyı kayıt ederken bir şeyler yanlış gitti",
-    "disabled-account": "Hesabınız devre dışı bırakıldı. Sunucu yöneticisiyle iletişime geçin.",
+    "disabled-account": "Hesabınız devre dışı. Sunucu yöneticisiyle iletişime geçin.",
     "validate-email": "E-Posta'yı doğrularken bir hata oluştu: {0}",
     "confirm-token-gen": "Doğrulama tokeni oluşturulurken bir sorun oluştu",
     "password-required": "Yönetici değilseniz, hesabınızı değiştirmek için mevcut şifrenizi girmelisiniz",

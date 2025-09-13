@@ -30,12 +30,12 @@ public class TachiyomiService : ITachiyomiService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private readonly ILogger<ReaderService> _logger;
+    private readonly ILogger<TachiyomiService> _logger;
     private readonly IReaderService _readerService;
 
     private static readonly CultureInfo EnglishCulture = CultureInfo.CreateSpecificCulture("en-US");
 
-    public TachiyomiService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ReaderService> logger, IReaderService readerService)
+    public TachiyomiService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<TachiyomiService> logger, IReaderService readerService)
     {
         _unitOfWork = unitOfWork;
         _readerService = readerService;

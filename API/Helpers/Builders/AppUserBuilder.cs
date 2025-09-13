@@ -2,6 +2,7 @@
 using System.Linq;
 using API.Data;
 using API.Entities;
+using API.Entities.Enums;
 using Kavita.Common;
 
 namespace API.Helpers.Builders;
@@ -21,7 +22,7 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             ApiKey = HashUtil.ApiKey(),
             UserPreferences = new AppUserPreferences
             {
-                Theme = theme ?? Seed.DefaultThemes.First()
+                Theme = theme ?? Seed.DefaultThemes.First(),
             },
             ReadingLists = new List<ReadingList>(),
             Bookmarks = new List<AppUserBookmark>(),
@@ -31,7 +32,8 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             Devices = new List<Device>(),
             Id = 0,
             DashboardStreams = new List<AppUserDashboardStream>(),
-            SideNavStreams = new List<AppUserSideNavStream>()
+            SideNavStreams = new List<AppUserSideNavStream>(),
+            ReadingProfiles = [],
         };
     }
 
@@ -61,4 +63,16 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
         return this;
     }
 
+    public AppUserBuilder WithRole(string role)
+    {
+        _appUser.UserRoles ??= new List<AppUserRole>();
+        _appUser.UserRoles.Add(new AppUserRole() {Role = new AppRole() {Name = role}});
+        return this;
+    }
+
+    public AppUserBuilder WithIdentityProvider(IdentityProvider identityProvider)
+    {
+        _appUser.IdentityProvider = identityProvider;
+        return this;
+    }
 }

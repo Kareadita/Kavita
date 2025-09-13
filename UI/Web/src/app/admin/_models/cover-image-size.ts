@@ -1,3 +1,4 @@
+
 export enum CoverImageSize {
     Default = 1,
     Medium = 2,
@@ -5,10 +6,6 @@ export enum CoverImageSize {
     XLarge = 4
 }
 
-export const CoverImageSizes =
-    [
-        {value: CoverImageSize.Default, title: 'cover-image-size.default'},
-        {value: CoverImageSize.Medium, title: 'cover-image-size.medium'},
-        {value: CoverImageSize.Large, title: 'cover-image-size.large'},
-        {value: CoverImageSize.XLarge, title: 'cover-image-size.xlarge'}
-    ];
+export const allCoverImageSizes = Object.keys(CoverImageSize)
+  .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
+  .map(key => parseInt(key, 10)) as CoverImageSize[];

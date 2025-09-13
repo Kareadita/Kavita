@@ -1,0 +1,139 @@
+{
+    "user-preferences": {
+        "locale-tooltip": "Kieli, jota Kavitan tulee käyttää",
+        "share-series-reviews-tooltip": "Pitäisikö Kavita sisällyttää arvostelusi sarjoista muille käyttäjille",
+        "title": "Käyttäjän hallintapaneeli",
+        "pref-description": "Nämä ovat laajamittaisia asetuksia, jotka on sidottu tiliisi.",
+        "account-tab": "{{tabs.account-tab}}",
+        "preferences-tab": "{{tabs.preferences-tab}}",
+        "theme-tab": "{{tabs.theme-tab}}",
+        "devices-tab": "{{tabs.devices-tab}}",
+        "smart-filters-tab": "{{tabs.smart-filters-tab}}",
+        "success-toast": "Käyttäjäasetukset päivitetty",
+        "global-settings-title": "Yleisesti pätevät asetukset",
+        "page-layout-mode-label": "Sivun asettelutila",
+        "page-layout-mode-tooltip": "Näytä kohteet kortteina tai luettelonäkymänä Sarjojen yksityiskohdat -sivulla.",
+        "locale-label": "Kieliasetus",
+        "blur-unread-summaries-label": "Sumenna lukemattomat yhteenvedot",
+        "blur-unread-summaries-tooltip": "Sumentaa yhteenvetotekstiä osissa tai luvuissa, joissa ei ole edetty lukemisessa (spoilerien välttämiseksi)",
+        "prompt-on-download-label": "Kehote lataamisesta",
+        "prompt-on-download-tooltip": "Näytä kehote, kun lataus ylittää {{size}} Mt",
+        "disable-animations-label": "Poista animaatiot käytöstä",
+        "collapse-series-relationships-label": "Kutista sarjojen suhteet",
+        "collapse-series-relationships-tooltip": "Pitäisikö Kavita näyttää sarjoja, joilla ei ole suhteita tai jotka ovat vanhempi/esiosa",
+        "share-series-reviews-label": "Jaa sarjojen arvostelut",
+        "disable-animations-tooltip": "Poistaa animaatiot käytöstä sivustolla. Hyödyllinen e-musteen lukijoille.",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "scrobbling-tab": "{{tabs.scrobbling-tab}}"
+    },
+    "customize-dashboard-modal": {
+        "smart-filters": "Älykkäät suodattimet",
+        "title-external-sources": "Ulkoiset lähteet",
+        "external-sources": "Ulkoiset lähteet",
+        "title-smart-filters": "Älykkäät suodattimet"
+    },
+    "tabs": {
+        "smart-filters-tab": "Älykkäät suodattimet"
+    },
+    "nav-header": {
+        "all-filters": "Älykkäät suodattimet"
+    },
+    "grouped-typeahead": {
+        "reading-lists": "Lukulistat"
+    },
+    "login": {
+        "title": "Kirjaudu sisään tilillesi",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
+        "forgot-password": "Unohtuiko salasana?",
+        "submit": "Kirjaudu sisään"
+    },
+    "dashboard": {
+        "no-libraries": "Kirjastoja ei ole vielä määritetty. Luo joitakin sisään",
+        "server-settings-link": "Palvelimen asetukset",
+        "not-granted": "Sinulle ei ole myönnetty pääsyä yhteenkään kirjastoon.",
+        "on-deck-title": "Kannella",
+        "recently-added-title": "Äskettäin lisätyt sarjat",
+        "more-in-genre-title": "Lisää {{genre}}:ssa",
+        "recently-updated-title": "Äskettäin päivitetyt sarjat"
+    },
+    "edit-user": {
+        "close": "{{common.close}}",
+        "username": "{{common.username}}",
+        "required": "{{validation.required-field}}",
+        "email": "{{common.email}}",
+        "saving": "Tallennetaan…",
+        "update": "Päivitä",
+        "account-detail-title": "Tilin yksityiskohdat",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}"
+    },
+    "user-scrobble-history": {
+        "title": "Scrobble-historia",
+        "not-read-warning": "Ylävirran palveluntarjoajat pitävät aina suurimman numeron",
+        "filter-label": "{{common.filter}}",
+        "created-header": "Luotu",
+        "last-modified-header": "Viimeksi muokattu",
+        "type-header": "Tyyppi",
+        "series-header": "Sarjat",
+        "data-header": "Tiedot",
+        "is-processed-header": "On käsitelty",
+        "no-data": "Ei tietoja",
+        "volume-and-chapter-num": "Osa {{v}} Luku {{n}}",
+        "volume-num": "Osa {{num}}",
+        "rating": "Arvosana {{r}}",
+        "chapter-num": "Luku {{num}}",
+        "not-applicable": "Ei sovellettavissa",
+        "processed": "Käsitelty",
+        "not-processed": "Ei käsitelty",
+        "special": "{{entity-title.special}}",
+        "description": "Täältä löydät kaikki tiliisi linkitetyt scrobble-tapahtumat. Jotta tapahtumat olisivat olemassa, sinulla on oltava aktiivinen scrobble-palveluntarjoaja määritettynä. Kaikki käsitellyt tapahtumat tyhjennetään kuukauden kuluttua. Jos on käsittelemättömiä tapahtumia, ne eivät todennäköisesti pysty muodostamaan osumia ylävirtaan. Ota yhteyttä järjestelmänvalvojaasi saadaksesi ne korjattua."
+    },
+    "scrobble-event-type-pipe": {
+        "chapter-read": "Lukemisen eteneminen",
+        "score-updated": "Luokituksen päivitys",
+        "want-to-read-add": "Haluan lukea: Lisää",
+        "want-to-read-remove": "Haluan lukea: Poista",
+        "review": "Arvostelun päivitys"
+    },
+    "spoiler": {
+        "click-to-show": "Spoileri, napsauta näyttääksesi"
+    },
+    "review-card-modal": {
+        "close": "{{common.close}}",
+        "external-mod": "(external)",
+        "go-to-review": "Siirry Arvosteluun",
+        "user-review": "{{username}}:n arvostelu"
+    },
+    "review-card": {
+        "your-review": "Tämä on arvostelusi",
+        "external-review": "Ulkoinen arvostelu",
+        "local-review": "Paikallinen arvostelu",
+        "rating-percentage": "Arvio {{r}} %"
+    },
+    "want-to-read": {
+        "title": "Haluan lukea",
+        "no-items": "Ei kohteita. Yritä lisätä sarjoja.",
+        "no-items-filtered": "Yksikään kohde ei vastaa nykyistä suodatinta.",
+        "series-count": "{{common.series-count}}"
+    },
+    "restriction-selector": {
+        "no-restriction": "Ei rajoituksia"
+    },
+    "side-nav": {
+        "reading-lists": "Lukulistat"
+    },
+    "reading-lists": {
+        "title": "Lukulistat"
+    },
+    "errors": {
+        "user-not-auth": "Käyttäjää ei ole todennettu"
+    },
+    "customize-sidenav-streams": {
+        "smart-filters-title": "Älykkäät suodattimet"
+    },
+    "manage-tasks-settings": {
+        "cleanup-label": "Puhdistus"
+    }
+}

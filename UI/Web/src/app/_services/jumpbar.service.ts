@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { JumpKey } from '../_models/jumpbar/jump-key';
+import {Injectable} from '@angular/core';
+import {JumpKey} from '../_models/jumpbar/jump-key';
 
 const keySize = 25; // Height of the JumpBar button
 
@@ -16,21 +16,23 @@ export class JumpbarService {
 
 
   getResumeKey(key: string) {
-    if (this.resumeKeys.hasOwnProperty(key)) return this.resumeKeys[key];
+    const k = key.toUpperCase();
+    if (this.resumeKeys.hasOwnProperty(k)) return this.resumeKeys[k];
     return '';
   }
 
-  getResumePosition(key: string) {
-    if (this.resumeScroll.hasOwnProperty(key)) return this.resumeScroll[key];
+  getResumePosition(url: string) {
+    if (this.resumeScroll.hasOwnProperty(url)) return this.resumeScroll[url];
     return 0;
   }
 
   saveResumeKey(key: string, value: string) {
-    this.resumeKeys[key] = value;
+    const k = key.toUpperCase();
+    this.resumeKeys[k] = value;
   }
 
-  saveScrollOffset(key: string, value: number) {
-    this.resumeScroll[key] = value;
+  saveResumePosition(url: string, value: number) {
+    this.resumeScroll[url] = value;
   }
 
   generateJumpBar(jumpBarKeys: Array<JumpKey>, currentSize: number) {
@@ -75,9 +77,11 @@ export class JumpbarService {
 
   _removeFirstPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1, jumpBarKeys: Array<JumpKey>, jumpBarKeysToRender: Array<JumpKey>) {
     const removedIndexes: Array<number> = [];
+
     for(let removal = 0; removal < numberOfRemovals; removal++) {
       let min = 100000000;
       let minIndex = -1;
+
       for(let i = 1; i < midPoint; i++) {
         if (jumpBarKeys[i].size < min && !removedIndexes.includes(i)) {
           min = jumpBarKeys[i].size;
@@ -93,28 +97,33 @@ export class JumpbarService {
   }
 
   /**
-   * 
+   *
    * @param data An array of objects
    * @param keySelector A method to fetch a string from the object, which is used to classify the JumpKey
-   * @returns 
+   * @returns
    */
    getJumpKeys(data :Array<any>, keySelector: (data: any) => string) {
     const keys: {[key: string]: number} = {};
     data.forEach(obj => {
-      let ch = keySelector(obj).charAt(0);
-      if (/\d|\#|!|%|@|\(|\)|\^|\.|_|\*/g.test(ch)) {
-        ch = '#';
+      try {
+        let ch = keySelector(obj).charAt(0).toUpperCase();
+        if (/\d|\#|!|%|@|\(|\)|\^|\.|_|\*/g.test(ch)) {
+          ch = '#';
+        }
+        if (!keys.hasOwnProperty(ch)) {
+          keys[ch] = 0;
+        }
+        keys[ch] += 1;
+      } catch (e) {
+        console.error('Failed to calculate jump key for ', obj, e);
       }
-      if (!keys.hasOwnProperty(ch)) {
-        keys[ch] = 0;
-      }
-      keys[ch] += 1;
     });
     return Object.keys(keys).map(k => {
+      k = k.toUpperCase();
       return {
         key: k,
         size: keys[k],
-        title: k.toUpperCase()
+        title: k
       }
     }).sort((a, b) => {
       if (a.key < b.key) return -1;

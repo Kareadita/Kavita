@@ -1,5 +1,12 @@
+.review-card {
+  max-width: 320px;
+  max-height: 130px;
+  height: 130px;
+  width: 320px;
+}
+
 .profile-image {
-    font-size: 2rem;
+    font-size: 1.2rem;
     padding: 20px;
 }
 
@@ -26,8 +33,6 @@
 }
 
 .card-text.no-images {
-    min-height: 63px;
-    max-height: 63px;
     text-overflow: ellipsis;
     overflow: hidden;
 }
@@ -42,10 +47,16 @@
     max-width: 319px;
     justify-content: space-between;
     margin: 0 auto;
-    padding: .5rem 0;
 
     & > * {
         margin: 0 5px;
         display: inline-flex;
     }
+}
+
+.card-body {
+    display: block;
+    visibility: visible;
+    min-height: 93.5px;
+    max-height: 93.5px;
 }

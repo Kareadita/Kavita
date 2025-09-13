@@ -1,0 +1,103 @@
+<ng-container *transloco="let t; prefix:'manage-matched-metadata'">
+  <p>{{t('description')}}</p>
+
+  <form [formGroup]="filterGroup">
+    <div class="row g-0">
+      <div class="col-auto ms-auto me-3">
+        <label for="libtype-filter">{{t('library-type')}}</label>
+        <select class="form-select" formControlName="libraryType" id="libtype-filter">
+          <option [value]="-1">{{t('all-status-label')}}</option>
+          @for(libType of allLibraryTypes; track libType) {
+            <option [value]="libType">{{libType | libraryType}}</option>
+          }
+        </select>
+      </div>
+      <div class="col-auto">
+        <label for="match-filter">{{t('matched-state-label')}}</label>
+        <select class="form-select" formControlName="matchState" id="match-filter">
+          @for(state of allMatchStates; track state) {
+            <option [value]="state">{{state | matchStateOption}}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </form>
+
+  <ngx-datatable
+    class="bootstrap"
+    [rows]="data"
+    [loadingIndicator]="isLoading"
+    [columnMode]="ColumnMode.flex"
+    rowHeight="auto"
+    [limit]="15"
+    [footerHeight]="50"
+  >
+
+    <ngx-datatable-column prop="series.name" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('series-name-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.series.id)"></app-image>
+        <a class="ms-2" [href]="baseUrl + 'library/' + item.series.libraryId + '/series/' + item.series.id" target="_blank">{{item.series.name}}</a>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column prop="series.libraryId" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('library-name-header')}}
+      </ng-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
+        {{item.series.libraryId | libraryName | async}}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column prop="status" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('status-header')}}
+      </ng-template>
+      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+        @if (item.series.isBlacklisted) {
+          {{t('blacklist-status-label')}}
+        } @else if (item.series.dontMatch) {
+          {{t('dont-match-status-label')}}
+        } @else {
+          @if (item.isMatched) {
+            {{t('matched-status-label')}}
+
+          } @else {
+            {{t('unmatched-status-label')}}
+          }
+        }
+      </ng-template>
+    </ngx-datatable-column>
+
+    @if (filterGroup.get('matchState')?.value === MatchStateOption.Matched) {
+      <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{t('valid-until-header')}}
+        </ng-template>
+        <ng-template let-item="row" ngx-datatable-cell-template>
+          @if (item.series.isBlacklisted || item.series.dontMatch || !item.isMatched) {
+            {{null | defaultValue}}
+          } @else {
+            {{item.validUntilUtc | utcToLocalTime}}
+          }
+        </ng-template>
+      </ngx-datatable-column>
+    }
+
+    <ngx-datatable-column prop="" [width]="20" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+      <ng-template let-column="column" ngx-datatable-header-template>
+        {{t('actions-header')}}
+      </ng-template>
+      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+        <button class="btn btn-icon" (click)="fixMatch(item.series)">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <span class="visually-hidden">{{t('match-alt', {seriesName: item.series.name})}}</span>
+        </button>
+      </ng-template>
+    </ngx-datatable-column>
+
+  </ngx-datatable>
+</ng-container>

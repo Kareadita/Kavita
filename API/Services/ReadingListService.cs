@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -48,6 +49,15 @@ public interface IReadingListService
     Task CreateReadingListsFromSeries(Series series, Library library);
 
     Task CreateReadingListsFromSeries(int libraryId, int seriesId);
+    Task<string> GenerateReadingListCoverImage(int readingListId);
+    /// <summary>
+    /// Check, and update if needed, all reading lists' AgeRating who contain the passed series
+    /// </summary>
+    /// <param name="seriesId">The series whose age rating is being updated</param>
+    /// <param name="ageRating">The new (uncommited) age rating of the series</param>
+    /// <returns></returns>
+    /// <remarks>This method does not commit changes</remarks>
+    Task UpdateReadingListAgeRatingForSeries(int seriesId, AgeRating ageRating);
 }
 
 /// <summary>
@@ -59,15 +69,20 @@ public class ReadingListService : IReadingListService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReadingListService> _logger;
     private readonly IEventHub _eventHub;
-    private readonly ChapterSortComparerDefaultFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerDefaultFirst.Default;
+    private readonly IImageService _imageService;
+    private readonly IDirectoryService _directoryService;
+
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Parser.RegexTimeout);
 
-    public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger, IEventHub eventHub)
+    public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger,
+        IEventHub eventHub, IImageService imageService, IDirectoryService directoryService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventHub = eventHub;
+        _imageService = imageService;
+        _directoryService = directoryService;
     }
 
     public static string FormatTitle(ReadingListItemDto item)
@@ -89,7 +104,13 @@ public class ReadingListService : IReadingListService
                 {
                     title = $"Volume {Parser.CleanSpecialTitle(item.VolumeNumber)}";
                 }
-            } else {
+            }
+            else if (item.VolumeNumber == Parser.SpecialVolume)
+            {
+                title = specialTitle;
+            }
+            else
+            {
                 title = $"Volume {specialTitle}";
             }
         }
@@ -101,15 +122,30 @@ public class ReadingListService : IReadingListService
 
         if (title != string.Empty) return title;
 
+        // item.ChapterNumber is Range
         if (item.ChapterNumber == Parser.DefaultChapter &&
             !string.IsNullOrEmpty(item.ChapterTitleName))
         {
             title = item.ChapterTitleName;
         }
+        else if (item.IsSpecial &&
+                 (!string.IsNullOrEmpty(item.ChapterTitleName) || !string.IsNullOrEmpty(chapterNum)))
+        {
+            if (!string.IsNullOrEmpty(item.ChapterTitleName))
+            {
+                title = item.ChapterTitleName;
+            }
+            else
+            {
+                title = chapterNum;
+            }
+
+        }
         else
         {
             title = ReaderService.FormatChapterName(item.LibraryType, true, true) + chapterNum;
         }
+
         return title;
     }
 
@@ -420,6 +456,7 @@ public class ReadingListService : IReadingListService
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
         if (series == null || library == null) return;
+
         await CreateReadingListsFromSeries(series, library);
     }
 
@@ -436,6 +473,7 @@ public class ReadingListService : IReadingListService
         _logger.LogInformation("Processing Reading Lists for {SeriesName}", series.Name);
         var user = await _unitOfWork.UserRepository.GetDefaultAdminUser();
         series.Metadata ??= new SeriesMetadataBuilder().Build();
+
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
             var pairs = new List<Tuple<string, string>>();
@@ -488,8 +526,12 @@ public class ReadingListService : IReadingListService
 
                 if (!_unitOfWork.HasChanges()) continue;
 
+
+                _imageService.UpdateColorScape(readingList);
                 await CalculateReadingListAgeRating(readingList);
+
                 await _unitOfWork.CommitAsync(); // TODO: See if we can avoid this extra commit by reworking bottom logic
+
                 await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1,
                     user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
                 await _unitOfWork.CommitAsync();
@@ -512,13 +554,13 @@ public class ReadingListService : IReadingListService
         var maxPairs = Math.Max(arcs.Length, arcNumbers.Length);
         for (var i = 0; i < maxPairs; i++)
         {
-            var arcNumber = int.MaxValue.ToString();
+            var arcNumber = int.MaxValue.ToString(CultureInfo.InvariantCulture);
             if (arcNumbers.Length > i)
             {
                 arcNumber = arcNumbers[i];
             }
 
-            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumber, out _)) continue;
+            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumber, CultureInfo.InvariantCulture, out _)) continue;
             data.Add(new Tuple<string, string>(arcs[i], arcNumber));
         }
 
@@ -537,13 +579,14 @@ public class ReadingListService : IReadingListService
         {
             CblName = cblReading.Name,
             Success = CblImportResult.Success,
-            Results = new List<CblBookResult>(),
+            Results = [],
             SuccessfulInserts = new List<CblBookResult>()
         };
+
         if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
 
-        // Is there another reading list with the same name?
-        if (await _unitOfWork.ReadingListRepository.ReadingListExists(cblReading.Name))
+        // Is there another reading list with the same name on the user's account?
+        if (await _unitOfWork.ReadingListRepository.ReadingListExistsForUser(cblReading.Name, userId))
         {
             importSummary.Success = CblImportResult.Fail;
             importSummary.Results.Add(new CblBookResult
@@ -557,9 +600,6 @@ public class ReadingListService : IReadingListService
         var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
-
-        // How can we match properly with ComicVine library when year is part of the series unless we do this in 2 passes and see which has a better match
-
 
         if (userSeries.Count == 0)
         {
@@ -597,10 +637,6 @@ public class ReadingListService : IReadingListService
 
     private static List<string> GetUniqueSeries(CblReadingList cblReading, bool useComicLibraryMatching)
     {
-        if (useComicLibraryMatching)
-        {
-            return cblReading.Books.Book.Select(b => Parser.Normalize(GetSeriesFormatting(b, useComicLibraryMatching))).Distinct().ToList();
-        }
         return cblReading.Books.Book.Select(b => Parser.Normalize(GetSeriesFormatting(b, useComicLibraryMatching))).Distinct().ToList();
     }
 
@@ -632,6 +668,7 @@ public class ReadingListService : IReadingListService
         var allSeriesLocalized = userSeries.ToDictionary(s => s.NormalizedLocalizedName);
 
         var readingListNameNormalized = Parser.Normalize(cblReading.Name);
+
         // Get all the user's reading lists
         var allReadingLists = (user.ReadingLists).ToDictionary(s => s.NormalizedTitle);
         if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
@@ -736,7 +773,10 @@ public class ReadingListService : IReadingListService
         }
 
         // If there are no items, don't create a blank list
-        if (!_unitOfWork.HasChanges() || !readingList.Items.Any()) return importSummary;
+        if (!_unitOfWork.HasChanges() || readingList.Items.Count == 0) return importSummary;
+
+
+        _imageService.UpdateColorScape(readingList);
         await _unitOfWork.CommitAsync();
 
 
@@ -786,5 +826,52 @@ public class ReadingListService : IReadingListService
         var cblReadingList = (CblReadingList) reader.Deserialize(file);
         file.Close();
         return cblReadingList;
+    }
+
+    public async Task<string> GenerateReadingListCoverImage(int readingListId)
+    {
+        // TODO: Currently reading lists are dynamically generated at runtime. This needs to be overhauled to be generated and stored within
+        // the Reading List (and just expire every so often) so we can utilize ColorScapes.
+        // Check if a cover already exists for the reading list
+        // var potentialExistingCoverPath = _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory,
+        //     ImageService.GetReadingListFormat(readingListId));
+        // if (_directoryService.FileSystem.File.Exists(potentialExistingCoverPath))
+        // {
+        //     // Check if we need to update CoverScape
+        //
+        // }
+
+        var covers = await _unitOfWork.ReadingListRepository.GetRandomCoverImagesAsync(readingListId);
+        var destFile = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory,
+            ImageService.GetReadingListFormat(readingListId));
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        destFile += settings.EncodeMediaAs.GetExtension();
+
+        if (_directoryService.FileSystem.File.Exists(destFile)) return destFile;
+        ImageService.CreateMergedImage(
+            covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
+            settings.CoverImageSize,
+            destFile);
+        // TODO: Refactor this so that reading lists have a dedicated cover image so we can calculate primary/secondary colors
+
+        return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
+    }
+
+    public async Task UpdateReadingListAgeRatingForSeries(int seriesId, AgeRating ageRating)
+    {
+        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListsBySeriesId(seriesId);
+        foreach (var readingList in readingLists)
+        {
+            var seriesIds = readingList.Items.Select(item => item.SeriesId).ToList();
+            seriesIds.Remove(seriesId); // Don't get AgeRating from database
+
+            var maxAgeRating = await _unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(seriesIds);
+            if (ageRating > maxAgeRating)
+            {
+                maxAgeRating = ageRating;
+            }
+
+            readingList.AgeRating = maxAgeRating;
+        }
     }
 }

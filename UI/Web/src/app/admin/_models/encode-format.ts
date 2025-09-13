@@ -4,4 +4,6 @@ export enum EncodeFormat {
     AVIF = 2
 }
 
-export const EncodeFormats = [{value: EncodeFormat.PNG, title: 'PNG'}, {value: EncodeFormat.WebP, title: 'WebP'}, {value: EncodeFormat.AVIF, title: 'AVIF'}];
+export const allEncodeFormats = Object.keys(EncodeFormat)
+  .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
+  .map(key => parseInt(key, 10)) as EncodeFormat[];

@@ -16,6 +16,7 @@ using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using SharpCompress.Archives;
 using SharpCompress.Common;
+using YamlDotNet.Core;
 
 namespace API.Services;
 
@@ -127,9 +128,11 @@ public class ArchiveService : IArchiveService
                 }
                 case ArchiveLibrary.NotSupported:
                     _logger.LogWarning("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                    _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService, "File format not supported", string.Empty);
                     return 0;
                 default:
                     _logger.LogWarning("[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                    _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService, "File format not supported", string.Empty);
                     return 0;
             }
         }
@@ -352,16 +355,23 @@ public class ArchiveService : IArchiveService
             foreach (var path in files)
             {
                 var tempPath = Path.Join(tempLocation, _directoryService.FileSystem.Path.GetFileNameWithoutExtension(_directoryService.FileSystem.FileInfo.New(path).Name));
-                progressCallback(Tuple.Create(_directoryService.FileSystem.FileInfo.New(path).Name, (1.0f * totalFiles) / count));
-                if (Tasks.Scanner.Parser.Parser.IsArchive(path))
+
+                // Image series need different handling
+                if (Tasks.Scanner.Parser.Parser.IsImage(path))
                 {
-                    ExtractArchive(path, tempPath);
-                }
-                else
-                {
-                    _directoryService.CopyFileToDirectory(path, tempPath);
+                    var parentDirectory = _directoryService.FileSystem.DirectoryInfo.New(path).Parent?.Name;
+                    tempPath = Path.Join(tempLocation, parentDirectory ?? _directoryService.FileSystem.FileInfo.New(path).Name);
                 }
 
+                if (Tasks.Scanner.Parser.Parser.IsArchive(path))
+                {
+                    // Archives don't need to be put into a subdirectory of the same name
+                    tempPath = _directoryService.GetParentDirectoryName(tempPath);
+                }
+
+                progressCallback(Tuple.Create(_directoryService.FileSystem.FileInfo.New(path).Name, (1.0f * totalFiles) / count));
+
+                _directoryService.CopyFileToDirectory(path, tempPath);
                 count++;
             }
         }

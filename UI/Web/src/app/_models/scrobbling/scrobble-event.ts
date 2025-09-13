@@ -7,6 +7,7 @@ export enum ScrobbleEventType {
 }
 
 export interface ScrobbleEvent {
+  id: number;
   seriesName: string;
   seriesId: number;
   libraryId: number;

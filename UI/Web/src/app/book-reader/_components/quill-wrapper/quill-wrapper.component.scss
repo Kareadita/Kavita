@@ -1,0 +1,170 @@
+:host ::ng-deep quill-editor {
+  .ql-toolbar,
+  .ql-container {
+    border: 0.0625rem solid var(--primary-color);
+    background-color: var(--drawer-bg-color);
+  }
+
+  .ql-toolbar {
+    border-bottom: 0.0625rem solid var(--primary-color);
+    padding: 0.5rem;
+    border-radius: 0.3125rem 0.3125rem 0 0 !important;
+
+    .ql-formats {
+      margin-right: 0.9375rem;
+    }
+  }
+
+  .ql-container {
+    border-top: none;
+    border-radius: 0 0 0.3125rem 0.3125rem !important;
+
+    .ql-editor {
+      background-color: var(--theme-bg-color);
+      color: var(--body-text-color);
+      min-height: 60px;
+
+      &::before {
+        color: var(--input-placeholder-color);
+      }
+
+      &.ql-blank::before {
+        font-style: italic;
+        color: var(--input-placeholder-color);
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+
+  .quil-wrapper-btn,
+  button[class*="ql-"] {
+    color: var(--drawer-text-color) !important;
+    background-color: transparent;
+    border: 0.0625rem solid transparent;
+    border-radius: 0.1875rem;
+    padding: 0.3125rem;
+    margin: 0.125rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--btn-primary-hover-bg-color);
+      color: var(--btn-primary-hover-text-color) !important;
+    }
+
+    svg {
+      transform: scale(1.5);
+    }
+
+    &.ql-active {
+      background-color: var(--btn-primary-bg-color);
+      color: var(--drawer-text-color) !important;
+
+      .ql-stroke {
+        stroke: var(--drawer-text-color) !important;
+      }
+
+      .ql-fill {
+        fill: var(--drawer-text-color) !important;
+      }
+    }
+  }
+
+  .ql-stroke {
+    stroke: var(--drawer-text-color) !important;
+  }
+
+  .ql-fill {
+    fill: var(--drawer-text-color) !important;
+  }
+
+  .quil-wrapper-select,
+  .ql-picker {
+    color: var(--drawer-text-color) !important;
+    background-color: var(--drawer-bg-color) !important;
+    margin: 0.125rem;
+    min-width: 1.875rem;
+
+    .ql-picker-label {
+      color: var(--drawer-text-color) !important;
+      border: 0.0625rem solid var(--input-border-color);
+      border-radius: 0.1875rem;
+      background-color: var(--input-bg-color) !important;
+      text-align: center !important;
+      display: flex !important;
+      align-items: flex-start !important;
+      justify-content: flex-start !important;
+
+      &:hover {
+        .ql-stroke {
+          stroke: var(--btn-primary-hover-text-color) !important;
+        }
+      }
+
+      svg {
+        display: none !important;
+      }
+    }
+
+    .ql-picker-options {
+      background-color: var(--drawer-bg-color);
+      border: 0.0625rem solid var(--input-border-color);
+      border-radius: 0.1875rem;
+      box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+      min-width: auto !important;
+      width: 100% !important;
+
+      .ql-picker-item {
+        color: var(--drawer-text-color) !important;
+        border-radius: 0.3125rem;
+        padding-left: 0.125rem;
+
+        &:hover {
+          background-color: var(--btn-primary-hover-bg-color);
+          color: var(--btn-primary-hover-text-color) !important;
+        }
+
+        &.ql-selected {
+          background-color: var(--btn-primary-bg-color);
+          color: var(--drawer-text-color) !important;
+        }
+      }
+    }
+
+    &.ql-expanded {
+      .ql-picker-label {
+        border-color: var(--primary-color);
+        background-color: var(--btn-primary-bg-color);
+        color: var(--drawer-text-color) !important;
+
+        .ql-stroke {
+          stroke: var(--drawer-text-color) !important;
+        }
+
+        svg {
+          display: none !important;
+        }
+      }
+    }
+  }
+
+  select.quil-wrapper-select {
+    background-color: var(--input-bg-color);
+    color: var(--input-text-color);
+    border: 0.0625rem solid var(--input-border-color);
+    border-radius: 0.1875rem;
+
+    option {
+      background-color: var(--drawer-bg-color);
+      color: var(--drawer-text-color);
+    }
+  }
+
+  .ql-formats:not(:last-child) {
+    margin-right: 0.9375rem;
+    padding-right: 0.9375rem;
+    border-right: 0.0625rem solid var(--input-border-color);
+  }
+}

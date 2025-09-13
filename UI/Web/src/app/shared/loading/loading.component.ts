@@ -1,14 +1,13 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import {CommonModule} from "@angular/common";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-  selector: 'app-loading',
-  standalone: true,
-  imports: [CommonModule, TranslocoDirective],
-  templateUrl: './loading.component.html',
-  styleUrls: ['./loading.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-loading',
+    imports: [CommonModule, TranslocoDirective],
+    templateUrl: './loading.component.html',
+    styleUrls: ['./loading.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoadingComponent {
 

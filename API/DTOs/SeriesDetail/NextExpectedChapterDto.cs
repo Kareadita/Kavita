@@ -2,7 +2,7 @@
 
 namespace API.DTOs.SeriesDetail;
 
-public class NextExpectedChapterDto
+public sealed record NextExpectedChapterDto
 {
     public float ChapterNumber { get; set; }
     public float VolumeNumber { get; set; }

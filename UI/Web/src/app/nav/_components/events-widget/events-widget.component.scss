@@ -20,7 +20,7 @@
 
 .widget-button--indicator {
   position: absolute;
-  top: 30px;
+  top: 24px;
   color: var(--event-widget-activity-bg-color);
 
   &.error {
@@ -65,10 +65,6 @@
     white-space:nowrap;
 }
 
-.btn:focus, .btn:hover {
-    box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);
-}
-
 .small-spinner {
     width: 1rem;
     height: 1rem;
@@ -83,6 +79,7 @@
 .dark-menu-item {
   &.update-available {
     cursor: pointer;
+    opacity: 1;
 
     i.fa {
       color: var(--primary-color) !important;
@@ -121,7 +118,7 @@
     }
 
     .btn-close {
-      top: 10px;
+      top: 35px;
       right: 10px;
       font-size: 11px;
       position: absolute;

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities.Enums;
@@ -34,33 +35,41 @@ public class BookController : BaseApiController
     }
 
     /// <summary>
-    /// Retrieves information for the PDF and Epub reader
+    /// Retrieves information for the PDF and Epub reader. This will cache the file.
     /// </summary>
     /// <remarks>This only applies to Epub or PDF files</remarks>
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("{chapterId}/book-info")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId"])]
     public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId)
     {
         var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
         if (dto == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         var bookTitle = string.Empty;
+
+
         switch (dto.SeriesFormat)
         {
             case MangaFormat.Epub:
             {
                 var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId))[0];
-                using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath, BookService.BookReaderOptions);
+                await _cacheService.Ensure(chapterId);
+                var file = _cacheService.GetCachedFile(chapterId, mangaFile.FilePath);
+                using var book = await EpubReader.OpenBookAsync(file, BookService.LenientBookReaderOptions);
                 bookTitle = book.Title;
+
                 break;
             }
             case MangaFormat.Pdf:
             {
                 var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId))[0];
+                await _cacheService.Ensure(chapterId);
+                var file = _cacheService.GetCachedFile(chapterId, mangaFile.FilePath);
                 if (string.IsNullOrEmpty(bookTitle))
                 {
                     // Override with filename
-                    bookTitle = Path.GetFileNameWithoutExtension(mangaFile.FilePath);
+                    bookTitle = Path.GetFileNameWithoutExtension(file);
                 }
 
                 break;
@@ -72,9 +81,9 @@ public class BookController : BaseApiController
                 break;
         }
 
-        return Ok(new BookInfoDto()
+        var info = new BookInfoDto()
         {
-            ChapterNumber =  dto.ChapterNumber,
+            ChapterNumber = dto.ChapterNumber,
             VolumeNumber = dto.VolumeNumber,
             VolumeId = dto.VolumeId,
             BookTitle = bookTitle,
@@ -84,7 +93,10 @@ public class BookController : BaseApiController
             LibraryId = dto.LibraryId,
             IsSpecial = dto.IsSpecial,
             Pages = dto.Pages,
-        });
+        };
+
+
+        return Ok(info);
     }
 
     /// <summary>
@@ -102,7 +114,7 @@ public class BookController : BaseApiController
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
         if (chapter == null) return BadRequest(await _localizationService.Get("en", "chapter-doesnt-exist"));
 
-        using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
+        using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.LenientBookReaderOptions);
         var key = BookService.CoalesceKeyForAnyFile(book, file);
 
         if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return BadRequest(await _localizationService.Get("en", "file-missing"));
@@ -157,7 +169,11 @@ public class BookController : BaseApiController
 
         try
         {
-            return Ok(await _bookService.GetBookPage(page, chapterId, path, baseUrl));
+            var ptocBookmarks =
+                await _unitOfWork.UserTableOfContentRepository.GetPersonalToCForPage(User.GetUserId(), chapterId, page);
+            var annotations = await _unitOfWork.UserRepository.GetAnnotationsByPage(User.GetUserId(), chapter.Id, page);
+
+            return Ok(await _bookService.GetBookPage(page, chapterId, path, baseUrl, ptocBookmarks, annotations));
         }
         catch (KavitaException ex)
         {

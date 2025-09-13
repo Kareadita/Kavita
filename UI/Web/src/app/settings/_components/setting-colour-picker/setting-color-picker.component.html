@@ -1,0 +1,32 @@
+@if(editMode()) {
+  <div class="color-picker-container">
+    <button class="btn btn-icon color">
+      @if (showPicker()) {
+        <div #colorPopup>
+          <chrome-picker
+            class="floating-picker"
+            [class.left]="first()"
+            [class.right]="last()"
+            [control]="chromeControl"
+          >
+          </chrome-picker>
+        </div>
+      }
+
+      <div [id]="id()" class="dot" appLongClick
+             (longClick)="longClick()"
+             [style.background]="color() | slotColor"
+             (click)="togglePicker()"
+      ></div>
+      <label [for]="id()" class="visually-hidden">{{label()}}</label>
+    </button>
+  </div>
+} @else {
+  <button [id]="id()" class="btn btn-icon color" (click)="onSelect()">
+    <div class="dot" appLongClick (longClick)="longClick()"
+         [ngClass]="{'active': selected()}"
+         [ngStyle]="{'background-color': color() | slotColor}">
+    </div>
+  </button>
+  <label [for]="id()" class="visually-hidden">{{label()}}</label>
+}

@@ -1,0 +1,87 @@
+// You must add this on a component based drawer
+:host {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.bookmark-item {
+  display: flex;
+  background: var(--bs-dark, #2b2b2b);
+  border-radius: .5rem;
+  overflow: hidden;
+  min-height: 92px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.4);
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(100,150,250,.6);
+  }
+}
+
+.thumb-wrapper {
+  width: 80px;
+  flex: 0 0 80px;
+  background: #111;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  img, app-image {
+    border-radius: 0;
+  }
+}
+
+.bookmark-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: .5rem .75rem;
+  min-width: 0; // allow text truncation
+}
+
+.title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.page-label {
+  font-weight: 600;
+  font-size: .9rem;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.chapter-title {
+  font-size: .75rem;
+  line-height: 1.1rem;
+  color: #b5b5b5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: .4rem;
+}
+
+.btn-icon {
+  padding: .35rem .55rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Mobile tweaks
+@media (max-width: 576px) {
+  .bookmark-item {
+    min-height: 84px;
+  }
+  .thumb-wrapper { width: 64px; flex-basis: 64px; }
+  .bookmark-meta { padding: .5rem .5rem .6rem; }
+  .chapter-title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
+}

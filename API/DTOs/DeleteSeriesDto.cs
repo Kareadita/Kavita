@@ -2,7 +2,7 @@
 
 namespace API.DTOs;
 
-public class DeleteSeriesDto
+public sealed record DeleteSeriesDto
 {
     public IList<int> SeriesIds { get; set; } = default!;
 }

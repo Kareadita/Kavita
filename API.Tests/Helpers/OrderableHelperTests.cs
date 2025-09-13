@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using API.Entities;
 using API.Helpers;
@@ -49,17 +50,14 @@ public class OrderableHelperTests
     [Fact]
     public void ReorderItems_InvalidPosition_NoChange()
     {
-        // Arrange
         var items = new List<AppUserSideNavStream>
         {
             new AppUserSideNavStream { Id = 1, Order = 0, Name = "A" },
             new AppUserSideNavStream { Id = 2, Order = 1, Name = "A" },
         };
 
-        // Act
         OrderableHelper.ReorderItems(items, 2, 3);  // Position 3 is out of range
 
-        // Assert
         Assert.Equal(1, items[0].Id);  // Item 1 should remain at position 0
         Assert.Equal(2, items[1].Id);  // Item 2 should remain at position 1
     }
@@ -80,7 +78,6 @@ public class OrderableHelperTests
     [Fact]
     public void ReorderItems_DoubleMove()
     {
-        // Arrange
         var items = new List<AppUserSideNavStream>
         {
             new AppUserSideNavStream { Id = 1, Order = 0, Name = "0" },
@@ -94,7 +91,6 @@ public class OrderableHelperTests
         // Move 4 -> 1
         OrderableHelper.ReorderItems(items, 5, 1);
 
-        // Assert
         Assert.Equal(1, items[0].Id);
         Assert.Equal(0, items[0].Order);
         Assert.Equal(5, items[1].Id);
@@ -108,5 +104,99 @@ public class OrderableHelperTests
         OrderableHelper.ReorderItems(items, items[4].Id, 1); // 3 -> 1
 
         Assert.Equal("034125", string.Join("", items.Select(s => s.Name)));
+    }
+
+    private static List<ReadingListItem> CreateTestReadingListItems(int count = 4)
+    {
+        var items = new List<ReadingListItem>();
+
+        for (var i = 0; i < count; i++)
+        {
+            items.Add(new ReadingListItem() { Id = i + 1, Order = count, ReadingListId = i + 1});
+        }
+
+        return items;
+    }
+
+    [Fact]
+    public void ReorderItems_MoveItemToBeginning_CorrectOrder()
+    {
+        var items = CreateTestReadingListItems();
+
+        OrderableHelper.ReorderItems(items, 3, 0);
+
+        Assert.Equal(3, items[0].Id);
+        Assert.Equal(1, items[1].Id);
+        Assert.Equal(2, items[2].Id);
+        Assert.Equal(4, items[3].Id);
+
+        for (var i = 0; i < items.Count; i++)
+        {
+            Assert.Equal(i, items[i].Order);
+        }
+    }
+
+    [Fact]
+    public void ReorderItems_MoveItemToEnd_CorrectOrder()
+    {
+        var items = CreateTestReadingListItems();
+
+        OrderableHelper.ReorderItems(items, 1, 3);
+
+        Assert.Equal(2, items[0].Id);
+        Assert.Equal(3, items[1].Id);
+        Assert.Equal(4, items[2].Id);
+        Assert.Equal(1, items[3].Id);
+
+        for (var i = 0; i < items.Count; i++)
+        {
+            Assert.Equal(i, items[i].Order);
+        }
+    }
+
+    [Fact]
+    public void ReorderItems_MoveItemToMiddle_CorrectOrder()
+    {
+        var items = CreateTestReadingListItems();
+
+        OrderableHelper.ReorderItems(items, 4, 2);
+
+        Assert.Equal(1, items[0].Id);
+        Assert.Equal(2, items[1].Id);
+        Assert.Equal(4, items[2].Id);
+        Assert.Equal(3, items[3].Id);
+
+        for (var i = 0; i < items.Count; i++)
+        {
+            Assert.Equal(i, items[i].Order);
+        }
+    }
+
+    [Fact]
+    public void ReorderItems_MoveItemToOutOfBoundsPosition_MovesToEnd()
+    {
+        var items = CreateTestReadingListItems();
+
+        OrderableHelper.ReorderItems(items, 2, 10);
+
+        Assert.Equal(1, items[0].Id);
+        Assert.Equal(3, items[1].Id);
+        Assert.Equal(4, items[2].Id);
+        Assert.Equal(2, items[3].Id);
+
+        for (var i = 0; i < items.Count; i++)
+        {
+            Assert.Equal(i, items[i].Order);
+        }
+    }
+
+    [Fact]
+    public void ReorderItems_NegativePosition_ThrowsArgumentException()
+    {
+        var items = CreateTestReadingListItems();
+
+        Assert.Throws<ArgumentException>(() =>
+            OrderableHelper.ReorderItems(items, 2, -1)
+        );
     }
 }

@@ -1,53 +1,61 @@
-@import '../node_modules/swiper/swiper';
+@use 'swiper/swiper-bundle.min' as swiper;
 
-@import './theme/variables';
+@use './theme/variables' as theme;
 
 // Import themes which define the css variables we use to customize the app
-@import './theme/themes/dark';
+@use './theme/themes/dark';
 
 // Import colors for overrides of bootstrap theme
-@import './theme/toastr';
+@use './theme/toastr' as toastr;
+
+@use '../node_modules/quill/dist/quill.snow.css' as quill;
 
 
 // Bootstrap must be after _colors since we define the colors there
-@import '../node_modules/bootstrap/scss/bootstrap';
+@use '../node_modules/bootstrap/scss/bootstrap';
 
-@import '../node_modules/charts.css/dist/charts.min';
+@use '../node_modules/charts.css/dist/charts.min' as charts;
 
+@use '../node_modules/@siemens/ngx-datatable/index.css' as ngxDatatable;
+@use '../node_modules/@siemens/ngx-datatable/themes/bootstrap.css' as ngxDatatableBootstrap;
+@use '../node_modules/@siemens/ngx-datatable/assets/icons.css' as ngxDatatableIcons;
 
 
 // Import all the customized theme overrides
-@import './theme/components/input';
-@import './theme/components/anchors';
-@import './theme/components/nav';
-@import './theme/components/buttons';
-@import './theme/components/toast';
-@import './theme/components/checkbox';
-@import './theme/components/list';
-@import './theme/components/navbar';
-@import './theme/components/popover';
-@import './theme/components/pagination';
-@import './theme/components/dropdown';
-@import './theme/components/accordion';
-@import './theme/components/breadcrumb';
-@import './theme/components/ratingstar';
-@import './theme/components/modal';
-@import './theme/components/card';
-@import './theme/components/slider';
-@import './theme/components/radios';
-@import './theme/components/selects';
-@import './theme/components/progress';
-@import './theme/components/sidenav';
-@import './theme/components/carousel';
-@import './theme/components/offcanvas';
-@import './theme/components/table';
-@import './theme/components/alerts';
-@import './theme/components/typeahead';
+@use './theme/components/input';
+@use './theme/components/anchors';
+@use './theme/components/nav';
+@use './theme/components/badge';
+@use './theme/components/buttons';
+@use './theme/components/toast';
+@use './theme/components/checkbox';
+@use './theme/components/list';
+@use './theme/components/navbar';
+@use './theme/components/popover';
+@use './theme/components/pagination';
+@use './theme/components/dropdown';
+@use './theme/components/accordion';
+@use './theme/components/breadcrumb';
+@use './theme/components/ratingstar';
+@use './theme/components/modal';
+@use './theme/components/card';
+@use './theme/components/slider';
+@use './theme/components/radios';
+@use './theme/components/selects';
+@use './theme/components/progress';
+@use './theme/components/sidenav';
+@use './theme/components/carousel';
+@use './theme/components/offcanvas';
+@use './theme/components/table';
+@use './theme/components/alerts';
+@use './theme/components/typeahead';
+@use './theme/components/tooltip';
 
-
-@import './theme/utilities/utilities';
-@import './theme/utilities/animations';
-@import './theme/utilities/global';
+@use './theme/utilities/headings';
+@use './theme/utilities/utilities';
+@use './theme/utilities/animations';
+@use './theme/utilities/global';
+@use "./theme/utilities/spinners";
 
 
 // Global Styles
@@ -63,6 +71,18 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/Poppins/Poppins.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "League Spartan";
+  src: url("assets/fonts/League_Spartan/LeagueSpartan-VariableFont_wght.ttf");
+  font-display: swap;
+}
+
 label, select, .clickable {
   cursor: pointer;
 }
@@ -73,19 +93,36 @@ label, select, .clickable {
 
 // Needed for fullscreen
 app-root {
-  background-color: transparent;
   scrollbar-width: thin;
-  scrollbar-color: var(--primary-color-scrollbar);
+  scrollbar-color: rgba(255,255,255,0.3);
 }
 
-::-webkit-scrollbar {
-  width: 14px;
-}
 
 ::-webkit-scrollbar-thumb {
   background-clip: padding-box;
-  background-color: var(--primary-color-scrollbar);
   border: 3px solid transparent;
   border-radius: 8px;
   min-height: 50px;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden; // When this is enabled, it will break the webtoon reader. The nav.service will automatically remove/apply on toggling them
+  scrollbar-color: rgba(255,255,255,0.3) rgba(0, 0, 0, 0.1);
+  scrollbar-width: thin;
+  padding: 0;
+  margin: 0;
+
+  @media (max-width: theme.$grid-breakpoints-lg) {
+    /* Setting this break the readers */
+    //margin-top: var(--nav-mobile-offset) !important;
+    //height: calc(var(--vh)* 100 - var(--nav-mobile-offset)) !important;
+  }
+
+}
+
+.setting-section-break {
+  height: 1px;
+  background-color: var(--setting-break-color);
+  margin: 30px 0;
 }

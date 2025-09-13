@@ -1,9 +1,13 @@
 // Global styles for the site. Keep this as small as possible
 
+html {
+  font-size: var(--html-font-size);
+}
+
 html, body { height: 100%; overflow: hidden; }
 body {
   margin: 0;
-  font-family: var(--body-font-family);
+  font-family: var(--body-font-family), serif;
   color: var(--body-text-color);
   color-scheme: var(--color-scheme);
   max-height: 100%;
@@ -17,13 +21,13 @@ body {
 
 hr {
     background-color: var(--hr-color);
-    border-top: 0px;
+    border-top: 0;
 }
 
 .accent {
     background-color: var(--accent-bg-color) !important;
     color: var(--accent-text-color) !important;
-    box-shadow: inset 0px 0px 8px 1px var(--accent-bg-color) !important;
+    box-shadow: inset 0 0 8px 1px var(--accent-bg-color) !important;
     font-size: var(--accent-text-size) !important;
     font-style: italic;
     padding: 10px;
@@ -34,16 +38,17 @@ hr {
     color: var(--text-muted-color) !important;
 }
 
-.subtitle-with-actionables {
-    margin-left: 32px;
+.form-check-input {
+  cursor: pointer !important;
 }
+
+
 
 .form-switch .form-check-input:checked {
     background-color: var(--primary-color);
 }
 
 .navbar-offset {
-  margin-top: 56px;
+  margin-top: 75px;
 }
-
 

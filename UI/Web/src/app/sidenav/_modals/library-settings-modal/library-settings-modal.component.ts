@@ -1,18 +1,15 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   DestroyRef,
   inject,
   Input,
+  model,
   OnInit
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
-  NgbAccordionBody,
-  NgbAccordionButton, NgbAccordionCollapse,
-  NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
   NgbActiveModal,
   NgbModal,
   NgbModalModule,
@@ -25,14 +22,19 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
-import {SettingsService} from 'src/app/admin/settings.service';
 import {
   DirectoryPickerComponent,
   DirectoryPickerResult
 } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
-import {Library, LibraryType} from 'src/app/_models/library/library';
+import {
+  allKavitaPlusMetadataApplicableTypes,
+  allKavitaPlusScrobbleEligibleTypes,
+  allLibraryTypes,
+  Library,
+  LibraryType
+} from 'src/app/_models/library/library';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {UploadService} from 'src/app/_services/upload.service';
@@ -40,18 +42,25 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {allFileTypeGroup, FileTypeGroup} from "../../../_models/library/file-type-group.enum";
 import {FileTypeGroupPipe} from "../../../_pipes/file-type-group.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {WikiLink} from "../../../_models/wiki";
+import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
+import {SettingSwitchComponent} from "../../../settings/_components/setting-switch/setting-switch.component";
+import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
+import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
+import {ActionService} from "../../../_services/action.service";
+import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 
 enum TabID {
   General = 'general-tab',
   Folder = 'folder-tab',
   Cover = 'cover-tab',
-  Advanced = 'advanced-tab'
+  Advanced = 'advanced-tab',
+  Tasks = 'tasks-tab'
 }
 
 enum StepID {
@@ -62,75 +71,90 @@ enum StepID {
 }
 
 @Component({
-  selector: 'app-library-settings-modal',
-  standalone: true,
-  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
-    SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton, NgbAccordionCollapse, NgbAccordionBody, EditListComponent],
-  templateUrl: './library-settings-modal.component.html',
-  styleUrls: ['./library-settings-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-library-settings-modal',
+    imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
+        SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
+        FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent],
+    templateUrl: './library-settings-modal.component.html',
+    styleUrls: ['./library-settings-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibrarySettingsModalComponent implements OnInit {
 
-  protected readonly LibraryType = LibraryType;
-  protected readonly Breakpoint = Breakpoint;
-  protected readonly TabID = TabID;
-  protected readonly WikiLink = WikiLink;
-
-  public readonly utilityService = inject(UtilityService);
-  public readonly modal = inject(NgbActiveModal);
+  protected readonly utilityService = inject(UtilityService);
+  protected readonly modal = inject(NgbActiveModal);
   private readonly destroyRef = inject(DestroyRef);
   private readonly uploadService = inject(UploadService);
   private readonly modalService = inject(NgbModal);
-  private readonly settingService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
   private readonly libraryService = inject(LibraryService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly imageService = inject(ImageService);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  private readonly actionService = inject(ActionService);
+
+  protected readonly LibraryType = LibraryType;
+  protected readonly Breakpoint = Breakpoint;
+  protected readonly TabID = TabID;
+  protected readonly WikiLink = WikiLink;
+  protected readonly Action = Action;
+  protected readonly libraryTypePipe = new LibraryTypePipe();
 
   @Input({required: true}) library!: Library | undefined;
 
   active = TabID.General;
   imageUrls: Array<string> = [];
+  protected readonly excludePatternTooltip = `<span>` + translate('library-settings-modal.exclude-patterns-tooltip') +
+  `<a class="ms-1" href="${WikiLink.ScannerExclude}" rel="noopener noreferrer" target="_blank">${translate('library-settings-modal.help')}` +
+  `<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>`;
 
   libraryForm: FormGroup = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     type: new FormControl<LibraryType>(LibraryType.Manga, { nonNullable: true, validators: [Validators.required] }),
-    folderWatching: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    includeInDashboard: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    includeInRecommended: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    manageCollections: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    manageReadingLists: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    allowScrobbling: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
+    folderWatching: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    includeInDashboard: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    includeInRecommended: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    manageCollections: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
+    manageReadingLists: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
+    allowScrobbling: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    allowMetadataMatching: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
+    enableMetadata: new FormControl<boolean>(true, { nonNullable: true, validators: [] }), // required validator doesn't check value, just if true
+    removePrefixForSortName: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
   });
 
   selectedFolders: string[] = [];
   madeChanges = false;
-  libraryTypes: string[] = []
+  libraryTypes = allLibraryTypes.map(f => {
+    return {title: this.libraryTypePipe.transform(f), value: f};
+  }).sort((a, b) => a.title.localeCompare(b.title));
 
   isAddLibrary = false;
   setupStep = StepID.General;
   fileTypeGroups = allFileTypeGroup;
   excludePatterns: Array<string> = [''];
+  filesAtRoot = model<boolean>(false);
+
+  tasks: ActionItem<Library>[] = this.getTasks();
 
   get IsKavitaPlusEligible() {
     const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
-    return libType === LibraryType.Manga || libType === LibraryType.LightNovel;
+    return allKavitaPlusMetadataApplicableTypes.includes(libType);
+  }
+
+  get IsMetadataDownloadEligible() {
+    const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
+    return allKavitaPlusMetadataApplicableTypes.includes(libType);
   }
 
   ngOnInit(): void {
-    this.settingService.getLibraryTypes().subscribe((types) => {
-      this.libraryTypes = types;
-      this.cdRef.markForCheck();
-    });
-
     if (this.library === undefined) {
       this.isAddLibrary = true;
       this.cdRef.markForCheck();
+    } else {
+      this.checkForFilesAtRoot();
     }
 
     if (this.library?.coverImage != null && this.library?.coverImage !== '') {
@@ -138,10 +162,20 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.cdRef.markForCheck();
     }
 
-    if (this.library && (this.library.type === LibraryType.Comic || this.library.type === LibraryType.Book)) {
+    if (this.library && !(this.library.type === LibraryType.Manga || this.library.type === LibraryType.LightNovel) ) {
       this.libraryForm.get('allowScrobbling')?.setValue(false);
       this.libraryForm.get('allowScrobbling')?.disable();
+
+      if (this.IsMetadataDownloadEligible) {
+        this.libraryForm.get('allowMetadataMatching')?.setValue(this.library.allowMetadataMatching ?? true);
+        this.libraryForm.get('allowMetadataMatching')?.enable();
+      } else {
+        this.libraryForm.get('allowMetadataMatching')?.setValue(false);
+        this.libraryForm.get('allowMetadataMatching')?.disable();
+      }
     }
+
+
 
     this.libraryForm.get('name')?.valueChanges.pipe(
       debounceTime(100),
@@ -161,6 +195,20 @@ export class LibrarySettingsModalComponent implements OnInit {
 
 
     this.setValues();
+
+    // Turn on/off manage collections/rl
+    this.libraryForm.get('enableMetadata')?.valueChanges.pipe(
+      tap(enabled => {
+        const manageCollectionsFc = this.libraryForm.get('manageCollections');
+        const manageReadingListsFc = this.libraryForm.get('manageReadingLists');
+
+        manageCollectionsFc?.setValue(enabled);
+        manageReadingListsFc?.setValue(enabled);
+
+        this.cdRef.markForCheck();
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
 
     // This needs to only apply after first render
     this.libraryForm.get('type')?.valueChanges.pipe(
@@ -201,6 +249,21 @@ export class LibrarySettingsModalComponent implements OnInit {
         }
 
         this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible);
+        this.libraryForm.get('allowMetadataMatching')?.setValue(this.IsKavitaPlusEligible);
+
+        if (!this.IsKavitaPlusEligible) {
+          this.libraryForm.get('allowScrobbling')?.disable();
+        } else {
+          this.libraryForm.get('allowScrobbling')?.enable();
+        }
+
+        if (this.IsMetadataDownloadEligible) {
+          this.libraryForm.get('allowMetadataMatching')?.enable();
+        } else {
+          this.libraryForm.get('allowMetadataMatching')?.disable();
+        }
+
+
         this.cdRef.markForCheck();
       }),
       takeUntilDestroyed(this.destroyRef)
@@ -218,15 +281,25 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('manageCollections')?.setValue(this.library.manageCollections);
       this.libraryForm.get('manageReadingLists')?.setValue(this.library.manageReadingLists);
       this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
-      this.libraryForm.get('allowScrobbling')?.setValue(this.library.allowScrobbling);
+      this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible ? this.library.allowScrobbling : false);
+      this.libraryForm.get('allowMetadataMatching')?.setValue(this.IsMetadataDownloadEligible ? this.library.allowMetadataMatching : false);
+      this.libraryForm.get('excludePatterns')?.setValue(this.excludePatterns ? this.library.excludePatterns : false);
+      this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata);
+      this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.removePrefixForSortName);
       this.selectedFolders = this.library.folders;
+
       this.madeChanges = false;
+
+      // TODO: Refactor into FormArray
       for(let fileTypeGroup of allFileTypeGroup) {
-        this.libraryForm.addControl(fileTypeGroup + '', new FormControl(this.library.libraryFileTypes.includes(fileTypeGroup), []));
+        this.libraryForm.addControl(fileTypeGroup + '', new FormControl((this.library.libraryFileTypes || []).includes(fileTypeGroup), []));
       }
+
+      // TODO: Refactor into FormArray
       for(let glob of this.library.excludePatterns) {
-        this.libraryForm.addControl('excludeGlob-' , new FormControl(glob, []));
+        this.libraryForm.addControl('excludeGlob-', new FormControl(glob, []));
       }
+
       this.excludePatterns = this.library.excludePatterns;
     } else {
       for(let fileTypeGroup of allFileTypeGroup) {
@@ -247,7 +320,14 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   isDisabled() {
-    return !(this.libraryForm.valid && this.selectedFolders.length > 0);
+    const selectedFileTypes = [];
+    for(let fileTypeGroup of allFileTypeGroup) {
+      if (this.libraryForm.value[fileTypeGroup]) {
+        selectedFileTypes.push(fileTypeGroup);
+      }
+    }
+
+    return !(this.libraryForm.valid && this.selectedFolders.length > 0 && selectedFileTypes.length > 0);
   }
 
   reset() {
@@ -276,6 +356,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       }
     }
     model.excludePatterns = this.excludePatterns;
+
 
     if (this.libraryForm.errors) {
       return;
@@ -320,7 +401,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   applyCoverImage(coverUrl: string) {
-    this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe();
   }
 
   updateCoverImageIndex(selectedIndex: number) {
@@ -329,7 +410,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   resetCoverImage() {
-    this.uploadService.updateLibraryCoverImage(this.library!.id, '').subscribe(() => {});
+    this.uploadService.updateLibraryCoverImage(this.library!.id, '', false).subscribe();
   }
 
   openDirectoryPicker() {
@@ -339,6 +420,7 @@ export class LibrarySettingsModalComponent implements OnInit {
         if (!this.selectedFolders.includes(closeResult.folderPath)) {
           this.selectedFolders.push(closeResult.folderPath);
           this.madeChanges = true;
+          this.checkForFilesAtRoot();
           this.cdRef.markForCheck();
         }
       }
@@ -348,6 +430,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   removeFolder(folder: string) {
     this.selectedFolders = this.selectedFolders.filter(item => item !== folder);
     this.madeChanges = true;
+    this.checkForFilesAtRoot();
     this.cdRef.markForCheck();
   }
 
@@ -362,5 +445,43 @@ export class LibrarySettingsModalComponent implements OnInit {
       case StepID.Advanced:
         return false; // Advanced are optional
     }
+  }
+
+  getTasks() {
+    const blackList = [Action.Edit];
+    return this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getLibraryActions(this.runTask.bind(this)), blackList);
+  }
+
+  async runTask(action: ActionItem<Library>) {
+    switch (action.action) {
+      case Action.Scan:
+        await this.actionService.scanLibrary(this.library!);
+        break;
+      case Action.RefreshMetadata:
+        await this.actionService.refreshLibraryMetadata(this.library!);
+        break;
+      case Action.GenerateColorScape:
+        await this.actionService.refreshLibraryMetadata(this.library!, undefined, false);
+        break;
+      case Action.Delete:
+        await this.actionService.deleteLibrary(this.library!, () => {
+          this.modal.dismiss();
+        });
+        break;
+    }
+  }
+
+  checkForFilesAtRoot() {
+    this.libraryService.hasFilesAtRoot(this.selectedFolders).subscribe(results => {
+      let containsMultipleFiles = false;
+      Object.keys(results).forEach(key => {
+        if (results[key]) {
+          containsMultipleFiles = true;
+          return;
+        }
+      });
+
+      this.filesAtRoot.set(containsMultipleFiles);
+    })
   }
 }

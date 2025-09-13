@@ -19,6 +19,22 @@ $pointer-offset: 5px;
   overflow: auto;
   text-align: center;
   //height: calc(var(--vh)*100); // this needs to be applied on the DOM because it breaks infinite scroller
+
+  &::-webkit-scrollbar {
+    background-color: transparent;  /*make scrollbar space invisible */
+    width: inherit;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--default-state-scrollbar); /*makes it invisible when not hovering*/
+  }
+
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--primary-color-scrollbar); /*On hover, it will turn grey*/
+    }
+  }
+
 }
 
 

@@ -1,0 +1,17 @@
+.annotation-card {
+  max-width: 400px;
+}
+
+.content-quote {
+  color: var(--drawer-text-color);
+  max-height: 320px;
+  overflow: hidden;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+:host ::ng-deep quill-view {
+  color: var(--drawer-text-color);
+}

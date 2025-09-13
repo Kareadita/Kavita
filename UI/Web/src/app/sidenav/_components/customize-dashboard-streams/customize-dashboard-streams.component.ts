@@ -1,27 +1,26 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {
-  DraggableOrderedListComponent, IndexUpdateEvent
+  DraggableOrderedListComponent,
+  IndexUpdateEvent
 } from "../../../reading-list/_components/draggable-ordered-list/draggable-ordered-list.component";
 import {DashboardStreamListItemComponent} from "../dashboard-stream-list-item/dashboard-stream-list-item.component";
 import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {DashboardService} from "../../../_services/dashboard.service";
 import {FilterService} from "../../../_services/filter.service";
-import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {forkJoin} from "rxjs";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
-  selector: 'app-customize-dashboard-streams',
-  standalone: true,
-  imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, ReactiveFormsModule, FilterPipe],
-  templateUrl: './customize-dashboard-streams.component.html',
-  styleUrls: ['./customize-dashboard-streams.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-customize-dashboard-streams',
+    imports: [DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective,
+      ReactiveFormsModule, FilterPipe],
+    templateUrl: './customize-dashboard-streams.component.html',
+    styleUrls: ['./customize-dashboard-streams.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomizeDashboardStreamsComponent {
 
@@ -31,11 +30,9 @@ export class CustomizeDashboardStreamsComponent {
   private readonly utilityService = inject(UtilityService);
 
   items: DashboardStream[] = [];
+  allSmartFilters: SmartFilter[] = [];
   smartFilters: SmartFilter[] = [];
   accessibilityMode: boolean = false;
-
-
-
   listForm: FormGroup = new FormGroup({
     'filterQuery': new FormControl('', [])
   });
@@ -49,7 +46,7 @@ export class CustomizeDashboardStreamsComponent {
     this.cdRef.markForCheck();
   }
 
-  constructor(public modal: NgbActiveModal) {
+  constructor() {
     forkJoin([this.dashboardService.getDashboardStreams(false), this.filterService.getAllFilters()]).subscribe(results => {
       this.items = results[0];
 
@@ -58,10 +55,17 @@ export class CustomizeDashboardStreamsComponent {
         this.accessibilityMode = true;
       }
 
-      const smartFilterStreams = new Set(results[0].filter(d => !d.isProvided).map(d => d.name));
-      this.smartFilters = results[1].filter(d => !smartFilterStreams.has(d.name));
+      this.allSmartFilters = results[1];
+      this.updateSmartFilters();
+
       this.cdRef.markForCheck();
     });
+  }
+
+  updateSmartFilters() {
+    const smartFilterStreams = new Set(this.items.filter(d => !d.isProvided).map(d => d.name));
+    this.smartFilters = this.allSmartFilters.filter(d => !smartFilterStreams.has(d.name));
+    this.cdRef.markForCheck();
   }
 
   addFilterToStream(filter: SmartFilter) {
@@ -81,6 +85,19 @@ export class CustomizeDashboardStreamsComponent {
     this.items[position].visible = !this.items[position].visible;
     this.cdRef.markForCheck();
     this.dashboardService.updateDashboardStream(this.items[position]).subscribe();
+  }
+
+  delete(item: DashboardStream) {
+    this.dashboardService.deleteSmartFilterStream(item.id).subscribe({
+      next: () => {
+        this.items = this.items.filter(d => d.id !== item.id);
+        this.updateSmartFilters();
+        this.cdRef.markForCheck();
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
   }
 
 }

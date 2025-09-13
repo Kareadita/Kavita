@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using API.Data.Misc;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Metadata;
+using API.Entities.Person;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions.Filtering;
@@ -18,7 +20,8 @@ public static class SearchQueryableExtensions
             .Where(s => EF.Functions.Like(s.Title!, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedTitle!, $"%{searchQuery}%"))
             .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.NormalizedTitle);
+            .OrderBy(s => s.NormalizedTitle.Length)
+            .ThenBy(s => s.NormalizedTitle);
     }
 
     public static IQueryable<ReadingList> Search(this IQueryable<ReadingList> queryable,
@@ -28,7 +31,8 @@ public static class SearchQueryableExtensions
             .Where(rl => rl.AppUserId == userId || rl.Promoted)
             .Where(rl => EF.Functions.Like(rl.Title, $"%{searchQuery}%"))
             .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.NormalizedTitle);
+            .OrderBy(s => s.NormalizedTitle.Length)
+            .ThenBy(s => s.NormalizedTitle);
     }
 
     public static IQueryable<Library> Search(this IQueryable<Library> queryable,
@@ -45,11 +49,29 @@ public static class SearchQueryableExtensions
     public static IQueryable<Person> SearchPeople(this IQueryable<SeriesMetadata> queryable,
         string searchQuery, IEnumerable<int> seriesIds)
     {
-        return queryable
+        // Get people from SeriesMetadata
+        var peopleFromSeriesMetadata = queryable
             .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.People.Where(t => t.Name != null && EF.Functions.Like(t.Name, $"%{searchQuery}%")))
-            .AsSplitQuery()
-            .Distinct()
+            .SelectMany(sm => sm.People.Select(sp => sp.Person))
+            .Where(p =>
+                EF.Functions.Like(p.Name, $"%{searchQuery}%") ||
+                p.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%"))
+            );
+
+        var peopleFromChapterPeople = queryable
+            .Where(sm => seriesIds.Contains(sm.SeriesId))
+            .SelectMany(sm => sm.Series.Volumes)
+            .SelectMany(v => v.Chapters)
+            .SelectMany(ch => ch.People.Select(cp => cp.Person))
+            .Where(p =>
+                EF.Functions.Like(p.Name, $"%{searchQuery}%") ||
+                p.Aliases.Any(pa => EF.Functions.Like(pa.Alias, $"%{searchQuery}%"))
+            );
+
+        // Combine both queries and ensure distinct results
+        return peopleFromSeriesMetadata
+            .Union(peopleFromChapterPeople)
+            .Select(p => p)
             .OrderBy(p => p.NormalizedName);
     }
 
@@ -60,7 +82,8 @@ public static class SearchQueryableExtensions
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .Distinct()
-            .OrderBy(t => t.NormalizedTitle);
+            .OrderBy(t => t.NormalizedTitle.Length)
+            .ThenBy(t => t.NormalizedTitle);
     }
 
     public static IQueryable<Tag> SearchTags(this IQueryable<SeriesMetadata> queryable,
@@ -71,6 +94,7 @@ public static class SearchQueryableExtensions
             .SelectMany(sm => sm.Tags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
             .Distinct()
-            .OrderBy(t => t.NormalizedTitle);
+            .OrderBy(t => t.NormalizedTitle.Length)
+            .ThenBy(t => t.NormalizedTitle);
     }
 }

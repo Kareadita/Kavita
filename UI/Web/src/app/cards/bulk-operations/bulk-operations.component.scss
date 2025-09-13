@@ -1,10 +1,16 @@
-.bulk-select {
-    background-color: var(--navbar-bg-color);
-    border-bottom: 2px solid var(--primary-color);
-    color: var(--bulk-selection-text-color) !important;
+.bulk-select-container {
+    z-index: 1;
+    top: 0;
+    position: sticky;
 
-    .btn-icon {
-        color: var(--bulk-selection-text-color);
+    .bulk-select {
+        background-color: var(--bulk-selection-bg-color);
+        border-bottom: 2px solid var(--primary-color);
+        color: var(--bulk-selection-text-color) !important;
+
+        .btn-icon {
+            color: var(--bulk-selection-text-color);
+        }
     }
 }
 

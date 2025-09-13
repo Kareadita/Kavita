@@ -1,34 +1,40 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   DestroyRef,
-  ElementRef, EventEmitter, HostListener,
+  ElementRef,
+  EventEmitter,
+  HostListener,
   inject,
   Input,
-  OnInit, Output,
+  model,
+  OnInit,
+  Output,
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {fromEvent, merge, of} from "rxjs";
-import {catchError} from "rxjs/operators";
+import {catchError, debounceTime, tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ReaderService} from "../../../_services/reader.service";
 import {ToastrService} from "ngx-toastr";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
+import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
+import {Annotation} from "../../_models/annotations/annotation";
 
 enum BookLineOverlayMode {
   None = 0,
-  Bookmark = 1
+  Annotate = 1,
+  Bookmark = 2
 }
 
 @Component({
-  selector: 'app-book-line-overlay',
-  standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, TranslocoDirective],
-  templateUrl: './book-line-overlay.component.html',
-  styleUrls: ['./book-line-overlay.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-book-line-overlay',
+    imports: [ReactiveFormsModule, TranslocoDirective],
+    templateUrl: './book-line-overlay.component.html',
+    styleUrls: ['./book-line-overlay.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BookLineOverlayComponent implements OnInit {
   @Input({required: true}) libraryId!: number;
@@ -40,19 +46,24 @@ export class BookLineOverlayComponent implements OnInit {
   @Output() refreshToC: EventEmitter<void> = new EventEmitter();
   @Output() isOpen: EventEmitter<boolean> = new EventEmitter(false);
 
-  xPath: string = '';
+  startXPath: string = '';
+  endXPath: string = '';
+  allTextFromSelection: string = '';
   selectedText: string = '';
   mode: BookLineOverlayMode = BookLineOverlayMode.None;
   bookmarkForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
   });
+  hasSelectedAnnotation = model<boolean>(false);
+
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly readerService = inject(ReaderService);
+  private readonly toastr = inject(ToastrService);
+  private readonly elementRef = inject(ElementRef);
+  private readonly epubMenuService = inject(EpubReaderMenuService);
 
-  get BookLineOverlayMode() { return BookLineOverlayMode; }
-  constructor(private elementRef: ElementRef, private toastr: ToastrService) {}
 
   @HostListener('window:keydown', ['$event'])
   handleKeyPress(event: KeyboardEvent) {
@@ -73,10 +84,11 @@ export class BookLineOverlayComponent implements OnInit {
       const touchEnd$ = fromEvent<TouchEvent>(this.parent.nativeElement, 'touchend');
 
       merge(mouseUp$, touchEnd$)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((event: MouseEvent | TouchEvent) => {
-          this.handleEvent(event);
-        });
+        .pipe(
+          takeUntilDestroyed(this.destroyRef),
+          debounceTime(20),  // Need extra time for this extension to inject DOM https://github.com/Kareadita/Kavita/issues/3521
+          tap((event: MouseEvent | TouchEvent) => this.handleEvent(event))
+        ).subscribe();
     }
   }
 
@@ -85,8 +97,11 @@ export class BookLineOverlayComponent implements OnInit {
     if (!event.target) return;
 
 
+    // NOTE: This doesn't account for a partial occlusion with an annotation
+    this.hasSelectedAnnotation.set((event.target as HTMLElement).classList.contains('epub-highlight'));
 
-    if ((selection === null || selection === undefined || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText)) {
+    if ((selection === null || selection === undefined || selection.toString().trim() === ''
+      || selection.toString().trim() === this.selectedText) || this.hasSelectedAnnotation()) {
       if (this.selectedText !== '') {
         event.preventDefault();
         event.stopPropagation();
@@ -102,11 +117,26 @@ export class BookLineOverlayComponent implements OnInit {
 
     this.selectedText = selection ? selection.toString().trim() : '';
 
+
     if (this.selectedText.length > 0 && this.mode === BookLineOverlayMode.None) {
-      this.xPath = this.readerService.getXPathTo(event.target);
-      if (this.xPath !== '') {
-        this.xPath = '//' + this.xPath;
-      }
+
+      // Get the range from the selection
+      const range = selection.getRangeAt(0);
+
+      // Get start and end containers
+      const startContainer = this.getElementContainer(range.startContainer);
+      const endContainer = this.getElementContainer(range.endContainer);
+
+      // Generate XPaths for both start and end
+      this.startXPath = this.readerService.getXPathTo(startContainer);
+      this.endXPath = this.readerService.getXPathTo(endContainer);
+
+      // Protect from DOM Shift by removing the UI part and making this scoped to true epub html
+      this.startXPath = this.readerService.descopeBookReaderXpath(this.startXPath);
+      this.endXPath = this.readerService.descopeBookReaderXpath(this.endXPath);
+
+      // Get the context window for generating a blurb in annotation flow
+      this.allTextFromSelection = (event.target as Element).textContent || '';
 
       this.isOpen.emit(true);
       event.preventDefault();
@@ -121,12 +151,48 @@ export class BookLineOverlayComponent implements OnInit {
     if (this.mode === BookLineOverlayMode.Bookmark) {
       this.bookmarkForm.get('name')?.setValue(this.selectedText);
       this.focusOnBookmarkInput();
+      return;
+    }
+
+    // On mobile, first selection might not match as users can select after the fact. Recalculate
+    const windowText = window.getSelection();
+    const selectedText = windowText?.toString() === '' ? this.selectedText : windowText?.toString() ?? this.selectedText;
+
+    if (this.mode === BookLineOverlayMode.Annotate) {
+
+      const createAnnotation = {
+        id: 0,
+        xPath: this.startXPath,
+        endingXPath: this.endXPath,
+        selectedText: selectedText,
+        comment: '',
+        containsSpoiler: false,
+        pageNumber: this.pageNumber,
+        selectedSlotIndex: 0,
+        chapterTitle: '',
+        highlightCount: selectedText.length,
+        ownerUserId: 0,
+        ownerUsername: '',
+        createdUtc: '',
+        lastModifiedUtc: '',
+        context: this.allTextFromSelection,
+        chapterId: this.chapterId,
+        libraryId: this.libraryId,
+        volumeId: this.volumeId,
+        seriesId: this.seriesId,
+      } as Annotation;
+
+      this.epubMenuService.openCreateAnnotationDrawer(createAnnotation, () => {
+        this.reset();
+      });
     }
   }
 
   createPTOC() {
+    const xpath = this.readerService.descopeBookReaderXpath(this.startXPath);
+
     this.readerService.createPersonalToC(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNumber,
-      this.bookmarkForm.get('name')?.value, this.xPath).pipe(catchError(err => {
+      this.bookmarkForm.get('name')?.value, xpath, this.selectedText).pipe(catchError(err => {
         this.focusOnBookmarkInput();
         return of();
     })).subscribe(() => {
@@ -144,8 +210,11 @@ export class BookLineOverlayComponent implements OnInit {
   reset() {
     this.bookmarkForm.reset();
     this.mode = BookLineOverlayMode.None;
-    this.xPath = '';
+    this.startXPath = '';
+    this.endXPath = '';
+
     this.selectedText = '';
+    this.allTextFromSelection = '';
     const selection = window.getSelection();
     if (selection) {
       selection.removeAllRanges();
@@ -163,5 +232,12 @@ export class BookLineOverlayComponent implements OnInit {
     this.reset();
   }
 
+  private getElementContainer(node: Node): Element {
+    // If the node is a text node, get its parent element
+    // If it's already an element, return it
+    return node.nodeType === Node.TEXT_NODE ? node.parentElement! : node as Element;
+  }
+
+  protected readonly BookLineOverlayMode = BookLineOverlayMode;
 
 }

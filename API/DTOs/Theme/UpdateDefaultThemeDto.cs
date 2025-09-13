@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Theme;
 
-public class UpdateDefaultThemeDto
+public sealed record UpdateDefaultThemeDto
 {
     public int ThemeId { get; set; }
 }

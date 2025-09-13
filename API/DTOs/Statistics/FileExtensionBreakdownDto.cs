@@ -4,7 +4,7 @@ using API.Entities.Enums;
 namespace API.DTOs.Statistics;
 #nullable enable
 
-public class FileExtensionDto
+public sealed record FileExtensionDto
 {
     public string? Extension { get; set; }
     public MangaFormat Format { get; set; }
@@ -12,7 +12,7 @@ public class FileExtensionDto
     public long TotalFiles { get; set; }
 }
 
-public class FileExtensionBreakdownDto
+public sealed record FileExtensionBreakdownDto
 {
     /// <summary>
     /// Total bytes for all files

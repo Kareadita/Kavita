@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import { DevicePlatform } from 'src/app/_models/device/device-platform';
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({
     name: 'devicePlatform',

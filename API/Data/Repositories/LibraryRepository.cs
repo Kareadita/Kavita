@@ -18,6 +18,7 @@ using Kavita.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 [Flags]
 public enum LibraryIncludes
@@ -39,7 +40,7 @@ public interface ILibraryRepository
     Task<bool> LibraryExists(string libraryName);
     Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None);
     IEnumerable<LibraryDto> GetLibraryDtosForUsernameAsync(string userName);
-    Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
+    Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None, bool track = true);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
     IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
@@ -104,13 +105,16 @@ public class LibraryRepository : ILibraryRepository
     /// </summary>
     /// <param name="includes"></param>
     /// <returns></returns>
-    public async Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None)
+    public async Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None, bool track = true)
     {
-        return await _context.Library
+        var query = _context.Library
             .Include(l => l.AppUsers)
             .Includes(includes)
-            .AsSplitQuery()
-            .ToListAsync();
+            .AsSplitQuery();
+
+        if (track) return await query.ToListAsync();
+
+        return await query.AsNoTracking().ToListAsync();
     }
 
     /// <summary>
@@ -257,7 +261,7 @@ public class LibraryRepository : ILibraryRepository
     public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int>? libraryIds)
     {
         var ret = await _context.Series
-            .WhereIf(libraryIds is {Count: > 0} , s => libraryIds.Contains(s.LibraryId))
+            .WhereIf(libraryIds is {Count: > 0} , s => libraryIds!.Contains(s.LibraryId))
             .Select(s => s.Metadata.Language)
             .AsSplitQuery()
             .AsNoTracking()

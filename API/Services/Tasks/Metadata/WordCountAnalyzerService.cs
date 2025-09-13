@@ -35,7 +35,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     private readonly IReaderService _readerService;
     private readonly IMediaErrorService _mediaErrorService;
 
-    private const int AverageCharactersPerWord = 5;
+    public const int AverageCharactersPerWord = 5;
 
     public WordCountAnalyzerService(ILogger<WordCountAnalyzerService> logger, IUnitOfWork unitOfWork, IEventHub eventHub,
         ICacheHelper cacheHelper, IReaderService readerService, IMediaErrorService mediaErrorService)
@@ -179,7 +179,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                         var pageCounter = 1;
                         try
                         {
-                            using var book = await EpubReader.OpenBookAsync(filePath, BookService.BookReaderOptions);
+                            using var book = await EpubReader.OpenBookAsync(filePath, BookService.LenientBookReaderOptions);
 
                             var totalPages = book.Content.Html.Local;
                             foreach (var bookPage in totalPages)
@@ -217,6 +217,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 chapter.MinHoursToRead = est.MinHours;
                 chapter.MaxHoursToRead = est.MaxHours;
                 chapter.AvgHoursToRead = est.AvgHours;
+
                 foreach (var file in chapter.Files)
                 {
                     UpdateFileAnalysis(file);
@@ -246,7 +247,6 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         _unitOfWork.MangaFileRepository.Update(file);
     }
 
-
     private async Task<int> GetWordCountFromHtml(EpubLocalTextContentFileRef bookFile, string filePath)
     {
         try
@@ -255,7 +255,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
             doc.LoadHtml(await bookFile.ReadContentAsync());
 
             var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
-            return textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) / AverageCharactersPerWord ?? 0;
+            var characterCount =  textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) ?? 0;
+            return GetWordCount(characterCount);
         }
         catch (EpubContentException ex)
         {
@@ -264,6 +265,12 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 $"Invalid Epub Metadata, {bookFile.FilePath} does not exist", ex.Message);
             return 0;
         }
+    }
+
+    public static int GetWordCount(int characterCount)
+    {
+        if (characterCount == 0) return 0;
+        return characterCount / AverageCharactersPerWord;
     }
 
 }

@@ -1,3 +1,9 @@
+.main-container {
+  margin-top: 10px;
+  padding: 0 0 0 10px;
+}
+
+
 .poster {
   width: 100%;
   max-width: 300px;
@@ -17,9 +23,10 @@
 
 .card-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 158px);
+  grid-template-columns: repeat(auto-fill, 160px);
   grid-gap: 0.5rem;
   justify-content: space-around;
+  padding-bottom: 20px;
 }
 
 
@@ -27,14 +34,6 @@
   width: 100%;
   height: calc(100vh - 85px);
   max-height: calc(var(--vh)*100 - 170px);
-}
-
-// This is responsible for ensuring we scroll down and only tabs and companion bar is visible
-.main-container {
-  // Height set dynamically by  get ScrollingBlockHeight()
-  overflow-y: auto;
-  position: relative;
-  overscroll-behavior-y: none;
 }
 
 h2 {

@@ -1,4 +1,6 @@
-﻿using API.Services.Plus;
+﻿using API.Entities;
+using API.Entities.Enums;
+using API.Services.Plus;
 
 namespace API.DTOs.SeriesDetail;
 #nullable enable
@@ -7,7 +9,7 @@ namespace API.DTOs.SeriesDetail;
 /// Represents a User Review for a given Series
 /// </summary>
 /// <remarks>The user does not need to be a Kavita user</remarks>
-public class UserReviewDto
+public sealed record UserReviewDto
 {
     /// <summary>
     /// A tagline for the review
@@ -26,6 +28,7 @@ public class UserReviewDto
     /// The series this is for
     /// </summary>
     public int SeriesId { get; set; }
+    public int? ChapterId { get; set; }
     /// <summary>
     /// The library this series belongs in
     /// </summary>
@@ -54,4 +57,8 @@ public class UserReviewDto
     /// If this review is External, which Provider did it come from
     /// </summary>
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.Kavita;
+    /// <summary>
+    /// Source of the Rating
+    /// </summary>
+    public RatingAuthority Authority { get; set; } = RatingAuthority.User;
 }

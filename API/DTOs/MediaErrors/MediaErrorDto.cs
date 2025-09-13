@@ -2,7 +2,7 @@
 
 namespace API.DTOs.MediaErrors;
 
-public class MediaErrorDto
+public sealed record MediaErrorDto
 {
     /// <summary>
     /// Format Type (RAR, ZIP, 7Zip, Epub, PDF)
@@ -20,4 +20,6 @@ public class MediaErrorDto
     /// Exception message
     /// </summary>
     public string Details { get; set; }
+
+    public DateTime CreatedUtc { get; set; }
 }

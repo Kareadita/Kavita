@@ -7,5 +7,6 @@ public enum ScrobbleEventSortField
     LastModified = 2,
     Type= 3,
     Series = 4,
-    IsProcessed = 5
+    IsProcessed = 5,
+    ScrobbleEventFilter = 6
 }

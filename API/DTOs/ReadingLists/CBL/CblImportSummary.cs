@@ -75,7 +75,7 @@ public enum CblImportReason
     InvalidFile = 9,
 }
 
-public class CblBookResult
+public sealed record CblBookResult
 {
     /// <summary>
     /// Order in the CBL
@@ -114,7 +114,7 @@ public class CblBookResult
 /// <summary>
 /// Represents the summary from the Import of a given CBL
 /// </summary>
-public class CblImportSummaryDto
+public sealed record CblImportSummaryDto
 {
     public string CblName { get; set; }
     /// <summary>

@@ -3,7 +3,7 @@
 /// <summary>
 /// Used for running some task against a Series.
 /// </summary>
-public class RefreshSeriesDto
+public sealed record RefreshSeriesDto
 {
     /// <summary>
     /// Library Id series belongs to
@@ -18,4 +18,9 @@ public class RefreshSeriesDto
     /// </summary>
     /// <remarks>This is expensive if true. Defaults to true.</remarks>
     public bool ForceUpdate { get; init; } = true;
+    /// <summary>
+    /// Should the task force re-calculation of colorscape.
+    /// </summary>
+    /// <remarks>This is expensive if true. Defaults to true.</remarks>
+    public bool ForceColorscape { get; init; } = false;
 }

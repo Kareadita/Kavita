@@ -7,18 +7,16 @@ import {
   OnInit,
   ViewEncapsulation
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-  selector: 'app-spoiler',
-  standalone: true,
-    imports: [CommonModule, SafeHtmlPipe, TranslocoDirective],
-  templateUrl: './spoiler.component.html',
-  styleUrls: ['./spoiler.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-spoiler',
+    imports: [SafeHtmlPipe, TranslocoDirective],
+    templateUrl: './spoiler.component.html',
+    styleUrls: ['./spoiler.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    encapsulation: ViewEncapsulation.None
 })
 export class SpoilerComponent implements OnInit{
 

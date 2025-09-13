@@ -22,11 +22,18 @@
 }
 
 .nav-tabs {
-    border-color: var(--nav-tab-border-color);
-
+    border-color: transparent;
+    .nav-item {
+        border-color: transparent;
+        border-width: 0 0 1px 0;
+    }
     .nav-link {
         color: var(--nav-link-text-color);
         position: relative;
+        border-width: var(--nav-tab-border-width);
+        border-radius: 0;
+        text-align: center;
+        padding: 8px 20px;
 
         &.active, &:focus {
             color: var(--nav-tab-active-text-color);

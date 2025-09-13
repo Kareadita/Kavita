@@ -16,6 +16,7 @@ public interface IUserTableOfContentRepository
     void Remove(AppUserTableOfContent toc);
     Task<bool> IsUnique(int userId, int chapterId, int page, string title);
     IEnumerable<PersonalToCDto> GetPersonalToC(int userId, int chapterId);
+    Task<List<PersonalToCDto>> GetPersonalToCForPage(int userId, int chapterId, int page);
     Task<AppUserTableOfContent?> Get(int userId, int chapterId, int pageNum, string title);
 }
 
@@ -53,6 +54,15 @@ public class UserTableOfContentRepository : IUserTableOfContentRepository
             .ProjectTo<PersonalToCDto>(_mapper.ConfigurationProvider)
             .OrderBy(t => t.PageNumber)
             .AsEnumerable();
+    }
+
+    public async Task<List<PersonalToCDto>> GetPersonalToCForPage(int userId, int chapterId, int page)
+    {
+        return await _context.AppUserTableOfContent
+            .Where(t => t.AppUserId == userId && t.ChapterId == chapterId && t.PageNumber == page)
+            .ProjectTo<PersonalToCDto>(_mapper.ConfigurationProvider)
+            .OrderBy(t => t.PageNumber)
+            .ToListAsync();
     }
 
     public async Task<AppUserTableOfContent?> Get(int userId,int chapterId, int pageNum, string title)

@@ -94,9 +94,11 @@ Package()
     fi
 
     echo "Copying appsettings.json"
-    cp config/appsettings.json $lOutputFolder/config/appsettings.json
+    cp config/appsettings.json $lOutputFolder/config/appsettings-init.json
     echo "Removing appsettings.Development.json"
     rm $lOutputFolder/config/appsettings.Development.json
+    echo "Removing appsettings.json"
+    rm $lOutputFolder/config/appsettings.json
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/

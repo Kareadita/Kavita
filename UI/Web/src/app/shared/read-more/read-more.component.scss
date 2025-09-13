@@ -1,4 +1,19 @@
+@use "../../../theme/variables" as theme;
+
 .blur-text {
   color: transparent;
   text-shadow: 0 0 5px var(--body-text-color);
+}
+
+.read-more-cont {
+  font-size: 0.8rem;
+
+  div {
+    word-break: break-word;
+    max-width: 120ch;
+
+    @media (max-width: theme.$grid-breakpoints-sm) {
+      max-width: 50ch;
+    }
+  }
 }

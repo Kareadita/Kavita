@@ -1,78 +1,719 @@
 {
     "login": {
-        "forgot-password": "Unustasid parooli?",
-        "title": "Meldimine"
+        "title": "Meldimine",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
+        "forgot-password": "Unustasid parooli?"
     },
     "dashboard": {
         "no-libraries": "Siin pole veel ühtegi raamatukogumit üles seatud. Seadista mõned",
+        "server-settings-link": "Serveri seaded",
         "not-granted": "Sulle ei ole antud juurdepääsu ühelegi kogule.",
+        "on-deck-title": "Laual",
         "recently-updated-title": "Hiljuti uuendatud sarjad",
         "recently-added-title": "Viimati lisatud sarjad",
-        "more-in-genre-title": "Rohkem žanris {{genre}}",
-        "server-settings-link": "Serveri seaded",
-        "on-deck-title": "Laual"
+        "more-in-genre-title": "Rohkem žanris {{genre}}"
     },
     "edit-user": {
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}",
+        "username": "{{common.username}}",
+        "required": "{{validation.required-field}}",
+        "email": "{{common.email}}",
+        "cancel": "{{common.cancel}}",
         "saving": "Salvestan…",
         "update": "Uuendus"
     },
     "user-scrobble-history": {
         "title": "Scrobble ajalugu",
         "description": "Siit leiad oma kontoga seotud scrobble juhtumid. Selleks, et juhtumid tekiks, pead seadistama scrobble serveri seaded. Kõik scrobble juhtumid, mis on serverisse ära saadetud, kustuvad peale ühte kuud. Kui on üleslaadimata juhtumeid, on tõenäoline, et need ei klapi üleslaetud scrobble juhtumitega - palun võta ühendust enda administraatoriga, et need korda saada.",
-        "is-processed-header": "On töödeldud",
-        "data-header": "Andmed",
-        "series-header": "Sari",
-        "type-header": "Tüüp",
-        "last-modified-header": "Viimati muudetud",
         "not-read-warning": "Allavoolu teenusepakkujad hoiavad alati alles kõrgeima arvu",
+        "filter-label": "{{common.filter}}",
         "created-header": "Loodud",
+        "last-modified-header": "Viimati muudetud",
+        "type-header": "Tüüp",
+        "series-header": "Sari",
+        "data-header": "Andmed",
+        "is-processed-header": "On töödeldud",
         "no-data": "Andmed puuduvad",
         "volume-and-chapter-num": "Raamat {{v}} peatükk {{n}}",
         "volume-num": "Raamat {{num}}",
         "chapter-num": "peatükk {{num}}",
-        "not-processed": "Töötlemata",
         "rating": "Hinnang {{r}}",
         "not-applicable": "Ei rakendu",
-        "processed": "Töödeldud"
+        "processed": "Töödeldud",
+        "not-processed": "Töötlemata",
+        "special": "{{entity-title.special}}"
     },
     "scrobble-event-type-pipe": {
-        "want-to-read-add": "Lugemissoov: lisa",
         "chapter-read": "Järg",
         "score-updated": "Hinnangu uuendus",
+        "want-to-read-add": "Lugemissoov: lisa",
         "want-to-read-remove": "Lugemissoov: eemalda",
         "review": "Ülevaate uuendus"
     },
     "spoiler": {
         "click-to-show": "Potentsiaalselt mittesoovitav eelinfo sisu kohta - kliki seda, et näidata"
     },
-    "review-series-modal": {
-        "title": "Muuda ülevaade",
-        "review-label": "Ülevaade",
-        "min-length": "Ülevaade peab olema vähemalt {{count}} märki pikk"
+    "review-card-modal": {
+        "close": "{{common.close}}",
+        "user-review": "{{username}} ülevaade",
+        "external-mod": "(väline)",
+        "go-to-review": "Ülevaate juurde"
     },
     "review-card": {
-        "local-review": "Süsteemisisene (kohalik) ülevaade",
         "your-review": "See on sinu ülevaade",
         "external-review": "Süsteemiväline ülevaade",
+        "local-review": "Süsteemisisene (kohalik) ülevaade",
         "rating-percentage": "Hinnang {{r}}%"
     },
     "want-to-read": {
         "title": "Lugemissoov",
+        "series-count": "{{common.series-count}}",
         "no-items": "Siin ei ole midagi. Proovi sari lisada.",
         "no-items-filtered": "Hetkefiltrile ei vasta ühtegi eset."
     },
     "user-preferences": {
         "title": "Kasutaja kiirlinkide töölaud",
-        "3rd-party-clients-tab": "Kolmanda osapoole klientprogrammid",
-        "theme-tab": "Teema",
-        "devices-tab": "Seaded",
         "pref-description": "Need on süsteemiülesed seaded, mis rakenduvad sinu kontole.",
-        "account-tab": "Konto",
-        "preferences-tab": "Eelistused"
+        "account-tab": "{{tabs.account-tab}}",
+        "preferences-tab": "{{tabs.preferences-tab}}",
+        "theme-tab": "{{tabs.theme-tab}}",
+        "devices-tab": "{{tabs.devices-tab}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "scrobbling-tab": "{{tabs.scrobbling-tab}}",
+        "smart-filters-tab": "{{tabs.smart-filters-tab}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}"
     },
-    "review-card-modal": {
-        "user-review": "{{username}} ülevaade",
-        "external-mod": "(väline)",
-        "go-to-review": "Ülevaate juurde"
+    "user-holds": {
+        "no-data": "{{typeahead.no-data}}"
+    },
+    "theme-manager": {
+        "download": "{{changelog.download}}",
+        "apply": "{{common.apply}}",
+        "delete": "{{common.delete}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "add": "{{common.add}}"
+    },
+    "restriction-selector": {
+        "age-rating-label": "{{metadata-fields.age-rating-title}}"
+    },
+    "site-theme-provider-pipe": {
+        "custom": "{{device-platform-pipe.custom}}"
+    },
+    "manage-devices": {
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}",
+        "edit": "{{common.edit}}",
+        "no-data": "{{typeahead.no-data}}",
+        "actions-header": "{{manage-users.actions-header}}"
+    },
+    "edit-device-modal": {
+        "device-name-label": "{{manage-devices.name-label}}",
+        "platform-label": "{{manage-devices.platform-label}}",
+        "email-label": "{{common.email}}",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}"
+    },
+    "change-password": {
+        "password-label": "{{common.password}}",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "change-email": {
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
+    },
+    "change-age-restriction": {
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
+    },
+    "scrobbling-providers": {
+        "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "loading": "{{common.loading}}"
+    },
+    "typeahead": {
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}"
+    },
+    "generic-list-modal": {
+        "close": "{{common.close}}",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}"
+    },
+    "user-stats-info-cards": {
+        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
+        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
+        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
+        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}"
+    },
+    "top-readers": {
+        "this-week": "{{time-periods.this-week}}",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "last-year": "{{time-periods.last-year}}",
+        "all-time": "{{time-periods.all-time}}"
+    },
+    "role-selector": {
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}"
+    },
+    "directory-picker": {
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "help": "{{common.help}}"
+    },
+    "library-access-modal": {
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "close": "{{common.close}}",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
+    },
+    "person-role-pipe": {
+        "team": "{{filter-field-pipe.team}}",
+        "location": "{{filter-field-pipe.location}}"
+    },
+    "reset-password": {
+        "email-label": "{{common.email}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "submit": "{{common.submit}}"
+    },
+    "reset-password-modal": {
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
+    },
+    "all-series": {
+        "series-count": "{{common.series-count}}"
+    },
+    "all-filters": {
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "create": "{{common.create}}"
+    },
+    "out-of-date-modal": {
+        "close": "{{common.close}}"
+    },
+    "invite-user": {
+        "close": "{{common.close}}",
+        "email": "{{common.email}}",
+        "required-field": "{{common.required-field}}",
+        "cancel": "{{common.cancel}}",
+        "email-not-sent": "{{toasts.email-not-sent}}",
+        "notice": "{{manage-settings.notice}}"
+    },
+    "library-selector": {
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}"
+    },
+    "license": {
+        "cancel": "{{common.cancel}}",
+        "edit": "{{common.edit}}",
+        "loading": "{{common.loading}}",
+        "activate-email-label": "{{common.email}}",
+        "activate-delete": "{{common.delete}}",
+        "activate-reset": "{{common.reset}}",
+        "activate-save": "{{common.save}}"
+    },
+    "book-line-overlay": {
+        "close": "{{common.close}}",
+        "required-field": "{{common.required-field}}",
+        "save": "{{common.save}}"
+    },
+    "book-reader": {
+        "bookmarks-header": "{{side-nav.bookmarks}}"
+    },
+    "confirm-email": {
+        "username-label": "{{common.username}}",
+        "password-label": "{{common.password}}",
+        "email-label": "{{common.email}}",
+        "required-field": "{{common.required-field}}",
+        "valid-email": "{{common.valid-email}}",
+        "password-validation": "{{validation.password-validation}}"
+    },
+    "confirm-reset-password": {
+        "password-label": "{{common.password}}",
+        "required-field": "{{validation.required-field}}",
+        "submit": "{{common.submit}}",
+        "password-validation": "{{validation.password-validation}}"
+    },
+    "register": {
+        "username-label": "{{common.username}}",
+        "email-label": "{{common.email}}",
+        "password-label": "{{common.password}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "password-validation": "{{validation.password-validation}}"
+    },
+    "series-detail": {
+        "close": "{{common.close}}",
+        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "read": "{{common.read}}",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "reviews-tab": "{{tabs.reviews-tab}}",
+        "storyline-tab": "{{tabs.storyline-tab}}",
+        "books-tab": "{{tabs.books-tab}}",
+        "volumes-tab": "{{tabs.volumes-tab}}",
+        "specials-tab": "{{tabs.specials-tab}}",
+        "related-tab": "{{tabs.related-tab}}",
+        "details-tab": "{{tabs.details-tab}}",
+        "info-tab": "{{tabs.info-tab}}",
+        "recommendations-tab": "{{tabs.recommendations-tab}}",
+        "no-pages": "{{toasts.no-pages}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "colorists-title": "{{metadata-fields.colorists-title}}",
+        "editors-title": "{{metadata-fields.editors-title}}",
+        "inkers-title": "{{metadata-fields.inkers-title}}",
+        "letterers-title": "{{metadata-fields.letterers-title}}",
+        "translators-title": "{{metadata-fields.translators-title}}",
+        "pencillers-title": "{{metadata-fields.pencillers-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "imprints-title": "{{metadata-fields.imprints-title}}",
+        "teams-title": "{{metadata-fields.teams-title}}",
+        "locations-title": "{{metadata-fields.locations-title}}",
+        "genres-title": "{{metadata-fields.genres-title}}",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "ongoing": "{{publication-status-pipe.ongoing}}",
+        "volume-num": "{{common.volume-num}}",
+        "reading-lists-title": "{{side-nav.reading-lists}}",
+        "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}"
+    },
+    "metadata-fields": {
+        "collections-title": "{{side-nav.collections}}",
+        "reading-lists-title": "{{side-nav.reading-lists}}"
+    },
+    "external-rating": {
+        "close": "{{common.close}}"
+    },
+    "update-notification-modal": {
+        "close": "{{common.close}}"
+    },
+    "side-nav-companion-bar": {
+        "page-settings-title": "{{series-detail.page-settings-title}}"
+    },
+    "side-nav": {
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "customize": "{{settings.customize}}"
+    },
+    "library-settings-modal": {
+        "close": "{{common.close}}",
+        "general-tab": "{{tabs.general-tab}}",
+        "folder-tab": "{{tabs.folder-tab}}",
+        "cover-tab": "{{tabs.cover-tab}}",
+        "advanced-tab": "{{tabs.advanced-tab}}",
+        "tasks-tab": "{{tabs.tasks-tab}}",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}",
+        "help": "{{common.help}}"
+    },
+    "reader-settings": {
+        "font-family-label": "{{user-preferences.font-family-label}}",
+        "font-size-label": "{{user-preferences.font-size-book-label}}",
+        "line-spacing-label": "{{user-preferences.line-height-book-label}}",
+        "margin-label": "{{user-preferences.margin-book-label}}",
+        "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
+        "writing-style-label": "{{user-preferences.writing-style-label}}",
+        "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
+        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}"
+    },
+    "bookmarks": {
+        "title": "{{side-nav.bookmarks}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "bulk-operations": {
+        "deselect-all": "{{common.deselect-all}}"
+    },
+    "details-tab": {
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "translators-title": "{{metadata-fields.translators-title}}",
+        "letterers-title": "{{metadata-fields.letterers-title}}",
+        "colorists-title": "{{metadata-fields.colorists-title}}",
+        "inkers-title": "{{metadata-fields.inkers-title}}",
+        "pencillers-title": "{{metadata-fields.pencillers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "editors-title": "{{metadata-fields.editors-title}}",
+        "teams-title": "{{metadata-fields.teams-title}}",
+        "locations-title": "{{metadata-fields.locations-title}}",
+        "imprints-title": "{{metadata-fields.imprints-title}}",
+        "genres-title": "{{metadata-fields.genres-title}}",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "weblinks-title": "{{tabs.weblink-tab}}"
+    },
+    "related-tab": {
+        "reading-lists-title": "{{reading-lists.title}}",
+        "collections-title": "{{side-nav.collections}}",
+        "relations-title": "{{tabs.related-tab}}"
+    },
+    "cover-image-chooser": {
+        "reset": "{{common.reset}}",
+        "apply": "{{common.apply}}",
+        "applied": "{{theme-manager.applied}}"
+    },
+    "edit-series-relation": {
+        "remove": "{{common.remove}}",
+        "parent": "{{relationship-pipe.parent}}"
+    },
+    "bulk-add-to-collection": {
+        "promoted": "{{common.promoted}}",
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "loading": "{{common.loading}}",
+        "create": "{{common.create}}"
+    },
+    "entity-title": {
+        "issue-num": "{{common.issue-hash-num}}",
+        "chapter": "{{common.chapter-num}}",
+        "book-num": "{{common.book-num-shorthand}}"
+    },
+    "manage-media-issues": {
+        "filter-label": "{{common.filter}}"
+    },
+    "manage-email-settings": {
+        "reset": "{{common.reset}}",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "save": "{{common.save}}"
+    },
+    "manage-library": {
+        "loading": "{{common.loading}}",
+        "actions-header": "{{manage-users.actions-header}}",
+        "name-header": "{{manage-users.name-header}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}",
+        "cancel": "{{common.cancel}}",
+        "apply": "{{common.apply}}"
+    },
+    "copy-settings-from-library-modal": {
+        "close": "{{common.close}}"
+    },
+    "manage-media-settings": {
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}"
+    },
+    "manage-scrobble-errors": {
+        "filter-label": "{{common.filter}}"
+    },
+    "manage-settings": {
+        "host-name-label": "{{manage-email-settings.host-name-label}}",
+        "host-name-tooltip": "{{manage-email-settings.host-name-tooltip}}",
+        "host-name-validation": "{{manage-email-settings.host-name-validation}}",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "field-required": "{{validation.field-required}}"
+    },
+    "manage-tasks-settings": {
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required": "{{validation.required-field}}"
+    },
+    "manage-users": {
+        "loading": "{{common.loading}}"
+    },
+    "edit-collection-tags": {
+        "required-field": "{{validation.required-field}}",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "general-tab": "{{tabs.general-tab}}",
+        "cover-image-tab": "{{tabs.cover-tab}}",
+        "info-tab": "{{tabs.info-tab}}",
+        "series-tab": "{{tabs.series-tab}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}",
+        "filter-label": "{{common.filter}}"
+    },
+    "library-recommended": {
+        "on-deck": "{{dashboard.on-deck-title}}"
+    },
+    "settings": {
+        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}"
+    },
+    "collection-detail": {
+        "item-count": "{{common.item-count}}"
+    },
+    "all-collections": {
+        "item-count": "{{common.item-count}}"
+    },
+    "reading-lists": {
+        "item-count": "{{common.item-count}}"
+    },
+    "reading-list-item": {
+        "remove": "{{common.remove}}",
+        "read": "{{common.read}}"
+    },
+    "stream-list-item": {
+        "remove": "{{common.remove}}"
+    },
+    "reading-list-detail": {
+        "item-count": "{{common.item-count}}",
+        "read": "{{common.read}}",
+        "characters-title": "{{metadata-fields.characters-title}}"
+    },
+    "events-widget": {
+        "close": "{{common.close}}"
+    },
+    "shortcuts-modal": {
+        "close": "{{common.close}}"
+    },
+    "grouped-typeahead": {
+        "genres": "{{metadata-fields.genres-title}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}"
+    },
+    "nav-header": {
+        "help": "{{common.help}}",
+        "close": "{{common.close}}"
+    },
+    "promoted-icon": {
+        "promoted": "{{common.promoted}}"
+    },
+    "add-to-list-modal": {
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "promoted-alt": "{{common.promoted}}",
+        "loading": "{{common.loading}}",
+        "create": "{{common.create}}"
+    },
+    "edit-reading-list-modal": {
+        "general-tab": "{{tabs.general-tab}}",
+        "cover-image-tab": "{{tabs.cover-tab}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "import-mal-collection-modal": {
+        "close": "{{common.close}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "edit-chapter-progress": {
+        "action-header": "{{common.edit}}",
+        "edit-alt": "{{common.edit}}",
+        "no-data": "{{user-scrobble-history.no-data}}"
+    },
+    "import-cbl-modal": {
+        "close": "{{common.close}}"
+    },
+    "manga-reader": {
+        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
+        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}"
+    },
+    "metadata-filter": {
+        "filter-title": "{{common.filter}}",
+        "reset": "{{common.reset}}",
+        "apply": "{{common.apply}}",
+        "save": "{{common.save}}",
+        "genres-label": "{{metadata-fields.genres-title}}",
+        "tags-label": "{{metadata-fields.tags-title}}",
+        "age-rating-label": "{{metadata-fields.age-rating-title}}",
+        "language-label": "{{metadata-fields.language-title}}"
+    },
+    "metadata-filter-row": {
+        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
+    },
+    "edit-series-modal": {
+        "general-tab": "{{tabs.general-tab}}",
+        "metadata-tab": "{{tabs.metadata-tab}}",
+        "people-tab": "{{tabs.people-tab}}",
+        "web-links-tab": "{{tabs.weblink-tab}}",
+        "cover-image-tab": "{{tabs.cover-tab}}",
+        "related-tab": "{{tabs.related-tab}}",
+        "info-tab": "{{tabs.info-tab}}",
+        "tasks-tab": "{{tabs.tasks-tab}}",
+        "genres-label": "{{metadata-fields.genres-title}}",
+        "tags-label": "{{metadata-fields.tags-title}}",
+        "cover-artist-label": "{{metadata-fields.cover-artists-title}}",
+        "writer-label": "{{metadata-fields.writers-title}}",
+        "publisher-label": "{{metadata-fields.publishers-title}}",
+        "imprint-label": "{{metadata-fields.imprints-title}}",
+        "penciller-label": "{{metadata-fields.pencillers-title}}",
+        "letterer-label": "{{metadata-fields.letterers-title}}",
+        "inker-label": "{{metadata-fields.inkers-title}}",
+        "editor-label": "{{metadata-fields.editors-title}}",
+        "colorist-label": "{{metadata-fields.colorists-title}}",
+        "character-label": "{{metadata-fields.characters-title}}",
+        "translator-label": "{{metadata-fields.translators-title}}",
+        "team-label": "{{metadata-fields.teams-title}}",
+        "location-label": "{{metadata-fields.locations-title}}",
+        "language-label": "{{metadata-fields.language-title}}",
+        "age-rating-label": "{{metadata-fields.age-rating-title}}",
+        "required-field": "{{validation.required-field}}",
+        "close": "{{common.close}}",
+        "release-year-label": "{{sort-field-pipe.release-year}}",
+        "web-link-label": "{{tabs.weblink-tab}}",
+        "save": "{{common.save}}",
+        "last-read-title": "{{sort-field-pipe.read-progress}}",
+        "loading": "{{common.loading}}",
+        "pages-title": "{{edit-chapter-modal.pages-label}}",
+        "volume-num": "{{common.volume-num}}",
+        "release-year-validation": "{{validation.year-validation}}",
+        "volumes-title": "{{tab.volumes-tab}}"
+    },
+    "edit-chapter-modal": {
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "summary-label": "{{edit-series-modal.summary-label}}",
+        "genres-label": "{{edit-series-modal.genres-label}}",
+        "tags-label": "{{edit-series-modal.tags-label}}",
+        "writer-label": "{{edit-series-modal.writer-label}}",
+        "cover-artist-label": "{{edit-series-modal.cover-artist-label}}",
+        "publisher-label": "{{edit-series-modal.publisher-label}}",
+        "imprint-label": "{{edit-series-modal.imprint-label}}",
+        "penciller-label": "{{edit-series-modal.penciller-label}}",
+        "letterer-label": "{{edit-series-modal.letterer-label}}",
+        "inker-label": "{{edit-series-modal.inker-label}}",
+        "editor-label": "{{edit-series-modal.editor-label}}",
+        "colorist-label": "{{edit-series-modal.colorist-label}}",
+        "character-label": "{{edit-series-modal.character-label}}",
+        "translator-label": "{{edit-series-modal.translator-label}}",
+        "team-label": "{{filter-field-pipe.team}}",
+        "location-label": "{{filter-field-pipe.location}}",
+        "language-label": "{{edit-series-modal.language-label}}",
+        "age-rating-label": "{{edit-series-modal.age-rating-label}}",
+        "web-link-description": "{{edit-series-modal.web-link-description}}",
+        "web-link-label": "{{edit-series-modal.web-link-label}}",
+        "general-tab": "{{tabs.general-tab}}",
+        "people-tab": "{{tabs.people-tab}}",
+        "weblink-tab": "{{tabs.weblink-tab}}",
+        "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
+        "cover-image-tab": "{{tabs.cover-tab}}",
+        "tasks-tab": "{{tabs.tasks-tab}}",
+        "progress-tab": "{{tabs.progress-tab}}",
+        "info-tab": "{{tabs.info-tab}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "tags-tab": "{{tabs.tags-tab}}",
+        "size-label": "{{edit-series-modal.size-title}}",
+        "links-label": "{{metadata-fields.links-title}}",
+        "last-read-label": "{{sort-field-pipe.read-progress}}"
+    },
+    "edit-volume-modal": {
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "progress-tab": "{{tabs.progress-tab}}",
+        "cover-image-tab": "{{tabs.cover-tab}}",
+        "tasks-tab": "{{tabs.tasks-tab}}",
+        "info-tab": "{{tabs.info-tab}}",
+        "pages-label": "{{edit-chapter-modal.pages-count}}",
+        "words-label": "{{edit-chapter-modal.length-title}}",
+        "pages-count": "{{edit-chapter-modal.pages-count}}",
+        "words-count": "{{edit-chapter-modal.words-count}}",
+        "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
+        "date-added-label": "{{edit-chapter-modal.date-added-label}}",
+        "size-label": "{{edit-chapter-modal.size-label}}",
+        "id-label": "{{edit-chapter-modal.id-label}}",
+        "links-label": "{{series-metadata-detail.links-label}}",
+        "last-read-label": "{{edit-chapter-modal.last-read-label}}",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
+        "files-label": "{{edit-chapter-modal.files-label}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+    },
+    "reading-activity": {
+        "this-week": "{{time-periods.this-week}}",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "last-year": "{{time-periods.last-year}}",
+        "all-time": "{{time-periods.all-time}}"
+    },
+    "series-preview-drawer": {
+        "tags-label": "{{filter-field-pipe.tags}}",
+        "genres-label": "{{filter-field-pipe.genres}}",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+    },
+    "server-stats": {
+        "tags": "{{metadata-fields.tags-title}}",
+        "genres": "{{metadata-fields.genres-title}}"
+    },
+    "customize-dashboard-modal": {
+        "close": "{{common.close}}",
+        "help": "{{common.help}}"
+    },
+    "customize-dashboard-streams": {
+        "save": "{{common.save}}",
+        "add": "{{common.add}}",
+        "filter": "{{common.filter}}",
+        "clear": "{{common.clear}}"
+    },
+    "customize-sidenav-streams": {
+        "save": "{{common.save}}",
+        "add": "{{common.add}}",
+        "filter": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
+        "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
+        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}"
+    },
+    "manage-external-sources": {
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}"
+    },
+    "manage-smart-filters": {
+        "delete": "{{common.delete}}",
+        "filter": "{{common.filter}}",
+        "clear": "{{common.clear}}"
+    },
+    "edit-external-source-item": {
+        "save": "{{common.save}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "delete": "{{common.delete}}",
+        "required": "{{validation.required-field}}"
+    },
+    "stream-pipe": {
+        "on-deck": "{{dashboard.on-deck-title}}",
+        "recently-updated": "{{dashboard.recently-updated-title}}",
+        "newly-added": "{{dashboard.recently-added-title}}",
+        "more-in-genre": "{{dashboard.more-in-genre-title}}",
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "collections": "{{side-nav.collections}}",
+        "reading-lists": "{{side-nav.reading-lists}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "all-series": "{{side-nav.all-series}}"
+    },
+    "filter-field-pipe": {
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "characters": "{{metadata-fields.characters-title}}",
+        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "release-year": "{{sort-field-pipe.release-year}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "writers": "{{metadata-fields.writers-title}}"
+    },
+    "actionable": {
+        "clear": "{{common.clear}}"
     }
 }

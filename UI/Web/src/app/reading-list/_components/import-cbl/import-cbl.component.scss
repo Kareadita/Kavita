@@ -1,0 +1,46 @@
+.file-input {
+  display: none;
+}
+
+.heading-badge  {
+  color: var(--bs-badge-color);
+}
+
+::ng-deep .file-info {
+  width: 83%;
+  float: left;
+}
+
+::ng-deep .file-buttons {
+  float: right;
+}
+
+file-upload {
+  background: none;
+  height: auto;
+}
+
+::ng-deep .upload-input {
+  color: var(--input-text-color) !important;
+}
+
+::ng-deep file-upload-list-item {
+  color: var(--input-text-color) !important;
+}
+
+::ng-deep .remove-btn {
+  background: #C0392B;
+  border-radius: 3px;
+  color: var(--input-text-color) !important;
+  font-weight: bold;
+  padding: 3px 5px;
+}
+
+::ng-deep .reading-list-success--item {
+  color: var(--primary-color);
+}
+
+::ng-deep .reading-list-fail--item {
+  color: var(--error-color);
+}
+

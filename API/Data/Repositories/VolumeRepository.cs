@@ -15,6 +15,7 @@ using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 [Flags]
 public enum VolumeIncludes
@@ -34,6 +35,7 @@ public interface IVolumeRepository
     void Add(Volume volume);
     void Update(Volume volume);
     void Remove(Volume volume);
+    void Remove(IList<Volume> volumes);
     Task<IList<MangaFile>> GetFilesForVolume(int volumeId);
     Task<string?> GetVolumeCoverImageAsync(int volumeId);
     Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds);
@@ -42,8 +44,10 @@ public interface IVolumeRepository
     Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
     Task<IEnumerable<Volume>> GetVolumes(int seriesId);
+    Task<IList<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None);
     Task<Volume?> GetVolumeByIdAsync(int volumeId);
     Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
+    Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync();
 }
 public class VolumeRepository : IVolumeRepository
 {
@@ -69,6 +73,10 @@ public class VolumeRepository : IVolumeRepository
     public void Remove(Volume volume)
     {
         _context.Volume.Remove(volume);
+    }
+    public void Remove(IList<Volume> volumes)
+    {
+        _context.Volume.RemoveRange(volumes);
     }
 
     /// <summary>
@@ -126,9 +134,18 @@ public class VolumeRepository : IVolumeRepository
 
         if (includeChapters)
         {
-            query = query.Include(v => v.Chapters).AsSplitQuery();
+            query = query
+                .Includes(VolumeIncludes.Chapters)
+                .AsSplitQuery();
         }
-        return await query.ToListAsync();
+        var volumes =  await query.ToListAsync();
+
+        foreach (var volume in volumes)
+        {
+            volume.Chapters = volume.Chapters.OrderBy(c => c.SortOrder).ToList();
+        }
+
+        return volumes;
     }
 
     /// <summary>
@@ -141,12 +158,11 @@ public class VolumeRepository : IVolumeRepository
     {
         var volume = await _context.Volume
             .Where(vol => vol.Id == volumeId)
-            .Include(vol => vol.Chapters)
-            .ThenInclude(c => c.Files)
+            .Includes(VolumeIncludes.Chapters | VolumeIncludes.Files)
             .AsSplitQuery()
             .OrderBy(v => v.MinNumber)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
-            .SingleOrDefaultAsync(vol => vol.Id == volumeId);
+            .FirstOrDefaultAsync(vol => vol.Id == volumeId);
 
         if (volume == null) return null;
 
@@ -165,8 +181,16 @@ public class VolumeRepository : IVolumeRepository
     {
         return await _context.Volume
             .Where(vol => vol.SeriesId == seriesId)
-            .Include(vol => vol.Chapters)
-            .ThenInclude(c => c.Files)
+            .Includes(VolumeIncludes.Chapters | VolumeIncludes.Files)
+            .AsSplitQuery()
+            .OrderBy(vol => vol.MinNumber)
+            .ToListAsync();
+    }
+    public async Task<IList<Volume>> GetVolumesById(IList<int> volumeIds, VolumeIncludes includes = VolumeIncludes.None)
+    {
+        return await _context.Volume
+            .Where(vol => volumeIds.Contains(vol.Id))
+            .Includes(includes)
             .AsSplitQuery()
             .OrderBy(vol => vol.MinNumber)
             .ToListAsync();
@@ -204,24 +228,19 @@ public class VolumeRepository : IVolumeRepository
 
         await AddVolumeModifiers(userId, volumes);
 
-        foreach (var volume in volumes)
-        {
-            volume.Chapters = volume.Chapters.OrderBy(c => c.SortOrder).ToList();
-        }
-
         return volumes;
     }
 
     public async Task<Volume?> GetVolumeByIdAsync(int volumeId)
     {
-        return await _context.Volume.SingleOrDefaultAsync(x => x.Id == volumeId);
+        return await _context.Volume.FirstOrDefaultAsync(x => x.Id == volumeId);
     }
 
     public async Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat)
     {
         var extension = encodeFormat.GetExtension();
         return await _context.Volume
-            .Include(v => v.Chapters)
+            .Includes(VolumeIncludes.Chapters)
             .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
             .AsSplitQuery()
             .ToListAsync();
@@ -251,5 +270,18 @@ public class VolumeRepository : IVolumeRepository
                 .Where(p => p.VolumeId == v.Id)
                 .Sum(p => p.PagesRead);
         }
+    }
+
+    /// <summary>
+    /// Returns cover images for locked chapters
+    /// </summary>
+    /// <returns></returns>
+    public async Task<IEnumerable<string>> GetCoverImagesForLockedVolumesAsync()
+    {
+        return (await _context.Volume
+            .Where(c => c.CoverImageLocked)
+            .Select(c => c.CoverImage)
+            .Where(t => !string.IsNullOrEmpty(t))
+            .ToListAsync())!;
     }
 }

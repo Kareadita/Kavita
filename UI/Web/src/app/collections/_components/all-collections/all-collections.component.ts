@@ -4,15 +4,12 @@ import {
   Component,
   DestroyRef,
   EventEmitter,
-  HostListener,
   inject,
   OnInit
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router} from '@angular/router';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {map, of} from 'rxjs';
-import {Observable} from 'rxjs/internal/Observable';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
@@ -29,19 +26,16 @@ import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
-import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
-import {ProviderNamePipe} from "../../../_pipes/provider-name.pipe";
 import {CollectionOwnerComponent} from "../collection-owner/collection-owner.component";
 import {User} from "../../../_models/user";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
-import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
 import {ActionService} from "../../../_services/action.service";
-import {KEY_CODES} from "../../../shared/_services/utility.service";
 import {WikiLink} from "../../../_models/wiki";
+import {DefaultModalOptions} from "../../../_models/default-modal-options";
 
 
 @Component({
@@ -50,7 +44,8 @@ import {WikiLink} from "../../../_models/wiki";
   styleUrls: ['./all-collections.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe, TranslocoDirective, ProviderImagePipe, ProviderNamePipe, CollectionOwnerComponent, BulkOperationsComponent, SeriesCardComponent]
+  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe,
+    TranslocoDirective, CollectionOwnerComponent, BulkOperationsComponent]
 })
 export class AllCollectionsComponent implements OnInit {
 
@@ -76,24 +71,9 @@ export class AllCollectionsComponent implements OnInit {
   collections: UserCollection[] = [];
   collectionTagActions: ActionItem<UserCollection>[] = [];
   jumpbarKeys: Array<JumpKey> = [];
-  isAdmin$: Observable<boolean> = of(false);
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   trackByIdentity = (index: number, item: UserCollection) => `${item.id}_${item.title}_${item.owner}_${item.promoted}`;
   user!: User;
-
-  @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = true;
-    }
-  }
-
-  @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = false;
-    }
-  }
 
 
   constructor() {
@@ -112,16 +92,22 @@ export class AllCollectionsComponent implements OnInit {
 
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (!user) return;
-      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this))
+      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(
+        this.handleCollectionActionCallback.bind(this), this.shouldRenderCollection.bind(this))
         .filter(action => this.collectionService.actionListFilter(action, user));
       this.cdRef.markForCheck();
     });
+  }
 
-
-    this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(user => {
-      if (!user) return false;
-      return this.accountService.hasAdminRole(user);
-    }));
+  shouldRenderCollection(action: ActionItem<UserCollection>, entity: UserCollection, user: User) {
+    switch (action.action) {
+      case Action.Promote:
+        return !entity.promoted;
+      case Action.UnPromote:
+        return entity.promoted;
+      default:
+        return true;
+    }
   }
 
   loadCollection(item: UserCollection) {
@@ -160,7 +146,7 @@ export class AllCollectionsComponent implements OnInit {
         });
         break;
       case(Action.Edit):
-        const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
+        const modalRef = this.modalService.open(EditCollectionTagsComponent, DefaultModalOptions);
         modalRef.componentInstance.tag = collectionTag;
         modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
           if (results.success) {

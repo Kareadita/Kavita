@@ -1,0 +1,48 @@
+@use 'quill-theme' as quill;
+
+@include quill.quill-white-theme;
+
+// You must add this on a component based drawer
+:host {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-quote {
+  color: var(--drawer-text-color);
+  max-height: 320px;
+  overflow: hidden;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.annotation-meta {
+  color: var(--drawer-text-color);
+}
+
+.setting-section-break {
+  margin: 10px 0 !important;
+}
+
+.offcanvas-title-right {
+  padding: calc(var(--bs-offcanvas-padding-y) * 0.5) calc(var(--bs-offcanvas-padding-x) * 0.5);
+  margin: calc(-0.5 * var(--bs-offcanvas-padding-y)) calc(-0.5 * var(--bs-offcanvas-padding-x)) calc(-0.5 * var(--bs-offcanvas-padding-y)) auto;
+}
+
+// Highlight stuff (needs to be moved to annotation service)
+
+$blue-color: rgba(59, 130, 246);
+$green-color: rgba(34, 197, 94);
+
+.blue-title {
+  background-color: $blue-color;
+}
+
+.green-title {
+  background-color: $green-color;
+}
+
+

@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'collection-owner'">
+<ng-container *transloco="let t; prefix: 'collection-owner'">
   @if (accountService.currentUser$ | async; as user) {
     <div class="fw-light text-accent">
       {{t('collection-created-label', {owner: collection.owner})}}
@@ -6,8 +6,8 @@
         {{t('collection-via-label')}}
         <app-image [imageUrl]="collection.source | providerImage"
                    width="16px" height="16px"
-                   [ngbTooltip]="collection.source | providerName"
-                   [attr.aria-label]="collection.source | providerName"></app-image>
+                   [ngbTooltip]="collection.source | scrobbleProviderName"
+                   [attr.aria-label]="collection.source | scrobbleProviderName"></app-image>
       }
     </div>
   }

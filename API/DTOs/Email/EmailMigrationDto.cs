@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Email;
 
-public class EmailMigrationDto
+public sealed record EmailMigrationDto
 {
     public string EmailAddress { get; init; } = default!;
     public string Username { get; init; } = default!;

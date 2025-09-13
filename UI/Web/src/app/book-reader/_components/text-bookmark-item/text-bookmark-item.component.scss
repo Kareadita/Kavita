@@ -1,0 +1,11 @@
+.card:hover {
+  background-color: var(--elevation-layer7)
+}
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.content {
+  color: var(--drawer-text-color)
+}

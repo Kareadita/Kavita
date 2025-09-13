@@ -7,7 +7,7 @@ input:not([type="range"]), .form-control {
         border-color: var(--input-focused-border-color);
         background-color: var(--input-bg-color);
         color: var(--input-text-color);
-        box-shadow: 0 0 0 0.25rem var(--input-focus-boxshadow-color);
+        box-shadow: 0 0 0 .25rem var(--input-focus-boxshadow-color);
     }
 
     &:read-only {
@@ -30,4 +30,9 @@ input:not([type="range"]), .form-control {
 
 .form-range::-webkit-slider-thumb, .form-range::-moz-range-thumb {
     background-color: var(--input-range-color);
+}
+
+.form-check-input[type=checkbox]:indeterminate {
+  background-color: var(--input-bg-color);
+  border-color: var(--input-border-color);
 }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.KavitaPlus.ExternalMetadata;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
@@ -20,7 +21,7 @@ using Microsoft.Extensions.Logging;
 namespace API.Services.Plus;
 #nullable enable
 
-sealed class SeriesCollection
+internal sealed class SeriesCollection
 {
     public required IList<ExternalMetadataIdsDto> Series { get; set; }
     public required string Summary { get; set; }
@@ -158,7 +159,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
                 var normalizedLocalizedSeriesName = seriesInfo.LocalizedSeriesName?.ToNormalized();
 
                 // Search for existing series in the collection
-                var formats = GetMangaFormats(seriesInfo.PlusMediaFormat);
+                var formats = seriesInfo.PlusMediaFormat.GetMangaFormats();
                 var existingSeries = collection.Items.FirstOrDefault(s =>
                     (s.Name.ToNormalized() == normalizedSeriesName ||
                      s.NormalizedName == normalizedSeriesName ||
@@ -243,19 +244,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         }
     }
 
-    private static IList<MangaFormat> GetMangaFormats(MediaFormat? mediaFormat)
-    {
-        if (mediaFormat == null) return [MangaFormat.Archive];
-        return mediaFormat switch
-        {
-            MediaFormat.Manga => [MangaFormat.Archive, MangaFormat.Image],
-            MediaFormat.Comic => [MangaFormat.Archive],
-            MediaFormat.LightNovel => [MangaFormat.Epub, MangaFormat.Pdf],
-            MediaFormat.Book => [MangaFormat.Epub, MangaFormat.Pdf],
-            MediaFormat.Unknown => [MangaFormat.Archive],
-            _ => [MangaFormat.Archive]
-        };
-    }
+
 
     private static long GetStackId(string url)
     {
@@ -270,13 +259,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
 
         var seriesForStack = await ($"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/stack?stackId=" + stackId)
-            .WithHeader("Accept", "application/json")
-            .WithHeader("User-Agent", "Kavita")
-            .WithHeader("x-license-key", license)
-            .WithHeader("x-installId", HashUtil.ServerToken())
-            .WithHeader("x-kavita-version", BuildInfo.Version)
-            .WithHeader("Content-Type", "application/json")
-            .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+            .WithKavitaPlusHeaders(license)
             .GetJsonAsync<SeriesCollection>();
 
         return seriesForStack;

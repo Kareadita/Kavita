@@ -4,6 +4,7 @@ using API.Entities.Interfaces;
 
 namespace API.Entities;
 
+
 /// <summary>
 /// Represents a saved page in a Chapter entity for a given user.
 /// </summary>
@@ -19,7 +20,19 @@ public class AppUserBookmark : IEntityDate
     /// Filename in the Bookmark Directory
     /// </summary>
     public string FileName { get; set; } = string.Empty;
-
+    /// <summary>
+    /// Only applicable for Epubs - handles multiple images on one page
+    /// </summary>
+    /// <remarks>0-based index of the image position on page</remarks>
+    public int ImageOffset { get; set; }
+    /// <summary>
+    /// Only applicable for Epubs
+    /// </summary>
+    public string? XPath { get; set; }
+    /// <summary>
+    /// Chapter name (from ToC) or Title (from ComicInfo/PDF)
+    /// </summary>
+    public string? ChapterTitle { get; set; }
 
     // Relationships
     [JsonIgnore]

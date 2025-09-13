@@ -16,3 +16,12 @@
 a.read-more-link {
   white-space: nowrap;
 }
+
+.not-clickable {
+  cursor: text;
+}
+
+.offcanvas-body {
+  mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
+}

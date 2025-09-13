@@ -103,7 +103,7 @@ public class ThemeController : BaseApiController
     [HttpDelete]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> DeleteTheme(int themeId)
     {
-
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         await _themeService.DeleteTheme(themeId);
 
         return Ok();
@@ -128,6 +128,8 @@ public class ThemeController : BaseApiController
     [HttpPost("upload-theme")]
     public async Task<ActionResult<SiteThemeDto>> DownloadTheme(IFormFile formFile)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+
         if (!formFile.FileName.EndsWith(".css")) return BadRequest("Invalid file");
         if (formFile.FileName.Contains("..")) return BadRequest("Invalid file");
         var tempFile = await UploadToTemp(formFile);

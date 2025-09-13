@@ -1,24 +1,29 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import {DestroyRef, Inject, inject, Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {DestroyRef, inject, Injectable} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
-import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment';
-import { ChapterInfo } from '../manga-reader/_models/chapter-info';
-import { Chapter } from '../_models/chapter';
-import { HourEstimateRange } from '../_models/series-detail/hour-estimate-range';
-import { MangaFormat } from '../_models/manga-format';
-import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
-import { PageBookmark } from '../_models/readers/page-bookmark';
-import { ProgressBookmark } from '../_models/readers/progress-bookmark';
-import { FileDimension } from '../manga-reader/_models/file-dimension';
+import {Router} from '@angular/router';
+import {environment} from 'src/environments/environment';
+import {ChapterInfo} from '../manga-reader/_models/chapter-info';
+import {Chapter} from '../_models/chapter';
+import {HourEstimateRange} from '../_models/series-detail/hour-estimate-range';
+import {MangaFormat} from '../_models/manga-format';
+import {BookmarkInfo} from '../_models/manga-reader/bookmark-info';
+import {PageBookmark} from '../_models/readers/page-bookmark';
+import {ProgressBookmark} from '../_models/readers/progress-bookmark';
+import {FileDimension} from '../manga-reader/_models/file-dimension';
 import screenfull from 'screenfull';
-import { TextResonse } from '../_types/text-response';
-import { AccountService } from './account.service';
+import {TextResonse} from '../_types/text-response';
+import {AccountService} from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {PersonalToC} from "../_models/readers/personal-toc";
-import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import NoSleep from 'nosleep.js';
 import {FullProgress} from "../_models/readers/full-progress";
+import {Volume} from "../_models/volume";
+import {UtilityService} from "../shared/_services/utility.service";
+import {translate} from "@jsverse/transloco";
+import {ToastrService} from "ngx-toastr";
+import {FilterField} from "../_models/metadata/v2/filter-field";
 
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
@@ -30,17 +35,24 @@ export const CHAPTER_ID_NOT_FETCHED = -2;
 export class ReaderService {
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly utilityService = inject(UtilityService);
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
+  private readonly accountService = inject(AccountService);
+  private readonly toastr = inject(ToastrService);
+  private readonly httpClient = inject(HttpClient);
+  private readonly document = inject(DOCUMENT);
+
   baseUrl = environment.apiUrl;
   encodedKey: string = '';
 
   // Override background color for reader and restore it onDestroy
   private originalBodyColor!: string;
 
-  private noSleep = new NoSleep();
 
-  constructor(private httpClient: HttpClient, private router: Router,
-    private location: Location, private accountService: AccountService,
-    @Inject(DOCUMENT) private document: Document) {
+  private noSleep: NoSleep = new NoSleep();
+
+  constructor() {
       this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
         if (user) {
           this.encodedKey = encodeURIComponent(user.apiKey);
@@ -48,17 +60,18 @@ export class ReaderService {
       });
   }
 
+
   enableWakeLock(element?: Element | Document) {
     // Enable wake lock.
     // (must be wrapped in a user input event handler e.g. a mouse or touch handler)
 
     if (!element) element = this.document;
 
-    const enableNoSleepHandler = () => {
+    const enableNoSleepHandler = async () => {
       element!.removeEventListener('click', enableNoSleepHandler, false);
       element!.removeEventListener('touchmove', enableNoSleepHandler, false);
       element!.removeEventListener('mousemove', enableNoSleepHandler, false);
-      this.noSleep!.enable();
+      await this.noSleep.enable();
     };
 
     // Enable wake lock.
@@ -89,15 +102,15 @@ export class ReaderService {
     return `${this.baseUrl}reader/pdf?chapterId=${chapterId}&apiKey=${this.encodedKey}`;
   }
 
-  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, page});
+  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number, imageNumber: number = 0, xpath: string | null = null) {
+    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, page, imageNumber, xpath});
   }
 
-  unbookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, page});
+  unbookmark(seriesId: number, volumeId: number, chapterId: number, page: number, imageNumber: number = 0) {
+    return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, page, imageNumber});
   }
 
-  getAllBookmarks(filter: SeriesFilterV2 | undefined) {
+  getAllBookmarks(filter: FilterV2<FilterField> | undefined) {
     return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', filter);
   }
 
@@ -211,6 +224,10 @@ export class ReaderService {
     return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/time-left?seriesId=' + seriesId);
   }
 
+  getTimeLeftForChapter(seriesId: number, chapterId: number) {
+    return this.httpClient.get<HourEstimateRange>(this.baseUrl + `reader/time-left-for-chapter?seriesId=${seriesId}&chapterId=${chapterId}`);
+  }
+
   /**
    * Captures current body color and forces background color to be black. Call @see resetOverrideStyles() on destroy of component to revert changes
    */
@@ -255,13 +272,13 @@ export class ReaderService {
 
 
   getQueryParamsObject(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
-    let params: {[key: string]: any} = {};
-    if (incognitoMode) {
-      params['incognitoMode'] = true;
-    }
+    const params: {[key: string]: any} = {};
+    params['incognitoMode'] = incognitoMode;
+
     if (readingListMode) {
       params['readingListId'] = readingListId;
     }
+
     return params;
   }
 
@@ -298,13 +315,18 @@ export class ReaderService {
   /**
    * Closes the reader and causes a redirection
    */
-  closeReader(readingListMode: boolean = false, readingListId: number = 0) {
+  closeReader(libraryId: number, seriesId: number, chapterId: number, readingListMode: boolean = false, readingListId: number = 0) {
     if (readingListMode) {
       this.router.navigateByUrl('lists/' + readingListId);
-    } else {
-      // TODO: back doesn't always work, it might be nice to check the pattern of the url and see if we can be smart before just going back
-      this.location.back();
+      return
     }
+
+    if (window.history.length > 1) {
+      this.location.back();
+      return;
+    }
+
+    this.router.navigateByUrl(`/library/${libraryId}/series/${seriesId}/chapter/${chapterId}`);
   }
 
   removePersonalToc(chapterId: number, pageNumber: number, title: string) {
@@ -315,17 +337,197 @@ export class ReaderService {
     return this.httpClient.get<Array<PersonalToC>>(this.baseUrl + 'reader/ptoc?chapterId=' + chapterId);
   }
 
-  createPersonalToC(libraryId: number, seriesId: number, volumeId: number, chapterId: number, pageNumber: number, title: string, bookScrollId: string | null) {
-    return this.httpClient.post(this.baseUrl + 'reader/create-ptoc', {libraryId, seriesId, volumeId, chapterId, pageNumber, title, bookScrollId});
+  createPersonalToC(libraryId: number, seriesId: number, volumeId: number, chapterId: number, pageNumber: number, title: string, bookScrollId: string | null, selectedText: string) {
+    return this.httpClient.post(this.baseUrl + 'reader/create-ptoc', {libraryId, seriesId, volumeId, chapterId, pageNumber, title, bookScrollId, selectedText});
   }
 
+
+
   getElementFromXPath(path: string) {
-    const node = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (node?.nodeType === Node.ELEMENT_NODE) {
-      return node as Element;
+    try {
+      const node = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+      if (node?.nodeType === Node.ELEMENT_NODE) {
+        return node as Element;
+      }
+      return null;
+    } catch (e) {
+      console.debug("Failed to evaluate XPath:", path, " exception:", e)
+      return null;
     }
-    return null;
   }
+
+  /**
+   * Removes the Kavita UI aspect of the xpath from a given xpath variable
+   * Used for Annotations and Bookmarks within epub reader
+   *
+   * @param xpath
+   */
+  descopeBookReaderXpath(xpath: string) {
+    if (xpath.startsWith("id(")) return xpath;
+
+    const bookContentElement = this.document.querySelector('.book-content');
+    if (!bookContentElement?.children[0]) {
+      console.warn('Book content element not found, returning original xpath');
+      return xpath;
+    }
+
+    const bookContentXPath = this.getXPathTo(bookContentElement.children[0], true);
+
+    // Normalize both paths
+    const normalizedXpath = this.normalizeXPath(xpath);
+    const normalizedBookContentXPath = this.normalizeXPath(bookContentXPath);
+
+    //console.log('Descoping - Original:', xpath);
+    //console.log('Descoping - Normalized xpath:', normalizedXpath);
+    //console.log('Descoping - Book content path:', normalizedBookContentXPath);
+
+    // Find the UI container pattern and extract content path
+    const descopedPath = this.extractContentPath(normalizedXpath, normalizedBookContentXPath);
+
+    //console.log('Descoped', xpath, 'to', descopedPath);
+    return descopedPath;
+  }
+
+  /**
+   * Adds the Kavita UI aspect to the xpath so loading from xpath in the reader works
+   * @param xpath
+   */
+  scopeBookReaderXpath(xpath: string) {
+    if (xpath.startsWith("id(")) return xpath;
+
+    const bookContentElement = this.document.querySelector('.book-content');
+    if (!bookContentElement?.children[0]) {
+      console.warn('Book content element not found, returning original xpath');
+      return xpath;
+    }
+
+    const bookContentXPath = this.getXPathTo(bookContentElement.children[0], true);
+    const normalizedXpath = this.normalizeXPath(xpath);
+    const normalizedBookContentXPath = this.normalizeXPath(bookContentXPath);
+
+    // If already scoped, return as-is
+    if (normalizedXpath.includes(normalizedBookContentXPath)) {
+      return xpath;
+    }
+
+    // Replace //body with the actual book content path
+    if (normalizedXpath.startsWith('//body')) {
+      const relativePath = normalizedXpath.substring(6); // Remove '//body'
+      return bookContentXPath + relativePath;
+    }
+
+    // If it starts with /body, replace with book content path
+    if (normalizedXpath.startsWith('/body')) {
+      const relativePath = normalizedXpath.substring(5); // Remove '/body'
+      return bookContentXPath + relativePath;
+    }
+
+    // Default: prepend the book content path
+    return bookContentXPath + (normalizedXpath.startsWith('/') ? normalizedXpath : '/' + normalizedXpath);
+  }
+
+  /**
+   * Extract the content path by finding the UI container boundary
+   */
+  private extractContentPath(fullXpath: string, bookContentXPath: string): string {
+    // Look for the pattern where the book content container ends
+    // The book content path should be a prefix of the full path
+
+    // First, try direct substring match
+    if (fullXpath.startsWith(bookContentXPath)) {
+      const contentPath = fullXpath.substring(bookContentXPath.length);
+      return '//body' + (contentPath.startsWith('/') ? contentPath : '/' + contentPath);
+    }
+
+    // If direct match fails, try to find the common UI structure pattern
+    // Look for the app-book-reader container end point
+    const readerPattern = /\/app-book-reader\[\d+\]\/div\[\d+\]\/div\[\d+\]\/div\[\d+\]\/div\[\d+\]\/div\[\d+\]/;
+    const match = fullXpath.match(readerPattern);
+
+    if (match) {
+      const containerEndIndex = fullXpath.indexOf(match[0]) + match[0].length;
+      const contentPath = fullXpath.substring(containerEndIndex);
+      return '//body' + (contentPath.startsWith('/') ? contentPath : '/' + contentPath);
+    }
+
+    // Alternative approach: look for the deepest common path structure
+    // Split both paths and find where they diverge after the UI container
+    const fullParts = fullXpath.split('/').filter(p => p.length > 0);
+    const bookParts = bookContentXPath.split('/').filter(p => p.length > 0);
+
+    // Find the app-book-reader index in full path
+    const readerIndex = fullParts.findIndex(part => part.startsWith('app-book-reader'));
+
+    if (readerIndex !== -1) {
+      // Look for the pattern after app-book-reader that matches book content structure
+      // Typically: app-book-reader[1]/div[1]/div[2]/div[3]/div[1]/div[1] then content starts
+      let contentStartIndex = readerIndex + 6; // Skip the typical 6 div containers
+
+      // Adjust based on actual book content depth
+      const bookReaderIndex = bookParts.findIndex(part => part.startsWith('app-book-reader'));
+      if (bookReaderIndex !== -1) {
+        const expectedDepth = bookParts.length - bookReaderIndex - 1;
+        contentStartIndex = readerIndex + 1 + expectedDepth;
+      }
+
+      if (contentStartIndex < fullParts.length) {
+        const contentParts = fullParts.slice(contentStartIndex);
+        return '//body/' + contentParts.join('/');
+      }
+    }
+
+    // Fallback: clean common UI prefixes
+    return this.cleanCommonUIPrefixes(fullXpath);
+  }
+
+  /**
+   * Normalize XPath by cleaning common variations and converting to lowercase
+   */
+  private normalizeXPath(xpath: string): string {
+    let normalized = xpath.toLowerCase();
+
+    // Remove common HTML document prefixes
+    const prefixesToRemove = [
+      '//html[1]//body',
+      '//html[1]//app-root[1]',
+      '//html//body',
+      '//html//app-root[1]'
+    ];
+
+    for (const prefix of prefixesToRemove) {
+      if (normalized.startsWith(prefix)) {
+        normalized = '//body' + normalized.substring(prefix.length);
+        break;
+      }
+    }
+
+    return normalized;
+  }
+
+  /**
+   * Clean common UI prefixes that shouldn't be in descoped paths
+   */
+  private cleanCommonUIPrefixes(xpath: string): string {
+    let cleaned = xpath;
+
+    // Remove app-root references
+    cleaned = cleaned.replace(/\/app-root\[\d+\]/g, '');
+
+    // Ensure it starts with //body
+    if (!cleaned.startsWith('//body') && !cleaned.startsWith('/body')) {
+      // Try to find body in the path
+      const bodyIndex = cleaned.indexOf('/body');
+      if (bodyIndex !== -1) {
+        cleaned = '//' + cleaned.substring(bodyIndex + 1);
+      } else {
+        // If no body found, assume it should start with //body
+        cleaned = '//body' + (cleaned.startsWith('/') ? cleaned : '/' + cleaned);
+      }
+    }
+
+    return cleaned;
+  }
+
 
   /**
    *
@@ -333,24 +535,84 @@ export class ReaderService {
    * @param pureXPath Will ignore shortcuts like id('')
    */
   getXPathTo(element: any, pureXPath = false): string {
-    if (element === null) return '';
-    if (!pureXPath) {
-      if (element.id !== '') { return 'id("' + element.id + '")'; }
-      if (element === document.body) { return element.tagName; }
+    if (!element) {
+      console.error('getXPathTo: element is null or undefined');
+      return '';
     }
 
+    let xpath = this.getXPath(element, pureXPath);
 
-    let ix = 0;
-    const siblings = element.parentNode?.childNodes || [];
-    for (let sibling of siblings) {
-      if (sibling === element) {
-        return this.getXPathTo(element.parentNode) + '/' + element.tagName + '[' + (ix + 1) + ']';
-      }
-      if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
-        ix++;
-      }
-
+    // Ensure xpath starts with // for absolute paths
+    if (xpath && !xpath.startsWith('//') && !xpath.startsWith('id(')) {
+      xpath = '//' + xpath;
     }
-    return '';
+
+    return xpath;
   }
+
+  private getXPath(element: HTMLElement, pureXPath = false): string {
+    if (!element) {
+      console.error('getXPath: element is null or undefined');
+      return '';
+    }
+
+    // Handle shortcuts (unless pureXPath is requested)
+    if (!pureXPath && element.id) {
+      return `id("${element.id}")`;
+    }
+
+    if (element === document.body) {
+      return 'body';
+    }
+
+    if (!element.parentNode) {
+      return element.tagName.toLowerCase();
+    }
+
+    // Count same-tag siblings
+    let siblingIndex = 1;
+    const siblings = Array.from(element.parentNode?.children ?? []);
+    const tagName = element.tagName;
+
+    for (const sibling of siblings) {
+      if (sibling === element) {
+        break;
+      }
+      if (sibling.tagName === tagName) {
+        siblingIndex++;
+      }
+    }
+
+    const currentPath = `${element.tagName.toLowerCase()}[${siblingIndex}]`;
+    const parentPath = this.getXPath(element.parentElement!, pureXPath);
+
+    return parentPath ? `${parentPath}/${currentPath}` : currentPath;
+  }
+
+  readVolume(libraryId: number, seriesId: number, volume: Volume, incognitoMode: boolean = false) {
+    if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
+      // Find the continue point chapter and load it
+      const unreadChapters = volume.chapters.filter(item => item.pagesRead < item.pages);
+      if (unreadChapters.length > 0) {
+        this.readChapter(libraryId, seriesId, unreadChapters[0], incognitoMode);
+        return;
+      }
+      this.readChapter(libraryId, seriesId, volume.chapters[0], incognitoMode);
+      return;
+    }
+
+    // Sort the chapters, then grab first if no reading progress
+    this.readChapter(libraryId, seriesId, [...volume.chapters].sort(this.utilityService.sortChapters)[0], incognitoMode);
+  }
+
+  readChapter(libraryId: number, seriesId: number, chapter: Chapter, incognitoMode: boolean = false) {
+    if (chapter.pages === 0) {
+      this.toastr.error(translate('series-detail.no-pages'));
+      return;
+    }
+
+    this.router.navigate(this.getNavigationArray(libraryId, seriesId, chapter.id, chapter.files[0].format),
+      {queryParams: {incognitoMode}});
+  }
+
 }

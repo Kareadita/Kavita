@@ -41,6 +41,7 @@ public interface ICacheService
     IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath);
     string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
+    string GetCachedFile(int chapterId, string firstFilePath);
     public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
     Task<int> CacheBookmarkForSeries(int userId, int seriesId);
     void CleanupBookmarkCache(int seriesId);
@@ -80,7 +81,6 @@ public class CacheService : ICacheService
     /// <returns></returns>
     public IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath)
     {
-        var sw = Stopwatch.StartNew();
         var files = _directoryService.GetFilesWithExtension(cachePath, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
             .OrderByNatural(Path.GetFileNameWithoutExtension)
             .ToArray();
@@ -118,7 +118,6 @@ public class CacheService : ICacheService
             Cache.MaxFiles = originalCacheSize;
         }
 
-        _logger.LogDebug("File Dimensions call for {Length} images took {Time}ms", dimensions.Count, sw.ElapsedMilliseconds);
         return dimensions;
     }
 
@@ -157,6 +156,17 @@ public class CacheService : ICacheService
         return path;
     }
 
+    public string GetCachedFile(int chapterId, string firstFilePath)
+    {
+        var extractPath = GetCachePath(chapterId);
+        var path = Path.Join(extractPath, _directoryService.FileSystem.Path.GetFileName(firstFilePath));
+        if (!(_directoryService.FileSystem.FileInfo.New(path).Exists))
+        {
+            path = firstFilePath;
+        }
+        return path;
+    }
+
 
     /// <summary>
     /// Caches the files for the given chapter to CacheDirectory
@@ -170,11 +180,34 @@ public class CacheService : ICacheService
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
         var extractPath = GetCachePath(chapterId);
 
-        SemaphoreSlim extractLock = ExtractLocks.GetOrAdd(chapterId, id => new SemaphoreSlim(1,1));
+        var extractLock = ExtractLocks.GetOrAdd(chapterId, id => new SemaphoreSlim(1,1));
 
         await extractLock.WaitAsync();
         try {
-            if(_directoryService.Exists(extractPath)) return chapter;
+            if (_directoryService.Exists(extractPath))
+            {
+                if (extractPdfToImages)
+                {
+                    var pdfImages = _directoryService.GetFiles(extractPath,
+                        Tasks.Scanner.Parser.Parser.ImageFileExtensions);
+                    if (pdfImages.Any())
+                    {
+                        return chapter;
+                    }
+                }
+                else
+                {
+                    // Do an explicit check for files since rarely a "permission denied" error on deleting
+                    // the file can occur, thus leaving an empty folder and we would never re-cache the files.
+                    if (_directoryService.GetFiles(extractPath).Any())
+                    {
+                        return chapter;
+                    }
+
+                    // Delete the extractPath as ExtractArchive will return if the directory already exists
+                    _directoryService.ClearAndDeleteDirectory(extractPath);
+                }
+            }
 
             var files = chapter?.Files.ToList();
             ExtractChapterFiles(extractPath, files, extractPdfToImages);
@@ -195,13 +228,13 @@ public class CacheService : ICacheService
     /// <returns></returns>
     public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile>? files, bool extractPdfImages = false)
     {
-        if (files == null) return;
+        if (files == null || files.Count == 0) return;
         var removeNonImages = true;
         var fileCount = files.Count;
         var extraPath = string.Empty;
         var extractDi = _directoryService.FileSystem.DirectoryInfo.New(extractPath);
 
-        if (files.Count > 0 && files[0].Format == MangaFormat.Image)
+        if (files[0].Format == MangaFormat.Image)
         {
             // Check if all the files are Images. If so, do a directory copy, else do the normal copy
             if (files.All(f => f.Format == MangaFormat.Image))
@@ -321,9 +354,7 @@ public class CacheService : ICacheService
         // Calculate what chapter the page belongs to
         var path = GetCachePath(chapterId);
         // NOTE: We can optimize this by extracting and renaming, so we don't need to scan for the files and can do a direct access
-        var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
-            //.OrderByNatural(Path.GetFileNameWithoutExtension) // This is already done in GetPageFromFiles
-            .ToArray();
+        var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions);
 
         return GetPageFromFiles(files, page);
     }

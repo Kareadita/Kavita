@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import { LibraryType } from '../_models/library/library';
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 
 /**
  * Returns the name of the LibraryType
@@ -11,7 +11,7 @@ import {TranslocoService} from "@ngneat/transloco";
 })
 export class LibraryTypePipe implements PipeTransform {
 
-  translocoService = inject(TranslocoService);
+  private readonly translocoService = inject(TranslocoService);
   transform(libraryType: LibraryType): string {
     switch (libraryType) {
       case LibraryType.Book:

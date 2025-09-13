@@ -2,7 +2,7 @@
 
 namespace API.DTOs.SeriesDetail;
 
-public class UpdateRelatedSeriesDto
+public sealed record UpdateRelatedSeriesDto
 {
     public int SeriesId { get; set; }
     public IList<int> Adaptations { get; set; } = default!;

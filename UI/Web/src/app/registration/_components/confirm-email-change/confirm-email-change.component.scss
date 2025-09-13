@@ -3,5 +3,9 @@
 }
 
 .card {
-    background-color: var(--primary-color);
+    background-color: var(--login-card-bg-color);
+}
+
+p {
+    font-family: var(--login-input-font-family);
 }

@@ -13,7 +13,7 @@ public static class CronHelper
             CronExpression.Parse(cronExpression);
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             /* Swallow */
             return false;

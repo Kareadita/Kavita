@@ -5,11 +5,13 @@ using API.Entities.Interfaces;
 
 namespace API.Entities;
 
-public class Library : IEntityDate
+public class Library : IEntityDate, IHasCoverImage
 {
     public int Id { get; set; }
     public required string Name { get; set; }
     public string? CoverImage { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
     public LibraryType Type { get; set; }
     /// <summary>
     /// If Folder Watching is enabled for this library
@@ -38,11 +40,22 @@ public class Library : IEntityDate
     /// <summary>
     /// Should this library allow Scrobble events to emit from it
     /// </summary>
-    /// <remarks>Scrobbling requires a valid LicenseKey</remarks>
+    /// <remarks>Requires a valid LicenseKey</remarks>
     public bool AllowScrobbling { get; set; } = true;
-
-
-
+    /// <summary>
+    /// Allow any series within this Library to download metadata.
+    /// </summary>
+    /// <remarks>This does not exclude the library from being linked to wrt Series Relationships</remarks>
+    /// <remarks>Requires a valid LicenseKey</remarks>
+    public bool AllowMetadataMatching { get; set; } = true;
+    /// <summary>
+    /// Should Kavita read metadata files from the library
+    /// </summary>
+    public bool EnableMetadata { get; set; } = true;
+    /// <summary>
+    /// Should Kavita remove sort articles "The" for the sort name
+    /// </summary>
+    public bool RemovePrefixForSortName { get; set; } = false;
 
 
     public DateTime Created { get; set; }
@@ -77,5 +90,11 @@ public class Library : IEntityDate
         {
             LastScanned = (DateTime) time;
         }
+    }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
     }
 }

@@ -1,0 +1,182 @@
+name: Stable Workflow
+
+on:
+  push:
+    branches: ['release/**']
+  pull_request:
+    branches: [ 'develop' ]
+    types: [ closed ]
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Debug Info
+        run: |
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Not Contains Release: ${{ !contains(github.head_ref, 'release') }}"
+          echo "Matches Develop: ${{ github.ref == 'refs/heads/develop' }}"
+  if_merged:
+    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
+    runs-on: ubuntu-24.04
+    steps:
+      - run: |
+          echo The PR was merged
+  build:
+    name: Upload Kavita.Common for Version Bump
+    runs-on: ubuntu-24.04
+    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: csproj
+          path: Kavita.Common/Kavita.Common.csproj
+
+  stable:
+    name: Build Stable and Nightly Docker if Release
+    needs: [ build ]
+    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
+    runs-on: ubuntu-24.04
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Find Current Pull Request
+        uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+        with:
+          state: all
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Parse PR body
+        id: parse-body
+        run: |
+          body="Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
+
+          echo $body
+          echo "BODY=$body" >> $GITHUB_OUTPUT
+
+      - name: Check Out Repo
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - name: NodeJS to Compile WebUI
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: |
+
+          cd UI/Web || exit
+          echo 'Installing web dependencies'
+          npm ci
+
+          echo 'Building UI'
+          npm run prod
+
+          echo 'Copying back to Kavita wwwroot'
+          rsync -a dist/ ../../API/wwwroot/
+
+          cd ../ || exit
+
+      - name: Get csproj Version
+        uses: kzrnm/get-net-sdk-project-versions-action@v2
+        id: get-version
+        with:
+          proj-path: Kavita.Common/Kavita.Common.csproj
+
+      - name: Echo csproj version
+        run: echo "${{steps.get-version.outputs.assembly-version}}"
+
+      - name: Parse Version
+        run: |
+          version='${{steps.get-version.outputs.assembly-version}}'
+          newVersion=${version%.*}
+          echo $newVersion
+          echo "VERSION=$newVersion" >> $GITHUB_OUTPUT
+        id: parse-version
+
+      - name: Compile dotnet app
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - name: Install Swashbuckle CLI
+        run: dotnet tool install -g Swashbuckle.AspNetCore.Cli
+
+      - run: ./monorepo-build.sh
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        if: ${{ github.repository_owner == 'Kareadita' }}
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: docker_meta_stable
+        uses: docker/metadata-action@v5
+        with:
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ steps.parse-version.outputs.VERSION }}
+          images: |
+            name=jvmilazz0/kavita,enable=${{ github.repository_owner == 'Kareadita' }}
+            name=ghcr.io/${{ github.repository }}
+
+      - name: Build and push stable
+        id: docker_build_stable
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          push: true
+          tags: ${{ steps.docker_meta_stable.outputs.tags }}
+          labels: ${{ steps.docker_meta_stable.outputs.labels }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: docker_meta_nightly
+        uses: docker/metadata-action@v5
+        with:
+          tags: |
+            type=raw,value=nightly
+            type=raw,value=nightly-${{ steps.parse-version.outputs.VERSION }}
+          images: |
+            name=jvmilazz0/kavita,enable=${{ github.repository_owner == 'Kareadita' }}
+            name=ghcr.io/${{ github.repository }}
+
+      - name: Build and push nightly
+        id: docker_build_nightly
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          push: true
+          tags: ${{ steps.docker_meta_nightly.outputs.tags }}
+          labels: ${{ steps.docker_meta_nightly.outputs.labels }}
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build_stable.outputs.digest }}
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build_nightly.outputs.digest }}

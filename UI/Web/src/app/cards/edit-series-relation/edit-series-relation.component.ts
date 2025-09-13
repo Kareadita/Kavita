@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -9,20 +10,19 @@ import {
   Output
 } from '@angular/core';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import { map, Observable, of, firstValueFrom, ReplaySubject } from 'rxjs';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
-import { SearchResult } from 'src/app/_models/search/search-result';
-import { Series } from 'src/app/_models/series';
-import { RelationKind, RelationKinds } from 'src/app/_models/series-detail/relation-kind';
-import { ImageService } from 'src/app/_services/image.service';
-import { LibraryService } from 'src/app/_services/library.service';
-import { SearchService } from 'src/app/_services/search.service';
-import { SeriesService } from 'src/app/_services/series.service';
+import {firstValueFrom, map, Observable, of, ReplaySubject} from 'rxjs';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
+import {TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
+import {SearchResult} from 'src/app/_models/search/search-result';
+import {Series} from 'src/app/_models/series';
+import {RelationKind, RelationKinds} from 'src/app/_models/series-detail/relation-kind';
+import {ImageService} from 'src/app/_services/image.service';
+import {LibraryService} from 'src/app/_services/library.service';
+import {SearchService} from 'src/app/_services/search.service';
+import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
-import {CommonModule} from "@angular/common";
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoModule} from "@jsverse/transloco";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {WikiLink} from "../../_models/wiki";
 
@@ -33,18 +33,16 @@ interface RelationControl {
 }
 
 @Component({
-  selector: 'app-edit-series-relation',
-  standalone: true,
-  imports: [
-    TypeaheadComponent,
-    CommonModule,
-    ReactiveFormsModule,
-    TranslocoModule,
-    RelationshipPipe,
-  ],
-  templateUrl: './edit-series-relation.component.html',
-  styleUrls: ['./edit-series-relation.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-edit-series-relation',
+    imports: [
+        TypeaheadComponent,
+        ReactiveFormsModule,
+        TranslocoModule,
+        RelationshipPipe,
+    ],
+    templateUrl: './edit-series-relation.component.html',
+    styleUrls: ['./edit-series-relation.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditSeriesRelationComponent implements OnInit {
 
@@ -114,7 +112,8 @@ export class EditSeriesRelationComponent implements OnInit {
   }
 
   async addNewRelation() {
-    this.relations.push({series: undefined, formControl: new FormControl(RelationKind.Adaptation, []), typeaheadSettings: await firstValueFrom(this.createSeriesTypeahead(undefined, RelationKind.Adaptation, this.relations.length))});
+    this.relations.push({series: undefined, formControl: new FormControl(RelationKind.Adaptation, []),
+      typeaheadSettings: await firstValueFrom(this.createSeriesTypeahead(undefined, RelationKind.Adaptation, this.relations.length))});
     this.cdRef.markForCheck();
 
     // Focus on the new typeahead
@@ -153,7 +152,9 @@ export class EditSeriesRelationComponent implements OnInit {
     );
 
     seriesSettings.compareFn = (options: SearchResult[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.name, filter));
+      return options.filter(m => {
+        return this.utilityService.filter(m.name, filter) || this.utilityService.filter(m.localizedName, filter);
+      });
     }
 
     seriesSettings.selectionCompareFn = (a: SearchResult, b: SearchResult) => {

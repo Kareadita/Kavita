@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Upload Kavita.Common for Version Bump
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
   version:
     name: Bump version
     needs: [ build ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,7 +33,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-            dotnet-version: 8.0.x
+            dotnet-version: 9.0.x
 
       - name: Bump versions
         uses: SiqiLu/dotnet-bump-version@2.0.0
@@ -45,7 +45,7 @@ jobs:
   canary:
       name: Build Canary Docker
       needs: [ build, version ]
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-24.04
       permissions:
           packages: write
           contents: read
@@ -98,10 +98,10 @@ jobs:
           - name: Compile dotnet app
             uses: actions/setup-dotnet@v4
             with:
-                dotnet-version: 8.0.x
+                dotnet-version: 9.0.x
 
           - name: Install Swashbuckle CLI
-            run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+            run: dotnet tool install -g Swashbuckle.AspNetCore.Cli
 
           - run: ./monorepo-build.sh
 

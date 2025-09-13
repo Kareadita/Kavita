@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Recommendation;
 
-public class MetadataTagDto
+public sealed record MetadataTagDto
 {
     public string Name { get; set; }
     public string Description { get; private set; }

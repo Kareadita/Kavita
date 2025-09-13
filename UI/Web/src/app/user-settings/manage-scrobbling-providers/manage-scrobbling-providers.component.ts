@@ -1,43 +1,29 @@
-import {ChangeDetectorRef, Component, ContentChild, DestroyRef, ElementRef, inject, OnInit} from '@angular/core';
-import {NgIf, NgOptimizedImage} from "@angular/common";
-import {
-  NgbAccordionBody,
-  NgbAccordionButton,
-  NgbAccordionCollapse, NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
-  NgbCollapse,
-  NgbTooltip
-} from "@ng-bootstrap/ng-bootstrap";
+import {ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {Select2Module} from "ng-select2-component";
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
-import {ManageAlertsComponent} from "../../admin/manage-alerts/manage-alerts.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ScrobbleProviderItemComponent} from "../scrobble-provider-item/scrobble-provider-item.component";
+import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
+import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
+import {LicenseService} from "../../_services/license.service";
+import {ConfirmService} from "../../shared/confirm.service";
 
 @Component({
-  selector: 'app-manage-scrobbling-providers',
-  standalone: true,
-  imports: [
-    NgIf,
-    NgOptimizedImage,
-    NgbTooltip,
-    ReactiveFormsModule,
-    Select2Module,
-    TranslocoDirective,
-    NgbCollapse,
-    ManageAlertsComponent,
-    NgbAccordionBody,
-    NgbAccordionButton,
-    NgbAccordionCollapse,
-    NgbAccordionDirective,
-    NgbAccordionHeader,
-    NgbAccordionItem,
-    LoadingComponent,
-  ],
-  templateUrl: './manage-scrobbling-providers.component.html',
-  styleUrl: './manage-scrobbling-providers.component.scss'
+    selector: 'app-manage-scrobbling-providers',
+    imports: [
+        ReactiveFormsModule,
+        TranslocoDirective,
+        LoadingComponent,
+        ScrobbleProviderItemComponent,
+        ScrobbleProviderNamePipe,
+        SettingTitleComponent,
+    ],
+    templateUrl: './manage-scrobbling-providers.component.html',
+    styleUrl: './manage-scrobbling-providers.component.scss'
 })
 export class ManageScrobblingProvidersComponent implements OnInit {
   public readonly accountService = inject(AccountService);
@@ -45,6 +31,10 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly licenseService = inject(LicenseService);
+  private readonly confirmService = inject(ConfirmService);
+
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 
   hasValidLicense: boolean = false;
 
@@ -53,14 +43,12 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   malToken: string = '';
   malUsername: string = '';
 
-  aniListTokenExpired: boolean = false;
-  malTokenExpired: boolean = false;
 
   isViewMode: boolean = true;
   loaded: boolean = false;
 
   constructor() {
-    this.accountService.hasValidLicense$.subscribe(res => {
+    this.licenseService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       this.hasValidLicense = res;
       this.cdRef.markForCheck();
       if (this.hasValidLicense) {
@@ -77,10 +65,9 @@ export class ManageScrobblingProvidersComponent implements OnInit {
           this.formGroup.get('malUsername')?.setValue(this.malUsername);
           this.cdRef.markForCheck();
         });
-        this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
-          this.aniListTokenExpired = hasExpired;
-          this.cdRef.markForCheck();
-        });
+      } else {
+        this.loaded = true;
+        this.cdRef.markForCheck();
       }
     });
   }
@@ -101,7 +88,30 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   }
 
   saveAniListForm() {
-    this.scrobblingService.updateAniListToken(this.formGroup.get('aniListToken')!.value).subscribe(() => {
+    this.scrobblingService.updateAniListToken(this.formGroup.get('aniListToken')!.value).subscribe(async (isFirstToken) => {
+
+      if (isFirstToken) {
+        const result = await this.confirmService.confirm('', {
+          buttons: [
+            {text: translate('scrobbling-providers.anilist-first-later'), type: 'secondary'},
+            {text: translate('scrobbling-providers.anilist-first-now'), type: 'primary'},
+          ],
+          _type: 'confirm',
+          content: translate('scrobbling-providers.anilist-first-description'),
+          header: translate('scrobbling-providers.anilist-first-header'),
+          disableEscape: true
+        });
+        // false is Later, true is Now
+        if (result) {
+          this.scrobblingService.triggerScrobbleEventGeneration().subscribe(_ => {
+            this.aniListToken = this.formGroup.get('aniListToken')!.value;
+            this.resetForm();
+            this.cdRef.markForCheck();
+          });
+          return;
+        }
+      }
+
       this.toastr.success(translate('toasts.anilist-token-updated'));
       this.aniListToken = this.formGroup.get('aniListToken')!.value;
       this.resetForm();
@@ -119,8 +129,9 @@ export class ManageScrobblingProvidersComponent implements OnInit {
     });
   }
 
-  toggleViewMode() {
-    this.isViewMode = !this.isViewMode;
+  updateEditMode(mode: boolean) {
+    this.isViewMode = !mode;
     this.resetForm();
+    this.cdRef.markForCheck();
   }
 }

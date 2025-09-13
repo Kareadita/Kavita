@@ -1,0 +1,143 @@
+<ng-container *transloco="let t; prefix:'user-preferences'">
+  <p>
+    {{t('pref-description')}}
+  </p>
+
+  @if (user) {
+    <form [formGroup]="settingsForm">
+      <h4>{{t('global-settings-title')}}</h4>
+      <ng-container>
+
+        <div class="row g-0 mt-4 mb-4">
+          <app-setting-item [title]="t('locale-label')" [subtitle]="t('locale-tooltip')" labelId="locale">
+            <ng-template #view>
+              {{Locale | titlecase}}
+            </ng-template>
+            <ng-template #edit>
+              <select class="form-select" aria-describedby="global-header" formControlName="locale" id="locale">
+                @for(opt of locales; track opt.renderName) {
+                  <option [value]="opt.fileName">{{opt.renderName | titlecase}} ({{opt.translationCompletion | number:'1.0-1'}}%)</option>
+                }
+              </select>
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        <div class="row g-0 mt-4 mb-4">
+          <app-setting-switch [title]="t('blur-unread-summaries-label')" [subtitle]="t('blur-unread-summaries-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch" id="blur-unread-summaries"
+                       formControlName="blurUnreadSummaries" class="form-check-input"
+                       aria-labelledby="auto-close-label">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+
+
+        <div class="row g-0 mt-4 mb-4">
+          <app-setting-switch [title]="t('prompt-on-download-label')" [subtitle]="t('prompt-on-download-tooltip', {size: '100'})">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch" id="prompt-on-download"
+                       formControlName="promptForDownloadSize" class="form-check-input"
+                       aria-labelledby="auto-close-label">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+
+        <div class="row g-0 mt-4 mb-4">
+          <app-setting-switch [title]="t('disable-animations-label')" [subtitle]="t('disable-animations-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch" id="disable-animations"
+                       formControlName="noTransitions" class="form-check-input"
+                       aria-labelledby="auto-close-label">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+
+        <div class="row g-0 mt-4 mb-4">
+          <app-setting-switch [title]="t('collapse-series-relationships-label')" [subtitle]="t('collapse-series-relationships-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch" id="collapse-series-relationships"
+                       formControlName="collapseSeriesRelationships" class="form-check-input"
+                       aria-labelledby="auto-close-label">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+
+        <div class="row g-0 mt-4 mb-4">
+          <app-setting-item [canEdit]="false" [showEdit]="false" [allowClickEvents]="true"
+                            [title]="t('highlight-bar-label')" [subtitle]="t('highlight-bar-tooltip')">
+            <ng-template #view>
+              <app-highlight-bar
+                [isCollapsed]="false"
+                [canCollapse]="false"
+                [selectedSlotIndex]="0"
+                [isEditMode]="true"
+                [canChangeEditMode]="false"
+              />
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+      </ng-container>
+
+      <div class="setting-section-break"></div>
+
+      <h4>{{t('social-settings-title')}}</h4>
+      <div class="row g-0 mt-4">
+        <app-setting-switch [title]="t('share-series-reviews-label')" [subtitle]="t('share-series-reviews-tooltip')">
+          <ng-template #switch>
+            <div class="form-check form-switch float-end">
+              <input type="checkbox" role="switch" id="share-series-reviews"
+                     formControlName="shareReviews" class="form-check-input"
+                     aria-labelledby="auto-close-label">
+            </div>
+          </ng-template>
+        </app-setting-switch>
+      </div>
+      <!-- TODO: Hook in Share Annotations and View User Annotation toggles -->
+
+
+
+      @if (licenseService.hasValidLicense$ | async) {
+        <div class="setting-section-break"></div>
+        <h4 id="kavitaplus-heading" class="mt-4">{{t('kavitaplus-settings-title')}}</h4>
+
+        <div class="row g-0 mt-4 mb-4">
+          @if(settingsForm.get('aniListScrobblingEnabled'); as formControl) {
+            <app-setting-switch [title]="t('anilist-scrobbling-label')" [subtitle]="t('anilist-scrobbling-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="setting-anilist-scrobbling" type="checkbox"
+                         class="form-check-input" formControlName="aniListScrobblingEnabled">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+
+        <div class="row g-0 mt-4 mb-4">
+          @if(settingsForm.get('wantToReadSync'); as formControl) {
+            <app-setting-switch [title]="t('want-to-read-sync-label')" [subtitle]="t('want-to-read-sync-tooltip')">
+              <ng-template #switch>
+                <div class="form-check form-switch float-end">
+                  <input id="setting-want-to-read-sync" type="checkbox" class="form-check-input" formControlName="wantToReadSync">
+                </div>
+              </ng-template>
+            </app-setting-switch>
+          }
+        </div>
+      }
+    </form>
+  }
+
+
+</ng-container>

@@ -1,0 +1,10 @@
+@if (items.length > 0) {
+  <h5>{{ title }}
+    <span class="badge bg-primary ms-2">{{items.length}}</span>
+  </h5>
+  <ul>
+    @for(item of items; track item;) {
+      <li class="code">{{item}}</li>
+    }
+  </ul>
+}

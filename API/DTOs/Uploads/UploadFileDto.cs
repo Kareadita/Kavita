@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Uploads;
 
-public class UploadFileDto
+public sealed record UploadFileDto
 {
     /// <summary>
     /// Id of the Entity
@@ -10,4 +10,9 @@ public class UploadFileDto
     /// Base Url encoding of the file to upload from (can be null)
     /// </summary>
     public required string Url { get; set; }
+
+    /// <summary>
+    /// Lock the cover or not
+    /// </summary>
+    public bool LockCover { get; set; } = true;
 }

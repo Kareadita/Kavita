@@ -1,0 +1,14 @@
+@use '../../../card-item-common';
+
+a {
+    color: var(--card-text-color);
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.card-title {
+    padding: 5px 0;
+    max-width: unset;
+}

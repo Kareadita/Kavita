@@ -12,6 +12,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+#nullable enable
 
 public interface IScrobbleRepository
 {
@@ -19,16 +20,36 @@ public interface IScrobbleRepository
     void Attach(ScrobbleError error);
     void Remove(ScrobbleEvent evt);
     void Remove(IEnumerable<ScrobbleEvent> events);
+    void Remove(IEnumerable<ScrobbleError> errors);
     void Update(ScrobbleEvent evt);
     Task<IList<ScrobbleEvent>> GetByEvent(ScrobbleEventType type, bool isProcessed = false);
     Task<IList<ScrobbleEvent>> GetProcessedEvents(int daysAgo);
     Task<bool> Exists(int userId, int seriesId, ScrobbleEventType eventType);
     Task<IEnumerable<ScrobbleErrorDto>> GetScrobbleErrors();
+    Task<IList<ScrobbleError>> GetAllScrobbleErrorsForSeries(int seriesId);
     Task ClearScrobbleErrors();
     Task<bool> HasErrorForSeries(int seriesId);
-    Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType);
+    /// <summary>
+    /// Get all events for a specific user and type
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="eventType"></param>
+    /// <param name="isNotProcessed">If true, only returned not processed events</param>
+    /// <returns></returns>
+    Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType, bool isNotProcessed = false);
     Task<IEnumerable<ScrobbleEvent>> GetUserEventsForSeries(int userId, int seriesId);
+    /// <summary>
+    /// Return the events with given ids, when belonging to the passed user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="scrobbleEventIds"></param>
+    /// <returns></returns>
+    Task<IList<ScrobbleEvent>> GetUserEvents(int userId, IList<long> scrobbleEventIds);
     Task<PagedList<ScrobbleEventDto>> GetUserEvents(int userId, ScrobbleEventFilter filter, UserParams pagination);
+    Task<IList<ScrobbleEvent>> GetAllEventsForSeries(int seriesId);
+    Task<IList<ScrobbleEvent>> GetAllEventsWithSeriesIds(IEnumerable<int> seriesIds);
+    Task<IList<ScrobbleEvent>> GetEvents();
 }
 
 /// <summary>
@@ -65,6 +86,11 @@ public class ScrobbleRepository : IScrobbleRepository
         _context.ScrobbleEvent.RemoveRange(events);
     }
 
+    public void Remove(IEnumerable<ScrobbleError> errors)
+    {
+        _context.ScrobbleError.RemoveRange(errors);
+    }
+
     public void Update(ScrobbleEvent evt)
     {
         _context.Entry(evt).State = EntityState.Modified;
@@ -78,6 +104,7 @@ public class ScrobbleRepository : IScrobbleRepository
             .Include(s => s.Series)
             .ThenInclude(s => s.Metadata)
             .Include(s => s.AppUser)
+            .ThenInclude(u => u.UserPreferences)
             .Where(s => s.ScrobbleEventType == type)
             .Where(s => s.IsProcessed == isProcessed)
             .AsSplitQuery()
@@ -88,6 +115,11 @@ public class ScrobbleRepository : IScrobbleRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Returns all processed events that were processed 7 or more days ago
+    /// </summary>
+    /// <param name="daysAgo"></param>
+    /// <returns></returns>
     public async Task<IList<ScrobbleEvent>> GetProcessedEvents(int daysAgo)
     {
         var date = DateTime.UtcNow.Subtract(TimeSpan.FromDays(daysAgo));
@@ -111,6 +143,13 @@ public class ScrobbleRepository : IScrobbleRepository
             .ToListAsync();
     }
 
+    public async Task<IList<ScrobbleError>> GetAllScrobbleErrorsForSeries(int seriesId)
+    {
+        return await _context.ScrobbleError
+            .Where(e => e.SeriesId == seriesId)
+            .ToListAsync();
+    }
+
     public async Task ClearScrobbleErrors()
     {
         _context.ScrobbleError.RemoveRange(_context.ScrobbleError);
@@ -122,19 +161,29 @@ public class ScrobbleRepository : IScrobbleRepository
         return await _context.ScrobbleError.AnyAsync(n => n.SeriesId == seriesId);
     }
 
-    public async Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType)
+    public async Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType, bool isNotProcessed = false)
     {
-        return await _context.ScrobbleEvent.FirstOrDefaultAsync(e =>
-            e.AppUserId == userId && e.SeriesId == seriesId && e.ScrobbleEventType == eventType);
+        return await _context.ScrobbleEvent
+            .Where(e => e.AppUserId == userId && e.SeriesId == seriesId && e.ScrobbleEventType == eventType)
+            .WhereIf(isNotProcessed, e => !e.IsProcessed)
+            .OrderBy(e => e.LastModifiedUtc)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<ScrobbleEvent>> GetUserEventsForSeries(int userId, int seriesId)
     {
         return await _context.ScrobbleEvent
-            .Where(e => e.AppUserId == userId && !e.IsProcessed)
+            .Where(e => e.AppUserId == userId && !e.IsProcessed && e.SeriesId == seriesId)
             .Include(e => e.Series)
             .OrderBy(e => e.LastModifiedUtc)
             .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<IList<ScrobbleEvent>> GetUserEvents(int userId, IList<long> scrobbleEventIds)
+    {
+        return await _context.ScrobbleEvent
+            .Where(e => e.AppUserId == userId && scrobbleEventIds.Contains(e.Id))
             .ToListAsync();
     }
 
@@ -143,14 +192,35 @@ public class ScrobbleRepository : IScrobbleRepository
         var query =  _context.ScrobbleEvent
             .Where(e => e.AppUserId == userId)
             .Include(e => e.Series)
-            .SortBy(filter.Field, filter.IsDescending)
             .WhereIf(!string.IsNullOrEmpty(filter.Query), s =>
                 EF.Functions.Like(s.Series.Name, $"%{filter.Query}%")
             )
             .WhereIf(!filter.IncludeReviews, e => e.ScrobbleEventType != ScrobbleEventType.Review)
+            .SortBy(filter.Field, filter.IsDescending)
             .AsSplitQuery()
             .ProjectTo<ScrobbleEventDto>(_mapper.ConfigurationProvider);
 
         return await PagedList<ScrobbleEventDto>.CreateAsync(query, pagination.PageNumber, pagination.PageSize);
+    }
+
+    public async Task<IList<ScrobbleEvent>> GetAllEventsForSeries(int seriesId)
+    {
+        return await _context.ScrobbleEvent
+            .Where(e => e.SeriesId == seriesId)
+            .ToListAsync();
+    }
+
+    public async Task<IList<ScrobbleEvent>> GetAllEventsWithSeriesIds(IEnumerable<int> seriesIds)
+    {
+        return await _context.ScrobbleEvent
+            .Where(e => seriesIds.Contains(e.SeriesId))
+            .ToListAsync();
+    }
+
+    public async Task<IList<ScrobbleEvent>> GetEvents()
+    {
+        return await _context.ScrobbleEvent
+            .Include(e => e.AppUser)
+            .ToListAsync();
     }
 }

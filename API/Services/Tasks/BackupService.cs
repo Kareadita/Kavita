@@ -179,6 +179,10 @@ public class BackupService : IBackupService
             _directoryService.CopyFilesToDirectory(
                 chapterImages.Select(s => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, s)), outputTempDir);
 
+            var volumeImages = await _unitOfWork.VolumeRepository.GetCoverImagesForLockedVolumesAsync();
+            _directoryService.CopyFilesToDirectory(
+                volumeImages.Select(s => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, s)), outputTempDir);
+
             var libraryImages = await _unitOfWork.LibraryRepository.GetAllCoverImagesAsync();
             _directoryService.CopyFilesToDirectory(
                 libraryImages.Select(s => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, s)), outputTempDir);

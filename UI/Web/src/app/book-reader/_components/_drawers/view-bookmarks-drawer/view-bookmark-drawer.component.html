@@ -1,0 +1,76 @@
+<ng-container *transloco="let t; prefix: 'view-bookmark-drawer'">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">
+      {{t('title')}}
+    </h5>
+    <button type="button" class="btn-close text-reset" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+
+  <div class="offcanvas-body">
+
+    <ul #subnav="ngbNav" ngbNav [(activeId)]="tocId" class="reader-pills nav nav-pills mb-2" [destroyOnHide]="false">
+      <li [ngbNavItem]="TabID.Image">
+        <a ngbNavLink>{{t('text-header')}}</a>
+        <ng-template ngbNavContent>
+          <app-personal-table-of-contents [chapterId]="chapterId()!" [pageNum]="pageNum()" (loadChapter)="loadChapterPart($event)"
+                                          [tocRefresh]="refreshPToC" />
+        </ng-template>
+      </li>
+      <li [ngbNavItem]="TabID.Text">
+        <a ngbNavLink>{{t('image-header')}}</a>
+        <ng-template ngbNavContent>
+          @let items = bookmarks();
+
+          <div class="px-2 py-1">
+            @for(item of items; track item) {
+              <div class="bookmark-item mb-2" role="listitem" tabindex="0">
+                <div class="thumb-wrapper">
+                  <app-image
+                    [imageUrl]="imageService.getBookmarkedImage(item.chapterId, item.page, item.imageOffset)"
+                    [styles]="{width: '100%', height: '100%', objectFit: 'cover'}" />
+                </div>
+                <div class="bookmark-meta">
+                  <div class="title-row">
+                    <span class="page-label">{{t('page-num-label', {page: item.page})}}</span>
+                    <div class="actions d-none d-sm-flex">
+                      <button class="btn btn-success btn-icon" (click)="goToBookmark(item)" [attr.aria-label]="t('view')">
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                      <button class="btn btn-danger btn-icon" (click)="deleteBookmark(item)" [attr.aria-label]="t('delete')">
+                        <i class="fa fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </div>
+                  @if (item.chapterTitle) {
+                    <div class="chapter-title" [title]="item.chapterTitle">{{item.chapterTitle}}</div>
+                  }
+                  <div class="actions actions-mobile mt-2 d-flex d-sm-none">
+                    <button class="btn btn-success flex-fill mr-2" (click)="goToBookmark(item)" [attr.aria-label]="t('view')">
+                      <i class="fa-solid fa-eye"></i>
+                    </button>
+                    <button class="btn btn-danger flex-fill" (click)="deleteBookmark(item)" [attr.aria-label]="t('delete')">
+                      <i class="fa fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+            @empty {
+              <div class="text-center text-muted py-4">
+                <i class="fa fa-bookmark-o fa-2x mb-2"></i>
+                <p class="mb-0 text-white">{{t('no-data')}}</p>
+              </div>
+            }
+          </div>
+        </ng-template>
+      </li>
+    </ul>
+    <div [ngbNavOutlet]="subnav" class="mt-3"></div>
+
+
+
+
+
+
+  </div>
+</ng-container>

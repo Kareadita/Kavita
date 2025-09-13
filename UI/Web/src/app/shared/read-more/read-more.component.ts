@@ -1,19 +1,20 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges } from '@angular/core';
-import {CommonModule} from "@angular/common";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnChanges} from '@angular/core';
+import {NgClass} from "@angular/common";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-  selector: 'app-read-more',
-  standalone: true,
-  imports: [CommonModule, SafeHtmlPipe, TranslocoDirective],
-  templateUrl: './read-more.component.html',
-  styleUrls: ['./read-more.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-read-more',
+    imports: [SafeHtmlPipe, TranslocoDirective, NgClass],
+    templateUrl: './read-more.component.html',
+    styleUrls: ['./read-more.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReadMoreComponent implements OnChanges {
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   /**
-   * String to apply readmore on
+   * String to apply read more on
    */
   @Input({required: true}) text!: string;
   /**
@@ -33,7 +34,6 @@ export class ReadMoreComponent implements OnChanges {
   hideToggle: boolean = true;
   isCollapsed: boolean = true;
 
-  constructor(private readonly cdRef: ChangeDetectorRef) {}
 
   toggleView() {
     this.isCollapsed = !this.isCollapsed;
@@ -41,23 +41,38 @@ export class ReadMoreComponent implements OnChanges {
   }
 
   determineView() {
+    const text = this.text ? this.text.replace(/\n/g, '<br>') : '';
+
     if (!this.text || this.text.length <= this.maxLength) {
-        this.currentText = this.text;
+        this.currentText = text;
         this.isCollapsed = true;
         this.hideToggle = true;
+        this.cdRef.markForCheck();
         return;
     }
+
     this.hideToggle = false;
     if (this.isCollapsed) {
-      this.currentText = this.text.substring(0, this.maxLength);
-      this.currentText = this.currentText.substring(0, Math.min(this.currentText.length, this.currentText.lastIndexOf(' ')));
+      this.currentText = text.substring(0, this.maxLength);
+
+      // Find last natural breaking point: space for English, or a CJK character boundary
+      const match = this.currentText.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]+$/u);
+      const lastSpace = this.currentText.lastIndexOf(' ');
+
+      if (lastSpace > 0) {
+        this.currentText = this.currentText.substring(0, lastSpace); // Prefer space for English
+      } else if (match) {
+        this.currentText = this.currentText.substring(0, this.currentText.length - match[0].length); // Trim CJK
+      }
+
       this.currentText = this.currentText + '…';
     } else if (!this.isCollapsed)  {
-      this.currentText = this.text;
+      this.currentText = text;
     }
 
     this.cdRef.markForCheck();
   }
+
   ngOnChanges() {
       this.determineView();
   }

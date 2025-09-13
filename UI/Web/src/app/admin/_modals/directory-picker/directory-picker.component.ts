@@ -6,7 +6,7 @@ import { DirectoryDto } from 'src/app/_models/system/directory-dto';
 import { LibraryService } from '../../../_services/library.service';
 import { NgIf, NgFor, NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../../_models/wiki";
 
 
@@ -16,11 +16,10 @@ export interface DirectoryPickerResult {
 }
 
 @Component({
-  selector: 'app-directory-picker',
-  templateUrl: './directory-picker.component.html',
-  styleUrls: ['./directory-picker.component.scss'],
-  standalone: true,
-  imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgIf, NgFor, NgClass, TranslocoDirective]
+    selector: 'app-directory-picker',
+    templateUrl: './directory-picker.component.html',
+    styleUrls: ['./directory-picker.component.scss'],
+    imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgIf, NgFor, NgClass, TranslocoDirective]
 })
 export class DirectoryPickerComponent implements OnInit {
 

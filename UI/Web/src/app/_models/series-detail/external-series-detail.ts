@@ -27,8 +27,9 @@ export interface MetadataTagDto {
 
 export interface ExternalSeriesDetail {
   name: string;
-  aniListId?: number;
-  malId?: number;
+  aniListId?: number | null;
+  malId?: number | null;
+  cbrId?: number | null;
   synonyms: Array<string>;
   plusMediaFormat: PlusMediaFormat;
   siteUrl?: string;
@@ -37,6 +38,11 @@ export interface ExternalSeriesDetail {
   summary?: string;
   volumeCount?: number;
   chapterCount?: number;
+  /**
+   * These are duplicated with volumeCount based on where it's being invoked.
+   */
+  volumes?: number;
+  chapters?: number;
   staff: Array<SeriesStaff>;
   tags: Array<MetadataTagDto>;
   provider: ScrobbleProvider;

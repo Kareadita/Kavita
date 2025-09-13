@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.System;
 
-public class DirectoryDto
+public sealed record DirectoryDto
 {
     /// <summary>
     /// Name of the directory

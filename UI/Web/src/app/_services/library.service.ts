@@ -1,11 +1,11 @@
-import { HttpClient } from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {DestroyRef, Injectable} from '@angular/core';
-import { of } from 'rxjs';
+import {of} from 'rxjs';
 import {filter, map, tap} from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { JumpKey } from '../_models/jumpbar/jump-key';
-import { Library, LibraryType } from '../_models/library/library';
-import { DirectoryDto } from '../_models/system/directory-dto';
+import {environment} from 'src/environments/environment';
+import {JumpKey} from '../_models/jumpbar/jump-key';
+import {Library, LibraryType} from '../_models/library/library';
+import {DirectoryDto} from '../_models/system/directory-dto';
 import {EVENTS, MessageHubService} from "./message-hub.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
@@ -73,6 +73,10 @@ export class LibraryService {
     return this.httpClient.get<DirectoryDto[]>(this.baseUrl + 'library/list' + query);
   }
 
+  hasFilesAtRoot(roots: Array<string>) {
+    return this.httpClient.post<{[key: string]: boolean}>(this.baseUrl + 'library/has-files-at-root', {roots});
+  }
+
   getJumpBar(libraryId: number) {
     return this.httpClient.get<JumpKey[]>(this.baseUrl + 'library/jump-bar?libraryId=' + libraryId);
   }
@@ -93,12 +97,20 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/scan?libraryId=' + libraryId + '&force=' + force, {});
   }
 
-  analyze(libraryId: number) {
-    return this.httpClient.post(this.baseUrl + 'library/analyze?libraryId=' + libraryId, {});
+  scanMultipleLibraries(libraryIds: Array<number>, force = false) {
+    return this.httpClient.post(this.baseUrl + 'library/scan-multiple', {ids: libraryIds, force: force});
   }
 
-  refreshMetadata(libraryId: number, forceUpdate = false) {
-    return this.httpClient.post(this.baseUrl + 'library/refresh-metadata?libraryId=' + libraryId + '&force=' + forceUpdate, {});
+  refreshMetadata(libraryId: number, forceUpdate = false, forceColorscape = false) {
+    return this.httpClient.post(this.baseUrl + `library/refresh-metadata?libraryId=${libraryId}&force=${forceUpdate}&forceColorscape=${forceColorscape}`, {});
+  }
+
+  refreshMetadataMultipleLibraries(libraryIds: Array<number>, force = false, forceColorscape = false) {
+    return this.httpClient.post(this.baseUrl + 'library/refresh-metadata-multiple?forceColorscape=' + forceColorscape, {ids: libraryIds, force: force});
+  }
+
+  copySettingsFromLibrary(sourceLibraryId: number, targetLibraryIds: Array<number>, includeType: boolean) {
+    return this.httpClient.post(this.baseUrl + 'library/copy-settings-from', {sourceLibraryId, targetLibraryIds, includeType});
   }
 
   create(model: {name: string, type: number, folders: string[]}) {
@@ -107,6 +119,13 @@ export class LibraryService {
 
   delete(libraryId: number) {
     return this.httpClient.delete(this.baseUrl + 'library/delete?libraryId=' + libraryId, {});
+  }
+
+  deleteMultiple(libraryIds: Array<number>) {
+    if (libraryIds.length === 0) {
+      return of();
+    }
+    return this.httpClient.delete(this.baseUrl + 'library/delete-multiple?libraryIds=' + libraryIds.join(','), {});
   }
 
   update(model: {name: string, folders: string[], id: number}) {

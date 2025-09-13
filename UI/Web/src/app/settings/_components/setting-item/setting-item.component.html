@@ -1,0 +1,40 @@
+<ng-container *transloco="let t;">
+  <div>
+    <div class="settings-row g-0 row">
+      <div class="col-auto {{fixedExtras ? 'setting-title no-anim edit' : 'setting-title edit'}}">
+        <h6 class="section-title">
+          @if (labelId) {
+            <label class="reset-label" [for]="labelId">{{title}}</label>
+          } @else {
+            {{title}}
+          }
+          @if (titleExtraRef) {
+            <ng-container [ngTemplateOutlet]="titleExtraRef"></ng-container>
+          }
+        </h6>
+      </div>
+      <div class="col-auto text-end align-self-end justify-content-end">
+        @if (showEdit) {
+        <button type="button" class="btn btn-icon edit-btn btn-sm btn-alignment" (click)="toggleEditMode()" [disabled]="!canEdit">
+          {{isEditMode ? t('common.close') : (editLabel || t('common.edit'))}}
+        </button>
+        }
+        @if (titleActionsRef) {
+          <ng-container [ngTemplateOutlet]="titleActionsRef"></ng-container>
+        }
+      </div>
+    </div>
+
+    @if (isEditMode) {
+      <ng-container [ngTemplateOutlet]="valueEditRef"></ng-container>
+    } @else {
+      <span class="view-value" [ngClass]="{'non-selectable': (!canEdit || !showEdit)}" (click)="toggleEditMode()">
+        <ng-container [ngTemplateOutlet]="valueViewRef"></ng-container>
+      </span>
+    }
+
+    @if (subtitle) {
+      <div class="text-muted mt-2" [innerHTML]="subtitle | safeHtml"></div>
+    }
+  </div>
+</ng-container>

@@ -36,5 +36,4 @@ Run `npm run start`
 - all components must be standalone
 
 # Update latest angular
-`ng update @angular/core @angular/cli @typescript-es
-lint/parser @angular/localize @angular/compiler-cli @angular/cli @angular-devkit/build-angular @angular/cdk`
+`ng update @angular/core @angular/cli @typescript-eslint/parser @angular/localize @angular/compiler-cli @angular/cdk @angular/animations @angular/common @angular/forms @angular/platform-browser @angular/platform-browser-dynamic @angular/router`

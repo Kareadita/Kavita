@@ -2,46 +2,50 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   EventEmitter,
-  HostListener,
   inject,
   OnInit
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
-import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
-import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
-import { ConfirmService } from 'src/app/shared/confirm.service';
+import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
+import {ConfirmService} from 'src/app/shared/confirm.service';
 import {DownloadService} from 'src/app/shared/_services/download.service';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
-import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
-import { Pagination } from 'src/app/_models/pagination';
-import { Series } from 'src/app/_models/series';
-import { FilterEvent } from 'src/app/_models/metadata/series-filter';
-import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { ReaderService } from 'src/app/_services/reader.service';
-import {DecimalPipe, NgIf} from '@angular/common';
-import { CardItemComponent } from '../../../cards/card-item/card-item.component';
-import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
-import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
-import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
-import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
+import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
+import {Pagination} from 'src/app/_models/pagination';
+import {Series} from 'src/app/_models/series';
+import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
+import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {JumpbarService} from 'src/app/_services/jumpbar.service';
+import {ReaderService} from 'src/app/_services/reader.service';
+import {DecimalPipe} from '@angular/common';
+import {CardItemComponent} from '../../../cards/card-item/card-item.component';
+import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
+import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
+import {
+  SideNavCompanionBarComponent
+} from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {MetadataService} from "../../../_services/metadata.service";
 
 @Component({
   selector: 'app-bookmarks',
   templateUrl: './bookmarks.component.html',
   styleUrls: ['./bookmarks.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective, NgIf]
+  imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective]
 })
 export class BookmarksComponent implements OnInit {
 
@@ -59,6 +63,8 @@ export class BookmarksComponent implements OnInit {
   private readonly titleService = inject(Title);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly imageService = inject(ImageService);
+  public readonly metadataService = inject(MetadataService);
+  public readonly destroyRef = inject(DestroyRef);
 
   protected readonly WikiLink = WikiLink;
 
@@ -71,26 +77,33 @@ export class BookmarksComponent implements OnInit {
   jumpbarKeys: Array<JumpKey> = [];
 
   pagination: Pagination = new Pagination();
-  filter: SeriesFilterV2 | undefined = undefined;
-  filterSettings: FilterSettings = new FilterSettings();
+  filter: FilterV2<FilterField> | undefined = undefined;
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
-  filterActiveCheck!: SeriesFilterV2;
+  filterActiveCheck!: FilterV2<FilterField>;
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
   refresh: EventEmitter<void> = new EventEmitter();
 
   constructor() {
-      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-        this.filter = filter;
 
-        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-        this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+        this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+
+        if (this.filter == null) {
+          this.filter = this.metadataService.createDefaultFilterDto('series');
+          this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+        }
+
+        this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
+        this.filterActiveCheck.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
         this.filterSettings.presetsV2 =  this.filter;
         this.filterSettings.statementLimit = 1;
 
         this.cdRef.markForCheck();
       });
+
 
       this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
     }
@@ -100,30 +113,16 @@ export class BookmarksComponent implements OnInit {
   }
 
 
-  @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = true;
-    }
-  }
-
-  @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = false;
-    }
-  }
-
   async handleAction(action: ActionItem<Series>, series: Series) {
     switch (action.action) {
       case(Action.Delete):
-        this.clearBookmarks(series);
+        await this.clearBookmarks(series);
         break;
       case(Action.DownloadBookmark):
         this.downloadBookmarks(series);
         break;
       case(Action.ViewSeries):
-        this.router.navigate(['library', series.libraryId, 'series', series.id]);
+        await this.router.navigate(['library', series.libraryId, 'series', series.id]);
         break;
       default:
         break;
@@ -176,7 +175,7 @@ export class BookmarksComponent implements OnInit {
 
       const distinctSeriesMap = new Map();
       this.bookmarks.forEach(b => {
-        distinctSeriesMap.set(b.series.id, b.series);
+        distinctSeriesMap.set(b.series!.id, b.series!);
       });
       this.series = Array.from(distinctSeriesMap.values());
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (t: Series) => t.name);
@@ -212,7 +211,7 @@ export class BookmarksComponent implements OnInit {
     this.downloadService.download('bookmark', this.bookmarks.filter(bmk => bmk.seriesId === series.id));
   }
 
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

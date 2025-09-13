@@ -10,4 +10,8 @@ namespace API.Controllers;
 [Authorize]
 public class BaseApiController : ControllerBase
 {
+    public BaseApiController()
+    {
+
+    }
 }

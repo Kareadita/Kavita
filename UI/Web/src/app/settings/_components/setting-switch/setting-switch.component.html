@@ -1,0 +1,26 @@
+<ng-container *transloco="let t;">
+  <div>
+    <div class="row g-0 mb-2">
+      <div class="col-auto">
+        @if (switchRef) {
+          <ng-container [ngTemplateOutlet]="switchRef"></ng-container>
+        }
+      </div>
+      <div class="col-auto">
+        <h6 class="section-title" [id]="id || title">
+          @if (labelId) {
+            <label class="reset-label" [for]="labelId">{{title}}</label>
+          } @else {
+            {{title}}
+          }
+        </h6>
+      </div>
+
+    </div>
+
+
+    @if (subtitle) {
+      <div class="text-muted mt-2" [innerHTML]="subtitle | safeHtml"></div>
+    }
+  </div>
+</ng-container>

@@ -1,0 +1,246 @@
+$image-height: 232.91px;
+$image-width: 160px;
+
+.error-banner {
+  width: $image-width;
+  height: 18px;
+  background-color: var(--toast-error-bg-color);
+  font-size: 12px;
+  color: white;
+  text-transform: uppercase;
+  text-align: center;
+
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+
+.selected-highlight {
+  outline: 2px solid var(--primary-color);
+}
+
+.progress-banner {
+  width: $image-width;
+  height: 5px;
+
+  .progress {
+    color: var(--card-progress-bar-color);
+    background-color: transparent;
+  }
+}
+
+.download {
+  width: 80px;
+  height: 80px;
+  position: absolute;
+  top: 25%;
+  right: 30%;
+}
+
+.badge-container {
+  border-radius: 4px;
+  display: block;
+  height: $image-height;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 160px;
+}
+
+.not-read-badge {
+  position: absolute;
+  top: calc(-1 * (var(--card-progress-triangle-size) / 2));
+  right: -14px;
+  z-index: 1000;
+  height: var(--card-progress-triangle-size);
+  width: var(--card-progress-triangle-size);
+  background-color: var(--primary-color);
+  transform: rotate(45deg);
+}
+
+.bulk-mode {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  visibility: hidden;
+
+  &.always-show {
+    visibility: visible !important;
+    width: $image-width;
+    height: $image-height;
+  }
+
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    color: var(--checkbox-bg-color);
+  }
+}
+
+.meta-title {
+  display: none;
+  visibility: hidden;
+  pointer-events: none;
+  border-width: 0;
+}
+
+.overlay {
+  &:hover {
+    .bulk-mode {
+      visibility: visible;
+      z-index: 110;
+    }
+
+    &:hover {
+      visibility: visible;
+
+      .overlay-information {
+        visibility: visible;
+        display: block;
+      }
+
+      & + .meta-title {
+        display: -webkit-box;
+        visibility: visible;
+        pointer-events: none;
+      }
+    }
+
+    .overlay-information {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 232.91px;
+      transition: all 0.2s;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+
+      &:hover {
+        background-color: var(--card-overlay-hover-bg-color);
+        cursor: pointer;
+      }
+
+      .overlay-information--centered {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.7);
+        border-radius: 50px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 115;
+
+        &:hover {
+          background-color: var(--primary-color) !important;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  .count {
+    top: 5px;
+    right: 10px;
+    position: absolute;
+  }
+}
+
+.card-actions {
+  z-index: 115;
+}
+
+.library {
+  font-size: 13px;
+  text-decoration: none;
+  margin-top: 0px;
+}
+
+.card-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+
+    :first-child {
+      min-width: 22px;
+    } 
+
+    .card-title {
+      font-size: 0.8rem;
+      margin: 0;
+      text-align: center;
+      max-width: 90px;
+
+      a {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+}
+
+.card-actions {
+  min-width: 15.82px;
+}
+
+.card-format {
+  min-width: 22px;
+}
+
+::ng-deep app-card-actionables .dropdown .dropdown-toggle {
+  padding: 0 5px;
+}
+
+.meta-title {
+  .card-title {
+    max-width: unset;
+  }
+}
+
+.card-title {
+  font-size: 0.8rem;
+  margin: 0;
+  padding: 10px 0;
+  text-align: center;
+  max-width: 120px;
+
+  a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.card-body > div:nth-child(2) {
+  height: 40px;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  font-size: 0.8rem;
+}
+
+.overlay-information {
+  visibility: hidden;
+  display: none;
+    .card-title {
+      padding: 10px;
+    }
+}
+
+.chapter,
+.volume,
+.series,
+.expected {
+  .overlay-information--centered {
+    div {
+      height: 32px;
+      width: 32px;
+      i {
+        font-size: 1.4rem;
+        line-height: 32px;
+      }
+    }
+  }
+}

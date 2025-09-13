@@ -1,0 +1,9 @@
+
+// You must add this on a component based drawer
+:host {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+

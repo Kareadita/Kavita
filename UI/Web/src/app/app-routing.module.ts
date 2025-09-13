@@ -1,8 +1,7 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
-import { AuthGuard } from './_guards/auth.guard';
-import { LibraryAccessGuard } from './_guards/library-access.guard';
-import { AdminGuard } from './_guards/admin.guard';
+import {NgModule} from '@angular/core';
+import {PreloadAllModules, RouterModule, Routes} from '@angular/router';
+import {AuthGuard} from './_guards/auth.guard';
+import {LibraryAccessGuard} from './_guards/library-access.guard';
 
 const routes: Routes = [
   {
@@ -11,13 +10,8 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     children: [
       {
-        path: 'admin',
-        canActivate: [AdminGuard],
-        loadChildren: () => import('./_routes/admin-routing.module').then(m => m.routes)
-      },
-      {
-        path: 'preferences',
-        loadChildren: () => import('./_routes/user-settings-routing.module').then(m => m.routes)
+        path: 'settings',
+        loadChildren: () => import('./_routes/settings-routing.module').then(m => m.routes)
       },
       {
         path: 'collections',
@@ -29,7 +23,6 @@ const routes: Routes = [
       },
       {
         path: 'announcements',
-        canActivate: [AdminGuard],
         loadChildren: () => import('./_routes/announcements-routing.module').then(m => m.routes)
       },
       {
@@ -53,6 +46,14 @@ const routes: Routes = [
         loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
       },
       {
+        path: 'person',
+        loadChildren: () => import('./_routes/person-detail-routing.module').then(m => m.routes)
+      },
+      {
+        path: 'browse',
+        loadChildren: () => import('./_routes/browse-routing.module').then(m => m.routes)
+      },
+      {
         path: 'library',
         runGuardsAndResolvers: 'always',
         canActivate: [AuthGuard, LibraryAccessGuard],
@@ -66,6 +67,16 @@ const routes: Routes = [
             path: ':libraryId/series/:seriesId',
             pathMatch: 'full',
             loadComponent: () => import('../app/series-detail/_components/series-detail/series-detail.component').then(c => c.SeriesDetailComponent)
+          },
+          {
+            path: ':libraryId/series/:seriesId/chapter/:chapterId',
+            pathMatch: 'full',
+            loadComponent: () => import('./chapter-detail/chapter-detail.component').then(c => c.ChapterDetailComponent)
+          },
+          {
+            path: ':libraryId/series/:seriesId/volume/:volumeId',
+            pathMatch: 'full',
+            loadComponent: () => import('./volume-detail/volume-detail.component').then(c => c.VolumeDetailComponent)
           },
           {
             path: ':libraryId/series/:seriesId/manga',

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using API.Entities;
-using API.Entities.Enums;
-using API.Entities.Metadata;
+using System.Linq;
+using API.Entities.Person;
 using API.Extensions;
 
 namespace API.Helpers.Builders;
@@ -11,15 +10,14 @@ public class PersonBuilder : IEntityBuilder<Person>
     private readonly Person _person;
     public Person Build() => _person;
 
-    public PersonBuilder(string name, PersonRole role)
+    public PersonBuilder(string name)
     {
         _person = new Person()
         {
             Name = name.Trim(),
             NormalizedName = name.ToNormalized(),
-            Role = role,
-            ChapterMetadatas = new List<Chapter>(),
-            SeriesMetadatas = new List<SeriesMetadata>()
+            SeriesMetadataPeople = new List<SeriesMetadataPeople>(),
+            ChapterPeople = new List<ChapterPeople>()
         };
     }
 
@@ -34,10 +32,24 @@ public class PersonBuilder : IEntityBuilder<Person>
         return this;
     }
 
-    public PersonBuilder WithSeriesMetadata(SeriesMetadata metadata)
+    public PersonBuilder WithAlias(string alias)
     {
-        _person.SeriesMetadatas ??= new List<SeriesMetadata>();
-        _person.SeriesMetadatas.Add(metadata);
+        if (_person.Aliases.Any(a => a.NormalizedAlias.Equals(alias.ToNormalized())))
+        {
+            return this;
+        }
+
+        _person.Aliases.Add(new PersonAliasBuilder(alias).Build());
+
         return this;
     }
+
+
+
+    public PersonBuilder WithSeriesMetadata(SeriesMetadataPeople seriesMetadataPeople)
+    {
+        _person.SeriesMetadataPeople.Add(seriesMetadataPeople);
+        return this;
+    }
+
 }

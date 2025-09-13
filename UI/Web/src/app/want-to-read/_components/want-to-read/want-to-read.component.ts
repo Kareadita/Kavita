@@ -1,43 +1,49 @@
-import { DOCUMENT, NgStyle, NgIf, DecimalPipe } from '@angular/common';
+import {DecimalPipe, DOCUMENT, NgStyle} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   ElementRef,
   EventEmitter,
-  HostListener,
   inject,
   Inject,
   OnInit,
   ViewChild
 } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { Router, ActivatedRoute } from '@angular/router';
-import { take, debounceTime } from 'rxjs';
-import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
-import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { UtilityService, KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
-import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
-import { Pagination } from 'src/app/_models/pagination';
-import { Series } from 'src/app/_models/series';
-import { FilterEvent } from 'src/app/_models/metadata/series-filter';
-import { Action, ActionItem } from 'src/app/_services/action-factory.service';
-import { ActionService } from 'src/app/_services/action.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
-import { SeriesService } from 'src/app/_services/series.service';
+import {Title} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
+import {debounceTime, take} from 'rxjs';
+import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
+import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
+import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
+import {Pagination} from 'src/app/_models/pagination';
+import {Series} from 'src/app/_models/series';
+import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
+import {Action, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionService} from 'src/app/_services/action.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {JumpbarService} from 'src/app/_services/jumpbar.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {ScrollService} from 'src/app/_services/scroll.service';
+import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SeriesCardComponent } from '../../../cards/series-card/series-card.component';
-import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
-import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
-import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
+import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
+import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
+import {
+  SideNavCompanionBarComponent
+} from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
+import {MetadataService} from "../../../_services/metadata.service";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 
 
 @Component({
@@ -45,23 +51,23 @@ import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
     templateUrl: './want-to-read.component.html',
     styleUrls: ['./want-to-read.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, NgIf, DecimalPipe, TranslocoDirective]
+    imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
 })
 export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly metadataService = inject(MetadataService);
 
   isLoading: boolean = true;
   series: Array<Series> = [];
   pagination: Pagination = new Pagination();
-  filter: SeriesFilterV2 | undefined = undefined;
-  filterSettings: FilterSettings = new FilterSettings();
+  filter: FilterV2<FilterField, SortField> | undefined = undefined;
+  filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   refresh: EventEmitter<void> = new EventEmitter();
 
-  filterActiveCheck!: SeriesFilterV2;
+  filterActiveCheck!: FilterV2<FilterField>;
   filterActive: boolean = false;
 
   jumpbarKeys: Array<JumpKey> = [];
@@ -106,12 +112,22 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
       this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
 
-      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot).subscribe(filter => {
-        this.filter = filter;
 
-        this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-        this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+        this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+
+        const defaultStmt = {field: FilterField.WantToRead, value: 'true', comparison: FilterComparison.Equal} as FilterStatement<FilterField>;
+
+        if (this.filter == null) {
+          this.filter = this.metadataService.createDefaultFilterDto('series');
+          this.filter.statements.push(defaultStmt);
+        }
+
+
+        this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
+        this.filterActiveCheck!.statements.push(defaultStmt);
         this.filterSettings.presetsV2 =  this.filter;
+
 
         this.cdRef.markForCheck();
       });
@@ -145,20 +161,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     this.scrollService.setScrollContainer(this.scrollingBlock);
   }
 
-  @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = true;
-    }
-  }
-
-  @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = false;
-    }
-  }
-
   removeSeries(seriesId: number) {
     this.series = this.series.filter(s => s.id != seriesId);
     this.pagination.totalItems--;
@@ -180,7 +182,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  updateFilter(data: FilterEvent) {
+  updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

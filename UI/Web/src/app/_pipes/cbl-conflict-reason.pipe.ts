@@ -1,7 +1,8 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import { CblBookResult } from 'src/app/_models/reading-list/cbl/cbl-book-result';
 import { CblImportReason } from 'src/app/_models/reading-list/cbl/cbl-import-reason.enum';
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoService} from "@jsverse/transloco";
+import {APP_BASE_HREF} from "@angular/common";
 
 const failIcon = '<i aria-hidden="true" class="reading-list-fail--item fa-solid fa-circle-xmark me-1"></i>';
 const successIcon = '<i aria-hidden="true" class="reading-list-success--item fa-solid fa-circle-check me-1"></i>';
@@ -13,6 +14,7 @@ const successIcon = '<i aria-hidden="true" class="reading-list-success--item fa-
 export class CblConflictReasonPipe implements PipeTransform {
 
   translocoService = inject(TranslocoService);
+  protected readonly baseUrl = inject(APP_BASE_HREF);
 
   transform(result: CblBookResult): string {
     switch (result.reason) {
@@ -23,9 +25,9 @@ export class CblConflictReasonPipe implements PipeTransform {
       case CblImportReason.EmptyFile:
         return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.empty-file');
       case CblImportReason.NameConflict:
-        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.chapter-missing', {readingListName: result.readingListName});
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.name-conflict', {readingListName: result.readingListName});
       case CblImportReason.SeriesCollision:
-        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.series-collision', {seriesLink: `<a href="/library/${result.libraryId}/series/${result.seriesId}" target="_blank">${result.series}</a>`});
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.series-collision', {seriesLink: `<a href="${this.baseUrl}library/${result.libraryId}/series/${result.seriesId}" target="_blank">${result.series}</a>`});
       case CblImportReason.SeriesMissing:
         return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.series-missing', {series: result.series});
       case CblImportReason.VolumeMissing:

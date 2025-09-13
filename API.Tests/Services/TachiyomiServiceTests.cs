@@ -1,7 +1,6 @@
-﻿using API.Extensions;
-using API.Helpers.Builders;
+﻿using API.Helpers.Builders;
 using API.Services.Plus;
-using API.Services.Tasks;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 using System.Collections.Generic;
@@ -16,7 +15,6 @@ using API.Entities.Enums;
 using API.Helpers;
 using API.Services;
 using SignalR;
-using Helpers;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -24,97 +22,20 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
-public class TachiyomiServiceTests
+public class TachiyomiServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
-    private readonly DataContext _context;
-    private readonly ReaderService _readerService;
-    private readonly TachiyomiService _tachiyomiService;
-    private const string CacheDirectory = "C:/kavita/config/cache/";
-    private const string CoverImageDirectory = "C:/kavita/config/covers/";
-    private const string BackupDirectory = "C:/kavita/config/backups/";
-    private const string DataDirectory = "C:/data/";
 
 
-    public TachiyomiServiceTests()
+    public (IReaderService, ITachiyomiService) Setup(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        var contextOptions = new DbContextOptionsBuilder().UseSqlite(CreateInMemoryDatabase()).Options;
-
-        _context = new DataContext(contextOptions);
-        Task.Run(SeedDb).GetAwaiter().GetResult();
-
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
-        _mapper = config.CreateMapper();
-        _unitOfWork = new UnitOfWork(_context, _mapper, null);
-
-        _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+        var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>());
-        _tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), _readerService);
+        var tachiyomiService = new TachiyomiService(unitOfWork, mapper, Substitute.For<ILogger<TachiyomiService>>(), readerService);
 
+        return (readerService, tachiyomiService);
     }
-
-
-    #region Setup
-
-    private static DbConnection CreateInMemoryDatabase()
-    {
-        var connection = new SqliteConnection("Filename=:memory:");
-
-        connection.Open();
-
-        return connection;
-    }
-
-    private async Task<bool> SeedDb()
-    {
-        await _context.Database.MigrateAsync();
-        var filesystem = CreateFileSystem();
-
-        await Seed.SeedSettings(_context,
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
-
-        var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
-        setting.Value = CacheDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
-        setting.Value = BackupDirectory;
-
-        _context.ServerSetting.Update(setting);
-
-        _context.Library.Add(
-            new LibraryBuilder("Manga")
-                .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
-                .Build()
-            );
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    private async Task ResetDb()
-    {
-        _context.Series.RemoveRange(_context.Series.ToList());
-
-        await _context.SaveChangesAsync();
-    }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(DataDirectory);
-
-        return fileSystem;
-    }
-
-
-
-    #endregion
 
 
     #region GetLatestChapter
@@ -122,7 +43,8 @@ public class TachiyomiServiceTests
     [Fact]
     public async Task GetLatestChapter_ShouldReturnChapter_NoProgress()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readerService, tachiyomiService) = Setup(unitOfWork, mapper);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -148,7 +70,7 @@ public class TachiyomiServiceTests
             .Build();
 
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             Libraries = new List<Library>()
@@ -157,9 +79,9 @@ public class TachiyomiServiceTests
             }
 
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Null(latestChapter);
     }
@@ -167,7 +89,8 @@ public class TachiyomiServiceTests
     [Fact]
     public async Task GetLatestChapter_ShouldReturnMaxChapter_CompletelyRead()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readerService, tachiyomiService) = Setup(unitOfWork, mapper);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -192,7 +115,7 @@ public class TachiyomiServiceTests
             .WithSeries(series)
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             Libraries = new List<Library>()
@@ -201,16 +124,16 @@ public class TachiyomiServiceTests
             }
 
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await _readerService.MarkSeriesAsRead(user,1);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await readerService.MarkSeriesAsRead(user,1);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Equal("96", latestChapter.Number);
     }
@@ -218,7 +141,8 @@ public class TachiyomiServiceTests
     [Fact]
     public async Task GetLatestChapter_ShouldReturnHighestChapter_Progress()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readerService, tachiyomiService) = Setup(unitOfWork, mapper);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -243,7 +167,7 @@ public class TachiyomiServiceTests
             .WithSeries(series)
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             Libraries = new List<Library>()
@@ -252,16 +176,16 @@ public class TachiyomiServiceTests
             }
 
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await _tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Equal("21", latestChapter.Number);
     }
@@ -269,7 +193,8 @@ public class TachiyomiServiceTests
     [Fact]
     public async Task GetLatestChapter_ShouldReturnEncodedVolume_Progress()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readerService, tachiyomiService) = Setup(unitOfWork, mapper);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -294,7 +219,7 @@ public class TachiyomiServiceTests
             .WithSeries(series)
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             Libraries = new List<Library>()
@@ -303,24 +228,25 @@ public class TachiyomiServiceTests
             }
 
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await _tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
         Assert.Equal("0.0001", latestChapter.Number);
     }
 
     [Fact]
     public async Task GetLatestChapter_ShouldReturnEncodedVolume_Progress2()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readerService, tachiyomiService) = Setup(unitOfWork, mapper);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -342,7 +268,7 @@ public class TachiyomiServiceTests
             .WithSeries(series)
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             Libraries = new List<Library>()
@@ -351,17 +277,17 @@ public class TachiyomiServiceTests
             }
 
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await _readerService.MarkSeriesAsRead(user, 1);
+        await readerService.MarkSeriesAsRead(user, 1);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
         Assert.Equal("0.0003", latestChapter.Number);
     }
 
@@ -369,7 +295,8 @@ public class TachiyomiServiceTests
     [Fact]
     public async Task GetLatestChapter_ShouldReturnEncodedYearlyVolume_Progress()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readerService, tachiyomiService) = Setup(unitOfWork, mapper);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -392,7 +319,7 @@ public class TachiyomiServiceTests
             .WithSeries(series)
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             Libraries = new List<Library>()
@@ -401,16 +328,16 @@ public class TachiyomiServiceTests
             }
 
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await _tachiyomiService.MarkChaptersUntilAsRead(user,1,2002/10_000F);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,2002/10_000F);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
         Assert.Equal("0.2002", latestChapter.Number);
     }
 
@@ -422,7 +349,8 @@ public class TachiyomiServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldReturnChapter_NoProgress()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readerService, tachiyomiService) = Setup(unitOfWork, mapper);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -447,7 +375,7 @@ public class TachiyomiServiceTests
             .WithSeries(series)
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             Libraries = new List<Library>()
@@ -456,16 +384,17 @@ public class TachiyomiServiceTests
             }
 
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Null(latestChapter);
     }
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldReturnMaxChapter_CompletelyRead()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readerService, tachiyomiService) = Setup(unitOfWork, mapper);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -490,7 +419,7 @@ public class TachiyomiServiceTests
             .WithSeries(series)
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             Libraries = new List<Library>()
@@ -499,15 +428,15 @@ public class TachiyomiServiceTests
             }
 
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await _readerService.MarkSeriesAsRead(user,1);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await readerService.MarkSeriesAsRead(user,1);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Equal("96", latestChapter.Number);
     }
@@ -515,7 +444,8 @@ public class TachiyomiServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldReturnHighestChapter_Progress()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readerService, tachiyomiService) = Setup(unitOfWork, mapper);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -540,7 +470,7 @@ public class TachiyomiServiceTests
             .WithSeries(series)
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             Libraries = new List<Library>()
@@ -549,22 +479,23 @@ public class TachiyomiServiceTests
             }
 
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await _tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Equal("21", latestChapter.Number);
     }
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldReturnEncodedVolume_Progress()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (readerService, tachiyomiService) = Setup(unitOfWork, mapper);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
@@ -588,7 +519,7 @@ public class TachiyomiServiceTests
             .WithSeries(series)
             .Build();
 
-        _context.AppUser.Add(new AppUser()
+        context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             Libraries = new List<Library>()
@@ -597,16 +528,16 @@ public class TachiyomiServiceTests
             }
 
         });
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await _tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
-        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
         Assert.Equal("0.0001", latestChapter.Number);
     }
 

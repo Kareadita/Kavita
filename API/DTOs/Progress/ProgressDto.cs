@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace API.DTOs.Progress;
 #nullable enable
 
-public class ProgressDto
+public sealed record ProgressDto
 {
     [Required]
     public int VolumeId { get; set; }

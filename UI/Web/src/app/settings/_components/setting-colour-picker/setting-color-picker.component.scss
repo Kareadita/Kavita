@@ -1,0 +1,122 @@
+$dotSize: 30px;
+
+.color-picker-container {
+  position: relative;
+  display: inline-block;
+}
+
+.floating-picker {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  margin-bottom: 4px;
+  padding: 1px;
+
+  background: var(--drawer-bg-color);
+  border: 2px solid var(--primary-color);
+  border-radius: var(--card-border-radius);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+// This doesn't seem to work
+// @media (max-width: var(--setting-mobile-breakpoint)px) {
+@media (max-width: 768px) {
+  .floating-picker.left {
+    transform: translateX(-25%);
+  }
+
+  .floating-picker.right {
+    transform: translateX(-75%);
+  }
+}
+
+:host ::ng-deep chrome-picker {
+
+  rgba-input-component {
+
+    span.ng-star-inserted {
+      color: var(--drawer-text-color);
+    }
+
+  }
+
+  input {
+    background: var(--drawer-bg-color);
+    color: var(--drawer-text-color);
+    border-radius: 4px;
+    border: 1px solid var(--input-border-color);
+  }
+
+  span.type-btn {
+    background: var(--drawer-bg-color);
+    color: var(--drawer-text-color);
+  }
+
+  span.type-btn:hover {
+    background: var(--drawer-bg-color);
+    color: var(--drawer-text-color);
+  }
+
+  span.type-btn::after {
+    content: '\f2f1'; /* FA Cycle */
+    font-family: "Font Awesome 5 Free", serif;
+    font-weight: 900;
+    color: var(--drawer-text-color);
+
+    display: inline-block;
+    position: relative;
+    top: -10px;
+  }
+
+  .gradient-color,
+  hue-component,
+  indicator-component {
+    padding: 1px;
+    border: 1px solid var(--input-border-color);
+  }
+
+
+}
+
+.btn.btn-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &.color {
+    display: unset;
+    width: auto;
+
+    .dot {
+      height: $dotSize;
+      width: $dotSize;
+      border-radius: 50%;
+      margin: 0 auto;
+      cursor: pointer;
+    }
+
+    .dot-add {
+      i {
+        color: var(--primary-color);
+      }
+      border: 2px solid var(--primary-color);
+
+      &:hover {
+        background-color: var(--primary-color);
+        i {
+          color: var(--secondary-color);
+        }
+      }
+    }
+  }
+}
+
+.active {
+  border: 2px solid var(--primary-color);
+}
+

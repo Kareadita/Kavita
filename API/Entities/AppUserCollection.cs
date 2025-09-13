@@ -10,7 +10,7 @@ namespace API.Entities;
 /// <summary>
 /// Represents a Collection of Series for a given User
 /// </summary>
-public class AppUserCollection : IEntityDate
+public class AppUserCollection : IEntityDate, IHasCoverImage
 {
     public int Id { get; set; }
     public required string Title { get; set; }
@@ -23,11 +23,9 @@ public class AppUserCollection : IEntityDate
     /// Reading lists that are promoted are only done by admins
     /// </summary>
     public bool Promoted { get; set; }
-    /// <summary>
-    /// Path to the (managed) image file
-    /// </summary>
-    /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
     public string? CoverImage { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
     public bool CoverImageLocked { get; set; }
     /// <summary>
     /// The highest age rating from all Series within the collection
@@ -60,6 +58,12 @@ public class AppUserCollection : IEntityDate
     /// A <br/> separated string of all missing series
     /// </summary>
     public string? MissingSeriesFromSource { get; set; }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
 
     // Relationship
     public AppUser AppUser { get; set; } = null!;

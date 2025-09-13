@@ -1,19 +1,72 @@
-import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
-import { ReplaySubject, take } from 'rxjs';
+import {DOCUMENT} from '@angular/common';
+import {DestroyRef, inject, Inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
+import {filter, ReplaySubject, take} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {TextResonse} from "../_types/text-response";
-import {DashboardStream} from "../_models/dashboard/dashboard-stream";
 import {AccountService} from "./account.service";
-import {tap} from "rxjs/operators";
+import {map} from "rxjs/operators";
+import {NavigationEnd, Router} from "@angular/router";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {SettingsTabId} from "../sidenav/preference-nav/preference-nav.component";
+import {WikiLink} from "../_models/wiki";
+import {AuthGuard} from "../_guards/auth.guard";
+import {SettingsService} from "../admin/settings.service";
+
+/**
+ * NavItem used to construct the dropdown or NavLinkModal on mobile
+ * Priority construction
+ * @param routerLink A link to a page on the web app, takes priority
+ * @param fragment Optional fragment for routerLink
+ * @param href A link to an external page, must set noopener noreferrer
+ * @param click Callback, lowest priority. Should only be used if routerLink and href or not set
+ */
+interface NavItem {
+  transLocoKey: string;
+  href?: string;
+  fragment?: string;
+  routerLink?: string;
+  click?: () => void;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class NavService {
+
+  private readonly accountService = inject(AccountService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+
   public localStorageSideNavKey = 'kavita--sidenav--expanded';
+
+  public navItems: NavItem[] = [
+    {
+      transLocoKey: 'all-filters',
+      routerLink: '/all-filters/',
+    },
+    {
+      transLocoKey: 'browse-genres',
+      routerLink: '/browse/genres',
+    },
+    {
+      transLocoKey: 'browse-tags',
+      routerLink: '/browse/tags',
+    },
+    {
+      transLocoKey: 'announcements',
+      routerLink: '/announcements/',
+    },
+    {
+      transLocoKey: 'help',
+      href: WikiLink.Guides,
+    },
+    {
+      transLocoKey: 'logout',
+      click: () => this.logout(),
+    }
+  ]
 
   private navbarVisibleSource = new ReplaySubject<boolean>(1);
   /**
@@ -26,17 +79,31 @@ export class NavService {
    * If the Side Nav is in a collapsed state or not.
    */
   sideNavCollapsed$ = this.sideNavCollapseSource.asObservable();
+  sideNavCollapsedSignal = toSignal(this.sideNavCollapsed$, {initialValue: false});
 
   private sideNavVisibilitySource = new ReplaySubject<boolean>(1);
   /**
    * If the side nav is rendered or not into the DOM.
    */
   sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
+  sideNavVisibilitySignal = toSignal(this.sideNavVisibility$, {initialValue: false})
+
+  usePreferenceSideNav$ = this.router.events.pipe(
+    filter(event => event instanceof NavigationEnd),
+    map((evt) => {
+      const event = (evt as NavigationEnd);
+      const url = event.urlAfterRedirects || event.url;
+      return (
+        /\/admin\/dashboard(#.*)?/.test(url) || /\/preferences(\/[^\/]+|#.*)?/.test(url) || /\/settings(\/[^\/]+|#.*)?/.test(url)
+      );
+    }),
+    takeUntilDestroyed(this.destroyRef),
+  );
 
   private renderer: Renderer2;
   baseUrl = environment.apiUrl;
 
-  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2, private httpClient: HttpClient, private accountService: AccountService) {
+  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2, private httpClient: HttpClient) {
     this.renderer = rendererFactory.createRenderer(null, null);
 
     // To avoid flashing, let's check if we are authenticated before we show
@@ -75,24 +142,59 @@ export class NavService {
     return this.httpClient.post(this.baseUrl + 'stream/bulk-sidenav-stream-visibility', {ids: streamIds, visibility: targetVisibility});
   }
 
+  deleteSideNavSmartFilter(streamId: number) {
+    return this.httpClient.delete(this.baseUrl + 'stream/smart-filter-side-nav-stream?sideNavStreamId=' + streamId, {});
+  }
+
   /**
    * Shows the top nav bar. This should be visible on all pages except the reader.
    */
   showNavBar() {
-    this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', '56px');
-    this.renderer.setStyle(this.document.querySelector('body'), 'height', 'calc(var(--vh)*100 - 56px)');
-    this.renderer.setStyle(this.document.querySelector('html'), 'height', 'calc(var(--vh)*100 - 56px)');
-    this.navbarVisibleSource.next(true);
+    setTimeout(() => {
+      const bodyElem = this.document.querySelector('body');
+      this.renderer.setStyle(bodyElem, 'margin-top', 'var(--nav-offset)');
+      this.renderer.removeStyle(bodyElem, 'scrollbar-gutter');
+      this.renderer.setStyle(bodyElem, 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
+      this.renderer.setStyle(bodyElem, 'overflow', 'hidden');
+      this.renderer.setStyle(this.document.querySelector('html'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
+      this.navbarVisibleSource.next(true);
+    }, 10);
   }
 
   /**
    * Hides the top nav bar.
    */
   hideNavBar() {
-    this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', '0px');
-    this.renderer.removeStyle(this.document.querySelector('body'), 'height');
-    this.renderer.removeStyle(this.document.querySelector('html'), 'height');
-    this.navbarVisibleSource.next(false);
+    setTimeout(() => {
+      const bodyElem = this.document.querySelector('body');
+      this.renderer.removeStyle(bodyElem, 'height');
+      this.renderer.setStyle(bodyElem, 'margin-top', '0px', RendererStyleFlags2.Important);
+      this.renderer.setStyle(bodyElem, 'scrollbar-gutter', 'initial', RendererStyleFlags2.Important);
+      this.renderer.removeStyle(this.document.querySelector('html'), 'height');
+      this.renderer.setStyle(bodyElem, 'overflow', 'auto');
+      this.navbarVisibleSource.next(false);
+    }, 10);
+  }
+
+  logout() {
+    this.hideNavBar();
+    this.hideSideNav();
+    this.accountService.logout();
+  }
+
+  handleLogin() {
+    this.showNavBar();
+    this.showSideNav();
+
+    // Check if user came here from another url, else send to library route
+    const pageResume = localStorage.getItem(AuthGuard.urlKey);
+    if (pageResume && pageResume !== '/login') {
+      localStorage.setItem(AuthGuard.urlKey, '');
+      this.router.navigateByUrl(pageResume);
+    } else {
+      localStorage.setItem(AuthGuard.urlKey, '');
+      this.router.navigateByUrl('/home');
+    }
   }
 
   /**
@@ -116,5 +218,10 @@ export class NavService {
       this.sideNavCollapseSource.next(newVal);
       localStorage.setItem(this.localStorageSideNavKey, newVal + '');
     });
+  }
+
+  collapseSideNav(isCollapsed: boolean) {
+    this.sideNavCollapseSource.next(isCollapsed);
+    localStorage.setItem(this.localStorageSideNavKey, isCollapsed + '');
   }
 }

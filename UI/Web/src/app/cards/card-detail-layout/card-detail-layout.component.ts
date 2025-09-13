@@ -1,26 +1,32 @@
-import {CommonModule, DOCUMENT} from '@angular/common';
+import {DOCUMENT, NgClass, NgForOf, NgTemplateOutlet} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   ContentChild,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
   inject,
   Inject,
+  input,
   Input,
   OnChanges,
   OnInit,
   Output,
+  signal,
+  Signal,
+  SimpleChange,
+  SimpleChanges,
   TemplateRef,
   TrackByFunction,
-  ViewChild
+  ViewChild,
+  WritableSignal
 } from '@angular/core';
-import {Router} from '@angular/router';
+import {NavigationStart, Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
-import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
-import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Library} from 'src/app/_models/library/library';
@@ -28,46 +34,63 @@ import {Pagination} from 'src/app/_models/pagination';
 import {FilterEvent, FilterItem, SortField} from 'src/app/_models/metadata/series-filter';
 import {ActionItem} from 'src/app/_services/action-factory.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
-import {ScrollService} from 'src/app/_services/scroll.service';
 import {LoadingComponent} from "../../shared/loading/loading.component";
-
-
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
-import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
+import {filter, map} from "rxjs/operators";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {tap} from "rxjs";
+import {FilterV2} from "../../_models/metadata/v2/filter-v2";
+import {FilterSettingsBase, ValidFilterEntity} from "../../metadata-filter/filter-settings";
 
 
 const ANIMATION_TIME_MS = 0;
 
+/**
+ * Provides a virtualized card layout, jump bar, and metadata filter bar.
+ *
+ * How to use:
+ * - For filtering:
+ *    - pass a filterSettings which will bootstrap the filtering bar
+ *    - pass a jumpbar method binding to calc the count for the entity (not implemented yet)
+ * - For card layout
+ *    - Pass an identity function for trackby
+ *    - Pass a pagination object for the total count
+ *    - Pass the items
+ *    -
+ */
 @Component({
   selector: 'app-card-detail-layout',
-  standalone: true,
-  imports: [CommonModule, LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent, TranslocoDirective],
+  imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, MetadataFilterComponent,
+    TranslocoDirective, NgTemplateOutlet, NgClass, NgForOf],
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
-export class CardDetailLayoutComponent implements OnInit, OnChanges {
+export class CardDetailLayoutComponent<TFilter extends number, TSort extends number> implements OnInit, OnChanges {
 
-  private readonly filterUtilityService = inject(FilterUtilitiesService);
   protected readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly jumpbarService = inject(JumpbarService);
   private readonly router = inject(Router);
-  private readonly scrollService = inject(ScrollService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  @Input() header: string = '';
+
+
+  header: Signal<string> = input('');
   @Input() isLoading: boolean = false;
-  @Input() items: any[] = [];
   @Input() pagination!: Pagination;
+  @Input() items: any[] = [];
+
+
   /**
    * Parent scroll for virtualize pagination
    */
   @Input() parentScroll!: Element | Window;
 
-  // Filter Code
+  // We need to pass filterOpen from the grandfather to the metadata filter due to the filter button being in a separate component
   @Input() filterOpen!: EventEmitter<boolean>;
   /**
    * Should filtering be shown on the page
@@ -76,15 +99,20 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   /**
    * Any actions to exist on the header for the parent collection (library, collection)
    */
-  @Input() actions: ActionItem<any>[] = [];
+  actions: Signal<ActionItem<any>[]> = input([]);
   /**
    * A trackBy to help with rendering. This is required as without it there are issues when scrolling
    */
   @Input({required: true}) trackByIdentity!: TrackByFunction<any>;
-  @Input() filterSettings!: FilterSettings;
+  @Input() filterSettings: FilterSettingsBase | undefined = undefined;
+  entityType = input<ValidFilterEntity | 'other'>();
   @Input() refresh!: EventEmitter<void>;
 
 
+  /**
+   * Will force the jumpbar to be disabled - in cases where you're not using a traditional filter config
+   */
+  customSort = input(false);
   @Input() jumpBarKeys: Array<JumpKey> = []; // This is approx 784 pixels tall, original keys
   jumpBarKeysToRender: Array<JumpKey> = []; // What is rendered on screen
 
@@ -92,19 +120,26 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
-  @ContentChild('noData') noDataTemplate!: TemplateRef<any>;
+  @ContentChild('noData') noDataTemplate: TemplateRef<any> | null = null;
   @ViewChild('.jump-bar') jumpBar!: ElementRef<HTMLDivElement>;
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
-  filter: SeriesFilterV2 = this.filterUtilityService.createSeriesV2Filter();
   libraries: Array<FilterItem<Library>> = [];
 
   updateApplied: number = 0;
-  hasResumedJumpKey: boolean = false;
   bufferAmount: number = 1;
 
-  protected readonly Breakpoint = Breakpoint;
+
+  filterSignal: WritableSignal<FilterV2<number, number> | undefined> = signal(undefined);
+  hasCustomSort = computed(() => {
+    if (this.customSort()) return true;
+    if (this.filteringDisabled) return false;
+
+    const filter = this.filterSignal();
+    return filter?.sortOptions?.sortField != SortField.SortName || !filter?.sortOptions.isAscending;
+  });
+
 
   constructor(@Inject(DOCUMENT) private document: Document) {}
 
@@ -119,16 +154,12 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     if (this.trackByIdentity === undefined) {
-      this.trackByIdentity = (_: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
-    }
-
-    if (this.filterSettings === undefined) {
-      this.filterSettings = new FilterSettings();
-      this.cdRef.markForCheck();
+      this.trackByIdentity = (_: number, item: any) => `${this.header()}_${this.updateApplied}_${item?.id}`;
     }
 
     if (this.pagination === undefined) {
-      this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
+      const items = this.items;
+      this.pagination = {currentPage: 1, itemsPerPage: items.length, totalItems: items.length, totalPages: 1};
       this.cdRef.markForCheck();
     }
 
@@ -138,43 +169,33 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
         this.virtualScroller.refresh();
       });
     }
+
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationStart),
+      takeUntilDestroyed(this.destroyRef),
+      map(evt => evt as NavigationStart),
+      tap(_ => this.tryToSaveJumpKey()),
+    ).subscribe();
+
   }
 
 
-  ngOnChanges(): void {
+  ngOnChanges(changes: SimpleChanges): void {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
 
-    // TODO: I wish I had signals so I can tap into when isLoading is false and trigger the scroll code
+    const startIndex = this.jumpbarService.getResumePosition(this.router.url);
+    if (startIndex > 0) {
+      setTimeout(() => this.virtualScroller.scrollToIndex(startIndex, true, 0, ANIMATION_TIME_MS), 10);
+      return;
+    }
 
-    // Don't resume jump key when there is a custom sort order, as it won't work
-    if (!this.hasCustomSort()) {
-      if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
-        const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
-        if (resumeKey === '') return;
-        const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
-        if (keys.length < 1) return;
-
-        this.hasResumedJumpKey = true;
-        setTimeout(() => this.scrollTo(keys[0]), 100);
+    if (changes.hasOwnProperty('isLoading')) {
+      const loadingChange = changes['isLoading'] as SimpleChange;
+      if (loadingChange.previousValue === true && loadingChange.currentValue === false) {
+        setTimeout(() => this.virtualScroller.scrollToIndex(0, true, 0, ANIMATION_TIME_MS), 10);
       }
     }
-    //  else {
-    //   // I will come back and refactor this to work
-    //   // const scrollPosition = this.jumpbarService.getResumePosition(this.router.url);
-    //   // console.log('scroll position: ', scrollPosition);
-    //   // if (scrollPosition > 0) {
-    //   //   setTimeout(() => this.virtualScroller.scrollToIndex(scrollPosition, true, 0, 1000), 100);
-    //   // }
-    // }
-  }
-
-  hasCustomSort() {
-    if (this.filteringDisabled) return false;
-    const hasCustomSort = this.filter?.sortOptions?.sortField != SortField.SortName || !this.filter?.sortOptions.isAscending;
-    const hasNonDefaultSortField = this.filterSettings?.presetsV2?.sortOptions?.sortField != SortField.SortName;
-
-    return hasCustomSort;
   }
 
   performAction(action: ActionItem<any>) {
@@ -183,10 +204,10 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     }
   }
 
-  applyMetadataFilter(event: FilterEvent) {
-    this.applyFilter.emit(event);
+  applyMetadataFilter(event: FilterEvent<number, number>) {
+    this.applyFilter.emit(event as FilterEvent<TFilter, TSort>);
     this.updateApplied++;
-    this.filter = event.filterV2;
+    this.filterSignal.set(event.filterV2);
     this.cdRef.markForCheck();
   }
 
@@ -201,20 +222,12 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     }
 
     this.virtualScroller.scrollToIndex(targetIndex, true, 0, ANIMATION_TIME_MS);
-    this.jumpbarService.saveResumeKey(this.router.url, jumpKey.key);
-    // TODO: This doesn't work, we need the offset from virtual scroller
-    this.jumpbarService.saveScrollOffset(this.router.url, this.scrollService.scrollPosition);
-
-    this.cdRef.markForCheck();
+    setTimeout(() => this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.startIndex), ANIMATION_TIME_MS + 100);
   }
 
-  tryToSaveJumpKey(item: any) {
-    let name = '';
-    if (item.hasOwnProperty('name')) {
-      name = item.name;
-    } else if (item.hasOwnProperty('title')) {
-      name = item.title;
-    }
-    this.jumpbarService.saveResumeKey(this.router.url, name.charAt(0));
+  tryToSaveJumpKey() {
+    this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.startIndex);
   }
+
+  protected readonly Breakpoint = Breakpoint;
 }

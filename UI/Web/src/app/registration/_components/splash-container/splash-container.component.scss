@@ -1,38 +1,65 @@
+::ng-deep body {
+    scrollbar-gutter: stable;
+}
+
 .login {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
     height: calc(var(--vh, 1vh) * 100 - 57px);
     min-height: 289px;
     position: relative;
     width: 100vw;
     max-width: 100vw;
-
+    background: var(--login-background-color);
 
     &::before {
         content: "";
-        background-image: url('../../../../assets/images/login-bg.jpg');
-        background-size: cover;
+        background-image: var(--login-background-url);
+        background-size: var(--login-background-size);
         position: absolute;
         top: 0;
         right: 0;
         bottom: 0;
-        opacity: 0.1;
+        opacity: var(--login-background-opacity);
         width: 100%;
     }
 
+    h2 {
+        font-family: "Spartan", sans-serif;
+        font-size: 1.5rem;
+        margin-bottom: 0;
+        font-weight: bold;
+        display: inline-block;
+        margin-left: 5px;
+        vertical-align: middle;
+    }
+
     .logo-container {
+        width: 100%;
         .logo {
-            display:inline-block;
-            height: 50px;
+            width: var(--login-logo-width);
+            height: var(--login-logo-height);
+            background-image: var(--login-logo-image);
+            background-size: var(--login-logo-bg-size);
+            background-repeat: var(--login-logo-bg-repeat);
+            display: inline-block;
+            vertical-align: middle;
         }
     }
 
+    .login-container {
+        width: 100%;
+    }
+
     .card {
-        background-color: var(--primary-color);
+        background-color: var(--login-card-bg-color);
         color: #fff;
-        min-width: 300px;
-        max-width: 12rem;
+        max-width: 300px;
+        border-width: var(--login-card-border-width);
+        border-style: var(--login-card-border-style);
+        border-color: var(--login-card-border-color);
 
         &:focus {
             border: 2px solid white;
@@ -40,12 +67,14 @@
         }
 
 
-        .card-title {
-            font-family: 'Spartan', sans-serif;
-            font-weight: bold;
-            display: inline-block;
-            vertical-align: middle;
-            width: 100%;
+        ::ng-deep.card-title {
+            h2 {
+                font-family: 'Poppins', sans-serif;
+                display: inline-block;
+                vertical-align: middle;
+                width: 100%;
+                font-size: 1rem;
+            }
         }
 
         .card-text {

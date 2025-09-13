@@ -1,20 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Misc;
 using API.Data.Repositories;
 using API.DTOs.Stats;
+using API.DTOs.Stats.V3;
+using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Enums.UserPreferences;
+using API.Extensions;
+using API.Services.Plus;
+using API.Services.Tasks.Scanner.Parser;
 using Flurl.Http;
+using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -24,7 +33,6 @@ namespace API.Services.Tasks;
 public interface IStatsService
 {
     Task Send();
-    Task<ServerInfoDto> GetServerInfo();
     Task<ServerInfoSlimDto> GetServerInfoSlim();
     Task SendCancellation();
 }
@@ -36,23 +44,33 @@ public class StatsService : IStatsService
     private readonly ILogger<StatsService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly DataContext _context;
-    private readonly IStatisticService _statisticService;
-    private const string ApiUrl = "https://stats.kavitareader.com";
+    private readonly ILicenseService _licenseService;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly IEmailService _emailService;
+    private readonly ICacheService _cacheService;
+    private readonly string _apiUrl = "";
+    private const string ApiKey = "MsnvA2DfQqxSK5jh"; // It's not important this is public, just a way to keep bots from hitting the API willy-nilly
 
-    public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork, DataContext context, IStatisticService statisticService)
+    public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork, DataContext context,
+        ILicenseService licenseService, UserManager<AppUser> userManager, IEmailService emailService,
+        ICacheService cacheService, IHostEnvironment environment)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _context = context;
-        _statisticService = statisticService;
+        _licenseService = licenseService;
+        _userManager = userManager;
+        _emailService = emailService;
+        _cacheService = cacheService;
 
-        FlurlHttp.ConfigureClient(ApiUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        FlurlConfiguration.ConfigureClientForUrl(Configuration.StatsApiUrl);
+
+        _apiUrl = environment.IsDevelopment() ? "http://localhost:5001" : Configuration.StatsApiUrl;
     }
 
     /// <summary>
     /// Due to all instances firing this at the same time, we can DDOS our server. This task when fired will schedule the task to be run
-    /// randomly over a 6 hour spread
+    /// randomly over a six-hour spread
     /// </summary>
     public async Task Send()
     {
@@ -71,24 +89,22 @@ public class StatsService : IStatsService
     // ReSharper disable once MemberCanBePrivate.Global
     public async Task SendData()
     {
-        var data = await GetServerInfo();
+        var sw = Stopwatch.StartNew();
+        var data = await GetStatV3Payload();
+        _logger.LogDebug("Collecting stats took {Time} ms", sw.ElapsedMilliseconds);
+        sw.Stop();
         await SendDataToStatsServer(data);
     }
 
 
-    private async Task SendDataToStatsServer(ServerInfoDto data)
+    private async Task SendDataToStatsServer(ServerInfoV3Dto data)
     {
         var responseContent = string.Empty;
 
         try
         {
-            var response = await (ApiUrl + "/api/v2/stats")
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(30))
+            var response = await (_apiUrl + "/api/v3/stats")
+                .WithBasicHeaders(ApiKey)
                 .PostJsonAsync(data);
 
             if (response.StatusCode != StatusCodes.Status200OK)
@@ -112,67 +128,6 @@ public class StatsService : IStatsService
         }
     }
 
-    public async Task<ServerInfoDto> GetServerInfo()
-    {
-        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-
-        var serverInfo = new ServerInfoDto
-        {
-            InstallId = serverSettings.InstallId,
-            Os = RuntimeInformation.OSDescription,
-            KavitaVersion = serverSettings.InstallVersion,
-            DotnetVersion = Environment.Version.ToString(),
-            IsDocker = OsInfo.IsDocker,
-            NumOfCores = Math.Max(Environment.ProcessorCount, 1),
-            UsersWithEmulateComicBook = await _context.AppUserPreferences.CountAsync(p => p.EmulateBook),
-            TotalReadingHours = await _statisticService.TimeSpentReadingForUsersAsync(ArraySegment<int>.Empty, ArraySegment<int>.Empty),
-
-            PercentOfLibrariesWithFolderWatchingEnabled = await GetPercentageOfLibrariesWithFolderWatchingEnabled(),
-            PercentOfLibrariesIncludedInRecommended = await GetPercentageOfLibrariesIncludedInRecommended(),
-            PercentOfLibrariesIncludedInDashboard = await GetPercentageOfLibrariesIncludedInDashboard(),
-            PercentOfLibrariesIncludedInSearch = await GetPercentageOfLibrariesIncludedInSearch(),
-
-            HasBookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync()).Any(),
-            NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count(),
-            NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllCollectionsAsync()).Count(),
-            NumberOfReadingLists = await _unitOfWork.ReadingListRepository.Count(),
-            OPDSEnabled = serverSettings.EnableOpds,
-            NumberOfUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Count(),
-            TotalFiles = await _unitOfWork.LibraryRepository.GetTotalFiles(),
-            TotalGenres = await _unitOfWork.GenreRepository.GetCountAsync(),
-            TotalPeople = await _unitOfWork.PersonRepository.GetCountAsync(),
-            UsingSeriesRelationships = await GetIfUsingSeriesRelationship(),
-            EncodeMediaAs = serverSettings.EncodeMediaAs,
-            MaxSeriesInALibrary = await MaxSeriesInAnyLibrary(),
-            MaxVolumesInASeries = await MaxVolumesInASeries(),
-            MaxChaptersInASeries = await MaxChaptersInASeries(),
-            MangaReaderBackgroundColors = await AllMangaReaderBackgroundColors(),
-            MangaReaderPageSplittingModes = await AllMangaReaderPageSplitting(),
-            MangaReaderLayoutModes = await AllMangaReaderLayoutModes(),
-            FileFormats = AllFormats(),
-            UsingRestrictedProfiles = await GetUsingRestrictedProfiles(),
-            LastReadTime = await _unitOfWork.AppUserProgressRepository.GetLatestProgress()
-        };
-
-        var usersWithPref = (await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences)).ToList();
-        serverInfo.UsersOnCardLayout =
-            usersWithPref.Count(u => u.UserPreferences.GlobalPageLayoutMode == PageLayoutMode.Cards);
-        serverInfo.UsersOnListLayout =
-            usersWithPref.Count(u => u.UserPreferences.GlobalPageLayoutMode == PageLayoutMode.List);
-
-        var firstAdminUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).FirstOrDefault();
-
-        if (firstAdminUser != null)
-        {
-            var firstAdminUserPref = (await _unitOfWork.UserRepository.GetPreferencesAsync(firstAdminUser.UserName!));
-            var activeTheme = firstAdminUserPref?.Theme ?? Seed.DefaultThemes.First(t => t.IsDefault);
-
-            serverInfo.ActiveSiteTheme = activeTheme.Name;
-            if (firstAdminUserPref != null) serverInfo.MangaReaderMode = firstAdminUserPref.ReaderMode;
-        }
-
-        return serverInfo;
-    }
 
     public async Task<ServerInfoSlimDto> GetServerInfoSlim()
     {
@@ -196,12 +151,8 @@ public class StatsService : IStatsService
 
         try
         {
-            var response = await (ApiUrl + "/api/v2/stats/opt-out?installId=" + installId)
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
+            var response = await (_apiUrl + "/api/v2/stats/opt-out?installId=" + installId)
+                .WithBasicHeaders(ApiKey)
                 .WithTimeout(TimeSpan.FromSeconds(30))
                 .PostAsync();
 
@@ -220,42 +171,32 @@ public class StatsService : IStatsService
         }
     }
 
-    private async Task<float> GetPercentageOfLibrariesWithFolderWatchingEnabled()
+    private static async Task<long> PingStatsApi()
     {
-        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
-        if (libraries.Count == 0) return 0.0f;
-        return libraries.Count(l => l.FolderWatching) / (1.0f * libraries.Count);
-    }
+        try
+        {
+            var sw = Stopwatch.StartNew();
+            var response = await (Configuration.StatsApiUrl + "/api/health/")
+                .WithBasicHeaders(ApiKey)
+                .GetAsync();
 
-    private async Task<float> GetPercentageOfLibrariesIncludedInRecommended()
-    {
-        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
-        if (libraries.Count == 0) return 0.0f;
-        return libraries.Count(l => l.IncludeInRecommended) / (1.0f * libraries.Count);
-    }
+            if (response.StatusCode == StatusCodes.Status200OK)
+            {
+                sw.Stop();
+                return sw.ElapsedMilliseconds;
+            }
+        }
+        catch (Exception)
+        {
+            /* Swallow */
+        }
 
-    private async Task<float> GetPercentageOfLibrariesIncludedInDashboard()
-    {
-        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
-        if (libraries.Count == 0) return 0.0f;
-        return libraries.Count(l => l.IncludeInDashboard) / (1.0f * libraries.Count);
-    }
-
-    private async Task<float> GetPercentageOfLibrariesIncludedInSearch()
-    {
-        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
-        if (libraries.Count == 0) return 0.0f;
-        return libraries.Count(l => l.IncludeInSearch) / (1.0f * libraries.Count);
-    }
-
-    private Task<bool> GetIfUsingSeriesRelationship()
-    {
-        return _context.SeriesRelation.AnyAsync();
+        return 0;
     }
 
     private async Task<int> MaxSeriesInAnyLibrary()
     {
-        // If first time flow, just return 0
+        // If first time flow, return 0
         if (!await _context.Series.AnyAsync()) return 0;
         return await _context.Series
             .Select(s => _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series!).Count())
@@ -281,50 +222,195 @@ public class StatsService : IStatsService
     {
         // If first time flow, just return 0
         if (!await _context.Chapter.AnyAsync()) return 0;
+
         return await _context.Series
             .AsNoTracking()
             .AsSplitQuery()
             .MaxAsync(s => s.Volumes!
-                .Where(v => v.MinNumber == 0)
+                .Where(v => v.MinNumber == Parser.LooseLeafVolumeNumber)
                 .SelectMany(v => v.Chapters!)
                 .Count());
     }
 
-    private async Task<IEnumerable<string>> AllMangaReaderBackgroundColors()
+    private async Task<ServerInfoV3Dto> GetStatV3Payload()
     {
-        return await _context.AppUserPreferences.Select(p => p.BackgroundColor).Distinct().ToListAsync();
-    }
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var mediaSettings = await _unitOfWork.SettingsRepository.GetMetadataSettings();
+        var dto = new ServerInfoV3Dto()
+        {
+            InstallId = serverSettings.InstallId,
+            KavitaVersion = serverSettings.InstallVersion,
+            InitialKavitaVersion = serverSettings.FirstInstallVersion,
+            InitialInstallDate = (DateTime)serverSettings.FirstInstallDate!,
+            IsDocker = OsInfo.IsDocker,
+            Os = RuntimeInformation.OSDescription,
+            NumOfCores = Math.Max(Environment.ProcessorCount, 1),
+            DotnetVersion = Environment.Version.ToString(),
+            OpdsEnabled = serverSettings.EnableOpds,
+            EncodeMediaAs = serverSettings.EncodeMediaAs,
+            MatchedMetadataEnabled = mediaSettings.Enabled,
+            OidcEnabled = !string.IsNullOrEmpty(serverSettings.OidcConfig.Authority),
+        };
 
-    private async Task<IEnumerable<PageSplitOption>> AllMangaReaderPageSplitting()
-    {
-        return await _context.AppUserPreferences.Select(p => p.PageSplitOption).Distinct().ToListAsync();
-    }
+        dto.OsLocale = CultureInfo.CurrentCulture.EnglishName;
+        dto.LastReadTime = await _unitOfWork.AppUserProgressRepository.GetLatestProgress();
+        dto.MaxSeriesInALibrary = await MaxSeriesInAnyLibrary();
+        dto.MaxVolumesInASeries = await MaxVolumesInASeries();
+        dto.MaxChaptersInASeries = await MaxChaptersInASeries();
+        dto.TotalFiles = await _context.MangaFile.CountAsync();
+        dto.TotalGenres = await _context.Genre.CountAsync();
+        dto.TotalPeople = await _context.Person.CountAsync();
+        dto.TotalSeries = await _context.Series.CountAsync();
+        dto.TotalLibraries = await _context.Library.CountAsync();
+        dto.NumberOfCollections =  await _context.AppUserCollection.CountAsync();
+        dto.NumberOfReadingLists = await _context.ReadingList.CountAsync();
+
+        try
+        {
+            var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+            dto.ActiveKavitaPlusSubscription = await _licenseService.HasActiveSubscription(license);
+        }
+        catch (Exception)
+        {
+            dto.ActiveKavitaPlusSubscription = false;
+        }
 
 
-    private async Task<IEnumerable<LayoutMode>> AllMangaReaderLayoutModes()
-    {
-        return await _context.AppUserPreferences.Select(p => p.LayoutMode).Distinct().ToListAsync();
-    }
+        // Find a random cbz/zip file and open it for reading
+        await OpenRandomFile(dto);
+        dto.TimeToPingKavitaStatsApi = await PingStatsApi();
 
-    private IEnumerable<FileFormatDto> AllFormats()
-    {
+        #region Relationships
 
-        var results =  _context.MangaFile
-            .AsNoTracking()
-            .AsEnumerable()
-            .Select(m => new FileFormatDto()
+        dto.Relationships = await _context.SeriesRelation
+            .GroupBy(sr => sr.RelationKind)
+            .Select(g => new RelationshipStatV3
             {
-                Format = m.Format,
-                Extension = m.Extension
+                Relationship = g.Key,
+                Count = g.Count()
             })
-            .DistinctBy(f => f.Extension)
-            .ToList();
+            .ToListAsync();
 
-        return results;
+        #endregion
+
+        #region Libraries
+        var allLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.Folders |
+            LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns | LibraryIncludes.AppUser)).ToList();
+        dto.Libraries ??= [];
+        foreach (var library in allLibraries)
+        {
+            var libDto = new LibraryStatV3();
+            libDto.IncludeInDashboard = library.IncludeInDashboard;
+            libDto.IncludeInSearch = library.IncludeInSearch;
+            libDto.LastScanned = library.LastScanned;
+            libDto.NumberOfFolders = library.Folders.Count;
+            libDto.FileTypes = library.LibraryFileTypes.Select(s => s.FileTypeGroup).Distinct().ToList();
+            libDto.UsingExcludePatterns = library.LibraryExcludePatterns.Any(p => !string.IsNullOrEmpty(p.Pattern));
+            libDto.UsingFolderWatching = library.FolderWatching;
+            libDto.CreateCollectionsFromMetadata = library.ManageCollections;
+            libDto.CreateReadingListsFromMetadata = library.ManageReadingLists;
+            libDto.EnabledMetadata = library.EnableMetadata;
+            libDto.LibraryType = library.Type;
+
+            dto.Libraries.Add(libDto);
+        }
+        #endregion
+
+        #region Users
+
+        // Create a dictionary mapping user IDs to the libraries they have access to
+        var userLibraryAccess = allLibraries
+            .SelectMany(l => l.AppUsers.Select(appUser => new { l, appUser.Id }))
+            .GroupBy(x => x.Id)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.l).ToList());
+        dto.Users ??= [];
+        var allUsers = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences
+                                                                         | AppUserIncludes.ReadingLists | AppUserIncludes.Bookmarks
+                                                                         | AppUserIncludes.Collections | AppUserIncludes.Devices
+                                                                         | AppUserIncludes.Progress | AppUserIncludes.Ratings
+                                                                         | AppUserIncludes.SmartFilters | AppUserIncludes.WantToRead, false);
+        foreach (var user in allUsers)
+        {
+            var userDto = new UserStatV3();
+            userDto.HasMALToken = !string.IsNullOrEmpty(user.MalAccessToken);
+            userDto.HasAniListToken = !string.IsNullOrEmpty(user.AniListAccessToken);
+            userDto.AgeRestriction = new AgeRestriction()
+            {
+                AgeRating = user.AgeRestriction,
+                IncludeUnknowns = user.AgeRestrictionIncludeUnknowns
+            };
+
+            userDto.Locale = user.UserPreferences.Locale;
+            userDto.Roles = [.. _userManager.GetRolesAsync(user).Result];
+            userDto.LastLogin = user.LastActiveUtc;
+            userDto.HasValidEmail = user.Email != null && _emailService.IsValidEmail(user.Email);
+            userDto.IsEmailConfirmed = user.EmailConfirmed;
+            userDto.ActiveTheme = user.UserPreferences.Theme.Name;
+            userDto.CollectionsCreatedCount = user.Collections.Count;
+            userDto.ReadingListsCreatedCount = user.ReadingLists.Count;
+            userDto.LastReadTime = user.Progresses
+                .Select(p => p.LastModifiedUtc)
+                .DefaultIfEmpty()
+                .Max();
+            userDto.DevicePlatforms = user.Devices.Select(d => d.Platform).ToList();
+            userDto.SeriesBookmarksCreatedCount = user.Bookmarks.Count;
+            userDto.SmartFilterCreatedCount = user.SmartFilters.Count;
+            userDto.IsSharingReviews = user.UserPreferences.ShareReviews;
+            userDto.WantToReadSeriesCount = user.WantToRead.Count;
+            userDto.IdentityProvider = user.IdentityProvider;
+
+            if (allLibraries.Count > 0 && userLibraryAccess.TryGetValue(user.Id, out var accessibleLibraries))
+            {
+                userDto.PercentageOfLibrariesHasAccess = (1f * accessibleLibraries.Count) / allLibraries.Count;
+            }
+            else
+            {
+                userDto.PercentageOfLibrariesHasAccess = 0;
+            }
+
+            dto.Users.Add(userDto);
+        }
+
+        #endregion
+
+        return dto;
     }
 
-    private Task<bool> GetUsingRestrictedProfiles()
+    private async Task OpenRandomFile(ServerInfoV3Dto dto)
     {
-        return _context.Users.AnyAsync(u => u.AgeRestriction > AgeRating.NotApplicable);
+        var random = new Random();
+        List<string> extensions = [".cbz", ".zip"];
+
+        // Count the total number of files that match the criteria
+        var count = await _context.MangaFile.AsNoTracking()
+            .Where(r => r.Extension != null && extensions.Contains(r.Extension))
+            .CountAsync();
+
+        if (count == 0)
+        {
+            dto.TimeToOpeCbzMs = 0;
+            dto.TimeToOpenCbzPages = 0;
+
+            return;
+        }
+
+        // Generate a random skip value
+        var skip = random.Next(count);
+
+        // Fetch the random file
+        var randomFile = await _context.MangaFile.AsNoTracking()
+            .Where(r => r.Extension != null && extensions.Contains(r.Extension))
+            .Skip(skip)
+            .Take(1)
+            .FirstAsync();
+
+        var sw = Stopwatch.StartNew();
+
+        await _cacheService.Ensure(randomFile.ChapterId);
+        var time = sw.ElapsedMilliseconds;
+        sw.Stop();
+
+        dto.TimeToOpeCbzMs = time;
+        dto.TimeToOpenCbzPages = randomFile.Pages;
     }
 }

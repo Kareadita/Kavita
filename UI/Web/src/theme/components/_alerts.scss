@@ -1,5 +1,17 @@
 .alert-warning {
-    --bs-alert-color: black;
-    --bs-alert-bg: #fff3cd;
-    --bs-alert-border-color: #ffecb5
+  --bs-alert-color: var(--alert-text-color);
+  --bs-alert-bg: var(--alert-bg-color);
+  --bs-alert-border-color: var(--warning-color);
+}
+
+.alert-danger {
+  --bs-alert-color: var(--alert-text-color);
+  --bs-alert-bg: var(--alert-bg-color);
+  --bs-alert-border-color: var(--error-color);
+}
+
+.alert-danger {
+  --bs-alert-color: var(--alert-text-color);
+  --bs-alert-bg: var(--alert-bg-color);
+  --bs-alert-border-color: var(--primary-color);
 }

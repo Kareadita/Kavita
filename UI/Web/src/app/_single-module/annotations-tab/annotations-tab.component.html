@@ -1,0 +1,9 @@
+<div class="mb-3" *transloco="let t;prefix:'annotations-tab'">
+  <app-carousel-reel [items]="annotations()" [alwaysShow]="false">
+    <ng-template #carouselItem let-item let-position="idx">
+      <div style="min-width: 200px">
+        <app-annotation-card [annotation]="item" [allowEdit]="false" [showPageLink]="false" [isInReader]="false" [showInReaderLink]="true"></app-annotation-card>
+      </div>
+    </ng-template>
+  </app-carousel-reel>
+</div>

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Person;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Helpers.Builders;
@@ -24,7 +25,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
             MinNumber = Parser.MinNumberFromRange(number),
             MaxNumber = Parser.MaxNumberFromRange(number),
             SortOrder = Parser.MinNumberFromRange(number),
-            Files = new List<MangaFile>(),
+            Files = [],
             Pages = 1,
             CreatedUtc = DateTime.UtcNow
         };
@@ -38,9 +39,9 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
 
         return builder.WithNumber(Parser.RemoveExtensionIfSupported(info.Chapters)!)
             .WithRange(specialTreatment ? info.Filename : info.Chapters)
-            .WithTitle((specialTreatment && info.Format == MangaFormat.Epub)
+            .WithTitle(specialTreatment && info.Format is MangaFormat.Epub or MangaFormat.Pdf
             ? info.Title
-            : specialTitle)
+            : specialTitle ?? string.Empty)
             .WithIsSpecial(specialTreatment);
     }
 
@@ -140,6 +141,39 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     {
         _chapter.Created = created;
         _chapter.CreatedUtc = created.ToUniversalTime();
+        return this;
+    }
+
+    public ChapterBuilder WithPerson(Person person, PersonRole role)
+    {
+        _chapter.People ??= new List<ChapterPeople>();
+        _chapter.People.Add(new ChapterPeople()
+        {
+            Person = person,
+            Role = role,
+            Chapter = _chapter,
+        });
+
+        return this;
+    }
+
+    public ChapterBuilder WithTags(IList<Tag> tags)
+    {
+        _chapter.Tags ??= [];
+        foreach (var tag in tags)
+        {
+            _chapter.Tags.Add(tag);
+        }
+        return this;
+    }
+
+    public ChapterBuilder WithGenres(IList<Genre> genres)
+    {
+        _chapter.Genres ??= [];
+        foreach (var genre in genres)
+        {
+            _chapter.Genres.Add(genre);
+        }
         return this;
     }
 }

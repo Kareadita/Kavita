@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Device;
 
-public class SendSeriesToDeviceDto
+public sealed record SendSeriesToDeviceDto
 {
     public int DeviceId { get; set; }
     public int SeriesId { get; set; }

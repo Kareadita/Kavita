@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs;
 
-public class UpdateSeriesMetadataDto
+public sealed record UpdateSeriesMetadataDto
 {
-    public SeriesMetadataDto SeriesMetadata { get; set; } = default!;
+    public SeriesMetadataDto SeriesMetadata { get; set; } = null!;
 }

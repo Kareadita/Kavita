@@ -1,15 +1,14 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Download } from 'src/app/shared/_models/download';
-import { DownloadEvent } from 'src/app/shared/_services/download.service';
-import {CommonModule} from "@angular/common";
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {Observable} from 'rxjs';
+import {Download} from 'src/app/shared/_models/download';
+import {DownloadEvent} from 'src/app/shared/_services/download.service';
 import {CircularLoaderComponent} from "../../shared/circular-loader/circular-loader.component";
-import {TranslocoDirective} from "@ngneat/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
+import {AsyncPipe} from "@angular/common";
 
 @Component({
   selector: 'app-download-indicator',
-  standalone: true,
-  imports: [CommonModule, CircularLoaderComponent, TranslocoDirective],
+  imports: [CircularLoaderComponent, TranslocoDirective, AsyncPipe],
   templateUrl: './download-indicator.component.html',
   styleUrls: ['./download-indicator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

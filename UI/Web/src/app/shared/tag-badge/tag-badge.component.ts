@@ -23,12 +23,11 @@ export enum TagBadgeCursor {
 }
 
 @Component({
-  selector: 'app-tag-badge',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './tag-badge.component.html',
-  styleUrls: ['./tag-badge.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-tag-badge',
+    imports: [CommonModule],
+    templateUrl: './tag-badge.component.html',
+    styleUrls: ['./tag-badge.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagBadgeComponent {
 

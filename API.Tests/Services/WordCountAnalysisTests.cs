@@ -1,52 +1,48 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
-using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
-using API.Tests.Helpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Polly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class WordCountAnalysisTests : AbstractDbTest
+public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
-    private readonly IReaderService _readerService;
     private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
     private const long WordCount = 33608; // 37417 if splitting on space, 33608 if just character count
     private const long MinHoursToRead = 1;
-    private const long AvgHoursToRead = 2;
+    private const float AvgHoursToRead = 1.66954792f;
     private const long MaxHoursToRead = 3;
-    public WordCountAnalysisTests() : base()
+
+    private IReaderService Setup(IUnitOfWork unitOfWork)
     {
-        _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+        return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>());
     }
 
-    protected override async Task ResetDb()
-    {
-        _context.Series.RemoveRange(_context.Series.ToList());
-
-        await _context.SaveChangesAsync();
-    }
-
     [Fact]
     public async Task ReadingTimeShouldBeNonZero()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var readerService = Setup(unitOfWork);
+
         var series = new SeriesBuilder("Test Series")
             .WithFormat(MangaFormat.Epub)
             .Build();
@@ -58,7 +54,7 @@ public class WordCountAnalysisTests : AbstractDbTest
                 MangaFormat.Epub).Build())
             .Build();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithSeries(series)
             .Build());
 
@@ -69,23 +65,23 @@ public class WordCountAnalysisTests : AbstractDbTest
                 .Build(),
         };
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
         var cacheService = new CacheHelper(new FileService());
-        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), _unitOfWork,
-            Substitute.For<IEventHub>(), cacheService, _readerService, Substitute.For<IMediaErrorService>());
+        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
+            Substitute.For<IEventHub>(), cacheService, readerService, Substitute.For<IMediaErrorService>());
 
 
         await service.ScanSeries(1, 1);
 
         Assert.Equal(WordCount, series.WordCount);
         Assert.Equal(MinHoursToRead, series.MinHoursToRead);
-        Assert.Equal(AvgHoursToRead, series.AvgHoursToRead);
+        Assert.True(series.AvgHoursToRead.Is(AvgHoursToRead));
         Assert.Equal(MaxHoursToRead, series.MaxHoursToRead);
 
         // Validate the Chapter gets updated correctly
-        var volume = series.Volumes.First();
+        var volume = series.Volumes[0];
         Assert.Equal(WordCount, volume.WordCount);
         Assert.Equal(MinHoursToRead, volume.MinHoursToRead);
         Assert.Equal(AvgHoursToRead, volume.AvgHoursToRead);
@@ -102,7 +98,9 @@ public class WordCountAnalysisTests : AbstractDbTest
     [Fact]
     public async Task ReadingTimeShouldIncreaseWhenNewBookAdded()
     {
-        await ResetDb();
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var readerService = Setup(unitOfWork);
+
         var chapter = new ChapterBuilder("")
             .WithFile(new MangaFileBuilder(
                 Path.Join(_testDirectory,
@@ -116,17 +114,17 @@ public class WordCountAnalysisTests : AbstractDbTest
                 .Build())
             .Build();
 
-        _context.Library.Add(new LibraryBuilder("Test", LibraryType.Book)
+        context.Library.Add(new LibraryBuilder("Test", LibraryType.Book)
             .WithSeries(series)
             .Build());
 
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
 
         var cacheService = new CacheHelper(new FileService());
-        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), _unitOfWork,
-            Substitute.For<IEventHub>(), cacheService, _readerService, Substitute.For<IMediaErrorService>());
+        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
+            Substitute.For<IEventHub>(), cacheService, readerService, Substitute.For<IMediaErrorService>());
         await service.ScanSeries(1, 1);
 
         var chapter2 = new ChapterBuilder("2")
@@ -141,23 +139,21 @@ public class WordCountAnalysisTests : AbstractDbTest
             .WithChapter(chapter2)
             .Build());
 
-        series.Volumes.First().Chapters.Add(chapter2);
-        await _unitOfWork.CommitAsync();
+        series.Volumes[0].Chapters.Add(chapter2);
+        await unitOfWork.CommitAsync();
 
         await service.ScanSeries(1, 1);
 
         Assert.Equal(WordCount * 2L, series.WordCount);
         Assert.Equal(MinHoursToRead * 2, series.MinHoursToRead);
-        //Assert.Equal(AvgHoursToRead * 2, series.AvgHoursToRead);
-        //Assert.Equal((MaxHoursToRead * 2) - 1, series.MaxHoursToRead); // This is just a rounding issue
 
-        var firstVolume = series.Volumes.ElementAt(0);
+        var firstVolume = series.Volumes[0];
         Assert.Equal(WordCount, firstVolume.WordCount);
         Assert.Equal(MinHoursToRead, firstVolume.MinHoursToRead);
-        Assert.Equal(AvgHoursToRead, firstVolume.AvgHoursToRead);
+        Assert.True(series.AvgHoursToRead.Is(AvgHoursToRead * 2));
         Assert.Equal(MaxHoursToRead, firstVolume.MaxHoursToRead);
 
-        var secondVolume = series.Volumes.ElementAt(1);
+        var secondVolume = series.Volumes[1];
         Assert.Equal(WordCount, secondVolume.WordCount);
         Assert.Equal(MinHoursToRead, secondVolume.MinHoursToRead);
         Assert.Equal(AvgHoursToRead, secondVolume.AvgHoursToRead);

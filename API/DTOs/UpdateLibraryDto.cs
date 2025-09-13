@@ -4,7 +4,7 @@ using API.Entities.Enums;
 
 namespace API.DTOs;
 
-public class UpdateLibraryDto
+public sealed record UpdateLibraryDto
 {
     [Required]
     public int Id { get; init; }
@@ -19,8 +19,6 @@ public class UpdateLibraryDto
     [Required]
     public bool IncludeInDashboard { get; init; }
     [Required]
-    public bool IncludeInRecommended { get; init; }
-    [Required]
     public bool IncludeInSearch { get; init; }
     [Required]
     public bool ManageCollections { get; init; }
@@ -28,6 +26,12 @@ public class UpdateLibraryDto
     public bool ManageReadingLists { get; init; }
     [Required]
     public bool AllowScrobbling { get; init; }
+    [Required]
+    public bool AllowMetadataMatching { get; init; }
+    [Required]
+    public bool EnableMetadata { get; init; }
+    [Required]
+    public bool RemovePrefixForSortName { get; init; }
     /// <summary>
     /// What types of files to allow the scanner to pickup
     /// </summary>

@@ -1,0 +1,13 @@
+.update-details {
+  border-radius: 0.5rem;
+}
+
+:host ::ng-deep .blog-content {
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  word-wrap: break-word;
+
+  img {
+    max-width: 100% !important;
+  }
+}

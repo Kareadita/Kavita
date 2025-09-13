@@ -1,28 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.MetadataMatching;
+using API.Entities.Person;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities.Metadata;
 
 [Index(nameof(Id), nameof(SeriesId), IsUnique = true)]
-public class SeriesMetadata : IHasConcurrencyToken
+public class SeriesMetadata : IHasConcurrencyToken, IHasKPlusMetadata
 {
     public int Id { get; set; }
 
     public string Summary { get; set; } = string.Empty;
-
-    [Obsolete("Use AppUserCollection instead")]
-    public ICollection<CollectionTag> CollectionTags { get; set; } = new List<CollectionTag>();
-
-    public ICollection<Genre> Genres { get; set; } = new List<Genre>();
-    public ICollection<Tag> Tags { get; set; } = new List<Tag>();
-    /// <summary>
-    /// All people attached at a Series level.
-    /// </summary>
-    public ICollection<Person> People { get; set; } = new List<Person>();
 
     /// <summary>
     /// Highest Age Rating from all Chapters
@@ -50,8 +43,13 @@ public class SeriesMetadata : IHasConcurrencyToken
     /// </summary>
     /// <remarks>This is not populated from Chapters of the Series</remarks>
     public string WebLinks { get; set; } = string.Empty;
+    /// <summary>
+    /// Tracks which metadata has been set by K+
+    /// </summary>
+    public IList<MetadataSettingField> KPlusOverrides { get; set; } = [];
 
-    // Locks
+    #region Locks
+
     public bool LanguageLocked { get; set; }
     public bool SummaryLocked { get; set; }
     /// <summary>
@@ -79,9 +77,26 @@ public class SeriesMetadata : IHasConcurrencyToken
     public bool CoverArtistLocked { get; set; }
     public bool ReleaseYearLocked { get; set; }
 
-    // Relationship
-    public Series Series { get; set; } = null!;
+    #endregion
+
+    #region Relationships
+
+    [Obsolete("Use AppUserCollection instead")]
+    public ICollection<CollectionTag> CollectionTags { get; set; } = new List<CollectionTag>();
+
+    public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+    public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+
+    /// <summary>
+    /// All people attached at a Series level.
+    /// </summary>
+    public ICollection<SeriesMetadataPeople> People { get; set; } = new List<SeriesMetadataPeople>();
+
     public int SeriesId { get; set; }
+    public Series Series { get; set; } = null!;
+
+    #endregion
+
 
     /// <inheritdoc />
     [ConcurrencyCheck]
@@ -92,5 +107,27 @@ public class SeriesMetadata : IHasConcurrencyToken
     public void OnSavingChanges()
     {
         RowVersion++;
+    }
+
+    /// <summary>
+    /// Any People in this Role present
+    /// </summary>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    public bool AnyOfRole(PersonRole role)
+    {
+        return People.Any(p => p.Role == role);
+    }
+
+    /// <summary>
+    /// Are all instances of the role from Kavita+
+    /// </summary>
+    /// <param name="role"></param>
+    /// <returns></returns>
+    public bool AllKavitaPlus(PersonRole role)
+    {
+        var people = People.Where(p => p.Role == role);
+        if (people.Any()) return people.All(p => p.KavitaPlusConnection);
+        return false;
     }
 }

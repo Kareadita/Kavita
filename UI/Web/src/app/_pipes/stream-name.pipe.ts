@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {translate} from "@ngneat/transloco";
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'streamName',

@@ -3,7 +3,7 @@
 We're always looking for people to help make Kavita even better, there are a number of ways to contribute.
 
 ## Documentation ##
-Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavitareader.com/) the better.
+Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavitareader.com/contributing) the better.
 
 ## Development ##
 
@@ -13,7 +13,7 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 - HTML/Javascript editor of choice (VS Code/Sublime Text/Webstorm/Atom/etc)
 - [Git](https://git-scm.com/downloads)
 - [NodeJS](https://nodejs.org/en/download/) (Node 18.13.X or higher)
-- .NET 8.0+
+- .NET 9.0+
 - dotnet tool install -g Swashbuckle.AspNetCore.Cli
 
 ### Getting started ###
@@ -64,5 +64,8 @@ If you just want to play with Swagger, you can just
 - cd Kavita/API
 - dotnet run -c Debug
 - Go to http://localhost:5000/swagger/index.html
+
+If you have a build issue around swagger run:
+` swagger tofile --output ../openapi.json API/bin/Debug/net8.0/API.dll v1` to see the error and correct it
 
 If you have any questions about any of this, please let us know.

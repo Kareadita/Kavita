@@ -14,6 +14,7 @@ namespace API.Extensions.QueryExtensions.Filtering;
 public static class SeriesFilter
 {
     private const float FloatingPointTolerance = 0.001f;
+
     public static IQueryable<Series> HasLanguage(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, IList<string> languages)
     {
@@ -43,6 +44,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
+            case FilterComparison.IsEmpty:
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
@@ -71,6 +73,8 @@ public static class SeriesFilter
                 return queryable.Where(s => s.Metadata.ReleaseYear >= DateTime.Now.Year - (int) releaseYear);
             case FilterComparison.IsNotInLast:
                 return queryable.Where(s => s.Metadata.ReleaseYear < DateTime.Now.Year - (int) releaseYear);
+            case FilterComparison.IsEmpty:
+                return queryable.Where(s => s.Metadata.ReleaseYear == 0);
             case FilterComparison.Matches:
             case FilterComparison.Contains:
             case FilterComparison.NotContains:
@@ -86,14 +90,18 @@ public static class SeriesFilter
 
 
     public static IQueryable<Series> HasRating(this IQueryable<Series> queryable, bool condition,
-        FilterComparison comparison, int rating, int userId)
+        FilterComparison comparison, float rating, int userId)
     {
         if (rating < 0 || !condition || userId <= 0) return queryable;
+
+        // AppUserRating stores a 5-digit number.
+        rating = Math.Clamp(rating, 0f, 5f);
+
 
         switch (comparison)
         {
             case FilterComparison.Equal:
-                return queryable.Where(s => s.Ratings.Any(r => Math.Abs(r.Rating - rating) < FloatingPointTolerance && r.AppUserId == userId));
+                return queryable.Where(s => s.Ratings.Any(r => Math.Abs(r.Rating - rating) <= FloatingPointTolerance && r.AppUserId == userId));
             case FilterComparison.GreaterThan:
                 return queryable.Where(s => s.Ratings.Any(r => r.Rating > rating && r.AppUserId == userId));
             case FilterComparison.GreaterThanEqual:
@@ -102,10 +110,13 @@ public static class SeriesFilter
                 return queryable.Where(s => s.Ratings.Any(r => r.Rating < rating && r.AppUserId == userId));
             case FilterComparison.LessThanEqual:
                 return queryable.Where(s => s.Ratings.Any(r => r.Rating <= rating && r.AppUserId == userId));
+            case FilterComparison.NotEqual:
+                return queryable.Where(s => s.Ratings.Any(r => Math.Abs(r.Rating - rating) >= FloatingPointTolerance && r.AppUserId == userId));
+            case FilterComparison.IsEmpty:
+                return queryable.Where(s => s.Ratings.All(r => r.AppUserId != userId));
             case FilterComparison.Contains:
             case FilterComparison.Matches:
             case FilterComparison.NotContains:
-            case FilterComparison.NotEqual:
             case FilterComparison.BeginsWith:
             case FilterComparison.EndsWith:
             case FilterComparison.IsBefore:
@@ -124,7 +135,7 @@ public static class SeriesFilter
     {
         if (!condition || ratings.Count == 0) return queryable;
 
-        var firstRating = ratings.First();
+        var firstRating = ratings[0];
         switch (comparison)
         {
             case FilterComparison.Equal:
@@ -151,11 +162,13 @@ public static class SeriesFilter
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
             case FilterComparison.MustContains:
+            case FilterComparison.IsEmpty:
                 throw new KavitaException($"{comparison} not applicable for Series.AgeRating");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
     }
+
     public static IQueryable<Series> HasAverageReadTime(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, int avgReadTime)
     {
@@ -164,17 +177,17 @@ public static class SeriesFilter
         switch (comparison)
         {
             case FilterComparison.NotEqual:
-                return queryable.Where(s => s.AvgHoursToRead != avgReadTime);
+                return queryable.WhereNotEqual(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.Equal:
-                return queryable.Where(s => s.AvgHoursToRead == avgReadTime);
+                return queryable.WhereEqual(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.GreaterThan:
-                return queryable.Where(s => s.AvgHoursToRead > avgReadTime);
+                return queryable.WhereGreaterThan(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.GreaterThanEqual:
-                return queryable.Where(s => s.AvgHoursToRead >= avgReadTime);
+                return queryable.WhereGreaterThanOrEqual(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.LessThan:
-                return queryable.Where(s => s.AvgHoursToRead < avgReadTime);
+                return queryable.WhereLessThan(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.LessThanEqual:
-                return queryable.Where(s => s.AvgHoursToRead <= avgReadTime);
+                return queryable.WhereLessThanOrEqual(s => s.AvgHoursToRead, avgReadTime);
             case FilterComparison.Contains:
             case FilterComparison.Matches:
             case FilterComparison.NotContains:
@@ -185,6 +198,7 @@ public static class SeriesFilter
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
             case FilterComparison.MustContains:
+            case FilterComparison.IsEmpty:
                 throw new KavitaException($"{comparison} not applicable for Series.AverageReadTime");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
@@ -196,7 +210,7 @@ public static class SeriesFilter
     {
         if (!condition || pubStatues.Count == 0) return queryable;
 
-        var firstStatus = pubStatues.First();
+        var firstStatus = pubStatues[0];
         switch (comparison)
         {
             case FilterComparison.Equal:
@@ -219,6 +233,7 @@ public static class SeriesFilter
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
             case FilterComparison.Matches:
+            case FilterComparison.IsEmpty:
                 throw new KavitaException($"{comparison} not applicable for Series.PublicationStatus");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
@@ -237,38 +252,37 @@ public static class SeriesFilter
         if (!condition) return queryable;
 
         var subQuery = queryable
-            .Include(s => s.Progress)
-            .Where(s => s.Progress != null)
             .Select(s => new
             {
-                Series = s,
-                Percentage = ((float) s.Progress
+                SeriesId = s.Id,
+                SeriesName = s.Name,
+                Percentage = s.Progress
                     .Where(p => p != null && p.AppUserId == userId)
-                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0) * 100)
+                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0f) * 100f
             })
-            .AsSplitQuery()
-            .AsEnumerable();
+            .AsSplitQuery();
 
         switch (comparison)
         {
             case FilterComparison.Equal:
-                subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) < FloatingPointTolerance);
+                subQuery = subQuery.WhereEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.GreaterThan:
-                subQuery = subQuery.Where(s => s.Percentage > readProgress);
+                subQuery = subQuery.WhereGreaterThan(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.GreaterThanEqual:
-                subQuery = subQuery.Where(s => s.Percentage >= readProgress);
+                subQuery = subQuery.WhereGreaterThanOrEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.LessThan:
-                subQuery = subQuery.Where(s => s.Percentage < readProgress);
+                subQuery = subQuery.WhereLessThan(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.LessThanEqual:
-                subQuery = subQuery.Where(s => s.Percentage <= readProgress);
+                subQuery = subQuery.WhereLessThanOrEqual(s => s.Percentage, readProgress);
                 break;
             case FilterComparison.NotEqual:
-                subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) > FloatingPointTolerance);
+                subQuery = subQuery.WhereNotEqual(s => s.Percentage, readProgress);
                 break;
+            case FilterComparison.IsEmpty:
             case FilterComparison.Matches:
             case FilterComparison.Contains:
             case FilterComparison.NotContains:
@@ -284,7 +298,7 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        var ids = subQuery.Select(s => s.SeriesId);
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
@@ -298,31 +312,32 @@ public static class SeriesFilter
             .Include(s => s.ExternalSeriesMetadata)
             .Select(s => new
             {
-                Series = s,
+                SeriesId = s.Id,
+                SeriesName = s.Name,
                 AverageRating = s.ExternalSeriesMetadata.AverageExternalRating
             })
             .AsSplitQuery()
-            .AsEnumerable();
+            .AsQueryable();
 
         switch (comparison)
         {
             case FilterComparison.Equal:
-                subQuery = subQuery.Where(s => Math.Abs(s.AverageRating - rating) < FloatingPointTolerance);
+                subQuery = subQuery.WhereEqual(s => s.AverageRating, rating);
                 break;
             case FilterComparison.GreaterThan:
-                subQuery = subQuery.Where(s => s.AverageRating > rating);
+                subQuery = subQuery.WhereGreaterThan(s => s.AverageRating, rating);
                 break;
             case FilterComparison.GreaterThanEqual:
-                subQuery = subQuery.Where(s => s.AverageRating >= rating);
+                subQuery = subQuery.WhereGreaterThanOrEqual(s => s.AverageRating, rating);
                 break;
             case FilterComparison.LessThan:
-                subQuery = subQuery.Where(s => s.AverageRating < rating);
+                subQuery = subQuery.WhereLessThan(s => s.AverageRating, rating);
                 break;
             case FilterComparison.LessThanEqual:
-                subQuery = subQuery.Where(s => s.AverageRating <= rating);
+                subQuery = subQuery.WhereLessThanOrEqual(s => s.AverageRating, rating);
                 break;
             case FilterComparison.NotEqual:
-                subQuery = subQuery.Where(s => Math.Abs(s.AverageRating - rating) > FloatingPointTolerance);
+                subQuery = subQuery.WhereNotEqual(s => s.AverageRating, rating);
                 break;
             case FilterComparison.Matches:
             case FilterComparison.Contains:
@@ -334,12 +349,80 @@ public static class SeriesFilter
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
             case FilterComparison.MustContains:
+            case FilterComparison.IsEmpty:
                 throw new KavitaException($"{comparison} not applicable for Series.AverageRating");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        var ids = subQuery.Select(s => s.SeriesId);
+        return queryable.Where(s => ids.Contains(s.Id));
+    }
+
+    /// <summary>
+    /// HasReadingDate but used to filter where last reading point was TODAY() - timeDeltaDays. This allows the user
+    /// to build smart filters "Haven't read in a month"
+    /// </summary>
+    public static IQueryable<Series> HasReadLast(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, int timeDeltaDays, int userId)
+    {
+        if (!condition || timeDeltaDays == 0) return queryable;
+
+        var subQuery = queryable
+            .Include(s => s.Progress)
+            .Where(s => s.Progress.Any())
+            .Select(s => new
+            {
+                SeriesId = s.Id,
+                SeriesName = s.Name,
+                MaxDate = s.Progress.Where(p => p != null && p.AppUserId == userId)
+                    .Select(p => (DateTime?) p.LastModified)
+                    .DefaultIfEmpty()
+                    .Max()
+            })
+            .Where(s => s.MaxDate != null)
+            .AsSplitQuery()
+            .AsEnumerable();
+
+        var date = DateTime.Now.AddDays(-timeDeltaDays);
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate.Equals(date));
+                break;
+            case FilterComparison.IsAfter:
+            case FilterComparison.GreaterThan:
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate > date);
+                break;
+            case FilterComparison.GreaterThanEqual:
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate >= date);
+                break;
+            case FilterComparison.IsBefore:
+            case FilterComparison.LessThan:
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate < date);
+                break;
+            case FilterComparison.LessThanEqual:
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate <= date);
+                break;
+            case FilterComparison.NotEqual:
+                subQuery = subQuery.Where(s => s.MaxDate != null && !s.MaxDate.Equals(date));
+                break;
+            case FilterComparison.Matches:
+            case FilterComparison.Contains:
+            case FilterComparison.NotContains:
+            case FilterComparison.BeginsWith:
+            case FilterComparison.EndsWith:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
+            case FilterComparison.IsEmpty:
+                throw new KavitaException($"{comparison} not applicable for Series.ReadProgress");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+
+        var ids = subQuery.Select(s => s.SeriesId);
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
@@ -350,10 +433,11 @@ public static class SeriesFilter
 
         var subQuery = queryable
             .Include(s => s.Progress)
-            .Where(s => s.Progress != null)
+            .Where(s => s.Progress.Any())
             .Select(s => new
             {
-                Series = s,
+                SeriesId = s.Id,
+                SeriesName = s.Name,
                 MaxDate = s.Progress.Where(p => p != null && p.AppUserId == userId)
                     .Select(p => (DateTime?) p.LastModified)
                     .DefaultIfEmpty()
@@ -393,19 +477,20 @@ public static class SeriesFilter
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
             case FilterComparison.MustContains:
+            case FilterComparison.IsEmpty:
                 throw new KavitaException($"{comparison} not applicable for Series.ReadProgress");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
 
-        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        var ids = subQuery.Select(s => s.SeriesId);
         return queryable.Where(s => ids.Contains(s.Id));
     }
 
     public static IQueryable<Series> HasTags(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, IList<int> tags)
     {
-        if (!condition || tags.Count == 0) return queryable;
+        if (!condition || (comparison != FilterComparison.IsEmpty && tags.Count == 0)) return queryable;
 
         switch (comparison)
         {
@@ -424,6 +509,8 @@ public static class SeriesFilter
                 queries.AddRange(tags.Select(gId => queryable.Where(s => s.Metadata.Tags.Any(p => p.Id == gId))));
 
                 return queries.Aggregate((q1, q2) => q1.Intersect(q2));
+            case FilterComparison.IsEmpty:
+                return queryable.Where(s => s.Metadata.Tags.Count == 0);
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -442,6 +529,48 @@ public static class SeriesFilter
     }
 
     public static IQueryable<Series> HasPeople(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, IList<int> people, PersonRole role)
+    {
+        if (!condition || (comparison != FilterComparison.IsEmpty && people.Count == 0)) return queryable;
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+            case FilterComparison.Contains:
+                return queryable.Where(s => s.Metadata.People.Any(p => people.Contains(p.PersonId) && p.Role == role));
+            case FilterComparison.NotEqual:
+            case FilterComparison.NotContains:
+                return queryable.Where(s => s.Metadata.People.All(p => !people.Contains(p.PersonId) || p.Role != role));
+            case FilterComparison.MustContains:
+                var queries = new List<IQueryable<Series>>()
+                {
+                    queryable
+                };
+                queries.AddRange(people.Select(personId =>
+                    queryable.Where(s => s.Metadata.People.Any(p => p.PersonId == personId && p.Role == role))));
+
+                return queries.Aggregate((q1, q2) => q1.Intersect(q2));
+            case FilterComparison.IsEmpty:
+                // Ensure no person with the given role exists
+                return queryable.Where(s => s.Metadata.People.All(p => p.Role != role));
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.BeginsWith:
+            case FilterComparison.EndsWith:
+            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
+            case FilterComparison.Matches:
+                throw new KavitaException($"{comparison} not applicable for Series.People");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+    }
+
+    public static IQueryable<Series> HasPeopleLegacy(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, IList<int> people)
     {
         if (!condition || people.Count == 0) return queryable;
@@ -450,19 +579,20 @@ public static class SeriesFilter
         {
             case FilterComparison.Equal:
             case FilterComparison.Contains:
-                return queryable.Where(s => s.Metadata.People.Any(p => people.Contains(p.Id)));
+                return queryable.Where(s => s.Metadata.People.Any(p => people.Contains(p.PersonId)));
             case FilterComparison.NotEqual:
             case FilterComparison.NotContains:
-                return queryable.Where(s => s.Metadata.People.All(t => !people.Contains(t.Id)));
+                return queryable.Where(s => s.Metadata.People.All(t => !people.Contains(t.PersonId)));
             case FilterComparison.MustContains:
                 // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
                 var queries = new List<IQueryable<Series>>()
                 {
                     queryable
                 };
-                queries.AddRange(people.Select(gId => queryable.Where(s => s.Metadata.People.Any(p => p.Id == gId))));
+                queries.AddRange(people.Select(gId => queryable.Where(s => s.Metadata.People.Any(p => p.PersonId == gId))));
 
                 return queries.Aggregate((q1, q2) => q1.Intersect(q2));
+            case FilterComparison.IsEmpty:
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -483,7 +613,7 @@ public static class SeriesFilter
     public static IQueryable<Series> HasGenre(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, IList<int> genres)
     {
-        if (!condition || genres.Count == 0) return queryable;
+        if (!condition || (comparison != FilterComparison.IsEmpty && genres.Count == 0)) return queryable;
 
         switch (comparison)
         {
@@ -502,6 +632,8 @@ public static class SeriesFilter
                 queries.AddRange(genres.Select(gId => queryable.Where(s => s.Metadata.Genres.Any(p => p.Id == gId))));
 
                 return queries.Aggregate((q1, q2) => q1.Intersect(q2));
+            case FilterComparison.IsEmpty:
+                return queryable.Where(s => s.Metadata.Genres.Count == 0);
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -544,6 +676,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
+            case FilterComparison.IsEmpty:
                 throw new KavitaException($"{comparison} not applicable for Series.Format");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
@@ -553,7 +686,7 @@ public static class SeriesFilter
     public static IQueryable<Series> HasCollectionTags(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, IList<int> collectionTags, IList<int> collectionSeries)
     {
-        if (!condition || collectionTags.Count == 0) return queryable;
+        if (!condition || (comparison != FilterComparison.IsEmpty && collectionTags.Count == 0)) return queryable;
 
 
         switch (comparison)
@@ -573,6 +706,8 @@ public static class SeriesFilter
                 queries.AddRange(collectionSeries.Select(gId => queryable.Where(s => collectionSeries.Any(p => p == s.Id))));
 
                 return queries.Aggregate((q1, q2) => q1.Intersect(q2));
+            case FilterComparison.IsEmpty:
+                return queryable.Where(s => s.Collections.Count == 0);
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -633,6 +768,7 @@ public static class SeriesFilter
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
             case FilterComparison.MustContains:
+            case FilterComparison.IsEmpty:
                 throw new KavitaException($"{comparison} not applicable for Series.Name");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
@@ -656,6 +792,8 @@ public static class SeriesFilter
                 return queryable.Where(s => EF.Functions.Like(s.Metadata.Summary, $"%{queryString}%"));
             case FilterComparison.NotEqual:
                 return queryable.Where(s => s.Metadata.Summary != queryString);
+            case FilterComparison.IsEmpty:
+                return queryable.Where(s => string.IsNullOrEmpty(s.Metadata.Summary));
             case FilterComparison.NotContains:
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
@@ -703,6 +841,7 @@ public static class SeriesFilter
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
             case FilterComparison.MustContains:
+            case FilterComparison.IsEmpty:
                 throw new KavitaException($"{comparison} not applicable for Series.FolderPath");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
@@ -779,6 +918,7 @@ public static class SeriesFilter
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
             case FilterComparison.MustContains:
+            case FilterComparison.IsEmpty:
                 throw new KavitaException($"{comparison} not applicable for Series.FolderPath");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");

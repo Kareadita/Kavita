@@ -7,7 +7,9 @@ using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using Hangfire;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -90,6 +92,13 @@ public class BookmarkService : IBookmarkService
         var bookmark = await _unitOfWork.UserRepository.GetBookmarkAsync(bookmarkId);
         if (bookmark == null) return;
 
+        // Validate the bookmark isn't already in target format
+        if (bookmark.FileName.EndsWith(encodeFormat.GetExtension()))
+        {
+            // Nothing to ddo
+            return;
+        }
+
         bookmark.FileName = await _mediaConversionService.SaveAsEncodingFormat(bookmarkDirectory, bookmark.FileName,
             BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId), encodeFormat);
         _unitOfWork.UserRepository.Update(bookmark);
@@ -105,12 +114,17 @@ public class BookmarkService : IBookmarkService
     /// <param name="bookmarkDto"></param>
     /// <param name="imageToBookmark">Full path to the cached image that is going to be copied</param>
     /// <returns>If the save to DB and copy was successful</returns>
-    public async Task<bool> BookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto, string imageToBookmark)
+    public async Task<bool> BookmarkPage(AppUser? userWithBookmarks, BookmarkDto bookmarkDto, string imageToBookmark)
     {
-        if (userWithBookmarks == null || userWithBookmarks.Bookmarks == null) return false;
+        if (userWithBookmarks?.Bookmarks == null)
+        {
+            throw new KavitaException("Bookmarks cannot be null!");
+        }
+
         try
         {
-            var userBookmark = userWithBookmarks.Bookmarks.SingleOrDefault(b => b.Page == bookmarkDto.Page && b.ChapterId == bookmarkDto.ChapterId);
+            var userBookmark = userWithBookmarks.Bookmarks
+                .SingleOrDefault(b => b.Page == bookmarkDto.Page && b.ChapterId == bookmarkDto.ChapterId && b.ImageOffset == bookmarkDto.ImageOffset);
             if (userBookmark != null)
             {
                 _logger.LogError("Bookmark already exists for Series {SeriesId}, Volume {VolumeId}, Chapter {ChapterId}, Page {PageNum}", bookmarkDto.SeriesId, bookmarkDto.VolumeId, bookmarkDto.ChapterId, bookmarkDto.Page);
@@ -129,6 +143,9 @@ public class BookmarkService : IBookmarkService
                 SeriesId = bookmarkDto.SeriesId,
                 ChapterId = bookmarkDto.ChapterId,
                 FileName = Path.Join(targetFolderStem, fileInfo.Name),
+                ImageOffset = bookmarkDto.ImageOffset,
+                XPath = bookmarkDto.XPath,
+                ChapterTitle = bookmarkDto.ChapterTitle,
                 AppUserId = userWithBookmarks.Id
             };
 
@@ -137,7 +154,7 @@ public class BookmarkService : IBookmarkService
             _unitOfWork.UserRepository.Add(bookmark);
             await _unitOfWork.CommitAsync();
 
-            if (settings.EncodeMediaAs == EncodeFormat.WEBP)
+            if (settings.EncodeMediaAs != EncodeFormat.PNG)
             {
                 // Enqueue a task to convert the bookmark to webP
                 BackgroundJob.Enqueue(() => ConvertBookmarkToEncoding(bookmark.Id));
@@ -162,7 +179,7 @@ public class BookmarkService : IBookmarkService
     public async Task<bool> RemoveBookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto)
     {
         var bookmarkToDelete = userWithBookmarks.Bookmarks.SingleOrDefault(x =>
-            x.ChapterId == bookmarkDto.ChapterId && x.Page == bookmarkDto.Page);
+            x.ChapterId == bookmarkDto.ChapterId && x.Page == bookmarkDto.Page && x.ImageOffset == bookmarkDto.ImageOffset);
         try
         {
             if (bookmarkToDelete != null)

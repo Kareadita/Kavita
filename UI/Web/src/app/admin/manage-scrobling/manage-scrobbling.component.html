@@ -1,0 +1,9 @@
+
+<app-user-scrobble-history></app-user-scrobble-history>
+
+@if(accountService.isAdmin$ | async) {
+  <div class="setting-section-break"></div>
+  <div class="mt-4">
+    <app-manage-scrobble-errors (scrobbleCount)="updateScrobbleErrorCount($event)"></app-manage-scrobble-errors>
+  </div>
+}

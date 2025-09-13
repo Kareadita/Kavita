@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Metadata;
+using API.Entities.MetadataMatching;
+using API.Entities.Person;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Entities;
 
-public class Chapter : IEntityDate, IHasReadTimeEstimate
+public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKPlusMetadata
 {
     public int Id { get; set; }
     /// <summary>
@@ -46,11 +48,9 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
 
-    /// <summary>
-    /// Relative path to the (managed) image file representing the cover image
-    /// </summary>
-    /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
     public string? CoverImage { get; set; }
+    public string PrimaryColor { get; set; }
+    public string SecondaryColor { get; set; }
     public bool CoverImageLocked { get; set; }
     /// <summary>
     /// Total number of pages in all MangaFiles
@@ -120,7 +120,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// <inheritdoc cref="IHasReadTimeEstimate"/>
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate"/>
-    public int AvgHoursToRead { get; set; }
+    public float AvgHoursToRead { get; set; }
     /// <summary>
     /// Comma-separated link of urls to external services that have some relation to the Chapter
     /// </summary>
@@ -128,14 +128,51 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public string ISBN { get; set; } = string.Empty;
 
     /// <summary>
+    /// Tracks which metadata has been set by K+
+    /// </summary>
+    public IList<MetadataSettingField> KPlusOverrides { get; set; } = [];
+
+    /// <summary>
+    /// (Kavita+) Average rating from Kavita+ metadata
+    /// </summary>
+    public float AverageExternalRating { get; set; } = 0f;
+
+    #region Locks
+
+    public bool AgeRatingLocked { get; set; }
+    public bool TitleNameLocked { get; set; }
+    public bool GenresLocked { get; set; }
+    public bool TagsLocked { get; set; }
+    public bool WriterLocked { get; set; }
+    public bool CharacterLocked { get; set; }
+    public bool ColoristLocked { get; set; }
+    public bool EditorLocked { get; set; }
+    public bool InkerLocked { get; set; }
+    public bool ImprintLocked { get; set; }
+    public bool LettererLocked { get; set; }
+    public bool PencillerLocked { get; set; }
+    public bool PublisherLocked { get; set; }
+    public bool TranslatorLocked { get; set; }
+    public bool TeamLocked { get; set; }
+    public bool LocationLocked { get; set; }
+    public bool CoverArtistLocked { get; set; }
+    public bool LanguageLocked { get; set; }
+    public bool SummaryLocked { get; set; }
+    public bool ISBNLocked { get; set; }
+    public bool ReleaseDateLocked { get; set; }
+
+    #endregion
+
+    /// <summary>
     /// All people attached at a Chapter level. Usually Comics will have different people per issue.
     /// </summary>
-    public ICollection<Person> People { get; set; } = new List<Person>();
+    public ICollection<ChapterPeople> People { get; set; } = new List<ChapterPeople>();
     /// <summary>
     /// Genres for the Chapter
     /// </summary>
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+    public ICollection<AppUserChapterRating> Ratings { get; set; } = [];
 
     public ICollection<AppUserProgress> UserProgress { get; set; }
 
@@ -143,6 +180,9 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     // Relationships
     public Volume Volume { get; set; } = null!;
     public int VolumeId { get; set; }
+
+    public ICollection<ExternalReview> ExternalReviews { get; set; } = [];
+    public ICollection<ExternalRating> ExternalRatings { get; set; } = null!;
 
     public void UpdateFrom(ParserInfo info)
     {
@@ -154,8 +194,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
             MinNumber = Parser.DefaultChapterNumber;
             MaxNumber = Parser.DefaultChapterNumber;
         }
-        // NOTE: This doesn't work well for all because Pdf usually should use into.Title or even filename
-        Title = (IsSpecial && info.Format == MangaFormat.Epub)
+        Title = (IsSpecial && info.Format is MangaFormat.Epub or MangaFormat.Pdf)
             ? info.Title
             : Parser.RemoveExtensionIfSupported(Range);
 
@@ -169,22 +208,30 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// <returns></returns>
     public string GetNumberTitle()
     {
-        if (MinNumber.Is(MaxNumber))
+        try
         {
-            if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
+            if (MinNumber.Is(MaxNumber))
             {
-                return Parser.RemoveExtensionIfSupported(Title);
+                if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
+                {
+                    return Parser.RemoveExtensionIfSupported(Title);
+                }
+
+                if (MinNumber.Is(0f) && !float.TryParse(Range, CultureInfo.InvariantCulture, out _))
+                {
+                    return $"{Range.ToString(CultureInfo.InvariantCulture)}";
+                }
+
+                return $"{MinNumber.ToString(CultureInfo.InvariantCulture)}";
+
             }
 
-            if (MinNumber.Is(0) && !float.TryParse(Range, CultureInfo.InvariantCulture, out _))
-            {
-                return $"{Range}";
-            }
-
-            return $"{MinNumber}";
-
+            return $"{MinNumber.ToString(CultureInfo.InvariantCulture)}-{MaxNumber.ToString(CultureInfo.InvariantCulture)}";
         }
-        return $"{MinNumber}-{MaxNumber}";
+        catch (Exception)
+        {
+            return MinNumber.ToString(CultureInfo.InvariantCulture);
+        }
     }
 
     /// <summary>
@@ -194,5 +241,32 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public bool IsSingleVolumeChapter()
     {
         return MinNumber.Is(Parser.DefaultChapterNumber) && !IsSpecial;
+    }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
+
+    public bool IsPersonRoleLocked(PersonRole role)
+    {
+        return role switch
+        {
+            PersonRole.Character => CharacterLocked,
+            PersonRole.Writer => WriterLocked,
+            PersonRole.Penciller => PencillerLocked,
+            PersonRole.Inker => InkerLocked,
+            PersonRole.Colorist => ColoristLocked,
+            PersonRole.Letterer => LettererLocked,
+            PersonRole.CoverArtist => CoverArtistLocked,
+            PersonRole.Editor => EditorLocked,
+            PersonRole.Publisher => PublisherLocked,
+            PersonRole.Translator => TranslatorLocked,
+            PersonRole.Imprint => ImprintLocked,
+            PersonRole.Team => TeamLocked,
+            PersonRole.Location => LocationLocked,
+            _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
+        };
     }
 }

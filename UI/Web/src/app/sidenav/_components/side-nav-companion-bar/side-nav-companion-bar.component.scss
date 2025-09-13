@@ -1,3 +1,39 @@
 .hide-if-empty:empty {
     display: none !important;
 }
+
+.btn-icon {
+  position: relative;
+}
+
+.icon-position {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  font-size: 0.8em;
+  color: var(--primary-color);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon-position.active {
+  animation: spin 3.3s linear infinite;
+}
+
+.icon-container::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  bottom: -4px;
+  width: 23px;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease, left 0.3s ease;
+}

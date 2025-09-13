@@ -1,0 +1,26 @@
+.text-muted {
+  font-size: 0.9rem;
+
+  a {
+    color: var(--primary-color);
+  }
+}
+
+.view-value {
+  font-size: 18px;
+  color: var(--primary-color);
+  cursor: pointer;
+}
+
+.non-selectable {
+  cursor: default;
+}
+
+.btn-alignment {
+  padding-bottom: 0.5rem; // Align with h6
+  padding-top: 0;
+}
+
+.edit-btn {
+  color: var(--primary-color);
+}

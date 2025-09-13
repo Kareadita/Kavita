@@ -1,25 +1,8 @@
-.update-body {
-    width: 100%;
-    word-wrap: break-word;
-    white-space: pre-wrap;
+.update-details {
+  border-radius: 0.5rem;
 }
 
 
-
-::ng-deep .changelog  {
-
-    h1 {
-        font-size: 26px;
-    }
-
-    p, ul {
-        margin-bottom: 0px;
-    }
-
-  img {
-    max-width: 100% !important;
-  }
-
-
+.changelog-header {
+  color: var(--body-text-color);
 }
-

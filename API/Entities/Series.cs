@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
-using API.Extensions;
 
 namespace API.Entities;
 
-public class Series : IEntityDate, IHasReadTimeEstimate
+public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
 {
     public int Id { get; set; }
     /// <summary>
@@ -39,7 +38,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public DateTime Created { get; set; }
     /// <summary>
-    /// Whenever a modification occurs. Ie) New volumes, removed volumes, title update, etc
+    /// Whenever a modification occurs. ex: New volumes, removed volumes, title update, etc
     /// </summary>
     public DateTime LastModified { get; set; }
 
@@ -82,6 +81,9 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public MangaFormat Format { get; set; } = MangaFormat.Unknown;
 
+    public string PrimaryColor { get; set; } = string.Empty;
+    public string SecondaryColor { get; set; } = string.Empty;
+
     public bool SortNameLocked { get; set; }
     public bool LocalizedNameLocked { get; set; }
 
@@ -99,7 +101,18 @@ public class Series : IEntityDate, IHasReadTimeEstimate
 
     public int MinHoursToRead { get; set; }
     public int MaxHoursToRead { get; set; }
-    public int AvgHoursToRead { get; set; }
+    public float AvgHoursToRead { get; set; }
+
+    #region KavitaPlus
+    /// <summary>
+    /// Do not match the series with any external Metadata service. This will automatically opt it out of scrobbling.
+    /// </summary>
+    public bool DontMatch { get; set; }
+    /// <summary>
+    /// If the series was unable to match, it will be blacklisted until a manual metadata match overrides it
+    /// </summary>
+    public bool IsBlacklisted { get; set; }
+    #endregion
 
     public SeriesMetadata Metadata { get; set; } = null!;
     public ExternalSeriesMetadata ExternalSeriesMetadata { get; set; } = null!;
@@ -142,5 +155,21 @@ public class Series : IEntityDate, IHasReadTimeEstimate
                NormalizedLocalizedName == nameNormalized ||
                NormalizedName == localizedNameNormalized ||
                NormalizedLocalizedName == localizedNameNormalized;
+    }
+
+    public void ResetColorScape()
+    {
+        PrimaryColor = string.Empty;
+        SecondaryColor = string.Empty;
+    }
+
+    /// <summary>
+    /// Is this Series capable of Scrobbling
+    /// </summary>
+    /// <remarks>This includes if there is no Match/Manual Match needed, the series is blacklisted, or has a NoMatch</remarks>
+    /// <returns></returns>
+    public bool WillScrobble()
+    {
+        return !IsBlacklisted && !DontMatch;
     }
 }

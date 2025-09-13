@@ -3,7 +3,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Builders;
-using API.Tests.Helpers;
 using Xunit;
 
 namespace API.Tests.Extensions;

@@ -7,25 +7,29 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
-import { map, Observable, of, shareReplay, take } from 'rxjs';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ToastrService} from 'ngx-toastr';
+import {map, Observable, of, shareReplay} from 'rxjs';
+import {User} from 'src/app/_models/user';
+import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import { NgIf, NgFor, AsyncPipe } from '@angular/common';
-import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {AsyncPipe} from "@angular/common";
 
 @Component({
     selector: 'app-change-password',
     templateUrl: './change-password.component.html',
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-  imports: [NgIf, NgbCollapse, NgFor, ReactiveFormsModule, AsyncPipe, TranslocoDirective]
+  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, AsyncPipe]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly accountService = inject(AccountService);
+  private readonly toastr = inject(ToastrService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   passwordChangeForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
@@ -33,19 +37,18 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   observableHandles: Array<any> = [];
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
-  isViewMode: boolean = true;
-  private readonly destroyRef = inject(DestroyRef);
+  isEditMode: boolean = false;
+  canEdit: boolean = false;
+
 
   public get password() { return this.passwordChangeForm.get('password'); }
   public get confirmPassword() { return this.passwordChangeForm.get('confirmPassword'); }
-
-
-  constructor(private accountService: AccountService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
 
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay()).subscribe(user => {
       this.user = user;
+      this.canEdit = !this.accountService.hasReadOnlyRole(user!);
       this.cdRef.markForCheck();
     });
 
@@ -85,14 +88,16 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
     this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword, model.oldPassword).subscribe(() => {
       this.toastr.success(translate('toasts.password-updated'));
       this.resetPasswordForm();
-      this.isViewMode = true;
+      this.isEditMode = false;
+      this.cdRef.markForCheck();
     }, err => {
       this.resetPasswordErrors = err;
+      this.cdRef.markForCheck();
     }));
   }
 
-  toggleViewMode() {
-    this.isViewMode = !this.isViewMode;
-    this.resetPasswordForm();
+  updateEditMode(mode: boolean) {
+    this.isEditMode = mode;
+    this.cdRef.markForCheck();
   }
 }

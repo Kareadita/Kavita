@@ -7,7 +7,7 @@ namespace API.DTOs.Reader;
 /// <summary>
 /// Information about the Chapter for the Reader to render
 /// </summary>
-public class ChapterInfoDto : IChapterInfoDto
+public sealed record ChapterInfoDto : IChapterInfoDto
 {
     /// <summary>
     /// The Chapter Number

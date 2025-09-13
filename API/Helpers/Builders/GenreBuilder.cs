@@ -16,14 +16,14 @@ public class GenreBuilder : IEntityBuilder<Genre>
         {
             Title = name.Trim().SentenceCase(),
             NormalizedTitle = name.ToNormalized(),
-            Chapters = new List<Chapter>(),
-            SeriesMetadatas = new List<SeriesMetadata>()
+            Chapters = [],
+            SeriesMetadatas = []
         };
     }
 
     public GenreBuilder WithSeriesMetadata(SeriesMetadata seriesMetadata)
     {
-        _genre.SeriesMetadatas ??= new List<SeriesMetadata>();
+        _genre.SeriesMetadatas ??= [];
         _genre.SeriesMetadatas.Add(seriesMetadata);
         return this;
     }

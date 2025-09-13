@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.Entities.Enums;
 using API.Services.Plus;
 
 namespace API.Entities.Metadata;
@@ -20,6 +21,7 @@ public class ExternalReview
     /// </summary>
     public string RawBody { get; set; }
     public required ScrobbleProvider Provider { get; set; }
+    public RatingAuthority Authority { get; set; } = RatingAuthority.User;
     public string SiteUrl { get; set; }
     /// <summary>
     /// Reviewer's username
@@ -37,6 +39,7 @@ public class ExternalReview
 
 
     public int SeriesId { get; set; }
+    public int? ChapterId { get; set; }
 
     // Relationships
     public ICollection<ExternalSeriesMetadata> ExternalSeriesMetadatas { get; set; } = null!;

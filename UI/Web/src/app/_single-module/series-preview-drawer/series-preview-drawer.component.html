@@ -2,22 +2,25 @@
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">
       {{name}}
-
     </h5>
     <button type="button" class="btn-close text-reset" [attr.aria-label]="t('common.close')" (click)="close()"></button>
   </div>
 
   <div class="offcanvas-body">
-    <ng-container *ngIf="CoverUrl as coverUrl">
+    @if (CoverUrl; as coverUrl) {
       <div style="width: 160px" class="mx-auto mb-3">
-        <app-image *ngIf="coverUrl" height="230px" width="160px" [styles]="{'object-fit': 'contain', 'max-height': '230px'}" [imageUrl]="coverUrl"></app-image>
+        @if (coverUrl) {
+          <app-image height="232.91px" width="160px" [styles]="{'object-fit': 'contain', 'max-height': '232.91px'}" [imageUrl]="coverUrl"></app-image>
+        }
       </div>
-    </ng-container>
+    }
 
-    <ng-container *ngIf="externalSeries; else localSeriesBody">
-      <div *ngIf="(externalSeries.volumeCount || 0) > 0 || (externalSeries.chapterCount || 0) > 0" class="text-muted muted mb-2">
-        {{t('series-preview-drawer.vols-and-chapters', {volCount: externalSeries.volumeCount, chpCount: externalSeries.chapterCount})}}
-      </div>
+    @if (externalSeries) {
+      @if ((externalSeries.volumeCount || 0) > 0 || (externalSeries.chapterCount || 0) > 0) {
+        <div class="text-muted muted mb-2">
+          {{t('series-preview-drawer.vols-and-chapters', {volCount: externalSeries.volumeCount, chpCount: externalSeries.chapterCount})}}
+        </div>
+      }
 
       @if(isExternalSeries && externalSeries) {
         <div class="text-muted muted mb-2">
@@ -26,14 +29,20 @@
         </div>
       }
 
-      <app-read-more *ngIf="externalSeries.summary" [maxLength]="300" [text]="externalSeries.summary"></app-read-more>
+      @if (externalSeries.summary) {
+        <app-read-more [maxLength]="300" [text]="externalSeries.summary"></app-read-more>
+      }
+    }
 
+      <a class="btn btn-primary col-12 mt-2" [href]="url" target="_blank" rel="noopener noreferrer">
+        {{t('series-preview-drawer.view-series')}}
+      </a>
+
+    @if (externalSeries) {
       <div class="mt-3">
         <app-metadata-detail [tags]="externalSeries.genres" [libraryId]="0"  [heading]="t('series-preview-drawer.genres-label')">
           <ng-template #itemTemplate let-item>
-            <app-tag-badge>
-              {{item}}
-            </app-tag-badge>
+            <span class="dark-exempt btn-icon not-clickable">{{item}}</span>
           </ng-template>
         </app-metadata-detail>
       </div>
@@ -41,25 +50,70 @@
       <div class="mt-3">
         <app-metadata-detail [tags]="externalSeries.tags" [libraryId]="0"  [heading]="t('series-preview-drawer.tags-label')">
           <ng-template #itemTemplate let-item>
-            <app-tag-badge>
-              {{item.name}}
-            </app-tag-badge>
+            <span class="dark-exempt btn-icon not-clickable">{{item.name}}</span>
           </ng-template>
         </app-metadata-detail>
       </div>
 
       <div class="mt-3">
-        <app-metadata-detail [tags]="externalSeries.staff" [libraryId]="0"  [heading]="t('series-preview-drawer.staff-label')">
+        <app-metadata-detail [tags]="externalSeries.staff" [libraryId]="0"  [heading]="t('series-preview-drawer.staff-label')" [includeComma]="false">
           <ng-template #itemTemplate let-item>
-            <div class="card mb-3" style="max-width: 180px;">
+            <div class="card mb-3">
+              <div class="row g-0">
+                <div class="col-md-3">
+                  @if (item.imageUrl && !item.imageUrl.endsWith('default.jpg')) {
+                    <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}" [imageUrl]="item.imageUrl" classes="person-img"></app-image>
+                  } @else {
+                    <i class="fa fa-user-circle align-self-center person-img" style="font-size: 28px;" aria-hidden="true"></i>
+                  }
+                </div>
+                <div class="col-md-9">
+                  <div class="card-body">
+                    <h6 class="card-title">{{item.name}}</h6>
+                    <p class="card-text" style="font-size: 14px"><small class="text-muted">{{item.role}}</small></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </app-metadata-detail>
+      </div>
+    }
+    @else if(localSeries) {
+      <div class="d-inline-block mb-2 mt-2" style="width: 100%">
+        <span class="text-muted muted">{{localSeries.publicationStatus | publicationStatus}}</span>
+        <button class="btn btn-secondary btn-sm float-end me-3"
+                (click)="toggleWantToRead()"
+                ngbTooltip="{{wantToRead ? t('series-preview-drawer.remove-from-want-to-read') : t('series-preview-drawer.add-to-want-to-read')}}">
+          <i class="{{wantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <app-read-more [maxLength]="300" [text]="localSeries.summary"></app-read-more>
+
+      <div class="mt-3">
+        <app-metadata-detail [tags]="localSeries.genres" [libraryId]="0"  [heading]="t('series-preview-drawer.genres-label')">
+          <ng-template #itemTemplate let-item>
+            <a class="dark-exempt btn-icon not-clickable">{{item.title}}</a>
+          </ng-template>
+        </app-metadata-detail>
+      </div>
+
+      <div class="mt-3">
+        <app-metadata-detail [tags]="localSeries.tags" [libraryId]="0" [heading]="t('series-preview-drawer.tags-label')">
+          <ng-template #itemTemplate let-item>
+            <span class="dark-exempt btn-icon not-clickable">{{item.title}}</span>
+          </ng-template>
+        </app-metadata-detail>
+      </div>
+
+      <div class="mt-3">
+        <app-metadata-detail [tags]="localStaff" [libraryId]="0" [heading]="t('series-preview-drawer.staff-label')" [includeComma]="false">
+          <ng-template #itemTemplate let-item>
+            <div class="card mb-3">
               <div class="row g-0">
                 <div class="col-md-4">
-                  <ng-container *ngIf="item.imageUrl && !item.imageUrl.endsWith('default.jpg'); else localPerson">
-                    <app-image height="24px" width="24px" [styles]="{'object-fit': 'contain'}" [imageUrl]="item.imageUrl" classes="person-img"></app-image>
-                  </ng-container>
-                  <ng-template #localPerson>
-                    <i class="fa fa-user-circle align-self-center person-img" style="font-size: 28px;" aria-hidden="true"></i>
-                  </ng-template>
+                  <i class="fa fa-user-circle align-self-center" style="font-size: 28px; margin-top: 24px; margin-left: 24px" aria-hidden="true"></i>
                 </div>
                 <div class="col-md-8">
                   <div class="card-body">
@@ -72,67 +126,8 @@
           </ng-template>
         </app-metadata-detail>
       </div>
-    </ng-container>
-
-    <ng-template #localSeriesBody>
-      <ng-container *ngIf="localSeries">
-        <div class="d-inline-block mb-2" style="width: 100%">
-          <span class="text-muted muted">{{localSeries.publicationStatus | publicationStatus}}</span>
-          <button class="btn btn-secondary btn-sm float-end me-3"
-                  (click)="toggleWantToRead()"
-                  ngbTooltip="{{wantToRead ? t('series-preview-drawer.remove-from-want-to-read') : t('series-preview-drawer.add-to-want-to-read')}}">
-            <i class="{{wantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
-          </button>
-        </div>
-        <app-read-more [maxLength]="300" [text]="localSeries.summary"></app-read-more>
-
-        <div class="mt-3">
-          <app-metadata-detail [tags]="localSeries.genres" [libraryId]="0"  [heading]="t('series-preview-drawer.genres-label')">
-            <ng-template #itemTemplate let-item>
-              <app-tag-badge>
-                {{item.title}}
-              </app-tag-badge>
-            </ng-template>
-          </app-metadata-detail>
-        </div>
-
-        <div class="mt-3">
-          <app-metadata-detail [tags]="localSeries.tags" [libraryId]="0" [heading]="t('series-preview-drawer.tags-label')">
-            <ng-template #itemTemplate let-item>
-              <app-tag-badge>
-                {{item.title}}
-              </app-tag-badge>
-            </ng-template>
-          </app-metadata-detail>
-        </div>
-
-        <div class="mt-3">
-          <app-metadata-detail [tags]="localStaff" [libraryId]="0" [heading]="t('series-preview-drawer.staff-label')">
-            <ng-template #itemTemplate let-item>
-              <div class="card mb-3" style="max-width: 180px;">
-                <div class="row g-0">
-                  <div class="col-md-4">
-                    <i class="fa fa-user-circle align-self-center" style="font-size: 28px; margin-top: 24px; margin-left: 24px" aria-hidden="true"></i>
-                  </div>
-                  <div class="col-md-8">
-                    <div class="card-body">
-                      <h6 class="card-title">{{item.name}}</h6>
-                      <p class="card-text" style="font-size: 14px"><small class="text-muted">{{item.role}}</small></p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ng-template>
-          </app-metadata-detail>
-        </div>
-
-      </ng-container>
-    </ng-template>
+    }
 
     <app-loading [loading]="isLoading"></app-loading>
-
-    <a class="btn btn-primary col-12 mt-2" [href]="url" target="_blank" rel="noopener noreferrer">
-      {{t('series-preview-drawer.view-series')}}
-    </a>
   </div>
 </ng-container>

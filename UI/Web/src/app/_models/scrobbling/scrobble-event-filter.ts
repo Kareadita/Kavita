@@ -4,7 +4,8 @@ export enum ScrobbleEventSortField {
   LastModified = 2,
   Type= 3,
   Series = 4,
-  IsProcessed = 5
+  IsProcessed = 5,
+  ScrobbleEvent = 6
 }
 
 export interface ScrobbleEventFilter {

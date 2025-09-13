@@ -1,6 +1,8 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using API.DTOs.Settings;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Scrobble;
@@ -19,7 +21,9 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     public ICollection<AppUserRole> UserRoles { get; set; } = null!;
     public ICollection<AppUserProgress> Progresses { get; set; } = null!;
     public ICollection<AppUserRating> Ratings { get; set; } = null!;
+    public ICollection<AppUserChapterRating> ChapterRatings { get; set; } = null!;
     public AppUserPreferences UserPreferences { get; set; } = null!;
+    public ICollection<AppUserReadingProfile> ReadingProfiles { get; set; } = null!;
     /// <summary>
     /// Bookmarks associated with this User
     /// </summary>
@@ -44,6 +48,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// A list of Table of Contents for a given Chapter
     /// </summary>
     public ICollection<AppUserTableOfContent> TableOfContents { get; set; } = null!;
+    public ICollection<AppUserAnnotation> Annotations { get; set; } = null!;
     /// <summary>
     /// An API Key to interact with external services, like OPDS
     /// </summary>
@@ -75,6 +80,27 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// The Client ID for the user's MAL account. User should create a client on MAL for this.
     /// </summary>
     public string? MalAccessToken { get; set; }
+
+    /// <summary>
+    /// Has the user ran Scrobble Event Generation
+    /// </summary>
+    /// <remarks>Only applicable for Kavita+ and when a Token is present</remarks>
+    public bool HasRunScrobbleEventGeneration { get; set; }
+    /// <summary>
+    /// The timestamp of when Scrobble Event Generation ran (Utc)
+    /// </summary>
+    /// <remarks>Kavita+ only</remarks>
+    public DateTime ScrobbleEventGenerationRan { get; set; }
+
+    /// <summary>
+    /// The sub returned the by OIDC provider
+    /// </summary>
+    public string? OidcId { get; set; }
+    /// <summary>
+    /// The IdentityProvider for the user, default to <see cref="Enums.IdentityProvider.Kavita"/>
+    /// </summary>
+    public IdentityProvider IdentityProvider { get; set; } = IdentityProvider.Kavita;
+
 
     /// <summary>
     /// A list of Series the user doesn't want scrobbling for

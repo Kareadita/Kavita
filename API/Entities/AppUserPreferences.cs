@@ -1,4 +1,5 @@
-﻿using API.Data;
+﻿using System.Collections.Generic;
+using API.Data;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 
@@ -54,6 +55,10 @@ public class AppUserPreferences
     /// Manga Reader Option: Should swiping trigger pagination
     /// </summary>
     public bool SwipeToPaginate { get; set; }
+    /// <summary>
+    /// Manga Reader Option: Allow Automatic Webtoon detection
+    /// </summary>
+    public bool AllowAutomaticWebtoonReaderDetection { get; set; }
 
     #endregion
 
@@ -103,6 +108,10 @@ public class AppUserPreferences
     /// </summary>
     /// <remarks>Defaults to false</remarks>
     public bool BookReaderImmersiveMode { get; set; } = false;
+    /// <summary>
+    /// Book Reader Option: A set of 5 distinct highlight slots with default colors. User can customize. Binds to all Highlight Annotations (<see cref="AppUserAnnotation"/>.
+    /// </summary>
+    public List<HighlightSlot> BookReaderHighlightSlots { get; set; }
     #endregion
 
     #region PdfReader
@@ -160,7 +169,17 @@ public class AppUserPreferences
     /// UI Site Global Setting: The language locale that should be used for the user
     /// </summary>
     public string Locale { get; set; }
+    #endregion
 
+    #region KavitaPlus
+    /// <summary>
+    /// Should this account have Scrobbling enabled for AniList
+    /// </summary>
+    public bool AniListScrobblingEnabled { get; set; }
+    /// <summary>
+    /// Should this account have Want to Read Sync enabled
+    /// </summary>
+    public bool WantToReadSync { get; set; }
     #endregion
 
     public AppUser AppUser { get; set; } = null!;

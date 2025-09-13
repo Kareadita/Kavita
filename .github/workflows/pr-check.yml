@@ -1,15 +1,13 @@
 name: Validate PR Body
 
 on:
-    push:
-        branches: '**'
     pull_request:
         branches: [ main, develop, canary ]
         types: [synchronize]
 
 jobs:
     check_pr:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-24.04
         steps:
             - name: Extract branch name
               shell: bash
