@@ -1,23 +1,12 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  Inject,
-  inject,
-  OnInit,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {FontService} from "src/app/_services/font.service";
 import {AccountService} from "../../../_services/account.service";
-import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EpubFont, FontProvider} from 'src/app/_models/preferences/epub-font';
-import {User} from "../../../_models/user";
 import {NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
 import {DOCUMENT, NgStyle, NgTemplateOutlet} from "@angular/common";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
-import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -59,7 +48,19 @@ export class FontManagerComponent implements OnInit {
   protected readonly FontProvider = FontProvider;
 
   user = this.accountService.currentUserSignal;
+
   fonts = signal<EpubFont[]>([]);
+  visibleFonts = computed(() => {
+    const fonts = this.fonts();
+    const hide = this.hideSystemFonts();
+    if (!hide) return fonts;
+
+    return fonts.filter(f => f.provider === FontProvider.User);
+  });
+
+  hideSystemFonts = signal(false);
+
+
   /**
    * Fonts added during the current sessions
    */
@@ -67,14 +68,15 @@ export class FontManagerComponent implements OnInit {
 
   selectedFont = signal<EpubFont | undefined>(undefined);
   isUploadingFont = signal(false);
+  uploadMode = signal<'file' | 'url' | 'all'>('all');
 
   form: FormGroup = new FormGroup({
     fontUrl: new FormControl('', [])
   });
 
   files: NgxFileDropEntry[] = [];
-  acceptableExtensions = ['.woff2', 'woff', 'tff', 'otf'].join(',');
-  mode: 'file' | 'url' | 'all' = 'all';
+  // When accepting more types, also need to update in the Parser
+  acceptableExtensions = ['.woff2', '.woff', '.tff', '.otf'].join(',');
 
   ngOnInit() {
     this.loadFonts();
@@ -93,7 +95,7 @@ export class FontManagerComponent implements OnInit {
     }
 
 
-    if (font.name !== 'Default') {
+    if (font.name !== FontService.DefaultEpubFont) {
       this.fontService.getFontFace(font).load().then(loadedFace => {
         (this.document as any).fonts.add(loadedFace);
       });
@@ -128,6 +130,7 @@ export class FontManagerComponent implements OnInit {
     this.isUploadingFont.set(true);
     this.fontService.uploadFromUrl(url).subscribe((f) => {
       this.addFont(f);
+      this.form.get('fontUrl')!.setValue('');
       this.isUploadingFont.set(false);
     });
   }
@@ -139,13 +142,7 @@ export class FontManagerComponent implements OnInit {
 
     this.fontService.deleteFont(id).subscribe(() => {
       this.fonts.update(x => x.filter(f => f.id !== id))
-      this.cdRef.markForCheck();
     });
-  }
-
-  changeMode(mode: 'file' | 'url' | 'all') {
-    this.mode = mode;
-    this.cdRef.markForCheck();
   }
 
   private addFont(font: EpubFont) {
@@ -157,4 +154,5 @@ export class FontManagerComponent implements OnInit {
     return this.loadedFonts().includes(font) ? 'loaded' : '';
   }
 
+  protected readonly FontService = FontService;
 }

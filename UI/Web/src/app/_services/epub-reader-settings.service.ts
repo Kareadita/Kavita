@@ -482,11 +482,11 @@ export class EpubReaderSettingsService {
     ).subscribe(fontName => {
       this.isUpdatingFromForm = true;
 
-      const familyName = this._epubFonts().find(f => f.name === fontName)?.name || 'default';
+      const familyName = this._epubFonts().find(f => f.name === fontName)?.name || FontService.DefaultEpubFont;
       const currentStyles = this._pageStyles();
 
       const newStyles = { ...currentStyles };
-      if (familyName === 'default') {
+      if (familyName === FontService.DefaultEpubFont) {
         newStyles['font-family'] = 'inherit';
       } else {
         newStyles['font-family'] = `'${familyName}'`;

@@ -259,7 +259,7 @@
     },
 
     "font-manager": {
-        "description": "Kavita comes with a few fonts, but you can add your own. This page is for adding and removing fonts, use the book reading settings to choose the font you want to use.",
+        "description": "Kavita's epub reader comes with a few build-in fonts, add your own fonts here. Upload a file, or use a google fonts url. See the <a href='https://wiki.kavitareader.com/guides/epub-fonts/' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
         "enter-an-url-pre-title": "Enter an {{url}}",
         "url": "url",
         "add": "Add",
@@ -272,7 +272,8 @@
         "back": "Back",
         "load": "Load",
         "no-preview": "This font cannot be previewed. This will take the default style from the book.",
-        "brown-fox": "The quick brown fox jumps over the lazy dog"
+        "brown-fox": "The quick brown fox jumps over the lazy dog",
+        "filter-system-fonts-label": "Filter System Fonts"
     },
 
     "theme": {
@@ -1897,7 +1898,7 @@
         "user-stats": "Stats",
         "scrobbling": "Scrobbling",
         "theme": "Theme",
-        "font": "Font",
+        "font": "Epub Fonts",
         "customize": "Customize",
         "cbl-import": "CBL Reading List",
         "mal-stack-import": "MAL Stack",

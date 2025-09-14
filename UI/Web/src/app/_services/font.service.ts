@@ -13,10 +13,11 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 })
 export class FontService {
 
+  public static readonly DefaultEpubFont = 'Default';
+
   private readonly httpClient = inject(HttpClient);
   private readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
-  public defaultEpubFont: string = 'default';
 
   baseUrl: string = environment.apiUrl;
   apiKey: string = '';
