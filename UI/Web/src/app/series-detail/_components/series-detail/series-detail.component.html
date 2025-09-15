@@ -254,7 +254,7 @@
                   <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_specials') {
-                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}" />
+                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters().length}" />
                       }
                     </div>
                   </virtual-scroller>
@@ -271,7 +271,7 @@
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
-                  <app-annotations-tab [annotations]="annotations()" [displaySeries]="true" />
+                  <app-annotations-tab [annotations]="annotations()" [displaySeries]="true" [scrollingBlock]="scrollingBlock" />
                 }
               </ng-template>
             </li>
