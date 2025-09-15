@@ -997,7 +997,7 @@
         "previous": "Previous",
 
         "go-to-page": "Go to page",
-        "go-to-page-prompt": "There are {{totalPages}} pages. Which page do you want to go to?",
+        "go-to-page-prompt": "There are {{totalPages}} pages. Which page do you want to go to? Page starts at 1.",
 
         "page-num-label": "Page {{page}}",
         "completion-label": "{{percent}} complete",

@@ -135,28 +135,29 @@
         </div>
 
 
-        <div class="book-title justify-content-center">
+        <div class="d-flex mt-2 justify-content-center">
           @if(!isLoading()) {
             <span class="me-1">
-              <a class="btn-link" style="width: 100%" href="javascript:void(0);" (click)="goToPage()" [title]="t('go-to-page')">{{t('page-num-label', {page: virtualizedPageNum() + 1})}}</a>
-            / {{virtualizedMaxPages()}}
+              <a class="btn-link" style="width: 100%" href="javascript:void(0);" (click)="goToPage()" [title]="t('go-to-page')">
+                {{t('page-num-label', {page: virtualizedPageNum() + 1})}}</a> / {{virtualizedMaxPages()}}
             </span>
 
             <div class="d-none d-sm-block">
+              <span class="me-1">•</span>
               {{t('completion-label', {percent: (virtualizedPageNum() / virtualizedMaxPages()) | percent})}}
               @if (readingTimeLeftResource.value(); as timeLeft) {
-                ,
-                <span class="time-left ms-1">
+                <span class="me-1">•</span>
+                <span class="time-left">
                     <i class="fa-solid fa-clock" aria-hidden="true"></i>
                   {{timeLeft! | readTimeLeft:true }}
                 </span>
               }
-            </div>
+            </div>D
           }
 
           @if (debugMode()) {
             @let vp = getVirtualPage();
-            {{vp[0] * vp[2]}} / {{vp[1] * vp[2]}}
+            <span class="ms-2">{{vp[0] * vp[2]}} / {{vp[1] * vp[2]}}</span>
           }
 
         </div>

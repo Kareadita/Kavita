@@ -449,9 +449,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const showForVerticalDefault = !isColumnMode && isVerticalLayout;
 
+    const showWhenDefaultLayout = !isColumnMode && !isVerticalLayout;
+
     const otherCondition = !immersiveMode || isDrawerOpen || actionBarVisible;
 
-    return (baseCondition || showForVerticalDefault) && otherCondition;
+    return (baseCondition || showForVerticalDefault || showWhenDefaultLayout) && otherCondition;
   });
 
 
@@ -1148,7 +1150,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   async promptForPage() {
     const promptConfig = {...this.confirmService.defaultPrompt};
     promptConfig.header = translate('book-reader.go-to-page');
-    promptConfig.content = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages() - 1});
+    promptConfig.content = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages()});
 
     const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
 
@@ -1162,13 +1164,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const goToPageNum = await this.promptForPage();
       if (goToPageNum === null) { return; }
 
-      page = parseInt(goToPageNum.trim(), 10);
+      page = parseInt(goToPageNum.trim(), 10) - 1; // -1 since the UI displays with a +1
     }
 
     if (page === undefined || this.pageNum() === page) { return; }
 
-    if (page > this.maxPages() - 1) {
-      page = this.maxPages() - 1;
+    if (page > this.maxPages()) {
+      page = this.maxPages();
     } else if (page < 0) {
       page = 0;
     }
