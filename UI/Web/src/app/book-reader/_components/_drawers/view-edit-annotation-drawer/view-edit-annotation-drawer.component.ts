@@ -32,7 +32,7 @@ import {QuillTheme, QuillWrapperComponent} from "../../quill-wrapper/quill-wrapp
 import {ContentChange, QuillViewComponent} from "ngx-quill";
 import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {AccountService} from "../../../../_services/account.service";
-import {ResizeDirective, ResizeMode} from "../../../../_directives/resize.directive";
+import {OffCanvasResizeComponent, ResizeMode} from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 
 export enum AnnotationMode {
   View = 0,
@@ -55,7 +55,7 @@ const INIT_HIGHLIGHT_DELAY = 200;
     QuillViewComponent,
     DatePipe,
     UtcToLocaleDatePipe,
-    ResizeDirective
+    OffCanvasResizeComponent
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',

@@ -117,34 +117,39 @@
     </ng-template>
 
     <ng-template #bottomActionBar>
-      <div class="action-bar row g-0 justify-content-between">
-        <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1"
-                (click)="movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
-                [disabled]="isPrevDisabled()"
-                title="{{isLeftToRight ? t('previous') : t('next')}} Page">
-          <i class="fa {{(isLeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{isLeftToRight ? '' : 'next-page-highlight'}}" aria-hidden="true"></i>
-        </button>
+      <div class="action-bar g-0 justify-content-between">
 
-        @if (!this.adhocPageHistory.isEmpty()) {
-          <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" [title]="t('go-back')">
-            <i class="fa fa-reply" aria-hidden="true"></i>
+        <div class="d-flex">
+          <button class="btn btn-outline-secondary btn-icon ms-sm-5"
+                  (click)="movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+                  [disabled]="isPrevDisabled()"
+                  title="{{isLeftToRight ? t('previous') : t('next')}} Page">
+            <i class="fa {{(isLeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{isLeftToRight ? '' : 'next-page-highlight'}}" aria-hidden="true"></i>
           </button>
-        }
+
+          @if (!this.adhocPageHistory.isEmpty()) {
+            <button class="btn btn-outline-secondary btn-icon ms-1" (click)="goBack()" [title]="t('go-back')">
+              <i class="fa fa-reply" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
 
 
-        <div class="book-title col-3 d-none d-sm-block">
+        <div class="book-title d-none d-sm-block">
           @if(!isLoading()) {
             <span class="me-1">
                 {{t('page-num-label', {page: virtualizedPageNum()})}} / {{virtualizedMaxPages()}}
-              </span>
+            </span>
 
-            <span> {{t('completion-label', {percent: (virtualizedPageNum() / virtualizedMaxPages()) | percent})}}</span>
+            <span>
+              {{t('completion-label', {percent: (virtualizedPageNum() / virtualizedMaxPages()) | percent})}}
+            </span>
             @if (readingTimeLeftResource.value(); as timeLeft) {
               ,
-              <span class="time-left">
+              <span class="time-left ms-1">
                   <i class="fa-solid fa-clock" aria-hidden="true"></i>
                 {{timeLeft! | readTimeLeft:true }}
-                </span>
+              </span>
             }
           }
 
@@ -155,12 +160,15 @@
 
         </div>
 
-        <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
-                [disabled]="isNextDisabled()"
-                (click)="movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
-                title="{{isLeftToRight ? t('next') : t('previous')}} Page">
-          <i class="fa {{(isLeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection() === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
-        </button>
+        <div class="d-flex justify-content-end">
+          <button class="btn btn-outline-secondary btn-icon me-sm-5"
+                  [disabled]="isNextDisabled()"
+                  (click)="movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+                  title="{{isLeftToRight ? t('next') : t('previous')}} Page">
+            <i class="fa {{(isLeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection() === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
+          </button>
+        </div>
+
       </div>
     </ng-template>
   </ng-container>

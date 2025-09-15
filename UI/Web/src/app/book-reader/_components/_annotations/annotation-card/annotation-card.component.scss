@@ -1,10 +1,16 @@
 .annotation-card {
-  max-width: 400px;
+  max-width: 25rem;
+  width: 25rem;
+
+  .card-body {
+    height: 7.78rem;
+    overflow: auto;
+  }
 }
 
 .content-quote {
   color: var(--drawer-text-color);
-  max-height: 320px;
+  max-height: 20rem;
   overflow: hidden;
   display: -webkit-box;
   line-clamp: 2;

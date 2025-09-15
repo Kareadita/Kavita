@@ -1,0 +1,71 @@
+.drag-handle-bottom,
+.drag-handle-top {
+  position: sticky;
+  width: 100%;
+  height: 12px;
+  cursor: row-resize;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  background: transparent;
+  border: none;
+}
+
+.drag-handle-bottom {
+  top: 0;
+  margin-top: 2px;
+}
+
+.drag-handle-top {
+  bottom: 0;
+  margin-bottom: 2px;
+}
+
+.drag-handle-start,
+.drag-handle-end {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 60px;
+  cursor: col-resize;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  background: transparent;
+  border: none;
+}
+
+.drag-handle-start {
+  position: absolute;
+  right: 0;
+}
+
+.drag-handle-end {
+  position: absolute;
+  left: 0;
+}
+
+.drag-indicator-horizontal {
+  width: 60px;
+  height: 8px;
+  background: var(--accent-bg-color);
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.drag-indicator-vertical {
+  width: 8px;
+  height: 40px;
+  background: var(--accent-bg-color);
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.drag-handle-bottom:hover .drag-indicator-horizontal,
+.drag-handle-top:hover .drag-indicator-horizontal,
+.drag-handle-start:hover .drag-indicator-vertical,
+.drag-handle-end:hover .drag-indicator-vertical {
+  background: #6c757d;
+}
