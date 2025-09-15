@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Annotation} from "../../book-reader/_models/annotations/annotation";
 import {
@@ -14,7 +14,8 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
     VirtualScrollerModule
   ],
   templateUrl: './annotations-tab.component.html',
-  styleUrl: './annotations-tab.component.scss'
+  styleUrl: './annotations-tab.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnnotationsTabComponent {
 
