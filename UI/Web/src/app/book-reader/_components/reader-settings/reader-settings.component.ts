@@ -23,7 +23,6 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
 import {BookReadingProfileFormGroup, EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
-import {LayoutMode} from "../../../manga-reader/_models/layout-mode";
 
 /**
  * Used for book reader. Do not use for other components
@@ -119,6 +118,9 @@ export class ReaderSettingsComponent implements OnInit {
   protected hasParentProfile!: Signal<boolean>;
   protected parentReadingProfile!: Signal<ReadingProfile | null>;
   protected currentReadingProfile!: Signal<ReadingProfile | null>;
+
+
+  protected isVerticalLayout!: Signal<boolean>;
 
 
   async ngOnInit() {

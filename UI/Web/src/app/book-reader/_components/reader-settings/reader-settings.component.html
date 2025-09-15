@@ -142,8 +142,10 @@
                     <input type="radio" formControlName="bookReaderLayoutMode" [value]="BookPageLayoutMode.Column1" class="btn-check" id="layout-mode-col1" autocomplete="off">
                     <label class="btn btn-outline-primary" for="layout-mode-col1">{{t('layout-mode-option-1col')}}</label>
 
-                    <input type="radio" formControlName="bookReaderLayoutMode" [value]="BookPageLayoutMode.Column2" class="btn-check" id="layout-mode-col2" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="layout-mode-col2">{{t('layout-mode-option-2col')}}</label>
+                    @if (writingStyleModel() === WritingStyle.Horizontal) {
+                      <input type="radio" formControlName="bookReaderLayoutMode" [value]="BookPageLayoutMode.Column2" class="btn-check" id="layout-mode-col2" autocomplete="off">
+                      <label class="btn btn-outline-primary" for="layout-mode-col2">{{t('layout-mode-option-2col')}}</label>
+                    }
                   </div>
                 </div>
 

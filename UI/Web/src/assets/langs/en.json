@@ -1002,7 +1002,8 @@
         "page-num-label": "Page {{page}}",
         "completion-label": "{{percent}} complete",
 
-        "force-selected-one-column": "Layout mode switched to One Column due to insufficient space to render Two Columns"
+        "force-selected-one-column": "Layout mode switched to One Column due to insufficient space to render Two Columns",
+        "forced-vertical-switch": "Layout mode switched as Two Column layout doesn't work with Vertical Writing Style"
     },
 
     "personal-table-of-contents": {
