@@ -117,9 +117,9 @@
     </ng-template>
 
     <ng-template #bottomActionBar>
-      <div class="action-bar g-0 justify-content-between">
+      <div class="action-bar g-0 justify-content-between align-items-center">
 
-        <div class="d-flex">
+        <div class="d-flex justify-content-start">
           <button class="btn btn-outline-secondary btn-icon ms-sm-5"
                   (click)="movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
                   [disabled]="isPrevDisabled()"
@@ -135,22 +135,23 @@
         </div>
 
 
-        <div class="book-title d-none d-sm-block">
+        <div class="book-title justify-content-center">
           @if(!isLoading()) {
             <span class="me-1">
-                {{t('page-num-label', {page: virtualizedPageNum()})}} / {{virtualizedMaxPages()}}
+              <a class="btn-link" style="width: 100%" href="javascript:void(0);" (click)="goToPage()" [title]="t('go-to-page')">{{t('page-num-label', {page: virtualizedPageNum() + 1})}}</a>
+            / {{virtualizedMaxPages()}}
             </span>
 
-            <span>
+            <div class="d-none d-sm-block">
               {{t('completion-label', {percent: (virtualizedPageNum() / virtualizedMaxPages()) | percent})}}
-            </span>
-            @if (readingTimeLeftResource.value(); as timeLeft) {
-              ,
-              <span class="time-left ms-1">
-                  <i class="fa-solid fa-clock" aria-hidden="true"></i>
-                {{timeLeft! | readTimeLeft:true }}
-              </span>
-            }
+              @if (readingTimeLeftResource.value(); as timeLeft) {
+                ,
+                <span class="time-left ms-1">
+                    <i class="fa-solid fa-clock" aria-hidden="true"></i>
+                  {{timeLeft! | readTimeLeft:true }}
+                </span>
+              }
+            </div>
           }
 
           @if (debugMode()) {
