@@ -77,7 +77,6 @@ public class ThemeService : IThemeService
     private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
-    private readonly IFileService _fileService;
     private readonly ILogger<ThemeService> _logger;
     private readonly Markdown _markdown = new();
     private readonly IMemoryCache _cache;
@@ -91,12 +90,11 @@ public class ThemeService : IThemeService
     private const string GithubReadme = "https://raw.githubusercontent.com/Kareadita/Themes/main/README.md";
 
     public ThemeService(IDirectoryService directoryService, IUnitOfWork unitOfWork,
-        IEventHub eventHub, IFileService fileService, ILogger<ThemeService> logger, IMemoryCache cache)
+        IEventHub eventHub, ILogger<ThemeService> logger, IMemoryCache cache)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
-        _fileService = fileService;
         _logger = logger;
         _cache = cache;
 
