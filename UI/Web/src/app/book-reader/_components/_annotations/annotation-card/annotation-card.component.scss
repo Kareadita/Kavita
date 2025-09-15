@@ -25,3 +25,6 @@
 :host ::ng-deep quill-view {
   color: var(--drawer-text-color);
 }
+:host ::ng-deep .ql-editor {
+  padding: 0;
+}
