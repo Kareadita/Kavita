@@ -81,6 +81,8 @@ interface HistoryPoint {
   scrollPart: string;
 }
 
+type Container = {left: number, right: number, top: number, bottom: number, width: number, height: number};
+
 const TOP_OFFSET = -(50 + 10) * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
 
 const COLUMN_GAP = 20; // px
@@ -1749,10 +1751,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     let resumeElement: string | null = null;
     if (!this.bookContentElemRef || !this.bookContentElemRef.nativeElement) return null;
 
+    const container = this.getViewportBoundingRect();
+
     const intersectingEntries = Array.from(this.bookContentElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
       .filter(entry => {
-        return this.utilityService.isInViewport(entry, this.topOffset);
+        return this.isPartiallyContainedIn(container, entry);
+        //return this.utilityService.isInViewport(entry, this.topOffset);
       });
 
     intersectingEntries.sort((a, b) => this.sortElementsForLayout(a, b));
@@ -2286,7 +2291,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    *
    * NOTE: On Scroll LayoutMode, the height/bottom are not correct
    */
-  getViewportBoundingRect() {
+  getViewportBoundingRect(): Container {
     const margin = this.getMargin();
     const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
     const visibleBoundingBox = this.bookContentElemRef.nativeElement.getBoundingClientRect();
@@ -2365,6 +2370,43 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     return margin;
+  }
+
+  /**
+   * A custom is visible method for column modes, that makes sense
+   * @param container
+   * @param element
+   */
+   isPartiallyContainedIn(container: Container, element: Element) {
+    const rect = element.getBoundingClientRect();
+
+    if (
+      rect.top >= container.top &&
+      rect.bottom <= container.bottom &&
+      rect.right <= container.right &&
+      rect.left >= container.left
+    ) {
+      return true;
+    }
+
+    // First element in the top, overflow to the left
+    const isCloseByTop = Math.abs(rect.top - container.top) <= 0.05 * container.height;
+    if (isCloseByTop && rect.left < container.left && rect.right < container.right && rect.right > container.left) {
+      return true;
+    }
+
+    return false;
+  }
+
+  logSelectedElement() {
+    const element = this.getElementFromXPath(this.lastSeenScrollPartPath);
+    if (element) {
+      console.log(element);
+      (element as HTMLElement).style.border = '1px solid red';
+      setTimeout(() => {
+        (element as HTMLElement).style.border = '';
+      }, 1_000);
+    }
   }
 
 
