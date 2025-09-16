@@ -33,6 +33,16 @@ body:
     validations:
       required: true
   - type: dropdown
+    id: reverse-proxy
+    attributes:
+      label: Are you accessing kavita through a reverse proxy? If yes can you confirm that the issue persists with a direct connection
+      multiple: false
+      options:
+        - Yes
+        - No
+    validations:
+      required: true
+  - type: dropdown
     id: OS
     attributes:
       label: What operating system is Kavita being hosted from?
