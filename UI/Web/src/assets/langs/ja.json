@@ -49,7 +49,10 @@
         "not-processed": "未処理",
         "special": "{{entity-title.special}}",
         "scrobbling-disabled": "Scrobbleはアカウント設定で無効になっています。",
-        "token-expired": "あなたのAniListトークンは期限切れだ！アカウントページで更新するまで、イベントのスコーブリングは処理されない。"
+        "token-expired": "あなたのAniListトークンは期限切れだ！アカウントページで更新するまで、イベントのスコーブリングは処理されない。",
+        "select-all-label": "全て選択",
+        "delete-selected-label": "選択中を削除",
+        "generate-scrobble-events": "イベントを補完"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "読書の進捗状況",
@@ -71,7 +74,8 @@
         "your-review": "これはあなたのレビューです｡",
         "external-review": "外部のレビュー",
         "local-review": "ローカルレビュー",
-        "rating-percentage": "評価{{r}}%"
+        "rating-percentage": "評価{{r}}%",
+        "critic": "評論家"
     },
     "want-to-read": {
         "title": "読みたい",
@@ -114,7 +118,9 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "kavitaplus-settings-title": "Kavita+",
-        "anilist-scrobbling-label": "AniListへのスコア登録"
+        "anilist-scrobbling-label": "AniListへのスコア登録",
+        "anilist-scrobbling-tooltip": "AniListへ読書進捗・評価を送信する",
+        "want-to-read-sync-tooltip": "保留中の読書リストにある AniList と MAL シリーズに基づいて、Kavita が「読みたい」リストにアイテムを追加することを許可します"
     },
     "user-holds": {
         "title": "Scrobble Holds",
@@ -239,7 +245,8 @@
         "regen-warning": "APIキーを再生成すると既存のクライアントは無効になります。",
         "no-key": "ERROR - キーが設定されていません",
         "confirm-reset": "これによりセットアップされたOPDS構成が無効になります｡続行しますか？",
-        "key-reset": "API Keyをリセットする"
+        "key-reset": "API Keyをリセットする",
+        "reset": "リセット"
     },
     "scrobbling-providers": {
         "title": "Scrobblingプロバイダー",
@@ -598,7 +605,6 @@
     },
     "personal-table-of-contents": {
         "no-data": "まだブックマークされたものがありません",
-        "page": "{{value}}ページ",
         "delete": "{{bookmarkName}}を消去"
     },
     "confirm-email": {
@@ -790,7 +796,8 @@
         "file-type-group-tooltip": "どの種類のファイルでも、Kavitaのスキャンが必要です。 たとえば、アーカイブにはすべてのcb*、zip、rarなどのファイルが含まれます。",
         "exclude-patterns-label": "除外パターン",
         "exclude-patterns-tooltip": "Kavitaがディレクトリをスキャンする際に一致させるためのパターン（Glob構文）を設定し、スキャナーの結果から除外します。",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "files-at-root-warning": "1つ以上のフォルダの直下にファイルが存在します。Kavita ではこれらを処理出来ません。"
     },
     "file-type-group-pipe": {
         "archive": "アーカイブ",
@@ -2115,5 +2122,22 @@
     },
     "manage-metadata-settings": {
         "enable-cover-image-label": "カバー画像"
+    },
+    "reviews": {
+        "user-reviews-local": "ローカルレビュー",
+        "user-reviews-plus": "外部レビュー"
+    },
+    "review-modal": {
+        "title": "レビューを編集",
+        "review-label": "レビュー",
+        "min-length": "レビューの記入は最低 {{count}} 文字以上が必要です"
+    },
+    "edit-person-modal": {
+        "invalid-asin": "ASINは有効なISBN-10またはISBN-13形式である必要があります"
+    },
+    "manage-oidc-connect": {
+        "notice": "お知らせ",
+        "provider-title": "提供者",
+        "require-verified-email-label": "認証されたEメールを要求"
     }
 }

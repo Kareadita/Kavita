@@ -362,7 +362,9 @@
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}"
+        "scrobbling-tooltip": "{{settings.scrobbling}}",
+        "read-options-alt": "Olvassa el a lehetőségeket",
+        "layout-mode-option-list": "Lista"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -541,7 +543,8 @@
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
         "read": "{{common.read}}",
-        "characters-title": "{{metadata-fields.characters-title}}"
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "read-options-alt": "Olvassa el a lehetőségeket"
     },
     "events-widget": {
         "close": "{{common.close}}"
@@ -557,7 +560,8 @@
     },
     "nav-header": {
         "help": "{{common.help}}",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "nav-link-header": "Navigációs beállítások"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -795,5 +799,8 @@
         "theme-black": "Fekete",
         "theme-paper": "Papír",
         "theme-white": "Fehér"
+    },
+    "manage-reading-profiles": {
+        "scaling-option-label": "Méretezési beállítások"
     }
 }

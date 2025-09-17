@@ -632,7 +632,6 @@
     },
     "personal-table-of-contents": {
         "no-data": "Nessun preferito ancora",
-        "page": "Pagina {{value}}",
         "delete": "Elimina {{bookmarkName}}"
     },
     "confirm-email": {

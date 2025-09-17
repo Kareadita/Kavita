@@ -179,7 +179,6 @@
         "title": "Paràmetres del llibre"
     },
     "personal-table-of-contents": {
-        "page": "Pàgina {{value}}",
         "delete": "Suprimeix {{bookmarkName}}"
     },
     "confirm-email": {

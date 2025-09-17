@@ -632,13 +632,10 @@
         "toc-header": "ToC",
         "loading-book": "Načítava sa kniha…",
         "close-reader": "Zavrieť Čítačku",
-        "go-to-first-page": "Prejsť na prvú stránku",
-        "go-to-section": "Prejsť do sekcie",
-        "go-to-section-prompt": "Existuje {{totalSections}} sekcií. Do ktorej sekcie chcete prejsť?"
+        "go-to-first-page": "Prejsť na prvú stránku"
     },
     "personal-table-of-contents": {
         "no-data": "Zatiaľ nič nie je v záložkách",
-        "page": "Strana {{value}}",
         "delete": "Zmazať {{bookmarkName}}"
     },
     "confirm-email": {
@@ -858,7 +855,10 @@
         "allow-metadata-matching-label": "Povoliť zhodu metadát",
         "allow-metadata-matching-tooltip": "Mala by Kavita stiahnuť metadáta pre série v rámci tejto knižnice. Toto sa uskutoční len vtedy, ak má server aktívne predplatné Kavita+.",
         "enable-metadata-label": "Povoliť metadáta (ComicInfo/Epub/PDF)",
-        "enable-metadata-tooltip": "Povoliť Kavite čítať súbory s metadátami, ktoré prepíšu analýzu názvov súborov."
+        "enable-metadata-tooltip": "Povoliť Kavite čítať súbory s metadátami, ktoré prepíšu analýzu názvov súborov.",
+        "remove-prefix-for-sortname-label": "Odstránenie bežných predpon pre názov zoradenia",
+        "remove-prefix-for-sortname-tooltip": "Kavita odstráni z názvov pre názov zoradenia bežné predpony ako „The“, „A“, „An“. Neprepíše nastavené metadáta.",
+        "files-at-root-warning": "Jeden alebo viacero priečinkov obsahuje súbory v koreňovom adresári. Kavita to nepodporuje."
     },
     "file-type-group-pipe": {
         "archive": "Archív",
@@ -2458,7 +2458,8 @@
         "aliases-tab": "Aliasy",
         "aliases-label": "Upraviť aliasy",
         "alias-overlap": "Tento alias už odkazuje na inú osobu alebo je menom tejto osoby, zvážte ich zlúčenie.",
-        "aliases-tooltip": "Keď je séria označená aliasom osoby, táto osoba je priradená, nie je vytvorená nová osoba. Pri odstraňovaní aliasu budete musieť znova prehľadať sériu, aby sa zmena prejavila."
+        "aliases-tooltip": "Keď je séria označená aliasom osoby, táto osoba je priradená, nie je vytvorená nová osoba. Pri odstraňovaní aliasu budete musieť znova prehľadať sériu, aby sa zmena prejavila.",
+        "invalid-asin": "ASIN musí byť v platnom formáte ISBN-10 alebo ISBN-13"
     },
     "kavitaplus-metadata-breakdown-stats": {
         "completed-series-label": "Dokončené série",

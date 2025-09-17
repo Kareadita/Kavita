@@ -1796,7 +1796,6 @@
     },
     "personal-table-of-contents": {
         "no-data": "இதுவரை எதுவும் புக்மார்க்கு செய்யப்படவில்லை",
-        "page": "பக்கம் {{value}}",
         "delete": "{{bookmarkName}}} ஐ நீக்கு"
     },
     "confirm-email": {

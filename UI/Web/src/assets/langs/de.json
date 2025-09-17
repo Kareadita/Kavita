@@ -5,12 +5,13 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Passwort vergessen?",
-        "submit": "Anmelden"
+        "submit": "Anmelden",
+        "oidc": "OpenID Connect"
     },
     "dashboard": {
         "no-libraries": "Es gibt noch keine Bibliotheken. Erstelle welche in",
         "server-settings-link": "Servereinstellungen",
-        "not-granted": "Sie haben noch keinen Zugang zu Bibliotheken.",
+        "not-granted": "Dir wurde noch kein Zugang zu Bibliotheken gewährt.",
         "on-deck-title": "Weiterlesen",
         "recently-updated-title": "Kürzlich aktualisierte Serien",
         "recently-added-title": "Neu hinzugefügte Serien",
@@ -26,7 +27,12 @@
         "saving": "Speichern…",
         "update": "Aktualisierung",
         "account-detail-title": "Konto Details",
-        "invalid-email-warning": "Eine ungültige E-Mail-Adresse blockiert einige Funktionen von Kavita"
+        "invalid-email-warning": "Eine ungültige E-Mail-Adresse blockiert einige Funktionen von Kavita",
+        "notice": "Achtung!",
+        "out-of-sync": "Dieser Benutzer wurde über OIDC erstellt. Wenn die Einstellung „SyncUsers“ aktiviert ist, können alle an diesem Konto vorgenommenen Änderungen überschrieben werden.",
+        "oidc-managed": "Dieser Benutzer wird über OIDC verwaltet. Bitte wenden Sie sich an Ihren OIDC-Administrator, um Änderungen zu beantragen.",
+        "identity-provider": "Identität des Anbieters",
+        "identity-provider-tooltip": "Kavita-Benutzer werden niemals mit OIDC-Konten synchronisiert."
     },
     "user-scrobble-history": {
         "title": "Scrobble-Verlauf",
@@ -121,7 +127,10 @@
         "want-to-read-sync-label": "Willst du lesen synchronisieren",
         "kavitaplus-settings-title": "Kavita+",
         "want-to-read-sync-tooltip": "Erlaube Kavita, basierend auf AniList und MAL-Serien Elemente zu deiner „Want to Read“-Liste in „Pending readlist“ hinzuzufügen",
-        "anilist-scrobbling-tooltip": "Erlaube Kavita, ihren Lesefortschritt und ihre Bewertungen zu AniList zu scrobbeln (Einweg-Synchronisierung)"
+        "anilist-scrobbling-tooltip": "Erlaube Kavita, ihren Lesefortschritt und ihre Bewertungen zu AniList zu scrobbeln (Einweg-Synchronisierung)",
+        "social-settings-title": "Soziale Einstellungen",
+        "highlight-bar-label": "Markierungen hervorheben Farben",
+        "highlight-bar-tooltip": "Diese Farben werden von allen Büchern gemeinsam genutzt"
     },
     "user-holds": {
         "title": "Scrobble pausiert",
@@ -133,7 +142,7 @@
     },
     "theme-manager": {
         "title": "Motiv-Manager",
-        "description": "Kavita ist in meinen Farben erhältlich. Finde ein Farbschema, das deinen Bedürfnissen entspricht, oder erstellen selbst eines und teile dieses. Die Themen können für dein Konto oder für alle Konten angewendet werden.",
+        "description": "Kavita kommt in meinen Farben daher. Finde ein Farbschema, das deinen Bedürfnissen entspricht, oder erstelle selbst eines und teile es. Die Themen können für dein Konto oder für alle Konten angewendet werden.",
         "site-themes": "Webseiten Motiv",
         "set-default": "Standard festlegen",
         "default-theme": "Standard",
@@ -150,7 +159,7 @@
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "eine CSS Datei",
         "preview-default": "Wähle zunächst ein Theme aus",
-        "preview-default-admin": "Wähle ein Design aus oder lade eines hoch",
+        "preview-default-admin": "Wähle ein Thema aus oder lade eines hoch",
         "preview-title": "Vorschau",
         "add": "{{common.add}}"
     },
@@ -422,7 +431,7 @@
         "prequel": "Prequel",
         "sequel": "Nachfolger",
         "side-story": "Nebengeschichte",
-        "spin-off": "Spin Off",
+        "spin-off": "Spin-off",
         "parent": "Übergeordnet",
         "edition": "Ausgabe",
         "annual": "Jährlich"
@@ -460,7 +469,7 @@
     },
     "library-type-pipe": {
         "book": "Buch",
-        "comic": "Comic (Legacy)",
+        "comic": "Comic (veraltet)",
         "manga": "Manga",
         "comicVine": "Comic",
         "image": "Bild",
@@ -598,7 +607,10 @@
         "k+-already-registered-header": "Lizenz bereits registriert",
         "overwrite": "Überschreiben",
         "k+-unlocked": "Kavita+ freigeschaltet!",
-        "k+-unlocked-description": "Willkommen bei Kavita+! Kavita generiert Scrobbler-Ereignisse aus Ihren Fortschritten, Bewertungen und Lesewünschen, sobald Sie Ihre Scrobbler-Anbieter unter Ihrem Konto registriert haben. Nehmen Sie sich etwas Zeit, um sicherzustellen, dass Sie Scrobbler-Holds für alle Serien setzen, die Sie nicht scrobbeln möchten."
+        "k+-unlocked-description": "Willkommen bei Kavita+! Kavita generiert Scrobbler-Ereignisse aus Ihren Fortschritten, Bewertungen und Lesewünschen, sobald Sie Ihre Scrobbler-Anbieter unter Ihrem Konto registriert haben. Nehmen Sie sich etwas Zeit, um sicherzustellen, dass Sie Scrobbler-Holds für alle Serien setzen, die Sie nicht scrobbeln möchten.",
+        "cancel-tooltip": "Kündigen Sie Ihr Abonnement und löschen Sie die Lizenz innerhalb von Kavita.",
+        "kavita+-warning": "Kavita+ ist unabhängig von Kavita. Wenn Sie Kavita deinstallieren, ohne sich abzumelden, werden Ihnen weiterhin Gebühren berechnet.",
+        "cancel-label": "Abonnement kündigen"
     },
     "book-line-overlay": {
         "copy": "Kopieren",
@@ -606,7 +618,8 @@
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "bookmark-label": "Lesezeichen Name",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "annotate": "Kommentieren"
     },
     "book-reader": {
         "title": "Buch Einstellungen",
@@ -631,15 +644,18 @@
         "incognito-mode-label": "Unsichtbarkeits Modus",
         "next": "Nächste",
         "previous": "Vorherige",
-        "go-to-page-prompt": "Es gibt {{totalPages}} Seiten. Auf welche Seite möchten sie gehen?",
+        "go-to-page-prompt": "Es gibt {{totalPages}} Seiten. Zu welcher Seite möchten Sie gehen?",
         "go-to-first-page": "Zur ersten Seite gehen",
-        "go-to-section": "Zum Abschnitt gehen",
-        "go-to-section-prompt": "Es gibt {{totalSections}} Abschnitte. Zu welchem Abschnitt möchten Sie springen?"
+        "page-num-label": "Seite {{page}}",
+        "completion-label": "{{percent}} abgeschlossen",
+        "force-selected-one-column": "Der Layoutmodus wurde aufgrund unzureichenden Platzes für die Darstellung von zwei Spalten auf eine Spalte umgestellt"
     },
     "personal-table-of-contents": {
         "no-data": "Noch nichts mit Lesezeichen versehen",
-        "page": "Seite {{value}}",
-        "delete": "Löschen {{bookmarkName}}"
+        "delete": "Löschen {{bookmarkName}}",
+        "page-title": "Seite {{page}}",
+        "chapter-and-page-title": "Kapitel {{chapterTitle}}, Seite {{page}}",
+        "no-match": "Keine Lesezeichen entsprechen dem Filter"
     },
     "confirm-email": {
         "title": "Registrieren",
@@ -750,10 +766,10 @@
         "colorists-title": "Koloristen",
         "editors-title": "Editoren",
         "inkers-title": "Inker",
-        "letterers-title": "Letterers",
+        "letterers-title": "Letterer",
         "translators-title": "Übersetzer",
         "pencillers-title": "Zeichner",
-        "publishers-title": "Publishers",
+        "publishers-title": "Publisher",
         "imprints-title": "Imprints",
         "teams-title": "Teams",
         "locations-title": "Standorte",
@@ -769,7 +785,8 @@
         "entry-label": "Siehe Details",
         "kavita-tooltip": "Ihre Bewertung + Gesamtbewertung",
         "kavita-rating-title": "Ihre Bewertung",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "critic": "{{review-card.critic}}"
     },
     "badge-expander": {
         "more-items": "und {{count}} mehr"
@@ -823,7 +840,7 @@
         "type-label": "Typ",
         "type-tooltip": "Der Bibliothekstyp bestimmt, wie die Dateinamen geparst werden und ob die Benutzeroberfläche Kapitel (Manga) oder Ausgaben (Comics) anzeigt. Im Wiki finden Sie weitere Details zu den Unterschieden zwischen den Bibliothekstypen.",
         "kavitaplus-eligible-label": "Kavita+ Förderfähig",
-        "kavitaplus-eligible-tooltip": "Unterstützt Kavita+-Metadatenfunktionen oder Scrobbeln",
+        "kavitaplus-eligible-tooltip": "Unterstützt Kavita+-Metadatenfunktionen und/oder Scrobbeln",
         "folder-description": "Ordner zur Bibliothek hinzufügen",
         "browse": "Nach Medienordnern suchen",
         "help-us-part-1": "Helfen Sie uns, indem Sie folgen ",
@@ -840,7 +857,7 @@
         "manage-reading-list-tooltip": "Soll Kavita Leselisten aus den Tags StoryArc/StoryArcNumber und AlternativeSeries/AlternativeCount in den ComicInfo.xml/opf-Dateien erstellen",
         "allow-scrobbling-label": "Scrobbling zulassen",
         "allow-scrobbling-tooltip": "Sollte Kavita Leseereignisse scrobbeln, Status, Bewertungen und Rezensionen zu konfigurierten Anbietern lesen wollen. Dies geschieht nur, wenn der Server ein aktives Kavita+ Abonnement hat.",
-        "folder-watching-label": "Ordner Überwachung",
+        "folder-watching-label": "Ordner-Überwachung",
         "folder-watching-tooltip": "Server-Ordnerüberwachung für diese Bibliothek außer Kraft setzen. Wenn diese Option ausgeschaltet ist, wird die Ordnerüberwachung für die Ordner, die diese Bibliothek enthält, nicht durchgeführt. Wenn Bibliotheken Ordner gemeinsam nutzen, können diese trotzdem überprüft werden. Wartet immer 10 Minuten, bevor der Scan ausgelöst wird.",
         "include-in-dashboard-label": "In das Dashboard einbeziehen",
         "include-in-dashboard-tooltip": "Sollen Serien aus der Bibliothek in das Dashboard aufgenommen werden. Dies betrifft alle Streams, wie On Deck, Kürzlich aktualisiert, Kürzlich hinzugefügt oder alle benutzerdefinierten Ergänzungen.",
@@ -861,10 +878,13 @@
         "allow-metadata-matching-tooltip": "Sollte Kavita Metadaten für Serien in dieser Bibliothek herunterladen. Dies geschieht nur, wenn der Server über ein aktives Kavita+-Abonnement verfügt.",
         "allow-metadata-matching-label": "Erlaube Metadatenabgleich",
         "enable-metadata-label": "Metadaten aktivieren (ComicInfo/Epub/PDF)",
-        "enable-metadata-tooltip": "Erlauben Sie Kavita, Metadaten-Dateien zu lesen, die Dateinamenanalyse überschreiben."
+        "enable-metadata-tooltip": "Erlauben Sie Kavita, Metadaten-Dateien zu lesen, die Dateinamenanalyse überschreiben.",
+        "remove-prefix-for-sortname-label": "Entfernen Sie allgemeine Präfixe für Sort Name",
+        "remove-prefix-for-sortname-tooltip": "Kavita entfernt häufige Präfixe wie „The“, „A“ und „An“ aus Titeln, um Namen zu sortieren. Überschreibt keine festgelegten Metadaten.",
+        "files-at-root-warning": "Ein oder mehrere Ordner enthalten Dateien im Stammverzeichnis. Kavita unterstützt dies nicht."
     },
     "file-type-group-pipe": {
-        "archive": "Archive",
+        "archive": "Archiv",
         "epub": "Epub",
         "pdf": "Pdf",
         "image": "Bild"
@@ -873,7 +893,7 @@
         "general-settings-title": "Allgemeine Einstellungen",
         "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
         "margin-label": "{{manage-reading-profiles.margin-book-label}}",
-        "reset-to-defaults": "Auf Standardwerte zurücksetzen",
+        "reset-to-defaults": "Alles zurücksetzen",
         "reader-settings-title": "Reader-Einstellungen",
         "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
         "right-to-left": "Von rechts nach links",
@@ -909,7 +929,9 @@
         "create-new": "Neues Profil von impliziert",
         "reading-profile-updated": "Leseprofil aktualisiert",
         "reading-profile-promoted": "Leseprofil beworben",
-        "line-spacing-min-label": "1x"
+        "line-spacing-min-label": "1x",
+        "font-family-label": "{{manage-reading-profiles.font-family-label}}",
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}"
     },
     "table-of-contents": {
         "no-data": "Dieses Buch hat kein Inhaltsverzeichnis in den Metadaten oder eine toc-Datei"
@@ -925,7 +947,7 @@
         "delete-single-success": "Die Lesezeichen von {{SerienName}} wurden entfernt"
     },
     "bulk-operations": {
-        "title": "Bulk-Aktionen",
+        "title": "Stapelaktionen",
         "items-selected": "{{num}} ausgewählte Artikel",
         "mark-as-unread": "Als ungelesen markieren",
         "mark-as-read": "Als gelesen markieren",
@@ -1083,7 +1105,7 @@
         "apply": "{{common.apply}}",
         "bulk-copy-to": "Wähle aus, in welche Bibliotheken die Einstellungen von {{libraryName}} kopiert werden sollen",
         "include-type-tooltip": "Dies wird nicht automatisch gescannt. Beim nächsten Scan kann es sein, dass du Serienverschiebungen aufgrund von Parsing-Unterschieden hast",
-        "bulk-action-label": "Bulk Action",
+        "bulk-action-label": "Stapelaktion",
         "include-type-label": "Kopieren des Bibliothekstyps einbeziehen"
     },
     "copy-settings-from-library-modal": {
@@ -1139,19 +1161,19 @@
         "customization-settings-title": "Personalisierung",
         "notice": "Hinweis:",
         "restart-required": "Die Änderung von Port, Base Url, Cache Size oder IPs erfordert einen manuellen Neustart von Kavita, um wirksam zu werden.",
-        "base-url-label": "Base Url",
+        "base-url-label": "Basis-URL",
         "base-url-tooltip": "Verwenden Sie dies, wenn Sie Kavita auf einer Basis-URL hosten wollen, d.h. yourdomain.com/kavita. Nicht unterstützt auf Docker mit Nicht-Root-Benutzer.",
         "ip-address-label": "IP-Adressen",
         "ip-address-tooltip": "Durch Kommata getrennte Liste der IP-Adressen, die der Server abhört. Dies ist festgelegt, wenn Sie mit Docker arbeiten. Erfordert einen Neustart, um wirksam zu werden.",
         "port-label": "Port",
         "port-tooltip": "Port, auf dem der Server lauscht. Dies wird behoben, wenn Sie auf Docker laufen. Erfordert einen Neustart, um wirksam zu werden.",
-        "backup-label": "Tage der Backups",
+        "backup-label": "Sicherungstage",
         "backup-tooltip": "Die Anzahl der zu erhaltenden Sicherungen. Standardwert ist 30, Minimum ist 1, Maximum ist 30.",
-        "log-label": "Tage der Logs",
+        "log-label": "Protokollierte Tage",
         "log-tooltip": "Die Anzahl der zu erhaltenden Protokolle. Standardwert ist 30, Minimum ist 1, Maximum ist 30.",
         "logging-level-label": "Stufe der Protokollierung",
         "logging-level-tooltip": "Verwenden Sie Debug, um Probleme zu identifizieren. Die Fehlersuche kann viel Speicherplatz beanspruchen.",
-        "cache-size-label": "Cache Größe",
+        "cache-size-label": "Cache-Größe",
         "cache-size-tooltip": "Die Menge an Speicher, die für die Zwischenspeicherung schwerer APIs erlaubt ist. Der Standardwert ist 75 MB.",
         "on-deck-last-progress-label": "An Deck Letzter Fortschritt (Tage)",
         "on-deck-last-progress-tooltip": "Die Anzahl der Tage, die seit dem letzten Fortschritt vergangen sind, bevor etwas von On Deck gestartet wurde.",
@@ -1179,15 +1201,15 @@
         "min-logs-validation": "Sie müssen mindestens 1 Protokoll haben",
         "min-days-validation": "Muss mindestens 1 Tag betragen",
         "min-cache-validation": "Muss 50 MB groß sein.",
-        "max-backup-validation": "Sie können nicht mehr als {{num}} Backup haben",
-        "min-backup-validation": "Sie müssen mindestens 1 Backup haben",
+        "max-backup-validation": "Sie können nicht mehr als {{num}} sichern",
+        "min-backup-validation": "Sie müssen mindestens 1 Sicherung haben",
         "ip-address-validation": "IP-Adressen können nur gültige IPv4- oder IPv6-Adressen enthalten",
         "base-url-validation": "Die Basis-URL muss mit / beginnen und enden"
     },
     "manage-system": {
         "title": "Über das System",
         "version-title": "Version",
-        "installId-title": "ID installieren",
+        "installId-title": "Installations-ID",
         "more-info-title": "Mehr Infos",
         "first-install-version-title": "Erste Installationsversion",
         "first-install-date-title": "Datum der Erstinstallation",
@@ -1198,13 +1220,13 @@
         "source-title": "Quelle:",
         "feature-request-title": "Funktionswünsche:",
         "localization-title": "Lokalisierungen:",
-        "updates-title": "Historie aktualisieren"
+        "updates-title": "Aktualisierungs-Verlauf"
     },
     "manage-tasks-settings": {
         "title": "Wiederkehrende Aufgaben",
         "library-scan-label": "Bibliotheks-Scan",
         "library-scan-tooltip": "Wie oft Kavita die Metadaten der Bibliotheksdateien überprüft und aktualisiert.",
-        "library-database-backup-label": "Kavita Backup",
+        "library-database-backup-label": "Kavita-Sicherung",
         "library-database-backup-tooltip": "Wie oft Kavita die Datenbank und andere zugehörige Dateien sichern soll.",
         "cleanup-label": "Bereinigung",
         "cleanup-tooltip": "Wie oft Kavita Bereinigungen durchführen soll. Dies kann sehr umfangreich sein und sollte in den meisten Fällen um Mitternacht durchgeführt werden",
@@ -1243,7 +1265,7 @@
         "backup-database-task": "Datenbank sichern",
         "backup-database-task-desc": "Erstellt eine Sicherungskopie der Datenbank, der Lesezeichen, der Themen, der manuell hochgeladenen Cover und der Konfigurationsdateien.",
         "backup-database-task-success": "Ein Auftrag zur Sicherung der Datenbank wurde in die Warteschlange gestellt",
-        "download-logs-task": "Logs herunterladen",
+        "download-logs-task": "Protokolle herunterladen",
         "download-logs-task-desc": "Kompiliert alle Protokolldateien in eine Zip-Datei und lädt sie herunter.",
         "sync-themes-task": "Themen synchronisieren",
         "sync-themes-task-desc": "Heruntergeladene Designs mit Änderungen vom Upstream synchronisieren, wenn die Version übereinstimmt.",
@@ -1284,7 +1306,9 @@
         "loading": "{{common.loading}}",
         "actions-header": "Aktionen",
         "pending-tooltip": "Dieser Benutzer hat seine E-Mail nicht bestätigt",
-        "all-libraries": "Alle Bibliotheken"
+        "all-libraries": "Alle Bibliotheken",
+        "identity-provider-native-tooltip": "Muttersprachler",
+        "identity-provider-oidc-tooltip": "OIDC"
     },
     "edit-collection-tags": {
         "title": "Sammlung {{collectionName}} bearbeiten",
@@ -1330,7 +1354,7 @@
         "admin-libraries": "Bibliotheken",
         "admin-media": "Medien",
         "admin-media-issues": "Medienprobleme",
-        "admin-logs": "Logs",
+        "admin-logs": "Protokolle",
         "admin-email": "Email",
         "admin-tasks": "Aufgaben",
         "admin-statistics": "Statistik",
@@ -1338,7 +1362,7 @@
         "admin-kavitaplus": "Lizenz",
         "account": "Konto",
         "preferences": "Präferenzen",
-        "clients": "API Key / OPDS",
+        "clients": "API-Key / OPDS",
         "devices": "Geräte",
         "user-stats": "Statistiken",
         "scrobbling": "Scrobbling",
@@ -1351,7 +1375,10 @@
         "admin-manage-tokens": "Verwalte Benutzertoken",
         "scrobble-holds": "Scrobble-Holds",
         "admin-metadata": "Verwalte Metadaten",
-        "reading-profiles": "Leseprofile"
+        "reading-profiles": "Leseprofile",
+        "admin-oidc": "OpenID Connect",
+        "admin-mappings-import": "Metadaten-Einstellungen",
+        "admin-public-metadata": "Metadaten verwalten"
     },
     "collection-detail": {
         "no-data": "Es sind keine Artikel vorhanden. Versuchen Sie, eine Serie hinzuzufügen.",
@@ -1375,7 +1402,7 @@
     },
     "draggable-ordered-list": {
         "instructions-alt": "Wenn Sie eine Nummer in die Eingabe für die Neubestellung eingeben, wird der Artikel an dieser Stelle eingefügt und die Reihenfolge aller anderen Artikel wird aktualisiert.",
-        "reorder-label": "Nachbestellung",
+        "reorder-label": "Anordnen",
         "bulk-select-label": "Bulk Artikel auswählen",
         "remove-item-alt": "Artikel entfernen"
     },
@@ -1412,7 +1439,7 @@
         "no-data": "Nichts hinzugefügt",
         "characters-title": "{{metadata-fields.characters-title}}",
         "edit-label": "Editiermodus",
-        "reorder-alt": "Artikel neu bestellen",
+        "reorder-alt": "Einträge anordnen",
         "dnd-warning": "Drag & Drop ist auf Mobilgeräten oder bei einer Leseliste mit mehr als 100 Einträgen nicht verfügbar.",
         "writers-title": "{{metadata-fields.writers-title}}",
         "details-tab": "{{series-detail.details-tab}}",
@@ -1471,7 +1498,7 @@
         "server-settings": "Server Einstellungen",
         "settings": "Einstellungen",
         "help": "{{common.help}}",
-        "announcements": "Ankündigungen",
+        "announcements": "Mitteilungen",
         "logout": "Abmelden",
         "all-filters": "Intelligente Filter",
         "nav-link-header": "Navigation Optionen",
@@ -1623,7 +1650,14 @@
         "no-prev-chapter": "Kein vorheriges Kapitel",
         "series-progress": "Fortschritt der Serie: {{percentage}}",
         "reading-profile-updated": "Leseprofil aktualisiert",
-        "reading-profile-promoted": "Leseprofil beworben"
+        "reading-profile-promoted": "Leseprofil beworben",
+        "off": "{{reader-settings.off}}",
+        "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
+        "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
+        "update-parent": "{{reader-settings.update-parent}}",
+        "loading": "{{reader-settings.loading}}",
+        "create-new": "{{reader-settings.create-new}}",
+        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1831,7 +1865,9 @@
         "range-hours": "{{value}} {{hourWord}}",
         "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}"
     },
     "day-breakdown": {
         "title": "Tagesaufteilung",
@@ -1908,14 +1944,14 @@
         "total-series-label": "Gesamte Serie",
         "total-series-tooltip": "Serien insgesamt: {{count}}",
         "total-volumes-label": "Gesamte Bände",
-        "total-volumes-tooltip": "Gesamte Bände: {{count}}",
+        "total-volumes-tooltip": "Bände insgesamt: {{count}}",
         "total-files-label": "Dateien insgesamt",
         "total-files-tooltip": "Dateien insgesamt: {{count}}",
         "total-size-label": "Gesamtgröße",
         "total-genres-label": "Genres insgesamt",
         "total-genres-tooltip": "Genres insgesamt: {{count}}",
         "total-tags-label": "Gesamte Tags",
-        "total-tags-tooltip": "Gesamte Tags: {{count}}",
+        "total-tags-tooltip": "Tags insgesamt: {{count}}",
         "total-people-label": "Personen insgesamt",
         "total-people-tooltip": "Personen insgesamt: {{count}}",
         "total-read-time-label": "Gesamte Lesezeit",
@@ -1952,7 +1988,24 @@
         "invalid-password-reset-url": "Ungültige Url zum Zurücksetzen des Passworts",
         "delete-theme-in-use": "Thema wird derzeit von mindestens einem Benutzer verwendet, kann nicht gelöscht werden",
         "theme-manual-upload": "Es gab ein Problem bei der Erstellung eines Schemas aus einem manuellen Upload",
-        "theme-already-in-use": "Schema existiert bereits unter diesem Namen"
+        "theme-already-in-use": "Schema existiert bereits unter diesem Namen",
+        "import-fields": {
+            "non-unique-age-ratings": "Die Zuordnungsschlüssel für die Altersfreigabe sind nicht eindeutig. Bitte korrigieren Sie Ihre Importdatei",
+            "non-unique-fields": "Feldzuordnungen haben keine eindeutige ID. Bitte korrigieren Sie Ihre Importdatei"
+        },
+        "oidc": {
+            "missing-external-id": "OIDC hat keine gültige Kennung zurückgegeben",
+            "missing-email": "OIDC hat keine gültige E-Mail-Adresse zurückgegeben",
+            "email-not-verified": "Ihre E-Mail-Adresse muss verifiziert werden, um die Anmeldung über OIDC zu ermöglichen",
+            "no-account": "Kein passendes Konto gefunden",
+            "disabled-account": "Dieses Konto ist deaktiviert. Bitte wenden Sie sich an einen Administrator",
+            "creating-user": "Die Erstellung eines neuen Benutzers ist fehlgeschlagen. Bitte wenden Sie sich an einen Administrator",
+            "role-not-assigned": "Sie verfügen nicht über die erforderlichen Rollen, um auf diese Anwendung zugreifen zu können",
+            "failed-to-update-email": "E-Mail konnte nicht aktualisiert werden",
+            "failed-to-update-username": "Benutzername konnte nicht aktualisiert werden",
+            "email-in-use": "E-Mail-Adresse wird bereits von einem anderen Konto verwendet",
+            "syncing-user": "Die Synchronisierung Ihres Kontos über OIDC ist fehlgeschlagen. Bitte wenden Sie sich an einen Administrator"
+        }
     },
     "metadata-builder": {
         "or": "Passend zu einem der folgenden Punkte",
@@ -2039,7 +2092,8 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-people}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -2178,7 +2232,7 @@
         "confirm-delete-volume": "Sind Sie sicher, dass Sie dieses Volume löschen wollen? Die Dateien auf der Festplatte werden dadurch nicht verändert.",
         "alert-bad-theme": "Das Schema enthält ungültiges oder unsicheres Css. Bitte wenden Sie sich an Ihren Administrator, damit dies korrigiert wird. Standardmäßig wird das dunkle Theme verwendet.",
         "confirm-library-delete": "Sind Sie sicher, dass Sie die Bibliothek {{name}} löschen möchten? Sie können diese Aktion nicht rückgängig machen.",
-        "confirm-library-type-change": "Wenn Sie den Bibliothekstyp ändern, wird ein neuer Scan mit anderen Parsing-Regeln ausgelöst, was dazu führen kann, dass Serien neu erstellt werden und Sie somit Fortschritte und Lesezeichen verlieren. Bevor Sie dies tun, sollten Sie ein Backup erstellen. Sind Sie sicher, dass Sie fortfahren möchten?",
+        "confirm-library-type-change": "Wenn Sie den Bibliothekstyp ändern, wird ein neuer Scan mit anderen Parsing-Regeln ausgelöst, was dazu führen kann, dass Serien neu erstellt werden und Sie somit Fortschritte und Lesezeichen verlieren. Bevor Sie dies tun, sollten Sie eine Sicherung erstellen. Sind Sie sicher, dass Sie fortfahren möchten?",
         "confirm-download-size": "Der {{entityType}} ist {{size}}. Sind Sie sicher, dass Sie fortfahren möchten?",
         "confirm-download-size-ios": "iOS hat Probleme beim Herunterladen von Dateien, die größer als 200 MB sind. Dieser Download wird möglicherweise nicht abgeschlossen.",
         "list-doesnt-exist": "Diese Liste gibt es nicht",
@@ -2218,12 +2272,16 @@
         "series-bound-to-reading-profile": "Serie gebunden an Leseprofil {{name}}",
         "library-bound-to-reading-profile": "Bibliothek, verknüpft mit Leseprofil {{name}}",
         "series-added-want-to-read": "Serie aus der Liste „Möchte lesen“ hinzugefügt",
-        "external-match-rate-error": "Die Rate für die Suche nach {{seriesName}} ist abgelaufen. Versuch's in 5 Minuten nochmal."
+        "external-match-rate-error": "Die Rate für die Suche nach {{seriesName}} ist abgelaufen. Versuch's in 5 Minuten nochmal.",
+        "confirm-delete-bookmark": "Möchten Sie dieses Lesezeichen wirklich löschen?",
+        "confirm-delete-annotation": "Sind Sie sicher, dass Sie diese Anmerkung löschen möchten?"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
         "hour": "Stunde",
-        "hours": "Stunden"
+        "hours": "Stunden",
+        "hour-left": "Stunde übrig",
+        "hours-left": "Stunden übrig"
     },
     "actionable": {
         "scan-library": "Bibliothek scannen",
@@ -2340,7 +2398,9 @@
         "required-field": "Dieses Feld wird benötigt",
         "valid-email": "Dies muss eine gültige E-Mail sein",
         "password-validation": "Das Passwort muss zwischen 6 und 256 Zeichen lang sein",
-        "year-validation": "Dies muss eine gültige Jahreszahl sein, die größer als 1000 und 4 Zeichen lang ist"
+        "year-validation": "Dies muss eine gültige Jahreszahl sein, die größer als 1000 und 4 Zeichen lang ist",
+        "other-field-required": "{{name}} ist erforderlich, wenn {{other}} festgelegt ist",
+        "invalid-uri": "Die angegebene URI ist ungültig"
     },
     "entity-type": {
         "volume": "Band",
@@ -2376,10 +2436,11 @@
         "devices-tab": "Geräte",
         "stats-tab": "Statistiken",
         "scrobbling-tab": "Scrobbling",
-        "smart-filters-tab": "Smarte Filter"
+        "smart-filters-tab": "Smarte Filter",
+        "annotations-tab": "Anmerkungen"
     },
     "common": {
-        "reset-to-default": "Auf Standardwerte zurücksetzen",
+        "reset-to-default": "Alles zurücksetzen",
         "close": "Schließen",
         "clear": "Klar",
         "filter": "Filter",
@@ -2420,7 +2481,8 @@
         "author-count": "{{num}} Autoren",
         "no-data": "Keine Daten",
         "chapter-count": "{{num}} Kapitel",
-        "issue-count": "{{num}} Probleme"
+        "issue-count": "{{num}} Probleme",
+        "unknown": "Unbekannt"
     },
     "confirm": {
         "alert": "Alarm",
@@ -2459,13 +2521,14 @@
         "loading": "{{common.loading}}",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "save": "{{common.save}}",
         "aliases-tooltip": "Wenn eine Serie mit einem Alias einer Person versehen ist, wird diese Person zugewiesen, anstatt eine neue Person anzulegen. Wenn Sie einen Alias löschen, müssen Sie die Serie erneut scannen, damit die Änderung übernommen wird.",
         "aliases-tab": "Aliases",
         "aliases-label": "Aliase bearbeiten",
-        "alias-overlap": "Dieser Alias verweist bereits auf eine andere Person oder ist der Name dieser Person. Bitte erwäge, sie zusammenzuführen."
+        "alias-overlap": "Dieser Alias verweist bereits auf eine andere Person oder ist der Name dieser Person. Bitte erwäge, sie zusammenzuführen.",
+        "invalid-asin": "Die ASIN muss im gültigen ISBN-10- oder ISBN-13-Format vorliegen"
     },
     "changelog-update-item": {
         "download": "Download",
@@ -2486,7 +2549,8 @@
         "details": "Seite anzeigen",
         "updating-metadata-status": "Metadaten aktualisieren",
         "volume-count": "{{server-stats.volume-count}}",
-        "chapter-count": "{{common.chapter-count}}"
+        "chapter-count": "{{common.chapter-count}}",
+        "issue-count": "{{common.issue-count}}"
     },
     "match-series-modal": {
         "description": "Wähle einen Treffer aus, um die Metadaten von Kavita+ neu zu verknüpfen und Scrobble-Ereignisse neu zu generieren. „Nicht übereinstimmend“ kann verwendet werden, um Kavita daran zu hindern, Metadaten abzugleichen und zu scrobbeln.",
@@ -2583,8 +2647,8 @@
         "blacklist-tooltip": "Alles, was in dieser Liste steht, wird sowohl aus der Genre- als auch aus der Tag-Verarbeitung entfernt. Hier kannst du Genres/Tags hinzufügen, <b>die nicht </b>geschrieben werden sollen. Achte darauf, dass sie durch Kommas getrennt sind.",
         "whitelist-tooltip": "Erlaube nur, dass eine Zeichenfolge in dieser Liste für <b>Tags</b> geschrieben wird. Stelle sicher, dass sie durch Kommas getrennt sind.",
         "derive-publication-status-tooltip": "Erlaube, dass der Publikationsstatus aus der Gesamtzahl der Kapitel/Bände abgeleitet wird.",
-        "age-rating-mapping-description": "Alle Links, die sich entweder in Genre oder Tags befinden, legen die Altersfreigabe für die Serie fest.",
-        "field-mapping-description": "Richtet Regeln für bestimmte Zeichenketten ein, die im Feld „Genre/Tag“ gefunden werden, und ordnet sie einer neuen Zeichenkette in „Genre/Tag“ zu und entfernt sie optional aus der Liste „Quelle“. Gilt nur, wenn das Schreiben von Genre/Tag aktiviert ist.",
+        "age-rating-mapping-description": "Alle Links, die sich entweder in Genre oder Tags befinden, legen die Altersfreigabe für die Serie fest. Der Abgleich wird normalisiert und ist unabhängig von Groß- und Kleinschreibung. Die höchste Altersfreigabe wird verwendet.",
+        "field-mapping-description": "Richtet Regeln für bestimmte Zeichenketten ein, die im Feld „Genre/Tag“ gefunden werden, und ordnet sie einer neuen Zeichenkette in „Genre/Tag“ zu und entfernt sie optional aus der Liste „Quelle“. Der Abgleich wird normalisiert und ist unabhängig von Groß- und Kleinschreibung. Der erste passende Wert wird verwendet. Gilt nur, wenn das Schreiben von Genre/Tag aktiviert ist.",
         "enable-start-date-label": "Startdatum",
         "localized-name-label": "Lokalisierter Seriennamen",
         "localized-name-tooltip": "Erlaube die Eingabe von lokalisierten Namen, wenn das Feld entsperrt ist. Kavita wird versuchen, die beste Schätzung vorzunehmen.",
@@ -2600,7 +2664,24 @@
         "chapter-header": "Kapitel Felder",
         "enable-chapter-publisher-tooltip": "Zulassen, dass der Herausgeber des Kapitels/der Ausgabe geschrieben wird",
         "enable-chapter-cover-label": "Kapitel-Cover",
-        "enable-chapter-cover-tooltip": "Cover von Kapitel/Ausgabe festlegen"
+        "enable-chapter-cover-tooltip": "Cover von Kapitel/Ausgabe festlegen",
+        "k+-warning": "Die folgenden Einstellungen werden mit denen auf der K+-Seite geteilt. Sie können sie an beiden Stellen ändern",
+        "export-settings": "Export",
+        "export-tooltip": "Exportieren Sie Ihre Blacklist und Whitelist, Altersfreigabe und Feldzuordnungen",
+        "export-file-name": "Kavita Metadaten-Einstellungen Export.json",
+        "import-settings": "Import",
+        "import-tooltip": "Importieren Sie Ihre eigenen Einstellungen oder die Einstellungen anderer",
+        "enable-extended-metadata-processing-label": "Erweiterte Metadatenverarbeitung",
+        "enable-extended-metadata-processing-tooltip": "Sollen Genres und Tags, die aus ComicInfo stammen oder über die Benutzeroberfläche hinzugefügt wurden, unter Verwendung der Blacklist, Whitelist, Altersfreigabe-Zuordnungen und Feldzuordnungen verarbeitet werden?",
+        "remove-age-rating-mapping-label": "Altersfreigabe-Zuordnung entfernen",
+        "remove-field-mapping-label": "Feldzuordnung entfernen",
+        "series-header": "Serienfelder",
+        "people-header": "Personen",
+        "tags-header": "Tags",
+        "source-genre-tags-placeholder": "Quelle Genre/Tag",
+        "dest-genre-tags-placeholder": "Ziel-Genre/Tag",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}"
     },
     "metadata-setting-field-pipe": {
         "covers": "Covers",
@@ -2621,7 +2702,7 @@
     "role-localized-pipe": {
         "bookmark": "Lesezeichen",
         "change-restriction": "Änderung der Beschränkung",
-        "login": "Einloggen",
+        "login": "Anmelden",
         "read-only": "Nur Lesen",
         "admin": "Admin",
         "promote": "Promote",
@@ -2642,7 +2723,11 @@
     "review-modal": {
         "review-label": "Rezension",
         "title": "Rezension Bearbeiten",
-        "min-length": "Die Rezension muss mindestens {{count}} Zeichen lang sein"
+        "min-length": "Die Rezension muss mindestens {{count}} Zeichen lang sein",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
+        "required": "{{validation.required-field}}"
     },
     "manage-reading-profiles": {
         "description": "Nicht alle Ihre Serien können auf dieselbe Weise gelesen werden. Richten Sie daher für jede Bibliothek oder Serie separate Leseprofile ein, damit Sie so nahtlos wie möglich zu Ihrer Serie zurückkehren können.",
@@ -2688,7 +2773,7 @@
         "immersive-mode-label": "Immersiver Modus",
         "reading-direction-book-label": "Leserichtung",
         "reading-direction-book-tooltip": "Klicken Sie hier, um zur nächsten Seite zu gelangen. Von rechts nach links bedeutet, dass Sie auf die linke Seite des Bildschirms klicken, um zur nächsten Seite zu gelangen.",
-        "immersive-mode-tooltip": "Dadurch wird das Menü hinter einem Klick auf das Lesedokument ausgeblendet und die Seitenumblätterung per Fingertipp aktiviert.",
+        "immersive-mode-tooltip": "Dadurch wird das Menü hinter einem Klick auf das Lesedokument versteckt und das Umblättern per Fingertipp aktiviert",
         "font-family-label": "Schriftfamilie",
         "font-family-tooltip": "Zu ladende Schriftfamilie. Standardmäßig wird die Standardschriftart des Buches geladen",
         "writing-style-label": "Schreibstil",
@@ -2710,18 +2795,30 @@
         "reading-profile-library-settings-title": "Bibliothek",
         "wiki-title": "Wiki",
         "disable-width-override-label": "Breitenüberschreibung deaktivieren",
-        "disable-width-override-tooltip": "Verhindere, dass die Breitenüberschreibung wirksam wird, wenn dein Bildschirm mindestens den konfigurierten Haltepunkt erreicht oder kleiner ist"
+        "disable-width-override-tooltip": "Verhindere, dass die Breitenüberschreibung wirksam wird, wenn dein Bildschirm mindestens den konfigurierten Haltepunkt erreicht oder kleiner ist",
+        "reset": "{{common.reset}}",
+        "add": "{{common.add}}",
+        "width-override-label": "{{manga-reader.width-override-label}}",
+        "delete": "{{common.delete}}"
     },
     "bulk-set-reading-profile-modal": {
         "no-data": "Es wurden noch keine Sammlungen erstellt",
         "bound": "Gebunden",
-        "title": "Leseprofil festlegen"
+        "title": "Leseprofil festlegen",
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "loading": "{{common.loading}}",
+        "create": "{{common.create}}"
     },
     "merge-person-modal": {
         "alias-title": "Neue Aliase",
         "known-for-title": "Bekannt für",
         "src": "Person zusammenführen",
-        "merge-warning": "Wenn Sie fortfahren, wird die ausgewählte Person entfernt. Der Name der ausgewählten Person wird als Alias hinzugefügt und alle ihre Rollen werden übertragen."
+        "merge-warning": "Wenn Sie fortfahren, wird die ausgewählte Person entfernt. Der Name der ausgewählten Person wird als Alias hinzugefügt und alle ihre Rollen werden übertragen.",
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
     },
     "browse-people": {
         "title": "Personen suchen",
@@ -2730,11 +2827,16 @@
         "sort-label": "Sortieren",
         "name-label": "Name",
         "issue-count-label": "Anzahl der Ausgabe",
-        "series-count-label": "Anzahl der Serien"
+        "series-count-label": "Anzahl der Serien",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
     },
     "browse-genres": {
         "title": "Genres durchsuchen",
-        "genre-count": "{{num}} Genres"
+        "genre-count": "{{num}} Genres",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
     },
     "breakpoint-pipe": {
         "never": "Niemals",
@@ -2767,12 +2869,136 @@
     },
     "browse-tags": {
         "title": "Tags durchsuchen",
-        "genre-count": "{{num}} Tags"
+        "genre-count": "{{num}} Tags",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
     },
     "generic-filter-field-pipe": {
         "person-name": "Name",
         "person-series-count": "Anzahl der Serien",
         "person-chapter-count": "Kapitelanzahl",
         "person-role": "Rolle"
+    },
+    "oidc": {
+        "title": "OIDC-Callback",
+        "login": "Zurück zur Anmeldemaske",
+        "error-loading-info": "Fehler beim Laden der OIDC-Infos, kontaktiere deinen Administrator",
+        "timeout": "OIDC-Auflösung hat das Zeitlimit erreicht oder ein Fehler ist passiert"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "save-success": "OIDC-Einstellungen erfolgreich aktualisiert",
+        "notice": "Bemerkung",
+        "restart-required": "Um die Autoritäts- oder Client-ID zu ändern, muss Kavita manuell neu gestartet werden, damit die Änderung wirksam wird.",
+        "provider-title": "Provider",
+        "provider-tooltip": "In den Anbietereinstellungen müssen Sie manuell auf „Speichern“ klicken. Kavita muss als vertraulicher Client konfiguriert werden und benötigt eine Weiterleitungs-URL. Weitere Informationen finden Sie im <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
+        "behavior-title": "Verhalten",
+        "manual-save-label": "Das Ändern der Providereinstellungen erfordert ein manuelles Speichern",
+        "authority-label": "Autorität",
+        "authority-tooltip": "Die URL zu Ihrem OIDC-Anbieter, ohne den Pfad .well-known/openid-configuration",
+        "client-id-label": "Client ID",
+        "client-id-tooltip": "Die in Ihrem OIDC-Anbieter festgelegte Client-ID kann beliebig sein",
+        "secret-label": "Client-Geheimnis",
+        "secret-tooltip": "Das von Ihrem OIDC-Anbieter generierte Geheimnis",
+        "provision-accounts-label": "Provisionskonten",
+        "provision-accounts-tooltip": "Erstellen Sie automatisch ein neues Konto, wenn Sie sich über OIDC anmelden und es nicht mit einem bestehenden Konto abgeglichen werden kann",
+        "advanced-title": "Erweiterte Einstellungen",
+        "advanced-tooltip": "Ändern Sie diese Optionen nur, wenn Sie deren Auswirkungen verstehen.",
+        "roles-prefix-label": "Rollenpräfix",
+        "roles-prefix-tooltip": "Kavita wird nur Rollen in Betracht ziehen, die mit diesem Präfix beginnen.",
+        "roles-claim-label": "Rollen beanspruchen",
+        "roles-claim-tooltip": "Die Anforderung, die Kavita zum Extrahieren von Rollen verwendet. Lassen Sie das Feld leer, um die Standardeinstellung zu verwenden.",
+        "custom-scopes-label": "Benutzerdefinierte Bereiche",
+        "custom-scopes-tooltip": "Zusätzliche Berechtigungen, die Sie bei der Anmeldung von Ihrem OIDC-Anbieter anfordern müssen. Trennen Sie mehrere Berechtigungen durch Kommas. Falsche Werte können die Anmeldung verhindern.",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "require-verified-email-label": "Verifizierte E-Mails erforderlich",
+        "require-verified-email-tooltip": "Bei der Erstellung eines neuen Kontos oder der Verknüpfung mit einem bestehenden Konto ist eine E-Mail-Verifizierung erforderlich. Wenn ein neu erstelltes Konto über eine verifizierte E-Mail-Adresse verfügt, wird es automatisch auf Kavitas Seite verifiziert.",
+        "sync-user-settings-label": "Benutzereinstellungen mit OIDC-Rollen synchronisieren",
+        "sync-user-settings-tooltip": "Über OIDC erstellte Benutzer werden vollständig vom Identitätsanbieter verwaltet, einschließlich Rollen, Bibliothekszugriff und Altersfreigabe. Wenn diese Option deaktiviert ist, haben Benutzer nach der Kontoerstellung keinen Zugriff auf Inhalte. Weitere Informationen finden Sie in der Dokumentation.",
+        "auto-login-label": "Automatische Anmeldung",
+        "auto-login-tooltip": "Automatische Weiterleitung zum OIDC-Anbieter beim Öffnen des Anmeldebildschirms",
+        "disable-password-authentication-label": "Passwortauthentifizierung deaktivieren",
+        "disable-password-authentication-tooltip": "Benutzer mit der Administratorrolle können diese Einschränkung umgehen",
+        "provider-name-label": "Name des Anbieters",
+        "provider-name-tooltip": "Name, der auf dem Anmeldebildschirm angezeigt wird",
+        "defaults-title": "Standardwerte",
+        "defaults-requirement": "Die folgenden Einstellungen werden verwendet, wenn ein Benutzer über OIDC registriert wird, während SyncUserSettings deaktiviert ist",
+        "default-include-unknowns-label": "Unbekannte einbeziehen",
+        "default-include-unknowns-tooltip": "Unbekannte Altersfreigaben einbeziehen",
+        "default-age-restriction-label": "Altersfreigabe",
+        "default-age-restriction-tooltip": "Maximale Altersfreigabe für neue Nutzer",
+        "no-restriction": "{{restriction-selector.no-restriction}}"
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "OpenID Connect"
+    },
+    "import-mappings": {
+        "import-step": "Import",
+        "configure-step": "Konfigurieren",
+        "conflicts-step": "Kollisionen beheben",
+        "finalize-step": "Abschließen",
+        "select-files-warning": "Sie müssen eine JSON-Datei hochladen, um fortzufahren",
+        "invalid-file": "Die Datei konnte nicht analysiert werden. Überprüfen Sie Ihre Eingabe",
+        "file-no-valid-content": "Ihr Import enthielt keine aussagekräftigen Daten, um fortzufahren",
+        "fields-to-import": "Einstellungen",
+        "fields-to-import-tooltip": "Deaktivieren, um eine Einstellung vollständig zu überspringen",
+        "whitelist-label": "Tags-Whitelist",
+        "blacklist-label": "Tags-Blacklist",
+        "age-ratings-label": "Altersfreigabe-Zuordnungen",
+        "field-mappings-label": "Feldzuordnungen",
+        "field-mappings-conflicts-tooltip": "Entscheiden Sie, welches Zielergebnis verwendet werden soll",
+        "import-mode-label": "Importmodus",
+        "import-mode-tooltip": "„Ersetzen“ ignoriert Ihre aktuellen Einstellungen, „Zusammenführen“ versucht, Konflikte gemäß Ihrer Konfiguration zu lösen",
+        "merge": "Zusammenführen",
+        "replace": "Ersetzen",
+        "resolution-label": "Konfliktlösung",
+        "resolution-tooltip": "Entscheiden Sie, wie Kavita mit Konflikten umgehen soll",
+        "manual": "Handbuch",
+        "keep": "Behalten",
+        "to-pick": "Auflösung auswählen",
+        "finalize-title": "Vorschau Ihrer Einstellungen, drücken Sie „Speichern“, um den Import abzuschließen",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "save": "{{common.save}}",
+        "import-description": "Laden Sie eine Datei hoch, die Sie oder jemand anderes exportiert hat, um sie durch Ihre aktuellen Einstellungen zu ersetzen oder mit diesen zusammenzuführen.",
+        "age-ratings-conflicts-tooltip": "Entscheiden Sie, welche Altersfreigabe verwendet werden soll"
+    },
+    "annotation-card": {
+        "contains-spoilers-label": "Spoilers",
+        "view-in-reader-label": "Ansicht im Reader"
+    },
+    "view-annotations-drawer": {
+        "filter-label": "Anmerkungen filtern"
+    },
+    "view-edit-annotation-drawer": {
+        "view-title": "Anmerkung anzeigen",
+        "edit-title": "Anmerkung bearbeiten",
+        "create-title": "Anmerkung erstellen",
+        "create": "Erstellen"
+    },
+    "view-bookmark-drawer": {
+        "title": "Lesezeichen",
+        "load-bookmark": "Laden",
+        "image-header": "Bild",
+        "text-header": "Text"
+    },
+    "page-chapter-label-pipe": {
+        "page-only": "— Seite {{pageNumber}}",
+        "full": "— Seite {{pageNumber}}, Kapitel „{{chapterTitle}}“"
+    },
+    "view-toc-drawer": {
+        "title": "Inhaltsverzeichnis",
+        "toc-header": "Buch",
+        "personal-header": "Persönlich"
+    },
+    "epub-setting-drawer": {
+        "title": "Buch-Einstellungen"
+    },
+    "highlight-bar": {
+        "add-new-color-alt": "Benutzerdefinierte Farbe hinzufügen",
+        "slot-label": "Highlight-Slot {{slot}}"
     }
 }

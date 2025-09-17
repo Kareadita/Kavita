@@ -5,7 +5,8 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Pasfhocal dearmadta?",
-        "submit": "Sínigh isteach"
+        "submit": "Sínigh isteach",
+        "oidc": "OpenID Connect"
     },
     "dashboard": {
         "no-libraries": "Níl aon leabharlanna socraithe fós. Cruthaigh roinnt i",
@@ -26,7 +27,12 @@
         "saving": "Ag sábháil…",
         "update": "Nuashonrú",
         "account-detail-title": "Sonraí Cuntais",
-        "invalid-email-warning": "Cuirfidh ríomhphost neamhbhailí bac ar roinnt feidhmiúlachtaí de chuid Kavita"
+        "invalid-email-warning": "Cuirfidh ríomhphost neamhbhailí bac ar roinnt feidhmiúlachtaí de chuid Kavita",
+        "notice": "Rabhadh!",
+        "out-of-sync": "Cruthaíodh an t-úsáideoir seo trí OIDC. Má tá an socrú SyncUsers cumasaithe, féadfar aon athruithe a dhéantar ar an gcuntas seo a athscríobh.",
+        "oidc-managed": "Tá an t-úsáideoir seo á bhainistiú trí OIDC. Téigh i dteagmháil le riarthóir d'OIDC le haon athruithe a iarraidh.",
+        "identity-provider": "Soláthraí aitheantais",
+        "identity-provider-tooltip": "Ní dhéantar úsáideoirí Kavita a shioncronú le cuntais OIDC riamh."
     },
     "user-scrobble-history": {
         "title": "Stair Scrobble",
@@ -108,8 +114,8 @@
         "collapse-series-relationships-label": "Caidrimh Sraithe a Chomhbhrú",
         "collapse-series-relationships-tooltip": "Ar chóir Kavita thaispeáint Sraith nach bhfuil aon chaidreamh nó go bhfuil an tuismitheoir/réamhscéal",
         "share-series-reviews-label": "Léirmheasanna Sraith Comhroinn",
-        "share-series-reviews-tooltip": "Ar chóir Kavita san áireamh do athbhreithnithe ar Sraith d'úsáideoirí eile",
-        "clients-opds-alert": "Níl OPDS cumasaithe ar an bhfreastalaí seo. Ní dhéanfaidh sé seo difear d'úsáideoirí Tachiyami.",
+        "share-series-reviews-tooltip": "Lig do do léirmheasanna a bheith le feiceáil ag úsáideoirí eile ar an bhfreastalaí seo",
+        "clients-opds-alert": "Níl OPDS cumasaithe ar an bhfreastalaí seo. Ní bheidh tionchar aige seo ar úsáideoirí Mihon.",
         "clients-opds-description": "Úsáidfidh gach cliant 3ú Páirtí an eochair API nó an Url Ceangail thíos. Tá siad seo cosúil le pasfhocail, coinnigh príobháideach é.",
         "clients-api-key-tooltip": "Tá an eochair API cosúil le pasfhocal. Má athshocraítear é, cuirfidh sé aon chliaint atá ann cheana ó bhail.",
         "clients-opds-url-label": "OPDS URL",
@@ -121,7 +127,10 @@
         "anilist-scrobbling-label": "Scrobbling AniList",
         "anilist-scrobbling-tooltip": "Lig do Kavita Scrobble (sioncronú aontreo) dul chun cinn a léamh agus rátálacha chuig AniList",
         "want-to-read-sync-label": "Ag Teastáil le Léamh Sioncrónaithe",
-        "want-to-read-sync-tooltip": "Lig do Kavita míreanna a chur le do liosta Want to Read bunaithe ar shraith AniList agus MAL sa léiliosta ar feitheamh"
+        "want-to-read-sync-tooltip": "Lig do Kavita míreanna a chur le do liosta Mian Léamh bunaithe ar AniList agus sraith MAL sa liosta Léamh Ar Feitheamh",
+        "social-settings-title": "Socruithe Sóisialta",
+        "highlight-bar-label": "Aibhsíonn nótaí dathanna",
+        "highlight-bar-tooltip": "Tá na dathanna seo roinnte idir na leabhair uile"
     },
     "user-holds": {
         "title": "Coinníonn Scrobble",
@@ -165,7 +174,7 @@
         "description": "Nuair a roghnaítear iad, déanfar gach liosta sraithe agus léitheoireachta a bhfuil mír amháin ar a laghad acu atá níos mó ná an srian roghnaithe a bhriseadh ó thorthaí.",
         "not-applicable-for-admins": "Níl sé seo infheidhme maidir le admins.",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "no-restriction": "Gan Srian",
+        "no-restriction": "Gan srian",
         "include-unknowns-label": "Cuir anaithnid san áireamh",
         "include-unknowns-tooltip": "Más fíor, ceadófar Anaithnid le Srian Aoise. D'fhéadfadh sé seo a bheith ina chúis le sceitheadh na meán d'úsáideoirí a bhfuil srianta Aoise orthu."
     },
@@ -598,7 +607,10 @@
         "total-subbed-months-label": "Míonna Iomlána Suibscríofa",
         "email-label": "Ríomhphost Cláraithe",
         "license-mismatch": "Is féidir ceadúnas a chlárú le cás Kavita eile. Athchlárú lena shocrú.",
-        "k+-unlocked": "Kavita+ díghlasáilte!"
+        "k+-unlocked": "Kavita+ díghlasáilte!",
+        "kavita+-warning": "Tá Kavita+ ar leithligh ó Kavita. Má dhíshuiteálann tú Kavita gan díliostáil, gearrfar táille ort.",
+        "cancel-label": "Cealaigh an Síntiús",
+        "cancel-tooltip": "Cealaigh do shíntiús agus scrios an ceadúnas laistigh de Kavita."
     },
     "book-line-overlay": {
         "copy": "Cóipeáil",
@@ -606,7 +618,8 @@
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "bookmark-label": "Ainm Leabharmharcanna",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "annotate": "Anótáil"
     },
     "book-reader": {
         "title": "Socruithe Leabhar",
@@ -631,15 +644,19 @@
         "incognito-mode-label": "Mód Incognito",
         "next": "Ar Aghaidh",
         "previous": "Roimhe Seo",
-        "go-to-page-prompt": "Tá leathanaigh {{totalPages}} ann. Cén leathanach ar mhaith leat dul chuige?",
-        "go-to-section": "Téigh go dtí an roinn",
-        "go-to-section-prompt": "Tá {{totalSections}} rannóg ann. Cén rannóg ar mhaith leat dul chuici?",
-        "go-to-first-page": "Téigh go dtí an chéad leathanach"
+        "go-to-page-prompt": "Tá {{totalPages}} leathanach ann. Cén leathanach ar mhaith leat dul chuige?",
+        "go-to-first-page": "Téigh go dtí an chéad leathanach",
+        "page-num-label": "Leathanach {{page}}",
+        "completion-label": "{{percent}} críochnaithe",
+        "force-selected-one-column": "Athraíodh an modh leagan amach go Colún Amháin mar gheall ar easpa spáis chun Dhá Cholún a rindreáil"
     },
     "personal-table-of-contents": {
         "no-data": "Níl aon rud Leabharmharcáilte fós",
-        "page": "Leathanach {{value}}",
-        "delete": "Scrios {{bookmarkName}}"
+        "delete": "Scrios {{bookmarkName}}",
+        "page-title": "Leathanach {{page}}",
+        "chapter-and-page-title": "Caibidil {{chapterTitle}}, Leathanach {{page}}",
+        "no-match": "Gan aon scagaire meaitseáil leabharmharcanna",
+        "filter-label": "{{common.filter}}"
     },
     "confirm-email": {
         "title": "Cláraigh",
@@ -737,7 +754,8 @@
         "publication-status-title": "Foilsiú",
         "publication-status-tooltip": "Stádas Foilseacháin",
         "off": "{{reader-settings.off}}",
-        "on": "{{reader-settings.on}}"
+        "on": "{{reader-settings.on}}",
+        "annotations-tab": "{{tabs.annotations-tab}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -824,7 +842,7 @@
         "type-label": "Cineál",
         "type-tooltip": "Cinneann cineál leabharlainne conas a dhéantar comhaid a pharsáil agus má thaispeánann an Chomhéadain Caibidlí (Manga) vs Ceisteanna (Comics). Seiceáil an vicí le haghaidh tuilleadh sonraí ar na difríochtaí idir na cineálacha leabharlainne.",
         "kavitaplus-eligible-label": "Kavita+ Incháilithe",
-        "kavitaplus-eligible-tooltip": "Tacaíonn gnéithe meiteashonraí Kavita+ nó Scrobbling",
+        "kavitaplus-eligible-tooltip": "Tacaíonn sé le gnéithe meiteashonraí Kavita+ agus/nó Scrobbling",
         "folder-description": "Cuir fillteáin le do leabharlann",
         "browse": "Brabhsáil le haghaidh Fillteáin Meán",
         "help-us-part-1": "Cabhraigh linn trí na nithe seo a leanas a leanúint ",
@@ -862,7 +880,10 @@
         "allow-metadata-matching-tooltip": "Ar cheart do Kavita meiteashonraí a íoslódáil do Shraith laistigh den Leabharlann seo. Ní tharlóidh sé seo ach amháin má tá Síntiús gníomhach Kavita+ ag an bhfreastalaí.",
         "allow-metadata-matching-label": "Ceadaigh Meaitseáil Meiteashonraí",
         "enable-metadata-tooltip": "Lig do Kavita comhaid meiteashonraí a léamh a sháraíonn parsáil ainm comhaid.",
-        "enable-metadata-label": "Cumasaigh Meiteashonraí (ComicInfo/Epub/PDF)"
+        "enable-metadata-label": "Cumasaigh Meiteashonraí (ComicInfo/Epub/PDF)",
+        "remove-prefix-for-sortname-label": "Bain réimíreanna coitianta le haghaidh Ainm Sórtála",
+        "remove-prefix-for-sortname-tooltip": "Bainfidh Kavita réimíreanna coitianta ar nós 'An', 'A', 'An' as teidil le haghaidh ainm sórtála. Ní sháraíonn sé meiteashonraí socraithe.",
+        "files-at-root-warning": "Tá comhaid ag an bhfréamh i bhfillteán amháin nó níos mó. Ní thacaíonn Kavita leis seo."
     },
     "file-type-group-pipe": {
         "archive": "Cartlann",
@@ -1209,7 +1230,7 @@
         "library-scan-tooltip": "Cé chomh minic a dhéanfaidh Kavita meiteashonraí a scanadh agus a athnuachan timpeall ar chomhaid leabharlainne.",
         "library-database-backup-label": "Cúltaca fileata",
         "library-database-backup-tooltip": "Cé chomh minic a dhéanfaidh Kavita cúltaca ar an mbunachar sonraí agus ar chomhaid ghaolmhara eile.",
-        "cleanup-label": "Glanadh",
+        "cleanup-label": "Glan suas",
         "cleanup-tooltip": "Cé chomh minic a rithfidh Kavita tascanna glantacháin. D'fhéadfadh sé seo a bheith trom agus ba chóir é a dhéanamh ag meán oíche i bhformhór na gcásanna",
         "adhoc-tasks-title": "Tascanna Ad-hoc",
         "job-title-header": "Teideal an Phoist",
@@ -1287,7 +1308,9 @@
         "loading": "{{common.loading}}",
         "actions-header": "Gníomhartha",
         "pending-tooltip": "Níor bhailíochtaigh an t-úsáideoir seo a ríomhphost",
-        "all-libraries": "Gach Leabharlann"
+        "all-libraries": "Gach Leabharlann",
+        "identity-provider-oidc-tooltip": "OIDC",
+        "identity-provider-native-tooltip": "Dúchasach"
     },
     "edit-collection-tags": {
         "title": "Cuir {{collectionName}} Collection in eagar",
@@ -1354,7 +1377,10 @@
         "admin-manage-tokens": "Bainistigh Comharthaí Úsáideora",
         "scrobble-holds": "Scrobble i seilbh",
         "admin-metadata": "Bainistigh Meiteashonraí",
-        "reading-profiles": "Próifílí Léitheoireachta"
+        "reading-profiles": "Próifílí Léitheoireachta",
+        "admin-oidc": "Ceangail OpenID",
+        "admin-mappings-import": "Socruithe Meiteashonraí",
+        "admin-public-metadata": "Bainistigh Meiteashonraí"
     },
     "collection-detail": {
         "no-data": "Níl aon mhír ann. Bain triail as sraith a chur leis.",
@@ -1463,7 +1489,8 @@
         "collections": "Bailiúcháin",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
-        "include-extras": "Cuir Caibidlí & Comhaid san áireamh"
+        "include-extras": "Cuir Caibidlí & Comhaid san áireamh",
+        "annotations": "{{tabs.annotations-tab}}"
     },
     "nav-header": {
         "skip-alt": "Scipeáil chuig an bpríomhábhar",
@@ -1964,7 +1991,24 @@
         "invalid-password-reset-url": "Athshocraigh url neamhbhailí an phasfhocail",
         "delete-theme-in-use": "Tá an téama in úsáid faoi láthair ag úsáideoir amháin ar a laghad, ní féidir é a scriosadh",
         "theme-manual-upload": "Bhí fadhb ann a chruthaigh Téama ó uaslódáil láimhe",
-        "theme-already-in-use": "Tá téama ann cheana féin faoin ainm sin"
+        "theme-already-in-use": "Tá téama ann cheana féin faoin ainm sin",
+        "import-fields": {
+            "non-unique-age-ratings": "Níl eochracha mapála rátála aoise uathúil, ceartaigh do chomhad allmhairithe le do thoil",
+            "non-unique-fields": "Níl aitheantas uathúil ag mapálacha réimse, ceartaigh do chomhad allmhairithe le do thoil"
+        },
+        "oidc": {
+            "missing-external-id": "Níor thug OIDC aitheantóir bailí ar ais",
+            "missing-email": "Níor thug OIDC ríomhphost bailí ar ais",
+            "email-not-verified": "Ní mór do ríomhphost a fhíorú chun logáil isteach a cheadú trí OIDC",
+            "no-account": "Ní bhfuarthas aon chuntas comhoiriúnach",
+            "disabled-account": "Tá an cuntas seo díchumasaithe, déan teagmháil le riarthóir le do thoil",
+            "creating-user": "Theip ar úsáideoir nua a chruthú, déan teagmháil le riarthóir le do thoil",
+            "role-not-assigned": "Níl na róil riachtanacha sannta duit chun rochtain a fháil ar an bhfeidhmchlár seo",
+            "failed-to-update-email": "Theip ar an ríomhphost a nuashonrú",
+            "failed-to-update-username": "Theip ar an ainm úsáideora a nuashonrú",
+            "email-in-use": "Tá ríomhphost in úsáid cheana féin ag cuntas eile",
+            "syncing-user": "Theip ar do chuntas a shioncronú ó OIDC, déan teagmháil le riarthóir le do thoil"
+        }
     },
     "metadata-builder": {
         "or": "Meaitseáil aon cheann díobh seo a leanas",
@@ -2084,7 +2128,7 @@
         "writers": "{{metadata-fields.writers-title}}",
         "path": "Cosán",
         "file-path": "Cosán Comhad",
-        "want-to-read": "Ar mhaith leat léamh",
+        "want-to-read": "Ba mhaith liom a léamh",
         "read-date": "Dáta Léitheoireachta",
         "average-rating": "Meánráta",
         "read-last": "Léigh go deireanach"
@@ -2231,12 +2275,16 @@
         "series-added-want-to-read": "Sraith curtha leis ón liosta Ar Mhaith Leat Léamh",
         "series-bound-to-reading-profile": "Sraith atá ceangailte le Próifíl Léitheoireachta {{name}}",
         "library-bound-to-reading-profile": "Leabharlann ceangailte le Próifíl Léitheoireachta {{name}}",
-        "external-match-rate-error": "Rith Kavita as an ráta ag cuardach {{seriesName}}. Déan iarracht arís i gceann 5 nóiméad."
+        "external-match-rate-error": "Rith Kavita as an ráta ag cuardach {{seriesName}}. Déan iarracht arís i gceann 5 nóiméad.",
+        "confirm-delete-bookmark": "An bhfuil tú cinnte gur mian leat an Leabharmharc seo a scriosadh?",
+        "confirm-delete-annotation": "An bhfuil tú cinnte gur mian leat an nóta seo a scriosadh?"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Uair",
         "hour": "Uair",
-        "hours": "Uaireanta"
+        "hours": "Uaireanta",
+        "hour-left": "Uair an chloig fágtha",
+        "hours-left": "Uaireanta fágtha"
     },
     "actionable": {
         "scan-library": "Leabharlann Scan",
@@ -2353,7 +2401,9 @@
         "required-field": "Tá an réimse seo ag teastáil",
         "valid-email": "Ní mór gur ríomhphost bailí é seo",
         "password-validation": "Caithfidh pasfhocal a bheith idir 6 agus 256 carachtar ar fad",
-        "year-validation": "Caithfidh sé seo a bheith ina bliain bhailí níos mó ná 1000 agus 4 charachtar ar fad"
+        "year-validation": "Caithfidh sé seo a bheith ina bliain bhailí níos mó ná 1000 agus 4 charachtar ar fad",
+        "other-field-required": "Tá {{name}} ag teastáil nuair a bhíonn {{other}} socraithe",
+        "invalid-uri": "Tá an URI a cuireadh ar fáil neamhbhailí"
     },
     "entity-type": {
         "volume": "Imleabhar",
@@ -2389,7 +2439,8 @@
         "devices-tab": "Gléasanna",
         "stats-tab": "Stait",
         "scrobbling-tab": "Ag scrobadh",
-        "smart-filters-tab": "Scagairí Cliste"
+        "smart-filters-tab": "Scagairí Cliste",
+        "annotations-tab": "Anótálacha"
     },
     "common": {
         "reset-to-default": "Athshocraigh go Réamhshocrú",
@@ -2433,7 +2484,8 @@
         "author-count": "{{num}} Údair",
         "chapter-count": "{{num}} Caibidlí",
         "no-data": "Uimh Sonraí",
-        "issue-count": "{{num}} Fadhbanna"
+        "issue-count": "{{num}} Fadhbanna",
+        "unknown": "Gan aithne"
     },
     "confirm": {
         "alert": "Airdeall",
@@ -2459,7 +2511,7 @@
         "loading": "{{common.loading}}",
         "title": "Sonraí {{personName}}",
         "name-label": "{{edit-series-modal.name-label}}",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "close": "{{common.close}}",
         "role-label": "Ról",
@@ -2478,7 +2530,8 @@
         "aliases-label": "Cuir leasainmneacha in eagar",
         "aliases-tab": "Leasainmneacha",
         "aliases-tooltip": "Nuair a chuirtear leasainm duine ar shraith, sanntar an duine sin seachas duine nua a chruthú. Agus leasainm á scriosadh, beidh ort an tsraith a athscanadh le go dtabharfar faoi deara an t-athrú.",
-        "alias-overlap": "Tá an leasainm seo ag tagairt do dhuine eile cheana féin nó is é ainm an duine seo é, smaoinigh ar iad a chumasc."
+        "alias-overlap": "Tá an leasainm seo ag tagairt do dhuine eile cheana féin nó is é ainm an duine seo é, smaoinigh ar iad a chumasc.",
+        "invalid-asin": "Ní mór don ASIN a bheith i bhformáid bhailí ISBN-10 nó ISBN-13"
     },
     "new-version-modal": {
         "description": "Tá leagan nua de Kavita ar fáil. Athnuaigh le nuashonrú.",
@@ -2589,14 +2642,14 @@
         "whitelist-label": "Clibeanna an Liosta Bán",
         "whitelist-tooltip": "Ná ceadaigh ach teaghrán sa liosta seo a scríobh do <b>Clibeanna</b>. Cinntigh go bhfuil siad scartha le camóga.",
         "age-rating-mapping-title": "Léarscáiliú Rátála Aoise",
-        "age-rating-mapping-description": "Socróidh aon teaghráin ar chlé má fhaightear iad i gCeachtar Seánra nó Clibeanna an Rátáil Aoise ar an tSraith.",
+        "age-rating-mapping-description": "Aon teaghráin ar chlé, má fhaightear iad sa Seánra nó sna Clibeanna, socróidh siad an Rátáil Aoise ar an Sraith. Déantar an meaitseáil a normalú agus níl sé íogair ó thaobh cás de, agus úsáidtear an rátáil aoise is airde.",
         "genre": "Seánra",
         "tag": "Chlib",
         "remove-source-tag-label": "Bain Clib Foinse",
         "add-field-mapping-label": "Cuir Mapáil Réimse leis",
         "add-age-rating-mapping-label": "Cuir Mapáil Rátála Aoise leis",
         "field-mapping-title": "Mapáil Réimse",
-        "field-mapping-description": "Socraigh rialacha do theaghráin áirithe a fhaightear sa réimse Seánra/Clib agus mapáil go teaghrán nua sa Seánra/Clib é agus bain den liosta Foinse go roghnach é. Ní bhaineann ach amháin nuair atá Seánra/Clib in ann a scríobh.",
+        "field-mapping-description": "Socraigh rialacha do theaghráin áirithe a fhaightear sa réimse Seánra/Clib agus mapáil iad chuig teaghrán nua i Seánra/Clib agus bain iad den liosta Foinse más mian leat. Déantar an meaitseáil a normalú agus níl aon íogaireacht idir litreacha cás agus litreacha beaga, úsáidtear an chéad luach meaitseála. Ní bhaineann sé seo ach nuair a bhíonn an Seánra/Clib cumasaithe le scríobh.",
         "first-last-name-label": "Céad Deireadh Ag Ainmniú",
         "first-last-name-tooltip": "Cinntigh go scríobhtar ainmneacha na nDaoine Ar dtús ansin ar Dheiridh",
         "person-roles-label": "Róil",
@@ -2616,7 +2669,22 @@
         "enable-chapter-release-date-tooltip": "Ceadaigh Dáta Eisiúna na Caibidle/na hEagráine a scríobh",
         "enable-chapter-publisher-label": "Foilsitheoir",
         "enable-chapter-cover-label": "Clúdach Caibidle",
-        "enable-chapter-cover-tooltip": "Ceadaigh Clúdach na Caibidle/na hEagráin a shocrú"
+        "enable-chapter-cover-tooltip": "Ceadaigh Clúdach na Caibidle/na hEagráin a shocrú",
+        "k+-warning": "Tá na socruithe thíos roinnte leis na cinn atá le fáil ar leathanach K+. Is féidir leat iad a athrú in aon cheann de na háiteanna",
+        "export-settings": "Easpórtáil",
+        "export-tooltip": "Easpórtáil do liosta dubh agus do liosta bán, rátáil aoise, agus mapálacha réimse",
+        "export-file-name": "Socruithe Meiteashonraí Kavita Export.json",
+        "import-settings": "Iompórtáil",
+        "import-tooltip": "Iompórtáil do shocruithe féin nó socruithe duine eile",
+        "enable-extended-metadata-processing-label": "Próiseáil meiteashonraí leathnaithe",
+        "enable-extended-metadata-processing-tooltip": "Ar cheart seánraí agus clibeanna a fhoinsítear ó ComicInfo nó a chuirtear leis tríd an gcomhéadan úsáideora a phróiseáil ag baint úsáide as an liosta dubh, an liosta bán, mapálacha rátála aoise, agus mapálacha réimse.",
+        "remove-age-rating-mapping-label": "Bain mapáil rátála aoise",
+        "remove-field-mapping-label": "Bain mapáil réimse",
+        "series-header": "Réimsí Sraithe",
+        "people-header": "Daoine",
+        "tags-header": "Clibeanna",
+        "source-genre-tags-placeholder": "Seánra/clib foinse",
+        "dest-genre-tags-placeholder": "Seánra/clib ceann scríbe"
     },
     "metadata-setting-field-pipe": {
         "people": "{{tabs.people-tab}}",
@@ -2813,5 +2881,141 @@
         "mobile": "Soghluaiste",
         "tablet": "Táibléad",
         "desktop": "Deasc"
+    },
+    "oidc": {
+        "title": "Glao ar ais OIDC",
+        "login": "Ar ais go scáileán logáil isteach",
+        "error-loading-info": "Tharla earráid agus faisnéis OIDC á luchtú, déan teagmháil le do riarthóir",
+        "timeout": "Tá réiteach OIDC imithe in éag nó tá earráid tarlaithe"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "save-success": "Nuashonraíodh do shocruithe OIDC go rathúil",
+        "notice": "Fógra",
+        "restart-required": "Éilíonn athrú Údaráis nó Aitheantais Cliant atosú de láimh ar Kavita chun go dtiocfaidh sé i bhfeidhm.",
+        "provider-title": "Soláthraí",
+        "provider-tooltip": "Éilíonn socruithe an tsoláthraí ort cliceáil ar Sábháil de láimh. Ní mór Kavita a chumrú mar chliant rúnda agus teastaíonn URL atreoraithe uaidh. Féach ar an <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>vicí</a> le haghaidh tuilleadh sonraí.",
+        "behavior-title": "Iompar",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "manual-save-label": "Éilíonn athrú socruithe soláthraí sábháil de láimh",
+        "authority-label": "Údarás",
+        "authority-tooltip": "An URL chuig do sholáthraí OIDC, ná cuir an cosán .well-known/openid-configuration san áireamh",
+        "client-id-label": "Aitheantas Cliant",
+        "client-id-tooltip": "Is féidir leis an ClientID atá socraithe i do sholáthraí OIDC a bheith rud ar bith",
+        "secret-label": "Rún an chliaint",
+        "secret-tooltip": "An rún mar a ghintear é ag do sholáthraí OIDC",
+        "provision-accounts-label": "Cuntais sholáthair",
+        "provision-accounts-tooltip": "Cruthaigh cuntas nua go huathoibríoch agus tú ag logáil isteach trí OIDC mura féidir é a mheaitseáil le ceann atá ann cheana féin",
+        "require-verified-email-label": "Éiligh ríomhphoist fhíoraithe",
+        "require-verified-email-tooltip": "Éilíonn sé fíorú ríomhphoist agus cuntas nua á chruthú nó á mheaitseáil le ceann atá ann cheana féin. Má tá ríomhphost fíoraithe ag cuntas nua-chruthaithe, déanfar é a fhíorú go huathoibríoch ar thaobh Kavita.",
+        "sync-user-settings-label": "Sioncrónaigh socruithe úsáideora le róil OIDC",
+        "sync-user-settings-tooltip": "Déanfaidh an soláthraí aitheantais bainistíocht iomlán ar úsáideoirí a chruthaítear trí OIDC, lena n-áirítear róil, rochtain leabharlainne, agus rátáil aoise. Mura bhfuil an rogha seo ar fáil, ní bheidh rochtain ag úsáideoirí ar aon ábhar tar éis cuntas a chruthú. Féach ar an doiciméadú le haghaidh tuilleadh sonraí.",
+        "auto-login-label": "Logáil isteach uathoibríoch",
+        "auto-login-tooltip": "Atreorú uathoibríoch chuig soláthraí OIDC nuair a osclaítear an scáileán logála isteach",
+        "disable-password-authentication-label": "Díchumasaigh fíordheimhniú pasfhocail",
+        "disable-password-authentication-tooltip": "Is féidir le húsáideoirí a bhfuil ról riarthóra acu an srian seo a sheachaint",
+        "provider-name-label": "Ainm an tsoláthraí",
+        "provider-name-tooltip": "Ainm a thaispeántar ar an scáileán logála isteach",
+        "defaults-title": "Réamhshocruithe",
+        "defaults-requirement": "Úsáidtear na socruithe seo a leanas nuair a chláraítear úsáideoir trí OIDC agus SyncUserSettings múchta",
+        "default-include-unknowns-label": "Cuir anaithnidí san áireamh",
+        "default-include-unknowns-tooltip": "Cuir rátálacha aoise anaithnide san áireamh",
+        "default-age-restriction-label": "Rátáil aoise",
+        "default-age-restriction-tooltip": "Uasráta aoise a thaispeántar d'úsáideoirí nua",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "advanced-title": "Socruithe ardleibhéil",
+        "advanced-tooltip": "Ná modhnaigh na roghanna seo ach amháin má thuigeann tú a dtionchar.",
+        "roles-prefix-label": "Réimír na rólanna",
+        "roles-prefix-tooltip": "Ní bhreithneoidh Kavita ach róil a thosaíonn leis an réimír seo.",
+        "roles-claim-label": "Éileamh rólanna",
+        "roles-claim-tooltip": "An t-éileamh a úsáidfidh Kavita chun róil a bhaint amach. Fág bán chun an réamhshocrú a úsáid.",
+        "custom-scopes-label": "Scóip saincheaptha",
+        "custom-scopes-tooltip": "Raon feidhme breise le hiarraidh ó do sholáthraí OIDC le linn logála isteach. Scar il-raon feidhme le camóga. D’fhéadfadh luachanna míchearta cosc a chur ar logáil isteach."
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "Ceangail OpenID"
+    },
+    "import-mappings": {
+        "import-step": "Iompórtáil",
+        "configure-step": "Cumraigh",
+        "conflicts-step": "Réiteach imbhuailtí",
+        "finalize-step": "Críochnaigh",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "save": "{{common.save}}",
+        "import-description": "Uaslódáil comhad a d'easpórtáil tú féin nó duine eile chun do shocruithe reatha a athsholáthar nó a chumasc.",
+        "select-files-warning": "Ní mór duit comhad json a uaslódáil le leanúint ar aghaidh",
+        "invalid-file": "Theip ar do chomhad a pharsáil, seiceáil d’ionchur",
+        "file-no-valid-content": "Ní raibh aon sonraí bríocha i d’allmhairiú le leanúint leis",
+        "fields-to-import": "Socruithe",
+        "fields-to-import-tooltip": "Díchumasaigh chun socrú a scipeáil go hiomlán",
+        "whitelist-label": "Liosta bán na gclibeanna",
+        "blacklist-label": "Clibeanna liosta dubh",
+        "age-ratings-label": "Mapálacha rátála aoise",
+        "field-mappings-label": "Mapálacha réimse",
+        "age-ratings-conflicts-tooltip": "Cinneadh a dhéanamh faoin rátáil aoise atá le húsáid",
+        "field-mappings-conflicts-tooltip": "Cinneadh a dhéanamh faoin toradh ceann scríbe atá le húsáid",
+        "import-mode-label": "Mód iompórtála",
+        "import-mode-tooltip": "Athsholáthar neamhaird ar do shocruithe reatha, déanfaidh Cumasc iarracht coinbhleachtaí a réiteach ar an mbealach atá cumraithe agat",
+        "merge": "Cumaisc",
+        "replace": "Athsholáthair",
+        "resolution-label": "Réiteach coinbhleachta",
+        "resolution-tooltip": "Déan cinneadh ar an gcaoi ar cheart do Kavita déileáil le coinbhleachtaí",
+        "manual": "Lámhleabhar",
+        "keep": "Coinnigh",
+        "to-pick": "Roghnaigh réiteach",
+        "finalize-title": "Réamhamharc ar do shocruithe, brúigh sábháil chun d’allmhairiú a chríochnú"
+    },
+    "annotation-card": {
+        "page-num": "{{book-reader.page-num-label}}",
+        "contains-spoilers-label": "Spoiléirí",
+        "view-in-reader-label": "Féach sa Léitheoir"
+    },
+    "annotations-tab": {
+        "title": "{{tabs.annotations-tab}}"
+    },
+    "view-annotations-drawer": {
+        "title": "{{tabs.annotations-tab}}",
+        "close": "{{common.close}}",
+        "filter-label": "Scagaire Nótaí",
+        "no-data": "{{common.no-data}}"
+    },
+    "view-edit-annotation-drawer": {
+        "view-title": "Féach ar an nóta",
+        "edit-title": "Cuir anótáil in Eagar",
+        "create-title": "Cruthaigh Anótáil",
+        "create": "Cruthaigh",
+        "close": "{{common.close}}",
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
+    },
+    "view-bookmark-drawer": {
+        "title": "Leabharmharcanna",
+        "close": "{{common.close}}",
+        "no-data": "{{common.no-data}}",
+        "page-num-label": "{{book-reader.page-num-label}}",
+        "load-bookmark": "Luchtaigh",
+        "image-header": "Íomhá",
+        "text-header": "Téacs"
+    },
+    "page-chapter-label-pipe": {
+        "page-only": "— Leathanach {{pageNumber}}",
+        "full": "— Leathanach {{pageNumber}}, Caibidil \"{{chapterTitle}}\""
+    },
+    "view-toc-drawer": {
+        "title": "Clár Ábhair",
+        "close": "{{common.close}}",
+        "toc-header": "Leabhar",
+        "personal-header": "Pearsanta"
+    },
+    "epub-setting-drawer": {
+        "title": "Socruithe Leabhar",
+        "close": "{{common.close}}"
+    },
+    "highlight-bar": {
+        "add-new-color-alt": "Cuir Dath Saincheaptha leis",
+        "slot-label": "Aibhsigh sliotán {{slot}}"
     }
 }

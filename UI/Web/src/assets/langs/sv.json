@@ -2088,7 +2088,6 @@
     },
     "personal-table-of-contents": {
         "delete": "Ta bort {{bookmarkName}}",
-        "page": "Sida {{value}}",
         "no-data": "Inget bokmärkt ännu"
     },
     "theme": {

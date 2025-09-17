@@ -623,9 +623,7 @@
         "table-of-contents-header": "目錄",
         "close-reader": "關閉閱讀器",
         "loading-book": "正在加載書籍…",
-        "go-to-first-page": "前往第一頁",
-        "go-to-section-prompt": "共有 {{totalSections}} 個章節。您想前往？",
-        "go-to-section": "前往章節"
+        "go-to-first-page": "前往第一頁"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -2217,7 +2215,6 @@
     },
     "personal-table-of-contents": {
         "no-data": "尚未有任何書籤",
-        "page": "第 {{value}} 頁",
         "delete": "刪除{{bookmarkName}}"
     },
     "confirm-email-change": {

@@ -5,7 +5,8 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "忘记密码？",
-        "submit": "登入"
+        "submit": "登入",
+        "oidc": "OpenID 连接"
     },
     "dashboard": {
         "no-libraries": "尚未设置资料库。在以下位置创建一些资料库",
@@ -26,7 +27,12 @@
         "saving": "正在保存…",
         "update": "更新",
         "account-detail-title": "帐户详细信息",
-        "invalid-email-warning": "无效的电子邮件将阻止 Kavita 的某些功能"
+        "invalid-email-warning": "无效的电子邮件将阻止 Kavita 的某些功能",
+        "notice": "警告！",
+        "out-of-sync": "此用户是通过 OIDC 创建的。如果启用了“同步用户”设置，则对此帐号所做的任何更改都可能会被覆盖。",
+        "oidc-managed": "此用户通过 OIDC 管理。请联系您的 OIDC 管理员申请更改。",
+        "identity-provider": "身份提供者",
+        "identity-provider-tooltip": "Kavita 用户从未与 OIDC 帐户同步。"
     },
     "user-scrobble-history": {
         "title": "Scrobble 历史",
@@ -108,8 +114,8 @@
         "collapse-series-relationships-label": "折叠系列的关联",
         "collapse-series-relationships-tooltip": "是否显示没有关联的系列或者前传",
         "share-series-reviews-label": "分享系列评论",
-        "share-series-reviews-tooltip": "是否对其他用户显示你的评论",
-        "clients-opds-alert": "此服务器未启用OPDS，不会影响Tachiyomi用户。",
+        "share-series-reviews-tooltip": "允许此服务器上的其他用户看到您的评论",
+        "clients-opds-alert": "此服务器未启用 OPDS。这不会影响 Mihon 用户。",
         "clients-opds-description": "所有第三方客户端均使用下方的API密钥或链接。它们就像密码一样，请保密。",
         "clients-api-key-tooltip": "API 密钥等同于密码。重置密钥将导致所有客户端失效。",
         "clients-opds-url-label": "OPDS 网址",
@@ -121,7 +127,10 @@
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobbling",
         "want-to-read-sync-label": "想要阅读同步",
-        "want-to-read-sync-tooltip": "允许 Kavita 根据待读列表中的 AniList 和 MAL 系列将项目添加到您的想读列表中"
+        "want-to-read-sync-tooltip": "允许 Kavita 根据待读列表中的 AniList 和 MAL 系列将项目添加到您的想读列表中",
+        "social-settings-title": "社交设置",
+        "highlight-bar-label": "注释高亮显示颜色",
+        "highlight-bar-tooltip": "所有书籍都共享这些颜色"
     },
     "user-holds": {
         "title": "刮削暂停",
@@ -598,7 +607,10 @@
         "k+-already-registered-header": "许可证已经注册",
         "overwrite": "覆盖",
         "k+-unlocked": "Kavita+ 已解锁！",
-        "k+-unlocked-description": "欢迎来到 Kavita+！一旦您在帐户下注册了 Scrobbling 提供商，Kavita 就会根据您的进度、评分和阅读意愿生成 scrobble 事件。花点时间确保您为不想 scrobble 的任何系列设置了 scrobbling 保留。"
+        "k+-unlocked-description": "欢迎来到 Kavita+！一旦您在帐户下注册了 Scrobbling 提供商，Kavita 就会根据您的进度、评分和阅读意愿生成 scrobble 事件。花点时间确保您为不想 scrobble 的任何系列设置了 scrobbling 保留。",
+        "kavita+-warning": "Kavita+ 与 Kavita 是相互独立的。如果您在未取消订阅的情况下卸载 Kavita，则需要付费。",
+        "cancel-label": "取消订阅",
+        "cancel-tooltip": "取消您的订阅并删除 Kavita 内的许可证。"
     },
     "book-line-overlay": {
         "copy": "复制",
@@ -606,7 +618,8 @@
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "bookmark-label": "书签名称",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "annotate": "注释"
     },
     "book-reader": {
         "title": "书籍设置",
@@ -632,14 +645,18 @@
         "next": "下一个",
         "previous": "上一个",
         "go-to-page-prompt": "共有 {{totalPages}} 页。您想转到哪一页？",
-        "go-to-section": "转到节",
-        "go-to-section-prompt": "共有 {{totalSections}} 节。您想转到哪一节？",
-        "go-to-first-page": "转到第一页"
+        "go-to-first-page": "转到第一页",
+        "page-num-label": "第 {{page}} 页",
+        "completion-label": "{{percent}} 完成",
+        "force-selected-one-column": "由于空间不足以呈现两列，布局模式切换为单列"
     },
     "personal-table-of-contents": {
         "no-data": "尚未添加书签",
-        "page": "页 {{value}}",
-        "delete": "删除 {{bookmarkName}}"
+        "delete": "删除 {{bookmarkName}}",
+        "page-title": "第 {{page}} 页",
+        "chapter-and-page-title": "第 {{chapterTitle}} 章，第 {{page}} 页",
+        "no-match": "没有符合筛选条件的书签",
+        "filter-label": "{{common.filter}}"
     },
     "confirm-email": {
         "title": "注册",
@@ -737,7 +754,8 @@
         "publication-status-title": "出版",
         "publication-status-tooltip": "出版状态",
         "on": "{{reader-settings.on}}",
-        "off": "{{reader-settings.off}}"
+        "off": "{{reader-settings.off}}",
+        "annotations-tab": "{{tabs.annotations-tab}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -862,7 +880,10 @@
         "allow-metadata-matching-label": "允许元数据匹配",
         "allow-metadata-matching-tooltip": "Kavita 是否应下载此库中系列的元数据。仅当服务器具有有效的 Kavita+ 订阅时才会发生这种情况。",
         "enable-metadata-label": "启用元数据（ComicInfo/Epub/PDF）",
-        "enable-metadata-tooltip": "允许 Kavita 读取覆盖文件名解析的元数据文件。"
+        "enable-metadata-tooltip": "允许 Kavita 读取覆盖文件名解析的元数据文件。",
+        "remove-prefix-for-sortname-label": "删除排序名称的常见前缀",
+        "remove-prefix-for-sortname-tooltip": "Kavita 将从排序名称的标题中删除常见前缀，例如“The”、“A”、“An”。不会覆盖已设置的元数据。",
+        "files-at-root-warning": "一个或多个文件夹的根目录下包含文件。Kavita 不支持这种情况。"
     },
     "file-type-group-pipe": {
         "archive": "档案",
@@ -1287,7 +1308,9 @@
         "loading": "{{common.loading}}",
         "actions-header": "活动",
         "pending-tooltip": "此用户尚未验证其电子邮件",
-        "all-libraries": "所有资料库"
+        "all-libraries": "所有资料库",
+        "identity-provider-oidc-tooltip": "OIDC",
+        "identity-provider-native-tooltip": "本地"
     },
     "edit-collection-tags": {
         "title": "编辑 {{collectionName}} 收藏",
@@ -1354,7 +1377,10 @@
         "admin-matched-metadata": "匹配的元数据",
         "scrobble-holds": "Scrobble 持有",
         "admin-metadata": "管理元数据",
-        "reading-profiles": "阅读配置文件"
+        "reading-profiles": "阅读配置文件",
+        "admin-mappings-import": "元数据设置",
+        "admin-public-metadata": "管理元数据",
+        "admin-oidc": "OpenID 连接"
     },
     "collection-detail": {
         "no-data": "暂无项目。请尝试添加一个系列。",
@@ -1463,7 +1489,8 @@
         "collections": "收藏",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
-        "include-extras": "包括章节和文件"
+        "include-extras": "包括章节和文件",
+        "annotations": "{{tabs.annotations-tab}}"
     },
     "nav-header": {
         "skip-alt": "跳转至主要内容",
@@ -1964,7 +1991,24 @@
         "invalid-password-reset-url": "无效的重置密码网址",
         "delete-theme-in-use": "主题当前已被至少一名用户使用，无法删除",
         "theme-manual-upload": "通过手动上传创建主题时出现问题",
-        "theme-already-in-use": "同名的主题已存在"
+        "theme-already-in-use": "同名的主题已存在",
+        "import-fields": {
+            "non-unique-age-ratings": "年龄分级映射键不唯一，请更正您的导入文件",
+            "non-unique-fields": "字段映射没有唯一 ID，请更正您的导入文件"
+        },
+        "oidc": {
+            "missing-external-id": "OIDC 未返回有效标识符",
+            "missing-email": "OIDC 没有返回有效的电子邮件",
+            "email-not-verified": "您的电子邮件必须经过验证才能通过 OIDC 登录",
+            "no-account": "未找到匹配的帐户",
+            "disabled-account": "该账户已被禁用，请联系管理员",
+            "creating-user": "无法创建新用户，请联系管理员",
+            "role-not-assigned": "您没有分配访问此应用程序所需的角色",
+            "failed-to-update-email": "更新电子邮件失败",
+            "failed-to-update-username": "更新用户名失败",
+            "email-in-use": "电子邮件已被其他帐户使用",
+            "syncing-user": "无法从 OIDC 同步您的帐户，请联系管理员"
+        }
     },
     "metadata-builder": {
         "or": "匹配以下任意项",
@@ -2231,12 +2275,16 @@
         "series-added-want-to-read": "从“想读”列表中添加的系列",
         "series-bound-to-reading-profile": "系列绑定到阅读配置文件 {{name}}",
         "library-bound-to-reading-profile": "资料库绑定到阅读配置文件 {{name}}",
-        "external-match-rate-error": "Kavita 查找 {{seriesName}} 的速度已超出范围。请过 5 分钟再试。"
+        "external-match-rate-error": "Kavita 查找 {{seriesName}} 的速度已超出范围。请过 5 分钟再试。",
+        "confirm-delete-bookmark": "您确定要删除此书签吗？",
+        "confirm-delete-annotation": "您确定要删除此注释吗？"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
         "hour": "小时",
-        "hours": "小时"
+        "hours": "小时",
+        "hour-left": "剩余小时",
+        "hours-left": "剩余小时"
     },
     "actionable": {
         "scan-library": "扫描资料库",
@@ -2353,7 +2401,9 @@
         "required-field": "必填项",
         "valid-email": "必须输入有效的电子邮件地址",
         "password-validation": "密码长度必须介于 6 到 256 个字符之间",
-        "year-validation": "必须为大于 1000 且长度为 4 个字符的有效年份"
+        "year-validation": "必须为大于 1000 且长度为 4 个字符的有效年份",
+        "other-field-required": "设置 {{other}} 时，需要 {{name}}",
+        "invalid-uri": "提供的 uri 无效"
     },
     "entity-type": {
         "volume": "卷",
@@ -2389,7 +2439,8 @@
         "devices-tab": "设备",
         "stats-tab": "状态",
         "scrobbling-tab": "Scrobbling",
-        "smart-filters-tab": "智能筛选"
+        "smart-filters-tab": "智能筛选",
+        "annotations-tab": "注释"
     },
     "common": {
         "reset-to-default": "重置为默认值",
@@ -2433,7 +2484,8 @@
         "author-count": "{{num}} 作者",
         "chapter-count": "{{num}} 章",
         "no-data": "无数据",
-        "issue-count": "{{num}} 期"
+        "issue-count": "{{num}} 期",
+        "unknown": "未知"
     },
     "confirm": {
         "confirm": "确认",
@@ -2447,7 +2499,7 @@
         "mal-id-label": "MAL Id",
         "anilist-id-label": "AniList Id",
         "description-label": "描述",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "title": "{{personName}} 详细信息",
         "general-tab": "{{edit-series-modal.general-tab}}",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
@@ -2468,7 +2520,8 @@
         "aliases-tooltip": "当某个系列被标记为某个人的别名时，系统会分配该人，而不是创建新的人。删除别名后，您必须重新扫描该系列才能生效。",
         "aliases-tab": "别名",
         "aliases-label": "编辑别名",
-        "alias-overlap": "此别名已经指向另一个人或为该人的名字，请考虑合并它们。"
+        "alias-overlap": "此别名已经指向另一个人或为该人的名字，请考虑合并它们。",
+        "invalid-asin": "ASIN 必须是有效的 ISBN-10 或 ISBN-13 格式"
     },
     "person-detail": {
         "all-roles": "角色",
@@ -2592,11 +2645,11 @@
         "whitelist-label": "白名单标签",
         "whitelist-tooltip": "仅允许为<b>标签</b>写入此列表中的字符串。确保它们以逗号分隔。",
         "age-rating-mapping-title": "年龄分级映射",
-        "age-rating-mapping-description": "如果在类型或标签中找到左侧的任何字符串，则会设置该系列的年龄分级。",
+        "age-rating-mapping-description": "如果在“类型”或“标签”中发现了左侧的任何字符串，都将设置该系列的年龄分级。匹配是规范化的且不区分大小写，将使用最高年龄分级。",
         "add-field-mapping-label": "添加字段映射",
         "add-age-rating-mapping-label": "添加年龄分级映射",
         "field-mapping-title": "字段映射",
-        "field-mapping-description": "为在类型/标签字段中找到的某些字符串设置规则，并将其映射到类型/标签中的新字符串，并可选择将其从源列表中删除。仅适用于类型/标签可写入的情况。",
+        "field-mapping-description": "为在“类型/标签”字段中找到的某些字符串设置规则，并将其映射到“类型/标签”中的新字符串，并可选择将其从“来源”列表中移除。匹配已规范化且不区分大小写，将使用第一个匹配的值。仅在启用“类型/标签”写入功能时适用。",
         "first-last-name-label": "首命名",
         "first-last-name-tooltip": "确保人们的名字写在前面，然后是姓氏",
         "person-roles-label": "角色",
@@ -2616,7 +2669,22 @@
         "enable-chapter-publisher-label": "出版社",
         "enable-chapter-title-label": "标题",
         "enable-chapter-title-tooltip": "允许写入章节/期刊的标题",
-        "enable-chapter-publisher-tooltip": "允许写入章节/期刊的出版社"
+        "enable-chapter-publisher-tooltip": "允许写入章节/期刊的出版社",
+        "k+-warning": "以下设置与 K+ 页面上的设置相同。您可以在任一位置更改它们",
+        "export-settings": "导出",
+        "export-tooltip": "导出黑名单和白名单、年龄分级和字段映射",
+        "export-file-name": "Kavita 元数据设置 Export.json",
+        "import-settings": "导入",
+        "import-tooltip": "导入您或其他人的设置",
+        "enable-extended-metadata-processing-label": "扩展元数据处理",
+        "enable-extended-metadata-processing-tooltip": "是否应使用黑名单、白名单、年龄分级映射和字段映射来处理来自 ComicInfo 或通过 UI 添加的类型和标签。",
+        "remove-age-rating-mapping-label": "删除年龄分级映射",
+        "remove-field-mapping-label": "删除字段映射",
+        "series-header": "系列字段",
+        "people-header": "创作人员",
+        "tags-header": "标签",
+        "source-genre-tags-placeholder": "来源类型/标签",
+        "dest-genre-tags-placeholder": "目标类型/标签"
     },
     "metadata-setting-field-pipe": {
         "covers": "封面",
@@ -2813,5 +2881,141 @@
         "tablet": "平板",
         "desktop": "桌面",
         "never": "从不"
+    },
+    "import-mappings": {
+        "field-mappings-conflicts-tooltip": "决定使用哪个目标结果",
+        "import-step": "导入",
+        "configure-step": "配置",
+        "conflicts-step": "解决冲突",
+        "finalize-step": "完成",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "save": "{{common.save}}",
+        "import-description": "上传您或其他人导出的文件以替换或合并您当前的设置。",
+        "select-files-warning": "您必须上传 json 文件才能继续",
+        "invalid-file": "无法解析您的文件，请检查您的输入",
+        "file-no-valid-content": "您的导入不包含任何有意义的数据，无法继续",
+        "fields-to-import": "设置",
+        "fields-to-import-tooltip": "禁用以完全跳过设置",
+        "whitelist-label": "标签白名单",
+        "blacklist-label": "标签黑名单",
+        "age-ratings-label": "年龄分级映射",
+        "field-mappings-label": "字段映射",
+        "age-ratings-conflicts-tooltip": "决定使用哪个年龄分级",
+        "import-mode-label": "导入模式",
+        "import-mode-tooltip": "替换忽略您当前的设置，合并将尝试按照您配置的方式解决冲突",
+        "merge": "合并",
+        "replace": "代替",
+        "resolution-label": "冲突解决",
+        "resolution-tooltip": "决定 Kavita 如何处理冲突",
+        "manual": "手动",
+        "keep": "保持",
+        "to-pick": "选择分辨率",
+        "finalize-title": "预览您的设置，按“保存”完成导入"
+    },
+    "oidc": {
+        "title": "OIDC 回调",
+        "login": "返回登录屏幕",
+        "error-loading-info": "加载 OIDC 信息时发生错误，请联系您的管理员",
+        "timeout": "OIDC 解析已超时或发生错误"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "save-success": "已成功更新您的 OIDC 设置",
+        "notice": "注意",
+        "restart-required": "更改权限或客户端 ID 需要手动重启 Kavita 才能生效。",
+        "provider-title": "提供商",
+        "provider-tooltip": "提供商设置需要您手动点击“保存”。Kavita 必须配置为机密客户端，并且需要重定向网址。更多详情，请参阅<a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>。",
+        "behavior-title": "行为",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "manual-save-label": "更改提供商设置需要手动保存",
+        "authority-label": "授权",
+        "authority-tooltip": "您的 OIDC 提供商的 URL 不包括 .well-known/openid-configuration 路径",
+        "client-id-label": "客户端 ID",
+        "client-id-tooltip": "您的 OIDC 提供商中设置的客户端 ID 可以是任何值",
+        "secret-label": "客户端密钥",
+        "secret-tooltip": "您的 OIDC 提供商生成的密钥",
+        "provision-accounts-label": "提供商帐户",
+        "provision-accounts-tooltip": "如果通过 OIDC 登录时无法与现有帐户匹配，则自动创建新帐户",
+        "require-verified-email-label": "需要经过验证的电子邮件",
+        "require-verified-email-tooltip": "创建新帐户或与现有帐户匹配时，需要验证电子邮件地址。如果新创建的帐户已验证电子邮件地址，则 Kavita 端将自动验证该帐户。",
+        "sync-user-settings-label": "将用户设置与 OIDC 角色同步",
+        "sync-user-settings-tooltip": "通过 OIDC 创建的用户将完全由身份提供商管理，包括角色、资料库访问权限和年龄分级。如果禁用此选项，用户在帐户创建后将无法访问任何内容。更多详情，请参阅文档。",
+        "auto-login-label": "自动登录",
+        "auto-login-tooltip": "打开登录屏幕时自动重定向到 OIDC 提供商",
+        "disable-password-authentication-label": "禁用密码验证",
+        "disable-password-authentication-tooltip": "具有管理员角色的用户可以绕过此限制",
+        "provider-name-label": "提供商名称",
+        "provider-name-tooltip": "登录屏幕上显示的名称",
+        "defaults-title": "默认值",
+        "defaults-requirement": "当用户通过 OIDC 注册且同步用户设置已关闭时，将使用以下设置",
+        "default-include-unknowns-label": "包含未知内容",
+        "default-include-unknowns-tooltip": "包括未知年龄分级",
+        "default-age-restriction-label": "年龄分级",
+        "default-age-restriction-tooltip": "向新用户显示最高年龄分级",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "advanced-title": "高级设置",
+        "advanced-tooltip": "仅当您了解这些选项的影响时才修改它们。",
+        "roles-prefix-label": "角色前缀",
+        "roles-prefix-tooltip": "Kavita 只会考虑以此前缀开头的角色。",
+        "roles-claim-label": "角色声明",
+        "roles-claim-tooltip": "Kavita 将用于提取角色的声明。留空则使用默认值。",
+        "custom-scopes-label": "自定义范围",
+        "custom-scopes-tooltip": "登录期间向 OIDC 提供商请求的附加范围。多个范围请用逗号分隔。值不正确可能会导致登录失败。"
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "OpenID 连接"
+    },
+    "annotation-card": {
+        "page-num": "{{book-reader.page-num-label}}",
+        "contains-spoilers-label": "剧透",
+        "view-in-reader-label": "在阅读器中查看"
+    },
+    "annotations-tab": {
+        "title": "{{tabs.annotations-tab}}"
+    },
+    "view-annotations-drawer": {
+        "title": "{{tabs.annotations-tab}}",
+        "close": "{{common.close}}",
+        "filter-label": "筛选注释",
+        "no-data": "{{common.no-data}}"
+    },
+    "view-edit-annotation-drawer": {
+        "view-title": "查看注释",
+        "edit-title": "编辑注释",
+        "create-title": "创建注释",
+        "create": "创建",
+        "close": "{{common.close}}",
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
+    },
+    "view-bookmark-drawer": {
+        "title": "书签",
+        "close": "{{common.close}}",
+        "no-data": "{{common.no-data}}",
+        "page-num-label": "{{book-reader.page-num-label}}",
+        "load-bookmark": "加载",
+        "image-header": "图片",
+        "text-header": "文本"
+    },
+    "page-chapter-label-pipe": {
+        "page-only": "— 第 {{pageNumber}} 页",
+        "full": "— 第 {{pageNumber}} 页，章节 \"{{chapterTitle}}\""
+    },
+    "view-toc-drawer": {
+        "title": "目录",
+        "close": "{{common.close}}",
+        "toc-header": "书籍",
+        "personal-header": "个人"
+    },
+    "epub-setting-drawer": {
+        "title": "书籍设置",
+        "close": "{{common.close}}"
+    },
+    "highlight-bar": {
+        "add-new-color-alt": "添加自定义颜色",
+        "slot-label": "高亮 slot {{slot}}"
     }
 }

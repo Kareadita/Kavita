@@ -5,7 +5,8 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "¿Ha olvidado la contraseña?",
-        "submit": "Acceder"
+        "submit": "Acceder",
+        "oidc": "OpenID Connect"
     },
     "dashboard": {
         "no-libraries": "Aún no se ha configurado ninguna biblioteca. Cree una en",
@@ -26,7 +27,12 @@
         "saving": "Guardando …",
         "update": "Actualizar",
         "account-detail-title": "Detalles de la cuenta",
-        "invalid-email-warning": "Un correo no válido bloqueará determinadas funciones de Kavita"
+        "invalid-email-warning": "Un correo no válido bloqueará determinadas funciones de Kavita",
+        "notice": "¡Alerta!",
+        "out-of-sync": "Este usuario fue creado por medio de OIDC. Si la configuración \"Sincronizar Usuarios\" está habilitada, cualquier cambio hecho a esta cuenta puede ser sobrescrito.",
+        "oidc-managed": "Este usuario está siendo manejado por medio de OIDC. Por favor contacte a su administrador de OIDC para solicitar cualquier cambio.",
+        "identity-provider": "Proveedor de identidad",
+        "identity-provider-tooltip": "Los usuarios de Kavita nunca son sincronizados con cuentas OIDC."
     },
     "user-scrobble-history": {
         "title": "Historial de Scrobble",
@@ -50,7 +56,9 @@
         "special": "{{entity-title.special}}",
         "token-expired": "¡Tu token de AniList ha expirado! Los eventos de scrobbling no se procesarán hasta que no sea renovado en la página de Cuentas.",
         "generate-scrobble-events": "Eventos de Backfill",
-        "scrobbling-disabled": "Has deshabilitado el scrobbling en las configuraciones de tu cuenta"
+        "scrobbling-disabled": "Has deshabilitado el scrobbling en las configuraciones de tu cuenta",
+        "select-all-label": "Seleccionar todo",
+        "delete-selected-label": "Eliminar lo seleccionado"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progreso en la lectura",
@@ -72,7 +80,8 @@
         "your-review": "Esta es su reseña",
         "external-review": "Reseña externa",
         "local-review": "Reseña local",
-        "rating-percentage": "Calificación {{r}} %"
+        "rating-percentage": "Calificación {{r}} %",
+        "critic": "crítico"
     },
     "want-to-read": {
         "title": "Quiero leer",
@@ -82,7 +91,7 @@
     },
     "user-preferences": {
         "title": "Panel de usuario",
-        "pref-description": "Estas son configuraciones globales vinculadas a su cuenta.",
+        "pref-description": "Estas son configuraciones globales vinculadas a su cuenta. Las configuraciones por lector están ubicadas en \"Perfiles de Lectura\".",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -629,7 +638,6 @@
     },
     "personal-table-of-contents": {
         "no-data": "Todavía no se ha guardado nada en marcadores",
-        "page": "Página {{value}}",
         "delete": "Eliminar {{bookmarkName}}"
     },
     "confirm-email": {
@@ -809,7 +817,7 @@
         "type-label": "Tipo",
         "type-tooltip": "El tipo de biblioteca determina cómo se analizan los nombres de los archivo y si la interfaz de usuario muestra capítulos (manga) y números (cómics). Consulta la wiki para obtener más detalles sobre las diferencias entre los tipos de biblioteca.",
         "kavitaplus-eligible-label": "Kavita+ admisible",
-        "kavitaplus-eligible-tooltip": "¿Kavita+ obtendrá información o admitirá Scrobbling?",
+        "kavitaplus-eligible-tooltip": "Soporta características de Kavita+ relacionadas a metadatos o Scrobbling",
         "folder-description": "Añadir carpetas a su biblioteca",
         "browse": "Examinar las Carpetas Multimedia",
         "help-us-part-1": "Ayúdenos siguiendo ",
@@ -2467,5 +2475,56 @@
         "genres": "{{metadata-fields.genres-title}}",
         "tags": "{{metadata-fields.tags-title}}",
         "localized-name": "{{edit-series-modal.localized-name-label}}"
+    },
+    "oidc": {
+        "title": "OIDC Callback",
+        "login": "Volver a la pantalla de inicio de sesión",
+        "error-loading-info": "Ocurrió un error al cargar la información de OIDC, contacte a su administrador"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "save-success": "Se han actualizado correctamente sus configuraciones de OIDC",
+        "provider-title": "Proveedor",
+        "provider-tooltip": "Estas configuraciones requieren que manualmente presiones \"Guardar\". Kavita debe ser configurado como un cliente confidencial y necesita una URL de redireccionamiento. Para más información, puede consultar la <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
+        "behavior-title": "Comportamiento",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "manual-save-label": "Los cambios en las configuraciones de proveedor requieren un guardado manual",
+        "require-verified-email-label": "Requerir correos electrónicos verificados",
+        "require-verified-email-tooltip": "Requiere verificación por medio de correco electrónico al crear una nueva cuenta o al identificarse con una existente. Si una cuenta recién creada tiene un correo electrónico verificado, estará automáticamente verificado para Kavita.",
+        "auto-login-label": "Inicio de sesión automático",
+        "auto-login-tooltip": "Redireccionar automáticamente al proveedor OIDC cuando se abra la página de inicio de sesión",
+        "disable-password-authentication-label": "Deshabilitar autentificación por medio de contraseña",
+        "disable-password-authentication-tooltip": "Los usuarios con el rol de administrador pueden saltarse esta restricción",
+        "provider-name-label": "Nombre del proveedor",
+        "provider-name-tooltip": "El nombre que se mostrará en la pantalla de inicio de sesión",
+        "defaults-title": "Opciones por defecto",
+        "defaults-requirement": "Las siguientes configuraciones son usadas cuando un usuario se registra por medio de OIDC mientras \"Sincronizar configuraciones de usuario\" esté desactivado",
+        "default-include-unknowns-label": "Incluir desconocidos",
+        "default-include-unknowns-tooltip": "Incluir clasificaciones por edad desconocidas",
+        "default-age-restriction-label": "Clasificación por edad",
+        "default-age-restriction-tooltip": "Máxima clasificación por edad mostrada a los nuevos usuarios",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "advanced-title": "Configuraciones avanzadas",
+        "advanced-tooltip": "Solo modifique estas configuraciones si entiende su impacto.",
+        "roles-prefix-label": "Prefijo de rol",
+        "roles-prefix-tooltip": "Kavita solo considerará los roles que empiecen con este prefijo."
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "OpenID Connect"
+    },
+    "reviews": {
+        "user-reviews-local": "Reseñas locales",
+        "user-reviews-plus": "Reseñas externas"
+    },
+    "review-modal": {
+        "title": "Editar reseña",
+        "review-label": "Reseña",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
+        "min-length": "La reseña debe tener al menos {{count}} carácteres",
+        "required": "{{validation.required-field}}"
     }
 }

@@ -209,5 +209,11 @@
     "dashboard-stream-only-delete-smart-filter": "Ní féidir ach sruthanna cliste scagaire a scriosadh ón deais",
     "smart-filter-name-required": "Ainm Scagaire Cliste ag teastáil",
     "aliases-have-overlap": "Tá forluí idir ceann amháin nó níos mó de na leasainmneacha agus daoine eile, ní féidir iad a nuashonrú",
-    "generated-reading-profile-name": "Gineadh ó {0}"
+    "generated-reading-profile-name": "Gineadh ó {0}",
+    "password-authentication-disabled": "Tá fíordheimhniú pasfhocail díchumasaithe, logáil isteach trí OpenID Connect",
+    "oidc-managed": "Ní féidir úsáideoirí atá á mbainistiú ag OIDC a chur in eagar.",
+    "cannot-change-identity-provider-original-user": "Ní féidir Soláthraí Céannachta an chuntais riarthóra bhunaidh a athrú",
+    "oidc-invalid-authority": "Tá údarás OIDC neamhbhailí",
+    "annotation-failed-create": "Theip ar anótáil a chruthú, déan iarracht arís",
+    "annotation-delete": "Níorbh fhéidir an nóta a scriosadh"
 }

@@ -5,7 +5,8 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Esqueceu a senha?",
-        "submit": "Fazer login"
+        "submit": "Fazer login",
+        "oidc": "OpenID Connect"
     },
     "dashboard": {
         "no-libraries": "Não existem bibliotecas configuradas. Crie algumas em",
@@ -26,7 +27,12 @@
         "saving": "A Guardar…",
         "update": "Atualizar",
         "account-detail-title": "Detalhes da Conta",
-        "invalid-email-warning": "Um email inválido bloqueará algumas funcionalidades do Kavita"
+        "invalid-email-warning": "Um email inválido bloqueará algumas funcionalidades do Kavita",
+        "notice": "Aviso!",
+        "out-of-sync": "Este utilizador foi criado via OIDC. Se a configuração SyncUsers estiver ativada, todas as alterações feitas nessa conta poderão ser substituídas.",
+        "oidc-managed": "Este utilizador é gerenciado via OIDC. Entre em contato com o administrador do OIDC para solicitar alterações.",
+        "identity-provider": "Provedor de identidade",
+        "identity-provider-tooltip": "Os utilizadores do Kavita nunca são sincronizados com contas OIDC."
     },
     "user-scrobble-history": {
         "title": "Histórico de Scrobble",
@@ -632,13 +638,10 @@
         "next": "Seguinte",
         "previous": "Anterior",
         "go-to-page-prompt": "Existem {{totalPages}} páginas. Para que página deseja ir?",
-        "go-to-first-page": "Ir para a primeira página",
-        "go-to-section": "Ir para secção",
-        "go-to-section-prompt": "Existem {{totalSections}} secções. Para que secção deseja ir?"
+        "go-to-first-page": "Ir para a primeira página"
     },
     "personal-table-of-contents": {
         "no-data": "Ainda não existem marcadores",
-        "page": "Página {{value}}",
         "delete": "Eliminar {{bookmarkName}}"
     },
     "confirm-email": {
@@ -824,7 +827,7 @@
         "type-label": "Tipo",
         "type-tooltip": "O tipo de biblioteca indica como os nomes dos ficheiros são processados e se o UI mostra Capítulos (Manga) vs Edições (BDs). Verifique o wiki para mais detalhes relativamente às diferenças entre os dois tipos de bibliotecas.",
         "kavitaplus-eligible-label": "Kavita+ Elegível",
-        "kavitaplus-eligible-tooltip": "Suporta as funcionalidades de metadados do Kavita+ ou Scrobbling",
+        "kavitaplus-eligible-tooltip": "Kavita+ suporta recursos de metadados e/ou Scrobbling",
         "folder-description": "Adicione pastas à sua biblioteca",
         "browse": "Procure as Pastas Que Pretende Adicionar",
         "help-us-part-1": "Ajude-nos e siga ",
@@ -862,7 +865,10 @@
         "allow-metadata-matching-label": "Permitir Correspondência de Metadados",
         "allow-metadata-matching-tooltip": "Se o Kavita deve descarregar metadados para as Séries nesta Biblioteca. Isto irá acontecer apenas se o servidor tiver uma subscrição Kavita+ ativa.",
         "enable-metadata-label": "Permitir Metadados (ComicInfo/Epub/PDF)",
-        "enable-metadata-tooltip": "Permitir que o Kavita use metadados que substituem a análise dos nomes dos ficheiros."
+        "enable-metadata-tooltip": "Permitir que o Kavita use metadados que substituem a análise dos nomes dos ficheiros.",
+        "remove-prefix-for-sortname-label": "Remover prefixos comuns para Organizar pelo Nome",
+        "remove-prefix-for-sortname-tooltip": "O Kavita removerá prefixos comuns como 'The', 'A', 'An' dos títulos para organizar pelo nome. Não substitui os metadados definidos.",
+        "files-at-root-warning": "Uma ou mais pastas contém ficheiros na raiz. Kavita não suporta isto."
     },
     "file-type-group-pipe": {
         "archive": "Arquivo",
@@ -1287,7 +1293,9 @@
         "loading": "{{common.loading}}",
         "actions-header": "Ações",
         "pending-tooltip": "Este utilizador não validou o seu email",
-        "all-libraries": "Todas as Bibliotecas"
+        "all-libraries": "Todas as Bibliotecas",
+        "identity-provider-oidc-tooltip": "OIDC",
+        "identity-provider-native-tooltip": "Nativo"
     },
     "edit-collection-tags": {
         "title": "Editar Coleção {{collectionName}}",
@@ -1354,7 +1362,10 @@
         "admin-manage-tokens": "Gerir Tokens de Utilizador",
         "scrobble-holds": "Pausas de Scrobble",
         "admin-metadata": "Gerir Metadados",
-        "reading-profiles": "Perfis de Leitura"
+        "reading-profiles": "Perfis de Leitura",
+        "admin-oidc": "OpenID Connect",
+        "admin-mappings-import": "Configurações de metadados",
+        "admin-public-metadata": "Gerir Metadados"
     },
     "collection-detail": {
         "no-data": "Não existem itens. Tente adicionar uma série.",
@@ -1964,7 +1975,24 @@
         "invalid-password-reset-url": "Url para repor palavra passe inválido",
         "delete-theme-in-use": "O tema está a ser usado por pelo menos um utilizador, não pode ser eliminado",
         "theme-manual-upload": "Houve um problema a criar o Tema a partir do upload manual",
-        "theme-already-in-use": "Já existe um tema com este nome"
+        "theme-already-in-use": "Já existe um tema com este nome",
+        "import-fields": {
+            "non-unique-age-ratings": "As chaves de mapeamento de classificação etária não são exclusivas, corrija o seu ficheiro de importação",
+            "non-unique-fields": "Os mapeamentos de campo não têm um id exclusivo, corrija o seu ficheiro de importação"
+        },
+        "oidc": {
+            "missing-external-id": "O OIDC não retornou um identificador válido",
+            "missing-email": "O OIDC não retornou um e-mail válido",
+            "email-not-verified": "O seu e-mail deve ser verificado para permitir o login via OIDC",
+            "no-account": "Nenhuma conta correspondente encontrada",
+            "disabled-account": "Esta conta está desativada, entre em contato com um administrador",
+            "creating-user": "Falha ao criar um novo utilizador, entre em contato com um administrador",
+            "role-not-assigned": "Não tem os papéis necessários atribuídos para aceder esta aplicação",
+            "failed-to-update-email": "Falha ao atualizar o e-mail",
+            "failed-to-update-username": "Falha ao atualizar o nome de utilizador",
+            "email-in-use": "E-mail já em uso por outra conta",
+            "syncing-user": "Falha ao sincronizar a sua conta do OIDC, entre em contato com um administrador"
+        }
     },
     "metadata-builder": {
         "or": "Iguale qualquer um dos seguintes",
@@ -2353,7 +2381,9 @@
         "required-field": "Este campo é obrigatório",
         "valid-email": "Este deve ser um email válido",
         "password-validation": "A palavra passe tem de ter entre 6 a 256 caracteres",
-        "year-validation": "O ano tem de ser um valor válido maior que 1000 e com 4 caracteres"
+        "year-validation": "O ano tem de ser um valor válido maior que 1000 e com 4 caracteres",
+        "other-field-required": "{{name}} é necessário quando {{other}} é definido",
+        "invalid-uri": "A uri fornecido é inválido"
     },
     "entity-type": {
         "volume": "volume",
@@ -2433,7 +2463,8 @@
         "author-count": "{{num}} Autores",
         "chapter-count": "{{num}} Capítulos",
         "no-data": "Sem Dados",
-        "issue-count": "{{num}} Edições"
+        "issue-count": "{{num}} Edições",
+        "unknown": "Desconhecido"
     },
     "confirm": {
         "alert": "Alerta",
@@ -2460,7 +2491,7 @@
         "loading": "{{common.loading}}",
         "close": "{{common.close}}",
         "description-label": "Descrição",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "role-label": "Função",
         "mal-id-label": "Id MAL",
         "name-label": "{{edit-series-modal.name-label}}",
@@ -2478,7 +2509,8 @@
         "aliases-tab": "Pseudónimos",
         "aliases-label": "Editar pseudónimos",
         "alias-overlap": "Este pseudónimo refere-se a outra pessoa ou é o nome desta pessoa, considere juntar as duas pessoas.",
-        "aliases-tooltip": "Quando uma série é etiquetada com o pseudónimo de uma pessoa, essa pessoa é associada à serie em vez de ser criada uma pessoa nova. Quando um pseudónimo for apagado, será necessário voltar a analisar a série para que essa alteração tenha efeito."
+        "aliases-tooltip": "Quando uma série é etiquetada com o pseudónimo de uma pessoa, essa pessoa é associada à serie em vez de ser criada uma pessoa nova. Quando um pseudónimo for apagado, será necessário voltar a analisar a série para que essa alteração tenha efeito.",
+        "invalid-asin": "O ASIN deve estar num formato ISBN-10 ou ISBN-13 válido"
     },
     "changelog-update-item": {
         "fixed": "Corrigido",
@@ -2599,9 +2631,9 @@
         "add-age-rating-mapping-label": "Adicionar Mapeamento de Classificação Etária",
         "remove-source-tag-label": "Remover Etiqueta de Origem",
         "whitelist-label": "Etiquetas Permitidas",
-        "field-mapping-description": "Configure regras para os termos encontrados nos campos Género/Etiqueta e mapeie-os para termos novos no Género/Etiqueta ou remova-os, opcionalmente, da lista de origem. Só é aplicável quando o Género/Etiqueta podem ser escritos.",
+        "field-mapping-description": "Configure regras para determinados termos encontrados no campo Gênero/Etiqueta e mapeie-as para um novo termo em Gênero/Etiqueta e, opcionalmente, remova-as da lista Fonte. A correspondência é normalizada e não diferencia maiúsculas de minúsculas, o primeiro valor correspondente é usado. Aplicável apenas quando Gênero/Etiqueta estão ativados para serem gravados.",
         "whitelist-tooltip": "Apenas que apenas os termos nesta lista sejam escritos nas <b>Etiquetas</b>. Certifique-se que os termos estão separados por vírgulas.",
-        "age-rating-mapping-description": "Os termos à esquerda que forem encontrados no Género ou Etiquetas, serão usados para definir a Classificação Etária da Série.",
+        "age-rating-mapping-description": "Quaisquer termos à esquerda, se encontradas em Gênero ou Etiquetas, definirão a classificação etária na série. A correspondência é normalizada e não diferencia maiúsculas de minúsculas, a classificação etária mais alta é usada.",
         "first-last-name-label": "Convenção Primeiro Nome/Sobrenome",
         "first-last-name-tooltip": "Certificar que os nomes das Pessoas são escritos pela ordem Primeiro Nome e depois Sobrenome",
         "overrides-label": "Substituições",
@@ -2616,7 +2648,22 @@
         "enable-chapter-publisher-tooltip": "Permitir que o Editor do Capítulo/Edição seja gravado",
         "enable-chapter-cover-label": "Capa do Capítulo",
         "enable-chapter-cover-tooltip": "Permitir que a Capa do Capítulo/Editor seja definida",
-        "chapter-header": "Campos do Capítulo"
+        "chapter-header": "Campos do Capítulo",
+        "k+-warning": "As configurações abaixo são partilhadas com as encontradas na página K+. Pode alterá-los em qualquer local",
+        "export-settings": "Exportar",
+        "export-tooltip": "Exporte a sua lista negra e lista branca, classificação etária e mapeamentos de campo",
+        "export-file-name": "Configurações de Metadados do Kavita Export.json",
+        "import-settings": "Importar",
+        "import-tooltip": "Importe as suas configurações ou as de outra pessoa",
+        "enable-extended-metadata-processing-label": "Processamento estendido de metadados",
+        "enable-extended-metadata-processing-tooltip": "Os gêneros e etiquetas originados do ComicInfo ou adicionados por meio da interface do utilizador devem ser processados usando a lista negra, lista branca, mapeamentos de classificação etária e mapeamentos de campo.",
+        "remove-age-rating-mapping-label": "Remover mapeamento de classificação etária",
+        "remove-field-mapping-label": "Remover mapeamento de campo",
+        "series-header": "Campos de Séries",
+        "people-header": "Pessoas",
+        "tags-header": "Etiqetas",
+        "source-genre-tags-placeholder": "Fonte de gênero/etiqueta",
+        "dest-genre-tags-placeholder": "Destino do gênero/etiqueta"
     },
     "metadata-setting-field-pipe": {
         "people": "{{tabs.people-tab}}",
@@ -2813,5 +2860,92 @@
         "mobile": "Móvel",
         "tablet": "Tablet",
         "desktop": "Desktop"
+    },
+    "oidc": {
+        "title": "Retorno OIDC",
+        "login": "Voltar ao ecrã de login",
+        "error-loading-info": "Ocorreu um erro ao carregar as informações do OIDC, entre em contato com o administrador",
+        "timeout": "A resolução do OIDC expirou ou ocorreu um erro"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "save-success": "Atualizou com sucesso as suas configurações do OIDC",
+        "notice": "Comunicado",
+        "restart-required": "A alteração da autoridade ou do ID do cliente requer uma reinicialização manual do Kavita para entrar em vigor.",
+        "provider-title": "Provedor",
+        "provider-tooltip": "As configurações do provedor exigem que clique manualmente em Gravar. O Kavita deve ser configurado como um cliente confidencial e precisa de uma URL de redirecionamento. Veja o <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> para mais pormenores.",
+        "behavior-title": "Comportamento",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "manual-save-label": "Alterar as configurações do provedor requer gravar manualmente",
+        "authority-label": "Autoridade",
+        "authority-tooltip": "A URL para o provedor OIDC não inclui o caminho .well-known/openid-configuration",
+        "client-id-label": "ID do Cliente",
+        "client-id-tooltip": "O ClientID definido no seu provedor OIDC pode ser qualquer coisa",
+        "secret-label": "Segredo do cliente",
+        "secret-tooltip": "O segredo gerado pelo seu provedor OIDC",
+        "provision-accounts-label": "Provisionar contas",
+        "provision-accounts-tooltip": "Criar automaticamente uma nova conta ao fazer login via OIDC se ela não puder ser correspondida a uma existente",
+        "require-verified-email-label": "Exigir e-mails verificados",
+        "require-verified-email-tooltip": "Requer verificação de e-mail ao criar uma nova conta ou encontrar uma existente. Se uma conta recém-criada tiver um e-mail verificado, ele será verificado automaticamente do lado da Kavita.",
+        "sync-user-settings-label": "Sincronizar configurações do utilizador com funções OIDC",
+        "sync-user-settings-tooltip": "Os utilizadores criados por meio do OIDC serão totalmente gerenciados pelo provedor de identidade, incluindo funções, acesso à biblioteca e classificação etária. Se esta opção estiver desativada, os utilizadores não terão acesso a nenhum conteúdo após a criação da conta. Consulte a documentação para obter mais pormenores.",
+        "auto-login-label": "Login automático",
+        "auto-login-tooltip": "Redirecionamento automático para o provedor OIDC ao abrir o ecrã de login",
+        "disable-password-authentication-label": "Desativar autenticação de palavra-passe",
+        "disable-password-authentication-tooltip": "Os utilizadores com a função de administrador podem ignorar esta restrição",
+        "provider-name-label": "Nome do provedor",
+        "provider-name-tooltip": "Nome mostrado no ecrã de login",
+        "defaults-title": "Padrões",
+        "defaults-requirement": "As configurações a seguir são usadas quando um utilizador é registado via OIDC enquanto SyncUserSettings está desativado",
+        "default-include-unknowns-label": "Incluir desconhecidos",
+        "default-include-unknowns-tooltip": "Incluir classificações etárias desconhecidas",
+        "default-age-restriction-label": "Classificação etária",
+        "default-age-restriction-tooltip": "Classificação etária máxima mostrada para novos utilizadores",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "advanced-title": "Configurações avançadas",
+        "advanced-tooltip": "Modifique estas opções apenas se perceber o seu impacto.",
+        "roles-prefix-label": "Prefixo de papéis",
+        "roles-prefix-tooltip": "Kavita considerará apenas papéis que começam com este prefixo.",
+        "roles-claim-label": "Reivindicar papéis",
+        "roles-claim-tooltip": "A alegação que Kavita usará para extrair papéis. Deixe em branco para usar o padrão.",
+        "custom-scopes-label": "Escopos personalizados",
+        "custom-scopes-tooltip": "Escopos adicionais a serem solicitados ao provedor OIDC durante o logon. Separe vários escopos com vírgulas. Valores incorretos podem impedir o login."
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "OpenID Connect"
+    },
+    "import-mappings": {
+        "import-step": "Importar",
+        "configure-step": "Configurar",
+        "conflicts-step": "Resolver colisões",
+        "finalize-step": "Finalizar",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "save": "{{common.save}}",
+        "import-description": "Carregue um ficheiro que você ou outra pessoa exportou para substituir ou mesclar com as suas configurações atuais.",
+        "select-files-warning": "Deve fazer upload de um ficheiro json para continuar",
+        "invalid-file": "Falha ao analisar o seu ficheiro, verifique a sua entrada",
+        "file-no-valid-content": "A sua importação não continha dados significativos para continuar",
+        "fields-to-import": "Configurações",
+        "fields-to-import-tooltip": "Desativar para ignorar totalmente uma configuração",
+        "whitelist-label": "Lista de branca de etiquetas",
+        "blacklist-label": "Lista negra de etiquetas",
+        "age-ratings-label": "Mapeamentos de classificação etária",
+        "field-mappings-label": "Mapeamentos de campo",
+        "age-ratings-conflicts-tooltip": "Decida qual classificação etária usar",
+        "field-mappings-conflicts-tooltip": "Decida qual resultado de destino usar",
+        "import-mode-label": "Modo de importação",
+        "import-mode-tooltip": "Substituir desconsidera as suas configurações atuais, fundir tentará resolver conflitos da maneira que configurou",
+        "merge": "Fundir",
+        "replace": "Substituir",
+        "resolution-label": "Resolução de conflitos",
+        "resolution-tooltip": "Decida como Kavita deve lidar com conflitos",
+        "manual": "Manual",
+        "keep": "Manter",
+        "to-pick": "Escolha a resolução",
+        "finalize-title": "Visualize as suas configurações, pressione gravar para concluir a sua importação"
     }
 }

@@ -1785,7 +1785,6 @@
         "r18-plus": "R18+"
     },
     "personal-table-of-contents": {
-        "page": "Trang {{value}}",
         "no-data": "Chưa có gì được đánh dấu",
         "delete": "Xóa {{bookmarkName}}"
     },

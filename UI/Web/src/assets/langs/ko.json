@@ -5,7 +5,8 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "비밀번호를 잊으셨나요?",
-        "submit": "로그인"
+        "submit": "로그인",
+        "oidc": "OpenID 연결"
     },
     "dashboard": {
         "no-libraries": "아직 라이브러리 설정이 없습니다. 다음에서 몇 가지를 만들어 보세요",
@@ -26,7 +27,12 @@
         "saving": "저장중…",
         "update": "업데이트",
         "account-detail-title": "계정 자세히보기",
-        "invalid-email-warning": "유효하지 않은 이메일은 Kavita의 일부 기능을 차단합니다"
+        "invalid-email-warning": "유효하지 않은 이메일은 Kavita의 일부 기능을 차단합니다",
+        "notice": "경고!",
+        "out-of-sync": "이 사용자는 OIDC를 통해 생성되었습니다. SyncUsers 설정이 활성화되어 있을 경우, 이 계정에 대한 변경사항은 덮어쓰일 수 있습니다.",
+        "oidc-managed": "이 사용자는 OIDC를 통해 관리됩니다. 변경을 요청하려면 OIDC 관리자에게 문의하십시오.",
+        "identity-provider": "신원 제공자",
+        "identity-provider-tooltip": "Kavita 사용자는 OIDC 계정과 연동되지 않습니다."
     },
     "user-scrobble-history": {
         "title": "스크로블 이력",
@@ -98,7 +104,7 @@
         "page-layout-mode-label": "페이지 레이아웃 모드",
         "page-layout-mode-tooltip": "시리즈 세부 정보 페이지에서 항목을 카드 또는 목록 보기로 표시합니다.",
         "locale-label": "언어",
-        "locale-tooltip": "Kavita가 표시하는 언어",
+        "locale-tooltip": "Kavita에서 사용할 언어",
         "blur-unread-summaries-label": "읽지 않은 요약 흐리게 처리",
         "blur-unread-summaries-tooltip": "읽기 진행률이 없는 볼륨 또는 챕터의 요약 텍스트를 흐리게 표시(스포일러 방지)",
         "prompt-on-download-label": "다운로드시 묻기",
@@ -106,10 +112,10 @@
         "disable-animations-label": "애니메이션 비활성화",
         "disable-animations-tooltip": "사이트에서 애니메이션을 끕니다. 전자책 단말기에 유용합니다.",
         "collapse-series-relationships-label": "시리즈 관계 접기",
-        "collapse-series-relationships-tooltip": "Kavita는 관계가 없거나 상위/속편인 시리즈를 표시해야 합니까",
+        "collapse-series-relationships-tooltip": "활성화 시 관계가 없거나, 상위/속편인 시리즈를 표시합니다",
         "share-series-reviews-label": "시리즈 리뷰 공유",
-        "share-series-reviews-tooltip": "Kavita에 다른 사용자를 위한 시리즈 리뷰를 포함합니까",
-        "clients-opds-alert": "이 서버에서 OPDS를 사용할 수 없습니다. 이것은 Tachiyomi 사용자에게 영향을 미치지 않습니다.",
+        "share-series-reviews-tooltip": "당신의 리뷰를 이 서버의 다른 사용자가 볼 수 있도록 허용합니다",
+        "clients-opds-alert": "이 서버에서 OPDS를 사용할 수 없습니다. 이것은 Mihon 사용자에게 영향을 미치지 않습니다.",
         "clients-opds-description": "모든 서드파티 클라이언트는 API 키 또는 아래의 연결 URL을 사용합니다. 이것은 암호와 같으므로 비공개로 유지하십시오.",
         "clients-api-key-tooltip": "API 키는 비밀번호와 같습니다. 재설정하면 기존 클라이언트가 모두 무효화됩니다.",
         "clients-opds-url-label": "OPDS URL",
@@ -121,7 +127,10 @@
         "anilist-scrobbling-tooltip": "Kavita가 AniList에 읽기 진행 상황 및 평가를 스크로블(단방향 동기화)하도록 허용",
         "want-to-read-sync-label": "읽고 싶은 동기화",
         "want-to-read-sync-tooltip": "Kavita가 AniList 및 MAL의 보류 중인 읽기 목록에 있는 시리즈를 기반으로 '읽고 싶은 목록'에 항목을 추가하도록 허용합니다",
-        "kavitaplus-settings-title": "Kavita+"
+        "kavitaplus-settings-title": "Kavita+",
+        "social-settings-title": "소셜 설정",
+        "highlight-bar-label": "주석 하이라이트 색상",
+        "highlight-bar-tooltip": "이 색상은 모든 책에 공유됩니다"
     },
     "user-holds": {
         "title": "스크러블 홀드",
@@ -181,7 +190,7 @@
         "platform-label": "플랫폼",
         "email-label": "이메일",
         "name-label": "이름",
-        "email-setup-alert": "장치로 파일을 보내고 싶으십니까? 관리자가 먼저 이메일 설정을 설정하도록 하세요!",
+        "email-setup-alert": "장치로 파일을 보내고 싶으십니까? 먼저 관리자에게 이메일 설정을 요청하세요!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
@@ -248,7 +257,7 @@
         "hide": "숨기기",
         "regen-warning": "API 키를 재생성하면 기존 클라이언트가 무효화됩니다.",
         "no-key": "오류 - 키가 설정되지 않음",
-        "confirm-reset": "이렇게 하면 설정한 모든 OPDS 구성이 무효화됩니다. 정말 계속 하시겠습니까?",
+        "confirm-reset": "실행시 설정한 모든 OPDS 구성이 무효화됩니다. 계속하시겠습니까?",
         "key-reset": "API 키 재설정",
         "reset": "재설정"
     },
@@ -598,7 +607,10 @@
         "actions-title": "액션",
         "license-active-label": "라이선스 활성화됨",
         "valid-tooltip": "유효",
-        "invalid-tooltip": "무효"
+        "invalid-tooltip": "무효",
+        "kavita+-warning": "Kavita+는 Kavita와 분리되어 있습니다. 구독을 취소하지 않고 Kavita를 삭제할 경우 요금이 부과됩니다.",
+        "cancel-label": "구독 취소",
+        "cancel-tooltip": "구독을 취소하고 Kavita에서 라이선스를 제거합니다."
     },
     "book-line-overlay": {
         "copy": "복사",
@@ -606,7 +618,8 @@
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "bookmark-label": "북마크 이름",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "annotate": "주석 달기"
     },
     "book-reader": {
         "title": "책 설정",
@@ -631,15 +644,19 @@
         "incognito-mode-label": "시크릿 모드",
         "next": "다음",
         "previous": "이전",
-        "go-to-page-prompt": "{{totalPages}} 페이지가 있습니다. 어떤 페이지로 이동하시겠습니까?",
+        "go-to-page-prompt": "{{totalPages}} 페이지가 있습니다. 어느 페이지로 이동하시겠습니까?",
         "go-to-first-page": "첫 페이지로",
-        "go-to-section": "섹션으로 이동",
-        "go-to-section-prompt": "{{totalSections}} 섹션이 있습니다. 어떤 섹션으로 이동하시겠습니까?"
+        "page-num-label": "{{page}} 페이지",
+        "completion-label": "{{percent}} 완료",
+        "force-selected-one-column": "2개 열을 표기할 공간이 충분하지 않아 레이아웃 모드가 1개 열로 전환되었습니다"
     },
     "personal-table-of-contents": {
         "no-data": "아직 북마크된 항목 없음",
-        "page": "페이지 {{value}}",
-        "delete": "삭제 {{bookmarkName}}"
+        "delete": "삭제 {{bookmarkName}}",
+        "page-title": "{{page}} 페이지",
+        "chapter-and-page-title": "{{chapterTitle}} 챕터, {{page}} 페이지",
+        "no-match": "필터에 해당하는 북마크가 없습니다",
+        "filter-label": "{{common.filter}}"
     },
     "confirm-email": {
         "title": "등록",
@@ -737,7 +754,8 @@
         "publication-status-title": "출판",
         "publication-status-tooltip": "출판현황",
         "on": "{{reader-settings.on}}",
-        "off": "{{reader-settings.off}}"
+        "off": "{{reader-settings.off}}",
+        "annotations-tab": "{{tabs.annotations-tab}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -807,7 +825,7 @@
         "customize": "{{settings.customize}}",
         "edit": "{{common.edit}}",
         "cancel-edit": "재정렬 닫기",
-        "browse-people": "사용자 탐색"
+        "browse-people": "인물 탐색"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -824,7 +842,7 @@
         "type-label": "유형",
         "type-tooltip": "라이브러리 유형에 따라 파일 이름이 구문 분석되는 방식과 UI에 장(만화)과 이슈(만화)가 표시되는지 여부가 결정됩니다. 라이브러리 유형 간의 차이점에 대한 자세한 내용은 Wiki를 확인하세요.",
         "kavitaplus-eligible-label": "Kavita+ 적격",
-        "kavitaplus-eligible-tooltip": "Kavita+ 메타데이터 기능 또는 자동 추천 지원",
+        "kavitaplus-eligible-tooltip": "Kavita+ 메타데이터 기능 및 자동 추천 지원",
         "folder-description": "라이브러리에 폴더 추가",
         "browse": "미디어 폴더 찾아보기",
         "help-us-part-1": "팔로우하여 저희를 도와주세요 ",
@@ -859,9 +877,13 @@
         "exclude-patterns-label": "패턴 제외",
         "exclude-patterns-tooltip": "디렉터리를 스캔할 때 Kavita가 일치시킬 패턴 집합(Glob 구문)을 구성하고, 스캐너 결과에서 제외할 수 있도록 설정하세요.",
         "help": "{{common.help}}",
-        "allow-metadata-matching-tooltip": "Kavita가 이 라이브러리 내의 시리즈에 대한 메타데이터를 다운로드해야 합니까? 이는 서버에 활성 Kavita+ 구독이 있는 경우에만 발생합니다.",
+        "allow-metadata-matching-tooltip": "Kavita가 이 라이브러리 내 시리즈의 메타데이터를 다운로드할지 설정합니다. 이는 서버에 활성 Kavita+ 구독이 있는 경우에만 작동합니다.",
         "allow-metadata-matching-label": "메타데이터 일치 허용",
-        "enable-metadata-label": "메타데이터 활성화 (ComicInfo/Epub/PDF)"
+        "enable-metadata-label": "메타데이터 활성화 (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "Kavita가 파일명 파싱을 덮어쓰는 메타데이터 파일을 읽을 수 있도록 허용합니다.",
+        "remove-prefix-for-sortname-label": "정렬되는 이름에서 공통된 접두사를 제거합니다",
+        "remove-prefix-for-sortname-tooltip": "Kavita는 제목에서 'The', 'A', 'An'과 같은 일반적인 접두사를 제거하여 정렬 이름을 생성합니다. 메타데이터 설정을 덮어쓰지 않습니다.",
+        "files-at-root-warning": "하나 또는 그 이상의 폴더의 루트 경로에 파일이 있습니다. Kavita는 이를 지원하지 않습니다."
     },
     "file-type-group-pipe": {
         "archive": "아카이브",
@@ -906,7 +928,12 @@
         "theme-paper": "종이",
         "update-parent": "{{name}}(으)로 저장",
         "line-spacing-min-label": "1x",
-        "line-spacing-max-label": "2.5x"
+        "line-spacing-max-label": "2.5x",
+        "loading": "불러오는 중",
+        "create-new": "현재 설정값으로 새 프로필 생성",
+        "create-new-tooltip": "현재 설정된 프로필 설정값을 토대로 관리 가능한 프로필을 생성합니다",
+        "reading-profile-updated": "읽기 프로필 업데이트 완료",
+        "reading-profile-promoted": "읽기 프로필 생성 완료"
     },
     "table-of-contents": {
         "no-data": "이 책에는 메타데이터 또는 toc 파일에 설정된 목차가 없습니다"
@@ -1091,7 +1118,7 @@
         "select-option": "라이브러리 선택"
     },
     "manage-media-settings": {
-        "encode-as-description-part-1": "WebP/AVIF는 파일의 공간 요구 사항을 크게 줄일 수 있습니다. WebP/AVIF는 모든 브라우저 또는 버전에서 지원되지 않습니다. 이러한 설정이 귀하의 설정에 적합한지 알아보려면 다음을 방문하십시오. ",
+        "encode-as-description-part-1": "WebP/AVIF는 파일의 공간 요구 사항을 크게 줄일 수 있습니다. WebP/AVIF는 모든 브라우저 또는 버전에서 지원되는 형식은 아닙니다. 이러한 설정이 귀하의 설정에 적합한지 알아보려면 다음을 방문하십시오. ",
         "encode-as-description-part-2": "WebP를 사용할 수 있습니까?",
         "encode-as-description-part-3": "AVIF를 사용할 수 있습니까?",
         "encode-as-warning": "WebP/AVIF로 이동한 후에는 PNG로 다시 변환할 수 없습니다. 모든 표지를 재생성하려면 라이브러리의 표지를 새로 고쳐야 합니다. 북마크와 파비콘은 변환할 수 없습니다.",
@@ -1156,7 +1183,7 @@
         "on-deck-last-chapter-add-tooltip": "계속 읽기를 포함하기 위해 마지막 챕터 이후의 일수가 추가되었습니다.",
         "allow-stats-label": "익명 사용 수집 허용",
         "allow-stats-tooltip-part-1": "익명의 사용 데이터를 Kavita의 서버로 보냅니다. 여기에는 사용된 특정 기능, 파일 수, OS 버전, Kavita 설치 버전, CPU 및 메모리에 대한 정보가 포함됩니다. 이 정보를 사용하여 기능, 버그 수정 및 성능 튜닝의 우선 순위를 정합니다. 적용하려면 다시 시작해야 합니다. 참조 ",
-        "allow-stats-tooltip-part-2": "무엇을 수집합니다.",
+        "allow-stats-tooltip-part-2": "수집하는 항목들에 대해서.",
         "send-data": "데이터 보내기",
         "opds-label": "OPDS",
         "opds-tooltip": "OPDS 지원을 통해 모든 사용자는 OPDS를 사용하여 서버에서 콘텐츠를 읽고 다운로드할 수 있습니다.",
@@ -1226,10 +1253,10 @@
         "convert-media-task-desc": "모든 kavita 관리 미디어를 대상 인코딩으로 변환하는 장기 실행 작업을 실행합니다. 이것은 느립니다(특히 ARM 장치에서).",
         "convert-media-task-success": "대상 인코딩으로의 미디어 변환이 대기열에 추가되었습니다",
         "bust-cache-task": "버스트 캐시",
-        "bust-cache-task-desc": "Kavita+ 캐시 파괴 - 잘못된 일치를 디버깅할 때만 사용해야 합니다.",
+        "bust-cache-task-desc": "Kavita+ 캐시 삭제- 잘못된 매치를 디버깅할 때만 사용하십시오.",
         "bust-cache-task-success": "Kavita+ 캐시 버스트",
         "bust-locale-task": "로케일 캐시 지우기",
-        "bust-locale-task-desc": "로케일 캐시를 파괴합니다. 업데이트 후 문자열이 올바르게 표시되지 않는 문제를 해결할 수 있습니다. 브라우저 새로 고침이 필요합니다.",
+        "bust-locale-task-desc": "로케일 캐시를 삭제합니다. 업데이트 후 문자열이 올바르게 표시되지 않는 문제를 해결할 수 있습니다. 브라우저 새로 고침이 필요합니다.",
         "bust-locale-task-success": "로케일 캐시 지워짐",
         "clear-reading-cache-task": "읽기 캐시 지우기",
         "clear-reading-cache-task-desc": "읽기 위해 캐시된 파일을 지웁니다. 지난 24시간 이내에 이전에 읽은 파일을 방금 업데이트한 경우에 유용합니다.",
@@ -1281,7 +1308,9 @@
         "loading": "{{common.loading}}",
         "actions-header": "작업",
         "pending-tooltip": "이 사용자는 이메일을 확인하지 않았습니다",
-        "all-libraries": "모든 라이브러리"
+        "all-libraries": "모든 라이브러리",
+        "identity-provider-oidc-tooltip": "OIDC",
+        "identity-provider-native-tooltip": "네이티브"
     },
     "edit-collection-tags": {
         "title": "편집 {{collectionName}} 컬렉션",
@@ -1347,7 +1376,11 @@
         "admin-metadata": "메타데이터 관리",
         "scrobble-holds": "스크러블 홀드",
         "admin-email-history": "이메일 기록",
-        "admin-matched-metadata": "일치하는 메타데이터"
+        "admin-matched-metadata": "일치하는 메타데이터",
+        "reading-profiles": "읽기 프로필",
+        "admin-mappings-import": "메타데이터 설정",
+        "admin-public-metadata": "메타데이터 관리",
+        "admin-oidc": "OpenID 연결"
     },
     "collection-detail": {
         "no-data": "항목이 없습니다. 시리즈를 추가해 보세요.",
@@ -1456,7 +1489,8 @@
         "collections": "컬렉션",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
-        "include-extras": "챕터 및 파일 포함"
+        "include-extras": "챕터 및 파일 포함",
+        "annotations": "{{tabs.annotations-tab}}"
     },
     "nav-header": {
         "skip-alt": "메인 콘텐츠로 건너뛰기",
@@ -1471,7 +1505,10 @@
         "logout": "로그아웃",
         "all-filters": "스마트 필터",
         "nav-link-header": "네비게이션 옵션",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "browse-genres": "장르 탐색",
+        "person-aka-status": "별명과 매칭",
+        "browse-tags": "태그 탐색"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1621,7 +1658,9 @@
         "create-new": "{{reader-settings.create-new}}",
         "update-parent": "{{reader-settings.update-parent}}",
         "loading": "{{reader-settings.loading}}",
-        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}"
+        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
+        "reading-profile-updated": "읽기 프로필 업데이트 완료",
+        "reading-profile-promoted": "읽기 프로필 생성 완료"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1679,7 +1718,9 @@
         "read-progress": "마지막으로 읽음",
         "average-rating": "평균 평점",
         "random": "랜덤",
-        "person-name": "이름"
+        "person-name": "이름",
+        "person-series-count": "시리즈 개수",
+        "person-chapter-count": "챕터 개수"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 세부정보",
@@ -1930,7 +1971,7 @@
         "file-count": "{{num}} 파일",
         "genre-count": "{{num}} 장르",
         "tag-count": "{{num}} 태그",
-        "people-count": "{{num}} 인물",
+        "people-count": "인물 {{num}} 명",
         "tags": "{{metadata-fields.tags-title}}",
         "people": "인물",
         "genres": "{{metadata-fields.genres-title}}"
@@ -1950,7 +1991,24 @@
         "invalid-password-reset-url": "잘못된 비밀번호 재설정 URL",
         "delete-theme-in-use": "현재 최소 한 명의 사용자가 테마를 사용 중이므로 삭제할 수 없습니다",
         "theme-manual-upload": "수동 업로드로 테마를 생성하는 중에 문제가 발생했습니다",
-        "theme-already-in-use": "해당 이름의 테마가 이미 존재합니다"
+        "theme-already-in-use": "해당 이름의 테마가 이미 존재합니다",
+        "import-fields": {
+            "non-unique-age-ratings": "연령 등급 매핑 키가 고유하지 않습니다. 불러올 파일을 수정해 주십시오",
+            "non-unique-fields": "필드 매핑에 고유 ID가 없습니다. 가져올 파일을 수정해 주십시오"
+        },
+        "oidc": {
+            "missing-external-id": "OIDC가 유효한 식별자를 반환하지 않았습니다",
+            "missing-email": "OIDC가 유효한 이메일을 반환하지 않았습니다",
+            "email-not-verified": "OIDC를 통해 로그인하려면 이메일을 인증해야 합니다",
+            "no-account": "일치하는 계정 없음",
+            "disabled-account": "비활성화된 계정입니다. 관리자에게 문의해 주십시오",
+            "creating-user": "신규 사용자 생성 실패. 관리자에게 문의해 주십시오",
+            "role-not-assigned": "이 애플리케이션에 액세스하기 위해 필요한 역할이 할당되어 있지 않습니다",
+            "failed-to-update-email": "이메일 업데이트 실패",
+            "failed-to-update-username": "사용자 이름 업데이트 실패",
+            "email-in-use": "이 이메일 주소는 다른 계정에서 사용 중입니다",
+            "syncing-user": "OIDC를 통한 계정 동기화 실패. 관리자에게 문의해 주십시오"
+        }
     },
     "metadata-builder": {
         "or": "다음 중 하나와 일치",
@@ -2109,13 +2167,13 @@
         "user-deleted": "{{user}} 가 삭제되었습니다",
         "click-email-link": "이메일을 확인하려면 이 링크를 클릭하십시오. 확인을 하셔야 로그인이 가능합니다.",
         "series-added-to-collection": "{{collectionName}} 컬렉션에 시리즈가 추가됨",
-        "no-series-collection-warning": "경고! 시리즈를 선택하지 않았습니다. 저장하면 컬렉션이 삭제됩니다. 계속 하시겠습니까?",
+        "no-series-collection-warning": "경고! 시리즈를 선택하지 않았습니다. 저장하면 컬렉션이 삭제됩니다. 계속하시겠습니까?",
         "collection-updated": "컬렉션 업데이트됨",
         "reading-list-deleted": "읽기 목록이 삭제되었습니다",
         "reading-lists-deleted": "읽기 목록 삭제",
         "reading-list-updated": "읽기 목록 업데이트됨",
         "confirm-delete-reading-list": "읽기 목록을 삭제하시겠습니까? 이것은 되돌릴 수 없습니다.",
-        "confirm-delete-reading-lists": "읽기 목록을 삭제하시겠습니까? 이것은 취소가 불가능 합니다.",
+        "confirm-delete-reading-lists": "읽기 목록을 삭제하시겠습니까? 이것은 되돌릴 수 없습니다.",
         "item-removed": "삭제된 항목",
         "nothing-to-remove": "제거할 항목 없음",
         "series-added-to-reading-list": "읽기 목록에 추가된 시리즈",
@@ -2172,13 +2230,13 @@
         "confirm-regen-covers": "표지를 새로 고치면 모든 표지 이미지가 다시 계산됩니다. 이것은 무거운 작업입니다. 대신 스캔을 수행하지 않으시겠습니까?",
         "alert-long-running": "이것은 장기 실행 프로세스입니다. 다시 호출하기 전에 완료할 시간을 주십시오.",
         "confirm-delete-multiple-series": "정말 {{count}} 시리즈를 삭제하시겠습니까? 디스크의 파일은 수정하지 않습니다.",
-        "confirm-delete-series": "이 시리즈를 삭제하시겠습니까? 디스크의 파일은 수정하지 않습니다.",
+        "confirm-delete-series": "이 시리즈를 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다.",
         "confirm-delete-chapter": "이 챕터를 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다.",
         "confirm-delete-volume": "이 볼륨을 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다.",
         "alert-bad-theme": "테마에 유효하지 않거나 안전하지 않은 CSS가 있습니다. 이를 수정하려면 관리자에게 문의하세요. 어두운 테마로 기본 설정.",
         "confirm-library-delete": "정말로 {{name}} 라이브러리를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-        "confirm-library-type-change": "라이브러리 유형을 변경하면 다른 구문 분석 규칙을 사용하여 새 스캔이 시작되고 시리즈가 다시 생성되어 진행 상황과 북마크가 손실될 수 있습니다. 이 작업을 수행하기 전에 백업해야 합니다. 계속하시겠습니까?",
-        "confirm-download-size": "{{entityType}}은 {{size}}입니다. 정말 계속 하시겠습니까?",
+        "confirm-library-type-change": "라이브러리 유형을 변경하면, 다른 구문 분석 규칙을 사용하여 새 스캔이 시작됩니다. 시리즈가 다시 생성되어 진행 상황과 북마크가 손실될 수 있습니다. 이 작업을 수행하기 전에 백업해야 합니다. 계속하시겠습니까?",
+        "confirm-download-size": "{{entityType}}은 {{size}}입니다. 계속하시겠습니까?",
         "confirm-download-size-ios": "iOS는 200MB보다 큰 파일을 다운로드하는 데 문제가 있습니다. 이 다운로드가 완료되지 않을 수 있습니다.",
         "list-doesnt-exist": "이 목록은 존재하지 않습니다",
         "confirm-delete-smart-filter": "이 스마트 필터를 삭제하시겠습니까?",
@@ -2203,7 +2261,7 @@
         "stack-imported": "가져온 스택",
         "confirm-delete-theme": "이 테마를 제거하면 디스크에서 삭제됩니다. 제거하기 전에 임시 디렉토리에서 가져올 수 있습니다",
         "mal-token-required": "MAL 토큰이 필요합니다. 사용자 설정에서 설정하세요",
-        "confirm-reset-server-settings": "이렇게 하면 설정이 최초 설치 값으로 재설정됩니다. 계속하시겠습니까?",
+        "confirm-reset-server-settings": "설정이 최초 설치 값으로 재설정됩니다. 계속하시겠습니까?",
         "must-select-library": "최소한 하나의 라이브러리를 선택해야 합니다",
         "bulk-scan": "여러 라이브러리를 스캔하는 것은 순차적으로 진행됩니다. 라이브러리 크기에 따라 시간이 오래 걸리거나 완료되지 않을 수 있습니다.",
         "bulk-covers": "여러 라이브러리에서 커버를 새로 고침하는 것은 많은 리소스를 소모하며 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?",
@@ -2214,12 +2272,19 @@
         "match-success": "시리즈가 올바르게 일치함",
         "confirm-delete-multiple-volumes": "{{count}}개의 볼륨을 삭제하시겠습니까? 디스크의 파일은 수정되지 않습니다.",
         "scrobble-gen-init": "과거 열람 이력 및 평가를 추적하는 이벤트를 생성하여 연결된 서비스와 동기화하는 기능을 작업 예정 목록에 추가하였습니다.",
-        "series-added-want-to-read": "읽고 싶어요 목록에 추가된 시리즈"
+        "series-added-want-to-read": "읽고 싶어요 목록에 추가된 시리즈",
+        "series-bound-to-reading-profile": "{{name}} 읽기 프로필과 연결된 시리즈",
+        "library-bound-to-reading-profile": "{{name}} 읽기 프로필과 연결된 라이브러리",
+        "external-match-rate-error": "{{seriesName}}을(를) 검색하던 도중 연결이 끊겼습니다. 5분 정도 후 다시 시도해 주십시오.",
+        "confirm-delete-bookmark": "정말 이 북마크를 삭제하시겠습니까?",
+        "confirm-delete-annotation": "정말 이 주석을 삭제하시겠습니까?"
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
         "hour": "시간",
-        "hours": "시간"
+        "hours": "시간",
+        "hour-left": "시간 남음",
+        "hours-left": "시간 남음"
     },
     "actionable": {
         "scan-library": "라이브러리 스캔",
@@ -2292,7 +2357,11 @@
         "rename-tooltip": "스마트 필터 이름 변경",
         "reading-profiles": "읽기 프로필",
         "set-reading-profile": "읽기 프로필 설정",
-        "merge": "병합"
+        "merge": "병합",
+        "set-reading-profile-tooltip": "읽기 프로필을 이 라이브러리에 연결",
+        "clear-reading-profile": "읽기 프로필 해제",
+        "clear-reading-profile-tooltip": "이 라이브러리의 읽기 프로필 해제",
+        "cleared-profile": "연결 해제된 읽기 프로필"
     },
     "preferences": {
         "left-to-right": "왼쪽에서 오른쪽",
@@ -2332,7 +2401,9 @@
         "required-field": "이 필드는 필수입니다",
         "valid-email": "유효한 이메일이어야 합니다",
         "password-validation": "비밀번호는 6~256자 사이여야 합니다",
-        "year-validation": "1000자보다 크고 4자 길이의 유효한 연도여야 합니다"
+        "year-validation": "1000자보다 크고 4자 길이의 유효한 연도여야 합니다",
+        "other-field-required": "{{other}}이(가) 설정된 경우 {{name}} 이(가) 필요합니다",
+        "invalid-uri": "입력된 URL이 유효하지 않습니다"
     },
     "entity-type": {
         "volume": "볼륨",
@@ -2368,7 +2439,8 @@
         "devices-tab": "디바이스",
         "stats-tab": "통계",
         "scrobbling-tab": "스크로블링",
-        "smart-filters-tab": "스마트 필터"
+        "smart-filters-tab": "스마트 필터",
+        "annotations-tab": "주석"
     },
     "common": {
         "reset-to-default": "기본값으로 재설정",
@@ -2411,30 +2483,34 @@
         "volume-nums": "볼륨",
         "author-count": "{{num}} 저자",
         "no-data": "데이터 없음",
-        "chapter-count": "{{num}} 챕터"
+        "chapter-count": "{{num}} 챕터",
+        "issue-count": "{{num}} 호",
+        "unknown": "불명"
     },
     "confirm": {
         "alert": "긴급",
         "confirm": "확인",
         "info": "정보",
         "cancel": "{{common.cancel}}",
-        "ok": "Ok"
+        "ok": "Ok",
+        "prompt": "질문"
     },
     "person-detail": {
         "known-for-title": "알려진",
-        "individual-role-title": "{{role}} 로서",
+        "individual-role-title": "{{role}}로서",
         "browse-person-title": "{{name}}의 모든 작품",
         "all-roles": "역할",
         "browse-person-by-role-title": "{{role}}로서의 {{name}}의 모든 작품",
         "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
-        "no-info": "이 사람에 대한 정보 없음"
+        "no-info": "이 사람에 대한 정보 없음",
+        "aka-title": "별명 "
     },
     "edit-person-modal": {
         "general-tab": "{{edit-series-modal.general-tab}}",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
         "asin-label": "ASIN",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "대안으로 가능한 경우 CoversDB에서 표지를 다운로드할 수 있습니다.",
         "download-coversdb": "CoversDB에서 다운로드",
@@ -2452,7 +2528,10 @@
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "description-label": "설명",
         "aliases-label": "별명 편집",
-        "aliases-tab": "별명"
+        "aliases-tab": "별명",
+        "alias-overlap": "이 별명은 이미 다른 사람에게 해당되거나 그 사람의 이름과 동일합니다. 병합하는 것을 고려하십시오.",
+        "aliases-tooltip": "시리즈에 어떤 사람의 별칭이 태그될 경우, 그 사람이 할당되며 새로운 사람을 생성하지 않습니다. 별칭을 삭제할 경우 변경사항이 반영되려면 시리즈를 다시 스캔해야 합니다.",
+        "invalid-asin": "ASIN은 유효한 ISBN-10 또는 ISBN-13 형식이어야 합니다"
     },
     "changelog-update-item": {
         "known-issues": "알려진 문제",
@@ -2520,20 +2599,20 @@
         "first-last-name-tooltip": "사람들의 이름이 먼저 쓰여지고 그 다음에 성으로 쓰여지도록 하세요",
         "summary-label": "요약",
         "whitelist-tooltip": "이 목록의 문자열만 <b>태그</b>에 대해 작성되는 것을 허용합니다. 쉼표로 구분해야 합니다.",
-        "age-rating-mapping-description": "장르나 태그에서 왼쪽의 문자열이 발견되면 해당 시리즈의 연령 등급이 설정됩니다.",
+        "age-rating-mapping-description": "장르나 태그에서 왼쪽의 문자열이 발견되면 해당 시리즈의 연령 등급이 설정됩니다. 매칭은 표준화되고 대소문자를 구분하지 않으며, 가장 높은 연령 등급이 적용됩니다.",
         "add-age-rating-mapping-label": "연령 등급 매핑 추가",
         "field-mapping-title": "필드 매핑",
         "remove-source-tag-label": "소스 태그 제거",
         "first-last-name-label": "이름 성",
         "person-roles-label": "역할",
         "enabled-label": "메타데이터 다운로드 활성화",
-        "enable-people-label": "사람들",
+        "enable-people-label": "인물",
         "derive-publication-status-tooltip": "총 장/권 수를 기준으로 출판 상태를 도출할 수 있습니다.",
-        "field-mapping-description": "장르/태그 필드에서 발견된 특정 문자열에 대한 설정 규칙을 장르/태그의 새 문자열에 매핑하고 선택적으로 소스 목록에서 제거합니다. 장르/태그를 쓸 수 있는 경우에만 적용됩니다.",
+        "field-mapping-description": "장르/태그 필드에서 발견된 특정 문자열에 대한 설정 규칙을 장르/태그의 새 문자열에 매핑하고 선택적으로 소스 목록에서 제거합니다. 매칭은 표준화되고 대소문자를 구분하지 않으며, 첫 번째 매칭값이 사용됩니다. 장르/태그를 쓸 수 있는 경우에만 적용됩니다.",
         "blacklist-label": "블랙리스트 장르/태그",
         "enabled-tooltip": "Kavita가 메타데이터를 다운로드하고 데이터베이스에 쓸 수 있도록 허용합니다.",
         "summary-tooltip": "필드 잠금이 해제되면 요약을 쓸 수 있도록 허용합니다.",
-        "enable-people-tooltip": "사람(캐릭터, 작가 등)을 <b>추가</b>할 수 있도록 허용합니다. 모든 사람은 이미지를 포함합니다.",
+        "enable-people-tooltip": "인물(캐릭터, 작가 등)을 <b>추가</b>할 수 있도록 허용합니다. 모든 사람은 이미지를 포함합니다.",
         "add-field-mapping-label": "필드 매핑 추가",
         "localized-name-label": "현지화된 시리즈 이름",
         "localized-name-tooltip": "필드가 잠금 해제되면 Localized Name을 쓸 수 있도록 허용합니다. Kavita는 최선의 추측을 시도합니다.",
@@ -2560,7 +2639,22 @@
         "enable-chapter-publisher-label": "출판사",
         "enable-chapter-publisher-tooltip": "Chapter/Issue 출판사 작성 허용",
         "enable-chapter-cover-label": "챕터 표지",
-        "enable-chapter-cover-tooltip": "Chapter/Issue 커버 설정 허용"
+        "enable-chapter-cover-tooltip": "Chapter/Issue 커버 설정 허용",
+        "k+-warning": "아래 설정은 K+ 페이지에 있는 설정과 공유됩니다. 이 설정은 두 위치 중 어느 곳에서나 변경할 수 있습니다",
+        "export-settings": "내보내기",
+        "export-tooltip": "블랙리스트 및 화이트리스트, 연령 등급, 필드 매핑을 내보냅니다",
+        "export-file-name": "Kavita Metadata Settings Export.json",
+        "import-settings": "가져오기",
+        "import-tooltip": "자신 또는 외부의 설정값을 가져옵니다",
+        "enable-extended-metadata-processing-label": "확장 메타데이터 처리",
+        "enable-extended-metadata-processing-tooltip": "CominInfo를 통해 가져오거나 UI를 통해 추가된 장르 및 태그는 블랙리스트, 화이트리스트, 연령 등급 매핑, 필드 매핑을 사용해 처리됩니다.",
+        "remove-age-rating-mapping-label": "연령 등급 매핑 제거",
+        "remove-field-mapping-label": "필드 매핑 제거",
+        "series-header": "시리즈 필드",
+        "people-header": "사람들",
+        "tags-header": "태그",
+        "source-genre-tags-placeholder": "원본 장르/태그",
+        "dest-genre-tags-placeholder": "적용 장르/태그"
     },
     "match-series-modal": {
         "search": "검색",
@@ -2602,7 +2696,7 @@
         "summary": "{{filter-field-pipe.summary}}",
         "publication-status": "{{edit-series-modal.publication-status-title}}",
         "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
-        "chapter-publisher": "{{person-role-pipe.publisher}} (Chapter)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (챕터)",
         "chapter-covers": "커버 (Chapter)",
         "chapter-title": "제목 (챕터)",
         "chapter-release-date": "발매일 (Chapter)",
@@ -2639,14 +2733,16 @@
         "required": "{{validation.required-field}}"
     },
     "browse-people": {
-        "author-count": "{{num}} 사용자",
+        "author-count": "인물 {{num}} 명",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "roles-label": "역할",
         "sort-label": "정렬",
         "series-count": "{{common.series-count}}",
-        "title": "사용자 탐색",
+        "title": "인물 탐색",
         "issue-count": "{{common.issue-count}}",
-        "name-label": "이름"
+        "name-label": "이름",
+        "issue-count-label": "호 개수",
+        "series-count-label": "시리즈 개수"
     },
     "merge-person-modal": {
         "save": "{{common.save}}",
@@ -2654,7 +2750,8 @@
         "src": "사용자 병합",
         "alias-title": "새 별명",
         "close": "{{common.close}}",
-        "title": "{{personName}}"
+        "title": "{{personName}}",
+        "known-for-title": "알려진 이름"
     },
     "bulk-set-reading-profile-modal": {
         "loading": "{{common.loading}}",
@@ -2662,19 +2759,263 @@
         "filter-label": "{{common.filter}}",
         "close": "{{common.close}}",
         "create": "{{common.create}}",
-        "title": "읽기 프로필 설정"
+        "title": "읽기 프로필 설정",
+        "no-data": "아직 생성된 컬렉션이 없습니다",
+        "bound": "연결"
     },
     "manage-reading-profiles": {
-        "reset": "{{common.reset}}"
+        "reset": "{{common.reset}}",
+        "description": "모든 시리즈를 같은 방식으로 읽지는 않을 수도 있습니다. 라이브러리 또는 시리즈별로 별도의 읽기 프로필을 설정해 끊김 없이 읽을 수 있습니다.",
+        "extra-tip": "시리즈 및 라이브러리의 액션 메뉴를 통해 읽기 프로필을 개별 또는 일괄 할당할 수 있습니다. 읽기 도중에 변경할 경우 해당 시리즈에 대한 선택사항을 기억하는 숨겨진 프로필이 생성됩니다(PDF에는 미적용). 이 프로필은 해당 시리즈에 읽기 프로필을 할당하면 제거됩니다. 자세한 내용을 확인하려면",
+        "wiki-title": "위키",
+        "profiles-title": "당신의 읽기 프로필",
+        "default-profile": "기본값",
+        "add": "{{common.add}}",
+        "add-tooltip": "새 프로필은 설정을 변경한 후에 저장됩니다",
+        "make-default": "기본값으로 설정",
+        "no-selected": "선택된 프로필 없음",
+        "confirm": "정말로 {{name}} 읽기 프로필을 삭제하시겠습니까?",
+        "selection-tip": "목록에서 프로필을 선택하거나 오른쪽 상단에서 새로운 프로필을 생성하십시오",
+        "image-reader-settings-title": "이미지 리더",
+        "reading-direction-label": "읽기 방향",
+        "reading-direction-tooltip": "다음 페이지로 이동하기 위해 클릭하는 방향입니다. \"오른쪽에서 왼쪽\"의 경우 다음 페이지로 이동하려면 화면 왼쪽을 클릭해야 합니다.",
+        "scaling-option-label": "스케일링 옵션",
+        "scaling-option-tooltip": "이미지를 화면 크기에 맞게 조정하는 방법.",
+        "page-splitting-label": "페이지 분할",
+        "page-splitting-tooltip": "넓은 이미지(즉 좌우 이미지가 결합된 경우)를 분할하는 방법",
+        "reading-mode-label": "읽기 모드",
+        "reading-mode-tooltip": "읽기 인터페이스를 수직, 수평 기준으로 페이지를 설정하거나 스크롤을 적용하도록 변경합니다",
+        "layout-mode-label": "레이아웃 모드",
+        "layout-mode-tooltip": "화면에 단일 이미지를 표시하거나 두 개의 이미지를 옆으로 나란히 표시합니다",
+        "background-color-label": "배경 색상",
+        "background-color-tooltip": "이미지 리더의 배경 색상을 지정합니다",
+        "auto-close-menu-label": "자동으로 메뉴 닫기",
+        "auto-close-menu-tooltip": "메뉴가 자동으로 닫힙니다",
+        "show-screen-hints-label": "화면에 힌트 표시",
+        "show-screen-hints-tooltip": "페이지 분할 영역과 방향을 이해하는 것을 돕는 오버레이를 표시합니다",
+        "emulate-comic-book-label": "만화책 에뮬레이트",
+        "emulate-comic-book-tooltip": "책으로 읽는 것을 모사하기 위해 그림자 효과를 적용합니다",
+        "swipe-to-paginate-label": "스와이프로 페이지 넘기기",
+        "swipe-to-paginate-tooltip": "스와이프로 이전 또는 다음 페이지로 이동합니다",
+        "allow-auto-webtoon-reader-label": "자동 웹툰 읽기 모드",
+        "allow-auto-webtoon-reader-tooltip": "페이지가 웹툰 형식으로 판단될 경우 웹툰 읽기 모드로 전환됩니다. 일부 오탐지가 발생할 수 있습니다.",
+        "width-override-label": "{{manga-reader.width-override-label}}",
+        "width-override-tooltip": "리더에서 이미지 너비를 재정의합니다",
+        "disable-width-override-label": "너비 재정의 비활성화",
+        "disable-width-override-tooltip": "화면 크기가 설정된 분할 지점보다 작은 경우 너비 재정의가 적용되지 않도록 합니다",
+        "book-reader-settings-title": "도서 리더",
+        "tap-to-paginate-label": "탭하여 페이지 이동",
+        "tap-to-paginate-tooltip": "화면의 측면을 탭해서 이전/다음 페이지로 이동합니다",
+        "immersive-mode-label": "몰입형 모드",
+        "immersive-mode-tooltip": "리더 화면에서 클릭시 메뉴를 숨기고, 탭으로 페이지를 넘깁니다",
+        "reading-direction-book-label": "읽기 방향",
+        "reading-direction-book-tooltip": "다음 페이지로 이동하기 위해 클릭하는 방향입니다. \"오른쪽에서 왼쪽\"의 경우 다음 페이지로 이동하려면 화면 왼쪽을 클릭해야 합니다.",
+        "font-family-label": "글꼴 패밀리",
+        "font-family-tooltip": "불러올 폰트 패밀리를 설정합니다. 기본값으로 설정할 경우 책의 기본 글꼴을 불러옵니다",
+        "writing-style-label": "텍스트 방향",
+        "writing-style-tooltip": "텍스트의 방향을 변경합니다. 수평 방향은 왼쪽에서 오른쪽, 수직 방향을 위에서 아래로 읽습니다.",
+        "layout-mode-book-label": "레이아웃 모드",
+        "layout-mode-book-tooltip": "콘텐츠가 표시되는 방식을 설정합니다. 스크롤은 책에서 설정한 대로 페이지가 이어집니다. 1열 또는 2열 레이아웃은 기기의 높이에 따라 한 페이지의 1열 또는 2열의 텍스트를 표시합니다",
+        "color-theme-book-label": "색상 테마",
+        "color-theme-book-tooltip": "책 리더 콘텐츠와 메뉴에 적용하는 색상 테마를 설정합니다",
+        "font-size-book-label": "글꼴 크기",
+        "font-size-book-tooltip": "책의 글꼴에 적용하는 크기 비율을 설정합니다",
+        "line-height-book-label": "줄 간격",
+        "line-height-book-tooltip": "줄 사이의 간격을 설정합니다",
+        "margin-book-label": "여백",
+        "margin-book-tooltip": "화면 측면의 여백을 설정합니다. 모바일 기기에서는 설정과 무관하게 0으로 적용됩니다.",
+        "pdf-reader-settings-title": "PDF 리더",
+        "pdf-scroll-mode-label": "스크롤 모드",
+        "pdf-scroll-mode-tooltip": "페이지를 스크롤하는 방법을 설정합니다. 수평/수직 또는 탭(스크롤 없음)으로 페이지를 이동합니다",
+        "pdf-spread-mode-label": "스프레드 모드",
+        "pdf-spread-mode-tooltip": "페이지 배열 방식을 설정합니다. 단일 또는 이중(홀수/짝수)",
+        "pdf-theme-label": "테마",
+        "pdf-theme-tooltip": "리더의 색상 테마를 설정합니다",
+        "reading-profile-series-settings-title": "시리즈",
+        "reading-profile-library-settings-title": "라이브러리",
+        "delete": "{{common.delete}}"
     },
     "browse-genres": {
         "series-count": "{{common.series-count}}",
-        "issue-count": "{{common.issue-count}}"
+        "issue-count": "{{common.issue-count}}",
+        "title": "장르 탐색",
+        "genre-count": "{{num}}개 장르"
     },
     "browse-tags": {
         "title": "태그 탐색",
         "series-count": "{{common.series-count}}",
         "issue-count": "{{common.issue-count}}",
         "genre-count": "{{num}} 태그"
+    },
+    "browse-title-pipe": {
+        "publication-status": "{{value}}개 작품",
+        "age-rating": "{{value}} 등급",
+        "user-rating": "평점 {{value}}",
+        "tag": "보유 태그 {{value}}",
+        "translator": "역자 {{value}}",
+        "character": "등장 캐릭터 {{value}}",
+        "publisher": "{{value}} 출판",
+        "editor": "편집 {{value}}",
+        "artist": "삽화 {{value}}",
+        "letterer": "식자 {{value}}",
+        "colorist": "채색 {{value}}",
+        "inker": "선화 {{value}}",
+        "penciller": "밑그림 {{value}}",
+        "writer": "저자 {{value}}",
+        "genre": "장르 {{value}}",
+        "library": "{{value}} 시리즈 수록",
+        "format": "형식 {{value}}",
+        "release-year": "{{value}}년 발매",
+        "imprint": "출판 레이블 {{value}}",
+        "team": "출판 팀 {{value}}",
+        "location": "{{value}} 소재"
+    },
+    "generic-filter-field-pipe": {
+        "person-role": "역할",
+        "person-name": "이름",
+        "person-series-count": "시리즈 수",
+        "person-chapter-count": "챕터 수"
+    },
+    "breakpoint-pipe": {
+        "never": "없음",
+        "mobile": "모바일",
+        "tablet": "태블릿",
+        "desktop": "데스크탑"
+    },
+    "import-mappings": {
+        "import-step": "가져오기",
+        "configure-step": "구성",
+        "conflicts-step": "충돌 해결",
+        "finalize-step": "확정",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "save": "{{common.save}}",
+        "import-description": "현재 설정을 교체 또는 병합하기 위해 본인 또는 다른 사람이 내보낸 파일을 업로드합니다.",
+        "select-files-warning": "계속하려면 json 파일을 업로드해야 합니다",
+        "invalid-file": "파일 파싱에 실패했습니다. 입력 내용을 확인해 주십시오",
+        "file-no-valid-content": "불러오는 데이터에 진행 가능한 의미 있는 데이터가 포함되어 있지 않습니다",
+        "fields-to-import": "설정",
+        "fields-to-import-tooltip": "모든 설정을 건너뛰고 비활성화",
+        "whitelist-label": "화이트리스트 태그",
+        "blacklist-label": "블랙리스트 태그",
+        "age-ratings-label": "연령 등급 매핑",
+        "field-mappings-label": "필드 매핑",
+        "age-ratings-conflicts-tooltip": "사용할 연령 등급을 결정하십시오",
+        "import-mode-label": "가져오기 모드",
+        "import-mode-tooltip": "\"대체\"는 현재 설정을 무시하며, \"병합\"은 설정된 방법에 따라 충돌 해결을 시도합니다",
+        "merge": "병합",
+        "replace": "대체",
+        "resolution-label": "충돌 해결",
+        "resolution-tooltip": "Kavita가 충돌을 어떻게 해결할지 결정합니다",
+        "manual": "수동 편집",
+        "keep": "유지",
+        "to-pick": "해결 방법 선택",
+        "finalize-title": "설정 미리보기 화면입니다. 저장 버튼을 눌러 가져오기를 완료하십시오",
+        "field-mappings-conflicts-tooltip": "사용할 대상 결과를 결정하세요"
+    },
+    "oidc": {
+        "title": "OIDC 콜백",
+        "login": "로그인 화면으로 돌아가기",
+        "error-loading-info": "OIDC 정보 로딩에 오류가 발생했습니다. 관리자에게 문의하십시오",
+        "timeout": "OIDC 인증 시간이 초과되었거나 오류가 발생했습니다"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "save-success": "OIDC 설정 업데이트 완료",
+        "notice": "알림",
+        "restart-required": "권한 또는 클라이언트 ID 변경사항 적용을 위해서는 Kavita를 수동으로 재시작해야 합니다.",
+        "provider-title": "제공자",
+        "provider-tooltip": "제공자 설정은 수동으로 저장 버튼을 클릭해야 합니다. Kavita는 confidential client로 설정되어야 하며 리다이렉트 URL을 필요로 합니다. 자세한 사항은 <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>위키</a>를 참조하십시오.",
+        "behavior-title": "행동",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "manual-save-label": "제공자 설정을 변경하려면 수동으로 저장해야 합니다",
+        "authority-label": "권한",
+        "authority-tooltip": "OIDC 제공자의 URL입니다. .well-known/openid-configuration 경로는 포함하지 마십시오",
+        "client-id-label": "클라이언트 ID",
+        "client-id-tooltip": "OIDC 제공자에 ClientID를 설정합니다. 어떤 제공자도 사용할 수 있습니다",
+        "secret-label": "클라이언트 비밀번호",
+        "secret-tooltip": "OIDC 제공자를 통해 생성된 비밀번호",
+        "provision-accounts-label": "예비 계정",
+        "provision-accounts-tooltip": "OIDC를 통해 로그인할 때 기존 계정과 일치하지 않을 경우 자동으로 새로운 계정을 생성합니다",
+        "require-verified-email-label": "인증된 이메일이 필요합니다",
+        "require-verified-email-tooltip": "새로운 계정을 생성하거나 기존 계정과 연결할 때 이메일 인증이 필요합니다. 새로 생성된 계정이 인증된 이메일을 가지고 있다면, Kavita 측에서 자동으로 인증됩니다.",
+        "sync-user-settings-label": "사용자 설정을 OIDC 역할과 동기화",
+        "sync-user-settings-tooltip": "OIDC를 통해 생성되는 사용자는 신원 제공자에 의해 역할, 라이브러리 접근, 연령 등급을 포함하여 완전히 관리됩니다. 이 옵션이 비활성화할 경우 계정 생성 후 사용자는 어떤 콘텐츠에도 접근할 수 없습니다. 자세한 내용은 문서를 참조하십시오.",
+        "auto-login-label": "자동 로그인",
+        "auto-login-tooltip": "로그인 화면을 열 때 OIDC 제공자로 자동 리다이렉트",
+        "disable-password-authentication-label": "비밀번호 인증 비활성화",
+        "disable-password-authentication-tooltip": "관리자 권한을 가진 사용자는 이 제한을 우회할 수 있습니다",
+        "provider-name-label": "제공자 이름",
+        "provider-name-tooltip": "로그인 화면에 표시되는 이름",
+        "defaults-title": "기본값",
+        "defaults-requirement": "SyncUserSettings가 비활성화된 상태에서 OIDC를 통해 사용자가 등록될 때 다음 설정들이 적용됩니다",
+        "default-include-unknowns-label": "불명 정보 포함",
+        "default-include-unknowns-tooltip": "연령 등급 불명 포함",
+        "default-age-restriction-label": "연령 등급",
+        "default-age-restriction-tooltip": "신규 사용자에게 표시할 최대 연령 등급",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "advanced-title": "고급 설정",
+        "advanced-tooltip": "이 옵션들의 영향을 이해한 경우에만 수정하십시오.",
+        "roles-prefix-label": "역할 접두사",
+        "roles-prefix-tooltip": "Kavita는 이 접두사로 시작하는 역할만 고려합니다.",
+        "roles-claim-label": "역할 주장",
+        "roles-claim-tooltip": "Kavita가 역할을 추출하기 위해 사용할 주장입니다. 기본값을 사용하려면 비워 두세요.",
+        "custom-scopes-label": "맞춤 범위",
+        "custom-scopes-tooltip": "로그인 시 OIDC 제공업체에 요청할 추가 범위입니다. 여러 범위를 쉼표로 구분하세요. 잘못된 값을 입력하면 로그인이 불가능할 수 있습니다."
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "OpenID 연결"
+    },
+    "annotation-card": {
+        "page-num": "{{book-reader.page-num-label}}",
+        "contains-spoilers-label": "스포일러",
+        "view-in-reader-label": "리더에서 보기"
+    },
+    "annotations-tab": {
+        "title": "{{tabs.annotations-tab}}"
+    },
+    "view-annotations-drawer": {
+        "title": "{{tabs.annotations-tab}}",
+        "close": "{{common.close}}",
+        "filter-label": "필터 주석",
+        "no-data": "{{common.no-data}}"
+    },
+    "view-edit-annotation-drawer": {
+        "view-title": "주석 보기",
+        "edit-title": "주석 편집",
+        "create-title": "주석 생성",
+        "create": "생성",
+        "close": "{{common.close}}",
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
+    },
+    "view-bookmark-drawer": {
+        "title": "북마크",
+        "close": "{{common.close}}",
+        "no-data": "{{common.no-data}}",
+        "page-num-label": "{{book-reader.page-num-label}}",
+        "load-bookmark": "불러오기",
+        "image-header": "이미지",
+        "text-header": "텍스트"
+    },
+    "page-chapter-label-pipe": {
+        "page-only": "— {{pageNumber}} 페이지",
+        "full": "— {{pageNumber}} 페이지, \"{{chapterTitle}}\" 챕터"
+    },
+    "view-toc-drawer": {
+        "title": "컨텐츠 테이블",
+        "close": "{{common.close}}",
+        "toc-header": "책",
+        "personal-header": "개인"
+    },
+    "epub-setting-drawer": {
+        "title": "책 설정",
+        "close": "{{common.close}}"
+    },
+    "highlight-bar": {
+        "add-new-color-alt": "커스텀 색상 추가",
+        "slot-label": "{{slot}} 슬롯 하이라이트"
     }
 }

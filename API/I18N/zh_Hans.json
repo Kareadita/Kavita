@@ -209,5 +209,11 @@
     "smart-filter-system-name": "您不能使用系统提供的流名称",
     "sidenav-stream-only-delete-smart-filter": "只能从侧边栏删除智能筛选器流",
     "aliases-have-overlap": "一个或多个别名与其他人有重叠，无法更新",
-    "generated-reading-profile-name": "由 {0} 生成"
+    "generated-reading-profile-name": "由 {0} 生成",
+    "password-authentication-disabled": "密码验证已禁用，请通过 OpenID Connect 登录",
+    "oidc-managed": "无法编辑由 OIDC 管理的用户。",
+    "cannot-change-identity-provider-original-user": "无法更改原始管理员帐户的身份提供者",
+    "oidc-invalid-authority": "OIDC 授权无效",
+    "annotation-failed-create": "创建注释失败，请重试",
+    "annotation-delete": "无法删除注释"
 }

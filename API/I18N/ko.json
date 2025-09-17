@@ -208,6 +208,12 @@
     "sidenav-stream-only-delete-smart-filter": "사이드 메뉴에서 스마트 필터 스트림만 삭제할 수 있습니다",
     "smart-filter-name-required": "스마트 필터 이름이 필요합니다",
     "smart-filter-system-name": "시스템 제공 스트림 이름은 사용할 수 없습니다",
-    "aliases-have-overlap": "하나 이상의 별명이 다른 사용자와 중복되어 업데이트할 수 없습니다",
-    "generated-reading-profile-name": "{0}(으)로부터 생성됨"
+    "aliases-have-overlap": "하나 이상의 별명이 다른 인물과 중복되어 업데이트할 수 없습니다",
+    "generated-reading-profile-name": "{0}(으)로부터 생성됨",
+    "password-authentication-disabled": "비밀번호 인증이 비활성화되었습니다. OpenID 연결을 통해 로그인하십시오",
+    "oidc-managed": "OIDC로 관리되는 사용자는 편집할 수 없습니다.",
+    "cannot-change-identity-provider-original-user": "원본 관리자 계정의 신원 제공자는 변경할 수 없습니다",
+    "oidc-invalid-authority": "OIDC 권한이 유효하지 않습니다",
+    "annotation-failed-create": "주석 생성에 실패했습니다, 다시 시도해 주십시오",
+    "annotation-delete": "주석 삭제 실패"
 }

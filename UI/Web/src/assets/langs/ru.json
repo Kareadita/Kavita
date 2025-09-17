@@ -5,15 +5,16 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Забыли пароль?",
-        "submit": "Войти"
+        "submit": "Войти",
+        "oidc": "Подключение OpenID"
     },
     "dashboard": {
-        "no-libraries": "Библиотеки пока не настроены. Настройте некоторые из них в",
+        "no-libraries": "Библиотеки пока не настроены. Создайте их в",
         "server-settings-link": "Настройки сервера",
-        "not-granted": "Вам не был предоставлен доступ ни к каким библиотекам.",
-        "on-deck-title": "Продолжить чтение",
-        "recently-updated-title": "Недавно обновленная серия",
-        "recently-added-title": "Недавно добавленная серия",
+        "not-granted": "Вам не предоставлен доступ ни к одной из библиотек.",
+        "on-deck-title": "В очереди",
+        "recently-updated-title": "Недавно обновленные серии",
+        "recently-added-title": "Недавно добавленные серии",
         "more-in-genre-title": "Больше в {{genre}}"
     },
     "edit-user": {
@@ -25,12 +26,17 @@
         "cancel": "{{common.cancel}}",
         "saving": "Сохранение…",
         "update": "Обновление",
-        "invalid-email-warning": "Недействительный адрес электронной почты заблокирует некоторые функции Kavita",
-        "account-detail-title": "Детали учетной записи"
+        "invalid-email-warning": "Недействительный адрес электронной почты ограничит некоторые функции Kavita",
+        "account-detail-title": "Детали учетной записи",
+        "notice": "Предупреждение!",
+        "out-of-sync": "Этот пользователь был создан с помощью OIDC. Если включена настройка синхронизации пользователей, любые изменения, внесённые в эту учётную запись, могут быть перезаписаны.",
+        "oidc-managed": "Этот пользователь управляется через OIDC. Пожалуйста, свяжитесь с вашим администратором OIDC, чтобы запросить какие-либо изменения.",
+        "identity-provider": "Поставщик идентификационных данных",
+        "identity-provider-tooltip": "Пользователи Kavita никогда не синхронизируются с учётными записями OIDC."
     },
     "user-scrobble-history": {
-        "title": "История Скроббла",
-        "description": "Здесь вы найдете все события скроббла, связанные с вашей учетной записью. Для того чтобы события существовали, у вас должен быть настроен активный поставщик скробблинга. Все события, которые были обработаны, будут удалены через месяц. Если есть необработанные события, то, скорее всего, они не смогут сформировать совпадения выше по потоку. Пожалуйста, обратитесь к своему администратору, чтобы они были исправлены.",
+        "title": "История сбора данных",
+        "description": "Здесь вы найдёте все события сбора данных, связанные с вашей учётной записью. Для того, чтобы события существовали, у вас должен быть настроен активный поставщик сбора данных. Все события, которые были обработаны, будут удалены через месяц. Если есть необработанные события, то, скорее всего, они не смогут сформировать совпадения выше по потоку. Пожалуйста, обратитесь к своему администратору, чтобы они были исправлены.",
         "filter-label": "{{общий.фильтр}}",
         "created-header": "Создано",
         "last-modified-header": "Последнее изменение",
@@ -38,38 +44,44 @@
         "series-header": "Серии",
         "data-header": "Данные",
         "is-processed-header": "Обрабатывается",
-        "no-data": "Нет данных",
+        "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Том {{v}} Глава {{n}}",
         "volume-num": "Том {{num}}",
         "chapter-num": "Глава {{num}}",
         "rating": "Рейтинг {{r}}",
         "not-applicable": "Непригодный",
-        "processed": "Обработанный",
+        "processed": "Обработано",
         "not-processed": "Не обработано",
         "special": "{{entity-title.special}}",
-        "not-read-warning": "Поставщики услуг верхнего уровня всегда будут иметь наибольшее количество"
+        "not-read-warning": "Поставщики услуг верхнего уровня всегда будут иметь наибольшее количество",
+        "select-all-label": "Выбрать все",
+        "delete-selected-label": "Удалить выбранное",
+        "token-expired": "Ваш AniList-токен просрочен! События сбора данных не будут обрабатываться, пока вы не обновите его на странице аккаунта.",
+        "scrobbling-disabled": "Сбор данных отключён в настройках вашего аккаунта.",
+        "generate-scrobble-events": "События обратного заполнения"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Прогресс чтения",
         "score-updated": "Обновление рейтинга",
-        "want-to-read-add": "Хотите прочитать: Добавить",
-        "want-to-read-remove": "Хотите прочитать: Удалить",
-        "review": "Обновление обзора"
+        "want-to-read-add": "Хочу прочитать: Добавить",
+        "want-to-read-remove": "Хочу прочитать: Удалить",
+        "review": "Обновить отзыв"
     },
     "spoiler": {
         "click-to-show": "Спойлер, нажмите, чтобы показать"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
-        "user-review": "Обзор на {{username}}",
+        "user-review": "Отзыв пользователя {{username}}",
         "external-mod": "(внешний)",
-        "go-to-review": "Перейти к просмотру"
+        "go-to-review": "Перейти к отзыву"
     },
     "review-card": {
         "your-review": "Это ваш отзыв",
         "external-review": "Внешний обзор",
-        "local-review": "Обзор",
-        "rating-percentage": "Рейтинг {{r}}%"
+        "local-review": "Локальный отзыв",
+        "rating-percentage": "Рейтинг {{r}}%",
+        "critic": "критик"
     },
     "want-to-read": {
         "title": "Хочу прочитать",
@@ -79,7 +91,7 @@
     },
     "user-preferences": {
         "title": "Панель управления пользователя",
-        "pref-description": "Это глобальные настройки, которые привязаны к вашей учетной записи.",
+        "pref-description": "Это глобальные настройки, привязанные к вашей учётной записи. Параметры читателя находятся в профилях чтения.",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -94,29 +106,39 @@
         "locale-label": "Язык",
         "locale-tooltip": "Язык, который должна использовать Кавита",
         "blur-unread-summaries-label": "Размытие непрочитанного",
-        "blur-unread-summaries-tooltip": "Размытие аннотаций в не прочитанных томах или главах (во избежание спойлеров)",
+        "blur-unread-summaries-tooltip": "Размытие аннотаций в непрочитанных томах или главах (во избежание спойлеров)",
         "prompt-on-download-label": "Запрос на загрузку",
         "prompt-on-download-tooltip": "Запрашивать, когда размер загрузки превышает {{size}} МБ",
         "disable-animations-label": "Отключение анимации",
-        "disable-animations-tooltip": "Отключает анимацию на сайте. Полезно для устройств чтения с электронными чернилами.",
+        "disable-animations-tooltip": "Отключает анимацию на сайте. Полезно для устройств с экранами на электронных чернилах.",
         "collapse-series-relationships-label": "Свернуть отношение к серии",
-        "collapse-series-relationships-tooltip": "Должна ли Кавита показывать серии, которые не имеют отношения друг к другу, или это родителаякий серия/приквел",
+        "collapse-series-relationships-tooltip": "Показывать серии, которые не имеют отношения друг к другу, или является приквелом/родителем",
         "share-series-reviews-label": "Поделится обзором серий",
         "share-series-reviews-tooltip": "Должна ли Kavita включать ваши отзывы о сериях для других пользователей",
         "clients-opds-alert": "OPDS не включен на этом сервере. Это не повлияет на пользователей Tachiyomi.",
-        "clients-opds-description": "Все сторонние клиенты будут использовать либо API-ключ, либо указанный ниже Url подключения. Например пароли, храните их в тайне.",
-        "clients-api-key-tooltip": "Ключ API - это как пароль. Храните его в секрете, берегите его.",
-        "clients-opds-url-tooltip": "OPDS URL",
+        "clients-opds-description": "Все сторонние клиенты будут использовать API-ключ или URL-подключения, указанные ниже. Они аналогичны паролям — храните их в секрете.",
+        "clients-api-key-tooltip": "API-ключ аналогичен паролю. Его сброс повлечет потерю доступа для всех клиентов.",
+        "clients-opds-url-tooltip": "Список поддерживаемых OPDS-клиентов: ",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-tooltip": "Разрешить Kavita отправлять данные о прогрессе чтения и оценках в AniList (односторонняя синхронизация)",
+        "want-to-read-sync-label": "Синхронизация списка 'Хочу прочитать'",
+        "want-to-read-sync-tooltip": "Разрешить Kavita добавлять материалы в ваш список «Хочу прочитать» на основе серий из AniList и MAL, находящихся в ожидании чтения",
+        "clients-opds-url-label": "OPDS URL",
+        "clients-api-key-label": "API-ключ",
+        "anilist-scrobbling-label": "Сбор данных AniList"
     },
     "user-holds": {
         "title": "Удерживающие устройства Scrobble",
-        "description": "Это управляемый пользователем список серий, которые не будут передаваться провайдерам. Вы можете удалить серию в любое время, и следующее событие, которое можно отскаблировать (прогресс чтения, рейтинг, статус \"Хочу прочитать\"), вызовет события.",
-        "no-data": "{{typeahead.no-data}}"
+        "description": "Это управляемый пользователем список серий, которые не будут передаваться вышестоящим сервисам. Вы можете удалить серию в любое время, и следующее доступное для скробблинга событие (прогресс чтения, оценка, статус «Хочу прочитать») активирует отправку данных.",
+        "no-data": "{{typeahead.no-data}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "delete-label": "{{common.remove}}"
     },
     "theme-manager": {
-        "title": "Менеджер темы",
+        "title": "Менеджер тем",
         "site-themes": "Темы сайта",
         "set-default": "Установить по умолчанию",
         "download": "{{changelog.download}}",
@@ -127,17 +149,26 @@
         "delete": "{{common.delete}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "description": "Kavita предлагает цветовые схемы на любой вкус: выберите готовую или создайте свою и поделитесь ею. Темы могут примениться для вашего аккаунта или для всех глобально.",
+        "default-theme": "По умолчанию",
+        "downloaded": "Загружено",
+        "downloadable": "Загружаемый",
+        "active-theme": "Активный",
+        "upload-continued": "CSS-файл",
+        "preview-default": "Сначала выберите тему",
+        "preview-default-admin": "Сначала выберите тему или загрузите свою",
+        "preview-title": "Предпросмотр"
     },
     "theme": {
-        "theme-dark": "Темнота",
-        "theme-black": "Черный",
-        "theme-paper": "Бумага",
-        "theme-white": "Белый"
+        "theme-dark": "Тёмная",
+        "theme-black": "Чёрная",
+        "theme-paper": "Бумажная",
+        "theme-white": "Белая"
     },
     "restriction-selector": {
         "title": "Ограничение по возрастному рейтингу",
-        "description": "При выборе этого параметра все серии и списки для чтения, в которых есть хотя бы один элемент, превышающий выбранное ограничение, будут исключены из результатов.",
+        "description": "При выборе этого параметра все серии и списки чтения, содержащие хотя бы один элемент, превышающий выбранное ограничение, будут исключены из результатов.",
         "not-applicable-for-admins": "Это не относится к администраторам.",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "no-restriction": "Без ограничений",
@@ -153,13 +184,15 @@
         "description": "Раздел предназначен для настройки устройств, которые не могут подключаться к Kavita через веб-браузер, но используют адрес электронной почты, принимающий файлы.",
         "devices-title": "Устройства",
         "no-devices": "Пока нет ни одного настроенного устройства",
-        "platform-label": "Платформа: ",
-        "email-label": "Электронная почта: ",
+        "platform-label": "Платформа",
+        "email-label": "Электронная почта",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
-        "actions-header": "{{manage-users.actions-header}}"
+        "actions-header": "{{manage-users.actions-header}}",
+        "name-label": "Имя",
+        "email-setup-alert": "Хотите отправить файлы на ваше устройство? Попросите администратора настроить электронную почту!"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -169,7 +202,10 @@
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
         "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "valid-email": "{{validation.valid-email}}",
+        "title": "Изменить устройство",
+        "email-tooltip": "Этот e-mail будет использоваться для получения файлов через функцию 'Отправить в'",
+        "device-platform-label": "Платформа"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -185,23 +221,24 @@
         "permission-error": "У вас нет разрешения на изменение пароля. Обратитесь к администратору сервера."
     },
     "change-email": {
-        "email-title": "Email",
-        "email-label": "{{common.email}}",
+        "email-title": "Электронная почта",
+        "email-label": "Новая электронная почта",
         "current-password-label": "Текущий пароль",
         "email-not-confirmed": "Это письмо не подтверждено",
         "email-confirmed": "Email-адрес подтвержден",
         "email-updated-title": "Электронная почта обновлена",
-        "email-updated-description": "Вы можете воспользоваться следующей ссылкой для подтверждения электронной почты для вашей учетной записи. Если ваш сервер доступен извне, на него будет отправлено письмо, и эту ссылку можно использовать для подтверждения электронной почты.",
+        "email-updated-description": "Вы можете подтвердить электронную почту, перейдя по ссылке ниже. Если параметры электронной почты заданы, вы также получите электронное письмо с этой ссылкой.",
         "setup-user-account": "Настройка учетной записи пользователя",
         "invite-url-label": "URL приглашения",
         "invite-url-tooltip": "Скопируйте это и вставьте в новую вкладку",
-        "permission-error": "У вас нет разрешения на изменение электронной почты. Обратитесь к администратору сервера.",
+        "permission-error": "У вас нет прав для изменения адреса электронной почты. Обратитесь к администратору сервера.",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "has-invalid-email": "Похоже, вы не указали действующий адрес электронной почты. Чтобы изменить его, администратор должен отправить вам ссылку для подтверждения."
     },
     "change-age-restriction": {
         "age-restriction-label": "Возрастное ограничение",
@@ -215,39 +252,49 @@
         "copy": "Копировать",
         "show": "Показать",
         "hide": "Скрыть",
-        "regen-warning": "Регенерация ключа API приведет к аннулированию всех существующих клиентов.",
+        "regen-warning": "Повторная генерация API-ключа приведет к аннулированию всех существующих клиентов.",
         "no-key": "ОШИБКА - КЛЮЧ НЕ УСТАНОВЛЕН",
-        "confirm-reset": "Это приведет к аннулированию всех настроенных конфигураций OPDS. Вы уверены, что хотите продолжить?",
-        "key-reset": "Сброс ключа API"
+        "confirm-reset": "Это приведет к аннулированию всех настроенных вами конфигураций OPDS. Вы уверены, что хотите продолжить?",
+        "key-reset": "Сброс ключа API",
+        "reset": "Сброс"
     },
     "scrobbling-providers": {
-        "title": "Провайдеры скрапбукинга",
-        "requires": "Эта функция требует активной лицензии {{product}}.",
+        "title": "Поставщики сбора данных",
+        "requires": "Для этой функции требуется действующая лицензия {{product}}",
         "token-valid": "Токен валиден",
         "token-expired": "Срок действия токена истек",
-        "no-token-set": "Нет набора жетонов",
-        "token-set": "Набор жетонов",
-        "generate": "Создать",
-        "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
+        "no-token-set": "Токен не установлен",
+        "token-set": "Токен установлен",
+        "generate": "Сгенерировать",
+        "instructions": "В первый раз пользователи должны нажать на \"{{scrobbling-providers.generate}}\" ниже, чтобы разрешить Kavita+ взаимодействовать с {{service}}. После авторизации программы скопируйте и вставьте токен в поле ввода ниже. Вы можете восстановить свой токен в любое время.",
         "token-input-label": "Вставьте сюда токен для {{service}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "generic-instructions": "Заполните информацию о внешних сервисах, чтобы разрешить Kavita+ взаимодействовать с ними.",
+        "anilist-first-header": "Токен AniList сохранён",
+        "anilist-first-description": "Ваш токен AniList успешно настроен. Он действует в течение года: Kavita заранее уведомит вас о предстоящем истечении срока, чтобы вы могли обновить его. С этим токеном Kavita будет автоматически создавать события сбора данных на основе вашей истории чтения, списка «Хочу прочитать» и оценок. Вы можете запустить синхронизацию сейчас или позже. Если есть произведения, которые вы не хотите синхронизировать, выберите «Позже» и установите для них блокировку сбора данных. Достаточно запустить эту задачу один раз — дальнейшая синхронизация будет выполняться автоматически. <br/> Если вы выберете «Позже», найти кнопку запуска можно будет на странице сбора данных.",
+        "anilist-first-later": "Позже",
+        "anilist-first-now": "Сейчас",
+        "mal-instructions": "Kavita использует идентификатор клиента MAL для аутентификации. Создайте нового клиента для Kavita и после одобрения укажите идентификатор клиента и свое имя пользователя.",
+        "mal-token-input-label": "Идентификатор клиента MAL",
+        "mal-username-input-label": "Имя пользователя MAL",
+        "mal-used-for": "MyAnimeList используется для создания умных коллекций и требует синхронизации чтения."
     },
     "typeahead": {
         "locked-field": "Поле заблокировано",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "add-item": "Добавить {{item}}…",
-        "no-data": "Нет данных",
-        "add-custom-item": ", тип для добавления пользовательского элемента"
+        "no-data": "{{common.no-data}}",
+        "add-custom-item": ", введите свой вариант"
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
         "clear": "{{common.clear}}",
         "filter": "{{common.filter}}",
-        "open-filtered-search": "Откройте отфильтрованный поиск для {{item}}."
+        "open-filtered-search": "Открыть поиск с фильтром {{item}}"
     },
     "user-stats-info-cards": {
         "total-pages-read-label": "Прочитанных страниц",
@@ -268,11 +315,11 @@
     },
     "user-stats": {
         "library-read-progress-title": "Прогресс чтения в библиотеке",
-        "read-percentage": "% Прочитанного"
+        "read-percentage": "% Прочитано"
     },
     "top-readers": {
         "title": "Лучшие читатели",
-        "time-selection-label": "Timeframe",
+        "time-selection-label": "Период",
         "comics-label": "Комиксы: {{value}} часов",
         "manga-label": "Манга: {{value}} часов",
         "books-label": "Книги: {{value}} часов",
@@ -289,14 +336,16 @@
         "select-all": "{{common.select-all}}"
     },
     "directory-picker": {
-        "title": "Выберите директорию",
+        "title": "Выберите папку",
         "close": "{{common.close}}",
         "path-label": "Путь",
         "path-placeholder": "Начните печатать или выберите путь",
         "name-header": "Название",
         "cancel": "{{common.cancel}}",
         "share": "Поделиться",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "instructions": "Выберите папку, чтобы открыть её. Не видите нужную? Попробуйте сначала проверить корневой каталог /.",
+        "type-header": "Тип"
     },
     "library-access-modal": {
         "select-all": "{{common.select-all}}",
@@ -313,7 +362,8 @@
         "last-7-days": "Последние 7 дней",
         "last-30-days": "Последние 30 дней",
         "last-90-days": "Последние 90 дней",
-        "all-time": "Все время"
+        "all-time": "Все время",
+        "last-year": "Прошлый год"
     },
     "day-of-week-pipe": {
         "monday": "Понедельник",
@@ -325,11 +375,28 @@
         "sunday": "Воскресенье"
     },
     "cbl-conflict-reason-pipe": {
-        "chapter-missing": "{{series}}: Главы с номером {{chapter}} нет в Kavita. Она будет пропущена."
+        "chapter-missing": "{{series}}: Главы с номером {{chapter}} нет в Kavita. Она будет пропущена.",
+        "all-series-missing": "Ваш аккаунт не имеет доступа ни к одной из серий в списке, либо в Kavita отсутствуют данные для отображения.",
+        "empty-file": "CBL-файл пуст — нет данных для обработки.",
+        "name-conflict": "В вашем аккаунте уже существует читательский список ({{readingListName}}), соответствующий этому CBL-файлу.",
+        "series-collision": "Серия {{seriesLink}} конфликтует с одноименной серией в другой библиотеке.",
+        "series-missing": "Серия «{{series}}» отсутствует в Kavita, либо у вашей учетной записи нет прав доступа. Все связанные с этой серией элементы будут пропущены при импорте.",
+        "volume-missing": "{{series}}: том {{volume}} отсутствует в Kavita, либо у вашей учетной записи нет прав доступа. Все элементы с этим номером тома будут пропущены.",
+        "all-chapter-missing": "Ни одна из глав не может быть сопоставлена с существующими главами в Kavita.",
+        "invalid-file": "Файл повреждён или не соответствует ожидаемым тегам/спецификациям.",
+        "success": "Том {{volume}}, глава {{chapter}} серии {{series}} успешно сопоставлены."
     },
     "person-role-pipe": {
         "team": "{{filter-field-pipe.team}}",
-        "location": "{{filter-field-pipe.location}}"
+        "location": "{{filter-field-pipe.location}}",
+        "artist": "Художник",
+        "colorist": "Колорист",
+        "cover-artist": "{{artist}}",
+        "editor": "Редактор",
+        "publisher": "Издатель",
+        "writer": "Писатель",
+        "other": "Другой",
+        "translator": "Переводчик"
     },
     "reset-password": {
         "email-label": "{{common.email}}",
@@ -340,17 +407,24 @@
     "reset-password-modal": {
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "error-label": "Ошибка: "
     },
     "all-series": {
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "title": "Все серии"
     },
     "all-filters": {
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}"
+        "create": "{{common.create}}",
+        "title": "Все умные фильтры"
     },
     "out-of-date-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "subtitle": "Похоже, что ваша установка отстала более чем на {{count}} версий!",
+        "description-1": "Пожалуйста, подумайте об обновлении, чтобы использовать последнюю версию Kavita.",
+        "description-2": "Взгляните на наш <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>вики</a> с инструкциями по обновлению.",
+        "description-3": "Если есть какая-то конкретная причина, по которой вы ещё не обновлялись, мы хотели бы знать, что удерживает вас на устаревшей версии! Зайдите в наш discord и сообщите нам, что мешает вам перейти на новую версию."
     },
     "invite-user": {
         "close": "{{common.close}}",
@@ -358,11 +432,22 @@
         "required-field": "{{common.required-field}}",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
-        "notice": "{{manage-settings.notice}}"
+        "notice": "{{manage-settings.notice}}",
+        "title": "Пригласить пользователя",
+        "setup-user-title": "Пользователь приглашен",
+        "setup-user-description": "Вы можете использовать ссылку ниже, чтобы настроить учётную запись для вашего пользователя, или воспользоваться кнопкой копирования. Возможно, потребуется выйти из системы перед использованием ссылки для регистрации нового пользователя.",
+        "setup-user-account": "Настройка учетной записи пользователя",
+        "setup-user-account-tooltip": "Скопируйте это и вставьте в новой вкладке. Возможно, вам потребуется выйти из системы.",
+        "invite-url-label": "Ссылка-приглашение",
+        "invite": "Пригласить",
+        "inviting": "Приглашение…",
+        "description": "Пригласите пользователя на свой сервер, указав его адрес электронной почты. Он получит электронное письмо с просьбой создать учётную запись. Чтобы это сработало, у вас должны быть установлены поля настроек имени узла и электронной почты на вкладке <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">Электронная почта</a>, в противном случае вам будет предоставлена ссылка для настройки от имени пользователя. <br/><br/> Адрес электронной почты не обязательно должен быть действительным."
     },
     "library-selector": {
         "select-all": "{{common.select-all}}",
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "title": "Библиотеки",
+        "no-data": "Пока не настроено ни одной библиотеки."
     },
     "license": {
         "cancel": "{{common.cancel}}",
@@ -370,16 +455,78 @@
         "loading": "{{common.loading}}",
         "activate-email-label": "{{common.email}}",
         "activate-delete": "{{common.delete}}",
-        "activate-reset": "{{common.reset}}",
-        "activate-save": "{{common.save}}"
+        "activate-reset": "Сброс лицензии",
+        "activate-save": "{{common.save}}",
+        "title": "Лицензия Kavita+",
+        "manage": "Управлять",
+        "invalid-license-tooltip": "Если ваша подписка закончилась, вам необходимо написать в поддержку для оформления новой",
+        "check": "Проверить",
+        "buy": "Купить",
+        "activate": "Активировать",
+        "renew": "Продлить",
+        "no-license-key": "Лицензионный ключ отсутствует",
+        "license-valid": "Лицензия действительна",
+        "license-not-valid": "Лицензия недействительна",
+        "help-label": "{{common.help}}",
+        "info-title": "Информация о лицензии",
+        "actions-title": "Действия",
+        "license-active-label": "Лицензия активна",
+        "expiration-label": "Срок действия",
+        "valid-tooltip": "Действителен",
+        "invalid-tooltip": "Недействителен",
+        "reset-label": "Сбросить",
+        "reset-tooltip": "Это сбросит привязку лицензии Kavita+ к текущему экземпляру сервера. Требуется указать адрес электронной почты и лицензионный ключ",
+        "delete-label": "Удалить лицензию",
+        "supported-version-label": "В поддерживаемой версии Kavita",
+        "delete-tooltip": "Это приведет к аннулированию лицензии Kavita и запрету Kavita общаться с Kavita+. Не отменяет вашу подписку. Сначала используйте «управление», чтобы отменить подписку.",
+        "manage-tooltip": "Обновление информации о платеже, отмена/приостановка подписки и так далее",
+        "faq-title": "ЧАВО",
+        "total-subbed-months-label": "Общее количество подписанных месяцев",
+        "email-label": "Зарегистрированный адрес электронной почты",
+        "license-mismatch": "Лицензия может быть зарегистрирована на другой экземпляр Kavita. Зарегистрируйтесь повторно, чтобы исправить ошибку.",
+        "k+-license-overwrite": "Лицензия зарегистрирована на другой экземпляр Kavita. Это может произойти при повторной установке и в редких случаях из-за обновлений системы. Выберите «Перезаписать», чтобы принудительно зарегистрировать этот экземпляр в Kavita+.",
+        "k+-already-registered-header": "Лицензия уже зарегистрирована",
+        "overwrite": "Перезаписать",
+        "k+-unlocked": "Кавита+ разблокирована!",
+        "k+-unlocked-description": "Добро пожаловать в Kavita+! Kavita будет создавать события отслеживание данных на основе ваших достижений, оценок и желания ознакомиться с ними, как только вы зарегистрируете свою учётную запись для поставщиков отслеживания данных. Потратьте некоторое время на то, чтобы убедиться, что вы сохраняете отслеживание данных для любых серий, которые вы не хотите просматривать.",
+        "activate-description": "Введите лицензионный ключ и адрес электронной почты, который использовался для регистрации в Stripe",
+        "activate-license-label": "Лицензионный ключ",
+        "activate-discordId-label": "Идентификатор пользователя Discord",
+        "activate-discordId-tooltip": "Свяжите свой аккаунт в Discord с Kavita+. Это даст вам доступ к скрытым каналам, которые помогут сформировать Kavita.",
+        "discord-validation": "Это неверный идентификатор пользователя Discord. Ваш идентификатор пользователя не является вашим логином в Discord.",
+        "activate-reset-tooltip": "Аннулируйте предыдущую регистрацию, используя свою лицензию. Требуется как лицензия, так и электронная почта",
+        "kavita+-desc-part-1": "Kavita+— это услуга премиум-подписки, которая открывает возможности для всех пользователей данного экземпляра Kavita. Купите подписку, чтобы разблокировать ",
+        "kavita+-desc-part-2": "Преимущества премии",
+        "kavita+-desc-part-3": "сегодня!",
+        "kavita+-requirement": "Программа Kavita+ предназначена для работы только с 3 последними версиями. Все, что выходит за рамки этого, может не работать.",
+        "kavita+-warning": "Kavita+ является отдельным сервисом. Если вы удалите Kavita, не отменив подписку на Kavita+, с вас продолжат списывать плату."
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "copy": "Копировать",
+        "bookmark": "Закладка",
+        "bookmark-label": "Имя закладки"
     },
     "book-reader": {
-        "bookmarks-header": "{{side-nav.bookmarks}}"
+        "bookmarks-header": "{{side-nav.bookmarks}}",
+        "title": "Настройки книги",
+        "page-label": "Страница",
+        "pagination-header": "Секция",
+        "go-to-first-page": "К первой странице",
+        "go-to-last-page": "К последней странице",
+        "prev-page": "Пред. страница",
+        "next-page": "След. страница",
+        "prev-chapter": "Предыдущая глава/том",
+        "next-chapter": "Следующая глава/том",
+        "skip-header": "Перейти к основному содержанию",
+        "virtual-pages": "виртуальные страницы",
+        "settings-header": "Настройки",
+        "table-of-contents-header": "Содержание",
+        "loading-book": "Книга загружается…",
+        "go-back": "Назад",
+        "close-reader": "Закрыть чтение"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -405,7 +552,7 @@
     },
     "series-detail": {
         "close": "{{common.close}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "read": "{{common.read}}",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
@@ -438,7 +585,7 @@
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}"
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -456,7 +603,8 @@
     "side-nav": {
         "filter-label": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "home": "Главная"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -469,17 +617,18 @@
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "files-at-root-warning": "Один или несколько каталогов содержат файлы в своём корневом уровне. Kavita не поддерживает такую структуру."
     },
     "reader-settings": {
-        "font-family-label": "{{user-preferences.font-family-label}}",
-        "font-size-label": "{{user-preferences.font-size-book-label}}",
-        "line-spacing-label": "{{user-preferences.line-height-book-label}}",
-        "margin-label": "{{user-preferences.margin-book-label}}",
-        "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
-        "writing-style-label": "{{user-preferences.writing-style-label}}",
-        "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "font-family-label": "{{manage-reading-profiles.font-family-label}}",
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
+        "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
+        "margin-label": "{{manage-reading-profiles.margin-book-label}}",
+        "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
+        "immersive-mode-label": "{{manage-reading-profiles.immersive-mode-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "left-to-right": "Слева направо",
         "right-to-left": "Справа налево",
         "writing-style-tooltip": "Изменяет направление текста. По горизонтали - слева направо, по вертикали - сверху вниз."
@@ -603,44 +752,132 @@
         "on-deck": "{{dashboard.on-deck-title}}"
     },
     "settings": {
-        "kavitaplus-section-title": "{{settings.admin-kavitaplus}}"
+        "kavitaplus-section-title": "Kavita+",
+        "account": "Аккаунт",
+        "preferences": "Настройки",
+        "reading-profiles": "Профили чтения",
+        "clients": "Ключ API / OPDS",
+        "devices": "Устройства",
+        "user-stats": "Статистика",
+        "theme": "Тема",
+        "customize": "Кастомизация",
+        "cbl-import": "Список чтения CBL",
+        "admin-public-metadata": "Управление метаданными"
     },
     "collection-detail": {
-        "item-count": "{{common.item-count}}"
+        "item-count": "{{common.item-count}}",
+        "no-data-filtered": "Нет элементов, соответствующих текущему фильтру.",
+        "last-sync": "Последняя синхронизация: {{date}}",
+        "no-data": "Нет элементов. Попробуйте добавить серию.",
+        "title-alt": "Kavita — коллекция {{collectionName}}",
+        "series-header": "Серии",
+        "sync-progress": "Собранные серии: {{title}}"
     },
     "all-collections": {
-        "item-count": "{{common.item-count}}"
+        "item-count": "{{common.item-count}}",
+        "title": "Коллекции",
+        "no-data": "Нет коллекций.",
+        "create-one-part-1": "Попробуйте создать",
+        "create-one-part-2": "одну"
     },
     "reading-lists": {
-        "item-count": "{{common.item-count}}"
+        "item-count": "{{common.item-count}}",
+        "title": "Списки чтения",
+        "no-data": "Нет списков чтения.",
+        "create-one-part-1": "Попробуйте создать",
+        "create-one-part-2": "один"
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}"
+        "read": "{{common.read}}",
+        "released-label": "Дата выпуска: {{date}}"
     },
     "stream-list-item": {
-        "remove": "{{common.remove}}"
+        "remove": "{{common.remove}}",
+        "delete": "{{common.delete}}",
+        "load-filter": "Загрузить фильтр",
+        "provided": "Предоставлено",
+        "smart-filter": "Умный фильтр",
+        "library": "Библиотека",
+        "external-source": "Внешний источник"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
         "read": "{{common.read}}",
-        "characters-title": "{{metadata-fields.characters-title}}"
+        "characters-title": "{{metadata-fields.characters-title}}",
+        "page-settings-title": "Настройки страницы",
+        "remove-read": "Убрать из прочитанного",
+        "order-numbers-label": "Упорядочить номера",
+        "continue": "Продолжить",
+        "read-options-alt": "Параметры чтения",
+        "incognito-alt": "(Приватный режим)",
+        "no-data": "Пока ничего не добавлено",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "items-title": "Произведения",
+        "storyline-tab": "{{series-detail.storyline-tab}}",
+        "details-tab": "{{series-detail.details-tab}}",
+        "edit-alt": "{{common.edit}}",
+        "edit-label": "Режим редактирования",
+        "date-range-title": "Диапазон дат",
+        "more-alt": "{{series-detail.more-alt}}",
+        "reorder-alt": "Изменить порядок произведений",
+        "dnd-warning": "Перетаскивание недоступно на мобильных устройствах или когда список чтения содержит более 100 произведений."
     },
     "events-widget": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "title-alt": "Активность",
+        "dismiss-all": "Скрыть все",
+        "update-available": "Доступно обновление",
+        "downloading-item": "Загрузка",
+        "more-info": "Подробнее",
+        "users-online-count": "{{num}} Пользователей онлайн",
+        "active-events-title": "Текущие события:",
+        "no-data": "Здесь пока ничего не происходит",
+        "left-to-process": "Осталось обработать: {{leftToProcess}}",
+        "download-in-queue": "{{num}} загрузок в очереди"
     },
     "shortcuts-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "title": "Сочетания клавиш",
+        "prev-page": "Перейти на предыдущую страницу",
+        "next-page": "Перейти на следующую страницу",
+        "go-to": "Открыть окно «Перейти к странице»",
+        "bookmark": "Добавить текущую страницу в закладки",
+        "double-click": "двойной щелчок",
+        "close-reader": "Закрыть читалку",
+        "toggle-menu": "Открыть/закрыть меню"
     },
     "grouped-typeahead": {
         "genres": "{{metadata-fields.genres-title}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "files": "Файлы",
+        "chapters": "Главы",
+        "people": "Персоны",
+        "tags": "Теги",
+        "annotations": "{{tabs.annotations-tab}}",
+        "libraries": "Библиотеки",
+        "reading-lists": "Списки чтения",
+        "collections": "Коллекции",
+        "include-extras": "Включить главы и файлы"
     },
     "nav-header": {
         "help": "{{common.help}}",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "skip-alt": "Перейти к основному содержимому",
+        "search-series-alt": "Поиск серии",
+        "search-alt": "Поиск…",
+        "no-data": "Ничего не найдено",
+        "scroll-to-top-alt": "Наверх",
+        "server-settings": "Настройки сервера",
+        "settings": "Настройки",
+        "announcements": "Объявления",
+        "logout": "Выход",
+        "all-filters": "Умные фильтры",
+        "nav-link-header": "Параметры навигации"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -672,8 +909,8 @@
         "close": "{{common.close}}"
     },
     "manga-reader": {
-        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
+        "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
         "right-to-left-alt": "Справа налево",
         "left-to-right-alt": "Слево направо"
     },
@@ -688,7 +925,7 @@
         "language-label": "{{metadata-fields.language-title}}"
     },
     "metadata-filter-row": {
-        "unit-user-rating": "{{metadata-filter-row.unit-reading-progress}}"
+        "unit-user-rating": "0.0 - 5.0 звёзд"
     },
     "edit-series-modal": {
         "general-tab": "{{tabs.general-tab}}",
@@ -772,8 +1009,8 @@
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
-        "pages-label": "{{edit-chapter-modal.pages-count}}",
-        "words-label": "{{edit-chapter-modal.length-title}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
@@ -808,13 +1045,20 @@
     },
     "customize-dashboard-modal": {
         "close": "{{common.close}}",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "dashboard": "Панель управления",
+        "sidenav": "Боковая панель",
+        "external-sources": "Внешние источники",
+        "smart-filters": "Умные фильтры",
+        "description": "Вы можете настроить разные аспекты Kavita, меняя порядок элементов, управляя видимостью и привязывая умные фильтры/внешние источники к главной странице или боковой панели."
     },
     "customize-dashboard-streams": {
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "no-data": "Все умные фильтры добавлены на панель управления или ещё не созданы.",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
         "save": "{{common.save}}",
@@ -822,24 +1066,48 @@
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
-        "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
-        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}"
+        "reorder-when-filter-present": "Вы не можете изменять порядок методом перетаскивания при активном фильтре. Используйте {{customize-sidenav-streams.order-numbers-label}}",
+        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
+        "no-data": "Все умные фильтры добавлены на боковую панель или ещё не созданы.",
+        "no-data-external-source": "Все внешние источники добавлены на боковую панель или ещё не созданы.",
+        "smart-filters-title": "Умные фильтры",
+        "bulk-mode-label": "Режим пакетной обработки"
     },
     "manage-external-sources": {
         "clear": "{{common.clear}}",
-        "filter": "{{common.filter}}"
+        "filter": "{{common.filter}}",
+        "add-source": "Добавить",
+        "help-link": "Дополнительная информация",
+        "description": "Расширьте свой опыт, добавив внешние серверы и удобно включив их в вашу боковую панель для быстрого доступа как к вашему собственному серверу, так и к серверам ваших друзей.",
+        "no-data": "Внешние источники отсутствуют"
     },
     "manage-smart-filters": {
         "delete": "{{common.delete}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "no-data": "Умные фильтры не созданы",
+        "errored": "Ошибка кодировки в фильтре. Вам необходимо создать его заново.",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "edit": "{{common.edit}}",
+        "save": "{{common.save}}",
+        "edit-smart-filter": "Изменить {{name}}",
+        "name-label": "Имя",
+        "required-field": "Умные фильтры должны иметь имена",
+        "filter-name-unique": "Имена умных фильтров должны быть уникальными"
     },
     "edit-external-source-item": {
         "save": "{{common.save}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "not-unique": "Внешний источник с таким хостом уже существует. Убедитесь в отсутствии у вас дубликатов",
+        "title": "Новый внешний источник",
+        "host-label": "Хост",
+        "name-label": "Имя",
+        "api-key-label": "API-ключ",
+        "pattern": "Хост должен быть действительным URL-адресом с префиксом http(s)://"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -850,16 +1118,38 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-people}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
         "characters": "{{metadata-fields.characters-title}}",
-        "cover-artist": "{{person-role-pipe.cover-artist}}",
+        "cover-artist": "{{person-role-pipe.artist}}",
         "genres": "{{metadata-fields.genres-title}}",
         "release-year": "{{sort-field-pipe.release-year}}",
         "tags": "{{metadata-fields.tags-title}}",
-        "writers": "{{metadata-fields.writers-title}}"
+        "writers": "{{metadata-fields.writers-title}}",
+        "collection-tags": "Метки коллекций",
+        "editor": "Редактор",
+        "formats": "Форматы",
+        "team": "Команда",
+        "location": "Местоположение",
+        "languages": "Языки",
+        "libraries": "Библиотеки",
+        "publication-status": "Статус публикации",
+        "publisher": "Издатель",
+        "read-progress": "Прогресс чтения",
+        "read-time": "Время чтения",
+        "series-name": "Название серии",
+        "summary": "Краткое содержание",
+        "translators": "Переводчики",
+        "user-rating": "Пользовательский рейтинг",
+        "path": "Путь",
+        "file-path": "Путь к файлу",
+        "want-to-read": "Хочу прочитать",
+        "read-date": "Дата чтения",
+        "read-last": "Прочитано последним",
+        "average-rating": "Средний рейтинг"
     },
     "actionable": {
         "clear": "{{common.clear}}",
@@ -873,7 +1163,7 @@
     "validation": {
         "required-field": "Это поле обязательно для заполнения",
         "valid-email": "Это должен быть действительный адрес электронной почты",
-        "password-validation": "Длина пароля должна составлять от 6 до 32 символов",
+        "password-validation": "Длина пароля должна составлять от 6 до 256 символов",
         "year-validation": "Значение года должно быть настоящий, цифра должна быть больше 1000 и содержать 4 цифры"
     },
     "entity-type": {
@@ -905,9 +1195,9 @@
         "username": "Имя пользователя",
         "password": "Пароль",
         "select-all": "Выбрать все",
-        "deselect-all": "Отменить выбор всех",
-        "series-count": "{{num}} Серия",
-        "item-count": "{{num}} Предметы",
+        "deselect-all": "Снять все отметки",
+        "series-count": "{{num}} серий",
+        "item-count": "{{num}} элементов",
         "book-num": "Книга",
         "issue-hash-num": "Вопрос #",
         "issue-num": "Вопрос",
@@ -918,10 +1208,11 @@
         "volume-nums": "Тома",
         "book-nums": "Книги",
         "issue-num-shorthand": "#{{num}}",
-        "volume-num-shorthand": "Том. {{num}}",
+        "volume-num-shorthand": "Том {{num}}",
         "chapter-num-shorthand": "Глава {{num}}",
-        "chapter-count": "{{num}} Главы",
-        "no-data": "Нет данных"
+        "chapter-count": "{{num}} глав",
+        "no-data": "Нет данных",
+        "author-count": "{{num}} авторов"
     },
     "preferences": {
         "original": "Оригинал",
@@ -934,7 +1225,65 @@
         "confirm-download-size-ios": "В iOS возникают проблемы с загрузкой файлов размером более 200 МБ, загрузка может завершиться некорректно.",
         "confirm-library-type-change": "Смена типа библиотеки вызовет новое сканирование с другими правилами синтаксического анализа и может привести к повторному созданию серий, что может привести к потере прогресса и закладок. Перед началом разумно создать резервную копию. Вы уверены, что хотите продолжить?",
         "chapter-deleted": "Удаление главы",
-        "collection-not-owned": "Вы не являетесь владельцем этой коллекции"
+        "collection-not-owned": "Вы не являетесь владельцем этой коллекции",
+        "regen-cover": "Задача по обновлению обложки добавлена в очередь",
+        "no-pages": "Страницы отсутствуют. Kavita не смогла прочитать этот архив.",
+        "download-in-progress": "Загрузка уже выполняется. Пожалуйста, подождите.",
+        "scan-queued": "Сканирование для {{name}} поставлено в очередь",
+        "server-settings-updated": "Настройки сервера обновлены",
+        "reset-ip-address": "IP-адреса сброшены",
+        "reset-base-url": "Базовый URL сброшен",
+        "unauthorized-1": "У вас нет прав для просмотра этой страницы.",
+        "no-updates": "Обновления отсутствуют",
+        "confirm-delete-user": "Вы уверены, что хотите удалить этого пользователя?",
+        "user-deleted": "Пользователь {{user}} был удалён",
+        "click-email-link": "Пожалуйста, перейдите по этой ссылке, чтобы подтвердить электронную почту. Подтверждение необходимо для входа в аккаунт.",
+        "series-added-to-collection": "Серия добавлена в коллекцию {{collectionName}}",
+        "no-series-collection-warning": "Внимание! Ни одна серия не выбрана — сохранение приведёт к удалению коллекции. Вы уверены, что хотите продолжить?",
+        "collection-updated": "Коллекция обновлена",
+        "reading-list-deleted": "Список чтения удален",
+        "reading-lists-deleted": "Списки чтения удалены",
+        "reading-list-updated": "Список чтения обновлен",
+        "confirm-delete-reading-list": "Вы уверены, что хотите удалить список чтения? Это действие нельзя отменить.",
+        "confirm-delete-reading-lists": "Вы уверены, что хотите удалить списки чтения? Это действие нельзя отменить.",
+        "item-removed": "Элемент удалён",
+        "nothing-to-remove": "Нет элементов для удаления",
+        "series-added-to-reading-list": "Серия добавлена в список чтения",
+        "volumes-added-to-reading-list": "Том добавлен в список чтения",
+        "chapter-added-to-reading-list": "Глава добавлена в список чтения",
+        "multiple-added-to-reading-list": "Главы и тома добавлены в список чтения",
+        "select-files-warning": "Необходимо выбрать файлы для продолжения",
+        "reading-list-imported": "Список чтения импортирован",
+        "incognito-off": "Режим инкогнито отключён. Отслеживание прогресса возобновлено.",
+        "email-service-reset": "Почтовая служба сброшена",
+        "email-service-reachable": "Подключение к почте Kavita выполнено успешно",
+        "email-service-unresponsive": "URL почтового сервиса не отвечает.",
+        "refresh-covers-queued": "Обновление обложек для {{name}} поставлено в очередь",
+        "generate-colorscape-queued": "Генерация цветовой палитры для {{name}} поставлена в очередь",
+        "library-file-analysis-queued": "Анализ файлов библиотеки для {{name}} поставлен в очередь",
+        "entity-read": "{{name}} помечено как прочитанное",
+        "entity-unread": "{{name}} помечено как непрочитанное",
+        "mark-read": "Помечено как прочитанное",
+        "mark-unread": "Помечено как непрочитанное",
+        "series-added-want-to-read": "Серия добавлена из списка «Хочу прочитать»",
+        "series-removed-want-to-read": "Серия удалена из списка «Хочу прочитать»",
+        "series-deleted": "Серия удалена",
+        "delete-review": "Вы уверены, что хотите удалить свой отзыв?",
+        "review-deleted": "Отзыв удален",
+        "file-send-to": "Файл(-ы) отправлен(-ы) на электронную почту {{name}}",
+        "theme-missing": "Текущая тема больше не существует. Пожалуйста, обновите страницу.",
+        "email-sent": "Электронное письмо отправлено на {{email}}",
+        "email-not-sent": "Отправка невозможна — указанный адрес электронной почты недействителен. Ссылка была занесена в журнал событий. Администратор может предоставить эту ссылку для завершения процесса.",
+        "k+-license-saved": "Лицензионный ключ сохранён, но недействителен. Нажмите «Проверить» для повторной валидации подписки. Первоначальная регистрация может занять несколько минут. Первичная регистрация может потребовать около минуты, прежде чем лицензия станет активной.",
+        "k+-error": "При активации вашей лицензии возникла ошибка. Пожалуйста, повторите попытку.",
+        "k+-delete-key": "Это приведёт только к удалению лицензионного ключа Kavita, после чего появится ссылка на покупку. <b>Ваша подписка при этом не отменяется!</b> Сначала отмените подписку через раздел «Управление».",
+        "k+-reset-key": "Это действие аннулирует предыдущую регистрацию, использовавшую вашу лицензию, и позволит зарегистрировать новый экземпляр Kavita.",
+        "k+-reset-key-success": "Ваша лицензия была аннулирована. Используйте кнопку \"Изменить\" чтобы повторно зарегистрировать экземпляр и активировать Kavita+",
+        "library-deleted": "Библиотека {{name}} удалена",
+        "copied-to-clipboard": "Скопировано в буфер обмена",
+        "book-settings-info": "Вы можете изменять настройки книги, сохранять эти настройки для всех книг и просматривать оглавление в боковой панели.",
+        "no-next-chapter": "Не удалось найти следующую {{entity}}",
+        "no-prev-chapter": "Предыдущий {{entity}} не найден"
     },
     "tabs": {
         "devices-tab": "Устройства",
@@ -949,5 +1298,346 @@
     },
     "day-breakdown": {
         "no-data": "Отсутствует прогресс, отправляйтесь читать =)"
+    },
+    "reviews": {
+        "user-reviews-local": "Локальные отзывы",
+        "user-reviews-plus": "Внешние отзывы"
+    },
+    "review-modal": {
+        "title": "Редактировать отзыв",
+        "review-label": "Отзыв",
+        "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
+        "min-length": "Отзыв должен содержать минимум {{count}} символов",
+        "required": "{{validation.required-field}}",
+        "close": "{{common.close}}"
+    },
+    "device-platform-pipe": {
+        "custom": "Пользовательский"
+    },
+    "cbl-import-result-pipe": {
+        "success": "Успешно",
+        "partial": "Частично",
+        "failure": "Неудачно"
+    },
+    "time-duration-pipe": {
+        "hours": "{{value}} часов",
+        "minutes": "{{value}} минут",
+        "days": "{{value}} дней",
+        "months": "{{value}} месяцев",
+        "years": "{{value}} лет"
+    },
+    "time-ago-pipe": {
+        "never": "Никогда",
+        "just-now": "только что",
+        "min-ago": "минут назад",
+        "mins-ago": "{{value}} минут назад",
+        "hour-ago": "часов назад",
+        "hours-ago": "{{value}} часов назад",
+        "day-ago": "дней назад",
+        "days-ago": "{{value}} дней назад",
+        "month-ago": "месяцев назад",
+        "months-ago": "{{value}} месяцев назад",
+        "year-ago": "лет назад",
+        "years-ago": "{{value}} лет назад"
+    },
+    "relationship-pipe": {
+        "adaptation": "Адаптация",
+        "alternative-setting": "Дополнительные параметры",
+        "alternative-version": "Альтернативная версия",
+        "contains": "Содержит",
+        "other": "Другое",
+        "prequel": "Предыстория",
+        "sequel": "Продолжение",
+        "side-story": "Побочная история",
+        "spin-off": "Ответвление",
+        "edition": "Издание",
+        "annual": "Ежегодный"
+    },
+    "changelog-update-item": {
+        "theme": "Тема",
+        "download": "Скачать",
+        "added": "Добавлено",
+        "changed": "Изменено",
+        "fixed": "Исправлено",
+        "developer": "Разработчик",
+        "api": "API",
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "Предложения",
+        "known-issues": "Известные проблемы",
+        "removed": "Удалён",
+        "published-label": "Опубликован: "
+    },
+    "changelog": {
+        "available": "Доступно",
+        "installed": "Установлено",
+        "download": "Загрузить",
+        "nightly": "Ночной: {{version}}"
+    },
+    "new-version-modal": {
+        "title": "Kavita была обновлена!",
+        "description": "Доступна новая версия Kavita. Приступить к обновлению.",
+        "added": "{{changelog.added}}",
+        "changed": "{{changelog.changed}}",
+        "fixed": "{{changelog.fixed}}",
+        "developer": "{{changelog.developer}}",
+        "theme": "{{changelog.theme}}",
+        "removed": "{{changelog.removed}}",
+        "known-issues": "{{changelog.known-issues}}",
+        "api": "{{changelog.api}}",
+        "close": "{{common.close}}",
+        "refresh": "Сброс"
+    },
+    "edit-person-modal": {
+        "invalid-asin": "ASIN должен соответствовать формату ISBN-10 или ISBN-13"
+    },
+    "file-type-group-pipe": {
+        "archive": "Архив",
+        "epub": "ePub",
+        "pdf": "Pdf"
+    },
+    "filter-comparison-pipe": {
+        "begins-with": "Начинается с",
+        "contains": "Содержит",
+        "greater-than": "Больше чем",
+        "greater-than-or-equal": "Больше или равно",
+        "equal": "Равно",
+        "less-than": "Меньше чем",
+        "less-than-or-equal": "Меньше или равно",
+        "matches": "Соответствует",
+        "does-not-contain": "Не содержит",
+        "not-equal": "Не равно",
+        "ends-with": "Заканчивается на",
+        "is-after": "После",
+        "is-before": "До",
+        "must-contains": "Должен содержать",
+        "is-empty": "Пусто"
+    },
+    "log-level-pipe": {
+        "debug": "Отладка",
+        "information": "Информация",
+        "warning": "Предупреждение",
+        "critical": "Критический"
+    },
+    "confirm": {
+        "alert": "Предупреждение",
+        "confirm": "Подтверждение",
+        "cancel": "{{common.cancel}}",
+        "ok": "Ok",
+        "prompt": "Вопрос",
+        "info": "Инфо"
+    },
+    "browse-title-pipe": {
+        "publication-status": "{{value}} работает",
+        "age-rating": "Рейтинг {{value}}",
+        "user-rating": "Рейтинг {{value}} звёзд",
+        "tag": "Имеет тег {{value}}",
+        "translator": "Перевел {{value}}",
+        "character": "Имеет символ {{value}}",
+        "publisher": "Опубликовал {{value}}",
+        "editor": "Отредактировал {{value}}",
+        "artist": "Рисовал {{value}}",
+        "letterer": "Написано {{value}}",
+        "genre": "Имеет жанр {{value}}",
+        "library": "В библиотеке {{value}}",
+        "format": "Формат {{value}}",
+        "release-year": "Выпущен в {{value}}",
+        "team": "Команда {{value}}",
+        "location": "Расположен в {{value}}"
+    },
+    "generic-filter-field-pipe": {
+        "person-role": "Роль",
+        "person-name": "Имя",
+        "person-series-count": "Количество серий",
+        "person-chapter-count": "Количество глав"
+    },
+    "oidc": {
+        "login": "Вернуться к экрану входа",
+        "error-loading-info": "Произошла ошибка при загрузке информации OIDC, обратитесь к своему администратору",
+        "timeout": "Время разрешения OIDC истекло или произошла ошибка",
+        "title": "Обратный вызов OIDC"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "save-success": "Ваши настройки OIDC успешно обновлены",
+        "notice": "Уведомление",
+        "restart-required": "Чтобы изменения полномочий или идентификатора клиента вступили в силу, необходимо вручную перезагрузить Kavita.",
+        "provider-title": "Поставщик",
+        "provider-tooltip": "В настройках поставщика необходимо вручную нажать кнопку Сохранить. Kavita должна быть настроена как конфиденциальный клиент, и для нее необходим URL-адрес для перенаправления. За подробностями смотрите <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>вики</a>.",
+        "behavior-title": "Поведение",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "manual-save-label": "Изменение настроек поставщика требует сохранения вручную",
+        "authority-label": "Полномочия",
+        "authority-tooltip": "URL-адрес вашего поставщика OIDC не должен включать путь .well-known/openid-configuration",
+        "client-id-label": "Идентификатор клиента",
+        "client-id-tooltip": "Идентификатор клиента, указанный в вашем поставщике OIDC, может быть любым",
+        "secret-label": "Секрет клиента",
+        "secret-tooltip": "Секрет, созданный вашим поставщиком OIDC",
+        "auto-login-label": "Автоматический вход",
+        "auto-login-tooltip": "Автоматическое перенаправление к поставщику OIDC при открытии экрана входа в систему",
+        "disable-password-authentication-label": "Отключить аутентификацию по паролю",
+        "disable-password-authentication-tooltip": "Пользователи с ролью администратора могут обойти это ограничение",
+        "provider-name-label": "Имя поставщика",
+        "provider-name-tooltip": "Имя, отображаемое на экране входа в систему",
+        "defaults-title": "Значения по умолчанию",
+        "defaults-requirement": "Используются следующие настройки, когда пользователь регистрируется через OIDC, а функция SyncUserSettings отключена",
+        "default-include-unknowns-label": "Включать неизвестные",
+        "default-include-unknowns-tooltip": "Включать неизвестные возрастные категории",
+        "default-age-restriction-label": "Возрастной рейтинг",
+        "default-age-restriction-tooltip": "Максимальный возрастной рейтинг, отображаемый новым пользователям",
+        "advanced-title": "Расширенные настройки",
+        "advanced-tooltip": "Изменяйте эти параметры только в том случае, если вы понимаете их влияние.",
+        "roles-prefix-label": "Префикс ролей",
+        "roles-prefix-tooltip": "Кавита рассмотрит только те роли, которые начинаются с этого префикса.",
+        "roles-claim-label": "Утверждение о ролях",
+        "roles-claim-tooltip": "Утверждение, которое Kavita будет использовать для выделения ролей. Оставьте поле пустым, чтобы использовать значение по умолчанию.",
+        "custom-scopes-label": "Пользовательские области видимости",
+        "custom-scopes-tooltip": "Дополнительные области можно запросить у вашего поставщика OIDC при входе в систему. Разделите несколько областей запятыми. Неправильные значения могут помешать входу в систему.",
+        "provision-accounts-tooltip": "Автоматическое создание новой учётной записи при входе в систему через OIDC, если она не может быть сопоставлена с существующей",
+        "require-verified-email-tooltip": "Требуется подтверждение электронной почты при создании новой учётной записи или при сопоставлении с существующей. Если у вновь созданной учётной записи есть подтвержденный адрес электронной почты, он будет автоматически подтверждён на стороне Kavita.",
+        "sync-user-settings-label": "Синхронизируйте пользовательские настройки с ролями OIDC",
+        "sync-user-settings-tooltip": "Пользователи, созданные с помощью OIDC, будут полностью управляться поставщиком удостоверений, включая роли, доступ к библиотеке и возрастной рейтинг. Если эта опция отключена, пользователи не будут иметь доступа к какому-либо контенту после создания учётной записи. Более подробную информацию смотрите в документации.",
+        "no-restriction": "{{restriction-selector.no-restriction}}"
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita"
+    },
+    "publication-status-pipe": {
+        "ongoing": "Онгоинг",
+        "completed": "Завершён",
+        "cancelled": "Отменён",
+        "ended": "Закончен"
+    },
+    "manga-format-pipe": {
+        "epub": "ePUB",
+        "archive": "Архив",
+        "image": "Изображение",
+        "pdf": "PDF",
+        "unknown": "Неизвестный"
+    },
+    "library-type-pipe": {
+        "book": "Книга",
+        "comic": "Комикс (Устаревший)",
+        "manga": "Манга",
+        "comicVine": "Комикс",
+        "image": "Изображение",
+        "lightNovel": "Легкий роман"
+    },
+    "age-rating-pipe": {
+        "unknown": "Неизвестный",
+        "early-childhood": "Раннее детство",
+        "adults-only": "Только старше 18",
+        "everyone": "Каждый"
+    },
+    "announcements": {
+        "title": "Объявления"
+    },
+    "manage-matched-metadata": {
+        "title": "Подходящие метаданные",
+        "description": "Все применимые серии, которые могут быть сопоставлены с внешними метаданными, находятся здесь. Kavita будет выполнять предварительную выборку или обновлять метаданные серий, по 50 серий в сутки ежедневно.",
+        "status-header": "Состояние",
+        "series-name-header": "Серии",
+        "library-name-header": "Библиотека",
+        "valid-until-header": "Следующее обновление",
+        "actions-header": "Действия",
+        "library-type": "Тип библиотеки",
+        "matched-state-label": "Состояние соответствия",
+        "matched-status-label": "Найдено",
+        "unmatched-status-label": "Не найдено",
+        "blacklist-status-label": "Требуется ручное сопоставление",
+        "dont-match-status-label": "{{dont-match-label}}",
+        "all-status-label": "Все",
+        "dont-match-label": "Не совпадают",
+        "no-data": "{{common.no-data}}",
+        "match-alt": "Совпадения {{seriesName}}"
+    },
+    "manage-user-tokens": {
+        "description": "Пользователям, у которых есть токены отслеживания данных, возможно, потребуется время от времени обновлять их. Kavita автоматически отправит им электронное письмо, если электронная почта настроена и у них есть действительный адрес электронной почты.",
+        "username-header": "Логин",
+        "anilist-header": "AniList",
+        "mal-header": "MAL",
+        "token-set-label": "Установить токен",
+        "no-data": "{{common.no-data}}",
+        "expires-label": "Заканчивается срок: {{date}}"
+    },
+    "manage-metadata-settings": {
+        "k+-warning": "Приведенные ниже настройки совпадают с настройками, указанными на странице K+. Вы можете изменить их в любом месте",
+        "export-settings": "Экспорт",
+        "export-tooltip": "Экспортируйте свои чёрный и белый списки, возрастной рейтинг и сопоставления полей",
+        "export-file-name": "Настройки метаданных Export.json Kavita",
+        "import-settings": "Импорт",
+        "import-tooltip": "Импортируйте свои или чужие настройки",
+        "description": "В Kavita+ есть возможность загружать и записывать в базу данных некоторые ограниченные метаданные. На этой странице вы можете переключать область действия.",
+        "enabled-label": "Включить загрузку метаданных",
+        "enabled-tooltip": "Разрешите Kavita загружать метаданные и записывать их в свою базу данных.",
+        "summary-label": "Сводка",
+        "summary-tooltip": "Разрешить запись сводки, когда поле будет разблокировано.",
+        "localized-name-label": "Локализованное название серии",
+        "localized-name-tooltip": "Разрешите вводить локализованное имя, когда поле будет разблокировано. Кавита попытается угадать наиболее подходящее.",
+        "derive-publication-status-label": "Состояние публикации",
+        "derive-publication-status-tooltip": "Позволяет определять состояние публикации на основе общего количества глав/томов.",
+        "enable-relations-label": "Отношения",
+        "enable-relations-tooltip": "Разрешить <b>добавлять</b> серии отношений.",
+        "enable-people-label": "Люди",
+        "enable-people-tooltip": "Разрешить <b>добавлять</b> людей (персонажей, сценаристов и т.д.). Все люди содержат изображения.",
+        "enable-cover-image-label": "Обложка",
+        "enable-cover-image-tooltip": "Разрешить Kavita записывать картинки для обложки серии",
+        "enable-start-date-label": "Дата начала",
+        "enable-start-date-tooltip": "Разрешить запись даты начала серии в серию",
+        "enable-chapter-title-label": "Заголовок",
+        "enable-chapter-title-tooltip": "Разрешить написание названия главы/выпуска",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "enable-chapter-release-date-label": "Дата выпуска",
+        "enable-chapter-release-date-tooltip": "Разрешить запись даты выпуска главы/издания",
+        "enable-chapter-publisher-label": "Издатель",
+        "enable-chapter-publisher-tooltip": "Разрешить запись издателя выпуска главы/издания",
+        "enable-chapter-cover-label": "Обложка главы",
+        "enable-chapter-cover-tooltip": "Разрешить установку обложки главы/издания",
+        "enable-genres-label": "Жанры",
+        "enable-genres-tooltip": "Разрешить запись жанров серий.",
+        "enable-tags-label": "Метки",
+        "enable-tags-tooltip": "Разрешить запись меток серии.",
+        "enable-extended-metadata-processing-label": "Расширенная обработка метаданных",
+        "enable-extended-metadata-processing-tooltip": "Жанры и метки, полученные из ComicInfo или добавленные через пользовательский интерфейс, должны обрабатываться с использованием чёрного списка, белого списка, сопоставлений возрастных рейтингов и полей.",
+        "blacklist-label": "Чёрный список жанров/меток",
+        "blacklist-tooltip": "Всё, что есть в этом списке, будет удалено из обработки как по жанрам, так и по меткам. Здесь можно добавлять жанры/метки, которые вы <b>не</b> хотите указывать. Убедитесь, что они разделены запятыми.",
+        "whitelist-label": "Белый список меток",
+        "whitelist-tooltip": "Разрешить использовать строку из этого списка только для <b>меток</b>. Убедитесь, что они разделены запятыми.",
+        "age-rating-mapping-title": "Отображение возрастного рейтинга",
+        "age-rating-mapping-description": "Любые строки слева, если они относятся к жанру или меткам, будут указывать возрастной рейтинг серии. Соответствие нормализовано и не учитывает регистр, используется самый высокий возрастной рейтинг.",
+        "genre": "Жанр",
+        "tag": "Метка",
+        "remove-source-tag-label": "Удалить исходную метку",
+        "add-field-mapping-label": "Добавить сопоставление полей",
+        "add-age-rating-mapping-label": "Добавить отображение возрастного рейтинга",
+        "remove-age-rating-mapping-label": "Убрать отображение возрастного рейтинга",
+        "remove-field-mapping-label": "Убрать сопоставление полей",
+        "field-mapping-title": "Отображение полей",
+        "field-mapping-description": "Установите правила для определённых строк, найденных в поле жанр/метка, и сопоставьте их с новой строкой в поле жанр/метка и, при необходимости, удалите её из списка источников. Соответствие нормализовано и не учитывает регистр, используется первое значение соответствия. Применимо только в том случае, если для записи разрешено использование жанр/метка.",
+        "first-last-name-label": "Имя и фамилия",
+        "first-last-name-tooltip": "Убедитесь, что имена людей пишутся сначала, а затем в последнюю очередь",
+        "person-roles-label": "Роли",
+        "overrides-description": "Разрешите Кавите писать поверх заблокированных полей.",
+        "chapter-header": "Поля главы",
+        "series-header": "Поля серии",
+        "people-header": "Люди",
+        "tags-header": "Метки",
+        "source-genre-tags-placeholder": "Источник жанра/метки",
+        "dest-genre-tags-placeholder": "Целевой жанра/метки"
+    },
+    "manage-system": {
+        "home-page-title": "Главная страница:"
+    },
+    "carousel-reel": {
+        "prev-items": "Предыдущие элементы",
+        "next-items": "Следующие элементы"
+    },
+    "draggable-ordered-list": {
+        "instructions-alt": "Когда вы укажете число в поле изменения порядка, элемент будет вставлен в эту позицию, а порядок всех остальных элементов обновится.",
+        "reorder-label": "Переставить",
+        "bulk-select-label": "Массовый выбор",
+        "remove-item-alt": "Удалить элемент"
     }
 }

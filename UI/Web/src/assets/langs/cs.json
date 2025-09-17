@@ -5,7 +5,8 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Zapomenuté heslo?",
-        "submit": "Přihlásit se"
+        "submit": "Přihlásit se",
+        "oidc": "OpenID Connect"
     },
     "dashboard": {
         "no-libraries": "Zatím nejsou nastaveny žádné knihovny. Vytvořte některé v",
@@ -26,7 +27,12 @@
         "saving": "Ukládání…",
         "update": "Aktualizace",
         "account-detail-title": "Detaily účtu",
-        "invalid-email-warning": "Neplatný e-mail zablokuje některé funkce systému Kavita"
+        "invalid-email-warning": "Neplatný e-mail zablokuje některé funkce systému Kavita",
+        "notice": "Varování!",
+        "out-of-sync": "Tento uživatel byl vytvořen prostřednictvím OIDC. Pokud je nastavení SyncUsers povoleno, mohou být všechny změny provedené v tomto účtu přepsány.",
+        "oidc-managed": "Tento uživatel je spravován prostřednictvím OIDC. S žádostí o jakékoli změny se obraťte na správce OIDC.",
+        "identity-provider": "Poskytovatel identity",
+        "identity-provider-tooltip": "Uživatelé Kavita nejsou nikdy synchronizováni s účty OIDC."
     },
     "user-scrobble-history": {
         "title": "Scrobble historie",
@@ -108,8 +114,8 @@
         "collapse-series-relationships-label": "Sbalit vztahy série",
         "collapse-series-relationships-tooltip": "Měla by Kavita ukázat seriály, které nemají žádné vztahy nebo jsou rodičem/prequelem",
         "share-series-reviews-label": "Sdílejte recenze Serií",
-        "share-series-reviews-tooltip": "Má Kavita zahrnout vaše recenze na Series pro ostatní uživatele",
-        "clients-opds-alert": "OPDS není na tomto serveru povoleno. Toto nebude mít vliv na uživatele Tachiyomi.",
+        "share-series-reviews-tooltip": "Povolit, aby vaše recenze byly viditelné pro ostatní uživatele na tomto serveru",
+        "clients-opds-alert": "OPDS není na tomto serveru povoleno. To nebude mít vliv na uživatele Mihon.",
         "clients-opds-description": "Všichni klienti třetích stran budou používat klíč API nebo níže uvedenou adresu URL připojení. Jsou to jako hesla, udržujte je v soukromí.",
         "clients-api-key-tooltip": "Klíč API je jako heslo. Jeho resetováním dojde ke zneplatnění všech stávajících klientů.",
         "clients-opds-url-tooltip": "Viz seznam podporovaných klientů OPDS: ",
@@ -121,7 +127,10 @@
         "anilist-scrobbling-label": "AniList Scrobblování",
         "anilist-scrobbling-tooltip": "Povolit Kavitě Scrobble (jednosměrná synchronizace) průběhu čtení a hodnocení do AniListu",
         "want-to-read-sync-label": "Chci číst Synchronizace",
-        "want-to-read-sync-tooltip": "Povolit Kavitě přidávat položky do seznamu Chci číst na základě AniListu a sérií MAL v seznamu čekajících čtení"
+        "want-to-read-sync-tooltip": "Povolit Kavitu přidávat položky do seznamu „Chci číst“ na základě seriálů AniList a MAL v seznamu „Čeká na přečtení“",
+        "social-settings-title": "Nastavení sociálních sítí",
+        "highlight-bar-label": "Anotace zvýrazňují barvy",
+        "highlight-bar-tooltip": "Tyto barvy jsou společné pro všechny knihy"
     },
     "user-holds": {
         "title": "Scrobble drží",
@@ -598,7 +607,10 @@
         "k+-unlocked": "Kavita+ odemčena!",
         "kavita+-desc-part-1": "Kavita+ je prémiová předplacená služba, která zpřístupňuje funkce všem uživatelům této instance Kavity. Zakoupením předplatného ji odemknete ",
         "kavita+-desc-part-3": "dnes!",
-        "kavita+-requirement": "Aplikace Kavita+ je navržena tak, aby fungovala pouze s nejnovějšími 3 verzemi. Cokoli mimo tuto verzi může být nefunkční."
+        "kavita+-requirement": "Aplikace Kavita+ je navržena tak, aby fungovala pouze s nejnovějšími 3 verzemi. Cokoli mimo tuto verzi může být nefunkční.",
+        "kavita+-warning": "Kavita+ je samostatná od Kavity. Pokud odinstalujete Kavitu bez odhlášení, bude vám účtované předplatné.",
+        "cancel-label": "Zrušit předplatné",
+        "cancel-tooltip": "Zrušte předplatné a odstraňte licenci v aplikaci Kavita."
     },
     "book-line-overlay": {
         "copy": "Kopírujte",
@@ -606,7 +618,8 @@
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "bookmark-label": "Název záložky",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "annotate": "Anotovat"
     },
     "book-reader": {
         "title": "Nastavení knih",
@@ -633,13 +646,17 @@
         "previous": "Předchozí",
         "go-to-page-prompt": "Existuje {{totalPages}} stránek. Na kterou stránku chcete přejít?",
         "go-to-first-page": "Přejít na první stránku",
-        "go-to-section": "Přejít do sekce",
-        "go-to-section-prompt": "Je zde {{totalSections}} sekcí. Do které sekce chcete přejít?"
+        "page-num-label": "Strana {{page}}",
+        "completion-label": "{{percent}} dokončeno",
+        "force-selected-one-column": "Režim rozvržení přepnut na jeden sloupec z důvodu nedostatečného prostoru pro vykreslení dvou sloupců"
     },
     "personal-table-of-contents": {
         "no-data": "V záložkách zatím nic není",
-        "page": "Stránka {{value}}",
-        "delete": "Smazat {{bookmarkName}}"
+        "delete": "Smazat {{bookmarkName}}",
+        "page-title": "Strana {{page}}",
+        "chapter-and-page-title": "Kapitola {{chapterTitle}}, strana {{page}}",
+        "no-match": "Žádné záložky neodpovídají filtru",
+        "filter-label": "{{common.filter}}"
     },
     "confirm-email": {
         "title": "Registrace",
@@ -737,7 +754,8 @@
         "pages-count": "{{num}} stran",
         "words-count": "{{num}} slov",
         "on": "{{reader-settings.on}}",
-        "off": "{{reader-settings.off}}"
+        "off": "{{reader-settings.off}}",
+        "annotations-tab": "{{tabs.annotations-tab}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -819,7 +837,7 @@
         "help": "{{common.help}}",
         "file-type-group-label": "Typy souborů",
         "allow-scrobbling-label": "Povolit scrobbling",
-        "kavitaplus-eligible-tooltip": "Podporuje funkce metadat Kavita+ nebo scrobblování",
+        "kavitaplus-eligible-tooltip": "Podporuje funkce metadat Kavita+ a/nebo scrobblování",
         "include-in-dashboard-label": "Zahrnout do panelu",
         "include-in-dashboard-tooltip": "Měly by být série z knihovny zařazeny na hlavní panel. To se týká všech sérií, jako jsou Rozečtené, Nedávno aktualizované, Nedávno přidané nebo jakékoli vlastní přírůstky.",
         "allow-scrobbling-tooltip": "Pokud Kavita scrobble čtení události, chcete číst stav, hodnocení a recenze konfigurovaných poskytovatelů. K tomu dojde pouze v případě, že má server aktivní předplatné Kavita+.",
@@ -858,7 +876,10 @@
         "allow-metadata-matching-label": "Povolit přiřazování metadat",
         "allow-metadata-matching-tooltip": "Měla by Kavita stáhnout metadata pro série v rámci této knihovny. K tomu dojde pouze v případě, že má server aktivní předplatné Kavita+.",
         "enable-metadata-label": "Povolit metadata (ComicInfo/Epub/PDF)",
-        "enable-metadata-tooltip": "Povolit Kavitě číst soubory metadat, které přepisují analýzu názvů souborů."
+        "enable-metadata-tooltip": "Povolit Kavitě číst soubory metadat, které přepisují analýzu názvů souborů.",
+        "remove-prefix-for-sortname-label": "Odebrat běžné předpony pro třídění názvů",
+        "remove-prefix-for-sortname-tooltip": "Kavita odstraní z názvů běžné předpony jako „The“, „A“, „An“ pro účely třídění názvů. Nepřepisuje nastavená metadata.",
+        "files-at-root-warning": "Jeden nebo více složek obsahuje soubory v kořenovém adresáři. Kavita tuto funkci nepodporuje."
     },
     "reader-settings": {
         "font-family-label": "{{manage-reading-profiles.font-family-label}}",
@@ -1235,7 +1256,9 @@
         "too-many-libraries": "Hodně",
         "sharing-header": "Sdílení",
         "actions-header": "Akce",
-        "all-libraries": "Všechny knihovny"
+        "all-libraries": "Všechny knihovny",
+        "identity-provider-oidc-tooltip": "OIDC",
+        "identity-provider-native-tooltip": "Nativní"
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",
@@ -1302,7 +1325,10 @@
         "scrobble-holds": "Podržení Scrobble",
         "account": "Účet",
         "admin-metadata": "Správa metadat",
-        "reading-profiles": "Profily čtení"
+        "reading-profiles": "Profily čtení",
+        "admin-oidc": "OpenID Connect",
+        "admin-mappings-import": "Nastavení Metadat",
+        "admin-public-metadata": "Správa metadat"
     },
     "collection-detail": {
         "item-count": "{{common.item-count}}",
@@ -1401,7 +1427,8 @@
         "people": "Lidé",
         "libraries": "Knihovny",
         "collections": "Sbírky",
-        "include-extras": "Zahrnout kapitoly a soubory"
+        "include-extras": "Zahrnout kapitoly a soubory",
+        "annotations": "{{tabs.annotations-tab}}"
     },
     "nav-header": {
         "help": "{{common.help}}",
@@ -2146,7 +2173,7 @@
         "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
         "description-label": "Popis",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "save": "{{common.save}}",
         "cover-image-description-extra": "Případně si můžete stáhnout obálku z CoversDB, pokud je k dispozici.",
@@ -2158,7 +2185,8 @@
         "aliases-tab": "Aliasy",
         "aliases-label": "Upravit aliasy",
         "alias-overlap": "Tento alias již odkazuje na jinou osobu nebo je jménem této osoby, zvažte jejich sloučení.",
-        "aliases-tooltip": "Pokud je série označena aliasem osoby, je tato osoba přiřazena, místo aby byla vytvořena nová osoba. Při odstranění aliasu je nutné sérii znovu prohledat, aby se změna zachytila."
+        "aliases-tooltip": "Pokud je série označena aliasem osoby, je tato osoba přiřazena, místo aby byla vytvořena nová osoba. Při odstranění aliasu je nutné sérii znovu prohledat, aby se změna zachytila.",
+        "invalid-asin": "ASIN musí být platný formát ISBN-10 nebo ISBN-13"
     },
     "errors": {
         "delete-theme-in-use": "Motiv je aktuálně používán alespoň jedním uživatelem, nelze odstranit",
@@ -2175,7 +2203,24 @@
         "invalid-confirmation-email": "Neplatný potvrzovací e-mail",
         "collection-invalid-access": "Nemáte přístup k žádným knihovnám, ke kterým tento štítek patří, nebo je tato sbírka neplatná",
         "invalid-password-reset-url": "Neplatná url adresa pro obnovení hesla",
-        "theme-manual-upload": "Vyskytl se problém při vytváření motivu z ručního nahrávání"
+        "theme-manual-upload": "Vyskytl se problém při vytváření motivu z ručního nahrávání",
+        "import-fields": {
+            "non-unique-age-ratings": "Klíče pro přiřazení věkové kategorie nejsou jedinečné, opravte prosím svůj importní soubor",
+            "non-unique-fields": "Pole mapování nemají jedinečné ID, opravte prosím svůj importní soubor"
+        },
+        "oidc": {
+            "missing-external-id": "OIDC nevrátilo platný identifikátor",
+            "missing-email": "OIDC nevrátilo platnou e-mailovou adresu",
+            "email-not-verified": "Váš e-mail musí být ověřen, aby bylo možné přihlášení přes OIDC",
+            "no-account": "Nenalezen žádný odpovídající účet",
+            "disabled-account": "Tento účet je deaktivován, kontaktujte prosím správce",
+            "creating-user": "Nepodařilo se vytvořit nového uživatele, kontaktujte správce",
+            "role-not-assigned": "Nemáte přiřazeny požadované role pro přístup k této aplikaci",
+            "failed-to-update-email": "Nepodařilo se aktualizovat e-mail",
+            "failed-to-update-username": "Nepodařilo se aktualizovat uživatelské jméno",
+            "email-in-use": "E-mail již používá jiný účet",
+            "syncing-user": "Synchronizace účtu z OIDC se nezdařila, kontaktujte správce"
+        }
     },
     "cover-image-size": {
         "xlarge": "Extra velké (1265x1795)",
@@ -2286,7 +2331,8 @@
         "storyline-tab": "Příběhová linie",
         "related-tab": "Související",
         "general-tab": "Obecné",
-        "cover-tab": "Obrázek na obalu"
+        "cover-tab": "Obrázek na obalu",
+        "annotations-tab": "Anotace"
     },
     "card-item": {
         "cannot-read": "Nelze přečíst"
@@ -2441,7 +2487,9 @@
         "series-added-want-to-read": "Série přidána ze seznamu Chci číst",
         "series-bound-to-reading-profile": "Série vázaná na čtenářský profil {{name}}",
         "library-bound-to-reading-profile": "Knihovna vázaná na čtenářský profil {{name}}",
-        "external-match-rate-error": "Kavita vyčerpala limit pro vyhledávání {{seriesName}}. Zkuste to znovu za 5 minut."
+        "external-match-rate-error": "Kavita vyčerpala limit pro vyhledávání {{seriesName}}. Zkuste to znovu za 5 minut.",
+        "confirm-delete-bookmark": "Opravdu chcete odstranit tuto záložku?",
+        "confirm-delete-annotation": "Opravdu chcete tuto poznámku smazat?"
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
@@ -2480,7 +2528,9 @@
     "read-time-pipe": {
         "less-than-hour": "<1 hodina",
         "hours": "Hodiny",
-        "hour": "Hodina"
+        "hour": "Hodina",
+        "hour-left": "Zbývá hodina",
+        "hours-left": "Zbývá hodin"
     },
     "common": {
         "add": "Přidat",
@@ -2524,7 +2574,8 @@
         "email": "E-mail",
         "chapter-count": "{{num}} Kapitol",
         "no-data": "Žádná data",
-        "issue-count": "{{num}} Vydání"
+        "issue-count": "{{num}} Vydání",
+        "unknown": "Neznámý"
     },
     "entity-type": {
         "logs": "záznamy",
@@ -2556,7 +2607,9 @@
         "valid-email": "Musí se jednat o platný e-mail",
         "required-field": "Toto pole je povinné",
         "year-validation": "Musí to být platný rok větší než 1000 a dlouhý 4 znaky",
-        "password-validation": "Heslo musí mít délku 6 až 256 znaků"
+        "password-validation": "Heslo musí mít délku 6 až 256 znaků",
+        "other-field-required": "{{name}} je vyžadováno, pokud je nastaveno {{other}}",
+        "invalid-uri": "Zadaná adresa URI je neplatná"
     },
     "confirm": {
         "alert": "Upozornění",
@@ -2587,7 +2640,7 @@
         "first-last-name-label": "První Poslední pojmenování",
         "first-last-name-tooltip": "Zajistěte, aby se jména lidí psala jako první a pak jako poslední",
         "person-roles-label": "Role",
-        "age-rating-mapping-description": "Všechny řetězce vlevo, pokud se nacházejí v Žánru nebo Štítcích, nastaví věkové hodnocení seriálu.",
+        "age-rating-mapping-description": "Jakékoli řetězce nalezené vlevo, ať už v žánru nebo v tagu, nastaví věkové hodnocení série. Shoda je normalizována a nerozlišuje velká a malá písmena, použije se nejvyšší věkové hodnocení.",
         "enabled-label": "Povolit stahování metadat",
         "blacklist-label": "Zakázání žánrů/štítků",
         "remove-source-tag-label": "Odstranění štítku zdroje",
@@ -2597,7 +2650,7 @@
         "tag": "Štítek",
         "enable-tags-label": "Štítky",
         "description": "Kavita+ má možnost stahovat a zapisovat do databáze některá omezená metadata. Tato stránka umožňuje přepínat, co je v rozsahu.",
-        "field-mapping-description": "Nastavení pravidel pro určité řetězce nalezené v poli Žánr/Štítek a jejich namapování na nový řetězec v poli Žánr/Štítek a volitelné odstranění ze seznamu Zdroje. Použitelné pouze v případě, že je povoleno zapisování do pole Žánr/Štítek.",
+        "field-mapping-description": "Nastavte pravidla pro určité řetězce nalezené v poli Žánr/Štítek a přiřaďte je k novému řetězci v poli Žánr/Štítek a volitelně je odeberte ze seznamu Zdroj. Porovnání je normalizováno a nerozlišuje velká a malá písmena, použije se první shodná hodnota. Platí pouze v případě, že je povoleno zapisování do pole Žánr/Štítek.",
         "enable-start-date-label": "Datum začátku",
         "blacklist-tooltip": "Cokoli z tohoto seznamu bude odstraněno ze zpracování Žánrů i Štítků. Toto je místo pro přidání žánrů/štítků, které <b>nechcete</b> zapisovat. Ujistěte se, že jsou odděleny čárkou.",
         "enable-cover-image-tooltip": "Umožnit Kavitě vložit obrázek na obálku série",
@@ -2616,7 +2669,22 @@
         "enable-chapter-title-label": "Titulek",
         "enable-chapter-title-tooltip": "Umožnit napsání názvu kapitoly/vydání",
         "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
-        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}"
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "k+-warning": "Níže uvedená nastavení jsou společná s nastaveními na stránce K+. Můžete je změnit na kterémkoli z těchto míst",
+        "export-settings": "Exportovat",
+        "export-tooltip": "Exportujte svůj zakázaný a povolený seznam, věkové hodnocení a mapování polí",
+        "export-file-name": "Kavita Nastavení metadat Export.json",
+        "import-settings": "Importovat",
+        "import-tooltip": "Importujte svá nastavení nebo nastavení někoho jiného",
+        "enable-extended-metadata-processing-label": "Rozšířené zpracování metadat",
+        "enable-extended-metadata-processing-tooltip": "Mají být žánry a tagy získané z ComicInfo nebo přidané prostřednictvím uživatelského rozhraní zpracovány pomocí zakázaného seznamu, povoleného seznamu, přiřazení věkových kategorií a přiřazení polí.",
+        "remove-age-rating-mapping-label": "Odebrat přiřazení věkové kategorie",
+        "remove-field-mapping-label": "Odebrat mapování polí",
+        "series-header": "Série polí",
+        "people-header": "Lidé",
+        "tags-header": "Štítky",
+        "source-genre-tags-placeholder": "Zdrojový žánr/štítek",
+        "dest-genre-tags-placeholder": "Cílové žánry/štítky"
     },
     "metadata-setting-field-pipe": {
         "people": "{{tabs.people-tab}}",
@@ -2813,5 +2881,141 @@
         "mobile": "Mobilní",
         "tablet": "Tablet",
         "desktop": "Stolní počítač"
+    },
+    "oidc": {
+        "title": "OIDC Callback",
+        "login": "Zpět na přihlašovací obrazovku",
+        "error-loading-info": "Při načítání informací OIDC došlo k chybě, kontaktujte svého správce",
+        "timeout": "Vypršela lhůta pro vyřešení OIDC nebo došlo k chybě"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "save-success": "Nastavení OIDC bylo úspěšně aktualizováno",
+        "notice": "Oznámení",
+        "restart-required": "Změna autority nebo ID klienta vyžaduje ruční restart aplikace Kavita, aby se změna projevila.",
+        "provider-title": "Poskytovatel",
+        "provider-tooltip": "Nastavení poskytovatele vyžaduje ruční kliknutí na tlačítko Uložit. Kavita musí být nakonfigurována jako důvěrný klient a vyžaduje přesměrovací URL. Další podrobnosti najdete na <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
+        "behavior-title": "Chování",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "manual-save-label": "Změna nastavení poskytovatele vyžaduje ruční uložení",
+        "authority-label": "Autorita",
+        "authority-tooltip": "URL adresa vašeho poskytovatele OIDC, nezahrnujte cestu .well-known/openid-configuration",
+        "client-id-label": "ID klienta",
+        "client-id-tooltip": "ID klienta nastavené ve vašem poskytovateli OIDC může být libovolné",
+        "secret-label": "Tajný klíč klienta",
+        "secret-tooltip": "Tajný klíč vygenerovaný vaším poskytovatelem OIDC",
+        "provision-accounts-label": "Rezervní účty",
+        "provision-accounts-tooltip": "Při přihlášení přes OIDC automaticky vytvořte nový účet, pokud jej nelze přiřadit k žádnému existujícímu účtu",
+        "require-verified-email-label": "Vyžadovat ověřené e-maily",
+        "require-verified-email-tooltip": "Při vytváření nového účtu nebo při propojení s existujícím účtem je vyžadováno ověření e-mailové adresy. Pokud má nově vytvořený účet ověřenou e-mailovou adresu, bude automaticky ověřen na straně Kavity.",
+        "sync-user-settings-label": "Synchronizujte uživatelská nastavení s rolemi OIDC",
+        "sync-user-settings-tooltip": "Uživatelé vytvoření prostřednictvím OIDC budou plně spravováni poskytovatelem identity, včetně rolí, přístupu do knihovny a věkového hodnocení. Pokud je tato možnost deaktivována, uživatelé nebudou mít po vytvoření účtu přístup k žádnému obsahu. Další podrobnosti najdete v dokumentaci.",
+        "auto-login-label": "Automatické přihlášení",
+        "auto-login-tooltip": "Při otevření přihlašovací obrazovky se automaticky přesměrujete na poskytovatele OIDC",
+        "disable-password-authentication-label": "Zakázat ověřování heslem",
+        "disable-password-authentication-tooltip": "Uživatelé s rolí správce mohou toto omezení obejít",
+        "provider-name-label": "Název poskytovatele",
+        "provider-name-tooltip": "Jméno zobrazené na přihlašovací obrazovce",
+        "defaults-title": "Výchozí nastavení",
+        "defaults-requirement": "Následující nastavení se použije, když se uživatel registruje přes OIDC a funkce SyncUserSettings je vypnutá",
+        "default-include-unknowns-label": "Zahrnout neznámé",
+        "default-include-unknowns-tooltip": "Zahrnout neznámé věkové kategorie",
+        "default-age-restriction-label": "Věková kategorie",
+        "default-age-restriction-tooltip": "Maximální věkové kategorie zobrazené novým uživatelům",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "advanced-title": "Pokročilá nastavení",
+        "advanced-tooltip": "Tyto možnosti měňte pouze v případě, že rozumíte jejich dopadu.",
+        "roles-prefix-label": "Předpona rolí",
+        "roles-prefix-tooltip": "Kavita bude zvažovat pouze role, které začínají touto předponou.",
+        "roles-claim-label": "Nároky na role",
+        "roles-claim-tooltip": "Nárok, který Kavita použije k získání rolí. Nechte prázdné, pokud chcete použít výchozí nastavení.",
+        "custom-scopes-label": "Vlastní rozsahy",
+        "custom-scopes-tooltip": "Další rozsahy, které můžete požadovat od svého poskytovatele OIDC při přihlášení. Více rozsahů oddělte čárkami. Nesprávné hodnoty mohou zabránit přihlášení."
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "OpenID Connect"
+    },
+    "import-mappings": {
+        "import-step": "Importovat",
+        "configure-step": "Konfigurovat",
+        "conflicts-step": "Vyřešit kolize",
+        "finalize-step": "Dokončit",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "save": "{{common.save}}",
+        "import-description": "Nahrajte soubor, který jste vy nebo někdo jiný exportoval, abyste nahradili nebo sloučili vaše aktuální nastavení.",
+        "select-files-warning": "Abyste mohli pokračovat, musíte nahrát soubor json",
+        "invalid-file": "Nepodařilo se analyzovat váš soubor, zkontrolujte vstupní data",
+        "file-no-valid-content": "Váš import neobsahoval žádné smysluplné údaje, které by umožnily pokračovat",
+        "fields-to-import": "Nastavení",
+        "fields-to-import-tooltip": "Zakázat, aby se nastavení zcela přeskočilo",
+        "whitelist-label": "Seznam povolených štítků",
+        "blacklist-label": "Seznam zakázaných štítků",
+        "age-ratings-label": "Mapování věkových kategorií",
+        "field-mappings-label": "Mapování polí",
+        "age-ratings-conflicts-tooltip": "Rozhodněte se, jaké věkové kategorie použít",
+        "field-mappings-conflicts-tooltip": "Rozhodněte se, který výsledek cíle použít",
+        "import-mode-label": "Režim importu",
+        "import-mode-tooltip": "Nahradit ignoruje vaše aktuální nastavení, sloučit se pokusí vyřešit konflikty způsobem, který jste nakonfigurovali",
+        "merge": "Sloučit",
+        "replace": "Nahradit",
+        "resolution-label": "Řešení konfliktů",
+        "resolution-tooltip": "Rozhodněte, jak by Kavita měla řešit konflikty",
+        "manual": "Manuál",
+        "keep": "Uchovat",
+        "to-pick": "Vyberte rozlišení",
+        "finalize-title": "Náhled nastavení, stiskněte tlačítko Uložit pro dokončení importu"
+    },
+    "annotation-card": {
+        "page-num": "{{book-reader.page-num-label}}",
+        "contains-spoilers-label": "Spoilery",
+        "view-in-reader-label": "Zobrazit v čtečce"
+    },
+    "annotations-tab": {
+        "title": "{{tabs.annotations-tab}}"
+    },
+    "view-annotations-drawer": {
+        "title": "{{tabs.annotations-tab}}",
+        "close": "{{common.close}}",
+        "filter-label": "Filtrovat poznámky",
+        "no-data": "{{common.no-data}}"
+    },
+    "view-edit-annotation-drawer": {
+        "view-title": "Zobrazit poznámku",
+        "edit-title": "Upravit poznámku",
+        "create-title": "Vytvořit poznámku",
+        "create": "Vytvořit",
+        "close": "{{common.close}}",
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
+    },
+    "view-bookmark-drawer": {
+        "title": "Záložky",
+        "close": "{{common.close}}",
+        "no-data": "{{common.no-data}}",
+        "page-num-label": "{{book-reader.page-num-label}}",
+        "load-bookmark": "Načíst",
+        "image-header": "Obrázek",
+        "text-header": "Text"
+    },
+    "page-chapter-label-pipe": {
+        "page-only": "— Strana {{pageNumber}}",
+        "full": "— Strana {{pageNumber}}, Kapitola „{{chapterTitle}}“"
+    },
+    "view-toc-drawer": {
+        "title": "Obsah",
+        "close": "{{common.close}}",
+        "toc-header": "Kniha",
+        "personal-header": "Osobní"
+    },
+    "epub-setting-drawer": {
+        "title": "Nastavení knihy",
+        "close": "{{common.close}}"
+    },
+    "highlight-bar": {
+        "add-new-color-alt": "Přidat vlastní barvu",
+        "slot-label": "Zvýraznit slot {{slot}}"
     }
 }
