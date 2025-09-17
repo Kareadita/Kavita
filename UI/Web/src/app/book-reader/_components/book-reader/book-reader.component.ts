@@ -1273,10 +1273,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         textColor = 'black';
       }
 
+      const offSetX = Math.min(32, imgRect.width * 0.05);
+      const offSetY = Math.min(32, imgRect.height * 0.05);
+
       icon.style.cssText = `
           position: absolute;
-          left: ${relativeX + imgRect.width - 16 * 2}px;
-          top: ${relativeY + imgRect.height - 16 * 2}px;
+          left: ${imgRect.width + relativeX - offSetX}px;
+          top: ${imgRect.height + relativeY - offSetY}px;
           margin: 0;
           transform-origin: bottom right;
           padding-top: 5px;
