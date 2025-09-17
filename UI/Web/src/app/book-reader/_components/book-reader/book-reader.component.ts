@@ -1758,8 +1758,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const intersectingEntries = Array.from(this.bookContentElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
       .filter(entry => {
-        return this.isPartiallyContainedIn(container, entry);
-        //return this.utilityService.isInViewport(entry, this.topOffset);
+        //return this.isPartiallyContainedIn(container, entry);
+        return this.utilityService.isInViewport(entry, this.topOffset);
       });
 
     intersectingEntries.sort((a, b) => this.sortElementsForLayout(a, b));
