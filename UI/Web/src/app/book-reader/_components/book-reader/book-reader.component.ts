@@ -1273,10 +1273,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         textColor = 'black';
       }
 
+      const offSetX = Math.min(32, imgRect.width * 0.05);
+      const offSetY = Math.min(32, imgRect.height * 0.05);
+
       icon.style.cssText = `
           position: absolute;
-          left: ${relativeX + imgRect.width - 16 * 2}px;
-          top: ${relativeY + imgRect.height - 16 * 2}px;
+          left: ${imgRect.width + relativeX - offSetX}px;
+          top: ${imgRect.height + relativeY - offSetY}px;
           margin: 0;
           transform-origin: bottom right;
           padding-top: 5px;
@@ -1758,8 +1761,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const intersectingEntries = Array.from(this.bookContentElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
       .filter(entry => {
-        return this.isPartiallyContainedIn(container, entry);
-        //return this.utilityService.isInViewport(entry, this.topOffset);
+        //return this.isPartiallyContainedIn(container, entry);
+        return this.utilityService.isInViewport(entry, this.topOffset);
       });
 
     intersectingEntries.sort((a, b) => this.sortElementsForLayout(a, b));
