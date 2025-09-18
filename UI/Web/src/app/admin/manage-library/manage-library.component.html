@@ -1,13 +1,13 @@
 <ng-container *transloco="let t; prefix: 'manage-library'">
   <div class="position-relative">
-    <div class="position-absolute custom-position-2">
-      <app-card-actionables [inputActions]="bulkActions" btnClass="btn-outline-primary ms-1" [label]="t('bulk-action-label')"
-                            [disabled]="bulkMode" (actionHandler)="handleBulkAction($event, null!)" />
+    <div class="d-flex gap-2 position-absolute custom-position">
+      <app-card-actionables [inputActions]="bulkActions" btnClass="btn-outline-primary" [label]="t('bulk-action-label')"
+                            [disabled]="bulkMode" (actionHandler)="handleBulkAction($event, null!)">
+      </app-card-actionables>
+      <button class="btn btn-outline-primary" (click)="addLibrary()" [title]="t('add-library')">
+        <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span>
+      </button>
     </div>
-
-    <button class="btn btn-outline-primary position-absolute custom-position" (click)="addLibrary()" [title]="t('add-library')">
-      <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span>
-    </button>
   </div>
 
   @if (bulkMode && bulkAction === Action.CopySettings && sourceCopyToLibrary) {
