@@ -1,14 +1,14 @@
   <ng-container *transloco="let t; prefix: 'actionable'">
     @if (actions.length > 0) {
       @if ((utilityService.activeBreakpoint$ | async)! <= Breakpoint.Tablet) {
-        <button [disabled]="disabled" class="btn {{btnClass}} px-3" id="actions-{{labelBy}}"
+        <button [disabled]="disabled" class="btn {{btnClass}}" id="actions-{{labelBy}}"
                 (click)="openMobileActionableMenu($event)">
           {{label}}
           <i class="fa {{iconClass}}" aria-hidden="true"></i>
         </button>
       } @else {
         <div ngbDropdown container="body" class="d-inline-block">
-          <button [disabled]="disabled" class="btn {{btnClass}} px-3" id="actions-{{labelBy}}" ngbDropdownToggle
+          <button [disabled]="disabled" class="btn {{btnClass}}" id="actions-{{labelBy}}" ngbDropdownToggle
                   (click)="preventEvent($event)">
             {{label}}
             <i class="fa {{iconClass}}" aria-hidden="true"></i>
