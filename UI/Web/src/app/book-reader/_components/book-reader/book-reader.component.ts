@@ -757,6 +757,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.readerService.disableWakeLock();
 
+    // Remove any debug viewport things
+    this.document.querySelector('#test')?.remove();
+
     this.themeService.clearBookTheme();
 
     this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
@@ -2298,7 +2301,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   getViewportBoundingRect(): Container {
     const margin = this.getMargin();
-    const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
+    //const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
+    const pageSize = this.pageWidth();
     const visibleBoundingBox = this.bookContentElemRef.nativeElement.getBoundingClientRect();
 
     let bookContentPadding = 20;
@@ -2334,10 +2338,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const viewport = this.getViewportBoundingRect();
 
     // Insert a debug element to help visualize
-    document.querySelector('#test')?.remove();
+    this.document.querySelector('#test')?.remove();
 
     // Create and inject the red rectangle div
-    const redRect = document.createElement('div');
+    const redRect = this.document.createElement('div');
     redRect.id = 'test';
     redRect.style.position = 'absolute';
     redRect.style.left = `${viewport.left}px`;
@@ -2349,7 +2353,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     redRect.style.zIndex = '1000';
 
     // Inject into the document
-    document.body.appendChild(redRect);
+    this.document.body.appendChild(redRect);
   }
 
   /**
