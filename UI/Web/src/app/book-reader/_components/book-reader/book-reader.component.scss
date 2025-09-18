@@ -1,66 +1,66 @@
 @font-face {
-    font-family: "Fira_Sans";
-    src: url(../../../../assets/fonts/Fira_Sans/FiraSans-Regular.woff2) format("woff2");
-    font-display: swap;
+  font-family: "Fira_Sans";
+  src: url(../../../../assets/fonts/Fira_Sans/FiraSans-Regular.woff2) format("woff2");
+  font-display: swap;
 }
 
 @font-face {
-    font-family: "Lato";
-    src: url(../../../../assets/fonts/Lato/Lato-Regular.woff2) format("woff2");
-    font-display: swap;
+  font-family: "Lato";
+  src: url(../../../../assets/fonts/Lato/Lato-Regular.woff2) format("woff2");
+  font-display: swap;
 }
 
 @font-face {
-    font-family: "Libre_Baskerville";
-    src: url(../../../../assets/fonts/Libre_Baskerville/LibreBaskerville-Regular.woff2) format("woff2");
-    font-display: swap;
+  font-family: "Libre_Baskerville";
+  src: url(../../../../assets/fonts/Libre_Baskerville/LibreBaskerville-Regular.woff2) format("woff2");
+  font-display: swap;
 }
 
 @font-face {
-    font-family: "Merriweather";
-    src: url(../../../../assets/fonts/Merriweather/Merriweather-Regular.woff2) format("woff2");
-    font-display: swap;
+  font-family: "Merriweather";
+  src: url(../../../../assets/fonts/Merriweather/Merriweather-Regular.woff2) format("woff2");
+  font-display: swap;
 }
 
 @font-face {
-    font-family: "Nanum_Gothic";
-    src: url(../../../../assets/fonts/Nanum_Gothic/NanumGothic-Regular.woff2) format("woff2");
-    font-display: swap;
+  font-family: "Nanum_Gothic";
+  src: url(../../../../assets/fonts/Nanum_Gothic/NanumGothic-Regular.woff2) format("woff2");
+  font-display: swap;
 }
 
 @font-face {
-    font-family: "RocknRoll_One";
-    src: url(../../../../assets/fonts/RocknRoll_One/RocknRollOne-Regular.woff2) format("woff2");
-    font-display: swap;
+  font-family: "RocknRoll_One";
+  src: url(../../../../assets/fonts/RocknRoll_One/RocknRollOne-Regular.woff2) format("woff2");
+  font-display: swap;
 }
 
 @font-face {
-    font-family: "OpenDyslexic2";
-    src: url(../../../../assets/fonts/OpenDyslexic2/OpenDyslexic-Regular.woff2) format("woff2");
-    font-display: swap;
+  font-family: "OpenDyslexic2";
+  src: url(../../../../assets/fonts/OpenDyslexic2/OpenDyslexic-Regular.woff2) format("woff2");
+  font-display: swap;
 }
 
 @font-face {
-    font-family: "FastFontSerif";
-    src: url(../../../../assets/fonts/Fast_Font/Fast_Serif.woff2) format("woff2");
-    font-display: swap;
+  font-family: "FastFontSerif";
+  src: url(../../../../assets/fonts/Fast_Font/Fast_Serif.woff2) format("woff2");
+  font-display: swap;
 }
 
 @font-face {
-    font-family: "FastFontSans";
-    src: url(../../../../assets/fonts/Fast_Font/Fast_Sans.woff2) format("woff2");
-    font-display: swap;
+  font-family: "FastFontSans";
+  src: url(../../../../assets/fonts/Fast_Font/Fast_Sans.woff2) format("woff2");
+  font-display: swap;
 }
 
 
 
 :root {
-    --br-actionbar-button-text-color: #6c757d;
-    --accordion-body-bg-color: black;
-    --accordion-header-bg-color: grey;
-    --br-actionbar-button-hover-border-color: #6c757d;
-    --br-actionbar-bg-color: white;
-    --default-state-scrollbar: var(--primary-color-scrollbar);
+  --br-actionbar-button-text-color: #6c757d;
+  --accordion-body-bg-color: black;
+  --accordion-header-bg-color: grey;
+  --br-actionbar-button-hover-border-color: #6c757d;
+  --br-actionbar-bg-color: white;
+  --default-state-scrollbar: var(--primary-color-scrollbar);
 }
 
 
@@ -85,150 +85,145 @@ $action-bar-height: 38px;
   }
 }
 
-// Drawer
-.control-container {
-    padding-bottom: 5px;
-}
-
-.page-stub {
-    margin-top: 6px;
-    padding-left: 2px;
-    padding-right: 2px;
-}
-
-.drawer-body {
-    overflow: auto;
-
-    .reader-pills {
-        justify-content: center;
-        margin: 0 0.25rem;
-
-        li a {
-            border: 1px solid var(--primary-color);
-            margin: 0 0.25rem;
-
-            .active {
-                border: unset;
-            }
-        }
-    }
-}
-
-//          Drawer End
-
 .fixed-top {
-    z-index: 1022;
-    direction: ltr;
+  z-index: 1022;
+  direction: ltr;
 }
 
 .dark-mode .overlay {
-    opacity: 0;
+  opacity: 0;
 }
 
 
 .action-bar {
-    background-color: var(--br-actionbar-bg-color);
+  background-color: var(--br-actionbar-bg-color);
+  overflow: hidden;
+  box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
+  max-height: $action-bar-height;
+  height: $action-bar-height;
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 0.5rem;
+
+  .book-title-text {
+    text-align: center;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
-    max-height: $action-bar-height;
-    height: $action-bar-height;
+  }
 
-    .book-title-text {
-        text-align: center;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    @media(max-width: 875px) {
-        .book-title {
-            display: none;
-        }
-    }
-
+  @media(max-width: 875px) {
     .book-title {
-        margin-top: 10px;
-        text-align: center;
-        text-transform: capitalize;
-        max-height: inherit;
+      display: none;
     }
+  }
 
-    .next-page-highlight {
-        color: var(--primary-color);
-    }
+  .book-title {
+    margin-top: 10px;
+    text-align: center;
+    text-transform: capitalize;
+    max-height: inherit;
+  }
+
+  .next-page-highlight {
+    color: var(--primary-color);
+  }
+}
+
+@media (min-width: 876px) {
+  .action-bar {
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .center-group {
+    justify-self: center;
+  }
+
+  .right-group {
+    justify-self: end;
+  }
+}
+
+/* Mobile - 2 columns */
+@media (max-width: 875px) {
+  .action-bar {
+    grid-template-columns: auto 1fr;
+  }
+
+  .right-group {
+    justify-self: end;
+  }
 }
 
 .reader-container {
-    outline: none; // Only the reading section itself shouldn't receive any outline. We use it to shift focus in fullscreen mode
-    overflow: auto;
-    height: calc(var(--vh, 1vh) * 100);
-    position: relative;
-    // This is completely invisible, everything else renders over it
+  outline: none; // Only the reading section itself shouldn't receive any outline. We use it to shift focus in fullscreen mode
+  overflow: auto;
+  height: calc(var(--vh, 1vh) * 100);
+  position: relative;
+  // This is completely invisible, everything else renders over it
 
-    &.column-layout-1 {
-        height: calc(var(--vh) * 100);
-    }
+  &.column-layout-1 {
+    height: calc(var(--vh) * 100);
+  }
 
-    &.column-layout-2 {
-        height: calc(var(--vh) * 100);
-    }
+  &.column-layout-2 {
+    height: calc(var(--vh) * 100);
+  }
 
-    &.writing-style-vertical {
-        direction: rtl;
-    }
+  &.writing-style-vertical {
+    direction: rtl;
+  }
 }
 
 .reading-section {
-    width: 100%;
-    //overflow: auto;  // This will break progress reporting
-    height: 100vh;
-    padding-top: $action-bar-height;
-    padding-bottom: $action-bar-height;
-    position: relative;
-    direction: ltr;
+  width: 100%;
+  //overflow: auto;  // This will break progress reporting
+  height: 100vh;
+  padding-top: $action-bar-height;
+  padding-bottom: $action-bar-height;
+  position: relative;
+  direction: ltr;
 
-    //background-color: green !important;
+  //background-color: green !important;
 
-    &.column-layout-1 {
-        height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
-    }
+  &.column-layout-1 {
+    height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
+  }
 
-    &.column-layout-2 {
-        height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
-    }
+  &.column-layout-2 {
+    height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
+  }
 
-    &.immersive {
-        height: calc((var(--vh, 1vh) * 100));
-        //padding-top: 0px;
-        //padding-bottom: 0px;
-    }
+  &.immersive {
+    height: calc((var(--vh, 1vh) * 100));
+  }
 
-    &.writing-style-vertical {
-        writing-mode: vertical-rl;
-        height: 100%;
-    }
+  &.writing-style-vertical {
+    writing-mode: vertical-rl;
+    height: 100%;
+  }
 }
 
 .book-container {
-    position: relative;
-    height: 100%;
+  position: relative;
+  height: 100%;
 
-   //background-color: purple !important;
+  &.column-layout-1 {
+    height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
+  }
 
-    &.column-layout-1 {
-        height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
-    }
+  &.column-layout-2 {
+    height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
+  }
 
-    &.column-layout-2 {
-        height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
-    }
-
-    &.writing-style-vertical {
-        // Fixes an issue where chrome will cut of margins, doesn't seem to affect other browsers
-        overflow: auto;
-    }
+  &.writing-style-vertical {
+    // Fixes an issue where chrome will cut of margins, doesn't seem to affect other browsers
+    overflow: auto;
+  }
 }
 
 .book-content {
@@ -237,45 +232,50 @@ $action-bar-height: 38px;
   padding: 20px 0px;
 
   &.column-layout-1 {
-      height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
+    height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
 
-      &.writing-style-vertical {
-          padding: 0 10px 0 0;
-          margin: 20px 0;
-      }
+    &.writing-style-vertical {
+      padding: 0 10px 0 0;
+      margin: 20px 0;
     }
+  }
 
-    &.column-layout-2 {
-        height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
+  &.column-layout-2 {
+    height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
+    column-fill: balance;
 
-        &.writing-style-vertical {
-            padding: 0 10px 0 0;
-            margin: 20px 0;
-        }
+    &.debug {
+      column-rule: 2px dashed #666666;
     }
 
     &.writing-style-vertical {
-        height: auto;
+      padding: 0 10px 0 0;
+      margin: 20px 0;
     }
+  }
 
-    // &.immersive {
-    //     // Note: I removed this for bug: https://github.com/Kareadita/Kavita/issues/1726
-    //     //height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
-    // }
+  &.writing-style-vertical {
+    height: auto;
+  }
 
-    a, :link {
-        color: var(--brtheme-link-text-color);
-    }
+  // &.immersive {
+  //     // Note: I removed this for bug: https://github.com/Kareadita/Kavita/issues/1726
+  //     //height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
+  // }
 
-    background-color: var(--brtheme-bg-color);
+  a, :link {
+    color: var(--brtheme-link-text-color);
+  }
+
+  background-color: var(--brtheme-bg-color);
 }
 
 .pagination-cont {
-    background: var(--br-actionbar-bg-color);
-    border-radius: 5px;
-    padding: 5px 15px;
-    margin: 0 0 5px;
-    border: var(--drawer-pagination-border);
+  background: var(--br-actionbar-bg-color);
+  border-radius: 5px;
+  padding: 5px 15px;
+  margin: 0 0 5px;
+  border: var(--drawer-pagination-border);
 }
 
 .virt-pagination-cont {
@@ -285,70 +285,74 @@ $action-bar-height: 38px;
 }
 
 .bottom-bar {
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-    left: 0;
-    writing-mode: horizontal-tb;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  writing-mode: horizontal-tb;
 }
 
 
 
 // This is essentially fitting the text to height and when you press next you are scrolling over by page width
 .column-layout-1 {
-    .book-content {
-        column-count: 1;
-        column-gap: 20px;
-        overflow: hidden;
-        word-break: break-word;
-        overflow-wrap: break-word;
-    }
+  .book-content {
+    column-count: 1;
+    column-gap: 20px;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
 }
 
 .column-layout-2 {
-    .book-content {
-        column-count: 2;
-        column-gap: 20px;
-        overflow: hidden;
-        word-break: break-word;
-        overflow-wrap: break-word;
+  .book-content {
+    column-count: 2;
+    column-gap: 20px;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+
+    &.debug {
+      overflow: scroll;
+      overflow-y: hidden;
     }
+  }
 }
 
 // A bunch of resets so books render correctly
 ::ng-deep .book-content {
-    & a, & :link {
-        color: #8db2e5;
-    }
+  & a, & :link {
+    color: #8db2e5;
+  }
 }
 
 // This is applied to images in the backend
 ::ng-deep .kavita-scale-width-container {
-    width: auto;
-    max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height)) !important;
-    max-width: calc(var(--book-reader-content-max-width)) !important;
-    position: var(--book-reader-content-position) !important;
-    top: var(--book-reader-content-top) !important;
-    left: var(--book-reader-content-left) !important;
-    transform: var(--book-reader-content-transform) !important;
-
+  width: auto;
+  max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height)) !important;
+  max-width: calc(var(--book-reader-content-max-width)) !important;
+  position: var(--book-reader-content-position) !important;
+  top: var(--book-reader-content-top) !important;
+  left: var(--book-reader-content-left) !important;
+  transform: var(--book-reader-content-transform) !important;
 }
 
 // This is applied to images in the backend
 ::ng-deep .kavita-scale-width {
-    max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height)) !important;
-    max-width: calc(var(--book-reader-content-max-width)) !important;
-    object-fit: contain;
-    object-position: top center;
-    break-inside: avoid;
-    break-before: column;
-    max-height: 100vh;
+  max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height)) !important;
+  max-width: calc(var(--book-reader-content-max-width)) !important;
+  object-fit: contain;
+  object-position: top center;
+  break-inside: avoid;
+  break-before: column;
+  max-height: 100vh;
 }
 
 
 // Click to Paginate styles
 .icon-primary-color {
-    color: $primary-color;
+  color: $primary-color;
 }
 
 $pagination-color: transparent;
@@ -361,63 +365,63 @@ $pagination-opacity: 0;
 
 
 .right {
-    position: absolute;
-    right: 0px;
-    top: $action-bar-height;
-    width: 20vw;
-    z-index: 3;
-    background: $pagination-color;
-    border-color: transparent;
-    border: none !important;
-    opacity: 0;
-    outline: none;
-    cursor: pointer;
+  position: absolute;
+  right: 0px;
+  top: $action-bar-height;
+  width: 20vw;
+  z-index: 3;
+  background: $pagination-color;
+  border-color: transparent;
+  border: none !important;
+  opacity: 0;
+  outline: none;
+  cursor: pointer;
 
-    &.immersive {
-        top: 0;
-    }
+  &.immersive {
+    top: 0;
+  }
 
-    &.no-pointer-events {
-        pointer-events: none;
-    }
+  &.no-pointer-events {
+    pointer-events: none;
+  }
 }
 
 // This class pushes the click area to the left a bit to let users click the scrollbar
 .right-with-scrollbar {
-    position: absolute;
-    right: 17px;
-    top: $action-bar-height;
-    width: 18%;
-    z-index: 3;
-    background: $pagination-color;
-    opacity: $pagination-opacity;
-    border-color: transparent;
-    border: none !important;
-    outline: none;
-    cursor: pointer;
+  position: absolute;
+  right: 17px;
+  top: $action-bar-height;
+  width: 18%;
+  z-index: 3;
+  background: $pagination-color;
+  opacity: $pagination-opacity;
+  border-color: transparent;
+  border: none !important;
+  outline: none;
+  cursor: pointer;
 
-    &.immersive {
-        top: 0;
-    }
+  &.immersive {
+    top: 0;
+  }
 }
 
 .left {
-    position: absolute;
-    left: 0px;
-    top: $action-bar-height;
-    width: 20vw;
-    background: $pagination-color;
-    opacity: $pagination-opacity;
-    border-color: transparent;
-    border: none !important;
-    z-index: 3;
-    outline: none;
-    height: 100vw;
-    cursor: pointer;
+  position: absolute;
+  left: 0px;
+  top: $action-bar-height;
+  width: 20vw;
+  background: $pagination-color;
+  opacity: $pagination-opacity;
+  border-color: transparent;
+  border: none !important;
+  z-index: 3;
+  outline: none;
+  height: 100vw;
+  cursor: pointer;
 
-    &.immersive {
-        top: 0px;
-    }
+  &.immersive {
+    top: 0px;
+  }
 }
 
 
@@ -436,40 +440,40 @@ $pagination-opacity: 0;
 
 // TODO: Figure out why book-reader has it's own button overrides
 .btn {
-    &.btn-secondary {
-        color: var(--br-actionbar-button-text-color);
-        border-color: transparent;
-        background-color: unset;
+  &.btn-secondary {
+    color: var(--br-actionbar-button-text-color);
+    border-color: transparent;
+    background-color: unset;
 
-        &:hover, &:focus {
-            border-color: var(--br-actionbar-button-hover-border-color);
-        }
+    &:hover, &:focus {
+      border-color: var(--br-actionbar-button-hover-border-color);
     }
+  }
 
-    &.btn-outline-secondary {
-        border-color: transparent;
-        background-color: unset;
+  &.btn-outline-secondary {
+    border-color: transparent;
+    background-color: unset;
 
-        &:hover, &:focus {
-            border-color: var(--br-actionbar-button-hover-border-color);
-        }
+    &:hover, &:focus {
+      border-color: var(--br-actionbar-button-hover-border-color);
     }
+  }
 
-    span {
-        background-color: unset;
-        color: var(--br-actionbar-button-text-color);
-    }
+  span {
+    background-color: unset;
+    color: var(--br-actionbar-button-text-color);
+  }
 
-    i {
-        background-color: unset;
-        color: var(--br-actionbar-button-text-color);
-    }
+  i {
+    background-color: unset;
+    color: var(--br-actionbar-button-text-color);
+  }
 
-    &:active {
-        * {
-            color: white;
-        }
+  &:active {
+    * {
+      color: white;
     }
+  }
 }
 
 
@@ -478,17 +482,6 @@ $pagination-opacity: 0;
 .reader-header {
   border-bottom: 1px solid var(--bs-border-color);
   background-color: var(--bs-body-bg);
-}
-
-.progress-bar-container {
-  border-top: 1px solid var(--bs-border-color-translucent);
-  background-color: var(--br-actionbar-bg-color); // TODO: BUG: This isn't coloring well
-  max-height: 10px;
-
-  .progress {
-    border-radius: 0;
-    background-color: var(--br-actionbar-bg-color);
-  }
 }
 
 .page-progress-slider {

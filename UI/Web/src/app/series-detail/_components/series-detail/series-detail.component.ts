@@ -112,6 +112,9 @@ import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {VolumeRemovedEvent} from "../../../_models/events/volume-removed-event";
 import {ReviewsComponent} from "../../../_single-module/reviews/reviews.component";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
+import {AnnotationsTabComponent} from "../../../_single-module/annotations-tab/annotations-tab.component";
+import {Annotation} from "../../../book-reader/_models/annotations/annotation";
+import {AnnotationService} from "../../../_services/annotation.service";
 
 
 enum TabID {
@@ -123,6 +126,7 @@ enum TabID {
   Recommendations = 'recommendations-tab',
   Reviews = 'reviews-tab',
   Details = 'details-tab',
+  Annotations = 'annotations-tab'
 }
 
 interface StoryLineItem {
@@ -143,7 +147,7 @@ interface StoryLineItem {
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, AsyncPipe, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
-    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent]
+    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -184,6 +188,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly navService = inject(NavService);
   protected readonly readerService = inject(ReaderService);
   protected readonly themeService = inject(ThemeService);
+  protected readonly annotationService = inject(AnnotationService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly location = inject(Location);
@@ -291,6 +296,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   showStorylineTab = true;
   showChapterTab = computed(() => this.chapters().length > 0);
   showDetailsTab = true;
+  annotations = model<Annotation[]>([]);
 
   /**
    * This is the download we get from download service.
@@ -765,6 +771,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.cdRef.markForCheck();
     });
 
+    this.annotationService.getAnnotationsForSeries(seriesId).subscribe(annotationsForSeries => {
+      this.annotations.set(annotationsForSeries);
+    });
+
     this.readerService.getTimeLeft(seriesId).subscribe((timeLeft) => {
       this.readingTimeLeft = timeLeft;
       this.cdRef.markForCheck();
@@ -911,16 +921,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   shouldShowStorylineTab() {
     if (this.libraryType === LibraryType.ComicVine) return false;
     // Edge case for bad pdf parse
-    if ((this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) && (this.volumes.length === 0 && this.chapters.length === 0 && this.storyChapters.length > 0)) return true;
+    if ((this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) && (this.volumes.length === 0 && this.chapters().length === 0 && this.storyChapters.length > 0)) return true;
 
     return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel && this.libraryType !== LibraryType.Comic)
-      && (this.volumes.length > 0 || this.chapters.length > 0);
+      && (this.volumes.length > 0 || this.chapters().length > 0);
   }
 
   shouldShowVolumeTab() {
     if (this.libraryType === LibraryType.ComicVine) {
       if (this.volumes.length > 1) return true;
-      if (this.specials.length === 0 && this.chapters.length === 0) return true;
+      if (this.specials.length === 0 && this.chapters().length === 0) return true;
       return false;
     }
     return this.volumes.length > 0;
@@ -958,11 +968,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
-    if (this.volumes.length === 0 && this.chapters.length === 0 && this.specials.length > 0) {
+    if (this.volumes.length === 0 && this.chapters().length === 0 && this.specials.length > 0) {
       this.activeTabId = TabID.Specials;
     } else {
       if (this.libraryType == LibraryType.Comic || this.libraryType == LibraryType.ComicVine) {
-        if (this.chapters.length === 0) {
+        if (this.chapters().length === 0) {
           if (this.specials.length > 0) {
             this.activeTabId = TabID.Specials;
           } else {

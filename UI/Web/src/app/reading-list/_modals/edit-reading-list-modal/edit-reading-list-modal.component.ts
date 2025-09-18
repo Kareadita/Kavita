@@ -19,7 +19,7 @@ import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { CoverImageChooserComponent } from '../../../cards/cover-image-chooser/cover-image-chooser.component';
-import { NgIf, NgTemplateOutlet, AsyncPipe } from '@angular/common';
+import { NgTemplateOutlet, AsyncPipe } from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 enum TabID {
@@ -32,9 +32,18 @@ enum TabID {
     templateUrl: './edit-reading-list-modal.component.html',
     styleUrls: ['./edit-reading-list-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, AsyncPipe, TranslocoDirective]
+    imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, AsyncPipe, TranslocoDirective]
 })
 export class EditReadingListModalComponent implements OnInit {
+  private ngModal = inject(NgbActiveModal);
+  private readingListService = inject(ReadingListService);
+  utilityService = inject(UtilityService);
+  private uploadService = inject(UploadService);
+  private toastr = inject(ToastrService);
+  private imageService = inject(ImageService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  accountService = inject(AccountService);
+
 
   @Input({required: true}) readingList!: ReadingList;
   private readonly destroyRef = inject(DestroyRef);
@@ -51,10 +60,6 @@ export class EditReadingListModalComponent implements OnInit {
 
   get Breakpoint() { return Breakpoint; }
   get TabID() { return TabID; }
-
-  constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService,
-    public utilityService: UtilityService, private uploadService: UploadService, private toastr: ToastrService,
-    private imageService: ImageService, private readonly cdRef: ChangeDetectorRef, public accountService: AccountService) { }
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({

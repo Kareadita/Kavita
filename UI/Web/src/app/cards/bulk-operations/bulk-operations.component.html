@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'bulk-operations'">
+<ng-container *transloco="let t; prefix: 'bulk-operations'">
   @if (bulkSelectionService.selections$ | async; as selectionCount) {
     @if (selectionCount > 0) {
       <div class="bulk-select-container" [ngStyle]="{'margin-left': marginLeft + 'px', 'margin-right': marginRight + 'px'}">

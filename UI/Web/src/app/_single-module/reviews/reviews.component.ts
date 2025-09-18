@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {ReviewCardComponent} from "../review-card/review-card.component";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -6,13 +6,13 @@ import {UserReview} from "../review-card/user-review";
 import {User} from "../../_models/user";
 import {AccountService} from "../../_services/account.service";
 import {
-  ReviewModalComponent, ReviewModalCloseAction,
-  ReviewModalCloseEvent
+  ReviewModalCloseAction,
+  ReviewModalCloseEvent,
+  ReviewModalComponent
 } from "../review-modal/review-modal.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {Series} from "../../_models/series";
-import {Volume} from "../../_models/volume";
 import {Chapter} from "../../_models/chapter";
 
 @Component({
@@ -28,19 +28,19 @@ import {Chapter} from "../../_models/chapter";
 })
 export class ReviewsComponent {
 
+  private readonly accountService = inject(AccountService);
+  private readonly modalService = inject(NgbModal);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   @Input({required: true}) userReviews!: Array<UserReview>;
   @Input({required: true}) plusReviews!: Array<UserReview>;
   @Input({required: true}) series!: Series;
   @Input() volumeId: number | undefined;
   @Input() chapter: Chapter | undefined;
 
-  user: User | undefined;
+  user: User | undefined = undefined;
 
-  constructor(
-    private accountService: AccountService,
-    private modalService: NgbModal,
-    private cdRef: ChangeDetectorRef) {
-
+  constructor() {
     this.accountService.currentUser$.subscribe(user => {
       if (user) {
         this.user = user;

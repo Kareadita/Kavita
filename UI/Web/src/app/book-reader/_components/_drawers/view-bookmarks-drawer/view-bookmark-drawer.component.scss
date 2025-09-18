@@ -5,6 +5,15 @@
   flex-direction: column;
 }
 
+.drawer-text i {
+  color: var(--drawer-text-color);
+  font-size: 16px;
+}
+
+.drawer-text:hover i {
+  color: var(--drawer-text-color)
+}
+
 .bookmark-item {
   display: flex;
   background: var(--bs-dark, #2b2b2b);

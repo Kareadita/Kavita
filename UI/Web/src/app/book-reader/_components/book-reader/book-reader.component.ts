@@ -23,7 +23,7 @@ import {
 import {DOCUMENT, NgClass, NgStyle, NgTemplateOutlet, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
-import {forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
+import {firstValueFrom, forkJoin, fromEvent, merge, of, switchMap} from 'rxjs';
 import {catchError, debounceTime, distinctUntilChanged, filter, take, tap} from 'rxjs/operators';
 import {Chapter} from 'src/app/_models/chapter';
 import {NavService} from 'src/app/_services/nav.service';
@@ -47,7 +47,7 @@ import {ThemeService} from 'src/app/_services/theme.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {PAGING_DIRECTION} from 'src/app/manga-reader/_models/reader-enums';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgbProgressbar, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
@@ -67,6 +67,7 @@ import {LayoutMeasurementService} from "../../../_services/layout-measurement.se
 import {ColorscapeService} from "../../../_services/colorscape.service";
 import {environment} from "../../../../environments/environment";
 import {LoadPageEvent} from "../_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
+import afterFrame from "afterframe";
 
 
 interface HistoryPoint {
@@ -79,6 +80,8 @@ interface HistoryPoint {
    */
   scrollPart: string;
 }
+
+type Container = {left: number, right: number, top: number, bottom: number, width: number, height: number};
 
 const TOP_OFFSET = -(50 + 10) * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
 
@@ -124,7 +127,7 @@ const SCROLL_DELAY = 10;
         ])
     ],
   imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
-    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule, NgbProgressbar],
+    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule],
   providers: [EpubReaderSettingsService, LayoutMeasurementService],
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -295,7 +298,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       pageNumber: this.pageNum(),
     }),
     loader: async ({params}) => {
-      return this.readerService.getTimeLeftForChapter(params.seriesId, params.chapterId).toPromise();
+      return firstValueFrom(this.readerService.getTimeLeftForChapter(params.seriesId, params.chapterId));
     }
   });
 
@@ -354,6 +357,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   firstLoad: boolean = true;
 
+  /**
+   * Injects information to help debug issues
+   */
+  debugMode = model<boolean>(!environment.production && true);
+
 
 
   @ViewChild('bookContainer', {static: false}) bookContainerElemRef!: ElementRef<HTMLDivElement>;
@@ -361,10 +369,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * book-content class
    */
   @ViewChild('readingHtml', {static: false}) bookContentElemRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('readingHtml', { read: ViewContainerRef }) readingContainer!: ViewContainerRef;
+
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('reader', {static: false}) reader!: ElementRef;
-  @ViewChild('readingHtml', { read: ViewContainerRef }) readingContainer!: ViewContainerRef;
+
 
 
   protected readonly layoutMode = this.readerSettingsService.layoutMode;
@@ -441,9 +451,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const showForVerticalDefault = !isColumnMode && isVerticalLayout;
 
+    const showWhenDefaultLayout = !isColumnMode && !isVerticalLayout;
+
     const otherCondition = !immersiveMode || isDrawerOpen || actionBarVisible;
 
-    return (baseCondition || showForVerticalDefault) && otherCondition;
+    return (baseCondition || showForVerticalDefault || showWhenDefaultLayout) && otherCondition;
   });
 
 
@@ -525,7 +537,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const layoutMode = this.layoutMode();
       const writingStyle = this.writingStyle();
 
+      const windowWidth = this.windowWidth();
       const base = writingStyle === WritingStyle.Vertical ? this.pageHeight() : this.pageWidth();
+
+      // console.log('window width: ', windowWidth)
+      // console.log('book content width: ', this.readingSectionElemRef?.nativeElement?.clientWidth);
+      // console.log('column width: ', base / 4);
+
 
       switch (layoutMode) {
         case BookPageLayoutMode.Default:
@@ -533,7 +551,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         case BookPageLayoutMode.Column1:
           return ((base / 2) - 4) + 'px';
         case BookPageLayoutMode.Column2:
-          return (base / 4) + 'px'
+          //return (this.readingSectionElemRef?.nativeElement?.clientWidth - this.getMargin() + 1) / 2 + 'px';
+          return (((this.readingSectionElemRef?.nativeElement?.clientWidth ?? base)) / 4) + 1 + 'px'
+          //return ((base) / 4) + 6 + 'px'
         default:
           return 'unset';
       }
@@ -562,6 +582,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
       if (layoutMode !== BookPageLayoutMode.Default && writingStyle !== WritingStyle.Horizontal) {
+        console.log('verticalBookContentWidth: ', verticalPageWidth)
         return `${verticalPageWidth}px`;
       }
       return '';
@@ -625,7 +646,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
-
   }
 
   /**
@@ -736,6 +756,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
 
     this.readerService.disableWakeLock();
+
+    // Remove any debug viewport things
+    this.document.querySelector('#test')?.remove();
 
     this.themeService.clearBookTheme();
 
@@ -974,6 +997,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case KEY_CODES.F:
         this.applyFullscreen();
         break;
+      case KEY_CODES.SPACE:
+        this.actionBarVisible.update(x => !x);
+        break;
     }
   }
 
@@ -1093,30 +1119,30 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   addLinkClickHandlers() {
     const links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
-      links.forEach((link: any) => {
-        link.addEventListener('click', (e: any) => {
-          e.stopPropagation();
-          let targetElem = e.target;
-          if (e.target.nodeName !== 'A' && e.target.parentNode.nodeName === 'A') {
-            // Certain combos like <a><sup>text</sup></a> can cause the target to be the sup tag and not the anchor
-            targetElem = e.target.parentNode;
-          }
-          if (!targetElem.attributes.hasOwnProperty('kavita-page')) { return; }
-          const page = parseInt(targetElem.attributes['kavita-page'].value, 10);
-          if (this.adhocPageHistory.peek()?.page !== this.pageNum()) {
-            this.adhocPageHistory.push({page: this.pageNum(), scrollPart: this.readerService.scopeBookReaderXpath(this.lastSeenScrollPartPath)});
-          }
+    links.forEach((link: any) => {
+      link.addEventListener('click', (e: any) => {
+        e.stopPropagation();
+        let targetElem = e.target;
+        if (e.target.nodeName !== 'A' && e.target.parentNode.nodeName === 'A') {
+          // Certain combos like <a><sup>text</sup></a> can cause the target to be the sup tag and not the anchor
+          targetElem = e.target.parentNode;
+        }
+        if (!targetElem.attributes.hasOwnProperty('kavita-page')) { return; }
+        const page = parseInt(targetElem.attributes['kavita-page'].value, 10);
+        if (this.adhocPageHistory.peek()?.page !== this.pageNum()) {
+          this.adhocPageHistory.push({page: this.pageNum(), scrollPart: this.readerService.scopeBookReaderXpath(this.lastSeenScrollPartPath)});
+        }
 
-          const partValue = targetElem.attributes.hasOwnProperty('kavita-part') ? targetElem.attributes['kavita-part'].value : undefined;
-          if (partValue && page === this.pageNum()) {
-            this.scrollTo(targetElem.attributes['kavita-part'].value);
-            return;
-          }
+        const partValue = targetElem.attributes.hasOwnProperty('kavita-part') ? targetElem.attributes['kavita-part'].value : undefined;
+        if (partValue && page === this.pageNum()) {
+          this.scrollTo(targetElem.attributes['kavita-part'].value);
+          return;
+        }
 
-          this.setPageNum(page);
-          this.loadPage(partValue);
-        });
+        this.setPageNum(page);
+        this.loadPage(partValue);
       });
+    });
   }
 
   moveFocus() {
@@ -1129,7 +1155,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   async promptForPage() {
     const promptConfig = {...this.confirmService.defaultPrompt};
     promptConfig.header = translate('book-reader.go-to-page');
-    promptConfig.content = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages() - 1});
+    promptConfig.content = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages()});
 
     const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
 
@@ -1143,13 +1169,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const goToPageNum = await this.promptForPage();
       if (goToPageNum === null) { return; }
 
-      page = parseInt(goToPageNum.trim(), 10);
+      page = parseInt(goToPageNum.trim(), 10) - 1; // -1 since the UI displays with a +1
     }
 
     if (page === undefined || this.pageNum() === page) { return; }
 
-    if (page > this.maxPages() - 1) {
-      page = this.maxPages() - 1;
+    if (page > this.maxPages()) {
+      page = this.maxPages();
     } else if (page < 0) {
       page = 0;
     }
@@ -1159,39 +1185,41 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
+
+    console.log('load page called with: part: ', part, 'scrollTop: ', scrollTop);
     this.isLoading.set(true);
     this.cdRef.markForCheck();
 
     this.bookService.getBookPage(this.chapterId, this.pageNum()).subscribe(content => {
-      this.isSingleImagePage = this.checkSingleImagePage(content) // This needs be performed before we set this.page to avoid image jumping
+      this.isSingleImagePage = this.checkSingleImagePage(content); // This needs be performed before we set this.page to avoid image jumping
       this.updateSingleImagePageStyles();
+
       this.page.set(this.domSanitizer.bypassSecurityTrustHtml(content));
+
       this.scrollService.unlock();
+      this.setupObservers();
 
-      this.cdRef.markForCheck();
-
-      setTimeout(() => {
+      afterFrame(() => {
         this.addLinkClickHandlers();
         this.applyPageStyles(this.pageStyles());
 
         const imgs = this.readingSectionElemRef.nativeElement.querySelectorAll('img');
-        if (imgs === null || imgs.length === 0) {
+        if (imgs !== null && imgs.length > 0) {
+          Promise.all(Array.from(imgs ?? [])
+            .filter(img => !img.complete)
+            .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
+            .then(() => {
+              this.setupPage(part, scrollTop);
+              this.updateImageSizes();
+              this.injectImageBookmarkIndicators();
+            });
+        } else {
           this.setupPage(part, scrollTop);
-          return;
         }
 
-        Promise.all(Array.from(imgs)
-          .filter(img => !img.complete)
-          .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
-          .then(() => {
-            this.setupPage(part, scrollTop);
-            this.updateImageSizes();
-            this.injectImageBookmarkIndicators();
-            this.setupObservers();
-          });
 
         this.firstLoad = false;
-      }, SCROLL_DELAY);
+      });
     });
   }
 
@@ -1248,10 +1276,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         textColor = 'black';
       }
 
+      const offSetX = Math.min(32, imgRect.width * 0.05);
+      const offSetY = Math.min(32, imgRect.height * 0.05);
+
       icon.style.cssText = `
           position: absolute;
-          left: ${relativeX + imgRect.width - 16 * 2}px;
-          top: ${relativeY + imgRect.height - 16 * 2}px;
+          left: ${imgRect.width + relativeX - offSetX}px;
+          top: ${imgRect.height + relativeY - offSetY}px;
           margin: 0;
           transform-origin: bottom right;
           padding-top: 5px;
@@ -1367,14 +1398,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     try {
-      this.setupPageScroll(part, scrollTop);
+      this.scrollWithinPage(part, scrollTop);
     } catch (ex) {
       console.error(ex);
     }
 
     // we need to click the document before arrow keys will scroll down.
     this.reader.nativeElement.focus();
-    this.saveProgress();
+    this.scroll(() => this.handleScrollEvent()); // Will set lastSeenXPath and save progress
     this.isLoading.set(false);
     this.cdRef.markForCheck();
 
@@ -1383,14 +1414,34 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private setupPageScroll(part?: string | undefined, scrollTop?: number) {
+  private scroll(lambda: () => void) {
+    afterFrame(() => {
+      setTimeout(lambda, SCROLL_DELAY)
+    });
+  }
+
+  private scrollWithinPage(part?: string | undefined, scrollTop?: number) {
     if (part !== undefined && part !== '') {
-      this.scrollTo(this.readerService.scopeBookReaderXpath(part));
+
+      console.log('Scrolling via part: ', part);
+      this.scroll(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)));
+
+      // afterFrame(() => {
+      //   setTimeout(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)), SCROLL_DELAY)
+      // })
+      //
+      // setTimeout(() => {
+      //   afterFrame(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)));
+      // }, SCROLL_DELAY);
       return;
     }
 
     if (scrollTop !== undefined && scrollTop !== 0) {
-      setTimeout(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
+      // setTimeout(() => {
+      //   afterFrame(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
+      // }, SCROLL_DELAY);
+      console.log('Scrolling via scrollTop: ', scrollTop);
+      this.scroll(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
       return;
     }
 
@@ -1399,31 +1450,57 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (layoutMode === BookPageLayoutMode.Default) {
       if (writingStyle === WritingStyle.Vertical) {
-        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement), SCROLL_DELAY);
+        console.log('Scrolling via x axis: ', this.bookContentElemRef.nativeElement.clientWidth, ' via ', this.reader.nativeElement);
+        this.scroll(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
+        //
+        // setTimeout(() => {
+        //   afterFrame(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
+        // }, SCROLL_DELAY);
         return;
       }
 
-      setTimeout(() => this.scrollService.scrollTo(0, this.reader.nativeElement), SCROLL_DELAY);
+      // setTimeout(() => {
+      //   afterFrame(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
+      // }, SCROLL_DELAY);
+      console.log('Scrolling via x axis to 0: ', 0, ' via ', this.reader.nativeElement);
+      this.scroll(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
       return;
     }
 
     if (writingStyle === WritingStyle.Vertical) {
       if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-        setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'), SCROLL_DELAY);
+        // setTimeout(() => {
+        //   afterFrame(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
+        // }, SCROLL_DELAY);
+        console.log('(Vertical) Scrolling via x axis to: ', this.bookContentElemRef.nativeElement.scrollHeight, ' via ', this.bookContentElemRef.nativeElement);
+        this.scroll(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
         return;
       }
 
-      setTimeout(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement,'auto' ), SCROLL_DELAY);
+      // setTimeout(() => {
+      //   afterFrame(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement, 'auto'));
+      // }, SCROLL_DELAY);
+      console.log('(Vertical) Scrolling via x axis to 0: ', 0, ' via ', this.bookContentElemRef.nativeElement);
+      this.scroll(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement, 'auto'));
       return;
     }
 
     // We need to check if we are paging back, because we need to adjust the scroll
     if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-      setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement), SCROLL_DELAY);
+      // setTimeout(() => {
+      //   afterFrame(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
+      // }, SCROLL_DELAY);
+      console.log('(Page Back) Scrolling via x axis to: ', this.bookContentElemRef.nativeElement.scrollWidth, ' via ', this.bookContentElemRef.nativeElement);
+      this.scroll(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
       return;
     }
 
-    setTimeout(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement), SCROLL_DELAY);
+    // setTimeout(() => {
+    //   afterFrame(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
+    // }, SCROLL_DELAY);
+
+    console.log('Scrolling via x axis to 0: ', 0, ' via ', this.bookContentElemRef.nativeElement);
+    this.scroll(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
   }
 
   private setupAnnotationElements() {
@@ -1436,11 +1513,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const [,, pageWidth] = this.getVirtualPage();
-    const actualWidth = this.bookContentElemRef.nativeElement.scrollWidth;
-    const lastPageWidth = actualWidth % pageWidth;
+    const pageSize = this.pageSize();
+    const [_, totalScroll] = this.getScrollOffsetAndTotalScroll();
+    const lastPageSize = totalScroll % pageSize;
 
-    if (lastPageWidth >= pageWidth / 2 || lastPageWidth === 0) {
+    if (lastPageSize >= pageSize / 2 || lastPageSize === 0) {
       // The last page needs more than one column, no pages will be duplicated
       return;
     }
@@ -1595,7 +1672,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readingSectionElemRef == null) return 0;
 
     const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
-    return this.readingSectionElemRef.nativeElement.clientWidth - margin + (COLUMN_GAP * columnGapModifier);
+
+    // console.log('page size calc, client width: ', this.readingSectionElemRef.nativeElement.clientWidth)
+    // console.log('page size calc, margin: ', margin)
+    // console.log('page size calc, col gap: ', ((COLUMN_GAP / 2) * columnGapModifier));
+    // console.log("clientWidth", this.readingSectionElemRef.nativeElement.clientWidth, "window", window.innerWidth, "margin", margin, "left", marginLeft)
+    return this.readingSectionElemRef.nativeElement.clientWidth - margin + ((COLUMN_GAP) * columnGapModifier);
   });
 
   pageHeight = computed(() => {
@@ -1663,9 +1745,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   pageSize = computed(() => {
-    return this.writingStyle() === WritingStyle.Vertical
-      ? this.pageHeight()
-      : this.pageWidth();
+    const height = this.pageHeight();
+    const width = this.pageWidth();
+    const writingStyle = this.writingStyle();
+
+    return writingStyle === WritingStyle.Vertical
+      ? height
+      : width;
   });
 
 
@@ -1673,9 +1759,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     let resumeElement: string | null = null;
     if (!this.bookContentElemRef || !this.bookContentElemRef.nativeElement) return null;
 
+    const container = this.getViewportBoundingRect();
+
     const intersectingEntries = Array.from(this.bookContentElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
       .filter(entry => {
+        //return this.isPartiallyContainedIn(container, entry);
         return this.utilityService.isInViewport(entry, this.topOffset);
       });
 
@@ -1772,9 +1861,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       if (pageLevelStyles.includes(item[0])) {
-        this.renderer.setStyle(this.bookContentElemRef.nativeElement, item[0], item[1], RendererStyleFlags2.Important);
+
+        let value = item[1];
+        // Convert vw for margin into fixed pixels otherwise when paging, 2 column mode will bleed text between columns
+        if (item[0].startsWith('margin')) {
+          const vw = parseInt(item[1].replace('vw', ''), 10);
+          value = `${this.convertVwToPx(vw)}px`;
+        }
+
+        this.renderer.setStyle(this.bookContentElemRef.nativeElement, item[0], value, RendererStyleFlags2.Important);
       }
     });
+
+
 
     const individualElementStyles = Object.entries(pageStyles).filter(item => elementLevelStyles.includes(item[0]));
     for(let i = 0; i < this.bookContentElemRef.nativeElement.children.length; i++) {
@@ -1849,7 +1948,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.applyWritingStyle();
         break;
       case "layoutMode":
-        this.applyLayoutMode(res.object as BookPageLayoutMode);
+        this.applyLayoutMode(res.object as BookPageLayoutMode, true);
         break;
       case "readingDirection":
         // No extra functionality needs to be done
@@ -1892,7 +1991,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const writingStyle = this.writingStyle();
 
     if (layout !== BookPageLayoutMode.Default) {
-      setTimeout(() => this.scrollService.scrollIntoView(element as HTMLElement, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}}));
+      afterFrame(() => this.scrollService.scrollIntoView(element as HTMLElement, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}}));
       return;
     }
 
@@ -1900,12 +1999,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case WritingStyle.Vertical:
         const windowWidth = window.innerWidth || document.documentElement.clientWidth;
         const scrollLeft = element.getBoundingClientRect().left + window.scrollX - (windowWidth - element.getBoundingClientRect().width);
-        setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), SCROLL_DELAY);
+        afterFrame(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'));
         break;
       case WritingStyle.Horizontal:
         const fromTopOffset = element.getBoundingClientRect().top + window.scrollY + TOP_OFFSET;
         // We need to use a delay as webkit browsers (aka Apple devices) don't always have the document rendered by this point
-        setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), SCROLL_DELAY);
+        afterFrame(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement));
     }
   }
 
@@ -1975,15 +2074,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  applyLayoutMode(mode: BookPageLayoutMode) {
-    //const layoutModeChanged = mode !== this.layoutMode(); // TODO: This functionality wont work on the new signal-based logic
-
+  applyLayoutMode(mode: BookPageLayoutMode, isChange: boolean = false) {
     this.clearTimeout(this.updateImageSizeTimeout);
     this.updateImageSizeTimeout = setTimeout( () => {
-      this.updateImageSizes()
+      this.updateImageSizes();
+      this.injectImageBookmarkIndicators(true);
     }, 200);
 
-    this.updateSingleImagePageStyles()
+    this.updateSingleImagePageStyles();
 
     // Calculate if bottom actionbar is needed. On a timeout to get accurate heights
     // if (this.bookContentElemRef == null) {
@@ -1997,11 +2095,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    // When I switch layout, I might need to resume the progress point.
-    // if (mode === BookPageLayoutMode.Default && layoutModeChanged) {
-    //   const lastSelector = this.lastSeenScrollPartPath;
-    //   setTimeout(() => this.scrollTo(lastSelector));
-    // }
+    const lastSelector = this.lastSeenScrollPartPath;
+    if (isChange && lastSelector !== '') {
+      setTimeout(() => this.scrollTo(lastSelector), SCROLL_DELAY);
+    }
   }
 
   applyImmersiveMode(immersiveMode: boolean) {
@@ -2108,7 +2205,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleReaderClick(event: MouseEvent) {
-    if (!this.clickToPaginate()) {
+    if (!this.clickToPaginate() && !this.immersiveMode()) {
       event.preventDefault();
       event.stopPropagation();
       this.toggleMenu(event);
@@ -2176,8 +2273,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  viewAnnotations() {
-    this.epubMenuService.openViewAnnotationsDrawer((annotation: Annotation) => {
+  async viewAnnotations() {
+    await this.epubMenuService.openViewAnnotationsDrawer((annotation: Annotation) => {
       if (this.pageNum() != annotation.pageNumber) {
         this.setPageNum(annotation.pageNumber);
       }
@@ -2197,27 +2294,131 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private debugVirtualPaging() {
-    if (this.layoutMode() === BookPageLayoutMode.Default) return;
+  /**
+   * With queries and pure math, determines the actual viewport the user can see.
+   *
+   * NOTE: On Scroll LayoutMode, the height/bottom are not correct
+   */
+  getViewportBoundingRect(): Container {
+    const margin = this.getMargin();
+    //const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
+    const pageSize = this.pageWidth();
+    const visibleBoundingBox = this.bookContentElemRef.nativeElement.getBoundingClientRect();
 
-    const [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
-    const pageSize = this.pageSize();
-    const [currentVirtualPage, totalVirtualPages] = this.getVirtualPage();
+    let bookContentPadding = 20;
+    let bookPadding = getComputedStyle(this.bookContentElemRef?.nativeElement!).paddingTop;
+    if (bookPadding) {
+      bookContentPadding = parseInt(bookPadding.toString().replace('px', ''), 10);
+    }
 
-    console.log('Virtual Paging Debug:', {
-      scrollOffset,
-      totalScroll,
-      pageSize,
-      currentVirtualPage,
-      totalVirtualPages,
-      layoutMode: this.layoutMode(),
-      writingStyle: this.writingStyle(),
-      bookContentWidth: this.bookContentElemRef?.nativeElement?.clientWidth,
-      bookContentHeight: this.bookContentElemRef?.nativeElement?.clientHeight,
-      scrollWidth: this.bookContentElemRef?.nativeElement?.scrollWidth,
-      scrollHeight: this.bookContentElemRef?.nativeElement?.scrollHeight
+    // Adjust the bounding box for what is actually visible
+    const bottomBarHeight = this.document.querySelector('.bottom-bar')?.getBoundingClientRect().height ?? 38;
+    const topBarHeight = this.document.querySelector('.fixed-top')?.getBoundingClientRect().height ?? 48;
+
+//    console.log('bottom: ', visibleBoundingBox.bottom) // TODO: Bottom isn't ideal in scroll mode
+
+    const left = margin;
+    const top = topBarHeight;
+    const bottom = visibleBoundingBox.bottom - bottomBarHeight + bookContentPadding; // bookContent has a 20px padding top/bottom
+    const width = pageSize;
+    const height = bottom - top;
+    const right = left + width;
+
+    console.log('Visible Viewport', {
+      left, right, top, bottom, width, height
     });
+
+    return {
+      left, right, top, bottom, width, height
+    }
   }
 
+  debugInsertViewportView() {
+
+    const viewport = this.getViewportBoundingRect();
+
+    // Insert a debug element to help visualize
+    this.document.querySelector('#test')?.remove();
+
+    // Create and inject the red rectangle div
+    const redRect = this.document.createElement('div');
+    redRect.id = 'test';
+    redRect.style.position = 'absolute';
+    redRect.style.left = `${viewport.left}px`;
+    redRect.style.top = `${viewport.top}px`;
+    redRect.style.width = `${viewport.width}px`;
+    redRect.style.height = `${viewport.height}px`;
+    redRect.style.border = '5px solid red';
+    redRect.style.pointerEvents = 'none';
+    redRect.style.zIndex = '1000';
+
+    // Inject into the document
+    this.document.body.appendChild(redRect);
+  }
+
+  /**
+   * Get actual px margin (just one side), falls back to vw -> px mapping calculation
+   */
+  getMargin() {
+    const pageStyles = this.pageStyles();
+    let usedComputed = false;
+    let margin = this.convertVwToPx(parseInt(pageStyles['margin-left'], 10));
+
+
+    const computedMargin = getComputedStyle(this.bookContentElemRef?.nativeElement!).marginLeft;
+    if (computedMargin) {
+      margin = parseInt(computedMargin.toString().replace('px', ''), 10);
+      usedComputed = true;
+    }
+
+    // Sometimes computed will be 0 when first loading which can cause issues (first load)
+    if (usedComputed && margin < this.convertVwToPx(parseInt(pageStyles['margin-left'], 10))) {
+      console.warn('Computed margin was 0px when we expected non-zero. Defaulted back to derived vw->px value');
+      return this.convertVwToPx(parseInt(pageStyles['margin-left'], 10));
+    }
+
+
+    return margin;
+  }
+
+  /**
+   * A custom is visible method for column modes, that makes sense
+   * @param container
+   * @param element
+   */
+   isPartiallyContainedIn(container: Container, element: Element) {
+    const rect = element.getBoundingClientRect();
+
+    if (
+      rect.top >= container.top &&
+      rect.bottom <= container.bottom &&
+      rect.right <= container.right &&
+      rect.left >= container.left
+    ) {
+      return true;
+    }
+
+    // First element in the top, overflow to the left
+    const isCloseByTop = Math.abs(rect.top - container.top) <= 0.05 * container.height;
+    if (isCloseByTop && rect.left < container.left && rect.right < container.right && rect.right > container.left) {
+      return true;
+    }
+
+    return false;
+  }
+
+  logSelectedElement() {
+    const element = this.getElementFromXPath(this.lastSeenScrollPartPath);
+    if (element) {
+      console.log(element);
+      (element as HTMLElement).style.border = '1px solid red';
+      setTimeout(() => {
+        (element as HTMLElement).style.border = '';
+      }, 1_000);
+    }
+  }
+
+
   protected readonly Breakpoint = Breakpoint;
+  protected readonly environment = environment;
 }

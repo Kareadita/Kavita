@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {UserReview} from "../_single-module/review-card/user-review";
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
@@ -8,10 +8,10 @@ import {Rating} from "../_models/rating";
   providedIn: 'root'
 })
 export class ReviewService {
+  private httpClient = inject(HttpClient);
+
 
   private baseUrl = environment.apiUrl;
-
-  constructor(private httpClient: HttpClient) { }
 
   deleteReview(seriesId: number, chapterId?: number) {
     if (chapterId) {

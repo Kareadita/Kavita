@@ -1,26 +1,16 @@
-import { DOCUMENT, NgIf, NgClass, AsyncPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, DestroyRef,
-  EventEmitter,
-  inject,
-  Inject,
-  Input,
-  OnInit,
-  Output
-} from '@angular/core';
-import { Observable, of, map, tap, shareReplay, filter, combineLatest } from 'rxjs';
-import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
-import { ReaderService } from 'src/app/_services/reader.service';
-import { LayoutMode } from '../../_models/layout-mode';
-import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
-import { ReaderSetting } from '../../_models/reader-setting';
-import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
-import { MangaReaderService } from '../../_service/manga-reader.service';
+import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import {combineLatest, filter, map, Observable, of, shareReplay, tap} from 'rxjs';
+import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
+import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
+import {ReaderService} from 'src/app/_services/reader.service';
+import {LayoutMode} from '../../_models/layout-mode';
+import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
+import {ReaderSetting} from '../../_models/reader-setting';
+import {DEBUG_MODES, ImageRenderer} from '../../_models/renderer';
+import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
+import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
 
 /**
  * This is aimed at manga. Double page renderer but where if we have page = 10, you will see
@@ -31,9 +21,14 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './double-reverse-renderer.component.html',
     styleUrls: ['./double-reverse-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
+    imports: [NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
+  private readonly cdRef = inject(ChangeDetectorRef);
+  mangaReaderService = inject(MangaReaderService);
+  private document = inject<Document>(DOCUMENT);
+  readerService = inject(ReaderService);
+
 
 
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
@@ -80,11 +75,6 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
   get ReaderMode() {return ReaderMode;}
   get FITTING_OPTION() {return FITTING_OPTION;}
   get LayoutMode() {return LayoutMode;}
-
-
-
-  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: MangaReaderService,
-    @Inject(DOCUMENT) private document: Document, public readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(

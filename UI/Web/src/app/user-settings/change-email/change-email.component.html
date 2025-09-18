@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read:'change-email'">
+<ng-container *transloco="let t; prefix:'change-email'">
 
   <app-setting-item [title]="t('email-title')" [canEdit]="canEdit" [isEditMode]="isEditMode" (editMode)="updateEditMode($event)">
     <ng-template #view>
@@ -68,7 +68,7 @@
         <h4>{{t('email-updated-title')}}</h4>
         <p>{{t('email-updated-description')}}</p>
         <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
-        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('invite-url-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink"></app-api-key>
+        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('invite-url-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink" />
       }
     </ng-template>
   </app-setting-item>

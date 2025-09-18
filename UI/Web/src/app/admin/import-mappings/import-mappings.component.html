@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix: 'import-mappings'">
 
   <div class="row g-0" style="min-width: 135px;">
-    <app-step-tracker [steps]="steps" [currentStep]="currentStepIndex()"></app-step-tracker>
+    <app-step-tracker [steps]="steps" [currentStep]="currentStepIndex()" />
   </div>
 
   <app-loading [loading]="isLoading()" />
@@ -12,7 +12,7 @@
           <div class="row g-0">
             <p>{{t('import-description')}}</p>
             <form [formGroup]="uploadForm" enctype="multipart/form-data">
-              <file-upload [multiple]="false" formControlName="files"></file-upload>
+              <file-upload [multiple]="false" formControlName="files" />
             </form>
           </div>
         }
@@ -121,8 +121,7 @@
                         @for (resolution of ConflictResolutions; track resolution) {
                           <option [ngValue]="resolution">
                             <ng-container [ngTemplateOutlet]="ageRatingConflict"
-                                          [ngTemplateOutletContext]="{$implicit: arm, resolution: resolution }" >
-                            </ng-container>
+                                          [ngTemplateOutletContext]="{$implicit: arm, resolution: resolution }"  />
                           </option>
                         }
                       </select>
@@ -137,11 +136,9 @@
         @case (Step.Finalize) {
           @let res = importResult();
           @if (res) {
-            <app-manage-metadata-mappings
-              [settings]="res.resultingMetadataSettings"
+            <app-manage-metadata-mappings [settings]="res.resultingMetadataSettings"
               [settingsForm]="mappingsForm"
-              [showHeader]="false">
-            </app-manage-metadata-mappings>
+              [showHeader]="false" />
           }
         }
       }

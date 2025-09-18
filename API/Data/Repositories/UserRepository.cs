@@ -118,6 +118,7 @@ public interface IUserRepository
     Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None);
 
     Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId);
+    Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId);
 }
 
 public class UserRepository : IUserRepository
@@ -610,6 +611,14 @@ public class UserRepository : IUserRepository
             .Where(a => a.AppUserId == userId && a.Id == annotationId)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId)
+    {
+        return await _context.AppUserAnnotation
+            .Where(a => a.AppUserId == userId && a.SeriesId == seriesId)
+            .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
 

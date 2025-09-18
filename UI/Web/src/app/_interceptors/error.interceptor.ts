@@ -11,12 +11,13 @@ import {APP_BASE_HREF} from "@angular/common";
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
+  private router = inject(Router);
+  private toastr = inject(ToastrService);
+  private accountService = inject(AccountService);
+  private translocoService = inject(TranslocoService);
+
 
   baseURL = inject(APP_BASE_HREF);
-
-  constructor(private router: Router, private toastr: ToastrService,
-              private accountService: AccountService,
-              private translocoService: TranslocoService) {}
 
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {

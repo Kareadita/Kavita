@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ThemeService } from 'src/app/_services/theme.service';
@@ -13,10 +13,14 @@ import {translate} from "@jsverse/transloco";
     standalone: true
 })
 export class ConfirmMigrationEmailComponent {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private accountService = inject(AccountService);
+  private toastr = inject(ToastrService);
+  private themeService = inject(ThemeService);
 
-  constructor(private route: ActivatedRoute, private router: Router,
-    private accountService: AccountService, private toastr: ToastrService,
-    private themeService: ThemeService) {
+
+  constructor() {
 
     this.themeService.setTheme(this.themeService.defaultTheme);
     const token = this.route.snapshot.queryParamMap.get('token');

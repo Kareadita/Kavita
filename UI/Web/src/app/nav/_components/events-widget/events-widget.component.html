@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'events-widget'">
+<ng-container *transloco="let t; prefix: 'events-widget'">
 
   @if (accountService.isAdmin$ | async) {
     @if (downloadService.activeDownloads$ | async; as activeDownloads) {

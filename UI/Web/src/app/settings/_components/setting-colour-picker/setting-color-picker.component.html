@@ -3,21 +3,19 @@
     <button class="btn btn-icon color">
       @if (showPicker()) {
         <div #colorPopup>
-          <chrome-picker
-            class="floating-picker"
+          <chrome-picker class="floating-picker"
             [class.left]="first()"
             [class.right]="last()"
             [control]="chromeControl"
-          >
-          </chrome-picker>
+           />
         </div>
       }
 
-      <input [id]="id()" class="dot" appLongClick
+      <div [id]="id()" class="dot" appLongClick
              (longClick)="longClick()"
              [style.background]="color() | slotColor"
              (click)="togglePicker()"
-      />
+      ></div>
       <label [for]="id()" class="visually-hidden">{{label()}}</label>
     </button>
   </div>

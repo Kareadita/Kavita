@@ -10,11 +10,11 @@ import {tap} from "rxjs";
   providedIn: 'root'
 })
 export class UploadService {
+  private httpClient = inject(HttpClient);
+
 
   private baseUrl = environment.apiUrl;
   private readonly toastr = inject(ToastrService);
-
-  constructor(private httpClient: HttpClient) { }
 
 
   uploadByUrl(url: string) {

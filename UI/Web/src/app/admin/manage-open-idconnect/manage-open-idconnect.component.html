@@ -63,15 +63,11 @@
         @if (settingsForm.get('secret'); as formControl) {
           <app-setting-item [title]="t('secret-label')" [subtitle]="t('secret-tooltip')">
             <ng-template #view>
-              @if (formControl.value) {
-                {{'*'.repeat(10)}}
-              } @else {
-              {{ null | defaultValue }}
-              }
+              {{formControl.value | defaultValue}}
             </ng-template>
             <ng-template #edit>
               <input id="oid-secret" aria-describedby="oidc-secret-validations" class="form-control"
-                     formControlName="secret" type="password"
+                     formControlName="secret" type="text"
                      [class.is-invalid]="formControl.invalid && !formControl.untouched">
 
               @if (settingsForm.dirty || !settingsForm.untouched) {
@@ -207,11 +203,11 @@
       @if (oidcSettings()) {
         <div class="row g-0 mb-3">
           <div class="col-md-6 pe-4">
-            <app-role-selector (selected)="updateRoles($event)" [allowAdmin]="true" [preSelectedRoles]="selectedRoles()"></app-role-selector>
+            <app-role-selector (selected)="updateRoles($event)" [allowAdmin]="true" [preSelectedRoles]="selectedRoles()" />
           </div>
 
           <div class="col-md-6">
-            <app-library-selector (selected)="updateLibraries($event)" [preSelectedLibraries]="selectedLibraries()"></app-library-selector>
+            <app-library-selector (selected)="updateLibraries($event)" [preSelectedLibraries]="selectedLibraries()" />
           </div>
         </div>
       }

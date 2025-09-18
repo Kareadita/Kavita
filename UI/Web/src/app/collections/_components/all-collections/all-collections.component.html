@@ -1,10 +1,10 @@
 <div class="main-container container-fluid">
-  <ng-container *transloco="let t; read: 'all-collections'">
+  <ng-container *transloco="let t; prefix: 'all-collections'">
     <app-side-nav-companion-bar [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
       <h4 title>{{t('title')}}</h4>
       <h5 subtitle>{{t('item-count', {num: collections.length | number})}}</h5>
     </app-side-nav-companion-bar>
-    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+    <app-bulk-operations [actionCallback]="bulkActionCallback" />
 
     <app-card-detail-layout
       [isLoading]="isLoading"
@@ -23,7 +23,7 @@
                        [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true" [showFormat]="false">
 
           <ng-template #subtitle>
-            <app-collection-owner [collection]="item"></app-collection-owner>
+            <app-collection-owner [collection]="item" />
           </ng-template>
         </app-card-item>
       </ng-template>

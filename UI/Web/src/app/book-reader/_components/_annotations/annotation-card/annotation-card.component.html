@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'annotation-card'">
-  <div class="card annotation-card border-0 shadow-sm mb-3">
+  <div class="card border-0 shadow-sm mb-3" [class.annotation-card]="forceSize()">
     <div #username class="card-header d-flex justify-content-between align-items-center py-2 px-3 clickable" [ngStyle]="{'background-color': titleColor()}" (click)="viewAnnotation()">
       <div class="d-flex align-items-center">
         <strong [style.color]="colorscapeService.getContrastingTextColor(username)">{{ annotation().ownerUsername }}</strong>
@@ -7,7 +7,7 @@
       <div  [style.color]="colorscapeService.getContrastingTextColor(username)" class="ms-2">{{ annotation().createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
     </div>
 
-    <div class="card-body px-3 py-2">
+    <div class="card-body px-3 py-2" [ngClass]="{'spoilers': annotation().containsSpoiler && !hasClicked()}" (click)="hasClicked.set(true)">
 
       <blockquote class="mb-2 text-muted small fst-italic fw-lighter">
         <p class="content-quote">{{annotation().selectedText}}</p>
@@ -16,7 +16,7 @@
       <div class="mb-2 small text-muted">
         @let content = annotation().comment;
         @if (content !== '\"\"') {
-          <quill-view [content]="annotation().comment" format="json" theme="snow"></quill-view>
+          <quill-view [content]="annotation().comment" format="json" theme="snow" />
         } @else {
           {{null | defaultValue}}
         }
@@ -24,15 +24,6 @@
     </div>
 
     <div class="card-footer d-flex justify-content-between align-items-center py-2 px-3">
-      @if(annotation().containsSpoiler) {
-        <div class="d-flex align-items-center">
-          <span class="small text-muted">
-            <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
-            {{t('contains-spoilers-label')}}
-          </span>
-        </div>
-      }
-
       <div class="d-flex align-items-center gap-2">
 
         @if(showInReaderLink()) {
@@ -61,6 +52,14 @@
           </button>
         }
       </div>
+            @if(annotation().containsSpoiler) {
+        <div class="d-flex align-items-center">
+          <span class="small text-muted">
+            <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
+            {{t('contains-spoilers-label')}}
+          </span>
+        </div>
+      }
     </div>
   </div>
 

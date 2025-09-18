@@ -1,6 +1,8 @@
 import {ChangeDetectionStrategy, Component, computed, EventEmitter, input, OnInit, Output} from '@angular/core';
 import {ContentChange, QuillEditorComponent, QuillFormat} from "ngx-quill";
 import {FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 export enum QuillTheme {
   Snow = 'snow',
@@ -48,6 +50,10 @@ export interface ToolbarItem {
    * Pass an **empty** array to use the quill defaults
    */
   values?: string[];
+  /**
+   * An optional translation key for a tooltip
+   */
+  tooltipTranslationKey?: string
 }
 
 // There is very little documentation to what values are possible.
@@ -77,7 +83,7 @@ const defaultToolbarItems: ToolbarItem[][] = [
   ],
 
   [
-    {key: QuillToolbarKey.Clean},
+    {key: QuillToolbarKey.Clean, tooltipTranslationKey: 'clean-tooltip'},
   ]
 ];
 
@@ -90,6 +96,8 @@ const defaultToolbarItems: ToolbarItem[][] = [
   imports: [
     QuillEditorComponent,
     ReactiveFormsModule,
+    NgbTooltip,
+    TranslocoDirective,
   ],
   templateUrl: './quill-wrapper.component.html',
   styleUrl: './quill-wrapper.component.scss',

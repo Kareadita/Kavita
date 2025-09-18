@@ -1,15 +1,10 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, DestroyRef, inject,
-  OnInit
-} from '@angular/core';
-import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, model, OnInit} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../shared/confirm.service";
-import { LoadingComponent } from '../../shared/loading/loading.component';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import {LoadingComponent} from '../../shared/loading/loading.component';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {environment} from "../../../environments/environment";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
@@ -34,58 +29,59 @@ import {LicenseService} from "../../_services/license.service";
 export class LicenseComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);
   protected readonly WikiLink = WikiLink;
+  protected readonly buyLink = environment.buyLink;
 
-  formGroup: FormGroup = new FormGroup({});
-  isViewMode: boolean = true;
-  isChecking: boolean = true;
-  isSaving: boolean = false;
+  formGroup: FormGroup = new FormGroup({
+    'licenseKey': new FormControl('', [Validators.required]),
+    'email': new FormControl('', [Validators.required]),
+    'discordId': new FormControl('', [Validators.pattern(/\d+/)])
+  });
+  isViewMode = model<boolean>(true);
+  isChecking = model<boolean>(true);
+  isSaving = model<boolean>(false);
+  hasLicense = model<boolean>(false);
+  licenseInfo = model<LicenseInfo | null>(null);
+  showEmail = model<boolean>(false);
+
+  /**
+   * Either the normal manageLink or with a prefilled email to ease the user
+   */
+  readonly manageLink = computed(() => {
+    const email = this.licenseInfo()?.registeredEmail;
+    if (!email) return environment.manageLink;
+
+    return environment.manageLink + '?prefilled_email=' + encodeURIComponent(email);
+  })
 
 
-
-  hasLicense: boolean = false;
-  licenseInfo: LicenseInfo | null = null;
-  showEmail: boolean = false;
-
-  buyLink = environment.buyLink;
-  manageLink = environment.manageLink;
 
 
   ngOnInit(): void {
-    this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
-    this.formGroup.addControl('email', new FormControl('', [Validators.required]));
-    this.formGroup.addControl('discordId', new FormControl('', [Validators.pattern(/\d+/)]));
-
     this.loadLicenseInfo().subscribe();
-
   }
 
   loadLicenseInfo(forceCheck = false) {
-    this.isChecking = true;
-    this.cdRef.markForCheck();
+    this.isChecking.set(true);
 
     return this.licenseService.hasAnyLicense()
       .pipe(
         tap(res => {
-          this.hasLicense = res;
-          this.isChecking = false;
-          this.cdRef.markForCheck();
+          this.hasLicense.set(res);
+          this.isChecking.set(false);
         }),
         filter(hasLicense => hasLicense),
         tap(_ => {
-          this.isChecking = true;
-          this.cdRef.markForCheck();
+          this.isChecking.set(true);
         }),
         switchMap(_ => this.licenseService.licenseInfo(forceCheck)),
         tap(licenseInfo => {
-          this.licenseInfo = licenseInfo;
-          this.isChecking = false;
-          this.cdRef.markForCheck();
+          this.licenseInfo.set(licenseInfo);
+          this.isChecking.set(false);
         })
       );
   }
@@ -99,30 +95,37 @@ export class LicenseComponent implements OnInit {
   }
 
   saveForm() {
-    this.isSaving = true;
-    this.cdRef.markForCheck();
-    const hadActiveLicenseBefore = this.licenseInfo?.isActive;
-    this.licenseService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim(), this.formGroup.get('discordId')!.value.trim())
-      .subscribe(() => {
+    this.isSaving.set(true);
 
-        this.resetForm();
-        this.isViewMode = true;
-        this.isSaving = false;
-        this.cdRef.markForCheck();
-        this.loadLicenseInfo().subscribe(async (info) => {
-          if (info?.isActive && !hadActiveLicenseBefore) {
-            await this.confirmService.info(translate('license.k+-unlocked-description'), translate('license.k+-unlocked'));
-          } else {
-            this.toastr.info(translate('toasts.k+-license-saved'));
-          }
-        });
-    }, async (err) => {
-        await this.handleError(err);
+    const hadActiveLicenseBefore = this.licenseInfo()?.isActive;
+
+    const license = this.formGroup.get('licenseKey')!.value.trim();
+    const email = this.formGroup.get('email')!.value.trim();
+    const discordId = this.formGroup.get('discordId')!.value.trim();
+
+    this.licenseService.updateUserLicense(license, email, discordId)
+      .subscribe({
+        next: () => {
+          this.resetForm();
+          this.isViewMode.set(true);
+          this.isSaving.set(false);
+          this.cdRef.markForCheck();
+          this.loadLicenseInfo().subscribe(async (info) => {
+            if (info?.isActive && !hadActiveLicenseBefore) {
+              await this.confirmService.info(translate('license.k+-unlocked-description'), translate('license.k+-unlocked'));
+            } else {
+              this.toastr.info(translate('toasts.k+-license-saved'));
+            }
+          });
+        },
+        error: async err => {
+          await this.handleError(err);
+        }
       });
   }
 
   private async handleError(err: any) {
-    this.isSaving = false;
+    this.isSaving.set(false);
     this.cdRef.markForCheck();
 
     if (err.hasOwnProperty('error')) {
@@ -163,8 +166,7 @@ export class LicenseComponent implements OnInit {
   }
 
   forceSave() {
-    this.isSaving = false;
-    this.cdRef.markForCheck();
+    this.isSaving.set(false);
 
     this.licenseService.resetLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim())
       .subscribe(_ => {
@@ -179,10 +181,9 @@ export class LicenseComponent implements OnInit {
 
     this.licenseService.deleteLicense().subscribe(() => {
       this.resetForm();
-      this.isViewMode = true;
-      this.licenseInfo = null;
-      this.hasLicense = false;
-      //this.hasValidLicense = false;
+      this.isViewMode.set(true);
+      this.licenseInfo.set(null);
+      this.hasLicense.set(false);
       this.cdRef.markForCheck();
     });
   }
@@ -197,38 +198,16 @@ export class LicenseComponent implements OnInit {
     });
   }
 
-  //
-  // validateLicense(forceCheck = false) {
-  //   return of().pipe(
-  //     startWith(null),
-  //     tap(_ => {
-  //       this.isChecking = true;
-  //       this.cdRef.markForCheck();
-  //     }),
-  //     switchMap(_ => this.licenseService.licenseInfo(forceCheck)),
-  //     tap(licenseInfo => {
-  //       this.licenseInfo = licenseInfo;
-  //       //this.hasValidLicense = licenseInfo?.isActive || false;
-  //       this.isChecking = false;
-  //       this.cdRef.markForCheck();
-  //     })
-  //   )
-  //
-  // }
-
   updateEditMode(mode: boolean) {
-    this.isViewMode = !mode;
-    this.cdRef.markForCheck();
+    this.isViewMode.set(!mode);
   }
 
   toggleViewMode() {
-    this.isViewMode = !this.isViewMode;
-    this.cdRef.markForCheck();
+    this.isViewMode.update(v => !v);
     this.resetForm();
   }
 
   toggleEmailShow() {
-    this.showEmail = !this.showEmail;
-    this.cdRef.markForCheck();
+    this.showEmail.update(v => !v);
   }
 }

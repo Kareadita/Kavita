@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'edit-person-modal'">
+<ng-container *transloco="let t; prefix: 'edit-person-modal'">
   @if (person !== undefined) {
     <div class="modal-container">
       <div class="modal-header">
@@ -131,8 +131,7 @@
                                          (imageSelected)="updateSelectedIndex($event)"
                                          (selectedBase64Url)="updateSelectedImage($event)"
                                          [showReset]="person.coverImageLocked"
-                                         (resetClicked)="handleReset()">
-                </app-cover-image-chooser>
+                                         (resetClicked)="handleReset()" />
               </ng-template>
             </li>
           </ul>

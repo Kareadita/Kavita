@@ -1,15 +1,5 @@
-import { DOCUMENT, NgIf, NgClass, AsyncPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, DestroyRef,
-  EventEmitter,
-  inject,
-  Inject,
-  Input,
-  OnInit,
-  Output
-} from '@angular/core';
+import { DOCUMENT, NgClass, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { Observable, of, map, tap, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
@@ -30,9 +20,14 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './double-no-cover-renderer.component.html',
     styleUrls: ['./double-no-cover-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
+    imports: [NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleNoCoverRendererComponent implements OnInit {
+  private readonly cdRef = inject(ChangeDetectorRef);
+  mangaReaderService = inject(MangaReaderService);
+  private document = inject<Document>(DOCUMENT);
+  readerService = inject(ReaderService);
+
 
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
   @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
@@ -78,11 +73,6 @@ export class DoubleNoCoverRendererComponent implements OnInit {
   get ReaderMode() {return ReaderMode;}
   get FITTING_OPTION() {return FITTING_OPTION;}
   get LayoutMode() {return LayoutMode;}
-
-
-
-  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: MangaReaderService,
-    @Inject(DOCUMENT) private document: Document, public readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(

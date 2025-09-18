@@ -1,14 +1,6 @@
 import {DOCUMENT} from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import {
-  DestroyRef,
-  inject,
-  Inject,
-  Injectable,
-  Renderer2,
-  RendererFactory2,
-  SecurityContext
-} from '@angular/core';
+import { DestroyRef, inject, Injectable, Renderer2, RendererFactory2, SecurityContext } from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ToastrService} from 'ngx-toastr';
 import {filter, map, ReplaySubject, take, tap} from 'rxjs';
@@ -32,6 +24,13 @@ import {debounceTime} from "rxjs/operators";
   providedIn: 'root'
 })
 export class ThemeService {
+  private document = inject<Document>(DOCUMENT);
+  private httpClient = inject(HttpClient);
+  private domSanitizer = inject(DomSanitizer);
+  private confirmService = inject(ConfirmService);
+  private toastr = inject(ToastrService);
+  private router = inject(Router);
+
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly colorTransitionService = inject(ColorscapeService);
@@ -57,9 +56,10 @@ export class ThemeService {
   private baseUrl = environment.apiUrl;
 
 
-  constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private httpClient: HttpClient,
-  messageHub: MessageHubService, private domSanitizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService,
-  private router: Router) {
+  constructor() {
+    const rendererFactory = inject(RendererFactory2);
+    const messageHub = inject(MessageHubService);
+
     this.renderer = rendererFactory.createRenderer(null, null);
 
     messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {

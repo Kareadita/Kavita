@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'customize-dashboard-streams'">
+<ng-container *transloco="let t; prefix: 'customize-dashboard-streams'">
   <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
                               [showRemoveButton]="false">
     <ng-template #draggableItem let-position="idx" let-item>

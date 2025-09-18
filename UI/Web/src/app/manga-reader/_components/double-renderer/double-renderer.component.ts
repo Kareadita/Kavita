@@ -1,15 +1,5 @@
-import { DOCUMENT, NgIf, NgClass, AsyncPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, DestroyRef,
-  EventEmitter,
-  inject,
-  Inject,
-  Input,
-  OnInit,
-  Output
-} from '@angular/core';
+import { DOCUMENT, NgClass, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { Observable, of, map, tap, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
@@ -30,9 +20,14 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './double-renderer.component.html',
     styleUrls: ['./double-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
+    imports: [NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleRendererComponent implements OnInit, ImageRenderer {
+  private readonly cdRef = inject(ChangeDetectorRef);
+  mangaReaderService = inject(MangaReaderService);
+  private document = inject<Document>(DOCUMENT);
+  readerService = inject(ReaderService);
+
 
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
   @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
@@ -77,10 +72,6 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
 
   protected readonly ReaderMode = ReaderMode;
   protected readonly LayoutMode = LayoutMode;
-
-
-  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: MangaReaderService,
-    @Inject(DOCUMENT) private document: Document, public readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(

@@ -31,6 +31,7 @@ export class HighlightBarComponent {
   isCollapsed = model<boolean>(true);
   canCollapse = model<boolean>(true);
   isEditMode = model<boolean>(false);
+  allowEditMode = model<boolean>(true);
 
   slots = this.annotationService.slots;
 
@@ -53,6 +54,8 @@ export class HighlightBarComponent {
   }
 
   toggleEditMode() {
+    if (!this.allowEditMode()) return;
+
     const existingEdit = this.isEditMode();
     this.isEditMode.set(!existingEdit);
   }

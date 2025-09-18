@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'library-selector'">
+<ng-container *transloco="let t; prefix: 'library-selector'">
 
   <div class="d-flex justify-content-between">
     <div class="col-auto">
@@ -16,7 +16,7 @@
   </div>
 
   @if (isLoading) {
-    <app-loading [loading]="isLoading"></app-loading>
+    <app-loading [loading]="isLoading" />
   } @else {
     <div class="list-group">
       <ul class="ps-0">

@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import { Person } from '../../_models/metadata/person';
-import {CommonModule} from "@angular/common";
+
 import {SeriesStaff} from "../../_models/series-detail/external-series-detail";
 import {ImageComponent} from "../image/image.component";
 import {ImageService} from "../../_services/image.service";

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
@@ -158,6 +159,58 @@ public class SeriesRepositoryTests
         }
     }
 
+    [Theory]
+    [InlineData(12345, null, 12345)] // Case 1: Prioritize existing ExternalSeries id
+    [InlineData(0, "https://anilist.co/manga/100664/Ijiranaide-Nagatorosan/", 100664)] // Case 2: Extract from weblink if no external series id
+    [InlineData(0, "", null)] // Case 3: Return null if neither exist
+    public async Task GetPlusSeriesDto_Should_PrioritizeAniListId_Correctly(int externalAniListId, string? webLinks, int? expectedAniListId)
+    {
+        // Arrange
+        await ResetDb();
+
+        var series = new SeriesBuilder("Test Series")
+            .WithFormat(MangaFormat.Archive)
+            .Build();
+
+        var library = new LibraryBuilder("Test Library", LibraryType.Manga)
+            .WithFolderPath(new FolderPathBuilder("C:/data/manga/").Build())
+            .WithSeries(series)
+            .Build();
+
+
+
+        // Set up ExternalSeriesMetadata
+        series.ExternalSeriesMetadata = new ExternalSeriesMetadata()
+        {
+            AniListId = externalAniListId,
+            CbrId = 0,
+            MalId = 0,
+            GoogleBooksId = string.Empty
+        };
+
+        // Set up SeriesMetadata with WebLinks
+        series.Metadata = new SeriesMetadata()
+        {
+            WebLinks = webLinks,
+            ReleaseYear = 2021
+        };
+
+        _unitOfWork.LibraryRepository.Add(library);
+        _unitOfWork.SeriesRepository.Add(series);
+        await _unitOfWork.CommitAsync();
+
+        // Act
+        var result = await _unitOfWork.SeriesRepository.GetPlusSeriesDto(series.Id);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(expectedAniListId, result.AniListId);
+        Assert.Equal("Test Series", result.SeriesName);
+    }
+
     // TODO: GetSeriesDtoForLibraryIdV2Async Tests (On Deck)
+
+
+
 
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {environment} from "../../environments/environment";
 import { HttpClient } from "@angular/common/http";
 import {ExternalSource} from "../_models/sidenav/external-source";
@@ -9,9 +9,10 @@ import {map} from "rxjs/operators";
   providedIn: 'root'
 })
 export class ExternalSourceService {
+  private httpClient = inject(HttpClient);
+
 
   baseUrl = environment.apiUrl;
-  constructor(private httpClient: HttpClient) { }
 
   getExternalSources() {
     return this.httpClient.get<Array<ExternalSource>>(this.baseUrl + 'stream/external-sources');

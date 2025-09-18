@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ReplaySubject, shareReplay, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Device } from '../_models/device/device';
@@ -11,6 +11,9 @@ import { AccountService } from './account.service';
   providedIn: 'root'
 })
 export class DeviceService {
+  private httpClient = inject(HttpClient);
+  private accountService = inject(AccountService);
+
 
   baseUrl = environment.apiUrl;
 
@@ -18,7 +21,7 @@ export class DeviceService {
   public devices$ = this.devicesSource.asObservable().pipe(shareReplay());
 
 
-  constructor(private httpClient: HttpClient, private accountService: AccountService) {
+  constructor() {
     // Ensure we are authenticated before we make an authenticated api call.
     this.accountService.currentUser$.subscribe(user => {
       if (!user) {

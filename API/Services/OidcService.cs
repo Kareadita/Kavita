@@ -333,8 +333,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         user.OidcId = externalId;
         user.IdentityProvider = IdentityProvider.OpenIdConnect;
 
-        accountService.AddDefaultStreamsToUser(user);
-        await accountService.AddDefaultReadingProfileToUser(user);
+        await accountService.SeedUser(user);
 
         await SyncUserSettings(request, settings, claimsPrincipal, user);
         await SetDefaults(settings, user);

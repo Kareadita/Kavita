@@ -167,4 +167,15 @@
     padding-right: 0.9375rem;
     border-right: 0.0625rem solid var(--input-border-color);
   }
+
+  .ql-tooltip {
+    border: 0.0625rem solid var(--primary-color);
+    background-color: var(--drawer-bg-color);
+    max-width: 90vw !important;
+    width: auto !important;
+
+    &.ql-editing {
+      min-width: 20rem !important;
+    }
+  }
 }

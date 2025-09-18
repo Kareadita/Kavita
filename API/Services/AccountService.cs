@@ -54,6 +54,12 @@ public interface IAccountService
     /// <remarks>Does NOT commit</remarks>
     Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole);
     Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles);
+    /// <summary>
+    /// Seeds all information necessary for a new user
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns></returns>
+    Task SeedUser(AppUser user);
     void AddDefaultStreamsToUser(AppUser user);
     Task AddDefaultReadingProfileToUser(AppUser user);
 }
@@ -266,6 +272,17 @@ public partial class AccountService : IAccountService
         return [];
     }
 
+    public async Task SeedUser(AppUser user)
+    {
+        AddDefaultStreamsToUser(user);
+        AddDefaultHighlightSlotsToUser(user);
+        await AddDefaultReadingProfileToUser(user); // Commits
+    }
+
+    /// <summary>
+    /// Assign default streams
+    /// </summary>
+    /// <param name="user"></param>
     public void AddDefaultStreamsToUser(AppUser user)
     {
         foreach (var newStream in Seed.DefaultStreams.Select(_mapper.Map<AppUserDashboardStream, AppUserDashboardStream>))
@@ -279,6 +296,18 @@ public partial class AccountService : IAccountService
         }
     }
 
+    private void AddDefaultHighlightSlotsToUser(AppUser user)
+    {
+        if (user.UserPreferences.BookReaderHighlightSlots.Any()) return;
+
+        user.UserPreferences.BookReaderHighlightSlots = Seed.DefaultHighlightSlots.ToList();
+        _unitOfWork.UserRepository.Update(user);
+    }
+
+    /// <summary>
+    /// Assign default reading profile
+    /// </summary>
+    /// <param name="user"></param>
     public async Task AddDefaultReadingProfileToUser(AppUser user)
     {
         var profile = new AppUserReadingProfileBuilder(user.Id)

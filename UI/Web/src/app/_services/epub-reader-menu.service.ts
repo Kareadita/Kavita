@@ -1,9 +1,6 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {NgbOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {
-  ViewAnnotationsDrawerComponent
-} from "../book-reader/_components/_drawers/view-annotations-drawer/view-annotations-drawer.component";
-import {
   LoadPageEvent,
   ViewBookmarkDrawerComponent
 } from "../book-reader/_components/_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
@@ -47,13 +44,35 @@ export class EpubReaderMenuService {
     (ref.componentInstance as ViewEditAnnotationDrawerComponent).mode.set(AnnotationMode.Create);
 
     this.isDrawerOpen.set(true);
+
+    // Set CSS variable for drawer height
+    setTimeout(() => {
+      var drawerElement = document.querySelector('view-edit-annotation-drawer, app-view-edit-annotation-drawer');
+      if (!drawerElement) return;
+      var setDrawerHeightVar = function() {
+        if (!drawerElement) return;
+        var height = (drawerElement as HTMLElement).offsetHeight;
+        document.documentElement.style.setProperty('--drawer-height', height + 'px');
+      };
+      setDrawerHeightVar();
+      var resizeObserver = new window.ResizeObserver(function() {
+        setDrawerHeightVar();
+      });
+      resizeObserver.observe(drawerElement as HTMLElement);
+      // Optionally store observer for cleanup if needed
+    }, 0);
   }
 
 
-  openViewAnnotationsDrawer(loadAnnotationCallback: (annotation: Annotation) => void) {
+  async openViewAnnotationsDrawer(loadAnnotationCallback: (annotation: Annotation) => void) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
+
+    // This component needs to be imported dynamically as something breaks within Angular if it's not.
+    // I do not know what, but this fixes the drawer from not showing up in a production build.
+    const module = await import('../book-reader/_components/_drawers/view-annotations-drawer/view-annotations-drawer.component');
+    const ViewAnnotationsDrawerComponent = module.ViewAnnotationsDrawerComponent;
 
     const ref = this.offcanvasService.open(ViewAnnotationsDrawerComponent, {position: 'end'});
     ref.componentInstance.loadAnnotation.subscribe((annotation: Annotation) => {
@@ -154,6 +173,23 @@ export class EpubReaderMenuService {
     ref.dismissed.subscribe(() => this.setDrawerClosed());
 
     this.isDrawerOpen.set(true);
+
+    // Set CSS variable for drawer height
+    setTimeout(() => {
+      var drawerElement = document.querySelector('view-edit-annotation-drawer, app-view-edit-annotation-drawer');
+      if (!drawerElement) return;
+      var setDrawerHeightVar = function() {
+        if (!drawerElement) return;
+        var height = (drawerElement as HTMLElement).offsetHeight;
+        document.documentElement.style.setProperty('--drawer-height', height + 'px');
+      };
+      setDrawerHeightVar();
+      var resizeObserver = new window.ResizeObserver(function() {
+        setDrawerHeightVar();
+      });
+      resizeObserver.observe(drawerElement as HTMLElement);
+      // Optionally store observer for cleanup if needed
+    }, 0);
   }
 
   closeAll() {

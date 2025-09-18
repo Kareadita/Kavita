@@ -6,4 +6,12 @@
   flex-direction: column;
 }
 
+.drawer-text i {
+  color: var(--drawer-text-color);
+  font-size: 16px;
+}
+
+.drawer-text:hover i {
+  color: var(--drawer-text-color)
+}
 

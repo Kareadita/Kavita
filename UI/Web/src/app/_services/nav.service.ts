@@ -1,5 +1,5 @@
 import {DOCUMENT} from '@angular/common';
-import {DestroyRef, inject, Inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
+import { DestroyRef, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2 } from '@angular/core';
 import {filter, ReplaySubject, take} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
@@ -34,6 +34,9 @@ interface NavItem {
   providedIn: 'root'
 })
 export class NavService {
+  private document = inject<Document>(DOCUMENT);
+  private httpClient = inject(HttpClient);
+
 
   private readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
@@ -103,7 +106,9 @@ export class NavService {
   private renderer: Renderer2;
   baseUrl = environment.apiUrl;
 
-  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2, private httpClient: HttpClient) {
+  constructor() {
+    const rendererFactory = inject(RendererFactory2);
+
     this.renderer = rendererFactory.createRenderer(null, null);
 
     // To avoid flashing, let's check if we are authenticated before we show

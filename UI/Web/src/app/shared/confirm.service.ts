@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {take} from 'rxjs/operators';
 import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component';
@@ -9,13 +9,15 @@ import {ConfirmConfig} from './confirm-dialog/_models/confirm-config';
   providedIn: 'root'
 })
 export class ConfirmService {
+  private modalService = inject(NgbModal);
+
 
   defaultConfirm = new ConfirmConfig();
   defaultAlert = new ConfirmConfig();
   defaultInfo = new ConfirmConfig();
   defaultPrompt = new ConfirmConfig();
 
-  constructor(private modalService: NgbModal) {
+  constructor() {
     this.defaultConfirm.buttons = [
       {text: 'confirm.cancel', type: 'secondary'},
       {text: 'confirm.confirm', type: 'primary'},

@@ -8,7 +8,7 @@ import { PieDataItem } from '../../_models/pie-data-item';
 import { TimePeriods } from '../top-readers/top-readers.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { LineChartModule } from '@swimlane/ngx-charts';
-import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
@@ -19,7 +19,7 @@ const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
     templateUrl: './reading-activity.component.html',
     styleUrls: ['./reading-activity.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe, TranslocoDirective]
+    imports: [ReactiveFormsModule, LineChartModule, AsyncPipe, TranslocoDirective]
 })
 export class ReadingActivityComponent implements OnInit {
   /**

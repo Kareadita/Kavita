@@ -22,7 +22,7 @@ import {FileBreakdownStatsComponent} from '../file-breakdown-stats/file-breakdow
 import {TopReadersComponent} from '../top-readers/top-readers.component';
 import {StatListComponent} from '../stat-list/stat-list.component';
 import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
-import {AsyncPipe, DecimalPipe, NgIf} from '@angular/common';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
@@ -33,11 +33,17 @@ import {AccountService} from "../../../_services/account.service";
     templateUrl: './server-stats.component.html',
     styleUrls: ['./server-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgIf, IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent,
-        PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe,
-        CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective]
+    imports: [IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective]
 })
 export class ServerStatsComponent {
+  private statService = inject(StatisticsService);
+  private router = inject(Router);
+  private imageService = inject(ImageService);
+  private metadataService = inject(MetadataService);
+  private modalService = inject(NgbModal);
+  private utilityService = inject(UtilityService);
+  private filterUtilityService = inject(FilterUtilitiesService);
+
 
   private readonly destroyRef = inject(DestroyRef);
   protected readonly accountService = inject(AccountService);
@@ -67,9 +73,7 @@ export class ServerStatsComponent {
 
   get Breakpoint() { return Breakpoint; }
 
-  constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService,
-    private metadataService: MetadataService, private modalService: NgbModal, private utilityService: UtilityService,
-    private filterUtilityService: FilterUtilitiesService) {
+  constructor() {
     this.seriesImage = (data: PieDataItem) => {
       if (data.extra) return this.imageService.getSeriesCoverImage(data.extra.id);
       return '';

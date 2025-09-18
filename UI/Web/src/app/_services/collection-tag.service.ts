@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {environment} from 'src/environments/environment';
 import {UserCollection} from '../_models/collection-tag';
 import {TextResonse} from '../_types/text-response';
@@ -12,10 +12,11 @@ import {AccountService} from "./account.service";
   providedIn: 'root'
 })
 export class CollectionTagService {
+  private httpClient = inject(HttpClient);
+  private accountService = inject(AccountService);
+
 
   baseUrl = environment.apiUrl;
-
-  constructor(private httpClient: HttpClient, private accountService: AccountService) { }
 
   allCollections(ownedOnly = false) {
     return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection?ownedOnly=' + ownedOnly);

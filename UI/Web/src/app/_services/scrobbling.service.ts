@@ -1,5 +1,5 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {map} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
 import {TextResonse} from '../_types/text-response';
@@ -22,11 +22,11 @@ export enum ScrobbleProvider {
   providedIn: 'root'
 })
 export class ScrobblingService {
+  private httpClient = inject(HttpClient);
+  private utilityService = inject(UtilityService);
+
 
   baseUrl = environment.apiUrl;
-
-
-  constructor(private httpClient: HttpClient, private utilityService: UtilityService) {}
 
   hasTokenExpired(provider: ScrobbleProvider) {
     return this.httpClient.get<string>(this.baseUrl + 'scrobbling/token-expired?provider=' + provider, TextResonse)

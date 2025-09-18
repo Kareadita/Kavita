@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {map, Observable, shareReplay} from 'rxjs';
 import {Chapter} from '../_models/chapter';
 import {UserCollection} from '../_models/collection-tag';
@@ -180,6 +180,9 @@ export type ActionableEntity = Volume | Series | Chapter | ReadingList | UserCol
   providedIn: 'root',
 })
 export class ActionFactoryService {
+  private accountService = inject(AccountService);
+  private deviceService = inject(DeviceService);
+
   private libraryActions: Array<ActionItem<Library>> = [];
   private seriesActions: Array<ActionItem<Series>> = [];
   private volumeActions: Array<ActionItem<Volume>> = [];
@@ -192,7 +195,7 @@ export class ActionFactoryService {
   private smartFilterActions: Array<ActionItem<SmartFilter>> = [];
   private sideNavHomeActions: Array<ActionItem<void>> = [];
 
-  constructor(private accountService: AccountService, private deviceService: DeviceService) {
+  constructor() {
     this.accountService.currentUser$.subscribe((_) => {
       this._resetActions();
     });

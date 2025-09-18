@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; read: 'manage-system'">
+<ng-container *transloco="let t; prefix: 'manage-system'">
   @if (serverInfo) {
     <div class="mb-3">
       <h3>{{t('title')}}</h3>
@@ -67,6 +67,6 @@
 
   <div class="mb-3">
     <h3>{{t('updates-title')}}</h3>
-    <app-changelog></app-changelog>
+    <app-changelog />
   </div>
 </ng-container>

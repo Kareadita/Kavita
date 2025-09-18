@@ -1,20 +1,21 @@
 <ng-container *transloco="let t; prefix: 'epub-setting-drawer'">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title">
+    <h5 class="offcanvas-title drawer-text">
       {{t('title')}}
     </h5>
-    <button type="button" class="btn-close text-reset" [attr.aria-label]="t('close')" (click)="close()"></button>
+    <button type="button" class="btn-unstyled ms-auto" [attr.aria-label]="t('close')" (click)="close()">
+      <i class="fas fa-times"></i>
+    </button>
   </div>
 
   <div class="offcanvas-body">
     @let sId = seriesId();
     @let rp = readingProfile();
     @if (sId && rp) {
-      <app-reader-settings
-        [seriesId]="sId"
+      <app-reader-settings [seriesId]="sId"
         [readingProfile]="rp"
         [readerSettingsService]="readerSettingsService()"
-      ></app-reader-settings>
+       />
     }
   </div>
 </ng-container>

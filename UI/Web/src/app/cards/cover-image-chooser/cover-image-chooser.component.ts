@@ -4,7 +4,6 @@ import {
   Component,
   EventEmitter,
   inject,
-  Inject,
   Input,
   OnInit,
   Output
@@ -43,6 +42,7 @@ export class CoverImageChooserComponent implements OnInit {
   public readonly toastr = inject(ToastrService);
   public readonly uploadService = inject(UploadService);
   private readonly colorscapeService = inject(ColorscapeService)
+  private readonly document = inject(DOCUMENT)
 
   /**
    * If buttons show under images to allow immediate selection of cover images.
@@ -86,8 +86,6 @@ export class CoverImageChooserComponent implements OnInit {
   files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif'].join(',');
   mode: 'file' | 'url' | 'all' = 'all';
-
-  constructor(@Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({

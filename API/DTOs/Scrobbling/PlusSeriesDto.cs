@@ -4,7 +4,7 @@
 /// <summary>
 /// Represents information about a potential Series for Kavita+
 /// </summary>
-public sealed record PlusSeriesRequestDto
+public class PlusSeriesRequestDto
 {
     public int? AniListId { get; set; }
     public long? MalId { get; set; }

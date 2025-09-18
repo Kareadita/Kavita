@@ -16,14 +16,14 @@ import {ToastrService} from 'ngx-toastr';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {ReadingList} from 'src/app/_models/reading-list';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
-import {CommonModule} from "@angular/common";
+
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 
 @Component({
     selector: 'app-bulk-add-to-collection',
-    imports: [CommonModule, ReactiveFormsModule, FilterPipe, NgbModalModule, TranslocoDirective],
+    imports: [ReactiveFormsModule, FilterPipe, NgbModalModule, TranslocoDirective],
     templateUrl: './bulk-add-to-collection.component.html',
     styleUrls: ['./bulk-add-to-collection.component.scss'],
     encapsulation: ViewEncapsulation.None, // This is needed as per the bootstrap modal documentation to get styles to work.
