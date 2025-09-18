@@ -63,6 +63,8 @@ public interface IBookService
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
     Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath);
     Task<string> CopyImageToTempFromBook(int chapterId, BookmarkDto bookmarkDto, string cachedBookPath);
+    Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey);
+
 }
 
 public partial class BookService : IBookService
@@ -1076,6 +1078,27 @@ public partial class BookService : IBookService
         throw new KavitaException($"Page {bookmarkDto.Page} not found in epub");
     }
 
+    /// <summary>
+    /// Attempts to resolve a requested key path with some hacks to attempt to handle incorrect metadata
+    /// </summary>
+    /// <param name="bookFilePath"></param>
+    /// <param name="requestedKey"></param>
+    /// <returns></returns>
+    public async Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey)
+    {
+        using var book = await EpubReader.OpenBookAsync(bookFilePath, LenientBookReaderOptions);
+        var key = CoalesceKeyForAnyFile(book, requestedKey);
+
+        if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key))
+            return BookResourceResultDto.Error("file-missing");
+
+        var bookFile = book.Content.AllFiles.GetLocalFileRefByKey(key);
+        var content = await bookFile.ReadContentAsBytesAsync();
+        var contentType = GetContentType(bookFile.ContentType);
+
+        return BookResourceResultDto.Success(content, contentType, requestedKey);
+    }
+
 
     /// <summary>
     /// Parses out Title from book. Chapters and Volumes will always be "0". If there is any exception reading book (malformed books)
@@ -1285,13 +1308,13 @@ public partial class BookService : IBookService
         var cleanedKey = CleanContentKeys(key);
         if (book.Content.AllFiles.ContainsLocalFileRefWithKey(cleanedKey)) return cleanedKey;
 
-        // TODO: Figure this out
-        // Fallback to searching for key (bad epub metadata)
-        // var correctedKey = book.Content.AllFiles.Keys.SingleOrDefault(s => s.EndsWith(key));
-        // if (!string.IsNullOrEmpty(correctedKey))
-        // {
-        //     key = correctedKey;
-        // }
+        // Correct relative paths ./
+        if (key.StartsWith("./"))
+        {
+            var nonPathKey = key.Replace("./", string.Empty);
+            var correctedKey = book.Content.AllFiles.Local.SingleOrDefault(s => s.Key == nonPathKey);
+            if (correctedKey != null) return correctedKey.Key;
+        }
 
         return key;
     }
