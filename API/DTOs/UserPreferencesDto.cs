@@ -37,6 +37,9 @@ public sealed record UserPreferencesDto
     /// <inheritdoc cref="API.Entities.AppUserPreferences.Locale"/>
     [Required]
     public string Locale { get; set; }
+    /// <inheritdoc cref="API.Entities.AppUserPreferences.ColorScapeEnabled"/>
+    [Required]
+    public bool ColorScapeEnabled { get; set; } = true;
 
     /// <inheritdoc cref="API.Entities.AppUserPreferences.AniListScrobblingEnabled"/>
     public bool AniListScrobblingEnabled { get; set; }

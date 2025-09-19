@@ -14,6 +14,7 @@ export interface Preferences {
   shareReviews: boolean;
   locale: string;
   bookReaderHighlightSlots: HighlightSlot[];
+  colorScapeEnabled: boolean;
 
   // Kavita+
   aniListScrobblingEnabled: boolean;

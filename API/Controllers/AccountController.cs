@@ -530,6 +530,11 @@ public class AccountController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Change the Age Rating restriction for the user
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("update/age-restriction")]
     public async Task<ActionResult> UpdateAgeRestriction(UpdateAgeRestrictionDto dto)
     {

@@ -98,6 +98,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       this.settingsForm.addControl('collapseSeriesRelationships', new FormControl(this.user.preferences.collapseSeriesRelationships, []));
       this.settingsForm.addControl('shareReviews', new FormControl(this.user.preferences.shareReviews, []));
       this.settingsForm.addControl('locale', new FormControl(this.user.preferences.locale || 'en', []));
+      this.settingsForm.addControl('colorScapeEnabled', new FormControl(this.user.preferences.colorScapeEnabled ?? true, []));
 
       this.settingsForm.addControl('aniListScrobblingEnabled', new FormControl(this.user.preferences.aniListScrobblingEnabled || false, []));
       this.settingsForm.addControl('wantToReadSync', new FormControl(this.user.preferences.wantToReadSync || false, []));
@@ -145,6 +146,7 @@ export class ManageUserPreferencesComponent implements OnInit {
     this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('shareReviews')?.setValue(this.user.preferences.shareReviews, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('locale')?.setValue(this.user.preferences.locale || 'en', {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('colorScapeEnabled')?.setValue(this.user.preferences.colorScapeEnabled ?? true, {onlySelf: true, emitEvent: false});
 
     this.settingsForm.get('aniListScrobblingEnabled')?.setValue(this.user.preferences.aniListScrobblingEnabled || false, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('wantToReadSync')?.setValue(this.user.preferences.wantToReadSync || false, {onlySelf: true, emitEvent: false});
@@ -166,6 +168,7 @@ export class ManageUserPreferencesComponent implements OnInit {
       aniListScrobblingEnabled: modelSettings.aniListScrobblingEnabled,
       wantToReadSync: modelSettings.wantToReadSync,
       bookReaderHighlightSlots: modelSettings.bookReaderHighlightSlots,
+      colorScapeEnabled: modelSettings.colorScapeEnabled,
     };
   }
 }

@@ -205,6 +205,8 @@
         "share-series-reviews-tooltip": "Allow your reviews to be visible to other users on this server",
         "highlight-bar-label": "Annotations highlight colors",
         "highlight-bar-tooltip": "These colors are shared between all books",
+        "colorscape-label": "Use ColorScape",
+        "colorscape-tooltip": "Global toggle to enable/disable the dynamic gradient feature. Will override theme settings",
 
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobbling",

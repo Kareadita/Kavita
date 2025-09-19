@@ -139,6 +139,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserPreferences>()
             .Property(b => b.AllowAutomaticWebtoonReaderDetection)
             .HasDefaultValue(true);
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.ColorScapeEnabled)
+            .HasDefaultValue(true);
 
         builder.Entity<Library>()
             .Property(b => b.AllowScrobbling)

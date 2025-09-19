@@ -169,6 +169,10 @@ public class AppUserPreferences
     /// UI Site Global Setting: The language locale that should be used for the user
     /// </summary>
     public string Locale { get; set; }
+    /// <summary>
+    /// UI Site Global Setting: Should Kavita render ColorScape gradients
+    /// </summary>
+    public bool ColorScapeEnabled { get; set; } = true;
     #endregion
 
     #region KavitaPlus
