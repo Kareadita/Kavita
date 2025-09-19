@@ -566,8 +566,9 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> SaveProgress(ProgressDto progressDto)
     {
         var userId = User.GetUserId();
+
         if (!await _readerService.SaveReadingProgress(progressDto, userId))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
+            return BadRequest(await _localizationService.Translate(userId, "generic-read-progress"));
 
 
         return Ok(true);

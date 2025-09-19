@@ -1317,12 +1317,27 @@ public class OpdsController : BaseApiController
 
             // Save progress for the user (except Panels, they will use a direct connection)
             var userAgent = Request.Headers["User-Agent"].ToString();
+
+
+
             if (!userAgent.StartsWith("Panels", StringComparison.InvariantCultureIgnoreCase) || !saveProgress)
             {
+                // Kavita expects 0-N for progress, KOReader doesn't respect the OPDS-PS spec and does some wierd stuff
+                // https://github.com/Kareadita/Kavita/pull/4014#issuecomment-3313677492
+                var koreaderOffset = 0;
+                if (userAgent.StartsWith("Koreader", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var totalPages = await _unitOfWork.ChapterRepository.GetChapterTotalPagesAsync(chapterId);
+                    if (totalPages - pageNumber < 2)
+                    {
+                        koreaderOffset = 1;
+                    }
+                }
+
                 await _readerService.SaveReadingProgress(new ProgressDto()
                 {
                     ChapterId = chapterId,
-                    PageNum = pageNumber,
+                    PageNum = pageNumber + koreaderOffset,
                     SeriesId = seriesId,
                     VolumeId = volumeId,
                     LibraryId =libraryId
@@ -1333,7 +1348,7 @@ public class OpdsController : BaseApiController
         }
         catch (Exception)
         {
-            _cacheService.CleanupChapters(new []{ chapterId });
+            _cacheService.CleanupChapters([chapterId]);
             throw;
         }
     }
@@ -1345,6 +1360,7 @@ public class OpdsController : BaseApiController
         var userId = GetUserIdFromContext();
         var files = _directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
         if (files.Length == 0) return BadRequest(await _localizationService.Translate(userId, "favicon-doesnt-exist"));
+
         var path = files[0];
         var content = await _directoryService.ReadFileAsync(path);
         var format = Path.GetExtension(path);
