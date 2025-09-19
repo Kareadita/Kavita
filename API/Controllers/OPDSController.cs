@@ -909,7 +909,8 @@ public class OpdsController : BaseApiController
         if (anyUserProgress)
         {
             var chapterDto = await _readerService.GetContinuePoint(seriesId, userId);
-            await AddContinueReadingPoint(apiKey, seriesId, chapterDto, userId, feed, prefix, baseUrl);
+            var chapterDtoWithMetadata = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterDto.Id);
+            await AddContinueReadingPoint(apiKey, seriesId, chapterDtoWithMetadata!, userId, feed, prefix, baseUrl);
         }
 
 
@@ -993,9 +994,9 @@ public class OpdsController : BaseApiController
             return NotFound();
         }
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s ",
+        var feed = CreateFeed($"{series.Name} - Volume {volume!.Name}",
             $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);
-        SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{_seriesService.FormatChapterName(userId, libraryType)}s");
+        SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}");
 
         var chapterDtos = await _unitOfWork.ChapterRepository.GetChapterDtosAsync(volume.Chapters.Select(c => c.Id), ChapterIncludes.Files | ChapterIncludes.People);
         foreach (var chapter in chapterDtos)
@@ -1008,7 +1009,8 @@ public class OpdsController : BaseApiController
         if (firstChapterWithProgress != null)
         {
             var chapterDto = await _readerService.GetContinuePoint(seriesId, userId);
-            await AddContinueReadingPoint(apiKey, seriesId, chapterDto, userId, feed, prefix, baseUrl);
+            var chapterDtoWithMetadata = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterDto.Id);
+            await AddContinueReadingPoint(apiKey, seriesId, chapterDtoWithMetadata!, userId, feed, prefix, baseUrl);
         }
 
         foreach (var chapterDto in chapterDtos)
@@ -1039,7 +1041,8 @@ public class OpdsController : BaseApiController
 
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s",
+        var chapterName = await _seriesService.FormatChapterName(userId, libraryType);
+        var feed = CreateFeed( $"{series.Name} - Volume {volume!.Name} - {chapterName} {chapterId}",
             $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey, prefix);
         SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{_seriesService.FormatChapterName(userId, libraryType)}-{chapterId}-files");
 
@@ -1203,7 +1206,7 @@ public class OpdsController : BaseApiController
         var entry = await CreateChapterWithFile(userId, seriesId, volumeId, chapterId, mangaFile, series, chapter,
             apiKey, prefix, baseUrl);
 
-        entry.Title = await _localizationService.Translate(userId, "opds-continue-reading-title");
+        entry.Title = await _localizationService.Translate(userId, "opds-continue-reading-title", entry.Title);
 
         return entry;
     }
@@ -1227,6 +1230,7 @@ public class OpdsController : BaseApiController
         {
             var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
             SeriesService.RenameVolumeName(volume, libraryType, volumeLabel);
+
             if (!volume.IsLooseLeaf())
             {
                 title += $" - {volume.Name}";

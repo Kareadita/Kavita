@@ -160,7 +160,7 @@
     "generic-user-pref": "There was an issue saving preferences",
 
     "opds-disabled": "OPDS is not enabled on this server",
-    "opds-continue-reading-title": "Continue Reading",
+    "opds-continue-reading-title": "Continue Reading from: {0}",
     "on-deck": "On Deck",
     "browse-on-deck": "Browse On Deck",
     "recently-added": "Recently Added",
