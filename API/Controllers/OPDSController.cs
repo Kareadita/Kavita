@@ -809,7 +809,7 @@ public class OpdsController : BaseApiController
             return BadRequest(await _localizationService.Translate(userId, "query-required"));
         }
         query = query.Replace(@"%", string.Empty);
-        // Get libraries user has access to
+
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
         if (libraries.Count == 0) return BadRequest(await _localizationService.Translate(userId, "libraries-restricted"));
 
@@ -915,20 +915,18 @@ public class OpdsController : BaseApiController
 
         var chapterDict = new Dictionary<int, short>();
         var fileDict = new Dictionary<int, short>();
+
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
-            var chaptersForVolume = await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id,
-                ChapterIncludes.Files | ChapterIncludes.People);
+            var chaptersForVolume = await _unitOfWork.ChapterRepository.GetChapterDtosAsync(volume.Id, userId);
 
-
-            foreach (var chapter in chaptersForVolume)
+            foreach (var chapterDto in chaptersForVolume)
             {
-                var chapterId = chapter.Id;
+                var chapterId = chapterDto.Id;
                 if (!chapterDict.TryAdd(chapterId, 0)) continue;
 
-                var chapterDto = _mapper.Map<ChapterDto>(chapter);
-                foreach (var mangaFile in chapter.Files)
+                foreach (var mangaFile in chapterDto.Files)
                 {
                     // If a chapter has multiple files that are within one chapter, this dict prevents duplicate key exception
                     if (!fileDict.TryAdd(mangaFile.Id, 0)) continue;
@@ -1244,10 +1242,10 @@ public class OpdsController : BaseApiController
         }
 
         // Chunky requires a file at the end. Our API ignores this
-        var accLink =
-                CreateLink(FeedLinkRelation.Acquisition, fileType,
+        var accLink = CreateLink(FeedLinkRelation.Acquisition, fileType,
                     $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}",
                     filename);
+
         accLink.TotalPages = chapter.Pages;
 
         var entry = new FeedEntry()
@@ -1281,6 +1279,9 @@ public class OpdsController : BaseApiController
         {
             entry.Links.Add(await CreatePageStreamLink(series.LibraryId, seriesId, volumeId, chapterId, mangaFile, apiKey, prefix));
         }
+
+        // Patch in reading status on the item (as OPDS is seriously lacking)
+        entry.Title = $"{GetReadingProgressIcon(chapter.PagesRead, chapter.Pages)} {entry.Title}";
 
         return entry;
     }
@@ -1477,5 +1478,23 @@ public class OpdsController : BaseApiController
     private static string RemoveInvalidXmlChars(string input)
     {
         return new string(input.Where(XmlConvert.IsXmlChar).ToArray());
+    }
+
+    private static string GetReadingProgressIcon(int pagesRead, int totalPages)
+    {
+        if (pagesRead == 0) return "⭘";
+
+        var percentageRead = (double)pagesRead / totalPages;
+
+        return percentageRead switch
+        {
+            // 100%
+            >= 1.0 => "⬤",
+            // > 50% and < 100%
+            > 0.5 => "◕",
+            // > 25% and <= 50%
+            > 0.25 => "◑",
+            _ => "◔"
+        };
     }
 }

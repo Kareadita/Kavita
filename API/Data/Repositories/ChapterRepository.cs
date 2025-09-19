@@ -46,6 +46,7 @@ public interface IChapterRepository
     Task<ChapterMetadataDto?> GetChapterMetadataDtoAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files);
     Task<IList<MangaFile>> GetFilesForChapterAsync(int chapterId);
     Task<IList<Chapter>> GetChaptersAsync(int volumeId, ChapterIncludes includes = ChapterIncludes.None);
+    Task<IList<ChapterDto>> GetChapterDtosAsync(int volumeId, int userId);
     Task<IList<MangaFile>> GetFilesForChaptersAsync(IReadOnlyList<int> chapterIds);
     Task<string?> GetChapterCoverImageAsync(int chapterId);
     Task<IList<string>> GetAllCoverImagesAsync();
@@ -227,6 +228,27 @@ public class ChapterRepository : IChapterRepository
             .Includes(includes)
             .OrderBy(c => c.SortOrder)
             .ToListAsync();
+    }
+
+    /// <summary>
+    /// Returns Chapters for a volume id with Progress
+    /// </summary>
+    /// <param name="volumeId"></param>
+    /// <returns></returns>
+    public async Task<IList<ChapterDto>> GetChapterDtosAsync(int volumeId, int userId)
+    {
+        var chapts =  await _context.Chapter
+            .Where(c => c.VolumeId == volumeId)
+            .OrderBy(c => c.SortOrder)
+            .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        foreach (var chapter in chapts)
+        {
+            await AddChapterModifiers(userId, chapter);
+        }
+
+        return chapts;
     }
 
     /// <summary>
