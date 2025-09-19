@@ -50,7 +50,7 @@ public class ColorScapeController : BaseApiController
     [HttpGet("chapter")]
     public async Task<ActionResult<ColorScapeDto>> GetColorScapeForChapter(int id)
     {
-        var entity = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(id);
+        var entity = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(id, User.GetUserId());
         return GetColorSpaceDto(entity);
     }
 

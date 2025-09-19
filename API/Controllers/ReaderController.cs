@@ -882,7 +882,7 @@ public class ReaderController : BaseApiController
     {
         var userId = User.GetUserId();
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
         if (series == null || chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
 
         // Patch in the reading progress

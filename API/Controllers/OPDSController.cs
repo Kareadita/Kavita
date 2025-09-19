@@ -601,7 +601,7 @@ public class OpdsController : BaseApiController
 
         foreach (var item in items)
         {
-            var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(item.ChapterId);
+            var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(item.ChapterId, userId);
 
             // If there is only one file underneath, add a direct acquisition link, otherwise add a subsection
             if (chapterDto is {Files.Count: 1})
@@ -635,7 +635,7 @@ public class OpdsController : BaseApiController
     private async Task AddContinueReadingPoint(string apiKey, ReadingListItemDto firstReadReadingListItem, int userId,
         Feed feed, string prefix, string baseUrl)
     {
-        var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(firstReadReadingListItem.ChapterId);
+        var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(firstReadReadingListItem.ChapterId, userId);
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(firstReadReadingListItem.SeriesId, userId);
         if (chapterDto is {Files.Count: 1})
         {
@@ -909,8 +909,7 @@ public class OpdsController : BaseApiController
         if (anyUserProgress)
         {
             var chapterDto = await _readerService.GetContinuePoint(seriesId, userId);
-            var chapterDtoWithMetadata = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterDto.Id);
-            await AddContinueReadingPoint(apiKey, seriesId, chapterDtoWithMetadata!, userId, feed, prefix, baseUrl);
+            await AddContinueReadingPoint(apiKey, seriesId, chapterDto, userId, feed, prefix, baseUrl);
         }
 
 
@@ -987,7 +986,6 @@ public class OpdsController : BaseApiController
             return NotFound();
         }
 
-        var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId, VolumeIncludes.Chapters);
         if (volume == null)
         {
@@ -998,19 +996,14 @@ public class OpdsController : BaseApiController
             $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}");
 
-        var chapterDtos = await _unitOfWork.ChapterRepository.GetChapterDtosAsync(volume.Chapters.Select(c => c.Id), ChapterIncludes.Files | ChapterIncludes.People);
-        foreach (var chapter in chapterDtos)
-        {
-            await _unitOfWork.ChapterRepository.AddChapterModifiers(userId, chapter);
-        }
+        var chapterDtos = await _unitOfWork.ChapterRepository.GetChapterDtoByIdsAsync(volume.Chapters.Select(c => c.Id), userId);
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
         var firstChapterWithProgress = chapterDtos.FirstOrDefault(c => c.PagesRead > 0);
         if (firstChapterWithProgress != null)
         {
             var chapterDto = await _readerService.GetContinuePoint(seriesId, userId);
-            var chapterDtoWithMetadata = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterDto.Id);
-            await AddContinueReadingPoint(apiKey, seriesId, chapterDtoWithMetadata!, userId, feed, prefix, baseUrl);
+            await AddContinueReadingPoint(apiKey, seriesId, chapterDto, userId, feed, prefix, baseUrl);
         }
 
         foreach (var chapterDto in chapterDtos)
@@ -1035,7 +1028,7 @@ public class OpdsController : BaseApiController
         if (series == null) return BadRequest(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, ChapterIncludes.Files | ChapterIncludes.People);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
 
         if (chapter == null) return BadRequest(await _localizationService.Translate(userId, "chapter-doesnt-exist"));
 
