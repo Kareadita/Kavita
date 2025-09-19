@@ -330,23 +330,6 @@ public class OpdsController : BaseApiController
             });
         }
 
-        // if ((await _unitOfWork.AppUserExternalSourceRepository.GetExternalSources(userId)).Any())
-        // {
-        //     feed.Entries.Add(new FeedEntry()
-        //     {
-        //         Id = "allExternalSources",
-        //         Title = await _localizationService.Translate(userId, "external-sources"),
-        //         Content = new FeedEntryContent()
-        //         {
-        //             Text = await _localizationService.Translate(userId, "browse-external-sources")
-        //         },
-        //         Links = new List<FeedLink>()
-        //         {
-        //             CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/external-sources"),
-        //         }
-        //     });
-        // }
-
         return CreateXmlResult(SerializeXml(feed));
     }
 
@@ -462,7 +445,7 @@ public class OpdsController : BaseApiController
         SetFeedId(feed, "libraries");
 
         // Ensure libraries follow SideNav order
-        var userSideNavStreams = await _unitOfWork.UserRepository.GetSideNavStreams(userId, false);
+        var userSideNavStreams = await _unitOfWork.UserRepository.GetSideNavStreams(userId);
         foreach (var library in userSideNavStreams.Where(s => s.StreamType == SideNavStreamType.Library).Select(sideNavStream => sideNavStream.Library))
         {
             feed.Entries.Add(new FeedEntry()
@@ -734,6 +717,7 @@ public class OpdsController : BaseApiController
         var userId = GetUserIdFromContext();
         var (baseUrl, prefix) = await GetPrefix();
         var genre = await _unitOfWork.GenreRepository.GetGenreById(genreId);
+        if (genre == null) return BadRequest(await _localizationService.Translate(userId, "genre-doesnt-exist"));
         var seriesDtos = await _unitOfWork.SeriesRepository.GetMoreIn(userId, 0, genreId, GetUserParams(pageNumber));
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(seriesDtos.Select(s => s.Id));
 
@@ -1031,6 +1015,8 @@ public class OpdsController : BaseApiController
         var (baseUrl, prefix) = await GetPrefix();
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        if (series == null) return BadRequest(await _localizationService.Translate(userId, "series-doesnt-exist"));
+
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, ChapterIncludes.Files | ChapterIncludes.People);
 

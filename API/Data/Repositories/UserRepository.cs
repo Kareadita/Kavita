@@ -638,6 +638,7 @@ public class UserRepository : IUserRepository
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null) return ArraySegment<string>.Empty;
 
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (_userManager == null)
         {
             // userManager is null on Unit Tests only

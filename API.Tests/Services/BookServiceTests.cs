@@ -145,6 +145,9 @@ public class BookServiceTests
         Assert.Equal(parserInfo.Series, comicInfo.Title);
     }
 
+    /// <summary>
+    /// Tests that the ./ rewrite hack works as expected
+    /// </summary>
     [Fact]
     public async Task ShouldBeAbleToLookUpImage()
     {
