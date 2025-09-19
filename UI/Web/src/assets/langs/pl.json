@@ -1560,7 +1560,7 @@
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
-        "loading-message": "Ładowanie… Pliki PDF mogą ładować się dłużej niż oczekiwano",
+        "loading-message": "Ładowanie...",
         "incognito-mode": "Tryb incognito",
         "light-theme-alt": "Jasny motyw",
         "dark-theme-alt": "Ciemny motyw",

@@ -11,7 +11,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgxExtendedPdfViewerModule, PageViewModeType, ProgressBarEvent, ScrollModeType} from 'ngx-extended-pdf-viewer';
+import {NgxExtendedPdfViewerModule, pdfDefaultOptions, PageViewModeType, ProgressBarEvent, ScrollModeType} from 'ngx-extended-pdf-viewer';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
 import {BookService} from 'src/app/book-reader/_services/book.service';
@@ -126,6 +126,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
+      pdfDefaultOptions.disableAutoFetch = true;
   }
 
   @HostListener('window:keyup', ['$event'])

@@ -1508,7 +1508,7 @@
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
-        "loading-message": "Cargando……los PDF pueden ser más lentos de lo esperado",
+        "loading-message": "Cargando...",
         "incognito-mode": "Modo incógnito",
         "light-theme-alt": "Tema claro",
         "dark-theme-alt": "Tema oscuro",

@@ -1550,7 +1550,7 @@
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
-        "loading-message": "로딩 중……PDF가 예상보다 오래 걸릴 수 있습니다",
+        "loading-message": "로딩 중...",
         "incognito-mode": "시크릿 모드",
         "light-theme-alt": "밝은 테마",
         "dark-theme-alt": "어두운 테마",

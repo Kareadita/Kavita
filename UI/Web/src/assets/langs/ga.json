@@ -1560,7 +1560,7 @@
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
-        "loading-message": "Á Luchtú...... D'fhéadfadh sé go dtógfadh PDFanna níos faide ná mar a bhíothas ag súil leis",
+        "loading-message": "Á Luchtú...",
         "incognito-mode": "Mód Incognito",
         "light-theme-alt": "Téama Solais",
         "dark-theme-alt": "Téama Dorcha",

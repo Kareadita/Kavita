@@ -1540,7 +1540,7 @@
         "comicvine-parsing-label": "Použite zhodu Comic Vine Serií"
     },
     "pdf-reader": {
-        "loading-message": "Načítavanie……súborov PDF môže trvať dlhšie, ako sa očakávalo",
+        "loading-message": "Načítavanie...",
         "incognito-mode": "Mód Inkognito",
         "light-theme-alt": "Svetlá téma",
         "dark-theme-alt": "Tmavá téma",

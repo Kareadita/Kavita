@@ -2145,7 +2145,7 @@
         "cbl-repo": "சமூகத்தில் பல வாசிப்பு பட்டியல்களை நீங்கள் காணலாம் <a href = 'https: //github.com/dieseltech/cbl-readinglists' target = '_ வெற்று' rel = 'noopener norferrer'> களஞ்சி </a>."
     },
     "pdf-reader": {
-        "loading-message": "ஏற்றுதல் …… PDF கள் எதிர்பார்த்ததை விட அதிக நேரம் ஆகலாம்",
+        "loading-message": "ஏற்றுதல்...",
         "incognito-mode": "மறைநிலை பயன்முறை",
         "light-theme-alt": "ஒளி கருப்பொருள்",
         "dark-theme-alt": "இருண்ட கருப்பொருள்",

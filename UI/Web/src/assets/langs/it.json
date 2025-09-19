@@ -1511,7 +1511,7 @@
         "cbl-repo": "Puoi trovare molti elenchi di lettura nella community <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
     },
     "pdf-reader": {
-        "loading-message": "Caricamento... I PDF potrebbero richiedere più tempo del previsto",
+        "loading-message": "Caricamento...",
         "incognito-mode": "Modalità Incognito",
         "light-theme-alt": "Tema Chiaro",
         "dark-theme-alt": "Tema Scuro",

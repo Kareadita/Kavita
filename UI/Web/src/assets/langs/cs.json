@@ -2107,7 +2107,7 @@
     },
     "pdf-reader": {
         "incognito-mode": "Anonymní režim",
-        "loading-message": "Načítání......PDF může trvat déle, než se očekávalo",
+        "loading-message": "Načítání...",
         "light-theme-alt": "Světlý motiv",
         "dark-theme-alt": "Tmavý motiv",
         "close-reader-alt": "Zavřít čtečku",

@@ -1560,7 +1560,7 @@
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
-        "loading-message": "Chargement......de PDF peut prendre plus de temps que prévu",
+        "loading-message": "Chargement...",
         "incognito-mode": "Mode incognito",
         "light-theme-alt": "Thème clair",
         "dark-theme-alt": "Thème sombre",

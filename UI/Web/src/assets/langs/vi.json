@@ -1923,7 +1923,7 @@
         "light-theme-alt": "Chủ Đề Sáng",
         "dark-theme-alt": "Chủ Đề Tối",
         "close-reader-alt": "Đóng Trình Đọc",
-        "loading-message": "Đang tải……PDF có thể mất nhiều thời gian hơn dự kiến",
+        "loading-message": "Đang tải...",
         "toggle-incognito": "Tắt chế độ Ẩn Danh"
     },
     "pdf-layout-mode-pipe": {
