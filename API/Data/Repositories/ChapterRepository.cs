@@ -41,6 +41,8 @@ public interface IChapterRepository
     Task<int> GetChapterTotalPagesAsync(int chapterId);
     Task<Chapter?> GetChapterAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files);
     Task<ChapterDto?> GetChapterDtoAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files);
+    Task<IList<ChapterDto>> GetChapterDtosAsync(IEnumerable<int> chapterIds,
+        ChapterIncludes includes = ChapterIncludes.None);
     Task<ChapterMetadataDto?> GetChapterMetadataDtoAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files);
     Task<IList<MangaFile>> GetFilesForChapterAsync(int chapterId);
     Task<IList<Chapter>> GetChaptersAsync(int volumeId, ChapterIncludes includes = ChapterIncludes.None);
@@ -155,14 +157,23 @@ public class ChapterRepository : IChapterRepository
     }
     public async Task<ChapterDto?> GetChapterDtoAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files)
     {
-        var chapter = await _context.Chapter
+        return await _context.Chapter
             .Includes(includes)
             .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == chapterId);
+    }
 
-        return chapter;
+    public async Task<IList<ChapterDto>> GetChapterDtosAsync(IEnumerable<int> chapterIds, ChapterIncludes includes = ChapterIncludes.None)
+    {
+        return await _context.Chapter
+                .Where(c => chapterIds.Contains(c.Id))
+                .Includes(includes)
+                .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .AsSplitQuery()
+                .ToListAsync() ;
     }
 
     public async Task<ChapterMetadataDto?> GetChapterMetadataDtoAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files)
