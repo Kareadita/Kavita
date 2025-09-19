@@ -1238,7 +1238,7 @@
         "final-import-step": "Laatste stap"
     },
     "pdf-reader": {
-        "loading-message": "Het laden van……PDF's kunnen langer duren dan verwacht",
+        "loading-message": "Laden...",
         "incognito-mode": "Incognito modus",
         "light-theme-alt": "Licht thema",
         "dark-theme-alt": "Donker thema",

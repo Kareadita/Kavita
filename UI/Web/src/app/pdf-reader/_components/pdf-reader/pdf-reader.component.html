@@ -2,17 +2,23 @@
   @if (accountService.currentUser$ | async; as user) {
     <div class="{{theme}}" #container>
 
-      <div class="progress-container row g-0 align-items-center">
-        <div class="progress" style="height: 5px;">
-          <div class="progress-bar" role="progressbar" [ngStyle]="{'width': loadPercent + '%'}" [attr.aria-valuenow]="loadPercent" aria-valuemin="0" aria-valuemax="100"></div>
+      @if (isLoading) {
+        <div class="loading-message-container">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          {{t('loading-message')}}
         </div>
-      </div>
+        <div class="progress-container row g-0 align-items-center">
+          <div class="progress" style="height: 5px;">
+            <div class="progress-bar" role="progressbar" [ngStyle]="{'width': loadPercent + '%'}" [attr.aria-valuenow]="loadPercent" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      }
 
       <ngx-extended-pdf-viewer
         #pdfViewer
         [src]="readerService.downloadPdf(this.chapterId)"
         [authorization]="'Bearer ' + user.token"
-        height="calc(100vh - 5px)"
+        height="100vh"
         [(page)]="currentPage"
         [textLayer]="true"
         [showHandToolButton]="true"

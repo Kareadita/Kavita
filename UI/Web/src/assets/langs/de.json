@@ -1557,7 +1557,7 @@
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
-        "loading-message": "Das Laden von……PDFs kann länger dauern als erwartet",
+        "loading-message": "Laden...",
         "incognito-mode": "Inkognito-Modus",
         "light-theme-alt": "Light Schema",
         "dark-theme-alt": "Dunkles Schema",

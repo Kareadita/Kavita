@@ -1381,7 +1381,7 @@
         "comicvine-parsing-label": "Comic Vine シリーズのマッチングを使用"
     },
     "pdf-reader": {
-        "loading-message": "ローディング...... PDF は期待以上の時間がかかる場合があります",
+        "loading-message": "ローディング...",
         "incognito-mode": "シークレットモード",
         "light-theme-alt": "ライトテーマ",
         "dark-theme-alt": "ダークテーマ",

@@ -2150,7 +2150,7 @@
     },
 
     "pdf-reader": {
-        "loading-message": "Loading……PDFs may take longer than expected",
+        "loading-message": "Loading...",
         "incognito-mode": "Incognito Mode",
         "light-theme-alt": "Light Theme",
         "dark-theme-alt": "Dark Theme",

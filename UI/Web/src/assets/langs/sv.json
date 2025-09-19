@@ -2568,7 +2568,7 @@
         "light-theme-alt": "Ljust Tema",
         "dark-theme-alt": "Mörkt Tema",
         "toggle-incognito": "Stäng av Inkognitoläge",
-        "loading-message": "Laddar……PDFs kan ta längre än väntat",
+        "loading-message": "Laddar...",
         "incognito-mode": "Inkognitoläge"
     },
     "log-level-pipe": {

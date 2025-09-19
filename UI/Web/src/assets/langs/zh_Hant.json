@@ -2351,7 +2351,7 @@
     },
     "pdf-reader": {
         "close-reader-alt": "關閉閱讀器",
-        "loading-message": "載入中…PDF 可能需要比預期更長的時間",
+        "loading-message": "載入中...",
         "incognito-mode": "無痕模式",
         "light-theme-alt": "淺色主題",
         "dark-theme-alt": "深色主題",

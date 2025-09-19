@@ -1560,7 +1560,7 @@
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
-        "loading-message": "加载中...PDF文件可能需要比预期更长的时间",
+        "loading-message": "加载中...",
         "incognito-mode": "隐身模式",
         "light-theme-alt": "明亮主题",
         "dark-theme-alt": "深色主题",
