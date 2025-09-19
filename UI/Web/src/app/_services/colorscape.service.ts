@@ -2,7 +2,6 @@ import {inject, Injectable} from '@angular/core';
 import {DOCUMENT} from '@angular/common';
 import {BehaviorSubject, filter, take, tap, timer} from 'rxjs';
 import {NavigationEnd, Router} from "@angular/router";
-import {MessageHubService} from "./message-hub.service";
 import {AccountService} from "./account.service";
 
 interface ColorSpace {
@@ -34,12 +33,10 @@ const colorScapeSelector = 'colorscape';
 export class ColorscapeService {
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
-  private readonly messageHub = inject(MessageHubService);
   private readonly accountService = inject(AccountService);
 
   private colorSubject = new BehaviorSubject<ColorSpaceRGBA | null>(null);
   private colorSeedSubject = new BehaviorSubject<{primary: string, complementary: string | null} | null>(null);
-  public readonly colors$ = this.colorSubject.asObservable();
 
   private minDuration = 1000; // minimum duration
   private maxDuration = 4000; // maximum duration

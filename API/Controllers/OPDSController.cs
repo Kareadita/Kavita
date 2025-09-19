@@ -105,33 +105,32 @@ public class OpdsController : BaseApiController
 
     private readonly XmlSerializer _xmlSerializer;
     private readonly XmlSerializer _xmlOpenSearchSerializer;
-    private readonly FilterDto _filterDto = new FilterDto()
+    private readonly FilterDto _filterDto = new()
     {
-        Formats = new List<MangaFormat>(),
-        Character = new List<int>(),
-        Colorist = new List<int>(),
-        Editor = new List<int>(),
-        Genres = new List<int>(),
-        Inker = new List<int>(),
-        Languages = new List<string>(),
-        Letterer = new List<int>(),
-        Penciller = new List<int>(),
-        Libraries = new List<int>(),
-        Publisher = new List<int>(),
+        Formats = [],
+        Character = [],
+        Colorist = [],
+        Editor = [],
+        Genres = [],
+        Inker = [],
+        Languages = [],
+        Letterer = [],
+        Penciller = [],
+        Libraries = [],
+        Publisher = [],
         Rating = 0,
-        Tags = new List<int>(),
-        Translators = new List<int>(),
-        Writers = new List<int>(),
-        AgeRating = new List<AgeRating>(),
-        CollectionTags = new List<int>(),
-        CoverArtist = new List<int>(),
+        Tags = [],
+        Translators = [],
+        Writers = [],
+        AgeRating = [],
+        CollectionTags = [],
+        CoverArtist = [],
         ReadStatus = new ReadStatus(),
         SortOptions = null,
-        PublicationStatus = new List<PublicationStatus>()
+        PublicationStatus = []
     };
 
-    private readonly FilterV2Dto _filterV2Dto = new FilterV2Dto();
-    private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
+    private readonly FilterV2Dto _filterV2Dto = new();
     private const int PageSize = 20;
     public const string UserId = nameof(UserId);
 
@@ -187,10 +186,10 @@ public class OpdsController : BaseApiController
                         {
                             Text = await _localizationService.Translate(userId, "browse-on-deck")
                         },
-                        Links = new List<FeedLink>()
-                        {
+                        Links =
+                        [
                             CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/on-deck"),
-                        }
+                        ]
                     });
                     break;
                 case DashboardStreamType.NewlyAdded:
@@ -202,10 +201,10 @@ public class OpdsController : BaseApiController
                         {
                             Text = await _localizationService.Translate(userId, "browse-recently-added")
                         },
-                        Links = new List<FeedLink>()
-                        {
+                        Links =
+                        [
                             CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/recently-added"),
-                        }
+                        ]
                     });
                     break;
                 case DashboardStreamType.RecentlyUpdated:
@@ -217,10 +216,10 @@ public class OpdsController : BaseApiController
                         {
                             Text = await _localizationService.Translate(userId, "browse-recently-updated")
                         },
-                        Links = new List<FeedLink>()
-                        {
+                        Links =
+                        [
                             CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/recently-updated"),
-                        }
+                        ]
                     });
                     break;
                 case DashboardStreamType.MoreInGenre:
@@ -235,10 +234,10 @@ public class OpdsController : BaseApiController
                         {
                             Text = await _localizationService.Translate(userId, "browse-more-in-genre", randomGenre.Title)
                         },
-                        Links = new List<FeedLink>()
-                        {
+                        Links =
+                        [
                             CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/more-in-genre?genreId={randomGenre.Id}"),
-                        }
+                        ]
                     });
                     break;
                 case DashboardStreamType.SmartFilter:
@@ -269,10 +268,10 @@ public class OpdsController : BaseApiController
             {
                 Text = await _localizationService.Translate(userId, "browse-reading-lists")
             },
-            Links = new List<FeedLink>()
-            {
+            Links =
+            [
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/reading-list"),
-            }
+            ]
         });
         feed.Entries.Add(new FeedEntry()
         {
@@ -282,10 +281,10 @@ public class OpdsController : BaseApiController
             {
                 Text = await _localizationService.Translate(userId, "browse-want-to-read")
             },
-            Links = new List<FeedLink>()
-            {
+            Links =
+            [
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/want-to-read"),
-            }
+            ]
         });
         feed.Entries.Add(new FeedEntry()
         {
@@ -295,10 +294,10 @@ public class OpdsController : BaseApiController
             {
                 Text = await _localizationService.Translate(userId, "browse-libraries")
             },
-            Links = new List<FeedLink>()
-            {
+            Links =
+            [
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/libraries"),
-            }
+            ]
         });
         feed.Entries.Add(new FeedEntry()
         {
@@ -308,10 +307,10 @@ public class OpdsController : BaseApiController
             {
                 Text = await _localizationService.Translate(userId, "browse-collections")
             },
-            Links = new List<FeedLink>()
-            {
+            Links =
+            [
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/collections"),
-            }
+            ]
         });
 
         if ((_unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(userId)).Any())
@@ -324,10 +323,10 @@ public class OpdsController : BaseApiController
                 {
                     Text = await _localizationService.Translate(userId, "browse-smart-filters")
                 },
-                Links = new List<FeedLink>()
-                {
+                Links =
+                [
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/smart-filters"),
-                }
+                ]
             });
         }
 
@@ -441,11 +440,11 @@ public class OpdsController : BaseApiController
                 Id = externalSource.Id.ToString(),
                 Title = externalSource.Name,
                 Summary = externalSource.Host,
-                Links = new List<FeedLink>()
-                {
+                Links =
+                [
                     CreateLink(FeedLinkRelation.Start, FeedLinkType.AtomNavigation, opdsUrl),
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{opdsUrl}/favicon")
-                }
+                ]
             });
         }
 
@@ -684,14 +683,14 @@ public class OpdsController : BaseApiController
 
         var filter = new FilterV2Dto
         {
-            Statements = new List<FilterStatementDto>() {
+            Statements = [
                 new ()
                 {
                     Comparison = FilterComparison.Equal,
                     Field = FilterField.Libraries,
                     Value = libraryId + string.Empty
                 }
-            }
+            ]
         };
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, GetUserParams(pageNumber), filter);
@@ -855,15 +854,15 @@ public class OpdsController : BaseApiController
                 Id = collection.Id.ToString(),
                 Title = collection.Title,
                 Summary = collection.Summary,
-                Links = new List<FeedLink>()
-                {
+                Links =
+                [
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
                         $"{prefix}{apiKey}/collections/{collection.Id}"),
                     CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
                         $"{baseUrl}api/image/collection-cover?collectionId={collection.Id}&apiKey={apiKey}"),
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
                         $"{baseUrl}api/image/collection-cover?collectionId={collection.Id}&apiKey={apiKey}")
-                }
+                ]
             });
         }
 
@@ -874,10 +873,10 @@ public class OpdsController : BaseApiController
                 Id = readingListDto.Id.ToString(),
                 Title = readingListDto.Title,
                 Summary = readingListDto.Summary,
-                Links = new List<FeedLink>()
-                {
+                Links =
+                [
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
-                }
+                ]
             });
         }
 

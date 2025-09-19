@@ -3,7 +3,7 @@
       @if (currentUser && (navService.navbarVisible$ | async) === true) {
         <div class="fullpage-background">
           <div class="background-area">
-            <canvas id="backgroundCanvas" class="default-background" style="width: 100%; height: calc(var(--vh) * 100);"></canvas>
+            <canvas id="backgroundCanvas" class="default-background" style="width: 100%; height: calc(var('--vh') * 100);"></canvas>
           </div>
         </div>
       }
