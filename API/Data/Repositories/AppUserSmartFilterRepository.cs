@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Dashboard;
 using API.Entities;
+using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ public interface IAppUserSmartFilterRepository
     void Attach(AppUserSmartFilter filter);
     void Delete(AppUserSmartFilter filter);
     IEnumerable<SmartFilterDto> GetAllDtosByUserId(int userId);
+    Task<PagedList<SmartFilterDto>> GetPagedDtosByUserIdAsync(int userId, UserParams userParams);
     Task<AppUserSmartFilter?> GetById(int smartFilterId);
 
 }
@@ -52,6 +54,15 @@ public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository
             .Where(f => f.AppUserId == userId)
             .ProjectTo<SmartFilterDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
+    }
+
+    public Task<PagedList<SmartFilterDto>> GetPagedDtosByUserIdAsync(int userId, UserParams userParams)
+    {
+        var filters = _context.AppUserSmartFilter
+            .Where(f => f.AppUserId == userId)
+            .ProjectTo<SmartFilterDto>(_mapper.ConfigurationProvider);
+
+        return PagedList<SmartFilterDto>.CreateAsync(filters, userParams);
     }
 
     public async Task<AppUserSmartFilter?> GetById(int smartFilterId)

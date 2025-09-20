@@ -379,12 +379,12 @@ public class OpdsController : BaseApiController
 
     [HttpGet("{apiKey}/smart-filters")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetSmartFilters(string apiKey)
+    public async Task<IActionResult> GetSmartFilters(string apiKey, [FromQuery] int pageNumber = 0)
     {
         var userId = GetUserIdFromContext();
         var (_, prefix) = await GetPrefix();
 
-        var filters = _unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(userId);
+        var filters = await _unitOfWork.AppUserSmartFilterRepository.GetPagedDtosByUserIdAsync(userId, GetUserParams(pageNumber));
         var feed = CreateFeed(await _localizationService.Translate(userId, "smartFilters"), $"{apiKey}/smart-filters", apiKey, prefix);
         SetFeedId(feed, "smartFilters");
 
@@ -402,6 +402,7 @@ public class OpdsController : BaseApiController
             });
         }
 
+        AddPagination(feed, filters, $"{prefix}{apiKey}/smart-filters");
         return CreateXmlResult(SerializeXml(feed));
     }
 
@@ -458,14 +459,14 @@ public class OpdsController : BaseApiController
 
     [HttpGet("{apiKey}/collections")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetCollections(string apiKey)
+    public async Task<IActionResult> GetCollections(string apiKey, [FromQuery] int pageNumber = 0)
     {
         var userId = GetUserIdFromContext();
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
 
-        var tags = await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(user.Id, true);
+        var tags = await _unitOfWork.CollectionTagRepository.GetCollectionDtosPagedAsync(user.Id, GetUserParams(pageNumber), true);
 
         var (baseUrl, prefix) = await GetPrefix();
         var feed = CreateFeed(await _localizationService.Translate(userId, "collections"), $"{apiKey}/collections", apiKey, prefix);
@@ -488,6 +489,7 @@ public class OpdsController : BaseApiController
             ]
         }));
 
+        AddPagination(feed, tags, $"{prefix}{apiKey}/collections");
         return CreateXmlResult(SerializeXml(feed));
     }
 
@@ -727,6 +729,13 @@ public class OpdsController : BaseApiController
         return CreateXmlResult(SerializeXml(feed));
     }
 
+    /// <summary>
+    /// Returns recently updated series. While pagination is avaible, total amount of pages is not due to implementation
+    /// details
+    /// </summary>
+    /// <param name="apiKey"></param>
+    /// <param name="pageNumber"></param>
+    /// <returns></returns>
     [HttpGet("{apiKey}/recently-updated")]
     [Produces("application/xml")]
     public async Task<IActionResult> GetRecentlyUpdated(string apiKey, [FromQuery] int pageNumber = 1)
