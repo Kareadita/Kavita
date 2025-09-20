@@ -11,6 +11,7 @@ import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {animate, style, transition, trigger} from "@angular/animations";
+import {WikiLink} from "../../../_models/wiki";
 
 @Component({
   selector: 'app-font-manager',
@@ -46,6 +47,7 @@ export class FontManagerComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
 
   protected readonly FontProvider = FontProvider;
+  protected readonly WikiLink = WikiLink.EpubFontManager;
 
   user = this.accountService.currentUserSignal;
 
@@ -148,6 +150,7 @@ export class FontManagerComponent implements OnInit {
   private addFont(font: EpubFont) {
     this.fonts.update(x => [...x, font]);
     this.loadedFonts.update(x => [...x, font]);
+    setTimeout(() => this.selectedFont.set(font), 100);
   }
 
   animationState(font: EpubFont) {

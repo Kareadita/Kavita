@@ -124,8 +124,6 @@ public class FontController : BaseApiController
         {
             return BadRequest(_localizationService.Translate(User.GetUserId(), ex.Message));
         }
-
-        return Ok();
     }
 
     private async Task<string> UploadToTemp(IFormFile file)

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.DTOs.Font;
 using API.Entities;
 using API.Extensions;
+using API.Services.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -53,7 +54,7 @@ public class EpubFontRepository: IEpubFontRepository
     public async Task<IEnumerable<EpubFontDto>> GetFontDtosAsync()
     {
         return await _context.EpubFont
-            .OrderBy(s => s.Name == "Default" ? -1 : 0)
+            .OrderBy(s => s.Name == FontService.DefaultFont ? -1 : 0)
             .ThenBy(s => s)
             .ProjectTo<EpubFontDto>(_mapper.ConfigurationProvider)
             .ToListAsync();

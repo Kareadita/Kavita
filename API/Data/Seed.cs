@@ -17,6 +17,7 @@ using API.Entities.Enums.Theme;
 using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks;
 using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -75,8 +76,8 @@ public static class Seed
     [
         new ()
         {
-            Name = "Default",
-            NormalizedName = Parser.Normalize("Default"),
+            Name = FontService.DefaultFont,
+            NormalizedName = Parser.Normalize(FontService.DefaultFont),
             Provider = FontProvider.System,
             FileName = string.Empty,
         },

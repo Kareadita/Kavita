@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
+using API.Services.Tasks;
 
 namespace API.Entities;
 
@@ -109,7 +110,7 @@ public class AppUserReadingProfile
     /// <summary>
     /// Book Reader Option: Maps to the default Kavita font-family (inherit) or an override
     /// </summary>
-    public string BookReaderFontFamily { get; set; } = "default";
+    public string BookReaderFontFamily { get; set; } = FontService.DefaultFont;
     /// <summary>
     /// Book Reader Option: Allows tapping on side of screens to paginate
     /// </summary>

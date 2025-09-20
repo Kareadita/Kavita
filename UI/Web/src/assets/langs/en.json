@@ -261,7 +261,7 @@
     },
 
     "font-manager": {
-        "description": "Kavita's epub reader comes with a few build-in fonts, add your own fonts here. Upload a file, or use a google fonts url. See the <a href='https://wiki.kavitareader.com/guides/epub-fonts/' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
+        "description": "Kavita's epub reader comes with a few build-in fonts, add your own fonts here. Upload a file, or use a google fonts url. See the <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
         "enter-an-url-pre-title": "Enter an {{url}}",
         "url": "url",
         "add": "Add",

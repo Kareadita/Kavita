@@ -90,14 +90,14 @@ public interface IFontService
 public class FontService: IFontService
 {
 
-    public static readonly string DefaultFont = "default";
+    public static readonly string DefaultFont = "Default";
 
     private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<FontService> _logger;
     private readonly IEventHub _eventHub;
 
-    private const string SupportedFontUrlPrefix = "https://fonts.google.com/specimen/";
+    private const string SupportedFontUrlPrefix = "https://fonts.google.com/";
     private const string DownloadFontUrlPrefix = "https://fonts.google.com/download/list?family=";
     private const string GoogleFontsInvalidJsonPrefix = ")]}'";
 
@@ -165,7 +165,7 @@ public class FontService: IFontService
         }
 
         // Extract Font name from url
-        var fontFamily = url.Split(SupportedFontUrlPrefix)[1].Split("?")[0];
+        var fontFamily = url.Split(SupportedFontUrlPrefix)[1].Split("?")[0].Split("/").Last();
         _logger.LogInformation("Preparing to download {FontName} font", fontFamily);
 
         var metaData = await GetGoogleFontsMetadataAsync(fontFamily);
@@ -242,6 +242,7 @@ public class FontService: IFontService
         {
             content = content[GoogleFontsInvalidJsonPrefix.Length..];
         }
+
         return JsonSerializer.Deserialize<GoogleFontsMetadata>(content);
     }
 }

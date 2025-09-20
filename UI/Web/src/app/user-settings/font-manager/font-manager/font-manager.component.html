@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'font-manager'">
   <div class="container-fluid">
 
-    <p [innerHTML]="t('description')"></p>
+    <p [innerHTML]="t('description', {'wikiLink': WikiLink})"></p>
 
     <div class="row g-0 theme-container">
       <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7 scroller">
