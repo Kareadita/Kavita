@@ -3,7 +3,7 @@ using API.Entities.Enums.Font;
 
 namespace API.DTOs.Font;
 
-public class EpubFontDto
+public sealed record EpubFontDto
 {
     public int Id { get; set; }
     public string Name { get; set; }

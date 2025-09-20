@@ -53,7 +53,7 @@ public class FontController : BaseApiController
     }
 
     /// <summary>
-    /// Returns a font
+    /// Returns a font file
     /// </summary>
     /// <param name="fontId"></param>
     /// <param name="apiKey"></param>
