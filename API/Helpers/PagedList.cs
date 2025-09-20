@@ -23,6 +23,11 @@ public class PagedList<T> : List<T>
     public int PageSize { get; set; }
     public int TotalCount { get; set; }
 
+    public static async Task<PagedList<T>> CreateAsync(IQueryable<T> source, UserParams userParams)
+    {
+        return await CreateAsync(source, userParams.PageNumber, userParams.PageSize);
+    }
+
     public static async Task<PagedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize)
     {
         // NOTE: OrderBy warning being thrown here even if query has the orderby statement
