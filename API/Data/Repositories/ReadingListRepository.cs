@@ -31,7 +31,7 @@ public interface IReadingListRepository
 {
     Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true);
     Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None);
-    Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId);
+    Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null);
     Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId);
     Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
     Task<ReadingListDto?> GetReadingListDtoByTitleAsync(int userId, string title);
@@ -357,11 +357,11 @@ public class ReadingListRepository : IReadingListRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId)
+    public async Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null)
     {
         var userLibraries = _context.Library.GetUserLibraries(userId);
 
-        var items = await _context.ReadingListItem
+        var query = _context.ReadingListItem
             .Where(s => s.ReadingListId == readingListId)
             .Join(_context.Chapter, s => s.ChapterId, chapter => chapter.Id, (data, chapter) => new
             {
@@ -431,9 +431,17 @@ public class ReadingListRepository : IReadingListRepository
             })
             .Where(o => userLibraries.Contains(o.LibraryId))
             .OrderBy(rli => rli.Order)
-            .AsSplitQuery()
-            .AsNoTracking()
-            .ToListAsync();
+            .AsSplitQuery();
+
+        if (userParams != null)
+        {
+            query = query
+                .Skip(userParams.PageNumber * userParams.PageSize)
+                .Take(userParams.PageSize);
+        }
+
+
+        var items = await query.ToListAsync();
 
         foreach (var item in items)
         {

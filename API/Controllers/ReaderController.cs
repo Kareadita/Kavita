@@ -516,7 +516,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
         if (user == null) return Unauthorized();
-        user.Progresses ??= new List<AppUserProgress>();
+        user.Progresses ??= [];
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
         foreach (var volume in volumes)
@@ -568,8 +568,9 @@ public class ReaderController : BaseApiController
         var userId = User.GetUserId();
 
         if (!await _readerService.SaveReadingProgress(progressDto, userId))
+        {
             return BadRequest(await _localizationService.Translate(userId, "generic-read-progress"));
-
+        }
 
         return Ok(true);
     }
@@ -628,7 +629,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return Unauthorized();
-        if (user.Bookmarks == null) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+        if (user.Bookmarks == null || user.Bookmarks.Count == 0) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
 
         try
         {
@@ -668,7 +669,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return Unauthorized();
-        if (user.Bookmarks == null) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+        if (user.Bookmarks == null || user.Bookmarks.Count == 0) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
 
         try
         {

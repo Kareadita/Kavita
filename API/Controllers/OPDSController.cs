@@ -592,7 +592,7 @@ public class OpdsController : BaseApiController
         SetFeedId(feed, $"reading-list-{readingListId}");
 
 
-        var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).ToList();
+        var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId, GetUserParams(pageNumber))).ToList();
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
         var firstReadReadingListItem = items.FirstOrDefault(i => i.PagesRead > 0);
