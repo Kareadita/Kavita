@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, inject, Input, Output} from '@angular/core';
-import {APP_BASE_HREF, CommonModule} from '@angular/common';
+import { APP_BASE_HREF, CommonModule } from '@angular/common';
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";

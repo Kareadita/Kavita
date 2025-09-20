@@ -91,6 +91,14 @@
                   "maximumError": "30kb"
                 }
               ]
+            },
+            "proxy": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.proxy.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": ""
@@ -106,6 +114,9 @@
           "configurations": {
             "production": {
               "buildTarget": "kavita-webui:build:production"
+            },
+            "proxy": {
+              "buildTarget": "kavita-webui:build:proxy"
             }
           }
         },

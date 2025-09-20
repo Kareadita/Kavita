@@ -516,7 +516,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
         if (user == null) return Unauthorized();
-        user.Progresses ??= new List<AppUserProgress>();
+        user.Progresses ??= [];
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
         foreach (var volume in volumes)
@@ -566,9 +566,11 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> SaveProgress(ProgressDto progressDto)
     {
         var userId = User.GetUserId();
-        if (!await _readerService.SaveReadingProgress(progressDto, userId))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
 
+        if (!await _readerService.SaveReadingProgress(progressDto, userId))
+        {
+            return BadRequest(await _localizationService.Translate(userId, "generic-read-progress"));
+        }
 
         return Ok(true);
     }
@@ -627,7 +629,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return Unauthorized();
-        if (user.Bookmarks == null) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+        if (user.Bookmarks == null || user.Bookmarks.Count == 0) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
 
         try
         {
@@ -667,7 +669,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return Unauthorized();
-        if (user.Bookmarks == null) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+        if (user.Bookmarks == null || user.Bookmarks.Count == 0) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
 
         try
         {
@@ -882,7 +884,7 @@ public class ReaderController : BaseApiController
     {
         var userId = User.GetUserId();
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
         if (series == null || chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
 
         // Patch in the reading progress

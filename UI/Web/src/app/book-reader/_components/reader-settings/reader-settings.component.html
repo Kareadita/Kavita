@@ -83,7 +83,7 @@
                 <div class="controls" style="display: flex; justify-content: space-between; align-items: center; ">
                   <label for="writing-style" class="form-label">{{t('writing-style-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="writingStyleTooltip" role="button" tabindex="0" aria-describedby="writingStyle-help"></i></label>
                   <ng-template #writingStyleTooltip>{{t('writing-style-tooltip')}}</ng-template>
-                  <span class="visually-hidden" id="writingStyle-help"><ng-container [ngTemplateOutlet]="writingStyleTooltip"></ng-container></span>
+                  <span class="visually-hidden" id="writingStyle-help"><ng-container [ngTemplateOutlet]="writingStyleTooltip" /></span>
                   <button (click)="toggleWritingStyle()" id="writing-style" class="btn btn-icon" aria-labelledby="writingStyle-help" title="{{writingStyleModel() === WritingStyle.Horizontal ? t('horizontal') : t('vertical')}}">
                     <i class="fa {{writingStyleModel() === WritingStyle.Horizontal ? 'fa-arrows-left-right' : 'fa-arrows-up-down' }}" aria-hidden="true"></i>
                     <span class="phone-hidden"> {{writingStyleModel() === WritingStyle.Horizontal ? t('horizontal') : t('vertical') }}</span>
@@ -94,7 +94,7 @@
                   <label for="tap-pagination" class="form-label">{{t('tap-to-paginate-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tapPagination-help"></i></label>
                   <ng-template #tapPaginationTooltip>{{t('tap-to-paginate-tooltip')}}</ng-template>
                   <span class="visually-hidden" id="tapPagination-help">
-                  <ng-container [ngTemplateOutlet]="tapPaginationTooltip"></ng-container>
+                  <ng-container [ngTemplateOutlet]="tapPaginationTooltip" />
                 </span>
                   <div class="form-check form-switch">
                     <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" aria-labelledby="tapPagination-help" switch>
@@ -105,7 +105,7 @@
                   <label for="immersive-mode" class="form-label">{{t('immersive-mode-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="immersiveModeTooltip" role="button" tabindex="0" aria-describedby="immersiveMode-help"></i></label>
                   <ng-template #immersiveModeTooltip>{{t('immersive-mode-tooltip')}}</ng-template>
                   <span class="visually-hidden" id="immersiveMode-help">
-                        <ng-container [ngTemplateOutlet]="immersiveModeTooltip"></ng-container>
+                        <ng-container [ngTemplateOutlet]="immersiveModeTooltip" />
                     </span>
                   <div class="form-check form-switch">
                     <input type="checkbox" id="immersive-mode" formControlName="bookReaderImmersiveMode" class="form-check-input" aria-labelledby="immersiveMode-help" switch>
@@ -118,7 +118,7 @@
                                                                                         [ngbTooltip]="fullscreenTooltip" role="button" tabindex="1" aria-describedby="fullscreen-help"></i></label>
                   <ng-template #fullscreenTooltip>{{t('fullscreen-tooltip')}}</ng-template>
                   <span class="visually-hidden" id="fullscreen-help">
-                    <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>
+                    <ng-container [ngTemplateOutlet]="fullscreenTooltip" />
                 </span>
                   <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
                     <i class="fa {{isFullscreen() ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen() ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
@@ -132,7 +132,7 @@
                   <label id="layout-mode" class="form-label" style="margin-bottom:0.5rem">{{t('layout-mode-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="layoutTooltip" role="button" tabindex="1" aria-describedby="layout-help"></i></label>
                   <ng-template #layoutTooltip><span [innerHTML]="t('layout-mode-tooltip')"></span></ng-template>
                   <span class="visually-hidden" id="layout-help">
-                    <ng-container [ngTemplateOutlet]="layoutTooltip"></ng-container>
+                    <ng-container [ngTemplateOutlet]="layoutTooltip" />
                 </span>
                   <br>
                   <div class="btn-group d-flex justify-content-center" role="group" [attr.aria-label]="t('layout-mode-label')">
@@ -142,8 +142,10 @@
                     <input type="radio" formControlName="bookReaderLayoutMode" [value]="BookPageLayoutMode.Column1" class="btn-check" id="layout-mode-col1" autocomplete="off">
                     <label class="btn btn-outline-primary" for="layout-mode-col1">{{t('layout-mode-option-1col')}}</label>
 
-                    <input type="radio" formControlName="bookReaderLayoutMode" [value]="BookPageLayoutMode.Column2" class="btn-check" id="layout-mode-col2" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="layout-mode-col2">{{t('layout-mode-option-2col')}}</label>
+                    @if (writingStyleModel() === WritingStyle.Horizontal) {
+                      <input type="radio" formControlName="bookReaderLayoutMode" [value]="BookPageLayoutMode.Column2" class="btn-check" id="layout-mode-col2" autocomplete="off">
+                      <label class="btn btn-outline-primary" for="layout-mode-col2">{{t('layout-mode-option-2col')}}</label>
+                    }
                   </div>
                 </div>
 

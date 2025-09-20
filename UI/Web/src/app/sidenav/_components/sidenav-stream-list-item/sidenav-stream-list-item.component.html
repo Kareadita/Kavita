@@ -13,36 +13,49 @@
             <i class="me-1" [ngClass]="{'fas fa-eye': item.visible, 'fa-solid fa-eye-slash': !item.visible}" aria-hidden="true"></i>
             <span class="visually-hidden">{{t('remove')}}</span>
           </button>
-          <button *ngIf="item.streamType===SideNavStreamType.SmartFilter" class="btn btn-icon" (click)="delete.emit(item)">
-          <i class="fa-solid fa-trash" aria-hidden="true"></i>
-          <span class="visually-hidden">{{t('delete')}}</span>
-        </button>
+          @if (item.streamType===SideNavStreamType.SmartFilter) {
+            <button class="btn btn-icon" (click)="delete.emit(item)">
+              <i class="fa-solid fa-trash" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('delete')}}</span>
+            </button>
+          }
         </span>
       </h5>
       <div class="meta">
         <div class="ps-1">
-          <ng-container *ngIf="item.isProvided; else nonProvided">{{t('provided')}}</ng-container>
-          <ng-template #nonProvided>
-            <ng-container [ngSwitch]="item.streamType">
-              <ng-container *ngSwitchCase="SideNavStreamType.Library">{{t('library')}}</ng-container>
-              <ng-container *ngSwitchCase="SideNavStreamType.SmartFilter">{{t('smart-filter')}}</ng-container>
-              <ng-container *ngSwitchCase="SideNavStreamType.ExternalSource">{{t('external-source')}}</ng-container>
-            </ng-container>
-          </ng-template>
+          @if (item.isProvided) {
+            {{t('provided')}}
+          } @else {
+            @switch (item.streamType) {
+              @case (SideNavStreamType.Library) {
+                {{t('library')}}
+              }
+              @case (SideNavStreamType.SmartFilter) {
+                {{t('smart-filter')}}
+              }
+              @case (SideNavStreamType.ExternalSource) {
+                {{t('external-source')}}
+              }
+            }
+          }
         </div>
-        <div class="ps-1" *ngIf="!item.isProvided">
-          <ng-container [ngSwitch]="item.streamType">
-            <ng-container *ngSwitchCase="SideNavStreamType.Library">
-              <a [href]="baseUrl + 'library/' + this.item.libraryId" target="_blank">{{item.library?.name}}</a>
-            </ng-container>
-            <ng-container *ngSwitchCase="SideNavStreamType.SmartFilter">
-              <a [href]="baseUrl + 'all-series?' + this.item.smartFilterEncoded">{{t('load-filter')}}</a>
-            </ng-container>
-            <ng-container *ngSwitchCase="SideNavStreamType.ExternalSource">
+        @if (!item.isProvided) {
+          <div class="ps-1">
+            @switch (item.streamType) {
+              @case (SideNavStreamType.Library) {
+                <a [href]="baseUrl + 'library/' + this.item.libraryId" target="_blank">{{item.library?.name}}</a>
+              }
+              @case (SideNavStreamType.SmartFilter) {
+                <a [href]="baseUrl + 'all-series?' + this.item.smartFilterEncoded">{{t('load-filter')}}</a>
+              }
+              @case (SideNavStreamType.ExternalSource) {
               <a [href]="item.externalSource!.host! + 'login?apiKey=' + item.externalSource!.apiKey" target="_blank" rel="noopener noreferrer">{{item.externalSource!.host!}}</a>
-            </ng-container>
-          </ng-container>
+            
+}
+          }
+
         </div>
+}
       </div>
     </div>
   </div>

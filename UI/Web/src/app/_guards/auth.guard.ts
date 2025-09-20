@@ -11,15 +11,15 @@ import {APP_BASE_HREF} from "@angular/common";
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
+  private accountService = inject(AccountService);
+  private router = inject(Router);
+  private toastr = inject(ToastrService);
+  private translocoService = inject(TranslocoService);
+
 
   public static urlKey: string = 'kavita--auth-intersection-url';
 
   baseURL = inject(APP_BASE_HREF);
-
-  constructor(private accountService: AccountService,
-              private router: Router,
-              private toastr: ToastrService,
-              private translocoService: TranslocoService) {}
 
   canActivate(): Observable<boolean> {
     return this.accountService.currentUser$.pipe(take(1),

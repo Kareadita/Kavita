@@ -14,7 +14,7 @@ import { compare, SortableHeader, SortEvent } from 'src/app/_single-module/table
 import { PieDataItem } from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SortableHeader as SortableHeader_1 } from '../../../_single-module/table/_directives/sortable-header.directive';
-import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
@@ -22,9 +22,11 @@ import {TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './publication-status-stats.component.html',
     styleUrls: ['./publication-status-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, NgIf, PieChartModule, SortableHeader_1, NgFor, AsyncPipe, DecimalPipe, TranslocoDirective]
+    imports: [ReactiveFormsModule, PieChartModule, SortableHeader_1, AsyncPipe, DecimalPipe, TranslocoDirective]
 })
 export class PublicationStatusStatsComponent {
+  private statService = inject(StatisticsService);
+
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
 
@@ -40,7 +42,7 @@ export class PublicationStatusStatsComponent {
   formControl: FormControl = new FormControl(true, []);
 
 
-  constructor(private statService: StatisticsService) {
+  constructor() {
     this.publicationStatues$ = combineLatest([this.currentSort$, this.statService.getPublicationStatus()]).pipe(
       map(([sortConfig, data]) => {
         return (sortConfig.column) ? data.sort((a: PieDataItem, b: PieDataItem) => {

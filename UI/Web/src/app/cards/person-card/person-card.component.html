@@ -2,7 +2,7 @@
   <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
       @if(entity.coverImage) {
-        <app-image [imageUrl]="imageUrl" [errorImage]="imageService.noPersonImage" [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="158px" width="158px"></app-image>
+        <app-image [imageUrl]="imageUrl" [errorImage]="imageService.noPersonImage" [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="158px" width="158px" />
     } @else {
       <div class="missing-img mx-auto">
         <i class="fas fa-user fs-2" aria-hidden="true"></i>
@@ -32,14 +32,14 @@
           </span>
           @if (actions && actions.length > 0) {
             <span class="card-actions float-end">
-              <app-card-actionables [entity]="entity" [inputActions]="actions" [labelBy]="title"></app-card-actionables>
+              <app-card-actionables [entity]="entity" [inputActions]="actions" [labelBy]="title" />
             </span>
           }
         </div>
 
         @if (subtitleTemplate) {
           <div style="text-align: center">
-            <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
+            <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }" />
           </div>
         }
       </div>

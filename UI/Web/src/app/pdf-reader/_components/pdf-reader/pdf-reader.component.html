@@ -3,7 +3,7 @@
     <div class="{{theme}}" #container>
 
       @if (isLoading) {
-        <div class="loading mx-auto" style="min-width: 200px; width: 600px;">
+        <div class="loading-message-container">
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           {{t('loading-message')}}
         </div>
@@ -14,10 +14,9 @@
         </div>
       }
 
-      <ngx-extended-pdf-viewer
-        #pdfViewer
+      <ngx-extended-pdf-viewer #pdfViewer
         [src]="readerService.downloadPdf(this.chapterId)"
-        [authorization]="'Bearer ' + user.token"
+        [authorization]="user.token ? 'Bearer ' + user.token : ''"
         height="100vh"
         [(page)]="currentPage"
         [textLayer]="true"
@@ -46,9 +45,7 @@
         (zoomChange)="calcScrollbarNeeded()"
         (handToolChange)="updateHandTool($event)"
         (findbarVisibleChange)="updateSearchOpen($event)"
-      >
-
-      </ngx-extended-pdf-viewer>
+       />
 
       @if (scrollMode === ScrollModeType.page && !isLoading) {
         @if (!isSearchOpen) {
@@ -60,9 +57,9 @@
       <ng-template #multiToolbar>
         <div style="min-height: 36px" id="toolbarViewer" [ngStyle]="{'background-color': backgroundColor, 'color': fontColor}">
           <div id="toolbarViewerLeft">
-            <pdf-toggle-sidebar></pdf-toggle-sidebar>
-            <pdf-find-button [textLayer]='true'></pdf-find-button>
-            <pdf-paging-area></pdf-paging-area>
+            <pdf-toggle-sidebar />
+            <pdf-find-button [textLayer]='true' />
+            <pdf-paging-area />
 
             @if (utilityService.getActiveBreakpoint() > Breakpoint.Mobile) {
               <button class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" [ngbTooltip]="bookTitle">
@@ -84,13 +81,13 @@
             </button>
           </div>
 
-          <pdf-zoom-toolbar ></pdf-zoom-toolbar>
+          <pdf-zoom-toolbar />
 
 
           <div id="toolbarViewerRight">
-            <pdf-hand-tool></pdf-hand-tool>
-            <pdf-select-tool></pdf-select-tool>
-            <pdf-presentation-mode></pdf-presentation-mode>
+            <pdf-hand-tool />
+            <pdf-select-tool />
+            <pdf-presentation-mode />
 
             <!-- The book mode is messy, not ready for prime time -->
             <!--          @if (utilityService.getActiveBreakpoint() > Breakpoint.Mobile) {-->
@@ -152,7 +149,7 @@
 
 
             <div class="verticalToolbarSeparator hiddenSmallView"></div>
-            <pdf-toggle-secondary-toolbar></pdf-toggle-secondary-toolbar>
+            <pdf-toggle-secondary-toolbar />
           </div>
 
         </div>

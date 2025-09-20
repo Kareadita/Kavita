@@ -9,7 +9,7 @@ import {ReadingProfile, ReadingProfileKind} from "../_models/preferences/reading
 import {BookService} from "../book-reader/_services/book.service";
 import {ThemeService} from './theme.service';
 import {ReadingProfileService} from "./reading-profile.service";
-import {debounceTime, distinctUntilChanged, filter, skip, tap} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, filter, tap} from "rxjs/operators";
 import {BookTheme} from "../_models/preferences/book-theme";
 import {DOCUMENT} from "@angular/common";
 import {translate} from "@jsverse/transloco";
@@ -334,6 +334,13 @@ export class EpubReaderSettingsService {
       ? WritingStyle.Vertical
       : WritingStyle.Horizontal;
 
+    // Default back to Col 1 in this case
+    if (newStyle === WritingStyle.Vertical ) {
+      if (this._layoutMode() === BookPageLayoutMode.Column2) {
+        this.updateLayoutMode(BookPageLayoutMode.Column1);
+      }
+    }
+
     this._writingStyle.set(newStyle);
     this.settingsForm.get('bookReaderWritingStyle')!.setValue(newStyle);
   }
@@ -553,6 +560,14 @@ export class EpubReaderSettingsService {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe((layoutMode: BookPageLayoutMode) => {
       this.isUpdatingFromForm = true;
+
+      if (this.writingStyle() === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Column2) {
+        this.toastr.info(translate('book-reader.forced-vertical-switch'));
+        this.isUpdatingFromForm = false;
+        return;
+      }
+
+
       this._layoutMode.set(layoutMode);
       this.isUpdatingFromForm = false;
     });

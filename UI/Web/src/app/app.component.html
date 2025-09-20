@@ -3,12 +3,12 @@
       @if (currentUser && (navService.navbarVisible$ | async) === true) {
         <div class="fullpage-background">
           <div class="background-area">
-            <canvas id="backgroundCanvas" class="default-background" style="width: 100%; height: calc(var(--vh) * 100);"></canvas>
+            <canvas id="backgroundCanvas" class="default-background" style="width: 100%; height: calc(var('--vh') * 100);"></canvas>
           </div>
         </div>
       }
     }
-    <app-nav-header></app-nav-header>
+    <app-nav-header />
 
     @let sideNavVisible = navService.sideNavVisibility$ | async;
     @let sideNavCollapsed = navService.sideNavCollapsed$ | async;
@@ -17,9 +17,9 @@
     <div [ngClass]="{'closed' : sideNavCollapsed, 'content-wrapper': sideNavVisible}">
       @if (sideNavVisible) {
         @if(usePreferenceSideNav) {
-          <app-preference-nav></app-preference-nav>
+          <app-preference-nav />
         } @else {
-          <app-side-nav></app-side-nav>
+          <app-side-nav />
         }
       }
 
@@ -29,11 +29,11 @@
           <div>
             <div class="companion-bar" [ngClass]="{'companion-bar-content': sideNavCollapsed === false || usePreferenceSideNav,
                   'companion-bar-collapsed': (sideNavCollapsed && usePreferenceSideNav)}">
-              <router-outlet></router-outlet>
+              <router-outlet />
             </div>
           </div>
         } @else {
-          <router-outlet></router-outlet>
+          <router-outlet />
         }
       </div>
     </div>

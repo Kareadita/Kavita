@@ -9,13 +9,14 @@ import {ApiKeyComponent} from '../api-key/api-key.component';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 @Component({
   selector: 'app-change-email',
   templateUrl: './change-email.component.html',
   styleUrls: ['./change-email.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent]
+  imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent, DefaultValuePipe]
 })
 export class ChangeEmailComponent implements OnInit {
 

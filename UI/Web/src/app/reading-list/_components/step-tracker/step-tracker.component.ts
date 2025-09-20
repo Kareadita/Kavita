@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import {CommonModule} from "@angular/common";
 
 
@@ -18,10 +18,9 @@ export interface TimelineStep {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StepTrackerComponent {
+  private readonly cdRef = inject(ChangeDetectorRef);
+
   @Input() steps: Array<TimelineStep> = [];
   @Input() currentStep: number = 0;
-
-
-  constructor(private readonly cdRef: ChangeDetectorRef) {}
 
 }

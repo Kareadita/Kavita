@@ -154,7 +154,7 @@
     "reading-list-permission": "Você não tem permissões nesta lista de leitura ou a lista não existe",
     "reading-list-item-delete": "Não foi possível excluir os itens",
     "invalid-payload": "Carga inválida",
-    "issue-num": "Número {0}{1}",
+    "issue-num": "Edição {0}{1}",
     "chapter-num": "Capítulo {0}",
     "want-to-read": "Quero Ler",
     "browse-want-to-read": "Navegar no Quero Ler",
@@ -209,5 +209,11 @@
     "smart-filter-system-name": "Você não pode usar o nome de um fluxo fornecido pelo sistema",
     "sidenav-stream-only-delete-smart-filter": "Somente fluxos de filtros inteligentes podem ser excluídos do Navegador Lateral",
     "aliases-have-overlap": "Um ou mais dos pseudônimos se sobrepõem a outras pessoas, não pode atualizar",
-    "generated-reading-profile-name": "Gerado a partir de {0}"
+    "generated-reading-profile-name": "Gerado a partir de {0}",
+    "password-authentication-disabled": "A autenticação de senha foi desativada, faça login via OpenID Connect",
+    "oidc-managed": "Os usuários gerenciados pelo OIDC não podem ser editados.",
+    "cannot-change-identity-provider-original-user": "O provedor de identidade da conta de administrador original não pode ser alterado",
+    "oidc-invalid-authority": "A autoridade do OIDC é inválida",
+    "annotation-failed-create": "Falha ao criar anotação, tente novamente",
+    "annotation-delete": "Não foi possível excluir a anotação"
 }

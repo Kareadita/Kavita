@@ -16,7 +16,7 @@
         {{t('series-name-header')}}
       </ng-template>
       <ng-template let-item="row" ngx-datatable-cell-template>
-        <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+        <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
         <a class="btn-link ms-2" href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
       </ng-template>
     </ngx-datatable-column>
@@ -32,9 +32,7 @@
     </ngx-datatable-column>
 
     <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
-      <ng-template let-column="column" ngx-datatable-header-template>
-
-      </ng-template>
+      <ng-template let-column="column" ngx-datatable-header-template />
       <ng-template let-item="row" ngx-datatable-cell-template>
         <button class="btn btn-primary" (click)="removeHold(item)">{{t('delete-label')}}</button>
       </ng-template>

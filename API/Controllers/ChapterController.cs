@@ -51,9 +51,7 @@ public class ChapterController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
     {
-        var chapter =
-            await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId,
-                ChapterIncludes.People | ChapterIncludes.Files);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, User.GetUserId());
 
         return Ok(chapter);
     }

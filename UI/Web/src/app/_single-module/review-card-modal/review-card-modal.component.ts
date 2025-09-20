@@ -1,14 +1,4 @@
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  Inject,
-  Input,
-  ViewChild,
-  ViewContainerRef,
-  ViewEncapsulation
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, inject, Input, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core';
 import {DOCUMENT, NgOptimizedImage} from '@angular/common';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReactiveFormsModule} from "@angular/forms";
@@ -27,14 +17,13 @@ import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
   encapsulation: ViewEncapsulation.None
 })
 export class ReviewCardModalComponent implements AfterViewInit {
+  private document = inject<Document>(DOCUMENT);
+
 
   private modal = inject(NgbActiveModal);
 
   @Input({required: true}) review!: UserReview;
   @ViewChild('container', { read: ViewContainerRef }) container!: ViewContainerRef;
-
-
-  constructor(@Inject(DOCUMENT) private document: Document) {}
 
   close() {
     this.modal.close();

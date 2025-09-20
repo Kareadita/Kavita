@@ -12,7 +12,7 @@ import {
 import {Annotation} from "../../../_models/annotations/annotation";
 import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {QuillViewComponent} from "ngx-quill";
-import {DatePipe, NgStyle} from "@angular/common";
+import {DatePipe, NgClass, NgStyle} from "@angular/common";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmService} from "../../../../shared/confirm.service";
 import {AnnotationService} from "../../../../_services/annotation.service";
@@ -31,7 +31,8 @@ import {ActivatedRoute, Router, RouterLink} from "@angular/router";
     TranslocoDirective,
     DefaultValuePipe,
     NgStyle,
-    RouterLink
+    RouterLink,
+    NgClass
   ],
   templateUrl: './annotation-card.component.html',
   styleUrl: './annotation-card.component.scss',
@@ -51,6 +52,10 @@ export class AnnotationCardComponent {
   allowEdit = input<boolean>(true);
   showPageLink = input<boolean>(true);
   /**
+   * If sizes should be forced. Turned of in drawer to account for manual resize
+   */
+  forceSize = input<boolean>(true);
+  /**
    * Redirects to the reader with annotation in view
    */
   showInReaderLink = input<boolean>(false);
@@ -59,6 +64,7 @@ export class AnnotationCardComponent {
   @Output() navigate = new EventEmitter<Annotation>();
 
   titleColor: Signal<string>;
+  hasClicked = model<boolean>(false);
 
   constructor() {
 

@@ -22,7 +22,7 @@
           <i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="emailTooltip" role="button" tabindex="0"></i>
           <ng-template #emailTooltip>{{t('email-tooltip')}}</ng-template>
           <span class="visually-hidden" id="email-help">
-            <ng-container [ngTemplateOutlet]="emailTooltip"></ng-container>
+            <ng-container [ngTemplateOutlet]="emailTooltip" />
           </span>
           <input class="form-control custom-input" type="email" inputmode="email" id="email" autocomplete="email" formControlName="email" aria-describedby="email-help"
                  [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
@@ -44,7 +44,7 @@
           <ng-template #passwordTooltip>
             {{t('password-validation')}}
           </ng-template>
-          <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
+          <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip" /></span>
           <input id="password" class="form-control custom-input" maxlength="256" minlength="6" pattern="^.{6,256}$" formControlName="password" autocomplete="new-password"
                  type="password" aria-describedby="password-help" [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
           @if (registerForm.dirty || registerForm.touched) {

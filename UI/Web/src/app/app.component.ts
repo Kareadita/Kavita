@@ -50,7 +50,10 @@ export class AppComponent implements OnInit {
   transitionState$!: Observable<boolean>;
 
 
-  constructor(ratingConfig: NgbRatingConfig, modalConfig: NgbModalConfig) {
+  constructor() {
+    const ratingConfig = inject(NgbRatingConfig);
+    const modalConfig = inject(NgbModalConfig);
+
 
     modalConfig.fullscreen = 'lg';
 

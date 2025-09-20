@@ -29,20 +29,20 @@ namespace API.Data.Repositories;
 public enum AppUserIncludes
 {
     None = 1,
-    Progress = 2,
-    Bookmarks = 4,
-    ReadingLists = 8,
-    Ratings = 16,
-    UserPreferences = 32,
-    WantToRead = 64,
-    ReadingListsWithItems = 128,
-    Devices = 256,
-    ScrobbleHolds = 512,
-    SmartFilters = 1024,
-    DashboardStreams = 2048,
-    SideNavStreams = 4096,
-    ExternalSources = 8192,
-    Collections = 16384, // 2^14
+    Progress = 1 << 1,
+    Bookmarks = 1 << 2,
+    ReadingLists = 1 << 3,
+    Ratings = 1 << 4,
+    UserPreferences = 1 << 5,
+    WantToRead = 1 << 6,
+    ReadingListsWithItems = 1 << 7,
+    Devices = 1 << 8,
+    ScrobbleHolds = 1 << 9,
+    SmartFilters = 1 << 10,
+    DashboardStreams = 1 << 11,
+    SideNavStreams = 1 << 12,
+    ExternalSources = 1 << 13,
+    Collections = 1 << 14,
     ChapterRatings = 1 << 15,
 }
 
@@ -119,6 +119,7 @@ public interface IUserRepository
     Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None);
 
     Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId);
+    Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId);
 }
 
 public class UserRepository : IUserRepository
@@ -621,6 +622,14 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId)
+    {
+        return await _context.AppUserAnnotation
+            .Where(a => a.AppUserId == userId && a.SeriesId == seriesId)
+            .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {
@@ -638,6 +647,7 @@ public class UserRepository : IUserRepository
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         if (user == null) return ArraySegment<string>.Empty;
 
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (_userManager == null)
         {
             // userManager is null on Unit Tests only

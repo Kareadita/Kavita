@@ -8,11 +8,11 @@
         <ng-template #badgeExpanderItem let-item let-position="idx">
           @if(itemTemplate) {
             <span (click)="goTo(queryParam, item.id)">
-            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: position }"></ng-container>
+            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: position }" />
           </span>
           } @else {
             <app-tag-badge a11y-click="13,32" class="col-auto" (click)="goTo(queryParam, item.id)" [selectionMode]="TagBadgeCursor.Clickable">
-              <ng-container [ngTemplateOutlet]="titleTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: position }"></ng-container>
+              <ng-container [ngTemplateOutlet]="titleTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: position }" />
             </app-tag-badge>
           }
         </ng-template>

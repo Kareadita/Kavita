@@ -1,10 +1,10 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { NgbActiveModal, NgbTypeahead, NgbHighlight } from '@ng-bootstrap/ng-bootstrap';
 import { catchError, debounceTime, distinctUntilChanged, filter, map, merge, Observable, of, OperatorFunction, Subject, switchMap, tap } from 'rxjs';
 import { Stack } from 'src/app/shared/data-structures/stack';
 import { DirectoryDto } from 'src/app/_models/system/directory-dto';
 import { LibraryService } from '../../../_services/library.service';
-import { NgIf, NgFor, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../../_models/wiki";
@@ -19,9 +19,12 @@ export interface DirectoryPickerResult {
     selector: 'app-directory-picker',
     templateUrl: './directory-picker.component.html',
     styleUrls: ['./directory-picker.component.scss'],
-    imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgIf, NgFor, NgClass, TranslocoDirective]
+    imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgClass, TranslocoDirective]
 })
 export class DirectoryPickerComponent implements OnInit {
+  modal = inject(NgbActiveModal);
+  private libraryService = inject(LibraryService);
+
 
   @Input() startingFolder: string = '';
   /**
@@ -63,10 +66,6 @@ export class DirectoryPickerComponent implements OnInit {
       ),
       tap(() => this.searching = false)
     )
-  }
-
-  constructor(public modal: NgbActiveModal, private libraryService: LibraryService) {
-
   }
 
   ngOnInit(): void {

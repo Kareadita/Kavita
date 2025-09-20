@@ -1,10 +1,12 @@
 ﻿using System.IO;
 using System.IO.Abstractions;
+using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using VersOne.Epub;
 using Xunit;
 
 namespace API.Tests.Services;
@@ -141,5 +143,20 @@ public class BookServiceTests
         Assert.NotNull(parserInfo);
         Assert.Equal(parserInfo.Title, comicInfo.Title);
         Assert.Equal(parserInfo.Series, comicInfo.Title);
+    }
+
+    /// <summary>
+    /// Tests that the ./ rewrite hack works as expected
+    /// </summary>
+    [Fact]
+    public async Task ShouldBeAbleToLookUpImage()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var filePath = Path.Join(testDirectory, "Relative Key Test File.epub");
+
+        var result = await _bookService.GetResourceAsync(filePath, "./images/titlepage800.png");
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("image/png", result.ContentType);
     }
 }

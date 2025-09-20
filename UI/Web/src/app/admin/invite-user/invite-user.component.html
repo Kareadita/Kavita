@@ -30,17 +30,17 @@
 
           <div class="row g-0">
             <div class="col-md-6 pe-4">
-              <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true"></app-role-selector>
+              <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" />
             </div>
 
             <div class="col-md-6">
-              <app-library-selector (selected)="updateLibrarySelection($event)"></app-library-selector>
+              <app-library-selector (selected)="updateLibrarySelection($event)" />
             </div>
           </div>
 
           <div class="row g-0">
             <div class="col-md-12">
-              <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected"></app-restriction-selector>
+              <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" />
             </div>
           </div>
         </form>
@@ -55,7 +55,7 @@
           </div>
         }
         <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
-        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('setup-user-account-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink"></app-api-key>
+        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('setup-user-account-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink" />
       }
 
     </div>

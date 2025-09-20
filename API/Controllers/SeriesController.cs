@@ -180,7 +180,7 @@ public class SeriesController : BaseApiController
     [HttpGet("chapter")]
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
     {
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, User.GetUserId());
         if (chapter == null) return NoContent();
         return Ok(await _unitOfWork.ChapterRepository.AddChapterModifiers(User.GetUserId(), chapter));
     }

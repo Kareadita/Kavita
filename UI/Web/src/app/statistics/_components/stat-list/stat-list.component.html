@@ -11,7 +11,7 @@
         <li class="list-group-item" [ngClass]="{'underline': handleClick !== undefined}" (click)="doClick(item)">
           @if (image && image(item); as url) {
             @if (url && url.length > 0) {
-              <app-image width="32px" [styles]="{'max-height': '32px'}" class="img-top me-1" [imageUrl]="url"></app-image>
+              <app-image width="32px" [styles]="{'max-height': '32px'}" class="img-top me-1" [imageUrl]="url" />
             }
           }
           {{item.name}}

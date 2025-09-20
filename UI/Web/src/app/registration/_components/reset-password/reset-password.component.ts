@@ -3,7 +3,7 @@ import { Validators, FormGroup, FormControl, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from 'src/app/_services/account.service';
-import { NgIf } from '@angular/common';
+
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NavService} from "../../../_services/nav.service";
@@ -13,7 +13,7 @@ import {NavService} from "../../../_services/nav.service";
     templateUrl: './reset-password.component.html',
     styleUrls: ['./reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, ReactiveFormsModule, NgIf, TranslocoDirective]
+    imports: [SplashContainerComponent, ReactiveFormsModule, TranslocoDirective]
 })
 export class ResetPasswordComponent {
 

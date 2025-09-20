@@ -4,26 +4,26 @@
     <div class="row g-0 mb-2">
       <div class="col-8">
         <h4><span>{{t('title')}}</span>
-        </h4>
-      </div>
-      <div class="col-4">
-        <form>
-          <div class="form-check form-switch mt-2">
-            <input id="pub-status-viz" type="checkbox" class="form-check-input" [formControl]="formControl" role="switch">
-            <label for="pub-status-viz" class="form-check-label">{{formControl.value ? t('visualisation-label') : t('data-table-label') }}</label>
-          </div>
-        </form>
-      </div>
+      </h4>
     </div>
+    <div class="col-4">
+      <form>
+        <div class="form-check form-switch mt-2">
+          <input id="pub-status-viz" type="checkbox" class="form-check-input" [formControl]="formControl" role="switch">
+          <label for="pub-status-viz" class="form-check-label">{{formControl.value ? t('visualisation-label') : t('data-table-label') }}</label>
+        </div>
+      </form>
+    </div>
+  </div>
 
-    @let statuses = publicationStatues$ | async;
+  @let statuses = publicationStatues$ | async;
 
-    @if (formControl.value) {
-      <ngx-charts-advanced-pie-chart [results]="statuses" />
-    } @else {
-      <div style="height: 242px; overflow-y: auto;">
-        <table class="table table-striped table-striped table-sm scrollable">
-          <thead>
+  @if (formControl.value) {
+    <ngx-charts-advanced-pie-chart [results]="statuses" />
+  } @else {
+    <div style="height: 242px; overflow-y: auto;">
+      <table class="table table-striped table-striped table-sm scrollable">
+        <thead>
           <tr>
             <th scope="col" sortable="name" (sort)="onSort($event)">
               {{t('year-header')}}
@@ -32,21 +32,23 @@
               {{t('count-header')}}
             </th>
           </tr>
-          </thead>
-          <tbody>
-          <tr *ngFor="let item of statuses; let idx = index;">
-            <td id="adhoctask--{{idx}}">
-              {{item.name}}
-            </td>
-            <td>
-              {{item.value | number:'1.0-0'}}
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    }
-  </div>
+        </thead>
+        <tbody>
+          @for (item of statuses; track item; let idx = $index) {
+            <tr>
+              <td id="adhoctask--{{idx}}">
+                {{item.name}}
+              </td>
+              <td>
+                {{item.value | number:'1.0-0'}}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
 
 
 

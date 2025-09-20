@@ -46,8 +46,7 @@
     </ngx-datatable-column>
 
     <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-      <ng-template let-column="column" ngx-datatable-header-template>
-      </ng-template>
+      <ng-template let-column="column" ngx-datatable-header-template />
       <ng-template let-item="row" ngx-datatable-cell-template>
         <button class="btn btn-danger  me-2" (click)="deleteDevice(item)">
           <i class="fa fa-trash" aria-hidden="true"></i>

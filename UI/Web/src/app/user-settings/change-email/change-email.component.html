@@ -2,7 +2,7 @@
 
   <app-setting-item [title]="t('email-title')" [canEdit]="canEdit" [isEditMode]="isEditMode" (editMode)="updateEditMode($event)">
     <ng-template #view>
-      <span>{{user?.email}}</span>
+      <span>{{user?.email | defaultValue}}</span>
       @if(emailConfirmed) {
         <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('email-confirmed')"></i>
         <span class="visually-hidden">{{t('email-confirmed')}}</span>
@@ -68,7 +68,7 @@
         <h4>{{t('email-updated-title')}}</h4>
         <p>{{t('email-updated-description')}}</p>
         <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
-        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('invite-url-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink"></app-api-key>
+        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('invite-url-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink" />
       }
     </ng-template>
   </app-setting-item>

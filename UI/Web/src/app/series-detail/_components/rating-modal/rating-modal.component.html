@@ -6,7 +6,7 @@
   <div class="modal-body">
     <div class="row g-0">
       <ngx-stars [initialStars]="userRating" (ratingOutput)="updateRating($event)" [size]="2"
-                 [maxStars]="5" [color]="starColor"></ngx-stars>
+                 [maxStars]="5" [color]="starColor" />
       {{userRating * 20}}%
     </div>
   </div>

@@ -6,8 +6,7 @@
   }
 
   <div [ngStyle]="{'width': width, 'height': height}">
-    <circle-progress
-      [percent]="currentValue"
+    <circle-progress [percent]="currentValue"
       [radius]="100"
       [outerStrokeWidth]="15"
       [innerStrokeWidth]="0"
@@ -25,6 +24,6 @@
       [responsive]="true"
       [backgroundOpacity]="0.5"
       [backgroundColor]="backgroundColor"
-    ></circle-progress>
+     />
   </div>
 }

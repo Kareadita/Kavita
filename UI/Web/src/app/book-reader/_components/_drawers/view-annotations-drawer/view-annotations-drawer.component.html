@@ -1,14 +1,24 @@
 <ng-container *transloco="let t; prefix: 'view-annotations-drawer'">
+
+  <app-off-canvas-resize
+    [resizeMode]="ResizeMode.Width"
+    canvasPosition="end"
+    [minWidth]="200"
+    [maxWidth]="window.innerWidth*0.9"
+  />
+
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">
       {{t('title')}}
     </h5>
-    <button type="button" class="btn-close text-reset" [attr.aria-label]="t('close')" (click)="close()"></button>
+    <button type="button" class="btn-unstyled ms-auto" [attr.aria-label]="t('close')" (click)="close()">
+      <i class="fas fa-times"></i>
+    </button>
   </div>
 
   <div class="offcanvas-body">
     <form [formGroup]="formGroup">
-      @if (annotations.length > FilterAfter) {
+      @if (annotations().length > FilterAfter) {
         <div class="row g-0 mb-3">
           <div class="col-md-12">
             <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
@@ -20,7 +30,7 @@
       }
 
       @for(annotation of annotations() | filter: filterList; track annotation.comment + annotation.highlightColor + annotation.containsSpolier) {
-        <app-annotation-card [annotation]="annotation" (delete)="handleDelete(annotation)" (navigate)="handleNavigateTo($event)" />
+        <app-annotation-card [annotation]="annotation" (delete)="handleDelete(annotation)" (navigate)="handleNavigateTo($event)" [forceSize]="false" />
       }
       @empty {
         <p>{{t('no-data')}}</p>

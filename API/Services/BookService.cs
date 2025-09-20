@@ -63,6 +63,8 @@ public interface IBookService
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
     Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath);
     Task<string> CopyImageToTempFromBook(int chapterId, BookmarkDto bookmarkDto, string cachedBookPath);
+    Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey);
+
 }
 
 public partial class BookService : IBookService
@@ -315,7 +317,7 @@ public partial class BookService : IBookService
     /// </summary>
     /// <param name="doc"></param>
     /// <param name="ptocBookmarks"></param>
-    private static void InjectPTOCBookmarks(HtmlDocument doc, List<PersonalToCDto> ptocBookmarks)
+    private void InjectPTOCBookmarks(HtmlDocument doc, List<PersonalToCDto> ptocBookmarks)
     {
         if (ptocBookmarks.Count == 0) return;
 
@@ -333,8 +335,9 @@ public partial class BookService : IBookService
                 elem.PrependChild(HtmlNode.CreateNode(
                     $"<i class='fa-solid fa-bookmark ps-1 pe-1' role='button' id='ptoc-{bookmark.Id}' title='{bookmark.Title}'></i>"));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogWarning(ex, "Failed to inject a text (ptoc) bookmark into file");
                // Swallow
             }
         }
@@ -1075,6 +1078,27 @@ public partial class BookService : IBookService
         throw new KavitaException($"Page {bookmarkDto.Page} not found in epub");
     }
 
+    /// <summary>
+    /// Attempts to resolve a requested key path with some hacks to attempt to handle incorrect metadata
+    /// </summary>
+    /// <param name="bookFilePath"></param>
+    /// <param name="requestedKey"></param>
+    /// <returns></returns>
+    public async Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey)
+    {
+        using var book = await EpubReader.OpenBookAsync(bookFilePath, LenientBookReaderOptions);
+        var key = CoalesceKeyForAnyFile(book, requestedKey);
+
+        if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key))
+            return BookResourceResultDto.Error("file-missing");
+
+        var bookFile = book.Content.AllFiles.GetLocalFileRefByKey(key);
+        var content = await bookFile.ReadContentAsBytesAsync();
+        var contentType = GetContentType(bookFile.ContentType);
+
+        return BookResourceResultDto.Success(content, contentType, requestedKey);
+    }
+
 
     /// <summary>
     /// Parses out Title from book. Chapters and Volumes will always be "0". If there is any exception reading book (malformed books)
@@ -1219,7 +1243,7 @@ public partial class BookService : IBookService
     /// <param name="body">Body element from the epub</param>
     /// <param name="mappings">Epub mappings</param>
     /// <param name="page">Page number we are loading</param>
-    /// <param name="ptocBookmarks">Ptoc Bookmarks to tie against</param>
+    /// <param name="ptocBookmarks">Ptoc (Text) Bookmarks to tie against</param>
     /// <returns></returns>
     private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body,
         Dictionary<string, int> mappings, int page, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations)
@@ -1228,7 +1252,6 @@ public partial class BookService : IBookService
 
         RewriteAnchors(page, doc, mappings);
 
-        // TODO: Pass bookmarks here for state management
         ScopeImages(doc, book, apiBase);
 
         InjectImages(doc, book, apiBase);
@@ -1285,13 +1308,13 @@ public partial class BookService : IBookService
         var cleanedKey = CleanContentKeys(key);
         if (book.Content.AllFiles.ContainsLocalFileRefWithKey(cleanedKey)) return cleanedKey;
 
-        // TODO: Figure this out
-        // Fallback to searching for key (bad epub metadata)
-        // var correctedKey = book.Content.AllFiles.Keys.SingleOrDefault(s => s.EndsWith(key));
-        // if (!string.IsNullOrEmpty(correctedKey))
-        // {
-        //     key = correctedKey;
-        // }
+        // Correct relative paths ./
+        if (key.StartsWith("./"))
+        {
+            var nonPathKey = key.Replace("./", string.Empty);
+            var correctedKey = book.Content.AllFiles.Local.SingleOrDefault(s => s.Key == nonPathKey);
+            if (correctedKey != null) return correctedKey.Key;
+        }
 
         return key;
     }
@@ -1329,8 +1352,8 @@ public partial class BookService : IBookService
         var tocPage = book.Content.Html.Local.Select(s => s.Key)
             .FirstOrDefault(k => k.Equals("TOC.XHTML", StringComparison.InvariantCultureIgnoreCase) ||
             k.Equals("NAVIGATION.XHTML", StringComparison.InvariantCultureIgnoreCase));
-        if (string.IsNullOrEmpty(tocPage)) return chaptersList;
 
+        if (string.IsNullOrEmpty(tocPage)) return chaptersList;
         if (!book.Content.Html.TryGetLocalFileRefByKey(tocPage, out var file)) return chaptersList;
         var content = await file.ReadContentAsync();
 

@@ -1,12 +1,12 @@
 <ng-container *transloco="let t; prefix: 'series-detail'">
-  <app-bulk-operations [actionCallback]="bulkActionCallback" [marginLeft]="12" [marginRight]="0"></app-bulk-operations>
+  <app-bulk-operations [actionCallback]="bulkActionCallback" [marginLeft]="12" [marginRight]="0" />
 
   @if (series && seriesMetadata && libraryType !== null) {
     <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
       <div class="row mb-0 mb-xl-3 info-container">
         <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''"
              class="image-container series col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
-          <app-cover-image [entity]="series" [coverImage]="imageService.getSeriesCoverImage(series.id)" [continueTitle]="ContinuePointTitle" (read)="read()"></app-cover-image>
+          <app-cover-image [entity]="series" [coverImage]="imageService.getSeriesCoverImage(series.id)" [continueTitle]="ContinuePointTitle" (read)="read()" />
         </div>
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-sm-12 col-xs-12">
@@ -33,8 +33,7 @@
                                    [hasReadingProgress]="hasReadingProgress"
                                    [readingTimeEntity]="series"
                                    [libraryType]="libraryType"
-                                   [mangaFormat]="series.format">
-          </app-metadata-detail-row>
+                                   [mangaFormat]="series.format" />
 
           <div class="mt-2 mb-2">
             <app-external-rating [seriesId]="series.id"
@@ -42,8 +41,7 @@
                                  [userRating]="series.userRating"
                                  [hasUserRated]="series.hasUserRated"
                                  [libraryType]="libraryType"
-                                 [webLinks]="WebLinks">
-            </app-external-rating>
+                                 [webLinks]="WebLinks" />
           </div>
 
           <div class="mt-3 mb-3">
@@ -96,19 +94,19 @@
 
               <div class="col-auto ms-2">
                 <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables [entity]="series" [inputActions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
+                  <app-card-actionables [entity]="series" [inputActions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn" />
                 </div>
               </div>
 
               <div class="col-auto ms-2 d-none d-md-block btn-actions">
-                <app-download-button [download$]="download$" [entity]="series" entityType="series"></app-download-button>
+                <app-download-button [download$]="download$" [entity]="series" entityType="series" />
               </div>
 
             </div>
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 170 : 200"></app-read-more>
+            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 170 : 200" />
           </div>
 
           <div class="mt-2 upper-details">
@@ -188,13 +186,13 @@
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item) {
                         @if (item.isChapter) {
-                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}"></ng-container>
+                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}" />
                         } @else {
-                          <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}"></ng-container>
+                          <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}" />
                         }
                       }
 
-                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}"></ng-container>
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}" />
                     </div>
                   </virtual-scroller>
                 }
@@ -214,9 +212,9 @@
                   <virtual-scroller #scroll [items]="volumes" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead +  + '_volumes') {
-                        <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}"></ng-container>
+                        <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes.length}" />
                       }
-                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}"></ng-container>
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}" />
                     </div>
                   </virtual-scroller>
                 }
@@ -235,9 +233,9 @@
                   <virtual-scroller #scroll [items]="chapters()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_chapters') {
-                        <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters().length}"></ng-container>
+                        <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters().length}" />
                       }
-                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}"></ng-container>
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}" />
                     </div>
                   </virtual-scroller>
                 }
@@ -256,10 +254,24 @@
                   <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_specials') {
-                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters.length}"></ng-container>
+                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters().length}" />
                       }
                     </div>
                   </virtual-scroller>
+                }
+              </ng-template>
+            </li>
+          }
+
+          @if (annotations().length > 0) {
+            <li [ngbNavItem]="TabID.Annotations">
+              <a ngbNavLink>
+                {{t(TabID.Annotations)}}
+                <span class="badge rounded-pill text-bg-secondary">{{annotations().length}}</span>
+              </a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
+                  <app-annotations-tab [annotations]="annotations()" [displaySeries]="true" [scrollingBlock]="scrollingBlock" />
                 }
               </ng-template>
             </li>
@@ -277,7 +289,7 @@
                                    [collections]="collections"
                                    [relations]="relations"
                                    [libraryId]="libraryId"
-                                   [bookmarks]="bookmarks"></app-related-tab>
+                                   [bookmarks]="bookmarks" />
                 }
               </ng-template>
             </li>
@@ -295,9 +307,9 @@
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track idx) {
                         @if (!item.hasOwnProperty('coverUrl')) {
-                          <app-series-card class="col-auto mt-2 mb-2" [series]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
+                          <app-series-card class="col-auto mt-2 mb-2" [series]="item" [previewOnClick]="true" [libraryId]="item.libraryId" />
                         } @else {
-                          <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>
+                          <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item" />
                         }
                       }
                     </div>
@@ -331,8 +343,7 @@
                                    [readingTime]="series"
                                    [releaseYear]="seriesMetadata.releaseYear"
                                    [language]="seriesMetadata.language"
-                                   [format]="series.format">
-                  </app-details-tab>
+                                   [format]="series.format" />
                 }
               </ng-template>
             </li>
@@ -350,14 +361,14 @@
           @case (TabID.Volumes) {
             @if (nextExpectedChapter.volumeNumber !== SpecialVolumeNumber && nextExpectedChapter.chapterNumber === LooseLeafOrSpecialNumber) {
               <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter"
-                                      [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
+                                      [imageUrl]="imageService.getSeriesCoverImage(series.id)" />
             }
           }
           @case (TabID.Chapters) {
-            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
+            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(series.id)" />
           }
           @case (TabID.Storyline) {
-            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(series.id)"></app-next-expected-card>
+            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(series.id)" />
           }
         }
       }
@@ -373,16 +384,14 @@
                     [actions]="chapterActions"
                     [libraryType]="libraryType"
                     (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                    [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-  </app-chapter-card>
+                    [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
 </ng-template>
 
 <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
   <app-volume-card class="col-auto mt-2 mb-2" [volume]="item" [seriesId]="seriesId" [libraryId]="libraryId" [libraryType]="libraryType"
                    [actions]="volumeActions"
                    (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                   [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-  </app-volume-card>
+                   [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
 </ng-template>
 
 <ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
@@ -391,6 +400,5 @@
                     [actions]="chapterActions"
                     [libraryType]="libraryType"
                     (selection)="bulkSelectionService.handleCardSelection('special', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                    [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
-  </app-chapter-card>
+                    [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
 </ng-template>

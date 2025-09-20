@@ -1,15 +1,5 @@
-import { DOCUMENT, NgIf, AsyncPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, computed, DestroyRef, effect,
-  EventEmitter,
-  inject,
-  Inject, Injector,
-  Input,
-  OnInit,
-  Output, signal, Signal, WritableSignal
-} from '@angular/core';
+import { DOCUMENT, AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, effect, EventEmitter, inject, Injector, Input, OnInit, Output, signal, Signal, WritableSignal } from '@angular/core';
 import {combineLatest, combineLatestWith, filter, map, Observable, of, shareReplay, switchMap, tap} from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
@@ -31,6 +21,10 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
     imports: [AsyncPipe, SafeStylePipe]
 })
 export class SingleRendererComponent implements OnInit, ImageRenderer {
+  private readonly cdRef = inject(ChangeDetectorRef);
+  mangaReaderService = inject(MangaReaderService);
+  private document = inject<Document>(DOCUMENT);
+
 
   private readonly utilityService = inject(UtilityService);
   private readonly injector = inject(Injector);
@@ -63,9 +57,6 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
 
   get ReaderMode() {return ReaderMode;}
   get LayoutMode() {return LayoutMode;}
-
-  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: MangaReaderService,
-    @Inject(DOCUMENT) private document: Document) {}
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(

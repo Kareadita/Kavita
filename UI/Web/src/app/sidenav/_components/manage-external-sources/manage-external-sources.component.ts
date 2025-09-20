@@ -18,6 +18,8 @@ import {WikiLink} from "../../../_models/wiki";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageExternalSourcesComponent {
+  accountService = inject(AccountService);
+
 
   externalSources: Array<ExternalSource> = [];
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -33,7 +35,7 @@ export class ManageExternalSourcesComponent {
     return listItem.name.toLowerCase().indexOf(filterVal) >= 0 || listItem.host.toLowerCase().indexOf(filterVal) >= 0;
   }
 
-  constructor(public accountService: AccountService) {
+  constructor() {
     this.externalSourceService.getExternalSources().subscribe(data => {
       this.externalSources = data;
       this.cdRef.markForCheck();

@@ -81,7 +81,9 @@ export class SettingItemComponent implements OnChanges {
     event.stopPropagation(); // Prevent the click from bubbling up
   }
 
-  constructor(elementRef: ElementRef) {
+  constructor() {
+    const elementRef = inject(ElementRef);
+
     if (!this.toggleOnViewClick) return;
 
     fromEvent(window, 'click')

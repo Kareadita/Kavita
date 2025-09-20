@@ -6,6 +6,10 @@ import {Annotation} from "../../../_models/annotations/annotation";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {FilterPipe} from "../../../../_pipes/filter.pipe";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {
+  OffCanvasResizeComponent,
+  ResizeMode
+} from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 
 @Component({
   selector: 'app-view-annotations-drawer',
@@ -13,7 +17,8 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
     TranslocoDirective,
     AnnotationCardComponent,
     FilterPipe,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    OffCanvasResizeComponent
   ],
   templateUrl: './view-annotations-drawer.component.html',
   styleUrl: './view-annotations-drawer.component.scss',
@@ -30,7 +35,7 @@ export class ViewAnnotationsDrawerComponent {
   formGroup = new FormGroup({
     filter: new FormControl('', [])
   });
-  readonly FilterAfter = 6;
+  readonly FilterAfter = 4;
 
   handleDelete(annotation: Annotation) {
     this.annotationService.delete(annotation.id).subscribe();
@@ -50,4 +55,7 @@ export class ViewAnnotationsDrawerComponent {
     return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.pageNumber.toString().indexOf(query) >= 0
       || (listItem.selectedText ?? '').toLowerCase().indexOf(query) >= 0;
   }
+
+  protected readonly window = window;
+  protected readonly ResizeMode = ResizeMode;
 }

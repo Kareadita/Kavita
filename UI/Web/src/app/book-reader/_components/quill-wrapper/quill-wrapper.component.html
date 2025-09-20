@@ -1,4 +1,4 @@
-<div [formGroup]="formGroup()!">
+<div [formGroup]="formGroup()!" *transloco="let t; prefix: 'quill-wrapper'">
   <quill-editor class="w-100"
                 [format]="format()"
                 [theme]="theme()"
@@ -14,15 +14,23 @@
             <span>
 
               @if (toolbarItem.value !== undefined) {
-                <button type="button" [class]="toolbarItem.key + ' quil-wrapper-btn'" [value]="toolbarItem.value"></button>
+                <button
+                  [ngbTooltip]="toolbarItem.tooltipTranslationKey ? t(toolbarItem.tooltipTranslationKey) : undefined"
+                  type="button" [class]="toolbarItem.key + ' quil-wrapper-btn'" [value]="toolbarItem.value">
+                </button>
               } @else if (toolbarItem.values !== undefined) {
-                <select [class]="toolbarItem.key + ' quil-wrapper-select'">
+                <select
+                  [ngbTooltip]="toolbarItem.tooltipTranslationKey ? t(toolbarItem.tooltipTranslationKey) : undefined"
+                  [class]="toolbarItem.key + ' quil-wrapper-select'">
                   @for (value of toolbarItem.values; track value) {
                     <option [value]="value">{{ value }}</option>
                   }
                 </select>
               } @else {
-                <button type="button" [class]="toolbarItem.key + ' quil-wrapper-btn'"></button>
+                <button
+                  [ngbTooltip]="toolbarItem.tooltipTranslationKey ? t(toolbarItem.tooltipTranslationKey) : undefined"
+                  type="button" [class]="toolbarItem.key + ' quil-wrapper-btn'">
+                </button>
               }
 
           </span>

@@ -1,25 +1,22 @@
 <ng-container *transloco="let t; prefix:'user-stats'">
-  <div class="vstack gap-3" *ngIf="userId">
-
-    <div class="row g-0 d-flex justify-content-around">
-      <ng-container *ngIf="userStats$ | async as userStats">
-        <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [totalWordsRead]="userStats.totalWordsRead" [timeSpentReading]="userStats.timeSpentReading"
-                                   [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive" [avgHoursPerWeekSpentReading]="userStats.avgHoursPerWeekSpentReading"></app-user-stats-info-cards>
-      </ng-container>
+  @if (userId) {
+    <div class="vstack gap-3">
+      <div class="row g-0 d-flex justify-content-around">
+        @if (userStats$ | async; as userStats) {
+          <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [totalWordsRead]="userStats.totalWordsRead" [timeSpentReading]="userStats.timeSpentReading"
+          [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive" [avgHoursPerWeekSpentReading]="userStats.avgHoursPerWeekSpentReading" />
+        }
+      </div>
+      <div class="row g-0 fixed-row">
+        <app-reading-activity [userId]="userId" [isAdmin]="(accountService.isAdmin$ | async) || false" [individualUserMode]="true" />
+      </div>
+      <div class="row g-0 fixed-row">
+        <app-day-breakdown [userId]="userId" />
+      </div>
+      <div class="row g-0 fixed-row">
+        <app-stat-list [data$]="percentageRead$" [label]="t('read-percentage')" [title]="t('library-read-progress-title')" />
+      </div>
     </div>
-
-    <div class="row g-0 fixed-row">
-      <app-reading-activity [userId]="userId" [isAdmin]="(accountService.isAdmin$ | async) || false" [individualUserMode]="true"></app-reading-activity>
-    </div>
-
-    <div class="row g-0 fixed-row">
-      <app-day-breakdown [userId]="userId"></app-day-breakdown>
-    </div>
-
-    <div class="row g-0 fixed-row">
-      <app-stat-list [data$]="percentageRead$" [label]="t('read-percentage')" [title]="t('library-read-progress-title')"></app-stat-list>
-    </div>
-
-  </div>
+  }
 
 </ng-container>

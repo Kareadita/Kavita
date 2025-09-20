@@ -549,6 +549,11 @@ namespace API.Data.Migrations
                     b.Property<bool>("CollapseSeriesRelationships")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ColorScapeEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
                     b.Property<bool>("EmulateBook")
                         .HasColumnType("INTEGER");
 

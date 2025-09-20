@@ -208,6 +208,12 @@
     "dashboard-stream-only-delete-smart-filter": "Seuls les flux de filtres intelligents peuvent être supprimés du tableau de bord",
     "smart-filter-name-required": "Nom du filtre intelligent requis",
     "smart-filter-system-name": "Vous ne pouvez pas utiliser le nom d'un flux fourni par le système",
-    "aliases-have-overlap": "Un ou plusieurs alias se chevauchent avec d'autres personnes et ne peuvent pas être mis à jour",
-    "generated-reading-profile-name": "Généré à partir de {0}"
+    "aliases-have-overlap": "Un ou plusieurs alias entrent en conflit avec d'autres personnes, la mise à jour n'est pas possible",
+    "generated-reading-profile-name": "Généré à partir de {0}",
+    "password-authentication-disabled": "L'authentification par mot de passe a été désactivée, connexion via OpenID Connect",
+    "oidc-managed": "Les utilisateurs gérés par OIDC ne peuvent pas être modifiés.",
+    "cannot-change-identity-provider-original-user": "Le fournisseur d'identité du compte administrateur d'origine ne peut pas être modifié",
+    "oidc-invalid-authority": "L'autorité OIDC n'est pas valide",
+    "annotation-failed-create": "Échec de la création de l'annotation, réessayez",
+    "annotation-delete": "Impossible de supprimer l'annotation"
 }

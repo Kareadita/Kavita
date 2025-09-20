@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix:'scrobbling-providers'">
 
-  <app-setting-title [title]="t('title')" [canEdit]="hasValidLicense" [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)"></app-setting-title>
+  <app-setting-title [title]="t('title')" [canEdit]="hasValidLicense" [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)" />
 
   @if (loaded) {
     @if(!hasValidLicense) {
@@ -52,6 +52,6 @@
       </form>
     }
   } @else {
-    <app-loading [loading]="!loaded" [message]="t('loading')"></app-loading>
+    <app-loading [loading]="!loaded" [message]="t('loading')" />
   }
 </ng-container>

@@ -28,6 +28,11 @@ import {tap} from "rxjs";
     styleUrls: ['./side-nav-companion-bar.component.scss']
 })
 export class SideNavCompanionBarComponent implements OnInit {
+  private navService = inject(NavService);
+  private utilityService = inject(UtilityService);
+  toggleService = inject(ToggleService);
+  private offcanvasService = inject(NgbOffcanvas);
+
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
@@ -54,10 +59,6 @@ export class SideNavCompanionBarComponent implements OnInit {
   isExtrasOpen = false;
 
   private readonly destroyRef = inject(DestroyRef);
-
-  constructor(private navService: NavService, private utilityService: UtilityService, public toggleService: ToggleService,
-    private offcanvasService: NgbOffcanvas) {
-  }
 
   ngOnInit(): void {
     // If user opens side nav while filter is open on mobile, then collapse filter (as it doesn't render well) TODO: Change this when we have new drawer

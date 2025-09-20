@@ -73,6 +73,10 @@ export class AnnotationService {
     }));
   }
 
+  getAnnotationsForSeries(seriesId: number) {
+    return this.httpClient.get<Array<Annotation>>(this.baseUrl + 'annotation/all-for-series?seriesId=' + seriesId);
+  }
+
 
   createAnnotation(data: Annotation) {
     return this.httpClient.post<Annotation>(this.baseUrl + 'annotation/create', data).pipe(

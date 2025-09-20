@@ -118,6 +118,9 @@ export class ReaderSettingsComponent implements OnInit {
   protected epubFonts!: Signal<EpubFont[]>;
 
 
+  protected isVerticalLayout!: Signal<boolean>;
+
+
   async ngOnInit() {
     this.pageStyles = this.readerSettingsService.pageStyles;
     this.readingDirectionModel = this.readerSettingsService.readingDirection;

@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {Person, PersonRole} from "../_models/metadata/person";
@@ -17,10 +17,11 @@ import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
   providedIn: 'root'
 })
 export class PersonService {
+  private httpClient = inject(HttpClient);
+  private utilityService = inject(UtilityService);
+
 
   baseUrl = environment.apiUrl;
-
-  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
   updatePerson(person: Person) {
     return this.httpClient.post<Person>(this.baseUrl + "person/update", person);

@@ -1,4 +1,4 @@
-import {Directive, ElementRef, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output} from '@angular/core';
+import { Directive, ElementRef, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {createSwipeSubscription, SwipeDirection, SwipeEvent, SwipeStartEvent} from './ag-swipe.core';
 
@@ -7,6 +7,9 @@ import {createSwipeSubscription, SwipeDirection, SwipeEvent, SwipeStartEvent} fr
     standalone: true
 })
 export class SwipeDirective implements OnInit, OnDestroy {
+  private elementRef = inject(ElementRef);
+  private zone = inject(NgZone);
+
   private swipeSubscription: Subscription | undefined;
 
   @Input() restrictSwipeToLeftSide: boolean = false;
@@ -16,11 +19,6 @@ export class SwipeDirective implements OnInit, OnDestroy {
   @Output() swipeRight: EventEmitter<void> = new EventEmitter<void>();
   @Output() swipeUp: EventEmitter<void> = new EventEmitter<void>();
   @Output() swipeDown: EventEmitter<void> = new EventEmitter<void>();
-
-  constructor(
-    private elementRef: ElementRef,
-    private zone: NgZone
-  ) {}
 
   ngOnInit() {
     this.zone.runOutsideAngular(() => {

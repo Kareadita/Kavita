@@ -9,58 +9,64 @@
       <label for="typeahead-focus" class="form-label">{{t('path-label')}}</label>
       <div class="input-group">
         <input id="typeahead-focus" type="text" class="form-control" style="width: 100%" [(ngModel)]="path" [ngbTypeahead]="search"
-               (focus)="focus$.next($any($event).target.value)" (click)="click$.next($any($event).target.value)"
-               (ngModelChange)="updateTable()" #instance="ngbTypeahead" [placeholder]="t('path-placeholder')"
-               [resultTemplate]="rt" />
+          (focus)="focus$.next($any($event).target.value)" (click)="click$.next($any($event).target.value)"
+          (ngModelChange)="updateTable()" #instance="ngbTypeahead" [placeholder]="t('path-placeholder')"
+          [resultTemplate]="rt" />
+        </div>
+        <ng-template #rt let-r="result" let-t="term">
+          <ngb-highlight [result]="r" [term]="t" />
+        </ng-template>
       </div>
-      <ng-template #rt let-r="result" let-t="term">
-        <ngb-highlight [result]="r" [term]="t"></ngb-highlight>
-      </ng-template>
+
+      <nav aria-label="directory breadcrumb">
+        @if (routeStack.peek() !== undefined) {
+          <ol class="breadcrumb">
+            @for (route of routeStack.items; track route; let index = $index; let last = $last) {
+              <li class="breadcrumb-item {{route === routeStack.peek() ? 'active' : ''}}"
+                >
+                @if (last) {
+                  {{route}}
+                } @else {
+                  <a href="javascript:void(0);" (click)="navigateTo(index)">{{route}}</a>
+                }
+              </li>
+            }
+          </ol>
+        } @else {
+          <div class="breadcrumb">{{t('instructions')}}
+          </div>
+        }
+      </nav>
+
+      <table class="table table-striped scrollable">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 40px;">{{t('type-header')}}</th>
+            <th scope="col">{{t('name-header')}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr (click)="goBack()">
+            <td><i class="fa-solid fa-arrow-turn-up" aria-hidden="true"></i></td>
+            <td>...</td>
+          </tr>
+          @for (folder of folders; track folder; let idx = $index) {
+            <tr (click)="selectNode(folder)" class="clickable" [ngClass]="{'disabled': folder.disabled}">
+              <td><i class="fa-regular fa-folder" aria-hidden="true"></i></td>
+              <td id="folder--{{idx}}">
+                {{folder.name}}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      @if (helpUrl.length > 0) {
+        <a class="btn btn-icon" href="{{helpUrl}}" target="_blank" rel="noopener noreferrer">{{t('help')}}</a>
+      }
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
+      <button type="button" class="btn btn-primary" (click)="share()">{{t('share')}}</button>
     </div>
 
-    <nav aria-label="directory breadcrumb">
-      <ol class="breadcrumb" *ngIf="routeStack.peek() !== undefined; else noBreadcrumb">
-        <li class="breadcrumb-item {{route === routeStack.peek() ? 'active' : ''}}"
-            *ngFor="let route of routeStack.items; let index = index; let last = last;">
-          <ng-container *ngIf="last; else nonActive">
-            {{route}}
-          </ng-container>
-          <ng-template #nonActive>
-            <a href="javascript:void(0);" (click)="navigateTo(index)">{{route}}</a>
-          </ng-template>
-        </li>
-      </ol>
-      <ng-template #noBreadcrumb>
-        <div class="breadcrumb">{{t('instructions')}}
-        </div>
-      </ng-template>
-    </nav>
-
-    <table class="table table-striped scrollable">
-      <thead>
-      <tr>
-        <th scope="col" style="width: 40px;">{{t('type-header')}}</th>
-        <th scope="col">{{t('name-header')}}</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr (click)="goBack()">
-        <td><i class="fa-solid fa-arrow-turn-up" aria-hidden="true"></i></td>
-        <td>...</td>
-      </tr>
-      <tr *ngFor="let folder of folders; let idx = index;" (click)="selectNode(folder)" class="clickable" [ngClass]="{'disabled': folder.disabled}">
-        <td><i class="fa-regular fa-folder" aria-hidden="true"></i></td>
-        <td id="folder--{{idx}}">
-          {{folder.name}}
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="modal-footer">
-    <a class="btn btn-icon" *ngIf="helpUrl.length > 0" href="{{helpUrl}}" target="_blank" rel="noopener noreferrer">{{t('help')}}</a>
-    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
-    <button type="button" class="btn btn-primary" (click)="share()">{{t('share')}}</button>
-  </div>
-
-</ng-container>
+  </ng-container>

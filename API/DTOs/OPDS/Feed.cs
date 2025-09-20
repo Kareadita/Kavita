@@ -4,11 +4,6 @@ using System.Xml.Serialization;
 
 namespace API.DTOs.OPDS;
 
-// TODO: OPDS Dtos are internal state, shouldn't be in DTO directory
-
-/// <summary>
-///
-/// </summary>
 [XmlRoot("feed", Namespace = "http://www.w3.org/2005/Atom")]
 public sealed record Feed
 {
@@ -41,10 +36,10 @@ public sealed record Feed
     public int? StartIndex { get; set; } = null;
 
     [XmlElement("link")]
-    public List<FeedLink> Links { get; set; } = new List<FeedLink>() ;
+    public List<FeedLink> Links { get; set; } = [];
 
     [XmlElement("entry")]
-    public List<FeedEntry> Entries { get; set; } = new List<FeedEntry>();
+    public List<FeedEntry> Entries { get; set; } = [];
 
     public bool ShouldSerializeTotal()
     {

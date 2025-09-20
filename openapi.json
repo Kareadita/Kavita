@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.14",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.15",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.7.14"
+    "version": "0.8.7.15"
   },
   "servers": [
     {
@@ -427,7 +427,9 @@
         "tags": [
           "Account"
         ],
+        "summary": "Change the Age Rating restriction for the user",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -1009,6 +1011,47 @@
                   "items": {
                     "$ref": "#/components/schemas/AnnotationDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Annotation/all-for-series": {
+      "get": {
+        "tags": [
+          "Annotation"
+        ],
+        "summary": "Returns all annotations by Series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnotationDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnotationDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnotationDto"
                 }
               }
             }
@@ -5225,27 +5268,14 @@
             "schema": {
               "type": "string"
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Opds/{apiKey}/external-sources": {
-      "get": {
-        "tags": [
-          "Opds"
-        ],
-        "parameters": [
+          },
           {
-            "name": "apiKey",
-            "in": "path",
-            "required": true,
+            "name": "pageNumber",
+            "in": "query",
             "schema": {
-              "type": "string"
+              "type": "integer",
+              "format": "int32",
+              "default": 0
             }
           }
         ],
@@ -5321,6 +5351,15 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
             }
           }
         ],
@@ -5557,10 +5596,12 @@
         "tags": [
           "Opds"
         ],
+        "summary": "Returns recently updated series. While pagination is avaible, total amount of pages is not due to implementation\ndetails",
         "parameters": [
           {
             "name": "apiKey",
             "in": "path",
+            "description": "",
             "required": true,
             "schema": {
               "type": "string"
@@ -5569,6 +5610,7 @@
           {
             "name": "pageNumber",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -17973,6 +18015,10 @@
             "description": "UI Site Global Setting: The language locale that should be used for the user",
             "nullable": true
           },
+          "colorScapeEnabled": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should Kavita render ColorScape gradients"
+          },
           "aniListScrobblingEnabled": {
             "type": "boolean",
             "description": "Should this account have Scrobbling enabled for AniList"
@@ -28617,6 +28663,7 @@
           "blurUnreadSummaries",
           "bookReaderHighlightSlots",
           "collapseSeriesRelationships",
+          "colorScapeEnabled",
           "locale",
           "noTransitions",
           "promptForDownloadSize",
@@ -28654,6 +28701,9 @@
           "locale": {
             "minLength": 1,
             "type": "string"
+          },
+          "colorScapeEnabled": {
+            "type": "boolean"
           },
           "aniListScrobblingEnabled": {
             "type": "boolean"

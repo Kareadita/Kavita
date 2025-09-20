@@ -2088,7 +2088,6 @@
     },
     "personal-table-of-contents": {
         "delete": "Ta bort {{bookmarkName}}",
-        "page": "Sida {{value}}",
         "no-data": "Inget bokmärkt ännu"
     },
     "theme": {
@@ -2568,7 +2567,7 @@
         "light-theme-alt": "Ljust Tema",
         "dark-theme-alt": "Mörkt Tema",
         "toggle-incognito": "Stäng av Inkognitoläge",
-        "loading-message": "Laddar……PDFs kan ta längre än väntat",
+        "loading-message": "Laddar...",
         "incognito-mode": "Inkognitoläge"
     },
     "log-level-pipe": {

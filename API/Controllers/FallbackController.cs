@@ -20,8 +20,13 @@ public class FallbackController : Controller
         _taskScheduler = taskScheduler;
     }
 
-    public PhysicalFileResult Index()
+    public IActionResult Index()
     {
+        if (HttpContext.Request.Path.StartsWithSegments("/api"))
+        {
+            return NotFound();
+        }
+
         return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html"), "text/HTML");
     }
 }

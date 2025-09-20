@@ -1,9 +1,11 @@
 <div class="mb-3" *transloco="let t;prefix:'annotations-tab'">
-  <app-carousel-reel [items]="annotations()" [alwaysShow]="false">
-    <ng-template #carouselItem let-item let-position="idx">
-      <div style="min-width: 200px">
-        <app-annotation-card [annotation]="item" [allowEdit]="false" [showPageLink]="false" [isInReader]="false" [showInReaderLink]="true"></app-annotation-card>
-      </div>
-    </ng-template>
-  </app-carousel-reel>
+  <virtual-scroller #scroll [items]="annotations()"  [parentScroll]="scrollingBlock()" [childHeight]="1">
+    <div class="card-container row g-0" #container>
+      @for(item of scroll.viewPortItems; let idx = $index; track item.id) {
+        <div style="min-width: 200px" class="col-auto m-2">
+          <app-annotation-card [annotation]="item" [allowEdit]="false" [showPageLink]="false" [isInReader]="false" [showInReaderLink]="true" />
+        </div>
+      }
+    </div>
+  </virtual-scroller>
 </div>

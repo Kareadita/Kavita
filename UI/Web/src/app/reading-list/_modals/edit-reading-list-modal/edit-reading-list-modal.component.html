@@ -6,7 +6,7 @@
   </div>
   <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
     <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
-        orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+      orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
       <li [ngbNavItem]="TabID.General">
         <a ngbNavLink>{{t(TabID.General)}}</a>
         <ng-template ngbNavContent>
@@ -15,104 +15,136 @@
               <div class="col-md-8 col-sm-12">
                 <label for="library-name" class="form-label">Name</label>
                 <input id="library-name" class="form-control" formControlName="title" type="text" [class.is-invalid]="reviewGroup.get('title')?.invalid && reviewGroup.get('title')?.touched">
-                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
-                  <div *ngIf="reviewGroup.get('title')?.errors?.required">
-                    {{t('required-field')}}
+                @if (reviewGroup.dirty || reviewGroup.touched) {
+                  <div id="inviteForm-validations" class="invalid-feedback">
+                    @if (reviewGroup.get('title')?.errors?.required) {
+                      <div>
+                        {{t('required-field')}}
+                      </div>
+                    }
+                    @if (reviewGroup.get('title')?.errors?.duplicateName) {
+                      <div>
+                        {{t('name-unique-validation')}}
+                      </div>
+                    }
                   </div>
-                  <div *ngIf="reviewGroup.get('title')?.errors?.duplicateName">
-                    {{t('name-unique-validation')}}
-                  </div>
-                </div>
+                }
               </div>
-              <ng-container *ngIf="(accountService.currentUser$ | async) as user">
-                <div class="col-md-3 col-sm-12 ms-2" *ngIf="accountService.hasAdminRole(user)">
-                  <div class="form-check form-switch">
-                    <input type="checkbox" id="tag-promoted" role="switch" formControlName="promoted" class="form-check-input" switch
-                           aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
-                    <label class="form-check-label me-1" for="tag-promoted">{{t('promote-label')}}</label>
-                    <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
-                    <ng-template #promotedTooltip>{{t('promote-tooltip')}}</ng-template>
-                    <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip"></ng-container></span>
-                  </div>
-                </div>
-              </ng-container>
-            </div>
-
-            <div class="row g-0 mb-3">
-              <div class="col-md-6 col-sm-12">
-                <h6 id="starting-year-header">{{t('starting-title')}}</h6>
-                <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('startingMonth') as formControl" style="width: 90%">
-                  <label for="start-month" class="form-label">{{t('month-label')}}</label>
-                  <input id="start-month" class="form-control" formControlName="startingMonth"
-                         type="number" inputmode="numeric" [class.is-invalid]="formControl?.invalid && formControl?.touched"
-                         aria-describedby="starting-year-header">
-                  <div class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
-                    <div *ngIf="formControl.errors?.min || formControl.errors?.max">
-                      {{t('month-validation')}}
+              @if ((accountService.currentUser$ | async); as user) {
+                @if (accountService.hasAdminRole(user)) {
+                  <div class="col-md-3 col-sm-12 ms-2">
+                    <div class="form-check form-switch">
+                      <input type="checkbox" id="tag-promoted" role="switch" formControlName="promoted" class="form-check-input" switch
+                        aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
+                        <label class="form-check-label me-1" for="tag-promoted">{{t('promote-label')}}</label>
+                        <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
+                        <ng-template #promotedTooltip>{{t('promote-tooltip')}}</ng-template>
+                        <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip" /></span>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('startingYear') as formControl" style="width: 90%">
-                  <label for="start-year" class="form-label">{{t('year-label')}}</label>
-                  <input id="start-year" class="form-control" formControlName="startingYear" type="number" inputmode="numeric"
-                         [class.is-invalid]="formControl.invalid && formControl.touched"
-                         aria-describedby="starting-year-header">
-                  <div class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
-                    <div *ngIf="formControl.errors?.min || formControl.errors?.max">
-                      {{t('year-validation')}}
-                    </div>
-                  </div>
-                </div>
+                  }
+                }
               </div>
 
-              <div class="col-md-6 col-sm-12">
-                <h6 id="ending-year-heading">{{t('ending-title')}}</h6>
-                <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('endingMonth') as formControl" style="width: 90%">
-                  <label for="ending-month" class="form-label">{{t('month-label')}}</label>
-                  <input id="ending-month" class="form-control" formControlName="endingMonth" type="number" inputmode="numeric"
-                         [class.is-invalid]="formControl?.invalid && formControl?.touched"
-                         aria-describedby="ending-year-header">
-                  <div class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
-                    <div *ngIf="formControl.errors?.min || formControl.errors?.max">
-                      {{t('month-validation')}}
+              <div class="row g-0 mb-3">
+                <div class="col-md-6 col-sm-12">
+                  <h6 id="starting-year-header">{{t('starting-title')}}</h6>
+                  @if (reviewGroup.get('startingMonth'); as formControl) {
+                    <div class="col-md-6 col-sm-12" style="width: 90%">
+                      <label for="start-month" class="form-label">{{t('month-label')}}</label>
+                      <input id="start-month" class="form-control" formControlName="startingMonth"
+                        type="number" inputmode="numeric" [class.is-invalid]="formControl?.invalid && formControl?.touched"
+                        aria-describedby="starting-year-header">
+                        @if (reviewGroup.dirty || reviewGroup.touched) {
+                          <div class="invalid-feedback">
+                            @if (formControl.errors?.min || formControl.errors?.max) {
+                              <div>
+                                {{t('month-validation')}}
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                    @if (reviewGroup.get('startingYear'); as formControl) {
+                      <div class="col-md-6 col-sm-12" style="width: 90%">
+                        <label for="start-year" class="form-label">{{t('year-label')}}</label>
+                        <input id="start-year" class="form-control" formControlName="startingYear" type="number" inputmode="numeric"
+                          [class.is-invalid]="formControl.invalid && formControl.touched"
+                          aria-describedby="starting-year-header">
+                          @if (reviewGroup.dirty || reviewGroup.touched) {
+                            <div class="invalid-feedback">
+                              @if (formControl.errors?.min || formControl.errors?.max) {
+                                <div>
+                                  {{t('year-validation')}}
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      }
                     </div>
-                  </div>
-                </div>
-                <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('endingYear') as formControl" style="width: 90%">
-                  <label for="ending-year" class="form-label">{{t('year-label')}}</label>
-                  <input id="ending-year" class="form-control" formControlName="endingYear" type="number" inputmode="numeric"
-                         [class.is-invalid]="formControl?.invalid && formControl?.touched"
-                         aria-describedby="ending-year-header">
-                  <div class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
-                    <div *ngIf="formControl.errors?.min || formControl.errors?.max">
-                      {{t('year-validation')}}
-                    </div>
-                  </div>
-                </div>
-              </div>
+
+                    <div class="col-md-6 col-sm-12">
+                      <h6 id="ending-year-heading">{{t('ending-title')}}</h6>
+                      @if (reviewGroup.get('endingMonth'); as formControl) {
+                        <div class="col-md-6 col-sm-12" style="width: 90%">
+                          <label for="ending-month" class="form-label">{{t('month-label')}}</label>
+                          <input id="ending-month" class="form-control" formControlName="endingMonth" type="number" inputmode="numeric"
+                            [class.is-invalid]="formControl?.invalid && formControl?.touched"
+                            aria-describedby="ending-year-header">
+                            @if (reviewGroup.dirty || reviewGroup.touched) {
+                              <div class="invalid-feedback">
+                                @if (formControl.errors?.min || formControl.errors?.max) {
+                                  <div>
+                                    {{t('month-validation')}}
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        }
+                        @if (reviewGroup.get('endingYear'); as formControl) {
+                          <div class="col-md-6 col-sm-12" style="width: 90%">
+                            <label for="ending-year" class="form-label">{{t('year-label')}}</label>
+                            <input id="ending-year" class="form-control" formControlName="endingYear" type="number" inputmode="numeric"
+                              [class.is-invalid]="formControl?.invalid && formControl?.touched"
+                              aria-describedby="ending-year-header">
+                              @if (reviewGroup.dirty || reviewGroup.touched) {
+                                <div class="invalid-feedback">
+                                  @if (formControl.errors?.min || formControl.errors?.max) {
+                                    <div>
+                                      {{t('year-validation')}}
+                                    </div>
+                                  }
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="row g-0 mb-3">
+                        <label for="summary" class="form-label">{{t('summary-label')}}</label>
+                        <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>
+                      </div>
+                    </form>
+                  </ng-template>
+                </li>
+                <li [ngbNavItem]="TabID.CoverImage">
+                  <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+                  <ng-template ngbNavContent>
+                    <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="readingList.coverImageLocked" (resetClicked)="handleReset()" />
+                  </ng-template>
+                </li>
+              </ul>
+              <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+              <button type="submit" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
             </div>
 
-            <div class="row g-0 mb-3">
-              <label for="summary" class="form-label">{{t('summary-label')}}</label>
-              <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>
-            </div>
-          </form>
-        </ng-template>
-      </li>
-      <li [ngbNavItem]="TabID.CoverImage">
-        <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
-        <ng-template ngbNavContent>
-          <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="readingList.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
-        </ng-template>
-      </li>
-    </ul>
-    <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
-    <button type="submit" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
-  </div>
 
 
-
-</ng-container>
+          </ng-container>

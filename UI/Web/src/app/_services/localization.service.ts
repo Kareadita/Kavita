@@ -9,6 +9,8 @@ import {TranslocoService} from "@jsverse/transloco";
   providedIn: 'root'
 })
 export class LocalizationService {
+  private httpClient = inject(HttpClient);
+
 
   private readonly translocoService = inject(TranslocoService);
 
@@ -16,8 +18,6 @@ export class LocalizationService {
 
   private readonly localeSubject = new ReplaySubject<KavitaLocale[]>(1);
   public readonly locales$ = this.localeSubject.asObservable();
-
-  constructor(private httpClient: HttpClient) { }
 
   getLocales() {
     return this.httpClient.get<KavitaLocale[]>(this.baseUrl + 'locale').pipe(tap(locales => {

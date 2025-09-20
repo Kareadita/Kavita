@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  ElementRef,
-  Inject,
-  inject,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {AsyncPipe, DatePipe, DecimalPipe, DOCUMENT, Location, NgClass, NgStyle} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
@@ -80,6 +70,8 @@ enum TabID {
     RouterLink, VirtualScrollerModule, NgStyle, NgbNavOutlet, NgbNavItem, PromotedIconComponent, DefaultValuePipe, DetailsTabComponent]
 })
 export class ReadingListDetailComponent implements OnInit {
+  private document = inject<Document>(DOCUMENT);
+
 
   protected readonly MangaFormat = MangaFormat;
   protected readonly Breakpoint = Breakpoint;
@@ -169,8 +161,6 @@ export class ReadingListDetailComponent implements OnInit {
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
-
-  constructor(@Inject(DOCUMENT) private document: Document) {}
 
 
   ngOnInit(): void {

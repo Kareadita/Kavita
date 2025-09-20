@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'card-detail-layout'">
-  <app-loading [loading]="isLoading"></app-loading>
+  <app-loading [loading]="isLoading" />
 
   @if (header().length > 0) {
     <div class="row mt-2 g-0 pb-2">
@@ -7,7 +7,7 @@
         <h4>
           @if (actions().length > 0) {
             <span>
-              <app-card-actionables (actionHandler)="performAction($event)" [inputActions]="actions()" [labelBy]="header()"></app-card-actionables>&nbsp;
+              <app-card-actionables (actionHandler)="performAction($event)" [inputActions]="actions()" [labelBy]="header()" />&nbsp;
             </span>
           }
 
@@ -15,7 +15,7 @@
             {{header()}}&nbsp;
             @if (pagination) {
               <span class="badge bg-primary rounded-pill"
-                    [attr.aria-label]="t('total-items', {count: pagination.totalItems})">{{pagination.totalItems}}</span>
+              [attr.aria-label]="t('total-items', {count: pagination.totalItems})">{{pagination.totalItems}}</span>
             }
           </span>
 
@@ -25,24 +25,24 @@
   }
 
   @if (filterSettings) {
-    <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
+    <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)" />
   }
 
   <div class="viewport-container ms-1" [ngClass]="{'empty': items.length === 0 && !isLoading}">
     <div class="content-container">
       <div class="card-container">
         @if (items.length === 0 && !isLoading) {
-          <p><ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container></p>
+          <p><ng-container [ngTemplateOutlet]="noDataTemplate" /></p>
         }
 
         <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="bufferAmount" [parentScroll]="parentScroll">
           <div class="grid row g-0" #container>
             @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
               <div class="card col-auto mt-2 mb-2"
-                   (click)="tryToSaveJumpKey()"
-                   id="jumpbar-index--{{i}}"
-                   [attr.jumpbar-index]="i">
-                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }"></ng-container>
+                (click)="tryToSaveJumpKey()"
+                id="jumpbar-index--{{i}}"
+                [attr.jumpbar-index]="i">
+                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }" />
               </div>
             }
           </div>
@@ -51,7 +51,7 @@
     </div>
 
     @if (jumpBarKeysToRender.length >= 4 && items.length > 0 && scroll.viewPortInfo.maxScrollPosition > 0) {
-      <ng-container [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }"></ng-container>
+      <ng-container [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }" />
     }
   </div>
 
@@ -59,9 +59,11 @@
     <virtual-scroller #scroll [items]="items" [bufferAmount]="bufferAmount">
       <div class="grid row g-0" #container>
 
-        <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" (click)="tryToSaveJumpKey()" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
-          <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
-        </div>
+        @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
+          <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey()" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
+          </div>
+        }
 
       </div>
     </virtual-scroller>
@@ -70,7 +72,7 @@
       <div class="mx-auto" style="width: 200px;">
         <p>
           @if (noDataTemplate) {
-            <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+            <ng-container [ngTemplateOutlet]="noDataTemplate" />
           } @else {
             {{t('no-data')}}
           }
@@ -84,7 +86,7 @@
     <div class="jump-bar">
       @for(jumpKey of jumpBarKeysToRender; track jumpKey.key; let i = $index) {
         <button class="btn btn-link flip-button" [ngClass]="{'disabled': hasCustomSort()}"
-                (click)="scrollTo(jumpKey)">
+          (click)="scrollTo(jumpKey)">
           <div class="flip-button-inner">
             <div class="flip-button-front">{{jumpKey.title}}</div>
             <div class="flip-button-back">{{jumpKey.size}}</div>

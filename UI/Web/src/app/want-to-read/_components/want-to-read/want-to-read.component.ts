@@ -1,17 +1,5 @@
 import {DecimalPipe, DOCUMENT, NgStyle} from '@angular/common';
-import {
-  AfterContentChecked,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  ElementRef,
-  EventEmitter,
-  inject,
-  Inject,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, EventEmitter, inject, OnInit, ViewChild } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {debounceTime, take} from 'rxjs';
@@ -54,6 +42,22 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
     imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
 })
 export class WantToReadComponent implements OnInit, AfterContentChecked {
+  imageService = inject(ImageService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private seriesService = inject(SeriesService);
+  private titleService = inject(Title);
+  bulkSelectionService = inject(BulkSelectionService);
+  private actionService = inject(ActionService);
+  private messageHub = inject(MessageHubService);
+  private filterUtilityService = inject(FilterUtilitiesService);
+  private utilityService = inject(UtilityService);
+  private document = inject<Document>(DOCUMENT);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private scrollService = inject(ScrollService);
+  private hubService = inject(MessageHubService);
+  private jumpbarService = inject(JumpbarService);
+
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -103,12 +107,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
-  constructor(public imageService: ImageService, private router: Router, private route: ActivatedRoute,
-    private seriesService: SeriesService, private titleService: Title,
-    public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService,
-    private filterUtilityService: FilterUtilitiesService, private utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
-    private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService, private hubService: MessageHubService,
-    private jumpbarService: JumpbarService) {
+  constructor() {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
       this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
 

@@ -1,30 +1,5 @@
-import {DOCUMENT, NgClass, NgForOf, NgTemplateOutlet} from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  ContentChild,
-  DestroyRef,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  inject,
-  Inject,
-  input,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  signal,
-  Signal,
-  SimpleChange,
-  SimpleChanges,
-  TemplateRef,
-  TrackByFunction,
-  ViewChild,
-  WritableSignal
-} from '@angular/core';
+import { DOCUMENT, NgClass, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, ContentChild, DestroyRef, ElementRef, EventEmitter, HostListener, inject, input, Input, OnChanges, OnInit, Output, signal, Signal, SimpleChange, SimpleChanges, TemplateRef, TrackByFunction, ViewChild, WritableSignal } from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
@@ -62,14 +37,15 @@ const ANIMATION_TIME_MS = 0;
  */
 @Component({
   selector: 'app-card-detail-layout',
-  imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, MetadataFilterComponent,
-    TranslocoDirective, NgTemplateOutlet, NgClass, NgForOf],
+  imports: [LoadingComponent, VirtualScrollerModule, CardActionablesComponent, MetadataFilterComponent, TranslocoDirective, NgTemplateOutlet, NgClass],
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true
 })
 export class CardDetailLayoutComponent<TFilter extends number, TSort extends number> implements OnInit, OnChanges {
+  private document = inject<Document>(DOCUMENT);
+
 
   protected readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -139,9 +115,6 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     const filter = this.filterSignal();
     return filter?.sortOptions?.sortField != SortField.SortName || !filter?.sortOptions.isAscending;
   });
-
-
-  constructor(@Inject(DOCUMENT) private document: Document) {}
 
 
   @HostListener('window:resize', ['$event'])

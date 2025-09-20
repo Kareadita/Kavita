@@ -6,13 +6,13 @@
   <p>{{t('clients-opds-description')}}</p>
 
 
-  <app-api-key [hideData]="true" [title]="t('clients-api-key-label')" [tooltipText]="t('clients-api-key-tooltip')" [showRefresh]="true"></app-api-key>
+  <app-api-key [hideData]="true" [title]="t('clients-api-key-label')" [tooltipText]="t('clients-api-key-tooltip')" [showRefresh]="true" />
 
 
   @if (opdsEnabled && opdsUrl) {
     <div class="mt-4">
       <app-api-key [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink" [hideData]="true" [showRefresh]="false"
-                 [transform]="makeUrl"></app-api-key>
+                 [transform]="makeUrl" />
     </div>
   }
 

@@ -49,19 +49,23 @@
               <ng-template #typeTooltip>{{t('type-tooltip')}}</ng-template>
               <ng-template #kavitaplusEligibleTooltip>{{t('kavitaplus-eligible-tooltip')}}</ng-template>
               <span class="visually-hidden" id="library-type-help">
-                <ng-container [ngTemplateOutlet]="typeTooltip"></ng-container>
+                <ng-container [ngTemplateOutlet]="typeTooltip" />
               </span>
               <select class="form-select" id="library-type" formControlName="type" aria-describedby="library-type-help">
                 @for (opt of libraryTypes; track opt.value) {
                   <option [value]="opt.value">{{opt.title}}</option>
                 }
-
               </select>
+              <div class="text-muted mt-2">
+                {{LibraryTypeValue | libraryTypeSubtitle}}
+              </div>
             </div>
-            <div *ngIf="!isAddLibrary">
-              {{t('last-scanned-label')}}
-              <span>{{library?.lastScanned | date: 'short' | defaultDate}}</span>
-            </div>
+            @if (!isAddLibrary) {
+              <div>
+                {{t('last-scanned-label')}}
+                <span>{{library?.lastScanned | date: 'short' | defaultDate}}</span>
+              </div>
+            }
           </ng-template>
         </li>
 
@@ -108,7 +112,7 @@
             <p>{{t('cover-description-extra')}}</p>
             <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateCoverImageIndex($event)"
                                      (selectedBase64Url)="applyCoverImage($event)" [showReset]="library?.coverImage !== null"
-                                     (resetClicked)="resetCoverImage()"></app-cover-image-chooser>
+                                     (resetClicked)="resetCoverImage()" />
           </ng-template>
         </li>
 
@@ -228,7 +232,7 @@
               <app-setting-item [title]="t('exclude-patterns-label')" [showEdit]="false" [canEdit]="false"
                                 [subtitle]="excludePatternTooltip" [toggleOnViewClick]="false">
                 <ng-template #view>
-                  <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)"></app-edit-list>
+                  <app-edit-list [items]="excludePatterns" [label]="t('exclude-patterns-label')" (updateItems)="updateGlobs($event)" />
                 </ng-template>
               </app-setting-item>
             </div>

@@ -1,14 +1,13 @@
 <ng-container *transloco="let t; prefix: 'manage-library'">
   <div class="position-relative">
-    <div class="position-absolute custom-position-2">
-      <app-card-actionables [inputActions]="bulkActions" btnClass="btn-outline-primary ms-1" [label]="t('bulk-action-label')"
+    <div class="d-flex gap-2 position-absolute custom-position">
+      <app-card-actionables [inputActions]="bulkActions" btnClass="btn-outline-primary" [label]="t('bulk-action-label')"
                             [disabled]="bulkMode" (actionHandler)="handleBulkAction($event, null!)">
       </app-card-actionables>
+      <button class="btn btn-outline-primary" (click)="addLibrary()" [title]="t('add-library')">
+        <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span>
+      </button>
     </div>
-
-    <button class="btn btn-outline-primary position-absolute custom-position" (click)="addLibrary()" [title]="t('add-library')">
-      <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add-library')}}</span>
-    </button>
   </div>
 
   @if (bulkMode && bulkAction === Action.CopySettings && sourceCopyToLibrary) {
@@ -20,7 +19,7 @@
          <label class="form-check-label" for="bulk-action-type">{{t('include-type-label')}}</label>
          <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="left" [ngbTooltip]="includeTypeTooltip" role="button" tabindex="0"></i>
          <ng-template #includeTypeTooltip>{{t('include-type-tooltip')}}</ng-template>
-         <span class="visually-hidden" id="include-type-help"><ng-container [ngTemplateOutlet]="includeTypeTooltip"></ng-container></span>
+         <span class="visually-hidden" id="include-type-help"><ng-container [ngTemplateOutlet]="includeTypeTooltip" /></span>
        </div>
      </form>
 
@@ -73,7 +72,7 @@
           <td>
             <!-- On Mobile we want to use ... for each row -->
             @if (useActionables$ | async) {
-              <app-card-actionables [entity]="library" [inputActions]="actions"></app-card-actionables>
+              <app-card-actionables [entity]="library" [inputActions]="actions" />
             } @else {
               <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" [ngbTooltip]="t('scan-library')"
                       [attr.aria-label]="t('scan-library')">
@@ -95,7 +94,7 @@
       }
       @empty {
         @if (loading) {
-          <tr><td colspan="6" style="text-align: center;"><app-loading [loading]="loading"></app-loading></td></tr>
+          <tr><td colspan="6" style="text-align: center;"><app-loading [loading]="loading" /></td></tr>
         } @else {
           <tr><td colspan="6" style="text-align: center;">{{t('no-data')}}</td></tr>
         }

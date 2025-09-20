@@ -1,6 +1,13 @@
 <ng-container *transloco="let t; prefix: 'view-edit-annotation-drawer'">
 
-  <div class="offcanvas-header d-flex flex-column p-2 p-sm-3" [ngStyle]="{'border-bottom': '2px solid ' + titleColor()}">
+  <app-off-canvas-resize
+    [resizeMode]="ResizeMode.Height"
+    canvasPosition="bottom"
+    [minHeight]="200"
+    [maxHeight]="window.innerHeight*0.9"
+  />
+
+  <div class="offcanvas-header d-flex flex-column p-2 p-sm-3 pt-0" [ngStyle]="{'border-bottom': '2px solid ' + titleColor()}">
     <div class="d-flex flex-row align-items-center w-100 mb-2 mb-sm-0">
       <div class="flex-shrink-0">
         <h5 class="offcanvas-title mb-0">
@@ -27,7 +34,7 @@
         }
       </div>
 
-      <div class="flex-shrink-0">
+      <div class="d-flex align-items-center gap-3">
         @if (isEditOrCreateMode() && formGroup) {
           <form [formGroup]="formGroup" novalidate>
             <div class="form-check form-switch">
@@ -40,6 +47,27 @@
             <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
             {{t('contains-spoilers-label')}}
           </div>
+        }
+        @switch (mode()) {
+          @case (AnnotationMode.Create) {
+            <button class="btn btn-primary" (click)="createAnnotation()">{{t('create')}}</button>
+          }
+          @case (AnnotationMode.View) {
+            @let an = annotation();
+            @if (an) {
+              <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
+                <div class="d-flex align-items-center">
+                  {{ an.ownerUsername }}
+                </div>
+                <div class="ms-2">{{ an.createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
+              </div>
+
+              @if (an.ownerUsername === accountService.currentUserSignal()?.username) {
+                <button class="btn btn-primary" (click)="switchToEditMode()">{{t('edit')}}</button>
+              }
+
+            }
+          }
         }
       </div>
     </div>
@@ -57,42 +85,34 @@
     }
   </div>
 
-    <div class="offcanvas-body">
-      @if (annotation() && formGroup) {
-        <form [formGroup]="formGroup" novalidate>
-          <div class="d-flex justify-content-center">
-            <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5" style="max-width: 800px; width: 100%;">
-              <div id="render-target" #renderTarget>
-                <p class="content-quote mb-0" [innerHTML]="totalText()"></p>
-              </div>
-              <cite class="float-end mb-1 annotation-meta">{{annotation()! | pageChapterLabel}}</cite>
-            </blockquote>
-          </div>
-
-          <div class="setting-section-break" aria-hidden="true"></div>
-
-          <div class="row g-0 mt-2 mb-2 mx-auto">
-            @if (isEditOrCreateMode()) {
-              <app-quill-wrapper
-                controlName="note"
-                [formGroup]="formGroup"
-                [theme]="QuillTheme.Snow"
-                (contentChanged)="updateContent($event)"
-              >
-              </app-quill-wrapper>
-            } @else {
-              <quill-view [content]="annotation()!.comment" format="json" theme="snow"></quill-view>
-            }
-          </div>
-
-          @if (mode() === AnnotationMode.Create) {
-            <div class="row g-0 mt-5">
-              <button class="btn btn-primary col-12" (click)="createAnnotation()">{{t('create')}}</button>
+  <div class="offcanvas-body">
+    @if (annotation() && formGroup) {
+      <form [formGroup]="formGroup" novalidate>
+        <div class="d-flex justify-content-center">
+          <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5" style="max-width: 800px; width: 100%;">
+            <div id="render-target" #renderTarget>
+              <p class="content-quote mb-0" [innerHTML]="totalText()"></p>
             </div>
+            <cite class="float-end mb-1 annotation-meta">{{annotation()! | pageChapterLabel}}</cite>
+          </blockquote>
+        </div>
+
+        <div class="setting-section-break" aria-hidden="true"></div>
+
+        <div class="row g-0 mt-2 mb-2 mx-auto">
+          @if (isEditOrCreateMode()) {
+            <app-quill-wrapper controlName="note"
+                               [formGroup]="formGroup"
+                               [theme]="QuillTheme.Snow"
+                               (contentChanged)="updateContent($event)"
+            />
+          } @else {
+            <quill-view [content]="annotation()!.comment" format="json" theme="snow" />
           }
+        </div>
 
-        </form>
-      }
+      </form>
+    }
 
-    </div>
+  </div>
 </ng-container>

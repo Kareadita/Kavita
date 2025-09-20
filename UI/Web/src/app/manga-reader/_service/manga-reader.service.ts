@@ -1,4 +1,4 @@
-import {ElementRef, Injectable, Renderer2, RendererFactory2} from '@angular/core';
+import { ElementRef, Injectable, Renderer2, RendererFactory2, inject } from '@angular/core';
 import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
 import {ScalingOption} from 'src/app/_models/preferences/scaling-option';
 import {ReaderService} from 'src/app/_services/reader.service';
@@ -11,12 +11,16 @@ import {BookmarkInfo} from 'src/app/_models/manga-reader/bookmark-info';
   providedIn: 'root'
 })
 export class MangaReaderService {
+  private readerService = inject(ReaderService);
+
 
   private pageDimensions: DimensionMap = {};
   private pairs: {[key: number]: number} = {};
   private renderer: Renderer2;
 
-  constructor(rendererFactory: RendererFactory2, private readerService: ReaderService) {
+  constructor() {
+    const rendererFactory = inject(RendererFactory2);
+
     this.renderer = rendererFactory.createRenderer(null, null);
   }
 

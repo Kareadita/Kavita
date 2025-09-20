@@ -14,7 +14,7 @@ import { compare, SortableHeader, SortEvent } from 'src/app/_single-module/table
 import { PieDataItem } from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SortableHeader as SortableHeader_1 } from '../../../_single-module/table/_directives/sortable-header.directive';
-import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import {TranslocoDirective} from "@jsverse/transloco";
 
@@ -24,7 +24,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
     styleUrls: ['./manga-format-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, SortableHeader_1, NgFor, AsyncPipe, DecimalPipe, TranslocoDirective]
+  imports: [NgbTooltip, ReactiveFormsModule, PieChartModule, SortableHeader_1, AsyncPipe, DecimalPipe, TranslocoDirective]
 })
 export class MangaFormatStatsComponent {
 

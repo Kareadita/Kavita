@@ -22,7 +22,7 @@
     <app-edit-external-source-item [source]="externalSource"
                                    (sourceUpdate)="updateSource(idx, $event)"
                                    (sourceDelete)="deleteSource(idx, $event)"
-                                   [isViewMode]="externalSource.id !== 0"></app-edit-external-source-item>
+                                   [isViewMode]="externalSource.id !== 0" />
   } @empty {
     <ul>
       <li class="list-group-item">

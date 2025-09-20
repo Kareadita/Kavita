@@ -9,6 +9,9 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   providedIn: 'root'
 })
 export class ImageService {
+  private accountService = inject(AccountService);
+  private themeService = inject(ThemeService);
+
   private readonly destroyRef = inject(DestroyRef);
   baseUrl = environment.apiUrl;
   apiKey: string = '';
@@ -20,7 +23,7 @@ export class ImageService {
   public nextChapterImage = 'assets/images/image-placeholder.dark-min.png';
   public noPersonImage = 'assets/images/error-person-missing.dark.min.png';
 
-  constructor(private accountService: AccountService, private themeService: ThemeService) {
+  constructor() {
     this.themeService.currentTheme$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(theme => {
       if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';

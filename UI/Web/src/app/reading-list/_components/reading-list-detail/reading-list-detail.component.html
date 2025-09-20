@@ -5,13 +5,13 @@
       <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
         <div class="row mb-0 mb-xl-3 info-container">
           <div class="image-container series col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
-            <app-image [styles]="{'max-height': '400px', 'max-width': '300px'}" [imageUrl]="imageService.getReadingListCoverImage(readingList.id)" (click)="read()"></app-image>
+            <app-image [styles]="{'max-height': '400px', 'max-width': '300px'}" [imageUrl]="imageService.getReadingListCoverImage(readingList.id)" (click)="read()" />
           </div>
 
           <div class="col-xl-10 col-lg-7 col-md-12 col-sm-12 col-xs-12">
             <h4 class="title mb-2">
             <span>
-              <app-promoted-icon [promoted]="readingList.promoted"></app-promoted-icon>
+              <app-promoted-icon [promoted]="readingList.promoted" />
               <span class="ms-2">{{readingList.title}}</span>
               @if(isLoading) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -85,7 +85,7 @@
 
                 <div class="col-auto ms-2">
                   <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
-                    <app-card-actionables [entity]="readingList" [inputActions]="actions" [labelBy]="readingList.title" iconClass="fa-ellipsis-h" btnClass="btn"></app-card-actionables>
+                    <app-card-actionables [entity]="readingList" [inputActions]="actions" [labelBy]="readingList.title" iconClass="fa-ellipsis-h" btnClass="btn" />
                   </div>
                 </div>
 
@@ -100,7 +100,7 @@
             </div>
 
             <div class="mt-2 mb-3">
-              <app-read-more [text]="readingList.summary || ''" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 170 : 200"></app-read-more>
+              <app-read-more [text]="readingList.summary || ''" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 170 : 200" />
             </div>
 
             <div class="mt-2 upper-details">
@@ -220,7 +220,7 @@
                           {{t('no-data')}}
                         </div>
                       } @else if(isLoading) {
-                        <app-loading [loading]="isLoading"></app-loading>
+                        <app-loading [loading]="isLoading" />
                       }
 
                       @if(formGroup.get('edit')?.value && (items.length > 100 || utilityService.getActiveBreakpoint() < Breakpoint.Tablet)) {

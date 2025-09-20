@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -17,7 +16,6 @@ using API.Errors;
 using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
-using API.Services.Plus;
 using API.SignalR;
 using AutoMapper;
 using Hangfire;
@@ -29,7 +27,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SharpCompress;
 
 namespace API.Controllers;
 
@@ -53,7 +50,6 @@ public class AccountController : BaseApiController
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
-    private readonly IOidcService _oidcService;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -62,8 +58,7 @@ public class AccountController : BaseApiController
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
         IEmailService emailService, IEventHub eventHub,
-        ILocalizationService localizationService,
-        IOidcService oidcService)
+        ILocalizationService localizationService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -75,7 +70,6 @@ public class AccountController : BaseApiController
         _emailService = emailService;
         _eventHub = eventHub;
         _localizationService = localizationService;
-        _oidcService = oidcService;
     }
 
     /// <summary>
@@ -197,11 +191,7 @@ public class AccountController : BaseApiController
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            // Assign default streams
-            _accountService.AddDefaultStreamsToUser(user);
-
-            // Assign default reading profile
-            await _accountService.AddDefaultReadingProfileToUser(user);
+            await _accountService.SeedUser(user);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest(await _localizationService.Get("en", "confirm-token-gen"));
@@ -534,6 +524,11 @@ public class AccountController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Change the Age Rating restriction for the user
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("update/age-restriction")]
     public async Task<ActionResult> UpdateAgeRestriction(UpdateAgeRestrictionDto dto)
     {
@@ -745,11 +740,7 @@ public class AccountController : BaseApiController
             var result = await _userManager.CreateAsync(user, AccountService.DefaultPassword);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            // Assign default streams
-            _accountService.AddDefaultStreamsToUser(user);
-
-            // Assign default reading profile
-            await _accountService.AddDefaultReadingProfileToUser(user);
+            await _accountService.SeedUser(user);
 
             // Assign Roles
             var roles = dto.Roles;

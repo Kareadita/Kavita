@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix: 'edit-volume-modal'">
   <div class="modal-container">
     <div class="modal-header">
-      <h4 class="modal-title">{{t('title')}} <app-entity-title [libraryType]="libraryType" [entity]="volume" [prioritizeTitleName]="false"></app-entity-title></h4>
+      <h4 class="modal-title">{{t('title')}} <app-entity-title [libraryType]="libraryType" [entity]="volume" [prioritizeTitleName]="false" /></h4>
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
     <div class="modal-body scrollable-modal" [ngClass]="{'d-flex': utilityService.getActiveBreakpoint() !== Breakpoint.Mobile}">
@@ -100,7 +100,7 @@
                   {{t('cover-image-description')}}
                 </p>
                 <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)"
-                                         [showReset]="true" (resetClicked)="handleReset()"></app-cover-image-chooser>
+                                         [showReset]="true" (resetClicked)="handleReset()" />
               </ng-template>
             </li>
           }
@@ -110,8 +110,8 @@
             <a ngbNavLink>{{t(TabID.Progress)}}</a>
             <ng-template ngbNavContent>
               @for(chapter of volume.chapters; track chapter.id) {
-                <h6><app-entity-title [entity]="chapter" [prioritizeTitleName]="false"></app-entity-title></h6>
-                <app-edit-chapter-progress [chapter]="chapter"></app-edit-chapter-progress>
+                <h6><app-entity-title [entity]="chapter" [prioritizeTitleName]="false" /></h6>
+                <app-edit-chapter-progress [chapter]="chapter" />
                 <div class="setting-section-break"></div>
               }
             </ng-template>

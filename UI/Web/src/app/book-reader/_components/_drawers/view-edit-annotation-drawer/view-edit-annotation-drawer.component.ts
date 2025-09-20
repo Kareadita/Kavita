@@ -23,13 +23,16 @@ import {HighlightBarComponent} from "../../_annotations/highlight-bar/highlight-
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {User} from "../../../../_models/user";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
-import {DOCUMENT, NgStyle} from "@angular/common";
+import {DatePipe, DOCUMENT, NgStyle} from "@angular/common";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 import {PageChapterLabelPipe} from "../../../../_pipes/page-chapter-label.pipe";
 import {UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
 import {QuillTheme, QuillWrapperComponent} from "../../quill-wrapper/quill-wrapper.component";
 import {ContentChange, QuillViewComponent} from "ngx-quill";
+import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
+import {AccountService} from "../../../../_services/account.service";
+import {OffCanvasResizeComponent, ResizeMode} from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 
 export enum AnnotationMode {
   View = 0,
@@ -49,13 +52,17 @@ const INIT_HIGHLIGHT_DELAY = 200;
     NgStyle,
     PageChapterLabelPipe,
     QuillWrapperComponent,
-    QuillViewComponent
+    QuillViewComponent,
+    DatePipe,
+    UtcToLocaleDatePipe,
+    OffCanvasResizeComponent
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ViewEditAnnotationDrawerComponent implements OnInit {
+
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
   private readonly annotationService = inject(AnnotationService);
   private readonly destroyRef = inject(DestroyRef);
@@ -66,6 +73,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   private readonly epubHighlightService = inject(EpubHighlightService);
   private readonly fb = inject(NonNullableFormBuilder);
   protected readonly utilityService = inject(UtilityService);
+  protected readonly accountService = inject(AccountService);
 
   @ViewChild('renderTarget', {read: ViewContainerRef}) renderTarget!: ViewContainerRef;
 
@@ -193,6 +201,25 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
       hasSpoiler: this.fb.control<boolean>(false, []),
       selectedSlotIndex: this.fb.control<number>(0, []),
     });
+
+    effect(() => {
+      const editMode = this.isEditMode();
+      if (!editMode) return;
+
+      this.formGroup.valueChanges.pipe(
+        debounceTime(350),
+        switchMap(_ => {
+          const updatedAnnotation = this.annotation();
+          if (!updatedAnnotation) return of();
+
+          updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
+          updatedAnnotation.comment = JSON.stringify(this.annotationNote);
+
+          return this.annotationService.updateAnnotation(updatedAnnotation);
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe();
+    });
   }
 
   ngOnInit(){
@@ -203,24 +230,6 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
       this.formGroup.get('hasSpoiler')!.setValue(annotation.containsSpoiler);
       this.formGroup.get('selectedSlotIndex')!.setValue(annotation.selectedSlotIndex);
     }
-
-    if (!this.isEditMode()) {
-      return;
-    }
-
-    this.formGroup.valueChanges.pipe(
-      debounceTime(350),
-      switchMap(_ => {
-        const updatedAnnotation = this.annotation();
-        if (!updatedAnnotation) return of();
-
-        updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
-        updatedAnnotation.comment = JSON.stringify(this.annotationNote);
-
-        return this.annotationService.updateAnnotation(updatedAnnotation);
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
   }
 
   createAnnotation() {
@@ -236,6 +245,15 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     this.annotationService.createAnnotation(highlightAnnotation).subscribe(_ => {
       this.close();
     });
+  }
+
+  switchToEditMode() {
+    if (this.isEditMode()) return;
+
+    const annotation = this.annotation();
+    if (annotation == null || annotation.ownerUsername !== this.accountService.currentUserSignal()?.username) return;
+
+    this.mode.set(AnnotationMode.Edit);
   }
 
   changeSlotIndex(slotIndex: number) {
@@ -326,4 +344,6 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   protected readonly AnnotationMode = AnnotationMode;
   protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly QuillTheme = QuillTheme;
+  protected readonly ResizeMode = ResizeMode;
+  protected readonly window = window;
 }

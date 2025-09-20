@@ -1,17 +1,9 @@
 import {DOCUMENT} from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import {
-  DestroyRef,
-  inject,
-  Inject,
-  Injectable,
-  Renderer2,
-  RendererFactory2,
-  SecurityContext
-} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {DestroyRef, effect, inject, Injectable, Renderer2, RendererFactory2, SecurityContext} from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ToastrService} from 'ngx-toastr';
-import {filter, map, ReplaySubject, take, tap} from 'rxjs';
+import {map, ReplaySubject, take, tap} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../shared/confirm.service';
 import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
@@ -23,15 +15,21 @@ import {translate} from "@jsverse/transloco";
 import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
-import {NavigationEnd, Router} from "@angular/router";
 import {ColorscapeService} from "./colorscape.service";
 import {ColorScape} from "../_models/theme/colorscape";
-import {debounceTime} from "rxjs/operators";
+import {AccountService} from "./account.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ThemeService {
+  private document = inject<Document>(DOCUMENT);
+  private httpClient = inject(HttpClient);
+  private domSanitizer = inject(DomSanitizer);
+  private confirmService = inject(ConfirmService);
+  private toastr = inject(ToastrService);
+  private accountService = inject(AccountService);
+
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly colorTransitionService = inject(ColorscapeService);
@@ -44,7 +42,7 @@ export class ThemeService {
 
   private themesSource = new ReplaySubject<SiteTheme[]>(1);
   public themes$ = this.themesSource.asObservable();
-  
+
   private darkModeSource = new ReplaySubject<boolean>(1);
   public isDarkMode$ = this.darkModeSource.asObservable();
 
@@ -57,9 +55,10 @@ export class ThemeService {
   private baseUrl = environment.apiUrl;
 
 
-  constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private httpClient: HttpClient,
-  messageHub: MessageHubService, private domSanitizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService,
-  private router: Router) {
+  constructor() {
+    const rendererFactory = inject(RendererFactory2);
+    const messageHub = inject(MessageHubService);
+
     this.renderer = rendererFactory.createRenderer(null, null);
 
     messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
@@ -83,8 +82,15 @@ export class ThemeService {
 
         });
       }
+    });
 
-
+    effect(() => {
+      const user = this.accountService.currentUserSignal();
+      if (user?.preferences && user?.preferences.theme) {
+        this.setTheme(user.preferences.theme.name);
+      } else {
+        this.setTheme(this.defaultTheme);
+      }
     });
   }
 

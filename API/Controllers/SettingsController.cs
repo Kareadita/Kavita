@@ -71,6 +71,9 @@ public class SettingsController : BaseApiController
     public async Task<ActionResult<ServerSettingDto>> GetSettings()
     {
         var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+
+        // Do not send OIDC secret to user
+        settingsDto.OidcConfig.Secret = "*".Repeat(settingsDto.OidcConfig.Secret.Length);
         return Ok(settingsDto);
     }
 

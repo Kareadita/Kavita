@@ -209,5 +209,9 @@
     "smart-filter-system-name": "Du kannst den Namen eines vom System bereitgestellten Streams nicht verwenden",
     "smart-filter-name-required": "Name des Smart Filters erforderlich",
     "aliases-have-overlap": "Ein oder mehrere Aliasnamen sind mit anderen Personen identisch und können nicht aktualisiert werden",
-    "generated-reading-profile-name": "Erstellt aus {0}"
+    "generated-reading-profile-name": "Erstellt aus {0}",
+    "password-authentication-disabled": "Die Passwortauthentifizierung wurde deaktiviert, Anmeldung über OpenID Connect",
+    "oidc-managed": "Von OIDC verwaltete Benutzer können nicht bearbeitet werden.",
+    "cannot-change-identity-provider-original-user": "Der Identitätsanbieter des ursprünglichen Administratorkontos kann nicht geändert werden",
+    "oidc-invalid-authority": "OIDC-Autorität ist ungültig"
 }

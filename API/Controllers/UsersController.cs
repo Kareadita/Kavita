@@ -109,6 +109,7 @@ public class UsersController : BaseApiController
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
         existingPreferences.ShareReviews = preferencesDto.ShareReviews;
+        existingPreferences.ColorScapeEnabled = preferencesDto.ColorScapeEnabled;
         existingPreferences.BookReaderHighlightSlots = preferencesDto.BookReaderHighlightSlots;
 
         if (await _licenseService.HasActiveLicense())

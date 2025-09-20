@@ -5,11 +5,11 @@
           @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
             <div class="example-box">
               <div class="d-flex list-container">
-                <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: true }"></ng-container>
-                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+                <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: true }" />
+                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
 
                 @if (showRemoveButton) {
-                  <ng-container [ngTemplateOutlet]="removeBtn" [ngTemplateOutletContext]="{$implicit: item, idx: i}"></ng-container>
+                  <ng-container [ngTemplateOutlet]="removeBtn" [ngTemplateOutletContext]="{$implicit: item, idx: i}" />
                 }
 
               </div>
@@ -24,11 +24,11 @@
                [cdkDragData]="item" cdkDragBoundary=".example-list"
                [cdkDragDisabled]="accessibilityMode || disabled || bulkMode" cdkDragPreviewContainer="parent">
             <div class="d-flex list-container">
-              <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: false }"></ng-container>
-              <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+              <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: false }" />
+              <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
 
               @if (showRemoveButton) {
-                <ng-container [ngTemplateOutlet]="removeBtn" [ngTemplateOutletContext]="{$implicit: item, idx: i}"></ng-container>
+                <ng-container [ngTemplateOutlet]="removeBtn" [ngTemplateOutletContext]="{$implicit: item, idx: i}" />
               }
 
             </div>

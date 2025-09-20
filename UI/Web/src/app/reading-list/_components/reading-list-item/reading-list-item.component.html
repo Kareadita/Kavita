@@ -1,13 +1,13 @@
 <ng-container *transloco="let t; prefix: 'reading-list-item'">
   <div class="d-flex flex-row g-0reading-list-item">
     <div class="d-none d-md-block pe-2">
-      <app-image width="106px" [styles]="{'max-height': '125px'}" class="img-top me-3" [imageUrl]="imageService.getChapterCoverImage(item.chapterId)"></app-image>
+      <app-image width="106px" [styles]="{'max-height': '125px'}" class="img-top me-3" [imageUrl]="imageService.getChapterCoverImage(item.chapterId)" />
       @if (item.pagesRead === 0 && item.pagesTotal > 0) {
         <div class="not-read-badge" ></div>
       }
       @if (item.pagesRead < item.pagesTotal && item.pagesTotal > 0 && item.pagesRead !== item.pagesTotal) {
         <div class="progress-banner">
-          <p><ngb-progressbar type="primary" height="5px" [value]="item.pagesRead" [max]="item.pagesTotal"></ngb-progressbar></p>
+          <p><ngb-progressbar type="primary" height="5px" [value]="item.pagesRead" [max]="item.pagesTotal" /></p>
         </div>
       }
     </div>
@@ -38,11 +38,11 @@
 
         </h5>
         <div class="ps-1 d-none d-md-inline-block mb-1">
-          <app-series-format [format]="item.seriesFormat"></app-series-format>
+          <app-series-format [format]="item.seriesFormat" />
           <a href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
         </div>
 
-        <app-read-more [text]="item.summary || ''" [showToggle]="false" [maxLength]="500"></app-read-more>
+        <app-read-more [text]="item.summary || ''" [showToggle]="false" [maxLength]="500" />
 
 
         @if (item.releaseDate !== '0001-01-01T00:00:00') {

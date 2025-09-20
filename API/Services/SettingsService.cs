@@ -598,10 +598,16 @@ public class SettingsService : ISettingsService
             updateSettingsDto.OidcConfig.RolesClaim = ClaimTypes.Role;
         }
 
+        var currentConfig = JsonSerializer.Deserialize<OidcConfigDto>(setting.Value)!;
+
+        // Patch Oidc Secret back in if not changed
+        if ("*".Repeat(currentConfig.Secret.Length) == updateSettingsDto.OidcConfig.Secret)
+        {
+            updateSettingsDto.OidcConfig.Secret = currentConfig.Secret;
+        }
+
         var newValue = JsonSerializer.Serialize(updateSettingsDto.OidcConfig);
         if (setting.Value == newValue) return false;
-
-        var currentConfig = JsonSerializer.Deserialize<OidcConfigDto>(setting.Value)!;
 
         if (currentConfig.Authority != updateSettingsDto.OidcConfig.Authority)
         {

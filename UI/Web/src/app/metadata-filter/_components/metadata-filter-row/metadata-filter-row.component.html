@@ -52,8 +52,7 @@
                                  [hideSelectedItems]="true"
                                  [multiple]="isMultiSelectDropdownAllowed()"
                                  [infiniteScroll]="true"
-                                 [resettable]="true">
-                        </select2>
+                                 [resettable]="true" />
                       }
                     }
                   }
@@ -71,7 +70,7 @@
               }
             </div>
 
-            <ng-content #removeBtn></ng-content>
+            <ng-content #removeBtn />
         </div>
     </form>
 </ng-container>

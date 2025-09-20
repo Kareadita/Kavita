@@ -26,14 +26,14 @@ your reading collection with your friends and family!
 - First class responsive readers that work great on any device (phone, tablet, desktop)
 - Customizable theming support: [Theme Repo](https://github.com/Kareadita/Themes) and [Documentation](https://wiki.kavitareader.com/guides/themes)
 - External metadata integration and scrobbling for read status, ratings, and reviews (available via [Kavita+](https://wiki.kavitareader.com/kavita+)) 
-- Rich Metadata support with filtering and searching
+- Rich Metadata support with filtering, searching, and smart filters
 - Ways to group reading material: Collections, Reading Lists (CBL Import), Want to Read
-- Ability to manage users with rich Role-based management for age restrictions, abilities within the app, etc
+- Ability to manage users with rich Role-based management for age restrictions, abilities within the app, OIDC, etc
 - Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
 - Ability to customize your dashboard and side nav with smart filters, custom order and visibility toggles
-- Full Localization Support
-- Ability to download metadata (available via [Kavita+](https://wiki.kavitareader.com/kavita+))
-
+- Full Localization Support ([Weblate](https://hosted.weblate.org/engage/kavita/))
+- Ability to download metadata, reviews, ratings, and more (available via [Kavita+](https://wiki.kavitareader.com/kavita+))
+- Epub-based Annotation/Highlight support 
 
 ## Support
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://discord.gg/eczRp9eeem)

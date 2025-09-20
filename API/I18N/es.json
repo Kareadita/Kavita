@@ -203,5 +203,7 @@
     "person-name-unique": "El nombre de la persona debe ser único",
     "person-image-doesnt-exist": "La persona no existe en CoversDB",
     "email-taken": "El correo electrónico ya está en uso",
-    "kavitaplus-restricted": "Esto está restringido a Kavita+"
+    "kavitaplus-restricted": "Esto está restringido a Kavita+",
+    "password-authentication-disabled": "La autentificación por medio de contraseñas ha sido desabilitada, identifícate por medio de OpenID Connect",
+    "oidc-managed": "Los usuarios administrados por OIDC no se pueden editar."
 }

@@ -7,7 +7,6 @@ import {Preferences} from '../_models/preferences/preferences';
 import {User} from '../_models/user';
 import {Router} from '@angular/router';
 import {EVENTS, MessageHubService} from './message-hub.service';
-import {ThemeService} from './theme.service';
 import {InviteUserResponse} from '../_models/auth/invite-user-response';
 import {UserUpdateEvent} from '../_models/events/user-update-event';
 import {AgeRating} from '../_models/metadata/age-rating';
@@ -51,7 +50,6 @@ export class AccountService {
   private readonly httpClient = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly messageHub = inject(MessageHubService);
-  private readonly themeService = inject(ThemeService);
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
@@ -226,14 +224,6 @@ export class AccountService {
     if (user) {
       localStorage.setItem(this.userKey, JSON.stringify(user));
       localStorage.setItem(AccountService.lastLoginKey, user.username);
-
-      if (user.preferences && user.preferences.theme) {
-        this.themeService.setTheme(user.preferences.theme.name);
-      } else {
-        this.themeService.setTheme(this.themeService.defaultTheme);
-      }
-    } else {
-      this.themeService.setTheme(this.themeService.defaultTheme);
     }
 
     this.currentUser = user;

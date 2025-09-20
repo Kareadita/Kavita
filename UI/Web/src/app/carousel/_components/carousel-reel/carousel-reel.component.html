@@ -4,7 +4,7 @@
     <div class="carousel-container mb-3">
       <div>
         @if (actionables.length > 0) {
-          <app-card-actionables [inputActions]="actionables" (actionHandler)="performAction($event)"></app-card-actionables>
+          <app-card-actionables [inputActions]="actionables" (actionHandler)="performAction($event)" />
         }
         <h4 class="header" (click)="sectionClicked($event)" [ngClass]="{'non-selectable': !clickableTitle}">
           @if (titleLink !== '') {
@@ -33,12 +33,12 @@
             (swiperprogress)="onProgress($event)">
             @for(item of items; track item; let i = $index;) {
               <swiper-slide>
-                <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+                <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
               </swiper-slide>
             } @empty {
               @if (alwaysShow) {
                 <swiper-slide>
-                  <ng-container [ngTemplateOutlet]="carouselItemTemplate"></ng-container>
+                  <ng-container [ngTemplateOutlet]="carouselItemTemplate" />
                 </swiper-slide>
               }
             }

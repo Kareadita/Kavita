@@ -32,7 +32,7 @@
                 [selected]="slot.slotNumber === selectedSlotIndex()"
                 (selectPicker)="selectSlot(index, slot)"
                 [editMode]="isEditMode()"
-                [canChangeEditMode]="canChangeEditMode()"
+                [canChangeEditMode]="allowEditMode()"
                 (editModeChange)="isEditMode.set($event)"
                 [first]="$first"
                 [last]="$last"
@@ -41,12 +41,14 @@
           </div>
         }
 
-        @if (desktopLayout()) {
+        @if (desktopLayout() && allowEditMode()) {
           <button class="btn btn-icon ms-2 color" (click)="toggleEditMode()">
             @if (!isEditMode()) {
               <i class="fa-solid fa-pencil-alt" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('edit')}}</span>
             } @else {
               <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('close')}}</span>
             }
           </button>
         }

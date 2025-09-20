@@ -225,6 +225,20 @@ button i.fa {
 
 }
 
+.btn-unstyled {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+
+.btn-unstyled:focus {
+  outline: none;
+}
+
 //
 //.btn-primary .btn-check:checked + .btn, :not(.btn-check) + .btn:active, .btn:first-child:active, .btn.active, .btn.show {
 //  --bs-btn-active-bg: var(--primary-color-dark-shade);

@@ -1,4 +1,4 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import {TranslocoService} from "@jsverse/transloco";
 import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
 
@@ -7,8 +7,8 @@ import {HourEstimateRange} from "../_models/series-detail/hour-estimate-range";
   standalone: true
 })
 export class ReadTimeLeftPipe implements PipeTransform {
+  private readonly translocoService = inject(TranslocoService);
 
-  constructor(private readonly translocoService: TranslocoService) {}
 
   transform(readingTimeLeft: HourEstimateRange, includeLeftLabel = false): string {
     const hoursLabel = readingTimeLeft.avgHours > 1

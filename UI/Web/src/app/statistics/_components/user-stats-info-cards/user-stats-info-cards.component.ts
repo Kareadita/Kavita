@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
@@ -18,6 +18,10 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
     imports: [IconAndTitleComponent, DecimalPipe, CompactNumberPipe, TimeDurationPipe, TimeAgoPipe, TranslocoDirective]
 })
 export class UserStatsInfoCardsComponent {
+  private statsService = inject(StatisticsService);
+  private modalService = inject(NgbModal);
+  private accountService = inject(AccountService);
+
 
   @Input() totalPagesRead: number = 0;
   @Input() totalWordsRead: number = 0;
@@ -25,8 +29,6 @@ export class UserStatsInfoCardsComponent {
   @Input() chaptersRead: number = 0;
   @Input() lastActive: string = '';
   @Input() avgHoursPerWeekSpentReading: number = 0;
-
-  constructor(private statsService: StatisticsService, private modalService: NgbModal, private accountService: AccountService) { }
 
   openPageByYearList() {
     const numberPipe = new CompactNumberPipe();

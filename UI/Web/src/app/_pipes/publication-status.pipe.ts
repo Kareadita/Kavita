@@ -1,4 +1,4 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { PublicationStatus } from '../_models/metadata/publication-status';
 import {TranslocoService} from "@jsverse/transloco";
 
@@ -7,7 +7,8 @@ import {TranslocoService} from "@jsverse/transloco";
   standalone: true
 })
 export class PublicationStatusPipe implements PipeTransform {
-  constructor(private translocoService: TranslocoService) {}
+  private translocoService = inject(TranslocoService);
+
 
   transform(value: PublicationStatus): string {
     switch (value) {

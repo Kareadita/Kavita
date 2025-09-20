@@ -400,11 +400,13 @@ public class Startup
         app.UseStaticFiles(new StaticFileOptions
         {
             // bcmap files needed for PDF reader localizations (https://github.com/Kareadita/Kavita/issues/2970)
+            // ftl files are needed for PDF zoom options (https://github.com/Kareadita/Kavita/issues/3995)
             ContentTypeProvider = new FileExtensionContentTypeProvider
             {
                 Mappings =
                 {
-                    [".bcmap"] = "application/octet-stream"
+                    [".bcmap"] = "application/octet-stream",
+                    [".ftl"] = "text/plain"
                 }
             },
             HttpsCompression = HttpsCompressionMode.Compress,

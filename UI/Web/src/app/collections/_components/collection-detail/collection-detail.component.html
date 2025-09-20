@@ -6,9 +6,9 @@
           <ng-container title>
             @if (collectionTag) {
               <h4>
-                <app-promoted-icon [promoted]="collectionTag.promoted"></app-promoted-icon>
+                <app-promoted-icon [promoted]="collectionTag.promoted" />
                 <span class="ms-2">{{collectionTag.title}}</span>
-                <app-card-actionables [entity]="collectionTag" [disabled]="actionInProgress" [inputActions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v"></app-card-actionables>
+                <app-card-actionables [entity]="collectionTag" [disabled]="actionInProgress" [inputActions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v" />
               </h4>
             }
             <h5 subtitle class="ms-2 subtitle-with-actionables">{{t('item-count', {num: series.length})}}</h5>
@@ -23,14 +23,14 @@
         @if (summary.length > 0 || collectionTag.source !== ScrobbleProvider.Kavita) {
           <div class="row mb-3">
             <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
-              <app-image [styles]="{'max-width': '481px'}" [imageUrl]="imageService.getCollectionCoverImage(collectionTag.id)"></app-image>
+              <app-image [styles]="{'max-width': '481px'}" [imageUrl]="imageService.getCollectionCoverImage(collectionTag.id)" />
 
               @if (collectionTag.source !== ScrobbleProvider.Kavita && collectionTag.missingSeriesFromSource !== null
               && series.length !== collectionTag.totalSourceCount && collectionTag.totalSourceCount > 0) {
                 <div class="under-image">
                   <app-image [imageUrl]="collectionTag.source | providerImage"
                              width="16px" height="16px"
-                             [ngbTooltip]="collectionTag.source | scrobbleProviderName" tabindex="0"></app-image>
+                             [ngbTooltip]="collectionTag.source | scrobbleProviderName" tabindex="0" />
                   <span class="ms-2 me-2">{{t('sync-progress', {title: series.length + ' / ' + collectionTag.totalSourceCount})}}</span>
                   <i class="fa-solid fa-question-circle" aria-hidden="true" [ngbTooltip]="t('last-sync', {date: collectionTag.lastSyncUtc | date: 'short' | defaultDate })"></i>
                 </div>
@@ -39,7 +39,7 @@
             <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
               @if (summary.length > 0) {
                 <div class="mb-2">
-                  <app-read-more [text]="summary" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 170 : 200"></app-read-more>
+                  <app-read-more [text]="summary" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 170 : 200" />
                 </div>
 
                 @if (collectionTag.source !== ScrobbleProvider.Kavita) {
@@ -55,7 +55,7 @@
 
 
 
-        <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+        <app-bulk-operations [actionCallback]="bulkActionCallback" />
 
         @if (filter) {
           <app-card-detail-layout
@@ -71,7 +71,7 @@
               <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="loadPage()"
                                (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
                                [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
-              ></app-series-card>
+               />
             </ng-template>
 
             @if(!filterActive && series.length === 0) {

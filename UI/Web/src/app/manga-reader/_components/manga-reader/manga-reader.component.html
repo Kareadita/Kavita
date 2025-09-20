@@ -49,18 +49,16 @@
     }
 
 
-    <app-loading [loading]="isLoading || (!(currentImage$ | async)?.complete && this.readerMode !== ReaderMode.Webtoon)" [absolute]="true"></app-loading>
+    <app-loading [loading]="isLoading || (!(currentImage$ | async)?.complete && this.readerMode !== ReaderMode.Webtoon)" [absolute]="true" />
     <div class="reading-area"
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
          [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : '100dvh'}" #readingArea>
       @if (readerMode !== ReaderMode.Webtoon) {
         <div appDblClick (dblclick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
-          <app-canvas-renderer
-            [readerSettings$]="readerSettings$"
+          <app-canvas-renderer [readerSettings$]="readerSettings$"
             [image$]="currentImage$"
             [bookmark$]="showBookmarkEffect$"
-            [showClickOverlay$]="showClickOverlay$">
-          </app-canvas-renderer>
+            [showClickOverlay$]="showClickOverlay$" />
         </div>
 
         <!-- Pagination controls and screen hints-->
@@ -94,32 +92,28 @@
                                [bookmark$]="showBookmarkEffect$"
                                [pageNum$]="pageNum$"
                                [showClickOverlay$]="showClickOverlay$"
-                               [readingProfile]="readingProfile">
-          </app-single-renderer>
+                               [readingProfile]="readingProfile" />
 
           <app-double-renderer [image$]="currentImage$"
                                [readerSettings$]="readerSettings$"
                                [bookmark$]="showBookmarkEffect$"
                                [showClickOverlay$]="showClickOverlay$"
                                [pageNum$]="pageNum$"
-                               [getPage]="getPageFn">
-          </app-double-renderer>
+                               [getPage]="getPageFn" />
 
           <app-double-reverse-renderer [image$]="currentImage$"
                                        [readerSettings$]="readerSettings$"
                                        [bookmark$]="showBookmarkEffect$"
                                        [showClickOverlay$]="showClickOverlay$"
                                        [pageNum$]="pageNum$"
-                                       [getPage]="getPageFn">
-          </app-double-reverse-renderer>
+                                       [getPage]="getPageFn" />
 
           <app-double-no-cover-renderer [image$]="currentImage$"
                                         [readerSettings$]="readerSettings$"
                                         [bookmark$]="showBookmarkEffect$"
                                         [showClickOverlay$]="showClickOverlay$"
                                         [pageNum$]="pageNum$"
-                                        [getPage]="getPageFn">
-          </app-double-no-cover-renderer>
+                                        [getPage]="getPageFn" />
         </div>
       } @else {
         @if (!isLoading && !inSetup) {
@@ -135,8 +129,7 @@
                                    [bookmarkPage]="showBookmarkEffectEvent"
                                    [fullscreenToggled]="fullscreenEvent"
                                    [readerSettings$]="readerSettings$"
-                                   [readingProfile]="readingProfile">
-            </app-infinite-scroller>
+                                   [readingProfile]="readingProfile" />
           </div>
         }
       }
@@ -152,11 +145,11 @@
               <button class="btn btn-icon col-2" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" [title]="t('first-page-tooltip')"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
               @if (pageOptions.ceil > 0) {
                 <div class="col custom-slider">
-                  <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChange)="sliderDragUpdate($event)" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
+                  <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChange)="sliderDragUpdate($event)" (userChangeStart)="cancelMenuCloseTimer();" />
                 </div>
               } @else {
                 <div class="col custom-slider">
-                  <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" (userChangeEnd)="startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
+                  <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" (userChangeEnd)="startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();" />
                 </div>
               }
               <button class="btn btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" [title]="t('last-page-tooltip')"><i class="fa fa-step-forward" aria-hidden="true"></i></button>

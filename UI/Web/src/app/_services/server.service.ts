@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import {ServerInfoSlim} from '../admin/_models/server-info';
 import { UpdateVersionEvent } from '../_models/events/update-version-event';
@@ -12,10 +12,10 @@ import {map} from "rxjs/operators";
   providedIn: 'root'
 })
 export class ServerService {
+  private http = inject(HttpClient);
+
 
   baseUrl = environment.apiUrl;
-
-  constructor(private http: HttpClient) { }
 
   getVersion(apiKey: string) {
     return this.http.get<string>(this.baseUrl + 'plugin/version?apiKey=' + apiKey, TextResonse);

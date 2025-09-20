@@ -52,7 +52,7 @@
           <ng-template #passwordTooltip>
             {{t('password-validation')}}
           </ng-template>
-          <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
+          <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip" /></span>
           <input id="password" class="form-control" maxlength="256" minlength="6" pattern="^.{6,256}$" formControlName="password" type="password" aria-describedby="password-help">
 
           @if (registerForm.dirty || registerForm.touched) {

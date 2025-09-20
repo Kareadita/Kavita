@@ -43,11 +43,13 @@ public static partial class AnnotationHelper
                 var originalText = elem.InnerText;
 
                 // Calculate positions and sort by start position
+                var normalizedOriginalText = NormalizeWhitespace(originalText);
+
                 var sortedAnnotations = elementAnnotations
                     .Select(a => new
                     {
                         Annotation = a,
-                        StartPos = originalText.IndexOf(a.SelectedText, StringComparison.Ordinal)
+                        StartPos = normalizedOriginalText.IndexOf(NormalizeWhitespace(a.SelectedText), StringComparison.Ordinal)
                     })
                     .Where(a => a.StartPos >= 0)
                     .OrderBy(a => a.StartPos)
@@ -79,9 +81,10 @@ public static partial class AnnotationHelper
                     elem.AppendChild(HtmlNode.CreateNode(originalText.Substring(currentPos)));
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 /* Swallow */
+                return;
             }
         }
     }

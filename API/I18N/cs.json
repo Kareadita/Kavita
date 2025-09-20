@@ -209,5 +209,11 @@
     "smart-filter-system-name": "Nelze použít název streamu poskytovaného systémem",
     "sidenav-stream-only-delete-smart-filter": "Z postranní navigace lze odstranit pouze streamy chytrých filtrů",
     "aliases-have-overlap": "Jeden nebo více aliasů se překrývají s jinými osobami, nelze je aktualizovat",
-    "generated-reading-profile-name": "Generováno z {0}"
+    "generated-reading-profile-name": "Generováno z {0}",
+    "password-authentication-disabled": "Ověřování heslem bylo deaktivováno, přihlášení přes OpenID Connect",
+    "oidc-managed": "Uživatelé spravovaní OIDC nemohou být upravováni.",
+    "cannot-change-identity-provider-original-user": "Zprostředkovatel identity původního účtu správce nelze změnit",
+    "oidc-invalid-authority": "OIDC autorita je neplatná",
+    "annotation-failed-create": "Vytvoření anotace se nezdařilo, zkuste to znovu",
+    "annotation-delete": "Nelze odstranit poznámku"
 }

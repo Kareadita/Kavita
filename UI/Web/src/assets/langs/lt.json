@@ -1,0 +1,29 @@
+{
+    "login": {
+        "title": "Prisijungti prie paskyros",
+        "username": "Vartotojo vardas",
+        "password": "Slaptažodis",
+        "password-validation": "Slaptažodžio validacija",
+        "forgot-password": "Pamiršote slaptažodį?",
+        "submit": "Prisijungimas",
+        "oidc": "„OpenID Connect“"
+    },
+    "oidc": {
+        "title": "OIDC atgalinis kvietimas",
+        "login": "Atgal į prisijungimo langą",
+        "error-loading-info": "Kraunant OIDC informaciją įvyko klaida. Susisiekite su administratoriumi",
+        "timeout": "Nepavyko užbaigti OIDC autentifikacijos – baigėsi laikas arba įvyko klaida"
+    },
+    "manage-oidc-connect": {
+        "save": "Išsaugoti",
+        "save-success": "Sėkmingai atnaujinti jūsų OIDC nustatymai",
+        "notice": "Pranešimas",
+        "restart-required": "Norint pakeisti Authority arba Client ID, reikia rankiniu būdu paleisti Kavita iš naujo, kad pakeitimai įsigaliotų.",
+        "provider-title": "Tiekėjas",
+        "provider-tooltip": "Tiekėjo nustatymai reikalauja rankiniu būdu nuspausti 'Saugoti'. Kavita turi būti sukonfiguruota kaip konfidencialus klientas ir turi turėti nukreipimo URL. Skaityti <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> norint sužinoti daugiau.",
+        "behavior-title": "Elgesys",
+        "manual-save-label": "Tiekėjo nustatymų keitimas reikalauja rankinio išsaugojimo",
+        "authority-tooltip": "URL į jūsų OIDC tiekėją neturi .well-known/openid-configuration kelio",
+        "client-id-tooltip": "ClientID nustatytas pas jūsų OIDC tiekėją, gali būti bet koks"
+    }
+}

@@ -49,6 +49,7 @@ public sealed record AnnotationDto
     /// </summary>
     public int SelectedSlotIndex { get; set; }
 
+
     public required int ChapterId { get; set; }
     public required int VolumeId { get; set; }
     public required int SeriesId { get; set; }

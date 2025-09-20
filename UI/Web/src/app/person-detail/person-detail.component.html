@@ -5,13 +5,13 @@
       <app-side-nav-companion-bar>
         <ng-container title>
           <h2 class="title text-break">
-            <app-card-actionables [entity]="person" [inputActions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+            <app-card-actionables [entity]="person" [inputActions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v" />
             <span>{{person.name}}</span>
 
             @if (person.aniListId) {
               <a class="ms-1" [href]="anilistUrl | safeUrl"  target="_blank" rel="noopener noreferrer">
                 <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(anilistUrl)"
-                           [errorImage]="imageService.errorWebLinkImage"></app-image>
+                           [errorImage]="imageService.errorWebLinkImage" />
               </a>
             }
           </h2>
@@ -24,13 +24,12 @@
         @if (HasCoverImage) {
           <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mt-2">
             <div class="person-badge">
-              <app-image
-                      objectFit="cover"
+              <app-image objectFit="cover"
                       [styles]="{'object-position': 'top'}"
                       height="200px"
                       width="200px"
                       [imageUrl]="imageService.getPersonImage(person.id)"
-                      [errorImage]="imageService.noPersonImage"></app-image>
+                      [errorImage]="imageService.noPersonImage" />
             </div>
           </div>
         } @else {
@@ -43,7 +42,7 @@
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2">
           <div class="row g-0 mt-2">
-            <app-read-more [maxLength]="500" [text]="person.description || t('no-info')"></app-read-more>
+            <app-read-more [maxLength]="500" [text]="person.description || t('no-info')" />
 
 
             @if (person.aliases.length > 0) {
@@ -96,8 +95,7 @@
                            [imageUrl]="imageService.getSeriesCoverImage(item.id)"
                            [title]="item.name"
                            [suppressArchiveWarning]="true"
-                           (clicked)="navigateToSeries(item)">
-            </app-card-item>
+                           (clicked)="navigateToSeries(item)" />
           </ng-template>
         </app-carousel-reel>
       </div>
@@ -110,9 +108,7 @@
        <div class="row mt-2">
          <app-carousel-reel [items]="(chaptersByRole[role] | async)!" [title]="t('individual-role-title', {role: (role | personRole)})" (sectionClick)="loadFilterByRole(role)">
            <ng-template #carouselItem let-item>
-             <app-chapter-card [chapter]="item" [libraryId]="item.libraryId" [libraryType]="item.libraryType" [seriesId]="item.seriesId">
-
-             </app-chapter-card>
+             <app-chapter-card [chapter]="item" [libraryId]="item.libraryId" [libraryType]="item.libraryType" [seriesId]="item.seriesId" />
            </ng-template>
          </app-carousel-reel>
        </div>

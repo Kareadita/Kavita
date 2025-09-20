@@ -48,9 +48,9 @@
       <div class="setting-section-break"></div>
 
       @if (!formGroup.get('dontMatch')?.value) {
-        <app-loading [loading]="isLoading"></app-loading>
+        <app-loading [loading]="isLoading" />
         @for(item of matches; track item.series.name) {
-          <app-match-series-result-item [item]="item" [isDarkMode]="(themeService.isDarkMode$ | async)!" (selected)="selectMatch($event)"></app-match-series-result-item>
+          <app-match-series-result-item [item]="item" [isDarkMode]="(themeService.isDarkMode$ | async)!" (selected)="selectMatch($event)" />
         } @empty {
           @if (!isLoading) {
             <p>{{t('no-results')}}</p>

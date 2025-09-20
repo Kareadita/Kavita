@@ -26,8 +26,8 @@ public interface IGenreRepository
     Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false);
     Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null, QueryContext context = QueryContext.None);
     Task<int> GetCountAsync();
-    Task<GenreTagDto> GetRandomGenre();
-    Task<GenreTagDto> GetGenreById(int id);
+    Task<GenreTagDto?> GetRandomGenre();
+    Task<GenreTagDto?> GetGenreById(int id);
     Task<List<string>> GetAllGenresNotInListAsync(ICollection<string> genreNames);
     Task<PagedList<BrowseGenreDto>> GetBrowseableGenre(int userId, UserParams userParams);
 }
@@ -79,7 +79,7 @@ public class GenreRepository : IGenreRepository
         return await _context.Genre.CountAsync();
     }
 
-    public async Task<GenreTagDto> GetRandomGenre()
+    public async Task<GenreTagDto?> GetRandomGenre()
     {
         var genreCount = await GetCountAsync();
         if (genreCount == 0) return null;
@@ -92,7 +92,7 @@ public class GenreRepository : IGenreRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<GenreTagDto> GetGenreById(int id)
+    public async Task<GenreTagDto?> GetGenreById(int id)
     {
         return await _context.Genre
             .Where(g => g.Id == id)

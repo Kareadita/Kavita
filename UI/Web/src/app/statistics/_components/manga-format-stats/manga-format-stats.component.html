@@ -13,42 +13,43 @@
     </div>
   </div>
 
-  <ng-container *ngIf="formats$ | async as formats">
-    <ng-container *ngIf="formControl.value; else tableLayout">
+  @if (formats$ | async; as formats) {
+    @if (formControl.value) {
       <ngx-charts-pie-chart
         [view]="view"
         [results]="formats"
         [legend]="showLegend"
         [legendPosition]="legendPosition"
         [labels]="showLabels"
-      >
+        >
       </ngx-charts-pie-chart>
-    </ng-container>
-    <ng-template #tableLayout>
+    } @else {
       <table class="table table-striped table-striped table-sm scrollable">
         <thead>
-        <tr>
-          <th scope="col" sortable="name" (sort)="onSort($event)">
-            {{t('format-header')}}
-          </th>
-          <th scope="col" sortable="value" (sort)="onSort($event)">
-            {{t('count-header')}}
-          </th>
-        </tr>
+          <tr>
+            <th scope="col" sortable="name" (sort)="onSort($event)">
+              {{t('format-header')}}
+            </th>
+            <th scope="col" sortable="value" (sort)="onSort($event)">
+              {{t('count-header')}}
+            </th>
+          </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let item of formats; let idx = index;">
-          <td id="adhoctask--{{idx}}">
-            {{item.name}}
-          </td>
-          <td>
-            {{item.value | number:'1.0-0'}}
-          </td>
-        </tr>
+          @for (item of formats; track item; let idx = $index) {
+            <tr>
+              <td id="adhoctask--{{idx}}">
+                {{item.name}}
+              </td>
+              <td>
+                {{item.value | number:'1.0-0'}}
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
-    </ng-template>
-  </ng-container>
+    }
+  }
 
 
 

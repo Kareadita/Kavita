@@ -5,8 +5,9 @@ import cacheBusting from 'i18n-cache-busting.json'; // allowSyntheticDefaultImpo
 
 @Injectable({ providedIn: 'root' })
 export class HttpLoader implements TranslocoLoader {
+  private http = inject(HttpClient);
+
   private loadedVersions: { [key: string]: string } = {};
-  constructor(private http: HttpClient) {}
 
   getTranslation(langPath: string) {
     const tokens = langPath.split('/');

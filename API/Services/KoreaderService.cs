@@ -47,7 +47,7 @@ public class KoreaderService : IKoreaderService
         var userProgressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
         if (userProgressDto == null)
         {
-            var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(file.ChapterId);
+            var chapterDto = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(file.ChapterId, userId);
             if (chapterDto == null) throw new KavitaException(await _localizationService.Translate(userId, "chapter-doesnt-exist"));
 
             var volumeDto = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapterDto.VolumeId);

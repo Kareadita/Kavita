@@ -46,6 +46,17 @@ public class AnnotationController : BaseApiController
     }
 
     /// <summary>
+    /// Returns all annotations by Series
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("all-for-series")]
+    public async Task<ActionResult<AnnotationDto>> GetAnnotationsBySeries(int seriesId)
+    {
+        return Ok(await _unitOfWork.UserRepository.GetAnnotationDtosBySeries(User.GetUserId(), seriesId));
+    }
+
+    /// <summary>
     /// Returns the Annotation by Id. User must have access to annotation.
     /// </summary>
     /// <param name="annotationId"></param>

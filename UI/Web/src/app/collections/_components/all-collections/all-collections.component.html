@@ -4,7 +4,7 @@
       <h4 title>{{t('title')}}</h4>
       <h5 subtitle>{{t('item-count', {num: collections.length | number})}}</h5>
     </app-side-nav-companion-bar>
-    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+    <app-bulk-operations [actionCallback]="bulkActionCallback" />
 
     <app-card-detail-layout
       [isLoading]="isLoading"
@@ -23,7 +23,7 @@
                        [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true" [showFormat]="false">
 
           <ng-template #subtitle>
-            <app-collection-owner [collection]="item"></app-collection-owner>
+            <app-collection-owner [collection]="item" />
           </ng-template>
         </app-card-item>
       </ng-template>

@@ -4,8 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "npm run cache-locale && ng serve --host 0.0.0.0",
+    "start-proxy": "npm run cache-locale && ng serve --configuration proxy --host 0.0.0.0 --proxy-config proxy.conf.json",
     "build": "npm run cache-locale && ng build",
     "build-backend": "ng build && rm -r ../../API/wwwroot/* && cp -r dist/browser/* ../../API/wwwroot",
+    "build-backend-prod": "ng build --configuration production && rm -r ../../API/wwwroot/* && cp -r dist/browser/* ../../API/wwwroot",
     "minify-langs": "node minify-json.js",
     "cache-locale": "node hash-localization.js",
     "cache-locale-prime": "node hash-localization-prime.js",

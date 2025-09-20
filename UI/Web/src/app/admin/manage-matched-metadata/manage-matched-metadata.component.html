@@ -38,7 +38,7 @@
         {{t('series-name-header')}}
       </ng-template>
       <ng-template let-item="row" ngx-datatable-cell-template>
-        <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.series.id)"></app-image>
+        <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.series.id)" />
         <a class="ms-2" [href]="baseUrl + 'library/' + item.series.libraryId + '/series/' + item.series.id" target="_blank">{{item.series.name}}</a>
       </ng-template>
     </ngx-datatable-column>

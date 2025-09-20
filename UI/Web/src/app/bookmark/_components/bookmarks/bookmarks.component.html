@@ -6,7 +6,7 @@
       </h4>
       <h5 subtitle>{{t('series-count', {num: series.length | number})}}</h5>
     </app-side-nav-companion-bar>
-    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+    <app-bulk-operations [actionCallback]="bulkActionCallback" />
     @if (filter) {
       <app-card-detail-layout
         [isLoading]="loadingBookmarks"
@@ -23,7 +23,7 @@
                          [actions]="actions"
                          [selected]="bulkSelectionService.isCardSelected('bookmark', position)"
                          (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)"
-          ></app-card-item>
+           />
         </ng-template>
 
         <ng-template #noData>

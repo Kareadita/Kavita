@@ -1,6 +1,6 @@
 <ng-container *transloco="let t;prefix:'manage-reading-profiles'">
 
-  <app-loading [loading]="loading"></app-loading>
+  <app-loading [loading]="loading" />
 
   @if (!loading) {
     <div class="position-relative">
@@ -20,12 +20,12 @@
 
           @if (readingProfiles.length < virtualScrollerBreakPoint) {
             @for (readingProfile of readingProfiles; track readingProfile.id) {
-              <ng-container [ngTemplateOutlet]="readingProfileOption" [ngTemplateOutletContext]="{$implicit: readingProfile}"></ng-container>
+              <ng-container [ngTemplateOutlet]="readingProfileOption" [ngTemplateOutletContext]="{$implicit: readingProfile}" />
             }
           } @else {
             <virtual-scroller #scroll [items]="readingProfiles">
               @for (readingProfile of scroll.viewPortItems; track readingProfile.id) {
-                <ng-container [ngTemplateOutlet]="readingProfileOption" [ngTemplateOutletContext]="{$implicit: readingProfile}"></ng-container>
+                <ng-container [ngTemplateOutlet]="readingProfileOption" [ngTemplateOutletContext]="{$implicit: readingProfile}" />
               }
             </virtual-scroller>
           }

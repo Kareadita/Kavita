@@ -160,6 +160,7 @@
     "generic-user-pref": "There was an issue saving preferences",
 
     "opds-disabled": "OPDS is not enabled on this server",
+    "opds-continue-reading-title": "Continue Reading from: {0}",
     "on-deck": "On Deck",
     "browse-on-deck": "Browse On Deck",
     "recently-added": "Recently Added",
@@ -240,6 +241,6 @@
     "update-yearly-stats": "Update Yearly Stats",
 
     "generated-reading-profile-name": "Generated from {0}",
-
+    "genre-doesnt-exist": "Genre doesn't exist",
     "font-url-not-allowed": "Uploading a Font by url is only allowed from Google Fonts"
 }

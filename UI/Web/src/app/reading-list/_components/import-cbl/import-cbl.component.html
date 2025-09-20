@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix: 'import-cbl-modal'">
 
   <div class="row g-0" style="min-width: 135px;">
-    <app-step-tracker [steps]="steps" [currentStep]="currentStepIndex"></app-step-tracker>
+    <app-step-tracker [steps]="steps" [currentStep]="currentStepIndex" />
   </div>
 
   <div>
@@ -12,7 +12,7 @@
           <p [innerHTML]="t('cbl-repo') | safeHtml"></p>
 
           <form [formGroup]="uploadForm" enctype="multipart/form-data">
-            <file-upload formControlName="files"></file-upload>
+            <file-upload formControlName="files" />
           </form>
         </div>
       }
@@ -25,12 +25,12 @@
                 <div ngbAccordionItem>
                   <h5 ngbAccordionHeader>
                     <button ngbAccordionButton>
-                      <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
+                      <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }" />
                     </button>
                   </h5>
                   <div ngbAccordionCollapse>
                     <div ngbAccordionBody>
-                      <ng-container [ngTemplateOutlet]="validationList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
+                      <ng-container [ngTemplateOutlet]="validationList" [ngTemplateOutletContext]="{ summary: summary }" />
                     </div>
                   </div>
                 </div>
@@ -49,12 +49,12 @@
                 <div ngbAccordionItem>
                   <h5 ngbAccordionHeader>
                     <button ngbAccordionButton>
-                      <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
+                      <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }" />
                     </button>
                   </h5>
                   <div ngbAccordionCollapse>
                     <div ngbAccordionBody>
-                      <ng-container [ngTemplateOutlet]="resultsList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
+                      <ng-container [ngTemplateOutlet]="resultsList" [ngTemplateOutletContext]="{ summary: summary }" />
                     </div>
                   </div>
                 </div>
@@ -71,12 +71,12 @@
                 <div ngbAccordionItem>
                   <h5 ngbAccordionHeader>
                     <button ngbAccordionButton>
-                      <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
+                      <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }" />
                     </button>
                   </h5>
                   <div ngbAccordionCollapse>
                     <div ngbAccordionBody>
-                      <ng-container [ngTemplateOutlet]="resultsList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
+                      <ng-container [ngTemplateOutlet]="resultsList" [ngTemplateOutletContext]="{ summary: summary }" />
                     </div>
                   </div>
                 </div>

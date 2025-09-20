@@ -191,5 +191,6 @@
     "person-name-required": "人物の名前は必須であり、空にすることはできません",
     "person-image-doesnt-exist": "人物はCoversDBに存在しません",
     "generic-cover-person-save": "カバー画像を人物に保存できません",
-    "generic-cover-volume-save": "カバー画像を巻に保存できません"
+    "generic-cover-volume-save": "カバー画像を巻に保存できません",
+    "error-import-stack": "MALスタックのインポート中に問題が発生しました"
 }

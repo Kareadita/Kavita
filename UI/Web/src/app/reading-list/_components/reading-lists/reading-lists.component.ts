@@ -35,6 +35,17 @@ import {User} from "../../../_models/user";
     DecimalPipe, TranslocoDirective, BulkOperationsComponent]
 })
 export class ReadingListsComponent implements OnInit {
+  private readingListService = inject(ReadingListService);
+  imageService = inject(ImageService);
+  private actionFactoryService = inject(ActionFactoryService);
+  private accountService = inject(AccountService);
+  private toastr = inject(ToastrService);
+  private router = inject(Router);
+  private jumpbarService = inject(JumpbarService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private ngbModal = inject(NgbModal);
+  private titleService = inject(Title);
+
   protected readonly WikiLink = WikiLink;
 
   protected readonly bulkSelectionService = inject(BulkSelectionService);
@@ -50,11 +61,6 @@ export class ReadingListsComponent implements OnInit {
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
   globalActions: Array<ActionItem<any>> = [];
   trackByIdentity = (index: number, item: ReadingList) => `${item.id}_${item.title}_${item.promoted}`;
-
-
-  constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,
-    private accountService: AccountService, private toastr: ToastrService, private router: Router,
-    private jumpbarService: JumpbarService, private readonly cdRef: ChangeDetectorRef, private ngbModal: NgbModal, private titleService: Title) { }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {

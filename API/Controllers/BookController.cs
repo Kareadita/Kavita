@@ -111,19 +111,16 @@ public class BookController : BaseApiController
     public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
     {
         if (chapterId <= 0) return BadRequest(await _localizationService.Get("en", "chapter-doesnt-exist"));
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+
+        var chapter = await _cacheService.Ensure(chapterId);
         if (chapter == null) return BadRequest(await _localizationService.Get("en", "chapter-doesnt-exist"));
 
-        using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.LenientBookReaderOptions);
-        var key = BookService.CoalesceKeyForAnyFile(book, file);
+        var cachedFilePath = Path.Join(_cacheService.GetCachePath(chapterId), Path.GetFileName(chapter.Files.ElementAt(0).FilePath));
+        var result = await _bookService.GetResourceAsync(cachedFilePath, file);
 
-        if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return BadRequest(await _localizationService.Get("en", "file-missing"));
+        if (!result.IsSuccess) return BadRequest(await _localizationService.Translate(User.GetUserId(), result.ErrorMessage));
 
-        var bookFile = book.Content.AllFiles.GetLocalFileRefByKey(key);
-        var content = await bookFile.ReadContentAsBytesAsync();
-
-        var contentType = BookService.GetContentType(bookFile.ContentType);
-        return File(content, contentType, $"{chapterId}-{file}");
+        return File(result.Content, result.ContentType, $"{chapterId}-{file}");
     }
 
     /// <summary>

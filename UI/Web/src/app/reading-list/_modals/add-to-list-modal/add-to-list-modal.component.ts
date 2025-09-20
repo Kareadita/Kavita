@@ -5,7 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { FilterPipe } from '../../../_pipes/filter.pipe';
-import { NgIf, NgFor } from '@angular/common';
+
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 
 export enum ADD_FLOW {
@@ -20,9 +20,13 @@ export enum ADD_FLOW {
     selector: 'app-add-to-list-modal',
     templateUrl: './add-to-list-modal.component.html',
     styleUrls: ['./add-to-list-modal.component.scss'],
-    imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe, TranslocoDirective]
+    imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective]
 })
 export class AddToListModalComponent implements OnInit, AfterViewInit {
+  private modal = inject(NgbActiveModal);
+  private readingListService = inject(ReadingListService);
+  private toastr = inject(ToastrService);
+
 
   @Input({required: true}) title!: string;
   /**
@@ -69,9 +73,6 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
   }
 
   translocoService = inject(TranslocoService);
-
-
-  constructor(private modal: NgbActiveModal, private readingListService: ReadingListService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
 

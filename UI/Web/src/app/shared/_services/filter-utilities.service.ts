@@ -34,7 +34,7 @@ export class FilterUtilitiesService {
   private readonly http = inject(HttpClient);
   private readonly translocoService = inject(TranslocoService);
 
-  private readonly sortFieldPipe = new SortFieldPipe(this.translocoService);
+  private readonly sortFieldPipe = new SortFieldPipe();
   private readonly genericFilterFieldPipe = new GenericFilterFieldPipe();
 
   private readonly apiUrl = environment.apiUrl;

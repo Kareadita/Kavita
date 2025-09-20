@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
+using API.Helpers;
 using API.Services.Plus;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -49,6 +50,7 @@ public interface ICollectionTagRepository
     /// <param name="includePromoted"></param>
     /// <returns></returns>
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosAsync(int userId, bool includePromoted = false);
+    Task<PagedList<AppUserCollectionDto>> GetCollectionDtosPagedAsync(int userId, UserParams userParams, bool includePromoted = false);
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosBySeriesAsync(int userId, int seriesId, bool includePromoted = false);
 
     Task<IList<string>> GetAllCoverImagesAsync();
@@ -115,6 +117,18 @@ public class CollectionTagRepository : ICollectionTagRepository
             .OrderBy(uc => uc.Title)
             .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task<PagedList<AppUserCollectionDto>> GetCollectionDtosPagedAsync(int userId, UserParams userParams, bool includePromoted = false)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var collections = _context.AppUserCollection
+            .Where(uc => uc.AppUserId == userId || (includePromoted && uc.Promoted))
+            .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
+            .OrderBy(uc => uc.Title)
+            .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider);
+
+        return await PagedList<AppUserCollectionDto>.CreateAsync(collections, userParams);
     }
 
     public async Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosBySeriesAsync(int userId, int seriesId, bool includePromoted = false)

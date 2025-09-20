@@ -3,7 +3,7 @@
   <div class="d-flex clickable match-item" (click)="selectItem()">
     <div class="me-1">
       @if (item.series.coverUrl) {
-        <app-image class="me-3 search-result" width="100px" [imageUrl]="item.series.coverUrl"></app-image>
+        <app-image class="me-3 search-result" width="100px" [imageUrl]="item.series.coverUrl" />
       }
     </div>
     <div class="ms-1">
@@ -18,7 +18,7 @@
       </div>
       @if (item.series.summary) {
         <div>
-          <app-read-more [text]="item.series.summary" [showToggle]="false"></app-read-more>
+          <app-read-more [text]="item.series.summary" [showToggle]="false" />
           <span class="me-1"><a (click)="$event.stopPropagation()" [href]="item.series.siteUrl" rel="noreferrer noopener" target="_blank">{{t('details')}}</a></span>
         </div>
       }
@@ -27,7 +27,7 @@
 
   @if (isSelected) {
     <div class="d-flex p-1 justify-content-center">
-      <app-loading [absolute]="false" [loading]="true"></app-loading>
+      <app-loading [absolute]="false" [loading]="true" />
       <span class="ms-2">{{t('updating-metadata-status')}}</span>
     </div>
   } @else {

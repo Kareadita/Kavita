@@ -57,6 +57,8 @@
 @use './theme/utilities/global';
 @use "./theme/utilities/spinners";
 
+@use './theme/directives/resize';
+
 
 // Global Styles
 @font-face {

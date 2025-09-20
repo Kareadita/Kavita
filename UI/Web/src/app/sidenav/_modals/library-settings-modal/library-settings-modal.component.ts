@@ -30,7 +30,6 @@ import {ConfirmService} from 'src/app/shared/confirm.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {
   allKavitaPlusMetadataApplicableTypes,
-  allKavitaPlusScrobbleEligibleTypes,
   allLibraryTypes,
   Library,
   LibraryType
@@ -54,6 +53,7 @@ import {SettingButtonComponent} from "../../../settings/_components/setting-butt
 import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
 import {ActionService} from "../../../_services/action.service";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
+import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
 
 enum TabID {
   General = 'general-tab',
@@ -72,9 +72,9 @@ enum StepID {
 
 @Component({
     selector: 'app-library-settings-modal',
-    imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
-        SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-        FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent],
+  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
+    SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe],
     templateUrl: './library-settings-modal.component.html',
     styleUrls: ['./library-settings-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -123,6 +123,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
     enableMetadata: new FormControl<boolean>(true, { nonNullable: true, validators: [] }), // required validator doesn't check value, just if true
     removePrefixForSortName: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
+    // TODO: Missing excludePatterns
   });
 
   selectedFolders: string[] = [];
@@ -138,6 +139,10 @@ export class LibrarySettingsModalComponent implements OnInit {
   filesAtRoot = model<boolean>(false);
 
   tasks: ActionItem<Library>[] = this.getTasks();
+
+  get LibraryTypeValue() {
+    return  parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;
+  }
 
   get IsKavitaPlusEligible() {
     const libType = parseInt(this.libraryForm.get('type')?.value + '', 10) as LibraryType;

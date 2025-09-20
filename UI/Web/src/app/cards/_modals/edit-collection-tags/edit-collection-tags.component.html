@@ -34,7 +34,7 @@
                   <label class="form-check-label me-1" for="tag-promoted">{{t('promote-label')}}</label>
                   <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
                   <ng-template #promotedTooltip>{{t('promote-tooltip')}}</ng-template>
-                  <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip"></ng-container></span>
+                  <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip" /></span>
                 </div>
               </div>
             </div>
@@ -82,12 +82,11 @@
                 </ul>
                 @if (pagination && series.length !== 0 && pagination.totalPages > 1) {
                   <div class="d-flex justify-content-center">
-                    <ngb-pagination
-                      [(page)]="pagination.currentPage"
+                    <ngb-pagination [(page)]="pagination.currentPage"
                       [pageSize]="pagination.itemsPerPage"
                       (pageChange)="onPageChange($event)"
                       [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
-                      [collectionSize]="pagination.totalItems"></ngb-pagination>
+                      [collectionSize]="pagination.totalItems" />
                   </div>
                 }
               </div>
@@ -101,7 +100,7 @@
         <ng-template ngbNavContent>
           <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)"
                                    (selectedBase64Url)="updateSelectedImage($event)" [showReset]="tag.coverImageLocked"
-                                   (resetClicked)="handleReset()"></app-cover-image-chooser>
+                                   (resetClicked)="handleReset()" />
         </ng-template>
       </li>
 

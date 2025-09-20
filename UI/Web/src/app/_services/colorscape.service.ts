@@ -2,7 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {DOCUMENT} from '@angular/common';
 import {BehaviorSubject, filter, take, tap, timer} from 'rxjs';
 import {NavigationEnd, Router} from "@angular/router";
-import {environment} from "../../environments/environment";
+import {AccountService} from "./account.service";
 
 interface ColorSpace {
   primary: string;
@@ -33,10 +33,10 @@ const colorScapeSelector = 'colorscape';
 export class ColorscapeService {
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
+  private readonly accountService = inject(AccountService);
 
   private colorSubject = new BehaviorSubject<ColorSpaceRGBA | null>(null);
   private colorSeedSubject = new BehaviorSubject<{primary: string, complementary: string | null} | null>(null);
-  public readonly colors$ = this.colorSubject.asObservable();
 
   private minDuration = 1000; // minimum duration
   private maxDuration = 4000; // maximum duration
@@ -51,6 +51,7 @@ export class ColorscapeService {
       filter(event => event instanceof NavigationEnd),
       tap(() => this.checkAndResetColorscapeAfterDelay())
     ).subscribe();
+
 
   }
 
@@ -175,7 +176,7 @@ export class ColorscapeService {
    * @param complementaryColor
    */
   setColorScape(primaryColor: string, complementaryColor: string | null = null) {
-    if (this.getCssVariable('--colorscape-enabled') === 'false') {
+    if (this.accountService.currentUserSignal()?.preferences?.colorScapeEnabled === false || this.getCssVariable('--colorscape-enabled') === 'false') {
       return;
     }
 

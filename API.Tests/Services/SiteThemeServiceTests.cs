@@ -33,7 +33,7 @@ public class SiteThemeServiceTest(ITestOutputHelper outputHelper): AbstractDbTes
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, unitOfWork, _messageHub, Substitute.For<IFileService>(),
+        var siteThemeService = new ThemeService(ds, unitOfWork, _messageHub,
             Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
 
         context.SiteTheme.Add(new SiteTheme()
@@ -62,7 +62,7 @@ public class SiteThemeServiceTest(ITestOutputHelper outputHelper): AbstractDbTes
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, unitOfWork, _messageHub, Substitute.For<IFileService>(),
+        var siteThemeService = new ThemeService(ds, unitOfWork, _messageHub,
             Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
 
         context.SiteTheme.Add(new SiteTheme()
@@ -91,7 +91,7 @@ public class SiteThemeServiceTest(ITestOutputHelper outputHelper): AbstractDbTes
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, unitOfWork, _messageHub, Substitute.For<IFileService>(),
+        var siteThemeService = new ThemeService(ds, unitOfWork, _messageHub,
             Substitute.For<ILogger<ThemeService>>(), Substitute.For<IMemoryCache>());
 
         context.SiteTheme.Add(new SiteTheme()

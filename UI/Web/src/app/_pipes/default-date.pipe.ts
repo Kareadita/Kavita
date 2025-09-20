@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({
@@ -7,9 +7,8 @@ import {TranslocoService} from "@jsverse/transloco";
   standalone: true
 })
 export class DefaultDatePipe implements PipeTransform {
+  private translocoService = inject(TranslocoService);
 
-  constructor(private translocoService: TranslocoService) {
-  }
   transform(value: any, replacementString = 'default-date-pipe.never'): string {
     if (value === null || value === undefined || value === '' || value === Infinity || Number.isNaN(value) || value === '1/1/01') {
       return this.translocoService.translate(replacementString);

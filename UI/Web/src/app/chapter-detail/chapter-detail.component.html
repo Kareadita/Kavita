@@ -5,7 +5,7 @@
     @if (chapter && series && libraryType !== null) {
       <div class="row mb-0 mb-xl-3 info-container">
         <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''" class="image-container col-5 col-sm-12 col-md-12 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
-          <app-cover-image [entity]="chapter" [coverImage]="imageService.getChapterCoverImage(chapter.id)" (read)="read()"></app-cover-image>
+          <app-cover-image [entity]="chapter" [coverImage]="imageService.getChapterCoverImage(chapter.id)" (read)="read()" />
         </div>
         <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12">
           <h4 class="title mb-2">
@@ -13,7 +13,7 @@
           </h4>
           <div class="subtitle mt-2 mb-2">
             <span class="me-2">
-              <app-entity-title [libraryType]="libraryType" [entity]="chapter" [prioritizeTitleName]="true" [includeChapter]="true"></app-entity-title>
+              <app-entity-title [libraryType]="libraryType" [entity]="chapter" [prioritizeTitleName]="true" [includeChapter]="true" />
             </span>
           </div>
 
@@ -22,8 +22,7 @@
                                    [hasReadingProgress]="chapter.pagesRead > 0"
                                    [readingTimeEntity]="chapter"
                                    [libraryType]="libraryType"
-                                   [mangaFormat]="series.format">
-          </app-metadata-detail-row>
+                                   [mangaFormat]="series.format" />
 
 
 
@@ -34,8 +33,7 @@
                                  [hasUserRated]="hasBeenRated"
                                  [libraryType]="libraryType!"
                                  [chapterId]="chapterId"
-            >
-            </app-external-rating>
+             />
           </div>
 
           <div class="mt-3 mb-3">
@@ -74,19 +72,19 @@
 
               <div class="col-auto ms-2k">
                 <div class="card-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables [entity]="chapter"  [inputActions]="chapterActions" [labelBy]="series.name + ' ' + chapter.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn"></app-card-actionables>
+                  <app-card-actionables [entity]="chapter"  [inputActions]="chapterActions" [labelBy]="series.name + ' ' + chapter.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn" />
                 </div>
               </div>
 
               <div class="col-auto ms-2 d-none d-md-block">
-                <app-download-button [download$]="download$" [entity]="chapter" entityType="chapter"></app-download-button>
+                <app-download-button [download$]="download$" [entity]="chapter" entityType="chapter" />
               </div>
 
             </div>
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="chapter.summary || ''" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 170 : 200"></app-read-more>
+            <app-read-more [text]="chapter.summary || ''" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 170 : 200" />
           </div>
 
           <div class="mt-2">
@@ -170,7 +168,7 @@
                                  [webLinks]="weblinks"
                                  [readingTime]="chapter"
                                  [language]="chapter.language"
-                                 [format]="series.format"></app-details-tab>
+                                 [format]="series.format" />
               }
             </ng-template>
           </li>
@@ -185,7 +183,7 @@
             </a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
-                <app-annotations-tab [annotations]="annotations()" />
+                <app-annotations-tab [annotations]="annotations()" [scrollingBlock]="scrollingBlock" />
               }
             </ng-template>
           </li>
@@ -209,7 +207,7 @@
             <a ngbNavLink>{{t('related-tab')}}</a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                <app-related-tab [readingLists]="readingLists"></app-related-tab>
+                <app-related-tab [readingLists]="readingLists" />
               }
             </ng-template>
           </li>
@@ -222,7 +220,7 @@
 
 
 
-    <app-loading [loading]="isLoading" style="min-height: 300px"></app-loading>
+    <app-loading [loading]="isLoading" style="min-height: 300px" />
   </div>
 
 </ng-container>

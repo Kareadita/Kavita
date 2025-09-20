@@ -2,20 +2,20 @@
   <div class="card-item-container card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
       @if (total > 0 || suppressArchiveWarning) {
-        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageUrl"></app-image>
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageUrl" />
       } @else if (total === 0 && !suppressArchiveWarning) {
-        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage"></app-image>
+        <app-image height="232.91px" width="160px" [styles]="{'border-radius': '.25rem .25rem 0 0'}" [imageUrl]="imageService.errorImage" />
       }
 
       <div class="progress-banner">
         @if (read > 0 && read < total && total > 0 && read !== total) {
           <p ngbTooltip="{{((read / total) * 100) | number:'1.0-1'}}% Read" container="body">
-            <ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar>
+            <ngb-progressbar type="primary" height="5px" [value]="read" [max]="total" />
           </p>
         }
 
         <span class="download">
-          <app-download-indicator [download$]="download$"></app-download-indicator>
+          <app-download-indicator [download$]="download$" />
         </span>
       </div>
 
@@ -62,7 +62,7 @@
     <div class="card-body meta-title">
       @if (subtitleTemplate) {
         <div style="text-align: center">
-          <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }"></ng-container>
+          <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }" />
         </div>
       }
       @if (!suppressLibraryLink && libraryName) {
@@ -76,14 +76,14 @@
         <span>
           @if (showFormat) {
             <span class="card-format">
-                <app-series-format [format]="format"></app-series-format>
+                <app-series-format [format]="format" />
             </span>
           }
         </span>
 
         <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
           @if (isPromoted(); as isPromoted) {
-            <span class="me-1"><app-promoted-icon [promoted]="isPromoted"></app-promoted-icon></span>
+            <span class="me-1"><app-promoted-icon [promoted]="isPromoted" /></span>
           }
           @if (linkUrl) {
             <a class="dark-exempt btn-icon" [routerLink]="linkUrl">{{title}}</a>
@@ -94,7 +94,7 @@
 
         <span class="card-actions">
         @if (actions && actions.length > 0) {
-            <app-card-actionables [entity]="actionEntity" (actionHandler)="performAction($event)" [inputActions]="actions" [labelBy]="title"></app-card-actionables>
+            <app-card-actionables [entity]="actionEntity" (actionHandler)="performAction($event)" [inputActions]="actions" [labelBy]="title" />
         }
         </span>
       </div>
