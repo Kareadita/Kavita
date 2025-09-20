@@ -867,7 +867,7 @@ public class OpdsController : BaseApiController
             });
         }
 
-        // TODO: Search should allow Chapters/Files and more
+        feed.Total = feed.Entries.Count;
 
         return CreateXmlResult(SerializeXml(feed));
     }
