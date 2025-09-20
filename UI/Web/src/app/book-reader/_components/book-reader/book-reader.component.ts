@@ -735,6 +735,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.lastSeenScrollPartPath !== '') {
       this.saveProgress();
+
+      if (this.debugMode()) {
+        this.logSelectedElement();
+      }
+
     }
   }
 
