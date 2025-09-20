@@ -11,7 +11,8 @@ import {
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {
   bookLayoutModes,
-  bookWritingStyles, breakPoints,
+  bookWritingStyles,
+  breakPoints,
   layoutModes,
   pageSplitOptions,
   pdfScrollModes,
@@ -28,7 +29,7 @@ import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {User} from "../../_models/user";
 import {AccountService} from "../../_services/account.service";
-import {debounceTime, distinctUntilChanged, map, take, tap} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, tap} from "rxjs/operators";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {BookService} from "../../book-reader/_services/book.service";
@@ -198,7 +199,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm = new FormGroup({})
 
     if (this.fonts().find(font => font.name === this.selectedProfile?.bookReaderFontFamily) === undefined) {
-      this.selectedProfile.bookReaderFontFamily = 'default';
+      this.selectedProfile.bookReaderFontFamily = FontService.DefaultEpubFont;
     }
 
     this.readingProfileForm.addControl('name', new FormControl(this.selectedProfile.name, Validators.required));

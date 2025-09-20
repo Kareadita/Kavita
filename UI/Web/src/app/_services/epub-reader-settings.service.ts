@@ -6,7 +6,6 @@ import {WritingStyle} from '../_models/preferences/writing-style';
 import {BookPageLayoutMode} from "../_models/readers/book-page-layout-mode";
 import {FormControl, FormGroup, NonNullableFormBuilder} from "@angular/forms";
 import {ReadingProfile, ReadingProfileKind} from "../_models/preferences/reading-profiles";
-import {BookService} from "../book-reader/_services/book.service";
 import {ThemeService} from './theme.service';
 import {ReadingProfileService} from "./reading-profile.service";
 import {debounceTime, distinctUntilChanged, filter, tap} from "rxjs/operators";
@@ -254,7 +253,7 @@ export class EpubReaderSettingsService {
   private setupDefaultsFromProfile(profile: ReadingProfile): void {
     // Set defaults if undefined
     if (profile.bookReaderFontFamily === undefined) {
-      profile.bookReaderFontFamily = 'default';
+      profile.bookReaderFontFamily = FontService.DefaultEpubFont;
     }
     if (profile.bookReaderFontSize === undefined || profile.bookReaderFontSize < 50) {
       profile.bookReaderFontSize = 100;
@@ -669,7 +668,7 @@ export class EpubReaderSettingsService {
 
     const currentStyles = this._pageStyles();
     const newStyles: PageStyle = {
-      'font-family': fontFamily || currentStyles['font-family'] || 'default',
+      'font-family': fontFamily || currentStyles['font-family'] || FontService.DefaultEpubFont,
       'font-size': fontSize || currentStyles['font-size'] || '100%',
       'margin-left': margin || currentStyles['margin-left'] || defaultMargin,
       'margin-right': margin || currentStyles['margin-right'] || defaultMargin,
@@ -681,7 +680,7 @@ export class EpubReaderSettingsService {
 
   public getDefaultPageStyles(): PageStyle {
     return {
-      'font-family': 'default',
+      'font-family': FontService.DefaultEpubFont,
       'font-size': '100%',
       'margin-left': '15vw',
       'margin-right': '15vw',
