@@ -85,7 +85,7 @@ export class FontManagerComponent implements OnInit {
 
   files: NgxFileDropEntry[] = [];
   // When accepting more types, also need to update in the Parser
-  acceptableExtensions = ['.woff2', '.woff', '.tff', '.otf'].join(',');
+  acceptableExtensions = ['.woff2', '.woff', '.ttf', '.otf'].join(',');
 
   ngOnInit() {
     this.loadFonts();

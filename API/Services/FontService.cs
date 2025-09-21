@@ -218,9 +218,9 @@ public class FontService: IFontService
 
         try
         {
-            // Copy the theme file to temp for nightly removal (to give user time to reclaim if made a mistake)
+            // Copy the font file to temp for nightly removal (to give user time to reclaim if made a mistake)
             var existingLocation =
-                _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, font.FileName);
+                _directoryService.FileSystem.Path.Join(_directoryService.EpubFontDirectory, font.FileName);
             var newLocation =
                 _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, font.FileName);
             _directoryService.CopyFileToDirectory(existingLocation, newLocation);

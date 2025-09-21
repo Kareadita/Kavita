@@ -237,9 +237,9 @@ public class BackupService : IBackupService
         {
             _directoryService.CopyDirectoryToDirectory(_directoryService.EpubFontDirectory, outputTempDir);
         }
-        catch (IOException)
+        catch (IOException ex)
         {
-            // Swallow exception
+            _logger.LogWarning(ex, "Failed to copy fonts to backup directory '{OutputTempDir}'. Fonts will not be included in the backup.", outputTempDir);
         }
 
         if (!_directoryService.GetFiles(outputTempDir, searchOption: SearchOption.AllDirectories).Any())

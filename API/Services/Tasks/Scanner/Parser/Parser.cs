@@ -31,7 +31,7 @@ public static partial class Parser
     private const string BookFileExtensions = EpubFileExtension + "|" + PdfFileExtension;
     private const string XmlRegexExtensions = @"\.xml";
     public const string MacOsMetadataFileStartsWith = @"._";
-    public const string FontFileExtensions = @"\.[woff2|tff|otf|woff]";
+    public const string FontFileExtensions = @"\.[woff2|ttf|otf|woff]";
 
     public const string SupportedExtensions =
         ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
