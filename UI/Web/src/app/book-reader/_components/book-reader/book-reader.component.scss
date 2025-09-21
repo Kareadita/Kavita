@@ -135,7 +135,7 @@ $action-bar-height: 38px;
 }
 
 @media (min-width: 876px) {
-  .action-bar {
+  .top-action-bar {
     grid-template-columns: 1fr auto 1fr;
   }
 
@@ -150,7 +150,7 @@ $action-bar-height: 38px;
 
 /* Mobile - 2 columns */
 @media (max-width: 875px) {
-  .action-bar {
+  .top-action-bar {
     grid-template-columns: auto 1fr;
   }
 
