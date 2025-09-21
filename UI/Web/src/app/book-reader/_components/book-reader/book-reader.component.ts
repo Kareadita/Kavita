@@ -1440,6 +1440,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private perfectPage() {
+    afterFrame(() => {
+      const [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
+      const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
+      const res = scrollOffset % pageSize;
+      console.log("ScrollOffset", scrollOffset, "totalScroll", totalScroll, "currentPage", currentVirtualPage, "pageSize", pageSize);
+      console.log("Perfect page?", res === 0, res );
+
+      const closestDistance = Math.min(res, pageSize - res);
+      console.log("Distance to closest perfect page:", closestDistance);
+    });
+  }
+
   private scrollWithinPage(part?: string | undefined, scrollTop?: number) {
     if (part !== undefined && part !== '') {
 
@@ -1603,6 +1616,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           'auto',
           () => {
             this.handleScrollEvent();
+            this.perfectPage();
           },
           {
             tolerance: 3,
@@ -1655,6 +1669,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           'auto',
           () => {
             this.handleScrollEvent();
+            this.perfectPage();
           },
           {
             tolerance: 3,
