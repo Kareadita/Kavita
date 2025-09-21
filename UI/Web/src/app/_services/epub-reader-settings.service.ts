@@ -15,13 +15,13 @@ import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
-import {LayoutMeasurementService} from "./layout-measurement.service";
 import {environment} from "../../environments/environment";
 import {EpubFont} from "../_models/preferences/epub-font";
 import {FontService} from "./font.service";
+import {EpubPageCalculationMethod} from "../_models/readers/epub-page-calculation-method";
 
 export interface ReaderSettingUpdate {
-  setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme';
+  setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme' | 'pageCalcMethod';
   object: any;
 }
 
@@ -35,11 +35,9 @@ export type BookReadingProfileFormGroup = FormGroup<{
   bookReaderWritingStyle: FormControl<WritingStyle>;
   bookReaderThemeName: FormControl<string>;
   bookReaderLayoutMode: FormControl<BookPageLayoutMode>;
-  bookReaderImmersiveMode:FormControl <boolean>;
+  bookReaderImmersiveMode: FormControl<boolean>;
+  bookReaderEpubPageCalculationMethod: FormControl<EpubPageCalculationMethod>;
 }>
-
-const COLUMN_GAP = 20; //px gap between columns
-
 
 @Injectable()
 export class EpubReaderSettingsService {
@@ -51,7 +49,6 @@ export class EpubReaderSettingsService {
   private readonly toastr = inject(ToastrService);
   private readonly document = inject(DOCUMENT);
   private readonly fb = inject(NonNullableFormBuilder);
-  private readonly layoutMeasurements = inject(LayoutMeasurementService);
 
   // Core signals - these will be the single source of truth
   private readonly _currentReadingProfile = signal<ReadingProfile | null>(null);
@@ -67,6 +64,7 @@ export class EpubReaderSettingsService {
   private readonly _activeTheme = signal<BookTheme | undefined>(undefined);
   private readonly _clickToPaginate = signal<boolean>(false);
   private readonly _layoutMode = signal<BookPageLayoutMode>(BookPageLayoutMode.Default);
+  private readonly _pageCalcMode = signal<EpubPageCalculationMethod>(EpubPageCalculationMethod.Default);
   private readonly _immersiveMode = signal<boolean>(false);
   private readonly _isFullscreen = signal<boolean>(false);
 
@@ -91,6 +89,7 @@ export class EpubReaderSettingsService {
   public readonly immersiveMode = this._immersiveMode.asReadonly();
   public readonly isFullscreen = this._isFullscreen.asReadonly();
   public readonly epubFonts = this._epubFonts.asReadonly();
+  public readonly pageCalcMode = this._pageCalcMode.asReadonly();
 
   // Computed signals for derived state
   public readonly layoutMode = computed(() => {
@@ -210,6 +209,18 @@ export class EpubReaderSettingsService {
         });
       }
     });
+
+    effect(() => {
+      const pageCalcMethod = this._pageCalcMode();
+      if (!this.isInitialized) return;
+
+      if (pageCalcMethod) {
+        this.settingUpdateSubject.next({
+          setting: 'pageCalcMethod',
+          object: pageCalcMethod
+        });
+      }
+    });
   }
 
 
@@ -252,7 +263,7 @@ export class EpubReaderSettingsService {
    */
   private setupDefaultsFromProfile(profile: ReadingProfile): void {
     // Set defaults if undefined
-    if (profile.bookReaderFontFamily === undefined) {
+    if (profile.bookReaderFontFamily === undefined || profile.bookReaderFontFamily === 'default') {
       profile.bookReaderFontFamily = FontService.DefaultEpubFont;
     }
     if (profile.bookReaderFontSize === undefined || profile.bookReaderFontSize < 50) {
@@ -273,6 +284,9 @@ export class EpubReaderSettingsService {
     if (profile.bookReaderLayoutMode === undefined) {
       profile.bookReaderLayoutMode = BookPageLayoutMode.Default;
     }
+    if (profile.bookReaderEpubPageCalculationMethod === undefined) {
+      profile.bookReaderEpubPageCalculationMethod = EpubPageCalculationMethod.Default;
+    }
 
     // Update signals from profile
     this._readingDirection.set(profile.bookReaderReadingDirection);
@@ -280,6 +294,7 @@ export class EpubReaderSettingsService {
     this._clickToPaginate.set(profile.bookReaderTapToPaginate);
     this._layoutMode.set(profile.bookReaderLayoutMode);
     this._immersiveMode.set(profile.bookReaderImmersiveMode);
+    this._pageCalcMode.set(profile.bookReaderEpubPageCalculationMethod);
 
     // Set up page styles
     this.setPageStyles(
@@ -378,6 +393,11 @@ export class EpubReaderSettingsService {
     this.settingsForm.get('bookReaderWritingStyle')?.setValue(value);
   }
 
+  updatePageCalcMethod(value: EpubPageCalculationMethod) {
+    this._pageCalcMode.set(value);
+    this.settingsForm.get('bookReaderEpubPageCalculationMethod')?.setValue(value);
+  }
+
   updateFullscreen(value: boolean) {
     this._isFullscreen.set(value);
     if (!this._isInitialized()) return;
@@ -472,6 +492,7 @@ export class EpubReaderSettingsService {
       bookReaderThemeName: this.fb.control(profile.bookReaderThemeName),
       bookReaderLayoutMode: this.fb.control(this._layoutMode()),
       bookReaderImmersiveMode: this.fb.control(this._immersiveMode()),
+      bookReaderEpubPageCalculationMethod: this.fb.control(this._pageCalcMode())
     });
 
     // Set up value change subscriptions
@@ -586,6 +607,15 @@ export class EpubReaderSettingsService {
       this.isUpdatingFromForm = false;
     });
 
+    // Page Calc Method
+    this.settingsForm.get('bookReaderEpubPageCalculationMethod')?.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(value => {
+      this.isUpdatingFromForm = true;
+      this._pageCalcMode.set(value as EpubPageCalculationMethod);
+      this.isUpdatingFromForm = false;
+    });
+
     // Update implicit profile on form changes (debounced) - ONLY source of profile updates
     this.settingsForm.valueChanges.pipe(
       debounceTime(500),
@@ -648,6 +678,7 @@ export class EpubReaderSettingsService {
     data.bookReaderImmersiveMode = this._immersiveMode();
     data.bookReaderReadingDirection = this._readingDirection();
     data.bookReaderWritingStyle = this._writingStyle();
+    data.bookReaderEpubPageCalculationMethod = this._pageCalcMode();
 
     const activeTheme = this._activeTheme();
     if (activeTheme) {

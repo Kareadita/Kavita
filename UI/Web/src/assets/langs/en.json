@@ -1383,6 +1383,8 @@
         "layout-mode-option-1col": "1 Column",
         "layout-mode-option-2col": "2 Column",
         "color-theme-title": "Color Theme",
+        "page-calc-method-label": "Page Calculation",
+        "page-calc-method-tooltip": "If you are experiencing text bleeding on column mode, try an alternative method of calculation",
 
         "line-spacing-min-label": "1x",
         "line-spacing-max-label": "2.5x",
@@ -3023,6 +3025,11 @@
         "hours-left": "Hours left"
     },
 
+    "epub-page-calc-method-pipe": {
+        "default": "Default",
+        "calc1": "Calc 1"
+    },
+
     "metadata-setting-field-pipe": {
         "covers": "Covers",
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -3233,6 +3240,9 @@
         "pdf-spread-mode-tooltip": "How pages should be laid out. Single or double (odd/even)",
         "pdf-theme-label": "Theme",
         "pdf-theme-tooltip": "Color theme of the reader",
+
+        "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
 
         "reading-profile-series-settings-title": "Series",
         "reading-profile-library-settings-title": "Library",

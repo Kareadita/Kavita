@@ -22,9 +22,9 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
 import {BookReadingProfileFormGroup, EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
-import {LayoutMode} from "../../../manga-reader/_models/layout-mode";
-import {FontService} from "../../../_services/font.service";
 import {EpubFont} from "../../../_models/preferences/epub-font";
+import {EpubPageCalcMethodPipe} from "../../../_pipes/epub-page-calc-method.pipe";
+import {allCalcMethods, EpubPageCalculationMethod} from "../../../_models/readers/epub-page-calculation-method";
 
 /**
  * Used for book reader. Do not use for other components
@@ -85,9 +85,9 @@ export const bookColorThemes = [
     templateUrl: './reader-settings.component.html',
     styleUrls: ['./reader-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton,
-      NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, NgClass, NgStyle,
-      TitleCasePipe, TranslocoDirective]
+  imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton,
+    NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, NgClass, NgStyle,
+    TitleCasePipe, TranslocoDirective, EpubPageCalcMethodPipe]
 })
 export class ReaderSettingsComponent implements OnInit {
 
@@ -116,9 +116,7 @@ export class ReaderSettingsComponent implements OnInit {
   protected parentReadingProfile!: Signal<ReadingProfile | null>;
   protected currentReadingProfile!: Signal<ReadingProfile | null>;
   protected epubFonts!: Signal<EpubFont[]>;
-
-
-  protected isVerticalLayout!: Signal<boolean>;
+  protected pageCalcMode!: Signal<EpubPageCalculationMethod>;
 
 
   async ngOnInit() {
@@ -135,6 +133,7 @@ export class ReaderSettingsComponent implements OnInit {
     this.parentReadingProfile = this.readerSettingsService.parentReadingProfile;
     this.currentReadingProfile = this.readerSettingsService.currentReadingProfile;
     this.epubFonts = this.readerSettingsService.epubFonts;
+    this.pageCalcMode = this.readerSettingsService.pageCalcMode;
 
 
     this.themes = this.readerSettingsService.getThemes();
@@ -166,7 +165,6 @@ export class ReaderSettingsComponent implements OnInit {
 
   toggleFullscreen() {
     this.readerSettingsService.toggleFullscreen();
-    this.cdRef.markForCheck();
   }
 
   // menu only code
@@ -183,4 +181,5 @@ export class ReaderSettingsComponent implements OnInit {
   protected readonly WritingStyle = WritingStyle;
   protected readonly ReadingDirection = ReadingDirection;
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
+  protected readonly calcMethods = allCalcMethods;
 }

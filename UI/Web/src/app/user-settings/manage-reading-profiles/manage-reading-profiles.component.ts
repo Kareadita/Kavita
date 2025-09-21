@@ -32,7 +32,6 @@ import {AccountService} from "../../_services/account.service";
 import {debounceTime, distinctUntilChanged, tap} from "rxjs/operators";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {BookService} from "../../book-reader/_services/book.service";
 import {BookPageLayoutMode} from "../../_models/readers/book-page-layout-mode";
 import {PdfTheme} from "../../_models/preferences/pdf-theme";
 import {PdfScrollMode} from "../../_models/preferences/pdf-scroll-mode";
@@ -65,6 +64,8 @@ import {ColorscapeService} from "../../_services/colorscape.service";
 import {Color} from "@iplab/ngx-color-picker";
 import {FontService} from "../../_services/font.service";
 import {EpubFont} from "../../_models/preferences/epub-font";
+import {EpubPageCalcMethodPipe} from "../../_pipes/epub-page-calc-method.pipe";
+import {allCalcMethods} from "../../_models/readers/epub-page-calculation-method";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -104,6 +105,7 @@ enum TabId {
     NgbTooltip,
     BreakpointPipe,
     SettingColorPickerComponent,
+    EpubPageCalcMethodPipe,
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
@@ -115,7 +117,6 @@ export class ManageReadingProfilesComponent implements OnInit {
   protected readonly colorscapeService = inject(ColorscapeService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
-  private readonly bookService = inject(BookService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
@@ -231,6 +232,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm.addControl('bookReaderLayoutMode', new FormControl(this.selectedProfile.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
     this.readingProfileForm.addControl('bookReaderThemeName', new FormControl(this.selectedProfile.bookReaderThemeName || bookColorThemes[0].name, []));
     this.readingProfileForm.addControl('bookReaderImmersiveMode', new FormControl(this.selectedProfile.bookReaderImmersiveMode, []));
+    this.readingProfileForm.addControl('bookReaderEpubPageCalculationMethod', new FormControl(this.selectedProfile.bookReaderEpubPageCalculationMethod, []));
 
     // Pdf reader
     this.readingProfileForm.addControl('pdfTheme', new FormControl(this.selectedProfile.pdfTheme || PdfTheme.Dark, []));
@@ -340,6 +342,7 @@ export class ManageReadingProfilesComponent implements OnInit {
   }
 
   protected readonly readingDirections = readingDirections;
+  protected readonly calcMethods = allCalcMethods;
   protected readonly pdfSpreadModes = pdfSpreadModes;
   protected readonly pageSplitOptions = pageSplitOptions;
   protected readonly bookLayoutModes = bookLayoutModes;

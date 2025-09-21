@@ -445,6 +445,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         existingProfile.BookThemeName = dto.BookReaderThemeName;
         existingProfile.BookReaderLayoutMode = dto.BookReaderLayoutMode;
         existingProfile.BookReaderImmersiveMode = dto.BookReaderImmersiveMode;
+        existingProfile.BookReaderEpubPageCalculationMethod = dto.BookReaderEpubPageCalculationMethod;
 
         // PDF Reading
         existingProfile.PdfTheme = dto.PdfTheme;

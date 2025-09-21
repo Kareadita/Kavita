@@ -119,7 +119,7 @@
                   <ng-template #fullscreenTooltip>{{t('fullscreen-tooltip')}}</ng-template>
                   <span class="visually-hidden" id="fullscreen-help">
                     <ng-container [ngTemplateOutlet]="fullscreenTooltip" />
-                </span>
+                  </span>
                   <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
                     <i class="fa {{isFullscreen() ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen() ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
                     @if (activeTheme()?.isDarkTheme) {
@@ -133,7 +133,7 @@
                   <ng-template #layoutTooltip><span [innerHTML]="t('layout-mode-tooltip')"></span></ng-template>
                   <span class="visually-hidden" id="layout-help">
                     <ng-container [ngTemplateOutlet]="layoutTooltip" />
-                </span>
+                  </span>
                   <br>
                   <div class="btn-group d-flex justify-content-center" role="group" [attr.aria-label]="t('layout-mode-label')">
                     <input type="radio" formControlName="bookReaderLayoutMode" [value]="BookPageLayoutMode.Default" class="btn-check" id="layout-mode-default" autocomplete="off">
@@ -149,6 +149,25 @@
                   </div>
                 </div>
 
+                <div class="controls mt-2" style="display:flex; justify-content:space-between; align-items:center;">
+                  <label id="page-calc-method" class="form-label">{{t('page-calc-method-label')}}
+                    <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top"
+                       [ngbTooltip]="pageCalcMethodTooltip" role="button" tabindex="1" aria-describedby="fullscreen-help"></i>
+                  </label>
+                  <ng-template #pageCalcMethodTooltip>{{t('page-calc-method-tooltip')}}</ng-template>
+                  <span class="visually-hidden" id="page-calc-method-help">
+                    <ng-container [ngTemplateOutlet]="pageCalcMethodTooltip" />
+                  </span>
+                  <br>
+                  <div>
+                    <select class="form-select" aria-describedby="book-reader-heading"
+                            formControlName="bookReaderEpubPageCalculationMethod">
+                      @for (opt of calcMethods; track opt) {
+                        <option [ngValue]="opt">{{opt | epubPageCalcMethod}}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
 
               </ng-template>
             </div>

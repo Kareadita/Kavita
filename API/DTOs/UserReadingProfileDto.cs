@@ -111,6 +111,10 @@ public sealed record UserReadingProfileDto
     [Required]
     public bool BookReaderImmersiveMode { get; set; } = false;
 
+    /// <inheritdoc cref="AppUserReadingProfile.BookReaderEpubPageCalculationMethod"/>
+    [Required]
+    public EpubPageCalculationMethod BookReaderEpubPageCalculationMethod { get; set; } = EpubPageCalculationMethod.Default;
+
     #endregion
 
     #region PdfReader
