@@ -241,6 +241,6 @@
     "update-yearly-stats": "Update Yearly Stats",
 
     "generated-reading-profile-name": "Generated from {0}",
-    "genre-doesnt-exist": "Genre doesn't exist"
-
+    "genre-doesnt-exist": "Genre doesn't exist",
+    "font-url-not-allowed": "Uploading a Font by url is only allowed from Google Fonts"
 }

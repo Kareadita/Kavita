@@ -42,6 +42,7 @@ public interface IDirectoryService
     /// Used for random files needed, like images to check against, list of countries, etc
     /// </summary>
     string AssetsDirectory { get; }
+    string EpubFontDirectory { get; }
     /// <summary>
     /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
     /// </summary>
@@ -100,6 +101,8 @@ public class DirectoryService : IDirectoryService
     public string TemplateDirectory { get; }
     public string PublisherDirectory { get; }
     public string LongTermCacheDirectory { get; }
+    public string EpubFontDirectory { get; }
+
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
@@ -141,6 +144,8 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(PublisherDirectory);
         LongTermCacheDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "cache-long");
         ExistOrCreate(LongTermCacheDirectory);
+        EpubFontDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "fonts");
+        ExistOrCreate(EpubFontDirectory);
     }
 
     /// <summary>

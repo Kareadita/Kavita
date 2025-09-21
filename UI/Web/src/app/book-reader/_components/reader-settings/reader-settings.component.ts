@@ -6,7 +6,6 @@ import {BookTheme} from 'src/app/_models/preferences/book-theme';
 import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
 import {WritingStyle} from 'src/app/_models/preferences/writing-style';
 import {ThemeProvider} from 'src/app/_models/preferences/site-theme';
-import {FontFamily} from '../../_services/book.service';
 import {BookBlackTheme} from '../../_models/book-black-theme';
 import {BookDarkTheme} from '../../_models/book-dark-theme';
 import {BookWhiteTheme} from '../../_models/book-white-theme';
@@ -23,6 +22,9 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
 import {BookReadingProfileFormGroup, EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
+import {LayoutMode} from "../../../manga-reader/_models/layout-mode";
+import {FontService} from "../../../_services/font.service";
+import {EpubFont} from "../../../_models/preferences/epub-font";
 
 /**
  * Used for book reader. Do not use for other components
@@ -95,11 +97,6 @@ export class ReaderSettingsComponent implements OnInit {
   @Input({required:true}) readingProfile!: ReadingProfile;
   @Input({required:true}) readerSettingsService!: EpubReaderSettingsService;
 
-  /**
-   * List of all font families user can select from
-   */
-  fontOptions: Array<string> = [];
-  fontFamilies: Array<FontFamily> = [];
   settingsForm!: BookReadingProfileFormGroup;
   /**
    * System provided themes
@@ -118,6 +115,7 @@ export class ReaderSettingsComponent implements OnInit {
   protected hasParentProfile!: Signal<boolean>;
   protected parentReadingProfile!: Signal<ReadingProfile | null>;
   protected currentReadingProfile!: Signal<ReadingProfile | null>;
+  protected epubFonts!: Signal<EpubFont[]>;
 
 
   protected isVerticalLayout!: Signal<boolean>;
@@ -136,9 +134,10 @@ export class ReaderSettingsComponent implements OnInit {
     this.hasParentProfile = this.readerSettingsService.hasParentProfile;
     this.parentReadingProfile = this.readerSettingsService.parentReadingProfile;
     this.currentReadingProfile = this.readerSettingsService.currentReadingProfile;
+    this.epubFonts = this.readerSettingsService.epubFonts;
+
 
     this.themes = this.readerSettingsService.getThemes();
-
 
     // Initialize the service if not already done
     if (!this.readerSettingsService.getCurrentReadingProfile()) {
@@ -146,8 +145,6 @@ export class ReaderSettingsComponent implements OnInit {
     }
 
     this.settingsForm = this.readerSettingsService.getSettingsForm();
-    this.fontFamilies = this.readerSettingsService.getFontFamilies();
-    this.fontOptions = this.fontFamilies.map(f => f.title);
     this.cdRef.markForCheck();
   }
 

@@ -67,6 +67,7 @@ import {LayoutMeasurementService} from "../../../_services/layout-measurement.se
 import {ColorscapeService} from "../../../_services/colorscape.service";
 import {environment} from "../../../../environments/environment";
 import {LoadPageEvent} from "../_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
+import {FontService} from "../../../_services/font.service";
 import afterFrame from "afterframe";
 
 
@@ -156,6 +157,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly layoutService = inject(LayoutMeasurementService);
   private readonly colorscapeService = inject(ColorscapeService);
+  private readonly fontService = inject(FontService);
 
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
   protected readonly WritingStyle = WritingStyle;
@@ -776,6 +778,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.fontService.getFonts().subscribe(fonts => {
+      fonts.filter(f => f.name !== FontService.DefaultEpubFont).forEach(font => {
+        this.fontService.getFontFace(font).load().then(loadedFace => {
+          (this.document as any).fonts.add(loadedFace);
+        });
+      });
+    });
+
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
     const chapterId = this.route.snapshot.paramMap.get('chapterId');

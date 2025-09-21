@@ -11,6 +11,7 @@ using API.DTOs.Device;
 using API.DTOs.Email;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
+using API.DTOs.Font;
 using API.DTOs.KavitaPlus.Manage;
 using API.DTOs.KavitaPlus.Metadata;
 using API.DTOs.MediaErrors;
@@ -281,6 +282,8 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.BookReaderThemeName,
                 opt =>
                     opt.MapFrom(src => src.BookThemeName));
+
+        CreateMap<EpubFont, EpubFontDto>();
 
 
         CreateMap<AppUserBookmark, BookmarkDto>();

@@ -184,6 +184,7 @@
         "stats-tab": "{{tabs.stats-tab}}",
         "scrobbling-tab": "{{tabs.scrobbling-tab}}",
         "smart-filters-tab": "{{tabs.smart-filters-tab}}",
+        "font-tab": "Font",
 
         "success-toast": "User preferences updated",
 
@@ -257,6 +258,24 @@
         "preview-default-admin": "Select a theme first or upload one manually",
         "preview-title": "Preview",
         "add": "{{common.add}}"
+    },
+
+    "font-manager": {
+        "description": "Kavita's epub reader comes with a few build-in fonts, add your own fonts here. Upload a file, or use a google fonts url. See the <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
+        "enter-an-url-pre-title": "Enter an {{url}}",
+        "url": "url",
+        "add": "{{common.add}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "a font file",
+        "preview-default": "Upload your own font via file or Google Font url",
+        "delete": "{{common.delete}}",
+        "url-label": "Url",
+        "back": "Back",
+        "load": "Load",
+        "no-preview": "This font cannot be previewed. This will take the default style from the book.",
+        "brown-fox": "The quick brown fox jumps over the lazy dog",
+        "filter-system-fonts-label": "Filter System Fonts"
     },
 
     "theme": {
@@ -1898,6 +1917,7 @@
         "user-stats": "Stats",
         "scrobbling": "Scrobbling",
         "theme": "Theme",
+        "font": "Epub Fonts",
         "customize": "Customize",
         "cbl-import": "CBL Reading List",
         "mal-stack-import": "MAL Stack",
@@ -2641,6 +2661,9 @@
         "delete-theme-in-use": "Theme is currently in use by at least one user, cannot delete",
         "theme-manual-upload": "There was an issue creating Theme from manual upload",
         "theme-already-in-use": "Theme already exists by that name",
+        "delete-font-in-use": "Font is currently in use by at least one user, cannot delete",
+        "font-manual-upload": "There was an issue creating Font from manual upload",
+        "font-already-in-use": "Font already exists by that name",
         "import-fields": {
             "non-unique-age-ratings": "Age rating mapping keys aren't unique, please correct your import file",
             "non-unique-fields": "Field mappings do not have a unique id, please correct your import file"
@@ -2971,7 +2994,7 @@
         "volume-deleted": "Volume deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",
         "stack-imported": "Stack Imported",
-        "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
+        "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal.",
         "mal-token-required": "MAL Token is required, set in User Settings",
         "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?",
         "must-select-library": "At least one library must be selected",
@@ -2986,7 +3009,10 @@
         "library-bound-to-reading-profile": "Library bound to Reading Profile {{name}}",
         "external-match-rate-error": "Kavita ran out of rate looking up {{seriesName}}. Try again in 5 minutes.",
         "confirm-delete-bookmark": "Are you sure you want to delete this Bookmark?",
-        "confirm-delete-annotation": "Are you sure you want to delete this Annotation?"
+        "confirm-delete-annotation": "Are you sure you want to delete this Annotation?",
+        "confirm-delete-font": "Removing this font will delete it from the disk. You can grab it from temp directory before removal.",
+        "confirm-force-delete-font": "This font is currently in use. Do you want to force delete it? This will force users back to the Default font.",
+        "font-in-use": "Cannot delete as the font is in use by one or more users."
     },
 
     "read-time-pipe": {

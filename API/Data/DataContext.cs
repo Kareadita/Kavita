@@ -81,6 +81,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserChapterRating> AppUserChapterRating { get; set; } = null!;
     public DbSet<AppUserReadingProfile> AppUserReadingProfiles { get; set; } = null!;
     public DbSet<AppUserAnnotation> AppUserAnnotation { get; set; } = null!;
+    public DbSet<EpubFont> EpubFont { get; set; } = null!;
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

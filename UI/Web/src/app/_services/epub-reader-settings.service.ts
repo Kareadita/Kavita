@@ -6,7 +6,6 @@ import {WritingStyle} from '../_models/preferences/writing-style';
 import {BookPageLayoutMode} from "../_models/readers/book-page-layout-mode";
 import {FormControl, FormGroup, NonNullableFormBuilder} from "@angular/forms";
 import {ReadingProfile, ReadingProfileKind} from "../_models/preferences/reading-profiles";
-import {BookService, FontFamily} from "../book-reader/_services/book.service";
 import {ThemeService} from './theme.service';
 import {ReadingProfileService} from "./reading-profile.service";
 import {debounceTime, distinctUntilChanged, filter, tap} from "rxjs/operators";
@@ -18,6 +17,8 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 import {LayoutMeasurementService} from "./layout-measurement.service";
 import {environment} from "../../environments/environment";
+import {EpubFont} from "../_models/preferences/epub-font";
+import {FontService} from "./font.service";
 
 export interface ReaderSettingUpdate {
   setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme';
@@ -43,7 +44,7 @@ const COLUMN_GAP = 20; //px gap between columns
 @Injectable()
 export class EpubReaderSettingsService {
   private readonly destroyRef = inject(DestroyRef);
-  private readonly bookService = inject(BookService);
+  private readonly fontService = inject(FontService);
   private readonly themeService = inject(ThemeService);
   private readonly readingProfileService = inject(ReadingProfileService);
   private readonly utilityService = inject(UtilityService);
@@ -57,6 +58,7 @@ export class EpubReaderSettingsService {
   private readonly _parentReadingProfile = signal<ReadingProfile | null>(null);
   private readonly _currentSeriesId = signal<number | null>(null);
   private readonly _isInitialized = signal<boolean>(false);
+  private readonly _epubFonts = signal<EpubFont[]>([]);
 
   // Settings signals
   private readonly _pageStyles = signal<PageStyle>(this.getDefaultPageStyles()); // Internal property used to capture all the different css properties to render on all elements
@@ -70,7 +72,6 @@ export class EpubReaderSettingsService {
 
   // Form will be managed separately but updated from signals
   private settingsForm!: BookReadingProfileFormGroup;
-  private fontFamilies: FontFamily[] = this.bookService.getFontFamilies();
   private isUpdatingFromForm = false; // Flag to prevent infinite loops
   private isInitialized = this._isInitialized(); // Non-signal, updates in effect
 
@@ -89,6 +90,7 @@ export class EpubReaderSettingsService {
   public readonly clickToPaginate = this._clickToPaginate.asReadonly();
   public readonly immersiveMode = this._immersiveMode.asReadonly();
   public readonly isFullscreen = this._isFullscreen.asReadonly();
+  public readonly epubFonts = this._epubFonts.asReadonly();
 
   // Computed signals for derived state
   public readonly layoutMode = computed(() => {
@@ -215,6 +217,9 @@ export class EpubReaderSettingsService {
    * Initialize the service with a reading profile and series ID
    */
   async initialize(seriesId: number, readingProfile: ReadingProfile): Promise<void> {
+    const fonts = await firstValueFrom(this.fontService.getFonts());
+    this._epubFonts.set(fonts);
+
     this._currentSeriesId.set(seriesId);
     this._currentReadingProfile.set(readingProfile);
 
@@ -248,7 +253,7 @@ export class EpubReaderSettingsService {
   private setupDefaultsFromProfile(profile: ReadingProfile): void {
     // Set defaults if undefined
     if (profile.bookReaderFontFamily === undefined) {
-      profile.bookReaderFontFamily = 'default';
+      profile.bookReaderFontFamily = FontService.DefaultEpubFont;
     }
     if (profile.bookReaderFontSize === undefined || profile.bookReaderFontSize < 50) {
       profile.bookReaderFontSize = 100;
@@ -297,13 +302,6 @@ export class EpubReaderSettingsService {
    */
   getCurrentReadingProfile(): ReadingProfile | null {
     return this._currentReadingProfile();
-  }
-
-  /**
-   * Get font families for UI
-   */
-  getFontFamilies(): FontFamily[] {
-    return this.fontFamilies;
   }
 
   /**
@@ -490,11 +488,11 @@ export class EpubReaderSettingsService {
     ).subscribe(fontName => {
       this.isUpdatingFromForm = true;
 
-      const familyName = this.fontFamilies.find(f => f.title === fontName)?.family || 'default';
+      const familyName = this._epubFonts().find(f => f.name === fontName)?.name || FontService.DefaultEpubFont;
       const currentStyles = this._pageStyles();
 
       const newStyles = { ...currentStyles };
-      if (familyName === 'default') {
+      if (familyName === FontService.DefaultEpubFont) {
         newStyles['font-family'] = 'inherit';
       } else {
         newStyles['font-family'] = `'${familyName}'`;
@@ -670,7 +668,7 @@ export class EpubReaderSettingsService {
 
     const currentStyles = this._pageStyles();
     const newStyles: PageStyle = {
-      'font-family': fontFamily || currentStyles['font-family'] || 'default',
+      'font-family': fontFamily || currentStyles['font-family'] || FontService.DefaultEpubFont,
       'font-size': fontSize || currentStyles['font-size'] || '100%',
       'margin-left': margin || currentStyles['margin-left'] || defaultMargin,
       'margin-right': margin || currentStyles['margin-right'] || defaultMargin,
@@ -682,7 +680,7 @@ export class EpubReaderSettingsService {
 
   public getDefaultPageStyles(): PageStyle {
     return {
-      'font-family': 'default',
+      'font-family': FontService.DefaultEpubFont,
       'font-size': '100%',
       'margin-left': '15vw',
       'margin-right': '15vw',

@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.15",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.16",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.7.15"
+    "version": "0.8.7.16"
   },
   "servers": [
     {
@@ -2909,6 +2909,221 @@
             "name": "name",
             "in": "query",
             "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Font/all": {
+      "get": {
+        "tags": [
+          "Font"
+        ],
+        "summary": "List out the fonts",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EpubFontDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EpubFontDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EpubFontDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Font": {
+      "get": {
+        "tags": [
+          "Font"
+        ],
+        "summary": "Returns a font file",
+        "parameters": [
+          {
+            "name": "fontId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Font"
+        ],
+        "summary": "Removes a font from the system",
+        "parameters": [
+          {
+            "name": "fontId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "description": "If the font is in use by other users and an admin wants it deleted, they must confirm to force delete it. This is prompted in the UI.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Font/in-use": {
+      "get": {
+        "tags": [
+          "Font"
+        ],
+        "summary": "Returns if the given font is in use by any other user. System provided fonts will always return true.",
+        "parameters": [
+          {
+            "name": "fontId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Font/upload": {
+      "post": {
+        "tags": [
+          "Font"
+        ],
+        "summary": "Manual upload",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "formFile": {
+                    "type": "string",
+                    "description": "",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "formFile": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpubFontDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpubFontDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpubFontDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Font/upload-by-url": {
+      "post": {
+        "tags": [
+          "Font"
+        ],
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -20879,6 +21094,32 @@
         },
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
+      },
+      "EpubFontDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "provider": {
+            "enum": [
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "ExternalChapterDto": {
         "type": "object",

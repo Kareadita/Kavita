@@ -35,6 +35,7 @@ public interface IUnitOfWork
     IEmailHistoryRepository EmailHistoryRepository { get; }
     IAppUserReadingProfileRepository AppUserReadingProfileRepository { get; }
     IAnnotationRepository AnnotationRepository { get; }
+    IEpubFontRepository EpubFontRepository { get; }
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
@@ -78,6 +79,7 @@ public class UnitOfWork : IUnitOfWork
         EmailHistoryRepository = new EmailHistoryRepository(_context, _mapper);
         AppUserReadingProfileRepository = new AppUserReadingProfileRepository(_context, _mapper);
         AnnotationRepository = new AnnotationRepository(_context, _mapper);
+        EpubFontRepository = new EpubFontRepository(_context, _mapper);
     }
 
     /// <summary>
@@ -109,6 +111,7 @@ public class UnitOfWork : IUnitOfWork
     public IEmailHistoryRepository EmailHistoryRepository { get; }
     public IAppUserReadingProfileRepository AppUserReadingProfileRepository { get; }
     public IAnnotationRepository AnnotationRepository { get; }
+    public IEpubFontRepository EpubFontRepository { get;  }
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.

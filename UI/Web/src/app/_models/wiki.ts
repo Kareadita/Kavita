@@ -22,4 +22,5 @@ export enum WikiLink {
   OpdsClients = 'https://wiki.kavitareader.com/guides/features/opds/#opds-capable-clients',
   Guides = 'https://wiki.kavitareader.com/guides',
   ReadingProfiles = "https://wiki.kavitareader.com/guides/user-settings/reading-profiles/",
+  EpubFontManager = "https://wiki.kavitareader.com/guides/epub-fonts/",
 }

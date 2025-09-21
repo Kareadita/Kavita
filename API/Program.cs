@@ -124,6 +124,7 @@ public class Program
                 await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
                 await Seed.SeedSettings(context, directoryService);
                 await Seed.SeedThemes(context);
+                await Seed.SeedFonts(context);
                 await Seed.SeedDefaultStreams(unitOfWork);
                 await Seed.SeedDefaultSideNavStreams(unitOfWork);
                 await Seed.SeedUserApiKeys(context);

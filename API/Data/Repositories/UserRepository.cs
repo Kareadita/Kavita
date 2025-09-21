@@ -84,6 +84,7 @@ public interface IUserRepository
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
     Task<AppUser?> GetUserByEmailAsync(string email, AppUserIncludes includes = AppUserIncludes.None);
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
+    Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByFontAsync(string fontName);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<bool> HasAccessToSeries(int userId, int seriesId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true);
@@ -289,6 +290,14 @@ public class UserRepository : IUserRepository
         return await _context.AppUserPreferences
             .Include(p => p.Theme)
             .Where(p => p.Theme.Id == themeId)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByFontAsync(string fontName)
+    {
+        return await _context.AppUserPreferences
+            .Where(p => p.BookReaderFontFamily == fontName)
             .AsSplitQuery()
             .ToListAsync();
     }

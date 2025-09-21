@@ -31,6 +31,7 @@ public static partial class Parser
     private const string BookFileExtensions = EpubFileExtension + "|" + PdfFileExtension;
     private const string XmlRegexExtensions = @"\.xml";
     public const string MacOsMetadataFileStartsWith = @"._";
+    public const string FontFileExtensions = @"\.[woff2|ttf|otf|woff]";
 
     public const string SupportedExtensions =
         ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
@@ -1255,6 +1256,14 @@ public static partial class Parser
         }
 
         return filename;
+    }
+
+    /**
+     * Replaced non-alphanumerical chars with a space
+     */
+    public static string PrettifyFileName(string name)
+    {
+        return Regex.Replace(name, "[^a-zA-Z0-9]", " ");
     }
 
     /// <summary>

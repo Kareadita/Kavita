@@ -1,8 +1,18 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {
   bookLayoutModes,
-  bookWritingStyles, breakPoints,
+  bookWritingStyles,
+  breakPoints,
   layoutModes,
   pageSplitOptions,
   pdfScrollModes,
@@ -19,7 +29,7 @@ import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {User} from "../../_models/user";
 import {AccountService} from "../../_services/account.service";
-import {debounceTime, distinctUntilChanged, map, take, tap} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, tap} from "rxjs/operators";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {BookService} from "../../book-reader/_services/book.service";
@@ -41,7 +51,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {WritingStylePipe} from "../../_pipes/writing-style.pipe";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {catchError, filter, of, switchMap} from "rxjs";
+import {catchError, filter, forkJoin, of, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ToastrService} from "ngx-toastr";
@@ -53,6 +63,8 @@ import {
 } from "../../settings/_components/setting-colour-picker/setting-color-picker.component";
 import {ColorscapeService} from "../../_services/colorscape.service";
 import {Color} from "@iplab/ngx-color-picker";
+import {FontService} from "../../_services/font.service";
+import {EpubFont} from "../../_models/preferences/epub-font";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -108,12 +120,13 @@ export class ManageReadingProfilesComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   private readonly transLoco = inject(TranslocoService);
+  private readonly fontService = inject(FontService);
 
   virtualScrollerBreakPoint = 20;
 
   savingProfile = signal(false);
+  fonts = signal<EpubFont[]>([]);
 
-  fontFamilies: Array<string> = [];
   readingProfiles: ReadingProfile[] = [];
   user!: User;
   activeTabId = TabId.ImageReader;
@@ -128,18 +141,21 @@ export class ManageReadingProfilesComponent implements OnInit {
   });
 
   constructor() {
-    this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
-    this.cdRef.markForCheck();
-  }
-
-  ngOnInit(): void {
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+    effect(() => {
+      const user = this.accountService.currentUserSignal();
       if (user) {
         this.user = user;
       }
     });
+  }
 
-    this.readingProfileService.getAllProfiles().subscribe(profiles => {
+  ngOnInit(): void {
+    forkJoin([
+      this.fontService.getFonts(),
+      this.readingProfileService.getAllProfiles()
+    ]).subscribe(([fonts, profiles]) => {
+      this.fonts.set(fonts);
+
       this.readingProfiles = profiles;
       this.loading = false;
       this.setupForm();
@@ -149,7 +165,6 @@ export class ManageReadingProfilesComponent implements OnInit {
 
       this.cdRef.markForCheck();
     });
-
   }
 
   async delete(readingProfile: ReadingProfile) {
@@ -175,7 +190,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     return (val <= 0) ? '' : val + '%'
   }
 
-  setupForm() {
+  async setupForm() {
     if (this.selectedProfile == null) {
       return;
     }
@@ -183,8 +198,8 @@ export class ManageReadingProfilesComponent implements OnInit {
 
     this.readingProfileForm = new FormGroup({})
 
-    if (this.fontFamilies.indexOf(this.selectedProfile.bookReaderFontFamily) < 0) {
-      this.selectedProfile.bookReaderFontFamily = 'default';
+    if (this.fonts().find(font => font.name === this.selectedProfile?.bookReaderFontFamily) === undefined) {
+      this.selectedProfile.bookReaderFontFamily = FontService.DefaultEpubFont;
     }
 
     this.readingProfileForm.addControl('name', new FormControl(this.selectedProfile.name, Validators.required));

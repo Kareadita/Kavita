@@ -201,6 +201,14 @@
           }
         }
 
+        @defer (when fragment === SettingsTabId.Font; prefetch on idle) {
+          @if (fragment === SettingsTabId.Font) {
+            <div class="scale col-md-12">
+              <app-font-manager />
+            </div>
+          }
+        }
+
         @defer (when fragment === SettingsTabId.Devices; prefetch on idle) {
           @if (fragment === SettingsTabId.Devices) {
             <div class="scale col-md-12">

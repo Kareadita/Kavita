@@ -124,6 +124,9 @@ public class BackupService : IBackupService
         await SendProgress(0.5F, "Copying bookmarks");
         await CopyBookmarksToBackupDirectory(tempDirectory);
 
+        await SendProgress(0.6F, "Copying Fonts");
+        CopyFontsToBackupDirectory(tempDirectory);
+
         await SendProgress(0.75F, "Copying themes");
         CopyThemesToBackupDirectory(tempDirectory);
 
@@ -217,6 +220,26 @@ public class BackupService : IBackupService
         catch (IOException)
         {
             // Swallow exception.
+        }
+
+        if (!_directoryService.GetFiles(outputTempDir, searchOption: SearchOption.AllDirectories).Any())
+        {
+            _directoryService.ClearAndDeleteDirectory(outputTempDir);
+        }
+    }
+
+    private void CopyFontsToBackupDirectory(string tempDirectory)
+    {
+        var outputTempDir = Path.Join(tempDirectory, "fonts");
+        _directoryService.ExistOrCreate(outputTempDir);
+
+        try
+        {
+            _directoryService.CopyDirectoryToDirectory(_directoryService.EpubFontDirectory, outputTempDir);
+        }
+        catch (IOException ex)
+        {
+            _logger.LogWarning(ex, "Failed to copy fonts to backup directory '{OutputTempDir}'. Fonts will not be included in the backup.", outputTempDir);
         }
 
         if (!_directoryService.GetFiles(outputTempDir, searchOption: SearchOption.AllDirectories).Any())

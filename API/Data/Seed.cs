@@ -12,10 +12,13 @@ using API.Data.Repositories;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.Font;
 using API.Entities.Enums.Theme;
 using API.Entities.MetadataMatching;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks;
+using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Identity;
@@ -66,6 +69,87 @@ public static class Seed
             Title = "Purple",
             SlotNumber = 4,
             Color = new RgbaColor { R = 255, G = 0, B = 255, A = 0.4f }
+        }
+    ];
+
+    public static readonly ImmutableArray<EpubFont> DefaultFonts =
+    [
+        new ()
+        {
+            Name = FontService.DefaultFont,
+            NormalizedName = Parser.Normalize(FontService.DefaultFont),
+            Provider = FontProvider.System,
+            FileName = string.Empty,
+        },
+        new ()
+        {
+            Name = "Merriweather",
+            NormalizedName = Parser.Normalize("Merriweather"),
+            Provider = FontProvider.System,
+            FileName = "Merriweather-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "EB Garamond",
+            NormalizedName = Parser.Normalize("EB Garamond"),
+            Provider = FontProvider.System,
+            FileName = "EBGaramond-VariableFont_wght.woff2",
+        },
+        new ()
+        {
+            Name = "Fira Sans",
+            NormalizedName = Parser.Normalize("Fira Sans"),
+            Provider = FontProvider.System,
+            FileName = "FiraSans-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "Lato",
+            NormalizedName = Parser.Normalize("Lato"),
+            Provider = FontProvider.System,
+            FileName = "Lato-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "Libre Baskerville",
+            NormalizedName = Parser.Normalize("Libre Baskerville"),
+            Provider = FontProvider.System,
+            FileName = "LibreBaskerville-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "Nanum Gothic",
+            NormalizedName = Parser.Normalize("Nanum Gothic"),
+            Provider = FontProvider.System,
+            FileName = "NanumGothic-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "Open Dyslexic",
+            NormalizedName = Parser.Normalize("Open Dyslexic"),
+            Provider = FontProvider.System,
+            FileName = "OpenDyslexic-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "RocknRoll One",
+            NormalizedName = Parser.Normalize("RocknRoll One"),
+            Provider = FontProvider.System,
+            FileName = "RocknRollOne-Regular.woff2",
+        },
+        new ()
+        {
+            Name = "Fast Font Serif",
+            NormalizedName = Parser.Normalize("Fast Font Serif"),
+            Provider = FontProvider.System,
+            FileName = "Fast_Serif.woff2",
+        },
+        new ()
+        {
+            Name = "Fast Font Sans",
+            NormalizedName = Parser.Normalize("Fast Font Sans"),
+            Provider = FontProvider.System,
+            FileName = "Fast_Sans.woff2",
         }
     ];
 
@@ -197,10 +281,26 @@ public static class Seed
 
         foreach (var theme in DefaultThemes)
         {
-            var existing = context.SiteTheme.FirstOrDefault(s => s.Name.Equals(theme.Name));
+            var existing = await context.SiteTheme.FirstOrDefaultAsync(s => s.Name.Equals(theme.Name));
             if (existing == null)
             {
                 await context.SiteTheme.AddAsync(theme);
+            }
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task SeedFonts(DataContext context)
+    {
+        await context.Database.EnsureCreatedAsync();
+
+        foreach (var font in DefaultFonts)
+        {
+            var existing = await context.EpubFont.FirstOrDefaultAsync(f => f.Name.Equals(font.Name));
+            if (existing == null)
+            {
+                await context.EpubFont.AddAsync(font);
             }
         }
 

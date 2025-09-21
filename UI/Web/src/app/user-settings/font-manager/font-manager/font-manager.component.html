@@ -1,0 +1,154 @@
+<ng-container *transloco="let t; prefix:'font-manager'">
+  <div class="container-fluid g-0">
+
+    <p [innerHTML]="t('description', {'wikiLink': WikiLink})"></p>
+    <form [formGroup]="form">
+      <div class="row g-0 theme-container">
+      <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7 scroller">
+        <div class="pe-2">
+
+          <div class="d-flex justify-content-between mb-2 align-items-center {{!selectedFont() ? 'active' : ''}}">
+            <button class="btn btn-outline-primary btn-sm me-1" (click)="selectFont(undefined)" [disabled]="selectedFont() === undefined || isReadOnly()">
+              <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t("add")}}
+            </button>
+            <div class="form-check form-switch">
+              <input type="checkbox" formControlName="filter" class="form-check-input" id="filter-out-system-fonts" (change)="hideSystemFonts.set(!hideSystemFonts())">
+              <label for="filter-out-system-fonts" class="form-check-label">{{t('filter-system-fonts-label')}}</label>
+            </div>
+          </div>
+
+          <ul style="height: 100%" class="list-group list-group-flush">
+
+            @for (font of visibleFonts(); track font.id) {
+              <ng-container [ngTemplateOutlet]="fontOption" [ngTemplateOutletContext]="{ $implicit: font}"></ng-container>
+            } @empty {
+              <app-loading [loading]="fonts().length === 0"></app-loading>
+            }
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-lg-9 col-md-7 col-sm-4 col-xs-4 ps-3">
+        <div class="card p-3">
+
+          @let currentFont = selectedFont();
+          @if (currentFont === undefined) {
+            <div class="row pb-4">
+              <div class="mx-auto">
+                <div class="d-flex justify-content-center">
+                  <div class="d-flex justify-content-evenly">
+                    {{t('preview-default')}}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            @if (files && files.length > 0) {
+              <app-loading [loading]="isUploadingFont()"></app-loading>
+            } @else {
+              <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
+                             dropZoneClassName="file-upload" contentClassName="file-upload-zone">
+
+                <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+
+                  @switch (uploadMode()) {
+                    @case ('all') {
+                      <div class="row g-0 mt-3 pb-3">
+                        <div class="mx-auto">
+                          <div class="row g-0 mb-3">
+                            <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
+                          </div>
+
+                          <div class="d-flex justify-content-center">
+                            <div class="d-flex justify-content-evenly">
+                              <a class="pe-0" href="javascript:void(0)" (click)="uploadMode.set('url')">
+                                <span class="phone-hidden">{{t('enter-an-url-pre-title', {url: ''})}}</span>{{t('url')}}
+                              </a>
+                              <span class="ps-1 pe-1">•</span>
+                              <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
+                              <span class="ps-1 pe-1">•</span>
+                              <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                    @case ('url') {
+                      <div class="row g-0 mt-3 pb-3 ms-md-2 me-md-2">
+                        <div class="input-group col-auto me-md-2" style="width: 83%">
+                          <label class="input-group-text" for="load-url">{{t('url-label')}}</label>
+                          <input type="text" autofocus autocomplete="off" class="form-control" formControlName="fontUrl"
+                                 placeholder="https://" id="load-url">
+                          <button class="btn btn-outline-secondary" type="button" (click)="uploadFromUrl(); uploadMode.set('all');"
+                                  [disabled]="(form.get('fontUrl')?.value).length === 0">
+                            {{t('load')}}
+                          </button>
+                        </div>
+                        <button class="btn btn-secondary col-auto" href="javascript:void(0)" (click)="uploadMode.set('all')">
+                          <i class="fas fa-share" aria-hidden="true" style="transform: rotateY(180deg)"></i>&nbsp;
+                          <span class="phone-hidden">{{t('back')}}</span>
+                        </button>
+                      </div>
+                    }
+                  }
+                </ng-template>
+
+              </ngx-file-drop>
+            }
+          } @else {
+            <h4>
+              {{currentFont.name | sentenceCase}}
+              <div class="float-end">
+                @if (currentFont.provider !== FontProvider.System && currentFont.name !== FontService.DefaultEpubFont) {
+                  <button class="btn btn-danger me-1" (click)="deleteFont(currentFont.id)" [disabled]="isReadOnly()">{{t('delete')}}</button>
+                }
+              </div>
+            </h4>
+
+            <div>
+              <ng-container [ngTemplateOutlet]="availableFont" [ngTemplateOutletContext]="{ $implicit: currentFont}"></ng-container>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    </form>
+  </div>
+
+  <ng-template #fontOption let-item>
+    @if (item !== undefined) {
+      @let currentFont = selectedFont();
+      <li
+        [@loadNewFontAnimation]="animationState(item)"
+        class="list-group-item d-flex justify-content-between align-items-start clickable rounded mt-1"
+        [class.active]="currentFont && currentFont?.name === item.name"
+        (click)="selectFont(item)"
+      >
+        <div class="ms-2 me-auto">
+          <div class="fw-bold">{{item.name | sentenceCase}}</div>
+        </div>
+        <div>
+          <span class="pill p-1 mx-1 provider">{{item.provider | siteThemeProvider}}</span>
+        </div>
+      </li>
+    }
+  </ng-template>
+
+  <ng-template #availableFont let-item>
+    @if (item) {
+      <div class="d-flex justify-content-between w-100">
+        @if (item.name === FontService.DefaultEpubFont) {
+          <div class="ms-2 me-auto fs-6">
+            {{t('no-preview')}}
+          </div>
+        }
+      </div>
+
+      @if (item.name !== FontService.DefaultEpubFont) {
+        <div class="p-1 me-1 preview mt-2 flex-grow-1 text-center w-100 fs-4 fs-lg-3 mt-2" [ngStyle]="{'font-family': item.name, 'word-break': 'keep-all'}">
+          {{t('brown-fox')}}
+        </div>
+      }
+    }
+  </ng-template>
+</ng-container>

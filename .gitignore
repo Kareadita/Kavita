@@ -508,6 +508,7 @@ UI/Web/dist/
 /API/config/logs/
 /API/config/backups/
 /API/config/cache/
+/API/config/fonts/
 /API/config/temp/
 /API/config/themes/
 /API/config/stats/
