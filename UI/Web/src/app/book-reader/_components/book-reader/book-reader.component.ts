@@ -1161,6 +1161,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const promptConfig = {...this.confirmService.defaultPrompt};
     promptConfig.header = translate('book-reader.go-to-page');
     promptConfig.content = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages()});
+    promptConfig.bookReader = true;
 
     const goToPageNum = await this.confirmService.prompt(undefined, promptConfig);
 

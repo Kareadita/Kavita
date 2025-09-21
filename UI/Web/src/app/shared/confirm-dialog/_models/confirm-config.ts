@@ -9,4 +9,8 @@ export class ConfirmConfig {
      * If the close button shouldn't be rendered
      */
     disableEscape: boolean = false;
+  /**
+   * Enables book theme css classes to style the popup properly
+   */
+  bookReader?: boolean = false;
 }
