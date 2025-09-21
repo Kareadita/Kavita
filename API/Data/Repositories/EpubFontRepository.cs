@@ -91,7 +91,7 @@ public class EpubFontRepository: IEpubFontRepository
 
     public async Task<bool> IsFontInUseAsync(int fontId)
     {
-        return await _context.AppUserPreferences
+        return await _context.AppUserReadingProfiles
             .Join(_context.EpubFont,
                 preference => preference.BookReaderFontFamily,
                 font => font.Name,

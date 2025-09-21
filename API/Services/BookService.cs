@@ -313,11 +313,11 @@ public partial class BookService : IBookService
     }
 
     /// <summary>
-    /// For each bookmark on this page, inject a specialized icon
+    /// For each ptoc (text) bookmark on this page, inject a specialized icon
     /// </summary>
     /// <param name="doc"></param>
     /// <param name="ptocBookmarks"></param>
-    private void InjectPTOCBookmarks(HtmlDocument doc, List<PersonalToCDto> ptocBookmarks)
+    private void InjectTextBookmarks(HtmlDocument doc, List<PersonalToCDto> ptocBookmarks)
     {
         if (ptocBookmarks.Count == 0) return;
 
@@ -1257,7 +1257,7 @@ public partial class BookService : IBookService
         InjectImages(doc, book, apiBase);
 
         // Inject PTOC Bookmark Icons
-        InjectPTOCBookmarks(doc, ptocBookmarks);
+        InjectTextBookmarks(doc, ptocBookmarks);
 
         // Inject Annotations
         InjectAnnotations(doc, annotations);

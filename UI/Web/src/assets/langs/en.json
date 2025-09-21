@@ -264,11 +264,11 @@
         "description": "Kavita's epub reader comes with a few build-in fonts, add your own fonts here. Upload a file, or use a google fonts url. See the <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
         "enter-an-url-pre-title": "Enter an {{url}}",
         "url": "url",
-        "add": "Add",
+        "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "a font file",
-        "preview-default": "Upload your own font via file or url",
+        "preview-default": "Upload your own font via file or Google Font url",
         "delete": "{{common.delete}}",
         "url-label": "Url",
         "back": "Back",
@@ -2994,7 +2994,7 @@
         "volume-deleted": "Volume deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",
         "stack-imported": "Stack Imported",
-        "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal",
+        "confirm-delete-theme": "Removing this theme will delete it from the disk. You can grab it from temp directory before removal.",
         "mal-token-required": "MAL Token is required, set in User Settings",
         "confirm-reset-server-settings": "This will reset your settings to first install values. Are you sure you want to continue?",
         "must-select-library": "At least one library must be selected",
@@ -3010,7 +3010,9 @@
         "external-match-rate-error": "Kavita ran out of rate looking up {{seriesName}}. Try again in 5 minutes.",
         "confirm-delete-bookmark": "Are you sure you want to delete this Bookmark?",
         "confirm-delete-annotation": "Are you sure you want to delete this Annotation?",
-        "confirm-delete-font": "Removing this font will delete it from the disk. You can grab it from temp directory before removal"
+        "confirm-delete-font": "Removing this font will delete it from the disk. You can grab it from temp directory before removal.",
+        "confirm-force-delete-font": "This font is currently in use. Do you want to force delete it? This will force users back to the Default font.",
+        "font-in-use": "Cannot delete as the font is in use by one or more users."
     },
 
     "read-time-pipe": {

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {FontService} from "src/app/_services/font.service";
 import {AccountService} from "../../../_services/account.service";
 import {ConfirmService} from "../../../shared/confirm.service";
@@ -12,6 +12,7 @@ import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {animate, style, transition, trigger} from "@angular/animations";
 import {WikiLink} from "../../../_models/wiki";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-font-manager',
@@ -43,8 +44,8 @@ export class FontManagerComponent implements OnInit {
   private document = inject(DOCUMENT);
   protected readonly fontService = inject(FontService);
   private readonly accountService = inject(AccountService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
+  private readonly toastr = inject(ToastrService);
 
   protected readonly FontProvider = FontProvider;
   protected readonly WikiLink = WikiLink.EpubFontManager;
@@ -73,7 +74,8 @@ export class FontManagerComponent implements OnInit {
   uploadMode = signal<'file' | 'url' | 'all'>('all');
 
   form: FormGroup = new FormGroup({
-    fontUrl: new FormControl('', [])
+    fontUrl: new FormControl('', []),
+    filter: new FormControl(this.hideSystemFonts(), [])
   });
 
   files: NgxFileDropEntry[] = [];
@@ -87,6 +89,11 @@ export class FontManagerComponent implements OnInit {
   loadFonts() {
     this.fontService.getFonts().subscribe(fonts => {
       this.fonts.set(fonts);
+
+      // First load, if there are user provided fonts, switch the filter toggle
+      if (fonts.filter(f => f.provider != FontProvider.System).length > 0 && !this.hideSystemFonts()) {
+        this.setHideSystemFontsFilter(true);
+      }
     });
   }
 
@@ -98,6 +105,10 @@ export class FontManagerComponent implements OnInit {
 
 
     if (font.name !== FontService.DefaultEpubFont) {
+
+      // Remove all potentially added fonts to clear the pallet
+
+
       this.fontService.getFontFace(font).load().then(loadedFace => {
         (this.document as any).fonts.add(loadedFace);
       });
@@ -142,8 +153,49 @@ export class FontManagerComponent implements OnInit {
       return;
     }
 
-    this.fontService.deleteFont(id).subscribe(() => {
-      this.fonts.update(x => x.filter(f => f.id !== id))
+    // Check if this font is in use
+    this.fontService.isFontInUse(id).subscribe(async (inUse) => {
+      if (!inUse) {
+        this.performDeleteFont(id);
+        return;
+      }
+
+      const isAdmin = this.accountService.hasAdminRole(this.accountService.currentUserSignal()!);
+
+      if (!isAdmin) {
+        this.toastr.info(translate('toasts.font-in-use'))
+        return;
+      }
+
+      if (!await this.confirmService.confirm(translate('toasts.confirm-force-delete-font'))) {
+        return;
+      }
+      this.performDeleteFont(id, true);
+    })
+
+
+  }
+
+  private setHideSystemFontsFilter(value: boolean) {
+    this.hideSystemFonts.set(value);
+    this.form.get('filter')?.setValue(value);
+  }
+
+  private performDeleteFont(id: number, force: boolean = false) {
+    this.fontService.deleteFont(id, force).subscribe(() => {
+      this.fonts.update(x => x.filter(f => f.id !== id));
+
+      // Select the first font in the list
+      const visibleFonts = this.visibleFonts();
+      if (visibleFonts.length === 0 && this.hideSystemFonts()) {
+        this.setHideSystemFontsFilter(false);
+        this.selectFont(this.fonts()[0]); // Default
+        return;
+      }
+
+      if (visibleFonts.length > 0) {
+        this.selectFont(visibleFonts[visibleFonts.length - 1]);
+      }
     });
   }
 

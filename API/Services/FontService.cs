@@ -85,6 +85,7 @@ public interface IFontService
     Task<EpubFont> CreateFontFromFileAsync(string path);
     Task Delete(int fontId);
     Task<EpubFont> CreateFontFromUrl(string url);
+    Task<bool> IsFontInUse(int fontId);
 }
 
 public class FontService: IFontService
@@ -144,13 +145,12 @@ public class FontService: IFontService
         return font;
     }
 
+    /// <summary>
+    /// This does not check if in use, use <see cref="IsFontInUse"/>
+    /// </summary>
+    /// <param name="fontId"></param>
     public async Task Delete(int fontId)
     {
-        if (await _unitOfWork.EpubFontRepository.IsFontInUseAsync(fontId))
-        {
-            throw new KavitaException("errors.delete-font-in-use");
-        }
-
         var font = await _unitOfWork.EpubFontRepository.GetFontAsync(fontId);
         if (font == null) return;
 
@@ -189,6 +189,19 @@ public class FontService: IFontService
         var path = await googleFontRef.url.DownloadFileAsync(_directoryService.TempDirectory, fileName);
 
         return await CreateFontFromFileAsync(path);
+    }
+
+    /// <summary>
+    /// Returns if the given font is in use by any other user. System provided fonts will always return true.
+    /// </summary>
+    /// <param name="fontId"></param>
+    /// <returns></returns>
+    public async Task<bool> IsFontInUse(int fontId)
+    {
+        var font = await _unitOfWork.EpubFontRepository.GetFontAsync(fontId);
+        if (font == null || font.Provider == FontProvider.System) return true;
+
+        return await _unitOfWork.EpubFontRepository.IsFontInUseAsync(fontId);
     }
 
     public async Task RemoveFont(EpubFont font)
