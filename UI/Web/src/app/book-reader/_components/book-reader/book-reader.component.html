@@ -146,10 +146,10 @@
             </span>
 
             <div class="d-none d-sm-block">
-              <span class="me-1">•</span>
+              <span class="mx-1">•</span>
               {{t('completion-label', {percent: (virtualizedPageNum() / virtualizedMaxPages()) | percent})}}
               @if (readingTimeLeftResource.value(); as timeLeft) {
-                <span class="me-1">•</span>
+                <span class="mx-1">•</span>
                 <span class="time-left">
                     <i class="fa-solid fa-clock" aria-hidden="true"></i>
                   {{timeLeft! | readTimeLeft:true }}

@@ -1440,19 +1440,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private perfectPage() {
-    afterFrame(() => {
-      const [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
-      const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
-      const res = scrollOffset % pageSize;
-      console.log("ScrollOffset", scrollOffset, "totalScroll", totalScroll, "currentPage", currentVirtualPage, "pageSize", pageSize);
-      console.log("Perfect page?", res === 0, res );
-
-      const closestDistance = Math.min(res, pageSize - res);
-      console.log("Distance to closest perfect page:", closestDistance);
-    });
-  }
-
   private scrollWithinPage(part?: string | undefined, scrollTop?: number) {
     if (part !== undefined && part !== '') {
 
@@ -1616,7 +1603,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           'auto',
           () => {
             this.handleScrollEvent();
-            this.perfectPage();
           },
           {
             tolerance: 3,
@@ -1669,7 +1655,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           'auto',
           () => {
             this.handleScrollEvent();
-            this.perfectPage();
           },
           {
             tolerance: 3,
@@ -1703,7 +1688,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.windowWidth(); // Ensure re-compute when windows size changes (element clientWidth isn't a signal)
 
     const marginLeft = this.pageStyles()['margin-left'];
-    const columnGapModifier = this.layoutMode() === BookPageLayoutMode.Default ? 0 : 1;
+    const columnGapModifier = this.columGapModifier();
     if (this.readingSectionElemRef == null) return 0;
 
     const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
@@ -1712,7 +1697,27 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // console.log('page size calc, margin: ', margin)
     // console.log('page size calc, col gap: ', ((COLUMN_GAP / 2) * columnGapModifier));
     // console.log("clientWidth", this.readingSectionElemRef.nativeElement.clientWidth, "window", window.innerWidth, "margin", margin, "left", marginLeft)
-    return this.readingSectionElemRef.nativeElement.clientWidth - margin + ((COLUMN_GAP) * columnGapModifier);
+    // console.log('clientWidth: ', this.readingSectionElemRef.nativeElement.clientWidth, 'offsetWidth:', this.readingSectionElemRef.nativeElement.offsetWidth, 'bbox:', this.readingSectionElemRef.nativeElement.getBoundingClientRect().width);
+
+    const calculationMethod: 0 | 1 = 0;
+
+    if (calculationMethod === 0) {
+      return this.readingSectionElemRef.nativeElement.clientWidth - margin + (((COLUMN_GAP) * columnGapModifier));
+    } else {
+      return this.readingSectionElemRef.nativeElement.clientWidth - margin + (((COLUMN_GAP) * columnGapModifier) + 10);
+    }
+  });
+
+  columGapModifier = computed(() => {
+    const calculationMethod: 0 | 1 = 0;
+    switch(this.layoutMode()) {
+      case BookPageLayoutMode.Default:
+        return 0;
+      case BookPageLayoutMode.Column1:
+        return 1;
+      case BookPageLayoutMode.Column2:
+        return calculationMethod === 0 ? 1 : 1.25;
+    }
   });
 
   pageHeight = computed(() => {
