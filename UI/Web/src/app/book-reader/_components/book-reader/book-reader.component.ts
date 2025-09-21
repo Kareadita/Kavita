@@ -962,6 +962,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Attempt to restore the reading position
     this.snapScrollOnResize();
+    afterFrame(() => {
+      this.injectImageBookmarkIndicators(true);
+    });
   }
 
   /**
