@@ -24,8 +24,8 @@ import {ToastrService} from "ngx-toastr";
     SentenceCasePipe,
     SiteThemeProviderPipe,
     NgTemplateOutlet,
-    NgStyle,
     TranslocoDirective,
+    NgStyle,
   ],
   templateUrl: './font-manager.component.html',
   styleUrl: './font-manager.component.scss',
@@ -41,16 +41,15 @@ import {ToastrService} from "ngx-toastr";
   ],
 })
 export class FontManagerComponent implements OnInit {
-  private document = inject(DOCUMENT);
-  protected readonly fontService = inject(FontService);
+  private readonly document = inject(DOCUMENT);
   private readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
+  protected readonly fontService = inject(FontService);
 
   protected readonly FontProvider = FontProvider;
   protected readonly WikiLink = WikiLink.EpubFontManager;
-
-  user = this.accountService.currentUserSignal;
+  protected readonly user = this.accountService.currentUserSignal;
 
   fonts = signal<EpubFont[]>([]);
   visibleFonts = computed(() => {
@@ -105,15 +104,10 @@ export class FontManagerComponent implements OnInit {
 
 
     if (font.name !== FontService.DefaultEpubFont) {
-
-      // Remove all potentially added fonts to clear the pallet
-
-
       this.fontService.getFontFace(font).load().then(loadedFace => {
         (this.document as any).fonts.add(loadedFace);
       });
     }
-
 
     this.selectedFont.set(font);
   }
