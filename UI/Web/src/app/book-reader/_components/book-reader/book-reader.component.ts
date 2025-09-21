@@ -1311,6 +1311,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           border-radius: 2px;
           background: ${backgroundColor} !important;
           color: ${textColor} !important;
+          font-family: var(--_fa-family) !important;
         `;
 
 
