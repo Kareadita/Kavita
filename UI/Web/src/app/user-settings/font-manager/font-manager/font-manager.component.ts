@@ -112,10 +112,11 @@ export class FontManagerComponent implements OnInit {
     if (font.name !== FontService.DefaultEpubFont) {
       this.fontService.getFontFace(font).load().then(loadedFace => {
         (this.document as any).fonts.add(loadedFace);
+        this.selectedFont.set(font);
       });
+    } else {
+      this.selectedFont.set(font);
     }
-
-    this.selectedFont.set(font);
   }
 
   dropped(files: NgxFileDropEntry[]) {
