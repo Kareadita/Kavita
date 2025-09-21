@@ -86,6 +86,8 @@ public class FontController : BaseApiController
     [HttpDelete]
     public async Task<IActionResult> DeleteFont(int fontId, bool force = false)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "denied"));
+
         var forceDelete = User.IsInRole(PolicyConstants.AdminRole) && force;
         var fontInUse = await _fontService.IsFontInUse(fontId);
         if (!fontInUse || forceDelete)
@@ -115,6 +117,8 @@ public class FontController : BaseApiController
     [HttpPost("upload")]
     public async Task<ActionResult<EpubFontDto>> UploadFont(IFormFile formFile)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "denied"));
+
         if (!_fontFileExtensionRegex.IsMatch(Path.GetExtension(formFile.FileName))) return BadRequest("Invalid file");
 
         if (formFile.FileName.Contains("..")) return BadRequest("Invalid file");
@@ -128,6 +132,7 @@ public class FontController : BaseApiController
     [HttpPost("upload-by-url")]
     public async Task<ActionResult> UploadFontByUrl([FromQuery]string url)
     {
+        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "denied"));
         // Validate url
         try
         {
@@ -143,9 +148,11 @@ public class FontController : BaseApiController
     private async Task<string> UploadToTemp(IFormFile file)
     {
         var outputFile = Path.Join(_directoryService.TempDirectory, file.FileName);
+
         await using var stream = System.IO.File.Create(outputFile);
         await file.CopyToAsync(stream);
         stream.Close();
+
         return outputFile;
     }
 }

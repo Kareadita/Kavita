@@ -50,6 +50,12 @@ export class FontManagerComponent implements OnInit {
   protected readonly FontProvider = FontProvider;
   protected readonly WikiLink = WikiLink.EpubFontManager;
   protected readonly user = this.accountService.currentUserSignal;
+  protected readonly isReadOnly = computed(() => {
+    const u = this.accountService.currentUserSignal();
+    if (!u) return true;
+
+    return this.accountService.hasReadOnlyRole(u);
+  });
 
   fonts = signal<EpubFont[]>([]);
   visibleFonts = computed(() => {

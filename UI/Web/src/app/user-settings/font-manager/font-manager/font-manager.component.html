@@ -8,8 +8,8 @@
         <div class="pe-2">
 
           <div class="d-flex justify-content-between mb-2 align-items-center {{!selectedFont() ? 'active' : ''}}">
-            <button class="btn btn-outline-primary btn-sm me-1" (click)="selectFont(undefined)" [disabled]="selectedFont() === undefined">
-              <i class="fa fa-plus me-1" aria-hidden="true"></i> {{t("add")}}
+            <button class="btn btn-outline-primary btn-sm me-1" (click)="selectFont(undefined)" [disabled]="selectedFont() === undefined || isReadOnly()">
+              <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t("add")}}
             </button>
             <div class="form-check form-switch">
               <input type="checkbox" formControlName="filter" class="form-check-input" id="filter-out-system-fonts" (change)="hideSystemFonts.set(!hideSystemFonts())">
@@ -100,7 +100,7 @@
               {{currentFont.name | sentenceCase}}
               <div class="float-end">
                 @if (currentFont.provider !== FontProvider.System && currentFont.name !== FontService.DefaultEpubFont) {
-                  <button class="btn btn-danger me-1" (click)="deleteFont(currentFont.id)">{{t('delete')}}</button>
+                  <button class="btn btn-danger me-1" (click)="deleteFont(currentFont.id)" [disabled]="isReadOnly()">{{t('delete')}}</button>
                 }
               </div>
             </h4>
