@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums.Font;
+using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Flurl.Http;
@@ -166,26 +167,26 @@ public class FontService: IFontService
 
         // Extract Font name from url
         var fontFamily = url.Split(SupportedFontUrlPrefix)[1].Split("?")[0].Split("/").Last();
-        _logger.LogInformation("Preparing to download {FontName} font", fontFamily);
+        _logger.LogInformation("Preparing to download {FontName} font", fontFamily.Sanitize());
 
         var metaData = await GetGoogleFontsMetadataAsync(fontFamily);
         if (metaData == null)
         {
-            _logger.LogError("Unable to find metadata for {FontName}", fontFamily);
+            _logger.LogError("Unable to find metadata for {FontName}", fontFamily.Sanitize());
             throw new KavitaException("errors.font-not-found");
         }
 
         var googleFontRef = metaData.VariableFont();
         if (googleFontRef == null)
         {
-            _logger.LogError("Unable to find variable font for {FontName} with metadata {MetaData}", fontFamily, metaData);
+            _logger.LogError("Unable to find variable font for {FontName} with metadata {MetaData}", fontFamily.Sanitize(), metaData);
             throw new KavitaException("errors.font-not-found");
         }
 
         var fontExt = Path.GetExtension(googleFontRef.filename);
         var fileName = $"{fontFamily}{fontExt}";
 
-        _logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily, fileName, googleFontRef.url);
+        _logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fileName, googleFontRef.url);
         var path = await googleFontRef.url.DownloadFileAsync(_directoryService.TempDirectory, fileName);
 
         return await CreateFontFromFileAsync(path);
@@ -246,7 +247,7 @@ public class FontService: IFontService
                 .GetStringAsync();
         } catch (Exception ex)
         {
-            _logger.LogError(ex, "Unable to get metadata for {FontName} from {Url}", fontName, url);
+            _logger.LogError(ex, "Unable to get metadata for {FontName} from {Url}", fontName.Sanitize(), url);
             return null;
         }
 
@@ -258,4 +259,6 @@ public class FontService: IFontService
 
         return JsonSerializer.Deserialize<GoogleFontsMetadata>(content);
     }
+
+
 }
