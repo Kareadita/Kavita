@@ -417,7 +417,8 @@ public class OpdsController : BaseApiController
 
         // Ensure libraries follow SideNav order
         var userSideNavStreams = await _unitOfWork.UserRepository.GetSideNavStreams(userId);
-        foreach (var library in userSideNavStreams.Where(s => s.StreamType == SideNavStreamType.Library).Select(sideNavStream => sideNavStream.Library))
+        foreach (var library in userSideNavStreams.Where(s => s.StreamType == SideNavStreamType.Library)
+                     .Select(sideNavStream => sideNavStream.Library))
         {
             feed.Entries.Add(new FeedEntry()
             {
@@ -593,6 +594,8 @@ public class OpdsController : BaseApiController
 
 
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId, GetUserParams(pageNumber))).ToList();
+        var totalItems = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).Count();
+
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
         var firstReadReadingListItem = items.FirstOrDefault(i => i.PagesRead > 0);
@@ -618,8 +621,9 @@ public class OpdsController : BaseApiController
                     CreateChapter(apiKey, $"{item.Order} - {item.SeriesName}: {item.Title}",
                         item.Summary ?? string.Empty, item.ChapterId, item.VolumeId, item.SeriesId, prefix, baseUrl));
             }
-
         }
+
+        AddPagination(feed, pageNumber, totalItems, UserParams.Default.PageSize, $"{prefix}{apiKey}/reading-list/{readingListId}/");
         return CreateXmlResult(SerializeXml(feed));
     }
 
@@ -868,7 +872,6 @@ public class OpdsController : BaseApiController
         }
 
         feed.Total = feed.Entries.Count;
-
         return CreateXmlResult(SerializeXml(feed));
     }
 
@@ -1126,6 +1129,45 @@ public class OpdsController : BaseApiController
         feed.ItemsPerPage = list.PageSize;
         feed.StartIndex = (Math.Max(list.CurrentPage - 1, 0) * list.PageSize) + 1;
     }
+
+    private static void AddPagination(Feed feed, int currentPage, int totalItems, int pageSize, string href)
+    {
+        var url = href;
+        if (href.Contains('?'))
+        {
+            url += "&amp;";
+        }
+        else
+        {
+            url += "?";
+        }
+
+        var pageNumber = Math.Max(currentPage, 1);
+        var totalPages = totalItems / pageSize;
+
+        if (pageNumber > 1)
+        {
+            feed.Links.Add(CreateLink(FeedLinkRelation.Prev, FeedLinkType.AtomNavigation, url + "pageNumber=" + (pageNumber - 1)));
+        }
+
+        if (pageNumber + 1 <= totalPages)
+        {
+            feed.Links.Add(CreateLink(FeedLinkRelation.Next, FeedLinkType.AtomNavigation, url + "pageNumber=" + (pageNumber + 1)));
+        }
+
+        // Update self to point to current page
+        var selfLink = feed.Links.SingleOrDefault(l => l.Rel == FeedLinkRelation.Self);
+        if (selfLink != null)
+        {
+            selfLink.Href = url + "pageNumber=" + pageNumber;
+        }
+
+
+        feed.Total = totalItems;
+        feed.ItemsPerPage = pageSize;
+        feed.StartIndex = (Math.Max(currentPage - 1, 0) * pageSize) + 1;
+    }
+
 
     private static FeedEntry CreateSeries(SeriesDto seriesDto, SeriesMetadataDto metadata, string apiKey, string prefix, string baseUrl)
     {
