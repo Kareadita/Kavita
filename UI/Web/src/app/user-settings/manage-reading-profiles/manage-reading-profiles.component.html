@@ -309,7 +309,7 @@
                             </div>
 
                             <div class="row g-0 mt-4 mb-4">
-                              <app-setting-item [title]="t('epub-page-calc-label')" [subtitle]="t('epub-page-calc-tooltip')">
+                              <app-setting-item [title]="t('page-calc-method-label')" [subtitle]="t('page-calc-method-tooltip')">
                                 <ng-template #view>
                                   {{readingProfileForm.get('bookReaderEpubPageCalculationMethod')!.value | epubPageCalcMethod}}
                                 </ng-template>

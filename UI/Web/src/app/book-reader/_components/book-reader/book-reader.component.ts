@@ -1688,7 +1688,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('page width recalulated')
     const calculationMethod = this.pageCalcMode();
     const marginLeft = this.pageStyles()['margin-left'];
-    const columnGapModifier = this.columGapModifier();
+    const columnGapModifier = this.columnGapModifier();
     if (this.readingSectionElemRef == null) return 0;
 
     const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
@@ -1706,7 +1706,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   });
 
-  columGapModifier = computed(() => {
+  columnGapModifier = computed(() => {
     const calculationMethod = this.pageCalcMode();
     switch(this.layoutMode()) {
       case BookPageLayoutMode.Default:
