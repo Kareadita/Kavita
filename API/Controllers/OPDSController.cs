@@ -599,7 +599,7 @@ public class OpdsController : BaseApiController
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
         var firstReadReadingListItem = items.FirstOrDefault(i => i.PagesRead > 0);
-        if (firstReadReadingListItem != null)
+        if (firstReadReadingListItem != null && pageNumber == 0)
         {
             await AddContinueReadingPoint(apiKey, firstReadReadingListItem, userId, feed, prefix, baseUrl);
         }
