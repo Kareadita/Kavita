@@ -3,7 +3,14 @@
     <div class="card-container row g-0" #container>
       @for(item of scroll.viewPortItems; let idx = $index; track item.id) {
         <div style="min-width: 200px" class="col-auto m-2">
-          <app-annotation-card [annotation]="item" [allowEdit]="false" [showPageLink]="false" [isInReader]="false" [showInReaderLink]="true" />
+          <app-annotation-card
+            [annotation]="item"
+            [allowEdit]="false"
+            [showPageLink]="false"
+            [isInReader]="false"
+            [showInReaderLink]="true"
+            [openInIncognitoMode]="true"
+          />
         </div>
       }
     </div>

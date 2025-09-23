@@ -28,7 +28,7 @@
 
         @if(showInReaderLink()) {
           <a target="_blank" [routerLink]="['/library', annotation().libraryId, 'series', annotation().seriesId, 'book', annotation().chapterId]"
-             [queryParams]="{annotation: annotation().id, incognitoMode: false}">{{t('view-in-reader-label')}}</a>
+             [queryParams]="{annotation: annotation().id, incognitoMode: openInIncognitoMode()}">{{t('view-in-reader-label')}}</a>
         }
 
 

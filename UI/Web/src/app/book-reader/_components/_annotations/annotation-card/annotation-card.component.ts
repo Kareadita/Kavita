@@ -59,6 +59,7 @@ export class AnnotationCardComponent {
    * Redirects to the reader with annotation in view
    */
   showInReaderLink = input<boolean>(false);
+  openInIncognitoMode = input<boolean>(false);
   isInReader = input<boolean>(true);
   @Output() delete = new EventEmitter();
   @Output() navigate = new EventEmitter<Annotation>();
