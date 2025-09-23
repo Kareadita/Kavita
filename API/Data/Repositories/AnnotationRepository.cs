@@ -72,7 +72,7 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
 
         var query = context.AppUserAnnotation.AsNoTracking();
 
-        query = BuildAnnotationFilterQuery(filter, query);
+        query = BuildAnnotationFilterQuery(userId, filter, query);
 
         var validUsers = await context.AppUserPreferences
             .Where(p => true) // TODO: Filter on sharing annotations preference
@@ -88,9 +88,21 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         return limitedQuery.ProjectTo<AnnotationDto>(mapper.ConfigurationProvider);
     }
 
-    private static IQueryable<AppUserAnnotation> BuildAnnotationFilterQuery(BrowseAnnotationFilterDto filter, IQueryable<AppUserAnnotation> query)
+    private static IQueryable<AppUserAnnotation> BuildAnnotationFilterQuery(int userId, BrowseAnnotationFilterDto filter, IQueryable<AppUserAnnotation> query)
     {
         if (filter.Statements == null || filter.Statements.Count == 0) return query;
+
+        // Manual intervention for Highlight slots, as they are not user recognisable. But would make sense
+        // to miss match between users
+        if (filter.Statements.Any(s => s.Field == AnnotationFilterField.HighlightSlot))
+        {
+            filter.Statements.Add(new AnnotationFilterStatementDto
+            {
+                Field = AnnotationFilterField.Owner,
+                Comparison = FilterComparison.Equal,
+                Value = $"{userId}",
+            });
+        }
 
         var queries = filter.Statements
             .Select(statement => BuildAnnotationFilterGroup(statement, query))
@@ -109,6 +121,7 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         {
             AnnotationFilterField.Owner => query.IsOwnedBy(true, statement.Comparison, (IList<int>) value),
             AnnotationFilterField.Library => query.IsInLibrary(true, statement.Comparison, (IList<int>) value),
+            AnnotationFilterField.HighlightSlot => query.IsUsingHighlights(true, statement.Comparison, (IList<int>) value),
             AnnotationFilterField.Spoiler => query.Where(a => !(bool) value || !a.ContainsSpoiler),
             _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
         };

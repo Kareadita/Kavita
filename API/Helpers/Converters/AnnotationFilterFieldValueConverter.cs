@@ -13,7 +13,8 @@ public static class AnnotationFilterFieldValueConverter
         return field switch
         {
             AnnotationFilterField.Owner or
-            AnnotationFilterField.Library => value.ParseIntArray(),
+                AnnotationFilterField.HighlightSlot or
+                AnnotationFilterField.Library => value.ParseIntArray(),
             AnnotationFilterField.Spoiler => bool.Parse(value),
             _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Field is not supported")
         };

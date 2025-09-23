@@ -41,4 +41,19 @@ public static class AnnotationFilter
         };
     }
 
+    public static IQueryable<AppUserAnnotation> IsUsingHighlights(this IQueryable<AppUserAnnotation> queryable, bool condition,
+        FilterComparison comparison, IList<int> highlightSlotIdxs)
+    {
+        if (highlightSlotIdxs.Count == 0 || !condition) return queryable;
+
+        return comparison switch
+        {
+            FilterComparison.Equal => queryable.Where(a => a.SelectedSlotIndex== highlightSlotIdxs[0]),
+            FilterComparison.Contains => queryable.Where(a => highlightSlotIdxs.Contains(a.SelectedSlotIndex)),
+            FilterComparison.NotContains => queryable.Where(a => !highlightSlotIdxs.Contains(a.SelectedSlotIndex)),
+            FilterComparison.NotEqual => queryable.Where(a => a.SelectedSlotIndex != highlightSlotIdxs[0]),
+            _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
+        };
+    }
+
 }

@@ -71,4 +71,8 @@ public enum AnnotationFilterField
     Owner = 1,
     Library = 2,
     Spoiler = 3,
+    /// <summary>
+    /// When used, only returns your own annotations
+    /// </summary>
+    HighlightSlot = 4,
 }

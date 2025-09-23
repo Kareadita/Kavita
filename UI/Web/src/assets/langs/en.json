@@ -2898,7 +2898,8 @@
         "average-rating": "Average Rating",
         "annotation-owner": "Owner",
         "annotation-series": "Series name",
-        "annotation-spoiler": "Spoiler"
+        "annotation-spoiler": "Spoiler",
+        "annotation-highlights": "Highlight color"
     },
 
 
