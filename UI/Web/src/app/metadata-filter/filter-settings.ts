@@ -3,11 +3,12 @@ import {SortField} from "../_models/metadata/series-filter";
 import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
 import {PersonFilterField} from "../_models/metadata/v2/person-filter-field";
 import {FilterField} from "../_models/metadata/v2/filter-field";
+import {AnnotationsFilterField, AnnotationsSortField} from "../_models/metadata/v2/annotations-filter";
 
 /**
  * The set of entities that are supported for rich filtering. Each entity must have its own distinct SortField and FilterField enums.
  */
-export type ValidFilterEntity = 'series' | 'person';
+export type ValidFilterEntity = 'series' | 'person' | 'annotation';
 
 export class FilterSettingsBase<TFilter extends number = number, TSort extends number = number> {
     presetsV2: FilterV2<TFilter, TSort> | undefined;
@@ -34,6 +35,10 @@ export class SeriesFilterSettings extends FilterSettingsBase<FilterField, SortFi
  */
 export class PersonFilterSettings extends FilterSettingsBase<PersonFilterField, PersonSortField> {
   type: ValidFilterEntity = 'person';
+}
+
+export class AnnotationsFilterSettings extends FilterSettingsBase<AnnotationsFilterField, AnnotationsSortField> {
+  type : ValidFilterEntity = 'annotation';
 }
 
 

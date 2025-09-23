@@ -58,6 +58,10 @@ export class NavService {
       routerLink: '/browse/tags',
     },
     {
+      transLocoKey: 'browse-annotations',
+      routerLink: '/browse/annotations'
+    },
+    {
       transLocoKey: 'announcements',
       routerLink: '/announcements/',
     },

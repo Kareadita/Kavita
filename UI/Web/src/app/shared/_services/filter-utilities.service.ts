@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, PipeTransform} from '@angular/core';
 import {Params, Router} from '@angular/router';
 import {allSeriesSortFields, SortField} from 'src/app/_models/metadata/series-filter';
 import {MetadataService} from "../../_services/metadata.service";
@@ -22,7 +22,17 @@ import {
 import {SortFieldPipe} from "../../_pipes/sort-field.pipe";
 import {GenericFilterFieldPipe} from "../../_pipes/generic-filter-field.pipe";
 import {TranslocoService} from "@jsverse/transloco";
+import {
+  allAnnotationsFilterFields,
+  allAnnotationsSortFields,
+  AnnotationsFilterField,
+  AnnotationsSortField
+} from "../../_models/metadata/v2/annotations-filter";
 
+export interface FieldOption<T extends number> {
+  title: string,
+  value: T,
+}
 
 @Injectable({
     providedIn: 'root'
@@ -114,16 +124,12 @@ export class FilterUtilitiesService {
    */
   getSortFields<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return this.translateAndSort(type, this.sortFieldPipe, allAnnotationsSortFields) as FieldOption<T>[];
       case 'series':
-        return allSeriesSortFields.map(f => {
-          return {title: this.sortFieldPipe.transform(f, type), value: f};
-        }).sort((a, b) => a.title.localeCompare(b.title)) as unknown as {title: string, value: T}[];
+        return this.translateAndSort(type, this.sortFieldPipe, allSeriesSortFields) as FieldOption<T>[];
       case 'person':
-        return allPersonSortFields.map(f => {
-          return {title: this.sortFieldPipe.transform(f, type), value: f};
-        }).sort((a, b) => a.title.localeCompare(b.title)) as unknown as {title: string, value: T}[];
-      default:
-        return [] as {title: string, value: T}[];
+        return this.translateAndSort(type, this.sortFieldPipe, allPersonSortFields) as FieldOption<T>[];
     }
   }
 
@@ -131,19 +137,25 @@ export class FilterUtilitiesService {
    * Returns the Filter Fields for the Metadata filter based on the entity.
    * @param type
    */
-  getFilterFields<T extends number>(type: ValidFilterEntity): {title: string, value: T}[] {
+  getFilterFields<T extends number>(type: ValidFilterEntity): FieldOption<T>[] {
     switch (type) {
+      case "annotation":
+        return this.translateAndSort(type, this.genericFilterFieldPipe, allAnnotationsFilterFields) as FieldOption<T>[];
       case 'series':
-        return allSeriesFilterFields.map(f => {
-          return {title: this.genericFilterFieldPipe.transform(f, type), value: f};
-        }).sort((a, b) => a.title.localeCompare(b.title)) as unknown as {title: string, value: T}[];
+        return this.translateAndSort(type, this.genericFilterFieldPipe, allSeriesFilterFields) as FieldOption<T>[];
       case 'person':
-        return allPersonFilterFields.map(f => {
-          return {title: this.genericFilterFieldPipe.transform(f, type), value: f};
-        }).sort((a, b) => a.title.localeCompare(b.title)) as unknown as {title: string, value: T}[];
-      default:
-        return [] as {title: string, value: T}[];
+        return this.translateAndSort(type, this.genericFilterFieldPipe, allPersonFilterFields) as FieldOption<T>[];
     }
+  }
+
+  private translateAndSort<T extends number>(type: ValidFilterEntity, pipe: PipeTransform, items: T[]): FieldOption<T>[] {
+    return items
+      .map(item => {
+        return {title: pipe.transform(item, type), value: item};
+      })
+      .sort((a, b) => {
+        return a.title.localeCompare(b.title);
+      });
   }
 
   /**
@@ -152,6 +164,8 @@ export class FilterUtilitiesService {
    */
   getDefaultFilterField<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return AnnotationsFilterField.Owner as unknown as T;
       case 'series':
         return FilterField.SeriesName as unknown as T;
       case 'person':
@@ -165,6 +179,11 @@ export class FilterUtilitiesService {
    */
   getDropdownFields<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return [
+          AnnotationsFilterField.Owner, AnnotationsFilterField.Library,
+          AnnotationsFilterField.Colour,
+        ] as T[];
       case 'series':
         return [
           FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
@@ -188,6 +207,10 @@ export class FilterUtilitiesService {
    */
   getStringFields<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return [
+          AnnotationsFilterField.Series,
+        ] as T[];
       case 'series':
         return [
           FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath
@@ -201,6 +224,10 @@ export class FilterUtilitiesService {
 
   getNumberFields<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return [
+
+        ] as T[];
       case 'series':
         return [
           FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress,
@@ -215,6 +242,10 @@ export class FilterUtilitiesService {
 
   getBooleanFields<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return [
+          AnnotationsFilterField.Spoiler,
+        ] as T[];
       case 'series':
         return [
           FilterField.WantToRead
@@ -228,6 +259,10 @@ export class FilterUtilitiesService {
 
   getDateFields<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return [
+
+        ] as T[];
       case 'series':
         return [
           FilterField.ReadingDate
@@ -241,6 +276,10 @@ export class FilterUtilitiesService {
 
   getNumberFieldsThatIncludeDateComparisons<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return [
+
+        ] as T[];
       case 'series':
         return [
           FilterField.ReleaseYear
@@ -254,6 +293,10 @@ export class FilterUtilitiesService {
 
   getDropdownFieldsThatIncludeDateComparisons<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return [
+
+        ] as T[];
       case 'series':
         return [
           FilterField.AgeRating
@@ -267,6 +310,10 @@ export class FilterUtilitiesService {
 
   getDropdownFieldsWithoutMustContains<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return [
+
+        ] as T[];
       case 'series':
         return [
           FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
@@ -280,6 +327,10 @@ export class FilterUtilitiesService {
 
   getDropdownFieldsThatIncludeNumberComparisons<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return [
+
+        ] as T[];
       case 'series':
         return [
           FilterField.AgeRating
@@ -293,6 +344,10 @@ export class FilterUtilitiesService {
 
   getFieldsThatShouldIncludeIsEmpty<T extends number>(type: ValidFilterEntity) {
     switch (type) {
+      case "annotation":
+        return [
+
+        ] as T[];
       case 'series':
         return [
           FilterField.Summary, FilterField.UserRating, FilterField.Genres,

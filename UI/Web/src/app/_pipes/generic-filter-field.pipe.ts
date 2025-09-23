@@ -3,6 +3,7 @@ import {FilterField} from "../_models/metadata/v2/filter-field";
 import {translate} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../metadata-filter/filter-settings";
 import {PersonFilterField} from "../_models/metadata/v2/person-filter-field";
+import {AnnotationsFilterField} from "../_models/metadata/v2/annotations-filter";
 
 @Pipe({
   name: 'genericFilterField'
@@ -12,12 +13,30 @@ export class GenericFilterFieldPipe implements PipeTransform {
   transform<T extends number>(value: T, entityType: ValidFilterEntity): string {
 
     switch (entityType) {
+      case "annotation":
+        return this.annotationsFilterField(value as AnnotationsFilterField);
       case "series":
         return this.translateFilterField(value as FilterField);
       case "person":
         return this.translatePersonFilterField(value as PersonFilterField);
     }
   }
+
+  private annotationsFilterField(value: AnnotationsFilterField) {
+    switch (value) {
+      case AnnotationsFilterField.Owner:
+        return translate('generic-filter-field-pipe.annotation-owner');
+      case AnnotationsFilterField.Series:
+        return translate('generic-filter-field-pipe.annotation-series');
+      case AnnotationsFilterField.Library:
+        return translate('generic-filter-field-pipe.annotation-library');
+      case AnnotationsFilterField.Colour:
+        return translate('generic-filter-field-pipe.annotation-colour');
+      case AnnotationsFilterField.Spoiler:
+        return translate('generic-filter-field-pipe.annotation-spoiler');
+    }
+  }
+
 
   private translatePersonFilterField(value: PersonFilterField) {
     switch (value) {

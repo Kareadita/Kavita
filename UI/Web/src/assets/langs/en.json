@@ -1270,6 +1270,14 @@
         "series-count": "{{common.series-count}}"
     },
 
+    "browse-annotations": {
+        "title": "Browse annotation",
+        "filter": {
+            "true": "True",
+            "false": "False"
+        }
+    },
+
     "person-detail": {
         "aka-title": "Also known as ",
         "known-for-title": "Known For",
@@ -2065,7 +2073,8 @@
         "close": "{{common.close}}",
         "person-aka-status": "Matches an alias",
         "browse-genres": "Browse Genres",
-        "browse-tags": "Browse Tags"
+        "browse-tags": "Browse Tags",
+        "browse-annotations": "Browse Annotations"
     },
 
     "promoted-icon": {
