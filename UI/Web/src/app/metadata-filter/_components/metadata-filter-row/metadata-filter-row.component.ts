@@ -15,7 +15,18 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
-import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  filter,
+  map,
+  Observable,
+  of,
+  pipe,
+  startWith,
+  switchMap,
+  tap
+} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
 import {FilterField} from 'src/app/_models/metadata/v2/filter-field';
@@ -216,7 +227,11 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       return this.filterUtilitiesService.getFilterFields(this.entityType());
     });
 
-    this.formGroup.get('input')?.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe((val: string) => this.handleFieldChange(val));
+    this.formGroup.get('input')?.valueChanges.pipe(
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef),
+      tap((val: string) => this.handleFieldChange(val)),
+    ).subscribe();
     this.populateFromPreset();
 
     this.formGroup.get('filterValue')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
@@ -326,6 +341,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     const dropdownFieldsThatIncludeDateComparisons = this.filterUtilitiesService.getDropdownFieldsThatIncludeDateComparisons<TFilter>(this.entityType());
     const dropdownFieldsWithoutMustContains = this.filterUtilitiesService.getDropdownFieldsWithoutMustContains<TFilter>(this.entityType());
     const dropdownFieldsThatIncludeNumberComparisons = this.filterUtilitiesService.getDropdownFieldsThatIncludeNumberComparisons<TFilter>(this.entityType());
+    const customComparisons = this.filterUtilitiesService.getCustomComparisons(inputVal);
 
     if (stringFields.includes(inputVal)) {
       let comps = [...StringComparisons];
@@ -334,19 +350,23 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
         comps.push(FilterComparison.IsEmpty);
       }
 
+      if (customComparisons && customComparisons.length > 0) {
+        comps = customComparisons;
+      }
+
       this.validComparisons$.next([...new Set(comps)]);
       this.predicateType$.next(PredicateType.Text);
 
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue('');
-        this.formGroup.get('comparison')?.patchValue(StringComparisons[0]);
+        this.formGroup.get('comparison')?.patchValue(comps[0]);
       }
       this.cdRef.markForCheck();
       return;
     }
 
     if (numberFields.includes(inputVal)) {
-      const comps = [...NumberComparisons];
+      let comps = [...NumberComparisons];
 
       if (numberFieldsThatIncludeDateComparisons.includes(inputVal)) {
         comps.push(...DateComparisons);
@@ -355,12 +375,16 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
         comps.push(FilterComparison.IsEmpty);
       }
 
+      if (customComparisons && customComparisons.length > 0) {
+        comps = customComparisons;
+      }
+
       this.validComparisons$.next([...new Set(comps)]);
       this.predicateType$.next(PredicateType.Number);
 
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(0);
-        this.formGroup.get('comparison')?.patchValue(NumberComparisons[0]);
+        this.formGroup.get('comparison')?.patchValue(comps[0]);
       }
 
       this.cdRef.markForCheck();
@@ -368,9 +392,13 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     }
 
     if (dateFields.includes(inputVal)) {
-      const comps = [...DateComparisons];
+      let comps = [...DateComparisons];
       if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
+      }
+
+      if (customComparisons && customComparisons.length > 0) {
+        comps = customComparisons;
       }
 
       this.validComparisons$.next([...new Set(comps)]);
@@ -378,7 +406,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
 
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(false);
-        this.formGroup.get('comparison')?.patchValue(DateComparisons[0]);
+        this.formGroup.get('comparison')?.patchValue(comps[0]);
       }
       this.cdRef.markForCheck();
       return;
@@ -390,13 +418,17 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
         comps.push(FilterComparison.IsEmpty);
       }
 
+      if (customComparisons && customComparisons.length > 0) {
+        comps = customComparisons;
+      }
+
 
       this.validComparisons$.next([...new Set(comps)]);
       this.predicateType$.next(PredicateType.Boolean);
 
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue(false);
-        this.formGroup.get('comparison')?.patchValue(BooleanComparisons[0]);
+        this.formGroup.get('comparison')?.patchValue(comps[0]);
       }
       this.cdRef.markForCheck();
       return;
@@ -412,6 +444,10 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       }
       if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
+      }
+
+      if (customComparisons && customComparisons.length > 0) {
+        comps = customComparisons;
       }
 
       this.validComparisons$.next([...new Set(comps)]);

@@ -24,6 +24,10 @@ export class GenericFilterFieldPipe implements PipeTransform {
 
   private annotationsFilterField(value: AnnotationsFilterField) {
     switch (value) {
+      case AnnotationsFilterField.Selection:
+        return translate('generic-filter-field-pipe.annotation-selection')
+      case AnnotationsFilterField.Comment:
+        return translate('generic-filter-field-pipe.annotation-comment')
       case AnnotationsFilterField.HighlightSlots:
         return translate('generic-filter-field-pipe.annotation-highlights')
       case AnnotationsFilterField.Owner:

@@ -123,6 +123,8 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
             AnnotationFilterField.Library => query.IsInLibrary(true, statement.Comparison, (IList<int>) value),
             AnnotationFilterField.HighlightSlot => query.IsUsingHighlights(true, statement.Comparison, (IList<int>) value),
             AnnotationFilterField.Spoiler => query.Where(a => !(bool) value || !a.ContainsSpoiler),
+            AnnotationFilterField.Comment => query.HasCommented(true, statement.Comparison, (string) value),
+            AnnotationFilterField.Selection => query.HasSelected(true, statement.Comparison, (string) value),
             _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
         };
     }

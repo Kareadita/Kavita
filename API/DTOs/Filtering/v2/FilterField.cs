@@ -75,4 +75,12 @@ public enum AnnotationFilterField
     /// When used, only returns your own annotations
     /// </summary>
     HighlightSlot = 4,
+    /// <summary>
+    /// This is the text selected in the book
+    /// </summary>
+    Selection = 5,
+    /// <summary>
+    /// This is the text the user wrote
+    /// </summary>
+    Comment = 6,
 }

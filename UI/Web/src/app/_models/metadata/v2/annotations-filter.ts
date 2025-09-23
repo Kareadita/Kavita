@@ -4,7 +4,9 @@ export enum AnnotationsFilterField {
   Owner = 1,
   Library = 2,
   Spoiler = 3,
-  HighlightSlots,
+  HighlightSlots = 4,
+  Selection = 5,
+  Comment = 6,
 }
 
 export const allAnnotationsFilterFields = Object.keys(AnnotationsFilterField)

@@ -16,6 +16,8 @@ public static class AnnotationFilterFieldValueConverter
                 AnnotationFilterField.HighlightSlot or
                 AnnotationFilterField.Library => value.ParseIntArray(),
             AnnotationFilterField.Spoiler => bool.Parse(value),
+            AnnotationFilterField.Selection => value,
+            AnnotationFilterField.Comment => value,
             _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Field is not supported")
         };
     }

@@ -25,8 +25,7 @@ import {TranslocoService} from "@jsverse/transloco";
 import {
   allAnnotationsFilterFields,
   allAnnotationsSortFields,
-  AnnotationsFilterField,
-  AnnotationsSortField
+  AnnotationsFilterField
 } from "../../_models/metadata/v2/annotations-filter";
 
 export interface FieldOption<T extends number> {
@@ -209,7 +208,7 @@ export class FilterUtilitiesService {
     switch (type) {
       case "annotation":
         return [
-
+          AnnotationsFilterField.Comment, AnnotationsFilterField.Selection,
         ] as T[];
       case 'series':
         return [
