@@ -1275,7 +1275,8 @@
         "filter": {
             "true": "True",
             "false": "False"
-        }
+        },
+        "annotations-count": "{{num}} Annotations"
     },
 
     "person-detail": {
@@ -2344,7 +2345,9 @@
         "random": "Random",
         "person-name": "Name",
         "person-series-count": "Series Count",
-        "person-chapter-count": "Chapter Count"
+        "person-chapter-count": "Chapter Count",
+        "annotation-owner": "Owner",
+        "annotation-series": "Series name"
     },
 
     "edit-series-modal": {
@@ -2823,8 +2826,7 @@
         "file-path": "File Path",
         "want-to-read": "Want to Read",
         "read-date": "Reading Date",
-        "read-last": "Read Last",
-        "average-rating": "Average Rating"
+        "read-last": "Read Last"
     },
 
     "filter-comparison-pipe": {
@@ -2892,7 +2894,12 @@
         "person-role": "Role",
         "person-name": "Name",
         "person-series-count": "Series Count",
-        "person-chapter-count": "Chapter Count"
+        "person-chapter-count": "Chapter Count",
+        "average-rating": "Average Rating",
+        "annotation-owner": "Owner",
+        "annotation-series": "Series name",
+        "annotation-colour": "Highlight color",
+        "annotation-spoiler": "Spoiler"
     },
 
 

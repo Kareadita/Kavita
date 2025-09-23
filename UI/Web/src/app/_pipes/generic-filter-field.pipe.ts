@@ -27,9 +27,9 @@ export class GenericFilterFieldPipe implements PipeTransform {
       case AnnotationsFilterField.Owner:
         return translate('generic-filter-field-pipe.annotation-owner');
       case AnnotationsFilterField.Series:
-        return translate('generic-filter-field-pipe.annotation-series');
+        return translate('filter-field-pipe.series-name');
       case AnnotationsFilterField.Library:
-        return translate('generic-filter-field-pipe.annotation-library');
+        return translate('filter-field-pipe.libraries');
       case AnnotationsFilterField.Colour:
         return translate('generic-filter-field-pipe.annotation-colour');
       case AnnotationsFilterField.Spoiler:
