@@ -543,16 +543,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // console.log('book content width: ', this.readingSectionElemRef?.nativeElement?.clientWidth);
       // console.log('column width: ', base / 4);
 
-
       switch (layoutMode) {
         case BookPageLayoutMode.Default:
           return 'unset';
         case BookPageLayoutMode.Column1:
-          return ((base / 2) - 4) + 'px';
+          // For single column, use half the available width minus a small buffer
+          return ((base / 2) - 2) + 'px';
         case BookPageLayoutMode.Column2:
-          //return (this.readingSectionElemRef?.nativeElement?.clientWidth - this.getMargin() + 1) / 2 + 'px';
-          return (((this.readingSectionElemRef?.nativeElement?.clientWidth ?? base)) / 4) + 1 + 'px'
-          //return ((base) / 4) + 6 + 'px'
+          // For two columns, use quarter of the available width minus a small buffer
+          return ((base / 4) - 1) + 'px';
         default:
           return 'unset';
       }
@@ -1683,10 +1682,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   pageWidth = computed(() => {
     this.windowWidth(); // Ensure re-compute when windows size changes (element clientWidth isn't a signal)
-    this.pageCalcMode();
-
+    
     console.log('page width recalulated')
-    const calculationMethod = this.pageCalcMode();
     const marginLeft = this.pageStyles()['margin-left'];
     const columnGapModifier = this.columnGapModifier();
     if (this.readingSectionElemRef == null) return 0;
@@ -1699,22 +1696,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // console.log("clientWidth", this.readingSectionElemRef.nativeElement.clientWidth, "window", window.innerWidth, "margin", margin, "left", marginLeft)
     // console.log('clientWidth: ', this.readingSectionElemRef.nativeElement.clientWidth, 'offsetWidth:', this.readingSectionElemRef.nativeElement.offsetWidth, 'bbox:', this.readingSectionElemRef.nativeElement.getBoundingClientRect().width);
 
-    if (calculationMethod === EpubPageCalculationMethod.Default) {
-      return this.readingSectionElemRef.nativeElement.clientWidth - margin + (((COLUMN_GAP) * columnGapModifier));
-    } else {
-      return this.readingSectionElemRef.nativeElement.clientWidth - margin + (((COLUMN_GAP) * columnGapModifier) + 10);
-    }
+    // Single calculation method that accounts for column gaps properly
+    return this.readingSectionElemRef.nativeElement.clientWidth - margin + (COLUMN_GAP * columnGapModifier);
   });
 
   columnGapModifier = computed(() => {
-    const calculationMethod = this.pageCalcMode();
     switch(this.layoutMode()) {
       case BookPageLayoutMode.Default:
         return 0;
       case BookPageLayoutMode.Column1:
         return 1;
       case BookPageLayoutMode.Column2:
-        return calculationMethod === EpubPageCalculationMethod.Default ? 1 : 1.25;
+        return 1;
     }
   });
 
