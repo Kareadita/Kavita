@@ -128,7 +128,7 @@ export class ManageMetadataMappingsComponent implements OnInit {
 
   export() {
     const data = this.packData();
-    this.downloadService.downloadObjectAsJson(data, translate('manage-metadata-settings.export-file-name'))
+    this.downloadService.downloadObjectAsJson(data, translate('manage-metadata-settings.export-file-name'));
   }
 
   addAgeRatingMapping(str: string = '', rating: AgeRating = AgeRating.Unknown) {

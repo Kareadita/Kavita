@@ -242,5 +242,6 @@
 
     "generated-reading-profile-name": "Generated from {0}",
     "genre-doesnt-exist": "Genre doesn't exist",
-    "font-url-not-allowed": "Uploading a Font by url is only allowed from Google Fonts"
+    "font-url-not-allowed": "Uploading a Font by url is only allowed from Google Fonts",
+    "annotation-export-failed": "Unable to export Annotations, check logs"
 }

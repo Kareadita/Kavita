@@ -18,7 +18,9 @@ import {
 } from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
-import {UpdateNotificationModalComponent} from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
+import {
+  UpdateNotificationModalComponent
+} from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
@@ -32,6 +34,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {AnnotationService} from "../../_services/annotation.service";
 
 interface AdhocTask {
   name: string;
@@ -59,6 +62,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   private readonly serverService = inject(ServerService);
   private readonly modalService = inject(NgbModal);
   private readonly downloadService = inject(DownloadService);
+  private readonly annotationService = inject(AnnotationService);
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
@@ -331,6 +335,10 @@ export class ManageTasksSettingsComponent implements OnInit {
     });
   }
 
+  test() {
+    this.annotationService.exportAnnotations().subscribe();
+  }
 
-    protected readonly ColumnMode = ColumnMode;
+
+  protected readonly ColumnMode = ColumnMode;
 }

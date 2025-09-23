@@ -3,13 +3,16 @@ import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
 import {Annotation} from '../book-reader/_models/annotations/annotation';
 import {TextResonse} from "../_types/text-response";
-import {map, of, tap} from "rxjs";
-import {switchMap} from "rxjs/operators";
+import {asyncScheduler, map, of, tap} from "rxjs";
+import {switchMap, throttleTime} from "rxjs/operators";
 import {AccountService} from "./account.service";
 import {User} from "../_models/user";
 import {MessageHubService} from "./message-hub.service";
 import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
 import {Router} from "@angular/router";
+import {SAVER, Saver} from "../_providers/saver.provider";
+import {download} from "../shared/_models/download";
+import {DEBOUNCE_TIME} from "../shared/_services/download.service";
 
 /**
  * Represents any modification (create/delete/edit) that occurs to annotations
@@ -31,6 +34,7 @@ export class AnnotationService {
   private readonly messageHub = inject(MessageHubService);
   private readonly router = inject(Router);
   private readonly baseUrl = environment.apiUrl;
+  private readonly save = inject<Saver>(SAVER);
 
   private _annotations = signal<Annotation[]>([]);
   /**
@@ -132,5 +136,15 @@ export class AnnotationService {
    */
   navigateToAnnotation(item: Annotation) {
     this.router.navigate(['/library', item.libraryId, 'series', item.seriesId, 'book', item.chapterId], { queryParams: { annotation: item.id } });
+  }
+
+  exportAnnotations() {
+    return this.httpClient.get(this.baseUrl + 'annotation/export', {observe: 'events', responseType: 'blob', reportProgress: true}).pipe(
+      tap(_ => console.log('export starting')),
+      throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
+      download((blob, filename) => {
+        this.save(blob, decodeURIComponent(filename));
+      })
+    );
   }
 }
