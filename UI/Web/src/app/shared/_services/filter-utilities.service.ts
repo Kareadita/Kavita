@@ -182,7 +182,6 @@ export class FilterUtilitiesService {
       case "annotation":
         return [
           AnnotationsFilterField.Owner, AnnotationsFilterField.Library,
-          AnnotationsFilterField.Colour,
         ] as T[];
       case 'series':
         return [
@@ -209,7 +208,7 @@ export class FilterUtilitiesService {
     switch (type) {
       case "annotation":
         return [
-          AnnotationsFilterField.Series,
+
         ] as T[];
       case 'series':
         return [

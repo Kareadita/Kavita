@@ -1,8 +1,10 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs.Metadata.Browse.Requests;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
@@ -31,6 +33,23 @@ public class AnnotationController : BaseApiController
         _bookService = bookService;
         _localizationService = localizationService;
         _eventHub = eventHub;
+    }
+
+    /// <summary>
+    /// Returns a list of annotations for browsing
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
+    [HttpPost("all-filtered")]
+    public async Task<ActionResult<PagedList<AnnotationDto>>> GetAnnotationsForBrowse(BrowseAnnotationFilterDto filter, [FromQuery] UserParams? userParams)
+    {
+        userParams ??= UserParams.Default;
+
+        var list = await _unitOfWork.AnnotationRepository.GetAnnotationDtos(User.GetUserId(), filter, userParams);
+        Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+
+        return Ok(list);
     }
 
     /// <summary>

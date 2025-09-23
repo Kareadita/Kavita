@@ -65,3 +65,10 @@ public enum PersonFilterField
     SeriesCount = 3,
     ChapterCount = 4,
 }
+
+public enum AnnotationFilterField
+{
+    Owner = 1,
+    Library = 2,
+    Spoiler = 3,
+}

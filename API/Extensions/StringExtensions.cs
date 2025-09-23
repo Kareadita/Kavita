@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -93,4 +94,16 @@ public static class StringExtensions
         return string.IsNullOrEmpty(input) ? string.Empty : string.Concat(Enumerable.Repeat(input, n));
     }
 
+    public static IList<int> ParseIntArray(this string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return [];
+        }
+
+        return value.Split(',')
+            .Where(s => !string.IsNullOrEmpty(s))
+            .Select(int.Parse)
+            .ToList();
+    }
 }

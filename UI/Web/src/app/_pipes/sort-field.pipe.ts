@@ -28,10 +28,12 @@ export class SortFieldPipe implements PipeTransform {
 
   private getAnnotationSortFields(value: AnnotationsSortField) {
     switch (value) {
+      case AnnotationsSortField.LastModified:
+        return this.translocoService.translate('sort-field-pipe.last-modified');
       case AnnotationsSortField.Owner:
         return this.translocoService.translate('sort-field-pipe.annotation-owner');
-      case AnnotationsSortField.Series:
-        return this.translocoService.translate('sort-field-pipe.annotation-series')
+      case AnnotationsSortField.Created:
+        return this.translocoService.translate('sort-field-pipe.created');
     }
   }
 

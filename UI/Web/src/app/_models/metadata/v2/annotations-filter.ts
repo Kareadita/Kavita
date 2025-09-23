@@ -2,10 +2,8 @@
 
 export enum AnnotationsFilterField {
   Owner = 1,
-  Series = 2,
-  Library = 3,
-  Colour = 4,
-  Spoiler = 5
+  Library = 2,
+  Spoiler = 3,
 }
 
 export const allAnnotationsFilterFields = Object.keys(AnnotationsFilterField)
@@ -14,7 +12,8 @@ export const allAnnotationsFilterFields = Object.keys(AnnotationsFilterField)
 
 export enum AnnotationsSortField {
   Owner = 1,
-  Series = 2,
+  Created = 2,
+  LastModified = 3,
 }
 
 export const allAnnotationsSortFields = Object.keys(AnnotationsSortField)

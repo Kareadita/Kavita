@@ -1,6 +1,6 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {environment} from "../../environments/environment";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {Annotation} from '../book-reader/_models/annotations/annotation';
 import {TextResonse} from "../_types/text-response";
 import {map, of, tap} from "rxjs";
@@ -10,6 +10,10 @@ import {User} from "../_models/user";
 import {MessageHubService} from "./message-hub.service";
 import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
 import {Router} from "@angular/router";
+import {FilterV2} from "../_models/metadata/v2/filter-v2";
+import {AnnotationsFilterField, AnnotationsSortField} from "../_models/metadata/v2/annotations-filter";
+import {UtilityService} from "../shared/_services/utility.service";
+import {PaginatedResult} from "../_models/pagination";
 
 /**
  * Represents any modification (create/delete/edit) that occurs to annotations
@@ -28,6 +32,7 @@ export class AnnotationService {
 
   private readonly httpClient = inject(HttpClient);
   private readonly accountService = inject(AccountService);
+  private readonly utilityService = inject(UtilityService);
   private readonly messageHub = inject(MessageHubService);
   private readonly router = inject(Router);
   private readonly baseUrl = environment.apiUrl;
@@ -71,6 +76,16 @@ export class AnnotationService {
       this._annotations.set(annotations);
       return annotations;
     }));
+  }
+
+  getAllAnnotationsFiltered(filter: FilterV2<AnnotationsFilterField, AnnotationsSortField>, pageNum?: number, itemsPerPage?: number) {
+    const params = this.utilityService.addPaginationIfExists(new HttpParams(), pageNum, itemsPerPage);
+
+    return this.httpClient.post<PaginatedResult<Annotation>[]>(this.baseUrl + 'annotation/all-filtered', filter, {observe: 'response', params}).pipe(
+      map((res: any) => {
+        return this.utilityService.createPaginatedResult(res as PaginatedResult<Annotation>[]);
+      }),
+    );
   }
 
   getAnnotationsForSeries(seriesId: number) {

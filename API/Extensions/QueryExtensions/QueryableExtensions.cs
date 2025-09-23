@@ -291,10 +291,27 @@ public static class QueryableExtensions
             PersonSortField.SeriesCount => query.OrderByDescending(p => p.SeriesMetadataPeople.Count),
             PersonSortField.ChapterCount when sort.IsAscending => query.OrderBy(p => p.ChapterPeople.Count),
             PersonSortField.ChapterCount => query.OrderByDescending(p => p.ChapterPeople.Count),
-            _ => query.OrderBy(p => p.Name)
+            _ => query.OrderBy(p => p.Name),
         };
+    }
 
+    public static IQueryable<AppUserAnnotation> SortBy(this IQueryable<AppUserAnnotation> query, AnnotationSortOptions? sort)
+    {
+        if (sort == null)
+        {
+            return query.OrderBy(a => a.CreatedUtc);
+        }
 
+        return sort.SortField switch
+        {
+            AnnotationSortField.Owner when sort.IsAscending => query.OrderBy(a => a.AppUser.UserName),
+            AnnotationSortField.Owner => query.OrderByDescending(a => a.AppUser.UserName),
+            AnnotationSortField.Created when sort.IsAscending => query.OrderBy(a => a.CreatedUtc),
+            AnnotationSortField.Created => query.OrderByDescending(a => a.CreatedUtc),
+            AnnotationSortField.LastModified when sort.IsAscending => query.OrderBy(a => a.LastModifiedUtc),
+            AnnotationSortField.LastModified => query.OrderByDescending(a => a.LastModifiedUtc),
+            _ => query.OrderBy(a => a.CreatedUtc),
+        };
     }
 
     /// <summary>

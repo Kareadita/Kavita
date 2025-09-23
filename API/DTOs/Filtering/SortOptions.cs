@@ -17,3 +17,12 @@ public sealed record PersonSortOptions
     public PersonSortField SortField { get; set; }
     public bool IsAscending { get; set; } = true;
 }
+
+/// <summary>
+/// All Sorting Options for a query related to Annotation Entity
+/// </summary>
+public sealed record AnnotationSortOptions
+{
+    public AnnotationSortField SortField { get; set; }
+    public bool IsAscending { get; set; } = true;
+}

@@ -26,12 +26,8 @@ export class GenericFilterFieldPipe implements PipeTransform {
     switch (value) {
       case AnnotationsFilterField.Owner:
         return translate('generic-filter-field-pipe.annotation-owner');
-      case AnnotationsFilterField.Series:
-        return translate('filter-field-pipe.series-name');
       case AnnotationsFilterField.Library:
         return translate('filter-field-pipe.libraries');
-      case AnnotationsFilterField.Colour:
-        return translate('generic-filter-field-pipe.annotation-colour');
       case AnnotationsFilterField.Spoiler:
         return translate('generic-filter-field-pipe.annotation-spoiler');
     }

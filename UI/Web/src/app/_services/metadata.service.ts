@@ -271,10 +271,6 @@ export class MetadataService {
         return this.libraryService.getLibraries().pipe(map(libs => libs.map(lib => {
           return {value: lib.id, label: lib.name};
         })));
-      case AnnotationsFilterField.Colour:
-        return of(this.highlightSlots().map(slot => {
-          return {value: slot.id, label: slot.title};
-        }))
     }
 
     return of([]);

@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  effect,
   EventEmitter,
   inject,
   OnInit,
@@ -17,11 +16,10 @@ import {AnnotationService} from "../../_services/annotation.service";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {Annotation} from "../../book-reader/_models/annotations/annotation";
 import {Pagination} from "../../_models/pagination";
-import {JumpKey} from "../../_models/jumpbar/jump-key";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map, tap} from "rxjs/operators";
 import {AnnotationsFilterSettings} from "../../metadata-filter/filter-settings";
-import {AnnotationsFilter, FilterV2} from "../../_models/metadata/v2/filter-v2";
+import {AnnotationsFilter} from "../../_models/metadata/v2/filter-v2";
 import {AnnotationsFilterField, AnnotationsSortField} from "../../_models/metadata/v2/annotations-filter";
 import {MetadataService} from "../../_services/metadata.service";
 import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
@@ -63,7 +61,6 @@ export class BrowseAnnotationsComponent implements OnInit {
     totalItems: 0,
     totalPages: 0
   });
-  jumpKeys = signal<JumpKey[]>([]);
   filterActive = signal(false);
   filter = signal<AnnotationsFilter | undefined>(undefined);
 
@@ -71,12 +68,6 @@ export class BrowseAnnotationsComponent implements OnInit {
   trackByIdentity = (idx: number, item: Annotation) => `${item.id}`;
   refresh: EventEmitter<void> = new EventEmitter();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-
-  constructor() {
-    effect(() => {
-      this.loadData(this.filter())
-    });
-  }
 
   ngOnInit() {
     this.route.data.pipe(
@@ -90,6 +81,7 @@ export class BrowseAnnotationsComponent implements OnInit {
 
         this.filter.set(filter);
         this.filterSettings.presetsV2 = this.filter();
+        this.loadData(this.filter())
       }),
     ).subscribe();
   }
@@ -100,9 +92,11 @@ export class BrowseAnnotationsComponent implements OnInit {
       filter.statements.push(this.metadataService.createDefaultFilterStatement('annotation') as FilterStatement<AnnotationsFilterField>);
     }
 
-    console.log("Searching for annotations!")
-    this.annotationsService.getAllAnnotations(226).pipe(
-      tap(a => this.annotations.set(a)),
+    this.annotationsService.getAllAnnotationsFiltered(filter).pipe(
+      tap(a => {
+        this.annotations.set(a.result);
+        this.pagination.set(a.pagination);
+      }),
       tap(() => this.isLoading.set(false)),
     ).subscribe();
   }
@@ -116,6 +110,7 @@ export class BrowseAnnotationsComponent implements OnInit {
       this.filterUtilityService.updateUrlFromFilter(data.filterV2).pipe(
         takeUntilDestroyed(this.destroyRef),
         tap(() => this.filter.set(data.filterV2)),
+        tap(() => this.loadData(this.filter()))
       ).subscribe();
       return;
     }
