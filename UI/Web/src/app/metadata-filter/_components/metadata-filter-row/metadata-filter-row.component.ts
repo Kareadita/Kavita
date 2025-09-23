@@ -63,6 +63,7 @@ const unitLabels: Map<number, FilterRowUi> = new Map([
   [FilterField.UserRating as number, new FilterRowUi('unit-user-rating')],
   [FilterField.ReadLast as number, new FilterRowUi('unit-read-last')],
   [AnnotationsFilterField.HighlightSlots as number, new FilterRowUi('', 'disclaimer-highlight-slots')],
+  [FilterField.FileSize as number, new FilterRowUi('unit-file-size', 'disclaimer-file-size')]
 ]);
 
 // const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath, PersonFilterField.Name];

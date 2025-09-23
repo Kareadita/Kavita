@@ -3,7 +3,9 @@
                 [format]="format()"
                 [theme]="theme()"
                 [formControlName]="controlName()"
-                (onContentChanged)="contentChanged.emit($event)">
+                (onContentChanged)="onContentChange($event)"
+                (onEditorCreated)="editor.set($event)"
+  >
 
     <div quill-editor-toolbar>
 

@@ -56,4 +56,34 @@ public static class AnnotationFilter
         };
     }
 
+    public static IQueryable<AppUserAnnotation> HasSelected(this IQueryable<AppUserAnnotation> queryable, bool condition,
+        FilterComparison comparison, string value)
+    {
+        if (string.IsNullOrEmpty(value) || !condition) return queryable;
+
+        return comparison switch
+        {
+            FilterComparison.Equal => queryable.Where(a => a.SelectedText == value),
+            FilterComparison.Contains => queryable.Where(a => value.Contains(a.SelectedText)),
+            FilterComparison.NotContains => queryable.Where(a => !value.Contains(a.SelectedText)),
+            FilterComparison.NotEqual => queryable.Where(a => a.SelectedText != value),
+            _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
+        };
+    }
+
+    public static IQueryable<AppUserAnnotation> HasCommented(this IQueryable<AppUserAnnotation> queryable, bool condition,
+        FilterComparison comparison, string value)
+    {
+        if (string.IsNullOrEmpty(value) || !condition) return queryable;
+
+        return comparison switch
+        {
+            FilterComparison.Equal => queryable.Where(a => a.CommentPlainText != null && a.CommentPlainText == value),
+            FilterComparison.NotEqual => queryable.Where(a => a.CommentPlainText != null && a.CommentPlainText != value),
+            FilterComparison.Contains => queryable.Where(a => a.CommentPlainText != null && a.CommentPlainText.Contains(value)),
+            FilterComparison.NotContains => queryable.Where(a => a.CommentPlainText != null && !a.CommentPlainText.Contains(value)),
+            _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
+        };
+    }
+
 }

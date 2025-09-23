@@ -5,6 +5,8 @@ export interface Annotation {
   endingXPath: string | null;
   selectedText: string | null;
   comment: string;
+  commentHtml: string;
+  commentPlainText: string;
   containsSpoiler: boolean;
   pageNumber: number;
   selectedSlotIndex: number;

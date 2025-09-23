@@ -374,4 +374,24 @@ export class FilterUtilitiesService {
 
     return new SeriesFilterSettings();
   }
+
+  /**
+   * Fully override which comparisons a field offers. This MUST return at least one FilterComparison
+   * @param field
+   */
+  getCustomComparisons<T extends number>(field: T): FilterComparison[] | null {
+    switch (field) {
+      case AnnotationsFilterField.Selection:
+        return [FilterComparison.Contains, FilterComparison.NotContains]
+      case AnnotationsFilterField.Comment:
+        return [FilterComparison.Contains, FilterComparison.NotContains, FilterComparison.Equal, FilterComparison.NotEqual]
+      case FilterField.FileSize:
+        return [
+          FilterComparison.Equal, FilterComparison.GreaterThan, FilterComparison.GreaterThanEqual,
+          FilterComparison.LessThan, FilterComparison.LessThanEqual
+        ]
+    }
+
+    return null;
+  }
 }

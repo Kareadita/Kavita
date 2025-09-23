@@ -28,6 +28,10 @@ public sealed record AnnotationDto
     /// Rich text Comment
     /// </summary>
     public string? Comment { get; set; }
+    /// <inheritdoc cref="AppUserAnnotation.CommentHtml"/>
+    public string? CommentHtml { get; set; }
+    /// <inheritdoc cref="AppUserAnnotation.CommentPlainText"/>
+    public string? CommentPlainText { get; set; }
     /// <summary>
     /// Title of the TOC Chapter within Epub (not Chapter Entity)
     /// </summary>

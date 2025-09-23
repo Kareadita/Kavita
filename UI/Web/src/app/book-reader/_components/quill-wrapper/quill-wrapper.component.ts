@@ -1,5 +1,6 @@
-import {ChangeDetectionStrategy, Component, computed, EventEmitter, input, OnInit, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, EventEmitter, input, OnInit, Output, signal} from '@angular/core';
 import {ContentChange, QuillEditorComponent, QuillFormat} from "ngx-quill";
+import type QuillType from 'quill'
 import {FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -123,7 +124,7 @@ export class QuillWrapperComponent {
   /**
    * Deligation of the quill onContentChange event
    */
-  @Output() contentChanged = new EventEmitter<ContentChange>();
+  @Output() contentChanged = new EventEmitter<{raw: ContentChange, html?: string}>();
 
   /**
    * Items to show in the toolbar
@@ -160,5 +161,15 @@ export class QuillWrapperComponent {
       .map(group => group.filter(item => !blackList.includes(item.key)))
       .filter(group => group.length > 0);
   });
+
+  editor = signal<QuillType | undefined>(undefined);
+
+  onContentChange($event: ContentChange) {
+    const quill = this.editor();
+    this.contentChanged.emit({
+      raw: $event,
+      html: quill?.getSemanticHTML() ?? '',
+    })
+  }
 
 }

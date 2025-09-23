@@ -11,6 +11,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
+using HtmlAgilityPack;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -166,6 +167,9 @@ public class AnnotationController : BaseApiController
             annotation.ContainsSpoiler = dto.ContainsSpoiler;
             annotation.SelectedSlotIndex = dto.SelectedSlotIndex;
             annotation.Comment = dto.Comment;
+            annotation.CommentHtml = dto.CommentHtml;
+            annotation.CommentPlainText = StripHtml(dto.CommentHtml);
+
             _unitOfWork.AnnotationRepository.Update(annotation);
 
             if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
@@ -182,6 +186,27 @@ public class AnnotationController : BaseApiController
         }
 
         return Ok();
+    }
+
+    private string StripHtml(string? html)
+    {
+        if (string.IsNullOrEmpty(html))
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            var document = new HtmlDocument();
+            document.LoadHtml(html);
+
+            return document.DocumentNode.InnerText.Replace("&nbsp;", " ");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Invalid html, cannot parse plain text");
+            return string.Empty;
+        }
     }
 
     /// <summary>

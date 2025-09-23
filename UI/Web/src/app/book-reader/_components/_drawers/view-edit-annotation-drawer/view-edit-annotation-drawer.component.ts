@@ -92,6 +92,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     selectedSlotIndex: FormControl<number>,
   }>;
   annotationNote: object = {};
+  annotationHtml: string = '';
 
   constructor() {
     this.titleColor = computed(() => {
@@ -214,6 +215,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
 
           updatedAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
           updatedAnnotation.comment = JSON.stringify(this.annotationNote);
+          updatedAnnotation.commentHtml = this.annotationHtml;
 
           return this.annotationService.updateAnnotation(updatedAnnotation);
         }),
@@ -273,8 +275,9 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     this.activeOffcanvas.close();
   }
 
-  updateContent(event: ContentChange) {
-    this.annotationNote = event.content;
+  updateContent(event: {raw: ContentChange, html?: string}) {
+    this.annotationNote = event.raw.content;
+    this.annotationHtml = event.html ?? '';
   }
 
   private initHighlights() {

@@ -2331,7 +2331,9 @@
         "unit-reading-progress": "Percent",
         "unit-user-rating": "0.0 - 5.0 Stars",
         "unit-read-last": "Days from TODAY",
-        "disclaimer-highlight-slots": "When using this field, only your own annotations will be shown"
+        "disclaimer-highlight-slots": "When using this field, only your own annotations will be shown",
+        "unit-file-size": "GB, MB, KB, B",
+        "disclaimer-file-size": "Total file size across all chapters for the series"
     },
 
     "sort-field-pipe": {
@@ -2827,7 +2829,9 @@
         "file-path": "File Path",
         "want-to-read": "Want to Read",
         "read-date": "Reading Date",
-        "read-last": "Read Last"
+        "read-last": "Read Last",
+        "average-rating": "Average rating",
+        "file-size": "File size"
     },
 
     "filter-comparison-pipe": {
@@ -2900,7 +2904,9 @@
         "annotation-owner": "Owner",
         "annotation-series": "Series name",
         "annotation-spoiler": "Spoiler",
-        "annotation-highlights": "Highlight color"
+        "annotation-highlights": "Highlight color",
+        "annotation-comment": "Comment",
+        "annotation-selection": "Selection"
     },
 
 
