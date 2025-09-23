@@ -313,7 +313,8 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
-        "actions-header": "{{manage-users.actions-header}}"
+        "actions-header": "{{manage-users.actions-header}}",
+        "warning": "Warning"
     },
 
     "edit-device-modal": {

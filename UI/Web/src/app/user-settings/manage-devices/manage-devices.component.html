@@ -8,6 +8,12 @@
 
   <p>{{t('description')}}</p>
 
+  @if (!hasEmailSetup) {
+    <div class="alert alert-warning" role="alert">
+      <strong>{{t('warning')}}</strong> {{t('email-setup-alert')}}
+    </div>
+  }
+
   <ngx-datatable
     class="bootstrap"
     [rows]="devices"
