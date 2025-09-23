@@ -63,7 +63,9 @@
             <div class="col pt-2 ms-2">
               @let label = uiLabel();
               @if (label !== null) {
-                <span class="text-muted">{{t(label.unit)}}</span>
+                @if (label.unit) {
+                  <span class="text-muted">{{t(label.unit)}}</span>
+                }
                 @if (label.tooltip) {
                   <i class="fa fa-info-circle ms-1" aria-hidden="true" [ngbTooltip]="t(label.tooltip)"></i>
                 }

@@ -27,6 +27,7 @@ import {NgbDate, NgbDateParserFormatter, NgbInputDatepicker, NgbTooltip} from "@
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../../filter-settings";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {AnnotationsFilterField} from "../../../_models/metadata/v2/annotations-filter";
 
 interface FieldConfig {
   type: PredicateType;
@@ -55,12 +56,13 @@ class FilterRowUi {
   }
 }
 
-const unitLabels: Map<FilterField, FilterRowUi> = new Map([
-    [FilterField.ReadingDate, new FilterRowUi('unit-reading-date')],
-    [FilterField.AverageRating, new FilterRowUi('unit-average-rating')],
-    [FilterField.ReadProgress, new FilterRowUi('unit-reading-progress')],
-    [FilterField.UserRating, new FilterRowUi('unit-user-rating')],
-    [FilterField.ReadLast, new FilterRowUi('unit-read-last')],
+const unitLabels: Map<number, FilterRowUi> = new Map([
+  [FilterField.ReadingDate as number, new FilterRowUi('unit-reading-date')],
+  [FilterField.AverageRating as number, new FilterRowUi('unit-average-rating')],
+  [FilterField.ReadProgress as number, new FilterRowUi('unit-reading-progress')],
+  [FilterField.UserRating as number, new FilterRowUi('unit-user-rating')],
+  [FilterField.ReadLast as number, new FilterRowUi('unit-read-last')],
+  [AnnotationsFilterField.HighlightSlots as number, new FilterRowUi('', 'disclaimer-highlight-slots')],
 ]);
 
 // const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath, PersonFilterField.Name];

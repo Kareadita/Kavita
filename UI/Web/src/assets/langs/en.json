@@ -2330,7 +2330,8 @@
         "unit-average-rating": "Kavita+ external rating, percent",
         "unit-reading-progress": "Percent",
         "unit-user-rating": "0.0 - 5.0 Stars",
-        "unit-read-last": "Days from TODAY"
+        "unit-read-last": "Days from TODAY",
+        "disclaimer-highlight-slots": "When using this field, only your own annotations will be shown"
     },
 
     "sort-field-pipe": {
