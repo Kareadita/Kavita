@@ -123,27 +123,6 @@ public class AnnotationController : BaseApiController
         }
     }
 
-    private string StripHtml(string? html)
-    {
-        if (string.IsNullOrEmpty(html))
-        {
-            return string.Empty;
-        }
-
-        try
-        {
-            var document = new HtmlDocument();
-            document.LoadHtml(html);
-
-            return document.DocumentNode.InnerText.Replace("&nbsp;", " ");
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "Invalid html, cannot parse plain text");
-            return string.Empty;
-        }
-    }
-
     /// <summary>
     /// Delete the annotation for the user
     /// </summary>

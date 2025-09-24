@@ -145,6 +145,8 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
                 Id = a.Id,
                 SelectedText = a.SelectedText,
                 Comment = a.Comment,
+                CommentHtml = a.CommentHtml,
+                CommentPlainText = a.CommentPlainText,
                 Context = a.Context,
                 ChapterTitle = a.ChapterTitle,
                 PageNumber = a.PageNumber,

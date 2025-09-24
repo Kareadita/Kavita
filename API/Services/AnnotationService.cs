@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -11,6 +12,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Helpers;
 using API.SignalR;
+using HtmlAgilityPack;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -125,6 +127,9 @@ public class AnnotationService : IAnnotationService
             annotation.ContainsSpoiler = dto.ContainsSpoiler;
             annotation.SelectedSlotIndex = dto.SelectedSlotIndex;
             annotation.Comment = dto.Comment;
+            annotation.CommentHtml = dto.CommentHtml;
+            annotation.CommentPlainText = StripHtml(dto.CommentHtml);
+
             _unitOfWork.AnnotationRepository.Update(annotation);
 
             if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
@@ -195,7 +200,7 @@ public class AnnotationService : IAnnotationService
                                 {
                                     id = annotation.Id,
                                     selectedText = annotation.SelectedText,
-                                    comment = ConvertQuillDeltaToHtml(annotation.Comment),
+                                    comment = annotation.CommentHtml,
                                     context = annotation.Context,
                                     chapterTitle = annotation.ChapterTitle,
                                     pageNumber = annotation.PageNumber,
@@ -208,8 +213,8 @@ public class AnnotationService : IAnnotationService
                                     obsidianTitle,
                                     obsidianBacklinks = new[] { $"[[{seriesGroup.Key.SeriesName} Series]]", $"[[{volumeGroup.Key.VolumeName}]]" }
                                 };
-                            }).ToArray()
-                        }).ToArray()
+                            }).ToArray(),
+                        }).ToArray(),
                 }).ToArray();
 
             // Serialize to JSON
@@ -237,26 +242,24 @@ public class AnnotationService : IAnnotationService
         }
     }
 
-        private string ConvertQuillDeltaToHtml(string? quillDelta)
+    private string StripHtml(string? html)
+    {
+        if (string.IsNullOrEmpty(html))
         {
-            if (string.IsNullOrWhiteSpace(quillDelta))
-            {
-                return string.Empty;
-            }
-
-            try
-            {
-
-                var deltaObject = JObject.Parse(quillDelta);
-                var opsArray = deltaObject["ops"] as JArray;
-                var html = new HtmlConverter(opsArray).Convert();
-                return html;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Cannot translate quill delta to html: {QuilDelta}", quillDelta);
-                // If we can't parse the Quill Delta, return the original text
-                return quillDelta;
-            }
+            return string.Empty;
         }
+
+        try
+        {
+            var document = new HtmlDocument();
+            document.LoadHtml(html);
+
+            return document.DocumentNode.InnerText.Replace("&nbsp;", " ");
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Invalid html, cannot parse plain text");
+            return string.Empty;
+        }
+    }
 }

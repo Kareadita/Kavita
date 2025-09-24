@@ -7,6 +7,8 @@ public sealed record FullAnnotationDto
     public int Id { get; set; }
     public string SelectedText { get; set; }
     public string? Comment { get; set; }
+    public string? CommentHtml { get; set; }
+    public string? CommentPlainText { get; set; }
     public string? Context { get; set; }
     public string? ChapterTitle { get; set; }
     public int PageNumber { get; set; }
