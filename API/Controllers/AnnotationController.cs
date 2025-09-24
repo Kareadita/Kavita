@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -151,6 +152,7 @@ public class AnnotationController : BaseApiController
         if (string.IsNullOrEmpty(exportFile)) return BadRequest();
 
 
-        return PhysicalFile(exportFile, "application/json", true);
+        return PhysicalFile(exportFile, "application/json",
+            System.Web.HttpUtility.UrlEncode(Path.GetFileName(exportFile)), true);
     }
 }

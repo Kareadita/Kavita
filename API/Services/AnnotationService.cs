@@ -14,10 +14,7 @@ using API.Helpers;
 using API.SignalR;
 using HtmlAgilityPack;
 using Kavita.Common;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-using Quill.Delta;
 
 namespace API.Services;
 
@@ -161,7 +158,7 @@ public class AnnotationService : IAnnotationService
 
             // Get settings for hostname
             var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            var hostname = !string.IsNullOrWhiteSpace(settings.HostName) ? settings.HostName : "http://localhost:5000/";
+            var hostname = !string.IsNullOrWhiteSpace(settings.HostName) ? settings.HostName : "http://localhost:5000";
 
             // Group annotations by series, then by volume
             var exportData = annotations

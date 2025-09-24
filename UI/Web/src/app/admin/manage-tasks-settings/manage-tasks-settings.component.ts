@@ -335,10 +335,5 @@ export class ManageTasksSettingsComponent implements OnInit {
     });
   }
 
-  test() {
-    this.annotationService.exportAnnotations().subscribe();
-  }
-
-
   protected readonly ColumnMode = ColumnMode;
 }
