@@ -90,6 +90,8 @@ public class AnnotationService : IAnnotationService
                 HighlightCount = dto.HighlightCount,
                 SelectedText = dto.SelectedText,
                 Comment = dto.Comment,
+                CommentHtml = dto.CommentHtml,
+                CommentPlainText = StripHtml(dto.CommentHtml),
                 ContainsSpoiler = dto.ContainsSpoiler,
                 PageNumber = dto.PageNumber,
                 SelectedSlotIndex = dto.SelectedSlotIndex,

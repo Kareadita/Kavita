@@ -32,7 +32,10 @@ import {QuillTheme, QuillWrapperComponent} from "../../quill-wrapper/quill-wrapp
 import {ContentChange, QuillViewComponent} from "ngx-quill";
 import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {AccountService} from "../../../../_services/account.service";
-import {OffCanvasResizeComponent, ResizeMode} from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
+import {
+  OffCanvasResizeComponent,
+  ResizeMode
+} from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 
 export enum AnnotationMode {
   View = 0,
@@ -240,6 +243,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
 
     highlightAnnotation.containsSpoiler = this.formGroup.get('hasSpoiler')!.value;
     highlightAnnotation.comment = JSON.stringify(this.annotationNote);
+    highlightAnnotation.commentHtml = this.annotationHtml;
     // For create annotation, we have to have this hack
     highlightAnnotation.createdUtc = '0001-01-01T00:00:00Z';
     highlightAnnotation.lastModifiedUtc = '0001-01-01T00:00:00Z'
