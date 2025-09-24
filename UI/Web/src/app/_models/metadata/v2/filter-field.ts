@@ -35,7 +35,8 @@ export enum FilterField
     Imprint = 29,
     Team = 30,
     Location = 31,
-    ReadLast = 32
+    ReadLast = 32,
+    FileSize = 33,
 }
 
 

@@ -56,6 +56,10 @@ public enum FilterField
     /// Last time User Read
     /// </summary>
     ReadLast = 32,
+    /// <summary>
+    /// Total filesize accross all files for all chapters of the series
+    /// </summary>
+    FileSize = 33,
 }
 
 public enum PersonFilterField

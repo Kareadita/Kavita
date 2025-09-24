@@ -76,6 +76,8 @@ export class FilterFieldPipe implements PipeTransform {
         return translate('filter-field-pipe.read-last');
       case FilterField.AverageRating:
         return translate('filter-field-pipe.average-rating');
+      case FilterField.FileSize:
+        return translate('filter-field-pipe.file-size');
       default:
         throw new Error(`Invalid FilterField value: ${value}`);
     }

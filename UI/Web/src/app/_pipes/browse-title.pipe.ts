@@ -70,6 +70,7 @@ export class BrowseTitlePipe implements PipeTransform {
       case FilterField.ReadLast:
       case FilterField.Summary:
       case FilterField.SeriesName:
+      case FilterField.FileSize:
       default:
         return '';
     }

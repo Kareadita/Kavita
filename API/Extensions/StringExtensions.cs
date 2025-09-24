@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 namespace API.Extensions;
 #nullable enable
 
-public static class StringExtensions
+public static partial class StringExtensions
 {
     private static readonly Regex SentenceCaseRegex = new(@"(^[a-z])|\.\s+(.)",
         RegexOptions.ExplicitCapture | RegexOptions.Compiled,
@@ -106,4 +106,39 @@ public static class StringExtensions
             .Select(int.Parse)
             .ToList();
     }
+
+    /// <summary>
+    /// Parses a human-readable file size string (e.g. "1.43 GB") into bytes.
+    /// </summary>
+    /// <param name="input">The input string like "1.43 GB", "4.2 KB", "512 B"</param>
+    /// <returns>Byte count as long</returns>
+    public static long ParseHumanReadableBytes(this string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            throw new ArgumentException("Input cannot be null or empty.", nameof(input));
+
+        var match = HumanReadableBytesRegex().Match(input);
+        if (!match.Success)
+            throw new FormatException($"Invalid format: '{input}'");
+
+        var value = double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+        var unit = match.Groups[2].Value.ToUpperInvariant();
+
+        var multiplier = unit switch
+        {
+            "B" => 1L,
+            "KB" => 1L << 10,
+            "MB" => 1L << 20,
+            "GB" => 1L << 30,
+            "TB" => 1L << 40,
+            "PB" => 1L << 50,
+            "EB" => 1L << 60,
+            _ => throw new FormatException($"Unknown unit: '{unit}'")
+        };
+
+        return (long)(value * multiplier);
+    }
+
+    [GeneratedRegex(@"^\s*(\d+(?:\.\d+)?)\s*([KMGTPE]?B)\s*$", RegexOptions.IgnoreCase)]
+    private static partial Regex HumanReadableBytesRegex();
 }

@@ -107,6 +107,7 @@ public static class FilterFieldValueConverter
                 .ToList(),
             FilterField.ReadTime => string.IsNullOrEmpty(value) ? 0 : int.Parse(value),
             FilterField.AverageRating => string.IsNullOrEmpty(value) ? 0f : value.AsFloat(),
+            FilterField.FileSize => value.ParseHumanReadableBytes(),
             _ => throw new ArgumentException("Invalid field type")
         };
     }

@@ -212,7 +212,7 @@ export class FilterUtilitiesService {
         ] as T[];
       case 'series':
         return [
-          FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath
+          FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath, FilterField.FileSize,
         ] as unknown as T[];
       case 'person':
         return [

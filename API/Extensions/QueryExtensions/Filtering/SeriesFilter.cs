@@ -925,5 +925,21 @@ public static class SeriesFilter
         }
     }
 
+    public static IQueryable<Series> HasFileSize(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, float fileSize)
+    {
+        if (fileSize == 0f || !condition) return queryable;
+
+        return comparison switch
+        {
+            FilterComparison.Equal => queryable.Where(s => s.Volumes.Sum(v => v.Chapters.Sum(c => c.Files.Sum(f => f.Bytes))) == fileSize),
+            FilterComparison.LessThan => queryable.Where(s => s.Volumes.Sum(v => v.Chapters.Sum(c => c.Files.Sum(f => f.Bytes))) < fileSize),
+            FilterComparison.LessThanEqual => queryable.Where(s => s.Volumes.Sum(v => v.Chapters.Sum(c => c.Files.Sum(f => f.Bytes))) <= fileSize),
+            FilterComparison.GreaterThan => queryable.Where(s => s.Volumes.Sum(v => v.Chapters.Sum(c => c.Files.Sum(f => f.Bytes))) > fileSize),
+            FilterComparison.GreaterThanEqual => queryable.Where(s => s.Volumes.Sum(v => v.Chapters.Sum(c => c.Files.Sum(f => f.Bytes))) >= fileSize),
+                _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported"),
+        };
+    }
+
 
 }
