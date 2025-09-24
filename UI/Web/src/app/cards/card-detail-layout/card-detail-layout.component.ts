@@ -1,5 +1,29 @@
-import { DOCUMENT, NgClass, NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, ContentChild, DestroyRef, ElementRef, EventEmitter, HostListener, inject, input, Input, OnChanges, OnInit, Output, signal, Signal, SimpleChange, SimpleChanges, TemplateRef, TrackByFunction, ViewChild, WritableSignal } from '@angular/core';
+import {DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  ContentChild,
+  DestroyRef,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  input,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  signal,
+  Signal,
+  SimpleChanges,
+  TemplateRef,
+  TrackByFunction,
+  ViewChild,
+  WritableSignal
+} from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
@@ -43,7 +67,7 @@ const ANIMATION_TIME_MS = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true
 })
-export class CardDetailLayoutComponent<TFilter extends number, TSort extends number> implements OnInit, OnChanges {
+export class CardDetailLayoutComponent<TFilter extends number, TSort extends number> implements OnInit, OnChanges, AfterViewInit {
   private document = inject<Document>(DOCUMENT);
 
 
@@ -105,6 +129,7 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
 
   updateApplied: number = 0;
   bufferAmount: number = 1;
+  resumed: boolean = false;
 
 
   filterSignal: WritableSignal<FilterV2<number, number> | undefined> = signal(undefined);
@@ -147,9 +172,35 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
       filter(event => event instanceof NavigationStart),
       takeUntilDestroyed(this.destroyRef),
       map(evt => evt as NavigationStart),
-      tap(_ => this.tryToSaveJumpKey()),
+      tap(_ => this.tryToSaveJumpKey({})),
     ).subscribe();
 
+  }
+
+  ngAfterViewInit(): void {
+    if (this.resumed) return;
+
+    this.jumpBarKeysToRender = [...this.jumpBarKeys];
+    this.resizeJumpBar();
+
+    if (this.jumpBarKeysToRender.length > 0) {
+      this.resumed = true;
+
+      // Check if there is an exact scroll position to restore
+      const scrollOffset = this.jumpbarService.getResumePosition(this.router.url);
+      if (scrollOffset > 0) {
+        setTimeout(() => {
+          this.virtualScroller.scrollToPosition(scrollOffset, ANIMATION_TIME_MS);
+        }, 100)
+      } else {
+        const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
+        if (resumeKey === '') return;
+        const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
+        if (keys.length < 1) return;
+
+        setTimeout(() => this.scrollTo(keys[0]), 100);
+      }
+    }
   }
 
 
@@ -157,16 +208,22 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
 
-    const startIndex = this.jumpbarService.getResumePosition(this.router.url);
-    if (startIndex > 0) {
-      setTimeout(() => this.virtualScroller.scrollToIndex(startIndex, true, 0, ANIMATION_TIME_MS), 10);
-      return;
-    }
+    if (this.jumpBarKeysToRender.length > 0) {
+      this.resumed = true;
 
-    if (changes.hasOwnProperty('isLoading')) {
-      const loadingChange = changes['isLoading'] as SimpleChange;
-      if (loadingChange.previousValue === true && loadingChange.currentValue === false) {
-        setTimeout(() => this.virtualScroller.scrollToIndex(0, true, 0, ANIMATION_TIME_MS), 10);
+      // Check if there is an exact scroll position to restore
+      const scrollOffset = this.jumpbarService.getResumePosition(this.router.url);
+      if (scrollOffset > 0) {
+        setTimeout(() => {
+          this.virtualScroller.scrollToPosition(scrollOffset, ANIMATION_TIME_MS);
+        }, 100)
+      } else {
+        const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
+        if (resumeKey === '') return;
+        const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
+        if (keys.length < 1) return;
+
+        setTimeout(() => this.scrollTo(keys[0]), 100);
       }
     }
   }
@@ -198,8 +255,17 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     setTimeout(() => this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.startIndex), ANIMATION_TIME_MS + 100);
   }
 
-  tryToSaveJumpKey() {
-    this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.startIndex);
+  tryToSaveJumpKey(item: any) {
+    let name = '';
+    if (item.hasOwnProperty('seriesName')) {
+      name = item.seriesName;
+    } else if (item.hasOwnProperty('name')) {
+      name = item.name;
+    } else if (item.hasOwnProperty('title')) {
+      name = item.title;
+    }
+    this.jumpbarService.saveResumeKey(this.router.url, name.charAt(0));
+    this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.scrollStartPosition);
   }
 
   protected readonly Breakpoint = Breakpoint;

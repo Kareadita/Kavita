@@ -39,7 +39,7 @@
           <div class="grid row g-0" #container id="card-detail-layout-items-container">
             @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
               <div class="card col-auto mt-2 mb-2 card-detail-layout-item"
-                (click)="tryToSaveJumpKey()"
+                (click)="tryToSaveJumpKey(item)"
                 id="jumpbar-index--{{i}}"
                 [attr.jumpbar-index]="i">
                 <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }" />
@@ -60,7 +60,7 @@
       <div class="grid row g-0" #container>
 
         @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
-          <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey()" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+          <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey(item)" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
             <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
           </div>
         }

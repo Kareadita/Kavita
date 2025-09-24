@@ -60,6 +60,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IReadingProfileService, ReadingProfileService>();
         services.AddScoped<IKoreaderService, KoreaderService>();
         services.AddScoped<IFontService, FontService>();
+        services.AddScoped<IAnnotationService, AnnotationService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();
