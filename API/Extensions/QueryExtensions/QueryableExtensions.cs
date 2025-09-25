@@ -310,6 +310,8 @@ public static class QueryableExtensions
             AnnotationSortField.Created => query.OrderByDescending(a => a.CreatedUtc),
             AnnotationSortField.LastModified when sort.IsAscending => query.OrderBy(a => a.LastModifiedUtc),
             AnnotationSortField.LastModified => query.OrderByDescending(a => a.LastModifiedUtc),
+            AnnotationSortField.Color when sort.IsAscending => query.OrderBy(a => a.SelectedSlotIndex),
+            AnnotationSortField.Color => query.OrderByDescending(a => a.SelectedSlotIndex),
             _ => query.OrderBy(a => a.CreatedUtc),
         };
     }

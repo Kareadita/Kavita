@@ -28,6 +28,8 @@ export class SortFieldPipe implements PipeTransform {
 
   private getAnnotationSortFields(value: AnnotationsSortField) {
     switch (value) {
+      case AnnotationsSortField.Color:
+        return this.translocoService.translate('sort-field-pipe.annotation-color');
       case AnnotationsSortField.LastModified:
         return this.translocoService.translate('sort-field-pipe.last-modified');
       case AnnotationsSortField.Owner:

@@ -2350,7 +2350,8 @@
         "person-series-count": "Series Count",
         "person-chapter-count": "Chapter Count",
         "annotation-owner": "Owner",
-        "annotation-series": "Series name"
+        "annotation-series": "Series name",
+        "annotation-color": "Color"
     },
 
     "edit-series-modal": {
