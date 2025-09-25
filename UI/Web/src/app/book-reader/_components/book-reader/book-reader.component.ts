@@ -1363,6 +1363,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           maxHeight = `${height}px`;
         }
+        maxWidth = `${(this.getVerticalPageWidth() / 2) - (COLUMN_GAP / 2)}px`;
         break
     }
     this.document.documentElement.style.setProperty('--book-reader-content-max-height', maxHeight);
