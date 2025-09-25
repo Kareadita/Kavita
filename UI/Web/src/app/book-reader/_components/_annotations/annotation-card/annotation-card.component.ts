@@ -52,7 +52,7 @@ export class AnnotationCardComponent {
   allowEdit = input<boolean>(true);
   showPageLink = input<boolean>(true);
   /**
-   * If sizes should be forced. Turned of in drawer to account for manual resize
+   * If sizes should be forced. Turned off in drawer to account for manual resize
    */
   forceSize = input<boolean>(true);
   /**
