@@ -548,11 +548,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         case BookPageLayoutMode.Default:
           return 'unset';
         case BookPageLayoutMode.Column1:
-          return ((base / 2) - 4) + 'px';
+          return (base / 2) + 'px';
         case BookPageLayoutMode.Column2:
-          //return (this.readingSectionElemRef?.nativeElement?.clientWidth - this.getMargin() + 1) / 2 + 'px';
-          return (((this.readingSectionElemRef?.nativeElement?.clientWidth ?? base)) / 4) + 1 + 'px'
-          //return ((base) / 4) + 6 + 'px'
+          return (base / 4) + 'px';
         default:
           return 'unset';
       }
@@ -1692,17 +1690,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readingSectionElemRef == null) return 0;
 
     const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
+    const baseWidth = this.readingSectionElemRef.nativeElement.clientWidth - margin;
 
     // console.log('page size calc, client width: ', this.readingSectionElemRef.nativeElement.clientWidth)
     // console.log('page size calc, margin: ', margin)
-    // console.log('page size calc, col gap: ', ((COLUMN_GAP / 2) * columnGapModifier));
+    // console.log('page size calc, col gap: ', ((COLUMN_GAP) * columnGapModifier));
     // console.log("clientWidth", this.readingSectionElemRef.nativeElement.clientWidth, "window", window.innerWidth, "margin", margin, "left", marginLeft)
     // console.log('clientWidth: ', this.readingSectionElemRef.nativeElement.clientWidth, 'offsetWidth:', this.readingSectionElemRef.nativeElement.offsetWidth, 'bbox:', this.readingSectionElemRef.nativeElement.getBoundingClientRect().width);
 
     if (calculationMethod === EpubPageCalculationMethod.Default) {
-      return this.readingSectionElemRef.nativeElement.clientWidth - margin + (((COLUMN_GAP) * columnGapModifier));
+      return baseWidth - (COLUMN_GAP * columnGapModifier);
     } else {
-      return this.readingSectionElemRef.nativeElement.clientWidth - margin + (((COLUMN_GAP) * columnGapModifier) + 10);
+      return baseWidth - (COLUMN_GAP * columnGapModifier);
     }
   });
 
@@ -1714,7 +1713,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case BookPageLayoutMode.Column1:
         return 1;
       case BookPageLayoutMode.Column2:
-        return calculationMethod === EpubPageCalculationMethod.Default ? 1 : 1.25;
+        return calculationMethod === EpubPageCalculationMethod.Default ? 2 : 2.5;
     }
   });
 
