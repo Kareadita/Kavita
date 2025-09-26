@@ -548,9 +548,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         case BookPageLayoutMode.Default:
           return 'unset';
         case BookPageLayoutMode.Column1:
-          return (base - COLUMN_GAP) + 'px';
+          return base + 'px';
         case BookPageLayoutMode.Column2:
-          return ((base - COLUMN_GAP) / 2) + 'px';
+          return (base / 2) + 'px';
         default:
           return 'unset';
       }

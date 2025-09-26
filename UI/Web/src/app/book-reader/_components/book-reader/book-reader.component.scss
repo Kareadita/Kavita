@@ -242,7 +242,7 @@ $action-bar-height: 38px;
 .column-layout-1 {
   .book-content {
     column-count: 1;
-    column-gap: 20px;
+    column-gap: 0px;
     overflow: hidden;
     word-break: break-word;
     overflow-wrap: break-word;
@@ -252,7 +252,7 @@ $action-bar-height: 38px;
 .column-layout-2 {
   .book-content {
     column-count: 2;
-    column-gap: 20px;
+    column-gap: 0px;
     overflow: hidden;
     word-break: break-word;
     overflow-wrap: break-word;
