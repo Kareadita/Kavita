@@ -1724,8 +1724,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!(this.pageStyles() || {}).hasOwnProperty('margin-left')) return 0; // TODO: Test this, added for safety during refactor
 
     const margin = (window.innerWidth * (parseInt(this.pageStyles()['margin-left'], 10) / 100)) * 2;
+    const columnGapModifier = this.columnGapModifier();
     const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-    return windowWidth - margin;
+    return windowWidth - margin - (COLUMN_GAP * columnGapModifier);
   }
 
   convertVwToPx(vwValue: number) {
