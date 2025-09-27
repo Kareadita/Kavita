@@ -64,7 +64,6 @@ public class AnnotationController : BaseApiController
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<AnnotationDto>>> GetAnnotations(int chapterId)
     {
-
         return Ok(await _unitOfWork.UserRepository.GetAnnotations(User.GetUserId(), chapterId));
     }
 
@@ -138,6 +137,28 @@ public class AnnotationController : BaseApiController
         if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "annotation-delete"));
 
         _unitOfWork.AnnotationRepository.Remove(annotation);
+        await _unitOfWork.CommitAsync();
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Removes annotations in bulk. Requires every annotation to be owned by the authenticated user
+    /// </summary>
+    /// <param name="annotationIds"></param>
+    /// <returns></returns>
+    [HttpPost("bulk-delete")]
+    public async Task<ActionResult> DeleteAnnotationsBulk(IList<int> annotationIds)
+    {
+        var userId = User.GetUserId();
+
+        var annotations = await _unitOfWork.AnnotationRepository.GetAnnotations(annotationIds);
+        if (annotations.Any(a => a.AppUserId != userId))
+        {
+            return BadRequest();
+        }
+
+        _unitOfWork.AnnotationRepository.Remove(annotations);
         await _unitOfWork.CommitAsync();
 
         return Ok();

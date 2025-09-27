@@ -23,8 +23,10 @@ public interface IAnnotationRepository
     void Attach(AppUserAnnotation annotation);
     void Update(AppUserAnnotation annotation);
     void Remove(AppUserAnnotation annotation);
+    void Remove(IEnumerable<AppUserAnnotation> annotations);
     Task<AnnotationDto?> GetAnnotationDto(int id);
     Task<AppUserAnnotation?> GetAnnotation(int id);
+    Task<IList<AppUserAnnotation>> GetAnnotations(IList<int> ids);
     Task<IList<FullAnnotationDto>> GetFullAnnotationsByUserIdAsync(int userId);
     Task<IList<FullAnnotationDto>> GetFullAnnotations(IList<int> annotationIds);
     Task<PagedList<AnnotationDto>> GetAnnotationDtos(int userId, BrowseAnnotationFilterDto filter, UserParams userParams);
@@ -47,6 +49,11 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         context.AppUserAnnotation.Remove(annotation);
     }
 
+    public void Remove(IEnumerable<AppUserAnnotation> annotations)
+    {
+        context.AppUserAnnotation.RemoveRange(annotations);
+    }
+
     public async Task<AnnotationDto?> GetAnnotationDto(int id)
     {
         return await context.AppUserAnnotation
@@ -58,6 +65,13 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
     {
         return await context.AppUserAnnotation
             .FirstOrDefaultAsync(a => a.Id == id);
+    }
+
+    public async Task<IList<AppUserAnnotation>> GetAnnotations(IList<int> ids)
+    {
+        return await context.AppUserAnnotation
+            .Where(a => ids.Contains(a.Id))
+            .ToListAsync();
     }
 
     public async Task<PagedList<AnnotationDto>> GetAnnotationDtos(int userId, BrowseAnnotationFilterDto filter, UserParams userParams)

@@ -117,11 +117,28 @@ export class BrowseAnnotationsComponent implements OnInit {
   handleAction = async (action: ActionItem<Annotation>, entity: Annotation) => {
     const selectedIndices = this.bulkSelectionService.getSelectedCardsForSource('annotations');
     const selectedAnnotations = this.annotations().filter((_, idx) => selectedIndices.includes(idx+''));
+    const ids = selectedAnnotations.map(a => a.id);
 
     switch (action.action) {
       case Action.Delete:
+        this.annotationsService.bulkDelete(ids).pipe(
+          tap(() => {
+            this.annotations.update(x => x.filter(a => !ids.includes(a.id)));
+            this.pagination.update(x => {
+              const count = this.annotations().length;
+
+              return {
+                ...x,
+                totalItems: count,
+                totalPages: Math.ceil(count / x.itemsPerPage),
+              }
+            })
+          }),
+        ).subscribe();
+        break
       case Action.Export:
-        this.annotationsService.exportAnnotations(selectedAnnotations.map(a => a.id)).subscribe();
+        this.annotationsService.exportAnnotations(ids).subscribe();
+        break
     }
   }
 

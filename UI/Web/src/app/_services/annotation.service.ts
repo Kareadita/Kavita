@@ -157,6 +157,19 @@ export class AnnotationService {
   }
 
   /**
+   * While this method will update the services annotations list. No events will be sent out.
+   * Deletion on the callers' side should be handled in the rxjs chain.
+   * @param ids
+   */
+  bulkDelete(ids: number[]) {
+    return this.httpClient.post(this.baseUrl + "annotation/bulk-delete", ids).pipe(
+      tap(() => {
+        this._annotations.update(x => x.filter(a => !ids.includes(a.id)));
+      }),
+    );
+  }
+
+  /**
    * Routes to the book reader with the annotation in view
    * @param item
    */
