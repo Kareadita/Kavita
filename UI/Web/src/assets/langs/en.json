@@ -2335,7 +2335,7 @@
         "unit-read-last": "Days from TODAY",
         "disclaimer-highlight-slots": "When using this field, only your own annotations will be shown",
         "unit-file-size": "GB, MB, KB, B",
-        "disclaimer-file-size": "Total file size across all chapters for the series"
+        "disclaimer-file-size": "File size must include the unit"
     },
 
     "sort-field-pipe": {
