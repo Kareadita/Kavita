@@ -19,7 +19,7 @@ public interface IPresenceTracker
 internal class ConnectionDetail
 {
     public string UserName { get; set; }
-    public List<string> ConnectionIds { get; set; } = new List<string>();
+    public List<string> ConnectionIds { get; set; } = [];
     public bool IsAdmin { get; set; }
 }
 
@@ -29,7 +29,7 @@ internal class ConnectionDetail
 public class PresenceTracker : IPresenceTracker
 {
     private readonly IUnitOfWork _unitOfWork;
-    private static readonly Dictionary<int, ConnectionDetail> OnlineUsers = new Dictionary<int, ConnectionDetail>();
+    private static readonly Dictionary<int, ConnectionDetail> OnlineUsers = new();
 
     public PresenceTracker(IUnitOfWork unitOfWork)
     {
@@ -63,9 +63,9 @@ public class PresenceTracker : IPresenceTracker
     {
         lock (OnlineUsers)
         {
-            if (!OnlineUsers.ContainsKey(userId)) return Task.CompletedTask;
+            if (!OnlineUsers.TryGetValue(userId, out var user)) return Task.CompletedTask;
 
-            OnlineUsers[userId].ConnectionIds.Remove(connectionId);
+            user.ConnectionIds.Remove(connectionId);
 
             if (OnlineUsers[userId].ConnectionIds.Count == 0)
             {
