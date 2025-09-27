@@ -102,15 +102,12 @@ public class AccountController : BaseApiController
 
         try
         {
-            user.UpdateLastActive();
+            await _unitOfWork.UserRepository.UpdateUserAsActive(user.Id);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
         }
-
-        _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
 
         return Ok(await ConstructUserDto(user, roles, false));
     }
@@ -293,7 +290,7 @@ public class AccountController : BaseApiController
         // Update LastActive on account
         try
         {
-            user.UpdateLastActive();
+            await _unitOfWork.UserRepository.UpdateUserAsActive(user.Id);
         }
         catch (Exception ex)
         {

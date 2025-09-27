@@ -45,6 +45,7 @@ namespace API.Controllers;
 
 [AllowAnonymous]
 [ServiceFilter(typeof(OpdsActionFilterAttribute))]
+[ServiceFilter(typeof(OpdsActiveUserMiddlewareAttribute))]
 public class OpdsController : BaseApiController
 {
     private readonly IOpdsService _opdsService;
@@ -53,41 +54,10 @@ public class OpdsController : BaseApiController
     private readonly IDirectoryService _directoryService;
     private readonly ICacheService _cacheService;
     private readonly IReaderService _readerService;
-    private readonly ISeriesService _seriesService;
     private readonly IAccountService _accountService;
     private readonly ILocalizationService _localizationService;
-    private readonly IMapper _mapper;
-
-
-    private readonly XmlSerializer _xmlSerializer;
     private readonly XmlSerializer _xmlOpenSearchSerializer;
-    private readonly FilterDto _filterDto = new()
-    {
-        Formats = [],
-        Character = [],
-        Colorist = [],
-        Editor = [],
-        Genres = [],
-        Inker = [],
-        Languages = [],
-        Letterer = [],
-        Penciller = [],
-        Libraries = [],
-        Publisher = [],
-        Rating = 0,
-        Tags = [],
-        Translators = [],
-        Writers = [],
-        AgeRating = [],
-        CollectionTags = [],
-        CoverArtist = [],
-        ReadStatus = new ReadStatus(),
-        SortOptions = null,
-        PublicationStatus = []
-    };
 
-    private readonly FilterV2Dto _filterV2Dto = new();
-    private const int PageSize = 20;
     public const string UserId = nameof(UserId);
 
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
@@ -101,13 +71,10 @@ public class OpdsController : BaseApiController
         _directoryService = directoryService;
         _cacheService = cacheService;
         _readerService = readerService;
-        _seriesService = seriesService;
         _accountService = accountService;
         _localizationService = localizationService;
-        _mapper = mapper;
         _opdsService = opdsService;
 
-        _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
     }
 

@@ -3,6 +3,7 @@ using API.Constants;
 using API.Controllers;
 using API.Data;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
 using API.Services.Plus;
 using API.Services.Store;
@@ -91,6 +92,7 @@ public static class ApplicationServiceExtensions
 
         services.AddScoped<IOidcService, OidcService>();
         services.AddScoped<OpdsActionFilterAttribute>();
+        services.AddScoped<OpdsActiveUserMiddlewareAttribute>();
 
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
