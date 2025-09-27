@@ -12,8 +12,8 @@ import {InviteUserComponent} from '../invite-user/invite-user.component';
 import {EditUserComponent} from '../edit-user/edit-user.component';
 import {Router} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
-import {AsyncPipe, NgClass, NgOptimizedImage, TitleCasePipe} from '@angular/common';
-import {size, TranslocoModule, TranslocoService} from "@jsverse/transloco";
+import {AsyncPipe, NgClass, TitleCasePipe} from '@angular/common';
+import {TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -124,7 +124,7 @@ export class ManageUsersComponent implements OnInit {
         setTimeout(() => {
           this.loadMembers();
           this.toastr.success(this.translocoService.translate('toasts.user-deleted', {user: member.username}));
-        }, 30); // SetTimeout because I've noticed this can run super fast and not give enough time for data to flush
+        }, 30); // SetTimeout because I've noticed this can run superfast and not give enough time for data to flush
       });
     }
   }
