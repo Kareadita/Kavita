@@ -164,9 +164,24 @@ export class AnnotationService {
     this.router.navigate(['/library', item.libraryId, 'series', item.seriesId, 'book', item.chapterId], { queryParams: { annotation: item.id } });
   }
 
-  exportAnnotations() {
-    return this.httpClient.get(this.baseUrl + 'annotation/export', {observe: 'events', responseType: 'blob', reportProgress: true}).pipe(
-      tap(_ => console.log('export starting')),
+  exportFilter(filter: FilterV2<AnnotationsFilterField, AnnotationsSortField>, pageNum?: number, itemsPerPage?: number) {
+    const params = this.utilityService.addPaginationIfExists(new HttpParams(), pageNum, itemsPerPage);
+
+    return this.httpClient.post(this.baseUrl + 'annotation/export-filter', filter, {
+      observe: 'events',
+      responseType: 'blob',
+      reportProgress: true,
+      params}).
+    pipe(
+      throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
+      download((blob, filename) => {
+        this.save(blob, decodeURIComponent(filename));
+      })
+    );
+  }
+
+  exportAnnotations(ids?: number[]) {
+    return this.httpClient.post(this.baseUrl + 'annotation/export', ids, {observe: 'events', responseType: 'blob', reportProgress: true}).pipe(
       throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
       download((blob, filename) => {
         this.save(blob, decodeURIComponent(filename));

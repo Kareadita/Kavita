@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
-  Component, computed,
-  DestroyRef, effect,
+  Component,
+  DestroyRef,
+  effect,
   EventEmitter,
   inject,
   OnInit,
@@ -29,6 +30,10 @@ import {CardDetailLayoutComponent} from "../../cards/card-detail-layout/card-det
 import {
   AnnotationCardComponent
 } from "../../book-reader/_components/_annotations/annotation-card/annotation-card.component";
+import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
+import {BulkOperationsComponent} from "../../cards/bulk-operations/bulk-operations.component";
+import {BulkSelectionService} from "../../cards/bulk-selection.service";
+import {User} from "../../_models/user";
 
 @Component({
   selector: 'app-browse-annotations',
@@ -37,7 +42,8 @@ import {
     TranslocoDirective,
     DecimalPipe,
     CardDetailLayoutComponent,
-    AnnotationCardComponent
+    AnnotationCardComponent,
+    BulkOperationsComponent
   ],
   templateUrl: './browse-annotations.component.html',
   styleUrl: './browse-annotations.component.scss',
@@ -51,7 +57,8 @@ export class BrowseAnnotationsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly metadataService = inject(MetadataService);
-
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  public readonly bulkSelectionService = inject(BulkSelectionService);
 
   isLoading = signal(true);
   annotations = signal<Annotation[]>([]);
@@ -69,6 +76,8 @@ export class BrowseAnnotationsComponent implements OnInit {
   refresh: EventEmitter<void> = new EventEmitter();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 
+  actions: ActionItem<Annotation>[] = [];
+
   constructor() {
     effect(() => {
       const event = this.annotationsService.events();
@@ -79,9 +88,16 @@ export class BrowseAnnotationsComponent implements OnInit {
           this.annotations.update(x => x.filter(a => a.id !== event.annotation.id));
       }
     });
+
+    effect(() => {
+      this.annotations();
+      this.bulkSelectionService.deselectAll();
+    });
   }
 
   ngOnInit() {
+    this.actions = this.actionFactoryService.getAnnotationActions(this.actionFactoryService.dummyCallback);
+
     this.route.data.pipe(
       takeUntilDestroyed(this.destroyRef),
       map(data => data['filter'] as AnnotationsFilter | null | undefined),
@@ -96,6 +112,28 @@ export class BrowseAnnotationsComponent implements OnInit {
         this.loadData(this.filter())
       }),
     ).subscribe();
+  }
+
+  handleAction = async (action: ActionItem<Annotation>, entity: Annotation) => {
+    const selectedIndices = this.bulkSelectionService.getSelectedCardsForSource('annotations');
+    const selectedAnnotations = this.annotations().filter((_, idx) => selectedIndices.includes(idx+''));
+
+    switch (action.action) {
+      case Action.Delete:
+      case Action.Export:
+        this.annotationsService.exportAnnotations(selectedAnnotations.map(a => a.id)).subscribe();
+    }
+  }
+
+  shouldRender = (action: ActionItem<Annotation>, entity: Annotation, user: User) => {
+    switch (action.action) {
+      case Action.Delete:
+        const selectedIndices = this.bulkSelectionService.getSelectedCardsForSource('annotations');
+        const selectedAnnotations = this.annotations().filter((_, idx) => selectedIndices.includes(idx+''));
+        return selectedAnnotations.find(a => a.ownerUsername !== user.username) === undefined;
+    }
+
+    return true;
   }
 
   private loadData(filter?: AnnotationsFilter) {
@@ -129,6 +167,4 @@ export class BrowseAnnotationsComponent implements OnInit {
 
     this.filter.set(data.filterV2);
   }
-
-
 }

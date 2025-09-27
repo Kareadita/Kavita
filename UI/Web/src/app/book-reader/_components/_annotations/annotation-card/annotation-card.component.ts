@@ -59,10 +59,14 @@ export class AnnotationCardComponent {
    * Redirects to the reader with annotation in view
    */
   showInReaderLink = input<boolean>(false);
+  showSelectionBox = input<boolean>(false);
   openInIncognitoMode = input<boolean>(false);
   isInReader = input<boolean>(true);
+
+  selected = input<boolean>(false);
   @Output() delete = new EventEmitter();
   @Output() navigate = new EventEmitter<Annotation>();
+  @Output() selection = new EventEmitter<boolean>();
 
   titleColor: Signal<string>;
   hasClicked = model<boolean>(false);

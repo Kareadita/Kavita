@@ -8,7 +8,12 @@ import {
   Input,
   OnInit
 } from '@angular/core';
-import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {
+  Action,
+  ActionFactoryService,
+  ActionItem,
+  ActionShouldRenderFunc
+} from 'src/app/_services/action-factory.service';
 import {BulkSelectionService} from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, DecimalPipe, NgStyle} from "@angular/common";
@@ -31,9 +36,10 @@ import {KEY_CODES} from "../../shared/_services/utility.service";
   styleUrls: ['./bulk-operations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BulkOperationsComponent implements OnInit {
+export class BulkOperationsComponent<T> implements OnInit {
 
-  @Input({required: true}) actionCallback!: (action: ActionItem<any>, data: any) => void;
+  @Input({required: true}) actionCallback!: (action: ActionItem<T>, data: any) => void;
+  @Input() shouldRenderFunc?: ActionShouldRenderFunc<T>;
   /**
    * Modal mode means don't fix to the top
    */
@@ -48,7 +54,7 @@ export class BulkOperationsComponent implements OnInit {
   @Input() marginRight: number = 8;
   hasMarkAsRead: boolean = false;
   hasMarkAsUnread: boolean = false;
-  actions: Array<ActionItem<any>> = [];
+  actions: Array<ActionItem<T>> = [];
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -74,7 +80,8 @@ export class BulkOperationsComponent implements OnInit {
   ngOnInit(): void {
     this.bulkSelectionService.actions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(actions => {
       // We need to do a recursive callback apply
-      this.actions = this.actionFactoryService.applyCallbackToList(actions, this.actionCallback.bind(this));
+      const shouldRender = this.shouldRenderFunc ? this.shouldRenderFunc.bind(this) : this.actionFactoryService.dummyShouldRender;
+      this.actions = this.actionFactoryService.applyCallbackToList(actions, this.actionCallback.bind(this), shouldRender);
       this.hasMarkAsRead = this.actionFactoryService.hasAction(this.actions, Action.MarkAsRead);
       this.hasMarkAsUnread = this.actionFactoryService.hasAction(this.actions, Action.MarkAsUnread);
       this.cdRef.markForCheck();

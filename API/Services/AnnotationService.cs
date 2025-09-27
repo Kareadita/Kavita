@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -8,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.Annotations;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Helpers;
@@ -22,7 +24,13 @@ public interface IAnnotationService
 {
     Task<AnnotationDto> CreateAnnotation(int userId, AnnotationDto dto);
     Task<AnnotationDto> UpdateAnnotation(int userId, AnnotationDto dto);
-    Task<string> ExportAnnotations(int userId);
+    /// <summary>
+    /// Export all annotations for a user, or optionally specify which annotation exactly
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="annotationIds"></param>
+    /// <returns></returns>
+    Task<string> ExportAnnotations(int userId, IList<int>? annotationIds = null);
 }
 
 public class AnnotationService : IAnnotationService
@@ -145,7 +153,7 @@ public class AnnotationService : IAnnotationService
         throw new KavitaException("generic-error");
     }
 
-    public async Task<string> ExportAnnotations(int userId)
+    public async Task<string> ExportAnnotations(int userId, IList<int>? annotationIds = null)
     {
         try
         {
@@ -154,7 +162,15 @@ public class AnnotationService : IAnnotationService
             if (user == null) throw new KavitaException("user-doesnt-exist");
 
             // Get all annotations for the user with related data
-            var annotations = await _unitOfWork.AnnotationRepository.GetFullAnnotationsByUserIdAsync(userId);
+            IList<FullAnnotationDto> annotations;
+            if (annotationIds == null)
+            {
+                annotations = await _unitOfWork.AnnotationRepository.GetFullAnnotationsByUserIdAsync(userId);
+            }
+            else
+            {
+                annotations = await _unitOfWork.AnnotationRepository.GetFullAnnotations(annotationIds);
+            }
 
             // Get settings for hostname
             var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -226,13 +242,9 @@ public class AnnotationService : IAnnotationService
 
             var json = JsonSerializer.Serialize(exportData, options);
 
-            // Write to temp directory
-            var tempFilePath = Path.Combine(_directoryService.TempDirectory, $"annotations_export_{userId}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json");
-            await File.WriteAllTextAsync(tempFilePath, json);
+            _logger.LogInformation("Successfully exported {AnnotationCount} annotations for user {UserId}", annotations.Count, userId);
 
-            _logger.LogInformation("Successfully exported {AnnotationCount} annotations for user {UserId} to {FilePath}", annotations.Count, userId, tempFilePath);
-
-            return tempFilePath;
+            return json;
         }
         catch (Exception ex)
         {

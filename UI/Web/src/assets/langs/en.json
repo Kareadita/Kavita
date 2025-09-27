@@ -1277,7 +1277,8 @@
             "true": "True",
             "false": "False"
         },
-        "annotations-count": "{{num}} Annotations"
+        "annotations-count": "{{num}} Annotations",
+        "export": "Export"
     },
 
     "person-detail": {
@@ -3151,7 +3152,8 @@
         "reorder": "Reorder",
         "rename": "Rename",
         "rename-tooltip": "Rename the Smart Filter",
-        "merge": "Merge"
+        "merge": "Merge",
+        "export": "Export"
     },
 
     "preferences": {

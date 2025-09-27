@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Metadata.Browse.Requests;
@@ -142,17 +144,44 @@ public class AnnotationController : BaseApiController
     }
 
     /// <summary>
-    /// Exports Annotations for the User
+    /// Exports annotations for the given users
     /// </summary>
     /// <returns></returns>
-    [HttpGet("export")]
-    public async Task<IActionResult> ExportAnnotations()
+    [HttpPost("export-filter")]
+    public async Task<IActionResult> ExportAnnotationsFilter(BrowseAnnotationFilterDto filter, [FromQuery] UserParams? userParams)
     {
-        var exportFile = await _annotationService.ExportAnnotations(User.GetUserId());
-        if (string.IsNullOrEmpty(exportFile)) return BadRequest();
+        userParams ??= UserParams.Default;
 
+        var list = await _unitOfWork.AnnotationRepository.GetAnnotationDtos(User.GetUserId(), filter, userParams);
+        var annotations = list.Select(a => a.Id).ToList();
 
-        return PhysicalFile(exportFile, "application/json",
-            System.Web.HttpUtility.UrlEncode(Path.GetFileName(exportFile)), true);
+        var json = await _annotationService.ExportAnnotations(User.GetUserId(), annotations);
+        if (string.IsNullOrEmpty(json)) return BadRequest();
+
+        var bytes = Encoding.UTF8.GetBytes(json);
+        var fileName = System.Web.HttpUtility.UrlEncode($"annotations_export_{User.GetUserId()}_{DateTime.UtcNow:yyyyMMdd_HHmmss}_filtered");
+        return File(bytes, "application/json", fileName + ".json");
+    }
+
+    /// <summary>
+    /// Exports Annotations for the User
+    /// </summary>
+    /// <param name="annotations">Export annotations with the given ids</param>
+    /// <returns></returns>
+    [HttpPost("export")]
+    public async Task<IActionResult> ExportAnnotations(IList<int>? annotations = null)
+    {
+        var json = await _annotationService.ExportAnnotations(User.GetUserId(), annotations);
+        if (string.IsNullOrEmpty(json)) return BadRequest();
+
+        var bytes = Encoding.UTF8.GetBytes(json);
+
+        var fileName = System.Web.HttpUtility.UrlEncode($"annotations_export_{User.GetUserId()}_{DateTime.UtcNow:yyyyMMdd_HHmmss}");
+        if (annotations != null)
+        {
+            fileName += "_user_selection";
+        }
+
+        return File(bytes, "application/json", fileName + ".json");
     }
 }

@@ -9,6 +9,8 @@
 
     </app-side-nav-companion-bar>
 
+    <app-bulk-operations [actionCallback]="handleAction" [shouldRenderFunc]="shouldRender" />
+
     <app-card-detail-layout
       [isLoading]="isLoading()"
       [items]="annotations()"
@@ -30,6 +32,9 @@
           [showInReaderLink]="true"
           [showPageLink]="false"
           [openInIncognitoMode]="true"
+          [showSelectionBox]="true"
+          [selected]="bulkSelectionService.isCardSelected('annotations', position)"
+          (selection)="bulkSelectionService.handleCardSelection('annotations', position, annotations().length, $event)"
         />
       </ng-template>
 
