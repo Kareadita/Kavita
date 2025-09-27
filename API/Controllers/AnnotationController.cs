@@ -98,7 +98,7 @@ public class AnnotationController : BaseApiController
     {
         try
         {
-            return Ok(_annotationService.CreateAnnotation(User.GetUserId(), dto));
+            return Ok(await _annotationService.CreateAnnotation(User.GetUserId(), dto));
         }
         catch (KavitaException ex)
         {
@@ -133,7 +133,7 @@ public class AnnotationController : BaseApiController
     public async Task<ActionResult> DeleteAnnotation(int annotationId)
     {
         var annotation = await _unitOfWork.AnnotationRepository.GetAnnotation(annotationId);
-        if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest(_localizationService.Translate(User.GetUserId(), "annotation-delete"));
+        if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "annotation-delete"));
 
         _unitOfWork.AnnotationRepository.Remove(annotation);
         await _unitOfWork.CommitAsync();
