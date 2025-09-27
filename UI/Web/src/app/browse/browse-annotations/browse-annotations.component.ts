@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
+  Component, computed,
+  DestroyRef, effect,
   EventEmitter,
   inject,
   OnInit,
@@ -68,6 +68,18 @@ export class BrowseAnnotationsComponent implements OnInit {
   trackByIdentity = (idx: number, item: Annotation) => `${item.id}`;
   refresh: EventEmitter<void> = new EventEmitter();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
+
+  constructor() {
+    effect(() => {
+      const event = this.annotationsService.events();
+      if (!event) return;
+
+      switch (event.type) {
+        case "delete":
+          this.annotations.update(x => x.filter(a => a.id !== event.annotation.id));
+      }
+    });
+  }
 
   ngOnInit() {
     this.route.data.pipe(

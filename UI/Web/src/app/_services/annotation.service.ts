@@ -128,21 +128,32 @@ export class AnnotationService {
     return this.httpClient.get<Annotation>(this.baseUrl + `annotation/${annotationId}`);
   }
 
-  delete(id: number) {
-    const filtered = this.annotations().filter(a => a.id === id);
-    if (filtered.length === 0) return of();
-    const annotationToDelete = filtered[0];
+  /**
+   * Deletes an annotation without it needing to be loading in the signal.
+   * Used in the ViewEditAnnotationDrawer. Event is still fired.
+   * @param annotation
+   */
+  deleteAnnotation(annotation: Annotation) {
+    const id = annotation.id;
 
     return this.httpClient.delete(this.baseUrl + `annotation?annotationId=${id}`, TextResonse).pipe(tap(_ => {
       const annotations = this._annotations();
       this._annotations.set(annotations.filter(a => a.id !== id));
 
       this._events.set({
-        pageNumber: annotationToDelete.pageNumber,
+        pageNumber: annotation.pageNumber,
         type: 'delete',
-        annotation: annotationToDelete
+        annotation: annotation
       });
     }));
+  }
+
+  delete(id: number) {
+    const filtered = this.annotations().filter(a => a.id === id);
+    if (filtered.length === 0) return of();
+    const annotationToDelete = filtered[0];
+
+    return this.deleteAnnotation(annotationToDelete);
   }
 
   /**

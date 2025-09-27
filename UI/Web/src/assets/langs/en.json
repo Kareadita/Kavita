@@ -950,7 +950,8 @@
         "create": "Create",
         "close": "{{common.close}}",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
-        "edit": "Edit"
+        "edit": "Edit",
+        "delete": "Delete"
     },
 
     "quill-wrapper": {
