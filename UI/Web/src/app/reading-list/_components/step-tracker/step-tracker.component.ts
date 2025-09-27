@@ -1,5 +1,5 @@
-import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
-import {CommonModule} from "@angular/common";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
+import {NgClass} from "@angular/common";
 
 
 export interface TimelineStep {
@@ -12,7 +12,9 @@ export interface TimelineStep {
 
 @Component({
     selector: 'app-step-tracker',
-    imports: [CommonModule],
+  imports: [
+    NgClass
+  ],
     templateUrl: './step-tracker.component.html',
     styleUrls: ['./step-tracker.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
