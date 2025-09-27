@@ -11,14 +11,12 @@ using API.Exceptions;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
-using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MimeTypes;
 
 namespace API.Controllers;
-
 #nullable enable
 
 
@@ -42,9 +40,8 @@ public class OpdsController : BaseApiController
 
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
-        IReaderService readerService, ISeriesService seriesService,
-        IAccountService accountService, ILocalizationService localizationService,
-        IMapper mapper, IOpdsService opdsService)
+        IReaderService readerService, IAccountService accountService,
+        ILocalizationService localizationService, IOpdsService opdsService)
     {
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
@@ -87,7 +84,6 @@ public class OpdsController : BaseApiController
         return CreateXmlResult(_opdsService.SerializeXml(feed));
     }
 
-    // TODO: Can I move this to the middleware?
     private async Task<Tuple<string, string>> GetPrefix()
     {
         var baseUrl = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BaseUrl)).Value;
@@ -316,7 +312,7 @@ public class OpdsController : BaseApiController
     }
 
     /// <summary>
-    /// Returns individual items (chapters) from Reading List by Id - Supports Pagination
+    /// Returns individual items (chapters) from Reading List by ID - Supports Pagination
     /// </summary>
     /// <param name="readingListId"></param>
     /// <param name="apiKey"></param>
@@ -638,7 +634,7 @@ public class OpdsController : BaseApiController
         {
             var (baseUrl, prefix) = await GetPrefix();
 
-            var feed = await _opdsService.GetItemsFromVolume(new OpdsItemsFromCompoundEntityIdsRequest()
+            var feed = await _opdsService.GetItemsFromChapter(new OpdsItemsFromCompoundEntityIdsRequest()
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,

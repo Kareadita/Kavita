@@ -61,7 +61,6 @@ public class OpdsService : IOpdsService
     private readonly IMapper _mapper;
 
     private readonly XmlSerializer _xmlSerializer;
-    private readonly XmlSerializer _xmlOpenSearchSerializer;
 
     private const int PageSize = 20;
     private readonly FilterV2Dto _filterV2Dto = new();
@@ -102,7 +101,6 @@ public class OpdsService : IOpdsService
         _mapper = mapper;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
-        _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
     }
 
     public async Task<Feed> GetCatalogue(OpdsCatalogueRequest request)
