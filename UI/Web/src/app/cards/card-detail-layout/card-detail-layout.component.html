@@ -32,6 +32,8 @@
     </app-metadata-filter>
   }
 
+  <ng-container [ngTemplateOutlet]="topBar" />
+
   <div class="viewport-container ms-1" [ngClass]="{'empty': items.length === 0 && !isLoading}">
     <div class="content-container">
       <div class="card-container">

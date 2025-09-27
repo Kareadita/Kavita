@@ -12,8 +12,6 @@
     </div>
 
     <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid ps-0" #scrollingBlock>
-        <app-bulk-operations [actionCallback]="bulkActionCallback" />
-
       @if (filter) {
         <app-card-detail-layout [isLoading]="isLoading"
                                 [items]="series"
@@ -24,6 +22,11 @@
                                 [trackByIdentity]="trackByIdentity"
                                 [refresh]="refresh"
                                 (applyFilter)="updateFilter($event)">
+
+          <ng-template #topBar>
+            <app-bulk-operations [actionCallback]="bulkActionCallback" />
+          </ng-template>
+
           <ng-template #cardItem let-item let-position="idx">
             <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="removeSeries($event)"
                              (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"

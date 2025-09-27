@@ -9,8 +9,6 @@
 
     </app-side-nav-companion-bar>
 
-    <app-bulk-operations [actionCallback]="handleAction" [shouldRenderFunc]="shouldRender" />
-
     <app-card-detail-layout
       [isLoading]="isLoading()"
       [items]="annotations()"
@@ -23,6 +21,10 @@
       [filterOpen]="filterOpen"
       (applyFilter)="updateFilter($event)"
     >
+
+      <ng-template #topBar>
+        <app-bulk-operations [actionCallback]="handleAction" [shouldRenderFunc]="shouldRender" />
+      </ng-template>
 
       <ng-template #extraButtons>
         <button class="btn btn-secondary ms-2" (click)="exportFilter()">
