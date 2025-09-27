@@ -233,7 +233,7 @@ public class LocalizationService : ILocalizationService
                     RenderName = GetDisplayName(fileName),
                     TranslationCompletion = 0, // Will be calculated later
                     IsRtL = IsRightToLeft(fileName),
-                    Hash = hash
+                    Hash = hash,
                 };
             }
             else
@@ -258,7 +258,15 @@ public class LocalizationService : ILocalizationService
             }
         }
 
-        var kavitaLocales = locales.Values.ToList();
+        var validFileNames = uiLanguages
+            .Select(file => _directoryService.FileSystem.Path.GetFileNameWithoutExtension(file))
+            .Intersect(backendLanguages
+                .Select(file => _directoryService.FileSystem.Path.GetFileNameWithoutExtension(file)))
+            .ToList();
+
+        var kavitaLocales = locales.Values
+            .Where(l => validFileNames.Contains(l.FileName))
+            .ToList();
         _cache.Set(LocaleCacheKey, kavitaLocales, _localsCacheOptions);
 
         return kavitaLocales;
