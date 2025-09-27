@@ -1,40 +1,20 @@
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Serialization;
-using API.Comparators;
 using API.Data;
-using API.Data.Repositories;
-using API.DTOs;
-using API.DTOs.Collection;
-using API.DTOs.CollectionTags;
-using API.DTOs.Filtering;
-using API.DTOs.Filtering.v2;
 using API.DTOs.OPDS;
 using API.DTOs.OPDS.Requests;
-using API.DTOs.Person;
 using API.DTOs.Progress;
-using API.DTOs.ReadingLists;
-using API.DTOs.Search;
-using API.Entities;
 using API.Entities.Enums;
 using API.Exceptions;
 using API.Extensions;
-using API.Helpers;
 using API.Middleware;
 using API.Services;
-using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Logging;
 using MimeTypes;
 
 namespace API.Controllers;
@@ -127,7 +107,7 @@ public class OpdsController : BaseApiController
     /// <returns></returns>
     [HttpGet("{apiKey}/smart-filters/{filterId}")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetSmartFilter(string apiKey, int filterId, [FromQuery] int pageNumber = 0)
+    public async Task<IActionResult> GetSmartFilter(string apiKey, int filterId, [FromQuery] int pageNumber = 1)
     {
         var userId = GetUserIdFromContext();
         var (baseUrl, prefix) = await GetPrefix();
@@ -154,7 +134,7 @@ public class OpdsController : BaseApiController
     /// <returns></returns>
     [HttpGet("{apiKey}/smart-filters")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetSmartFilters(string apiKey, [FromQuery] int pageNumber = 0)
+    public async Task<IActionResult> GetSmartFilters(string apiKey, [FromQuery] int pageNumber = 1)
     {
         try
         {
@@ -186,7 +166,7 @@ public class OpdsController : BaseApiController
     /// <returns></returns>
     [HttpGet("{apiKey}/libraries")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetLibraries(string apiKey, [FromQuery] int pageNumber = 0)
+    public async Task<IActionResult> GetLibraries(string apiKey, [FromQuery] int pageNumber = 1)
     {
         try
         {
@@ -217,7 +197,7 @@ public class OpdsController : BaseApiController
     /// <returns></returns>
     [HttpGet("{apiKey}/want-to-read")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetWantToRead(string apiKey, [FromQuery] int pageNumber = 0)
+    public async Task<IActionResult> GetWantToRead(string apiKey, [FromQuery] int pageNumber = 1)
     {
         try
         {
@@ -248,7 +228,7 @@ public class OpdsController : BaseApiController
     /// <returns></returns>
     [HttpGet("{apiKey}/collections")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetCollections(string apiKey, [FromQuery] int pageNumber = 0)
+    public async Task<IActionResult> GetCollections(string apiKey, [FromQuery] int pageNumber = 1)
     {
         try
         {
@@ -280,7 +260,7 @@ public class OpdsController : BaseApiController
     /// <returns></returns>
     [HttpGet("{apiKey}/collections/{collectionId}")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetCollection(int collectionId, string apiKey, [FromQuery] int pageNumber = 0)
+    public async Task<IActionResult> GetCollection(int collectionId, string apiKey, [FromQuery] int pageNumber = 1)
     {
         try
         {
@@ -312,7 +292,7 @@ public class OpdsController : BaseApiController
     /// <returns></returns>
     [HttpGet("{apiKey}/reading-list")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetReadingLists(string apiKey, [FromQuery] int pageNumber = 0)
+    public async Task<IActionResult> GetReadingLists(string apiKey, [FromQuery] int pageNumber = 1)
     {
         try
         {
@@ -344,7 +324,7 @@ public class OpdsController : BaseApiController
     /// <returns></returns>
     [HttpGet("{apiKey}/reading-list/{readingListId}")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey, [FromQuery] int pageNumber = 0)
+    public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey, [FromQuery] int pageNumber = 1)
     {
         try
         {
@@ -378,7 +358,7 @@ public class OpdsController : BaseApiController
     /// <returns></returns>
     [HttpGet("{apiKey}/libraries/{libraryId}")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetSeriesForLibrary(int libraryId, string apiKey, [FromQuery] int pageNumber = 0)
+    public async Task<IActionResult> GetSeriesForLibrary(int libraryId, string apiKey, [FromQuery] int pageNumber = 1)
     {
         try
         {
@@ -415,7 +395,6 @@ public class OpdsController : BaseApiController
         try
         {
             var (baseUrl, prefix) = await GetPrefix();
-            // TODO: Investigate why pagination starts at 1
             var feed = await _opdsService.GetRecentlyAdded(new OpdsPaginatedCatalogueRequest()
             {
                 BaseUrl = baseUrl,
@@ -447,7 +426,6 @@ public class OpdsController : BaseApiController
         try
         {
             var (baseUrl, prefix) = await GetPrefix();
-            // TODO: Investigate why pagination starts at 1
             var feed = await _opdsService.GetMoreInGenre(new OpdsItemsFromEntityIdRequest()
             {
                 BaseUrl = baseUrl,
@@ -479,7 +457,6 @@ public class OpdsController : BaseApiController
         try
         {
             var (baseUrl, prefix) = await GetPrefix();
-            // TODO: Investigate why pagination starts at 1
             var feed = await _opdsService.GetRecentlyUpdated(new OpdsPaginatedCatalogueRequest()
             {
                 BaseUrl = baseUrl,
@@ -510,7 +487,6 @@ public class OpdsController : BaseApiController
         try
         {
             var (baseUrl, prefix) = await GetPrefix();
-            // TODO: Investigate why pagination starts at 1
             var feed = await _opdsService.GetOnDeck(new OpdsPaginatedCatalogueRequest()
             {
                 BaseUrl = baseUrl,
