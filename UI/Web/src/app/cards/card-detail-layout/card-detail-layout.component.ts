@@ -122,6 +122,10 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
   @ContentChild('noData') noDataTemplate: TemplateRef<any> | null = null;
   @ViewChild('.jump-bar') jumpBar!: ElementRef<HTMLDivElement>;
+  /**
+   * Template that is rendered next to the save button
+   */
+  @ContentChild('extraButtons') extraButtonsRef!: TemplateRef<any>;
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 

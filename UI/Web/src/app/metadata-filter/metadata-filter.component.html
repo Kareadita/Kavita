@@ -79,10 +79,13 @@
       <button class="btn btn-primary col-6" (click)="apply()"><i class="fa-solid fa-play me-1" aria-hidden="true"></i>{{t('apply')}}</button>
     </div>
     <div class="col-md-2 col-sm-6 mt-4 pt-2">
-      <button class="btn btn-primary col-12" (click)="save()" [disabled]="filterSettings().saveDisabled || !this.sortGroup.get('name')?.value">
-        <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
-        {{t('save')}}
-      </button>
+      <div class="d-flex flex-grow-1"> <!-- TODO: How can we make this wider (col-12, old behv) if no extra buttons are present -->
+        <button class="btn btn-primary" (click)="save()" [disabled]="filterSettings().saveDisabled || !this.sortGroup.get('name')?.value">
+          <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+          {{t('save')}}
+        </button>
+        <ng-container [ngTemplateOutlet]="extraButtonsRef" />
+      </div>
     </div>
   </ng-template>
 </ng-container>

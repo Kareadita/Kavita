@@ -24,6 +24,12 @@
       (applyFilter)="updateFilter($event)"
     >
 
+      <ng-template #extraButtons>
+        <button class="btn btn-secondary ms-2" (click)="exportFilter()">
+          {{t('export')}}
+        </button>
+      </ng-template>
+
       <ng-template #cardItem let-item let-position="idx">
         <app-annotation-card
           [annotation]="item"

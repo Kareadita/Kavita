@@ -125,6 +125,13 @@ export class BrowseAnnotationsComponent implements OnInit {
     }
   }
 
+  exportFilter() {
+    const filter = this.filter();
+    if (!filter) return;
+
+    this.annotationsService.exportFilter(filter).subscribe();
+  }
+
   shouldRender = (action: ActionItem<Annotation>, entity: Annotation, user: User) => {
     switch (action.action) {
       case Action.Delete:
