@@ -157,9 +157,10 @@ public class AnnotationService : IAnnotationService
     {
         try
         {
-            // Get user with preferences for highlight colors
-            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
-            if (user == null) throw new KavitaException("user-doesnt-exist");
+            // Get users with preferences for highlight colors
+            var users = (await _unitOfWork.UserRepository
+                .GetAllUsersAsync(AppUserIncludes.UserPreferences))
+                .ToDictionary(u => u.Id, u => u);
 
             // Get all annotations for the user with related data
             IList<FullAnnotationDto> annotations;
@@ -196,6 +197,7 @@ public class AnnotationService : IAnnotationService
                             title = volumeGroup.Key.VolumeName,
                             annotations = volumeGroup.Select(annotation =>
                             {
+                                var user = users[annotation.UserId];
                                 var highlightSlot = user.UserPreferences.BookReaderHighlightSlots
                                     .FirstOrDefault(slot => slot.SlotNumber == annotation.SelectedSlotIndex);
 

@@ -351,6 +351,7 @@ public static class QueryableExtensions
         return query.Select(a => new FullAnnotationDto
             {
                 Id = a.Id,
+                UserId = a.AppUserId,
                 SelectedText = a.SelectedText,
                 Comment = a.Comment,
                 CommentHtml = a.CommentHtml,
