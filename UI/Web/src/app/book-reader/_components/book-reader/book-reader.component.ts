@@ -69,7 +69,6 @@ import {environment} from "../../../../environments/environment";
 import {LoadPageEvent} from "../_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
 import {FontService} from "../../../_services/font.service";
 import afterFrame from "afterframe";
-import {EpubPageCalculationMethod} from "../../../_models/readers/epub-page-calculation-method";
 
 
 interface HistoryPoint {
@@ -537,22 +536,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const writingStyle = this.writingStyle();
 
       const windowWidth = this.windowWidth();
+      const marginLeft = this.pageStyles()['margin-left'];
+      const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
       const base = writingStyle === WritingStyle.Vertical ? this.pageHeight() : this.pageWidth();
-
-      // console.log('window width: ', windowWidth)
-      // console.log('book content width: ', this.readingSectionElemRef?.nativeElement?.clientWidth);
-      // console.log('column width: ', base / 4);
 
 
       switch (layoutMode) {
         case BookPageLayoutMode.Default:
           return 'unset';
         case BookPageLayoutMode.Column1:
-          return ((base / 2) - 4) + 'px';
+          return Math.round(base / 2) + 'px';
         case BookPageLayoutMode.Column2:
-          //return (this.readingSectionElemRef?.nativeElement?.clientWidth - this.getMargin() + 1) / 2 + 'px';
-          return (((this.readingSectionElemRef?.nativeElement?.clientWidth ?? base)) / 4) + 1 + 'px'
-          //return ((base) / 4) + 6 + 'px'
+          return Math.round(base / 4) + 'px'
         default:
           return 'unset';
       }
@@ -1645,10 +1640,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         const targetScroll = currentVirtualPage * pageSize;
         const isVertical = this.writingStyle() === WritingStyle.Vertical;
 
+        const test = (document.querySelector('.reading-section')?.clientWidth || 0 - (document.querySelector('.left')?.clientWidth || 0) - (document.querySelector('.right')?.clientWidth || 0)) || targetScroll;
+
+        console.log('scrolling from ', this.bookContentElemRef.nativeElement.scrollLeft, ' to ', targetScroll);
+
         // +0 apparently goes forward 1 virtual page...
         const scrollMethod = isVertical ? 'scrollTo' : 'scrollToX';
         this.scrollService[scrollMethod](
-          targetScroll,
+          test,
           this.bookContentElemRef.nativeElement,
           'auto',
           () => {
@@ -1684,38 +1683,27 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   pageWidth = computed(() => {
     this.windowWidth(); // Ensure re-compute when windows size changes (element clientWidth isn't a signal)
-    this.pageCalcMode();
 
-    console.log('page width recalulated')
-    const calculationMethod = this.pageCalcMode();
     const marginLeft = this.pageStyles()['margin-left'];
+    const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
     const columnGapModifier = this.columnGapModifier();
     if (this.readingSectionElemRef == null) return 0;
 
-    const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
+    console.log('margin right: ', this.convertVwToPx(parseInt(marginLeft, 10)));
+    console.log('margin right dom: ', this.document.querySelector('.right')?.clientWidth);
 
-    // console.log('page size calc, client width: ', this.readingSectionElemRef.nativeElement.clientWidth)
-    // console.log('page size calc, margin: ', margin)
-    // console.log('page size calc, col gap: ', ((COLUMN_GAP / 2) * columnGapModifier));
-    // console.log("clientWidth", this.readingSectionElemRef.nativeElement.clientWidth, "window", window.innerWidth, "margin", margin, "left", marginLeft)
-    // console.log('clientWidth: ', this.readingSectionElemRef.nativeElement.clientWidth, 'offsetWidth:', this.readingSectionElemRef.nativeElement.offsetWidth, 'bbox:', this.readingSectionElemRef.nativeElement.getBoundingClientRect().width);
-
-    if (calculationMethod === EpubPageCalculationMethod.Default) {
-      return this.readingSectionElemRef.nativeElement.clientWidth - margin + (((COLUMN_GAP) * columnGapModifier));
-    } else {
-      return this.readingSectionElemRef.nativeElement.clientWidth - margin + (((COLUMN_GAP) * columnGapModifier) + 10);
-    }
+    // Give an additional pixels for buffer
+    return Math.round(this.readingSectionElemRef.nativeElement.clientWidth - margin
+      + (COLUMN_GAP * columnGapModifier) + 5);
   });
 
   columnGapModifier = computed(() => {
-    const calculationMethod = this.pageCalcMode();
     switch(this.layoutMode()) {
       case BookPageLayoutMode.Default:
         return 0;
       case BookPageLayoutMode.Column1:
-        return 1;
       case BookPageLayoutMode.Column2:
-        return calculationMethod === EpubPageCalculationMethod.Default ? 1 : 1.25;
+        return 1;
     }
   });
 
@@ -1738,7 +1726,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   convertVwToPx(vwValue: number) {
-    const viewportWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth || 0, window.innerWidth || 0);
+    const viewportWidth = Math.max(this.readingSectionElemRef?.nativeElement?.clientWidth ?? 0, window.innerWidth || 0);
     return (vwValue * viewportWidth) / 100;
   }
 
@@ -2340,7 +2328,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   getViewportBoundingRect(): Container {
     const margin = this.getMargin();
-    //const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
     const pageSize = this.pageWidth();
     const visibleBoundingBox = this.bookContentElemRef.nativeElement.getBoundingClientRect();
 
@@ -2387,12 +2374,58 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     redRect.style.top = `${viewport.top}px`;
     redRect.style.width = `${viewport.width}px`;
     redRect.style.height = `${viewport.height}px`;
-    redRect.style.border = '5px solid red';
+    redRect.style.border = '1px solid red';
     redRect.style.pointerEvents = 'none';
     redRect.style.zIndex = '1000';
+    redRect.title = `Width: ${viewport.width}px`;
 
     // Inject into the document
     this.document.body.appendChild(redRect);
+
+
+    // Insert margin boxes as well
+    const marginLeft = this.pageStyles()['margin-left'];
+    const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
+
+
+    // Insert a debug element to help visualize
+    this.document.querySelector('#debug-marginLeft')?.remove();
+
+    // Create and inject the red rectangle div
+    let greenRect = this.document.createElement('div');
+    greenRect.id = 'debug-marginLeft';
+    greenRect.style.position = 'absolute';
+    greenRect.style.left = `${viewport.left - margin}px`;
+    greenRect.style.top = `${viewport.top}px`;
+    greenRect.style.width = `${margin}px`;
+    greenRect.style.height = `${viewport.height}px`;
+    greenRect.style.border = '1px solid green';
+    greenRect.style.pointerEvents = 'none';
+    greenRect.style.zIndex = '1000';
+    greenRect.title = `Width: ${margin}px`;
+
+    // Inject into the document
+    this.document.body.appendChild(greenRect);
+
+
+    this.document.querySelector('#debug-marginRight')?.remove();
+
+    // Create and inject the red rectangle div
+    greenRect = this.document.createElement('div');
+    greenRect.id = 'debug-marginRight';
+    greenRect.style.position = 'absolute';
+    greenRect.style.left = `${viewport.left + viewport.width}px`;
+    greenRect.style.top = `${viewport.top}px`;
+    greenRect.style.width = `${margin}px`;
+    greenRect.style.height = `${viewport.height}px`;
+    greenRect.style.border = '1px solid green';
+    greenRect.style.pointerEvents = 'none';
+    greenRect.style.zIndex = '1000';
+    greenRect.title = `Width: ${margin}px`;
+
+    // Inject into the document
+    this.document.body.appendChild(greenRect);
+
   }
 
   /**
