@@ -64,8 +64,8 @@ public static class AnnotationFilter
         return comparison switch
         {
             FilterComparison.Equal => queryable.Where(a => a.SelectedText == value),
-            FilterComparison.Contains => queryable.Where(a => value.Contains(a.SelectedText)),
-            FilterComparison.NotContains => queryable.Where(a => !value.Contains(a.SelectedText)),
+            FilterComparison.Contains => queryable.Where(a => a.SelectedText.Contains(value)),
+            FilterComparison.NotContains => queryable.Where(a => !a.SelectedText.Contains(value)),
             FilterComparison.NotEqual => queryable.Where(a => a.SelectedText != value),
             _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
         };
