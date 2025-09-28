@@ -28,7 +28,7 @@ public interface IAnnotationRepository
     Task<AppUserAnnotation?> GetAnnotation(int id);
     Task<IList<AppUserAnnotation>> GetAnnotations(IList<int> ids);
     Task<IList<FullAnnotationDto>> GetFullAnnotationsByUserIdAsync(int userId);
-    Task<IList<FullAnnotationDto>> GetFullAnnotations(IList<int> annotationIds);
+    Task<IList<FullAnnotationDto>> GetFullAnnotations(int userId, IList<int> annotationIds);
     Task<PagedList<AnnotationDto>> GetAnnotationDtos(int userId, BrowseAnnotationFilterDto filter, UserParams userParams);
 }
 
@@ -92,6 +92,7 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         query = BuildAnnotationFilterQuery(userId, filter, query);
 
         var validUsers = await context.AppUserPreferences
+            .Where(a => a.AppUserId == userId) // TODO: Remove when the below is done
             .Where(p => true) // TODO: Filter on sharing annotations preference
             .Select(p => p.AppUserId)
             .ToListAsync();
@@ -147,12 +148,13 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         };
     }
 
-    public async Task<IList<FullAnnotationDto>> GetFullAnnotations(IList<int> annotationIds)
+    public async Task<IList<FullAnnotationDto>> GetFullAnnotations(int userId, IList<int> annotationIds)
     {
         return await context.AppUserAnnotation
             .AsNoTracking()
             .Where(a => annotationIds.Contains(a.Id))
-            //.Where(a => a.AppUser.UserPreferences.ShareAnnotations) TODO: Filter out annotations for users who don't share them
+            .Where(a => a.AppUserId == userId)
+            //.Where(a => a.AppUserId == userId || a.AppUser.UserPreferences.ShareAnnotations) TODO: Filter out annotations for users who don't share them
             .SelectFullAnnotation()
             .ToListAsync();
     }

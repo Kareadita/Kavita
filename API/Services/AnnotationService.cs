@@ -170,7 +170,7 @@ public class AnnotationService : IAnnotationService
             }
             else
             {
-                annotations = await _unitOfWork.AnnotationRepository.GetFullAnnotations(annotationIds);
+                annotations = await _unitOfWork.AnnotationRepository.GetFullAnnotations(userId, annotationIds);
             }
 
             // Get settings for hostname
