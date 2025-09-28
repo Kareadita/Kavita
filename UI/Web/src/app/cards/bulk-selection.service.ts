@@ -4,7 +4,7 @@ import {ReplaySubject} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
 
-type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'sideNavStream' | 'collection' | 'readingList';
+type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'sideNavStream' | 'collection' | 'readingList' | 'annotations';
 
 /**
  * Responsible for handling selections on cards. Can handle multiple card sources next to each other in different loops.
@@ -168,6 +168,10 @@ export class BulkSelectionService {
 
     if (Object.keys(this.selectedCards).filter(item => item === 'readingList').length > 0) {
       return this.applyFilterToList(this.actionFactory.getReadingListActions(callback), [Action.Promote, Action.UnPromote, Action.Delete]);
+    }
+
+    if (Object.keys(this.selectedCards).filter(item => item === 'annotations').length > 0) {
+      return this.actionFactory.getAnnotationActions(callback);
     }
 
     // Chapter/Volume

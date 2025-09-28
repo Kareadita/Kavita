@@ -2,13 +2,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef,
+  DestroyRef, effect,
   EventEmitter,
   inject,
   Input,
   OnChanges,
   OnDestroy,
-  OnInit,
   Output
 } from '@angular/core';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
@@ -17,7 +16,6 @@ import {ActionableEntity, ActionItem} from 'src/app/_services/action-factory.ser
 import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
 import {User} from "../../_models/user";
@@ -33,7 +31,7 @@ import {User} from "../../_models/user";
   styleUrls: ['./card-actionables.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardActionablesComponent implements OnInit, OnChanges, OnDestroy {
+export class CardActionablesComponent implements OnChanges, OnDestroy {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
@@ -65,17 +63,20 @@ export class CardActionablesComponent implements OnInit, OnChanges, OnDestroy {
   submenu: {[key: string]: NgbDropdown} = {};
   private closeTimeout: any = null;
 
-
-  ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((user) => {
+  constructor() {
+    effect(() => {
+      const user = this.accountService.currentUserSignal();
       if (!user) return;
+
       this.currentUser = user;
-      this.actions = this.inputActions.filter(a => this.willRenderAction(a, user!));
+      this.actions = this.inputActions.filter(a => this.willRenderAction(a, user));
       this.cdRef.markForCheck();
     });
   }
 
   ngOnChanges() {
+    if (!this.currentUser) return; // We can safely return as actionables will never be visible if there is no user
+
     this.actions = this.inputActions.filter(a => this.willRenderAction(a, this.currentUser!));
     this.cdRef.markForCheck();
   }

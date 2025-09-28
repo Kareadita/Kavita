@@ -10,7 +10,6 @@
       }
 
     </app-side-nav-companion-bar>
-    <app-bulk-operations [actionCallback]="bulkActionCallback" />
     <app-loading [absolute]="true" [loading]="bulkLoader" />
     @if (filter) {
       <app-card-detail-layout
@@ -24,6 +23,11 @@
         [refresh]="refresh"
         (applyFilter)="updateFilter($event)"
       >
+
+        <ng-template #topBar>
+          <app-bulk-operations [actionCallback]="bulkActionCallback" />
+        </ng-template>
+
         <ng-template #cardItem let-item let-position="idx">
           <app-series-card [series]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"
                            (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"

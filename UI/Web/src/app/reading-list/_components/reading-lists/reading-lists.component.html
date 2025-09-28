@@ -10,7 +10,6 @@
       }
 
     </app-side-nav-companion-bar>
-    <app-bulk-operations [actionCallback]="bulkActionCallback" />
 
     <app-card-detail-layout
       [isLoading]="loadingLists"
@@ -20,6 +19,11 @@
       [filteringDisabled]="true"
       [trackByIdentity]="trackByIdentity"
     >
+
+      <ng-template #topBar>
+        <app-bulk-operations [actionCallback]="bulkActionCallback" />
+      </ng-template>
+
       <ng-template #cardItem let-item let-position="idx" >
         <app-card-item [title]="item.title" [entity]="item" [actions]="actions[item.id]" [actionEntity]="item"
                        [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"

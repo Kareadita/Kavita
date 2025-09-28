@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace API.DTOs.Annotations;
 
 public sealed record FullAnnotationDto
 {
     public int Id { get; set; }
+    [JsonIgnore]
+    public int UserId { get; set; }
     public string SelectedText { get; set; }
     public string? Comment { get; set; }
     public string? CommentHtml { get; set; }

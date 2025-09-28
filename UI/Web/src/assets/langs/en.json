@@ -950,7 +950,8 @@
         "create": "Create",
         "close": "{{common.close}}",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
-        "edit": "Edit"
+        "edit": "Edit",
+        "delete": "Delete"
     },
 
     "quill-wrapper": {
@@ -1276,7 +1277,8 @@
             "true": "True",
             "false": "False"
         },
-        "annotations-count": "{{num}} Annotations"
+        "annotations-count": "{{num}} Annotations",
+        "export": "Export"
     },
 
     "person-detail": {
@@ -2333,7 +2335,7 @@
         "unit-read-last": "Days from TODAY",
         "disclaimer-highlight-slots": "When using this field, only your own annotations will be shown",
         "unit-file-size": "GB, MB, KB, B",
-        "disclaimer-file-size": "Total file size across all chapters for the series"
+        "disclaimer-file-size": "File size must include the unit"
     },
 
     "sort-field-pipe": {
@@ -2350,7 +2352,8 @@
         "person-series-count": "Series Count",
         "person-chapter-count": "Chapter Count",
         "annotation-owner": "Owner",
-        "annotation-series": "Series name"
+        "annotation-series": "Series name",
+        "annotation-color": "Color"
     },
 
     "edit-series-modal": {
@@ -3149,7 +3152,8 @@
         "reorder": "Reorder",
         "rename": "Rename",
         "rename-tooltip": "Rename the Smart Filter",
-        "merge": "Merge"
+        "merge": "Merge",
+        "export": "Export"
     },
 
     "preferences": {

@@ -128,21 +128,45 @@ export class AnnotationService {
     return this.httpClient.get<Annotation>(this.baseUrl + `annotation/${annotationId}`);
   }
 
-  delete(id: number) {
-    const filtered = this.annotations().filter(a => a.id === id);
-    if (filtered.length === 0) return of();
-    const annotationToDelete = filtered[0];
+  /**
+   * Deletes an annotation without it needing to be loading in the signal.
+   * Used in the ViewEditAnnotationDrawer. Event is still fired.
+   * @param annotation
+   */
+  deleteAnnotation(annotation: Annotation) {
+    const id = annotation.id;
 
     return this.httpClient.delete(this.baseUrl + `annotation?annotationId=${id}`, TextResonse).pipe(tap(_ => {
       const annotations = this._annotations();
       this._annotations.set(annotations.filter(a => a.id !== id));
 
       this._events.set({
-        pageNumber: annotationToDelete.pageNumber,
+        pageNumber: annotation.pageNumber,
         type: 'delete',
-        annotation: annotationToDelete
+        annotation: annotation
       });
     }));
+  }
+
+  delete(id: number) {
+    const filtered = this.annotations().filter(a => a.id === id);
+    if (filtered.length === 0) return of();
+    const annotationToDelete = filtered[0];
+
+    return this.deleteAnnotation(annotationToDelete);
+  }
+
+  /**
+   * While this method will update the services annotations list. No events will be sent out.
+   * Deletion on the callers' side should be handled in the rxjs chain.
+   * @param ids
+   */
+  bulkDelete(ids: number[]) {
+    return this.httpClient.post(this.baseUrl + "annotation/bulk-delete", ids).pipe(
+      tap(() => {
+        this._annotations.update(x => x.filter(a => !ids.includes(a.id)));
+      }),
+    );
   }
 
   /**
@@ -153,9 +177,24 @@ export class AnnotationService {
     this.router.navigate(['/library', item.libraryId, 'series', item.seriesId, 'book', item.chapterId], { queryParams: { annotation: item.id } });
   }
 
-  exportAnnotations() {
-    return this.httpClient.get(this.baseUrl + 'annotation/export', {observe: 'events', responseType: 'blob', reportProgress: true}).pipe(
-      tap(_ => console.log('export starting')),
+  exportFilter(filter: FilterV2<AnnotationsFilterField, AnnotationsSortField>, pageNum?: number, itemsPerPage?: number) {
+    const params = this.utilityService.addPaginationIfExists(new HttpParams(), pageNum, itemsPerPage);
+
+    return this.httpClient.post(this.baseUrl + 'annotation/export-filter', filter, {
+      observe: 'events',
+      responseType: 'blob',
+      reportProgress: true,
+      params}).
+    pipe(
+      throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
+      download((blob, filename) => {
+        this.save(blob, decodeURIComponent(filename));
+      })
+    );
+  }
+
+  exportAnnotations(ids?: number[]) {
+    return this.httpClient.post(this.baseUrl + 'annotation/export', ids, {observe: 'events', responseType: 'blob', reportProgress: true}).pipe(
       throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
       download((blob, filename) => {
         this.save(blob, decodeURIComponent(filename));

@@ -17,6 +17,7 @@ export enum AnnotationsSortField {
   Owner = 1,
   Created = 2,
   LastModified = 3,
+  Color = 4,
 }
 
 export const allAnnotationsSortFields = Object.keys(AnnotationsSortField)

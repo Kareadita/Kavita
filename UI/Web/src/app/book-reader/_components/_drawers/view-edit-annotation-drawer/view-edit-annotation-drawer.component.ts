@@ -11,11 +11,11 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal, NgbActiveOffcanvas, NgbOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {Annotation} from "../../../_models/annotations/annotation";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, switchMap} from "rxjs/operators";
 import {of} from "rxjs";
@@ -36,6 +36,7 @@ import {
   OffCanvasResizeComponent,
   ResizeMode
 } from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
+import {ConfirmService} from "../../../../shared/confirm.service";
 
 export enum AnnotationMode {
   View = 0,
@@ -77,6 +78,8 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   protected readonly utilityService = inject(UtilityService);
   protected readonly accountService = inject(AccountService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly offcanvasService = inject(NgbOffcanvas);
 
   @ViewChild('renderTarget', {read: ViewContainerRef}) renderTarget!: ViewContainerRef;
 
@@ -353,4 +356,15 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   protected readonly QuillTheme = QuillTheme;
   protected readonly ResizeMode = ResizeMode;
   protected readonly window = window;
+
+  async delete() {
+    const annotation = this.annotation();
+    if (!annotation) return;
+
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-annotation'))) return;
+
+    this.annotationService.deleteAnnotation(annotation).subscribe(_ => {
+      this.offcanvasService.dismiss();
+    });
+  }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data.Misc;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Annotations;
 using API.DTOs.Filtering;
 using API.DTOs.KavitaPlus.Manage;
 using API.DTOs.Metadata.Browse;
@@ -310,6 +311,8 @@ public static class QueryableExtensions
             AnnotationSortField.Created => query.OrderByDescending(a => a.CreatedUtc),
             AnnotationSortField.LastModified when sort.IsAscending => query.OrderBy(a => a.LastModifiedUtc),
             AnnotationSortField.LastModified => query.OrderByDescending(a => a.LastModifiedUtc),
+            AnnotationSortField.Color when sort.IsAscending => query.OrderBy(a => a.SelectedSlotIndex),
+            AnnotationSortField.Color => query.OrderByDescending(a => a.SelectedSlotIndex),
             _ => query.OrderBy(a => a.CreatedUtc),
         };
     }
@@ -341,5 +344,36 @@ public static class QueryableExtensions
             MatchStateOption.DontMatch => query.Where(s => s.DontMatch),
             _ => query
         };
+    }
+
+    public static IQueryable<FullAnnotationDto> SelectFullAnnotation(this IQueryable<AppUserAnnotation> query)
+    {
+        return query.Select(a => new FullAnnotationDto
+            {
+                Id = a.Id,
+                UserId = a.AppUserId,
+                SelectedText = a.SelectedText,
+                Comment = a.Comment,
+                CommentHtml = a.CommentHtml,
+                CommentPlainText = a.CommentPlainText,
+                Context = a.Context,
+                ChapterTitle = a.ChapterTitle,
+                PageNumber = a.PageNumber,
+                SelectedSlotIndex = a.SelectedSlotIndex,
+                ContainsSpoiler = a.ContainsSpoiler,
+                CreatedUtc = a.CreatedUtc,
+                LastModifiedUtc = a.LastModifiedUtc,
+                LibraryId = a.LibraryId,
+                LibraryName = a.Chapter.Volume.Series.Library.Name,
+                SeriesId = a.SeriesId,
+                SeriesName = a.Chapter.Volume.Series.Name,
+                VolumeId = a.VolumeId,
+                VolumeName = a.Chapter.Volume.Name,
+                ChapterId = a.ChapterId,
+            })
+            .OrderBy(a => a.SeriesId)
+            .ThenBy(a => a.VolumeId)
+            .ThenBy(a => a.ChapterId)
+            .ThenBy(a => a.PageNumber);
     }
 }
