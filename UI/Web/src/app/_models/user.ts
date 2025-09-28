@@ -3,6 +3,7 @@ import {Preferences} from './preferences/preferences';
 
 // This interface is only used for login and storing/retrieving JWT from local storage
 export interface User {
+  id: number;
   username: string;
   token: string;
   refreshToken: string;

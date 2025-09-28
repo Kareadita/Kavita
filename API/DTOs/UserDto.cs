@@ -9,6 +9,7 @@ namespace API.DTOs;
 
 public sealed record UserDto
 {
+    public int Id { get; init; }
     public string Username { get; init; } = null!;
     public string Email { get; init; } = null!;
     public IList<string> Roles { get; set; } = [];

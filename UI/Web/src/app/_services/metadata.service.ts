@@ -178,6 +178,10 @@ export class MetadataService {
   createDefaultFilterStatement(entityType: ValidFilterEntity) {
     switch (entityType) {
       case "annotation":
+        const userId = this.accountService.currentUserSignal()?.id;
+        if (userId) {
+          return this.createFilterStatement(AnnotationsFilterField.Owner, FilterComparison.Equal, `${this.accountService.currentUserSignal()!.id}`);
+        }
         return this.createFilterStatement(AnnotationsFilterField.Owner);
       case 'series':
         return this.createFilterStatement(FilterField.SeriesName);
