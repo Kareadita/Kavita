@@ -120,7 +120,6 @@ public class LicenseController(
     /// <summary>
     /// Resend the welcome email to the user
     /// </summary>
-    /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("resend-license")]
     public async Task<ActionResult<bool>> ResendWelcomeEmail()
