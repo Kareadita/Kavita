@@ -1585,7 +1585,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (currentVirtualPage > 1) {
         // Calculate the target scroll position for the previous page
-        const targetScroll = (currentVirtualPage - 2) * pageSize
+        const targetScroll = (currentVirtualPage - 2) * pageSize - (this.layoutMode() === BookPageLayoutMode.Column2 ? 3 : 0)
+
         const isVertical = this.writingStyle() === WritingStyle.Vertical;
 
         // -2 apparently goes back 1 virtual page...
@@ -1637,7 +1638,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (currentVirtualPage < totalVirtualPages) {
 
         // Calculate the target scroll position for the next page
-        const targetScroll = currentVirtualPage * pageSize;
+        const targetScroll = (currentVirtualPage * pageSize) + (this.layoutMode() === BookPageLayoutMode.Column2 ? 1 : 0);
         const isVertical = this.writingStyle() === WritingStyle.Vertical;
 
         const test = (document.querySelector('.reading-section')?.clientWidth || 0 - (document.querySelector('.left')?.clientWidth || 0) - (document.querySelector('.right')?.clientWidth || 0)) || targetScroll;
@@ -1647,7 +1648,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         // +0 apparently goes forward 1 virtual page...
         const scrollMethod = isVertical ? 'scrollTo' : 'scrollToX';
         this.scrollService[scrollMethod](
-          test,
+          targetScroll,
           this.bookContentElemRef.nativeElement,
           'auto',
           () => {
@@ -1693,8 +1694,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('margin right dom: ', this.document.querySelector('.right')?.clientWidth);
 
     // Give an additional pixels for buffer
-    return Math.round(this.readingSectionElemRef.nativeElement.clientWidth - margin
-      + (COLUMN_GAP * columnGapModifier) + 5);
+    return this.readingSectionElemRef.nativeElement.clientWidth - margin
+      + (COLUMN_GAP * columnGapModifier);
   });
 
   columnGapModifier = computed(() => {
@@ -1786,7 +1787,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     let resumeElement: string | null = null;
     if (!this.bookContentElemRef || !this.bookContentElemRef.nativeElement) return null;
 
-    const container = this.getViewportBoundingRect();
+    //const container = this.getViewportBoundingRect();
 
     const intersectingEntries = Array.from(this.bookContentElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
