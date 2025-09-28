@@ -102,6 +102,7 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
 
         var sortedQuery = query.SortBy(filter.SortOptions);
         var limitedQuery = filter.LimitTo <= 0 ? sortedQuery : sortedQuery.Take(filter.LimitTo);
+
         return limitedQuery.ProjectTo<AnnotationDto>(mapper.ConfigurationProvider);
     }
 

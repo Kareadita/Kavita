@@ -3,7 +3,7 @@ import {BrowsePeopleComponent} from "../browse/browse-people/browse-people.compo
 import {BrowseGenresComponent} from "../browse/browse-genres/browse-genres.component";
 import {BrowseTagsComponent} from "../browse/browse-tags/browse-tags.component";
 import {UrlFilterResolver} from "../_resolvers/url-filter.resolver";
-import {BrowseAnnotationsComponent} from "../browse/browse-annotations/browse-annotations.component";
+import {AllAnnotationsComponent} from "../all-annotations/all-annotations.component";
 
 
 export const routes: Routes = [
@@ -22,7 +22,7 @@ export const routes: Routes = [
   },
   {path: 'genres', component: BrowseGenresComponent, pathMatch: 'full'},
   {path: 'tags', component: BrowseTagsComponent, pathMatch: 'full'},
-  {path: 'annotations', component: BrowseAnnotationsComponent, pathMatch: 'full',
+  {path: 'annotations', component: AllAnnotationsComponent, pathMatch: 'full',
     resolve: {
       filter: UrlFilterResolver,
     },

@@ -1273,8 +1273,8 @@
         "series-count": "{{common.series-count}}"
     },
 
-    "browse-annotations": {
-        "title": "Browse annotation",
+    "all-annotations": {
+        "title": "All Annotations",
         "filter": {
             "true": "True",
             "false": "False"
@@ -2079,7 +2079,7 @@
         "person-aka-status": "Matches an alias",
         "browse-genres": "Browse Genres",
         "browse-tags": "Browse Tags",
-        "browse-annotations": "Browse Annotations"
+        "all-annotations": "Browse Annotations"
     },
 
     "promoted-icon": {
@@ -2910,8 +2910,8 @@
         "annotation-series": "Series name",
         "annotation-spoiler": "Spoiler",
         "annotation-highlights": "Highlight color",
-        "annotation-comment": "Comment",
-        "annotation-selection": "Selection"
+        "annotation-comment": "Annotation Text",
+        "annotation-selection": "Highlight Text"
     },
 
 

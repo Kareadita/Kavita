@@ -1,6 +1,5 @@
 export interface HighlightSlot {
   id: number;
-  title: string;
   color: RgbaColor;
   slotNumber:  number;
 }

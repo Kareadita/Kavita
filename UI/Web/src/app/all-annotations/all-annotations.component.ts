@@ -10,33 +10,36 @@ import {
 } from '@angular/core';
 import {
   SideNavCompanionBarComponent
-} from "../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
+} from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ActivatedRoute, Router} from "@angular/router";
-import {AnnotationService} from "../../_services/annotation.service";
-import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
-import {Annotation} from "../../book-reader/_models/annotations/annotation";
-import {Pagination} from "../../_models/pagination";
+import {AnnotationService} from "../_services/annotation.service";
+import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
+import {Annotation} from "../book-reader/_models/annotations/annotation";
+import {Pagination} from "../_models/pagination";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map, tap} from "rxjs/operators";
-import {AnnotationsFilterSettings} from "../../metadata-filter/filter-settings";
-import {AnnotationsFilter} from "../../_models/metadata/v2/filter-v2";
-import {AnnotationsFilterField, AnnotationsSortField} from "../../_models/metadata/v2/annotations-filter";
-import {MetadataService} from "../../_services/metadata.service";
-import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
-import {FilterEvent} from "../../_models/metadata/series-filter";
+import {AnnotationsFilterSettings} from "../metadata-filter/filter-settings";
+import {
+  AnnotationsFilter,
+  AnnotationsFilterField,
+  AnnotationsSortField
+} from "../_models/metadata/v2/annotations-filter";
+import {MetadataService} from "../_services/metadata.service";
+import {FilterStatement} from "../_models/metadata/v2/filter-statement";
+import {FilterEvent} from "../_models/metadata/series-filter";
 import {DecimalPipe} from "@angular/common";
-import {CardDetailLayoutComponent} from "../../cards/card-detail-layout/card-detail-layout.component";
+import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
 import {
   AnnotationCardComponent
-} from "../../book-reader/_components/_annotations/annotation-card/annotation-card.component";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
-import {BulkOperationsComponent} from "../../cards/bulk-operations/bulk-operations.component";
-import {BulkSelectionService} from "../../cards/bulk-selection.service";
-import {User} from "../../_models/user";
+} from "../book-reader/_components/_annotations/annotation-card/annotation-card.component";
+import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
+import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
+import {BulkSelectionService} from "../cards/bulk-selection.service";
+import {User} from "../_models/user";
 
 @Component({
-  selector: 'app-browse-annotations',
+  selector: 'app-all-annotations',
   imports: [
     SideNavCompanionBarComponent,
     TranslocoDirective,
@@ -45,11 +48,11 @@ import {User} from "../../_models/user";
     AnnotationCardComponent,
     BulkOperationsComponent
   ],
-  templateUrl: './browse-annotations.component.html',
-  styleUrl: './browse-annotations.component.scss',
+  templateUrl: './all-annotations.component.html',
+  styleUrl: './all-annotations.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BrowseAnnotationsComponent implements OnInit {
+export class AllAnnotationsComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);

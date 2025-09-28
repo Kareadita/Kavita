@@ -1,7 +1,7 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {computed, inject, Injectable} from '@angular/core';
 import {tap} from 'rxjs/operators';
-import {map, of} from 'rxjs';
+import {map, Observable, of} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {Genre} from '../_models/metadata/genre';
 import {AgeRatingDto} from '../_models/metadata/age-rating-dto';
@@ -22,7 +22,7 @@ import {TextResonse} from "../_types/text-response";
 import {QueryContext} from "../_models/metadata/v2/query-context";
 import {AgeRatingPipe} from "../_pipes/age-rating.pipe";
 import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
-import {TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoService} from "@jsverse/transloco";
 import {LibraryService} from './library.service';
 import {CollectionTagService} from "./collection-tag.service";
 import {PaginatedResult} from "../_models/pagination";
@@ -33,9 +33,10 @@ import {ValidFilterEntity} from "../metadata-filter/filter-settings";
 import {PersonFilterField} from "../_models/metadata/v2/person-filter-field";
 import {PersonRolePipe} from "../_pipes/person-role.pipe";
 import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
-import {AnnotationsFilterField, AnnotationsSortField} from "../_models/metadata/v2/annotations-filter";
+import {AnnotationsFilterField} from "../_models/metadata/v2/annotations-filter";
 import {AccountService} from "./account.service";
 import {MemberService} from "./member.service";
+import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
 
 @Injectable({
   providedIn: 'root'
@@ -261,7 +262,7 @@ export class MetadataService {
     }
   }
 
-  private getAnnotationOptionsForFilterField(field: AnnotationsFilterField) {
+  private getAnnotationOptionsForFilterField(field: AnnotationsFilterField): Observable<{value: number, label: string, color?: RgbaColor}[]> {
     switch (field) {
       case AnnotationsFilterField.Owner:
         return this.memberService.getMembers(false).pipe(map(members => members.map(member => {
@@ -272,8 +273,8 @@ export class MetadataService {
           return {value: lib.id, label: lib.name};
         })));
       case AnnotationsFilterField.HighlightSlots:
-        return of(this.highlightSlots().map(slot => {
-          return {value: slot.slotNumber, label: slot.title};
+        return of(this.highlightSlots().map((slot, idx) => {
+          return {value: slot.slotNumber, label: translate('highlight-bar.slot-label', {slot: slot.slotNumber + 1}), color: slot.color}; // Slots start at 0
         }));
     }
 

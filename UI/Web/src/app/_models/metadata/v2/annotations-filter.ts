@@ -1,3 +1,4 @@
+import {FilterV2} from "./filter-v2";
 
 
 export enum AnnotationsFilterField {
@@ -23,3 +24,5 @@ export enum AnnotationsSortField {
 export const allAnnotationsSortFields = Object.keys(AnnotationsSortField)
   .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
   .map(key => parseInt(key, 10)) as AnnotationsSortField[];
+
+export type AnnotationsFilter = FilterV2<AnnotationsFilterField, AnnotationsSortField>;
