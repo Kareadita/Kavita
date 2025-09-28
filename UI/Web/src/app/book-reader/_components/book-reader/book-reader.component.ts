@@ -380,7 +380,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly readingDirection = this.readerSettingsService.readingDirection;
   protected readonly writingStyle = this.readerSettingsService.writingStyle;
   protected readonly clickToPaginate = this.readerSettingsService.clickToPaginate;
-  protected readonly pageCalcMode = this.readerSettingsService.pageCalcMode;
 
   protected columnWidth!: Signal<string>;
   protected columnHeight!: Signal<string>;

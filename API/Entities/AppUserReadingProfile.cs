@@ -139,10 +139,6 @@ public class AppUserReadingProfile
     /// </summary>
     /// <remarks>Defaults to false</remarks>
     public bool BookReaderImmersiveMode { get; set; } = false;
-    /// <summary>
-    /// Book Reader Option: Different calculation modes for the page due to a bleed bug that devs cannot reproduce reliably or fix
-    /// </summary>
-    public EpubPageCalculationMethod BookReaderEpubPageCalculationMethod { get; set; } = EpubPageCalculationMethod.Default;
     #endregion
 
     #region PdfReader

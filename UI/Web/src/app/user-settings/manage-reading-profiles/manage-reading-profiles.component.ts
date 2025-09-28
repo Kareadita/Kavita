@@ -64,8 +64,6 @@ import {ColorscapeService} from "../../_services/colorscape.service";
 import {Color} from "@iplab/ngx-color-picker";
 import {FontService} from "../../_services/font.service";
 import {EpubFont} from "../../_models/preferences/epub-font";
-import {EpubPageCalcMethodPipe} from "../../_pipes/epub-page-calc-method.pipe";
-import {allCalcMethods} from "../../_models/readers/epub-page-calculation-method";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -104,8 +102,7 @@ enum TabId {
     LoadingComponent,
     NgbTooltip,
     BreakpointPipe,
-    SettingColorPickerComponent,
-    EpubPageCalcMethodPipe,
+    SettingColorPickerComponent
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
@@ -232,7 +229,6 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm.addControl('bookReaderLayoutMode', new FormControl(this.selectedProfile.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
     this.readingProfileForm.addControl('bookReaderThemeName', new FormControl(this.selectedProfile.bookReaderThemeName || bookColorThemes[0].name, []));
     this.readingProfileForm.addControl('bookReaderImmersiveMode', new FormControl(this.selectedProfile.bookReaderImmersiveMode, []));
-    this.readingProfileForm.addControl('bookReaderEpubPageCalculationMethod', new FormControl(this.selectedProfile.bookReaderEpubPageCalculationMethod, []));
 
     // Pdf reader
     this.readingProfileForm.addControl('pdfTheme', new FormControl(this.selectedProfile.pdfTheme || PdfTheme.Dark, []));
@@ -342,7 +338,6 @@ export class ManageReadingProfilesComponent implements OnInit {
   }
 
   protected readonly readingDirections = readingDirections;
-  protected readonly calcMethods = allCalcMethods;
   protected readonly pdfSpreadModes = pdfSpreadModes;
   protected readonly pageSplitOptions = pageSplitOptions;
   protected readonly bookLayoutModes = bookLayoutModes;
