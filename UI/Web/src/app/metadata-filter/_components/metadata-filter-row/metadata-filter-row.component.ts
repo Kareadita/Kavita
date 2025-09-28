@@ -305,7 +305,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     const dropdownFieldsThatIncludeDateComparisons = this.filterUtilitiesService.getDropdownFieldsThatIncludeDateComparisons<TFilter>(this.entityType());
     const dropdownFieldsWithoutMustContains = this.filterUtilitiesService.getDropdownFieldsWithoutMustContains<TFilter>(this.entityType());
     const dropdownFieldsThatIncludeNumberComparisons = this.filterUtilitiesService.getDropdownFieldsThatIncludeNumberComparisons<TFilter>(this.entityType());
-    const customComparisons = this.filterUtilitiesService.getCustomComparisons(inputVal);
+    const customComparisons = this.filterUtilitiesService.getCustomComparisons(this.entityType(), inputVal);
 
     if (stringFields.includes(inputVal)) {
       let comps = [...StringComparisons];

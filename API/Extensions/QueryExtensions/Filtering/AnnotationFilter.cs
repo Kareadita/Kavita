@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Reader;
 using API.Entities;
+using Kavita.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions.Filtering;
 
@@ -64,9 +66,22 @@ public static class AnnotationFilter
         return comparison switch
         {
             FilterComparison.Equal => queryable.Where(a => a.SelectedText == value),
-            FilterComparison.Contains => queryable.Where(a => a.SelectedText.Contains(value)),
-            FilterComparison.NotContains => queryable.Where(a => !a.SelectedText.Contains(value)),
             FilterComparison.NotEqual => queryable.Where(a => a.SelectedText != value),
+            FilterComparison.BeginsWith => queryable.Where(a => EF.Functions.Like(a.SelectedText, $"{value}%")),
+            FilterComparison.EndsWith => queryable.Where(a => EF.Functions.Like(a.SelectedText, $"%{value}")),
+            FilterComparison.Matches => queryable.Where(a => EF.Functions.Like(a.SelectedText, $"%{value}%")),
+            FilterComparison.GreaterThan or
+            FilterComparison.GreaterThanEqual or
+            FilterComparison.LessThan or
+            FilterComparison.LessThanEqual or
+            FilterComparison.Contains or
+            FilterComparison.MustContains or
+            FilterComparison.NotContains or
+            FilterComparison.IsBefore or
+            FilterComparison.IsAfter or
+            FilterComparison.IsInLast or
+            FilterComparison.IsNotInLast or
+            FilterComparison.IsEmpty => throw new KavitaException($"{comparison} is not applicable for Annotation.SelectedText"),
             _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
         };
     }
@@ -78,10 +93,23 @@ public static class AnnotationFilter
 
         return comparison switch
         {
-            FilterComparison.Equal => queryable.Where(a => a.CommentPlainText != null && a.CommentPlainText == value),
-            FilterComparison.NotEqual => queryable.Where(a => a.CommentPlainText != null && a.CommentPlainText != value),
-            FilterComparison.Contains => queryable.Where(a => a.CommentPlainText != null && a.CommentPlainText.Contains(value)),
-            FilterComparison.NotContains => queryable.Where(a => a.CommentPlainText != null && !a.CommentPlainText.Contains(value)),
+            FilterComparison.Equal => queryable.Where(a => a.CommentPlainText == value),
+            FilterComparison.NotEqual => queryable.Where(a => a.CommentPlainText != value),
+            FilterComparison.BeginsWith => queryable.Where(a => EF.Functions.Like(a.CommentPlainText, $"{value}%")),
+            FilterComparison.EndsWith => queryable.Where(a => EF.Functions.Like(a.CommentPlainText, $"%{value}")),
+            FilterComparison.Matches => queryable.Where(a => EF.Functions.Like(a.CommentPlainText, $"%{value}%")),
+            FilterComparison.GreaterThan or
+            FilterComparison.GreaterThanEqual or
+            FilterComparison.LessThan or
+            FilterComparison.LessThanEqual or
+            FilterComparison.Contains or
+            FilterComparison.MustContains or
+            FilterComparison.NotContains or
+            FilterComparison.IsBefore or
+            FilterComparison.IsAfter or
+            FilterComparison.IsInLast or
+            FilterComparison.IsNotInLast or
+            FilterComparison.IsEmpty => throw new KavitaException($"{comparison} is not applicable for Annotation.CommentPlainText"),
             _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
         };
     }
