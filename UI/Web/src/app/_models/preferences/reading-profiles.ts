@@ -11,7 +11,6 @@ import {PdfScrollMode} from "./pdf-scroll-mode";
 import {PdfLayoutMode} from "./pdf-layout-mode";
 import {PdfSpreadMode} from "./pdf-spread-mode";
 import {UserBreakpoint} from "../../shared/_services/utility.service";
-import {EpubPageCalculationMethod} from "../readers/epub-page-calculation-method";
 
 export enum ReadingProfileKind {
   Default = 0,
@@ -52,7 +51,6 @@ export interface ReadingProfile {
   bookReaderThemeName: string;
   bookReaderLayoutMode: BookPageLayoutMode;
   bookReaderImmersiveMode: boolean;
-  bookReaderEpubPageCalculationMethod: EpubPageCalculationMethod;
 
   // PDF Reader
   pdfTheme: PdfTheme;

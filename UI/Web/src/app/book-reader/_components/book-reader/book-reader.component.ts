@@ -69,7 +69,6 @@ import {environment} from "../../../../environments/environment";
 import {LoadPageEvent} from "../_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
 import {FontService} from "../../../_services/font.service";
 import afterFrame from "afterframe";
-import {EpubPageCalculationMethod} from "../../../_models/readers/epub-page-calculation-method";
 
 
 interface HistoryPoint {
@@ -381,7 +380,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly readingDirection = this.readerSettingsService.readingDirection;
   protected readonly writingStyle = this.readerSettingsService.writingStyle;
   protected readonly clickToPaginate = this.readerSettingsService.clickToPaginate;
-  protected readonly pageCalcMode = this.readerSettingsService.pageCalcMode;
 
   protected columnWidth!: Signal<string>;
   protected columnHeight!: Signal<string>;
@@ -537,22 +535,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const writingStyle = this.writingStyle();
 
       const windowWidth = this.windowWidth();
+      const marginLeft = this.pageStyles()['margin-left'];
+      const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
       const base = writingStyle === WritingStyle.Vertical ? this.pageHeight() : this.pageWidth();
-
-      // console.log('window width: ', windowWidth)
-      // console.log('book content width: ', this.readingSectionElemRef?.nativeElement?.clientWidth);
-      // console.log('column width: ', base / 4);
 
 
       switch (layoutMode) {
         case BookPageLayoutMode.Default:
           return 'unset';
         case BookPageLayoutMode.Column1:
-          return ((base / 2) - 4) + 'px';
+          return Math.round(base / 2) + 'px';
         case BookPageLayoutMode.Column2:
-          //return (this.readingSectionElemRef?.nativeElement?.clientWidth - this.getMargin() + 1) / 2 + 'px';
-          return (((this.readingSectionElemRef?.nativeElement?.clientWidth ?? base)) / 4) + 1 + 'px'
-          //return ((base) / 4) + 6 + 'px'
+          return Math.round(base / 4) + 'px'
         default:
           return 'unset';
       }
@@ -581,7 +575,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
       if (layoutMode !== BookPageLayoutMode.Default && writingStyle !== WritingStyle.Horizontal) {
-        console.log('verticalBookContentWidth: ', verticalPageWidth)
         return `${verticalPageWidth}px`;
       }
       return '';
@@ -977,7 +970,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (resumeElement !== null) {
 
       const element = this.getElementFromXPath(resumeElement);
-      console.log('Attempting to snap to element: ', element);
+      //console.log('Attempting to snap to element: ', element);
 
       this.scrollTo(resumeElement, 30); // This works pretty well, but not perfect
     }
@@ -1105,7 +1098,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.continuousChaptersStack.push(chapterId);
       // Ensure all scroll locks are undone
       this.scrollService.unlock();
-      console.log('cleared lock: ', this.scrollService.isScrollingLock())
+
       // Load chapter Id onto route but don't reload
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode(), this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
@@ -1202,7 +1195,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
 
-    console.log('load page called with: part: ', part, 'scrollTop: ', scrollTop);
     this.isLoading.set(true);
     this.cdRef.markForCheck();
 
@@ -1440,25 +1432,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private scrollWithinPage(part?: string | undefined, scrollTop?: number) {
     if (part !== undefined && part !== '') {
-
-      console.log('Scrolling via part: ', part);
       this.scroll(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)));
-
-      // afterFrame(() => {
-      //   setTimeout(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)), SCROLL_DELAY)
-      // })
-      //
-      // setTimeout(() => {
-      //   afterFrame(() => this.scrollTo(this.readerService.scopeBookReaderXpath(part)));
-      // }, SCROLL_DELAY);
       return;
     }
 
     if (scrollTop !== undefined && scrollTop !== 0) {
-      // setTimeout(() => {
-      //   afterFrame(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
-      // }, SCROLL_DELAY);
-      console.log('Scrolling via scrollTop: ', scrollTop);
       this.scroll(() => this.scrollService.scrollTo(scrollTop, this.reader.nativeElement));
       return;
     }
@@ -1468,56 +1446,36 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (layoutMode === BookPageLayoutMode.Default) {
       if (writingStyle === WritingStyle.Vertical) {
-        console.log('Scrolling via x axis: ', this.bookContentElemRef.nativeElement.clientWidth, ' via ', this.reader.nativeElement);
+        //console.log('Scrolling via x axis: ', this.bookContentElemRef.nativeElement.clientWidth, ' via ', this.reader.nativeElement);
         this.scroll(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
-        //
-        // setTimeout(() => {
-        //   afterFrame(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
-        // }, SCROLL_DELAY);
         return;
       }
 
-      // setTimeout(() => {
-      //   afterFrame(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
-      // }, SCROLL_DELAY);
-      console.log('Scrolling via x axis to 0: ', 0, ' via ', this.reader.nativeElement);
+      //console.log('Scrolling via x axis to 0: ', 0, ' via ', this.reader.nativeElement);
       this.scroll(() => this.scrollService.scrollTo(0, this.reader.nativeElement));
       return;
     }
 
     if (writingStyle === WritingStyle.Vertical) {
       if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-        // setTimeout(() => {
-        //   afterFrame(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
-        // }, SCROLL_DELAY);
-        console.log('(Vertical) Scrolling via x axis to: ', this.bookContentElemRef.nativeElement.scrollHeight, ' via ', this.bookContentElemRef.nativeElement);
+        //console.log('(Vertical) Scrolling via x axis to: ', this.bookContentElemRef.nativeElement.scrollHeight, ' via ', this.bookContentElemRef.nativeElement);
         this.scroll(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
         return;
       }
 
-      // setTimeout(() => {
-      //   afterFrame(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement, 'auto'));
-      // }, SCROLL_DELAY);
-      console.log('(Vertical) Scrolling via x axis to 0: ', 0, ' via ', this.bookContentElemRef.nativeElement);
+      //console.log('(Vertical) Scrolling via x axis to 0: ', 0, ' via ', this.bookContentElemRef.nativeElement);
       this.scroll(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement, 'auto'));
       return;
     }
 
     // We need to check if we are paging back, because we need to adjust the scroll
     if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-      // setTimeout(() => {
-      //   afterFrame(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
-      // }, SCROLL_DELAY);
-      console.log('(Page Back) Scrolling via x axis to: ', this.bookContentElemRef.nativeElement.scrollWidth, ' via ', this.bookContentElemRef.nativeElement);
+      //console.log('(Page Back) Scrolling via x axis to: ', this.bookContentElemRef.nativeElement.scrollWidth, ' via ', this.bookContentElemRef.nativeElement);
       this.scroll(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
       return;
     }
 
-    // setTimeout(() => {
-    //   afterFrame(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
-    // }, SCROLL_DELAY);
-
-    console.log('Scrolling via x axis to 0: ', 0, ' via ', this.bookContentElemRef.nativeElement);
+    //console.log('Scrolling via x axis to 0: ', 0, ' via ', this.bookContentElemRef.nativeElement);
     this.scroll(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
   }
 
@@ -1590,7 +1548,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (currentVirtualPage > 1) {
         // Calculate the target scroll position for the previous page
-        const targetScroll = (currentVirtualPage - 2) * pageSize
+        const targetScroll = (currentVirtualPage - 2) * pageSize - (this.layoutMode() === BookPageLayoutMode.Column2 ? 3 : 0)
+
         const isVertical = this.writingStyle() === WritingStyle.Vertical;
 
         // -2 apparently goes back 1 virtual page...
@@ -1642,7 +1601,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (currentVirtualPage < totalVirtualPages) {
 
         // Calculate the target scroll position for the next page
-        const targetScroll = currentVirtualPage * pageSize;
+        const targetScroll = (currentVirtualPage * pageSize) + (this.layoutMode() === BookPageLayoutMode.Column2 ? 1 : 0);
         const isVertical = this.writingStyle() === WritingStyle.Vertical;
 
         // +0 apparently goes forward 1 virtual page...
@@ -1684,38 +1643,24 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   pageWidth = computed(() => {
     this.windowWidth(); // Ensure re-compute when windows size changes (element clientWidth isn't a signal)
-    this.pageCalcMode();
 
-    console.log('page width recalulated')
-    const calculationMethod = this.pageCalcMode();
     const marginLeft = this.pageStyles()['margin-left'];
+    const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
     const columnGapModifier = this.columnGapModifier();
     if (this.readingSectionElemRef == null) return 0;
 
-    const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
-
-    // console.log('page size calc, client width: ', this.readingSectionElemRef.nativeElement.clientWidth)
-    // console.log('page size calc, margin: ', margin)
-    // console.log('page size calc, col gap: ', ((COLUMN_GAP / 2) * columnGapModifier));
-    // console.log("clientWidth", this.readingSectionElemRef.nativeElement.clientWidth, "window", window.innerWidth, "margin", margin, "left", marginLeft)
-    // console.log('clientWidth: ', this.readingSectionElemRef.nativeElement.clientWidth, 'offsetWidth:', this.readingSectionElemRef.nativeElement.offsetWidth, 'bbox:', this.readingSectionElemRef.nativeElement.getBoundingClientRect().width);
-
-    if (calculationMethod === EpubPageCalculationMethod.Default) {
-      return this.readingSectionElemRef.nativeElement.clientWidth - margin + (((COLUMN_GAP) * columnGapModifier));
-    } else {
-      return this.readingSectionElemRef.nativeElement.clientWidth - margin + (((COLUMN_GAP) * columnGapModifier) + 10);
-    }
+    // Give an additional pixels for buffer
+    return this.readingSectionElemRef.nativeElement.clientWidth - margin
+      + (COLUMN_GAP * columnGapModifier);
   });
 
   columnGapModifier = computed(() => {
-    const calculationMethod = this.pageCalcMode();
     switch(this.layoutMode()) {
       case BookPageLayoutMode.Default:
         return 0;
       case BookPageLayoutMode.Column1:
-        return 1;
       case BookPageLayoutMode.Column2:
-        return calculationMethod === EpubPageCalculationMethod.Default ? 1 : 1.25;
+        return 1;
     }
   });
 
@@ -1738,7 +1683,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   convertVwToPx(vwValue: number) {
-    const viewportWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth || 0, window.innerWidth || 0);
+    const viewportWidth = Math.max(this.readingSectionElemRef?.nativeElement?.clientWidth ?? 0, window.innerWidth || 0);
     return (vwValue * viewportWidth) / 100;
   }
 
@@ -1798,7 +1743,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     let resumeElement: string | null = null;
     if (!this.bookContentElemRef || !this.bookContentElemRef.nativeElement) return null;
 
-    const container = this.getViewportBoundingRect();
+    //const container = this.getViewportBoundingRect();
 
     const intersectingEntries = Array.from(this.bookContentElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
@@ -2340,7 +2285,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   getViewportBoundingRect(): Container {
     const margin = this.getMargin();
-    //const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
     const pageSize = this.pageWidth();
     const visibleBoundingBox = this.bookContentElemRef.nativeElement.getBoundingClientRect();
 
@@ -2354,7 +2298,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const bottomBarHeight = this.document.querySelector('.bottom-bar')?.getBoundingClientRect().height ?? 38;
     const topBarHeight = this.document.querySelector('.fixed-top')?.getBoundingClientRect().height ?? 48;
 
-//    console.log('bottom: ', visibleBoundingBox.bottom) // TODO: Bottom isn't ideal in scroll mode
 
     const left = margin;
     const top = topBarHeight;
@@ -2363,9 +2306,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const height = bottom - top;
     const right = left + width;
 
-    console.log('Visible Viewport', {
-      left, right, top, bottom, width, height
-    });
+    // console.log('Visible Viewport', {
+    //   left, right, top, bottom, width, height
+    // });
 
     return {
       left, right, top, bottom, width, height
@@ -2387,12 +2330,58 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     redRect.style.top = `${viewport.top}px`;
     redRect.style.width = `${viewport.width}px`;
     redRect.style.height = `${viewport.height}px`;
-    redRect.style.border = '5px solid red';
+    redRect.style.border = '1px solid red';
     redRect.style.pointerEvents = 'none';
     redRect.style.zIndex = '1000';
+    redRect.title = `Width: ${viewport.width}px`;
 
     // Inject into the document
     this.document.body.appendChild(redRect);
+
+
+    // Insert margin boxes as well
+    const marginLeft = this.pageStyles()['margin-left'];
+    const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
+
+
+    // Insert a debug element to help visualize
+    this.document.querySelector('#debug-marginLeft')?.remove();
+
+    // Create and inject the red rectangle div
+    let greenRect = this.document.createElement('div');
+    greenRect.id = 'debug-marginLeft';
+    greenRect.style.position = 'absolute';
+    greenRect.style.left = `${viewport.left - margin}px`;
+    greenRect.style.top = `${viewport.top}px`;
+    greenRect.style.width = `${margin}px`;
+    greenRect.style.height = `${viewport.height}px`;
+    greenRect.style.border = '1px solid green';
+    greenRect.style.pointerEvents = 'none';
+    greenRect.style.zIndex = '1000';
+    greenRect.title = `Width: ${margin}px`;
+
+    // Inject into the document
+    this.document.body.appendChild(greenRect);
+
+
+    this.document.querySelector('#debug-marginRight')?.remove();
+
+    // Create and inject the red rectangle div
+    greenRect = this.document.createElement('div');
+    greenRect.id = 'debug-marginRight';
+    greenRect.style.position = 'absolute';
+    greenRect.style.left = `${viewport.left + viewport.width}px`;
+    greenRect.style.top = `${viewport.top}px`;
+    greenRect.style.width = `${margin}px`;
+    greenRect.style.height = `${viewport.height}px`;
+    greenRect.style.border = '1px solid green';
+    greenRect.style.pointerEvents = 'none';
+    greenRect.style.zIndex = '1000';
+    greenRect.title = `Width: ${margin}px`;
+
+    // Inject into the document
+    this.document.body.appendChild(greenRect);
+
   }
 
   /**

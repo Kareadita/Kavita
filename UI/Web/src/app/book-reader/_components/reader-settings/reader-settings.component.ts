@@ -23,8 +23,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
 import {BookReadingProfileFormGroup, EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
 import {EpubFont} from "../../../_models/preferences/epub-font";
-import {EpubPageCalcMethodPipe} from "../../../_pipes/epub-page-calc-method.pipe";
-import {allCalcMethods, EpubPageCalculationMethod} from "../../../_models/readers/epub-page-calculation-method";
 
 /**
  * Used for book reader. Do not use for other components
@@ -87,7 +85,7 @@ export const bookColorThemes = [
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton,
     NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, NgClass, NgStyle,
-    TitleCasePipe, TranslocoDirective, EpubPageCalcMethodPipe]
+    TitleCasePipe, TranslocoDirective]
 })
 export class ReaderSettingsComponent implements OnInit {
 
@@ -116,7 +114,6 @@ export class ReaderSettingsComponent implements OnInit {
   protected parentReadingProfile!: Signal<ReadingProfile | null>;
   protected currentReadingProfile!: Signal<ReadingProfile | null>;
   protected epubFonts!: Signal<EpubFont[]>;
-  protected pageCalcMode!: Signal<EpubPageCalculationMethod>;
 
 
   async ngOnInit() {
@@ -133,7 +130,6 @@ export class ReaderSettingsComponent implements OnInit {
     this.parentReadingProfile = this.readerSettingsService.parentReadingProfile;
     this.currentReadingProfile = this.readerSettingsService.currentReadingProfile;
     this.epubFonts = this.readerSettingsService.epubFonts;
-    this.pageCalcMode = this.readerSettingsService.pageCalcMode;
 
 
     this.themes = this.readerSettingsService.getThemes();
@@ -181,5 +177,4 @@ export class ReaderSettingsComponent implements OnInit {
   protected readonly WritingStyle = WritingStyle;
   protected readonly ReadingDirection = ReadingDirection;
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
-  protected readonly calcMethods = allCalcMethods;
 }

@@ -148,27 +148,6 @@
                     }
                   </div>
                 </div>
-
-                <div class="controls mt-2" style="display:flex; justify-content:space-between; align-items:center;">
-                  <label id="page-calc-method" class="form-label">{{t('page-calc-method-label')}}
-                    <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top"
-                       [ngbTooltip]="pageCalcMethodTooltip" role="button" tabindex="1" aria-describedby="fullscreen-help"></i>
-                  </label>
-                  <ng-template #pageCalcMethodTooltip>{{t('page-calc-method-tooltip')}}</ng-template>
-                  <span class="visually-hidden" id="page-calc-method-help">
-                    <ng-container [ngTemplateOutlet]="pageCalcMethodTooltip" />
-                  </span>
-                  <br>
-                  <div>
-                    <select class="form-select" aria-describedby="book-reader-heading"
-                            formControlName="bookReaderEpubPageCalculationMethod">
-                      @for (opt of calcMethods; track opt) {
-                        <option [ngValue]="opt">{{opt | epubPageCalcMethod}}</option>
-                      }
-                    </select>
-                  </div>
-                </div>
-
               </ng-template>
             </div>
           </div>
