@@ -30,7 +30,7 @@ import {
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
 import {FilterField} from 'src/app/_models/metadata/v2/filter-field';
-import {AsyncPipe} from "@angular/common";
+import {AsyncPipe, NgStyle} from "@angular/common";
 import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {Select2, Select2Option} from "ng-select2-component";
@@ -39,6 +39,7 @@ import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../../filter-settings";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {AnnotationsFilterField} from "../../../_models/metadata/v2/annotations-filter";
+import {RgbaColor} from "../../../book-reader/_models/annotations/highlight-slot";
 
 interface FieldConfig {
   type: PredicateType;
@@ -120,7 +121,8 @@ const BooleanComparisons = [
     NgbTooltip,
     TranslocoDirective,
     NgbInputDatepicker,
-    Select2
+    Select2,
+    NgStyle
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -431,6 +433,12 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
 
   updateIfDateFilled() {
     this.propagateFilterUpdate();
+  }
+
+  selectOptionStyle(c?: RgbaColor) {
+    if (!c) return {}
+
+    return { 'color': `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})` };
   }
 
   protected readonly FilterComparison = FilterComparison;

@@ -52,7 +52,16 @@
                                  [hideSelectedItems]="true"
                                  [multiple]="isMultiSelectDropdownAllowed()"
                                  [infiniteScroll]="true"
-                                 [resettable]="true" />
+                                 [resettable]="true"
+                                 [templates]="template"
+                        >
+                          <ng-template #template let-label="label" let-color="color">
+                            {{label}}
+                            @if (color) {
+                              <i [ngStyle]="selectOptionStyle(color)" class="fas fa-circle"></i>
+                            }
+                          </ng-template>
+                        </select2>
                       }
                     }
                   }
