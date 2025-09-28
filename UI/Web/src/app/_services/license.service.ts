@@ -42,6 +42,10 @@ export class LicenseService {
     return this.httpClient.post<string>(this.baseUrl + 'license/reset', {license, email}, TextResonse);
   }
 
+  resendLicense() {
+    return this.httpClient.post<boolean>(this.baseUrl + 'license/resend-license', {}, TextResonse).pipe(map(res => (res + '') === "true"));
+  }
+
   /**
    * Returns information about License and will internally cache if license is valid or not
    */

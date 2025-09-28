@@ -788,6 +788,8 @@
         "manage-tooltip": "Update payment info, Cancel/Pause subscription, etc",
         "cancel-label": "Cancel Subscription",
         "cancel-tooltip": "Cancel your subscription and delete the license within Kavita.",
+        "resend-license-email": "Send License to email",
+        "resend-license-email-tooltip": "Resend Kavita+ license to email. License must be bound to this server to work.",
         "faq-title": "FAQ",
         "total-subbed-months-label": "Total Months Subscribed",
         "email-label": "Registered Email",
@@ -3041,7 +3043,9 @@
         "confirm-delete-annotation": "Are you sure you want to delete this Annotation?",
         "confirm-delete-font": "Removing this font will delete it from the disk. You can grab it from temp directory before removal.",
         "confirm-force-delete-font": "This font is currently in use. Do you want to force delete it? This will force users back to the Default font.",
-        "font-in-use": "Cannot delete as the font is in use by one or more users."
+        "font-in-use": "Cannot delete as the font is in use by one or more users.",
+        "k+-resend-welcome-email-success": "An email was sent to your Kavita+ email",
+        "k+-resend-welcome-email-error": "There was an error sending your Kavita+ license. This can be due to no longer having an active account. Reach out to support."
     },
 
     "read-time-pipe": {

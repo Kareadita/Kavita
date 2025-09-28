@@ -118,6 +118,17 @@ public class LicenseController(
     }
 
     /// <summary>
+    /// Resend the welcome email to the user
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("resend-license")]
+    public async Task<ActionResult<bool>> ResendWelcomeEmail()
+    {
+       return Ok(await licenseService.ResendWelcomeEmail());
+    }
+
+    /// <summary>
     /// Updates server license
     /// </summary>
     /// <remarks>Caches the result</remarks>
