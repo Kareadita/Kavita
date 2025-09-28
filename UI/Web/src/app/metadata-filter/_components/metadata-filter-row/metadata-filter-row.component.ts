@@ -377,7 +377,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     }
 
     if (booleanFields.includes(inputVal)) {
-      let comps = [...DateComparisons];
+      let comps = [...BooleanComparisons];
       if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
         comps.push(FilterComparison.IsEmpty);
       }
