@@ -50,7 +50,7 @@ public class LicenseController(
     }
 
     /// <summary>
-    /// Has any license registered with the instance. Does not check Kavita+ API
+    /// Has any license registered with the instance. Does not validate against Kavita+ API
     /// </summary>
     /// <returns></returns>
     [Authorize("RequireAdminRole")]

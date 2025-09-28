@@ -42,7 +42,7 @@
                   </i>
                 }
               }
-              @if (!isChecking() && hasLicense() && !licenseInfo) {
+              @if (!isChecking() && hasLicense() && !licenseInfo()) {
                 <div><span class="error">{{t('license-mismatch')}}</span></div>
               }
 
