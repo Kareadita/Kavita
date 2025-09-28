@@ -12,6 +12,14 @@ namespace API.Extensions;
 
 public static class HttpExtensions
 {
+    /// <summary>
+    /// Adds pagination headers - Use with <see cref="PagedList{T}"/>
+    /// </summary>
+    /// <param name="response"></param>
+    /// <param name="currentPage"></param>
+    /// <param name="itemsPerPage"></param>
+    /// <param name="totalItems"></param>
+    /// <param name="totalPages"></param>
     public static void AddPaginationHeader(this HttpResponse response, int currentPage,
         int itemsPerPage, int totalItems, int totalPages)
     {

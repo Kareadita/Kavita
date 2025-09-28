@@ -23,9 +23,12 @@ public interface IAnnotationRepository
     void Attach(AppUserAnnotation annotation);
     void Update(AppUserAnnotation annotation);
     void Remove(AppUserAnnotation annotation);
+    void Remove(IEnumerable<AppUserAnnotation> annotations);
     Task<AnnotationDto?> GetAnnotationDto(int id);
     Task<AppUserAnnotation?> GetAnnotation(int id);
+    Task<IList<AppUserAnnotation>> GetAnnotations(IList<int> ids);
     Task<IList<FullAnnotationDto>> GetFullAnnotationsByUserIdAsync(int userId);
+    Task<IList<FullAnnotationDto>> GetFullAnnotations(IList<int> annotationIds);
     Task<PagedList<AnnotationDto>> GetAnnotationDtos(int userId, BrowseAnnotationFilterDto filter, UserParams userParams);
 }
 
@@ -46,6 +49,11 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         context.AppUserAnnotation.Remove(annotation);
     }
 
+    public void Remove(IEnumerable<AppUserAnnotation> annotations)
+    {
+        context.AppUserAnnotation.RemoveRange(annotations);
+    }
+
     public async Task<AnnotationDto?> GetAnnotationDto(int id)
     {
         return await context.AppUserAnnotation
@@ -57,6 +65,13 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
     {
         return await context.AppUserAnnotation
             .FirstOrDefaultAsync(a => a.Id == id);
+    }
+
+    public async Task<IList<AppUserAnnotation>> GetAnnotations(IList<int> ids)
+    {
+        return await context.AppUserAnnotation
+            .Where(a => ids.Contains(a.Id))
+            .ToListAsync();
     }
 
     public async Task<PagedList<AnnotationDto>> GetAnnotationDtos(int userId, BrowseAnnotationFilterDto filter, UserParams userParams)
@@ -87,6 +102,7 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
 
         var sortedQuery = query.SortBy(filter.SortOptions);
         var limitedQuery = filter.LimitTo <= 0 ? sortedQuery : sortedQuery.Take(filter.LimitTo);
+
         return limitedQuery.ProjectTo<AnnotationDto>(mapper.ConfigurationProvider);
     }
 
@@ -131,6 +147,16 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         };
     }
 
+    public async Task<IList<FullAnnotationDto>> GetFullAnnotations(IList<int> annotationIds)
+    {
+        return await context.AppUserAnnotation
+            .AsNoTracking()
+            .Where(a => annotationIds.Contains(a.Id))
+            //.Where(a => a.AppUser.UserPreferences.ShareAnnotations) TODO: Filter out annotations for users who don't share them
+            .SelectFullAnnotation()
+            .ToListAsync();
+    }
+
     /// <summary>
     /// This does not track!
     /// </summary>
@@ -140,32 +166,7 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
     {
         return await context.AppUserAnnotation
             .Where(a => a.AppUserId == userId)
-            .Select(a => new FullAnnotationDto
-            {
-                Id = a.Id,
-                SelectedText = a.SelectedText,
-                Comment = a.Comment,
-                CommentHtml = a.CommentHtml,
-                CommentPlainText = a.CommentPlainText,
-                Context = a.Context,
-                ChapterTitle = a.ChapterTitle,
-                PageNumber = a.PageNumber,
-                SelectedSlotIndex = a.SelectedSlotIndex,
-                ContainsSpoiler = a.ContainsSpoiler,
-                CreatedUtc = a.CreatedUtc,
-                LastModifiedUtc = a.LastModifiedUtc,
-                LibraryId = a.LibraryId,
-                LibraryName = a.Chapter.Volume.Series.Library.Name,
-                SeriesId = a.SeriesId,
-                SeriesName = a.Chapter.Volume.Series.Name,
-                VolumeId = a.VolumeId,
-                VolumeName = a.Chapter.Volume.Name,
-                ChapterId = a.ChapterId
-            })
-            .OrderBy(a => a.SeriesId)
-            .ThenBy(a => a.VolumeId)
-            .ThenBy(a => a.ChapterId)
-            .ThenBy(a => a.PageNumber)
+            .SelectFullAnnotation()
             .ToListAsync();
     }
 }

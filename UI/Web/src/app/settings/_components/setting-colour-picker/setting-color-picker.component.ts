@@ -1,6 +1,7 @@
 import {
-  Component, DestroyRef,
-  effect, ElementRef,
+  Component,
+  DestroyRef,
+  ElementRef,
   EventEmitter,
   HostListener,
   inject,
@@ -11,7 +12,7 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {NgClass, NgStyle} from '@angular/common';
 import {SlotColorPipe} from "../../../_pipes/slot-color.pipe";
 import {RgbaColor} from "../../../book-reader/_models/annotations/highlight-slot";
 import {LongClickDirective} from "../../../_directives/long-click.directive";
@@ -24,7 +25,7 @@ import {tap} from "rxjs";
 @Component({
   selector: 'app-setting-colour-picker',
   standalone: true,
-  imports: [CommonModule, SlotColorPipe, LongClickDirective, ChromePickerComponent],
+  imports: [SlotColorPipe, LongClickDirective, ChromePickerComponent, NgClass, NgStyle],
   templateUrl: './setting-color-picker.component.html',
   styleUrl: './setting-color-picker.component.scss'
 })

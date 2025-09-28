@@ -52,17 +52,21 @@ export class AnnotationCardComponent {
   allowEdit = input<boolean>(true);
   showPageLink = input<boolean>(true);
   /**
-   * If sizes should be forced. Turned of in drawer to account for manual resize
+   * If sizes should be forced. Turned off in drawer to account for manual resize
    */
   forceSize = input<boolean>(true);
   /**
    * Redirects to the reader with annotation in view
    */
   showInReaderLink = input<boolean>(false);
+  showSelectionBox = input<boolean>(false);
   openInIncognitoMode = input<boolean>(false);
   isInReader = input<boolean>(true);
+
+  selected = input<boolean>(false);
   @Output() delete = new EventEmitter();
   @Output() navigate = new EventEmitter<Annotation>();
+  @Output() selection = new EventEmitter<boolean>();
 
   titleColor: Signal<string>;
   hasClicked = model<boolean>(false);

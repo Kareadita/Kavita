@@ -42,7 +42,7 @@
                   </i>
                 }
               }
-              @if (!isChecking() && hasLicense() && !licenseInfo) {
+              @if (!isChecking() && hasLicense() && !licenseInfo()) {
                 <div><span class="error">{{t('license-mismatch')}}</span></div>
               }
 
@@ -201,6 +201,14 @@
         <div class="mt-2 mb-2">
           <app-setting-button [subtitle]="t('manage-tooltip')">
             <a class="btn btn-primary btn-sm mt-1" [href]="manageLink()" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>
+          </app-setting-button>
+        </div>
+
+        <div class="mt-2 mb-2">
+          <app-setting-button [subtitle]="t('resend-license-email-tooltip')">
+            <button type="button" class="flex-fill btn btn-primary btn-sm mt-1" aria-describedby="license-key-header" (click)="resendWelcomeEmail()">
+              {{t('resend-license-email')}}
+            </button>
           </app-setting-button>
         </div>
       </div>

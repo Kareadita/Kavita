@@ -14,6 +14,7 @@ import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {translate} from "@jsverse/transloco";
 import {Person} from "../_models/metadata/person";
 import {User} from '../_models/user';
+import {Annotation} from "../book-reader/_models/annotations/annotation";
 
 export enum Action {
   Submenu = -1,
@@ -130,6 +131,7 @@ export enum Action {
    * Remove the reading profile from the entity
    */
   ClearReadingProfile = 31,
+  Export = 32,
 }
 
 /**
@@ -150,7 +152,7 @@ export interface ActionItem<T> {
   /**
    * @deprecated Use required Roles instead
    */
-  requiresAdmin: boolean;
+  requiresAdmin?: boolean;
   children: Array<ActionItem<T>>;
   /**
    * An optional class which applies to an item. ie) danger on a delete action
@@ -194,6 +196,7 @@ export class ActionFactoryService {
   private sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
   private smartFilterActions: Array<ActionItem<SmartFilter>> = [];
   private sideNavHomeActions: Array<ActionItem<void>> = [];
+  private annotationActions: Array<ActionItem<Annotation>> = [];
 
   constructor() {
     this.accountService.currentUser$.subscribe((_) => {
@@ -243,6 +246,10 @@ export class ActionFactoryService {
 
   getSideNavHomeActions(callback: ActionCallback<void>, shouldRenderFunc: ActionShouldRenderFunc<void> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.sideNavHomeActions, callback, shouldRenderFunc);
+  }
+
+  getAnnotationActions(callback: ActionCallback<Annotation>, shouldRenderFunc: ActionShouldRenderFunc<Annotation> = this.dummyShouldRender) {
+    return this.applyCallbackToList(this.annotationActions, callback, shouldRenderFunc);
   }
 
   dummyCallback(action: ActionItem<any>, entity: any) {}
@@ -1099,7 +1106,28 @@ export class ActionFactoryService {
         requiredRoles: [],
         children: [],
       }
-    ]
+    ];
+
+    this.annotationActions = [
+      {
+        action: Action.Delete,
+        title: 'delete',
+        description: '',
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+        requiredRoles: [],
+        children: [],
+      },
+      {
+        action: Action.Export,
+        title: 'export',
+        description: '',
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+        requiredRoles: [],
+        children: [],
+      }
+    ];
 
 
   }
@@ -1118,9 +1146,9 @@ export class ActionFactoryService {
     });
   }
 
-  public applyCallbackToList(list: Array<ActionItem<any>>,
-                             callback: ActionCallback<any>,
-                             shouldRenderFunc: ActionShouldRenderFunc<any> = this.dummyShouldRender): Array<ActionItem<any>> {
+  public applyCallbackToList<T>(list: Array<ActionItem<T>>,
+                             callback: ActionCallback<T>,
+                             shouldRenderFunc: ActionShouldRenderFunc<T> = this.dummyShouldRender): Array<ActionItem<T>> {
     // Create a clone of the list to ensure we aren't affecting the default state
     const actions = list.map((a) => {
       return { ...a };

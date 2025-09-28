@@ -50,7 +50,7 @@ public class LicenseController(
     }
 
     /// <summary>
-    /// Has any license registered with the instance. Does not check Kavita+ API
+    /// Has any license registered with the instance. Does not validate against Kavita+ API
     /// </summary>
     /// <returns></returns>
     [Authorize("RequireAdminRole")]
@@ -115,6 +115,16 @@ public class LicenseController(
         }
 
         return BadRequest(localizationService.Translate(User.GetUserId(), "unable-to-reset-k+"));
+    }
+
+    /// <summary>
+    /// Resend the welcome email to the user
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("resend-license")]
+    public async Task<ActionResult<bool>> ResendWelcomeEmail()
+    {
+       return Ok(await licenseService.ResendWelcomeEmail());
     }
 
     /// <summary>

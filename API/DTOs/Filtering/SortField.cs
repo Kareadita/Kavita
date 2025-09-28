@@ -42,7 +42,8 @@ public enum SortField
 
 public enum AnnotationSortField
 {
-    Owner,
-    Created,
-    LastModified,
+    Owner = 1,
+    Created = 2,
+    LastModified = 3,
+    Color = 4,
 }

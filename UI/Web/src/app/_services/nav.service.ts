@@ -1,5 +1,5 @@
 import {DOCUMENT} from '@angular/common';
-import { DestroyRef, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2 } from '@angular/core';
+import {DestroyRef, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
 import {filter, ReplaySubject, take} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
@@ -9,10 +9,8 @@ import {AccountService} from "./account.service";
 import {map} from "rxjs/operators";
 import {NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
-import {SettingsTabId} from "../sidenav/preference-nav/preference-nav.component";
 import {WikiLink} from "../_models/wiki";
 import {AuthGuard} from "../_guards/auth.guard";
-import {SettingsService} from "../admin/settings.service";
 
 /**
  * NavItem used to construct the dropdown or NavLinkModal on mobile
@@ -58,7 +56,7 @@ export class NavService {
       routerLink: '/browse/tags',
     },
     {
-      transLocoKey: 'browse-annotations',
+      transLocoKey: 'all-annotations',
       routerLink: '/browse/annotations'
     },
     {

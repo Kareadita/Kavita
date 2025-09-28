@@ -65,7 +65,9 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   constructor() {
     this.localizationService.getLocales().subscribe(res => {
-      this.locales = res;
+      this.locales = res.sort((l1, l2) => {
+        return l1.renderName.localeCompare(l2.renderName)
+      });
 
       this.cdRef.markForCheck();
     });

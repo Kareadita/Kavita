@@ -1,0 +1,13 @@
+
+::ng-deep #card-detail-layout-items-container {
+
+  grid-template-columns: repeat(auto-fill, 25rem) !important;
+  justify-content: space-around;
+
+  .card-detail-layout-item {
+    background-color: transparent !important;
+    max-width: 25rem;
+    width: 25rem;
+  }
+
+}

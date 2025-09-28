@@ -37,7 +37,6 @@ import {MetadataService} from 'src/app/_services/metadata.service';
 import {SeriesService} from 'src/app/_services/series.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CommonModule} from "@angular/common";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
 import {EditSeriesRelationComponent} from "../../edit-series-relation/edit-series-relation.component";
@@ -61,6 +60,7 @@ import {ActionService} from "../../../_services/action.service";
 import {DownloadService} from "../../../shared/_services/download.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {LicenseService} from "../../../_services/license.service";
+import {AsyncPipe, DecimalPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 
 enum TabID {
   General = 0,
@@ -92,7 +92,6 @@ const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
     NgbNavContent,
     NgbNavItem,
     NgbNavLink,
-    CommonModule,
     TypeaheadComponent,
     CoverImageChooserComponent,
     EditSeriesRelationComponent,
@@ -111,6 +110,10 @@ const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
     EditListComponent,
     SettingButtonComponent,
     SettingItemComponent,
+    NgTemplateOutlet,
+    AsyncPipe,
+    DecimalPipe,
+    TitleCasePipe,
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],

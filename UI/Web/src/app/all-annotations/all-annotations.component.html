@@ -1,5 +1,5 @@
 <div class="main-container container-fluid">
-  <ng-container *transloco="let t; prefix:'browse-annotations'" >
+  <ng-container *transloco="let t; prefix:'all-annotations'" >
     <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)">
       <h2 title>
         <span>{{t('title')}}</span>
@@ -22,6 +22,16 @@
       (applyFilter)="updateFilter($event)"
     >
 
+      <ng-template #topBar>
+        <app-bulk-operations [actionCallback]="handleAction" [shouldRenderFunc]="shouldRender" />
+      </ng-template>
+
+      <ng-template #extraButtons>
+        <button class="btn btn-secondary ms-2" (click)="exportFilter()">
+          {{t('export')}}
+        </button>
+      </ng-template>
+
       <ng-template #cardItem let-item let-position="idx">
         <app-annotation-card
           [annotation]="item"
@@ -30,6 +40,9 @@
           [showInReaderLink]="true"
           [showPageLink]="false"
           [openInIncognitoMode]="true"
+          [showSelectionBox]="true"
+          [selected]="bulkSelectionService.isCardSelected('annotations', position)"
+          (selection)="bulkSelectionService.handleCardSelection('annotations', position, annotations().length, $event)"
         />
       </ng-template>
 

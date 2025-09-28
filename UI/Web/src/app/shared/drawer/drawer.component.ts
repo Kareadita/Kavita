@@ -1,5 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
-import {CommonModule} from "@angular/common";
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  Output
+} from '@angular/core';
+import {NgStyle} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 
 export class DrawerOptions {
@@ -11,7 +19,7 @@ export class DrawerOptions {
 
 @Component({
     selector: 'app-drawer',
-    imports: [CommonModule, TranslocoDirective],
+  imports: [TranslocoDirective, NgStyle],
     templateUrl: './drawer.component.html',
     styleUrls: ['./drawer.component.scss'],
     exportAs: "drawer",

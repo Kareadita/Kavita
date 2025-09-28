@@ -25,8 +25,14 @@
   }
 
   @if (filterSettings) {
-    <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)" />
+    <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)">
+      <ng-template #extraButtons>
+        <ng-container [ngTemplateOutlet]="extraButtonsRef" />
+      </ng-template>
+    </app-metadata-filter>
   }
+
+  <ng-container [ngTemplateOutlet]="topBar" />
 
   <div class="viewport-container ms-1" [ngClass]="{'empty': items.length === 0 && !isLoading}">
     <div class="content-container">

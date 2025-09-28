@@ -4,7 +4,6 @@
       <h4 title>{{t('title')}}</h4>
       <h5 subtitle>{{t('item-count', {num: collections.length | number})}}</h5>
     </app-side-nav-companion-bar>
-    <app-bulk-operations [actionCallback]="bulkActionCallback" />
 
     <app-card-detail-layout
       [isLoading]="isLoading"
@@ -13,6 +12,11 @@
       [jumpBarKeys]="jumpbarKeys"
       [trackByIdentity]="trackByIdentity"
     >
+
+      <ng-template #topBar>
+        <app-bulk-operations [actionCallback]="bulkActionCallback" />
+      </ng-template>
+
       <ng-template #cardItem let-item let-position="idx">
         <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [actionEntity]="item"
                        [imageUrl]="imageService.getCollectionCoverImage(item.id)"

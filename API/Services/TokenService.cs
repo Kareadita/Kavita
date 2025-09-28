@@ -118,13 +118,11 @@ public class TokenService : ITokenService
 
             try
             {
-                user.UpdateLastActive();
-                _unitOfWork.UserRepository.Update(user);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.UserRepository.UpdateUserAsActive(user.Id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was an error updating last active for the user");
+                _logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
             }
 
             return new TokenRequestDto()

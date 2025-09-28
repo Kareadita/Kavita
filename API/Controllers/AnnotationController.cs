@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Metadata.Browse.Requests;
@@ -62,7 +64,6 @@ public class AnnotationController : BaseApiController
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<AnnotationDto>>> GetAnnotations(int chapterId)
     {
-
         return Ok(await _unitOfWork.UserRepository.GetAnnotations(User.GetUserId(), chapterId));
     }
 
@@ -98,7 +99,7 @@ public class AnnotationController : BaseApiController
     {
         try
         {
-            return Ok(_annotationService.CreateAnnotation(User.GetUserId(), dto));
+            return Ok(await _annotationService.CreateAnnotation(User.GetUserId(), dto));
         }
         catch (KavitaException ex)
         {
@@ -133,7 +134,7 @@ public class AnnotationController : BaseApiController
     public async Task<ActionResult> DeleteAnnotation(int annotationId)
     {
         var annotation = await _unitOfWork.AnnotationRepository.GetAnnotation(annotationId);
-        if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest(_localizationService.Translate(User.GetUserId(), "annotation-delete"));
+        if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "annotation-delete"));
 
         _unitOfWork.AnnotationRepository.Remove(annotation);
         await _unitOfWork.CommitAsync();
@@ -142,17 +143,66 @@ public class AnnotationController : BaseApiController
     }
 
     /// <summary>
-    /// Exports Annotations for the User
+    /// Removes annotations in bulk. Requires every annotation to be owned by the authenticated user
+    /// </summary>
+    /// <param name="annotationIds"></param>
+    /// <returns></returns>
+    [HttpPost("bulk-delete")]
+    public async Task<ActionResult> DeleteAnnotationsBulk(IList<int> annotationIds)
+    {
+        var userId = User.GetUserId();
+
+        var annotations = await _unitOfWork.AnnotationRepository.GetAnnotations(annotationIds);
+        if (annotations.Any(a => a.AppUserId != userId))
+        {
+            return BadRequest();
+        }
+
+        _unitOfWork.AnnotationRepository.Remove(annotations);
+        await _unitOfWork.CommitAsync();
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Exports annotations for the given users
     /// </summary>
     /// <returns></returns>
-    [HttpGet("export")]
-    public async Task<IActionResult> ExportAnnotations()
+    [HttpPost("export-filter")]
+    public async Task<IActionResult> ExportAnnotationsFilter(BrowseAnnotationFilterDto filter, [FromQuery] UserParams? userParams)
     {
-        var exportFile = await _annotationService.ExportAnnotations(User.GetUserId());
-        if (string.IsNullOrEmpty(exportFile)) return BadRequest();
+        userParams ??= UserParams.Default;
 
+        var list = await _unitOfWork.AnnotationRepository.GetAnnotationDtos(User.GetUserId(), filter, userParams);
+        var annotations = list.Select(a => a.Id).ToList();
 
-        return PhysicalFile(exportFile, "application/json",
-            System.Web.HttpUtility.UrlEncode(Path.GetFileName(exportFile)), true);
+        var json = await _annotationService.ExportAnnotations(User.GetUserId(), annotations);
+        if (string.IsNullOrEmpty(json)) return BadRequest();
+
+        var bytes = Encoding.UTF8.GetBytes(json);
+        var fileName = System.Web.HttpUtility.UrlEncode($"annotations_export_{User.GetUserId()}_{DateTime.UtcNow:yyyyMMdd_HHmmss}_filtered");
+        return File(bytes, "application/json", fileName + ".json");
+    }
+
+    /// <summary>
+    /// Exports Annotations for the User
+    /// </summary>
+    /// <param name="annotations">Export annotations with the given ids</param>
+    /// <returns></returns>
+    [HttpPost("export")]
+    public async Task<IActionResult> ExportAnnotations(IList<int>? annotations = null)
+    {
+        var json = await _annotationService.ExportAnnotations(User.GetUserId(), annotations);
+        if (string.IsNullOrEmpty(json)) return BadRequest();
+
+        var bytes = Encoding.UTF8.GetBytes(json);
+
+        var fileName = System.Web.HttpUtility.UrlEncode($"annotations_export_{User.GetUserId()}_{DateTime.UtcNow:yyyyMMdd_HHmmss}");
+        if (annotations != null)
+        {
+            fileName += "_user_selection";
+        }
+
+        return File(bytes, "application/json", fileName + ".json");
     }
 }

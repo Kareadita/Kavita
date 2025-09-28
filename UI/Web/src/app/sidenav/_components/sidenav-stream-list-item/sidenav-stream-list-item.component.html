@@ -49,13 +49,11 @@
                 <a [href]="baseUrl + 'all-series?' + this.item.smartFilterEncoded">{{t('load-filter')}}</a>
               }
               @case (SideNavStreamType.ExternalSource) {
-              <a [href]="item.externalSource!.host! + 'login?apiKey=' + item.externalSource!.apiKey" target="_blank" rel="noopener noreferrer">{{item.externalSource!.host!}}</a>
-            
-}
+                <a [href]="item.externalSource!.host! + 'login?apiKey=' + item.externalSource!.apiKey" target="_blank" rel="noopener noreferrer">{{item.externalSource!.host!}}</a>
+              }
           }
-
         </div>
-}
+      }
       </div>
     </div>
   </div>

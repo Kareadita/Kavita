@@ -33,6 +33,7 @@ public interface ILicenseService
     Task<bool> HasActiveSubscription(string? license);
     Task<bool> ResetLicense(string license, string email);
     Task<LicenseInfoDto?> GetLicenseInfo(bool forceCheck = false);
+    Task<bool> ResendWelcomeEmail();
 }
 
 public class LicenseService(
@@ -304,5 +305,35 @@ public class LicenseService(
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Attempts to resend a welcome email to the registered user. The sub does not need to be active.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<bool> ResendWelcomeEmail()
+    {
+        try
+        {
+            var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+            if (string.IsNullOrEmpty(encryptedLicense.Value)) return false;
+
+            var httpResponse = await (Configuration.KavitaPlusApiUrl + "/api/license/resend-welcome-email")
+                .WithKavitaPlusHeaders(encryptedLicense.Value)
+                .PostAsync();
+
+            var response = await httpResponse.GetStringAsync();
+
+            if (response == null) return false;
+
+
+            return response == "true";
+        }
+        catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return false;
     }
 }

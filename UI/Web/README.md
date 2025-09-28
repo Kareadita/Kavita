@@ -37,3 +37,8 @@ Run `npm run start`
 
 # Update latest angular
 `ng update @angular/core @angular/cli @typescript-eslint/parser @angular/localize @angular/compiler-cli @angular/cdk @angular/animations @angular/common @angular/forms @angular/platform-browser @angular/platform-browser-dynamic @angular/router`
+
+`npm install @angular-eslint/builder@latest @angular-eslint/eslint-plugin@latest @angular-eslint/eslint-plugin-template@latest @angular-eslint/schematics@latest @angular-eslint/template-parser@latest`
+
+# Update Localization library
+`npm install @jsverse/transloco@latest @jsverse/transloco-locale@latest @jsverse/transloco-persist-lang@latest @jsverse/transloco-persist-translations@latest @jsverse/transloco-preload-langs@latest`

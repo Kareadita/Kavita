@@ -120,6 +120,7 @@ public interface IUserRepository
 
     Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId);
     Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId);
+    Task UpdateUserAsActive(int userId);
 }
 
 public class UserRepository : IUserRepository
@@ -628,6 +629,15 @@ public class UserRepository : IUserRepository
             .Where(a => a.AppUserId == userId && a.SeriesId == seriesId)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task UpdateUserAsActive(int userId)
+    {
+        await _context.Set<AppUser>()
+            .Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(u => u.LastActiveUtc, DateTime.UtcNow)
+                .SetProperty(u => u.LastActive, DateTime.Now));
     }
 
 

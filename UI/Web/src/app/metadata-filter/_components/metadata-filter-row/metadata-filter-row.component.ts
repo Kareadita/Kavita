@@ -67,52 +67,19 @@ class FilterRowUi {
   }
 }
 
-const unitLabels: Map<number, FilterRowUi> = new Map([
-  [FilterField.ReadingDate as number, new FilterRowUi('unit-reading-date')],
-  [FilterField.AverageRating as number, new FilterRowUi('unit-average-rating')],
-  [FilterField.ReadProgress as number, new FilterRowUi('unit-reading-progress')],
-  [FilterField.UserRating as number, new FilterRowUi('unit-user-rating')],
-  [FilterField.ReadLast as number, new FilterRowUi('unit-read-last')],
-  [AnnotationsFilterField.HighlightSlots as number, new FilterRowUi('', 'disclaimer-highlight-slots')],
-  [FilterField.FileSize as number, new FilterRowUi('unit-file-size', 'disclaimer-file-size')]
-]);
-
-// const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath, PersonFilterField.Name];
-// const NumberFields = [
-//   FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress,
-//   FilterField.UserRating, FilterField.AverageRating, FilterField.ReadLast
-// ];
-// const DropdownFields = [
-//   FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
-//   FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-//   FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-//   FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-//   FilterField.Writers, FilterField.Genres, FilterField.Libraries,
-//   FilterField.Formats, FilterField.CollectionTags, FilterField.Tags,
-//   FilterField.Imprint, FilterField.Team, FilterField.Location, PersonFilterField.Role
-// ];
-// const BooleanFields = [FilterField.WantToRead];
-// const DateFields = [FilterField.ReadingDate];
-//
-// const DropdownFieldsWithoutMustContains = [
-//   FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
-// ];
-// const DropdownFieldsThatIncludeNumberComparisons = [
-//   FilterField.AgeRating
-// ];
-// const NumberFieldsThatIncludeDateComparisons = [
-//   FilterField.ReleaseYear
-// ];
-//
-// const FieldsThatShouldIncludeIsEmpty = [
-//   FilterField.Summary, FilterField.UserRating, FilterField.Genres,
-//   FilterField.CollectionTags, FilterField.Tags, FilterField.ReleaseYear,
-//   FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-//   FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-//   FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-//   FilterField.Writers, FilterField.Imprint, FilterField.Team,
-//   FilterField.Location,
-// ];
+const unitLabels: Map<ValidFilterEntity, Map<number, FilterRowUi>> = new Map([
+  ['series', new Map([
+    [FilterField.ReadingDate as number, new FilterRowUi('unit-reading-date')],
+    [FilterField.AverageRating as number, new FilterRowUi('unit-average-rating')],
+    [FilterField.ReadProgress as number, new FilterRowUi('unit-reading-progress')],
+    [FilterField.UserRating as number, new FilterRowUi('unit-user-rating')],
+    [FilterField.ReadLast as number, new FilterRowUi('unit-read-last')],
+    [FilterField.FileSize as number, new FilterRowUi('unit-file-size', 'disclaimer-file-size')]
+  ])],
+  ['annotation', new Map([
+    [AnnotationsFilterField.HighlightSlots as number, new FilterRowUi('', 'disclaimer-highlight-slots')],
+  ])],
+])
 
 const StringComparisons = [
   FilterComparison.Equal,
@@ -214,10 +181,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       , {requireSync: true, injector: this.injector});
 
     this.isEmptySelected = computed(() => this.comparisonSignal() !== FilterComparison.IsEmpty);
-    this.uiLabel = computed(() => {
-      if (!unitLabels.has(this.inputSignal())) return null;
-      return unitLabels.get(this.inputSignal()) as FilterRowUi;
-    });
+    this.uiLabel = computed(() => unitLabels.get(this.entityType())?.get(this.inputSignal()) ?? null);
 
     this.isMultiSelectDropdownAllowed = computed(() => {
       return this.comparisonSignal() === FilterComparison.Contains || this.comparisonSignal() === FilterComparison.NotContains || this.comparisonSignal() === FilterComparison.MustContains;

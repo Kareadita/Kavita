@@ -6,7 +6,6 @@
       </h4>
       <h5 subtitle>{{t('series-count', {num: series.length | number})}}</h5>
     </app-side-nav-companion-bar>
-    <app-bulk-operations [actionCallback]="bulkActionCallback" />
     @if (filter) {
       <app-card-detail-layout
         [isLoading]="loadingBookmarks"
@@ -17,6 +16,11 @@
         [jumpBarKeys]="jumpbarKeys"
         (applyFilter)="updateFilter($event)"
       >
+
+        <ng-template #topBar>
+          <app-bulk-operations [actionCallback]="bulkActionCallback" />
+        </ng-template>
+
         <ng-template #cardItem let-item let-position="idx">
           <app-card-item [entity]="item" [title]="item.name" [imageUrl]="imageService.getSeriesCoverImage(item.id)"
                          [suppressArchiveWarning]="true" (clicked)="viewBookmarks(item)" [count]="seriesIds[item.id]" [allowSelection]="true"

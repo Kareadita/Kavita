@@ -64,6 +64,7 @@
 
               @if (an.ownerUsername === accountService.currentUserSignal()?.username) {
                 <button class="btn btn-primary" (click)="switchToEditMode()">{{t('edit')}}</button>
+                <button class="btn btn-danger" (click)="delete()">{{t('delete')}}</button>
               }
 
             }

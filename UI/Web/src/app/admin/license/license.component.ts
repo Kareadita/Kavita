@@ -56,7 +56,7 @@ export class LicenseComponent implements OnInit {
     if (!email) return environment.manageLink;
 
     return environment.manageLink + '?prefilled_email=' + encodeURIComponent(email);
-  })
+  });
 
 
 
@@ -196,6 +196,17 @@ export class LicenseComponent implements OnInit {
     this.licenseService.resetLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim()).subscribe(() => {
       this.toastr.success(translate('toasts.k+-reset-key-success'));
     });
+  }
+
+  resendWelcomeEmail() {
+    this.licenseService.resendLicense().subscribe(res => {
+      if (res) {
+        this.toastr.success(translate('toasts.k+-resend-welcome-email-success'));
+      } else {
+        this.toastr.error(translate('toasts.k+-resend-welcome-message-error'));
+      }
+
+    })
   }
 
   updateEditMode(mode: boolean) {
