@@ -1,6 +1,8 @@
 <ng-container *transloco="let t; prefix: 'customize-sidenav-streams'">
   <form [formGroup]="listForm">
-    <app-bulk-operations [modalMode]="false" [actionCallback]="bulkActionCallback" />
+    <ng-template #topBar>
+     <app-bulk-operations [modalMode]="false" [actionCallback]="bulkActionCallback" />
+    </ng-template>
 
     @if (items.length > 3) {
       <div class="row g-0 mb-2">
