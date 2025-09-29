@@ -583,7 +583,6 @@ public class OpdsService : IOpdsService
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
-        // TODO: Need to fix this implementation to accept pageNumber starting at 1
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId, GetUserParams(request.PageNumber))).ToList();
         var totalItems = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).Count();
 
@@ -726,8 +725,9 @@ public class OpdsService : IOpdsService
         var chapterDtos = await _unitOfWork.ChapterRepository.GetChapterDtoByIdsAsync(volume.Chapters.Select(c => c.Id), userId);
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
-        var firstChapterWithProgress = chapterDtos.FirstOrDefault(c => c.PagesRead > 0);
-        if (firstChapterWithProgress != null)
+        var firstChapterWithProgress = chapterDtos.FirstOrDefault(i => i.PagesRead > 0 && i.PagesRead != i.Pages) ??
+                                       chapterDtos.FirstOrDefault(i => i.PagesRead == 0 && i.PagesRead != i.Pages);
+        if (firstChapterWithProgress != null && request.PageNumber == FirstPageNumber)
         {
             var chapterDto = await _readerService.GetContinuePoint(seriesId, userId);
             await AddContinueReadingPoint(seriesId, chapterDto, feed, request);
