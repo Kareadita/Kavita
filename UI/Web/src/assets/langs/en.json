@@ -202,8 +202,6 @@
         "disable-animations-tooltip": "Turns off animations in the site. Useful for e-ink readers.",
         "collapse-series-relationships-label": "Collapse Series Relationships",
         "collapse-series-relationships-tooltip": "Should Kavita show Series that have no relationships or is the parent/prequel",
-        "share-series-reviews-label": "Share Series Reviews",
-        "share-series-reviews-tooltip": "Allow your reviews to be visible to other users on this server",
         "highlight-bar-label": "Annotations highlight colors",
         "highlight-bar-tooltip": "These colors are shared between all books",
         "colorscape-label": "Use ColorScape",
@@ -215,6 +213,19 @@
         "want-to-read-sync-label": "Want To Read Sync",
         "want-to-read-sync-tooltip": "Allow Kavita to add items to your Want to Read list based on AniList and MAL series in Pending read list",
 
+        "share-series-reviews-label": "Share Series Reviews",
+        "share-series-reviews-tooltip": "Allow your reviews to be visible to other users on this server",
+        "share-annotations-label": "Share annotations",
+        "share-annotations-tooltip": "Allow your annotations to be viewed by other users on this server",
+        "view-other-annotations-label": "View others annotations",
+        "view-other-annotations-tooltip": "View other users' annotations while reading",
+        "social-libraries-label": "Social Libraries",
+        "social-libraries-tooltip": "Libraries on which social features should be enabled. No selection enables social features everywhere. Disable specific features if you wish to use them nowhere.",
+        "social-max-age-rating-label": "Max age rating",
+        "social-max-age-rating-tooltip": "Max age rating of the chapter on which social features will work",
+        "social-include-unknowns-label": "Include unknowns",
+        "social-include-unknowns-tooltip": "Enable social features on chapter with an unknown age rating",
+
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
         "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",
         "clients-api-key-tooltip": "The API key is like a password. Resetting it will invalidate any existing clients.",
@@ -224,6 +235,11 @@
 
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
+    },
+
+    "multi-check-box-form": {
+        "select-all": "Select all",
+        "deselect-all": "Deselect all"
     },
 
     "user-holds": {

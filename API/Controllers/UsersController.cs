@@ -108,9 +108,18 @@ public class UsersController : BaseApiController
         existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
-        existingPreferences.ShareReviews = preferencesDto.ShareReviews;
         existingPreferences.ColorScapeEnabled = preferencesDto.ColorScapeEnabled;
         existingPreferences.BookReaderHighlightSlots = preferencesDto.BookReaderHighlightSlots;
+
+        var allLibs = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id))
+            .Select(l => l.Id).ToList();
+
+        existingPreferences.ShareReviews = preferencesDto.ShareReviews;
+        existingPreferences.ShareAnnotations = preferencesDto.ShareAnnotations;
+        existingPreferences.ViewOtherAnnotations = preferencesDto.ViewOtherAnnotations;
+        existingPreferences.SocialLibraries = preferencesDto.SocialLibraries.Where(l => allLibs.Contains(l)).ToList();
+        existingPreferences.SocialMaxAgeRating = preferencesDto.SocialMaxAgeRating;
+        existingPreferences.SocialIncludeUnknowns = preferencesDto.SocialIncludeUnknowns;
 
         if (await _licenseService.HasActiveLicense())
         {

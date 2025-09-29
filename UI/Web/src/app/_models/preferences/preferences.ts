@@ -12,7 +12,6 @@ export interface Preferences {
   promptForDownloadSize: boolean;
   noTransitions: boolean;
   collapseSeriesRelationships: boolean;
-  shareReviews: boolean;
   locale: string;
   bookReaderHighlightSlots: HighlightSlot[];
   colorScapeEnabled: boolean;
@@ -22,6 +21,7 @@ export interface Preferences {
   wantToReadSync: boolean;
 
   // Social
+  shareReviews: boolean;
   shareAnnotations: boolean;
   viewOtherAnnotations: boolean;
   socialLibraries: number[];

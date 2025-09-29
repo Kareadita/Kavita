@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Preferences} from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
@@ -6,7 +15,7 @@ import {BookService} from "../../book-reader/_services/book.service";
 import {Title} from "@angular/platform-browser";
 import {Router} from "@angular/router";
 import {LocalizationService} from "../../_services/localization.service";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {Form, FormArray, FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {User} from "../../_models/user";
 import {KavitaLocale} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -17,6 +26,38 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {LicenseService} from "../../_services/license.service";
 import {HighlightBarComponent} from "../../book-reader/_components/_annotations/highlight-bar/highlight-bar.component";
+import {SiteTheme} from "../../_models/preferences/site-theme";
+import {PageLayoutMode} from "../../_models/page-layout-mode";
+import {HighlightSlot} from "../../book-reader/_models/annotations/highlight-slot";
+import {AgeRating} from "../../_models/metadata/age-rating";
+import {LibraryService} from "../../_services/library.service";
+import {Library} from "../../_models/library/library";
+import {MultiCheckBoxFormComponent} from "../../shared/_components/multi-check-box-form/multi-check-box-form.component";
+import {MetadataService} from "../../_services/metadata.service";
+import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
+import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
+
+type UserPreferencesForm = FormGroup<{
+  theme: FormControl<SiteTheme>,
+  globalPageLayoutMode: FormControl<PageLayoutMode>,
+  blurUnreadSummaries: FormControl<boolean>,
+  promptForDownloadSize: FormControl<boolean>,
+  noTransitions: FormControl<boolean>,
+  collapseSeriesRelationships: FormControl<boolean>,
+  locale: FormControl<string>,
+  bookReaderHighlightSlots: FormArray<FormControl<HighlightSlot>>,
+  colorScapeEnabled: FormControl<boolean>,
+
+  aniListScrobblingEnabled: FormControl<boolean>,
+  wantToReadSync: FormControl<boolean>,
+
+  shareReviews: FormControl<boolean>,
+  shareAnnotations: FormControl<boolean>,
+  viewOtherAnnotations: FormControl<boolean>,
+  socialLibraries: FormControl<number[]>,
+  socialMaxAgeRating: FormControl<AgeRating>,
+  socialIncludeUnknowns: FormControl<boolean>,
+}>
 
 @Component({
   selector: 'app-manga-user-preferences',
@@ -28,7 +69,9 @@ import {HighlightBarComponent} from "../../book-reader/_components/_annotations/
     SettingSwitchComponent,
     AsyncPipe,
     DecimalPipe,
-    HighlightBarComponent
+    HighlightBarComponent,
+    MultiCheckBoxFormComponent,
+    AgeRatingPipe,
   ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
@@ -44,11 +87,21 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly localizationService = inject(LocalizationService);
   protected readonly licenseService = inject(LicenseService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly metadataService = inject(MetadataService);
 
+
+  loading = signal(true);
+  ageRatings = signal<AgeRatingDto[]>([]);
+  libraries = signal<Library[]>([]);
+  libraryOptions = computed(() => this.libraries().map(l => {
+    return { label: l.name, value: l.id };
+  }));
 
   locales: Array<KavitaLocale> = [];
 
-  settingsForm: FormGroup = new FormGroup({});
+  settingsForm!: UserPreferencesForm;
   user: User | undefined = undefined;
 
   get Locale() {
@@ -75,33 +128,46 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - User Preferences');
+    this.cdRef.markForCheck();
 
     forkJoin({
       user: this.accountService.currentUser$.pipe(take(1)),
-      pref: this.accountService.getPreferences()
-    }).subscribe(results => {
-      if (results.user === undefined) {
+      pref: this.accountService.getPreferences(),
+      libraries: this.libraryService.getLibraries(),
+      ageRatings: this.metadataService.getAllAgeRatings(),
+    }).subscribe(({user, pref, libraries, ageRatings}) => {
+      if (user === undefined) {
         this.router.navigateByUrl('/login');
         return;
       }
 
-      this.user = results.user;
-      this.user.preferences = results.pref;
+      this.loading.set(false);
+      this.libraries.set(libraries);
+      this.ageRatings.set(ageRatings);
+      this.user = user;
+      this.user.preferences = pref;
 
-      this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
-      this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
-      this.settingsForm.addControl('blurUnreadSummaries', new FormControl(this.user.preferences.blurUnreadSummaries, []));
-      this.settingsForm.addControl('promptForDownloadSize', new FormControl(this.user.preferences.promptForDownloadSize, []));
-      this.settingsForm.addControl('noTransitions', new FormControl(this.user.preferences.noTransitions, []));
-      this.settingsForm.addControl('collapseSeriesRelationships', new FormControl(this.user.preferences.collapseSeriesRelationships, []));
-      this.settingsForm.addControl('shareReviews', new FormControl(this.user.preferences.shareReviews, []));
-      this.settingsForm.addControl('locale', new FormControl(this.user.preferences.locale || 'en', []));
-      this.settingsForm.addControl('colorScapeEnabled', new FormControl(this.user.preferences.colorScapeEnabled ?? true, []));
+      this.settingsForm = this.fb.group({
+        theme: this.fb.control<SiteTheme>(pref.theme),
+        globalPageLayoutMode: this.fb.control<PageLayoutMode>(pref.globalPageLayoutMode),
+        blurUnreadSummaries: this.fb.control<boolean>(pref.blurUnreadSummaries),
+        promptForDownloadSize: this.fb.control<boolean>(pref.promptForDownloadSize),
+        noTransitions: this.fb.control<boolean>(pref.noTransitions),
+        collapseSeriesRelationships: this.fb.control<boolean>(pref.collapseSeriesRelationships),
+        locale: this.fb.control<string>(pref.locale || 'en'),
+        bookReaderHighlightSlots: this.fb.array(pref.bookReaderHighlightSlots.map(s => this.fb.control(s))),
+        colorScapeEnabled: this.fb.control<boolean>(pref.colorScapeEnabled),
 
-      this.settingsForm.addControl('aniListScrobblingEnabled', new FormControl(this.user.preferences.aniListScrobblingEnabled || false, []));
-      this.settingsForm.addControl('wantToReadSync', new FormControl(this.user.preferences.wantToReadSync || false, []));
-      this.settingsForm.addControl('bookReaderHighlightSlots', new FormControl(this.user.preferences.bookReaderHighlightSlots, []));
+        aniListScrobblingEnabled: this.fb.control<boolean>(pref.aniListScrobblingEnabled),
+        wantToReadSync: this.fb.control<boolean>(pref.wantToReadSync),
 
+        shareReviews: this.fb.control<boolean>(pref.shareReviews),
+        shareAnnotations: this.fb.control<boolean>(pref.shareAnnotations),
+        viewOtherAnnotations: this.fb.control<boolean>(pref.viewOtherAnnotations),
+        socialLibraries: this.fb.control<number[]>(pref.socialLibraries),
+        socialMaxAgeRating: this.fb.control<AgeRating>(pref.socialMaxAgeRating),
+        socialIncludeUnknowns: this.fb.control<boolean>(pref.socialIncludeUnknowns),
+      });
 
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
@@ -123,14 +189,6 @@ export class ManageUserPreferencesComponent implements OnInit {
 
       this.cdRef.markForCheck();
     });
-
-    this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(mode => {
-      if (mode) {
-        this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
-        this.cdRef.markForCheck();
-      }
-    });
-    this.cdRef.markForCheck();
   }
 
   reset() {
@@ -152,21 +210,6 @@ export class ManageUserPreferencesComponent implements OnInit {
   }
 
   packSettings(): Preferences {
-    const modelSettings = this.settingsForm.value;
-
-    return  {
-      theme: modelSettings.theme,
-      globalPageLayoutMode: parseInt(modelSettings.globalPageLayoutMode, 10),
-      blurUnreadSummaries: modelSettings.blurUnreadSummaries,
-      promptForDownloadSize: modelSettings.promptForDownloadSize,
-      noTransitions: modelSettings.noTransitions,
-      collapseSeriesRelationships: modelSettings.collapseSeriesRelationships,
-      shareReviews: modelSettings.shareReviews,
-      locale: modelSettings.locale || 'en',
-      aniListScrobblingEnabled: modelSettings.aniListScrobblingEnabled,
-      wantToReadSync: modelSettings.wantToReadSync,
-      bookReaderHighlightSlots: modelSettings.bookReaderHighlightSlots,
-      colorScapeEnabled: modelSettings.colorScapeEnabled,
-    };
+    return this.settingsForm.getRawValue();
   }
 }
