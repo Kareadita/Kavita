@@ -1,6 +1,7 @@
 import {PageLayoutMode} from '../page-layout-mode';
 import {SiteTheme} from './site-theme';
 import {HighlightSlot} from "../../book-reader/_models/annotations/highlight-slot";
+import {AgeRating} from "../metadata/age-rating";
 
 export interface Preferences {
 
@@ -19,5 +20,12 @@ export interface Preferences {
   // Kavita+
   aniListScrobblingEnabled: boolean;
   wantToReadSync: boolean;
+
+  // Social
+  shareAnnotations: boolean;
+  viewOtherAnnotations: boolean;
+  socialLibraries: number[];
+  socialMaxAgeRating: AgeRating;
+  socialIncludeUnknowns: boolean;
 }
 

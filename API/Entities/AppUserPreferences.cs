@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using API.Data;
+using API.Data.Misc;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 using API.Services.Tasks;
@@ -185,6 +186,36 @@ public class AppUserPreferences
     /// Should this account have Want to Read Sync enabled
     /// </summary>
     public bool WantToReadSync { get; set; }
+    #endregion
+
+    #region Social
+
+    /// <summary>
+    /// Share your annotations with other users
+    /// </summary>
+    public bool ShareAnnotations { get; set; } = false;
+
+    /// <summary>
+    /// See other users' annotations while reading
+    /// </summary>
+    public bool ViewOtherAnnotations { get; set; } = true;
+
+    /// <summary>
+    /// For which libraries should social features be enabled
+    /// </summary>
+    /// <remarks>Empty array means all, disable specific social features to opt out everywhere</remarks>
+    public IList<int> SocialLibraries { get; set; } = [];
+
+    /// <summary>
+    /// Highest age rating for which social features are enabled
+    /// </summary>
+    public AgeRating SocialMaxAgeRating { get; set; } = AgeRating.NotApplicable;
+
+    /// <summary>
+    /// Enable social features for unknown age ratings
+    /// </summary>
+    public bool SocialIncludeUnknowns { get; set; } = true;
+
     #endregion
 
     public AppUser AppUser { get; set; } = null!;

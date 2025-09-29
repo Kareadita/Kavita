@@ -52,7 +52,10 @@ public class AppUserAnnotation : IEntityDate
 
     public bool ContainsSpoiler { get; set; }
 
-     // TODO: Figure out a simple mechansim to track upvotes (hashmap of userids?)
+    /// <summary>
+    /// A set container userIds of all users who have liked this annotations
+    /// </summary>
+    public ISet<int> Likes { get; set; } = new HashSet<int>();
 
      /// <summary>
      /// Title of the TOC Chapter within Epub (not Chapter Entity)

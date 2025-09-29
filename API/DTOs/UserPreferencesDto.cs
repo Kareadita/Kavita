@@ -48,4 +48,23 @@ public sealed record UserPreferencesDto
     /// <inheritdoc cref="API.Entities.AppUserPreferences.BookReaderHighlightSlots"/>
     [Required]
     public List<HighlightSlot> BookReaderHighlightSlots { get; set; }
+
+    #region Social
+
+    /// <inheritdoc cref="AppUserPreferences.ShareAnnotations"/>
+    public bool ShareAnnotations { get; set; } = false;
+
+    /// <inheritdoc cref="AppUserPreferences.ViewOtherAnnotations"/>
+    public bool ViewOtherAnnotations { get; set; } = true;
+
+    /// <inheritdoc cref="AppUserPreferences.SocialLibraries"/>
+    public IList<int> SocialLibraries { get; set; } = [];
+
+    /// <inheritdoc cref="AppUserPreferences.SocialMaxAgeRating"/>
+    public AgeRating SocialMaxAgeRating { get; set; } = AgeRating.NotApplicable;
+
+    /// <inheritdoc cref="AppUserPreferences.SocialIncludeUnknowns"/>
+    public bool SocialIncludeUnknowns { get; set; } = true;
+
+    #endregion
 }
