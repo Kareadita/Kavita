@@ -582,7 +582,7 @@ public class OpdsService : IOpdsService
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
-
+        // TODO: Need to fix this implementation to accept pageNumber starting at 1
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId, GetUserParams(request.PageNumber))).ToList();
         var totalItems = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).Count();
 

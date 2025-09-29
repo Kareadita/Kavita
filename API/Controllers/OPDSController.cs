@@ -320,7 +320,7 @@ public class OpdsController : BaseApiController
     /// <returns></returns>
     [HttpGet("{apiKey}/reading-list/{readingListId}")]
     [Produces("application/xml")]
-    public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey, [FromQuery] int pageNumber = 1)
+    public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey, [FromQuery] int pageNumber = 0)
     {
         try
         {

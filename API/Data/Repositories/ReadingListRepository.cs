@@ -436,7 +436,7 @@ public class ReadingListRepository : IReadingListRepository
         if (userParams != null)
         {
             query = query
-                .Skip(userParams.PageNumber * userParams.PageSize)
+                .Skip((userParams.PageNumber - 1) * userParams.PageSize) // NOTE: PageNumber starts at 1 with PagedList, so copy logic here
                 .Take(userParams.PageSize);
         }
 
