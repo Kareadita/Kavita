@@ -1143,7 +1143,8 @@
         "publication-status-title": "Publication",
         "publication-status-tooltip": "Publication Status",
         "on": "{{reader-settings.on}}",
-        "off": "{{reader-settings.off}}"
+        "off": "{{reader-settings.off}}",
+        "loading": "{{common.loading}}"
     },
 
     "match-series-modal": {
