@@ -9,13 +9,13 @@ import {
 import {RgbaColor} from "../../../book-reader/_models/annotations/highlight-slot";
 import {ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule} from "@angular/forms";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {LoadingComponent} from "../../loading/loading.component";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {NgStyle} from "@angular/common";
 
 /**
- * An item to display in the MultiCheckBoxFormComponent
+ * An item to display in the SettingMultiCheckBox
  */
-interface MultiSelectCheckBoxFormItem<T> {
+interface Item<T> {
   /**
    * Label to display in the list
    */
@@ -31,13 +31,13 @@ interface MultiSelectCheckBoxFormItem<T> {
 }
 
 /**
- * The MultiCheckBoxFormComponent should be used when wanting to display all options, of which any may be selected at once.
+ * The SettingMultiCheckBox should be used when wanting to display all options, of which any may be selected at once.
  * The component should have a formControlName bound to it of type FormControl<T[]>.
  *
  * An example can be found in ManageUserPreferencesComponent
  */
 @Component({
-  selector: 'app-multi-check-box-form',
+  selector: 'app-setting-multi-check-box',
   imports: [
     TranslocoDirective,
     LoadingComponent,
@@ -45,18 +45,18 @@ interface MultiSelectCheckBoxFormItem<T> {
     NgStyle
   ],
   standalone: true,
-  templateUrl: './multi-check-box-form.component.html',
-  styleUrl: './multi-check-box-form.component.scss',
+  templateUrl: './setting-multi-check-box.component.html',
+  styleUrl: './setting-multi-check-box.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => MultiCheckBoxFormComponent<any>),
+      useExisting: forwardRef(() => SettingMultiCheckBox<any>),
       multi: true,
     }
   ]
 })
-export class MultiCheckBoxFormComponent<T> implements ControlValueAccessor {
+export class SettingMultiCheckBox<T> implements ControlValueAccessor {
 
   /**
    * Title to display above the checkboxes
@@ -75,7 +75,7 @@ export class MultiCheckBoxFormComponent<T> implements ControlValueAccessor {
   /**
    * All possible options
    */
-  options = input.required<MultiSelectCheckBoxFormItem<T>[]>();
+  options = input.required<Item<T>[]>();
 
   isLoading = computed(() => {
     const loading = this.loading();
@@ -114,11 +114,11 @@ export class MultiCheckBoxFormComponent<T> implements ControlValueAccessor {
     this.disabled.set(isDisabled);
   }
 
-  isChecked(item: MultiSelectCheckBoxFormItem<T>) {
+  isChecked(item: Item<T>) {
     return this.selectedValues().includes(item.value);
   }
 
-  onCheckboxChange(item: MultiSelectCheckBoxFormItem<T>, event: Event) {
+  onCheckboxChange(item: Item<T>, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {

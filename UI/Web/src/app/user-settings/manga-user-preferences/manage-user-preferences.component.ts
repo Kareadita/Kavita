@@ -32,7 +32,7 @@ import {HighlightSlot} from "../../book-reader/_models/annotations/highlight-slo
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {LibraryService} from "../../_services/library.service";
 import {Library} from "../../_models/library/library";
-import {MultiCheckBoxFormComponent} from "../../shared/_components/multi-check-box-form/multi-check-box-form.component";
+import {SettingMultiCheckBox} from "../../settings/_components/setting-multi-check-box/setting-multi-check-box.component";
 import {MetadataService} from "../../_services/metadata.service";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
@@ -70,7 +70,7 @@ type UserPreferencesForm = FormGroup<{
     AsyncPipe,
     DecimalPipe,
     HighlightBarComponent,
-    MultiCheckBoxFormComponent,
+    SettingMultiCheckBox,
     AgeRatingPipe,
   ],
   templateUrl: './manage-user-preferences.component.html',
