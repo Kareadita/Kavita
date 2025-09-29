@@ -63,6 +63,7 @@ public class OpdsService : IOpdsService
     private readonly XmlSerializer _xmlSerializer;
 
     private const int PageSize = 20;
+    public const int FirstPageNumber = 1;
     private readonly FilterV2Dto _filterV2Dto = new();
     private readonly FilterDto _filterDto = new()
     {
@@ -588,8 +589,9 @@ public class OpdsService : IOpdsService
 
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
-        var firstReadReadingListItem = items.FirstOrDefault(i => i.PagesRead > 0);
-        if (firstReadReadingListItem != null && request.PageNumber == 0)
+        var firstReadReadingListItem = items.FirstOrDefault(i => i.PagesRead > 0 && i.PagesRead != i.PagesTotal) ??
+                                       items.FirstOrDefault(i => i.PagesRead == 0 && i.PagesRead != i.PagesTotal);
+        if (firstReadReadingListItem != null && request.PageNumber == FirstPageNumber)
         {
             await AddContinueReadingPoint(firstReadReadingListItem, feed, request);
         }
