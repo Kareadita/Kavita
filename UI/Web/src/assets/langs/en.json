@@ -953,7 +953,9 @@
     "annotation-card": {
         "page-num": "{{book-reader.page-num-label}}",
         "contains-spoilers-label": "Spoilers",
-        "view-in-reader-label": "View in Reader"
+        "view-in-reader-label": "View in Reader",
+        "location-tooltip": "{{library}} - {{series}}",
+        "likes": "{{amount}}"
     },
 
     "annotations-tab": {
@@ -3177,7 +3179,9 @@
         "rename": "Rename",
         "rename-tooltip": "Rename the Smart Filter",
         "merge": "Merge",
-        "export": "Export"
+        "export": "Export",
+        "like": "Like",
+        "unlike": "Remove like(s)"
     },
 
     "preferences": {

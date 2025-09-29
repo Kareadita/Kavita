@@ -1,7 +1,11 @@
 <ng-container *transloco="let t; prefix: 'annotation-card'">
   <div class="card border-0 shadow-sm mb-3" [class.annotation-card]="forceSize()">
     <div #username class="card-header d-flex justify-content-between align-items-center py-2 px-3 clickable" [ngStyle]="{'background-color': titleColor()}" (click)="viewAnnotation()">
+
       <div class="d-flex align-items-center">
+        @if (showLocationInformation()) {
+          <i class="fas fa-book me-2" [ngbTooltip]="t('location-tooltip', {series: annotation().seriesName, library: annotation().libraryName})"></i>
+        }
         <strong [style.color]="colorscapeService.getContrastingTextColor(username)">{{ annotation().ownerUsername }}</strong>
       </div>
       <div  [style.color]="colorscapeService.getContrastingTextColor(username)" class="ms-2">{{ annotation().createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
@@ -53,18 +57,27 @@
         }
       </div>
 
-      @if(annotation().containsSpoiler) {
-        <div class="d-flex align-items-center">
+      <div class="d-flex flex-row justify-content-center align-items-center">
+        @if(annotation().containsSpoiler) {
+          <div class="d-flex align-items-center">
           <span class="small text-muted">
             <i class="fa-solid fa-circle-exclamation me-1" aria-hidden="true"></i>
             {{t('contains-spoilers-label')}}
           </span>
-        </div>
-      }
+          </div>
+        }
 
-      @if (showSelectionBox()) {
-        <input class="form-check-input" type="checkbox" [checked]="selected()" (change)="selection.emit(this.selected())">
-      }
+        @if (showLikes()) {
+          <span class="ms-2">{{t('likes', {amount: annotation().likes.length})}}</span>
+          <i class="{{liked() ? 'fas' : 'fa-regular'}} fa-thumbs-up ms-1" (click)="handleLikeChange()"></i>
+        }
+
+        @if (showSelectionBox()) {
+          <input class="form-check-input ms-2" type="checkbox" [checked]="selected()" (change)="selection.emit(this.selected())">
+        }
+
+      </div>
+
     </div>
   </div>
 

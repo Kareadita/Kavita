@@ -29,7 +29,7 @@ public interface IAnnotationRepository
     Task<AnnotationDto?> GetAnnotationDto(int id);
     Task<AppUserAnnotation?> GetAnnotation(int id);
     Task<IList<AppUserAnnotation>> GetAllAnnotations();
-    Task<IList<AppUserAnnotation>> GetAnnotations(IList<int> ids);
+    Task<IList<AppUserAnnotation>> GetAnnotations(int userId, IList<int> ids);
     Task<IList<FullAnnotationDto>> GetFullAnnotationsByUserIdAsync(int userId);
     Task<IList<FullAnnotationDto>> GetFullAnnotations(int userId, IList<int> annotationIds);
     Task<PagedList<AnnotationDto>> GetAnnotationDtos(int userId, BrowseAnnotationFilterDto filter, UserParams userParams);
@@ -75,10 +75,13 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         return await context.AppUserAnnotation.ToListAsync();
     }
 
-    public async Task<IList<AppUserAnnotation>> GetAnnotations(IList<int> ids)
+    public async Task<IList<AppUserAnnotation>> GetAnnotations(int userId, IList<int> ids)
     {
+        var userPreferences = await context.AppUserPreferences.Where(p => p.AppUserId == userId).FirstAsync();
+
         return await context.AppUserAnnotation
             .Where(a => ids.Contains(a.Id))
+            .RestrictBySocialPreferences(userPreferences)
             .ToListAsync();
     }
 

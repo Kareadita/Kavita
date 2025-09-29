@@ -22,6 +22,10 @@
   filter: blur(3px);
 }
 
+input {
+  margin-top: 0;
+}
+
 :host ::ng-deep quill-view {
   color: var(--drawer-text-color);
 }

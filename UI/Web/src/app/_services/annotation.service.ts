@@ -23,7 +23,7 @@ import {PaginatedResult} from "../_models/pagination";
  */
 export interface AnnotationEvent {
   pageNumber: number;
-  type: 'create' | 'delete' | 'edit';
+  type: 'create' | 'delete' | 'edit' | 'social-update';
   annotation: Annotation;
 
 }
@@ -199,6 +199,48 @@ export class AnnotationService {
       download((blob, filename) => {
         this.save(blob, decodeURIComponent(filename));
       })
+    );
+  }
+
+  likeAnnotations(ids: number[]) {
+    const userId = this.accountService.currentUserSignal()?.id;
+    if (!userId) return of();
+
+    return this.httpClient.post(this.baseUrl + 'annotation/like', ids).pipe(
+      tap(() => {
+        const annotations = this._annotations().filter(a => ids.includes(a.id));
+
+        for (let annotation of annotations.filter(a => !a.likes.includes(userId))) {
+          annotation.likes.push(userId);
+
+          this._events.set({
+            pageNumber: annotation.pageNumber,
+            annotation: annotation,
+            type: 'social-update',
+          });
+        }
+      }),
+    );
+  }
+
+  unLikeAnnotations(ids: number[]) {
+    const userId = this.accountService.currentUserSignal()?.id;
+    if (!userId) return of();
+
+    return this.httpClient.post(this.baseUrl + 'annotation/unlike', ids).pipe(
+      tap(() => {
+        const annotations = this._annotations().filter(a => ids.includes(a.id));
+
+        for (let annotation of annotations.filter(a => a.likes.includes(userId))) {
+          annotation.likes = annotation.likes.filter(x => x != userId);
+
+          this._events.set({
+            pageNumber: annotation.pageNumber,
+            annotation: annotation,
+            type: 'social-update',
+          });
+        }
+      }),
     );
   }
 }

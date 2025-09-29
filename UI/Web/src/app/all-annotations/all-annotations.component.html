@@ -41,6 +41,8 @@
           [showPageLink]="false"
           [openInIncognitoMode]="true"
           [showSelectionBox]="true"
+          [showLocationInformation]="true"
+          [listedToUpdates]="true"
           [selected]="bulkSelectionService.isCardSelected('annotations', position)"
           (selection)="bulkSelectionService.handleCardSelection('annotations', position, annotations().length, $event)"
         />

@@ -26,4 +26,7 @@ export interface Annotation {
   volumeId: number;
   seriesId: number;
 
+  seriesName: string;
+  libraryName: string;
+
 }

@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  effect,
   EventEmitter,
   inject,
   input,
@@ -21,6 +23,11 @@ import {DefaultValuePipe} from "../../../../_pipes/default-value.pipe";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {ColorscapeService} from "../../../../_services/colorscape.service";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {AccountService} from "../../../../_services/account.service";
+import {EVENTS, MessageHubService} from "../../../../_services/message-hub.service";
+import {AnnotationUpdateEvent} from "../../../../_models/events/annotation-update-event";
+import {tap} from "rxjs/operators";
 
 @Component({
   selector: 'app-annotation-card',
@@ -32,7 +39,8 @@ import {ActivatedRoute, Router, RouterLink} from "@angular/router";
     DefaultValuePipe,
     NgStyle,
     RouterLink,
-    NgClass
+    NgClass,
+    NgbTooltip
   ],
   templateUrl: './annotation-card.component.html',
   styleUrl: './annotation-card.component.scss',
@@ -47,6 +55,9 @@ export class AnnotationCardComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly highlightSlotPipe = new SlotColorPipe();
+  private readonly accountService = inject(AccountService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly destroyRef = inject(DestroyRef);
 
   annotation = model.required<Annotation>();
   allowEdit = input<boolean>(true);
@@ -59,30 +70,50 @@ export class AnnotationCardComponent {
    * Redirects to the reader with annotation in view
    */
   showInReaderLink = input<boolean>(false);
+  /**
+   * Disable a selection checkbox. Fires selection when called
+   */
   showSelectionBox = input<boolean>(false);
+  /**
+   * Displays series and library name
+   */
+  showLocationInformation = input<boolean>(false);
+  /**
+   * Disable a like button
+   */
+  showLikes = input<boolean>(true);
   openInIncognitoMode = input<boolean>(false);
   isInReader = input<boolean>(true);
+  /**
+   * If enables, listens to annotation updates
+   */
+  listedToUpdates = input<boolean>(false);
 
   selected = input<boolean>(false);
   @Output() delete = new EventEmitter();
   @Output() navigate = new EventEmitter<Annotation>();
+  /**
+   * Fire when the checkbox is pressed, with the last known state (inverse of checked state)
+   */
   @Output() selection = new EventEmitter<boolean>();
 
   titleColor: Signal<string>;
   hasClicked = model<boolean>(false);
 
+  liked = computed(() => this.annotation().likes.includes(this.accountService.currentUserSignal()?.id ?? 0));
+
   constructor() {
 
-    // TODO: Validate if I want this -- aka update content on a detail page when receiving update from backend
-    // this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
-    //   if (message.payload !== EVENTS.AnnotationUpdate) return;
-    //   const updatedAnnotation = message.payload as AnnotationUpdateEvent;
-    //   if (this.annotation()?.id !== updatedAnnotation.annotation.id) return;
-    //
-    //   console.log('Refreshing annotation from backend: ', updatedAnnotation.annotation);
-    //   this.annotation.set(updatedAnnotation.annotation);
-    // });
+    effect(() => {
+      const enabled = this.listedToUpdates();
+      const event = this.messageHub.messageSignal();
+      if (!enabled || event?.event !== EVENTS.AnnotationUpdate) return;
 
+      const newAnnotation = (event.payload as AnnotationUpdateEvent).annotation;
+      if (this.annotation().id != newAnnotation.id) return;
+
+      this.annotation.set(newAnnotation);
+    });
 
     this.titleColor = computed(() => {
       const annotation = this.annotation();
@@ -134,6 +165,26 @@ export class AnnotationCardComponent {
     this.annotationService.delete(annotation.id).subscribe(_ => {
       this.delete.emit();
     });
+  }
 
+  handleLikeChange() {
+    const sub$ = this.liked()
+      ? this.annotationService.unLikeAnnotations([this.annotation().id])
+      : this.annotationService.likeAnnotations([this.annotation().id]);
+
+    sub$.pipe(
+     tap(() => {
+       this.annotation.update(x => {
+         const newLikes = this.liked()
+           ? x.likes.filter(id => id !== this.accountService.currentUserSignal()!.id)
+           : [...x.likes, this.accountService.currentUserSignal()!.id];
+
+         return {
+           ...x,
+           likes: newLikes,
+         }
+       })
+     })
+    ).subscribe();
   }
 }
