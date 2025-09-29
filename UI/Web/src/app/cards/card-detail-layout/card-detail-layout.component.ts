@@ -265,7 +265,9 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
 
   tryToSaveJumpKey(item: any) {
     let name = '';
-    if (item.hasOwnProperty('seriesName')) {
+    if (item.hasOwnProperty('sortName')) {
+      name = item.sortName;
+    } else if (item.hasOwnProperty('seriesName')) {
       name = item.seriesName;
     } else if (item.hasOwnProperty('name')) {
       name = item.name;
