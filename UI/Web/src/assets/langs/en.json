@@ -54,6 +54,8 @@
         "default-age-restriction-label": "Age rating",
         "default-age-restriction-tooltip": "Maximum age rating shown to new users",
         "no-restriction": "{{restriction-selector.no-restriction}}",
+        "default-roles-label": "Roles",
+        "default-libraries-label": "Libraries",
 
         "advanced-title": "Advanced settings",
         "advanced-tooltip": "Only modify these options if you understand their impact.",
@@ -95,7 +97,9 @@
         "out-of-sync": "This user was created via OIDC. If the SyncUsers setting is enabled, any changes made to this account may be overwritten.",
         "oidc-managed": "This user is managed via OIDC. Please contact your OIDC administrator to request any changes.",
         "identity-provider": "Identity provider",
-        "identity-provider-tooltip": "Kavita users are never synced with OIDC accounts."
+        "identity-provider-tooltip": "Kavita users are never synced with OIDC accounts.",
+        "libraries-label": "Libraries",
+        "roles-label": "Roles"
     },
 
     "user-scrobble-history": {
@@ -764,7 +768,9 @@
         "inviting": "Inviting…",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
-        "notice": "{{manage-settings.notice}}"
+        "notice": "{{manage-settings.notice}}",
+        "libraries-label": "Libraries",
+        "roles-label": "Roles"
     },
 
     "library-selector": {

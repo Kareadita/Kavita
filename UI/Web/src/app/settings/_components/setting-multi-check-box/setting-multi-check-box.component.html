@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix: 'multi-check-box-form'">
   <div class="d-flex justify-content-between">
-    <div class="w-100">
+    <div class="">
       <h4>{{title()}}</h4>
       <span class="text-muted d-block w-auto">{{tooltip()}}</span>
     </div>
@@ -11,7 +11,7 @@
                [indeterminate]="selectedValues().length > 0 && !allSelected()" (change)="toggleAll()"
                [checked]="allSelected()" [disabled]="disabled()"
         >
-        <label class="form-check-label" for="select-all">{{ allSelected() ? t('deselect-all') : t('select-all')}}</label>
+        <label class="form-check-label" for="select-all text-nowrap">{{ allSelected() ? t('deselect-all') : t('select-all')}}</label>
       </span>
     }
 
@@ -26,7 +26,7 @@
           <div class="form-check">
             <input id="option--{{index}}" type="checkbox" class="form-check-input"
                    [checked]="isChecked(opt)" (change)="onCheckboxChange(opt, $event)"
-                   [disabled]="disabled()"
+                   [disabled]="isDisabled(opt)"
             >
             <label class="form-check-label" for="option--{{index}}">{{opt.label}}</label>
             @if (opt.colour) {

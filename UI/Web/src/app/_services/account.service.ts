@@ -189,7 +189,7 @@ export class AccountService {
   }
 
   getRoles() {
-    return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
+    return this.httpClient.get<Role[]>(this.baseUrl + 'account/roles');
   }
 
 

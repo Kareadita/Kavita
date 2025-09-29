@@ -3,7 +3,7 @@ import {
   Component,
   computed, effect,
   forwardRef,
-  input,
+  input, model,
   signal
 } from '@angular/core';
 import {RgbaColor} from "../../../book-reader/_models/annotations/highlight-slot";
@@ -15,7 +15,7 @@ import {NgStyle} from "@angular/common";
 /**
  * An item to display in the SettingMultiCheckBox
  */
-interface Item<T> {
+export interface MultiCheckBoxItem<T> {
   /**
    * Label to display in the list
    */
@@ -28,6 +28,12 @@ interface Item<T> {
    * Appends a dot after the label
    */
   colour?: RgbaColor,
+  /**
+   * If the items checkbox should be disabled. Does not overwrite global disable
+   * @param value
+   * @param selected
+   */
+  disableFunc?: (value: T, selected: T[]) => boolean,
 }
 
 /**
@@ -75,7 +81,11 @@ export class SettingMultiCheckBox<T> implements ControlValueAccessor {
   /**
    * All possible options
    */
-  options = input.required<Item<T>[]>();
+  options = input.required<MultiCheckBoxItem<T>[]>();
+  /**
+   * Disable all checkboxes
+   */
+  disabled = model(false);
 
   isLoading = computed(() => {
     const loading = this.loading();
@@ -84,7 +94,6 @@ export class SettingMultiCheckBox<T> implements ControlValueAccessor {
   allSelected = computed(() => this.options().length === this.selectedValues().length);
 
   selectedValues = signal<T[]>([]);
-  disabled = signal(false);
 
   private _onChange: (value: T[]) => void = () => {};
   private _onTouched: () => void = () => {};
@@ -114,11 +123,22 @@ export class SettingMultiCheckBox<T> implements ControlValueAccessor {
     this.disabled.set(isDisabled);
   }
 
-  isChecked(item: Item<T>) {
+  isChecked(item: MultiCheckBoxItem<T>) {
     return this.selectedValues().includes(item.value);
   }
 
-  onCheckboxChange(item: Item<T>, event: Event) {
+  isDisabled(item: MultiCheckBoxItem<T>) {
+    const disabled = this.disabled();
+    const selected = this.selectedValues();
+
+    if (disabled) {
+      return true;
+    }
+
+    return item.disableFunc && item.disableFunc(item.value, selected);
+  }
+
+  onCheckboxChange(item: MultiCheckBoxItem<T>, event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
