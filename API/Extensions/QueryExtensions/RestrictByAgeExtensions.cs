@@ -151,4 +151,29 @@ public static class RestrictByAgeExtensions
 
         return q;
     }
+
+    public static IQueryable<AppUserAnnotation> RestrictAgainstAgeRestriction(this IQueryable<AppUserAnnotation> queryable, AgeRestriction restriction)
+    {
+        if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
+        var q = queryable.Where(a => a.Chapter.AgeRating <= restriction.AgeRating);
+
+        if (!restriction.IncludeUnknowns)
+        {
+            return q.Where(a => a.Chapter.AgeRating != AgeRating.Unknown);
+        }
+
+        return q;
+    }
+
+    public static IQueryable<AppUserAnnotation> RestrictBySocialPreferences(this IQueryable<AppUserAnnotation> queryable, AppUserPreferences userPreferences)
+    {
+        return queryable
+            .Where(a => a.AppUserId == userPreferences.AppUserId || (a.AppUser.UserPreferences.ShareAnnotations && userPreferences.ViewOtherAnnotations))
+            .WhereIf(userPreferences.SocialLibraries.Count > 0, a => userPreferences.SocialLibraries.Contains(a.LibraryId))
+            .RestrictAgainstAgeRestriction(new AgeRestriction
+            {
+                AgeRating = userPreferences.SocialMaxAgeRating,
+                IncludeUnknowns = userPreferences.SocialIncludeUnknowns,
+            });
+    }
 }

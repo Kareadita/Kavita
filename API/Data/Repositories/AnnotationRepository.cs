@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Misc;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata.Browse.Requests;
 using API.DTOs.Annotations;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers;
@@ -84,22 +86,17 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
     {
         var allLibrariesCount = await context.Library.CountAsync();
         var userLibs = await context.Library.GetUserLibraries(userId).ToListAsync();
-
         var seriesIds = await context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id).ToListAsync();
+
+        var userPreferences = await context.AppUserPreferences.Where(p => p.AppUserId == userId).FirstAsync();
 
         var query = context.AppUserAnnotation.AsNoTracking();
 
         query = BuildAnnotationFilterQuery(userId, filter, query);
 
-        var validUsers = await context.AppUserPreferences
-            .Where(a => a.AppUserId == userId) // TODO: Remove when the below is done
-            .Where(p => true) // TODO: Filter on sharing annotations preference
-            .Select(p => p.AppUserId)
-            .ToListAsync();
-
-        query = query.Where(a => validUsers.Contains(a.AppUserId))
-            .WhereIf(allLibrariesCount != userLibs.Count,
-                a => seriesIds.Contains(a.SeriesId));
+        query = query
+            .WhereIf(allLibrariesCount != userLibs.Count, a => seriesIds.Contains(a.SeriesId))
+            .RestrictBySocialPreferences(userPreferences);
 
         var sortedQuery = query.SortBy(filter.SortOptions);
         var limitedQuery = filter.LimitTo <= 0 ? sortedQuery : sortedQuery.Take(filter.LimitTo);
@@ -150,11 +147,12 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
 
     public async Task<IList<FullAnnotationDto>> GetFullAnnotations(int userId, IList<int> annotationIds)
     {
+        var userPreferences = await context.AppUserPreferences.Where(p => p.AppUserId == userId).FirstAsync();
+
         return await context.AppUserAnnotation
             .AsNoTracking()
             .Where(a => annotationIds.Contains(a.Id))
-            .Where(a => a.AppUserId == userId)
-            //.Where(a => a.AppUserId == userId || a.AppUser.UserPreferences.ShareAnnotations) TODO: Filter out annotations for users who don't share them
+            .RestrictBySocialPreferences(userPreferences)
             .SelectFullAnnotation()
             .ToListAsync();
     }
@@ -166,8 +164,10 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
     /// <returns></returns>
     public async Task<IList<FullAnnotationDto>> GetFullAnnotationsByUserIdAsync(int userId)
     {
+        var userPreferences = await context.AppUserPreferences.Where(p => p.AppUserId == userId).FirstAsync();
+
         return await context.AppUserAnnotation
-            .Where(a => a.AppUserId == userId)
+            .RestrictBySocialPreferences(userPreferences)
             .SelectFullAnnotation()
             .ToListAsync();
     }

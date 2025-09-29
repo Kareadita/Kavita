@@ -587,9 +587,11 @@ public class UserRepository : IUserRepository
     /// <returns></returns>
     public async Task<List<AnnotationDto>> GetAnnotations(int userId, int chapterId)
     {
-        // TODO: Check settings if I should include other user's annotations
+        var userPreferences = await _context.AppUserPreferences.Where(p => p.AppUserId == userId).FirstAsync();
+
         return await _context.AppUserAnnotation
-            .Where(a => a.AppUserId == userId && a.ChapterId == chapterId)
+            .Where(a => a.ChapterId == chapterId)
+            .RestrictBySocialPreferences(userPreferences)
             .OrderBy(a => a.PageNumber)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -597,9 +599,11 @@ public class UserRepository : IUserRepository
 
     public async Task<List<AnnotationDto>> GetAnnotationsByPage(int userId, int chapterId, int pageNum)
     {
-        // TODO: Check settings if I should include other user's annotations
+        var userPreferences = await _context.AppUserPreferences.Where(p => p.AppUserId == userId).FirstAsync();
+
         return await _context.AppUserAnnotation
-            .Where(a => a.AppUserId == userId && a.ChapterId == chapterId && a.PageNumber == pageNum)
+            .Where(a => a.ChapterId == chapterId && a.PageNumber == pageNum)
+            .RestrictBySocialPreferences(userPreferences)
             .OrderBy(a => a.PageNumber)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -617,8 +621,11 @@ public class UserRepository : IUserRepository
 
     public async Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId)
     {
+        var userPreferences = await _context.AppUserPreferences.Where(p => p.AppUserId == userId).FirstAsync();
+
         return await _context.AppUserAnnotation
-            .Where(a => a.AppUserId == userId && a.Id == annotationId)
+            .Where(a => a.Id == annotationId)
+            .RestrictBySocialPreferences(userPreferences)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
