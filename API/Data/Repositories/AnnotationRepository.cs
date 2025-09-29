@@ -28,6 +28,7 @@ public interface IAnnotationRepository
     void Remove(IEnumerable<AppUserAnnotation> annotations);
     Task<AnnotationDto?> GetAnnotationDto(int id);
     Task<AppUserAnnotation?> GetAnnotation(int id);
+    Task<IList<AppUserAnnotation>> GetAllAnnotations();
     Task<IList<AppUserAnnotation>> GetAnnotations(IList<int> ids);
     Task<IList<FullAnnotationDto>> GetFullAnnotationsByUserIdAsync(int userId);
     Task<IList<FullAnnotationDto>> GetFullAnnotations(int userId, IList<int> annotationIds);
@@ -67,6 +68,11 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
     {
         return await context.AppUserAnnotation
             .FirstOrDefaultAsync(a => a.Id == id);
+    }
+
+    public async Task<IList<AppUserAnnotation>> GetAllAnnotations()
+    {
+        return await context.AppUserAnnotation.ToListAsync();
     }
 
     public async Task<IList<AppUserAnnotation>> GetAnnotations(IList<int> ids)

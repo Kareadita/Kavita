@@ -42,6 +42,16 @@ public class UsersController : BaseApiController
     public async Task<ActionResult> DeleteUser(string username)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+        if (user == null) return BadRequest();
+
+        // Remove all likes for the user, so like counts are correct
+        var annotations = await _unitOfWork.AnnotationRepository.GetAllAnnotations();
+        foreach (var annotation in annotations.Where(a => a.Likes.Contains(user.Id)))
+        {
+            annotation.Likes.Remove(user.Id);
+            _unitOfWork.AnnotationRepository.Update(annotation);
+        }
+
         _unitOfWork.UserRepository.Delete(user);
 
         //(TODO: After updating a role or removing a user, delete their token)
