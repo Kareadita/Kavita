@@ -22,7 +22,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
     /// Smallest number of the Range. Can be a partial like Chapter 4.5
     /// </summary>
     [Obsolete("Use MinNumber and MaxNumber instead")]
-    public required string Number { get; set; }
+    public string Number { get; set; }
     /// <summary>
     /// Minimum Chapter Number.
     /// </summary>
