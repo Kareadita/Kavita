@@ -23,16 +23,17 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             UserPreferences = new AppUserPreferences
             {
                 Theme = theme ?? Seed.DefaultThemes.First(),
+                Locale = "en"
             },
-            ReadingLists = new List<ReadingList>(),
-            Bookmarks = new List<AppUserBookmark>(),
-            Libraries = new List<Library>(),
-            Ratings = new List<AppUserRating>(),
-            Progresses = new List<AppUserProgress>(),
-            Devices = new List<Device>(),
+            ReadingLists = [],
+            Bookmarks = [],
+            Libraries = [],
+            Ratings = [],
+            Progresses = [],
+            Devices = [],
             Id = 0,
-            DashboardStreams = new List<AppUserDashboardStream>(),
-            SideNavStreams = new List<AppUserSideNavStream>(),
+            DashboardStreams = [],
+            SideNavStreams = [],
             ReadingProfiles = [],
         };
     }
@@ -65,7 +66,7 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
 
     public AppUserBuilder WithRole(string role)
     {
-        _appUser.UserRoles ??= new List<AppUserRole>();
+        _appUser.UserRoles ??= [];
         _appUser.UserRoles.Add(new AppUserRole() {Role = new AppRole() {Name = role}});
         return this;
     }

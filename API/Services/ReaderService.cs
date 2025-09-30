@@ -209,6 +209,7 @@ public class ReaderService : IReaderService
 
         if (user.Progresses == null)
         {
+            //throw new ArgumentException("AppUser must have Progress on it"); // TODO: Figure out the impact of switching to a more dev experience exception
             throw new KavitaException("progress-must-exist");
         }
 

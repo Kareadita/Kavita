@@ -64,6 +64,7 @@ public class OpdsService : IOpdsService
 
     private const int PageSize = 20;
     public const int FirstPageNumber = 1;
+    public const string DefaultApiPrefix = "/api/opds/";
     private readonly FilterV2Dto _filterV2Dto = new();
     private readonly FilterDto _filterDto = new()
     {

@@ -87,11 +87,11 @@ public class OpdsController : BaseApiController
     private async Task<Tuple<string, string>> GetPrefix()
     {
         var baseUrl = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BaseUrl)).Value;
-        var prefix = "/api/opds/";
+        var prefix = OpdsService.DefaultApiPrefix;
         if (!Configuration.DefaultBaseUrl.Equals(baseUrl, StringComparison.InvariantCultureIgnoreCase))
         {
             // We need to update the Prefix to account for baseUrl
-            prefix = baseUrl + "api/opds/";
+            prefix = baseUrl + OpdsService.DefaultApiPrefix;
         }
 
         return new Tuple<string, string>(baseUrl, prefix);
