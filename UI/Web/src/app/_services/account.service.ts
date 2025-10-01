@@ -66,7 +66,7 @@ export class AccountService {
   }), shareReplay({bufferSize: 1, refCount: true}));
   public readonly isAdmin = toSignal(this.isAdmin$);
 
-  public readonly currentUserSignal = toSignal(this.currentUserSource);
+  public readonly currentUserSignal = toSignal(this.currentUser$);
 
   /**
    * SetTimeout handler for keeping track of refresh token call
@@ -202,8 +202,7 @@ export class AccountService {
         if (user) {
           this.setCurrentUser(user);
         }
-      }),
-      takeUntilDestroyed(this.destroyRef)
+      })
     );
   }
 
