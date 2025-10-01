@@ -62,9 +62,16 @@ public class OpdsService : IOpdsService
 
     private readonly XmlSerializer _xmlSerializer;
 
-    private const int PageSize = 20;
+    public const int PageSize = 20;
     public const int FirstPageNumber = 1;
     public const string DefaultApiPrefix = "/api/opds/";
+
+    public const string NoReadingProgressIcon = "⭘";
+    public const string QuarterReadingProgressIcon = "◔";
+    public const string HalfReadingProgressIcon = "◑";
+    public const string AboveHalfReadingProgressIcon = "◕";
+    public const string FullReadingProgressIcon = "⬤";
+
     private readonly FilterV2Dto _filterV2Dto = new();
     private readonly FilterDto _filterDto = new()
     {
@@ -1224,19 +1231,22 @@ public class OpdsService : IOpdsService
 
     private static string GetReadingProgressIcon(int pagesRead, int totalPages)
     {
-        if (pagesRead == 0) return "⭘";
+        if (pagesRead == 0)
+        {
+            return NoReadingProgressIcon;
+        }
 
         var percentageRead = (double)pagesRead / totalPages;
 
         return percentageRead switch
         {
             // 100%
-            >= 1.0 => "⬤",
+            >= 1.0 => FullReadingProgressIcon,
             // > 50% and < 100%
-            > 0.5 => "◕",
+            > 0.5 => AboveHalfReadingProgressIcon,
             // > 25% and <= 50%
-            > 0.25 => "◑",
-            _ => "◔"
+            > 0.25 => HalfReadingProgressIcon,
+            _ => QuarterReadingProgressIcon
         };
     }
 
