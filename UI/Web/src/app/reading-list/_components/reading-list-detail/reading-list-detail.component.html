@@ -256,10 +256,9 @@
                 <ng-template ngbNavContent>
                   @defer (when activeTabId === TabID.Details; prefetch on idle) {
                     <app-details-tab [metadata]="castInfo"
-                                     [readingTime]="rlInfo"
                                      [suppressEmptyGenres]="true"
                                      [suppressEmptyTags]="true"
-                                     [ageRating]="readingList.ageRating"/>
+                    />
                   }
                 </ng-template>
               </li>

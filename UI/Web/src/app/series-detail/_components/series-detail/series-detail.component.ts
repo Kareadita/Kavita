@@ -9,7 +9,7 @@ import {
   ElementRef,
   inject,
   model,
-  OnInit,
+  OnInit, signal,
   ViewChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
@@ -240,6 +240,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   isWantToRead: boolean = false;
   unreadCount: number = 0;
   totalCount: number = 0;
+  totalSize = signal<number | undefined>(undefined);
   readingTimeLeft: HourEstimateRange | null = null;
   /**
    * Poster image for the Series
@@ -864,6 +865,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.chapters.set(detail.chapters);
         this.volumes = detail.volumes;
         this.storyChapters = detail.storylineChapters;
+
+        this.totalSize.set(detail.volumes.reduce((sum, v) => sum + v.chapters.reduce((volumeSum, c) =>  {
+          return volumeSum + c.files.reduce((chapterSum, f) => chapterSum + f.bytes , 0)
+        }, 0), 0));
 
         this.storylineItems = [];
         const v = this.volumes.map(v => {

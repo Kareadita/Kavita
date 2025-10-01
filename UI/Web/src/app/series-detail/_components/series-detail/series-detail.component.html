@@ -33,7 +33,10 @@
                                    [hasReadingProgress]="hasReadingProgress"
                                    [readingTimeEntity]="series"
                                    [libraryType]="libraryType"
-                                   [mangaFormat]="series.format" />
+                                   [mangaFormat]="series.format"
+                                   [releaseYear]="seriesMetadata.releaseYear"
+                                   [size]="totalSize()"
+          />
 
           <div class="mt-2 mb-2">
             <app-external-rating [seriesId]="series.id"
@@ -340,10 +343,8 @@
                                    [genres]="seriesMetadata.genres"
                                    [tags]="seriesMetadata.tags"
                                    [webLinks]="WebLinks"
-                                   [readingTime]="series"
-                                   [releaseYear]="seriesMetadata.releaseYear"
-                                   [language]="seriesMetadata.language"
-                                   [format]="series.format" />
+                                   [filePaths]="[series.folderPath]"
+                  />
                 }
               </ng-template>
             </li>

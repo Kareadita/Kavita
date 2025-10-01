@@ -22,7 +22,9 @@
                                    [hasReadingProgress]="chapter.pagesRead > 0"
                                    [readingTimeEntity]="chapter"
                                    [libraryType]="libraryType"
-                                   [mangaFormat]="series.format" />
+                                   [mangaFormat]="series.format"
+                                   [size]="size"
+          />
 
 
 
@@ -166,9 +168,7 @@
                                  [genres]="chapter.genres"
                                  [tags]="chapter.tags"
                                  [webLinks]="weblinks"
-                                 [readingTime]="chapter"
-                                 [language]="chapter.language"
-                                 [format]="series.format" />
+                />
               }
             </ng-template>
           </li>

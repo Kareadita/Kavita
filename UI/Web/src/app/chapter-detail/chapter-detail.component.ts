@@ -177,6 +177,7 @@ export class ChapterDetailComponent implements OnInit {
   rating: number = 0;
   ratings: Array<Rating> = [];
   hasBeenRated: boolean = false;
+  size: number = 0;
   annotations = model<Annotation[]>([]);
 
   weblinks: Array<string> = [];
@@ -263,6 +264,7 @@ export class ChapterDetailComponent implements OnInit {
 
       this.series = results.series;
       this.chapter = results.chapter;
+      this.size = this.chapter.files.reduce((sum, f) => sum + f.bytes, 0);
       this.weblinks = this.chapter.webLinks.split(',');
       this.libraryType = results.libraryType;
       this.userReviews = results.chapterDetail.reviews.filter(r => !r.isExternal);

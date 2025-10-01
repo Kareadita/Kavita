@@ -1485,7 +1485,8 @@
         "release-title": "{{sort-field-pipe.release-year}}",
         "format-title": "{{metadata-filter.format-label}}",
         "length-title": "{{edit-chapter-modal.words-label}}",
-        "age-rating-title": "{{metadata-fields.age-rating-title}}"
+        "age-rating-title": "{{metadata-fields.age-rating-title}}",
+        "file-path-title": "Folder path"
     },
 
     "related-tab": {

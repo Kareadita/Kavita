@@ -216,6 +216,7 @@ export class VolumeDetailComponent implements OnInit {
   plusReviews: Array<UserReview> = [];
   rating: number = 0;
   hasBeenRated: boolean = false;
+  size: number = 0;
   annotations = model<Annotation[]>([]);
 
   mobileSeriesImgBackground: string | undefined;
@@ -407,6 +408,8 @@ export class VolumeDetailComponent implements OnInit {
 
       this.series = results.series;
       this.volume = results.volume;
+      this.size = this.volume.chapters.reduce((sum, c) =>
+        sum + c.files.reduce((fileSum, f) => fileSum + f.bytes, 0), 0);
       this.libraryType = results.libraryType;
 
       if (this.volume.chapters.length === 1) {

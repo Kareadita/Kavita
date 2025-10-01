@@ -1,54 +1,18 @@
 <ng-container *transloco="let t; prefix: 'details-tab'">
 <div class="details pb-3">
 
-  @if (readingTime) {
+  @if (accountService.isAdmin() && filePaths && filePaths.length > 0) {
     <div class="mb-3 ms-1">
-      <h4 class="header">{{t('read-time-title')}}</h4>
-      <div class="ms-3">
-        {{readingTime | readTime}}
+      <h4 class="header">{{t('file-path-title')}}</h4>
+      <div class="ms-3 d-flex flex-column">
+        @for (fp of filePaths; track $index) {
+          {{fp}}
+        }
       </div>
     </div>
   }
-
-  @if (releaseYear) {
-    <div class="mb-3 ms-1">
-      <h4 class="header">{{t('release-title')}}</h4>
-      <div class="ms-3">
-        {{releaseYear}}
-      </div>
-    </div>
-  }
-
-  @if (language) {
-    <div class="mb-3 ms-1">
-      <h4 class="header">{{t('language-title')}}</h4>
-      <div class="ms-3">
-        {{language | languageName | async}}
-      </div>
-    </div>
-  }
-
-  @if (ageRating) {
-    <div class="mb-3 ms-1">
-      <h4 class="header">{{t('age-rating-title')}}</h4>
-      <div class="ms-3">
-        <app-age-rating-image [rating]="ageRating" />
-      </div>
-    </div>
-  }
-
-  @if (format) {
-    <div class="mb-3 ms-1">
-      <h4 class="header">{{t('format-title')}}</h4>
-      <div class="ms-3">
-        <app-series-format [format]="format" /> {{format | mangaFormat }}
-      </div>
-    </div>
-  }
-
 
   @if (!suppressEmptyGenres || genres.length > 0) {
-    <div class="setting-section-break" aria-hidden="true"></div>
 
     <div class="mb-3 ms-1">
       <h4 class="header">{{t('genres-title')}}</h4>

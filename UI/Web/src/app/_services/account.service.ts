@@ -64,6 +64,7 @@ export class AccountService {
     if (!u) return false;
     return this.hasAdminRole(u);
   }), shareReplay({bufferSize: 1, refCount: true}));
+  public readonly isAdmin = toSignal(this.isAdmin$);
 
   public readonly currentUserSignal = toSignal(this.currentUserSource);
 
