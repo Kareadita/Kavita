@@ -242,6 +242,8 @@ namespace API.Data.Migrations
 
                     b.HasIndex("ChapterId");
 
+                    b.HasIndex("LibraryId");
+
                     b.HasIndex("SeriesId");
 
                     b.ToTable("AppUserAnnotation");
@@ -3016,6 +3018,12 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("API.Entities.Library", "Library")
+                        .WithMany()
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("API.Entities.Series", "Series")
                         .WithMany()
                         .HasForeignKey("SeriesId")
@@ -3025,6 +3033,8 @@ namespace API.Data.Migrations
                     b.Navigation("AppUser");
 
                     b.Navigation("Chapter");
+
+                    b.Navigation("Library");
 
                     b.Navigation("Series");
                 });

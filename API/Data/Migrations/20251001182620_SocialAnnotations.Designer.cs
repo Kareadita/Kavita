@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250929152234_SocialAnnotations")]
+    [Migration("20251001182620_SocialAnnotations")]
     partial class SocialAnnotations
     {
         /// <inheritdoc />
@@ -244,6 +244,8 @@ namespace API.Data.Migrations
                     b.HasIndex("AppUserId");
 
                     b.HasIndex("ChapterId");
+
+                    b.HasIndex("LibraryId");
 
                     b.HasIndex("SeriesId");
 
@@ -3019,6 +3021,12 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("API.Entities.Library", "Library")
+                        .WithMany()
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("API.Entities.Series", "Series")
                         .WithMany()
                         .HasForeignKey("SeriesId")
@@ -3028,6 +3036,8 @@ namespace API.Data.Migrations
                     b.Navigation("AppUser");
 
                     b.Navigation("Chapter");
+
+                    b.Navigation("Library");
 
                     b.Navigation("Series");
                 });

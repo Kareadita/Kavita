@@ -51,11 +51,32 @@ namespace API.Data.Migrations
                 type: "TEXT",
                 nullable: true,
                 defaultValue: "[]");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserAnnotation_LibraryId",
+                table: "AppUserAnnotation",
+                column: "LibraryId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AppUserAnnotation_Library_LibraryId",
+                table: "AppUserAnnotation",
+                column: "LibraryId",
+                principalTable: "Library",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_AppUserAnnotation_Library_LibraryId",
+                table: "AppUserAnnotation");
+
+            migrationBuilder.DropIndex(
+                name: "IX_AppUserAnnotation_LibraryId",
+                table: "AppUserAnnotation");
+
             migrationBuilder.DropColumn(
                 name: "ShareAnnotations",
                 table: "AppUserPreferences");
