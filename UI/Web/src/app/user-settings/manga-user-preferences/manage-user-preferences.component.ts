@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
-  DestroyRef,
+  DestroyRef, effect,
   inject,
   OnInit,
   signal
@@ -19,7 +19,7 @@ import {Form, FormArray, FormControl, FormGroup, NonNullableFormBuilder, Reactiv
 import {User} from "../../_models/user";
 import {KavitaLocale} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap, tap} from "rxjs";
+import {debounceTime, distinctUntilChanged, filter, forkJoin, of, switchMap, tap} from "rxjs";
 import {take} from "rxjs/operators";
 import {AsyncPipe, DecimalPipe, TitleCasePipe} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -36,6 +36,10 @@ import {SettingMultiCheckBox} from "../../settings/_components/setting-multi-che
 import {MetadataService} from "../../_services/metadata.service";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
+import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
+import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
 
 type UserPreferencesForm = FormGroup<{
   theme: FormControl<SiteTheme>,
@@ -72,6 +76,9 @@ type UserPreferencesForm = FormGroup<{
     HighlightBarComponent,
     SettingMultiCheckBox,
     AgeRatingPipe,
+    DefaultValuePipe,
+    TagBadgeComponent,
+    TypeaheadComponent,
   ],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
@@ -103,6 +110,7 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   settingsForm!: UserPreferencesForm;
   user: User | undefined = undefined;
+  libraryTypeAheadSettings = signal(new TypeaheadSettings<Library>());
 
   get Locale() {
     if (!this.settingsForm.get('locale')) return 'English';
@@ -141,14 +149,17 @@ export class ManageUserPreferencesComponent implements OnInit {
         return;
       }
 
+      this.user = user;
+      this.user.preferences = pref;
+
       this.loading.set(false);
       this.libraries.set(libraries);
       this.ageRatings.set([{
         value: AgeRating.NotApplicable,
         title: '',
       }, ...ageRatings]);
-      this.user = user;
-      this.user.preferences = pref;
+
+      this.setupLibraryTypeAheadSettings();
 
       this.settingsForm = this.fb.group({
         theme: this.fb.control<SiteTheme>(pref.theme),
@@ -194,22 +205,23 @@ export class ManageUserPreferencesComponent implements OnInit {
     });
   }
 
-  reset() {
-    if (!this.user) return;
+  private setupLibraryTypeAheadSettings() {
+    const libs = this.libraries();
+    const selectedLibs = this.user!.preferences.socialLibraries;
 
-    this.settingsForm.get('theme')?.setValue(this.user.preferences.theme, {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode, {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries, {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize, {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('noTransitions')?.setValue(this.user.preferences.noTransitions, {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships, {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('shareReviews')?.setValue(this.user.preferences.shareReviews, {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('locale')?.setValue(this.user.preferences.locale || 'en', {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('colorScapeEnabled')?.setValue(this.user.preferences.colorScapeEnabled ?? true, {onlySelf: true, emitEvent: false});
+    const settings = new TypeaheadSettings<Library>();
+    settings.multiple = true;
+    settings.minCharacters = 0;
+    settings.savedData = libs.filter(l => selectedLibs.includes(l.id));
+    settings.compareFn = (libs, filter) => libs.filter(l => l.name.toLowerCase().includes(filter.toLowerCase()));
+    settings.trackByIdentityFn = (idx, l) => `${l.id}`;
+    settings.fetchFn = (filter) => of(settings.compareFn(libs, filter));
 
-    this.settingsForm.get('aniListScrobblingEnabled')?.setValue(this.user.preferences.aniListScrobblingEnabled || false, {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('wantToReadSync')?.setValue(this.user.preferences.wantToReadSync || false, {onlySelf: true, emitEvent: false});
-    this.settingsForm.get('bookReaderHighlightSlots')?.setValue(this.user.preferences.bookReaderHighlightSlots, {onlySelf: true, emitEvent: false});
+    this.libraryTypeAheadSettings.set(settings);
+  }
+
+  syncFormWithTypeahead(libs: Library[] | Library) {
+    this.settingsForm.get('socialLibraries')!.setValue((libs as Library[]).map(l => l.id));
   }
 
   packSettings(): Preferences {
