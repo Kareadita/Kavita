@@ -2330,7 +2330,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     redRect.style.top = `${viewport.top}px`;
     redRect.style.width = `${viewport.width}px`;
     redRect.style.height = `${viewport.height}px`;
-    redRect.style.border = '1px solid red';
+    redRect.style.outline = '1px solid red';
     redRect.style.pointerEvents = 'none';
     redRect.style.zIndex = '1000';
     redRect.title = `Width: ${viewport.width}px`;
@@ -2355,7 +2355,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     greenRect.style.top = `${viewport.top}px`;
     greenRect.style.width = `${margin}px`;
     greenRect.style.height = `${viewport.height}px`;
-    greenRect.style.border = '1px solid green';
+    greenRect.style.outline = '1px solid green';
     greenRect.style.pointerEvents = 'none';
     greenRect.style.zIndex = '1000';
     greenRect.title = `Width: ${margin}px`;
@@ -2374,7 +2374,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     greenRect.style.top = `${viewport.top}px`;
     greenRect.style.width = `${margin}px`;
     greenRect.style.height = `${viewport.height}px`;
-    greenRect.style.border = '1px solid green';
+    greenRect.style.outline = '1px solid green';
     greenRect.style.pointerEvents = 'none';
     greenRect.style.zIndex = '1000';
     greenRect.title = `Width: ${margin}px`;
@@ -2439,9 +2439,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const element = this.getElementFromXPath(this.lastSeenScrollPartPath);
     if (element) {
       console.log(element);
-      (element as HTMLElement).style.border = '1px solid red';
+      (element as HTMLElement).style.outline = '1px solid red';
       setTimeout(() => {
-        (element as HTMLElement).style.border = '';
+        (element as HTMLElement).style.outline = '';
       }, 1_000);
     }
   }
