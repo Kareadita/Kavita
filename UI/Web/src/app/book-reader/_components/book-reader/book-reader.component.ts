@@ -1694,12 +1694,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   getVirtualPage() {
     if (!this.bookContentElemRef || !this.readingSectionElemRef) return [1, 1, 0];
 
-    const [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
+    let [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
     const pageSize = this.pageSize();
 
     if (pageSize <= 0 || totalScroll <= 0) return [1, 1, pageSize];
 
-    const totalVirtualPages = Math.max(1, Math.ceil(totalScroll / pageSize));
+    if (this.layoutMode() === 2) {
+      scrollOffset += LAYOUT_2_CONTAINER_PADDING;
+    }
+
+    const totalVirtualPages = Math.max(1, Math.round(totalScroll / pageSize));
     const delta = totalScroll - scrollOffset;
     let currentVirtualPage = 1;
 
