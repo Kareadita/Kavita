@@ -55,7 +55,7 @@ export class AnnotationCardComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly highlightSlotPipe = new SlotColorPipe();
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly messageHub = inject(MessageHubService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -168,6 +168,8 @@ export class AnnotationCardComponent {
   }
 
   handleLikeChange() {
+    if (this.annotation().ownerUserId === this.accountService.currentUserSignal()!.id) return;
+
     const sub$ = this.liked()
       ? this.annotationService.unLikeAnnotations([this.annotation().id])
       : this.annotationService.likeAnnotations([this.annotation().id]);

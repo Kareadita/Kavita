@@ -55,7 +55,7 @@
           @case (AnnotationMode.View) {
             @let an = annotation();
             @if (an) {
-              <div (click)="handleLikeChange()" class="ms-2 clickable">
+              <div (click)="handleLikeChange()" class="ms-2" [class.clickable]="an.ownerUserId !== accountService.currentUserSignal()!.id">
                 <span>{{an.likes.length}}</span>
                 <i class="{{liked() ? 'fas' : 'fa-regular'}} fa-thumbs-up ms-1"></i>
               </div>

@@ -10,6 +10,7 @@ import {
   OffCanvasResizeComponent,
   ResizeMode
 } from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
+import {AccountService} from "../../../../_services/account.service";
 
 @Component({
   selector: 'app-view-annotations-drawer',
@@ -28,6 +29,7 @@ export class ViewAnnotationsDrawerComponent {
 
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
   private readonly annotationService = inject(AnnotationService);
+  protected readonly accountService = inject(AccountService);
 
   @Output() loadAnnotation: EventEmitter<Annotation> = new EventEmitter();
 

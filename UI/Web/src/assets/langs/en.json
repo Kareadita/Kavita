@@ -219,9 +219,9 @@
 
         "share-series-reviews-label": "Share Series Reviews",
         "share-series-reviews-tooltip": "Allow your reviews to be visible to other users on this server",
-        "share-annotations-label": "Share annotations",
-        "share-annotations-tooltip": "Allow your annotations to be viewed by other users on this server",
-        "view-other-annotations-label": "View others annotations",
+        "share-annotations-label": "Share Annotations",
+        "share-annotations-tooltip": "Allow your annotations to be visible to other users on this server",
+        "view-other-annotations-label": "View Shared Annotations",
         "view-other-annotations-tooltip": "View other users' annotations while reading",
         "social-libraries-label": "Social Libraries",
         "social-libraries-tooltip": "Libraries on which social features should be enabled. No selection enables social features everywhere. Disable specific features if you wish to use them nowhere.",

@@ -376,6 +376,8 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     const annotation = this.annotation();
     if (!annotation) return;
 
+    if (annotation.ownerUserId === this.accountService.currentUserSignal()!.id) return;
+
     const sub$ = this.liked()
       ? this.annotationService.unLikeAnnotations([annotation.id])
       : this.annotationService.likeAnnotations([annotation.id]);

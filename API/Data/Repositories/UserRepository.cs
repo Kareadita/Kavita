@@ -632,8 +632,11 @@ public class UserRepository : IUserRepository
 
     public async Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId)
     {
+        var userPreferences = await _context.AppUserPreferences.Where(p => p.AppUserId == userId).FirstAsync();
+
         return await _context.AppUserAnnotation
-            .Where(a => a.AppUserId == userId && a.SeriesId == seriesId)
+            .Where(a => a.SeriesId == seriesId)
+            .RestrictBySocialPreferences(userPreferences)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }

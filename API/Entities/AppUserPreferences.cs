@@ -198,7 +198,7 @@ public class AppUserPreferences
     /// <summary>
     /// See other users' annotations while reading
     /// </summary>
-    public bool ViewOtherAnnotations { get; set; } = true;
+    public bool ViewOtherAnnotations { get; set; } = false;
 
     /// <summary>
     /// For which libraries should social features be enabled

@@ -43,7 +43,7 @@ namespace API.Data.Migrations
                 table: "AppUserPreferences",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: true);
+                defaultValue: false);
 
             migrationBuilder.AddColumn<string>(
                 name: "Likes",

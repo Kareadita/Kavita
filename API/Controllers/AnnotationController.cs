@@ -132,7 +132,7 @@ public class AnnotationController(
             return BadRequest();
         }
 
-        foreach (var annotation in annotations.Where(a => !a.Likes.Contains(userId)))
+        foreach (var annotation in annotations.Where(a => !a.Likes.Contains(userId) && a.AppUserId != userId))
         {
             annotation.Likes.Add(userId);
             unitOfWork.AnnotationRepository.Update(annotation);

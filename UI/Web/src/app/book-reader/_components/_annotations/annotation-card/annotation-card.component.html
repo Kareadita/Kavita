@@ -68,7 +68,7 @@
         }
 
         @if (showLikes()) {
-          <div (click)="handleLikeChange()" class="ms-2 clickable">
+          <div (click)="handleLikeChange()" class="ms-2" [class.clickable]="annotation().ownerUserId !== accountService.currentUserSignal()!.id">
             <span>{{annotation().likes.length}}</span>
             <i class="{{liked() ? 'fas' : 'fa-regular'}} fa-thumbs-up ms-1"></i>
           </div>

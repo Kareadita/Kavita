@@ -304,10 +304,6 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(new List<int>());
 
         builder.Entity<AppUserPreferences>()
-            .Property(a => a.ViewOtherAnnotations)
-            .HasDefaultValue(true);
-
-        builder.Entity<AppUserPreferences>()
             .Property(a => a.SocialMaxAgeRating)
             .HasDefaultValue(AgeRating.NotApplicable);
 

@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251001182620_SocialAnnotations")]
+    [Migration("20251001204113_SocialAnnotations")]
     partial class SocialAnnotations
     {
         /// <inheritdoc />
@@ -649,9 +649,7 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("ViewOtherAnnotations")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("WantToReadSync")
                         .ValueGeneratedOnAdd()
