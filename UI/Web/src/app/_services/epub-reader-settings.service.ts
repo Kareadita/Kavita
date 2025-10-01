@@ -277,12 +277,12 @@ export class EpubReaderSettingsService {
     this._immersiveMode.set(profile.bookReaderImmersiveMode);
 
     // Set up page styles
-    this.setPageStyles(
+    this._pageStyles.set(this.buildPageStyles(
       profile.bookReaderFontFamily,
       profile.bookReaderFontSize + '%',
       profile.bookReaderMargin + 'vw',
       profile.bookReaderLineSpacing + '%'
-    );
+    ));
   }
 
   /**
@@ -597,12 +597,19 @@ export class EpubReaderSettingsService {
    */
   resetSettings() {
     const defaultStyles = this.getDefaultPageStyles();
-    this.setPageStyles(
+
+    const styles = this.buildPageStyles(
       defaultStyles["font-family"],
       defaultStyles["font-size"],
       defaultStyles['margin-left'],
       defaultStyles['line-height'],
     );
+
+    // Update form to ensure RP is updated, forgive me for the replace...
+    this.settingsForm.get('bookReaderFontFamily')!.setValue(styles["font-family"]);
+    this.settingsForm.get('bookReaderFontSize')!.setValue(parseInt(styles["font-size"].replace("%", "")));
+    this.settingsForm.get('bookReaderMargin')!.setValue(parseInt(styles["margin-left"].replace("vw", "")));
+    this.settingsForm.get('bookReaderLineSpacing')!.setValue(parseInt(styles["line-height"].replace("%", "")));
   }
 
 
@@ -653,7 +660,7 @@ export class EpubReaderSettingsService {
     return data;
   }
 
-  private setPageStyles(fontFamily?: string, fontSize?: string, margin?: string, lineHeight?: string): void {
+  private buildPageStyles(fontFamily?: string, fontSize?: string, margin?: string, lineHeight?: string) {
     const windowWidth = window.innerWidth || this.document.documentElement.clientWidth || this.document.body.clientWidth;
     const mobileBreakpointMarginOverride = 700;
 
@@ -671,7 +678,7 @@ export class EpubReaderSettingsService {
       'line-height': lineHeight || currentStyles['line-height'] || '100%'
     };
 
-    this._pageStyles.set(newStyles);
+    return newStyles
   }
 
   public getDefaultPageStyles(): PageStyle {
