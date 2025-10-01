@@ -26,7 +26,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 {
     private readonly ITestOutputHelper _testOutputHelper = testOutputHelper;
 
-    private async Task<ReaderService> Setup(IUnitOfWork unitOfWork)
+    private ReaderService Setup(IUnitOfWork unitOfWork)
     {
      return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
          Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
@@ -52,7 +52,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task CapPageToChapterTest()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -82,7 +82,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task SaveReadingProgress_ShouldCreateNewEntity()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -121,7 +121,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task SaveReadingProgress_ShouldUpdateExisting()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -178,7 +178,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkChaptersAsReadTest()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -219,7 +219,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkChapterAsUnreadTest()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -267,7 +267,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         // V1 -> V2
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -309,7 +309,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         // V1 -> V2
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1-2")
@@ -343,7 +343,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         // V1 -> V2
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1.0")
@@ -387,7 +387,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -427,7 +427,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolumeWithFloat()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -468,7 +468,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldRollIntoChaptersFromVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -503,7 +503,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextChapter_WhenVolumesAreOnlyOneChapter_AndNextChapterIs0()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -544,7 +544,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromSpecial()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -575,7 +575,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -601,7 +601,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_NoSpecials()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -628,7 +628,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_NoSpecials_FirstIsVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -657,7 +657,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_WithSpecials()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -696,7 +696,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldMoveFromVolumeToSpecial_NoLooseLeafChapters()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -738,7 +738,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldMoveFromLooseLeafChapterToSpecial()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -777,7 +777,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromSpecial_WithVolumeAndLooseLeafChapters()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -817,7 +817,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldMoveFromSpecialToSpecial()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -858,7 +858,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolume_WhenAllVolumesHaveAChapterToo()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -898,7 +898,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         // V1 -> V2
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -940,7 +940,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         // V1 -> V2
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -979,7 +979,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldGetPrevVolume_2()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1031,7 +1031,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldRollIntoPrevVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1073,7 +1073,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldMoveFromSpecialToVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1111,7 +1111,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1141,7 +1141,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolumeWithZeroChapter()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1170,7 +1170,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolumeWithZeroChapterAndHasNormalChapters()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1201,7 +1201,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolumeWithZeroChapterAndHasNormalChapters2()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1247,7 +1247,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromChapter()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1277,7 +1277,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldMoveFromSpecialToSpecial()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1321,7 +1321,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldMoveFromChapterToVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1356,7 +1356,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldRollIntoPrevVolume_WhenAllVolumesHaveAChapterToo()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
@@ -1390,7 +1390,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstVolume_NoProgress()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").Build())
@@ -1434,7 +1434,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstVolume_WhenFirstVolumeIsAlsoTaggedAsChapter1_WithProgress()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(3).Build())
@@ -1474,7 +1474,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstVolume_WhenFirstVolumeIsAlsoTaggedAsChapter1Through11_WithProgress()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1", "1-11").WithPages(3).Build())
@@ -1514,7 +1514,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -1580,7 +1580,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial2()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             // Loose chapters
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1655,7 +1655,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenHasSpecial()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             // Loose chapters
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1686,7 +1686,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstSpecial()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -1748,7 +1748,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenNonRead_LooseLeafChaptersAndVolumes()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("230").WithPages(1).Build())
@@ -1785,7 +1785,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnLooseChapter_WhenAllVolumesRead_HasSpecialAndLooseChapters_Unread()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("100").WithPages(1).Build())
@@ -1841,7 +1841,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnLooseChapter_WhenAllVolumesAndAFewLooseChaptersRead()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("100").WithPages(1).Build())
@@ -1900,7 +1900,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllRead()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -1958,7 +1958,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllReadAndAllChapters()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1999,7 +1999,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstSpecial_WhenAllReadAndAllChapters()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2058,7 +2058,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnFirstVolumeChapter_WhenPreExistingProgress()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2111,7 +2111,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnUnreadSingleVolume_WhenThereAreSomeSingleVolumesBeforeLooseLeafChapters()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var readChapter1 = new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build();
         var readChapter2 = new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build();
         var volume = new VolumeBuilder("3").WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build()).Build();
@@ -2178,7 +2178,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_ShouldReturnLastLooseChapter()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -2274,7 +2274,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetContinuePoint_DuplicateIssueNumberBetweenChapters()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -2357,7 +2357,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkChaptersUntilAsRead_ShouldMarkAllChaptersAsRead()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2397,7 +2397,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkChaptersUntilAsRead_ShouldMarkUptTillChapterNumberAsRead()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2439,7 +2439,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkChaptersUntilAsRead_ShouldMarkAsRead_OnlyVolumesWithChapter0()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder("1")
@@ -2475,7 +2475,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkChaptersUntilAsRead_ShouldMarkAsReadAnythingUntil()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2544,7 +2544,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkSeriesAsReadTest()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var series = new SeriesBuilder("Test")
 
@@ -2585,7 +2585,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkSeriesAsUnreadTest()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2659,7 +2659,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkVolumesUntilAsRead_ShouldMarkVolumesAsRead()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -2717,7 +2717,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkVolumesUntilAsRead_ShouldMarkChapterBasedVolumesAsRead()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("10").WithPages(1).Build())
@@ -2796,7 +2796,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
 
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = await Setup(unitOfWork);
+        var readerService = Setup(unitOfWork);
 
         var files = wides.Select((b, i) => new FileDimensionDto() {PageNumber = i, Height = 1, Width = 1, FileName = string.Empty, IsWide = b}).ToList();
         var pairs = readerService.GetPairs(files);

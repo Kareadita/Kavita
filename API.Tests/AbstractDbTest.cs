@@ -12,10 +12,8 @@ using AutoMapper;
 using Hangfire;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Polly;
 using Xunit.Abstractions;
 
 namespace API.Tests;

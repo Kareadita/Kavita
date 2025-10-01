@@ -62,7 +62,16 @@ public class OpdsService : IOpdsService
 
     private readonly XmlSerializer _xmlSerializer;
 
-    private const int PageSize = 20;
+    public const int PageSize = 20;
+    public const int FirstPageNumber = 1;
+    public const string DefaultApiPrefix = "/api/opds/";
+
+    public const string NoReadingProgressIcon = "⭘";
+    public const string QuarterReadingProgressIcon = "◔";
+    public const string HalfReadingProgressIcon = "◑";
+    public const string AboveHalfReadingProgressIcon = "◕";
+    public const string FullReadingProgressIcon = "⬤";
+
     private readonly FilterV2Dto _filterV2Dto = new();
     private readonly FilterDto _filterDto = new()
     {
@@ -582,14 +591,14 @@ public class OpdsService : IOpdsService
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
-
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId, GetUserParams(request.PageNumber))).ToList();
         var totalItems = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).Count();
 
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
-        var firstReadReadingListItem = items.FirstOrDefault(i => i.PagesRead > 0);
-        if (firstReadReadingListItem != null && request.PageNumber == 0)
+        var firstReadReadingListItem = items.FirstOrDefault(i => i.PagesRead > 0 && i.PagesRead != i.PagesTotal) ??
+                                       items.FirstOrDefault(i => i.PagesRead == 0 && i.PagesRead != i.PagesTotal);
+        if (firstReadReadingListItem != null && request.PageNumber == FirstPageNumber)
         {
             await AddContinueReadingPoint(firstReadReadingListItem, feed, request);
         }
@@ -724,8 +733,9 @@ public class OpdsService : IOpdsService
         var chapterDtos = await _unitOfWork.ChapterRepository.GetChapterDtoByIdsAsync(volume.Chapters.Select(c => c.Id), userId);
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
-        var firstChapterWithProgress = chapterDtos.FirstOrDefault(c => c.PagesRead > 0);
-        if (firstChapterWithProgress != null)
+        var firstChapterWithProgress = chapterDtos.FirstOrDefault(i => i.PagesRead > 0 && i.PagesRead != i.Pages) ??
+                                       chapterDtos.FirstOrDefault(i => i.PagesRead == 0 && i.PagesRead != i.Pages);
+        if (firstChapterWithProgress != null && request.PageNumber == FirstPageNumber)
         {
             var chapterDto = await _readerService.GetContinuePoint(seriesId, userId);
             await AddContinueReadingPoint(seriesId, chapterDto, feed, request);
@@ -1221,19 +1231,22 @@ public class OpdsService : IOpdsService
 
     private static string GetReadingProgressIcon(int pagesRead, int totalPages)
     {
-        if (pagesRead == 0) return "⭘";
+        if (pagesRead == 0)
+        {
+            return NoReadingProgressIcon;
+        }
 
         var percentageRead = (double)pagesRead / totalPages;
 
         return percentageRead switch
         {
             // 100%
-            >= 1.0 => "⬤",
+            >= 1.0 => FullReadingProgressIcon,
             // > 50% and < 100%
-            > 0.5 => "◕",
+            > 0.5 => AboveHalfReadingProgressIcon,
             // > 25% and <= 50%
-            > 0.25 => "◑",
-            _ => "◔"
+            > 0.25 => HalfReadingProgressIcon,
+            _ => QuarterReadingProgressIcon
         };
     }
 
