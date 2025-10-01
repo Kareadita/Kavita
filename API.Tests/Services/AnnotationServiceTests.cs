@@ -1,9 +1,12 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Reader;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Helpers.Builders;
 using API.Services;
@@ -105,6 +108,59 @@ public class AnnotationServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             MessageFactory.AnnotationUpdate,
             Arg.Any<SignalRMessage>(),
             user.Id);
+    }
+
+    [Fact]
+    public async Task ExportAnnotationsCorrectExportUser()
+    {
+        var unitOfWork = Substitute.For<IUnitOfWork>();
+        var annotationRepo = Substitute.For<IAnnotationRepository>();
+        var settingsRepo = Substitute.For<ISettingsRepository>();
+        unitOfWork.AnnotationRepository.Returns(annotationRepo);
+        unitOfWork.SettingsRepository.Returns(settingsRepo);
+
+        settingsRepo.GetSettingsDtoAsync().Returns(new ServerSettingDto
+        {
+            HostName = "",
+        });
+
+        var annotationService = new AnnotationService(
+            Substitute.For<ILogger<AnnotationService>>(),
+            unitOfWork,
+            Substitute.For<IBookService>(),
+            Substitute.For<IEventHub>());
+
+        await annotationService.ExportAnnotations(1);
+
+        await annotationRepo.Received().GetFullAnnotationsByUserIdAsync(1);
+        await annotationRepo.DidNotReceive().GetFullAnnotations(1, []);
+    }
+
+    [Fact]
+    public async Task ExportAnnotationsCorrectExportSpecific()
+    {
+        var unitOfWork = Substitute.For<IUnitOfWork>();
+        var annotationRepo = Substitute.For<IAnnotationRepository>();
+        var settingsRepo = Substitute.For<ISettingsRepository>();
+        unitOfWork.AnnotationRepository.Returns(annotationRepo);
+        unitOfWork.SettingsRepository.Returns(settingsRepo);
+
+        settingsRepo.GetSettingsDtoAsync().Returns(new ServerSettingDto
+        {
+            HostName = "",
+        });
+
+        var annotationService = new AnnotationService(
+            Substitute.For<ILogger<AnnotationService>>(),
+            unitOfWork,
+            Substitute.For<IBookService>(),
+            Substitute.For<IEventHub>());
+
+        List<int> ids = [1, 2, 3]; // Received checks pointers I think
+        await annotationService.ExportAnnotations(1, ids);
+
+        await annotationRepo.DidNotReceive().GetFullAnnotationsByUserIdAsync(1);
+        await annotationRepo.Received().GetFullAnnotations(1, ids);
     }
 
     private static async Task<AnnotationDto> CreateSimpleAnnotation(IAnnotationService annotationService, AppUser user, Chapter chapter)

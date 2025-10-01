@@ -41,6 +41,13 @@ public class AnnotationService(
     : IAnnotationService
 {
 
+    private static readonly JsonSerializerOptions ExportJsonSerializerOptions = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
     /// <summary>
     /// Create a new Annotation for the user against a Chapter
     /// </summary>
@@ -227,14 +234,7 @@ public class AnnotationService(
                 }).ToArray();
 
             // Serialize to JSON
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-
-            var json = JsonSerializer.Serialize(exportData, options);
+            var json = JsonSerializer.Serialize(exportData, ExportJsonSerializerOptions);
 
             logger.LogInformation("Successfully exported {AnnotationCount} annotations for user {UserId}", annotations.Count, userId);
 

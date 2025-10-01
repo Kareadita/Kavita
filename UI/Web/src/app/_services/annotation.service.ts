@@ -87,7 +87,7 @@ export class AnnotationService {
 
     return this.httpClient.post<PaginatedResult<Annotation>[]>(this.baseUrl + 'annotation/all-filtered', filter, {observe: 'response', params}).pipe(
       map((res: any) => {
-        return this.utilityService.createPaginatedResult(res as PaginatedResult<Annotation>[]);
+        return this.utilityService.createPaginatedResult<Annotation>(res);
       }),
     );
   }

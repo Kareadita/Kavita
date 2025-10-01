@@ -147,32 +147,33 @@ export class AllAnnotationsComponent implements OnInit {
         break
       case Action.Like:
         this.annotationsService.likeAnnotations(ids).pipe(
-          tap(() => {
-            this.annotations.update(x => x.map(a => {
-              const newLikes = a.likes.includes(userId) ?
-                a.likes : [...a.likes, userId];
-
-              return {
-                ...a,
-                likes: newLikes,
-              };
-            }))
-          }),
+          tap(() => this.updateLikes(ids, userId, true)),
         ).subscribe();
         break;
       case Action.UnLike:
         this.annotationsService.unLikeAnnotations(ids).pipe(
-          tap(() => {
-            this.annotations.update(x => x.map(a => {
-              return {
-                ...a,
-                likes: a.likes.filter(id => id !== userId),
-              };
-            }))
-          }),
+          tap(() => this.updateLikes(ids, userId, false)),
         ).subscribe();
     }
   }
+
+  private updateLikes(ids: number[], userId: number, like: boolean): void {
+    this.annotations.update(annotations =>
+      annotations.map(annotation => {
+        if (!ids.includes(annotation.id)) return annotation;
+
+        let likes;
+        if (like) {
+          likes = annotation.likes.includes(userId) ? annotation.likes : [...annotation.likes, userId];
+        } else {
+          likes = annotation.likes.filter(id => id !== userId);
+        }
+
+        return { ...annotation, likes };
+      })
+    );
+  }
+
 
   exportFilter() {
     const filter = this.filter();
