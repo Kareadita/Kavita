@@ -954,8 +954,7 @@
         "page-num": "{{book-reader.page-num-label}}",
         "contains-spoilers-label": "Spoilers",
         "view-in-reader-label": "View in Reader",
-        "location-tooltip": "{{library}} - {{series}}",
-        "likes": "{{amount}}"
+        "location-tooltip": "{{library}} - {{series}}"
     },
 
     "annotations-tab": {

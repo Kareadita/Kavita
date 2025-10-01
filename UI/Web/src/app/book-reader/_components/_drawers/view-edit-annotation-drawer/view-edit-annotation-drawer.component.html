@@ -55,6 +55,10 @@
           @case (AnnotationMode.View) {
             @let an = annotation();
             @if (an) {
+              <div (click)="handleLikeChange()" class="ms-2 clickable">
+                <span>{{an.likes.length}}</span>
+                <i class="{{liked() ? 'fas' : 'fa-regular'}} fa-thumbs-up ms-1"></i>
+              </div>
               <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
                 <div class="d-flex align-items-center">
                   {{ an.ownerUsername }}

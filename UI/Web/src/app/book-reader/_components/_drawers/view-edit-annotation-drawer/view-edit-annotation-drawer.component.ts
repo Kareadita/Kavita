@@ -17,7 +17,7 @@ import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} fro
 import {Annotation} from "../../../_models/annotations/annotation";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, switchMap} from "rxjs/operators";
+import {debounceTime, switchMap, tap} from "rxjs/operators";
 import {of} from "rxjs";
 import {HighlightBarComponent} from "../../_annotations/highlight-bar/highlight-bar.component";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
@@ -90,6 +90,14 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   isEditOrCreateMode: Signal<boolean>
   titleColor: Signal<string>;
   totalText!: Signal<SafeHtml>;
+
+  liked = computed(() => {
+    const userId = this.accountService.currentUserSignal()?.id;
+    const annotation = this.annotation();
+    if (!userId || !annotation) return false;
+
+    return annotation.likes.includes(userId);
+  })
 
 
   formGroup!: FormGroup<{
@@ -269,12 +277,8 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     const annotation = this.annotation();
 
     if (annotation) {
-      console.log('view-edit drawer, slot index changed: ', slotIndex, 'comment: ', this.annotation()?.comment, 'form comment: ', this.formGroup.get('note')?.value);
       this.annotation.set({...annotation, selectedSlotIndex: slotIndex});
       this.formGroup.get('selectedSlotIndex')?.setValue(slotIndex);
-
-      // Patch back in any text in the quill editor
-      console.log('(2) view-edit drawer, slot index changed: ', slotIndex, 'comment: ', this.annotation()?.comment, 'form comment: ', this.formGroup.get('note')?.value);
     }
   }
 
@@ -366,5 +370,27 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     this.annotationService.deleteAnnotation(annotation).subscribe(_ => {
       this.offcanvasService.dismiss();
     });
+  }
+
+  handleLikeChange() {
+    const annotation = this.annotation();
+    if (!annotation) return;
+
+    const sub$ = this.liked()
+      ? this.annotationService.unLikeAnnotations([annotation.id])
+      : this.annotationService.likeAnnotations([annotation.id]);
+
+    const newLikes = this.liked()
+      ? annotation.likes.filter(id => id !== this.accountService.currentUserSignal()!.id)
+      : [...annotation.likes, this.accountService.currentUserSignal()!.id];
+
+    sub$.pipe(
+      tap(() => {
+        this.annotation.set({
+          ...annotation,
+          likes: newLikes,
+        })
+      }),
+    ).subscribe();
   }
 }

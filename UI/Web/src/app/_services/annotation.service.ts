@@ -23,7 +23,7 @@ import {PaginatedResult} from "../_models/pagination";
  */
 export interface AnnotationEvent {
   pageNumber: number;
-  type: 'create' | 'delete' | 'edit' | 'social-update';
+  type: 'create' | 'delete' | 'edit';
   annotation: Annotation;
 
 }
@@ -114,7 +114,6 @@ export class AnnotationService {
     return this.httpClient.post<Annotation>(this.baseUrl + 'annotation/update', data).pipe(
       switchMap(newAnnotation => this.getAllAnnotations(data.chapterId)),
       tap(_ => {
-        console.log('emitting edit event');
         this._events.set({
           pageNumber: data.pageNumber,
           type: 'edit',
@@ -202,45 +201,25 @@ export class AnnotationService {
     );
   }
 
+  /**
+   * Does not emit an event
+   * @param ids
+   */
   likeAnnotations(ids: number[]) {
     const userId = this.accountService.currentUserSignal()?.id;
     if (!userId) return of();
 
-    return this.httpClient.post(this.baseUrl + 'annotation/like', ids).pipe(
-      tap(() => {
-        const annotations = this._annotations().filter(a => ids.includes(a.id));
-
-        for (let annotation of annotations.filter(a => !a.likes.includes(userId))) {
-          annotation.likes.push(userId);
-
-          this._events.set({
-            pageNumber: annotation.pageNumber,
-            annotation: annotation,
-            type: 'social-update',
-          });
-        }
-      }),
-    );
+    return this.httpClient.post(this.baseUrl + 'annotation/like', ids);
   }
 
+  /**
+   * Does not emit an event
+   * @param ids
+   */
   unLikeAnnotations(ids: number[]) {
     const userId = this.accountService.currentUserSignal()?.id;
     if (!userId) return of();
 
-    return this.httpClient.post(this.baseUrl + 'annotation/unlike', ids).pipe(
-      tap(() => {
-        const annotations = this._annotations().filter(a => ids.includes(a.id));
-
-        for (let annotation of annotations.filter(a => a.likes.includes(userId))) {
-          annotation.likes = annotation.likes.filter(x => x != userId);
-
-          this._events.set({
-            pageNumber: annotation.pageNumber,
-            annotation: annotation,
-            type: 'social-update',
-          });
-        }
-      }),
-    );
+    return this.httpClient.post(this.baseUrl + 'annotation/unlike', ids);
   }
 }
