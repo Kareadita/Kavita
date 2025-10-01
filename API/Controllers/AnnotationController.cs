@@ -206,7 +206,7 @@ public class AnnotationController(
         var userId = User.GetUserId();
 
         var annotations = await unitOfWork.AnnotationRepository.GetAnnotations(userId, annotationIds);
-        if (annotations.Count != annotationIds.Count)
+        if (annotations.Any(a => a.AppUserId != userId))
         {
             return BadRequest();
         }

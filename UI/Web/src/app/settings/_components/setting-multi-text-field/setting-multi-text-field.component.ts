@@ -61,6 +61,11 @@ export class SettingMultiTextFieldComponent<T> implements ControlValueAccessor {
    * @optional
    */
   loading = input<boolean | undefined>(undefined);
+  /**
+   * id for the textarea input
+   * @optional
+   */
+  id = input<string>('');
 
   isLoading = computed(() => {
     const loading = this.loading();

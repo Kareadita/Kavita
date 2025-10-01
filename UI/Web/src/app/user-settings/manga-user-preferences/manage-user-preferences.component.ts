@@ -143,7 +143,10 @@ export class ManageUserPreferencesComponent implements OnInit {
 
       this.loading.set(false);
       this.libraries.set(libraries);
-      this.ageRatings.set(ageRatings);
+      this.ageRatings.set([{
+        value: AgeRating.NotApplicable,
+        title: '',
+      }, ...ageRatings]);
       this.user = user;
       this.user.preferences = pref;
 

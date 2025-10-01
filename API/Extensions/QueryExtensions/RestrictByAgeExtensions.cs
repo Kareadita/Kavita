@@ -152,14 +152,14 @@ public static class RestrictByAgeExtensions
         return q;
     }
 
-    public static IQueryable<AppUserAnnotation> RestrictAgainstAgeRestriction(this IQueryable<AppUserAnnotation> queryable, AgeRestriction restriction)
+    public static IQueryable<AppUserAnnotation> RestrictAgainstAgeRestriction(this IQueryable<AppUserAnnotation> queryable, AgeRestriction restriction, int userId)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
-        var q = queryable.Where(a => a.Chapter.AgeRating <= restriction.AgeRating);
+        var q = queryable.Where(a => a.Chapter.AgeRating <= restriction.AgeRating || a.AppUserId == userId);
 
         if (!restriction.IncludeUnknowns)
         {
-            return q.Where(a => a.Chapter.AgeRating != AgeRating.Unknown);
+            return q.Where(a => a.Chapter.AgeRating != AgeRating.Unknown || a.AppUserId == userId);
         }
 
         return q;
@@ -169,11 +169,11 @@ public static class RestrictByAgeExtensions
     {
         return queryable
             .Where(a => a.AppUserId == userPreferences.AppUserId || (a.AppUser.UserPreferences.ShareAnnotations && userPreferences.ViewOtherAnnotations))
-            .WhereIf(userPreferences.SocialLibraries.Count > 0, a => userPreferences.SocialLibraries.Contains(a.LibraryId))
+            .WhereIf(userPreferences.SocialLibraries.Count > 0, a => userPreferences.SocialLibraries.Contains(a.LibraryId) || a.AppUserId == userPreferences.AppUserId)
             .RestrictAgainstAgeRestriction(new AgeRestriction
             {
                 AgeRating = userPreferences.SocialMaxAgeRating,
                 IncludeUnknowns = userPreferences.SocialIncludeUnknowns,
-            });
+            }, userPreferences.AppUserId);
     }
 }

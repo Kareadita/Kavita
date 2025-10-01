@@ -9,7 +9,7 @@
     </ng-template>
 
     <ng-template #edit>
-      <textarea rows="3" id="custom-scopes" class="form-control"
+      <textarea rows="3" [id]="id()" class="form-control"
                 [value]="textFieldValue()"
                 (change)="onTextFieldChange($event)" [disabled]="disabled()">
       </textarea>
