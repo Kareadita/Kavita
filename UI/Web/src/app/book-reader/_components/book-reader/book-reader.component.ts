@@ -87,6 +87,7 @@ type Container = {left: number, right: number, top: number, bottom: number, widt
 const TOP_OFFSET = -(50 + 10) * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
 
 const COLUMN_GAP = 20; // px
+const LAYOUT_2_CONTAINER_PADDING = 12; // px --> .column-layout-2 .book-content { padding: 0 12px; }
 /**
  * Styles that should be applied on the top level book-content tag
  */
@@ -534,9 +535,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const layoutMode = this.layoutMode();
       const writingStyle = this.writingStyle();
 
-      const windowWidth = this.windowWidth();
-      const marginLeft = this.pageStyles()['margin-left'];
-      const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
+      // const windowWidth = this.windowWidth();
+      // const marginLeft = this.pageStyles()['margin-left'];
+      // const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
       const base = writingStyle === WritingStyle.Vertical ? this.pageHeight() : this.pageWidth();
 
 
@@ -544,9 +545,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         case BookPageLayoutMode.Default:
           return 'unset';
         case BookPageLayoutMode.Column1:
-          return Math.round(base / 2) + 'px';
+          return Math.floor(base / 2) + 'px';
         case BookPageLayoutMode.Column2:
-          return Math.round(base / 4) + 'px'
+          return Math.floor(base / 4) + 'px'
         default:
           return 'unset';
       }
@@ -1548,7 +1549,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (currentVirtualPage > 1) {
         // Calculate the target scroll position for the previous page
-        const targetScroll = (currentVirtualPage - 2) * pageSize - (this.layoutMode() === BookPageLayoutMode.Column2 ? 3 : 0)
+        const targetScroll = (currentVirtualPage - 2) * pageSize;
 
         const isVertical = this.writingStyle() === WritingStyle.Vertical;
 
@@ -1601,7 +1602,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (currentVirtualPage < totalVirtualPages) {
 
         // Calculate the target scroll position for the next page
-        const targetScroll = (currentVirtualPage * pageSize) + (this.layoutMode() === BookPageLayoutMode.Column2 ? 1 : 0);
+        const targetScroll = (currentVirtualPage * pageSize);
         const isVertical = this.writingStyle() === WritingStyle.Vertical;
 
         // +0 apparently goes forward 1 virtual page...
@@ -1649,9 +1650,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const columnGapModifier = this.columnGapModifier();
     if (this.readingSectionElemRef == null) return 0;
 
-    // Give an additional pixels for buffer
-    return this.readingSectionElemRef.nativeElement.clientWidth - margin
-      + (COLUMN_GAP * columnGapModifier);
+    const containerPad = this.layoutMode() === 2 ? LAYOUT_2_CONTAINER_PADDING * 2 : 0;
+    return this.reader.nativeElement.offsetWidth - margin + (COLUMN_GAP * columnGapModifier) - containerPad;
   });
 
   columnGapModifier = computed(() => {
@@ -1961,7 +1961,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   scrollTo(partSelector: string, timeout: number = 0) {
-    const element = this.getElementFromXPath(partSelector);
+    const element = this.getElementFromXPath(partSelector) as HTMLElement;
 
     if (element === null) {
       if (!environment.production) {
@@ -1975,7 +1975,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const writingStyle = this.writingStyle();
 
     if (layout !== BookPageLayoutMode.Default) {
-      afterFrame(() => this.scrollService.scrollIntoView(element as HTMLElement, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}}));
+      afterFrame(() => {
+        if (layout === BookPageLayoutMode.Column2) {
+          this.scrollService.scrollToX(element.offsetLeft - LAYOUT_2_CONTAINER_PADDING, this.bookContentElemRef.nativeElement);
+        }
+        else { // Column1
+          this.scrollService.scrollIntoView(element, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}});
+        }
+      });
       return;
     }
 

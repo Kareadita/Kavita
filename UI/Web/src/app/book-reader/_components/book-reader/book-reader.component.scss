@@ -256,6 +256,7 @@ $action-bar-height: 38px;
     overflow: hidden;
     word-break: break-word;
     overflow-wrap: break-word;
+    padding: 0 12px; // Add padding, so we can see the page border line on the left & right
 
     &.debug {
       overflow: scroll;
