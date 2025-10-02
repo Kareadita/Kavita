@@ -2934,7 +2934,8 @@
         "annotation-spoiler": "Spoiler",
         "annotation-highlights": "Highlight color",
         "annotation-comment": "Annotation Text",
-        "annotation-selection": "Highlight Text"
+        "annotation-selection": "Highlight Text",
+        "series": "{{tabs.series-tab}}"
     },
 
 

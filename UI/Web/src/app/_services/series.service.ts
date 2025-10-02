@@ -1,5 +1,5 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
@@ -223,5 +223,9 @@ export class SeriesService {
 
   updateDontMatch(seriesId: number, dontMatch: boolean) {
     return this.httpClient.post<string>(this.baseUrl + `series/dont-match?seriesId=${seriesId}&dontMatch=${dontMatch}`, {}, TextResonse);
+  }
+
+  getSeriesWithAnnotations() {
+    return this.httpClient.get<Series[]>(this.baseUrl + 'series/series-with-annotations');
   }
 }

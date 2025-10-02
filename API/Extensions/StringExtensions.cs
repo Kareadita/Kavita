@@ -101,8 +101,7 @@ public static partial class StringExtensions
             return [];
         }
 
-        return value.Split(',')
-            .Where(s => !string.IsNullOrEmpty(s))
+        return value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Select(int.Parse)
             .ToList();
     }
@@ -115,11 +114,17 @@ public static partial class StringExtensions
     public static long ParseHumanReadableBytes(this string input)
     {
         if (string.IsNullOrWhiteSpace(input))
+        {
             throw new ArgumentException("Input cannot be null or empty.", nameof(input));
+        }
+
 
         var match = HumanReadableBytesRegex().Match(input);
         if (!match.Success)
+        {
             throw new FormatException($"Invalid format: '{input}'");
+        }
+
 
         var value = double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
         var unit = match.Groups[2].Value.ToUpperInvariant();

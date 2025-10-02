@@ -87,4 +87,5 @@ public enum AnnotationFilterField
     /// This is the text the user wrote
     /// </summary>
     Comment = 6,
+    Series = 7
 }

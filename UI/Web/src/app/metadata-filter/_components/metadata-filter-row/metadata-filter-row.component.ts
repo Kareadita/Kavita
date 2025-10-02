@@ -15,18 +15,7 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
-import {
-  BehaviorSubject,
-  distinctUntilChanged,
-  filter,
-  map,
-  Observable,
-  of,
-  pipe,
-  startWith,
-  switchMap,
-  tap
-} from 'rxjs';
+import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
 import {FilterField} from 'src/app/_models/metadata/v2/filter-field';
@@ -35,7 +24,7 @@ import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {Select2, Select2Option} from "ng-select2-component";
 import {NgbDate, NgbDateParserFormatter, NgbInputDatepicker, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../../filter-settings";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {AnnotationsFilterField} from "../../../_models/metadata/v2/annotations-filter";
@@ -132,7 +121,6 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
   private readonly destroyRef = inject(DestroyRef);
   private readonly dateParser = inject(NgbDateParserFormatter);
   private readonly metadataService = inject(MetadataService);
-  private readonly translocoService = inject(TranslocoService);
   private readonly filterUtilitiesService = inject(FilterUtilitiesService);
   private readonly injector = inject(Injector);
 

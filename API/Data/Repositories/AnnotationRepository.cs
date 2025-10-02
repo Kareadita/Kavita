@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Misc;
+using API.DTOs;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata.Browse.Requests;
 using API.DTOs.Annotations;
@@ -33,6 +34,7 @@ public interface IAnnotationRepository
     Task<IList<FullAnnotationDto>> GetFullAnnotationsByUserIdAsync(int userId);
     Task<IList<FullAnnotationDto>> GetFullAnnotations(int userId, IList<int> annotationIds);
     Task<PagedList<AnnotationDto>> GetAnnotationDtos(int userId, BrowseAnnotationFilterDto filter, UserParams userParams);
+    Task<List<SeriesDto>> GetSeriesWithAnnotations(int userId);
 }
 
 public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnotationRepository
@@ -77,7 +79,9 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
 
     public async Task<IList<AppUserAnnotation>> GetAnnotations(int userId, IList<int> ids)
     {
-        var userPreferences = await context.AppUserPreferences.Where(p => p.AppUserId == userId).FirstAsync();
+        var userPreferences = await context.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .FirstAsync();
 
         return await context.AppUserAnnotation
             .Where(a => ids.Contains(a.Id))
@@ -91,11 +95,36 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         return await PagedList<AnnotationDto>.CreateAsync(query, userParams);
     }
 
+    public async Task<List<SeriesDto>> GetSeriesWithAnnotations(int userId)
+    {
+        var userPreferences = await context.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .FirstAsync();
+
+        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+
+        var seriesIdsWithAnnotations = await context.AppUserAnnotation
+            .RestrictBySocialPreferences(userPreferences)
+            .Select(a => a.SeriesId)
+            .ToListAsync();
+
+        return await context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId) && seriesIdsWithAnnotations.Contains(s.Id))
+            .RestrictAgainstAgeRestriction(userRating)
+            .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
+            .ToListAsync();
+
+    }
+
     private async Task<IQueryable<AnnotationDto>> CreatedFilteredAnnotationQueryable(int userId, BrowseAnnotationFilterDto filter)
     {
         var allLibrariesCount = await context.Library.CountAsync();
         var userLibs = await context.Library.GetUserLibraries(userId).ToListAsync();
-        var seriesIds = await context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id).ToListAsync();
+        var seriesIds = await context.Series
+            .Where(s => userLibs.Contains(s.LibraryId))
+            .Select(s => s.Id)
+            .ToListAsync();
 
         var userPreferences = await context.AppUserPreferences.Where(p => p.AppUserId == userId).FirstAsync();
 
@@ -146,6 +175,7 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         {
             AnnotationFilterField.Owner => query.IsOwnedBy(true, statement.Comparison, (IList<int>) value),
             AnnotationFilterField.Library => query.IsInLibrary(true, statement.Comparison, (IList<int>) value),
+            AnnotationFilterField.Series => query.HasSeries(true, statement.Comparison, (IList<int>) value),
             AnnotationFilterField.HighlightSlot => query.IsUsingHighlights(true, statement.Comparison, (IList<int>) value),
             AnnotationFilterField.Spoiler => query.Where(a => !(bool) value || !a.ContainsSpoiler),
             AnnotationFilterField.Comment => query.HasCommented(true, statement.Comparison, (string) value),
@@ -162,7 +192,8 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
             .AsNoTracking()
             .Where(a => annotationIds.Contains(a.Id))
             .RestrictBySocialPreferences(userPreferences)
-            .SelectFullAnnotation()
+            .ProjectTo<FullAnnotationDto>(mapper.ConfigurationProvider)
+            .OrderFullAnnotation()
             .ToListAsync();
     }
 
@@ -177,7 +208,8 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
 
         return await context.AppUserAnnotation
             .RestrictBySocialPreferences(userPreferences)
-            .SelectFullAnnotation()
+            .ProjectTo<FullAnnotationDto>(mapper.ConfigurationProvider)
+            .OrderFullAnnotation()
             .ToListAsync();
     }
 }

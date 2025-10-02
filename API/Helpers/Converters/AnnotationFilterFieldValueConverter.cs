@@ -14,7 +14,8 @@ public static class AnnotationFilterFieldValueConverter
         {
             AnnotationFilterField.Owner or
                 AnnotationFilterField.HighlightSlot or
-                AnnotationFilterField.Library => value.ParseIntArray(),
+                AnnotationFilterField.Library or
+                AnnotationFilterField.Series => value.ParseIntArray(),
             AnnotationFilterField.Spoiler => bool.Parse(value),
             AnnotationFilterField.Selection => value,
             AnnotationFilterField.Comment => value,
