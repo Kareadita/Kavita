@@ -164,10 +164,6 @@ public class AppUserPreferences
     /// </summary>
     public bool CollapseSeriesRelationships { get; set; } = false;
     /// <summary>
-    /// UI Site Global Setting: Should series reviews be shared with all users in the server
-    /// </summary>
-    public bool ShareReviews { get; set; } = false;
-    /// <summary>
     /// UI Site Global Setting: The language locale that should be used for the user
     /// </summary>
     public string Locale { get; set; }
@@ -191,28 +187,33 @@ public class AppUserPreferences
     #region Social
 
     /// <summary>
-    /// Share your annotations with other users
+    /// UI Site Global Setting: Should series reviews be shared with all users in the server
+    /// </summary>
+    public bool ShareReviews { get; set; } = false;
+
+    /// <summary>
+    /// UI Site Global Setting: Share your annotations with other users
     /// </summary>
     public bool ShareAnnotations { get; set; } = false;
 
     /// <summary>
-    /// See other users' annotations while reading
+    /// UI Site Global Setting: See other users' annotations while reading
     /// </summary>
     public bool ViewOtherAnnotations { get; set; } = false;
 
     /// <summary>
-    /// For which libraries should social features be enabled
+    /// UI Site Global Setting: For which libraries should social features be enabled
     /// </summary>
     /// <remarks>Empty array means all, disable specific social features to opt out everywhere</remarks>
     public IList<int> SocialLibraries { get; set; } = [];
 
     /// <summary>
-    /// Highest age rating for which social features are enabled
+    /// UI Site Global Setting: Highest age rating for which social features are enabled
     /// </summary>
     public AgeRating SocialMaxAgeRating { get; set; } = AgeRating.NotApplicable;
 
     /// <summary>
-    /// Enable social features for unknown age ratings
+    /// UI Site Global Setting: Enable social features for unknown age ratings
     /// </summary>
     public bool SocialIncludeUnknowns { get; set; } = true;
 
