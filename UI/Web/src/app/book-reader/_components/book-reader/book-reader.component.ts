@@ -87,7 +87,6 @@ type Container = {left: number, right: number, top: number, bottom: number, widt
 const TOP_OFFSET = -(50 + 10) * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
 
 const COLUMN_GAP = 20; // px
-const LAYOUT_2_CONTAINER_PADDING = 12; // px --> .column-layout-2 .book-content { padding: 0 12px; }
 /**
  * Styles that should be applied on the top level book-content tag
  */
@@ -545,9 +544,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         case BookPageLayoutMode.Default:
           return 'unset';
         case BookPageLayoutMode.Column1:
-          return Math.floor(base / 2) + 'px';
+          return Math.round(base / 2) + 'px';
         case BookPageLayoutMode.Column2:
-          return Math.floor(base / 4) + 'px'
+          return Math.round(base / 4) + 'px'
         default:
           return 'unset';
       }
@@ -1650,8 +1649,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const columnGapModifier = this.columnGapModifier();
     if (this.readingSectionElemRef == null) return 0;
 
-    const containerPad = this.layoutMode() === 2 ? LAYOUT_2_CONTAINER_PADDING * 2 : 0;
-    return this.reader.nativeElement.offsetWidth - margin + (COLUMN_GAP * columnGapModifier) - containerPad;
+    return this.reader.nativeElement.offsetWidth - margin + (COLUMN_GAP * columnGapModifier);
   });
 
   columnGapModifier = computed(() => {
@@ -1694,16 +1692,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   getVirtualPage() {
     if (!this.bookContentElemRef || !this.readingSectionElemRef) return [1, 1, 0];
 
-    let [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
+    const [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
     const pageSize = this.pageSize();
 
     if (pageSize <= 0 || totalScroll <= 0) return [1, 1, pageSize];
 
-    if (this.layoutMode() === 2) {
-      scrollOffset += LAYOUT_2_CONTAINER_PADDING;
-    }
-
-    const totalVirtualPages = Math.max(1, Math.round(totalScroll / pageSize));
+    const totalVirtualPages = Math.max(1, Math.ceil(totalScroll / pageSize));
     const delta = totalScroll - scrollOffset;
     let currentVirtualPage = 1;
 
@@ -1980,12 +1974,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (layout !== BookPageLayoutMode.Default) {
       afterFrame(() => {
-        if (layout === BookPageLayoutMode.Column2) {
-          this.scrollService.scrollToX(element.offsetLeft - LAYOUT_2_CONTAINER_PADDING, this.bookContentElemRef.nativeElement);
-        }
-        else { // Column1
-          this.scrollService.scrollIntoView(element, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}});
-        }
+        this.scrollService.scrollIntoView(element, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}});
       });
       return;
     }
