@@ -39,7 +39,7 @@ export class FontService {
   getFontFace(font: EpubFont): FontFace {
     // TODO: We need to refactor this so that we loadFonts with an array, fonts have an id to remove them, and we don't keep populating the document
     if (font.provider === FontProvider.System) {
-      return new FontFace(font.name, `url('/assets/fonts/${font.name}/${font.fileName}')`);
+      return new FontFace(font.name, `url('assets/fonts/${font.name}/${font.fileName}')`);
     }
 
     return new FontFace(font.name, `url(${this.baseUrl}font?fontId=${font.id}&apiKey=${this.encodedKey})`);

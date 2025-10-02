@@ -58,6 +58,10 @@
         cursor: pointer;
     }
 
+    .card-title {
+        color: var(--card-overlay-text-color);
+    }
+
     .overlay-information--centered {
         position: absolute;
         border-radius: 15px;

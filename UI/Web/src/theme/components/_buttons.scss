@@ -212,9 +212,33 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
     }
 }
 
-button i.fa {
-  color: var(--btn-fa-icon-color);
+$button_types: '', -primary, -secondary, -outline-primary, -outline-secondary, -danger;
+$icon_classes: fa, fa-regular, fa-solid;
+
+// FA icon colors for all button types
+// the .nav exception is for the Activity button in the top nav bar
+@each $button_type in $button_types {
+  button.btn#{$button_type} {
+    @each $icon_class in $icon_classes {
+      i:not(.nav).#{$icon_class} {
+        color: var(--btn#{$button_type}-fa-icon-color);
+      }
+
+      &:disabled {
+        i:not(.nav).#{$icon_class} {
+          color: var(--btn#{$button_type}-disabled-fa-icon-color, var(--btn#{$button_type}-disabled-text-color));
+        }
+      }
+
+      &:hover {
+        i:not(.nav).#{$icon_class} {
+          color: var(--btn#{$button_type}-hover-fa-icon-color, white);
+        }
+      }
+    }
+  }
 }
+
 
 .btn-check:focus + .btn, .btn:focus {
   box-shadow: 0 0 0 0.05rem var(--btn-focus-boxshadow-color);
