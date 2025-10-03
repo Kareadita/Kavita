@@ -169,11 +169,11 @@ public static class RestrictByAgeExtensions
     private static IQueryable<AppUserChapterRating> RestrictAgainstAgeRestriction(this IQueryable<AppUserChapterRating> queryable, AgeRestriction restriction, int userId)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
-        var q = queryable.Where(r => r.Chapter.AgeRating <= restriction.AgeRating || r.AppUserId == userId);
+        var q = queryable.Where(r => r.Series.Metadata.AgeRating <= restriction.AgeRating || r.AppUserId == userId);
 
         if (!restriction.IncludeUnknowns)
         {
-            return q.Where(a => a.Chapter.AgeRating != AgeRating.Unknown || a.AppUserId == userId);
+            return q.Where(a => a.Series.Metadata.AgeRating != AgeRating.Unknown || a.AppUserId == userId);
         }
 
         return q;
@@ -182,11 +182,11 @@ public static class RestrictByAgeExtensions
     private static IQueryable<AppUserAnnotation> RestrictAgainstAgeRestriction(this IQueryable<AppUserAnnotation> queryable, AgeRestriction restriction, int userId)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
-        var q = queryable.Where(a => a.Chapter.AgeRating <= restriction.AgeRating || a.AppUserId == userId);
+        var q = queryable.Where(a => a.Series.Metadata.AgeRating <= restriction.AgeRating || a.AppUserId == userId);
 
         if (!restriction.IncludeUnknowns)
         {
-            return q.Where(a => a.Chapter.AgeRating != AgeRating.Unknown || a.AppUserId == userId);
+            return q.Where(a => a.Series.Metadata.AgeRating != AgeRating.Unknown || a.AppUserId == userId);
         }
 
         return q;
@@ -229,9 +229,9 @@ public static class RestrictByAgeExtensions
             var includeUnknowns = preferencesById[sharingUserId].SocialIncludeUnknowns;
             if (ageRating != AgeRating.NotApplicable)
             {
-                queryable = queryable.Where(a => a.AppUserId != sharingUserId || a.Chapter.AgeRating <= ageRating)
+                queryable = queryable.Where(a => a.AppUserId != sharingUserId || a.Series.Metadata.AgeRating <= ageRating)
                     .WhereIf(!includeUnknowns,
-                        a => a.AppUserId != sharingUserId || a.Chapter.AgeRating != AgeRating.Unknown);
+                        a => a.AppUserId != sharingUserId || a.Series.Metadata.AgeRating != AgeRating.Unknown);
             }
         }
 
@@ -325,9 +325,9 @@ public static class RestrictByAgeExtensions
             var includeUnknowns = preferencesById[sharingUserId].SocialIncludeUnknowns;
             if (ageRating == AgeRating.NotApplicable)
             {
-                queryable = queryable.Where(r => r.AppUserId != sharingUserId || r.Chapter.AgeRating <= ageRating)
+                queryable = queryable.Where(r => r.AppUserId != sharingUserId || r.Series.Metadata.AgeRating <= ageRating)
                     .WhereIf(!includeUnknowns,
-                        r => r.AppUserId != sharingUserId || r.Chapter.AgeRating != AgeRating.Unknown);
+                        r => r.AppUserId != sharingUserId || r.Series.Metadata.AgeRating != AgeRating.Unknown);
             }
         }
 
