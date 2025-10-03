@@ -24,6 +24,7 @@ using Hangfire;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -557,6 +558,15 @@ public class LibraryController : BaseApiController
 
             await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
                 MessageFactory.LibraryModifiedEvent(libraryId, "delete"), false);
+
+            var userPreferences = await _unitOfWork.DataContext.AppUserPreferences.ToListAsync();
+            foreach (var userPreference in userPreferences)
+            {
+                userPreference.SocialPreferences.SocialLibraries = userPreference.SocialPreferences.SocialLibraries
+                    .Where(l => l != libraryId).ToList();
+            }
+
+            await _unitOfWork.CommitAsync();
             return true;
         }
         catch (Exception ex)
