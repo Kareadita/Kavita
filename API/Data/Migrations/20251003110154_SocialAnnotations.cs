@@ -10,40 +10,12 @@ namespace API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "ShareAnnotations",
-                table: "AppUserPreferences",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "SocialIncludeUnknowns",
-                table: "AppUserPreferences",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: true);
-
             migrationBuilder.AddColumn<string>(
-                name: "SocialLibraries",
+                name: "SocialPreferences",
                 table: "AppUserPreferences",
                 type: "TEXT",
                 nullable: true,
-                defaultValue: "[]");
-
-            migrationBuilder.AddColumn<int>(
-                name: "SocialMaxAgeRating",
-                table: "AppUserPreferences",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: -1);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "ViewOtherAnnotations",
-                table: "AppUserPreferences",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: false);
+                defaultValue: "{\"ShareReviews\":false,\"ShareAnnotations\":false,\"ViewOtherAnnotations\":false,\"SocialLibraries\":[],\"SocialMaxAgeRating\":-1,\"SocialIncludeUnknowns\":true}");
 
             migrationBuilder.AddColumn<string>(
                 name: "Likes",
@@ -78,23 +50,7 @@ namespace API.Data.Migrations
                 table: "AppUserAnnotation");
 
             migrationBuilder.DropColumn(
-                name: "ShareAnnotations",
-                table: "AppUserPreferences");
-
-            migrationBuilder.DropColumn(
-                name: "SocialIncludeUnknowns",
-                table: "AppUserPreferences");
-
-            migrationBuilder.DropColumn(
-                name: "SocialLibraries",
-                table: "AppUserPreferences");
-
-            migrationBuilder.DropColumn(
-                name: "SocialMaxAgeRating",
-                table: "AppUserPreferences");
-
-            migrationBuilder.DropColumn(
-                name: "ViewOtherAnnotations",
+                name: "SocialPreferences",
                 table: "AppUserPreferences");
 
             migrationBuilder.DropColumn(

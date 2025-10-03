@@ -21,6 +21,10 @@ export interface Preferences {
   wantToReadSync: boolean;
 
   // Social
+  socialPreferences: SocialPreferences;
+}
+
+export interface SocialPreferences {
   shareReviews: boolean;
   shareAnnotations: boolean;
   viewOtherAnnotations: boolean;

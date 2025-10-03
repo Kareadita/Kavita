@@ -226,9 +226,9 @@
         "social-libraries-label": "Social Libraries",
         "social-libraries-tooltip": "Libraries on which social features should be enabled. No selection enables social features everywhere. Disable specific features if you wish to use them nowhere.",
         "social-max-age-rating-label": "Max age rating",
-        "social-max-age-rating-tooltip": "Max age rating of the chapter on which social features will work",
+        "social-max-age-rating-tooltip": "Max age rating on which social features will work",
         "social-include-unknowns-label": "Include unknowns",
-        "social-include-unknowns-tooltip": "Enable social features on chapter with an unknown age rating",
+        "social-include-unknowns-tooltip": "Enable social features for series and chapters with an unknown age rating",
 
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
         "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",

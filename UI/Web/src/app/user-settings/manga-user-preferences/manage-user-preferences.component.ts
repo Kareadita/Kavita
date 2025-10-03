@@ -11,11 +11,10 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Preferences} from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
-import {BookService} from "../../book-reader/_services/book.service";
 import {Title} from "@angular/platform-browser";
 import {Router} from "@angular/router";
 import {LocalizationService} from "../../_services/localization.service";
-import {Form, FormArray, FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
+import {FormArray, FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {User} from "../../_models/user";
 import {KavitaLocale} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -32,12 +31,9 @@ import {HighlightSlot} from "../../book-reader/_models/annotations/highlight-slo
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {LibraryService} from "../../_services/library.service";
 import {Library} from "../../_models/library/library";
-import {SettingMultiCheckBox} from "../../settings/_components/setting-multi-check-box/setting-multi-check-box.component";
 import {MetadataService} from "../../_services/metadata.service";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
 
@@ -55,12 +51,14 @@ type UserPreferencesForm = FormGroup<{
   aniListScrobblingEnabled: FormControl<boolean>,
   wantToReadSync: FormControl<boolean>,
 
-  shareReviews: FormControl<boolean>,
-  shareAnnotations: FormControl<boolean>,
-  viewOtherAnnotations: FormControl<boolean>,
-  socialLibraries: FormControl<number[]>,
-  socialMaxAgeRating: FormControl<AgeRating>,
-  socialIncludeUnknowns: FormControl<boolean>,
+  socialPreferences: FormGroup<{
+    shareReviews: FormControl<boolean>,
+    shareAnnotations: FormControl<boolean>,
+    viewOtherAnnotations: FormControl<boolean>,
+    socialLibraries: FormControl<number[]>,
+    socialMaxAgeRating: FormControl<AgeRating>,
+    socialIncludeUnknowns: FormControl<boolean>,
+  }>,
 }>
 
 @Component({
@@ -74,10 +72,7 @@ type UserPreferencesForm = FormGroup<{
     AsyncPipe,
     DecimalPipe,
     HighlightBarComponent,
-    SettingMultiCheckBox,
     AgeRatingPipe,
-    DefaultValuePipe,
-    TagBadgeComponent,
     TypeaheadComponent,
   ],
   templateUrl: './manage-user-preferences.component.html',
@@ -88,7 +83,6 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
-  private readonly bookService = inject(BookService);
   private readonly titleService = inject(Title);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -175,12 +169,14 @@ export class ManageUserPreferencesComponent implements OnInit {
         aniListScrobblingEnabled: this.fb.control<boolean>(pref.aniListScrobblingEnabled),
         wantToReadSync: this.fb.control<boolean>(pref.wantToReadSync),
 
-        shareReviews: this.fb.control<boolean>(pref.shareReviews),
-        shareAnnotations: this.fb.control<boolean>(pref.shareAnnotations),
-        viewOtherAnnotations: this.fb.control<boolean>(pref.viewOtherAnnotations),
-        socialLibraries: this.fb.control<number[]>(pref.socialLibraries),
-        socialMaxAgeRating: this.fb.control<AgeRating>(pref.socialMaxAgeRating),
-        socialIncludeUnknowns: this.fb.control<boolean>(pref.socialIncludeUnknowns),
+        socialPreferences: this.fb.group({
+          shareReviews: this.fb.control<boolean>(pref.socialPreferences.shareReviews),
+          shareAnnotations: this.fb.control<boolean>(pref.socialPreferences.shareAnnotations),
+          viewOtherAnnotations: this.fb.control<boolean>(pref.socialPreferences.viewOtherAnnotations),
+          socialLibraries: this.fb.control<number[]>(pref.socialPreferences.socialLibraries),
+          socialMaxAgeRating: this.fb.control<AgeRating>(pref.socialPreferences.socialMaxAgeRating),
+          socialIncludeUnknowns: this.fb.control<boolean>(pref.socialPreferences.socialIncludeUnknowns),
+        }),
       });
 
       // Automatically save settings as we edit them
@@ -207,7 +203,7 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   private setupLibraryTypeAheadSettings() {
     const libs = this.libraries();
-    const selectedLibs = this.user!.preferences.socialLibraries;
+    const selectedLibs = this.user!.preferences.socialPreferences.socialLibraries;
 
     const settings = new TypeaheadSettings<Library>();
     settings.multiple = true;
@@ -221,7 +217,10 @@ export class ManageUserPreferencesComponent implements OnInit {
   }
 
   syncFormWithTypeahead(libs: Library[] | Library) {
-    this.settingsForm.get('socialLibraries')!.setValue((libs as Library[]).map(l => l.id));
+    this.settingsForm
+      .get('socialPreferences')!
+      .get('socialLibraries')!
+      .setValue((libs as Library[]).map(l => l.id));
   }
 
   packSettings(): Preferences {

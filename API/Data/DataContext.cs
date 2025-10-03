@@ -298,18 +298,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(IdentityProvider.Kavita);
 
         builder.Entity<AppUserPreferences>()
-            .Property(a => a.SocialLibraries)
-            .HasJsonConversion([])
+            .Property(a => a.SocialPreferences)
+            .HasJsonConversion(new AppUserSocialPreferences())
             .HasColumnType("TEXT")
-            .HasDefaultValue(new List<int>());
-
-        builder.Entity<AppUserPreferences>()
-            .Property(a => a.SocialMaxAgeRating)
-            .HasDefaultValue(AgeRating.NotApplicable);
-
-        builder.Entity<AppUserPreferences>()
-            .Property(a => a.SocialIncludeUnknowns)
-            .HasDefaultValue(true);
+            .HasDefaultValue(new AppUserSocialPreferences());
 
         builder.Entity<AppUserAnnotation>()
             .Property(a => a.Likes)

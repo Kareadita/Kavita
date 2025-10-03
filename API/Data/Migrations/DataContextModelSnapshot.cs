@@ -615,37 +615,21 @@ namespace API.Data.Migrations
                     b.Property<int>("ScalingOption")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("ShareAnnotations")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("ShareReviews")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("ShowScreenHints")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("SocialIncludeUnknowns")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("SocialLibraries")
+                    b.Property<string>("SocialPreferences")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("[]");
-
-                    b.Property<int>("SocialMaxAgeRating")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(-1);
+                        .HasDefaultValue("{\"ShareReviews\":false,\"ShareAnnotations\":false,\"ViewOtherAnnotations\":false,\"SocialLibraries\":[],\"SocialMaxAgeRating\":-1,\"SocialIncludeUnknowns\":true}");
 
                     b.Property<bool>("SwipeToPaginate")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ThemeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("ViewOtherAnnotations")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("WantToReadSync")

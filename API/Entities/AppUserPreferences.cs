@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Data;
-using API.Data.Misc;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 using API.Services.Tasks;
@@ -189,6 +189,28 @@ public class AppUserPreferences
     /// <summary>
     /// UI Site Global Setting: Should series reviews be shared with all users in the server
     /// </summary>
+    [Obsolete("Use SocialPreferences.ShareReviews")]
+    public bool ShareReviews { get; set; } = false;
+
+    /// <summary>
+    /// The social preferences of the AppUser
+    /// </summary>
+    /// <remarks>Saved as a JSON obj in the DB</remarks>
+    public AppUserSocialPreferences SocialPreferences { get; set; } = new();
+
+
+
+    #endregion
+
+    public AppUser AppUser { get; set; } = null!;
+    public int AppUserId { get; set; }
+}
+
+public class AppUserSocialPreferences
+{
+    /// <summary>
+    /// UI Site Global Setting: Should series reviews be shared with all users in the server
+    /// </summary>
     public bool ShareReviews { get; set; } = false;
 
     /// <summary>
@@ -216,9 +238,4 @@ public class AppUserPreferences
     /// UI Site Global Setting: Enable social features for unknown age ratings
     /// </summary>
     public bool SocialIncludeUnknowns { get; set; } = true;
-
-    #endregion
-
-    public AppUser AppUser { get; set; } = null!;
-    public int AppUserId { get; set; }
 }

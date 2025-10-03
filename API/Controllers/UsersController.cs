@@ -124,12 +124,9 @@ public class UsersController : BaseApiController
         var allLibs = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id))
             .Select(l => l.Id).ToList();
 
-        existingPreferences.ShareReviews = preferencesDto.ShareReviews;
-        existingPreferences.ShareAnnotations = preferencesDto.ShareAnnotations;
-        existingPreferences.ViewOtherAnnotations = preferencesDto.ViewOtherAnnotations;
-        existingPreferences.SocialLibraries = preferencesDto.SocialLibraries.Where(l => allLibs.Contains(l)).ToList();
-        existingPreferences.SocialMaxAgeRating = preferencesDto.SocialMaxAgeRating;
-        existingPreferences.SocialIncludeUnknowns = preferencesDto.SocialIncludeUnknowns;
+        preferencesDto.SocialPreferences.SocialLibraries = preferencesDto.SocialPreferences.SocialLibraries
+            .Where(l => allLibs.Contains(l)).ToList();
+        existingPreferences.SocialPreferences = preferencesDto.SocialPreferences;
 
         if (await _licenseService.HasActiveLicense())
         {
