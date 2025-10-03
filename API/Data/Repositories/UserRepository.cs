@@ -895,6 +895,7 @@ public class UserRepository : IUserRepository
                 },
                 Libraries =  u.Libraries.Select(l => new LibraryDto
                 {
+                    Id = l.Id,
                     Name = l.Name,
                     Type = l.Type,
                     LastScanned = l.LastScanned,
