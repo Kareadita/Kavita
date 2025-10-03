@@ -169,13 +169,30 @@
     --btn-alt-hover-bg-color: #3b4466;
     --btn-alt-focus-bg-color: #343c59;
     --btn-alt-focus-boxshadow-color: rgb(255 255 255 / 50%);
-    --btn-fa-icon-color: white;
     --btn-disabled-bg-color: #343a40;
     --btn-disabled-text-color: white;
     --btn-disabled-border-color: #6c757d;
     --bs-btn-disabled-border-color: transparent;
     --btn-actions-border-radius: 0.375rem;
     --btn-actions-hover-bg: rgb(255 255 255 / 18%);
+    --btn-fa-icon-color: white;
+    --btn-disabled-fa-icon-color: white;
+    --btn-hover-fa-icon-color: white;
+    --btn-primary-fa-icon-color: white;
+    --btn-primary-disabled-fa-icon-color: white;
+    --btn-primary-hover-fa-icon-color: white;
+    --btn-secondary-fa-icon-color: white;
+    --btn-secondary-disabled-fa-icon-color: white;
+    --btn-secondary-hover-fa-icon-color: white;
+    --btn-outline-primary-fa-icon-color: white;
+    --btn-outline-primary-disabled-fa-icon-color: white;
+    --btn-outline-primary-hover-fa-icon-color: white;
+    --btn-outline-secondary-fa-icon-color: white;
+    --btn-outline-secondary-disabled-fa-icon-color: white;
+    --btn-outline-secondary-hover-fa-icon-color: white;
+    --btn-danger-fa-icon-color: white;
+    --btn-danger-disabled-fa-icon-color: white;
+    --btn-danger-hover-fa-icon-color: white;
 
 
     /* Nav (Tabs) */
@@ -245,6 +262,7 @@
     --side-nav-hover-text-color: white;
     --side-nav-hover-bg-color: black;
     --side-nav-text-color: hsla(0,0%,100%,.85);
+    --side-nav-header-text-color: white;
     --side-nav-border-radius: 3px;
     --side-nav-border: none;
     --side-nav-border-closed: none;
@@ -256,6 +274,7 @@
     --side-nav-item-active-text-color: #fff;
     --side-nav-active-bg-color: transparent;
     --side-nav-overlay-color: var(--elevation-layer11-dark);
+    --side-nav-item-color: rgb(255 255 255 / 9%);
     --side-nav-item-closed-color: var(--elevation-layer10);
     --side-nav-item-closed-hover-color: white;
 
@@ -353,6 +372,9 @@
     --card-overlay-bg-color: rgba(0, 0, 0, 0);
     --card-overlay-hover-bg-color: rgba(30,30,30,.6);
     --card-progress-triangle-size: 28px;
+    --card-body-bg-color: rgba(0,0,0,0.7);
+    --card-title-text-color: var(--card-text-color);
+    --card-overlay-text-color: var(--card-text-color);
 
     /* Slider */
     --slider-text-color: white;
