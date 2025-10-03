@@ -205,34 +205,41 @@ public static class RestrictByAgeExtensions
         var preferencesById = userPreferences.ToDictionary(p => p.AppUserId, p => p.SocialPreferences);
         var socialPreferences = preferencesById[userId];
 
-        // We are unable to do dictionary lookups in Sqlite; This means we need to translate them to X IN Y.
-        var sharingUserIds = userPreferences
-            .Where(p => p.SocialPreferences.ShareAnnotations)
-            .Select(p => p.AppUserId)
-            .ToHashSet();
-
-        // Only include the users' annotations, or those of users that are sharing
-        queryable = queryable.Where(a => a.AppUserId == userId || sharingUserIds.Contains(a.AppUserId));
-
-        // For other users' annotation
-        foreach (var sharingUserId in sharingUserIds.Where(id => id != userId))
+        if (socialPreferences.ViewOtherAnnotations)
         {
-            // Filter out libs if enabled
-            var libs = preferencesById[sharingUserId].SocialLibraries;
-            if (libs.Count > 0)
-            {
-                queryable = queryable.Where(a => a.AppUserId != sharingUserId ||  libs.Contains(a.LibraryId));
-            }
+            // We are unable to do dictionary lookups in Sqlite; This means we need to translate them to X IN Y.
+            var sharingUserIds = userPreferences
+                .Where(p => p.SocialPreferences.ShareAnnotations)
+                .Select(p => p.AppUserId)
+                .ToHashSet();
 
-            // Filter on age rating
-            var ageRating = preferencesById[sharingUserId].SocialMaxAgeRating;
-            var includeUnknowns = preferencesById[sharingUserId].SocialIncludeUnknowns;
-            if (ageRating != AgeRating.NotApplicable)
+            // Only include the users' annotations, or those of users that are sharing
+            queryable = queryable.Where(a => a.AppUserId == userId || sharingUserIds.Contains(a.AppUserId));
+
+            // For other users' annotation
+            foreach (var sharingUserId in sharingUserIds.Where(id => id != userId))
             {
-                queryable = queryable.Where(a => a.AppUserId != sharingUserId || a.Series.Metadata.AgeRating <= ageRating)
-                    .WhereIf(!includeUnknowns,
-                        a => a.AppUserId != sharingUserId || a.Series.Metadata.AgeRating != AgeRating.Unknown);
+                // Filter out libs if enabled
+                var libs = preferencesById[sharingUserId].SocialLibraries;
+                if (libs.Count > 0)
+                {
+                    queryable = queryable.Where(a => a.AppUserId != sharingUserId ||  libs.Contains(a.LibraryId));
+                }
+
+                // Filter on age rating
+                var ageRating = preferencesById[sharingUserId].SocialMaxAgeRating;
+                var includeUnknowns = preferencesById[sharingUserId].SocialIncludeUnknowns;
+                if (ageRating != AgeRating.NotApplicable)
+                {
+                    queryable = queryable.Where(a => a.AppUserId != sharingUserId || a.Series.Metadata.AgeRating <= ageRating)
+                        .WhereIf(!includeUnknowns,
+                            a => a.AppUserId != sharingUserId || a.Series.Metadata.AgeRating != AgeRating.Unknown);
+                }
             }
+        }
+        else
+        {
+            queryable = queryable.Where(a => a.AppUserId == userId);
         }
 
         return queryable
@@ -323,7 +330,7 @@ public static class RestrictByAgeExtensions
 
             var ageRating = preferencesById[sharingUserId].SocialMaxAgeRating;
             var includeUnknowns = preferencesById[sharingUserId].SocialIncludeUnknowns;
-            if (ageRating == AgeRating.NotApplicable)
+            if (ageRating != AgeRating.NotApplicable)
             {
                 queryable = queryable.Where(r => r.AppUserId != sharingUserId || r.Series.Metadata.AgeRating <= ageRating)
                     .WhereIf(!includeUnknowns,
