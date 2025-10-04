@@ -48,7 +48,7 @@
         "provider-name-tooltip": "Name shown on the login screen",
 
         "defaults-title": "Defaults",
-        "defaults-requirement": "The following settings are used when a user is registered via OIDC while SyncUserSettings is turned off",
+        "defaults-requirement": "The following settings are used when a user is registered via OIDC while Sync User Settings is turned off",
         "default-include-unknowns-label": "Include unknowns",
         "default-include-unknowns-tooltip": "Include unknown age ratings",
         "default-age-restriction-label": "Age rating",
