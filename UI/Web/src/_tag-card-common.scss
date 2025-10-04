@@ -13,8 +13,11 @@
 }
 
 .tag-card:hover {
-  background-color: #3a3a3a;
+  background-color: var(--card-hover-bg-color);
   //transform: translateY(-3px); // Cool effect but has a weird background issue. ROBBIE: Fix this
+  & .tag-name, & .tag-meta {
+    color: var(--card-hover-text-color)
+  }
 }
 
 .tag-name {
