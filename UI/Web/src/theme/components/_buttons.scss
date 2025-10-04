@@ -151,7 +151,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 
 
 .btn:focus, .btn:active, .btn:active:focus {
-  box-shadow: 0 0 0 0 var(---btn-focus-boxshadow-color) !important;
+  box-shadow: 0 0 0 0 var(--btn-focus-boxshadow-color) !important;
 }
 
 
@@ -224,21 +224,22 @@ $icon_classes: fa, fa-regular, fa-solid;
         color: var(--btn#{$button_type}-fa-icon-color);
       }
 
-      &:disabled {
-        i:not(.nav).#{$icon_class} {
-          color: var(--btn#{$button_type}-disabled-fa-icon-color, var(--btn#{$button_type}-disabled-text-color));
-        }
-      }
-
       &:hover {
         i:not(.nav).#{$icon_class} {
-          color: var(--btn#{$button_type}-hover-fa-icon-color, white);
+          color: var(--btn#{$button_type}-hover-fa-icon-color);
         }
       }
     }
   }
 }
 
+button.btn:disabled{
+  @each $icon_class in $icon_classes {
+    i:not(.nav).#{$icon_class} {
+      color: var(--btn-disabled-fa-icon-color);
+    }
+  }
+}
 
 .btn-check:focus + .btn, .btn:focus {
   box-shadow: 0 0 0 0.05rem var(--btn-focus-boxshadow-color);
