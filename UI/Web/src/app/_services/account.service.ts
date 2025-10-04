@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, inject, Injectable} from '@angular/core';
+import {computed, DestroyRef, inject, Injectable} from '@angular/core';
 import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
@@ -67,6 +67,7 @@ export class AccountService {
   public readonly isAdmin = toSignal(this.isAdmin$);
 
   public readonly currentUserSignal = toSignal(this.currentUser$);
+  public readonly userId = computed(() => this.currentUserSignal()?.id);
 
   /**
    * SetTimeout handler for keeping track of refresh token call

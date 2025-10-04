@@ -37,6 +37,7 @@ import {
   ResizeMode
 } from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 import {ConfirmService} from "../../../../shared/confirm.service";
+import {AnnotationLikesComponent} from "../../_annotations/annotation-likes/annotation-likes.component";
 
 export enum AnnotationMode {
   View = 0,
@@ -59,7 +60,8 @@ const INIT_HIGHLIGHT_DELAY = 200;
     QuillViewComponent,
     DatePipe,
     UtcToLocaleDatePipe,
-    OffCanvasResizeComponent
+    OffCanvasResizeComponent,
+    AnnotationLikesComponent
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',
@@ -90,15 +92,6 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   isEditOrCreateMode: Signal<boolean>
   titleColor: Signal<string>;
   totalText!: Signal<SafeHtml>;
-
-  liked = computed(() => {
-    const userId = this.accountService.currentUserSignal()?.id;
-    const annotation = this.annotation();
-    if (!userId || !annotation) return false;
-
-    return annotation.likes.includes(userId);
-  })
-
 
   formGroup!: FormGroup<{
     note: FormControl<object>,
@@ -370,29 +363,5 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     this.annotationService.deleteAnnotation(annotation).subscribe(_ => {
       this.offcanvasService.dismiss();
     });
-  }
-
-  handleLikeChange() {
-    const annotation = this.annotation();
-    if (!annotation) return;
-
-    if (annotation.ownerUserId === this.accountService.currentUserSignal()!.id) return;
-
-    const sub$ = this.liked()
-      ? this.annotationService.unLikeAnnotations([annotation.id])
-      : this.annotationService.likeAnnotations([annotation.id]);
-
-    const newLikes = this.liked()
-      ? annotation.likes.filter(id => id !== this.accountService.currentUserSignal()!.id)
-      : [...annotation.likes, this.accountService.currentUserSignal()!.id];
-
-    sub$.pipe(
-      tap(() => {
-        this.annotation.set({
-          ...annotation,
-          likes: newLikes,
-        })
-      }),
-    ).subscribe();
   }
 }

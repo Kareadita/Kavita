@@ -1,0 +1,13 @@
+<ng-container *transloco="let t; prefix: 'annotation-card'">
+  @if (visible()) {
+    <button (click)="handleLikeChange()" class="ms-2 btn-unstyled"
+         [class.clickable]="annotation().ownerUserId !== accountService.userId()"
+         [attr.aria-label]="liked()
+         ? t('liked', {amount: annotation().likes.length})
+         : t('not-liked', {amount: annotation().likes.length})"
+    >
+      <span>{{annotation().likes.length}}</span>
+      <i class="{{liked() ? 'fas' : 'fa-regular'}} fa-thumbs-up ms-1"></i>
+    </button>
+  }
+</ng-container>

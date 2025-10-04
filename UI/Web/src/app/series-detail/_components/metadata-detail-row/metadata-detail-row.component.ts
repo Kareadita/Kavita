@@ -54,7 +54,7 @@ export class MetadataDetailRowComponent {
   @Input({required: true}) libraryType!: LibraryType;
   @Input({required: true}) mangaFormat!: MangaFormat;
   @Input() releaseYear: number | undefined;
-  @Input() size: number | undefined;
+  @Input() totalBytes: number | undefined;
 
   openGeneric(queryParamName: FilterField, filter: string | number) {
     if (queryParamName === FilterField.None) return;
