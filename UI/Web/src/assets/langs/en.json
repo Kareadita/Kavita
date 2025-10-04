@@ -2180,7 +2180,7 @@
         "next": "{{import-cbl-modal.next}}",
         "save": "{{common.save}}",
 
-        "import-description": "Upload a file you, or someone else has exported to replace or merge with your current settings.",
+        "import-description": "Upload a file you, or someone else, has exported to replace or merge with your current settings.",
         "select-files-warning": "You must upload a json file to continue",
         "invalid-file": "Failed to parse your file, check your input",
         "file-no-valid-content": "Your import did not contain any meaningful data to continue with",
