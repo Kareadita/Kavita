@@ -950,8 +950,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateWidthAndHeightCalcs();
     this.updateImageSizes();
 
+    // Refresh page styles to handle margin changes on window resize
+    this.applyPageStyles(this.pageStyles());
+
     // Attempt to restore the reading position
     this.snapScrollOnResize();
+
+    // Ensure the column1 and column2 page scroll position is correct after the page layout has been updated
+    if (this.layoutMode() !== BookPageLayoutMode.Default) {
+      // maybe there's a better way to call this rather than using timeout
+      setTimeout(() => this.refreshColumnPageScroll(), 300);
+    }
+
     afterFrame(() => {
       this.injectImageBookmarkIndicators(true);
     });
@@ -1534,6 +1544,29 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.nextPage();
         break;
     }
+  }
+
+  refreshColumnPageScroll() {
+    const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
+
+    // Calculate the target scroll position
+    const targetScroll = (currentVirtualPage - 1) * pageSize;
+    const isVertical = this.writingStyle() === WritingStyle.Vertical;
+
+    // -1 apparently goes current virtual page...
+    const scrollMethod = isVertical ? 'scrollTo' : 'scrollToX';
+    this.scrollService[scrollMethod](
+      targetScroll,
+      this.bookContentElemRef.nativeElement,
+      'auto',
+      () => {
+        this.handleScrollEvent();
+      },
+      {
+        tolerance: 3,
+        timeout: 2000
+      }
+    );
   }
 
   prevPage() {
