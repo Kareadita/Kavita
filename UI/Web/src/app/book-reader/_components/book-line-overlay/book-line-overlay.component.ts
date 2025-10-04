@@ -150,7 +150,6 @@ export class BookLineOverlayComponent implements OnInit {
     // Check if target has annotation class
     this.hasSelectedAnnotation.set((event.target as HTMLElement).classList.contains('epub-highlight'));
 
-    // Early exit conditions
     if (this.shouldSkipSelection(selection, isRightClick)) {
       if (this.selectedText !== '') {
         event.preventDefault();
