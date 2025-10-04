@@ -1057,6 +1057,56 @@ public class ScannerServiceTests: AbstractDbTest
         Assert.Contains(postLib.Series, x => x.Name == "Futoku No Guild");
     }
 
+    /// <summary>
+    /// Test that if we have 3 directories with
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_MetadataDisabled_NoCombining()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Series with slight differences No Metadata - Manga.json";
+
+        // Mark every series with metadata saying it belongs to Toradora
+        var infos = new Dictionary<string, ComicInfo>
+        {
+            {"Toradora v01.cbz", new ComicInfo()
+            {
+                Series = "Toradora",
+            }},
+            {"Toradora! v01.cbz", new ComicInfo()
+            {
+                Series = "Toradora",
+            }},
+            {"Toradora! Light Novel v01.cbz", new ComicInfo()
+            {
+                Series = "Toradora",
+            }},
+
+        };
+
+        var library = await scannerHelper.GenerateScannerData(testcase, infos);
+
+        // Disable metadata
+        library.EnableMetadata = false;
+        unitOfWork.LibraryRepository.Update(library);
+        await unitOfWork.CommitAsync();
+
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+
+        // Validate that there are 2 series
+        Assert.NotNull(postLib);
+        Assert.Equal(3, postLib.Series.Count);
+
+        Assert.Contains(postLib.Series, x => x.Name == "Toradora");
+        Assert.Contains(postLib.Series, x => x.Name == "Toradora!");
+        Assert.Contains(postLib.Series, x => x.Name == "Toradora! Light Novel");
+    }
+
     [Fact]
     public async Task ScanLibrary_SortName_NoPrefix()
     {
