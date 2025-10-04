@@ -130,7 +130,10 @@
         "want-to-read-sync-tooltip": "Permettre à Kavita d'ajouter des éléments à votre liste \"À lire\" en fonction des séries AniList et MAL de la liste \"En attente de lecture\"",
         "highlight-bar-label": "Couleur de surlignage des annotations",
         "highlight-bar-tooltip": "Tous les livres partagent ces couleurs",
-        "social-settings-title": "Paramètres sociaux"
+        "social-settings-title": "Paramètres sociaux",
+        "font-tab": "Police",
+        "colorscape-label": "Utiliser ColorScape",
+        "colorscape-tooltip": "Interrupteur général pour activer/désactiver la fonctionnalité de gradient dynamique. Prend le dessus des options des thèmes"
     },
     "user-holds": {
         "title": "Enregistrement du suivi d'activité",
@@ -469,7 +472,7 @@
     },
     "library-type-pipe": {
         "book": "Livre",
-        "comic": "Bande dessinée (Legacy)",
+        "comic": "Bande dessinée (Flexible)",
         "manga": "Manga",
         "comicVine": "Bande dessinée",
         "image": "Image",
@@ -2902,7 +2905,7 @@
         "client-id-label": "ID du client",
         "client-id-tooltip": "L'ID du client défini dans votre fournisseur OIDC, peut être n'importe quoi",
         "secret-label": "Secret du client",
-        "secret-tooltip": "Le secret tel qu'il est généré par votre fournisseur OIDC",
+        "secret-tooltip": "Le secret tel qu'il est généré par votre fournisseur OIDC, ne sera pas affiché après configuration.",
         "provision-accounts-tooltip": "Création automatique d'un nouveau compte lors de la connexion via l'OIDC s'il n'est pas possible de le faire correspondre à un compte existant",
         "other-field-required": "{{validation.other-field-required}}",
         "invalid-uri": "{{validation.invalid-uri}}",
@@ -3017,5 +3020,28 @@
     },
     "annotations-tab": {
         "title": "{{tabs.annotations-tab}}"
+    },
+    "font-manager": {
+        "add": "{{common.add}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "un fichier de police",
+        "preview-default": "Envoyez votre propre police par fichier ou url Google Font",
+        "delete": "{{common.delete}}",
+        "url-label": "Url",
+        "back": "Retour",
+        "load": "Charger",
+        "no-preview": "Cette police ne peut pas être prévisualisée. Le style par défaut du livre sera appliqué.",
+        "brown-fox": "Portez ce vieux whisky au juge blond qui fume",
+        "filter-system-fonts-label": "Filtrer les Polices Systèmes",
+        "description": "Le lecteur Epub de Kavita est livré avec quelques polices par défaut, ajoutez vos propres polices ici. Téléversez un fichier ou indiquez l'url d'une police Google Fonts. Voir le <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> pour plus d'informations.",
+        "enter-an-url-pre-title": "Entrez une {{url}}",
+        "url": "url"
+    },
+    "library-type-subtitle-pipe": {
+        "book": "Bibliothèque générique de livres.",
+        "comic": "Bibliothèque de Comics avec regroupement de volumes et recueils au sein d'une seule Série. Ne supporte pas plusieurs versions dans une même Série",
+        "manga": "Manga Japonais avec support de regoupement de volumes. Supporte aussi les images éparpillées.",
+        "comicVine": "Implémentation stricte des Comics basée sur les metadonnées Comic Vine avec intégration des outils spécialisés."
     }
 }

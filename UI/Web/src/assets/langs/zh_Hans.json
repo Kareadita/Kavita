@@ -130,7 +130,10 @@
         "want-to-read-sync-tooltip": "允许 Kavita 根据待读列表中的 AniList 和 MAL 系列将项目添加到您的想读列表中",
         "social-settings-title": "社交设置",
         "highlight-bar-label": "注释高亮显示颜色",
-        "highlight-bar-tooltip": "所有书籍都共享这些颜色"
+        "highlight-bar-tooltip": "所有书籍都共享这些颜色",
+        "colorscape-label": "使用色彩景观",
+        "colorscape-tooltip": "全局切换，用于启用/禁用动态渐变功能。将覆盖主题设置",
+        "font-tab": "字体"
     },
     "user-holds": {
         "title": "刮削暂停",
@@ -195,7 +198,8 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
-        "actions-header": "{{manage-users.actions-header}}"
+        "actions-header": "{{manage-users.actions-header}}",
+        "warning": "警告"
     },
     "edit-device-modal": {
         "title": "编辑设备",
@@ -469,7 +473,7 @@
     },
     "library-type-pipe": {
         "book": "书籍",
-        "comic": "漫画 (Legacy)",
+        "comic": "漫画 (Flexible)",
         "manga": "漫画(日漫)",
         "comicVine": "漫画",
         "image": "图片",
@@ -610,7 +614,9 @@
         "k+-unlocked-description": "欢迎来到 Kavita+！一旦您在帐户下注册了 Scrobbling 提供商，Kavita 就会根据您的进度、评分和阅读意愿生成 scrobble 事件。花点时间确保您为不想 scrobble 的任何系列设置了 scrobbling 保留。",
         "kavita+-warning": "Kavita+ 与 Kavita 是相互独立的。如果您在未取消订阅的情况下卸载 Kavita，则需要付费。",
         "cancel-label": "取消订阅",
-        "cancel-tooltip": "取消您的订阅并删除 Kavita 内的许可证。"
+        "cancel-tooltip": "取消您的订阅并删除 Kavita 内的许可证。",
+        "resend-license-email": "将许可证发送至电子邮件",
+        "resend-license-email-tooltip": "将 Kavita+ 许可证重新发送至电子邮件。许可证必须绑定到此服务器才能生效。"
     },
     "book-line-overlay": {
         "copy": "复制",
@@ -644,11 +650,12 @@
         "incognito-mode-label": "隐身模式",
         "next": "下一个",
         "previous": "上一个",
-        "go-to-page-prompt": "共有 {{totalPages}} 页。您想转到哪一页？",
+        "go-to-page-prompt": "共有 {{totalPages}} 页。您想转到哪一页？页面从 1 开始。",
         "go-to-first-page": "转到第一页",
         "page-num-label": "第 {{page}} 页",
         "completion-label": "{{percent}} 完成",
-        "force-selected-one-column": "由于空间不足以呈现两列，布局模式切换为单列"
+        "force-selected-one-column": "由于空间不足以呈现两列，布局模式切换为单列",
+        "forced-vertical-switch": "布局模式切换为双列布局，不支持垂直书写样式"
     },
     "personal-table-of-contents": {
         "no-data": "尚未添加书签",
@@ -1380,7 +1387,8 @@
         "reading-profiles": "阅读配置文件",
         "admin-mappings-import": "元数据设置",
         "admin-public-metadata": "管理元数据",
-        "admin-oidc": "OpenID 连接"
+        "admin-oidc": "OpenID 连接",
+        "font": "Epub 字体"
     },
     "collection-detail": {
         "no-data": "暂无项目。请尝试添加一个系列。",
@@ -1508,7 +1516,8 @@
         "close": "{{common.close}}",
         "person-aka-status": "匹配别名",
         "browse-genres": "浏览类型",
-        "browse-tags": "浏览标签"
+        "browse-tags": "浏览标签",
+        "all-annotations": "浏览注释"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1706,7 +1715,10 @@
         "unit-average-rating": "Kavita+ 外部评分，百分比",
         "unit-reading-progress": "百分比",
         "unit-user-rating": "0.0 - 5.0 星",
-        "unit-read-last": "从今天起"
+        "unit-read-last": "从今天起",
+        "disclaimer-highlight-slots": "使用此字段时，只会显示您自己的注释",
+        "unit-file-size": "GB, MB, KB, B",
+        "disclaimer-file-size": "文件大小必须包含单位"
     },
     "sort-field-pipe": {
         "sort-name": "排序名称",
@@ -1720,7 +1732,10 @@
         "random": "随机",
         "person-series-count": "系列数",
         "person-chapter-count": "章节数",
-        "person-name": "名称"
+        "person-name": "名称",
+        "annotation-owner": "所有者",
+        "annotation-series": "系列名称",
+        "annotation-color": "颜色"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 详细信息",
@@ -2008,7 +2023,10 @@
             "failed-to-update-username": "更新用户名失败",
             "email-in-use": "电子邮件已被其他帐户使用",
             "syncing-user": "无法从 OIDC 同步您的帐户，请联系管理员"
-        }
+        },
+        "delete-font-in-use": "字体目前至少有一位用户正在使用，无法删除",
+        "font-manual-upload": "手动上传创建字体时出现问题",
+        "font-already-in-use": "该名称的字体已经存在"
     },
     "metadata-builder": {
         "or": "匹配以下任意项",
@@ -2131,7 +2149,8 @@
         "want-to-read": "想读",
         "read-date": "阅读日期",
         "average-rating": "平均评分",
-        "read-last": "最后阅读"
+        "read-last": "最后阅读",
+        "file-size": "文件大小"
     },
     "filter-comparison-pipe": {
         "begins-with": "开始于",
@@ -2259,7 +2278,7 @@
         "volume-deleted": "卷已删除",
         "pdf-book-mode-screen-size": "屏幕对于书籍模式来说太小",
         "stack-imported": "Stack 导入",
-        "confirm-delete-theme": "删除该主题将从磁盘中删除它。您可以在删除之前从临时目录中获取它",
+        "confirm-delete-theme": "删除该主题将从磁盘中删除它。您可以在删除之前从临时目录中获取它。",
         "mal-token-required": "需要 MAL 令牌，在用户设置中设置",
         "confirm-reset-server-settings": "这会将您的设置重置为首次安装值。您确定要继续吗？",
         "bulk-covers": "刷新多个资料库的封面是一项繁重的工作，可能需要很长时间。您确定要继续吗？",
@@ -2277,7 +2296,12 @@
         "library-bound-to-reading-profile": "资料库绑定到阅读配置文件 {{name}}",
         "external-match-rate-error": "Kavita 查找 {{seriesName}} 的速度已超出范围。请过 5 分钟再试。",
         "confirm-delete-bookmark": "您确定要删除此书签吗？",
-        "confirm-delete-annotation": "您确定要删除此注释吗？"
+        "confirm-delete-annotation": "您确定要删除此注释吗？",
+        "confirm-delete-font": "移除此字体会将其从磁盘中删除。您可以在移除前从临时目录中获取它。",
+        "confirm-force-delete-font": "此字体目前正在使用中。是否要强制删除它？这将强制用户恢复使用默认字体。",
+        "font-in-use": "无法删除，因为该字体正在被一个或多个用户使用。",
+        "k+-resend-welcome-email-success": "一封电子邮件已发送至您的 Kavita+ 电子邮箱",
+        "k+-resend-welcome-email-error": "发送您的 Kavita+ 许可证时出错。这可能是由于您的帐户已失效。请联系客服。"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -2361,7 +2385,8 @@
         "set-reading-profile-tooltip": "将阅读配置文件绑定到此资料库",
         "clear-reading-profile": "清除阅读配置文件",
         "cleared-profile": "清除阅读配置文件",
-        "clear-reading-profile-tooltip": "清除此资料库的阅读配置文件"
+        "clear-reading-profile-tooltip": "清除此资料库的阅读配置文件",
+        "export": "导出"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -2811,7 +2836,9 @@
         "add-tooltip": "您的新配置文件将在更改后保存",
         "wiki-title": "wiki",
         "disable-width-override-label": "禁用宽度覆盖",
-        "disable-width-override-tooltip": "当屏幕尺寸至少等于或小于配置的断点时，防止宽度覆盖生效"
+        "disable-width-override-tooltip": "当屏幕尺寸至少等于或小于配置的断点时，防止宽度覆盖生效",
+        "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}"
     },
     "bulk-set-reading-profile-modal": {
         "title": "设置阅读配置文件",
@@ -2874,7 +2901,14 @@
         "person-chapter-count": "章节数",
         "person-series-count": "系列数",
         "person-role": "角色",
-        "person-name": "名称"
+        "person-name": "名称",
+        "average-rating": "平均评分",
+        "annotation-owner": "所有者",
+        "annotation-series": "系列名称",
+        "annotation-spoiler": "剧透",
+        "annotation-highlights": "高亮颜色",
+        "annotation-comment": "注释文本",
+        "annotation-selection": "高亮文本"
     },
     "breakpoint-pipe": {
         "mobile": "手机",
@@ -2936,7 +2970,7 @@
         "client-id-label": "客户端 ID",
         "client-id-tooltip": "您的 OIDC 提供商中设置的客户端 ID 可以是任何值",
         "secret-label": "客户端密钥",
-        "secret-tooltip": "您的 OIDC 提供商生成的密钥",
+        "secret-tooltip": "由您的 OIDC 提供商生成的密钥，设置后将不会显示",
         "provision-accounts-label": "提供商帐户",
         "provision-accounts-tooltip": "如果通过 OIDC 登录时无法与现有帐户匹配，则自动创建新帐户",
         "require-verified-email-label": "需要经过验证的电子邮件",
@@ -2989,7 +3023,9 @@
         "create-title": "创建注释",
         "create": "创建",
         "close": "{{common.close}}",
-        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
+        "edit": "编辑",
+        "delete": "删除"
     },
     "view-bookmark-drawer": {
         "title": "书签",
@@ -3016,6 +3052,49 @@
     },
     "highlight-bar": {
         "add-new-color-alt": "添加自定义颜色",
-        "slot-label": "高亮 slot {{slot}}"
+        "slot-label": "高亮 slot {{slot}}",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}"
+    },
+    "library-type-subtitle-pipe": {
+        "book": "通用图书库。",
+        "comic": "漫画库支持在同一系列内进行卷组和精装平装本管理。但同一系列内不支持多期连载。",
+        "manga": "支持卷分组的日本漫画。还能处理一些松散的图像配置。",
+        "comicVine": "基于 Comic Vine 元数据的严格漫画实现，并集成专用工具。",
+        "image": "松散的图像文件，支持有限。必须遵循基本 wiki 文档。",
+        "lightNovel": "针对轻小说进行特殊处理的图书库"
+    },
+    "quill-wrapper": {
+        "clean-tooltip": "删除所有样式"
+    },
+    "font-manager": {
+        "description": "Kavita 的 epub 阅读器自带一些字体，您可以在此处添加自己的字体。上传文件或使用 Google 字体网址。更多信息，请参阅 <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>。",
+        "enter-an-url-pre-title": "输入 {{url}}",
+        "url": "网址",
+        "add": "{{common.add}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "字体文件",
+        "preview-default": "通过文件或 Google 字体网址上传您自己的字体",
+        "delete": "{{common.delete}}",
+        "url-label": "网址",
+        "back": "返回",
+        "load": "加载",
+        "no-preview": "无法预览此字体。这将采用书中的默认样式。",
+        "brown-fox": "The quick brown fox jumps over the lazy dog",
+        "filter-system-fonts-label": "筛选系统字体"
+    },
+    "epub-page-calc-method-pipe": {
+        "default": "默认",
+        "calc1": "计算 1"
+    },
+    "all-annotations": {
+        "title": "全部注释",
+        "filter": {
+            "true": "True",
+            "false": "False"
+        },
+        "annotations-count": "{{num}} 注释",
+        "export": "导出"
     }
 }

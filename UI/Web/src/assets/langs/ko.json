@@ -130,7 +130,10 @@
         "kavitaplus-settings-title": "Kavita+",
         "social-settings-title": "소셜 설정",
         "highlight-bar-label": "주석 하이라이트 색상",
-        "highlight-bar-tooltip": "이 색상은 모든 책에 공유됩니다"
+        "highlight-bar-tooltip": "이 색상은 모든 책에 공유됩니다",
+        "font-tab": "글꼴",
+        "colorscape-label": "ColorScape 사용",
+        "colorscape-tooltip": "다이나믹 그래디언트 기능을 활성화/비활성화하는 전역 토글입니다. 테마 설정을 덮어씁니다"
     },
     "user-holds": {
         "title": "스크러블 홀드",
@@ -195,7 +198,8 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
-        "actions-header": "{{manage-users.actions-header}}"
+        "actions-header": "{{manage-users.actions-header}}",
+        "warning": "경고"
     },
     "edit-device-modal": {
         "title": "디바이스 편집",
@@ -469,7 +473,7 @@
     },
     "library-type-pipe": {
         "book": "책",
-        "comic": "만화 (Legacy)",
+        "comic": "만화 (Flexible)",
         "manga": "만화(Manga)",
         "comicVine": "코믹(Comic)",
         "image": "이미지",
@@ -477,9 +481,9 @@
     },
     "age-rating-pipe": {
         "unknown": "알 수 없음",
-        "early-childhood": "유아기",
+        "early-childhood": "어린이",
         "adults-only": "19세 미만 구독 불가",
-        "everyone": "모두",
+        "everyone": "전체 이용가",
         "everyone-10-plus": "10세 이상",
         "g": "G",
         "kids-to-adults": "모든 연령",
@@ -610,7 +614,9 @@
         "invalid-tooltip": "무효",
         "kavita+-warning": "Kavita+는 Kavita와 분리되어 있습니다. 구독을 취소하지 않고 Kavita를 삭제할 경우 요금이 부과됩니다.",
         "cancel-label": "구독 취소",
-        "cancel-tooltip": "구독을 취소하고 Kavita에서 라이선스를 제거합니다."
+        "cancel-tooltip": "구독을 취소하고 Kavita에서 라이선스를 제거합니다.",
+        "resend-license-email": "라이선스를 이메일로 보내기",
+        "resend-license-email-tooltip": "Kavita+ 라이선스를 이메일로 재발송합니다. 라이선스 동작을 위해서는 이 서버에 바인딩되어야 합니다."
     },
     "book-line-overlay": {
         "copy": "복사",
@@ -644,11 +650,12 @@
         "incognito-mode-label": "시크릿 모드",
         "next": "다음",
         "previous": "이전",
-        "go-to-page-prompt": "{{totalPages}} 페이지가 있습니다. 어느 페이지로 이동하시겠습니까?",
+        "go-to-page-prompt": "{{totalPages}} 페이지가 있습니다. 어느 페이지로 이동하시겠습니까? 페이지는 1부터 시작합니다.",
         "go-to-first-page": "첫 페이지로",
         "page-num-label": "{{page}} 페이지",
         "completion-label": "{{percent}} 완료",
-        "force-selected-one-column": "2개 열을 표기할 공간이 충분하지 않아 레이아웃 모드가 1개 열로 전환되었습니다"
+        "force-selected-one-column": "2개 열을 표기할 공간이 충분하지 않아 레이아웃 모드가 1개 열로 전환되었습니다",
+        "forced-vertical-switch": "2열 레이아웃이 세로쓰기 스타일과 호환되지 않아 레이아웃 모드가 전환되었습니다"
     },
     "personal-table-of-contents": {
         "no-data": "아직 북마크된 항목 없음",
@@ -741,7 +748,7 @@
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
         "ongoing": "{{publication-status-pipe.ongoing}}",
-        "release-date-title": "출시",
+        "release-date-title": "출시일",
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "pages-count": "{{num}} 페이지",
@@ -751,7 +758,7 @@
         "time-left-alt": "남은 시간",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
         "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
-        "publication-status-title": "출판",
+        "publication-status-title": "출판사",
         "publication-status-tooltip": "출판현황",
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
@@ -1380,7 +1387,8 @@
         "reading-profiles": "읽기 프로필",
         "admin-mappings-import": "메타데이터 설정",
         "admin-public-metadata": "메타데이터 관리",
-        "admin-oidc": "OpenID 연결"
+        "admin-oidc": "OpenID 연결",
+        "font": "EPUB 글꼴"
     },
     "collection-detail": {
         "no-data": "항목이 없습니다. 시리즈를 추가해 보세요.",
@@ -1508,7 +1516,8 @@
         "close": "{{common.close}}",
         "browse-genres": "장르 탐색",
         "person-aka-status": "별명과 매칭",
-        "browse-tags": "태그 탐색"
+        "browse-tags": "태그 탐색",
+        "all-annotations": "주석 탐색"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1706,7 +1715,10 @@
         "unit-average-rating": "Kavita+ 외부 평점, 백분율",
         "unit-reading-progress": "퍼센트",
         "unit-user-rating": "0.0 - 5.0 별",
-        "unit-read-last": "오늘부터의 일수"
+        "unit-read-last": "오늘부터의 일수",
+        "disclaimer-highlight-slots": "이 필드를 사용할 경우, 사용자 고유의 주석만 표시합니다",
+        "unit-file-size": "GB, MB, KB, B",
+        "disclaimer-file-size": "파일 크기는 단위를 포함해야 합니다"
     },
     "sort-field-pipe": {
         "sort-name": "정렬 이름",
@@ -1720,7 +1732,10 @@
         "random": "랜덤",
         "person-name": "이름",
         "person-series-count": "시리즈 개수",
-        "person-chapter-count": "챕터 개수"
+        "person-chapter-count": "챕터 개수",
+        "annotation-owner": "소유자",
+        "annotation-series": "시리즈 이름",
+        "annotation-color": "색상"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 세부정보",
@@ -2008,7 +2023,10 @@
             "failed-to-update-username": "사용자 이름 업데이트 실패",
             "email-in-use": "이 이메일 주소는 다른 계정에서 사용 중입니다",
             "syncing-user": "OIDC를 통한 계정 동기화 실패. 관리자에게 문의해 주십시오"
-        }
+        },
+        "delete-font-in-use": "최소 한 명의 사용자가 글꼴을 사용하고 있어 삭제할 수 없습니다",
+        "font-manual-upload": "수동 업로드 글꼴 생성 과정에서 문제가 발생했습니다",
+        "font-already-in-use": "같은 이름의 글꼴이 이미 존재합니다"
     },
     "metadata-builder": {
         "or": "다음 중 하나와 일치",
@@ -2131,7 +2149,8 @@
         "want-to-read": "읽고 싶어요",
         "read-date": "읽은 날짜",
         "average-rating": "평균 평점",
-        "read-last": "마지막으로 읽기"
+        "read-last": "마지막으로 읽기",
+        "file-size": "파일 크기"
     },
     "filter-comparison-pipe": {
         "begins-with": "시작",
@@ -2259,7 +2278,7 @@
         "volume-deleted": "볼륨이 삭제되었습니다",
         "pdf-book-mode-screen-size": "책 모드에 비해 화면이 너무 작음",
         "stack-imported": "가져온 스택",
-        "confirm-delete-theme": "이 테마를 제거하면 디스크에서 삭제됩니다. 제거하기 전에 임시 디렉토리에서 가져올 수 있습니다",
+        "confirm-delete-theme": "이 테마를 제거하면 디스크에서 삭제됩니다. 제거하기 전에 임시 디렉토리에서 가져올 수 있습니다.",
         "mal-token-required": "MAL 토큰이 필요합니다. 사용자 설정에서 설정하세요",
         "confirm-reset-server-settings": "설정이 최초 설치 값으로 재설정됩니다. 계속하시겠습니까?",
         "must-select-library": "최소한 하나의 라이브러리를 선택해야 합니다",
@@ -2277,7 +2296,12 @@
         "library-bound-to-reading-profile": "{{name}} 읽기 프로필과 연결된 라이브러리",
         "external-match-rate-error": "{{seriesName}}을(를) 검색하던 도중 연결이 끊겼습니다. 5분 정도 후 다시 시도해 주십시오.",
         "confirm-delete-bookmark": "정말 이 북마크를 삭제하시겠습니까?",
-        "confirm-delete-annotation": "정말 이 주석을 삭제하시겠습니까?"
+        "confirm-delete-annotation": "정말 이 주석을 삭제하시겠습니까?",
+        "confirm-delete-font": "이 글꼴을 제거하면 디스크에서 삭제됩니다. 제거하기 전에 임시 디렉토리에서 가져올 수 있습니다.",
+        "confirm-force-delete-font": "이 글꼴은 현재 사용 중입니다. 강제로 삭제하시겠습니까? 기본 글꼴로 강제 전환됩니다.",
+        "font-in-use": "한 명 이상의 사용자가 이 글꼴을 사용하고 있어 삭제할 수 없습니다.",
+        "k+-resend-welcome-email-success": "당신의 Kavita+ 이메일로 메일이 전송되었습니다",
+        "k+-resend-welcome-email-error": "Kavita+ 라이선스 발송 중 오류가 발생했습니다. 더 이상 활성 계정이 없기 때문일 수도 있습니다. 지원 팀에 문의해 주십시오."
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -2350,8 +2374,8 @@
         "back-to": "{{action}}으로 돌아가기",
         "title": "작업",
         "copy-settings": "설정 복사하기",
-        "match": "일치",
-        "match-tooltip": "Kavita+에서 시리즈를 수동으로 일치시키기",
+        "match": "매칭",
+        "match-tooltip": "Kavita+에서 시리즈를 수동으로 매칭시키기",
         "reorder": "정렬 변경",
         "rename": "이름 변경",
         "rename-tooltip": "스마트 필터 이름 변경",
@@ -2361,7 +2385,8 @@
         "set-reading-profile-tooltip": "읽기 프로필을 이 라이브러리에 연결",
         "clear-reading-profile": "읽기 프로필 해제",
         "clear-reading-profile-tooltip": "이 라이브러리의 읽기 프로필 해제",
-        "cleared-profile": "연결 해제된 읽기 프로필"
+        "cleared-profile": "연결 해제된 읽기 프로필",
+        "export": "내보내기"
     },
     "preferences": {
         "left-to-right": "왼쪽에서 오른쪽",
@@ -2413,7 +2438,7 @@
         "logs": "로그"
     },
     "tabs": {
-        "details-tab": "세부",
+        "details-tab": "세부정보",
         "reviews-tab": "리뷰",
         "storyline-tab": "줄거리",
         "books-tab": "책",
@@ -2575,9 +2600,9 @@
         "match-alt": "일치 {{seriesName}}",
         "status-header": "상태",
         "series-name-header": "시리즈",
-        "blacklist-status-label": "수동 일치 필요",
+        "blacklist-status-label": "수동 매칭 필요",
         "all-status-label": "모두",
-        "matched-state-label": "일치 상태",
+        "matched-state-label": "매칭 상태",
         "library-type": "라이브러리 유형"
     },
     "manage-user-tokens": {
@@ -2660,19 +2685,19 @@
         "search": "검색",
         "dont-match-tooltip": "이 시리즈를 매칭 및 스크로블링에서 제외합니다",
         "save": "{{common.save}}",
-        "title": "일치 {{seriesName}}",
+        "title": "{{seriesName}} 일치",
         "dont-match-label": "일치하지 않음",
         "description": "Kavita+ 메타데이터를 다시 연결하고 스크로블 이벤트를 재생성하려면 매치를 선택하세요. Don't Match를 사용하면 Kavita가 메타데이터를 일치시키고 스크로블링하는 것을 제한할 수 있습니다.",
         "close": "{{common.close}}",
         "query-label": "쿼리",
-        "no-results": "일치하는 항목을 찾을 수 없습니다. 지원되는 공급자의 URL을 추가하고 다시 시도해 보세요.",
+        "no-results": "동일한 항목을 찾을 수 없습니다. 지원되는 공급자의 URL을 추가하고 다시 시도해 보세요.",
         "query-tooltip": "시리즈 이름, AniList/MyAnimeList/ComicBookRoundup URL을 입력하세요. URL은 직접 조회를 사용합니다."
     },
     "match-series-result-item": {
         "volume-count": "{{server-stats.volume-count}}",
         "details": "페이지 보기",
         "updating-metadata-status": "메타데이터 업데이트",
-        "releasing": "출시",
+        "releasing": "출시일",
         "chapter-count": "{{common.chapter-count}}",
         "issue-count": "{{common.issue-count}}"
     },
@@ -2793,7 +2818,7 @@
         "auto-close-menu-tooltip": "메뉴가 자동으로 닫힙니다",
         "show-screen-hints-label": "화면에 힌트 표시",
         "show-screen-hints-tooltip": "페이지 분할 영역과 방향을 이해하는 것을 돕는 오버레이를 표시합니다",
-        "emulate-comic-book-label": "만화책 에뮬레이트",
+        "emulate-comic-book-label": "만화책 에뮬레이션",
         "emulate-comic-book-tooltip": "책으로 읽는 것을 모사하기 위해 그림자 효과를 적용합니다",
         "swipe-to-paginate-label": "스와이프로 페이지 넘기기",
         "swipe-to-paginate-tooltip": "스와이프로 이전 또는 다음 페이지로 이동합니다",
@@ -2833,7 +2858,9 @@
         "pdf-theme-tooltip": "리더의 색상 테마를 설정합니다",
         "reading-profile-series-settings-title": "시리즈",
         "reading-profile-library-settings-title": "라이브러리",
-        "delete": "{{common.delete}}"
+        "delete": "{{common.delete}}",
+        "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}"
     },
     "browse-genres": {
         "series-count": "{{common.series-count}}",
@@ -2874,7 +2901,14 @@
         "person-role": "역할",
         "person-name": "이름",
         "person-series-count": "시리즈 수",
-        "person-chapter-count": "챕터 수"
+        "person-chapter-count": "챕터 수",
+        "average-rating": "평균 평점",
+        "annotation-owner": "소유자",
+        "annotation-series": "시리즈 이름",
+        "annotation-spoiler": "스포일러",
+        "annotation-highlights": "강조 색상",
+        "annotation-comment": "주석 텍스트",
+        "annotation-selection": "강조 텍스트"
     },
     "breakpoint-pipe": {
         "never": "없음",
@@ -2936,7 +2970,7 @@
         "client-id-label": "클라이언트 ID",
         "client-id-tooltip": "OIDC 제공자에 ClientID를 설정합니다. 어떤 제공자도 사용할 수 있습니다",
         "secret-label": "클라이언트 비밀번호",
-        "secret-tooltip": "OIDC 제공자를 통해 생성된 비밀번호",
+        "secret-tooltip": "OIDC 제공자를 통해 생성된 비밀번호, 이후에는 표시되지 않습니다",
         "provision-accounts-label": "예비 계정",
         "provision-accounts-tooltip": "OIDC를 통해 로그인할 때 기존 계정과 일치하지 않을 경우 자동으로 새로운 계정을 생성합니다",
         "require-verified-email-label": "인증된 이메일이 필요합니다",
@@ -2989,7 +3023,9 @@
         "create-title": "주석 생성",
         "create": "생성",
         "close": "{{common.close}}",
-        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
+        "edit": "편집",
+        "delete": "삭제"
     },
     "view-bookmark-drawer": {
         "title": "북마크",
@@ -3016,6 +3052,49 @@
     },
     "highlight-bar": {
         "add-new-color-alt": "커스텀 색상 추가",
-        "slot-label": "{{slot}} 슬롯 하이라이트"
+        "slot-label": "{{slot}} 슬롯 하이라이트",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}"
+    },
+    "font-manager": {
+        "description": "Kavita의 EPUB 리더에는 몇 가지 기본 글꼴이 포함되어 있습니다. 글꼴 파일을 업로드하거나 Google 글꼴 URL을 사용하십시오. 자세한 내용은 <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>위키</a>를 참고하십시오.",
+        "enter-an-url-pre-title": "{{url}}을(를) 입력하십시오",
+        "url": "URL",
+        "add": "{{common.add}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "글꼴 파일",
+        "preview-default": "당신의 글꼴을 파일 또는 Google 글꼴 URL로 업로드하십시오",
+        "delete": "{{common.delete}}",
+        "url-label": "URL",
+        "back": "뒤로",
+        "load": "불러오기",
+        "no-preview": "이 글꼴은 미리보기할 수 없습니다. 책의 기본 스타일로 적용됩니다.",
+        "brown-fox": "다람쥐 헌 쳇바퀴에 타고파",
+        "filter-system-fonts-label": "시스템 글꼴 필터"
+    },
+    "library-type-subtitle-pipe": {
+        "book": "범용 도서 라이브러리.",
+        "comic": "단일 시리즈 내에서 권(Volume) 단위 묶음 또는 단행본(trade paperback)을 지원하는 만화 라이브러리. 동일 시리즈 내에서 여러 번의 재출간은 지원하지 않습니다.",
+        "manga": "권(volume)별 그룹화 기능을 지원하는 일본 만화. 일부 압축되지 않은 이미지 구성도 처리합니다.",
+        "comicVine": "Comic Vine 메타데이터 기반 엄격한 만화 구현 및 특화 도구와의 통합.",
+        "image": "제한적으로 지원하는 압축되지 않은 이미지 파일. 위키 문서를 대부분 준수해야 합니다.",
+        "lightNovel": "라이트 노벨에 최적화되어 특별히 관리하는 도서 라이브러리"
+    },
+    "quill-wrapper": {
+        "clean-tooltip": "모든 스타일 제거"
+    },
+    "epub-page-calc-method-pipe": {
+        "default": "기본값",
+        "calc1": "Calc 1"
+    },
+    "all-annotations": {
+        "title": "모든 주석",
+        "filter": {
+            "true": "참",
+            "false": "거짓"
+        },
+        "annotations-count": "{{num}}개 주석",
+        "export": "내보내기"
     }
 }

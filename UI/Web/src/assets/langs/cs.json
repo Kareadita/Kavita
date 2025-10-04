@@ -130,7 +130,10 @@
         "want-to-read-sync-tooltip": "Povolit Kavitu přidávat položky do seznamu „Chci číst“ na základě seriálů AniList a MAL v seznamu „Čeká na přečtení“",
         "social-settings-title": "Nastavení sociálních sítí",
         "highlight-bar-label": "Anotace zvýrazňují barvy",
-        "highlight-bar-tooltip": "Tyto barvy jsou společné pro všechny knihy"
+        "highlight-bar-tooltip": "Tyto barvy jsou společné pro všechny knihy",
+        "colorscape-label": "Použít ColorScape",
+        "colorscape-tooltip": "Globální přepínač pro zapnutí/vypnutí funkce dynamického přechodu. Přepíše nastavení motivu",
+        "font-tab": "Písmo"
     },
     "user-holds": {
         "title": "Scrobble drží",
@@ -195,7 +198,8 @@
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
         "actions-header": "{{manage-users.actions-header}}",
-        "name-label": "Název"
+        "name-label": "Název",
+        "warning": "Varování"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -469,7 +473,7 @@
     },
     "library-type-pipe": {
         "book": "Kniha",
-        "comic": "Komiks (Odkaz)",
+        "comic": "Komiks (flexibilní)",
         "manga": "Manga",
         "image": "Obrázek",
         "comicVine": "Komiks",
@@ -610,7 +614,9 @@
         "kavita+-requirement": "Aplikace Kavita+ je navržena tak, aby fungovala pouze s nejnovějšími 3 verzemi. Cokoli mimo tuto verzi může být nefunkční.",
         "kavita+-warning": "Kavita+ je samostatná od Kavity. Pokud odinstalujete Kavitu bez odhlášení, bude vám účtované předplatné.",
         "cancel-label": "Zrušit předplatné",
-        "cancel-tooltip": "Zrušte předplatné a odstraňte licenci v aplikaci Kavita."
+        "cancel-tooltip": "Zrušte předplatné a odstraňte licenci v aplikaci Kavita.",
+        "resend-license-email": "Odeslat licenci na e-mail",
+        "resend-license-email-tooltip": "Znovu odeslat licenci Kavita+ na e-mail. Licence musí být vázána na tento server, aby fungovala."
     },
     "book-line-overlay": {
         "copy": "Kopírujte",
@@ -644,11 +650,12 @@
         "incognito-mode-label": "Režim inkognito",
         "next": "Další",
         "previous": "Předchozí",
-        "go-to-page-prompt": "Existuje {{totalPages}} stránek. Na kterou stránku chcete přejít?",
+        "go-to-page-prompt": "Je zde {{totalPages}} stránek. Na kterou stránku chcete přejít? Stránky začínají od 1.",
         "go-to-first-page": "Přejít na první stránku",
         "page-num-label": "Strana {{page}}",
         "completion-label": "{{percent}} dokončeno",
-        "force-selected-one-column": "Režim rozvržení přepnut na jeden sloupec z důvodu nedostatečného prostoru pro vykreslení dvou sloupců"
+        "force-selected-one-column": "Režim rozvržení přepnut na jeden sloupec z důvodu nedostatečného prostoru pro vykreslení dvou sloupců",
+        "forced-vertical-switch": "Režim rozvržení přepnutý, protože rozvržení do dvou sloupců nefunguje s vertikálním stylem psaní"
     },
     "personal-table-of-contents": {
         "no-data": "V záložkách zatím nic není",
@@ -1328,7 +1335,8 @@
         "reading-profiles": "Profily čtení",
         "admin-oidc": "OpenID Connect",
         "admin-mappings-import": "Nastavení Metadat",
-        "admin-public-metadata": "Správa metadat"
+        "admin-public-metadata": "Správa metadat",
+        "font": "Písma Epub"
     },
     "collection-detail": {
         "item-count": "{{common.item-count}}",
@@ -1446,7 +1454,8 @@
         "announcements": "Oznámení",
         "person-aka-status": "Shoduje se s aliasem",
         "browse-tags": "Procházet štítky",
-        "browse-genres": "Procházet žánry"
+        "browse-genres": "Procházet žánry",
+        "all-annotations": "Procházet poznámky"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1606,7 +1615,10 @@
         "unit-average-rating": "Externí hodnocení Kavita+, procenta",
         "unit-reading-progress": "Procenta",
         "unit-reading-date": "Datum",
-        "unit-read-last": "Dny od DNEŠKA"
+        "unit-read-last": "Dny od DNEŠKA",
+        "disclaimer-highlight-slots": "Při použití tohoto pole se zobrazí pouze vaše vlastní poznámky",
+        "unit-file-size": "GB, MB, KB, B",
+        "disclaimer-file-size": "Velikost souboru musí zahrnovat jednotku"
     },
     "edit-series-modal": {
         "general-tab": "{{tabs.general-tab}}",
@@ -1931,7 +1943,8 @@
         "file-path": "Cesta k souboru",
         "collection-tags": "Štítky sbírky",
         "colorist": "Kolorista",
-        "path": "Cesta"
+        "path": "Cesta",
+        "file-size": "Velikost souboru"
     },
     "actionable": {
         "clear": "{{common.clear}}",
@@ -2008,7 +2021,8 @@
         "set-reading-profile-tooltip": "Připojit profil čtení k této knihovně",
         "clear-reading-profile": "Vymazat profil čtení",
         "clear-reading-profile-tooltip": "Vymazat profil čtení pro tuto knihovnu",
-        "cleared-profile": "Vyčištěný profil čtení"
+        "cleared-profile": "Vyčištěný profil čtení",
+        "export": "Exportovat"
     },
     "changelog-update-item": {
         "changed": "Změněno",
@@ -2158,7 +2172,10 @@
         "average-rating": "Průměrné hodnocení",
         "person-name": "Jméno",
         "person-series-count": "Počet sérií",
-        "person-chapter-count": "Počet kapitol"
+        "person-chapter-count": "Počet kapitol",
+        "annotation-owner": "Vlastník",
+        "annotation-series": "Název série",
+        "annotation-color": "Barva"
     },
     "edit-person-modal": {
         "name-label": "{{edit-series-modal.name-label}}",
@@ -2220,7 +2237,10 @@
             "failed-to-update-username": "Nepodařilo se aktualizovat uživatelské jméno",
             "email-in-use": "E-mail již používá jiný účet",
             "syncing-user": "Synchronizace účtu z OIDC se nezdařila, kontaktujte správce"
-        }
+        },
+        "delete-font-in-use": "Font je momentálně používán alespoň jedním uživatelem, nelze smazat",
+        "font-manual-upload": "Při ručním nahrávání písma došlo k problému",
+        "font-already-in-use": "Písmo s tímto názvem již existuje"
     },
     "cover-image-size": {
         "xlarge": "Extra velké (1265x1795)",
@@ -2465,7 +2485,7 @@
         "confirm-delete-volume": "Opravdu chcete tento svazek odstranit? Soubory na disku se tím nezmění.",
         "chapter-deleted": "Kapitola odstraněna",
         "volume-deleted": "Svazek odstraněn",
-        "confirm-delete-theme": "Odstraněním tohoto motivu dojde k jeho odstranění z disku. Před odstraněním jej můžete vzít z dočasného adresáře",
+        "confirm-delete-theme": "Odstraněním tohoto motivu dojde k jeho odstranění z disku. Před odstraněním jej můžete vzít z dočasného adresáře.",
         "user-deleted": "{{user}} byl smazán",
         "click-email-link": "Klikněte na tento odkaz a potvrďte svůj e-mail. Abyste se mohli přihlásit, je nutné potvrzení.",
         "reading-lists-deleted": "Seznamy čtení odstraněny",
@@ -2489,7 +2509,12 @@
         "library-bound-to-reading-profile": "Knihovna vázaná na čtenářský profil {{name}}",
         "external-match-rate-error": "Kavita vyčerpala limit pro vyhledávání {{seriesName}}. Zkuste to znovu za 5 minut.",
         "confirm-delete-bookmark": "Opravdu chcete odstranit tuto záložku?",
-        "confirm-delete-annotation": "Opravdu chcete tuto poznámku smazat?"
+        "confirm-delete-annotation": "Opravdu chcete tuto poznámku smazat?",
+        "confirm-delete-font": "Odstraněním tohoto fontu dojde k jeho smazání z disku. Před odstraněním si jej můžete stáhnout z dočasného adresáře.",
+        "confirm-force-delete-font": "Toto písmo je momentálně používáno. Chcete jej vynutit smazat? Tím se uživatelé vrátí k výchozímu písmu.",
+        "font-in-use": "Nelze smazat, protože písmo je používáno jedním nebo více uživateli.",
+        "k+-resend-welcome-email-success": "Na vaši e-mailovou adresu Kavita+ byl odeslán e-mail",
+        "k+-resend-welcome-email-error": "Při odesílání licence Kavita+ došlo k chybě. Může to být způsobeno tím, že již nemáte aktivní účet. Obraťte se na podporu."
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
@@ -2811,7 +2836,9 @@
         "reading-profile-library-settings-title": "Knihovna",
         "wiki-title": "wiki",
         "disable-width-override-label": "Zakázat přepsání šířky",
-        "disable-width-override-tooltip": "Zabraňte tomu, aby se přepsání šířky projevilo, pokud je vaše obrazovka alespoň v konfigurovaném bodě zlomu nebo menší"
+        "disable-width-override-tooltip": "Zabraňte tomu, aby se přepsání šířky projevilo, pokud je vaše obrazovka alespoň v konfigurovaném bodě zlomu nebo menší",
+        "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}"
     },
     "bulk-set-reading-profile-modal": {
         "title": "Nastavit profil čtení",
@@ -2874,7 +2901,14 @@
         "person-name": "Jméno",
         "person-series-count": "Počet sérií",
         "person-role": "Role",
-        "person-chapter-count": "Počet kapitol"
+        "person-chapter-count": "Počet kapitol",
+        "average-rating": "Průměrné hodnocení",
+        "annotation-owner": "Vlastník",
+        "annotation-series": "Název série",
+        "annotation-spoiler": "Spoiler",
+        "annotation-highlights": "Barva zvýraznění",
+        "annotation-comment": "Anotace textu",
+        "annotation-selection": "Zvýraznit text"
     },
     "breakpoint-pipe": {
         "never": "Nikdy",
@@ -2904,7 +2938,7 @@
         "client-id-label": "ID klienta",
         "client-id-tooltip": "ID klienta nastavené ve vašem poskytovateli OIDC může být libovolné",
         "secret-label": "Tajný klíč klienta",
-        "secret-tooltip": "Tajný klíč vygenerovaný vaším poskytovatelem OIDC",
+        "secret-tooltip": "Tajný klíč vygenerovaný vaším poskytovatelem OIDC se po nastavení nezobrazí",
         "provision-accounts-label": "Rezervní účty",
         "provision-accounts-tooltip": "Při přihlášení přes OIDC automaticky vytvořte nový účet, pokud jej nelze přiřadit k žádnému existujícímu účtu",
         "require-verified-email-label": "Vyžadovat ověřené e-maily",
@@ -2989,7 +3023,9 @@
         "create-title": "Vytvořit poznámku",
         "create": "Vytvořit",
         "close": "{{common.close}}",
-        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
+        "edit": "Upravit",
+        "delete": "Odstranit"
     },
     "view-bookmark-drawer": {
         "title": "Záložky",
@@ -3016,6 +3052,49 @@
     },
     "highlight-bar": {
         "add-new-color-alt": "Přidat vlastní barvu",
-        "slot-label": "Zvýraznit slot {{slot}}"
+        "slot-label": "Zvýraznit slot {{slot}}",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}"
+    },
+    "library-type-subtitle-pipe": {
+        "book": "Knihovna pro všeobecné účely.",
+        "comic": "Knihovna komiksů s podporou seskupování svazků a brožovaných vydání v rámci jedné série. Nepodporuje více vydání v jedné sérii.",
+        "manga": "Japonské komiksy s podporou seskupování svazků. Zvládá také některé volné konfigurace obrázků.",
+        "comicVine": "Přísná implementace komiksů na základě metadat Comic Vine s integrací specializovaných nástrojů.",
+        "image": "Volné obrazové soubory s omezenou podporou. Musí se v zásadě řídit dokumentací wiki.",
+        "lightNovel": "Knihovna knih se speciálním zpracováním optimalizovaným pro lehké romány"
+    },
+    "quill-wrapper": {
+        "clean-tooltip": "Odebrat všechny styly"
+    },
+    "font-manager": {
+        "description": "Čtečka epub Kavita obsahuje několik vestavěných fontů, zde můžete přidat své vlastní fonty. Nahrajte soubor nebo použijte adresu URL fontů Google. Další informace najdete na <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>.",
+        "enter-an-url-pre-title": "Zadejte {{url}}",
+        "url": "url",
+        "add": "{{common.add}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "soubor písma",
+        "preview-default": "Nahrajte vlastní písmo prostřednictvím souboru nebo adresy URL Google Font",
+        "delete": "{{common.delete}}",
+        "url-label": "Url",
+        "back": "Zpět",
+        "load": "Načíst",
+        "no-preview": "Toto písmo nelze zobrazit v náhledu. Bude převzat výchozí styl z knihy.",
+        "brown-fox": "Rychlá hnědá liška přeskočí líného psa",
+        "filter-system-fonts-label": "Filtrování systémových písem"
+    },
+    "epub-page-calc-method-pipe": {
+        "default": "Výchozí",
+        "calc1": "Calc 1"
+    },
+    "all-annotations": {
+        "title": "Všechny poznámky",
+        "filter": {
+            "true": "Pravda",
+            "false": "Nepravda"
+        },
+        "annotations-count": "{{num}} poznámek",
+        "export": "Export"
     }
 }

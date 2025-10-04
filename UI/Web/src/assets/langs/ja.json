@@ -5,7 +5,8 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "パスワードをお忘れですか?",
-        "submit": "サインイン"
+        "submit": "サインイン",
+        "oidc": "OpenID Connect"
     },
     "dashboard": {
         "no-libraries": "まだライブラリのセットアップはありません。 作成する",
@@ -2130,7 +2131,9 @@
     "review-modal": {
         "title": "レビューを編集",
         "review-label": "レビュー",
-        "min-length": "レビューの記入は最低 {{count}} 文字以上が必要です"
+        "min-length": "レビューの記入は最低 {{count}} 文字以上が必要です",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
     },
     "edit-person-modal": {
         "invalid-asin": "ASINは有効なISBN-10またはISBN-13形式である必要があります"
@@ -2138,6 +2141,54 @@
     "manage-oidc-connect": {
         "notice": "お知らせ",
         "provider-title": "提供者",
-        "require-verified-email-label": "認証されたEメールを要求"
+        "require-verified-email-label": "認証されたEメールを要求",
+        "save-success": "OIDC設定を正常に更新しました。",
+        "restart-required": "認証局またはクライアントIDを変更すると、Kavitaを手動で再起動しないと反映されません。",
+        "provider-tooltip": "プロバイダー設定は手動で「保存」をクリックする必要があります。Kavitaは機密クライアントとして設定され、リダイレクトURLが必要です。詳細は<a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>を参照してください。",
+        "manual-save-label": "プロバイダー設定の変更には手動での保存が必要です。",
+        "authority-label": "認証局",
+        "authority-tooltip": "OIDCプロバイダーのURLです。.well-known/openid-configuration のパスは含めないでください。",
+        "client-id-label": "クライアントID",
+        "client-id-tooltip": "OIDCプロバイダーで設定されたクライアントIDです。任意の値で構いません。",
+        "secret-label": "クライアントシークレット",
+        "secret-tooltip": "OIDCプロバイダーによって生成されたシークレットです。設定後は表示されません。",
+        "provision-accounts-label": "アカウントの自動作成",
+        "provision-accounts-tooltip": "OIDC経由でログインした際、既存のアカウントと一致しない場合に新しいアカウントを自動作成します。",
+        "require-verified-email-tooltip": "新しいアカウント作成時または既存アカウントとの照合時にメール認証が必要です。新規作成されたアカウントに認証済みメールがある場合、Kavita側でも自動的に認証済みとなります。",
+        "sync-user-settings-label": "OIDCの役割とユーザー設定を同期する。",
+        "sync-user-settings-tooltip": "OIDC経由で作成されたユーザーは、役割、ライブラリへのアクセス、年齢制限など、IDプロバイダーによって完全に管理されます。このオプションが無効の場合、アカウント作成後にユーザーはどのコンテンツにもアクセスできなくなります。詳細はドキュメントを参照してください。",
+        "auto-login-label": "自動ログイン",
+        "auto-login-tooltip": "ログイン画面を開いた際に、OIDCプロバイダーに自動的にリダイレクトします。",
+        "disable-password-authentication-label": "パスワード認証を無効にする",
+        "disable-password-authentication-tooltip": "管理者の役割を持つユーザーは、この制限を回避できます。",
+        "provider-name-label": "プロバイダー名",
+        "provider-name-tooltip": "ログイン画面に表示される名前",
+        "defaults-title": "デフォルト設定",
+        "defaults-requirement": "以下の設定は、「ユーザー設定の同期」が無効の状態でOIDC経由でユーザーが登録された場合に使用されます。",
+        "default-include-unknowns-label": "不明な年齢制限を含める",
+        "default-include-unknowns-tooltip": "不明な年齢評価を含める",
+        "default-age-restriction-label": "年齢制限",
+        "default-age-restriction-tooltip": "新規ユーザーに表示される最大の年齢制限",
+        "advanced-title": "詳細設定",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "advanced-tooltip": "これらのオプションは、影響を理解している場合にのみ変更してください。",
+        "roles-prefix-label": "ロールのプレフィックス",
+        "roles-prefix-tooltip": "Kavitaは、このプレフィックスで始まる役割のみを考慮します。",
+        "roles-claim-label": "ロールのクレーム",
+        "roles-claim-tooltip": "Kavitaが役割を抽出するために使用するクレームです。空白のままにするとデフォルトが使用されます。",
+        "custom-scopes-label": "カスタムスコープ",
+        "save": "{{common.save}}",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}"
+    },
+    "oidc": {
+        "title": "OIDC Callback",
+        "login": "ログイン画面に戻る",
+        "error-loading-info": "OIDC情報の読み込み中にエラーが発生しました。管理者に連絡してください。",
+        "timeout": "OIDCの解決がタイムアウトしたか、エラーが発生しました。"
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "OpenID Connect"
     }
 }

@@ -192,5 +192,9 @@
     "person-image-doesnt-exist": "人物はCoversDBに存在しません",
     "generic-cover-person-save": "カバー画像を人物に保存できません",
     "generic-cover-volume-save": "カバー画像を巻に保存できません",
-    "error-import-stack": "MALスタックのインポート中に問題が発生しました"
+    "error-import-stack": "MALスタックのインポート中に問題が発生しました",
+    "password-authentication-disabled": "パスワード認証が無効になりました。OpenID Connect経由でログインしてください。",
+    "oidc-managed": "OIDCによって管理されているユーザーは編集できません。",
+    "cannot-change-identity-provider-original-user": "元の管理者アカウントのIDプロバイダーは変更できません。",
+    "oidc-invalid-authority": "OIDCの認証局が無効"
 }

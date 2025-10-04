@@ -215,5 +215,10 @@
     "cannot-change-identity-provider-original-user": "Zprostředkovatel identity původního účtu správce nelze změnit",
     "oidc-invalid-authority": "OIDC autorita je neplatná",
     "annotation-failed-create": "Vytvoření anotace se nezdařilo, zkuste to znovu",
-    "annotation-delete": "Nelze odstranit poznámku"
+    "annotation-delete": "Nelze odstranit poznámku",
+    "opds-continue-reading-title": "Pokračovat ve čtení od: {0}",
+    "genre-doesnt-exist": "Žánr neexistuje",
+    "font-url-not-allowed": "Nahrávání písma pomocí URL je povoleno pouze z Google Fonts",
+    "annotation-export-failed": "Nelze exportovat poznámky, zkontrolujte protokoly",
+    "download-not-allowed": "Uživatel nemá oprávnění ke stažení"
 }

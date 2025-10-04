@@ -2529,5 +2529,15 @@
     "download-button": {
         "downloading-status": "Scaricamento…",
         "download-tooltip": "Scarica"
+    },
+    "oidc": {
+        "login": "Torna al login",
+        "error-loading-info": "Errore durante il caricamento di OIDC info, contattare l'amministratore",
+        "timeout": "Risoluzione dell'OIDC è scaduta o si è verificato un errore"
+    },
+    "manage-oidc-connect": {
+        "save-success": "Impostazioni OIDC aggiornate con successo",
+        "notice": "Avviso",
+        "restart-required": "La modifica dell'Autorità o del ClientID richiede un riavvio manuale di Kavita."
     }
 }
