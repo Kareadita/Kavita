@@ -4,7 +4,7 @@
 
       <div class="d-flex align-items-center">
         @if (showLocationInformation()) {
-          <i class="fas fa-book me-2" [ngbTooltip]="t('location-tooltip', {series: annotation().seriesName, library: annotation().libraryName})"></i>
+          <i tabindex="0" class="fas fa-book me-2" [ngbTooltip]="t('location-tooltip', {series: annotation().seriesName, library: annotation().libraryName})"></i>
         }
         <strong [style.color]="colorscapeService.getContrastingTextColor(username)">{{ annotation().ownerUsername }}</strong>
       </div>
@@ -67,15 +67,14 @@
           </div>
         }
 
-        @if (showLikes()) {
-          <div (click)="handleLikeChange()" class="ms-2" [class.clickable]="annotation().ownerUserId !== accountService.currentUserSignal()!.id">
-            <span>{{annotation().likes.length}}</span>
-            <i class="{{liked() ? 'fas' : 'fa-regular'}} fa-thumbs-up ms-1"></i>
-          </div>
-        }
+        <app-annotation-likes
+          [annotation]="annotation()"
+          [visible]="showLikes()"
+          (annotationChange)="annotation.set($event)"
+        />
 
         @if (showSelectionBox()) {
-          <input class="form-check-input ms-2" type="checkbox" [checked]="selected()" (change)="selection.emit(this.selected())">
+          <input class="form-check-input ms-2 mt-0" type="checkbox" [checked]="selected()" (change)="selection.emit(this.selected())">
         }
 
       </div>

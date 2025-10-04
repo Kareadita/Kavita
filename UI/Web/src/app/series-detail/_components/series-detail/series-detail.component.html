@@ -35,7 +35,7 @@
                                    [libraryType]="libraryType"
                                    [mangaFormat]="series.format"
                                    [releaseYear]="seriesMetadata.releaseYear"
-                                   [size]="totalSize()"
+                                   [totalBytes]="totalSize()"
           />
 
           <div class="mt-2 mb-2">
@@ -189,9 +189,9 @@
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item) {
                         @if (item.isChapter) {
-                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}" />
+                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, totalLength: storyChapters.length}" />
                         } @else {
-                          <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}" />
+                          <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, totalLength: volumes.length}" />
                         }
                       }
 
@@ -257,7 +257,7 @@
                   <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_specials') {
-                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters().length}" />
+                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters().length}" />
                       }
                     </div>
                   </virtual-scroller>

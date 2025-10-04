@@ -54,8 +54,8 @@
         "default-age-restriction-label": "Age rating",
         "default-age-restriction-tooltip": "Maximum age rating shown to new users",
         "no-restriction": "{{restriction-selector.no-restriction}}",
-        "default-roles-label": "Roles",
-        "default-libraries-label": "Libraries",
+        "default-roles-label": "{{common.roles}}",
+        "default-libraries-label": "{{common.libraries}}",
 
         "advanced-title": "Advanced settings",
         "advanced-tooltip": "Only modify these options if you understand their impact.",
@@ -98,8 +98,8 @@
         "oidc-managed": "This user is managed via OIDC. Please contact your OIDC administrator to request any changes.",
         "identity-provider": "Identity provider",
         "identity-provider-tooltip": "Kavita users are never synced with OIDC accounts.",
-        "libraries-label": "Libraries",
-        "roles-label": "Roles"
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
 
     "user-scrobble-history": {
@@ -226,9 +226,9 @@
         "social-libraries-label": "Social Libraries",
         "social-libraries-tooltip": "Libraries on which social features should be enabled. No selection enables social features everywhere. Disable specific features if you wish to use them nowhere.",
         "social-max-age-rating-label": "Max age rating",
-        "social-max-age-rating-tooltip": "Max age rating of the chapter on which social features will work",
+        "social-max-age-rating-tooltip": "Max age rating on which social features will work",
         "social-include-unknowns-label": "Include unknowns",
-        "social-include-unknowns-tooltip": "Enable social features on chapter with an unknown age rating",
+        "social-include-unknowns-tooltip": "Enable social features for series and chapters with an unknown age rating",
 
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
         "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",
@@ -491,7 +491,7 @@
     },
 
     "role-selector": {
-        "title": "Roles",
+        "title": "{{common.roles}}",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -769,12 +769,12 @@
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
         "notice": "{{manage-settings.notice}}",
-        "libraries-label": "Libraries",
-        "roles-label": "Roles"
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
 
     "library-selector": {
-        "title": "Libraries",
+        "title": "{{common.libraries}}",
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "There are no libraries setup yet."
@@ -929,7 +929,7 @@
         "field-mapping-description": "Setup rules for certain strings found in Genre/Tag field and map it to a new string in Genre/Tag and optionally remove it from the Source list. Matching is normalized and case-insensitive, the first matching value is used. Only applicable when Genre/Tag are enabled to be written.",
         "first-last-name-label": "First Last Naming",
         "first-last-name-tooltip": "Ensure People's names are written First then Last",
-        "person-roles-label": "Roles",
+        "person-roles-label": "{{common.roles}}",
         "overrides-label": "Overrides",
         "overrides-description": "Allow Kavita to write over locked fields.",
         "chapter-header": "Chapter Fields",
@@ -954,7 +954,9 @@
         "page-num": "{{book-reader.page-num-label}}",
         "contains-spoilers-label": "Spoilers",
         "view-in-reader-label": "View in Reader",
-        "location-tooltip": "{{library}} - {{series}}"
+        "location-tooltip": "{{library}} - {{series}}",
+        "liked": "Liked by {{amount}} people, including you",
+        "not-liked": "Liked by {{amount}} people, you did not like it"
     },
 
     "annotations-tab": {
@@ -1276,7 +1278,7 @@
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "issue-count": "{{common.issue-count}}",
         "series-count": "{{common.series-count}}",
-        "roles-label": "Roles",
+        "roles-label": "{{common.roles}}",
         "sort-label": "Sort",
         "name-label": "Name",
         "issue-count-label": "Issue Count",
@@ -1313,7 +1315,7 @@
         "individual-role-title": "As a {{role}}",
         "browse-person-title": "All Works of {{name}}",
         "browse-person-by-role-title": "All Works of {{name}} as a {{role}}",
-        "all-roles": "Roles",
+        "all-roles": "{{common.roles}}",
         "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
         "no-info": "No information about this Person"
     },
@@ -1623,7 +1625,7 @@
     },
 
     "manage-library": {
-        "title": "Libraries",
+        "title": "{{common.libraries}}",
         "add-library": "Add Library",
         "no-data": "There are no libraries. Try creating one.",
         "loading": "{{common.loading}}",
@@ -1861,7 +1863,7 @@
         "resend": "Resend",
         "setup": "Setup",
         "last-active-header": "Last Active",
-        "roles-header": "Roles",
+        "roles-header": "{{common.roles}}",
         "name-header": "Name",
         "none": "None",
         "never": "Never",
@@ -1933,7 +1935,7 @@
         "admin-general": "General",
         "admin-oidc": "OpenID Connect",
         "admin-users": "Users",
-        "admin-libraries": "Libraries",
+        "admin-libraries": "{{common.libraries}}",
         "admin-media": "Media",
         "admin-media-issues": "Media Issues",
         "admin-logs": "Logs",
@@ -2077,7 +2079,7 @@
         "annotations": "{{tabs.annotations-tab}}",
         "genres": "{{metadata-fields.genres-title}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "libraries": "Libraries",
+        "libraries": "{{common.libraries}}",
         "reading-lists": "Reading Lists",
         "collections": "Collections",
         "close": "{{common.close}}",
@@ -2323,7 +2325,7 @@
         "limit-label": "Limit",
 
         "format-label": "Format",
-        "libraries-label": "Libraries",
+        "libraries-label": "{{common.libraries}}",
         "collections-label": "Collections",
         "genres-label": "{{metadata-fields.genres-title}}",
         "tags-label": "{{metadata-fields.tags-title}}",
@@ -2838,7 +2840,7 @@
         "team": "Team",
         "location": "Location",
         "languages": "Languages",
-        "libraries": "Libraries",
+        "libraries": "{{common.libraries}}",
         "letterer": "Letterer",
         "publication-status": "Publication Status",
         "penciller": "Penciller",
@@ -3183,7 +3185,7 @@
         "merge": "Merge",
         "export": "Export",
         "like": "Like",
-        "unlike": "Remove like(s)"
+        "unlike": "Remove likes"
     },
 
     "preferences": {
@@ -3401,7 +3403,9 @@
         "book-nums": "Books",
         "issue-nums": "Issues",
         "chapter-nums": "Chapters",
-        "volume-nums": "Volumes"
+        "volume-nums": "Volumes",
+        "roles": "Roles",
+        "libraries": "Libraries"
     }
 
 }

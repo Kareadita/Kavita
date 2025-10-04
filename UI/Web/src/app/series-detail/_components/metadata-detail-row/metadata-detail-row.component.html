@@ -36,15 +36,15 @@
 
     @if (releaseYear) {
       <span class="small-text ms-3">
-        <i class="fas fa-calendar"></i>
+        <i class="fas fa-calendar" aria-hidden="true"></i>
         {{releaseYear}}
       </span>
     }
 
-    @if (size) {
+    @if (totalBytes) {
       <span class="small-text ms-3">
-        <i class="fas fa-database"></i>
-        {{size | bytes}}
+        <i class="fas fa-database" aria-hidden="true"></i>
+        {{totalBytes | bytes}}
       </span>
     }
 

@@ -27,7 +27,7 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {AccountService} from "../../../../_services/account.service";
 import {EVENTS, MessageHubService} from "../../../../_services/message-hub.service";
 import {AnnotationUpdateEvent} from "../../../../_models/events/annotation-update-event";
-import {tap} from "rxjs/operators";
+import {AnnotationLikesComponent} from "../annotation-likes/annotation-likes.component";
 
 @Component({
   selector: 'app-annotation-card',
@@ -40,7 +40,8 @@ import {tap} from "rxjs/operators";
     NgStyle,
     RouterLink,
     NgClass,
-    NgbTooltip
+    NgbTooltip,
+    AnnotationLikesComponent
   ],
   templateUrl: './annotation-card.component.html',
   styleUrl: './annotation-card.component.scss',
@@ -85,7 +86,7 @@ export class AnnotationCardComponent {
   openInIncognitoMode = input<boolean>(false);
   isInReader = input<boolean>(true);
   /**
-   * If enables, listens to annotation updates
+   * If enabled, listens to annotation updates
    */
   listedToUpdates = input<boolean>(false);
 
@@ -99,8 +100,6 @@ export class AnnotationCardComponent {
 
   titleColor: Signal<string>;
   hasClicked = model<boolean>(false);
-
-  liked = computed(() => this.annotation().likes.includes(this.accountService.currentUserSignal()?.id ?? 0));
 
   constructor() {
 
@@ -165,28 +164,5 @@ export class AnnotationCardComponent {
     this.annotationService.delete(annotation.id).subscribe(_ => {
       this.delete.emit();
     });
-  }
-
-  handleLikeChange() {
-    if (this.annotation().ownerUserId === this.accountService.currentUserSignal()!.id) return;
-
-    const sub$ = this.liked()
-      ? this.annotationService.unLikeAnnotations([this.annotation().id])
-      : this.annotationService.likeAnnotations([this.annotation().id]);
-
-    sub$.pipe(
-     tap(() => {
-       this.annotation.update(x => {
-         const newLikes = this.liked()
-           ? x.likes.filter(id => id !== this.accountService.currentUserSignal()!.id)
-           : [...x.likes, this.accountService.currentUserSignal()!.id];
-
-         return {
-           ...x,
-           likes: newLikes,
-         }
-       })
-     })
-    ).subscribe();
   }
 }
