@@ -2264,6 +2264,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       if (annotation.xPath != null) {
+        this.adhocPageHistory.push({page: this.pageNum(), scrollPart: this.readerService.scopeBookReaderXpath(this.lastSeenScrollPartPath)});
         this.loadPage(annotation.xPath);
       }
     });
