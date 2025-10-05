@@ -956,12 +956,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Attempt to restore the reading position
     this.snapScrollOnResize();
 
-    // Ensure the column1 and column2 page scroll position is correct after the page layout has been updated
-    if (this.layoutMode() !== BookPageLayoutMode.Default) {
-      // maybe there's a better way to call this rather than using timeout
-      setTimeout(() => this.refreshColumnPageScroll(), 300);
-    }
-
     afterFrame(() => {
       this.injectImageBookmarkIndicators(true);
     });
@@ -1546,29 +1540,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  refreshColumnPageScroll() {
-    const [currentVirtualPage, _, pageSize] = this.getVirtualPage();
-
-    // Calculate the target scroll position
-    const targetScroll = (currentVirtualPage - 1) * pageSize;
-    const isVertical = this.writingStyle() === WritingStyle.Vertical;
-
-    // -1 apparently goes current virtual page...
-    const scrollMethod = isVertical ? 'scrollTo' : 'scrollToX';
-    this.scrollService[scrollMethod](
-      targetScroll,
-      this.bookContentElemRef.nativeElement,
-      'auto',
-      () => {
-        this.handleScrollEvent();
-      },
-      {
-        tolerance: 3,
-        timeout: 2000
-      }
-    );
-  }
-
   prevPage() {
     const oldPageNum = this.pageNum();
 
@@ -1772,26 +1743,79 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFirstVisibleElementXPath() {
     let resumeElement: string | null = null;
-    if (!this.bookContentElemRef || !this.bookContentElemRef.nativeElement) return null;
+    const bookContentElement = this.bookContentElemRef?.nativeElement;
+    if (!bookContentElement) return null;
 
     //const container = this.getViewportBoundingRect();
 
-    const intersectingEntries = Array.from(this.bookContentElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
+    const intersectingEntries = Array.from(bookContentElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
       .filter(entry => {
         //return this.isPartiallyContainedIn(container, entry);
         return this.utilityService.isInViewport(entry, this.topOffset);
+      })
+      .filter((element, i, entries) => {
+        // Remove any children element contained in another element that exist on this entries
+        return !entries.some(item => element !== item && item.contains(element))
+
+        // Remove element that don't have any content
+        && (element.textContent.trim().length !== 0 || element.querySelectorAll('img, svg').length !== 0);
       });
 
     intersectingEntries.sort((a, b) => this.sortElementsForLayout(a, b));
 
     if (intersectingEntries.length > 0) {
-      let path = this.readerService.getXPathTo(intersectingEntries[0]);
+      const element = this.findTopLevelElement(intersectingEntries[0], intersectingEntries[1], bookContentElement);
+      let path = this.readerService.getXPathTo(element);
       if (path === '') return;
 
       resumeElement = path;
     }
     return resumeElement;
+  }
+
+  /**
+   * Finds the top level element that has the same parent.
+   * Illustrated with example below:
+   *
+   * <section>
+   *  <p>  <-- We want to get this element instead
+   *    <span> ... target ... </span>
+   *  </p>
+   *  <p>
+   *    <span> ... nextSibling ... </span>
+   *  </p>
+   * <section>
+  */
+  private findTopLevelElement(target: Element, nextSibling: Element, root: Element): Element | null {
+    if (nextSibling == null) return target;
+
+    // Immediately return if it's already sibling
+    if (target.parentElement === nextSibling.parentElement) return target;
+
+    const ancestors: Element[] = [];
+    let current: Element | null = null
+
+    // Collect all parent element from the next sibling
+    current = nextSibling.parentElement;
+    while (current && current !== root) {
+      ancestors.push(current);
+      current = current.parentElement;
+    }
+
+    // Traverse up from target to find the similar parent with nextSibling
+    current = target;
+    while (current && current !== root) {
+      let parent: Element | null = current.parentElement;
+
+      if (parent && ancestors.includes(parent)) {
+        return current;
+      }
+
+      current = parent;
+    }
+
+    return null;
   }
 
   /**
