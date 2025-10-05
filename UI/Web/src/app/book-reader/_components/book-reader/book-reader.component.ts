@@ -1705,13 +1705,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   });
 
 
-  getVerticalPageWidth() {
+  getVerticalPageWidth = computed(() => {
     if (!(this.pageStyles() || {}).hasOwnProperty('margin-left')) return 0; // TODO: Test this, added for safety during refactor
 
-    const margin = (window.innerWidth * (parseInt(this.pageStyles()['margin-left'], 10) / 100)) * 2;
-    const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+    const margin = (this.windowWidth() * (parseInt(this.pageStyles()['margin-left'], 10) / 100)) * 2;
+    const windowWidth = this.windowWidth() || document.documentElement.clientWidth;
     return windowWidth - margin;
-  }
+  });
 
   convertVwToPx(vwValue: number) {
     const viewportWidth = Math.max(this.readingSectionElemRef?.nativeElement?.clientWidth ?? 0, window.innerWidth || 0);
