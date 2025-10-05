@@ -31,7 +31,7 @@ public interface IReadingListRepository
 {
     Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true);
     Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None);
-    Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null);
+    Task<IList<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null);
     Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId);
     Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
     Task<ReadingListDto?> GetReadingListDtoByTitleAsync(int userId, string title);
@@ -357,7 +357,7 @@ public class ReadingListRepository : IReadingListRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null)
+    public async Task<IList<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null)
     {
         var userLibraries = _context.Library.GetUserLibraries(userId);
 

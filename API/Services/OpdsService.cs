@@ -591,13 +591,17 @@ public class OpdsService : IOpdsService
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
-        var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId, GetUserParams(request.PageNumber))).ToList();
-        var totalItems = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).Count();
+        // We apply the user params manually to prevent double DB trips (GetReadingListItemDtosByIdAsync calls ToListAsync internally)
+        var userParams = GetUserParams(request.PageNumber);
+        var allItems = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
+        // NOTE: PageNumber starts at 1 with PagedList, so copy logic here
+        var items = allItems.Skip((userParams.PageNumber - 1) * userParams.PageSize).Take(userParams.PageSize);
+        var totalItems = allItems.Count;
 
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
-        var firstReadReadingListItem = items.FirstOrDefault(i => i.PagesRead > 0 && i.PagesRead != i.PagesTotal) ??
-                                       items.FirstOrDefault(i => i.PagesRead == 0 && i.PagesRead != i.PagesTotal);
+        var firstReadReadingListItem = allItems.FirstOrDefault(i => i.PagesRead > 0 && i.PagesRead != i.PagesTotal) ??
+                                       allItems.FirstOrDefault(i => i.PagesRead == 0 && i.PagesRead != i.PagesTotal);
         if (firstReadReadingListItem != null && request.PageNumber == FirstPageNumber)
         {
             await AddContinueReadingPoint(firstReadReadingListItem, feed, request);
