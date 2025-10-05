@@ -310,7 +310,6 @@ export class EditSeriesModalComponent implements OnInit {
         this.volumeCollapsed[v.name] = true;
       });
       this.seriesVolumes.forEach(vol => {
-        //.sort(this.utilityService.sortChapters) (no longer needed, all data is sorted on the backend)
         vol.volumeFiles = vol.chapters?.map((c: Chapter) => c.files.map((f: any) => {
           // TODO: Identify how to fix this hack
           f.chapter = c.range;
