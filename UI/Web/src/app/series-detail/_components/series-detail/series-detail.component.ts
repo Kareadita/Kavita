@@ -866,9 +866,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.volumes = detail.volumes;
         this.storyChapters = detail.storylineChapters;
 
-        this.totalSize.set(detail.volumes.reduce((sum, v) => sum + v.chapters.reduce((volumeSum, c) =>  {
-          return volumeSum + c.files.reduce((chapterSum, f) => chapterSum + f.bytes , 0)
-        }, 0), 0));
+        const uniqueChapters = Array.from(
+          new Map([...detail.chapters, ...detail.volumes.flatMap(v => v.chapters)]
+            .map(c => [c.id, c])).values()
+        );
+
+        this.totalSize.set(uniqueChapters
+          .flatMap(c => c.files)
+          .reduce((sum, f) => sum + f.bytes, 0));
 
         this.storylineItems = [];
         const v = this.volumes.map(v => {
