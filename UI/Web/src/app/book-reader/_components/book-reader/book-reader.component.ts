@@ -359,6 +359,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   debugMode = model<boolean>(!environment.production && true);
 
+  /**
+   * Will be set to true if this.scroll(...) is called but the actual scroll is still delayed
+   * This can also be used to debug glitches or race conditions related to page scrolling
+   * For instance, when we invoke a scroll action, but another scroll is scheduled to be triggered afterward
+   */
+  hasDelayedScroll: boolean = false;
 
 
   @ViewChild('bookContainer', {static: false}) bookContainerElemRef!: ElementRef<HTMLDivElement>;
@@ -506,23 +512,29 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  get PageHeightForPagination() {
+  PageHeightForPagination = computed(() => {
     const layoutMode = this.layoutMode();
     const immersiveMode = this.immersiveMode();
-    const widthHeight = this.windowHeight();
 
-    if (layoutMode=== BookPageLayoutMode.Default) {
+    if (layoutMode === BookPageLayoutMode.Default) {
+      // Ensure Angular updates this PageHeightForPagination when these signal have an update
+      if (this.isLoading()) return;
+      this.windowHeight();
+      this.writingStyle();
+
       // if the book content is less than the height of the container, override and return height of container for pagination area
       if (this.bookContainerElemRef?.nativeElement?.clientHeight > this.bookContentElemRef?.nativeElement?.clientHeight) {
         return (this.bookContainerElemRef?.nativeElement?.clientHeight || 0) + 'px';
       }
 
-      return (this.bookContentElemRef?.nativeElement?.scrollHeight || 0)  - ((this.topOffset * (immersiveMode ? 0 : 1)) * 2) + 'px';
+      return (this.bookContentElemRef?.nativeElement?.scrollHeight || 0) - ((this.topOffset * (immersiveMode ? 0 : 1)) * 2) + 'px';
     }
 
-    if (immersiveMode) return widthHeight + 'px';
-    return (widthHeight) - (this.topOffset * 2) + 'px';
-  }
+    // const windowHeight = this.windowHeight();
+    // if (!immersiveMode) return windowHeight + 'px';
+    // return (windowHeight) - (this.topOffset * 2) + 'px';
+    return '100%';
+  });
 
   constructor() {
     this.navService.hideNavBar();
@@ -962,7 +974,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Only applies to non BookPageLayoutMode. Default and WritingStyle Horizontal
+   * Only applies to non BookPageLayoutMode.Default and WritingStyle Horizontal
    * @private
    */
   private snapScrollOnResize() {
@@ -1405,7 +1417,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Virtual Paging stuff
     this.updateWidthAndHeightCalcs();
     this.applyLayoutMode(this.layoutMode());
-    this.addEmptyPageIfRequired();
+    // this.addEmptyPageIfRequired(); // Already called in this.applyPageStyles()
 
     // Find all the part ids and their top offset
     this.setupPageAnchors();
@@ -1419,7 +1431,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // we need to click the document before arrow keys will scroll down.
     this.reader.nativeElement.focus();
-    this.scroll(() => this.handleScrollEvent()); // Will set lastSeenXPath and save progress
+    afterFrame(() => this.handleScrollEvent()); // Will set lastSeenXPath and save progress
     this.isLoading.set(false);
     this.cdRef.markForCheck();
 
@@ -1429,8 +1441,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private scroll(lambda: () => void) {
+    if (this.hasDelayedScroll) console.warn("Another scroll operation is still pending while this scroll function is being called again");
+    this.hasDelayedScroll = true;
+
+    // `afterFrame() + setTimeout()` can likely be replaced with `requestAnimationFrame()` instead
     afterFrame(() => {
-      setTimeout(lambda, SCROLL_DELAY)
+      setTimeout(() => {
+        this.hasDelayedScroll = false;
+        lambda();
+      }, SCROLL_DELAY)
     });
   }
 
@@ -1489,6 +1508,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private addEmptyPageIfRequired(): void {
+    const bookContentElem = this.bookContentElemRef.nativeElement;
+
+    // Remove the empty gap first (if exist) to recalculate if we need the empty gap
+    const oldEmptyGap = bookContentElem.querySelector('.kavita-empty-gap');
+    if (oldEmptyGap) oldEmptyGap.remove();
+
     if (this.layoutMode() !== BookPageLayoutMode.Column2 || this.isSingleImagePage) {
       return;
     }
@@ -1504,11 +1529,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Need to adjust height with the column gap to ensure we don't have too much extra page
     const columnHeight = this.pageHeight() - COLUMN_GAP;
-    const emptyPage = this.renderer.createElement('div');
+    const emptyPage = this.renderer.createElement('div')
+    emptyPage.classList.add('kavita-empty-gap');
 
     this.renderer.setStyle(emptyPage, 'height', columnHeight + 'px');
     this.renderer.setStyle(emptyPage, 'width', this.columnWidth());
-    this.renderer.appendChild(this.bookContentElemRef.nativeElement, emptyPage);
+    this.renderer.appendChild(bookContentElem, emptyPage);
   }
 
   goBack() {
@@ -1748,7 +1774,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     //const container = this.getViewportBoundingRect();
 
-    const intersectingEntries = Array.from(bookContentElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
+    const intersectingEntries = Array.from(bookContentElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span,figure'))
       .filter(element => !element.classList.contains('no-observe'))
       .filter(entry => {
         //return this.isPartiallyContainedIn(container, entry);
@@ -1759,7 +1785,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return !entries.some(item => element !== item && item.contains(element))
 
         // Remove element that don't have any content
-        && (element.textContent.trim().length !== 0 || element.querySelectorAll('img, svg').length !== 0);
+        && (element.textContent.trim().length !== 0 || element.querySelectorAll('img, svg').length !== 0 || /^(img|svg)$/im.test(element.tagName));
       });
 
     intersectingEntries.sort((a, b) => this.sortElementsForLayout(a, b));
@@ -1788,7 +1814,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * <section>
   */
   private findTopLevelElement(target: Element, nextSibling: Element, root: Element): Element | null {
-    if (nextSibling == null) return target;
+
+    // If no sibling provided, then lets transverse to parent element where the element display is not inline
+    if (nextSibling == null) {
+      let current: Element | null = target;
+      while (current && current !== root) {
+        const displayStyle = window.getComputedStyle(current).getPropertyValue('display');
+
+        if (!displayStyle.includes('inline')) return current;
+        current = current.parentElement;
+      }
+
+      return current;
+    }
 
     // Immediately return if it's already sibling
     if (target.parentElement === nextSibling.parentElement) return target;
@@ -1815,7 +1853,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       current = parent;
     }
 
-    return null;
+    console.warn("Unable to find similar parent element from the next sibling", target, nextSibling);
+    return target;
   }
 
   /**
@@ -1936,7 +1975,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.updateImageSizes(); // Re-call this as we will change window width/height again
 
       requestAnimationFrame(() => {
-        this.scrollTo(resumeElement);
+        this.addEmptyPageIfRequired(); // Try add after layout updated on next frame
+
+        // When the user switches pages, there may be a pending scroll that moves to the start or end of the page
+        // For example, `this.scrollWithinPage(...)` might be triggered when the user presses the prev/next page button
+        // So, we don't need to do another page scroll here
+        if (!this.hasDelayedScroll) {
+          this.scrollTo(resumeElement);
+        }
       });
     }
   }
@@ -2031,7 +2077,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (layout !== BookPageLayoutMode.Default) {
       afterFrame(() => {
-        this.scrollService.scrollIntoView(element, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}});
+        // scrollIntoView method will only scroll to the visible area of the element (not including margin)
+        // so we need to apply scroll-margin to that element to correctly scroll into it
+        let margin = window.getComputedStyle(element).margin;
+        if(margin !== '0px') element.style.scrollMargin = margin;
+
+        this.scrollService.scrollIntoView(element, {timeout, scrollIntoViewOptions: {'block': 'start', 'inline': 'start'}})
       });
       return;
     }
@@ -2120,6 +2171,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateImageSizeTimeout = setTimeout( () => {
       this.updateImageSizes();
       this.injectImageBookmarkIndicators(true);
+
+      // This needs to be checked after the bookmark indicator has been injected or removed
+      // When switching layout, these indicators may affect the page's total scrollWidth
+      this.addEmptyPageIfRequired();
     }, 200);
 
     this.updateSingleImagePageStyles();

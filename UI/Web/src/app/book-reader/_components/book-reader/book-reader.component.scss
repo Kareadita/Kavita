@@ -234,6 +234,7 @@ $action-bar-height: 38px;
   bottom: 0;
   left: 0;
   writing-mode: horizontal-tb;
+  z-index: 3;
 }
 
 
@@ -311,7 +312,7 @@ $pagination-opacity: 0;
 .right {
   position: absolute;
   right: 0px;
-  top: $action-bar-height;
+  top: 0px;
   width: 20vw;
   z-index: 3;
   background: $pagination-color;
@@ -334,8 +335,8 @@ $pagination-opacity: 0;
 .right-with-scrollbar {
   position: absolute;
   right: 17px;
-  top: $action-bar-height;
-  width: 18%;
+  top: 0px;
+  width: 18vw;
   z-index: 3;
   background: $pagination-color;
   opacity: $pagination-opacity;
@@ -352,7 +353,7 @@ $pagination-opacity: 0;
 .left {
   position: absolute;
   left: 0px;
-  top: $action-bar-height;
+  top: 0px;
   width: 20vw;
   background: $pagination-color;
   opacity: $pagination-opacity;

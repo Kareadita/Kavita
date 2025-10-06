@@ -23,22 +23,22 @@
          [ngStyle]="{'width': pageWidthForPagination()}"
          [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible()}" [@isLoading]="isLoading()" (click)="handleReaderClick($event)">
 
-      @if (clickToPaginate() && !hidePagination()) {
-        <div class="left {{clickOverlayClass('left')}} no-observe"
-             (click)="movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
-             [ngClass]="{'immersive' : immersiveMode()}"
-             tabindex="-1"
-             [ngStyle]="{height: PageHeightForPagination}"></div>
-        <div class="{{scrollbarNeeded() ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
-             (click)="movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
-             [ngClass]="{'immersive' : immersiveMode()}"
-             tabindex="-1"
-             [ngStyle]="{height: PageHeightForPagination}"></div>
-      }
-
       <div #bookContainer class="book-container {{writingStyle() | writingStyleClass}}"
         [ngClass]="{'immersive' : immersiveMode()}"
            (mousedown)="mouseDown($event)" >
+
+        @if (clickToPaginate() && !hidePagination()) {
+          <div class="left {{clickOverlayClass('left')}} no-observe"
+              (click)="movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+              [ngClass]="{'immersive' : immersiveMode()}"
+              tabindex="-1"
+              [ngStyle]="{height: PageHeightForPagination()}"></div>
+          <div class="{{scrollbarNeeded() ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
+              (click)="movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+              [ngClass]="{'immersive' : immersiveMode()}"
+              tabindex="-1"
+              [ngStyle]="{height: PageHeightForPagination()}"></div>
+        }
 
         <div #readingHtml class="book-content {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
              [ngStyle]="{'max-height': columnHeight(), 'max-width': verticalBookContentWidth(), 'width': verticalBookContentWidth(), 'column-width': columnWidth()}"
