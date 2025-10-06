@@ -38,7 +38,7 @@ import {
   EditSeriesModalComponent
 } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Device} from 'src/app/_models/device/device';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
@@ -158,7 +158,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly SettingsTabId = SettingsTabId;
   protected readonly FilterField = FilterField;
   protected readonly AgeRating = AgeRating;
-  protected readonly Breakpoint = Breakpoint;
+  protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly encodeURIComponent = encodeURIComponent;
 
   private readonly destroyRef = inject(DestroyRef);

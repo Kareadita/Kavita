@@ -39,7 +39,7 @@
             <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
               @if (summary.length > 0) {
                 <div class="mb-2">
-                  <app-read-more [text]="summary" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 170 : 200" />
+                  <app-read-more [text]="summary" [maxLength]="utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop ? 170 : 200" />
                 </div>
 
                 @if (collectionTag.source !== ScrobbleProvider.Kavita) {

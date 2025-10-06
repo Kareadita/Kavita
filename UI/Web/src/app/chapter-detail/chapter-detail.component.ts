@@ -61,7 +61,7 @@ import {
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
 import {hasAnyCast} from "../_models/common/i-has-cast";
-import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
+import {Breakpoint, UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {CoverUpdateEvent} from "../_models/events/cover-update-event";
 import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
@@ -156,7 +156,7 @@ export class ChapterDetailComponent implements OnInit {
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
-  protected readonly Breakpoint = Breakpoint;
+  protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly LibraryType = LibraryType;
   protected readonly encodeURIComponent = encodeURIComponent;
 

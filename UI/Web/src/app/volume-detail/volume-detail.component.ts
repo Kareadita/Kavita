@@ -53,7 +53,7 @@ import {IHasCast} from "../_models/common/i-has-cast";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
-import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
+import {Breakpoint, UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
@@ -194,7 +194,7 @@ export class VolumeDetailComponent implements OnInit {
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
-  protected readonly Breakpoint = Breakpoint;
+  protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly encodeURIComponent = encodeURIComponent;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
