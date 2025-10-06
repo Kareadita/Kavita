@@ -1,36 +1,53 @@
 .accordion-header {
     font-weight: bold;
-    color: var(--accordion-header-text-color); 
+    color: var(--accordion-header-text-color);
 }
 
-.accordion-item { 
+.accordion-item {
     background-color: var(--accordion-body-bg-color);
     color: var(--accordion-body-text-color);
     border-color: var(--accordion-body-border-color);
 
     div[role="tabpanel"] {
-      background-color: var(--accordion-header-bg-color); 
+      background-color: var(--accordion-header-bg-color);
 
       .accordion-body {
-        background-color: var(--accordion-active-body-bg-color); 
+        background-color: var(--accordion-active-body-bg-color);
       }
     }
 }
 
 .accordion-button {
-    &:not(.collapsed) {
-        color: var(--accordion-header-text-color); 
-        background-color: var(--accordion-body-bg-color);
-        box-shadow: var(--accordion-body-box-shadow);
+  display: flex;
+  justify-content: space-between;
+
+  &::after {
+    content: none;
+  }
+
+  &:not(.collapsed) {
+      color: var(--accordion-header-text-color);
+      background-color: var(--accordion-body-bg-color);
+      box-shadow: var(--accordion-body-box-shadow);
+
+    i {
+      transform: rotate(180deg);
+      transition: transform 0.3s ease;
+    }
+  }
+
+  &.collapsed {
+      color: var(--accordion-header-collapsed-text-color);
+      background-color: var(--accordion-header-collapsed-bg-color);
+
+    i {
+      transition: transform 0.3s ease;
     }
 
-    &.collapsed {
-        color: var(--accordion-header-collapsed-text-color); 
-        background-color: var(--accordion-header-collapsed-bg-color);
-    }
+  }
 
-    &:focus {
-        border-color: var(--accordion-button-focus-border-color);
-        box-shadow: var(--accordion-button-focus-box-shadow);
-    }
+  &:focus {
+      border-color: var(--accordion-button-focus-border-color);
+      box-shadow: var(--accordion-button-focus-box-shadow);
+  }
 }
