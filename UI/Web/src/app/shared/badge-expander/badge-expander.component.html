@@ -1,17 +1,17 @@
 <ng-container *transloco="let t; prefix: 'badge-expander'">
   <div class="badge-expander">
     <div class="content">
-      @for(item of visibleItems; track item; let i = $index; let last = $last) {
+      @for(item of visibleItems(); track item; let i = $index; let last = $last) {
         <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i, last: last }" />
-        @if (!last && includeComma) {
+        @if (!last && includeComma()) {
           <span>, </span>
         }
       } @empty {
         {{null | defaultValue}}
       }
-      @if (!isCollapsed && itemsLeft !== 0) {
-        <a href="javascript:void(0);" type="button" class="dark-exempt btn-icon ms-1" (click)="toggleVisible()" [attr.aria-expanded]="!isCollapsed">
-          {{t('more-items', {count: itemsLeft})}}
+      @if (isCollapsed() && itemsLeft() !== 0) {
+        <a href="javascript:void(0);" type="button" class="dark-exempt btn-icon ms-1" (click)="toggleVisible()" [attr.aria-expanded]="!isCollapsed()">
+          {{t('more-items', {count: itemsLeft()})}}
         </a>
       }
     </div>
