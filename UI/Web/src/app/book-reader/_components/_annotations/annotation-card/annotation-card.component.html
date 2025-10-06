@@ -37,7 +37,8 @@
 
 
         @if(showPageLink()) {
-          <span class="badge bg-secondary clickable" (click)="loadAnnotation()">{{t('page-num', {page: annotation().pageNumber})}}</span>
+          <!-- Page numbers are incremented by 1 in the UI -->
+          <span class="badge bg-secondary clickable" (click)="loadAnnotation()">{{t('page-num', {page: annotation().pageNumber + 1})}}</span>
         }
 
 
