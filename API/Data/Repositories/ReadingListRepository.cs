@@ -33,7 +33,7 @@ public interface IReadingListRepository
     Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None);
     Task<IList<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null);
     Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId);
-    Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
+    Task<IList<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
     Task<ReadingListDto?> GetReadingListDtoByTitleAsync(int userId, string title);
     Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId);
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
@@ -477,7 +477,7 @@ public class ReadingListRepository : IReadingListRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items)
+    public async Task<IList<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items)
     {
         var chapterIds = items.Select(i => i.ChapterId).Distinct();
         var userProgress = await _context.AppUserProgresses
