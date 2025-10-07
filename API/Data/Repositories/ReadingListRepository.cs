@@ -476,8 +476,11 @@ public class ReadingListRepository : IReadingListRepository
         var userLibraries = _context.Library.GetUserLibraries(userId);
 
         var query = _context.ReadingListItem
-            .Where(s => s.ReadingListId == readingListId)
-            .Join(_context.Chapter, s => s.ChapterId, chapter => chapter.Id, (data, chapter) => new
+        .Where(s => s.ReadingListId == readingListId)
+        .Join(_context.Chapter,
+            s => s.ChapterId,
+            chapter => chapter.Id,
+            (data, chapter) => new
             {
                 TotalPages = chapter.Pages,
                 ChapterNumber = chapter.Range,
@@ -488,7 +491,10 @@ public class ReadingListRepository : IReadingListRepository
                 chapter.Summary,
                 chapter.IsSpecial
             })
-            .Join(_context.Volume, s => s.ReadingListItem.VolumeId, volume => volume.Id, (data, volume) => new
+        .Join(_context.Volume,
+            s => s.ReadingListItem.VolumeId,
+            volume => volume.Id,
+            (data, volume) => new
             {
                 data.ReadingListItem,
                 data.TotalPages,
@@ -501,80 +507,73 @@ public class ReadingListRepository : IReadingListRepository
                 VolumeId = volume.Id,
                 VolumeNumber = volume.Name,
             })
-            .Join(_context.Series, s => s.ReadingListItem.SeriesId, series => series.Id,
-                (data, s) => new
-                {
-                    SeriesName = s.Name,
-                    SeriesFormat = s.Format,
-                    s.LibraryId,
-                    data.ReadingListItem,
-                    data.TotalPages,
-                    data.ChapterNumber,
-                    data.VolumeNumber,
-                    data.VolumeId,
-                    data.ReleaseDate,
-                    data.ChapterTitleName,
-                    data.FileSize,
-                    data.Summary,
-                    data.IsSpecial,
-                    LibraryName = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Name).Single(),
-                    LibraryType = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Type).Single()
-                })
-            .Select(data => new ReadingListItemDto()
+        .Join(_context.Series,
+            s => s.ReadingListItem.SeriesId,
+            series => series.Id,
+            (data, s) => new
             {
-                Id = data.ReadingListItem.Id,
-                ChapterId = data.ReadingListItem.ChapterId,
-                Order = data.ReadingListItem.Order,
-                SeriesId = data.ReadingListItem.SeriesId,
-                SeriesName = data.SeriesName,
-                SeriesFormat = data.SeriesFormat,
-                PagesTotal = data.TotalPages,
-                ChapterNumber = data.ChapterNumber,
-                VolumeNumber = data.VolumeNumber,
-                LibraryId = data.LibraryId,
-                VolumeId = data.VolumeId,
-                ReadingListId = data.ReadingListItem.ReadingListId,
-                ReleaseDate = data.ReleaseDate,
-                LibraryType = data.LibraryType,
-                ChapterTitleName = data.ChapterTitleName,
-                LibraryName = data.LibraryName,
-                FileSize = data.FileSize,
-                Summary = data.Summary,
-                IsSpecial = data.IsSpecial
+                SeriesName = s.Name,
+                SeriesFormat = s.Format,
+                s.LibraryId,
+                data.ReadingListItem,
+                data.TotalPages,
+                data.ChapterNumber,
+                data.VolumeNumber,
+                data.VolumeId,
+                data.ReleaseDate,
+                data.ChapterTitleName,
+                data.FileSize,
+                data.Summary,
+                data.IsSpecial,
+                LibraryName = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Name).Single(),
+                LibraryType = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Type).Single()
             })
-            .Where(o => userLibraries.Contains(o.LibraryId))
-            .OrderBy(rli => rli.Order)
-            .AsSplitQuery();
+        .GroupJoin(_context.AppUserProgresses.Where(p => p.AppUserId == userId),
+            data => data.ReadingListItem.ChapterId,
+            progress => progress.ChapterId,
+            (data, progressGroup) => new { Data = data, ProgressGroup = progressGroup })
+        .SelectMany(
+            x => x.ProgressGroup.DefaultIfEmpty(),
+            (x, progress) => new ReadingListItemDto()
+            {
+                Id = x.Data.ReadingListItem.Id,
+                ChapterId = x.Data.ReadingListItem.ChapterId,
+                Order = x.Data.ReadingListItem.Order,
+                SeriesId = x.Data.ReadingListItem.SeriesId,
+                SeriesName = x.Data.SeriesName,
+                SeriesFormat = x.Data.SeriesFormat,
+                PagesTotal = x.Data.TotalPages,
+                ChapterNumber = x.Data.ChapterNumber,
+                VolumeNumber = x.Data.VolumeNumber,
+                LibraryId = x.Data.LibraryId,
+                VolumeId = x.Data.VolumeId,
+                ReadingListId = x.Data.ReadingListItem.ReadingListId,
+                ReleaseDate = x.Data.ReleaseDate,
+                LibraryType = x.Data.LibraryType,
+                ChapterTitleName = x.Data.ChapterTitleName,
+                LibraryName = x.Data.LibraryName,
+                FileSize = x.Data.FileSize,
+                Summary = x.Data.Summary,
+                IsSpecial = x.Data.IsSpecial,
+                PagesRead = progress != null ? progress.PagesRead : 0,
+                LastReadingProgressUtc = progress != null ? progress.LastModifiedUtc : null
+            })
+        .Where(o => userLibraries.Contains(o.LibraryId))
+        .OrderBy(rli => rli.Order)
+        .AsSplitQuery();
 
         if (userParams != null)
         {
             query = query
-                .Skip((userParams.PageNumber - 1) * userParams.PageSize) // NOTE: PageNumber starts at 1 with PagedList, so copy logic here
+                .Skip((userParams.PageNumber - 1) * userParams.PageSize)
                 .Take(userParams.PageSize);
         }
-
 
         var items = await query.ToListAsync();
 
         foreach (var item in items)
         {
             item.Title = ReadingListService.FormatTitle(item);
-        }
-
-        // Attach progress information
-        var fetchedChapterIds = items.Select(i => i.ChapterId);
-        var progresses = await _context.AppUserProgresses
-            .Where(p => fetchedChapterIds.Contains(p.ChapterId) && p.AppUserId == userId)
-            .AsNoTracking()
-            .ToListAsync();
-
-        foreach (var progress in progresses)
-        {
-            var progressItem = items.SingleOrDefault(i => i.ChapterId == progress.ChapterId && i.ReadingListId == readingListId);
-            if (progressItem == null) continue;
-
-            progressItem.PagesRead = progress.PagesRead;
-            progressItem.LastReadingProgressUtc = progress.LastModifiedUtc;
         }
 
         return items;
