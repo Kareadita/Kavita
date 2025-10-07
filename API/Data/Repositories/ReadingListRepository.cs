@@ -362,10 +362,10 @@ public class ReadingListRepository : IReadingListRepository
     public async Task<bool> AnyUserReadingProgressAsync(int readingListId, int userId)
     {
         // Since the list is already created, we can assume RBS doesn't need to apply
-        var chapterIdsQuery =  _context.ReadingListItem
+        var chapterIdsQuery = _context.ReadingListItem
             .Where(s => s.ReadingListId == readingListId)
             .Select(s => s.ChapterId)
-            .AsEnumerable();
+            .AsQueryable();
 
         return await _context.AppUserProgresses
             .Where(p => chapterIdsQuery.Contains(p.ChapterId) && p.AppUserId == userId)
@@ -382,7 +382,7 @@ public class ReadingListRepository : IReadingListRepository
             .Join(_context.Chapter, rli => rli.ChapterId, chapter => chapter.Id, (rli, chapter) => new
                 {
                     ReadingListItem = rli,
-                    Chapter = chapter
+                    Chapter = chapter,
                 })
             .Join(_context.Volume, x => x.ReadingListItem.VolumeId, volume => volume.Id, (x, volume) => new
                 {
@@ -459,7 +459,7 @@ public class ReadingListRepository : IReadingListRepository
             LibraryType = library.Type,
             ChapterTitleName = item.Chapter.TitleName,
             LibraryName = library.Name,
-            FileSize = item.Chapter.Files.Sum(f => f.Bytes),
+            FileSize = item.Chapter.Files.Sum(f => f.Bytes), // TODO: See if we can put FileSize on the chapter in future
             Summary = item.Chapter.Summary,
             IsSpecial = item.Chapter.IsSpecial,
             LastReadingProgressUtc = item.Progress?.LastModifiedUtc
