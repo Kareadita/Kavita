@@ -981,12 +981,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const layoutMode = this.layoutMode();
     if (layoutMode === BookPageLayoutMode.Default) return;
 
-
-    const resumeElement = this.getFirstVisibleElementXPath() ?? null;
-    if (resumeElement !== null) {
-
+    const resumeElement = this.lastSeenScrollPartPath || (this.getFirstVisibleElementXPath() ?? '');
+    if (resumeElement) {
       const element = this.getElementFromXPath(resumeElement);
       //console.log('Attempting to snap to element: ', element);
+
+      if (this.debugMode()) {
+        this.logSelectedElement('yellow');
+      }
 
       this.scrollTo(resumeElement, 30); // This works pretty well, but not perfect
     }
@@ -2547,13 +2549,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return false;
   }
 
-  logSelectedElement() {
-    const element = this.getElementFromXPath(this.lastSeenScrollPartPath);
+  logSelectedElement(color='red') {
+    const element = this.getElementFromXPath(this.lastSeenScrollPartPath) as HTMLElement | null;
     if (element) {
       console.log(element);
-      (element as HTMLElement).style.outline = '1px solid red';
+      element.style.outline = '1px solid ' + color;
       setTimeout(() => {
-        (element as HTMLElement).style.outline = '';
+        element.style.outline = '';
       }, 1_000);
     }
   }
