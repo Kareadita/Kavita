@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {AsyncPipe, DatePipe, DecimalPipe, DOCUMENT, Location, NgClass, NgStyle} from '@angular/common';
+import {DatePipe, DecimalPipe, DOCUMENT, Location, NgClass, NgStyle} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs/operators';
 import {ConfirmService} from 'src/app/shared/confirm.service';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {ReadingList, ReadingListInfo, ReadingListItem} from 'src/app/_models/reading-list';
@@ -65,7 +65,7 @@ enum TabID {
   imports: [CardActionablesComponent, ImageComponent, NgbDropdown,
     NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent,
     LoadingComponent, DraggableOrderedListComponent,
-    ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective, ReactiveFormsModule,
+    ReadingListItemComponent, NgClass, DecimalPipe, DatePipe, TranslocoDirective, ReactiveFormsModule,
     NgbNav, NgbNavContent, NgbNavLink, NgbTooltip,
     RouterLink, VirtualScrollerModule, NgStyle, NgbNavOutlet, NgbNavItem, PromotedIconComponent, DefaultValuePipe, DetailsTabComponent]
 })
@@ -75,6 +75,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   protected readonly MangaFormat = MangaFormat;
   protected readonly Breakpoint = Breakpoint;
+  protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly TabID = TabID;
   protected readonly encodeURIComponent = encodeURIComponent;
 

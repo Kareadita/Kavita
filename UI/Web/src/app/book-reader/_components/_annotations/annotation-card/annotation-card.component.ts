@@ -89,6 +89,10 @@ export class AnnotationCardComponent {
    * If enabled, listens to annotation updates
    */
   listedToUpdates = input<boolean>(false);
+  /**
+   * If the card is rendered inside the book reader. Used for styling the confirm button
+   */
+  inBookReader = input<boolean>(false);
 
   selected = input<boolean>(false);
   @Output() delete = new EventEmitter();
@@ -157,7 +161,10 @@ export class AnnotationCardComponent {
   }
 
   async deleteAnnotation() {
-    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-annotation'))) return;
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-annotation'), {
+      ...this.confirmService.defaultConfirm,
+      bookReader: this.inBookReader(),
+    })) return;
     const annotation = this.annotation();
     if (!annotation) return;
 

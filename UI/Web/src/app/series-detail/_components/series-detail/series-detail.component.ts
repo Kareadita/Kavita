@@ -38,7 +38,7 @@ import {
   EditSeriesModalComponent
 } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Device} from 'src/app/_models/device/device';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
@@ -158,7 +158,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly SettingsTabId = SettingsTabId;
   protected readonly FilterField = FilterField;
   protected readonly AgeRating = AgeRating;
-  protected readonly Breakpoint = Breakpoint;
+  protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly encodeURIComponent = encodeURIComponent;
 
   private readonly destroyRef = inject(DestroyRef);
@@ -866,9 +866,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.volumes = detail.volumes;
         this.storyChapters = detail.storylineChapters;
 
-        this.totalSize.set(detail.volumes.reduce((sum, v) => sum + v.chapters.reduce((volumeSum, c) =>  {
-          return volumeSum + c.files.reduce((chapterSum, f) => chapterSum + f.bytes , 0)
-        }, 0), 0));
+        const uniqueChapters = Array.from(
+          new Map([...detail.chapters, ...detail.volumes.flatMap(v => v.chapters)]
+            .map(c => [c.id, c])).values()
+        );
+
+        this.totalSize.set(uniqueChapters
+          .flatMap(c => c.files)
+          .reduce((sum, f) => sum + f.bytes, 0));
 
         this.storylineItems = [];
         const v = this.volumes.map(v => {

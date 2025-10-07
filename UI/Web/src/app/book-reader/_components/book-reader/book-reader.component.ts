@@ -2259,11 +2259,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async viewAnnotations() {
     await this.epubMenuService.openViewAnnotationsDrawer((annotation: Annotation) => {
+      const currentPageNum = this.pageNum();
       if (this.pageNum() != annotation.pageNumber) {
         this.setPageNum(annotation.pageNumber);
       }
 
       if (annotation.xPath != null) {
+        this.adhocPageHistory.push({page: currentPageNum, scrollPart: this.readerService.scopeBookReaderXpath(this.lastSeenScrollPartPath)});
         this.loadPage(annotation.xPath);
       }
     });
