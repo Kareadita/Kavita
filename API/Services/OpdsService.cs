@@ -591,21 +591,22 @@ public class OpdsService : IOpdsService
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
-        // We apply the user params manually to prevent double DB trips (GetReadingListItemDtosByIdAsync calls ToListAsync internally)
-        var userParams = GetUserParams(request.PageNumber);
-        var allItems = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
-        // NOTE: PageNumber starts at 1 with PagedList, so copy logic here
-        var items = allItems.Skip((userParams.PageNumber - 1) * userParams.PageSize).Take(userParams.PageSize);
-        var totalItems = allItems.Count;
+        var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId, GetUserParams(request.PageNumber))).ToList();
+        var totalItems = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).Count();
 
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
-        var firstReadReadingListItem = allItems.FirstOrDefault(i => i.PagesRead > 0 && i.PagesRead != i.PagesTotal) ??
-                                       allItems.FirstOrDefault(i => i.PagesRead == 0 && i.PagesRead != i.PagesTotal);
-        if (firstReadReadingListItem != null && request.PageNumber == FirstPageNumber)
+        var anyProgress = await _unitOfWork.ReadingListRepository.AnyUserReadingProgressAsync(readingListId, userId);
+        if (anyProgress)
         {
-            await AddContinueReadingPoint(firstReadReadingListItem, feed, request);
+            var firstReadReadingListItem = await _unitOfWork.ReadingListRepository.GetContinueReadingPoint(readingListId, userId);
+            if (firstReadReadingListItem != null && request.PageNumber == FirstPageNumber)
+            {
+                await AddContinueReadingPoint(firstReadReadingListItem, feed, request);
+            }
         }
+
+
 
         foreach (var item in items)
         {
@@ -1007,7 +1008,7 @@ public class OpdsService : IOpdsService
 
         var pageNumber = Math.Max(list.CurrentPage, 1);
 
-        if (pageNumber > 1)
+        if (pageNumber > FirstPageNumber)
         {
             feed.Links.Add(CreateLink(FeedLinkRelation.Prev, FeedLinkType.AtomNavigation, url + "pageNumber=" + (pageNumber - 1)));
         }
