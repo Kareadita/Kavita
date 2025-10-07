@@ -58,6 +58,8 @@ public interface IReadingListRepository
     Task<IEnumerable<ReadingList>> GetReadingListsByIds(IList<int> ids, ReadingListIncludes includes = ReadingListIncludes.Items);
     Task<IEnumerable<ReadingList>> GetReadingListsBySeriesId(int seriesId, ReadingListIncludes includes = ReadingListIncludes.Items);
     Task<ReadingListInfoDto?> GetReadingListInfoAsync(int readingListId);
+    Task<bool> AnyUserReadingProgressAsync(int readingListId, int userId);
+    Task<ReadingListItemDto?> GetContinueReadingPoint(int readingListId, int userId);
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -357,6 +359,118 @@ public class ReadingListRepository : IReadingListRepository
             .SingleOrDefaultAsync();
     }
 
+    public async Task<bool> AnyUserReadingProgressAsync(int readingListId, int userId)
+    {
+        // Since the list is already created, we can assume RBS doesn't need to apply
+        var chapterIdsQuery =  _context.ReadingListItem
+            .Where(s => s.ReadingListId == readingListId)
+            .Select(s => s.ChapterId)
+            .AsEnumerable();
+
+        return await _context.AppUserProgresses
+            .Where(p => chapterIdsQuery.Contains(p.ChapterId) && p.AppUserId == userId)
+            .AsNoTracking()
+            .AnyAsync();
+    }
+
+    public async Task<ReadingListItemDto?> GetContinueReadingPoint(int readingListId, int userId)
+    {
+        var userLibraries = _context.Library.GetUserLibraries(userId);
+
+        var query = _context.ReadingListItem
+            .Where(rli => rli.ReadingListId == readingListId)
+            .Join(_context.Chapter, rli => rli.ChapterId, chapter => chapter.Id, (rli, chapter) => new
+                {
+                    ReadingListItem = rli,
+                    Chapter = chapter
+                })
+            .Join(_context.Volume, x => x.ReadingListItem.VolumeId, volume => volume.Id, (x, volume) => new
+                {
+                    x.ReadingListItem,
+                    x.Chapter,
+                    Volume = volume
+                })
+            .Join(_context.Series, x => x.ReadingListItem.SeriesId, series => series.Id, (x, series) => new
+                {
+                    x.ReadingListItem,
+                    x.Chapter,
+                    x.Volume,
+                    Series = series
+                })
+            .Where(x => userLibraries.Contains(x.Series.LibraryId))
+            .GroupJoin(_context.AppUserProgresses.Where(p => p.AppUserId == userId),
+                x => x.ReadingListItem.ChapterId,
+                progress => progress.ChapterId,
+                (x, progressGroup) => new
+                {
+                    x.ReadingListItem,
+                    x.Chapter,
+                    x.Volume,
+                    x.Series,
+                    ProgressGroup = progressGroup
+                })
+            .SelectMany(
+                x => x.ProgressGroup.DefaultIfEmpty(),
+                (x, progress) => new
+                {
+                    x.ReadingListItem,
+                    x.Chapter,
+                    x.Volume,
+                    x.Series,
+                    Progress = progress,
+                    PagesRead = progress != null ? progress.PagesRead : 0,
+                    HasProgress = progress != null,
+                    IsPartiallyRead = progress != null && progress.PagesRead > 0 && progress.PagesRead < x.Chapter.Pages,
+                    IsUnread = progress == null || progress.PagesRead == 0
+                })
+            .OrderBy(x => x.ReadingListItem.Order);
+
+        // First try to find a partially read item then the first unread item
+        var item = await query
+            .OrderBy(x => x.IsPartiallyRead ? 0 : x.IsUnread ? 1 : 2)
+            .ThenBy(x => x.ReadingListItem.Order)
+            .FirstOrDefaultAsync();
+
+
+        if (item == null) return null;
+
+        // Map to DTO
+        var library = await _context.Library
+            .Where(l => l.Id == item.Series.LibraryId)
+            .Select(l => new { l.Name, l.Type })
+            .FirstAsync();
+
+        var dto = new ReadingListItemDto
+        {
+            Id = item.ReadingListItem.Id,
+            ChapterId = item.ReadingListItem.ChapterId,
+            Order = item.ReadingListItem.Order,
+            SeriesId = item.ReadingListItem.SeriesId,
+            SeriesName = item.Series.Name,
+            SeriesFormat = item.Series.Format,
+            PagesTotal = item.Chapter.Pages,
+            PagesRead = item.PagesRead,
+            ChapterNumber = item.Chapter.Range,
+            VolumeNumber = item.Volume.Name,
+            LibraryId = item.Series.LibraryId,
+            VolumeId = item.Volume.Id,
+            ReadingListId = item.ReadingListItem.ReadingListId,
+            ReleaseDate = item.Chapter.ReleaseDate,
+            LibraryType = library.Type,
+            ChapterTitleName = item.Chapter.TitleName,
+            LibraryName = library.Name,
+            FileSize = item.Chapter.Files.Sum(f => f.Bytes),
+            Summary = item.Chapter.Summary,
+            IsSpecial = item.Chapter.IsSpecial,
+            LastReadingProgressUtc = item.Progress?.LastModifiedUtc
+        };
+
+        dto.Title = ReadingListService.FormatTitle(dto);
+
+        return dto;
+    }
+
+
     public async Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null)
     {
         var userLibraries = _context.Library.GetUserLibraries(userId);
@@ -373,7 +487,6 @@ public class ReadingListRepository : IReadingListRepository
                 FileSize = chapter.Files.Sum(f => f.Bytes),
                 chapter.Summary,
                 chapter.IsSpecial
-
             })
             .Join(_context.Volume, s => s.ReadingListItem.VolumeId, volume => volume.Id, (data, volume) => new
             {
@@ -451,7 +564,7 @@ public class ReadingListRepository : IReadingListRepository
         // Attach progress information
         var fetchedChapterIds = items.Select(i => i.ChapterId);
         var progresses = await _context.AppUserProgresses
-            .Where(p => fetchedChapterIds.Contains(p.ChapterId))
+            .Where(p => fetchedChapterIds.Contains(p.ChapterId) && p.AppUserId == userId)
             .AsNoTracking()
             .ToListAsync();
 

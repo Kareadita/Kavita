@@ -824,17 +824,70 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             PageNumber = OpdsService.FirstPageNumber
         });
 
-        // Note: Page 1 may include a "continue reading" item if there's progress
-        Assert.True(feed.Entries.Count >= UserParams.Default.PageSize);
+
+        Assert.True(feed.Entries.Count == UserParams.Default.PageSize);
         Assert.True(feed.Total >= OpdsService.PageSize);
 
         // Validate pagination - reading lists have complex pagination due to continue reading items
         // First page should never have prev link
         var prevLink = feed.Links.FirstOrDefault(l => l.Rel == FeedLinkRelation.Prev);
         Assert.Null(prevLink);
+    }
 
-        // Verify pagination structure is present when total exceeds what's displayed
-        // Note: Reading list pagination may behave differently due to continue reading item inclusion
+    /// <summary>
+    /// Reading lists have unique pagination implementation thus need explicit testing
+    /// </summary>
+    [Fact]
+    public async Task GetReadingListItems_ContinueFromItem_WhenFirst2PagesFullyRead()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (opdsService, readerService) = SetupService(unitOfWork, mapper);
+
+        // Create enough series for 2+ pages (UserParams.Default.PageSize * 2 + 5)
+        var totalItems = UserParams.Default.PageSize * 2 + 5;
+        var user = await SetupSeriesAndUser(context, unitOfWork, totalItems);
+
+        // Create reading list with items from all series (chapter 1 only)
+        var items = new List<(int, int, int)>();
+        for (var i = 1; i <= totalItems; i++)
+        {
+            items.Add((i, 1, i * 2 - 1)); // seriesId, volumeId, chapterId
+        }
+        var readingList = await CreateReadingList(context, unitOfWork, "Test Reading List", user.Id, items);
+
+        // Mark all chapters in first 2 pages as fully read
+        var itemsInFirst2Pages = UserParams.Default.PageSize * 2;
+        for (var i = 1; i <= itemsInFirst2Pages; i++)
+        {
+            var chapterId = i * 2 - 1;
+            var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+            if (chapter != null)
+            {
+                await readerService.MarkChaptersAsRead(user, i, [chapter]);
+            }
+        }
+        await unitOfWork.CommitAsync();
+
+        // Test page 1 - should include continue reading item at the top
+        var feed = await opdsService.GetReadingListItems(new OpdsItemsFromEntityIdRequest
+        {
+            ApiKey = user.ApiKey,
+            Prefix = OpdsService.DefaultApiPrefix,
+            BaseUrl = string.Empty,
+            UserId = user.Id,
+            EntityId = readingList.Id,
+            PageNumber = OpdsService.FirstPageNumber
+        });
+
+        Assert.NotEmpty(feed.Entries);
+
+        // Verify continue reading item is inserted at the top
+        var firstEntry = feed.Entries.First();
+        Assert.Contains("Continue Reading from", firstEntry.Title);
+
+        // The continue reading should point to the first unread item (page 3, first item)
+        var expectedNextUnreadItemIndex = itemsInFirst2Pages + 1; // First item of page 3
+        Assert.Contains($"Test {expectedNextUnreadItemIndex}", firstEntry.Title);
     }
 
     [Fact]

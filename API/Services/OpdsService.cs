@@ -596,12 +596,17 @@ public class OpdsService : IOpdsService
 
 
         // Check if there is reading progress or not, if so, inject a "continue-reading" item
-        var firstReadReadingListItem = items.FirstOrDefault(i => i.PagesRead > 0 && i.PagesRead != i.PagesTotal) ??
-                                       items.FirstOrDefault(i => i.PagesRead == 0 && i.PagesRead != i.PagesTotal);
-        if (firstReadReadingListItem != null && request.PageNumber == FirstPageNumber)
+        var anyProgress = await _unitOfWork.ReadingListRepository.AnyUserReadingProgressAsync(readingListId, userId);
+        if (anyProgress)
         {
-            await AddContinueReadingPoint(firstReadReadingListItem, feed, request);
+            var firstReadReadingListItem = await _unitOfWork.ReadingListRepository.GetContinueReadingPoint(readingListId, userId);
+            if (firstReadReadingListItem != null && request.PageNumber == FirstPageNumber)
+            {
+                await AddContinueReadingPoint(firstReadReadingListItem, feed, request);
+            }
         }
+
+
 
         foreach (var item in items)
         {
