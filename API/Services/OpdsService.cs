@@ -1003,7 +1003,7 @@ public class OpdsService : IOpdsService
 
         var pageNumber = Math.Max(list.CurrentPage, 1);
 
-        if (pageNumber > 1)
+        if (pageNumber > FirstPageNumber)
         {
             feed.Links.Add(CreateLink(FeedLinkRelation.Prev, FeedLinkType.AtomNavigation, url + "pageNumber=" + (pageNumber - 1)));
         }
