@@ -1379,6 +1379,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.document.documentElement.style.setProperty('--book-reader-content-max-height', maxHeight);
     this.document.documentElement.style.setProperty('--book-reader-content-max-width', maxWidth);
 
+    // If not set, the position will default to 'static', which may cause the bookmark indicator to be incorrectly positioned.
+    this.document.documentElement.style.setProperty('--book-reader-content-position', 'relative');
   }
 
   updateSingleImagePageStyles() {
@@ -1511,27 +1513,28 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private addEmptyPageIfRequired(): void {
     const bookContentElem = this.bookContentElemRef.nativeElement;
-
-    // Remove the empty gap first (if exist) to recalculate if we need the empty gap
     const oldEmptyGap = bookContentElem.querySelector('.kavita-empty-gap');
-    if (oldEmptyGap) oldEmptyGap.remove();
 
     if (this.layoutMode() !== BookPageLayoutMode.Column2 || this.isSingleImagePage) {
+      oldEmptyGap?.remove(); // We don't need empty gap for this condition
       return;
     }
 
     const pageSize = this.pageSize();
-    const [_, totalScroll] = this.getScrollOffsetAndTotalScroll();
+    let [_, totalScroll] = this.getScrollOffsetAndTotalScroll();
+
+    if (oldEmptyGap) totalScroll -= pageSize/2;
     const lastPageSize = totalScroll % pageSize;
 
     if (lastPageSize >= pageSize / 2 || lastPageSize === 0) {
       // The last page needs more than one column, no pages will be duplicated
+      oldEmptyGap?.remove();
       return;
     }
 
     // Need to adjust height with the column gap to ensure we don't have too much extra page
-    const columnHeight = this.pageHeight() - COLUMN_GAP;
-    const emptyPage = this.renderer.createElement('div')
+    const columnHeight = this.pageHeight() - (COLUMN_GAP * 2);
+    const emptyPage = oldEmptyGap ?? this.renderer.createElement('div');
     emptyPage.classList.add('kavita-empty-gap');
 
     this.renderer.setStyle(emptyPage, 'height', columnHeight + 'px');
@@ -1787,7 +1790,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return !entries.some(item => element !== item && item.contains(element))
 
         // Remove element that don't have any content
-        && (element.textContent.trim().length !== 0 || element.querySelectorAll('img, svg').length !== 0 || /^(img|svg)$/im.test(element.tagName));
+        && (element.textContent?.trim().length || element.querySelectorAll('img, svg').length !== 0 || /^(img|svg)$/im.test(element.tagName));
       });
 
     intersectingEntries.sort((a, b) => this.sortElementsForLayout(a, b));
