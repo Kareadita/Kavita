@@ -311,7 +311,7 @@ public class ReadingListRepository : IReadingListRepository
             .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
             .RestrictAgainstAgeRestriction(user.GetAgeRestriction());
 
-        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.NormalizedTitle);
+        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.Title);
 
        var finalQuery = query.ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
@@ -447,6 +447,7 @@ public class ReadingListRepository : IReadingListRepository
             Order = item.ReadingListItem.Order,
             SeriesId = item.ReadingListItem.SeriesId,
             SeriesName = item.Series.Name,
+            SeriesSortName = item.Series.SortName,
             SeriesFormat = item.Series.Format,
             PagesTotal = item.Chapter.Pages,
             PagesRead = item.PagesRead,
@@ -513,6 +514,7 @@ public class ReadingListRepository : IReadingListRepository
             (data, s) => new
             {
                 SeriesName = s.Name,
+                SortName = s.SortName,
                 SeriesFormat = s.Format,
                 s.LibraryId,
                 data.ReadingListItem,
@@ -541,6 +543,7 @@ public class ReadingListRepository : IReadingListRepository
                 Order = x.Data.ReadingListItem.Order,
                 SeriesId = x.Data.ReadingListItem.SeriesId,
                 SeriesName = x.Data.SeriesName,
+                SeriesSortName = x.Data.SortName,
                 SeriesFormat = x.Data.SeriesFormat,
                 PagesTotal = x.Data.TotalPages,
                 ChapterNumber = x.Data.ChapterNumber,

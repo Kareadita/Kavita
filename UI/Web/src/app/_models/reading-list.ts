@@ -9,6 +9,7 @@ export interface ReadingListItem {
   pagesRead: number;
   pagesTotal: number;
   seriesName: string;
+  seriesSortName: string;
   seriesFormat: MangaFormat;
   seriesId: number;
   chapterId: number;

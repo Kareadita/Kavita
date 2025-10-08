@@ -782,7 +782,7 @@
 
     "license": {
         "title": "Kavita+ License",
-        "kavita+-warning": "Kavita+ is separate from Kavita. If you uninstall Kavita without unsubscribing, you will be charged.",
+        "kavita+-warning": "Kavita+ is separate from Kavita. Uninstalling without first cancelling your subscription will continue the billing cycle.",
         "manage": "Manage",
         "invalid-license-tooltip": "If your subscription has ended, you must email support to get a new subscription created",
         "check": "Check",

@@ -267,6 +267,8 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     let name = '';
     if (item.hasOwnProperty('sortName')) {
       name = item.sortName;
+    } else if (item.hasOwnProperty('seriesSortName')) { // Reading List Item
+      name = item.seriesSortName;
     } else if (item.hasOwnProperty('seriesName')) {
       name = item.seriesName;
     } else if (item.hasOwnProperty('name')) {

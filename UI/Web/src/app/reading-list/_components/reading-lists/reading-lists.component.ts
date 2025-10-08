@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs/operators';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
@@ -43,7 +42,6 @@ export class ReadingListsComponent implements OnInit {
   private router = inject(Router);
   private jumpbarService = inject(JumpbarService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private ngbModal = inject(NgbModal);
   private titleService = inject(Title);
 
   protected readonly WikiLink = WikiLink;

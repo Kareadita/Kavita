@@ -11,6 +11,7 @@ public sealed record ReadingListItemDto
     public int ChapterId { get; init; }
     public int SeriesId { get; init; }
     public string? SeriesName { get; set; }
+    public string? SeriesSortName { get; set; }
     public MangaFormat SeriesFormat { get; set; }
     public int PagesRead { get; set; }
     public int PagesTotal { get; set; }
