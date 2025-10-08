@@ -383,11 +383,13 @@ public class ReadingListRepository : IReadingListRepository
                 {
                     ReadingListItem = rli,
                     Chapter = chapter,
+                    FileSize = _context.MangaFile.Where(f => f.ChapterId == chapter.Id).Sum(f => (long?)f.Bytes) ?? 0
                 })
             .Join(_context.Volume, x => x.ReadingListItem.VolumeId, volume => volume.Id, (x, volume) => new
                 {
                     x.ReadingListItem,
                     x.Chapter,
+                    x.FileSize,
                     Volume = volume
                 })
             .Join(_context.Series, x => x.ReadingListItem.SeriesId, series => series.Id, (x, series) => new
@@ -395,6 +397,7 @@ public class ReadingListRepository : IReadingListRepository
                     x.ReadingListItem,
                     x.Chapter,
                     x.Volume,
+                    x.FileSize,
                     Series = series
                 })
             .Where(x => userLibraries.Contains(x.Series.LibraryId))
@@ -407,6 +410,7 @@ public class ReadingListRepository : IReadingListRepository
                     x.Chapter,
                     x.Volume,
                     x.Series,
+                    x.FileSize,
                     ProgressGroup = progressGroup
                 })
             .SelectMany(
@@ -417,6 +421,7 @@ public class ReadingListRepository : IReadingListRepository
                     x.Chapter,
                     x.Volume,
                     x.Series,
+                    x.FileSize,
                     Progress = progress,
                     PagesRead = progress != null ? progress.PagesRead : 0,
                     HasProgress = progress != null,
@@ -460,7 +465,7 @@ public class ReadingListRepository : IReadingListRepository
             LibraryType = library.Type,
             ChapterTitleName = item.Chapter.TitleName,
             LibraryName = library.Name,
-            FileSize = item.Chapter.Files.Sum(f => f.Bytes), // TODO: See if we can put FileSize on the chapter in future
+            FileSize = item.FileSize,
             Summary = item.Chapter.Summary,
             IsSpecial = item.Chapter.IsSpecial,
             LastReadingProgressUtc = item.Progress?.LastModifiedUtc
