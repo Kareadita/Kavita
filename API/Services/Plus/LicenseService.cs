@@ -265,9 +265,6 @@ public class LicenseService(
             if (cacheValue.HasValue) return cacheValue.Value;
         }
 
-        // TODO: If info.IsCancelled && notActive, let's remove the license so we aren't constantly checking
-
-
         try
         {
             var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
@@ -287,10 +284,17 @@ public class LicenseService(
                 .All(r => new Version(r.UpdateVersion) <= BuildInfo.Version);
 
             response.HasLicense = hasLicense;
+            response.InstallId = HashUtil.ServerToken();
 
             // Cache if the license is valid here as well
             var licenseProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
             await licenseProvider.SetAsync(CacheKey, response.IsActive, _licenseCacheTimeout);
+
+            // TODO: If info.IsCancelled && notActive, let's remove the license so we aren't constantly checking
+            if (response is {IsCancelled: true, IsActive: false})
+            {
+                //logger.LogWarning("Kavita+ License is no longer active, removing Server registration");
+            }
 
             // Cache the license info if IsActive and ExpirationDate > DateTime.UtcNow + 2
             if (response.IsActive && response.ExpirationDate > DateTime.UtcNow.AddDays(2))
@@ -298,7 +302,6 @@ public class LicenseService(
                 await licenseInfoProvider.SetAsync(LicenseInfoCacheKey, response, _licenseCacheTimeout);
             }
 
-            response.InstallId = HashUtil.ServerToken();
 
             return response;
         }
