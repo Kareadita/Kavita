@@ -26,7 +26,7 @@
             <div class="subtitle">
               {{chapterTitleLabel()}}
               @if (totalSeriesPages > 0) {
-                <span>{{t('series-progress', {percentage: (Math.min(1, ((totalSeriesPagesRead + pageNum) / totalSeriesPages)) | percent)}) }}</span>
+                <span class="ms-2">{{t('series-progress', {percentage: (Math.min(1, ((totalSeriesPagesRead + pageNum) / totalSeriesPages)) | percent)}) }}</span>
               }
             </div>
           </div>

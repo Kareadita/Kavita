@@ -274,14 +274,14 @@ public class ReaderController : BaseApiController
         if (info.IsSpecial)
         {
             info.Subtitle = Path.GetFileNameWithoutExtension(info.FileName);
-        } else if (!info.IsSpecial && info.VolumeNumber.Equals(Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume))
+        } else if (!info.IsSpecial && info.VolumeNumber.Equals(Parser.LooseLeafVolume))
         {
             info.Subtitle = ReaderService.FormatChapterName(info.LibraryType, true, true) + info.ChapterNumber;
         }
         else
         {
             info.Subtitle = await _localizationService.Translate(User.GetUserId(), "volume-num", info.VolumeNumber);
-            if (!info.ChapterNumber.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultChapter))
+            if (!info.ChapterNumber.Equals(Parser.DefaultChapter))
             {
                 info.Subtitle += " " + ReaderService.FormatChapterName(info.LibraryType, true, true) +
                                  info.ChapterNumber;
