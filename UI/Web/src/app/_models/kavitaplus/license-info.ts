@@ -6,4 +6,5 @@ export interface LicenseInfo {
   registeredEmail: string;
   totalMonthsSubbed: number;
   hasLicense: boolean;
+  installId: string;
 }

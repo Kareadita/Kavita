@@ -267,6 +267,7 @@ public class LicenseService(
 
         // TODO: If info.IsCancelled && notActive, let's remove the license so we aren't constantly checking
 
+
         try
         {
             var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
@@ -296,6 +297,8 @@ public class LicenseService(
             {
                 await licenseInfoProvider.SetAsync(LicenseInfoCacheKey, response, _licenseCacheTimeout);
             }
+
+            response.InstallId = HashUtil.ServerToken();
 
             return response;
         }

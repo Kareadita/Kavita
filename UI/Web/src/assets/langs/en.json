@@ -815,6 +815,7 @@
         "faq-title": "FAQ",
         "total-subbed-months-label": "Total Months Subscribed",
         "email-label": "Registered Email",
+        "supportId-label": "Support Id",
 
         "license-mismatch": "License may be registered to another Kavita instance. Re-register to fix.",
         "k+-license-overwrite": "License is registered to another Kavita instance. This can happen on re-installation and rarely due to system updates. Select overwrite to force this instance to register with Kavita+.",
