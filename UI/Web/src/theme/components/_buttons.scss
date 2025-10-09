@@ -14,10 +14,18 @@
   --bs-btn-active-bg: var(--primary-color-dark-shade);
   --bs-btn-active-border-color: var(--primary-color-dark-shade);
 
+  i {
+    color: var(--btn-primary-text-color);
+  }
+
   &:hover {
     color: var(--btn-primary-hover-text-color);
     background-color: var(--btn-primary-hover-bg-color);
     border-color: var(--btn-primary-hover-border-color);
+
+    i {
+      --btncolor: var(-primary-hover-text-color);
+    }
   }
 }
 
@@ -30,10 +38,18 @@
   background-color: var(--btn-outline-primary-bg-color);
   border-color: var(--btn-outline-primary-border-color);
 
+  i {
+    color: var(--btn-outline-primary-text-color);
+  }
+
   &:hover {
     color: var(--btn-outline-primary-hover-text-color) !important;
     background-color: var(--btn-outline-primary-hover-bg-color) !important;
     border-color: var(--btn-outline-primary-hover-border-color) !important;
+
+    i {
+      color: var(--btn-outline-primary-hover-text-color) !important;
+    }
   }
 }
 
@@ -82,6 +98,10 @@
   background-color: var(--btn-secondary-outline-bg-color);
   border-color: var(--btn-secondary-outline-border-color);
 
+  i {
+    color: var(--btn-secondary-outline-text-color);
+  }
+
   &:hover {
     --bs-btn-color: var(--btn-secondary-outline-hover-text-color);
     --bs-btn-hover-bg: var(-btn-secondary-outline-hover-bg-color);
@@ -94,6 +114,10 @@
     box-shadow: inset 0px -2px 0px 0px var(--btn-secondary-outline-text-color);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+
+    i {
+      color: var(--btn-secondary-outline-hover-text-color);
+    }
   }
 }
 
@@ -103,10 +127,18 @@
   background-color: var(--btn-danger-outline-bg-color);
   border-color: var(--btn-danger-outline-border-color);
 
+  i {
+    color: var(--btn-danger-outline-text-color);
+  }
+
   &:hover {
     color: var(--btn-danger-outline-hover-text-color);
     background-color: var(--btn-danger-outline-hover-bg-color);
     border-color: var(--btn-danger-outline-hover-border-color);
+
+    i {
+      color: var(--btn-danger-outline-hover-text-color);
+    }
   }
 }
 
@@ -132,6 +164,9 @@
   background-color: var(--btn-disabled-bg-color);
   color: var(--btn-disabled-text-color);
   border-color: var(--btn-disabled-border-color);
+  i {
+    color: var(--btn-disabled-text-color);
+  }
 }
 
 button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
@@ -160,6 +195,10 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
   color: var(--body-text-color);
   border: none;
 
+  i {
+    color: var(--body-text-color);
+  }
+
   &:disabled {
     --bs-btn-disabled-bg: transparent;
   }
@@ -178,14 +217,26 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 
 .btn-primary-text {
   color: var(--btn-primary-text-text-color);
+
+  i {
+    color: var(--btn-primary-text-text-color);
+  }
 }
 
 .btn-secondary-text {
   color: var(--btn-secondary-text-text-color);
+
+  i {
+    color: var(--btn-secondary-text-text-color);
+  }
 }
 
 .btn-danger-text {
   color: var(--btn-danger-text-text-color);
+
+  i {
+    color: var(--btn-danger-text-text-color);
+  }
 }
 
 
@@ -194,6 +245,10 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
   color: var(--btn-secondary-text-color);
   background-color: var(--btn-secondary-bg-color);
   border-color: var(--btn-secondary-border-color);
+
+  i {
+    color: var(--btn-secondary-text-color);
+  }
 }
 
 .btn.btn-secondary.alt {
@@ -210,35 +265,6 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
       box-shadow: 0 0 0 0.05rem var(--btn-alt-focus-boxshadow-color);
       font-weight: var(--btn-secondary-font-weight);
     }
-}
-
-$button_types: '', -primary, -secondary, -outline-primary, -outline-secondary, -danger;
-$icon_classes: fa, fa-regular, fa-solid;
-
-// FA icon colors for all button types
-// the .nav exception is for the Activity button in the top nav bar
-@each $button_type in $button_types {
-  button.btn#{$button_type} {
-    @each $icon_class in $icon_classes {
-      i:not(.nav).#{$icon_class} {
-        color: var(--btn#{$button_type}-fa-icon-color);
-      }
-
-      &:hover {
-        i:not(.nav).#{$icon_class} {
-          color: var(--btn#{$button_type}-hover-fa-icon-color);
-        }
-      }
-    }
-  }
-}
-
-button.btn:disabled{
-  @each $icon_class in $icon_classes {
-    i:not(.nav).#{$icon_class} {
-      color: var(--btn-disabled-fa-icon-color);
-    }
-  }
 }
 
 .btn-check:focus + .btn, .btn:focus {

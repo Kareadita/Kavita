@@ -14,11 +14,6 @@
         box-shadow: 0 0 0 0.25rem var(--input-focus-boxshadow-color);
     }
 
-    &:read-only {
-        background-color: var(--input-bg-readonly-color);
-        cursor: initial;
-    }
-
     &:disabled {
         cursor: not-allowed;
         pointer-events: none;
