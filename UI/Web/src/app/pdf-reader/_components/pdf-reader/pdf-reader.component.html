@@ -2,7 +2,7 @@
   @if (accountService.currentUser$ | async; as user) {
     <div class="{{theme}}" #container>
 
-      @if (isLoading) {
+      @if (isLoading && !disableLoadingIndicator()) {
         <div class="loading-message-container">
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           {{t('loading-message')}}

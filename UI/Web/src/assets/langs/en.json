@@ -210,6 +210,8 @@
         "highlight-bar-tooltip": "These colors are shared between all books",
         "colorscape-label": "Use ColorScape",
         "colorscape-tooltip": "Global toggle to enable/disable the dynamic gradient feature. Will override theme settings",
+        "data-saver-label": "Data saver",
+        "data-saver-tooltip": "Minimizes data usage by preventing automatic prefetching (e.g., PDF reader)",
 
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobbling",

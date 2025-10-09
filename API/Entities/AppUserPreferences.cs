@@ -171,6 +171,13 @@ public class AppUserPreferences
     /// UI Site Global Setting: Should Kavita render ColorScape gradients
     /// </summary>
     public bool ColorScapeEnabled { get; set; } = true;
+
+    /// <summary>
+    /// Enable data saver mode across Kavita, limiting information that is pre-fetched
+    /// </summary>
+    /// <remarks>Currenty only integrated into the PDF reader</remarks>
+    public bool DataSaver { get; set; } = false;
+
     #endregion
 
     #region KavitaPlus

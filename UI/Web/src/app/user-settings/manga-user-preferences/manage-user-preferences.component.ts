@@ -47,6 +47,7 @@ type UserPreferencesForm = FormGroup<{
   locale: FormControl<string>,
   bookReaderHighlightSlots: FormArray<FormControl<HighlightSlot>>,
   colorScapeEnabled: FormControl<boolean>,
+  dataSaver: FormControl<boolean>,
 
   aniListScrobblingEnabled: FormControl<boolean>,
   wantToReadSync: FormControl<boolean>,
@@ -96,9 +97,6 @@ export class ManageUserPreferencesComponent implements OnInit {
   loading = signal(true);
   ageRatings = signal<AgeRatingDto[]>([]);
   libraries = signal<Library[]>([]);
-  libraryOptions = computed(() => this.libraries().map(l => {
-    return { label: l.name, value: l.id };
-  }));
 
   locales: Array<KavitaLocale> = [];
 
@@ -165,6 +163,7 @@ export class ManageUserPreferencesComponent implements OnInit {
         locale: this.fb.control<string>(pref.locale || 'en'),
         bookReaderHighlightSlots: this.fb.array(pref.bookReaderHighlightSlots.map(s => this.fb.control(s))),
         colorScapeEnabled: this.fb.control<boolean>(pref.colorScapeEnabled),
+        dataSaver: this.fb.control<boolean>(pref.dataSaver),
 
         aniListScrobblingEnabled: this.fb.control<boolean>(pref.aniListScrobblingEnabled),
         wantToReadSync: this.fb.control<boolean>(pref.wantToReadSync),

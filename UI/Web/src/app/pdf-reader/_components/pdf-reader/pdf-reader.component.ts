@@ -7,7 +7,7 @@ import {
   HostListener,
   inject,
   OnDestroy,
-  OnInit,
+  OnInit, signal,
   ViewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -110,6 +110,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   backgroundColor: string = this.themeMap[this.theme].background;
   fontColor: string = this.themeMap[this.theme].font;
 
+  /**
+   * True if Preferences.DataSaver is true
+   */
+  disableLoadingIndicator = signal(false);
   isLoading: boolean = true;
   /**
    * How much of the current document is loaded
@@ -259,6 +263,9 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   init() {
     this.backgroundColor = this.themeMap[this.theme].background;
     this.fontColor = this.themeMap[this.theme].font; // TODO: Move this to an observable or something
+
+    this.disableLoadingIndicator.set(this.user.preferences.dataSaver);
+    pdfDefaultOptions.disableAutoFetch = this.user.preferences.dataSaver;
 
     this.calcScrollbarNeeded();
 
