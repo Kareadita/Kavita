@@ -87,7 +87,7 @@ export class AnnotationService {
 
     return this.httpClient.post<PaginatedResult<Annotation>[]>(this.baseUrl + 'annotation/all-filtered', filter, {observe: 'response', params}).pipe(
       map((res: any) => {
-        return this.utilityService.createPaginatedResult(res as PaginatedResult<Annotation>[]);
+        return this.utilityService.createPaginatedResult<Annotation>(res);
       }),
     );
   }
@@ -114,7 +114,6 @@ export class AnnotationService {
     return this.httpClient.post<Annotation>(this.baseUrl + 'annotation/update', data).pipe(
       switchMap(newAnnotation => this.getAllAnnotations(data.chapterId)),
       tap(_ => {
-        console.log('emitting edit event');
         this._events.set({
           pageNumber: data.pageNumber,
           type: 'edit',
@@ -200,5 +199,27 @@ export class AnnotationService {
         this.save(blob, decodeURIComponent(filename));
       })
     );
+  }
+
+  /**
+   * Does not emit an event
+   * @param ids
+   */
+  likeAnnotations(ids: number[]) {
+    const userId = this.accountService.currentUserSignal()?.id;
+    if (!userId) return of();
+
+    return this.httpClient.post(this.baseUrl + 'annotation/like', ids);
+  }
+
+  /**
+   * Does not emit an event
+   * @param ids
+   */
+  unLikeAnnotations(ids: number[]) {
+    const userId = this.accountService.currentUserSignal()?.id;
+    if (!userId) return of();
+
+    return this.httpClient.post(this.baseUrl + 'annotation/unlike', ids);
   }
 }

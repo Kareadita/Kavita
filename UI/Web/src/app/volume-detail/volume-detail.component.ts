@@ -53,7 +53,7 @@ import {IHasCast} from "../_models/common/i-has-cast";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
-import {Breakpoint, UtilityService} from "../shared/_services/utility.service";
+import {Breakpoint, UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
@@ -194,7 +194,7 @@ export class VolumeDetailComponent implements OnInit {
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
-  protected readonly Breakpoint = Breakpoint;
+  protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly encodeURIComponent = encodeURIComponent;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
@@ -216,6 +216,7 @@ export class VolumeDetailComponent implements OnInit {
   plusReviews: Array<UserReview> = [];
   rating: number = 0;
   hasBeenRated: boolean = false;
+  size: number = 0;
   annotations = model<Annotation[]>([]);
 
   mobileSeriesImgBackground: string | undefined;
@@ -407,6 +408,8 @@ export class VolumeDetailComponent implements OnInit {
 
       this.series = results.series;
       this.volume = results.volume;
+      this.size = this.volume.chapters.reduce((sum, c) =>
+        sum + c.files.reduce((fileSum, f) => fileSum + f.bytes, 0), 0);
       this.libraryType = results.libraryType;
 
       if (this.volume.chapters.length === 1) {

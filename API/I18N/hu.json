@@ -200,5 +200,6 @@
     "person-doesnt-exist": "A személy nem létezik",
     "person-name-required": "A személy neve kötelező, és nem lehet üres",
     "email-taken": "Az e-mail már használatban van",
-    "person-name-unique": "A személy nevének egyedinek kell lennie"
+    "person-name-unique": "A személy nevének egyedinek kell lennie",
+    "password-authentication-disabled": "Jelszóhitelesítés letiltva, jelentkezzen be OpenID Connecten keresztül"
 }

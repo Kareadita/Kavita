@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.18",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.7.20",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.7.18"
+    "version": "0.8.7.20"
   },
   "servers": [
     {
@@ -1275,6 +1275,96 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Annotation/like": {
+      "post": {
+        "tags": [
+          "Annotation"
+        ],
+        "summary": "Adds a like for the currently authenticated user if not already from the annotations with given ids",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Annotation/unlike": {
+      "post": {
+        "tags": [
+          "Annotation"
+        ],
+        "summary": "Removes likes for the currently authenticated user if present from the annotations with given ids",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -13528,6 +13618,45 @@
         }
       }
     },
+    "/api/Series/series-with-annotations": {
+      "get": {
+        "tags": [
+          "Series"
+        ],
+        "summary": "Returns all Series that a user has access to",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Server/clear-cache": {
       "post": {
         "tags": [
@@ -17424,6 +17553,23 @@
             "description": "Selected Highlight Slot Index [0-4]",
             "format": "int32"
           },
+          "likes": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "libraryName": {
+            "type": "string",
+            "nullable": true
+          },
           "chapterId": {
             "type": "integer",
             "format": "int32"
@@ -17493,7 +17639,8 @@
               3,
               4,
               5,
-              6
+              6,
+              7
             ],
             "type": "integer",
             "format": "int32"
@@ -17919,6 +18066,16 @@
           "containsSpoiler": {
             "type": "boolean"
           },
+          "likes": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "A set container userIds of all users who have liked this annotations",
+            "nullable": true
+          },
           "chapterTitle": {
             "type": "string",
             "description": "Title of the TOC Chapter within Epub (not Chapter Entity)",
@@ -17927,6 +18084,9 @@
           "libraryId": {
             "type": "integer",
             "format": "int32"
+          },
+          "library": {
+            "$ref": "#/components/schemas/Library"
           },
           "seriesId": {
             "type": "integer",
@@ -18618,10 +18778,6 @@
             "type": "boolean",
             "description": "UI Site Global Setting: When showing series, only parent series or series with no relationships will be returned"
           },
-          "shareReviews": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
-          },
           "locale": {
             "type": "string",
             "description": "UI Site Global Setting: The language locale that should be used for the user",
@@ -18638,6 +18794,14 @@
           "wantToReadSync": {
             "type": "boolean",
             "description": "Should this account have Want to Read Sync enabled"
+          },
+          "shareReviews": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server",
+            "deprecated": true
+          },
+          "socialPreferences": {
+            "$ref": "#/components/schemas/AppUserSocialPreferences"
           },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
@@ -19111,6 +19275,60 @@
         },
         "additionalProperties": false,
         "description": "Represents a Saved user Filter"
+      },
+      "AppUserSocialPreferences": {
+        "type": "object",
+        "properties": {
+          "shareReviews": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+          },
+          "shareAnnotations": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Share your annotations with other users"
+          },
+          "viewOtherAnnotations": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: See other users' annotations while reading"
+          },
+          "socialLibraries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "UI Site Global Setting: For which libraries should social features be enabled",
+            "nullable": true
+          },
+          "socialMaxAgeRating": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "UI Site Global Setting: Highest age rating for which social features are enabled",
+            "format": "int32"
+          },
+          "socialIncludeUnknowns": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Enable social features for unknown age ratings"
+          }
+        },
+        "additionalProperties": false
       },
       "AppUserTableOfContent": {
         "required": [
@@ -19727,7 +19945,6 @@
       },
       "Chapter": {
         "required": [
-          "number",
           "range"
         ],
         "type": "object",
@@ -23439,6 +23656,11 @@
           "hasLicense": {
             "type": "boolean",
             "description": "A license is stored within Kavita"
+          },
+          "installId": {
+            "type": "string",
+            "description": "InstallId which can be given to support",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -29344,7 +29566,6 @@
           "locale",
           "noTransitions",
           "promptForDownloadSize",
-          "shareReviews",
           "theme"
         ],
         "type": "object",
@@ -29372,9 +29593,6 @@
           "collapseSeriesRelationships": {
             "type": "boolean"
           },
-          "shareReviews": {
-            "type": "boolean"
-          },
           "locale": {
             "minLength": 1,
             "type": "string"
@@ -29393,6 +29611,9 @@
             "items": {
               "$ref": "#/components/schemas/HighlightSlot"
             }
+          },
+          "socialPreferences": {
+            "$ref": "#/components/schemas/AppUserSocialPreferences"
           }
         },
         "additionalProperties": false

@@ -126,7 +126,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
-      pdfDefaultOptions.disableAutoFetch = true;
   }
 
   @HostListener('window:keyup', ['$event'])

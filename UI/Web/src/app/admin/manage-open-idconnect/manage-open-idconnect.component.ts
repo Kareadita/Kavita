@@ -2,8 +2,8 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
-  effect,
   inject,
   OnInit,
   signal
@@ -15,6 +15,7 @@ import {
   AsyncValidatorFn,
   FormControl,
   FormGroup,
+  NonNullableFormBuilder,
   ReactiveFormsModule,
   ValidationErrors,
   ValidatorFn
@@ -23,22 +24,44 @@ import {SettingsService} from "../settings.service";
 import {OidcConfig} from "../_models/oidc-config";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
-import {debounceTime, distinctUntilChanged, filter, map, of, switchMap, tap} from "rxjs";
+import {debounceTime, distinctUntilChanged, filter, forkJoin, map, of, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {RestrictionSelectorComponent} from "../../user-settings/restriction-selector/restriction-selector.component";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {MetadataService} from "../../_services/metadata.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
-import {allRoles, Role} from "../../_services/account.service";
+import {AccountService, allRoles, Role} from "../../_services/account.service";
 import {Library} from "../../_models/library/library";
 import {LibraryService} from "../../_services/library.service";
-import {LibrarySelectorComponent} from "../library-selector/library-selector.component";
-import {RoleSelectorComponent} from "../role-selector/role-selector.component";
 import {ToastrService} from "ngx-toastr";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
+import {
+  MultiCheckBoxItem,
+  SettingMultiCheckBox
+} from "../../settings/_components/setting-multi-check-box/setting-multi-check-box.component";
+import {
+  SettingMultiTextFieldComponent
+} from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
+
+type OidcFormGroup = FormGroup<{
+  autoLogin: FormControl<boolean>;
+  disablePasswordAuthentication: FormControl<boolean>;
+  providerName: FormControl<string>;
+  authority: FormControl<string>;
+  clientId: FormControl<string>;
+  secret: FormControl<string>;
+  provisionAccounts: FormControl<boolean>;
+  requireVerifiedEmail: FormControl<boolean>;
+  syncUserSettings: FormControl<boolean>;
+  rolesPrefix: FormControl<string>;
+  rolesClaim: FormControl<string>;
+  customScopes: FormControl<string[]>;
+  defaultRoles: FormControl<string[]>;
+  defaultLibraries: FormControl<number[]>;
+  defaultAgeRestriction: FormControl<AgeRating>;
+  defaultIncludeUnknowns: FormControl<boolean>;
+}>;
 
 @Component({
   selector: 'app-manage-open-idconnect',
@@ -48,11 +71,10 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
     SettingItemComponent,
     SettingSwitchComponent,
     AgeRatingPipe,
-    LibrarySelectorComponent,
-    RoleSelectorComponent,
     SafeHtmlPipe,
     DefaultValuePipe,
-    TagBadgeComponent
+    SettingMultiCheckBox,
+    SettingMultiTextFieldComponent
   ],
   templateUrl: './manage-open-idconnect.component.html',
   styleUrl: './manage-open-idconnect.component.scss',
@@ -65,81 +87,88 @@ export class ManageOpenIDConnectComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly metadataService = inject(MetadataService);
   private readonly toastr = inject(ToastrService);
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly accountService = inject(AccountService);
+  private readonly libraryService = inject(LibraryService);
 
   serverSettings!: ServerSettings;
-  settingsForm: FormGroup = new FormGroup({});
+  settingsForm!: OidcFormGroup;
 
+  loading = signal(true);
   oidcSettings = signal<OidcConfig | undefined>(undefined);
   ageRatings = signal<AgeRatingDto[]>([]);
-  selectedLibraries = signal<number[]>([]);
-  selectedRoles = signal<string[]>([]);
+  libraries = signal<Library[]>([]);
+  libraryOptions = computed(() => this.libraries().map(l => {
+    return { label: l.name, value: l.id };
+  }));
+  roles = signal<Role[]>(allRoles);
+  roleOptions: MultiCheckBoxItem<Role>[] = allRoles.map(r => {
+    return { label: r, value: r, disableFunc: (r, selected) => {
+      return r !== Role.Admin && selected.includes(Role.Admin);
+    }}
+  });
 
   ngOnInit(): void {
-    this.metadataService.getAllAgeRatings().subscribe(ratings => {
-      this.ageRatings.set(ratings);
-    });
+    forkJoin([
+      this.metadataService.getAllAgeRatings(),
+      this.settingsService.getServerSettings(),
+      this.libraryService.getLibraries(),
+    ]).subscribe(([ageRatings, settings, libraries]) => {
+      this.ageRatings.set(ageRatings);
+      this.libraries.set(libraries);
 
-    this.settingsService.getServerSettings().subscribe({
-      next: data => {
-        this.serverSettings = data;
-        this.oidcSettings.set(this.serverSettings.oidcConfig);
-        this.selectedRoles.set(this.serverSettings.oidcConfig.defaultRoles);
-        this.selectedLibraries.set(this.serverSettings.oidcConfig.defaultLibraries);
+      this.serverSettings = settings;
+      this.oidcSettings.set(this.serverSettings.oidcConfig);
 
-        this.settingsForm.addControl('authority', new FormControl(this.serverSettings.oidcConfig.authority, [], [this.authorityValidator()]));
-        this.settingsForm.addControl('clientId', new FormControl(this.serverSettings.oidcConfig.clientId, [this.requiredIf('authority')]));
-        this.settingsForm.addControl('secret', new FormControl(this.serverSettings.oidcConfig.secret, [this.requiredIf('authority')]));
-        this.settingsForm.addControl('provisionAccounts', new FormControl(this.serverSettings.oidcConfig.provisionAccounts, []));
-        this.settingsForm.addControl('requireVerifiedEmail', new FormControl(this.serverSettings.oidcConfig.requireVerifiedEmail, []));
-        this.settingsForm.addControl('syncUserSettings', new FormControl(this.serverSettings.oidcConfig.syncUserSettings, []));
-        this.settingsForm.addControl('rolesPrefix', new FormControl(this.serverSettings.oidcConfig.rolesPrefix, []));
-        this.settingsForm.addControl('rolesClaim', new FormControl(this.serverSettings.oidcConfig.rolesClaim, []));
-        this.settingsForm.addControl('autoLogin', new FormControl(this.serverSettings.oidcConfig.autoLogin, []));
-        this.settingsForm.addControl('disablePasswordAuthentication', new FormControl(this.serverSettings.oidcConfig.disablePasswordAuthentication, []));
-        this.settingsForm.addControl('providerName', new FormControl(this.serverSettings.oidcConfig.providerName, []));
-        this.settingsForm.addControl("defaultAgeRestriction", new FormControl(this.serverSettings.oidcConfig.defaultAgeRestriction, []));
-        this.settingsForm.addControl('defaultIncludeUnknowns', new FormControl(this.serverSettings.oidcConfig.defaultIncludeUnknowns, []));
-        this.settingsForm.addControl('customScopes', new FormControl(this.serverSettings.oidcConfig.customScopes.join(","), []))
-        this.cdRef.markForCheck();
+      this.settingsForm = this.fb.group({
+        authority: this.fb.control(this.serverSettings.oidcConfig.authority, { asyncValidators: [this.authorityValidator()] }),
+        clientId: this.fb.control(this.serverSettings.oidcConfig.clientId, { validators: [this.requiredIf('authority')] }),
+        secret: this.fb.control(this.serverSettings.oidcConfig.secret, { validators: [this.requiredIf('authority')] }),
+        provisionAccounts: this.fb.control(this.serverSettings.oidcConfig.provisionAccounts),
+        requireVerifiedEmail: this.fb.control(this.serverSettings.oidcConfig.requireVerifiedEmail),
+        syncUserSettings: this.fb.control(this.serverSettings.oidcConfig.syncUserSettings),
+        rolesPrefix: this.fb.control(this.serverSettings.oidcConfig.rolesPrefix),
+        rolesClaim: this.fb.control(this.serverSettings.oidcConfig.rolesClaim),
+        autoLogin: this.fb.control(this.serverSettings.oidcConfig.autoLogin),
+        disablePasswordAuthentication: this.fb.control(this.serverSettings.oidcConfig.disablePasswordAuthentication),
+        providerName: this.fb.control(this.serverSettings.oidcConfig.providerName),
+        defaultLibraries: this.fb.control(this.serverSettings.oidcConfig.defaultLibraries),
+        defaultRoles: this.fb.control(this.serverSettings.oidcConfig.defaultRoles),
+        defaultAgeRestriction: this.fb.control(this.serverSettings.oidcConfig.defaultAgeRestriction),
+        defaultIncludeUnknowns: this.fb.control(this.serverSettings.oidcConfig.defaultIncludeUnknowns),
+        customScopes: this.fb.control(this.serverSettings.oidcConfig.customScopes)
+      });
 
-        this.settingsForm.valueChanges.pipe(
-          debounceTime(300),
-          distinctUntilChanged(),
-          takeUntilDestroyed(this.destroyRef),
-          filter(() => {
-            // Do not auto save when provider settings have changed
-            const settings: OidcConfig = this.settingsForm.getRawValue();
-            return settings.authority == this.oidcSettings()?.authority && settings.clientId == this.oidcSettings()?.clientId;
-          }),
-          tap(() => this.save())
-        ).subscribe();
-      }
-    });
+      this.loading.set(false);
+      this.cdRef.markForCheck();
+
+      this.settingsForm.valueChanges.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+        filter(() => {
+          // Do not auto save when provider settings have changed
+          const settings: OidcConfig = this.packData().oidcConfig;
+          return settings.authority == this.oidcSettings()?.authority && settings.clientId == this.oidcSettings()?.clientId;
+        }),
+        tap(() => this.save())
+      ).subscribe();
+    })
   }
 
-  updateRoles(roles: string[]) {
-    this.selectedRoles.set(roles);
-    this.save();
-  }
-
-  updateLibraries(libraries: Library[]) {
-    this.selectedLibraries.set(libraries.map(l => l.id));
-    this.save();
+  private packData(): ServerSettings {
+    const newSettings = Object.assign({}, this.serverSettings);
+    newSettings.oidcConfig = {
+      ...this.settingsForm.getRawValue(),
+      enabled: false,
+    };
+    return newSettings;
   }
 
   save(showConfirmation: boolean = false) {
-    if (!this.settingsForm.valid || !this.serverSettings || !this.oidcSettings) return;
+    if (!this.settingsForm.valid || !this.serverSettings || !this.oidcSettings()) return;
 
-    const data = this.settingsForm.getRawValue();
-    const newSettings = Object.assign({}, this.serverSettings);
-    newSettings.oidcConfig = data as OidcConfig;
-    newSettings.oidcConfig.defaultAgeRestriction = parseInt(newSettings.oidcConfig.defaultAgeRestriction + '', 10) as AgeRating;
-    newSettings.oidcConfig.defaultRoles = this.selectedRoles();
-    newSettings.oidcConfig.defaultLibraries = this.selectedLibraries();
-    newSettings.oidcConfig.customScopes = (data.customScopes as string)
-      .split(',').map((item: string) => item.trim())
-      .filter((scope: string) => scope.length > 0);
-
+    const newSettings = this.packData();
     this.settingsService.updateServerSettings(newSettings).subscribe({
       next: data => {
         this.serverSettings = data;
@@ -155,14 +184,6 @@ export class ManageOpenIDConnectComponent implements OnInit {
         this.toastr.error(translate('errors.generic'))
       }
     })
-  }
-
-  breakString(s: string) {
-    if (s) {
-      return s.split(',');
-    }
-
-    return [];
   }
 
   authorityValidator(): AsyncValidatorFn {
@@ -188,6 +209,8 @@ export class ManageOpenIDConnectComponent implements OnInit {
 
   requiredIf(other: string): ValidatorFn {
     return (control): ValidationErrors | null => {
+      if (!this.settingsForm) return null;
+
       const otherControl = this.settingsForm.get(other);
       if (!otherControl) return null;
 

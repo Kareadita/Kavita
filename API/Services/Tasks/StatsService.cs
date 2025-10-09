@@ -355,7 +355,7 @@ public class StatsService : IStatsService
             userDto.DevicePlatforms = user.Devices.Select(d => d.Platform).ToList();
             userDto.SeriesBookmarksCreatedCount = user.Bookmarks.Count;
             userDto.SmartFilterCreatedCount = user.SmartFilters.Count;
-            userDto.IsSharingReviews = user.UserPreferences.ShareReviews;
+            userDto.IsSharingReviews = user.UserPreferences.SocialPreferences.ShareReviews;
             userDto.WantToReadSeriesCount = user.WantToRead.Count;
             userDto.IdentityProvider = user.IdentityProvider;
 

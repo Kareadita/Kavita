@@ -1,15 +1,15 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit, signal} from '@angular/core';
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {MetadataFieldMapping, MetadataFieldType, MetadataSettings} from "../_models/metadata-settings";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {MetadataService} from "../../_services/metadata.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {DownloadService} from "../../shared/_services/download.service";
+import {
+  SettingMultiTextFieldComponent
+} from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
 
 export type MetadataMappingsExport = {
   ageRatingMappings: Record<string, AgeRating>,
@@ -22,12 +22,10 @@ export type MetadataMappingsExport = {
   selector: 'app-manage-metadata-mappings',
   imports: [
     AgeRatingPipe,
-    DefaultValuePipe,
     FormsModule,
     ReactiveFormsModule,
-    SettingItemComponent,
-    TagBadgeComponent,
     TranslocoDirective,
+    SettingMultiTextFieldComponent,
   ],
   templateUrl: './manage-metadata-mappings.component.html',
   styleUrl: './manage-metadata-mappings.component.scss',
@@ -74,8 +72,8 @@ export class ManageMetadataMappingsComponent implements OnInit {
     const settings = this.settings();
     const settingsForm = this.settingsForm();
 
-    settingsForm.addControl('blacklist', new FormControl((settings.blacklist || '').join(','), []));
-    settingsForm.addControl('whitelist', new FormControl((settings.whitelist || '').join(','), []));
+    settingsForm.addControl('blacklist', new FormControl(settings.blacklist, []));
+    settingsForm.addControl('whitelist', new FormControl(settings.whitelist, []));
     settingsForm.addControl('ageRatingMappings', this.ageRatingMappings);
     settingsForm.addControl('fieldMappings', this.fieldMappings);
 
@@ -94,14 +92,6 @@ export class ManageMetadataMappingsComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  breakTags(csString: string) {
-    if (csString) {
-      return csString.split(',');
-    }
-
-    return [];
-  }
-
   public packData(): MetadataMappingsExport {
     const ageRatingMappings = this.ageRatingMappings.controls.reduce((acc: Record<string, AgeRating>, control) => {
       const { str, rating } = control.value;
@@ -114,15 +104,11 @@ export class ManageMetadataMappingsComponent implements OnInit {
     const fieldMappings = this.fieldMappings.controls
       .map((control) => control.value as MetadataFieldMapping)
       .filter(m => m.sourceValue.length > 0 && m.destinationValue.length > 0);
-
-    const blacklist = (this.settingsForm().get('blacklist')?.value || '').split(',').map((item: string) => item.trim()).filter((tag: string) => tag.length > 0);
-    const whitelist = (this.settingsForm().get('whitelist')?.value || '').split(',').map((item: string) => item.trim()).filter((tag: string) => tag.length > 0);
-
     return {
       ageRatingMappings: ageRatingMappings,
       fieldMappings: fieldMappings,
-      blacklist: blacklist,
-      whitelist: whitelist,
+      blacklist: this.settingsForm().get('blacklist')?.value || [],
+      whitelist: this.settingsForm().get('whitelist')?.value || [],
     }
   }
 

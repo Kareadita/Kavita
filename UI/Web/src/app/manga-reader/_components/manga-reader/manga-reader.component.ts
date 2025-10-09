@@ -501,7 +501,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return this.bookmarks[this.pageNum];
       }
 
-      return chapterInfo?.chapterTitle ?? '';
+      return chapterInfo?.chapterTitle || chapterInfo?.subtitle || '';
     });
 
 
@@ -835,7 +835,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     //send the current width override value to the label
     this.widthOverrideLabel$ = this.readerSettings$?.pipe(
-      map(values => (parseInt(values.widthSlider) <= 0) ? '' : values.widthSlider + '%'),
+      map(values => parseInt(values.widthSlider)),
+      map(widthOverride => (isNaN(widthOverride)) ? '' : widthOverride + '%'),
       takeUntilDestroyed(this.destroyRef)
     );
   }

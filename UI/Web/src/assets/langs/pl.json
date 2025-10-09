@@ -637,7 +637,8 @@
     },
     "personal-table-of-contents": {
         "no-data": "Nie dodano jeszcze nic do zakładek",
-        "delete": "Usunięto {{bookmarkName}}"
+        "delete": "Usunięto {{bookmarkName}}",
+        "filter-label": "{{common.filter}}"
     },
     "confirm-email": {
         "title": "Rejestracja",
@@ -735,7 +736,8 @@
         "publication-status-title": "Publikacja",
         "publication-status-tooltip": "Status publikacji",
         "on": "{{reader-settings.on}}",
-        "off": "{{reader-settings.off}}"
+        "off": "{{reader-settings.off}}",
+        "annotations-tab": "{{tabs.annotations-tab}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -1463,7 +1465,8 @@
         "collections": "Kolekcje",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
-        "include-extras": "Uwzględnij rozdziały i pliki"
+        "include-extras": "Uwzględnij rozdziały i pliki",
+        "annotations": "{{tabs.annotations-tab}}"
     },
     "nav-header": {
         "skip-alt": "Przejdź do głównej treści",
@@ -2822,16 +2825,62 @@
         "pdf-theme-tooltip": "Kolor motywu czytnika",
         "reading-profile-series-settings-title": "Serie",
         "reading-profile-library-settings-title": "Biblioteka",
-        "delete": "{{common.delete}}"
+        "delete": "{{common.delete}}",
+        "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}"
     },
     "oidc": {
         "login": "Wróć do ekranu logowania"
     },
     "manage-oidc-connect": {
         "require-verified-email-tooltip": "Wymagaj weryfikacji e-mail by utworzyć nowe konto lub połączyć z istniejącym. Jeśli nowo stworzone konto ma zweryfikowany e-mail, będzie automatycznie zweryfikowane po stronie Kavity.",
-        "advanced-title": "Ustawienia zaawansowane"
+        "advanced-title": "Ustawienia zaawansowane",
+        "save": "{{common.save}}",
+        "other-field-required": "{{validation.other-field-required}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "no-restriction": "{{restriction-selector.no-restriction}}"
     },
     "import-mappings": {
-        "replace": "Zamień"
+        "replace": "Zamień",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "save": "{{common.save}}"
+    },
+    "font-manager": {
+        "upload": "{{cover-image-chooser.upload}}",
+        "delete": "{{common.delete}}",
+        "add": "{{common.add}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}"
+    },
+    "annotation-card": {
+        "page-num": "{{book-reader.page-num-label}}"
+    },
+    "annotations-tab": {
+        "title": "{{tabs.annotations-tab}}"
+    },
+    "view-annotations-drawer": {
+        "title": "{{tabs.annotations-tab}}",
+        "close": "{{common.close}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "view-edit-annotation-drawer": {
+        "close": "{{common.close}}",
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
+    },
+    "view-bookmark-drawer": {
+        "close": "{{common.close}}",
+        "no-data": "{{common.no-data}}",
+        "page-num-label": "{{book-reader.page-num-label}}"
+    },
+    "view-toc-drawer": {
+        "close": "{{common.close}}"
+    },
+    "epub-setting-drawer": {
+        "close": "{{common.close}}"
+    },
+    "highlight-bar": {
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}"
     }
 }

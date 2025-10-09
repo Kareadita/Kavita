@@ -24,8 +24,9 @@
               @if (fileToProcess.validateSummary; as summary) {
                 <div ngbAccordionItem>
                   <h5 ngbAccordionHeader>
-                    <button ngbAccordionButton>
+                    <button ngbAccordionButton class="accordion-button">
                       <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }" />
+                      <i class="fas fa-chevron-up" aria-hidden="true"></i>
                     </button>
                   </h5>
                   <div ngbAccordionCollapse>
@@ -48,8 +49,9 @@
               @if (fileToProcess.dryRunSummary; as summary) {
                 <div ngbAccordionItem>
                   <h5 ngbAccordionHeader>
-                    <button ngbAccordionButton>
+                    <button ngbAccordionButton class="accordion-button">
                       <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }" />
+                      <i class="fas fa-chevron-up" aria-hidden="true"></i>
                     </button>
                   </h5>
                   <div ngbAccordionCollapse>
@@ -70,8 +72,9 @@
               @if (fileToProcess.finalizeSummary; as summary) {
                 <div ngbAccordionItem>
                   <h5 ngbAccordionHeader>
-                    <button ngbAccordionButton>
+                    <button ngbAccordionButton class="accordion-button">
                       <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }" />
+                      <i class="fas fa-chevron-up" aria-hidden="true"></i>
                     </button>
                   </h5>
                   <div ngbAccordionCollapse>

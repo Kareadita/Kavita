@@ -14,7 +14,6 @@ import {
 } from '@angular/core';
 import {fromEvent, merge, of} from "rxjs";
 import {catchError, debounceTime, tap} from "rxjs/operators";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ReaderService} from "../../../_services/reader.service";
 import {ToastrService} from "ngx-toastr";
@@ -22,6 +21,8 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {KEY_CODES} from "../../../shared/_services/utility.service";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {Annotation} from "../../_models/annotations/annotation";
+import {isMobileChromium} from "../../../_helpers/browser";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -78,72 +79,133 @@ export class BookLineOverlayComponent implements OnInit {
 
 
   ngOnInit() {
-    if (this.parent) {
+    // Check for Pointer Events API support
+    const hasPointerEvents = 'PointerEvent' in window;
 
-      const mouseUp$ = fromEvent<MouseEvent>(this.parent.nativeElement, 'mouseup');
-      const touchEnd$ = fromEvent<TouchEvent>(this.parent.nativeElement, 'touchend');
-
-      merge(mouseUp$, touchEnd$)
-        .pipe(
-          takeUntilDestroyed(this.destroyRef),
-          debounceTime(20),  // Need extra time for this extension to inject DOM https://github.com/Kareadita/Kavita/issues/3521
-          tap((event: MouseEvent | TouchEvent) => this.handleEvent(event))
-        ).subscribe();
+    // Some mobile Chromium browsers do not send touchend events reliably: https://github.com/Kareadita/Kavita/issues/4072
+    if (hasPointerEvents && !isMobileChromium()) {
+      // Use pointer events for modern browsers (except problematic mobile Chromium)
+      this.setupPointerEventListener();
+    } else {
+      // Fallback to mouse/touch events
+      this.setupLegacyEventListeners();
     }
   }
 
-  handleEvent(event: MouseEvent | TouchEvent) {
-    const selection = window.getSelection();
+  private setupPointerEventListener(): void {
+    if (!this.parent) return;
+
+    fromEvent<PointerEvent>(this.parent.nativeElement, 'pointerup')
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        debounceTime(20),
+        tap((event: PointerEvent) => this.handlePointerEvent(event))
+      ).subscribe();
+  }
+
+  private setupLegacyEventListeners(): void {
+    if (!this.parent) return;
+
+    const mouseUp$ = fromEvent<MouseEvent>(this.parent.nativeElement, 'mouseup');
+    const touchEnd$ = fromEvent<TouchEvent>(this.parent.nativeElement, 'touchend');
+
+    // Additional events for mobile Chromium workaround
+    const additionalEvents$ = isMobileChromium() ? [
+      fromEvent<TouchEvent>(this.parent.nativeElement, 'touchcancel'),
+      fromEvent<PointerEvent>(this.parent.nativeElement, 'pointerup')
+    ] : [];
+
+    merge(mouseUp$, touchEnd$, ...additionalEvents$)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        debounceTime(20),
+        tap((event: MouseEvent | TouchEvent | PointerEvent) => this.handleLegacyEvent(event))
+      ).subscribe();
+  }
+
+  private handlePointerEvent(event: PointerEvent): void {
+    // Filter out pen/stylus events if you don't want to handle them
+    if (event.pointerType === 'pen') {
+      return;
+    }
+
+    // Check for right-click
+    const isRightClick = event.button === 2;
+
+    this.processSelectionEvent(event, isRightClick);
+  }
+
+  private handleLegacyEvent(event: MouseEvent | TouchEvent | PointerEvent): void {
+    // Determine if it's a right-click (only applicable to mouse events)
+    const isRightClick = event instanceof MouseEvent && event.button === 2;
+
+    this.processSelectionEvent(event, isRightClick);
+  }
+
+  private processSelectionEvent(event: Event, isRightClick: boolean): void {
     if (!event.target) return;
 
+    const selection = window.getSelection();
 
-    // NOTE: This doesn't account for a partial occlusion with an annotation
+    // Check if target has annotation class
     this.hasSelectedAnnotation.set((event.target as HTMLElement).classList.contains('epub-highlight'));
 
-    if ((selection === null || selection === undefined || selection.toString().trim() === ''
-      || selection.toString().trim() === this.selectedText) || this.hasSelectedAnnotation()) {
+    if (this.shouldSkipSelection(selection, isRightClick)) {
       if (this.selectedText !== '') {
         event.preventDefault();
         event.stopPropagation();
       }
 
-      const isRightClick = (event instanceof MouseEvent && event.button === 2);
       if (!isRightClick) {
         this.reset();
       }
-
       return;
     }
 
+    // Process valid selection
     this.selectedText = selection ? selection.toString().trim() : '';
 
-
-    if (this.selectedText.length > 0 && this.mode === BookLineOverlayMode.None) {
-
-      // Get the range from the selection
-      const range = selection.getRangeAt(0);
-
-      // Get start and end containers
-      const startContainer = this.getElementContainer(range.startContainer);
-      const endContainer = this.getElementContainer(range.endContainer);
-
-      // Generate XPaths for both start and end
-      this.startXPath = this.readerService.getXPathTo(startContainer);
-      this.endXPath = this.readerService.getXPathTo(endContainer);
-
-      // Protect from DOM Shift by removing the UI part and making this scoped to true epub html
-      this.startXPath = this.readerService.descopeBookReaderXpath(this.startXPath);
-      this.endXPath = this.readerService.descopeBookReaderXpath(this.endXPath);
-
-      // Get the context window for generating a blurb in annotation flow
-      this.allTextFromSelection = (event.target as Element).textContent || '';
+    if (this.selectedText.length > 0 && this.mode === BookLineOverlayMode.None && selection !== null) {
+      this.captureSelectionContext(selection, event.target as Element);
 
       this.isOpen.emit(true);
       event.preventDefault();
       event.stopPropagation();
     }
+
     this.cdRef.markForCheck();
   }
+
+  private shouldSkipSelection(selection: Selection | null, isRightClick: boolean): boolean {
+    return (selection === null ||
+        selection === undefined ||
+        selection.toString().trim() === '' ||
+        selection.toString().trim() === this.selectedText) ||
+      this.hasSelectedAnnotation();
+  }
+
+  /**
+   * Captures XPath and context for the current selection
+   */
+  private captureSelectionContext(selection: Selection, targetElement: Element): void {
+    const range = selection.getRangeAt(0);
+
+    // Get start and end containers
+    const startContainer = this.getElementContainer(range.startContainer);
+    const endContainer = this.getElementContainer(range.endContainer);
+
+    // Generate XPaths for both start and end
+    this.startXPath = this.readerService.getXPathTo(startContainer);
+    this.endXPath = this.readerService.getXPathTo(endContainer);
+
+    // Protect from DOM Shift by removing the UI part and making this scoped to true epub html
+    this.startXPath = this.readerService.descopeBookReaderXpath(this.startXPath);
+    this.endXPath = this.readerService.descopeBookReaderXpath(this.endXPath);
+
+    // Get the context window for generating a blurb in annotation flow
+    this.allTextFromSelection = targetElement.textContent || '';
+  }
+
 
   switchMode(mode: BookLineOverlayMode) {
     this.mode = mode;

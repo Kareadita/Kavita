@@ -6,6 +6,7 @@
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button" [attr.aria-expanded]="acc.isExpanded('general-panel')" aria-controls="collapseOne">
               {{t('general-settings-title')}}
+              <i class="fas fa-chevron-up" aria-hidden="true"></i>
             </button>
           </h2>
           <div ngbAccordionCollapse>
@@ -68,6 +69,7 @@
           <h2 class="accordion-header" ngbAccordionHeader>
             <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded('reader-panel')" aria-controls="collapseOne">
               {{t('reader-settings-title')}}
+              <i class="fas fa-chevron-up" aria-hidden="true"></i>
             </button>
           </h2>
           <div ngbAccordionCollapse>
@@ -157,6 +159,7 @@
           <h2 class="accordion-header" ngbAccordionHeader>
             <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded('color-panel')" aria-controls="collapseOne">
               {{t('color-theme-title')}}
+              <i class="fas fa-chevron-up" aria-hidden="true"></i>
             </button>
           </h2>
           <div ngbAccordionCollapse>

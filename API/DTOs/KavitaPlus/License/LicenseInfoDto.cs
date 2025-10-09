@@ -32,4 +32,8 @@ public sealed record LicenseInfoDto
     /// A license is stored within Kavita
     /// </summary>
     public bool HasLicense { get; set; }
+    /// <summary>
+    /// InstallId which can be given to support
+    /// </summary>
+    public string InstallId { get; set; }
 }

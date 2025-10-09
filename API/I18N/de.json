@@ -213,5 +213,10 @@
     "password-authentication-disabled": "Die Passwortauthentifizierung wurde deaktiviert, Anmeldung über OpenID Connect",
     "oidc-managed": "Von OIDC verwaltete Benutzer können nicht bearbeitet werden.",
     "cannot-change-identity-provider-original-user": "Der Identitätsanbieter des ursprünglichen Administratorkontos kann nicht geändert werden",
-    "oidc-invalid-authority": "OIDC-Autorität ist ungültig"
+    "oidc-invalid-authority": "OIDC-Autorität ist ungültig",
+    "annotation-failed-create": "Anmerkung konnte nicht erstellt werden, bitte erneut versuchen",
+    "annotation-delete": "Anmerkung konnte nicht gelöscht werden",
+    "genre-doesnt-exist": "Das Genre gibt's nicht",
+    "font-url-not-allowed": "Das Hochladen einer Schriftart per URL geht nur mit Google Fonts",
+    "download-not-allowed": "Der Benutzer verfügt nicht über die erforderlichen Download-Berechtigungen"
 }

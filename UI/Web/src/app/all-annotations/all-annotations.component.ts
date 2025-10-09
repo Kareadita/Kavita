@@ -37,6 +37,7 @@ import {Action, ActionFactoryService, ActionItem} from "../_services/action-fact
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
 import {User} from "../_models/user";
+import {AccountService} from "../_services/account.service";
 
 @Component({
   selector: 'app-all-annotations',
@@ -62,6 +63,7 @@ export class AllAnnotationsComponent implements OnInit {
   private readonly metadataService = inject(MetadataService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
+  private readonly accountService = inject(AccountService);
 
   isLoading = signal(true);
   annotations = signal<Annotation[]>([]);
@@ -118,6 +120,7 @@ export class AllAnnotationsComponent implements OnInit {
   }
 
   handleAction = async (action: ActionItem<Annotation>, entity: Annotation) => {
+    const userId = this.accountService.currentUserSignal()!.id;
     const selectedIndices = this.bulkSelectionService.getSelectedCardsForSource('annotations');
     const selectedAnnotations = this.annotations().filter((_, idx) => selectedIndices.includes(idx+''));
     const ids = selectedAnnotations.map(a => a.id);
@@ -142,8 +145,35 @@ export class AllAnnotationsComponent implements OnInit {
       case Action.Export:
         this.annotationsService.exportAnnotations(ids).subscribe();
         break
+      case Action.Like:
+        this.annotationsService.likeAnnotations(ids).pipe(
+          tap(() => this.updateLikes(ids, userId, true)),
+        ).subscribe();
+        break;
+      case Action.UnLike:
+        this.annotationsService.unLikeAnnotations(ids).pipe(
+          tap(() => this.updateLikes(ids, userId, false)),
+        ).subscribe();
     }
   }
+
+  private updateLikes(ids: number[], userId: number, like: boolean): void {
+    this.annotations.update(annotations =>
+      annotations.map(annotation => {
+        if (!ids.includes(annotation.id)) return annotation;
+
+        let likes;
+        if (like) {
+          likes = annotation.likes.includes(userId) ? annotation.likes : [...annotation.likes, userId];
+        } else {
+          likes = annotation.likes.filter(id => id !== userId);
+        }
+
+        return { ...annotation, likes };
+      })
+    );
+  }
+
 
   exportFilter() {
     const filter = this.filter();

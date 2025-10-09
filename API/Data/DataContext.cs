@@ -13,6 +13,7 @@ using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
 using API.Entities.Person;
 using API.Entities.Scrobble;
+using API.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -226,30 +227,18 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
         builder.Entity<MetadataSettings>()
             .Property(x => x.AgeRatingMappings)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<Dictionary<string, AgeRating>>(v, JsonSerializerOptions.Default) ?? new Dictionary<string, AgeRating>()
-            );
+            .HasJsonConversion([]);
 
         // Ensure blacklist is stored as a JSON array
         builder.Entity<MetadataSettings>()
             .Property(x => x.Blacklist)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default) ?? new List<string>()
-            );
+            .HasJsonConversion([]);
         builder.Entity<MetadataSettings>()
             .Property(x => x.Whitelist)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default) ?? new List<string>()
-            );
+            .HasJsonConversion([]);
         builder.Entity<MetadataSettings>()
             .Property(x => x.Overrides)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<List<MetadataSettingField>>(v, JsonSerializerOptions.Default) ?? new List<MetadataSettingField>()
-            );
+            .HasJsonConversion([]);
 
         // Configure one-to-many relationship
         builder.Entity<MetadataSettings>()
@@ -280,44 +269,45 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
         builder.Entity<AppUserReadingProfile>()
             .Property(rp => rp.LibraryIds)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<List<int>>(v, JsonSerializerOptions.Default) ?? new List<int>())
+            .HasJsonConversion([])
             .HasColumnType("TEXT");
         builder.Entity<AppUserReadingProfile>()
             .Property(rp => rp.SeriesIds)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<List<int>>(v, JsonSerializerOptions.Default) ?? new List<int>())
+            .HasJsonConversion([])
             .HasColumnType("TEXT");
 
         builder.Entity<SeriesMetadata>()
             .Property(sm => sm.KPlusOverrides)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<IList<MetadataSettingField>>(v, JsonSerializerOptions.Default) ??
-                     new List<MetadataSettingField>())
+            .HasJsonConversion([])
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<MetadataSettingField>());
         builder.Entity<Chapter>()
             .Property(sm => sm.KPlusOverrides)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<IList<MetadataSettingField>>(v, JsonSerializerOptions.Default) ?? new List<MetadataSettingField>())
+            .HasJsonConversion([])
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<MetadataSettingField>());
 
         builder.Entity<AppUserPreferences>()
             .Property(a => a.BookReaderHighlightSlots)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<List<HighlightSlot>>(v, JsonSerializerOptions.Default) ?? new List<HighlightSlot>())
+            .HasJsonConversion([])
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<HighlightSlot>());
 
         builder.Entity<AppUser>()
             .Property(user => user.IdentityProvider)
             .HasDefaultValue(IdentityProvider.Kavita);
+
+        builder.Entity<AppUserPreferences>()
+            .Property(a => a.SocialPreferences)
+            .HasJsonConversion(new AppUserSocialPreferences())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new AppUserSocialPreferences());
+
+        builder.Entity<AppUserAnnotation>()
+            .Property(a => a.Likes)
+            .HasJsonConversion(new HashSet<int>())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new HashSet<int>());
     }
 
     #nullable enable

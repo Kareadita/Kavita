@@ -14,6 +14,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Person;
 using API.Entities.Scrobble;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions;
@@ -87,6 +88,34 @@ public static class QueryableExtensions
             .Where(lib => lib.AppUsers.Any(user => user.Id == userId))
             .IsRestricted(queryContext)
             .AsSplitQuery()
+            .Select(lib => lib.Id);
+    }
+
+    /// <summary>
+    /// Returns all library ids for a user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="libraryId">0 for no library filter</param>
+    /// <param name="queryContext">Defaults to None - The context behind this query, so appropriate restrictions can be placed</param>
+    /// <returns></returns>
+    public static IQueryable<int> GetLibraryIdsForUser(this DbSet<AppUser> query, int userId, int libraryId = 0, QueryContext queryContext = QueryContext.None)
+    {
+        var user = query
+            .AsSplitQuery()
+            .AsNoTracking()
+            .Where(u => u.Id == userId)
+            .AsSingleQuery();
+
+        if (libraryId == 0)
+        {
+            return user.SelectMany(l => l.Libraries)
+                .IsRestricted(queryContext)
+                .Select(lib => lib.Id);
+        }
+
+        return user.SelectMany(l => l.Libraries)
+            .Where(lib => lib.Id == libraryId)
+            .IsRestricted(queryContext)
             .Select(lib => lib.Id);
     }
 
@@ -346,31 +375,9 @@ public static class QueryableExtensions
         };
     }
 
-    public static IQueryable<FullAnnotationDto> SelectFullAnnotation(this IQueryable<AppUserAnnotation> query)
+    public static IQueryable<FullAnnotationDto> OrderFullAnnotation(this IQueryable<FullAnnotationDto> query)
     {
-        return query.Select(a => new FullAnnotationDto
-            {
-                Id = a.Id,
-                UserId = a.AppUserId,
-                SelectedText = a.SelectedText,
-                Comment = a.Comment,
-                CommentHtml = a.CommentHtml,
-                CommentPlainText = a.CommentPlainText,
-                Context = a.Context,
-                ChapterTitle = a.ChapterTitle,
-                PageNumber = a.PageNumber,
-                SelectedSlotIndex = a.SelectedSlotIndex,
-                ContainsSpoiler = a.ContainsSpoiler,
-                CreatedUtc = a.CreatedUtc,
-                LastModifiedUtc = a.LastModifiedUtc,
-                LibraryId = a.LibraryId,
-                LibraryName = a.Chapter.Volume.Series.Library.Name,
-                SeriesId = a.SeriesId,
-                SeriesName = a.Chapter.Volume.Series.Name,
-                VolumeId = a.VolumeId,
-                VolumeName = a.Chapter.Volume.Name,
-                ChapterId = a.ChapterId,
-            })
+        return query
             .OrderBy(a => a.SeriesId)
             .ThenBy(a => a.VolumeId)
             .ThenBy(a => a.ChapterId)

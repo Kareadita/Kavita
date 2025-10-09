@@ -242,9 +242,9 @@ export class UtilityService {
     return params;
   }
 
-  createPaginatedResult(response: any, paginatedVariable: PaginatedResult<any[]> | undefined = undefined) {
+  createPaginatedResult<T>(response: any, paginatedVariable: PaginatedResult<T[]> | undefined = undefined) {
     if (paginatedVariable === undefined) {
-      paginatedVariable = new PaginatedResult();
+      paginatedVariable = new PaginatedResult<T[]>();
     }
     if (response.body === null) {
       paginatedVariable.result = [];

@@ -55,6 +55,13 @@
           @case (AnnotationMode.View) {
             @let an = annotation();
             @if (an) {
+
+              <app-annotation-likes
+                [annotation]="an"
+                [visible]="true"
+                (annotationChange)="annotation.set($event)"
+              />
+
               <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
                 <div class="d-flex align-items-center">
                   {{ an.ownerUsername }}

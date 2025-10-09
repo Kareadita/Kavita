@@ -15,7 +15,7 @@
 
               @if(isLoadingExtra || isLoading) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
-                  <span class="visually-hidden">loading...</span>
+                  <span class="visually-hidden">{{t('loading')}}</span>
                 </div>
               }
               </span>
@@ -33,7 +33,10 @@
                                    [hasReadingProgress]="hasReadingProgress"
                                    [readingTimeEntity]="series"
                                    [libraryType]="libraryType"
-                                   [mangaFormat]="series.format" />
+                                   [mangaFormat]="series.format"
+                                   [releaseYear]="seriesMetadata.releaseYear"
+                                   [totalBytes]="totalSize()"
+          />
 
           <div class="mt-2 mb-2">
             <app-external-rating [seriesId]="series.id"
@@ -106,7 +109,7 @@
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="(utilityService.activeBreakpoint$ | async)! >= Breakpoint.Desktop ? 170 : 200" />
+            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop ? 170 : 200" />
           </div>
 
           <div class="mt-2 upper-details">
@@ -186,9 +189,9 @@
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item) {
                         @if (item.isChapter) {
-                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, chaptersLength: storyChapters.length}" />
+                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, totalLength: storyChapters.length}" />
                         } @else {
-                          <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, volumesLength: volumes.length}" />
+                          <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, totalLength: volumes.length}" />
                         }
                       }
 
@@ -254,7 +257,7 @@
                   <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_specials') {
-                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, chaptersLength: chapters().length}" />
+                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters().length}" />
                       }
                     </div>
                   </virtual-scroller>
@@ -340,10 +343,8 @@
                                    [genres]="seriesMetadata.genres"
                                    [tags]="seriesMetadata.tags"
                                    [webLinks]="WebLinks"
-                                   [readingTime]="series"
-                                   [releaseYear]="seriesMetadata.releaseYear"
-                                   [language]="seriesMetadata.language"
-                                   [format]="series.format" />
+                                   [filePaths]="[series.folderPath]"
+                  />
                 }
               </ng-template>
             </li>

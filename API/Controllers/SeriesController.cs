@@ -665,4 +665,16 @@ public class SeriesController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Returns all Series that a user has access to
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("series-with-annotations")]
+    public async Task<ActionResult<IList<SeriesDto>>> GetSeriesWithAnnotations()
+    {
+        var data = await _unitOfWork.AnnotationRepository.GetSeriesWithAnnotations(User.GetUserId());
+        return Ok(data);
+    }
+
+
 }

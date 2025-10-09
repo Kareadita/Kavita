@@ -35,10 +35,25 @@ public static class AnnotationFilter
 
         return comparison switch
         {
-            FilterComparison.Equal => queryable.Where(a => a.Series.LibraryId == libraryIds[0]),
-            FilterComparison.Contains => queryable.Where(a => libraryIds.Contains(a.Series.LibraryId)),
-            FilterComparison.NotContains => queryable.Where(a => !libraryIds.Contains(a.Series.LibraryId)),
-            FilterComparison.NotEqual => queryable.Where(a => a.Series.LibraryId != libraryIds[0]),
+            FilterComparison.Equal => queryable.Where(a => a.LibraryId == libraryIds[0]),
+            FilterComparison.Contains => queryable.Where(a => libraryIds.Contains(a.LibraryId)),
+            FilterComparison.NotContains => queryable.Where(a => !libraryIds.Contains(a.LibraryId)),
+            FilterComparison.NotEqual => queryable.Where(a => a.LibraryId != libraryIds[0]),
+            _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
+        };
+    }
+
+    public static IQueryable<AppUserAnnotation> HasSeries(this IQueryable<AppUserAnnotation> queryable, bool condition,
+        FilterComparison comparison, IList<int> seriesIds)
+    {
+        if (seriesIds.Count == 0 || !condition) return queryable;
+
+        return comparison switch
+        {
+            FilterComparison.Equal => queryable.Where(a => a.SeriesId == seriesIds[0]),
+            FilterComparison.Contains => queryable.Where(a => seriesIds.Contains(a.SeriesId)),
+            FilterComparison.NotContains => queryable.Where(a => !seriesIds.Contains(a.SeriesId)),
+            FilterComparison.NotEqual => queryable.Where(a => a.SeriesId != seriesIds[0]),
             _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
         };
     }
@@ -50,7 +65,7 @@ public static class AnnotationFilter
 
         return comparison switch
         {
-            FilterComparison.Equal => queryable.Where(a => a.SelectedSlotIndex== highlightSlotIdxs[0]),
+            FilterComparison.Equal => queryable.Where(a => a.SelectedSlotIndex == highlightSlotIdxs[0]),
             FilterComparison.Contains => queryable.Where(a => highlightSlotIdxs.Contains(a.SelectedSlotIndex)),
             FilterComparison.NotContains => queryable.Where(a => !highlightSlotIdxs.Contains(a.SelectedSlotIndex)),
             FilterComparison.NotEqual => queryable.Where(a => a.SelectedSlotIndex != highlightSlotIdxs[0]),

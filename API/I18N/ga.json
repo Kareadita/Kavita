@@ -215,5 +215,10 @@
     "cannot-change-identity-provider-original-user": "Ní féidir Soláthraí Céannachta an chuntais riarthóra bhunaidh a athrú",
     "oidc-invalid-authority": "Tá údarás OIDC neamhbhailí",
     "annotation-failed-create": "Theip ar anótáil a chruthú, déan iarracht arís",
-    "annotation-delete": "Níorbh fhéidir an nóta a scriosadh"
+    "annotation-delete": "Níorbh fhéidir an nóta a scriosadh",
+    "opds-continue-reading-title": "Lean ort ag léamh ó: {0}",
+    "genre-doesnt-exist": "Níl an seánra ann",
+    "font-url-not-allowed": "Ní cheadaítear Cló a uaslódáil trí url ach amháin ó Google Fonts",
+    "annotation-export-failed": "Ní féidir nótaí a easpórtáil, seiceáil na logaí",
+    "download-not-allowed": "Níl ceadanna íoslódála ag an úsáideoir"
 }

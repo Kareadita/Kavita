@@ -22,6 +22,7 @@ import {AsyncPipe} from "@angular/common";
 import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {AgeRatingImageComponent} from "../age-rating-image/age-rating-image.component";
+import {AccountService} from "../../_services/account.service";
 
 @Component({
   selector: 'app-details-tab',
@@ -31,13 +32,7 @@ import {AgeRatingImageComponent} from "../age-rating-image/age-rating-image.comp
     TranslocoDirective,
     ImageComponent,
     BadgeExpanderComponent,
-    ReadTimePipe,
-    SeriesFormatComponent,
-    MangaFormatPipe,
-    LanguageNamePipe,
-    AsyncPipe,
     SafeUrlPipe,
-    AgeRatingImageComponent
   ],
   templateUrl: './details-tab.component.html',
   styleUrl: './details-tab.component.scss',
@@ -47,22 +42,19 @@ export class DetailsTabComponent {
 
   protected readonly imageService = inject(ImageService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
+  protected readonly accountService = inject(AccountService);
 
   protected readonly PersonRole = PersonRole;
   protected readonly FilterField = FilterField;
   protected readonly MangaFormat = MangaFormat;
 
   @Input({required: true}) metadata!: IHasCast;
-  @Input() readingTime: IHasReadingTime | undefined;
-  @Input() ageRating: AgeRating | undefined;
-  @Input() language: string | undefined;
-  @Input() format: MangaFormat | undefined;
-  @Input() releaseYear: number | undefined;
   @Input() genres: Array<Genre> = [];
   @Input() tags: Array<Tag> = [];
   @Input() webLinks: Array<string> = [];
   @Input() suppressEmptyGenres: boolean = false;
   @Input() suppressEmptyTags: boolean = false;
+  @Input() filePaths: string[] | undefined;
 
 
   openGeneric(queryParamName: FilterField, filter: string | number) {

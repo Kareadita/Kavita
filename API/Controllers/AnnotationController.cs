@@ -21,23 +21,14 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
-public class AnnotationController : BaseApiController
+public class AnnotationController(
+    IUnitOfWork unitOfWork,
+    ILogger<AnnotationController> logger,
+    ILocalizationService localizationService,
+    IEventHub eventHub,
+    IAnnotationService annotationService)
+    : BaseApiController
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<AnnotationController> _logger;
-    private readonly ILocalizationService _localizationService;
-    private readonly IEventHub _eventHub;
-    private readonly IAnnotationService _annotationService;
-
-    public AnnotationController(IUnitOfWork unitOfWork, ILogger<AnnotationController> logger,
-        ILocalizationService localizationService, IEventHub eventHub, IAnnotationService annotationService)
-    {
-        _unitOfWork = unitOfWork;
-        _logger = logger;
-        _localizationService = localizationService;
-        _eventHub = eventHub;
-        _annotationService = annotationService;
-    }
 
     /// <summary>
     /// Returns a list of annotations for browsing
@@ -50,7 +41,7 @@ public class AnnotationController : BaseApiController
     {
         userParams ??= UserParams.Default;
 
-        var list = await _unitOfWork.AnnotationRepository.GetAnnotationDtos(User.GetUserId(), filter, userParams);
+        var list = await unitOfWork.AnnotationRepository.GetAnnotationDtos(User.GetUserId(), filter, userParams);
         Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
 
         return Ok(list);
@@ -64,7 +55,7 @@ public class AnnotationController : BaseApiController
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<AnnotationDto>>> GetAnnotations(int chapterId)
     {
-        return Ok(await _unitOfWork.UserRepository.GetAnnotations(User.GetUserId(), chapterId));
+        return Ok(await unitOfWork.UserRepository.GetAnnotations(User.GetUserId(), chapterId));
     }
 
     /// <summary>
@@ -75,7 +66,7 @@ public class AnnotationController : BaseApiController
     [HttpGet("all-for-series")]
     public async Task<ActionResult<AnnotationDto>> GetAnnotationsBySeries(int seriesId)
     {
-        return Ok(await _unitOfWork.UserRepository.GetAnnotationDtosBySeries(User.GetUserId(), seriesId));
+        return Ok(await unitOfWork.UserRepository.GetAnnotationDtosBySeries(User.GetUserId(), seriesId));
     }
 
     /// <summary>
@@ -86,7 +77,7 @@ public class AnnotationController : BaseApiController
     [HttpGet("{annotationId}")]
     public async Task<ActionResult<AnnotationDto>> GetAnnotation(int annotationId)
     {
-        return Ok(await _unitOfWork.UserRepository.GetAnnotationDtoById(User.GetUserId(), annotationId));
+        return Ok(await unitOfWork.UserRepository.GetAnnotationDtoById(User.GetUserId(), annotationId));
     }
 
     /// <summary>
@@ -99,11 +90,11 @@ public class AnnotationController : BaseApiController
     {
         try
         {
-            return Ok(await _annotationService.CreateAnnotation(User.GetUserId(), dto));
+            return Ok(await annotationService.CreateAnnotation(User.GetUserId(), dto));
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await localizationService.Translate(User.GetUserId(), ex.Message));
         }
     }
 
@@ -117,12 +108,74 @@ public class AnnotationController : BaseApiController
     {
         try
         {
-            return Ok(await _annotationService.UpdateAnnotation(User.GetUserId(), dto));
+            return Ok(await annotationService.UpdateAnnotation(User.GetUserId(), dto));
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await localizationService.Translate(User.GetUserId(), ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Adds a like for the currently authenticated user if not already from the annotations with given ids
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
+    [HttpPost("like")]
+    public async Task<ActionResult> LikeAnnotations(IList<int> ids)
+    {
+        var userId = User.GetUserId();
+
+        var annotations = await unitOfWork.AnnotationRepository.GetAnnotations(userId, ids);
+        if (annotations.Count != ids.Count)
+        {
+            return BadRequest();
+        }
+
+        foreach (var annotation in annotations.Where(a => !a.Likes.Contains(userId) && a.AppUserId != userId))
+        {
+            annotation.Likes.Add(userId);
+            unitOfWork.AnnotationRepository.Update(annotation);
+        }
+
+        if (unitOfWork.HasChanges())
+        {
+            await unitOfWork.CommitAsync();
+        }
+
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Removes likes for the currently authenticated user if present from the annotations with given ids
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
+    [HttpPost("unlike")]
+    public async Task<ActionResult> UnLikeAnnotations(IList<int> ids)
+    {
+        var userId = User.GetUserId();
+
+        var annotations = await unitOfWork.AnnotationRepository.GetAnnotations(userId, ids);
+        if (annotations.Count != ids.Count)
+        {
+            return BadRequest();
+        }
+
+        foreach (var annotation in annotations.Where(a => a.Likes.Contains(userId)))
+        {
+            annotation.Likes.Remove(userId);
+            unitOfWork.AnnotationRepository.Update(annotation);
+        }
+
+        if (unitOfWork.HasChanges())
+        {
+            await unitOfWork.CommitAsync();
+        }
+
+
+        return Ok();
     }
 
     /// <summary>
@@ -133,11 +186,11 @@ public class AnnotationController : BaseApiController
     [HttpDelete]
     public async Task<ActionResult> DeleteAnnotation(int annotationId)
     {
-        var annotation = await _unitOfWork.AnnotationRepository.GetAnnotation(annotationId);
-        if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "annotation-delete"));
+        var annotation = await unitOfWork.AnnotationRepository.GetAnnotation(annotationId);
+        if (annotation == null || annotation.AppUserId != User.GetUserId()) return BadRequest(await localizationService.Translate(User.GetUserId(), "annotation-delete"));
 
-        _unitOfWork.AnnotationRepository.Remove(annotation);
-        await _unitOfWork.CommitAsync();
+        unitOfWork.AnnotationRepository.Remove(annotation);
+        await unitOfWork.CommitAsync();
 
         return Ok();
     }
@@ -152,14 +205,14 @@ public class AnnotationController : BaseApiController
     {
         var userId = User.GetUserId();
 
-        var annotations = await _unitOfWork.AnnotationRepository.GetAnnotations(annotationIds);
+        var annotations = await unitOfWork.AnnotationRepository.GetAnnotations(userId, annotationIds);
         if (annotations.Any(a => a.AppUserId != userId))
         {
             return BadRequest();
         }
 
-        _unitOfWork.AnnotationRepository.Remove(annotations);
-        await _unitOfWork.CommitAsync();
+        unitOfWork.AnnotationRepository.Remove(annotations);
+        await unitOfWork.CommitAsync();
 
         return Ok();
     }
@@ -173,10 +226,10 @@ public class AnnotationController : BaseApiController
     {
         userParams ??= UserParams.Default;
 
-        var list = await _unitOfWork.AnnotationRepository.GetAnnotationDtos(User.GetUserId(), filter, userParams);
+        var list = await unitOfWork.AnnotationRepository.GetAnnotationDtos(User.GetUserId(), filter, userParams);
         var annotations = list.Select(a => a.Id).ToList();
 
-        var json = await _annotationService.ExportAnnotations(User.GetUserId(), annotations);
+        var json = await annotationService.ExportAnnotations(User.GetUserId(), annotations);
         if (string.IsNullOrEmpty(json)) return BadRequest();
 
         var bytes = Encoding.UTF8.GetBytes(json);
@@ -192,7 +245,7 @@ public class AnnotationController : BaseApiController
     [HttpPost("export")]
     public async Task<IActionResult> ExportAnnotations(IList<int>? annotations = null)
     {
-        var json = await _annotationService.ExportAnnotations(User.GetUserId(), annotations);
+        var json = await annotationService.ExportAnnotations(User.GetUserId(), annotations);
         if (string.IsNullOrEmpty(json)) return BadRequest();
 
         var bytes = Encoding.UTF8.GetBytes(json);

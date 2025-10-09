@@ -179,6 +179,14 @@
           </app-setting-item>
         </div>
 
+        <div class="mb-2 col-md-6 col-sm-12">
+          <app-setting-item [canEdit]="false" [showEdit]="false" [title]="t('supportId-label')">
+            <ng-template #view>
+              {{licInfo.installId}}
+            </ng-template>
+          </app-setting-item>
+        </div>
+
         <div class="setting-section-break"></div>
 
         <!-- Actions around license -->

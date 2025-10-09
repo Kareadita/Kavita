@@ -9,7 +9,7 @@
   }
 
   &::-webkit-scrollbar {
-    background-color: transparent; /*make scrollbar space invisible */
+    background-color: transparent;
     width: inherit;
     display: none;
     visibility: hidden;
@@ -17,7 +17,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: transparent; /*makes it invisible when not hovering*/
+    background: transparent;
   }
 
   &:hover {

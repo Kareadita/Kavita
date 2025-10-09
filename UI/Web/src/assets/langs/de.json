@@ -130,7 +130,10 @@
         "anilist-scrobbling-tooltip": "Erlaube Kavita, ihren Lesefortschritt und ihre Bewertungen zu AniList zu scrobbeln (Einweg-Synchronisierung)",
         "social-settings-title": "Soziale Einstellungen",
         "highlight-bar-label": "Markierungen hervorheben Farben",
-        "highlight-bar-tooltip": "Diese Farben werden von allen Büchern gemeinsam genutzt"
+        "highlight-bar-tooltip": "Diese Farben werden von allen Büchern gemeinsam genutzt",
+        "font-tab": "Schriftart",
+        "colorscape-label": "ColorScape verwenden",
+        "colorscape-tooltip": "Globale Umschaltfunktion zum Aktivieren/Deaktivieren der dynamischen Farbverlaufsfunktion. Überschreibt die Theme-Einstellungen"
     },
     "user-holds": {
         "title": "Scrobble pausiert",
@@ -195,7 +198,8 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
-        "actions-header": "{{manage-users.actions-header}}"
+        "actions-header": "{{manage-users.actions-header}}",
+        "warning": "Warnung"
     },
     "edit-device-modal": {
         "title": "Gerät bearbeiten",
@@ -610,7 +614,9 @@
         "k+-unlocked-description": "Willkommen bei Kavita+! Kavita generiert Scrobbler-Ereignisse aus Ihren Fortschritten, Bewertungen und Lesewünschen, sobald Sie Ihre Scrobbler-Anbieter unter Ihrem Konto registriert haben. Nehmen Sie sich etwas Zeit, um sicherzustellen, dass Sie Scrobbler-Holds für alle Serien setzen, die Sie nicht scrobbeln möchten.",
         "cancel-tooltip": "Kündigen Sie Ihr Abonnement und löschen Sie die Lizenz innerhalb von Kavita.",
         "kavita+-warning": "Kavita+ ist unabhängig von Kavita. Wenn Sie Kavita deinstallieren, ohne sich abzumelden, werden Ihnen weiterhin Gebühren berechnet.",
-        "cancel-label": "Abonnement kündigen"
+        "cancel-label": "Abonnement kündigen",
+        "resend-license-email": "Lizenz per E-Mail senden",
+        "resend-license-email-tooltip": "Kavita+ Lizenz erneut an E-Mail senden. Die Lizenz muss an diesen Server gebunden sein, damit sie funktioniert."
     },
     "book-line-overlay": {
         "copy": "Kopieren",
@@ -648,7 +654,8 @@
         "go-to-first-page": "Zur ersten Seite gehen",
         "page-num-label": "Seite {{page}}",
         "completion-label": "{{percent}} abgeschlossen",
-        "force-selected-one-column": "Der Layoutmodus wurde aufgrund unzureichenden Platzes für die Darstellung von zwei Spalten auf eine Spalte umgestellt"
+        "force-selected-one-column": "Der Layoutmodus wurde aufgrund unzureichenden Platzes für die Darstellung von zwei Spalten auf eine Spalte umgestellt",
+        "forced-vertical-switch": "Der Layoutmodus wurde geändert, weil das zweispaltige Layout mit dem vertikalen Schreibstil nicht klappt"
     },
     "personal-table-of-contents": {
         "no-data": "Noch nichts mit Lesezeichen versehen",
@@ -1378,7 +1385,8 @@
         "reading-profiles": "Leseprofile",
         "admin-oidc": "OpenID Connect",
         "admin-mappings-import": "Metadaten-Einstellungen",
-        "admin-public-metadata": "Metadaten verwalten"
+        "admin-public-metadata": "Metadaten verwalten",
+        "font": "Epub-Schriftarten"
     },
     "collection-detail": {
         "no-data": "Es sind keine Artikel vorhanden. Versuchen Sie, eine Serie hinzuzufügen.",
@@ -1487,7 +1495,8 @@
         "collections": "Sammlungen",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
-        "include-extras": "Kapitel und Dateien einbeziehen"
+        "include-extras": "Kapitel und Dateien einbeziehen",
+        "annotations": "{{tabs.annotations-tab}}"
     },
     "nav-header": {
         "skip-alt": "Zum Hauptinhalt springen",
@@ -1505,7 +1514,8 @@
         "close": "{{common.close}}",
         "person-aka-status": "Entspricht einem Alias",
         "browse-genres": "Genres durchsuchen",
-        "browse-tags": "Tags durchsuchen"
+        "browse-tags": "Tags durchsuchen",
+        "all-annotations": "Anmerkungen durchsuchen"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1703,7 +1713,10 @@
         "unit-average-rating": "Externes Rating von Kavita+, Prozent",
         "unit-reading-progress": "Prozentsatz",
         "unit-user-rating": "0.0 - 5.0 Sterne",
-        "unit-read-last": "Tage ab HEUTE"
+        "unit-read-last": "Tage ab HEUTE",
+        "disclaimer-highlight-slots": "Bei Verwendung dieses Feldes werden nur Ihre eigenen Anmerkungen angezeigt",
+        "unit-file-size": "GB, MB, KB, B",
+        "disclaimer-file-size": "Die Dateigröße muss die Einheit enthalten"
     },
     "sort-field-pipe": {
         "sort-name": "Sort Name",
@@ -1717,7 +1730,8 @@
         "random": "Zufällig",
         "person-series-count": "Anzahl der Serien",
         "person-name": "Name",
-        "person-chapter-count": "Anzahl der Kapitel"
+        "person-chapter-count": "Anzahl der Kapitel",
+        "annotation-owner": "Eigentümer"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Einzelheiten",
@@ -2977,7 +2991,9 @@
         "view-title": "Anmerkung anzeigen",
         "edit-title": "Anmerkung bearbeiten",
         "create-title": "Anmerkung erstellen",
-        "create": "Erstellen"
+        "create": "Erstellen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen"
     },
     "view-bookmark-drawer": {
         "title": "Lesezeichen",
@@ -3000,5 +3016,37 @@
     "highlight-bar": {
         "add-new-color-alt": "Benutzerdefinierte Farbe hinzufügen",
         "slot-label": "Highlight-Slot {{slot}}"
+    },
+    "font-manager": {
+        "description": "Der E-Book-Reader von Kavita verfügt über einige integrierte Schriftarten. Hier können Sie Ihre eigenen Schriftarten hinzufügen. Laden Sie eine Datei hoch oder verwenden Sie eine Google-Fonts-URL. Weitere Informationen finden Sie im <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>.",
+        "enter-an-url-pre-title": "Gib eine {{url}} ein",
+        "url": "URL",
+        "upload-continued": "eine Schriftartdatei",
+        "preview-default": "Lade deine eigene Schriftart über eine Datei oder die Google Font-URL hoch",
+        "back": "Zurück",
+        "load": "Laden",
+        "no-preview": "Diese Schriftart kann nicht in der Vorschau angezeigt werden. Es wird der Standardstil aus dem Buch verwendet.",
+        "brown-fox": "Der schnelle braune Fuchs springt über den faulen Hund",
+        "filter-system-fonts-label": "Systemschriften filtern",
+        "url-label": "Url"
+    },
+    "library-type-subtitle-pipe": {
+        "book": "Universelle Buchbibliothek.",
+        "comic": "Comic-Bibliothek, die das Gruppieren von Bänden und Taschenbuchausgaben innerhalb einer Serie unterstützt. Mehrere Ausgaben derselben Serie werden nicht unterstützt.",
+        "manga": "Japanische Comics mit Unterstützung für die Gruppierung nach Bänden. Kann auch mit einigen losen Bildkonfigurationen umgehen.",
+        "comicVine": "Genau nach den Comic-Metadaten von Comic Vine gemacht, mit Integration für spezielle Tools.",
+        "image": "Lose Bilddateien mit eingeschränkter Unterstützung. Muss sich weitgehend an die Wiki-Dokumentation halten.",
+        "lightNovel": "Bibliothek mit spezieller Handhabung, die für Light Novels optimiert ist"
+    },
+    "quill-wrapper": {
+        "clean-tooltip": "Alle Stile löschen"
+    },
+    "all-annotations": {
+        "filter": {
+            "true": "Wahr",
+            "false": "False"
+        },
+        "annotations-count": "{{num}} Annotations",
+        "export": "Export"
     }
 }

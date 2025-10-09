@@ -127,7 +127,13 @@
         "want-to-read-sync-tooltip": "Разрешить Kavita добавлять материалы в ваш список «Хочу прочитать» на основе серий из AniList и MAL, находящихся в ожидании чтения",
         "clients-opds-url-label": "OPDS URL",
         "clients-api-key-label": "API-ключ",
-        "anilist-scrobbling-label": "Сбор данных AniList"
+        "anilist-scrobbling-label": "Сбор данных AniList",
+        "font-tab": "Шрифт",
+        "highlight-bar-label": "Выделять аннотации цветом",
+        "highlight-bar-tooltip": "Эти цвета общие для всех книг",
+        "colorscape-label": "Использовать ColorScape",
+        "colorscape-tooltip": "Общий переключатель включить/выключить динамического градиента. Будут переопределены настройки темы",
+        "social-settings-title": "Социальные настройки"
     },
     "user-holds": {
         "title": "Удерживающие устройства Scrobble",
@@ -192,7 +198,8 @@
         "no-data": "{{typeahead.no-data}}",
         "actions-header": "{{manage-users.actions-header}}",
         "name-label": "Имя",
-        "email-setup-alert": "Хотите отправить файлы на ваше устройство? Попросите администратора настроить электронную почту!"
+        "email-setup-alert": "Хотите отправить файлы на ваше устройство? Попросите администратора настроить электронную почту!",
+        "warning": "Предупреждение"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -280,7 +287,9 @@
         "mal-instructions": "Kavita использует идентификатор клиента MAL для аутентификации. Создайте нового клиента для Kavita и после одобрения укажите идентификатор клиента и свое имя пользователя.",
         "mal-token-input-label": "Идентификатор клиента MAL",
         "mal-username-input-label": "Имя пользователя MAL",
-        "mal-used-for": "MyAnimeList используется для создания умных коллекций и требует синхронизации чтения."
+        "mal-used-for": "MyAnimeList используется для создания умных коллекций и требует синхронизации чтения.",
+        "scrobbling-applicable-label": "Скробблинг применён",
+        "anilist-used-for": "AniList используется для прокрутки (синхронизации данных), и требуется синхронизация чтения."
     },
     "typeahead": {
         "locked-field": "Поле заблокировано",
@@ -396,19 +405,28 @@
         "publisher": "Издатель",
         "writer": "Писатель",
         "other": "Другой",
-        "translator": "Переводчик"
+        "translator": "Переводчик",
+        "character": "Символ",
+        "inker": "Раскрасчик",
+        "letterer": "Художник-шрифтовик",
+        "penciller": "Рисовальщик",
+        "imprint": "Тиснение"
     },
     "reset-password": {
         "email-label": "{{common.email}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
-        "submit": "{{common.submit}}"
+        "submit": "{{common.submit}}",
+        "title": "Сбросить пароль",
+        "description": "Введите адрес электронной почты вашей учётной записи. Kavita вышлет вам электронное письмо, если в файле есть действительный адрес, в противном случае попросите администратора сбросить ваш пароль."
     },
     "reset-password-modal": {
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "error-label": "Ошибка: "
+        "error-label": "Ошибка: ",
+        "title": "Сбросить пароль для: {{username}}",
+        "new-password-label": "Новый пароль"
     },
     "all-series": {
         "series-count": "{{common.series-count}}",
@@ -424,7 +442,8 @@
         "subtitle": "Похоже, что ваша установка отстала более чем на {{count}} версий!",
         "description-1": "Пожалуйста, подумайте об обновлении, чтобы использовать последнюю версию Kavita.",
         "description-2": "Взгляните на наш <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>вики</a> с инструкциями по обновлению.",
-        "description-3": "Если есть какая-то конкретная причина, по которой вы ещё не обновлялись, мы хотели бы знать, что удерживает вас на устаревшей версии! Зайдите в наш discord и сообщите нам, что мешает вам перейти на новую версию."
+        "description-3": "Если есть какая-то конкретная причина, по которой вы ещё не обновлялись, мы хотели бы знать, что удерживает вас на устаревшей версии! Зайдите в наш discord и сообщите нам, что мешает вам перейти на новую версию.",
+        "title": "Не отставай!"
     },
     "invite-user": {
         "close": "{{common.close}}",
@@ -499,7 +518,11 @@
         "kavita+-desc-part-2": "Преимущества премии",
         "kavita+-desc-part-3": "сегодня!",
         "kavita+-requirement": "Программа Kavita+ предназначена для работы только с 3 последними версиями. Все, что выходит за рамки этого, может не работать.",
-        "kavita+-warning": "Kavita+ является отдельным сервисом. Если вы удалите Kavita, не отменив подписку на Kavita+, с вас продолжат списывать плату."
+        "kavita+-warning": "Kavita+ является отдельным сервисом. Если вы удалите Kavita, не отменив подписку на Kavita+, с вас продолжат списывать плату.",
+        "resend-license-email": "Отправить лицензию на электронную почту",
+        "resend-license-email-tooltip": "Выслать лицензию Kavita+ повторно по электронной почте. Для работы лицензия должна быть привязана к этому серверу.",
+        "cancel-label": "Отменить подписку",
+        "cancel-tooltip": "Отменить свою подписку и удалить лицензию в Kavita."
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
@@ -963,7 +986,43 @@
         "pages-title": "{{edit-chapter-modal.pages-label}}",
         "volume-num": "{{common.volume-num}}",
         "release-year-validation": "{{validation.year-validation}}",
-        "volumes-title": "{{tab.volumes-tab}}"
+        "volumes-title": "{{tab.volumes-tab}}",
+        "title": "Подробности {{seriesName}}",
+        "publication-status-label": "Состояние публикации",
+        "name-label": "Имя",
+        "sort-name-label": "Сортировка по имени",
+        "localized-name-label": "Переведённое имя",
+        "summary-label": "Общее",
+        "web-link-description": "Здесь вы можете добавить несколько разных ссылок на внешние сервисы.",
+        "cover-image-description": "Загрузите и выберите новое изображение обложки. Нажмите «Сохранить», чтобы загрузить и изменить обложку.",
+        "field-locked-alt": "Поле заблокировано",
+        "info-title": "Информация",
+        "library-title": "Библиотека",
+        "format-title": "Формат",
+        "created-title": "Создано",
+        "last-added-title": "Последний добавленный элемент",
+        "last-scanned-title": "Последнее сканирование",
+        "folder-path-title": "Путь к каталогу",
+        "folder-path-tooltip": "Самый длинный путь от корневого каталога библиотеки, который содержит все файлы серии",
+        "lowest-folder-path-title": "Самый короткий путь к каталогу",
+        "lowest-folder-path-tooltip": "Самый короткий путь от корневого каталога библиотеки, который содержит все файлы серии",
+        "publication-status-title": "Состояние публикации",
+        "total-pages-title": "Всего страниц",
+        "total-words-title": "Всего слов",
+        "total-items-title": "Всего элементов",
+        "max-items-title": "Максимум элементов",
+        "size-title": "Размер",
+        "added-title": "Добавлено",
+        "last-modified-title": "Последние изменения",
+        "view-files": "Просмотр файлов",
+        "words-title": "Слов",
+        "chapter-title": "Глава",
+        "highest-count-tooltip": "Самый высокий показатель среди всех ComicInfo в серии",
+        "max-issue-tooltip": "Поле максимального выпуска или тома из всех ComicInfo в серии",
+        "force-refresh": "Принудительно обновить",
+        "force-refresh-tooltip": "Принудительно обновить внешних метаданных с помощью Kavita+",
+        "loose-leaf-volume": "Отдельные главы на листах",
+        "specials-volume": "Специальные предложения"
     },
     "edit-chapter-modal": {
         "close": "{{common.close}}",
@@ -1000,7 +1059,13 @@
         "tags-tab": "{{tabs.tags-tab}}",
         "size-label": "{{edit-series-modal.size-title}}",
         "links-label": "{{metadata-fields.links-title}}",
-        "last-read-label": "{{sort-field-pipe.read-progress}}"
+        "last-read-label": "{{sort-field-pipe.read-progress}}",
+        "title": "Правка",
+        "title-label": "Заглавие",
+        "sort-order-label": "Порядок сортировки",
+        "sort-order-tooltip": "Порядок чтения, в котором эта глава расположена в томе",
+        "isbn-label": "ISBN-номер",
+        "release-date-label": "Выпуск"
     },
     "edit-volume-modal": {
         "close": "{{common.close}}",
@@ -1352,7 +1417,10 @@
         "side-story": "Побочная история",
         "spin-off": "Ответвление",
         "edition": "Издание",
-        "annual": "Ежегодный"
+        "annual": "Ежегодный",
+        "character": "Символ",
+        "doujinshi": "Додзинси",
+        "parent": "Родительский"
     },
     "changelog-update-item": {
         "theme": "Тема",
@@ -1498,10 +1566,13 @@
         "require-verified-email-tooltip": "Требуется подтверждение электронной почты при создании новой учётной записи или при сопоставлении с существующей. Если у вновь созданной учётной записи есть подтвержденный адрес электронной почты, он будет автоматически подтверждён на стороне Kavita.",
         "sync-user-settings-label": "Синхронизируйте пользовательские настройки с ролями OIDC",
         "sync-user-settings-tooltip": "Пользователи, созданные с помощью OIDC, будут полностью управляться поставщиком удостоверений, включая роли, доступ к библиотеке и возрастной рейтинг. Если эта опция отключена, пользователи не будут иметь доступа к какому-либо контенту после создания учётной записи. Более подробную информацию смотрите в документации.",
-        "no-restriction": "{{restriction-selector.no-restriction}}"
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "require-verified-email-label": "Требуется подтверждение электронной почты",
+        "provision-accounts-label": "Учётная запись снабжения"
     },
     "identity-provider-pipe": {
-        "kavita": "Kavita"
+        "kavita": "Kavita",
+        "oidc": "OpenID Connect"
     },
     "publication-status-pipe": {
         "ongoing": "Онгоинг",
@@ -1528,7 +1599,19 @@
         "unknown": "Неизвестный",
         "early-childhood": "Раннее детство",
         "adults-only": "Только старше 18",
-        "everyone": "Каждый"
+        "everyone": "Каждый",
+        "everyone-10-plus": "Старше 10+",
+        "g": "G",
+        "kids-to-adults": "От детей к взрослым",
+        "mature": "Зрелый",
+        "ma15-plus": "MA15+",
+        "mature-17-plus": "Зрелый MA15+",
+        "rating-pending": "Ожидаемый возраст",
+        "teen": "Подросток",
+        "x18-plus": "X18+",
+        "not-applicable": "Непригодный",
+        "pg": "PG",
+        "r18-plus": "R18+"
     },
     "announcements": {
         "title": "Объявления"
@@ -1639,5 +1722,34 @@
         "reorder-label": "Переставить",
         "bulk-select-label": "Массовый выбор",
         "remove-item-alt": "Удалить элемент"
+    },
+    "font-manager": {
+        "description": "Программа для чтения epub-файлов имеет несколько шрифтов по умолчанию, добавьте свои шрифты здесь. Вы можете загрузить файл или использовать ссылку на шрифты Google. Дополнительную информацию можно посмотреть на <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>.",
+        "enter-an-url-pre-title": "Введите {{url}}",
+        "url": "Ссылка",
+        "add": "{{общий.добавить}}",
+        "drag-n-drop": "{{выбор-обложки.перетащить}}",
+        "upload": "{{выбор-обложки.загрузить}}",
+        "upload-continued": "файл шрифта",
+        "preview-default": "Загрузите свой файл шрифта или ссылку на Google шрифт",
+        "delete": "{{общее.удалить}}",
+        "url-label": "Ссылка",
+        "back": "Вернуться",
+        "load": "Загрузить",
+        "no-preview": "Этот шрифт недоступен для просмотра. Будет взят шрифт по умолчанию из книги.",
+        "brown-fox": "Быстрая рыжая лисица перепрыгивает через ленивую собаку",
+        "filter-system-fonts-label": "Фильтр Системных Шрифтов"
+    },
+    "sort-field-pipe": {
+        "annotation-owner": "Владелец",
+        "annotation-color": "Цвет"
+    },
+    "library-type-subtitle-pipe": {
+        "book": "Универсальная книжная библиотека.",
+        "comic": "Библиотека комиксов с поддержкой группировки томов и обмена книгами в мягкой обложке в рамках одной серии. Не поддерживает несколько выпусков в одной серии.",
+        "manga": "Японские комиксы с поддержкой группирования по томам. Также поддерживает некоторые нестандартные конфигурации изображений.",
+        "comicVine": "Строгая реализация комиксов на основе метаданных Comic Vine с внедрением специализированных инструментов.",
+        "image": "Свободные файлы изображений с ограниченной поддержкой. Необходимо в основном следовать документации wiki.",
+        "lightNovel": "Библиотека книг со специальным управлением, оптимизированным для лёгких романов"
     }
 }

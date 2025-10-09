@@ -5,7 +5,8 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Elfelejtett jelszó?",
-        "submit": "{{common.submit}}Bejelentkezés"
+        "submit": "{{common.submit}}Bejelentkezés",
+        "oidc": "OpenID Connect"
     },
     "dashboard": {
         "no-libraries": "Még nincs könyvtár beálltva. \nÁllíts be egyet a",

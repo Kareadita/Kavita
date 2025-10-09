@@ -213,6 +213,11 @@ namespace API.Data.Migrations
                     b.Property<int>("LibraryId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Likes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("[]");
+
                     b.Property<int>("PageNumber")
                         .HasColumnType("INTEGER");
 
@@ -236,6 +241,8 @@ namespace API.Data.Migrations
                     b.HasIndex("AppUserId");
 
                     b.HasIndex("ChapterId");
+
+                    b.HasIndex("LibraryId");
 
                     b.HasIndex("SeriesId");
 
@@ -613,6 +620,11 @@ namespace API.Data.Migrations
 
                     b.Property<bool>("ShowScreenHints")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("SocialPreferences")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{\"ShareReviews\":false,\"ShareAnnotations\":false,\"ViewOtherAnnotations\":false,\"SocialLibraries\":[],\"SocialMaxAgeRating\":-1,\"SocialIncludeUnknowns\":true}");
 
                     b.Property<bool>("SwipeToPaginate")
                         .HasColumnType("INTEGER");
@@ -2988,6 +3000,12 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("API.Entities.Library", "Library")
+                        .WithMany()
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("API.Entities.Series", "Series")
                         .WithMany()
                         .HasForeignKey("SeriesId")
@@ -2997,6 +3015,8 @@ namespace API.Data.Migrations
                     b.Navigation("AppUser");
 
                     b.Navigation("Chapter");
+
+                    b.Navigation("Library");
 
                     b.Navigation("Series");
                 });

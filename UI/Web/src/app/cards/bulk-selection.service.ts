@@ -74,6 +74,7 @@ export class BulkSelectionService {
     }
     this.prevIndex = index;
     this.prevDataSource = dataSource;
+    this.debugLog("Setting max for " + dataSource + " to " + maxIndex);
     this.dataSourceMax[dataSource] = maxIndex;
     this.actionsSource.next(this.getActions(() => {}));
   }

@@ -241,7 +241,7 @@ export class CardItemComponent implements OnInit {
       }
     } else if (this.utilityService.isSeries(this.entity)) {
       this.tooltipTitle = this.title || (this.utilityService.asSeries(this.entity).name);
-    } else if (this.entity.hasOwnProperty('expectedDate')) {
+    } else if (this.entity.hasOwnProperty('expectedDate')) { // Upcoming Chapter Entity
       this.suppressArchiveWarning = true;
       this.imageUrl = '';
       const nextDate = (this.entity as NextExpectedChapter);
@@ -250,7 +250,6 @@ export class CardItemComponent implements OnInit {
       // this.overlayInformation = `
       //         <i class="fa-regular fa-clock mb-2" style="font-size: 26px" aria-hidden="true"></i>
       //         <div>${tokens[0]}</div><div>${tokens[1]}</div>`;
-      // // todo: figure out where this caller is
       this.centerOverlay = true;
 
       if (nextDate.expectedDate) {

@@ -37,6 +37,7 @@ import {AnnotationsFilterField} from "../_models/metadata/v2/annotations-filter"
 import {AccountService} from "./account.service";
 import {MemberService} from "./member.service";
 import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
+import {SeriesService} from "./series.service";
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +52,7 @@ export class MetadataService {
   private readonly utilityService = inject(UtilityService);
   private readonly accountService = inject(AccountService);
   private readonly memberService = inject(MemberService)
+  private readonly seriesService = inject(SeriesService)
 
   private readonly highlightSlots = computed(() => {
     return this.accountService.currentUserSignal()?.preferences?.bookReaderHighlightSlots ?? [];
@@ -280,6 +282,10 @@ export class MetadataService {
         return of(this.highlightSlots().map((slot, idx) => {
           return {value: slot.slotNumber, label: translate('highlight-bar.slot-label', {slot: slot.slotNumber + 1}), color: slot.color}; // Slots start at 0
         }));
+      case AnnotationsFilterField.Series:
+        return this.seriesService.getSeriesWithAnnotations().pipe(map(series => series.map(s => {
+          return {value: s.id, label: s.name};
+        })));
     }
 
     return of([]);

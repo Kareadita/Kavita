@@ -42,6 +42,16 @@ public class UsersController : BaseApiController
     public async Task<ActionResult> DeleteUser(string username)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+        if (user == null) return BadRequest();
+
+        // Remove all likes for the user, so like counts are correct
+        var annotations = await _unitOfWork.AnnotationRepository.GetAllAnnotations();
+        foreach (var annotation in annotations.Where(a => a.Likes.Contains(user.Id)))
+        {
+            annotation.Likes.Remove(user.Id);
+            _unitOfWork.AnnotationRepository.Update(annotation);
+        }
+
         _unitOfWork.UserRepository.Delete(user);
 
         //(TODO: After updating a role or removing a user, delete their token)
@@ -108,9 +118,15 @@ public class UsersController : BaseApiController
         existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
-        existingPreferences.ShareReviews = preferencesDto.ShareReviews;
         existingPreferences.ColorScapeEnabled = preferencesDto.ColorScapeEnabled;
         existingPreferences.BookReaderHighlightSlots = preferencesDto.BookReaderHighlightSlots;
+
+        var allLibs = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id))
+            .Select(l => l.Id).ToList();
+
+        preferencesDto.SocialPreferences.SocialLibraries = preferencesDto.SocialPreferences.SocialLibraries
+            .Where(l => allLibs.Contains(l)).ToList();
+        existingPreferences.SocialPreferences = preferencesDto.SocialPreferences;
 
         if (await _licenseService.HasActiveLicense())
         {

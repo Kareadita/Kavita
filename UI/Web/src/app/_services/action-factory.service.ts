@@ -132,6 +132,8 @@ export enum Action {
    */
   ClearReadingProfile = 31,
   Export = 32,
+  Like = 33,
+  UnLike = 34,
 }
 
 /**
@@ -1126,7 +1128,25 @@ export class ActionFactoryService {
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
         children: [],
-      }
+      },
+      {
+        action: Action.Like,
+        title: 'like',
+        description: '',
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+        requiredRoles: [],
+        children: [],
+      },
+      {
+        action: Action.UnLike,
+        title: 'unlike',
+        description: '',
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+        requiredRoles: [],
+        children: [],
+      },
     ];
 
 

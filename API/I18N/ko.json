@@ -215,5 +215,10 @@
     "cannot-change-identity-provider-original-user": "원본 관리자 계정의 신원 제공자는 변경할 수 없습니다",
     "oidc-invalid-authority": "OIDC 권한이 유효하지 않습니다",
     "annotation-failed-create": "주석 생성에 실패했습니다, 다시 시도해 주십시오",
-    "annotation-delete": "주석 삭제 실패"
+    "annotation-delete": "주석 삭제 실패",
+    "opds-continue-reading-title": "{0} 부터 이어서 읽기",
+    "genre-doesnt-exist": "장르가 존재하지 않습니다",
+    "font-url-not-allowed": "URL을 통한 글꼴 업로드는 Google 글꼴만 가능합니다",
+    "annotation-export-failed": "주석 내보내기를 사용할 수 없습니다. 로그를 확인하십시오",
+    "download-not-allowed": "사용자에게 다운로드 권한이 없습니다"
 }

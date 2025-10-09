@@ -33,23 +33,20 @@ public interface IAnnotationService
     Task<string> ExportAnnotations(int userId, IList<int>? annotationIds = null);
 }
 
-public class AnnotationService : IAnnotationService
+public class AnnotationService(
+    ILogger<AnnotationService> logger,
+    IUnitOfWork unitOfWork,
+    IBookService bookService,
+    IEventHub eventHub)
+    : IAnnotationService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IBookService _bookService;
-    private readonly IDirectoryService _directoryService;
-    private readonly IEventHub _eventHub;
-    private readonly ILogger<AnnotationService> _logger;
 
-    public AnnotationService(IUnitOfWork unitOfWork, IBookService bookService,
-        IDirectoryService directoryService, IEventHub eventHub, ILogger<AnnotationService> logger)
+    private static readonly JsonSerializerOptions ExportJsonSerializerOptions = new()
     {
-        _unitOfWork = unitOfWork;
-        _bookService = bookService;
-        _directoryService = directoryService;
-        _eventHub = eventHub;
-        _logger = logger;
-    }
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
 
     /// <summary>
     /// Create a new Annotation for the user against a Chapter
@@ -67,12 +64,12 @@ public class AnnotationService : IAnnotationService
                 throw new KavitaException("invalid-payload");
             }
 
-            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId) ?? throw new KavitaException("chapter-doesnt-exist");
+            var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId) ?? throw new KavitaException("chapter-doesnt-exist");
             var chapterTitle = string.Empty;
 
             try
             {
-                var toc = await _bookService.GenerateTableOfContents(chapter);
+                var toc = await bookService.GenerateTableOfContents(chapter);
                 var pageTocs = BookChapterItemHelper.GetTocForPage(toc, dto.PageNumber);
                 if (pageTocs.Count > 0)
                 {
@@ -105,14 +102,14 @@ public class AnnotationService : IAnnotationService
                 ChapterTitle = chapterTitle
             };
 
-            _unitOfWork.AnnotationRepository.Attach(annotation);
-            await _unitOfWork.CommitAsync();
+            unitOfWork.AnnotationRepository.Attach(annotation);
+            await unitOfWork.CommitAsync();
 
-            return await _unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id);
+            return (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id))!;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an exception when creating an annotation on {ChapterId} - Page {Page}", dto.ChapterId, dto.PageNumber);
+            logger.LogError(ex, "There was an exception when creating an annotation on {ChapterId} - Page {Page}", dto.ChapterId, dto.PageNumber);
             throw new KavitaException("annotation-failed-create");
         }
     }
@@ -128,7 +125,7 @@ public class AnnotationService : IAnnotationService
     {
         try
         {
-            var annotation = await _unitOfWork.AnnotationRepository.GetAnnotation(dto.Id);
+            var annotation = await unitOfWork.AnnotationRepository.GetAnnotation(dto.Id);
             if (annotation == null || annotation.AppUserId != userId) throw new KavitaException("denied");
 
             annotation.ContainsSpoiler = dto.ContainsSpoiler;
@@ -137,17 +134,19 @@ public class AnnotationService : IAnnotationService
             annotation.CommentHtml = dto.CommentHtml;
             annotation.CommentPlainText = StripHtml(dto.CommentHtml);
 
-            _unitOfWork.AnnotationRepository.Update(annotation);
+            unitOfWork.AnnotationRepository.Update(annotation);
 
-            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
+            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync())
             {
-                await _eventHub.SendMessageToAsync(MessageFactory.AnnotationUpdate,
+                dto = (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id))!;
+
+                await eventHub.SendMessageToAsync(MessageFactory.AnnotationUpdate,
                     MessageFactory.AnnotationUpdateEvent(dto), userId);
                 return dto;
             }
         } catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an exception updating Annotation for Chapter {ChapterId} - Page {PageNumber}",  dto.ChapterId, dto.PageNumber);
+            logger.LogError(ex, "There was an exception updating Annotation for Chapter {ChapterId} - Page {PageNumber}",  dto.ChapterId, dto.PageNumber);
         }
 
         throw new KavitaException("generic-error");
@@ -158,7 +157,7 @@ public class AnnotationService : IAnnotationService
         try
         {
             // Get users with preferences for highlight colors
-            var users = (await _unitOfWork.UserRepository
+            var users = (await unitOfWork.UserRepository
                 .GetAllUsersAsync(AppUserIncludes.UserPreferences))
                 .ToDictionary(u => u.Id, u => u);
 
@@ -166,15 +165,15 @@ public class AnnotationService : IAnnotationService
             IList<FullAnnotationDto> annotations;
             if (annotationIds == null)
             {
-                annotations = await _unitOfWork.AnnotationRepository.GetFullAnnotationsByUserIdAsync(userId);
+                annotations = await unitOfWork.AnnotationRepository.GetFullAnnotationsByUserIdAsync(userId);
             }
             else
             {
-                annotations = await _unitOfWork.AnnotationRepository.GetFullAnnotations(userId, annotationIds);
+                annotations = await unitOfWork.AnnotationRepository.GetFullAnnotations(userId, annotationIds);
             }
 
             // Get settings for hostname
-            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             var hostname = !string.IsNullOrWhiteSpace(settings.HostName) ? settings.HostName : "http://localhost:5000";
 
             // Group annotations by series, then by volume
@@ -235,22 +234,15 @@ public class AnnotationService : IAnnotationService
                 }).ToArray();
 
             // Serialize to JSON
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
+            var json = JsonSerializer.Serialize(exportData, ExportJsonSerializerOptions);
 
-            var json = JsonSerializer.Serialize(exportData, options);
-
-            _logger.LogInformation("Successfully exported {AnnotationCount} annotations for user {UserId}", annotations.Count, userId);
+            logger.LogInformation("Successfully exported {AnnotationCount} annotations for user {UserId}", annotations.Count, userId);
 
             return json;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to export annotations for user {UserId}", userId);
+            logger.LogError(ex, "Failed to export annotations for user {UserId}", userId);
             throw new KavitaException("annotation-export-failed");
         }
     }
@@ -271,7 +263,7 @@ public class AnnotationService : IAnnotationService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Invalid html, cannot parse plain text");
+            logger.LogError(exception, "Invalid html, cannot parse plain text");
             return string.Empty;
         }
     }

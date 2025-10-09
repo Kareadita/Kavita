@@ -12,6 +12,7 @@ export interface Annotation {
   selectedSlotIndex: number;
   chapterTitle: string | null;
   highlightCount: number;
+  likes: number[];
   ownerUserId: number;
   ownerUsername: string;
   createdUtc: string;
@@ -24,5 +25,8 @@ export interface Annotation {
   libraryId: number;
   volumeId: number;
   seriesId: number;
+
+  seriesName: string;
+  libraryName: string;
 
 }

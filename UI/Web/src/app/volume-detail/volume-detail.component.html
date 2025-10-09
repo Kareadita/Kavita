@@ -26,7 +26,9 @@
                                    [hasReadingProgress]="volume.pagesRead > 0"
                                    [readingTimeEntity]="volume"
                                    [libraryType]="libraryType"
-                                   [mangaFormat]="series.format" />
+                                   [mangaFormat]="series.format"
+                                   [totalBytes]="size"
+          />
 
           @if (libraryType !== null && series && volume.chapters.length === 1) {
             <div class="mt-2 mb-2">
@@ -88,7 +90,7 @@
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="volume.chapters[0].summary || ''" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 170 : 200" />
+            <app-read-more [text]="volume.chapters[0].summary || ''" [maxLength]="utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop ? 170 : 200" />
           </div>
 
           <div class="mt-2">
@@ -226,9 +228,7 @@
                 <app-details-tab [metadata]="volumeCast"
                                  [genres]="genres"
                                  [tags]="tags"
-                                 [readingTime]="volume"
-                                 [language]="volume.chapters[0].language"
-                                 [format]="series.format" />
+                />
               }
             </ng-template>
           </li>

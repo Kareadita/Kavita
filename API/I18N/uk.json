@@ -215,5 +215,10 @@
     "update-yearly-stats": "Оновити щорічну статистику",
     "generated-reading-profile-name": "Згенеровано з {0}",
     "annotation-failed-create": "Не вдалося створити анотацію, спробуйте ще раз",
-    "annotation-delete": "Не вдалося видалити анотацію"
+    "annotation-delete": "Не вдалося видалити анотацію",
+    "opds-continue-reading-title": "Продовжити читання з: {0}",
+    "genre-doesnt-exist": "Жанру не існує",
+    "font-url-not-allowed": "Завантаження шрифту за URL-адресою дозволено лише з Google Fonts",
+    "annotation-export-failed": "Не вдалося експортувати анотації, перевірте журнали",
+    "download-not-allowed": "Користувач не має дозволів на завантаження"
 }

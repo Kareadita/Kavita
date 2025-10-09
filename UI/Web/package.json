@@ -59,6 +59,7 @@
     "ngx-stars": "^1.6.5",
     "ngx-toastr": "^19.1.0",
     "nosleep.js": "^0.12.0",
+    "quill": "^2.0.3",
     "rxjs": "^7.8.2",
     "screenfull": "^6.0.2",
     "swiper": "^11.2.10",

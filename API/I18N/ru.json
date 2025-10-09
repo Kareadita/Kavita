@@ -213,5 +213,10 @@
     "password-authentication-disabled": "Авторизация по паролю отключена, войдите через OpenID Connect",
     "oidc-managed": "Пользователи, управляемые OIDC, не могут быть отредактированы.",
     "cannot-change-identity-provider-original-user": "Поставщик идентификационных данных исходной учётной записи администратора не может быть изменён",
-    "oidc-invalid-authority": "Полномочия OIDC недействительны"
+    "oidc-invalid-authority": "Полномочия OIDC недействительны",
+    "annotation-failed-create": "Не получилось создать аннотацию, попробуйте ещё раз",
+    "annotation-delete": "Не получилось удалить аннотацию",
+    "opds-continue-reading-title": "Продолжить чтение с: {0}",
+    "genre-doesnt-exist": "Такого жанра не существует",
+    "font-url-not-allowed": "Загрузка Шрифтов по ссылке разрешена только с Google Fonts"
 }

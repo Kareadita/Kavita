@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, inject, Injectable} from '@angular/core';
+import {computed, DestroyRef, inject, Injectable} from '@angular/core';
 import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
@@ -64,8 +64,10 @@ export class AccountService {
     if (!u) return false;
     return this.hasAdminRole(u);
   }), shareReplay({bufferSize: 1, refCount: true}));
+  public readonly isAdmin = toSignal(this.isAdmin$);
 
-  public readonly currentUserSignal = toSignal(this.currentUserSource);
+  public readonly currentUserSignal = toSignal(this.currentUser$);
+  public readonly userId = computed(() => this.currentUserSignal()?.id);
 
   /**
    * SetTimeout handler for keeping track of refresh token call
@@ -189,7 +191,7 @@ export class AccountService {
   }
 
   getRoles() {
-    return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
+    return this.httpClient.get<Role[]>(this.baseUrl + 'account/roles');
   }
 
 
@@ -201,8 +203,7 @@ export class AccountService {
         if (user) {
           this.setCurrentUser(user);
         }
-      }),
-      takeUntilDestroyed(this.destroyRef)
+      })
     );
   }
 

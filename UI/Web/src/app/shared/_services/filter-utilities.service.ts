@@ -181,7 +181,7 @@ export class FilterUtilitiesService {
       case "annotation":
         return [
           AnnotationsFilterField.Owner, AnnotationsFilterField.Library,
-          AnnotationsFilterField.HighlightSlots,
+          AnnotationsFilterField.HighlightSlots, AnnotationsFilterField.Series
         ] as T[];
       case 'series':
         return [

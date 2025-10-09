@@ -215,5 +215,10 @@
     "cannot-change-identity-provider-original-user": "O provedor de identidade da conta de administrador original não pode ser alterado",
     "oidc-invalid-authority": "A autoridade do OIDC é inválida",
     "annotation-failed-create": "Falha ao criar anotação, tente novamente",
-    "annotation-delete": "Não foi possível excluir a anotação"
+    "annotation-delete": "Não foi possível excluir a anotação",
+    "opds-continue-reading-title": "Continue lendo a partir de: {0}",
+    "genre-doesnt-exist": "Gênero não existe",
+    "font-url-not-allowed": "O envio de uma fonte por url só é permitido no Google Fonts",
+    "annotation-export-failed": "Não foi possível exportar Anotações, verificar logs",
+    "download-not-allowed": "O usuário não tem permissões de download"
 }

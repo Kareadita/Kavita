@@ -581,8 +581,11 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
         await userManager.CreateAsync(user);
         await userManager.CreateAsync(defaultAdmin);
 
-        var accountService = new AccountService(userManager, Substitute.For<ILogger<AccountService>>(), unitOfWork, mapper, Substitute.For<ILocalizationService>());
-        var oidcService = new OidcService(Substitute.For<ILogger<OidcService>>(), userManager, unitOfWork, accountService, Substitute.For<IEmailService>());
+        var accountService = new AccountService(userManager, Substitute.For<ILogger<AccountService>>(),
+            unitOfWork, mapper, Substitute.For<ILocalizationService>());
+        var oidcService = new OidcService(Substitute.For<ILogger<OidcService>>(), userManager, unitOfWork,
+            accountService, Substitute.For<IEmailService>());
+
         return (oidcService, user, accountService, userManager);
     }
 }

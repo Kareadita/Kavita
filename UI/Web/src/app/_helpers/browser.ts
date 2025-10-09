@@ -10,6 +10,68 @@ export const isSafari = [
   || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
 
 /**
+ * Detects if the browser is Chromium-based (Chrome, Edge, Opera, etc.)
+ */
+export const isChromiumBased = (): boolean => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  // Check for Chrome/Chromium indicators
+  return (userAgent.includes('chrome') ||
+      userAgent.includes('crios') || // Chrome on iOS
+      userAgent.includes('chromium') ||
+      userAgent.includes('edg/') || // Edge Chromium
+      userAgent.includes('opr/') || // Opera
+      userAgent.includes('samsungbrowser')) &&
+    !userAgent.includes('firefox') &&
+    !userAgent.includes('safari') ||
+    (userAgent.includes('safari') && userAgent.includes('chrome')); // Chrome includes Safari in UA
+};
+
+/**
+ * Detects if the device is mobile or tablet
+ */
+export const isMobileDevice = (): boolean => {
+  // Check for touch capability and screen size
+  const hasTouchScreen = 'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0 ||
+    (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+
+  // Additional mobile UA checks
+  const mobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+    navigator.userAgent.toLowerCase()
+  );
+
+  // Screen width check for tablets
+  const isSmallScreen = window.innerWidth <= 1024;
+
+  return hasTouchScreen && (mobileUA || isSmallScreen);
+};
+
+/**
+ * Detects if running on a Chromium-based mobile browser
+ */
+export const isMobileChromium = (): boolean => {
+  return isChromiumBased() && isMobileDevice();
+};
+
+/**
+ * Gets the Chrome/Chromium version
+ */
+export const getChromiumVersion = (): Version | null => {
+  const userAgent = navigator.userAgent;
+  const matches = userAgent.match(/(?:Chrome|CriOS|Edg|OPR)\/(\d+)\.(\d+)\.(\d+)/);
+
+  if (matches) {
+    return new Version(
+      parseInt(matches[1], 10),
+      parseInt(matches[2], 10),
+      parseInt(matches[3], 10)
+    );
+  }
+
+  return null;
+};
+
+/**
  * Represents a Version for a browser
  */
 export class Version {
@@ -47,7 +109,6 @@ export class Version {
     );
   }
 }
-
 
 export const getIosVersion = () => {
   const match = navigator.userAgent.match(/OS (\d+)_(\d+)_?(\d+)?/);

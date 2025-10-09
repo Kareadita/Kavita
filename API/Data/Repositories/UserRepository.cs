@@ -587,9 +587,11 @@ public class UserRepository : IUserRepository
     /// <returns></returns>
     public async Task<List<AnnotationDto>> GetAnnotations(int userId, int chapterId)
     {
-        // TODO: Check settings if I should include other user's annotations
+        var userPreferences = await _context.AppUserPreferences.ToListAsync();
+
         return await _context.AppUserAnnotation
-            .Where(a => a.AppUserId == userId && a.ChapterId == chapterId)
+            .Where(a => a.ChapterId == chapterId)
+            .RestrictBySocialPreferences(userId, userPreferences)
             .OrderBy(a => a.PageNumber)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -597,9 +599,11 @@ public class UserRepository : IUserRepository
 
     public async Task<List<AnnotationDto>> GetAnnotationsByPage(int userId, int chapterId, int pageNum)
     {
-        // TODO: Check settings if I should include other user's annotations
+        var userPreferences = await _context.AppUserPreferences.ToListAsync();
+
         return await _context.AppUserAnnotation
-            .Where(a => a.AppUserId == userId && a.ChapterId == chapterId && a.PageNumber == pageNum)
+            .Where(a => a.ChapterId == chapterId && a.PageNumber == pageNum)
+            .RestrictBySocialPreferences(userId, userPreferences)
             .OrderBy(a => a.PageNumber)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -617,16 +621,22 @@ public class UserRepository : IUserRepository
 
     public async Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId)
     {
+        var userPreferences = await _context.AppUserPreferences.ToListAsync();
+
         return await _context.AppUserAnnotation
-            .Where(a => a.AppUserId == userId && a.Id == annotationId)
+            .Where(a => a.Id == annotationId)
+            .RestrictBySocialPreferences(userId, userPreferences)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
 
     public async Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId)
     {
+        var userPreferences = await _context.AppUserPreferences.ToListAsync();
+
         return await _context.AppUserAnnotation
-            .Where(a => a.AppUserId == userId && a.SeriesId == seriesId)
+            .Where(a => a.SeriesId == seriesId)
+            .RestrictBySocialPreferences(userId, userPreferences)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
@@ -686,10 +696,12 @@ public class UserRepository : IUserRepository
 
     public async Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId)
     {
+        var userPreferences = await _context.AppUserPreferences.ToListAsync();
+
         return await _context.AppUserRating
             .Include(r => r.AppUser)
             .Where(r => r.SeriesId == seriesId)
-            .Where(r => r.AppUser.UserPreferences.ShareReviews || r.AppUserId == userId)
+            .RestrictBySocialPreferences(userId, userPreferences)
             .OrderBy(r => r.AppUserId == userId)
             .ThenBy(r => r.Rating)
             .AsSplitQuery()
@@ -699,10 +711,12 @@ public class UserRepository : IUserRepository
 
     public async Task<IList<UserReviewDto>> GetUserRatingDtosForChapterAsync(int chapterId, int userId)
     {
+        var userPreferences = await _context.AppUserPreferences.ToListAsync();
+
         return await _context.AppUserChapterRating
             .Include(r => r.AppUser)
             .Where(r => r.ChapterId == chapterId)
-            .Where(r => r.AppUser.UserPreferences.ShareReviews || r.AppUserId == userId)
+            .RestrictBySocialPreferences(userId, userPreferences)
             .OrderBy(r => r.AppUserId == userId)
             .ThenBy(r => r.Rating)
             .AsSplitQuery()
@@ -881,6 +895,7 @@ public class UserRepository : IUserRepository
                 },
                 Libraries =  u.Libraries.Select(l => new LibraryDto
                 {
+                    Id = l.Id,
                     Name = l.Name,
                     Type = l.Type,
                     LastScanned = l.LastScanned,

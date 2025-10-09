@@ -203,5 +203,6 @@
     "generic-cover-volume-save": "Impossibile salvare l'immagine di copertina nel Volume",
     "generic-cover-person-save": "Impossibile salvare l'immagine di copertina nella Persona",
     "error-import-stack": "Si è verificato un errore durante l'importazione dello stack MAL",
-    "kavitaplus-restricted": "Riservato a Kavita+"
+    "kavitaplus-restricted": "Riservato a Kavita+",
+    "password-authentication-disabled": "Autenticazione tramite password è disabilitata, utilizzare OpenID Connect"
 }

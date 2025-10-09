@@ -36,6 +36,8 @@ export class GenericFilterFieldPipe implements PipeTransform {
         return translate('filter-field-pipe.libraries');
       case AnnotationsFilterField.Spoiler:
         return translate('generic-filter-field-pipe.annotation-spoiler');
+        case AnnotationsFilterField.Series:
+        return translate('generic-filter-field-pipe.series');
     }
   }
 

@@ -17,7 +17,7 @@ import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} fro
 import {Annotation} from "../../../_models/annotations/annotation";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, switchMap} from "rxjs/operators";
+import {debounceTime, switchMap, tap} from "rxjs/operators";
 import {of} from "rxjs";
 import {HighlightBarComponent} from "../../_annotations/highlight-bar/highlight-bar.component";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
@@ -37,6 +37,7 @@ import {
   ResizeMode
 } from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 import {ConfirmService} from "../../../../shared/confirm.service";
+import {AnnotationLikesComponent} from "../../_annotations/annotation-likes/annotation-likes.component";
 
 export enum AnnotationMode {
   View = 0,
@@ -59,7 +60,8 @@ const INIT_HIGHLIGHT_DELAY = 200;
     QuillViewComponent,
     DatePipe,
     UtcToLocaleDatePipe,
-    OffCanvasResizeComponent
+    OffCanvasResizeComponent,
+    AnnotationLikesComponent
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',
@@ -90,7 +92,6 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   isEditOrCreateMode: Signal<boolean>
   titleColor: Signal<string>;
   totalText!: Signal<SafeHtml>;
-
 
   formGroup!: FormGroup<{
     note: FormControl<object>,
@@ -269,12 +270,8 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     const annotation = this.annotation();
 
     if (annotation) {
-      console.log('view-edit drawer, slot index changed: ', slotIndex, 'comment: ', this.annotation()?.comment, 'form comment: ', this.formGroup.get('note')?.value);
       this.annotation.set({...annotation, selectedSlotIndex: slotIndex});
       this.formGroup.get('selectedSlotIndex')?.setValue(slotIndex);
-
-      // Patch back in any text in the quill editor
-      console.log('(2) view-edit drawer, slot index changed: ', slotIndex, 'comment: ', this.annotation()?.comment, 'form comment: ', this.formGroup.get('note')?.value);
     }
   }
 

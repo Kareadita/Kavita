@@ -22,7 +22,9 @@
                                    [hasReadingProgress]="chapter.pagesRead > 0"
                                    [readingTimeEntity]="chapter"
                                    [libraryType]="libraryType"
-                                   [mangaFormat]="series.format" />
+                                   [mangaFormat]="series.format"
+                                   [totalBytes]="size"
+          />
 
 
 
@@ -84,7 +86,7 @@
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="chapter.summary || ''" [maxLength]="utilityService.getActiveBreakpoint() >= Breakpoint.Desktop ? 170 : 200" />
+            <app-read-more [text]="chapter.summary || ''" [maxLength]="utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop ? 170 : 200" />
           </div>
 
           <div class="mt-2">
@@ -166,9 +168,7 @@
                                  [genres]="chapter.genres"
                                  [tags]="chapter.tags"
                                  [webLinks]="weblinks"
-                                 [readingTime]="chapter"
-                                 [language]="chapter.language"
-                                 [format]="series.format" />
+                />
               }
             </ng-template>
           </li>
