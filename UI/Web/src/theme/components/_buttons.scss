@@ -24,7 +24,7 @@
     border-color: var(--btn-primary-hover-border-color);
 
     i {
-      --btncolor: var(-primary-hover-text-color);
+      color: var(--btn-primary-hover-text-color);
     }
   }
 }
