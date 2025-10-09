@@ -133,7 +133,6 @@ public class SettingsController : BaseApiController
     /// Is the minimum information setup for Email to work
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("is-email-setup")]
     public async Task<ActionResult<bool>> IsEmailSetup()
     {
