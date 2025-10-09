@@ -267,6 +267,12 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
     }
 }
 
+button {
+  i.fa, i.fa-regular {
+    color: var(--btn-fa-icon-color);
+  }
+}
+
 .btn-check:focus + .btn, .btn:focus {
   box-shadow: 0 0 0 0.05rem var(--btn-focus-boxshadow-color);
 }
