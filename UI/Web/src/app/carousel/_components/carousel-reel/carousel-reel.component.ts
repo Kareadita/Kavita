@@ -59,10 +59,18 @@ export class CarouselReelComponent {
 
   swiper: Swiper | undefined;
 
+  get progressChange() {
+    const totalItems = this.items.length;
+    const itemsToMove = Math.min(5, totalItems);
+    const progressPerItem = 1 / totalItems;
+    return Math.min(0.25, progressPerItem * itemsToMove);
+  }
+
   nextPage() {
     if (this.swiper) {
       if (this.swiper.isEnd) return;
-      this.swiper.setProgress(this.swiper.progress + 0.25, 600);
+
+      this.swiper.setProgress(this.swiper.progress + this.progressChange, 600);
       this.cdRef.markForCheck();
     }
   }
@@ -70,7 +78,7 @@ export class CarouselReelComponent {
   prevPage() {
     if (this.swiper) {
       if (this.swiper.isBeginning) return;
-      this.swiper.setProgress(this.swiper.progress - 0.25, 600);
+      this.swiper.setProgress(this.swiper.progress - this.progressChange, 600);
       this.cdRef.markForCheck();
     }
   }
