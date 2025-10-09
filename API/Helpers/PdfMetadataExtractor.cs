@@ -10,41 +10,40 @@ using Microsoft.Extensions.Logging;
 namespace API.Helpers;
 #nullable enable
 
-/**
- * Contributed by https://github.com/microtherion
- *
- * All references to the "PDF Spec" (section numbers, etc.) refer to the
- * PDF 1.7 Specification a.k.a. PDF32000-1:2008
- * https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf
- */
 
-/**
- * Reference for PDF Metadata Format
-    %PDF-1.4                   ← Header
+// Contributed by https://github.com/microtherion
+//
+// All references to the "PDF Spec" (section numbers, etc.) refer to the
+// PDF 1.7 Specification a.k.a. PDF32000-1:2008
+// https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf
 
-    Object 1 0 obj             ← Objects containing content
-    << /Type /Catalog ... >>
-    endobj
-
-    Object 2 0 obj
-    << /Type /Info ... >>
-    endobj
-
-    ...more objects...
-
-    xref                       ← Cross-reference table
-    0 6
-    0000000000 65535 f
-    0000000015 00000 n         ← Object 1 is at byte offset 15
-    0000000109 00000 n         ← Object 2 is at byte offset 109
-    ...
-
-    trailer                    ← Trailer dictionary
-    << /Size 6 /Root 1 0 R /Info 2 0 R >>
-    startxref
-    1234                       ← Byte offset where xref starts
-    %%EOF
- */
+// Reference for PDF Metadata Format
+// <![CDATA[
+//     %PDF-1.4                   ← Header
+//
+//     Object 1 0 obj             ← Objects containing content
+//     << /Type /Catalog ... >>
+//     endobj
+//
+//     Object 2 0 obj
+//     << /Type /Info ... >>
+//     endobj
+//
+//     ...more objects...
+//
+//     xref                       ← Cross-reference table
+//     0 6
+//     0000000000 65535 f
+//     0000000015 00000 n         ← Object 1 is at byte offset 15
+//     0000000109 00000 n         ← Object 2 is at byte offset 109
+//     ...
+//
+//     trailer                    ← Trailer dictionary
+//     << /Size 6 /Root 1 0 R /Info 2 0 R >>
+//     startxref
+//     1234                       ← Byte offset where xref starts
+//     %%EOF
+// ]]>
 
 /// <summary>
 /// Parse PDF file and try to extract as much metadata as possible.
@@ -1591,6 +1590,7 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor
             case PdfLexer.TokenType.Name:
             case PdfLexer.TokenType.String:
             case PdfLexer.TokenType.ObjectRef:
+            case PdfLexer.TokenType.Keyword:
                 break;
             case PdfLexer.TokenType.ArrayStart:
             {
@@ -1602,8 +1602,17 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor
                 SkipDictionary();
                 break;
             }
+            case PdfLexer.TokenType.StreamStart:
+            {
+                // If we encounter a stream, we need to skip it properly
+                // This is tricky because we need the Length from the dictionary
+                // For now, throw a more informative exception
+                throw new PdfMetadataExtractorException(
+                    "Encountered stream object in unexpected context - PDF may have inline streams in dictionary");
+            }
             default:
-                throw new PdfMetadataExtractorException("Unexpected token in SkipValue");
+                throw new PdfMetadataExtractorException(
+                    $"Unexpected token type in SkipValue: {token.Type} with value: {token.Value}");
         }
     }
 
