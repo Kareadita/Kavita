@@ -24,11 +24,11 @@
       @for (opt of options(); track opt.value; let index = $index) {
         <li class="list-group-item">
           <div class="form-check">
-            <input id="option--{{index}}" type="checkbox" class="form-check-input"
+            <input id="{{id()}}--option--{{index}}" type="checkbox" class="form-check-input"
                    [checked]="isChecked(opt)" (change)="onCheckboxChange(opt, $event)"
                    [disabled]="isDisabled(opt)"
             >
-            <label class="form-check-label" for="option--{{index}}">{{opt.label}}</label>
+            <label class="form-check-label" for="{{id()}}--option--{{index}}">{{opt.label}}</label>
             @if (opt.colour) {
               @let c = opt.colour;
               <i class="fas fa-circle" [ngStyle]="{ 'color': `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})` }"></i>

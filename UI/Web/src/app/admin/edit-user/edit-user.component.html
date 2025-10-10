@@ -94,6 +94,7 @@
           <div class="row g-0 mb-3">
             <div class="col-md-6 pe-4">
               <app-setting-multi-check-box
+                id="libraries"
                 [title]="t('libraries-label')"
                 [options]="libraryOptions()"
                 formControlName="libraries"
@@ -102,6 +103,7 @@
 
             <div class="col-md-6">
               <app-setting-multi-check-box
+                id="roles"
                 [title]="t('roles-label')"
                 [options]="roleOptions"
                 formControlName="roles"

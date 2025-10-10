@@ -205,19 +205,21 @@
           <div class="row g-0 mb-3">
             <div class="col-md-6 pe-4">
               <app-setting-multi-check-box
-                [title]="t('default-roles-label')"
-                [options]="roleOptions"
+                id="libraries"
+                [title]="t('default-libraries-label')"
+                [options]="libraryOptions()"
                 [loading]="loading()"
-                formControlName="defaultRoles"
+                formControlName="defaultLibraries"
               />
             </div>
 
             <div class="col-md-6">
               <app-setting-multi-check-box
-                [title]="t('default-libraries-label')"
-                [options]="libraryOptions()"
+                id="roles"
+                [title]="t('default-roles-label')"
+                [options]="roleOptions"
                 [loading]="loading()"
-                formControlName="defaultLibraries"
+                formControlName="defaultRoles"
               />
             </div>
           </div>

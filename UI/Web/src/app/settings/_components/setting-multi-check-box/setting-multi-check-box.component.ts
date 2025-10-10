@@ -65,6 +65,10 @@ export interface MultiCheckBoxItem<T> {
 export class SettingMultiCheckBox<T> implements ControlValueAccessor {
 
   /**
+   * Id to prepend to input id to ensure uniqueness
+   */
+  id = input.required<string>();
+  /**
    * Title to display above the checkboxes
    */
   title = input.required<string>();
