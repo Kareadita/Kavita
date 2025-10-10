@@ -27,9 +27,16 @@ Run `npx playwright test --reporter=line` or `npx playwright test` to run e2e te
 
 ## Connecting to your dev server via your phone or any other compatible client on local network
 
-Update `IP` constant in `src/environments/environment.ts` to your dev machine's ip instead of `localhost`.
+Run `npm run start-proxy`
 
-Run `npm run start`
+## Testing OIDC
+
+There's two options,
+
+1) Run the proxy and correct the port after redirect (on login).
+2) Run `build-backend` or `build-backend-prod`, and use `localhost:5000` to test. This requires you to rebuild after each change
+
+Do **NOT** commit appsettings.development.json while testing OIDC. It'll contain your secret key
 
 ## Notes:
 - injected services should be at the top of the file

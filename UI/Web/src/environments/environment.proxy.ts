@@ -2,12 +2,13 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-const IP = 'localhost';
-
+// All requests to the backend are proxies through the Angular server, we let the browser pick the host
+// This comes with the advantage that you don't need to change anything to test on a different device on the
+// network.
 export const environment = {
   production: false,
-  apiUrl: 'http://' + IP + ':4200/api/',
-  hubUrl: 'http://'+ IP + ':4200/hubs/',
+  apiUrl: '/api/',
+  hubUrl: '/hubs/',
   buyLink: 'https://buy.stripe.com/test_9AQ5mi058h1PcIo3cf?prefilled_promo_code=FREETRIAL',
   manageLink: 'https://billing.stripe.com/p/login/test_14kfZocuh6Tz5ag7ss'
 };
