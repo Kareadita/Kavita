@@ -84,6 +84,7 @@ $action-bar-height: 38px;
   }
 
   .center-group {
+    display: block;
     justify-self: center;
   }
 
@@ -96,6 +97,10 @@ $action-bar-height: 38px;
 @media (max-width: 875px) {
   .top-action-bar {
     grid-template-columns: auto 1fr;
+  }
+
+  .center-group {
+    display: none;
   }
 
   .right-group {
