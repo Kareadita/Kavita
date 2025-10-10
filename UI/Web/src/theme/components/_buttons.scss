@@ -18,7 +18,7 @@
     color: var(--btn-primary-text-color);
   }
 
-  &:hover {
+  &:hover, &:focus-visible {
     color: var(--btn-primary-hover-text-color);
     background-color: var(--btn-primary-hover-bg-color);
     border-color: var(--btn-primary-hover-border-color);
@@ -42,7 +42,7 @@
     color: var(--btn-outline-primary-text-color);
   }
 
-  &:hover {
+  &:hover, &:focus-visible {
     color: var(--btn-outline-primary-hover-text-color) !important;
     background-color: var(--btn-outline-primary-hover-bg-color) !important;
     border-color: var(--btn-outline-primary-hover-border-color) !important;
@@ -102,7 +102,7 @@
     color: var(--btn-secondary-outline-text-color);
   }
 
-  &:hover {
+  &:hover, &:focus-visible {
     --bs-btn-color: var(--btn-secondary-outline-hover-text-color);
     --bs-btn-hover-bg: var(-btn-secondary-outline-hover-bg-color);
     --bs-btn-hover-border-color: var(--btn-secondary-outline-hover-border-color);
@@ -131,7 +131,7 @@
     color: var(--btn-danger-outline-text-color);
   }
 
-  &:hover {
+  &:hover, &:focus-visible {
     color: var(--btn-danger-outline-hover-text-color);
     background-color: var(--btn-danger-outline-hover-bg-color);
     border-color: var(--btn-danger-outline-hover-border-color);
@@ -179,7 +179,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
       color: var(--body-text-color) !important;
     }
 
-    &:hover, &:focus {
+    &:hover, &:focus, &:focus-visible {
       color: var(--primary-color);
     }
 }
@@ -203,7 +203,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
     --bs-btn-disabled-bg: transparent;
   }
 
-  &:hover, &:focus {
+  &:hover, &:focus, &:focus-visible {
     color: var(--body-text-color);
     border: none;
   }
@@ -260,7 +260,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
       font-weight: var(--btn-secondary-font-weight);
     }
 
-    &:focus {
+    &:focus, &:focus-visible {
       background-color: var(--btn-alt-focus-bg-color);
       box-shadow: 0 0 0 0.05rem var(--btn-alt-focus-boxshadow-color);
       font-weight: var(--btn-secondary-font-weight);
@@ -295,11 +295,4 @@ button {
 .btn-unstyled:focus {
   outline: none;
 }
-
-//
-//.btn-primary .btn-check:checked + .btn, :not(.btn-check) + .btn:active, .btn:first-child:active, .btn.active, .btn.show {
-//  --bs-btn-active-bg: var(--primary-color-dark-shade);
-//  --bs-btn-active-border-color: var(--primary-color-dark-shade);
-//}
-
 
