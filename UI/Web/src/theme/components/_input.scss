@@ -3,14 +3,16 @@ input:not([type="range"]), .form-control {
     color: var(--input-text-color);
     border-color: var(--input-border-color);
 
-    &:focus {
+    &:focus:not(:checked) {
         border-color: var(--input-focused-border-color);
         background-color: var(--input-bg-color);
         color: var(--input-text-color);
         box-shadow: 0 0 0 .25rem var(--input-focus-boxshadow-color);
     }
 
-    &:read-only {
+    // Checkboxes are selected by the :read-only pseudo-class, even when they're editable
+    // See https://developer.mozilla.org/en-US/docs/Web/CSS/:read-only
+    &:read-only:not([type="checkbox"]) {
         background-color: var(--input-bg-readonly-color);
         cursor: initial;
     }

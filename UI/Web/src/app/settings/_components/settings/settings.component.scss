@@ -1,7 +1,7 @@
 @use '../../../../theme/variables' as theme;
 
 h2 {
-  color: white;
+  color: var(--side-nav-header-text-color);
   font-weight: bold;
 }
 

@@ -410,7 +410,7 @@ $pagination-opacity: 0;
 
   i {
     background-color: unset;
-    color: var(--br-actionbar-button-text-color);
+    color: var(--br-actionbar-button-text-color) !important;
   }
 
   &:active {

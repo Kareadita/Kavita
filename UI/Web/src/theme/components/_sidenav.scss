@@ -114,8 +114,7 @@
       }
 
       .active-highlight {
-        background-color: #2f2f2f;
-        background-color: rgb(255 255 255 / 9%);
+        background-color: var(--side-nav-item-color);
         width: 0.25rem;
         height: 100%;
         position: absolute;
@@ -203,7 +202,7 @@
       padding-left: 1.125rem;
 
       .side-nav-header {
-        color: #ffffff;
+        color: var(--side-nav-header-text-color);
         font-size: 1rem;
         margin-left: unset;
 
@@ -227,7 +226,7 @@
           text-align: unset;
           margin-left: 0.75rem;
           font-size: 0.9rem;
-          color: #999999;
+          color: var(--side-nav-text-color);
           
           div {
             display: flex;
@@ -238,6 +237,11 @@
           }
         }
 
+        &:hover {
+          .side-nav-text {
+            color: var(--side-nav-hover-text-color);
+          }
+        }
         .card-actions {
           display: none;
         }

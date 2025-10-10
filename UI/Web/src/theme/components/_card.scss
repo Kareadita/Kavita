@@ -38,6 +38,10 @@ $image-height: 232.91px;
 $image-filter-height: 160px;
 $image-width: 160px;
 
+.card-title {
+    --bs-card-title-color: var(--card-title-text-color);
+}
+
 .card-item-container {
     .card {
         max-width: $image-width;
@@ -76,12 +80,19 @@ $image-width: 160px;
                 height: $image-filter-height;
             }
         }
-    }
 
+        & .card-title {
+            color: var(--card-overlay-text-color);
+        }
+
+        & + .card-body {
+            color: var(--card-overlay-text-color);
+        }
+    }
 
     .card-body {
         padding: 0 5px !important;
-        background-color: rgba(0,0,0,0.7);
+        background-color: var(--card-body-bg-color);
         border-width: var(--card-border-width);
         border-style: var(--card-border-style);
         border-color: var(--card-border-color);

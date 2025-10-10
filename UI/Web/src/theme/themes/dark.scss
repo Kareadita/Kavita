@@ -244,7 +244,8 @@
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
     --side-nav-hover-text-color: white;
     --side-nav-hover-bg-color: black;
-    --side-nav-text-color: hsla(0,0%,100%,.85);
+    --side-nav-text-color: #999999;
+    --side-nav-header-text-color: white;
     --side-nav-border-radius: 3px;
     --side-nav-border: none;
     --side-nav-border-closed: none;
@@ -256,8 +257,10 @@
     --side-nav-item-active-text-color: #fff;
     --side-nav-active-bg-color: transparent;
     --side-nav-overlay-color: var(--elevation-layer11-dark);
+    --side-nav-item-color: rgb(255 255 255 / 9%);
     --side-nav-item-closed-color: var(--elevation-layer10);
     --side-nav-item-closed-hover-color: white;
+    --pref-side-nav-header-text-color: #d5d5d5;
 
     /* List items */
     --list-group-item-text-color: var(--body-text-color);
@@ -353,6 +356,11 @@
     --card-overlay-bg-color: rgba(0, 0, 0, 0);
     --card-overlay-hover-bg-color: rgba(30,30,30,.6);
     --card-progress-triangle-size: 28px;
+    --card-body-bg-color: rgba(0,0,0,0.7);
+    --card-title-text-color: var(--card-text-color);
+    --card-overlay-text-color: var(--card-text-color);
+    --card-hover-text-color: var(--card-text-color);
+    --card-hover-bg-color: #3a3a3a;
 
     /* Slider */
     --slider-text-color: white;
