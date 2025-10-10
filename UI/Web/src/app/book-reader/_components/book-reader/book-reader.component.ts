@@ -1378,9 +1378,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.document.documentElement.style.setProperty('--book-reader-content-max-height', maxHeight);
     this.document.documentElement.style.setProperty('--book-reader-content-max-width', maxWidth);
-
-    // If not set, the position will default to 'static', which may cause the bookmark indicator to be incorrectly positioned.
-    this.document.documentElement.style.setProperty('--book-reader-content-position', 'relative');
   }
 
   updateSingleImagePageStyles() {
@@ -1781,9 +1778,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const intersectingEntries = Array.from(bookContentElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span,figure'))
       .filter(element => !element.classList.contains('no-observe'))
-      .filter(entry => {
-        //return this.isPartiallyContainedIn(container, entry);
-        return this.utilityService.isInViewport(entry, this.topOffset);
+      .filter(element => {
+        //return this.isPartiallyContainedIn(container, element);
+        return this.utilityService.isInViewport(element, this.topOffset)
+
+        /* Remove main container element
+        <div class="book-content"> <-- bookContentElement
+          <div class="body"> <--- we don't need this
+            <style></style>
+            ...
+          </div>
+        </div>
+        */
+        && element.parentElement !== bookContentElement;
       })
       .filter((element, i, entries) => {
         // Remove any children element contained in another element that exist on this entries
