@@ -1,4 +1,5 @@
-﻿using API.Data.Metadata;
+﻿using System.IO;
+using API.Data.Metadata;
 using API.Entities.Enums;
 
 namespace API.Services.Tasks.Scanner.Parser;
@@ -7,8 +8,26 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
 {
     public override ParserInfo Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo comicInfo = null)
     {
-        var info = bookService.ParseInfo(filePath);
-        if (info == null) return null;
+        ParserInfo info;
+        if (enableMetadata)
+        {
+            info = bookService.ParseInfo(filePath);
+            if (info == null) return null;
+        }
+        else
+        {
+            var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
+            info = new ParserInfo
+            {
+                Filename = Path.GetFileName(filePath),
+                Format = MangaFormat.Epub,
+                Title = Parser.RemoveExtensionIfSupported(fileName)!,
+                FullFilePath = Parser.NormalizePath(filePath),
+                Series = Parser.ParseSeries(fileName, type),
+                Chapters = Parser.ParseChapter(fileName, type),
+                Volumes = Parser.ParseVolume(fileName, type),
+            };
+        }
 
         info.ComicInfo = comicInfo;
 
