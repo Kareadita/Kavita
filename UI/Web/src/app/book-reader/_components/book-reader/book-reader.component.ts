@@ -512,12 +512,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  PageHeightForPagination = computed(() => {
+  pageHeightForPagination = computed(() => {
     const layoutMode = this.layoutMode();
     const immersiveMode = this.immersiveMode();
 
     if (layoutMode === BookPageLayoutMode.Default) {
-      // Ensure Angular updates this PageHeightForPagination when these signal have an update
+      // Ensure Angular updates this pageHeightForPagination when these signal have an update
       if (this.isLoading()) return;
       this.windowHeight();
       this.writingStyle();
@@ -530,9 +530,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return (this.bookContentElemRef?.nativeElement?.scrollHeight || 0) - ((this.topOffset * (immersiveMode ? 0 : 1)) * 2) + 'px';
     }
 
-    // const windowHeight = this.windowHeight();
-    // if (!immersiveMode) return windowHeight + 'px';
-    // return (windowHeight) - (this.topOffset * 2) + 'px';
     return '100%';
   });
 
@@ -983,10 +980,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const resumeElement = this.lastSeenScrollPartPath || (this.getFirstVisibleElementXPath() ?? '');
     if (resumeElement) {
-      const element = this.getElementFromXPath(resumeElement);
-      //console.log('Attempting to snap to element: ', element);
 
       if (this.debugMode()) {
+        const element = this.getElementFromXPath(resumeElement);
+        //console.log('Attempting to snap to element: ', element);
         this.logSelectedElement('yellow');
       }
 
@@ -2575,8 +2572,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly environment = environment;
-  protected readonly BookPageLayoutMode = BookPageLayoutMode;
-  protected readonly WritingStyle = WritingStyle;
   protected readonly ReadingDirection = ReadingDirection;
   protected readonly PAGING_DIRECTION = PAGING_DIRECTION;
 }
