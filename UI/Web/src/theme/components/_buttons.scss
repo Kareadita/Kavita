@@ -268,7 +268,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 }
 
 button {
-  i.fa, i.fa-regular {
+  i {
     color: var(--btn-fa-icon-color);
   }
 }

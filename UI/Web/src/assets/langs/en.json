@@ -260,7 +260,7 @@
 
     "theme-manager": {
         "title": "Theme Manager",
-        "description": "Kavita comes in my colors, find a color scheme that meets your needs or build one yourself and share it. Themes may be applied for your account or applied to all accounts.",
+        "description": "Kavita comes in many colors, find a color scheme that meets your needs or build one yourself and share it. Themes may be applied for your account or applied to all accounts.",
         "site-themes": "Site Themes",
         "set-default": "Set Default",
         "default-theme": "Default",
@@ -1346,7 +1346,7 @@
         "help-us-part-3": "to naming and organizing your media.",
         "naming-conventions-part-1": "Kavita has ",
         "naming-conventions-part-2": "folder requirements.",
-        "naming-conventions-part-3": "Check this link to ensure you are following, else files my not show up in scan.",
+        "naming-conventions-part-3": "Check this link to ensure you are following, else files may not show up in scan.",
         "cover-description": "Custom library image icons are optional",
         "cover-description-extra": "Library image should not be large. Aim for a small file, 32x32 pixels in size. Kavita does not perform validation on size.",
         "manage-collection-label": "Manage Collections",
