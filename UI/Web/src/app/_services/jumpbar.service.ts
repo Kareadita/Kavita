@@ -107,7 +107,7 @@ export class JumpbarService {
     data.forEach(obj => {
       try {
         let ch = keySelector(obj).charAt(0).toUpperCase();
-        if (/\d|\#|!|%|@|\(|\)|\^|\.|_|\*/g.test(ch)) {
+        if (!/[a-zA-Z]/.test(ch)) {
           ch = '#';
         }
         if (!keys.hasOwnProperty(ch)) {
