@@ -278,8 +278,16 @@ button {
 }
 
 /* Button with dropdown */
-.btn-group.dropdown > button {
+.btn-group.dropdown button {
+  &.dropdown-item {
+    i {
+      color: var(--dropdown-item-text-color)
+    }
 
+    &:hover i {
+      color: var(--dropdown-item-hover-text-color)
+    }
+  }
 }
 
 .btn-unstyled {
