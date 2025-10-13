@@ -328,8 +328,8 @@ public class UserRepository : IUserRepository
 
     public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true)
     {
-        var query = _context.AppUser
-            .Includes(includeFlags);
+        var query = _context.AppUser.Includes(includeFlags);
+
         if (track)
         {
             return await query.ToListAsync();

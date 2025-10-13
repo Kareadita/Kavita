@@ -1,10 +1,10 @@
 import {inject, Injectable} from '@angular/core';
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { catchError } from 'rxjs/operators';
-import { AccountService } from '../_services/account.service';
+import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
+import {Observable, throwError} from 'rxjs';
+import {Router} from '@angular/router';
+import {ToastrService} from 'ngx-toastr';
+import {catchError} from 'rxjs/operators';
+import {AccountService} from '../_services/account.service';
 import {translate, TranslocoService} from "@jsverse/transloco";
 import {AuthGuard} from "../_guards/auth.guard";
 import {APP_BASE_HREF} from "@angular/common";
@@ -39,6 +39,9 @@ export class ErrorInterceptor implements HttpInterceptor {
             break;
           case 500:
             this.handleServerException(error);
+            break;
+          case 413:
+            this.handlePayloadTooLargeException(error);
             break;
           default:
             // Don't throw multiple Something unexpected went wrong
@@ -98,6 +101,10 @@ export class ErrorInterceptor implements HttpInterceptor {
 
   private handleNotFound(error: any) {
     this.toast('errors.not-found');
+  }
+
+  private handlePayloadTooLargeException(error: any) {
+    this.toast('errors.upload-too-large');
   }
 
   private handleServerException(error: any) {

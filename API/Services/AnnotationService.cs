@@ -156,11 +156,6 @@ public class AnnotationService(
     {
         try
         {
-            // Get users with preferences for highlight colors
-            var users = (await unitOfWork.UserRepository
-                .GetAllUsersAsync(AppUserIncludes.UserPreferences))
-                .ToDictionary(u => u.Id, u => u);
-
             // Get all annotations for the user with related data
             IList<FullAnnotationDto> annotations;
             if (annotationIds == null)
@@ -171,6 +166,15 @@ public class AnnotationService(
             {
                 annotations = await unitOfWork.AnnotationRepository.GetFullAnnotations(userId, annotationIds);
             }
+
+            var userIds = annotations.Select(a => a.UserId)
+                .Distinct()
+                .ToList();
+
+            // Get users with preferences for highlight colors
+            var users = (await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences, false))
+                .Where(u => userIds.Contains(u.Id))
+                .ToDictionary(u => u.Id, u => u);
 
             // Get settings for hostname
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
