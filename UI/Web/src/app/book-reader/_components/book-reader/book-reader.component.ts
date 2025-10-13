@@ -392,6 +392,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected verticalBookContentWidth!: Signal<string>;
   protected virtualizedPageNum!: Signal<number>;
   protected virtualizedMaxPages!: Signal<number>;
+  protected bookContentPaddingBottom = computed(() => {
+    const layoutMode = this.layoutMode();
+    if (layoutMode !== BookPageLayoutMode.Default) return '0px';
+    return '40px';
+  });
 
   pageWidthForPagination = computed(() => {
     const layoutMode = this.layoutMode();
