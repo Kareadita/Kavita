@@ -1,3 +1,4 @@
+import {AgeRating} from "../../../_models/metadata/age-rating";
 
 export interface Annotation {
   id: number;
@@ -28,5 +29,5 @@ export interface Annotation {
 
   seriesName: string;
   libraryName: string;
-
+  ageRating: AgeRating;
 }

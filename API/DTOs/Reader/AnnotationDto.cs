@@ -67,6 +67,11 @@ public sealed record AnnotationDto
 
     public required int OwnerUserId { get; set; }
     public string OwnerUsername { get; set; }
+    /// <summary>
+    /// The age rating of the series this annotation is linked to
+    /// </summary>
+    /// <remarks>Not required when creating/updating an annotation, this is added in flight</remarks>
+    public AgeRating AgeRating { get; set; }
 
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }

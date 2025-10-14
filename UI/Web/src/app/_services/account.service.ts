@@ -16,6 +16,7 @@ import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {Action} from "./action-factory.service";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
+import {Annotation} from "../book-reader/_models/annotations/annotation";
 
 export enum Role {
   Admin = 'Admin',
@@ -192,6 +193,46 @@ export class AccountService {
 
   getRoles() {
     return this.httpClient.get<Role[]>(this.baseUrl + 'account/roles');
+  }
+
+  /**
+   * Should likes be displayed for the given annotation
+   * @param annotation
+   */
+  showAnnotationLikes(annotation: Annotation) {
+    const user = this.currentUserSignal();
+    if (!user) return false;
+
+    const shareAnnotations = user.preferences.socialPreferences.shareAnnotations;
+    return this.isSocialFeatureEnabled(shareAnnotations, annotation.libraryId, annotation.ageRating);
+  }
+
+  /**
+   * Checks if the given social feature is enabled in a library with associated age rating on the entity
+   * @param feature
+   * @param activeLibrary
+   * @param ageRating
+   * @private
+   */
+  private isSocialFeatureEnabled(feature: boolean, activeLibrary: number, ageRating: AgeRating) {
+    const user = this.currentUserSignal();
+    if (!user || !feature) return false;
+
+    const socialPreferences = user.preferences.socialPreferences;
+
+    const libraryAllowed = socialPreferences.socialLibraries.length === 0 ||
+      socialPreferences.socialLibraries.includes(activeLibrary);
+
+    if (!libraryAllowed || socialPreferences.socialMaxAgeRating === AgeRating.NotApplicable) {
+      return libraryAllowed;
+    }
+
+    if (socialPreferences.socialIncludeUnknowns) {
+      return socialPreferences.socialMaxAgeRating >= ageRating;
+    }
+
+    return socialPreferences.socialMaxAgeRating >= ageRating && ageRating !== AgeRating.Unknown;
+
   }
 
 

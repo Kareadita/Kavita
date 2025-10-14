@@ -38,8 +38,6 @@ export class EpubHighlightComponent {
       if (!updateEvent || !annotation || updateEvent.annotation.id !== annotation.id) return;
       if (updateEvent.type !== 'edit') return;
 
-      console.log('[highlight] annotation updated', annotation);
-
       this.annotation.set(annotations.filter(a => a.id === annotation.id)[0]);
     });
   }

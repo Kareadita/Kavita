@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'annotation-card'">
-  @if (visible()) {
+  @if (visible() && accountService.showAnnotationLikes(annotation())) {
     <button (click)="handleLikeChange()" class="ms-2 btn-unstyled"
          [class.clickable]="annotation().ownerUserId !== accountService.userId()"
          [attr.aria-label]="liked()
