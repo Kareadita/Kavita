@@ -32,7 +32,9 @@
         "out-of-sync": "Tento uživatel byl vytvořen prostřednictvím OIDC. Pokud je nastavení SyncUsers povoleno, mohou být všechny změny provedené v tomto účtu přepsány.",
         "oidc-managed": "Tento uživatel je spravován prostřednictvím OIDC. S žádostí o jakékoli změny se obraťte na správce OIDC.",
         "identity-provider": "Poskytovatel identity",
-        "identity-provider-tooltip": "Uživatelé Kavita nejsou nikdy synchronizováni s účty OIDC."
+        "identity-provider-tooltip": "Uživatelé Kavita nejsou nikdy synchronizováni s účty OIDC.",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "user-scrobble-history": {
         "title": "Scrobble historie",
@@ -133,7 +135,19 @@
         "highlight-bar-tooltip": "Tyto barvy jsou společné pro všechny knihy",
         "colorscape-label": "Použít ColorScape",
         "colorscape-tooltip": "Globální přepínač pro zapnutí/vypnutí funkce dynamického přechodu. Přepíše nastavení motivu",
-        "font-tab": "Písmo"
+        "font-tab": "Písmo",
+        "share-annotations-label": "Sdílet poznámky",
+        "share-annotations-tooltip": "Povolit, aby vaše poznámky byly viditelné pro ostatní uživatele na tomto serveru",
+        "view-other-annotations-label": "Zobrazit sdílené poznámky",
+        "view-other-annotations-tooltip": "Při čtení zobrazit poznámky ostatních uživatelů",
+        "social-libraries-label": "Sociální knihovny",
+        "social-libraries-tooltip": "Knihovny, ve kterých by měly být povoleny sociální funkce. Žádný výběr povolí sociální funkce všude. Pokud nechcete některé funkce používat, deaktivujte je.",
+        "social-max-age-rating-label": "Maximální věkové omezení",
+        "social-max-age-rating-tooltip": "Maximální věkové omezení, při kterém budou sociální funkce fungovat",
+        "social-include-unknowns-label": "Zahrnout neznámé",
+        "social-include-unknowns-tooltip": "Povolit sociální funkce pro seriály a kapitoly s neznámým věkovým hodnocením",
+        "data-saver-label": "Úspora dat",
+        "data-saver-tooltip": "Minimalizuje využití dat tím, že zabraňuje automatickému přednačítání (např. čtečka PDF)"
     },
     "user-holds": {
         "title": "Scrobble drží",
@@ -159,7 +173,7 @@
         "upload-continued": "soubor css",
         "active-theme": "Aktivní",
         "preview-default-admin": "Nejprve vyberte motiv nebo jej nahrajte ručně",
-        "description": "Kavita se dodává v mých barvách, najděte si barevné schéma, které vyhovuje vašim potřebám, nebo si ho sestavte sami a podělte se o něj. Motivy lze použít pro váš účet nebo použít pro všechny účty.",
+        "description": "Kavita přichází v mnoha barvách, najděte si barevné schéma, které vyhovuje vašim potřebám, nebo si ho sestavte sami a podělte se o něj. Motivy lze použít pro váš účet nebo použít pro všechny účty.",
         "default-theme": "Výchozí",
         "downloaded": "Staženo",
         "downloadable": "Ke stažení",
@@ -340,7 +354,7 @@
         "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
-        "title": "Role",
+        "title": "{{common.roles}}",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -430,31 +444,31 @@
         "alternative-version": "Alternativní verze",
         "character": "Znak",
         "contains": "Obsahuje",
-        "doujinshi": "Doujinshi",
+        "doujinshi": "Dódžinši",
         "other": "Jiný",
         "prequel": "Prequel",
         "sequel": "Sequel",
         "side-story": "Vedlejší příběh",
-        "spin-off": "Spin Off",
+        "spin-off": "Spin-off",
         "parent": "Rodič",
         "edition": "Edice",
         "annual": "Roční"
     },
     "publication-status-pipe": {
         "ongoing": "Pokračující",
-        "hiatus": "Mezera",
+        "hiatus": "Pozastaveno",
         "completed": "Dokončeno",
         "cancelled": "Zrušeno",
         "ended": "Skončilo"
     },
     "person-role-pipe": {
         "artist": "Umělec",
-        "character": "Charakter",
+        "character": "Postava",
         "colorist": "Kolorista",
         "cover-artist": "{{artist}}",
         "editor": "Editor",
-        "inker": "Inker",
-        "letterer": "Dopisovatel",
+        "inker": "Inkoust",
+        "letterer": "Letterer",
         "penciller": "Tužka",
         "publisher": "Vydavatel",
         "writer": "Spisovatel",
@@ -554,10 +568,12 @@
         "inviting": "Pozvánka…",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
-        "notice": "{{manage-settings.notice}}"
+        "notice": "{{manage-settings.notice}}",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "library-selector": {
-        "title": "Knihovny",
+        "title": "{{common.libraries}}",
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "Zatím nebyly nastaveny žádné knihovny."
@@ -612,11 +628,12 @@
         "kavita+-desc-part-1": "Kavita+ je prémiová předplacená služba, která zpřístupňuje funkce všem uživatelům této instance Kavity. Zakoupením předplatného ji odemknete ",
         "kavita+-desc-part-3": "dnes!",
         "kavita+-requirement": "Aplikace Kavita+ je navržena tak, aby fungovala pouze s nejnovějšími 3 verzemi. Cokoli mimo tuto verzi může být nefunkční.",
-        "kavita+-warning": "Kavita+ je samostatná od Kavity. Pokud odinstalujete Kavitu bez odhlášení, bude vám účtované předplatné.",
+        "kavita+-warning": "Kavita+ je od Kavity oddělená. Odinstalování bez předchozího zrušení předplatného bude pokračovat v fakturačním cyklu.",
         "cancel-label": "Zrušit předplatné",
         "cancel-tooltip": "Zrušte předplatné a odstraňte licenci v aplikaci Kavita.",
         "resend-license-email": "Odeslat licenci na e-mail",
-        "resend-license-email-tooltip": "Znovu odeslat licenci Kavita+ na e-mail. Licence musí být vázána na tento server, aby fungovala."
+        "resend-license-email-tooltip": "Znovu odeslat licenci Kavita+ na e-mail. Licence musí být vázána na tento server, aby fungovala.",
+        "supportId-label": "Id podpory"
     },
     "book-line-overlay": {
         "copy": "Kopírujte",
@@ -642,7 +659,7 @@
         "settings-header": "Nastavení",
         "table-of-contents-header": "Obsah",
         "bookmarks-header": "{{side-nav.bookmarks}}",
-        "toc-header": "ToC",
+        "toc-header": "Obsah",
         "loading-book": "Načítání knihy…",
         "go-back": "Zpět",
         "close-reader": "Uzavřít čtení",
@@ -762,7 +779,8 @@
         "words-count": "{{num}} slov",
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
-        "annotations-tab": "{{tabs.annotations-tab}}"
+        "annotations-tab": "{{tabs.annotations-tab}}",
+        "loading": "{{common.loading}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -781,7 +799,7 @@
         "cover-artists-title": "Umělci",
         "characters-title": "Postavy",
         "colorists-title": "Koloristé",
-        "inkers-title": "Potiskovač",
+        "inkers-title": "Inkoust",
         "publishers-title": "Vydavatelé",
         "locations-title": "Lokace",
         "links-title": "Webové odkazy"
@@ -971,7 +989,8 @@
         "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
         "language-title": "{{edit-chapter-modal.language-label}}",
         "release-title": "{{sort-field-pipe.release-year}}",
-        "age-rating-title": "{{metadata-fields.age-rating-title}}"
+        "age-rating-title": "{{metadata-fields.age-rating-title}}",
+        "file-path-title": "Cesta ke složce"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1082,7 +1101,7 @@
         "include-type-label": "Zahrnout kopírování typu knihovny",
         "add-library": "Přidat knihovnu",
         "scan-library": "Skenovat knihovnu",
-        "title": "Knihovny",
+        "title": "{{common.libraries}}",
         "last-scanned-title": "Naposledy skenováno",
         "shared-folders-title": "Složky",
         "delete-library-by-name": "Smazat {{name}}",
@@ -1247,7 +1266,7 @@
         "edit-user-tooltip": "Upravit",
         "edit-user-alt": "Upravit uživatele {{user}}",
         "last-active-header": "Naposledy aktivní",
-        "roles-header": "Role",
+        "roles-header": "{{common.roles}}",
         "you-alt": "(Ty)",
         "pending-title": "Čeká na vyřízení",
         "delete-user-tooltip": "Odstranit uživatele",
@@ -1309,7 +1328,7 @@
         "admin-kavitaplus": "Licence",
         "devices": "Zařízení",
         "mal-stack-import": "Zásobník MAL",
-        "admin-libraries": "Knihovny",
+        "admin-libraries": "{{common.libraries}}",
         "admin-media": "Média",
         "admin-media-issues": "Problémy s médii",
         "admin-email": "Email",
@@ -1433,7 +1452,7 @@
         "tags": "Štítky",
         "chapters": "Kapitoly",
         "people": "Lidé",
-        "libraries": "Knihovny",
+        "libraries": "{{common.libraries}}",
         "collections": "Sbírky",
         "include-extras": "Zahrnout kapitoly a soubory",
         "annotations": "{{tabs.annotations-tab}}"
@@ -1597,13 +1616,13 @@
         "series-name-label": "Název série",
         "descending-alt": "Sestupně",
         "filter-name-label": "Název filtru",
-        "libraries-label": "Knihovny",
+        "libraries-label": "{{common.libraries}}",
         "in-progress": "Čtené",
-        "penciller-label": "Penciller",
+        "penciller-label": "Kresba",
         "sort-by-label": "Řadit podle",
         "ascending-alt": "Vzestupně",
         "letterer-label": "Letterer",
-        "inker-label": "Inker",
+        "inker-label": "Inkoust",
         "editor-label": "Editor",
         "translator-label": "Překladatel",
         "release-label": "Vydání",
@@ -1920,19 +1939,19 @@
         "writers": "{{metadata-fields.writers-title}}",
         "want-to-read": "Chci číst",
         "formats": "Formáty",
-        "penciller": "Penciller",
+        "penciller": "Kresba",
         "publication-status": "Stav publikace",
         "languages": "Jazyky",
         "read-date": "Datum čtení",
         "average-rating": "Průměrné hodnocení",
         "read-time": "Čas čtení",
-        "inker": "Inker",
+        "inker": "Inkoust",
         "read-last": "Poslední čtení",
         "imprint": "Otisk",
         "editor": "Editor",
         "team": "Tým",
         "location": "Poloha",
-        "libraries": "Knihovny",
+        "libraries": "{{common.libraries}}",
         "letterer": "Letterer",
         "series-name": "Název série",
         "translators": "Překladatelé",
@@ -2022,7 +2041,9 @@
         "clear-reading-profile": "Vymazat profil čtení",
         "clear-reading-profile-tooltip": "Vymazat profil čtení pro tuto knihovnu",
         "cleared-profile": "Vyčištěný profil čtení",
-        "export": "Exportovat"
+        "export": "Exportovat",
+        "like": "To se mi líbí",
+        "unlike": "Už se mi nelíbí"
     },
     "changelog-update-item": {
         "changed": "Změněno",
@@ -2053,7 +2074,7 @@
         "known-issues": "{{changelog.known-issues}}"
     },
     "person-detail": {
-        "all-roles": "Role",
+        "all-roles": "{{common.roles}}",
         "browse-person-by-role-title": "Všechny práce {{name}} jako {{role}}",
         "known-for-title": "Známý díky",
         "individual-role-title": "Jako {{role}}",
@@ -2600,7 +2621,9 @@
         "chapter-count": "{{num}} Kapitol",
         "no-data": "Žádná data",
         "issue-count": "{{num}} Vydání",
-        "unknown": "Neznámý"
+        "unknown": "Neznámý",
+        "roles": "Role",
+        "libraries": "Knihovny"
     },
     "entity-type": {
         "logs": "záznamy",
@@ -2664,7 +2687,7 @@
         "genre": "Žánr",
         "first-last-name-label": "První Poslední pojmenování",
         "first-last-name-tooltip": "Zajistěte, aby se jména lidí psala jako první a pak jako poslední",
-        "person-roles-label": "Role",
+        "person-roles-label": "{{common.roles}}",
         "age-rating-mapping-description": "Jakékoli řetězce nalezené vlevo, ať už v žánru nebo v tagu, nastaví věkové hodnocení série. Shoda je normalizována a nerozlišuje velká a malá písmena, použije se nejvyšší věkové hodnocení.",
         "enabled-label": "Povolit stahování metadat",
         "blacklist-label": "Zakázání žánrů/štítků",
@@ -2854,7 +2877,7 @@
         "title": "Procházet Osoby",
         "author-count": "{{num}} osob",
         "issue-count": "{{common.issue-count}}",
-        "roles-label": "Role",
+        "roles-label": "{{common.roles}}",
         "sort-label": "Třídit",
         "name-label": "Jméno",
         "issue-count-label": "Počet vydání",
@@ -2882,7 +2905,7 @@
         "character": "Má postavu {{value}}",
         "editor": "Úpravy provedl {{value}}",
         "artist": "Nakreslil {{value}}",
-        "letterer": "Vepsal text {{value}}",
+        "letterer": "Letterováno {{value}}",
         "inker": "Inkoustoval {{value}}",
         "genre": "Má žánr {{value}}",
         "library": "V rámci knihovny {{value}}",
@@ -2908,7 +2931,8 @@
         "annotation-spoiler": "Spoiler",
         "annotation-highlights": "Barva zvýraznění",
         "annotation-comment": "Anotace textu",
-        "annotation-selection": "Zvýraznit text"
+        "annotation-selection": "Zvýraznit text",
+        "series": "{{tabs.series-tab}}"
     },
     "breakpoint-pipe": {
         "never": "Nikdy",
@@ -2952,7 +2976,7 @@
         "provider-name-label": "Název poskytovatele",
         "provider-name-tooltip": "Jméno zobrazené na přihlašovací obrazovce",
         "defaults-title": "Výchozí nastavení",
-        "defaults-requirement": "Následující nastavení se použije, když se uživatel registruje přes OIDC a funkce SyncUserSettings je vypnutá",
+        "defaults-requirement": "Následující nastavení se použije, když je uživatel registrován přes OIDC a funkce Synchronizovat nastavení uživatele je vypnutá",
         "default-include-unknowns-label": "Zahrnout neznámé",
         "default-include-unknowns-tooltip": "Zahrnout neznámé věkové kategorie",
         "default-age-restriction-label": "Věková kategorie",
@@ -2965,7 +2989,9 @@
         "roles-claim-label": "Nároky na role",
         "roles-claim-tooltip": "Nárok, který Kavita použije k získání rolí. Nechte prázdné, pokud chcete použít výchozí nastavení.",
         "custom-scopes-label": "Vlastní rozsahy",
-        "custom-scopes-tooltip": "Další rozsahy, které můžete požadovat od svého poskytovatele OIDC při přihlášení. Více rozsahů oddělte čárkami. Nesprávné hodnoty mohou zabránit přihlášení."
+        "custom-scopes-tooltip": "Další rozsahy, které můžete požadovat od svého poskytovatele OIDC při přihlášení. Více rozsahů oddělte čárkami. Nesprávné hodnoty mohou zabránit přihlášení.",
+        "default-roles-label": "{{common.roles}}",
+        "default-libraries-label": "{{common.libraries}}"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -3006,7 +3032,10 @@
     "annotation-card": {
         "page-num": "{{book-reader.page-num-label}}",
         "contains-spoilers-label": "Spoilery",
-        "view-in-reader-label": "Zobrazit v čtečce"
+        "view-in-reader-label": "Zobrazit v čtečce",
+        "location-tooltip": "{{library}} - {{series}}",
+        "liked": "Líbí se {{amount}} lidem, včetně vás",
+        "not-liked": "Líbí se {{amount}} lidem, vám se nelíbí"
     },
     "annotations-tab": {
         "title": "{{tabs.annotations-tab}}"
@@ -3096,5 +3125,9 @@
         },
         "annotations-count": "{{num}} poznámek",
         "export": "Export"
+    },
+    "multi-check-box-form": {
+        "select-all": "Vybrat vše",
+        "deselect-all": "Zrušit výběr všeho"
     }
 }

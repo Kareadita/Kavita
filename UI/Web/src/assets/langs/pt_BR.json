@@ -32,7 +32,9 @@
         "out-of-sync": "Este usuário foi criado via OIDC. Se a configuração SyncUsers estiver habilitada, todas as alterações feitas nessa conta poderão ser substituídas.",
         "oidc-managed": "Este usuário é gerenciado via OIDC. Entre em contato com o administrador do OIDC para solicitar alterações.",
         "identity-provider": "Provedor de identidade",
-        "identity-provider-tooltip": "Os usuários do Kavita nunca são sincronizados com contas OIDC."
+        "identity-provider-tooltip": "Os usuários do Kavita nunca são sincronizados com contas OIDC.",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "user-scrobble-history": {
         "title": "Histórico de scrobble",
@@ -133,7 +135,19 @@
         "highlight-bar-tooltip": "Essas cores são compartilhadas entre todos os livros",
         "colorscape-label": "Usar o ColorScape",
         "colorscape-tooltip": "Opção global para ativar/desativar o recurso de gradiente dinâmico. Essa configuração prevalecerá sobre as definições do tema",
-        "font-tab": "Fonte"
+        "font-tab": "Fonte",
+        "share-annotations-label": "Compartilhar Anotações",
+        "share-annotations-tooltip": "Permitir que suas anotações sejam visíveis para outros usuários neste servidor",
+        "view-other-annotations-label": "Exibir Anotações Compartilhadas",
+        "view-other-annotations-tooltip": "Exibir as anotações de outros usuários durante a leitura",
+        "social-libraries-label": "Bibliotecas Sociais",
+        "social-libraries-tooltip": "Bibliotecas nas quais os recursos sociais devem ser habilitados. Nenhuma seleção habilita os recursos sociais em todos os lugares. Desabilite recursos específicos se não desejar usá-los em lugar nenhum.",
+        "social-max-age-rating-label": "Classificação etária máxima",
+        "social-max-age-rating-tooltip": "Classificação etária máxima em que os recursos sociais funcionarão",
+        "social-include-unknowns-label": "Incluir desconhecidos",
+        "social-include-unknowns-tooltip": "Habilitar recursos sociais para séries e capítulos com classificação etária desconhecida",
+        "data-saver-label": "Economizador de dados",
+        "data-saver-tooltip": "Minimiza o uso de dados evitando a pré-busca automática (por exemplo, leitor de PDF)"
     },
     "user-holds": {
         "title": "Paradas do Scrobble",
@@ -145,7 +159,7 @@
     },
     "theme-manager": {
         "title": "Gerenciador de Temas",
-        "description": "Kavita vem nas minhas cores, encontre um esquema de cores que atenda às suas necessidades ou construa um você mesmo e compartilhe-o. Os temas podem ser aplicados à sua conta ou a todas as contas.",
+        "description": "O Kavita está disponível em diversas cores. Encontre um esquema de cores que atenda às suas necessidades ou crie um você mesmo e compartilhe. Os temas podem ser aplicados à sua conta ou a todas as contas.",
         "site-themes": "Temas do Site",
         "set-default": "Definir Padrão",
         "default-theme": "Padrão",
@@ -340,7 +354,7 @@
         "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
-        "title": "Papéis",
+        "title": "{{common.roles}}",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -554,10 +568,12 @@
         "inviting": "Convidando…",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
-        "notice": "{{manage-settings.notice}}"
+        "notice": "{{manage-settings.notice}}",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "library-selector": {
-        "title": "Bibliotecas",
+        "title": "{{common.libraries}}",
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "Ainda não há bibliotecas configuradas."
@@ -612,11 +628,12 @@
         "k+-already-registered-header": "Licença já registrada",
         "overwrite": "Sobrescrever",
         "k+-unlocked": "Kavita+ desbloqueado!",
-        "kavita+-warning": "Kavita+ é separado de Kavita. Se você desinstalar o Kavita sem cancelar a assinatura, será cobrado.",
+        "kavita+-warning": "O Kavita+ é independente do Kavita. Desinstalar sem primeiro cancelar sua assinatura dará continuidade ao ciclo de cobrança.",
         "cancel-label": "Cancelar Assinatura",
         "cancel-tooltip": "Cancele sua assinatura e exclua a licença no Kavita.",
         "resend-license-email": "Enviar Licença para e-mail",
-        "resend-license-email-tooltip": "Reenvie a licença Kavita+ para o e-mail. A licença deve estar vinculada a este servidor para funcionar."
+        "resend-license-email-tooltip": "Reenvie a licença Kavita+ para o e-mail. A licença deve estar vinculada a este servidor para funcionar.",
+        "supportId-label": "ID de suporte"
     },
     "book-line-overlay": {
         "copy": "Copiar",
@@ -762,7 +779,8 @@
         "publication-status-tooltip": "Estado da Publicação",
         "off": "{{reader-settings.off}}",
         "on": "{{reader-settings.on}}",
-        "annotations-tab": "{{tabs.annotations-tab}}"
+        "annotations-tab": "{{tabs.annotations-tab}}",
+        "loading": "{{common.loading}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -992,7 +1010,8 @@
         "language-title": "{{edit-chapter-modal.language-label}}",
         "release-title": "{{sort-field-pipe.release-year}}",
         "length-title": "{{edit-chapter-modal.words-label}}",
-        "age-rating-title": "{{metadata-fields.age-rating-title}}"
+        "age-rating-title": "{{metadata-fields.age-rating-title}}",
+        "file-path-title": "Caminho da pasta"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1093,7 +1112,7 @@
         "save": "{{common.save}}"
     },
     "manage-library": {
-        "title": "Bibliotecas",
+        "title": "{{common.libraries}}",
         "add-library": "Adicionar Biblioteca",
         "no-data": "Não há bibliotecas. Tente criar uma.",
         "loading": "{{common.loading}}",
@@ -1304,7 +1323,7 @@
         "resend": "Reenviar",
         "setup": "Configurar",
         "last-active-header": "Última Atividade",
-        "roles-header": "Papéis",
+        "roles-header": "{{common.roles}}",
         "name-header": "Nome",
         "none": "Nada",
         "never": "Nunca",
@@ -1360,7 +1379,7 @@
         "kavitaplus-section-title": "Kavita+",
         "admin-general": "Geral",
         "admin-users": "Usuários",
-        "admin-libraries": "Bibliotecas",
+        "admin-libraries": "{{common.libraries}}",
         "admin-media": "Mídia",
         "admin-media-issues": "Problemas de Mídia",
         "admin-logs": "Registros",
@@ -1492,7 +1511,7 @@
         "tags": "Tags",
         "genres": "{{metadata-fields.genres-title}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "libraries": "Bibliotecas",
+        "libraries": "{{common.libraries}}",
         "reading-lists": "Listas de Leitura",
         "collections": "Coleções",
         "close": "{{common.close}}",
@@ -1682,7 +1701,7 @@
         "save": "{{common.save}}",
         "limit-label": "Limite",
         "format-label": "Formato",
-        "libraries-label": "Bibliotecas",
+        "libraries-label": "{{common.libraries}}",
         "collections-label": "Coleções",
         "genres-label": "{{metadata-fields.genres-title}}",
         "tags-label": "{{metadata-fields.tags-title}}",
@@ -2129,7 +2148,7 @@
         "team": "Equipe",
         "location": "Localização",
         "languages": "Idiomas",
-        "libraries": "Bibliotecas",
+        "libraries": "{{common.libraries}}",
         "letterer": "Letrista",
         "publication-status": "Situação da Publicação",
         "penciller": "Desenhista",
@@ -2386,7 +2405,9 @@
         "cleared-profile": "Perfil de Leitura Limpo",
         "set-reading-profile-tooltip": "Vincular um Perfil de Leitura a esta Biblioteca",
         "set-reading-profile": "Definir Perfil de Leitura",
-        "export": "Exportar"
+        "export": "Exportar",
+        "like": "Curtir",
+        "unlike": "Remover curtidas"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -2510,7 +2531,9 @@
         "chapter-count": "{{num}} Capítulos",
         "no-data": "Sem Dados",
         "issue-count": "{{num}} Edições",
-        "unknown": "Desconhecido"
+        "unknown": "Desconhecido",
+        "roles": "Papéis",
+        "libraries": "Bibliotecas"
     },
     "confirm": {
         "confirm": "Confirmar",
@@ -2553,7 +2576,7 @@
         "browse-person-by-role-title": "Todos os trabalhos de {{name}} como {{role}}",
         "individual-role-title": "Como um {{role}}",
         "known-for-title": "Conhecido Por",
-        "all-roles": "Papéis",
+        "all-roles": "{{common.roles}}",
         "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
         "no-info": "Nenhuma informação sobre esta Pessoa",
         "aka-title": "Também conhecido como · "
@@ -2671,7 +2694,7 @@
         "add-age-rating-mapping-label": "Adicionar Mapeamento de Classificação de Etária",
         "field-mapping-title": "Mapeamento de Campo",
         "first-last-name-label": "Primeiro Sobrenome",
-        "person-roles-label": "Papéis",
+        "person-roles-label": "{{common.roles}}",
         "field-mapping-description": "Configure regras para determinados termos encontrados no campo Gênero/Etiqueta e mapeie-as para um novo termo em Gênero/Etiqueta e, opcionalmente, remova-as da lista Fonte. A correspondência é normalizada e não diferencia maiúsculas de minúsculas, o primeiro valor correspondente é usado. Aplicável apenas quando Gênero/Etiqueta estão habilitados para serem gravados.",
         "first-last-name-tooltip": "Garantir que os nomes das Pessoas sejam escritos Primeiro, então o Último",
         "enable-genres-tooltip": "Permitir que os Gêneros das Séries sejam escritos.",
@@ -2852,7 +2875,7 @@
     },
     "browse-people": {
         "series-count": "{{common.series-count}}",
-        "roles-label": "Papéis",
+        "roles-label": "{{common.roles}}",
         "name-label": "Nome",
         "series-count-label": "Número de Séries",
         "title": "Navegar por Pessoas",
@@ -2914,7 +2937,8 @@
         "annotation-spoiler": "Spoiler",
         "annotation-highlights": "Cor de destaque",
         "annotation-comment": "Texto de Anotação",
-        "annotation-selection": "Texto de destaque"
+        "annotation-selection": "Texto de destaque",
+        "series": "{{tabs.series-tab}}"
     },
     "import-mappings": {
         "import-step": "Importar",
@@ -2925,7 +2949,7 @@
         "import": "{{import-cbl-modal.import}}",
         "next": "{{import-cbl-modal.next}}",
         "save": "{{common.save}}",
-        "import-description": "Carregue um arquivo que você ou outra pessoa exportou para substituir ou mesclar com suas configurações atuais.",
+        "import-description": "Envie um arquivo que você ou outra pessoa exportou para substituir ou mesclar com suas configurações atuais.",
         "select-files-warning": "Você deve fazer upload de um arquivo json para continuar",
         "invalid-file": "Falha ao analisar seu arquivo, verifique sua entrada",
         "file-no-valid-content": "Sua importação não continha dados significativos para continuar",
@@ -2984,7 +3008,7 @@
         "provider-name-label": "Nome do provedor",
         "provider-name-tooltip": "Nome mostrado na tela de login",
         "defaults-title": "Padrões",
-        "defaults-requirement": "As configurações a seguir são usadas quando um usuário é registrado via OIDC enquanto SyncUserSettings está desativado",
+        "defaults-requirement": "As seguintes configurações são usadas quando um usuário é registrado via OIDC enquanto a sincronização de configurações do usuário está desativada",
         "default-include-unknowns-label": "Incluir desconhecidos",
         "default-include-unknowns-tooltip": "Incluir classificações etárias desconhecidas",
         "default-age-restriction-label": "Classificação etária",
@@ -2997,7 +3021,9 @@
         "roles-claim-label": "Reivindicar papéis",
         "roles-claim-tooltip": "A alegação que Kavita usará para extrair papéis. Deixe em branco para usar o padrão.",
         "custom-scopes-label": "Escopos personalizados",
-        "custom-scopes-tooltip": "Escopos adicionais a serem solicitados ao provedor OIDC durante o logon. Separe vários escopos com vírgulas. Valores incorretos podem impedir o login."
+        "custom-scopes-tooltip": "Escopos adicionais a serem solicitados ao provedor OIDC durante o logon. Separe vários escopos com vírgulas. Valores incorretos podem impedir o login.",
+        "default-roles-label": "{{common.roles}}",
+        "default-libraries-label": "{{common.libraries}}"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -3006,7 +3032,10 @@
     "annotation-card": {
         "page-num": "{{book-reader.page-num-label}}",
         "contains-spoilers-label": "Spoilers",
-        "view-in-reader-label": "Exibir no Leitor"
+        "view-in-reader-label": "Exibir no Leitor",
+        "location-tooltip": "{{library}} - {{series}}",
+        "liked": "Curtido por {{amount}} pessoas, incluindo você",
+        "not-liked": "Curtido por {{amount}} pessoas, você não curtiu"
     },
     "annotations-tab": {
         "title": "{{tabs.annotations-tab}}"
@@ -3096,5 +3125,9 @@
         },
         "annotations-count": "{{num}} Anotações",
         "export": "Exportar"
+    },
+    "multi-check-box-form": {
+        "select-all": "Selecionar tudo",
+        "deselect-all": "Desmarcar tudo"
     }
 }

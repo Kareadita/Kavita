@@ -210,5 +210,15 @@
     "smart-filter-system-name": "Nie można użyć nazwy systemu dostarczanego strumieniem",
     "aliases-have-overlap": "Jeden lub więcej aliasów pokrywa się z innymi osobami, nie można ich zaktualizować",
     "generated-reading-profile-name": "Wygenerowano z {0}",
-    "password-authentication-disabled": "Autoryzacja poprzez hasło została wyłączona, zaloguj się używając OpenID Connect"
+    "password-authentication-disabled": "Autoryzacja poprzez hasło została wyłączona, zaloguj się używając OpenID Connect",
+    "oidc-managed": "Użytkownicy zarządzani przez OIDC nie mogą być edytowani.",
+    "cannot-change-identity-provider-original-user": "Nie można zmienić dostawcy tożsamości oryginalnego konta administratora",
+    "oidc-invalid-authority": "Uprawnienie OIDC jest nieprawidłowe",
+    "annotation-failed-create": "Nie udało się utworzyć adnotacji, spróbuj ponownie",
+    "annotation-delete": "Nie można usunąć adnotacji",
+    "opds-continue-reading-title": "Kontynuuj czytanie od: {0}",
+    "genre-doesnt-exist": "Gatunek nie istnieje",
+    "font-url-not-allowed": "Przesyłanie czcionki przez adres URL jest dozwolone wyłącznie z serwisu Google Fonts",
+    "annotation-export-failed": "Nie można wyeksportować adnotacji, sprawdź logi",
+    "download-not-allowed": "Użytkownik nie ma uprawnień do pobierania plików"
 }

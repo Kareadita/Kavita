@@ -32,7 +32,9 @@
         "out-of-sync": "此用户是通过 OIDC 创建的。如果启用了“同步用户”设置，则对此帐号所做的任何更改都可能会被覆盖。",
         "oidc-managed": "此用户通过 OIDC 管理。请联系您的 OIDC 管理员申请更改。",
         "identity-provider": "身份提供者",
-        "identity-provider-tooltip": "Kavita 用户从未与 OIDC 帐户同步。"
+        "identity-provider-tooltip": "Kavita 用户从未与 OIDC 帐户同步。",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "user-scrobble-history": {
         "title": "Scrobble 历史",
@@ -133,7 +135,19 @@
         "highlight-bar-tooltip": "所有书籍都共享这些颜色",
         "colorscape-label": "使用色彩景观",
         "colorscape-tooltip": "全局切换，用于启用/禁用动态渐变功能。将覆盖主题设置",
-        "font-tab": "字体"
+        "font-tab": "字体",
+        "share-annotations-label": "共享注释",
+        "share-annotations-tooltip": "允许此服务器上的其他用户看到您的注释",
+        "view-other-annotations-label": "查看共享注释",
+        "view-other-annotations-tooltip": "阅读时查看其他用户的注释",
+        "social-libraries-label": "社交资料库",
+        "social-libraries-tooltip": "启用社交功能的资料库。不选择则表示所有资料库都启用社交功能。如果您不想在任何地方使用某些功能，请禁用它们。",
+        "social-max-age-rating-label": "最高年龄分级",
+        "social-max-age-rating-tooltip": "社交功能适用的最高年龄分级",
+        "social-include-unknowns-label": "包含未知内容",
+        "social-include-unknowns-tooltip": "为年龄分级未知的系列和章节启用社交功能",
+        "data-saver-label": "数据节约模式",
+        "data-saver-tooltip": "通过防止自动预读（例如 PDF 阅读器）最大限度减少数据使用"
     },
     "user-holds": {
         "title": "刮削暂停",
@@ -145,7 +159,7 @@
     },
     "theme-manager": {
         "title": "主题管理器",
-        "description": "Kavita配色方案，找到一个满足您需求的配色方案，或者自己构建一个配色方案并分享。 主题可以应用于您的帐户或应用于所有帐户。",
+        "description": "Kavita 提供多种颜色，您可以找到符合您需求的配色方案，也可以自行设计并分享。主题可以应用于您的帐户，也可以应用于所有帐户。",
         "site-themes": "网站主题",
         "set-default": "设为默认值",
         "default-theme": "默认",
@@ -340,7 +354,7 @@
         "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
-        "title": "角色",
+        "title": "{{common.roles}}",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -554,10 +568,12 @@
         "inviting": "正在邀请…",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
-        "notice": "{{manage-settings.notice}}"
+        "notice": "{{manage-settings.notice}}",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "library-selector": {
-        "title": "资料库",
+        "title": "{{common.libraries}}",
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "尚未设置资料库。"
@@ -612,11 +628,12 @@
         "overwrite": "覆盖",
         "k+-unlocked": "Kavita+ 已解锁！",
         "k+-unlocked-description": "欢迎来到 Kavita+！一旦您在帐户下注册了 Scrobbling 提供商，Kavita 就会根据您的进度、评分和阅读意愿生成 scrobble 事件。花点时间确保您为不想 scrobble 的任何系列设置了 scrobbling 保留。",
-        "kavita+-warning": "Kavita+ 与 Kavita 是相互独立的。如果您在未取消订阅的情况下卸载 Kavita，则需要付费。",
+        "kavita+-warning": "Kavita+ 与 Kavita 是分开的。在未先取消订阅的情况下卸载将继续计费周期。",
         "cancel-label": "取消订阅",
         "cancel-tooltip": "取消您的订阅并删除 Kavita 内的许可证。",
         "resend-license-email": "将许可证发送至电子邮件",
-        "resend-license-email-tooltip": "将 Kavita+ 许可证重新发送至电子邮件。许可证必须绑定到此服务器才能生效。"
+        "resend-license-email-tooltip": "将 Kavita+ 许可证重新发送至电子邮件。许可证必须绑定到此服务器才能生效。",
+        "supportId-label": "支持 ID"
     },
     "book-line-overlay": {
         "copy": "复制",
@@ -762,7 +779,8 @@
         "publication-status-tooltip": "出版状态",
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
-        "annotations-tab": "{{tabs.annotations-tab}}"
+        "annotations-tab": "{{tabs.annotations-tab}}",
+        "loading": "{{common.loading}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -992,7 +1010,8 @@
         "language-title": "{{edit-chapter-modal.language-label}}",
         "release-title": "{{sort-field-pipe.release-year}}",
         "format-title": "{{metadata-filter.format-label}}",
-        "age-rating-title": "{{metadata-fields.age-rating-title}}"
+        "age-rating-title": "{{metadata-fields.age-rating-title}}",
+        "file-path-title": "文件夹路径"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1093,7 +1112,7 @@
         "save": "{{common.save}}"
     },
     "manage-library": {
-        "title": "资料库",
+        "title": "{{common.libraries}}",
         "add-library": "添加资料库",
         "no-data": "没有资料库，尝试创建一个。",
         "loading": "{{common.loading}}",
@@ -1304,7 +1323,7 @@
         "resend": "重新发送",
         "setup": "设置",
         "last-active-header": "最后活动",
-        "roles-header": "角色",
+        "roles-header": "{{common.roles}}",
         "name-header": "名称",
         "none": "没有",
         "never": "从不",
@@ -1360,7 +1379,7 @@
         "kavitaplus-section-title": "Kavita+",
         "admin-general": "常规",
         "admin-users": "用户",
-        "admin-libraries": "资料库",
+        "admin-libraries": "{{common.libraries}}",
         "admin-media": "媒体",
         "admin-media-issues": "媒体问题",
         "admin-logs": "日志",
@@ -1492,7 +1511,7 @@
         "tags": "标签",
         "genres": "{{metadata-fields.genres-title}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "libraries": "资料库",
+        "libraries": "{{common.libraries}}",
         "reading-lists": "阅读列表",
         "collections": "收藏",
         "close": "{{common.close}}",
@@ -1682,7 +1701,7 @@
         "save": "{{common.save}}",
         "limit-label": "限制数量",
         "format-label": "格式",
-        "libraries-label": "资料库",
+        "libraries-label": "{{common.libraries}}",
         "collections-label": "收藏",
         "genres-label": "{{metadata-fields.genres-title}}",
         "tags-label": "{{metadata-fields.tags-title}}",
@@ -2129,7 +2148,7 @@
         "team": "团队",
         "location": "地点",
         "languages": "语言",
-        "libraries": "资料库",
+        "libraries": "{{common.libraries}}",
         "letterer": "嵌字师",
         "publication-status": "出版状态",
         "penciller": "铅稿",
@@ -2386,7 +2405,9 @@
         "clear-reading-profile": "清除阅读配置文件",
         "cleared-profile": "清除阅读配置文件",
         "clear-reading-profile-tooltip": "清除此资料库的阅读配置文件",
-        "export": "导出"
+        "export": "导出",
+        "like": "点赞",
+        "unlike": "移除点赞"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -2510,7 +2531,9 @@
         "chapter-count": "{{num}} 章",
         "no-data": "无数据",
         "issue-count": "{{num}} 期",
-        "unknown": "未知"
+        "unknown": "未知",
+        "roles": "角色",
+        "libraries": "资料库"
     },
     "confirm": {
         "confirm": "确认",
@@ -2549,7 +2572,7 @@
         "invalid-asin": "ASIN 必须是有效的 ISBN-10 或 ISBN-13 格式"
     },
     "person-detail": {
-        "all-roles": "角色",
+        "all-roles": "{{common.roles}}",
         "known-for-title": "代表作品",
         "individual-role-title": "作为 {{role}}",
         "browse-person-title": "{{name}} 的全部作品",
@@ -2677,7 +2700,7 @@
         "field-mapping-description": "为在“类型/标签”字段中找到的某些字符串设置规则，并将其映射到“类型/标签”中的新字符串，并可选择将其从“来源”列表中移除。匹配已规范化且不区分大小写，将使用第一个匹配的值。仅在启用“类型/标签”写入功能时适用。",
         "first-last-name-label": "首命名",
         "first-last-name-tooltip": "确保人们的名字写在前面，然后是姓氏",
-        "person-roles-label": "角色",
+        "person-roles-label": "{{common.roles}}",
         "localized-name-label": "本地化系列名称",
         "localized-name-tooltip": "允许在字段解锁时写入本地化名称。Kavita 将尝试做出最佳猜测。",
         "enable-cover-image-label": "封面图片",
@@ -2860,7 +2883,7 @@
         "issue-count-label": "期刊数",
         "series-count-label": "系列数",
         "series-count": "{{common.series-count}}",
-        "roles-label": "角色"
+        "roles-label": "{{common.roles}}"
     },
     "browse-genres": {
         "series-count": "{{common.series-count}}",
@@ -2908,7 +2931,8 @@
         "annotation-spoiler": "剧透",
         "annotation-highlights": "高亮颜色",
         "annotation-comment": "注释文本",
-        "annotation-selection": "高亮文本"
+        "annotation-selection": "高亮文本",
+        "series": "{{tabs.series-tab}}"
     },
     "breakpoint-pipe": {
         "mobile": "手机",
@@ -2997,7 +3021,9 @@
         "roles-claim-label": "角色声明",
         "roles-claim-tooltip": "Kavita 将用于提取角色的声明。留空则使用默认值。",
         "custom-scopes-label": "自定义范围",
-        "custom-scopes-tooltip": "登录期间向 OIDC 提供商请求的附加范围。多个范围请用逗号分隔。值不正确可能会导致登录失败。"
+        "custom-scopes-tooltip": "登录期间向 OIDC 提供商请求的附加范围。多个范围请用逗号分隔。值不正确可能会导致登录失败。",
+        "default-roles-label": "{{common.roles}}",
+        "default-libraries-label": "{{common.libraries}}"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -3006,7 +3032,10 @@
     "annotation-card": {
         "page-num": "{{book-reader.page-num-label}}",
         "contains-spoilers-label": "剧透",
-        "view-in-reader-label": "在阅读器中查看"
+        "view-in-reader-label": "在阅读器中查看",
+        "location-tooltip": "{{library}} - {{series}}",
+        "liked": "包括您在内的 {{amount}} 人点赞",
+        "not-liked": "有 {{amount}} 人点赞，但您没有点赞"
     },
     "annotations-tab": {
         "title": "{{tabs.annotations-tab}}"
@@ -3096,5 +3125,9 @@
         },
         "annotations-count": "{{num}} 注释",
         "export": "导出"
+    },
+    "multi-check-box-form": {
+        "select-all": "全选",
+        "deselect-all": "取消全选"
     }
 }

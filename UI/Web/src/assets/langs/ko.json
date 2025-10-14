@@ -32,7 +32,9 @@
         "out-of-sync": "이 사용자는 OIDC를 통해 생성되었습니다. SyncUsers 설정이 활성화되어 있을 경우, 이 계정에 대한 변경사항은 덮어쓰일 수 있습니다.",
         "oidc-managed": "이 사용자는 OIDC를 통해 관리됩니다. 변경을 요청하려면 OIDC 관리자에게 문의하십시오.",
         "identity-provider": "신원 제공자",
-        "identity-provider-tooltip": "Kavita 사용자는 OIDC 계정과 연동되지 않습니다."
+        "identity-provider-tooltip": "Kavita 사용자는 OIDC 계정과 연동되지 않습니다.",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "user-scrobble-history": {
         "title": "스크로블 이력",
@@ -133,7 +135,17 @@
         "highlight-bar-tooltip": "이 색상은 모든 책에 공유됩니다",
         "font-tab": "글꼴",
         "colorscape-label": "ColorScape 사용",
-        "colorscape-tooltip": "다이나믹 그래디언트 기능을 활성화/비활성화하는 전역 토글입니다. 테마 설정을 덮어씁니다"
+        "colorscape-tooltip": "다이나믹 그래디언트 기능을 활성화/비활성화하는 전역 토글입니다. 테마 설정을 덮어씁니다",
+        "share-annotations-label": "공유 주석",
+        "share-annotations-tooltip": "이 서버의 다른 사용자에게 주석을 볼 수 있도록 허용하세요",
+        "view-other-annotations-label": "공유된 주석 보기",
+        "view-other-annotations-tooltip": "읽는 동안 다른 사용자의 주석 보기",
+        "social-libraries-label": "소셜 라이브러리",
+        "social-libraries-tooltip": "소셜 옵션이 활성화되어야 하는 라이브러리. 미선택시 모든 곳에서 소셜 옵션을 사용 할 수 있습니다. 기능을 아예 사용하지 않으려면 소셜 옵션을 비활성화하세요.",
+        "social-max-age-rating-label": "최대 연령 등급",
+        "social-max-age-rating-tooltip": "소셜 옵션이 활성화 되는 최대 연령 등급",
+        "social-include-unknowns-label": "알 수 없음 포함",
+        "social-include-unknowns-tooltip": "연령 등급을 알 수 없는 시리즈 및 챕터에 대한 소셜 옵션을 활성화합니다"
     },
     "user-holds": {
         "title": "스크러블 홀드",
@@ -340,7 +352,7 @@
         "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
-        "title": "권한",
+        "title": "{{common.roles}}",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -554,10 +566,12 @@
         "inviting": "초대중…",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{toasts.email-not-sent}}",
-        "notice": "{{manage-settings.notice}}"
+        "notice": "{{manage-settings.notice}}",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "library-selector": {
-        "title": "라이브러리",
+        "title": "{{common.libraries}}",
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "아직 라이브러리 설정이 없습니다."
@@ -616,7 +630,8 @@
         "cancel-label": "구독 취소",
         "cancel-tooltip": "구독을 취소하고 Kavita에서 라이선스를 제거합니다.",
         "resend-license-email": "라이선스를 이메일로 보내기",
-        "resend-license-email-tooltip": "Kavita+ 라이선스를 이메일로 재발송합니다. 라이선스 동작을 위해서는 이 서버에 바인딩되어야 합니다."
+        "resend-license-email-tooltip": "Kavita+ 라이선스를 이메일로 재발송합니다. 라이선스 동작을 위해서는 이 서버에 바인딩되어야 합니다.",
+        "supportId-label": "지원 ID"
     },
     "book-line-overlay": {
         "copy": "복사",
@@ -762,7 +777,8 @@
         "publication-status-tooltip": "출판현황",
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
-        "annotations-tab": "{{tabs.annotations-tab}}"
+        "annotations-tab": "{{tabs.annotations-tab}}",
+        "loading": "{{common.loading}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -992,7 +1008,8 @@
         "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
         "language-title": "{{edit-chapter-modal.language-label}}",
         "release-title": "{{sort-field-pipe.release-year}}",
-        "age-rating-title": "{{metadata-fields.age-rating-title}}"
+        "age-rating-title": "{{metadata-fields.age-rating-title}}",
+        "file-path-title": "폴더 경로"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1093,7 +1110,7 @@
         "save": "{{common.save}}"
     },
     "manage-library": {
-        "title": "라이브러리",
+        "title": "{{common.libraries}}",
         "add-library": "라이브러리 추가",
         "no-data": "라이브러리가 없습니다. 새로 만들어 보세요.",
         "loading": "{{common.loading}}",
@@ -1304,7 +1321,7 @@
         "resend": "재전송",
         "setup": "설정",
         "last-active-header": "마지막 활성",
-        "roles-header": "역할",
+        "roles-header": "{{common.roles}}",
         "name-header": "이름",
         "none": "없음",
         "never": "없음",
@@ -1360,7 +1377,7 @@
         "kavitaplus-section-title": "Kavita+",
         "admin-general": "일반",
         "admin-users": "유저",
-        "admin-libraries": "라이브러리",
+        "admin-libraries": "{{common.libraries}}",
         "admin-media": "미디어",
         "admin-media-issues": "미디어 문제",
         "admin-logs": "로그",
@@ -1492,7 +1509,7 @@
         "tags": "태그",
         "genres": "{{metadata-fields.genres-title}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "libraries": "라이브러리",
+        "libraries": "{{common.libraries}}",
         "reading-lists": "읽기 목록",
         "collections": "컬렉션",
         "close": "{{common.close}}",
@@ -1682,7 +1699,7 @@
         "save": "{{common.save}}",
         "limit-label": "제한",
         "format-label": "포맷",
-        "libraries-label": "라이브러리",
+        "libraries-label": "{{common.libraries}}",
         "collections-label": "컬렉션",
         "genres-label": "{{metadata-fields.genres-title}}",
         "tags-label": "{{metadata-fields.tags-title}}",
@@ -2129,7 +2146,7 @@
         "team": "팀",
         "location": "위치",
         "languages": "언어",
-        "libraries": "라이브러리",
+        "libraries": "{{common.libraries}}",
         "letterer": "레터러",
         "publication-status": "출판현황",
         "penciller": "펜슬러",
@@ -2386,7 +2403,9 @@
         "clear-reading-profile": "읽기 프로필 해제",
         "clear-reading-profile-tooltip": "이 라이브러리의 읽기 프로필 해제",
         "cleared-profile": "연결 해제된 읽기 프로필",
-        "export": "내보내기"
+        "export": "내보내기",
+        "unlike": "좋아요 제거",
+        "like": "좋아요"
     },
     "preferences": {
         "left-to-right": "왼쪽에서 오른쪽",
@@ -2510,7 +2529,9 @@
         "no-data": "데이터 없음",
         "chapter-count": "{{num}} 챕터",
         "issue-count": "{{num}} 호",
-        "unknown": "불명"
+        "unknown": "불명",
+        "roles": "역활",
+        "libraries": "라이브러리"
     },
     "confirm": {
         "alert": "긴급",
@@ -2524,7 +2545,7 @@
         "known-for-title": "알려진",
         "individual-role-title": "{{role}}로서",
         "browse-person-title": "{{name}}의 모든 작품",
-        "all-roles": "역할",
+        "all-roles": "{{common.roles}}",
         "browse-person-by-role-title": "{{role}}로서의 {{name}}의 모든 작품",
         "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
         "no-info": "이 사람에 대한 정보 없음",
@@ -2629,7 +2650,7 @@
         "field-mapping-title": "필드 매핑",
         "remove-source-tag-label": "소스 태그 제거",
         "first-last-name-label": "이름 성",
-        "person-roles-label": "역할",
+        "person-roles-label": "{{common.roles}}",
         "enabled-label": "메타데이터 다운로드 활성화",
         "enable-people-label": "인물",
         "derive-publication-status-tooltip": "총 장/권 수를 기준으로 출판 상태를 도출할 수 있습니다.",
@@ -2760,7 +2781,7 @@
     "browse-people": {
         "author-count": "인물 {{num}} 명",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "roles-label": "역할",
+        "roles-label": "{{common.roles}}",
         "sort-label": "정렬",
         "series-count": "{{common.series-count}}",
         "title": "인물 탐색",
@@ -2908,7 +2929,8 @@
         "annotation-spoiler": "스포일러",
         "annotation-highlights": "강조 색상",
         "annotation-comment": "주석 텍스트",
-        "annotation-selection": "강조 텍스트"
+        "annotation-selection": "강조 텍스트",
+        "series": "{{tabs.series-tab}}"
     },
     "breakpoint-pipe": {
         "never": "없음",
@@ -2925,7 +2947,7 @@
         "import": "{{import-cbl-modal.import}}",
         "next": "{{import-cbl-modal.next}}",
         "save": "{{common.save}}",
-        "import-description": "현재 설정을 교체 또는 병합하기 위해 본인 또는 다른 사람이 내보낸 파일을 업로드합니다.",
+        "import-description": "현재 설정을 대체하거나 병합하기 위해 내보낸 파일을 업로드하세요",
         "select-files-warning": "계속하려면 json 파일을 업로드해야 합니다",
         "invalid-file": "파일 파싱에 실패했습니다. 입력 내용을 확인해 주십시오",
         "file-no-valid-content": "불러오는 데이터에 진행 가능한 의미 있는 데이터가 포함되어 있지 않습니다",
@@ -2984,7 +3006,7 @@
         "provider-name-label": "제공자 이름",
         "provider-name-tooltip": "로그인 화면에 표시되는 이름",
         "defaults-title": "기본값",
-        "defaults-requirement": "SyncUserSettings가 비활성화된 상태에서 OIDC를 통해 사용자가 등록될 때 다음 설정들이 적용됩니다",
+        "defaults-requirement": "동기화 유저 설정이 비활성화된 상태에서 OIDC를 통해 사용자가 등록될 때 다음 설정들이 적용됩니다",
         "default-include-unknowns-label": "불명 정보 포함",
         "default-include-unknowns-tooltip": "연령 등급 불명 포함",
         "default-age-restriction-label": "연령 등급",
@@ -2997,7 +3019,9 @@
         "roles-claim-label": "역할 주장",
         "roles-claim-tooltip": "Kavita가 역할을 추출하기 위해 사용할 주장입니다. 기본값을 사용하려면 비워 두세요.",
         "custom-scopes-label": "맞춤 범위",
-        "custom-scopes-tooltip": "로그인 시 OIDC 제공업체에 요청할 추가 범위입니다. 여러 범위를 쉼표로 구분하세요. 잘못된 값을 입력하면 로그인이 불가능할 수 있습니다."
+        "custom-scopes-tooltip": "로그인 시 OIDC 제공업체에 요청할 추가 범위입니다. 여러 범위를 쉼표로 구분하세요. 잘못된 값을 입력하면 로그인이 불가능할 수 있습니다.",
+        "default-roles-label": "{{common.roles}}",
+        "default-libraries-label": "{{common.libraries}}"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -3006,7 +3030,10 @@
     "annotation-card": {
         "page-num": "{{book-reader.page-num-label}}",
         "contains-spoilers-label": "스포일러",
-        "view-in-reader-label": "리더에서 보기"
+        "view-in-reader-label": "리더에서 보기",
+        "location-tooltip": "{{library}} - {{series}}",
+        "liked": "당신을 포함한 {{amount}}명의 사람이 좋아합니다",
+        "not-liked": "당신을 포함한 {{amount}}명의 사람들이 좋아하지 않습니다"
     },
     "annotations-tab": {
         "title": "{{tabs.annotations-tab}}"
@@ -3096,5 +3123,9 @@
         },
         "annotations-count": "{{num}}개 주석",
         "export": "내보내기"
+    },
+    "multi-check-box-form": {
+        "select-all": "모두 선택",
+        "deselect-all": "모두 선택 취소"
     }
 }

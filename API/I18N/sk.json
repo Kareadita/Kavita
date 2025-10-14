@@ -209,5 +209,16 @@
     "kavita+-data-refresh": "Obnovenie údajov Kavita+",
     "backup": "Záloha",
     "update-yearly-stats": "Aktualizovať ročné štatistiky",
-    "generated-reading-profile-name": "Vygenerované z {0}"
+    "generated-reading-profile-name": "Vygenerované z {0}",
+    "password-authentication-disabled": "Overovanie heslom bolo zakázané, prihláste sa cez OpenID Connect",
+    "oidc-managed": "Používateľov spravovaných OIDC nie je možné upravovať.",
+    "cannot-change-identity-provider-original-user": "Poskytovateľa identity pôvodného administrátorského účtu nie je možné zmeniť",
+    "oidc-invalid-authority": "Autorita OIDC je neplatná",
+    "annotation-failed-create": "Nepodarilo sa vytvoriť anotáciu, skúste to znova",
+    "annotation-delete": "Anotáciu sa nepodarilo odstrániť",
+    "opds-continue-reading-title": "Pokračovať v čítaní z: {0}",
+    "genre-doesnt-exist": "Žáner neexistuje",
+    "font-url-not-allowed": "Nahrávanie písma pomocou adresy URL je povolené iba z Google Fonts",
+    "annotation-export-failed": "Nepodarilo sa exportovať anotácie, skontrolujte protokoly",
+    "download-not-allowed": "Používateľ nemá povolenia na sťahovanie"
 }

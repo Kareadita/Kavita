@@ -209,5 +209,16 @@
     "smart-filter-system-name": "Não pode usar o nome de um fluxo disponibilizado pelo sistema",
     "smart-filter-name-required": "Nome requerido para o filtro inteligente",
     "aliases-have-overlap": "Um ou mais pseudónimos sobrepõem-se com outras pessoas, não vai ser possível atualizar",
-    "generated-reading-profile-name": "Gerado de {0}"
+    "generated-reading-profile-name": "Gerado de {0}",
+    "password-authentication-disabled": "A autenticação com password foi desativada, inicie sessão através do OpenID Connect",
+    "oidc-managed": "Os utilizadores geridos por OIDC não podem ser editados.",
+    "cannot-change-identity-provider-original-user": "O provedor de identidade do administrador inicial não pode ser alterado",
+    "oidc-invalid-authority": "A autoridade OIDC é inválida",
+    "annotation-failed-create": "Ocorreu um erro a criar a anotação, tente novamente",
+    "annotation-delete": "Não foi possível eliminar a anotação",
+    "opds-continue-reading-title": "Continuar a leitura a partir de: {0}",
+    "genre-doesnt-exist": "O género não existe",
+    "font-url-not-allowed": "Subir uma font através de um url só é permitido com fonts Google",
+    "annotation-export-failed": "Não foi possível exportar Anotações, verifique os logs",
+    "download-not-allowed": "O utilizador não tem permissões para descarregar permissões"
 }
