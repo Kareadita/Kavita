@@ -178,7 +178,7 @@ public class AnnotationService(
 
             // Get settings for hostname
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            var hostname = !string.IsNullOrWhiteSpace(settings.HostName) ? settings.HostName : "http://localhost:5000";
+            var hostname = !string.IsNullOrWhiteSpace(settings.HostName) ? settings.HostName : $"http://localhost:{Configuration.Port}";
 
             // Group annotations by series, then by volume
             var exportData = annotations
