@@ -1,13 +1,14 @@
 .number {
   position: absolute;
-  top: 50%; 
-  left: 46%;
+  top: 50%;
   font-size: 18px;
+  width: 100%;
+  text-align: center;
 }
 
 .indicator {
+  position: relative;
   font-weight: 500;
-  margin-left: 2px;
   z-index: 10;
   color: var(--primary-color);
   animation: MoveUpDown 1s linear infinite;

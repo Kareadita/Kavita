@@ -1,29 +1,29 @@
 @if (currentValue > 0) {
-  @if (showIcon) {
-    <div [ngClass]="{'number': center}" class="indicator">
-      <i class="fa fa-angle-double-down" [ngStyle]="{'font-size': fontSize}" aria-hidden="true"></i>
-    </div>
-  }
-
   <div [ngStyle]="{'width': width, 'height': height}">
+    @if (showIcon) {
+      <div [ngClass]="{'number': center}" class="indicator d-flex justify-content-center">
+        <i class="fa fa-angle-double-down" [ngStyle]="{'font-size': fontSize}" aria-hidden="true"></i>
+      </div>
+    }
+
     <circle-progress [percent]="currentValue"
-      [radius]="100"
-      [outerStrokeWidth]="15"
-      [innerStrokeWidth]="0"
-      [space] = "0"
-      [backgroundPadding]="0"
-      outerStrokeLinecap="butt"
-      [outerStrokeColor]="outerStrokeColor"
-      [innerStrokeColor]="innerStrokeColor"
-      titleFontSize= "24"
-      unitsFontSize= "24"
-      [showSubtitle] = "false"
-      [animation]="animation"
-      [animationDuration]="300"
-      [startFromZero]="false"
-      [responsive]="true"
-      [backgroundOpacity]="0.5"
-      [backgroundColor]="backgroundColor"
-     />
+                     [radius]="100"
+                     [outerStrokeWidth]="15"
+                     [innerStrokeWidth]="0"
+                     [space] = "0"
+                     [backgroundPadding]="0"
+                     outerStrokeLinecap="butt"
+                     [outerStrokeColor]="outerStrokeColor"
+                     [innerStrokeColor]="innerStrokeColor"
+                     titleFontSize= "24"
+                     unitsFontSize= "24"
+                     [showSubtitle] = "false"
+                     [animation]="animation"
+                     [animationDuration]="300"
+                     [startFromZero]="false"
+                     [responsive]="true"
+                     [backgroundOpacity]="0.5"
+                     [backgroundColor]="backgroundColor"
+      />
   </div>
 }
