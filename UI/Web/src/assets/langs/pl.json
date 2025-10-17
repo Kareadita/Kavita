@@ -145,7 +145,9 @@
         "social-max-age-rating-label": "Maksymalna ocena wiekowa",
         "social-max-age-rating-tooltip": "Maksymalna ocena wiekowa, przy której działają funkcje społecznościowe",
         "social-include-unknowns-label": "Uwzględnij nieznane",
-        "social-include-unknowns-tooltip": "Włącz funkcje społecznościowe dla serii i rozdziałów z nieznaną oceną wiekową"
+        "social-include-unknowns-tooltip": "Włącz funkcje społecznościowe dla serii i rozdziałów z nieznaną oceną wiekową",
+        "data-saver-label": "Data saver",
+        "data-saver-tooltip": "Minimalizuje użycie danych poprzez zapobieganie automatycznego przechwycenia (np. czytelnika PDF)"
     },
     "user-holds": {
         "description": "To jest lista serii zarządzana przez użytkownika, które nie będą scrobblowane do zewnętrznych dostawców. Możesz usunąć serię w dowolnym momencie, a następne zdarzenie umożliwiające scrobblowanie (postęp czytania, ocena, status 'chcę przeczytać') wywoła scrobblowanie.",
@@ -626,11 +628,12 @@
         "email-label": "Zarejestrowany e-mail",
         "delete-tooltip": "Spowoduje to usunięcie licencji z Kavity, aby uniemożliwić Kavicie rozmowę z Kavitą+. Nie powoduje to anulowania subskrypcji. Aby anulować subskrypcję, należy najpierw użyć opcji „Zarządzaj”.",
         "manage-tooltip": "Zaktualizuj metody płatności, anulowanie/wstrzymanie subskrypcji, itp.",
-        "kavita+-warning": "Kavita+ jest oddzielną usługą od Kavita. Jeśli odinstalujesz Kavita bez anulowania subskrypcji, zostaniesz obciążony opłatą.",
+        "kavita+-warning": "Kavita+ jest oddzielną usługą od Kavita. Jeśli odinstalujesz Kavita bez anulowania subskrypcji, będziesz ją kontynuował.",
         "cancel-label": "Anuluj subskrypcję",
         "cancel-tooltip": "Anuluj subskrypcję i usuń licencję z Kavita.",
         "resend-license-email": "Wyślij licencję na e-mail",
-        "resend-license-email-tooltip": "Wyślij ponownie licencję Kavita+ na e-mail. Licencja musi być powiązana z tym serwerem, aby działała."
+        "resend-license-email-tooltip": "Wyślij ponownie licencję Kavita+ na e-mail. Licencja musi być powiązana z tym serwerem, aby działała.",
+        "supportId-label": "Identyfikator wsparcia"
     },
     "book-line-overlay": {
         "copy": "Kopiuj",
@@ -2042,7 +2045,8 @@
         "import-fields": {
             "non-unique-age-ratings": "Klucze mapowania ocen wiekowych nie są unikalne, popraw plik importu",
             "non-unique-fields": "Mapowania pól nie mają unikalnego identyfikatora, popraw plik importu"
-        }
+        },
+        "upload-too-large": "Plik jest zbyt duży, aby załadować, wybrać mniejszy obraz i powtórzyć."
     },
     "metadata-builder": {
         "or": "Dopasuj dowolne z poniższych",
@@ -2975,7 +2979,7 @@
         "provider-name-label": "Nazwa dostawcy",
         "provider-name-tooltip": "Nazwa wyświetlana na ekranie logowania",
         "defaults-title": "Domyślne",
-        "defaults-requirement": "Poniższe ustawienia są używane, gdy użytkownik jest rejestrowany przez OIDC przy wyłączonej opcji SyncUserSettings",
+        "defaults-requirement": "Poniższe ustawienia są używane gdy, użytkownik jest rejestrowany przez OIDC przy wyłączonej opcji synchronizacji ustawień użytkownika",
         "default-include-unknowns-label": "Uwzględnij nieznane",
         "default-include-unknowns-tooltip": "Uwzględnij nieznane oceny wiekowe",
         "default-age-restriction-label": "Ocena wiekowa",

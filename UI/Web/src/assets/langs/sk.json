@@ -170,7 +170,7 @@
         "add": "{{common.add}}",
         "default-theme": "Predvolené",
         "active-theme": "Aktívne",
-        "description": "Kavita prichádza vo svojich farbách, nájdite si farebnú schému, ktorá vyhovuje vašim potrebám alebo si ju vytvorte sami a zdieľajte ju. Motívy môžu byť použité pre váš účet alebo pre všetky účty.",
+        "description": "Kavita je dostupná v mnohých farbách, nájdite si farebnú schému, ktorá vyhovuje vašim potrebám, alebo si ju vytvorte sami a zdieľajte. Témy je možné použiť pre váš účet alebo pre všetky účty.",
         "downloaded": "Stiahnuté",
         "downloadable": "Stiahnuteľné",
         "preview-default-admin": "Najprv vyberte tému alebo ju nahrajte ručne",
@@ -868,7 +868,7 @@
         "help-us-part-3": "na pomenovanie a usporiadanie vašich médií.",
         "naming-conventions-part-1": "Kavita má ",
         "naming-conventions-part-2": "požiadavky na priečinok.",
-        "naming-conventions-part-3": "Skontrolujte tento odkaz, aby ste sa uistili, že ho sledujete, inak sa súbory nezobrazia pri skenovaní.",
+        "naming-conventions-part-3": "Skontrolujte tento odkaz, aby ste sa uistili, že postupujete podľa pokynov, inak sa súbory pri kontrole nemusia zobraziť.",
         "cover-description": "Ikony obrázkov vlastnej knižnice sú voliteľné",
         "cover-description-extra": "Obrázok knižnice by nemal byť veľký. Zamerajte sa na malý súbor s veľkosťou 32 x 32 pixelov. Kavita nevykonáva overenie veľkosti.",
         "manage-collection-label": "Spravovať Zbierky",
@@ -1996,7 +1996,8 @@
             "failed-to-update-username": "Používateľské meno sa nepodarilo aktualizovať",
             "email-in-use": "E-mail už používa iný účet",
             "syncing-user": "Synchronizácia vášho účtu z OIDC zlyhala, kontaktujte správcu"
-        }
+        },
+        "upload-too-large": "Súbor je na nahranie príliš veľký, vyberte menší obrázok a skúste to znova."
     },
     "metadata-builder": {
         "or": "Zhoda z ľubovolnej z nasledujúcich možností",

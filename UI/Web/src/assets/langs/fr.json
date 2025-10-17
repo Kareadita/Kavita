@@ -2045,7 +2045,8 @@
         },
         "delete-font-in-use": "Cette police est utilisée par au moins un autre utilisateur, impossible de la supprimer",
         "font-manual-upload": "Il y a eu un problème lors de la création de la Police à partir du téléchargement manuel",
-        "font-already-in-use": "Une police existe déjà avec ce nom"
+        "font-already-in-use": "Une police existe déjà avec ce nom",
+        "upload-too-large": "Le fichier est trop volumineux pour être téléchargé, sélectionnez une image plus petite et réessayez."
     },
     "metadata-builder": {
         "or": "Correspondre à l'un des éléments suivants",

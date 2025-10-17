@@ -2045,7 +2045,8 @@
         },
         "delete-font-in-use": "A fonte está atualmente em uso por pelo menos um usuário, não pode ser excluída",
         "font-manual-upload": "Houve um problema ao criar a fonte a partir do upload manual",
-        "font-already-in-use": "A fonte já existe com esse nome"
+        "font-already-in-use": "A fonte já existe com esse nome",
+        "upload-too-large": "O arquivo é muito grande para ser enviado, selecione uma imagem menor e tente novamente."
     },
     "metadata-builder": {
         "or": "Corresponda a qualquer um dos seguintes",

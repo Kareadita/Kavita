@@ -2045,7 +2045,8 @@
         },
         "delete-font-in-use": "字体目前至少有一位用户正在使用，无法删除",
         "font-manual-upload": "手动上传创建字体时出现问题",
-        "font-already-in-use": "该名称的字体已经存在"
+        "font-already-in-use": "该名称的字体已经存在",
+        "upload-too-large": "文件太大，无法上传，请选择较小的图像并重试。"
     },
     "metadata-builder": {
         "or": "匹配以下任意项",

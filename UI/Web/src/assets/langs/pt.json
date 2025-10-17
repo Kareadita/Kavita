@@ -146,7 +146,8 @@
         "social-max-age-rating-tooltip": "Classificação etária máxima que permite a utilização de funcionalidades sociais",
         "social-include-unknowns-label": "Incluir desconhecidos",
         "social-include-unknowns-tooltip": "Ligar funcionalidades sociais para séries e capítulos com uma classificação etária desconhecida",
-        "data-saver-label": "Poupança de dados"
+        "data-saver-label": "Poupança de dados",
+        "data-saver-tooltip": "Minimiza o uso de dados impedindo a prefetagem automática (por exemplo, leitor de PDF)"
     },
     "user-holds": {
         "title": "Retenções de Scrobble",
@@ -2044,7 +2045,8 @@
         },
         "delete-font-in-use": "A font está a ser usada por pelo menos um utilizador, por isso não pode ser eliminada",
         "font-manual-upload": "Ocorreu um erro ao criar a Font a partir do upload manual",
-        "font-already-in-use": "Já existe uma font com este nome"
+        "font-already-in-use": "Já existe uma font com este nome",
+        "upload-too-large": "O arquivo é muito grande para upload, selecione uma imagem menor e tente novamente."
     },
     "metadata-builder": {
         "or": "Iguale qualquer um dos seguintes",

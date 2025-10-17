@@ -2045,7 +2045,8 @@
         },
         "delete-font-in-use": "Die Schriftart wird derzeit von mindestens einem Benutzer verwendet und kann nicht gelöscht werden",
         "font-manual-upload": "Es gab ein Problem beim Erstellen einer Schriftart aus einem manuellen Upload",
-        "font-already-in-use": "Die Schriftart mit diesem Namen existiert bereits"
+        "font-already-in-use": "Die Schriftart mit diesem Namen existiert bereits",
+        "upload-too-large": "Die Datei ist zu groß zum Hochladen. Wählen Sie ein kleineres Bild aus und versuchen Sie es erneut."
     },
     "metadata-builder": {
         "or": "Passend zu einem der folgenden Punkte",

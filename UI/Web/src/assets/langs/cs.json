@@ -2261,7 +2261,8 @@
         },
         "delete-font-in-use": "Font je momentálně používán alespoň jedním uživatelem, nelze smazat",
         "font-manual-upload": "Při ručním nahrávání písma došlo k problému",
-        "font-already-in-use": "Písmo s tímto názvem již existuje"
+        "font-already-in-use": "Písmo s tímto názvem již existuje",
+        "upload-too-large": "Soubor je pro nahrání příliš velký, vyberte menší obrázek a zkuste to znovu."
     },
     "cover-image-size": {
         "xlarge": "Extra velké (1265x1795)",

@@ -2045,7 +2045,8 @@
         },
         "delete-font-in-use": "Tá an cló in úsáid ag úsáideoir amháin ar a laghad faoi láthair, ní féidir é a scriosadh",
         "font-manual-upload": "Bhí fadhb ann agus Cló á chruthú ó uaslódáil de láimh",
-        "font-already-in-use": "Tá cló ann cheana féin faoin ainm sin"
+        "font-already-in-use": "Tá cló ann cheana féin faoin ainm sin",
+        "upload-too-large": "Tá an comhad rómhór le huaslódáil, roghnaigh íomhá níos lú agus déan iarracht arís."
     },
     "metadata-builder": {
         "or": "Meaitseáil aon cheann díobh seo a leanas",
