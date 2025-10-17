@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.7" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
         <PackageReference Include="NSubstitute" Version="5.3.0" />
         <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="22.0.15" />
