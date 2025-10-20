@@ -360,9 +360,17 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         // Assign libraries
         await accountService.UpdateLibrariesForUser(user, settings.DefaultLibraries, settings.DefaultRoles.Contains(PolicyConstants.AdminRole));
 
-        // Assign age rating
-        user.AgeRestriction = settings.DefaultAgeRestriction;
-        user.AgeRestrictionIncludeUnknowns = settings.DefaultIncludeUnknowns;
+        // Assign age rating, or bypass if admin
+        if (await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
+        {
+            user.AgeRestriction = AgeRating.NotApplicable;
+            user.AgeRestrictionIncludeUnknowns = true;
+        }
+        else
+        {
+            user.AgeRestriction = settings.DefaultAgeRestriction;
+            user.AgeRestrictionIncludeUnknowns = settings.DefaultIncludeUnknowns;
+        }
 
         await unitOfWork.CommitAsync();
     }
