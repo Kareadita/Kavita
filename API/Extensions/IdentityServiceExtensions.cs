@@ -179,6 +179,7 @@ public static class IdentityServiceExtensions
             options.Cookie.HttpOnly = true;
             options.Cookie.IsEssential = true;
             options.Cookie.MaxAge = TimeSpan.FromDays(7);
+            options.Cookie.SameSite = SameSiteMode.Strict;
             options.SessionStore = store;
 
             if (isDevelopment)
