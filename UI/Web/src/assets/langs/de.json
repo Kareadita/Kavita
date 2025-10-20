@@ -11,7 +11,7 @@
     "dashboard": {
         "no-libraries": "Es gibt noch keine Bibliotheken. Erstelle welche in",
         "server-settings-link": "Servereinstellungen",
-        "not-granted": "Dir wurde noch kein Zugang zu Bibliotheken gewährt.",
+        "not-granted": "Ihnen wurde noch kein Zugang zu Bibliotheken gewährt.",
         "on-deck-title": "Weiterlesen",
         "recently-updated-title": "Kürzlich aktualisierte Serien",
         "recently-added-title": "Neu hinzugefügte Serien",
@@ -119,10 +119,10 @@
         "share-series-reviews-tooltip": "Lassen Sie Ihre Bewertungen für andere Benutzer auf diesem Server sichtbar sein",
         "clients-opds-alert": "OPDS ist auf diesem Server nicht aktiviert. Dies hat keine Auswirkungen auf Mihon-Benutzer.",
         "clients-opds-description": "Alle Clients von Drittanbietern verwenden entweder den API-Schlüssel oder die unten stehende Verbindungs-URL. Diese sind wie Passwörter, vertraulich zu behandeln.",
-        "clients-api-key-tooltip": "Der API-Schlüssel ist wie ein Passwort. Wenn Sie ihn zurücksetzen, werden alle bestehenden Kunden ungültig.",
+        "clients-api-key-tooltip": "Der API-Schlüssel ist wie ein Passwort. Durch das Zurücksetzen werden alle bestehenden Clients ungültig.",
         "clients-opds-url-label": "OPDS-URL",
         "clients-api-key-label": "API-Schlüssel",
-        "clients-opds-url-tooltip": "OPDS URLHier finden Sie eine Liste der unterstützten OPDS-Clients: ",
+        "clients-opds-url-tooltip": "OPDS URL: Hier finden Sie eine Liste der unterstützten OPDS-Clients: ",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "anilist-scrobbling-label": "AniList Scrobbeln",
@@ -151,7 +151,7 @@
     },
     "user-holds": {
         "title": "Scrobble pausiert",
-        "description": "Dies ist eine benutzergesteuerte Liste von Serien, die nicht an Upstream-Anbieter gescrobbelt wird. Du kannst eine Serie jederzeit entfernen und das nächste scrobbelfähige Ereignis (Lesefortschritt, Bewertung, Status „möchte lesen“) löst das Scrobbeln aus.",
+        "description": "Dies ist eine vom Benutzer verwaltete Liste von Serien, die nicht an Upstream-Anbieter gescrobbelt werden. Sie können eine Serie jederzeit entfernen, und das nächste scrobble-fähige Ereignis (Lesefortschritt, Bewertung, Status „Möchte lesen“) löst das Scrobbeln aus.",
         "no-data": "{{typeahead.no-data}}",
         "created-header": "{{manage-media-issues.created-header}}",
         "series-name-header": "{{manage-matched-metadata.series-name-header}}",
@@ -543,9 +543,9 @@
         "title": "Fall nicht zurück!",
         "close": "{{common.close}}",
         "subtitle": "Es sieht so aus, als sei Ihre Installation mehr als {{count}} Versionen im Rückstand!",
-        "description-1": "Bitte erwäge ein Upgrade, sodass du die neueste Version von Kavita verwendest.",
+        "description-1": "Bitte erwägen Sie ein Upgrade, damit Sie die neueste Version von Kavita verwenden.",
         "description-2": "Schauen Sie auf <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> , um Anweisungen zu erhalten, wie Sie ein Update ausführen können.",
-        "description-3": "Gibt es einen spezifischen Grund, warum du noch kein Update ausgeführt hast? Wir würden uns freuen, herauszufinden, was dich dazu bringt, eine veraltete Version zu verwenden! Schau in unserem Discord vorbei und teile uns mit, was deinen Upgrade-Pfad blockiert."
+        "description-3": "Wenn es einen bestimmten Grund gibt, warum Sie noch kein Update durchgeführt haben, würden wir gerne wissen, warum Sie weiterhin eine veraltete Version verwenden! Besuchen Sie unseren Discord-Server und teilen Sie uns mit, was Sie daran hindert, ein Upgrade durchzuführen."
     },
     "changelog": {
         "installed": "Installiert",
@@ -562,7 +562,7 @@
         "setup-user-title": "Nutzer wurde eingeladen",
         "setup-user-description": "Sie können den folgenden Link verwenden, um das Konto für Ihren Benutzer einzurichten, oder die Schaltfläche Kopieren verwenden. Möglicherweise müssen Sie sich abmelden, bevor Sie den Link zur Registrierung eines neuen Benutzers verwenden können.",
         "setup-user-account": "Erstelle Benutzerkonto",
-        "setup-user-account-tooltip": "Kopiere dies und füge es in einem neuen Tab ein. Du musst dich vielleicht abmelden.",
+        "setup-user-account-tooltip": "Kopieren Sie dies und fügen Sie es in einen neuen Tab ein. Möglicherweise müssen Sie sich abmelden.",
         "invite-url-label": "Einladungs-URL",
         "invite": "Einladung",
         "inviting": "Lade ein…",
@@ -581,7 +581,7 @@
     "license": {
         "title": "Kavita+ Lizenz",
         "manage": "Verwalten",
-        "invalid-license-tooltip": "Wenn dein Abonnement beendet ist, musst du den Support per E-Mail kontaktieren um ein neues Abonnement abzuschließen",
+        "invalid-license-tooltip": "Wenn Ihr Abonnement abgelaufen ist, müssen Sie eine E-Mail an den Support senden, um ein neues Abonnement zu erstellen",
         "check": "Überprüfen",
         "cancel": "{{common.cancel}}",
         "edit": "{{common.edit}}",
@@ -596,7 +596,7 @@
         "activate-license-label": "Lizenzschlüssel",
         "activate-email-label": "{{common.email}}",
         "activate-discordId-label": "Discord Nutzer ID",
-        "activate-discordId-tooltip": "Verbinde deinen Discord-Account mit Kavita+. Dies gewährt dir Zugriff auf versteckte Kanäle, um Kavita mitzugestalten.",
+        "activate-discordId-tooltip": "Verbinden Sie Ihr Discord-Konto mit Kavita+. Dadurch erhalten Sie Zugriff auf versteckte Kanäle, über die Sie Kavita mitgestalten können.",
         "discord-validation": "Dies ist keine valide Discord-User-ID. Deine User ID ist nicht dein Discord-Benutzername.",
         "activate-delete": "{{common.delete}}",
         "activate-reset": "Lizenz zurücksetzen",
@@ -887,7 +887,7 @@
         "folder-watching-label": "Ordner-Überwachung",
         "folder-watching-tooltip": "Server-Ordnerüberwachung für diese Bibliothek außer Kraft setzen. Wenn diese Option ausgeschaltet ist, wird die Ordnerüberwachung für die Ordner, die diese Bibliothek enthält, nicht durchgeführt. Wenn Bibliotheken Ordner gemeinsam nutzen, können diese trotzdem überprüft werden. Wartet immer 10 Minuten, bevor der Scan ausgelöst wird.",
         "include-in-dashboard-label": "In das Dashboard einbeziehen",
-        "include-in-dashboard-tooltip": "Sollen Serien aus der Bibliothek in das Dashboard aufgenommen werden. Dies betrifft alle Streams, wie On Deck, Kürzlich aktualisiert, Kürzlich hinzugefügt oder alle benutzerdefinierten Ergänzungen.",
+        "include-in-dashboard-tooltip": "Sollen Serien aus der Bibliothek in das Dashboard aufgenommen werden. Dies betrifft alle Streams, wie Weiterlesen, Kürzlich aktualisiert, Kürzlich hinzugefügt oder alle benutzerdefinierten Ergänzungen.",
         "include-in-search-label": "In die Suche einbeziehen",
         "include-in-search-tooltip": "Sollen Serien und abgeleitete Informationen (Genres, Personen, Dateien) aus der Bibliothek in die Suchergebnisse einbezogen werden.",
         "force-scan": "Erzwungener Scan",
@@ -1089,7 +1089,7 @@
         "reset": "{{common.reset}}",
         "test": "Test",
         "host-name-label": "Name des Hosts",
-        "host-name-tooltip": "Der Domainname deines Reverse-Proxys, der für die E-Mail-Funktionalität erforderlich ist. Wenn du keinen Reverse-Proxy verwendest, kannst du eine beliebige URL verwenden, einschließlich http://externalip:port/",
+        "host-name-tooltip": "Der Domainname Ihres Reverse-Proxys, der für die E-Mail-Funktionalität erforderlich ist. Wenn Sie keinen Reverse-Proxy verwenden, können Sie eine beliebige URL verwenden, einschließlich http://externalip:port/",
         "host-name-validation": "Der Hostname muss mit http(s) beginnen und darf nicht mit einem / enden",
         "sender-address-label": "Absender Adresse",
         "sender-address-tooltip": "Dies ist die E-Mail-Adresse, die der Empfänger sieht, wenn er die E-Mail erhält. Normalerweise ist dies die mit dem Konto verbundene E-Mail-Adresse.",
@@ -1132,7 +1132,7 @@
         "cancel": "{{common.cancel}}",
         "apply": "{{common.apply}}",
         "bulk-copy-to": "Wähle aus, in welche Bibliotheken die Einstellungen von {{libraryName}} kopiert werden sollen",
-        "include-type-tooltip": "Dies wird nicht automatisch gescannt. Beim nächsten Scan kann es sein, dass du Serienverschiebungen aufgrund von Parsing-Unterschieden hast",
+        "include-type-tooltip": "Dies wird nicht automatisch gescannt. Beim nächsten Scan kann es aufgrund von Parsing-Unterschieden zu einer Serienverschiebung kommen",
         "bulk-action-label": "Stapelaktion",
         "include-type-label": "Kopieren des Bibliothekstyps einbeziehen"
     },
@@ -1140,7 +1140,7 @@
         "close": "{{common.close}}",
         "select": "Auswählen",
         "title": "Einstellungen von einer Bibliothek in mehrere andere kopieren",
-        "description": "Wähle eine Bibliothek aus, von der du die Einstellungen kopieren willst, und wähle auf dem nächsten Bildschirm die Bibliotheken aus, auf die du sie anwenden willst.",
+        "description": "Wählen Sie eine Bibliothek aus, aus der Sie Einstellungen kopieren möchten, und wählen Sie auf dem nächsten Bildschirm die Bibliotheken aus, auf die Sie diese anwenden möchten.",
         "select-option": "Eine Bibliothek auswählen"
     },
     "manage-media-settings": {
@@ -1203,10 +1203,10 @@
         "logging-level-tooltip": "Verwenden Sie Debug, um Probleme zu identifizieren. Die Fehlersuche kann viel Speicherplatz beanspruchen.",
         "cache-size-label": "Cache-Größe",
         "cache-size-tooltip": "Die Menge an Speicher, die für die Zwischenspeicherung schwerer APIs erlaubt ist. Der Standardwert ist 75 MB.",
-        "on-deck-last-progress-label": "An Deck Letzter Fortschritt (Tage)",
-        "on-deck-last-progress-tooltip": "Die Anzahl der Tage, die seit dem letzten Fortschritt vergangen sind, bevor etwas von On Deck gestartet wurde.",
-        "on-deck-last-chapter-add-label": "An Deck Letztes Kapitel hinzufügen (Tage)",
-        "on-deck-last-chapter-add-tooltip": "Die Anzahl der Tage seit dem letzten Kapitel wurde hinzugefügt, um etwas an Deck zu haben.",
+        "on-deck-last-progress-label": "Weiterlesen Letzter Fortschritt (Tage)",
+        "on-deck-last-progress-tooltip": "Die Anzahl der Tage seit dem letzten Fortschritt, bevor etwas auf „Weiterlesen“ gestartet wird.",
+        "on-deck-last-chapter-add-label": "Weiterlesen Letztes Kapitel hinzufügen (Tage)",
+        "on-deck-last-chapter-add-tooltip": "Die Anzahl der Tage seit dem letzten Kapitel, um etwas zu „Weiterlesen“ hinzuzufügen.",
         "allow-stats-label": "Anonyme Nutzungserfassung zulassen",
         "allow-stats-tooltip-part-1": "Anonyme Nutzungsdaten an die Server von Kavita senden. Dazu gehören Informationen über bestimmte genutzte Funktionen, Anzahl der Dateien, Betriebssystemversion, Kavita-Installationsversion, CPU und Arbeitsspeicher. Wir verwenden diese Informationen, um Funktionen, Fehlerbehebungen und Leistungsoptimierungen zu priorisieren. Erfordert einen Neustart, um wirksam zu werden. Siehe die ",
         "allow-stats-tooltip-part-2": "für das, was gesammelt wird.",
@@ -1611,7 +1611,7 @@
         "dry-run-step": "Leerlauf",
         "final-import-step": "Letzter Schritt",
         "comicvine-parsing-label": "Comic Vine Series passend verwenden",
-        "cbl-repo": "Du findest viele Leselisten im <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>Repository</a> der Community.",
+        "cbl-repo": "In der Community finden Sie viele Leselisten <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repository</a>.",
         "help-label": "{{common.help}}"
     },
     "pdf-reader": {
@@ -2065,7 +2065,7 @@
         "external-sources": "Externe Quellen",
         "smart-filters": "Intelligente Filter",
         "help": "{{common.help}}",
-        "description": "Du kannst verschiedene Aspekte von Kavita anpassen, indem du neu anordnest, die Sichtbarkeit umschaltest und intelligente Filter/externe Quellen mit deiner Startseite oder der Seitennavigation verknüpfst."
+        "description": "Sie können verschiedene Aspekte von Kavita anpassen, indem Sie die Reihenfolge ändern, die Sichtbarkeit umschalten und intelligente Filter/externe Quellen an Ihre Startseite oder Navigationsleiste binden."
     },
     "customize-dashboard-streams": {
         "no-data": "Alle Smartfilter zum Dashboard hinzugefügt oder noch keine erstellt.",
@@ -2242,7 +2242,7 @@
         "email-not-sent": "Die gespeicherte E-Mail ist keine gültige E-Mail und kann nicht gesendet werden. Ein Link wurde in den Protokollen gelöscht. Der Administrator kann diesen Link bereitstellen, um den Vorgang abzuschließen.",
         "k+-license-saved": "Lizenzschlüssel gespeichert, aber er ist nicht gültig. Klicken Sie auf Prüfen, um das Abonnement erneut zu validieren. Die Erstregistrierung kann eine Minute dauern, bis sie übertragen wird.",
         "k+-error": "Beim Aktivieren Ihrer Lizenz ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
-        "k+-delete-key": "Dadurch wird nur Kavitas Lizenzschlüssel gelöscht und ein Link zum Kauf wird angezeigt. <b>Dein Abonnement wird dadurch nicht gekündigt!</b> Verwende zuerst „Verwalten“, um dein Abonnement zu kündigen.",
+        "k+-delete-key": "Dadurch wird lediglich der Lizenzschlüssel von Kavita gelöscht und ein Kauf-Link angezeigt. <b>Ihr Abonnement wird dadurch nicht abgebrochen!</b> Verwenden Sie „Verwalten”, um Ihr Abonnement zuerst zu kündigen.",
         "k+-reset-key": "Dadurch wird eine frühere Registrierung mit Ihrer Lizenz ungültig und Sie können eine Kavita-Instanz neu registrieren.",
         "k+-reset-key-success": "Ihre Lizenz wurde abgemeldet. Verwenden Sie die Schaltfläche Bearbeiten, um Ihre Instanz erneut zu registrieren und Kavita+ zu aktivieren",
         "library-deleted": "Bibliothek {{name}} wurde entfernt",
@@ -2272,7 +2272,7 @@
         "confirm-delete-series": "Sind Sie sicher, dass Sie diese Serie löschen wollen? Die Dateien auf der Festplatte werden dadurch nicht verändert.",
         "confirm-delete-chapter": "Sind Sie sicher, dass Sie dieses Kapitel löschen wollen? Die Dateien auf der Festplatte werden dadurch nicht verändert.",
         "confirm-delete-volume": "Sind Sie sicher, dass Sie dieses Volume löschen wollen? Die Dateien auf der Festplatte werden dadurch nicht verändert.",
-        "alert-bad-theme": "Das Schema enthält ungültiges oder unsicheres Css. Bitte wenden Sie sich an Ihren Administrator, damit dies korrigiert wird. Standardmäßig wird das dunkle Theme verwendet.",
+        "alert-bad-theme": "Das Schema enthält ungültiges oder unsicheres CSS. Bitte wenden Sie sich an Ihren Administrator, damit dies korrigiert wird. Standardmäßig wird das dunkle Theme verwendet.",
         "confirm-library-delete": "Sind Sie sicher, dass Sie die Bibliothek {{name}} löschen möchten? Sie können diese Aktion nicht rückgängig machen.",
         "confirm-library-type-change": "Wenn Sie den Bibliothekstyp ändern, wird ein neuer Scan mit anderen Parsing-Regeln ausgelöst, was dazu führen kann, dass Serien neu erstellt werden und Sie somit Fortschritte und Lesezeichen verlieren. Bevor Sie dies tun, sollten Sie eine Sicherung erstellen. Sind Sie sicher, dass Sie fortfahren möchten?",
         "confirm-download-size": "Der {{entityType}} ist {{size}}. Sind Sie sicher, dass Sie fortfahren möchten?",
@@ -2303,7 +2303,7 @@
         "confirm-reset-server-settings": "Dadurch werden Ihre Einstellungen auf die Werte der Erstinstallation zurückgesetzt. Sind Sie sicher, dass Sie fortfahren möchten?",
         "must-select-library": "Mindestens eine Bibliothek muss ausgewählt werden",
         "bulk-scan": "Das Scannen mehrerer Bibliotheken wird linear durchgeführt. Je nach Größe der Bibliothek kann dies sehr lange dauern und nicht vollständig sein.",
-        "bulk-covers": "Das Aktualisieren von Titelseiten in mehreren Bibliotheken ist intensiv und kann lange dauern. Bist du sicher, dass du fortfahren willst?",
+        "bulk-covers": "Das Aktualisieren der Cover in mehreren Bibliotheken ist sehr aufwendig und kann lange dauern. Möchten Sie wirklich fortfahren?",
         "person-image-downloaded": "Personen Cover wurde heruntergeladen und angewendet.",
         "confirm-delete-multiple-chapters": "Sind Sie sicher, dass Sie {{count}} Kapitel/Bände löschen möchten? Die Dateien auf der Festplatte werden dadurch nicht verändert.",
         "bulk-delete-libraries": "Möchten Sie wirklich {{count}} Bibliotheken löschen?",
@@ -2354,8 +2354,8 @@
         "add-to-want-to-read-tooltip": "Serie zum Lesewunsch hinzufügen",
         "remove-from-want-to-read": "Aus dem Lesewunsch entfernen",
         "remove-from-want-to-read-tooltip": "Serie aus der Liste der zu Lesenden entfernen",
-        "remove-from-on-deck": "Von Deck entfernen",
-        "remove-from-on-deck-tooltip": "Serien aus der Ansicht von On Deck entfernen",
+        "remove-from-on-deck": "Von Weiterlesen entfernen",
+        "remove-from-on-deck-tooltip": "Serien aus der Ansicht von Weiterlesen entfernen",
         "others": "Andere",
         "add-to-reading-list": "Zur Leseliste hinzufügen",
         "add-to-reading-list-tooltip": "Zu einer Leseliste hinzufügen",
@@ -2566,7 +2566,7 @@
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "description-label": "Beschreibung",
-        "cover-image-description-extra": "Alternativ kannst du ein Cover von CoversDB herunterladen, falls verfügbar.",
+        "cover-image-description-extra": "Alternativ können Sie ein Cover von CoversDB herunterladen, sofern verfügbar.",
         "download-coversdb": "Download von CoversDB",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
         "general-tab": "{{edit-series-modal.general-tab}}",
@@ -2617,7 +2617,7 @@
         "close": "{{common.close}}"
     },
     "email-history": {
-        "description": "Hier findest du alle E-Mails, die von Kavita an welchen Benutzer gesendet wurden.",
+        "description": "Hier finden Sie alle E-Mails, die von Kavita gesendet wurden und an welchen Benutzer.",
         "template-header": "Vorlage",
         "date-header": "Date senden",
         "user-header": "Gesendet an",
@@ -2669,7 +2669,7 @@
         "no-data": "{{common.no-data}}"
     },
     "manage-metadata-settings": {
-        "description": "Kavita+ kann einige begrenzte Metadaten herunterladen und in die Datenbank schreiben. Auf dieser Seite kannst du einstellen, was im Umfang enthalten ist.",
+        "description": "Kavita+ kann bestimmte Metadaten herunterladen und in die Datenbank schreiben. Auf dieser Seite können Sie festlegen, was in den Anwendungsbereich fällt.",
         "enabled-label": "Metadaten-Download aktivieren",
         "enabled-tooltip": "Erlaube Kavita, Metadaten herunterzuladen und in ihre Datenbank zu schreiben.",
         "summary-label": "Zusammenfassung",
@@ -2696,7 +2696,7 @@
         "remove-source-tag-label": "Quell-Tag entfernen",
         "add-field-mapping-label": "Füge Feldzuordnung hinzu",
         "add-age-rating-mapping-label": "Altersfreigabe hinzufügen",
-        "blacklist-tooltip": "Alles, was in dieser Liste steht, wird sowohl aus der Genre- als auch aus der Tag-Verarbeitung entfernt. Hier kannst du Genres/Tags hinzufügen, <b>die nicht </b>geschrieben werden sollen. Achte darauf, dass sie durch Kommas getrennt sind.",
+        "blacklist-tooltip": "Alles, was in dieser Liste steht, wird sowohl aus der Genre- als auch aus der Tag-Verarbeitung entfernt. Hier kannst du Genres/Tags hinzufügen, <b>die nicht</b> geschrieben werden sollen. Achte darauf, dass sie durch Kommas getrennt sind.",
         "whitelist-tooltip": "Erlaube nur, dass eine Zeichenfolge in dieser Liste für <b>Tags</b> geschrieben wird. Stelle sicher, dass sie durch Kommas getrennt sind.",
         "derive-publication-status-tooltip": "Erlaube, dass der Publikationsstatus aus der Gesamtzahl der Kapitel/Bände abgeleitet wird.",
         "age-rating-mapping-description": "Alle Links, die sich entweder in Genre oder Tags befinden, legen die Altersfreigabe für die Serie fest. Der Abgleich wird normalisiert und ist unabhängig von Groß- und Kleinschreibung. Die höchste Altersfreigabe wird verwendet.",
@@ -2783,7 +2783,7 @@
     },
     "manage-reading-profiles": {
         "description": "Nicht alle Ihre Serien können auf dieselbe Weise gelesen werden. Richten Sie daher für jede Bibliothek oder Serie separate Leseprofile ein, damit Sie so nahtlos wie möglich zu Ihrer Serie zurückkehren können.",
-        "extra-tip": "Lese-Profile kannst du über das Aktionsmenü in Serien und Bibliotheken oder für mehrere gleichzeitig festlegen. Wenn du die Einstellungen in einem Reader änderst, wird ein verstecktes Profil erstellt, das deine Auswahl für diese Serie speichert (nicht für PDFs). Dieses Profil wird gelöscht, wenn du der Serie eines deiner eigenen Lese-Profile zuweist. Mehr Infos findest du auf der",
+        "extra-tip": "Weisen Sie Leseprofile über das Aktionsmenü in Serien und Bibliotheken oder in großen Mengen zu. Wenn Sie die Einstellungen in einem Reader ändern, wird ein verstecktes Profil erstellt, das Ihre Auswahl für diese Serie speichert (nicht für PDFs). Dieses Profil wird entfernt, wenn Sie der Serie eines Ihrer eigenen Leseprofile zuweisen. Weitere Informationen finden Sie in der",
         "tap-to-paginate-tooltip": "Sollten die Seiten des E-Book-Reader-Bildschirms durch Antippen umblätterbar sein vorherige/nächste Seite",
         "show-screen-hints-tooltip": "Zeige eine Überlagerung an, um den Bereich und die Richtung der Paginierung besser zu verstehen",
         "font-size-book-tooltip": "Prozentuale Skalierung für die Schriftart im Buch",
@@ -2944,7 +2944,7 @@
     "oidc": {
         "title": "OIDC-Callback",
         "login": "Zurück zur Anmeldemaske",
-        "error-loading-info": "Fehler beim Laden der OIDC-Infos, kontaktiere deinen Administrator",
+        "error-loading-info": "Beim Laden der OIDC-Informationen ist ein Fehler aufgetreten. Wenden Sie sich an Ihren Administrator",
         "timeout": "OIDC-Auflösung hat das Zeitlimit erreicht oder ein Fehler ist passiert"
     },
     "manage-oidc-connect": {

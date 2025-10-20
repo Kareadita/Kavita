@@ -577,7 +577,8 @@
         "page-num-label": "Страница {{page}}",
         "completion-label": "{{percent}} завершено",
         "force-selected-one-column": "Режим компоновки переключён на одну колонку из-за нехватки места для отображения двух колонок",
-        "forced-vertical-switch": "Режим вёрстки переключён, так как вёрстка в две колонки не работает с вертикальным стилем написания"
+        "forced-vertical-switch": "Режим вёрстки переключён, так как вёрстка в две колонки не работает с вертикальным стилем написания",
+        "toc-header": "Оглавление"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -688,7 +689,12 @@
         "teams-title": "Команды",
         "language-title": "Язык",
         "age-rating-title": "Возрастной рейтинг",
-        "links-title": "Веб-ссылки"
+        "links-title": "Веб-ссылки",
+        "inkers-title": "Контуровщики",
+        "letterers-title": "Шрифтовики",
+        "pencillers-title": "Художники",
+        "imprints-title": "Импринты",
+        "locations-title": "Места"
     },
     "external-rating": {
         "close": "{{common.close}}",
@@ -764,7 +770,24 @@
         "allow-metadata-matching-tooltip": "Должна ли Kavita загружать метаданные для сериалов из этой библиотеки. Это произойдет только в том случае, если на сервере активна подписка на Kavita+.",
         "folder-watching-label": "Просмотр каталогов",
         "folder-watching-tooltip": "Переопределите просмотр папок на сервере для этой библиотеки. Если этот параметр отключён, просмотр каталогов не будет выполняться для каталогов, содержащихся в этой библиотеке. Если библиотеки предоставляют общий доступ к каталогам, то проверка каталогов все равно может выполняться. Всегда будет ожидаться 10 минут перед запуском проверки.",
-        "include-in-dashboard-label": "Включить в приборную панель"
+        "include-in-dashboard-label": "Включить в приборную панель",
+        "kavitaplus-eligible-label": "Доступно для Kavita+",
+        "kavitaplus-eligible-tooltip": "Поддерживает метаданные и скробблинг Kavita+",
+        "naming-conventions-part-1": "У Kavita ",
+        "allow-scrobbling-label": "Разрешить скробблинг",
+        "allow-scrobbling-tooltip": "Использовать скробблинг событий прочтения, пометки для чтения, оценок и рецензий при помощи настроеных провайдеров. Сервер должен иметь активную подписку на Kavita+.",
+        "include-in-search-label": "Включить в поиск",
+        "include-in-search-tooltip": "Включать серию и производную информацию (жанры, люди, файлы) из библиотеки в результаты поиска.",
+        "enable-metadata-label": "Разрешить метаданные (из ComicInfo/Epub/PDF)",
+        "remove-prefix-for-sortname-label": "Удалять префиксы из имен для сортировки",
+        "remove-prefix-for-sortname-tooltip": "Удалять префиксы «The», «A», «An» из имен для сортировки. Не изменяет заданные вручную метаданные.",
+        "force-scan": "Принудительный анализ",
+        "force-scan-tooltip": "Буден произведен анализ библиотеки по правилам первоначального анализа",
+        "next": "Далее",
+        "file-type-group-label": "Типы файлов",
+        "file-type-group-tooltip": "Типы файлов, сканируемые Kavita. Например, «Архив» включает файлы cb*, zip, rar и т. п.",
+        "exclude-patterns-label": "Исключить по шаблону",
+        "exclude-patterns-tooltip": "Задать шаблоны имен файлов, которые Kavita исключит из результатов анализа при просмотре каталогов."
     },
     "reader-settings": {
         "font-family-label": "{{manage-reading-profiles.font-family-label}}",
@@ -777,14 +800,47 @@
         "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "left-to-right": "Слева направо",
         "right-to-left": "Справа налево",
-        "writing-style-tooltip": "Изменяет направление текста. По горизонтали - слева направо, по вертикали - сверху вниз."
+        "writing-style-tooltip": "Изменяет направление текста. По горизонтали - слева направо, по вертикали - сверху вниз.",
+        "general-settings-title": "Общие настройки",
+        "reset-to-defaults": "По умолчанию",
+        "update-parent": "Сохранить как {{name}}",
+        "loading": "загрузка",
+        "reader-settings-title": "Настройки режима чтения",
+        "horizontal": "По горизонтали",
+        "vertical": "По вертикали",
+        "tap-to-paginate-label": "Листание касанием",
+        "tap-to-paginate-tooltip": "Прикосновения к краям экрана переворачивают страницы",
+        "on": "Вкл",
+        "off": "Выкл",
+        "fullscreen-label": "Во весь экран",
+        "exit": "Выход",
+        "layout-mode-option-scroll": "Свиток",
+        "layout-mode-option-1col": "1 колонка",
+        "layout-mode-option-2col": "2 колонки",
+        "color-theme-title": "Цветовая тема",
+        "line-spacing-min-label": "1x",
+        "line-spacing-max-label": "2,5x",
+        "theme-dark": "Темная",
+        "theme-black": "Черная",
+        "theme-white": "Белая",
+        "theme-paper": "Бумага"
     },
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "no-data": "Закладки отсутсвуют. Попробуйте их",
+        "no-data-2": "создать.",
+        "confirm-delete": "Очистить все закладки для нескольких серий? Это действие нельзя отменить.",
+        "confirm-single-delete": "Очистить все закладки для «{{seriesName}}»? Это действие нельзя отменить.",
+        "delete-success": "Закладки удалены",
+        "delete-single-success": "Закладки для «{{seriesName}}» были удалены"
     },
     "bulk-operations": {
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "title": "Массовые действия",
+        "items-selected": "Выделено элементов: {{num}}",
+        "mark-as-unread": "Пометить как непрочитанные",
+        "mark-as-read": "Пометить как прочитанные"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -802,7 +858,9 @@
         "imprints-title": "{{metadata-fields.imprints-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
-        "weblinks-title": "{{tabs.weblink-tab}}"
+        "weblinks-title": "{{tabs.weblink-tab}}",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "language-title": "{{edit-chapter-modal.language-label}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1629,7 +1687,8 @@
     "file-type-group-pipe": {
         "archive": "Архив",
         "epub": "ePub",
-        "pdf": "Pdf"
+        "pdf": "Pdf",
+        "image": "Изображение"
     },
     "filter-comparison-pipe": {
         "begins-with": "Начинается с",
@@ -1708,7 +1767,7 @@
         "client-id-label": "Идентификатор клиента",
         "client-id-tooltip": "Идентификатор клиента, указанный в вашем поставщике OIDC, может быть любым",
         "secret-label": "Секрет клиента",
-        "secret-tooltip": "Секрет, созданный вашим поставщиком OIDC",
+        "secret-tooltip": "Секрет, созданный вашим поставщиком OIDC; будет скрыт после задания",
         "auto-login-label": "Автоматический вход",
         "auto-login-tooltip": "Автоматическое перенаправление к поставщику OIDC при открытии экрана входа в систему",
         "disable-password-authentication-label": "Отключить аутентификацию по паролю",
@@ -2008,7 +2067,8 @@
         "no-results": "Не удается найти совпадение. Попробуйте добавить URL-адрес поддерживаемого провайдера и повторите попытку.",
         "query-label": "Запрос",
         "query-tooltip": "Введите название серии, URL-адрес AniList/MyAnimeList/ComicBookRoundup. Для поиска URL-адресов будет использоваться прямой поиск.",
-        "dont-match-label": "Не совпадают"
+        "dont-match-label": "Не совпадают",
+        "dont-match-tooltip": "Не сопоставлять и не скробировать эту серию"
     },
     "errors": {
         "user-not-auth": "Пользователь не аутентифицирован"
@@ -2041,7 +2101,8 @@
         "roles-label": "{{common.roles}}",
         "sort-label": "Сортировка",
         "name-label": "Имя",
-        "series-count-label": "Количество серий"
+        "series-count-label": "Количество серий",
+        "issue-count-label": "Кол-во выпусков"
     },
     "browse-genres": {
         "title": "Просмотр жанров",
@@ -2092,5 +2153,16 @@
         "medium": "Средний (640x909)",
         "large": "Большой (900x1277)",
         "xlarge": "Гигантский (1265x1795)"
+    },
+    "badge-expander": {
+        "more-items": "и еще {{count}}"
+    },
+    "table-of-contents": {
+        "no-data": "У книги отсутствует оглавление в метаданных или файле toc"
+    },
+    "card-detail-layout": {
+        "total-items": "Всего элементов: {{count}}",
+        "jumpkey-count": "Серий: {{count}}",
+        "no-data": "{{common.no-data}}"
     }
 }
