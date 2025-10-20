@@ -117,6 +117,7 @@ public static class ApplicationServiceExtensions
             options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 75 MB
             options.CompactionPercentage = 0.1; // LRU compaction (10%)
         });
+        // Needs to be registered after the memory chache, as it depends on it
         services.AddSingleton<ITicketStore, CustomTicketStore>();
 
         services.AddSwaggerGen(g =>

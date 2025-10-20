@@ -7,6 +7,13 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace API.Services.Store;
 
+/// <summary>
+/// The <see cref="ITicketStore"/> is used as <see cref="CookieAuthenticationOptions.SessionStore"/> for the OIDC implementation
+/// The full AuthenticationTicket cannot be included in the Cookie as popular reverse proxies (like nginx) will deny the request
+/// due the large header size. Instead, the key is used.
+/// </summary>
+/// <param name="cache"></param>
+/// <remarks>Note that this store is in memory, so OIDC authenticated users are logged out after restart</remarks>
 public class CustomTicketStore(IMemoryCache cache): ITicketStore
 {
 
