@@ -20,6 +20,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using MessageReceivedContext = Microsoft.AspNetCore.Authentication.JwtBearer.MessageReceivedContext;
@@ -142,6 +143,34 @@ public static class IdentityServiceExtensions
         var apiPrefix = baseUrl + "api";
         var hubsPrefix = baseUrl + "hubs";
 
+        var authority = Configuration.OidcSettings.Authority;
+        var hasTrailingSlash = authority.EndsWith('/');
+        var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
+
+        var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            url,
+            new OpenIdConnectConfigurationRetriever(),
+            new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
+        );
+
+        //var logger = services.BuildServiceProvider().GetRequiredService<ILogger<OidcService>>();
+        var supportedScopes = configurationManager.GetConfigurationAsync()
+            .ConfigureAwait(false)
+            .GetAwaiter()
+            .GetResult()
+            .ScopesSupported;
+
+        List<string> scopes = ["openid", "profile", "offline_access", "roles", "email"];
+        scopes.AddRange(settings.CustomScopes);
+        var validScopes = scopes.Where(scope =>
+        {
+            if (supportedScopes.Contains(scope))
+                return true;
+
+            //logger.LogWarning("Scope {Scope} is configured, but not supported by your OIDC provider. Skipping", scope);
+            return false;
+        }).ToList();
+
         services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme).Configure<ITicketStore>((options, store) =>
         {
             options.ExpireTimeSpan = TimeSpan.FromDays(7);
@@ -194,16 +223,12 @@ public static class IdentityServiceExtensions
             options.SaveTokens = true;
             options.GetClaimsFromUserInfoEndpoint = true;
             options.Scope.Clear();
-            options.Scope.Add("openid");
-            options.Scope.Add("profile");
-            options.Scope.Add("offline_access");
-            options.Scope.Add("roles");
-            options.Scope.Add("email");
 
-            foreach (var customScope in settings.CustomScopes)
+            foreach (var scope in validScopes)
             {
-                options.Scope.Add(customScope);
+                options.Scope.Add(scope);
             }
+
 
             options.Events = new OpenIdConnectEvents
             {
