@@ -242,6 +242,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             .Where(s => PolicyConstants.ValidRoles.Contains(s)).ToList();
         if (settings.SyncUserSettings && accessRoles.Count == 0)
         {
+            logger.LogDebug("No valid roles where found under {Claim} with prefix {Prefix}", settings.RolesClaim, settings.RolesPrefix);
             throw new KavitaException("errors.oidc.role-not-assigned");
         }
 
@@ -265,6 +266,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var roles = await userManager.GetRolesAsync(user);
         if (roles.Count == 0 || (!roles.Contains(PolicyConstants.LoginRole) && !roles.Contains(PolicyConstants.AdminRole)))
         {
+            logger.LogDebug("User does not have Login or AdminRole assigned. Has: {Roles}", string.Join(",", roles));
             throw new KavitaException("errors.oidc.disabled-account");
         }
 
