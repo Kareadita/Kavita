@@ -23,6 +23,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using MessageReceivedContext = Microsoft.AspNetCore.Authentication.JwtBearer.MessageReceivedContext;
 using TokenValidatedContext = Microsoft.AspNetCore.Authentication.OpenIdConnect.TokenValidatedContext;
 
@@ -153,7 +154,6 @@ public static class IdentityServiceExtensions
             new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
         );
 
-        //var logger = services.BuildServiceProvider().GetRequiredService<ILogger<OidcService>>();
         var supportedScopes = configurationManager.GetConfigurationAsync()
             .ConfigureAwait(false)
             .GetAwaiter()
@@ -167,7 +167,7 @@ public static class IdentityServiceExtensions
             if (supportedScopes.Contains(scope))
                 return true;
 
-            //logger.LogWarning("Scope {Scope} is configured, but not supported by your OIDC provider. Skipping", scope);
+            Log.Warning("Scope {Scope} is configured, but not supported by your OIDC provider. Skipping", scope);
             return false;
         }).ToList();
 
