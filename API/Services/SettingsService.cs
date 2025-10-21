@@ -20,6 +20,7 @@ using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
@@ -54,6 +55,7 @@ public class SettingsService : ISettingsService
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<SettingsService> _logger;
     private readonly IOidcService _oidcService;
+    private readonly bool _isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development;
 
     public SettingsService(IUnitOfWork unitOfWork, IDirectoryService directoryService,
         ILibraryWatcher libraryWatcher, ITaskScheduler taskScheduler,
@@ -528,6 +530,11 @@ public class SettingsService : ISettingsService
     public async Task<bool> IsValidAuthority(string authority)
     {
         if (string.IsNullOrEmpty(authority))
+        {
+            return false;
+        }
+
+        if (!_isDevelopment && !authority.StartsWith("https"))
         {
             return false;
         }

@@ -146,13 +146,19 @@ public static class IdentityServiceExtensions
         const string hubsPrefix = "/hubs";
 
         var authority = Configuration.OidcSettings.Authority;
+        if (!isDevelopment && !authority.StartsWith("https"))
+        {
+            Log.Error("OpenIdConnect authority is not using https, you must configure tls for your idp.");
+            return;
+        }
+
         var hasTrailingSlash = authority.EndsWith('/');
         var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
 
         var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
             url,
             new OpenIdConnectConfigurationRetriever(),
-            new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
+            new HttpDocumentRetriever { RequireHttps = !isDevelopment }
         );
 
         ICollection<string> supportedScopes;

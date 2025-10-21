@@ -26,6 +26,7 @@
         "behavior-title": "Behavior",
         "other-field-required": "{{validation.other-field-required}}",
         "invalid-uri": "{{validation.invalid-uri}}",
+        "tls-required": "The OIDC provider must use tls (https)",
         "manual-save-label": "Changing provider settings requires a manual save",
 
         "authority-label": "Authority",

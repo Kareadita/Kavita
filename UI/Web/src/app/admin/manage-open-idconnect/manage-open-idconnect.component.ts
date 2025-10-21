@@ -43,6 +43,7 @@ import {
 import {
   SettingMultiTextFieldComponent
 } from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
+import {environment} from "../../../environments/environment";
 
 type OidcFormGroup = FormGroup<{
   autoLogin: FormControl<boolean>;
@@ -191,6 +192,10 @@ export class ManageOpenIDConnectComponent implements OnInit {
       let uri: string = control.value;
       if (!uri || uri.trim().length === 0) {
         return of(null);
+      }
+
+      if (environment.production && !uri.startsWith("https")) {
+        return of({'requireTls': {'uri': uri}} as ValidationErrors);
       }
 
       try {

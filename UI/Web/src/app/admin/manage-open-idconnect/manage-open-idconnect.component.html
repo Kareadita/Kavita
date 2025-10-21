@@ -29,6 +29,9 @@
                     @if (formControl.errors?.invalidUri) {
                       <div>{{t('invalid-uri')}}</div>
                     }
+                    @if (formControl.errors?.requireTls) {
+                      <div>{{t('tls-required')}}</div>
+                    }
                   </div>
                 }
               </ng-template>

@@ -24,9 +24,9 @@ using Microsoft.Extensions.Logging;
 using NetVips;
 using Serilog;
 using Serilog.Events;
-using Serilog.Formatting.Display;
 using Serilog.Sinks.AspNetCore.SignalR.Extensions;
 using Log = Serilog.Log;
+using MessageTemplateTextFormatter = Serilog.Formatting.Display.MessageTemplateTextFormatter;
 
 namespace API;
 #nullable enable
