@@ -18,7 +18,7 @@ import {
   NgbNavLink,
   NgbNavOutlet
 } from '@ng-bootstrap/ng-bootstrap';
-import {forkJoin, Observable, of, tap} from 'rxjs';
+import {concat, forkJoin, Observable, of, tap} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
@@ -576,7 +576,7 @@ export class EditSeriesModalComponent implements OnInit {
 
     this.saveNestedComponents.emit();
 
-    forkJoin(apis).subscribe(results => {
+    concat(...apis).subscribe(results => {
       this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, updateExternal: this.hasForcedKPlus});
     });
   }

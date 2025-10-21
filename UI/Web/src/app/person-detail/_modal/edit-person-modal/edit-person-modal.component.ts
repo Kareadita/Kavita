@@ -22,7 +22,7 @@ import {
 import {PersonService} from "../../../_services/person.service";
 import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
-import {forkJoin, map, of} from "rxjs";
+import {concat, forkJoin, map, of} from "rxjs";
 import {UploadService} from "../../../_services/upload.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../../_services/account.service";
@@ -111,12 +111,6 @@ export class EditPersonModalComponent implements OnInit {
   save() {
     const apis = [];
 
-    const hasCoverChanges = this.touchedCoverImage || this.coverImageReset;
-
-    if (hasCoverChanges) {
-      apis.push(this.uploadService.updatePersonCoverImage(this.person.id, this.selectedCover, !this.coverImageReset));
-    }
-
     const person: Person = {
       id: this.person.id,
       coverImageLocked: this.person.coverImageLocked,
@@ -132,7 +126,13 @@ export class EditPersonModalComponent implements OnInit {
     };
     apis.push(this.personService.updatePerson(person));
 
-    forkJoin(apis).subscribe(_ => {
+    const hasCoverChanges = this.touchedCoverImage || this.coverImageReset;
+    if (hasCoverChanges) {
+      apis.push(this.uploadService.updatePersonCoverImage(this.person.id, this.selectedCover, !this.coverImageReset));
+    }
+
+    // Run api calls in sequency to prevent them from overwriting each-other in a race condition
+    concat(...apis).subscribe(_ => {
       this.modal.close({success: true, coverImageUpdate: hasCoverChanges, person: person});
     });
   }
@@ -200,7 +200,7 @@ export class EditPersonModalComponent implements OnInit {
       if (!asin || asin.trim().length === 0) {
         return of(null);
       }
-      
+
       return this.personService.isValidAsin(asin).pipe(map(valid => {
         if (valid) {
           return null;

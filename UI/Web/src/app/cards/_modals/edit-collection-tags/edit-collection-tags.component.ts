@@ -11,7 +11,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {debounceTime, distinctUntilChanged, forkJoin, switchMap, tap} from 'rxjs';
+import {concat, debounceTime, distinctUntilChanged, forkJoin, switchMap, tap} from 'rxjs';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
@@ -218,7 +218,7 @@ export class EditCollectionTagsComponent implements OnInit {
       apis.push(this.uploadService.updateCollectionCoverImage(this.tag.id, this.selectedCover));
     }
 
-    forkJoin(apis).subscribe(() => {
+    concat(...apis).subscribe(() => {
       this.modal.close({success: true, coverImageUpdated: selectedIndex > 0});
       this.toastr.success(translate('toasts.collection-updated'));
     });

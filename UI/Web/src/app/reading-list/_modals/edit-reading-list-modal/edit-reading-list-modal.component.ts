@@ -10,7 +10,7 @@ import {
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbTooltip, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, forkJoin, switchMap, tap } from 'rxjs';
+import {concat, debounceTime, distinctUntilChanged, forkJoin, switchMap, tap} from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
@@ -118,7 +118,7 @@ export class EditReadingListModalComponent implements OnInit {
       apis.push(this.uploadService.updateReadingListCoverImage(this.readingList.id, this.selectedCover))
     }
 
-    forkJoin(apis).subscribe(results => {
+    concat(...apis).subscribe(results => {
       this.readingList.title = model.title;
       this.readingList.summary = model.summary;
       this.readingList.coverImageLocked = this.coverImageLocked;

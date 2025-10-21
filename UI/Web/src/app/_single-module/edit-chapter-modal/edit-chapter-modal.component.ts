@@ -21,7 +21,7 @@ import {ActionService} from "../../_services/action.service";
 import {DownloadService} from "../../shared/_services/download.service";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
-import {forkJoin, Observable, of, tap} from "rxjs";
+import {concat, forkJoin, Observable, of, tap} from "rxjs";
 import {map, switchMap} from "rxjs/operators";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
@@ -269,7 +269,7 @@ export class EditChapterModalComponent implements OnInit {
       apis.push(this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover, !this.coverImageReset));
     }
 
-    forkJoin(apis).subscribe(results => {
+    concat(...apis).subscribe(results => {
       this.modal.close({success: true, chapter: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, needsReload: needsReload, isDeleted: false} as EditChapterModalCloseResult);
     });
   }
