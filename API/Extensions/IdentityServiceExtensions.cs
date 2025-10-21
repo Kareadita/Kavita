@@ -154,11 +154,21 @@ public static class IdentityServiceExtensions
             new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
         );
 
-        var supportedScopes = configurationManager.GetConfigurationAsync()
-            .ConfigureAwait(false)
-            .GetAwaiter()
-            .GetResult()
-            .ScopesSupported;
+        ICollection<string> supportedScopes;
+        try
+        {
+            supportedScopes = configurationManager.GetConfigurationAsync()
+                .ConfigureAwait(false)
+                .GetAwaiter()
+                .GetResult()
+                .ScopesSupported;
+        }
+        catch (Exception ex)
+        {
+            // Do not interrupt startup if OIDC fails (Network outage should still allow Kavita to run)
+            Log.Error(ex, "Failed to load OIDC configuration, OIDC will not be enabled. Restart to retry");
+            return;
+        }
 
         List<string> scopes = ["openid", "profile", "offline_access", "roles", "email"];
         scopes.AddRange(settings.CustomScopes);
