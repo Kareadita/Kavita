@@ -24,6 +24,7 @@ using Microsoft.Extensions.Logging;
 using NetVips;
 using Serilog;
 using Serilog.Events;
+using Serilog.Formatting.Display;
 using Serilog.Sinks.AspNetCore.SignalR.Extensions;
 using Log = Serilog.Log;
 
@@ -42,7 +43,7 @@ public class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
+            .WriteTo.Console(new MessageTemplateTextFormatter(LogLevelOptions.OutputTemplate))
             .MinimumLevel
             .Information()
             .CreateBootstrapLogger();

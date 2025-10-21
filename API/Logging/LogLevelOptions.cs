@@ -13,6 +13,7 @@ namespace API.Logging;
 public static class LogLevelOptions
 {
     public const string LogFile = "config/logs/kavita.log";
+    public const string OutputTemplate = "[Kavita] [{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId} {ThreadId}] [{Level}] {SourceContext} {Message:lj}{NewLine}{Exception}";
     public const bool LogRollingEnabled = true;
     /// <summary>
     /// Controls the Logging Level of the Application
@@ -37,7 +38,6 @@ public static class LogLevelOptions
 
     public static LoggerConfiguration CreateConfig(LoggerConfiguration configuration)
     {
-        const string outputTemplate = "[Kavita] [{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId} {ThreadId}] [{Level}] {SourceContext} {Message:lj}{NewLine}{Exception}";
         return configuration
             .MinimumLevel
             .ControlledBy(LogLevelSwitch)
@@ -51,11 +51,11 @@ public static class LogLevelOptions
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
             .Enrich.With(new ApiKeyEnricher())
-            .WriteTo.Console(new MessageTemplateTextFormatter(outputTemplate))
+            .WriteTo.Console(new MessageTemplateTextFormatter(OutputTemplate))
             .WriteTo.File(LogFile,
                 shared: true,
                 rollingInterval: RollingInterval.Day,
-                outputTemplate: outputTemplate)
+                outputTemplate: OutputTemplate)
             .Filter.ByIncludingOnly(ShouldIncludeLogStatement);
     }
 
