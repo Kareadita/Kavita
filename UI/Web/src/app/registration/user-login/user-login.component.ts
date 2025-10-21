@@ -39,7 +39,7 @@ export class UserLoginComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   protected readonly settingsService = inject(SettingsService);
 
-  baseUrl = environment.apiUrl;
+  baseUrl = environment.apiUrl.substring(0, environment.apiUrl.indexOf("api"));
 
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
@@ -89,7 +89,7 @@ export class UserLoginComponent implements OnInit {
       if (!oidcConfig || skipAutoLogin === undefined) return;
 
       if (oidcConfig.autoLogin && !skipAutoLogin) {
-        window.location.href = '/oidc/login';
+        window.location.href = this.baseUrl + 'oidc/login';
       }
     });
   }

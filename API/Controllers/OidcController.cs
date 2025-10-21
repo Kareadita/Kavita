@@ -17,6 +17,11 @@ public class OidcController: ControllerBase
     [HttpGet("login")]
     public IActionResult Login(string returnUrl = "/")
     {
+        if (returnUrl == "/")
+        {
+            returnUrl = Configuration.BaseUrl;
+        }
+
         var properties = new AuthenticationProperties { RedirectUri = returnUrl };
         return Challenge(properties, IdentityServiceExtensions.OpenIdConnect);
     }
@@ -31,7 +36,7 @@ public class OidcController: ControllerBase
         }
 
         var res = await Request.HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        if (!res.Succeeded || res.Properties == null || string.IsNullOrEmpty(res.Properties.GetString(OidcService.IdToken)))
+        if (!res.Succeeded || res.Properties == null || string.IsNullOrEmpty(res.Properties.GetTokenValue(OidcService.IdToken)))
         {
             HttpContext.Response.Cookies.Delete(OidcService.CookieName);
             return Redirect(Configuration.BaseUrl);

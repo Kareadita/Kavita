@@ -300,7 +300,7 @@ export class AccountService {
     this.messageHub.stopHubConnection();
 
     if (!user.token) {
-      window.location.href = '/oidc/logout';
+      window.location.href = this.baseUrl.substring(0, environment.apiUrl.indexOf("api")) + 'oidc/logout';
       return;
     }
 
