@@ -179,7 +179,7 @@
               </ng-template>
               <ng-template #edit>
                 <select class="form-select" formControlName="defaultAgeRestriction">
-                  <option value="-1">{{t('no-restriction')}}</option>
+                  <option [ngValue]="-1">{{t('no-restriction')}}</option>
                   @for (ageRating of ageRatings(); track ageRating.value) {
                     <option [ngValue]="ageRating.value">{{ageRating.title}}</option>
                   }
