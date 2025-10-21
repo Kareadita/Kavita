@@ -91,7 +91,7 @@ public class OpdsController : BaseApiController
         if (!Configuration.DefaultBaseUrl.Equals(baseUrl, StringComparison.InvariantCultureIgnoreCase))
         {
             // We need to update the Prefix to account for baseUrl
-            prefix = baseUrl + OpdsService.DefaultApiPrefix;
+            prefix = baseUrl.TrimEnd('/') + OpdsService.DefaultApiPrefix;
         }
 
         return new Tuple<string, string>(baseUrl, prefix);
