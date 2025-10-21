@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -141,8 +142,8 @@ public static class IdentityServiceExtensions
         var isDevelopment = environment.IsEnvironment(Environments.Development);
         var baseUrl = Configuration.BaseUrl;
 
-        var apiPrefix = baseUrl + "api";
-        var hubsPrefix = baseUrl + "hubs";
+        const string apiPrefix = "/api";
+        const string hubsPrefix = "/hubs";
 
         var authority = Configuration.OidcSettings.Authority;
         var hasTrailingSlash = authority.EndsWith('/');
@@ -233,8 +234,16 @@ public static class IdentityServiceExtensions
 
             options.SaveTokens = true;
             options.GetClaimsFromUserInfoEndpoint = true;
-            options.Scope.Clear();
 
+            // Due to some (Authelia) OIDC providers, we need to map these claims explicitly. Such that no flow breaks in the
+            // OidcService
+            options.MapInboundClaims = true;
+            options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
+            options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
+            options.ClaimActions.MapJsonKey(JwtRegisteredClaimNames.PreferredUsername, "preferred_username");
+            options.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "given_name");
+
+            options.Scope.Clear();
             foreach (var scope in validScopes)
             {
                 options.Scope.Add(scope);
@@ -243,7 +252,7 @@ public static class IdentityServiceExtensions
 
             options.Events = new OpenIdConnectEvents
             {
-                OnTokenValidated = OidcClaimsPrincipalConverter,
+                OnTicketReceived = OidcClaimsPrincipalConverter,
                 OnAuthenticationFailed = ctx =>
                 {
                     ctx.Response.Redirect(baseUrl + "login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ctx.Exception.Message));
@@ -288,7 +297,7 @@ public static class IdentityServiceExtensions
     /// Kavita roles the user has
     /// </summary>
     /// <param name="ctx"></param>
-    private static async Task OidcClaimsPrincipalConverter(TokenValidatedContext ctx)
+    private static async Task OidcClaimsPrincipalConverter(TicketReceivedContext ctx)
     {
         if (ctx.Principal == null) return;
 
@@ -300,56 +309,14 @@ public static class IdentityServiceExtensions
         }
 
         var claims = await OidcService.ConstructNewClaimsList(ctx.HttpContext.RequestServices, ctx.Principal, user);
-        var tokens = CopyOidcTokens(ctx);
 
         var identity = new ClaimsIdentity(claims, ctx.Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
-
-        ctx.Properties ??= new AuthenticationProperties();
-        ctx.Properties.StoreTokens(tokens);
 
         ctx.HttpContext.User = principal;
         ctx.Principal = principal;
 
         ctx.Success();
-    }
-
-    /// <summary>
-    /// Copy tokens returned by the OIDC provider that we require later
-    /// </summary>
-    /// <param name="ctx"></param>
-    /// <returns></returns>
-    private static List<AuthenticationToken> CopyOidcTokens(TokenValidatedContext ctx)
-    {
-        if (ctx.TokenEndpointResponse == null)
-        {
-            return [];
-        }
-
-        var tokens = new List<AuthenticationToken>();
-
-        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.RefreshToken))
-        {
-            tokens.Add(new AuthenticationToken { Name = OidcService.RefreshToken, Value = ctx.TokenEndpointResponse.RefreshToken });
-        }
-        else
-        {
-            var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<OidcService>>();
-            logger.LogWarning("OIDC login without refresh token, automatic sync will not work for this user");
-        }
-
-        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.IdToken))
-        {
-            tokens.Add(new AuthenticationToken { Name = OidcService.IdToken, Value = ctx.TokenEndpointResponse.IdToken });
-        }
-
-        if (!string.IsNullOrEmpty(ctx.TokenEndpointResponse.ExpiresIn))
-        {
-            var expiresAt = DateTimeOffset.UtcNow.AddSeconds(double.Parse(ctx.TokenEndpointResponse.ExpiresIn));
-            tokens.Add(new AuthenticationToken { Name = OidcService.ExpiresAt, Value = expiresAt.ToString("o") });
-        }
-
-        return tokens;
     }
 
     private static Task SetTokenFromQuery(MessageReceivedContext context)
