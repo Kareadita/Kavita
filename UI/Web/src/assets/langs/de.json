@@ -2494,7 +2494,7 @@
         "close": "Schließen",
         "clear": "Klar",
         "filter": "Filter",
-        "cancel": "Stornieren",
+        "cancel": "Abbrechen",
         "create": "Erstellen",
         "save": "Speichern",
         "reset": "Zurücksetzen",
@@ -2951,7 +2951,7 @@
         "save": "{{common.save}}",
         "save-success": "OIDC-Einstellungen erfolgreich aktualisiert",
         "notice": "Bemerkung",
-        "restart-required": "Um die Autoritäts- oder Client-ID zu ändern, muss Kavita manuell neu gestartet werden, damit die Änderung wirksam wird.",
+        "restart-required": "Ändern des Providers oder der erweiterten Einstellungen erfordert ein manuelles Neustart von Kavita.",
         "provider-title": "Provider",
         "provider-tooltip": "In den Anbietereinstellungen müssen Sie manuell auf „Speichern“ klicken. Kavita muss als vertraulicher Client konfiguriert werden und benötigt eine Weiterleitungs-URL. Weitere Informationen finden Sie im <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
         "behavior-title": "Verhalten",
@@ -2992,7 +2992,8 @@
         "default-age-restriction-tooltip": "Maximale Altersfreigabe für neue Nutzer",
         "no-restriction": "{{restriction-selector.no-restriction}}",
         "default-roles-label": "{{common.roles}}",
-        "default-libraries-label": "{{common.libraries}}"
+        "default-libraries-label": "{{common.libraries}}",
+        "tls-required": "Der OIDC-Anbieter muss TLS (HTTPS) verwenden"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",

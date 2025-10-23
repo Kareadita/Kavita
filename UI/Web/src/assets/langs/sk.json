@@ -508,7 +508,7 @@
         "mature-17-plus": "Od 17+",
         "teen": "Násťročný",
         "x18-plus": "X18+",
-        "not-applicable": "Not Applicable",
+        "not-applicable": "Neaplikovateľné",
         "pg": "PG"
     },
     "reset-password": {
@@ -2951,7 +2951,7 @@
         "save": "{{common.save}}",
         "save-success": "Nastavenia OIDC boli úspešne aktualizované",
         "notice": "Poznámka",
-        "restart-required": "Zmena autority alebo ID klienta vyžaduje manuálny reštart aplikácie Kavita, aby sa prejavila.",
+        "restart-required": "Zmena poskytovateľa alebo rozšírených nastavení vyžaduje manuálny reštart Kavity, aby sa prejavila.",
         "provider-title": "Poskytovateľ",
         "provider-tooltip": "Nastavenia poskytovateľa vyžadujú manuálne kliknutie na tlačidlo Uložiť. Kavita musí byť nakonfigurovaná ako dôverný klient a potrebuje URL adresu presmerovania. Viac informácií nájdete na <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
         "behavior-title": "Správanie",
@@ -2992,7 +2992,8 @@
         "roles-claim-label": "Nárok na role",
         "roles-claim-tooltip": "Nárok, ktorý Kavita použije na extrakciu rolí. Ak chcete použiť predvolenú hodnotu, ponechajte pole prázdne.",
         "custom-scopes-label": "Vlastné rozsahy",
-        "custom-scopes-tooltip": "Ďalšie rozsahy, ktoré si môžete vyžiadať od poskytovateľa OIDC počas prihlásenia. Viaceré rozsahy oddeľte čiarkami. Nesprávne hodnoty môžu zabrániť prihláseniu."
+        "custom-scopes-tooltip": "Ďalšie rozsahy, ktoré si môžete vyžiadať od poskytovateľa OIDC počas prihlásenia. Viaceré rozsahy oddeľte čiarkami. Nesprávne hodnoty môžu zabrániť prihláseniu.",
+        "tls-required": "Poskytovateľ OIDC musí používať TLS (https)"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",

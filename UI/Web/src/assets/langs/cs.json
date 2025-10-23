@@ -2951,7 +2951,7 @@
         "save": "{{common.save}}",
         "save-success": "Nastavení OIDC bylo úspěšně aktualizováno",
         "notice": "Oznámení",
-        "restart-required": "Změna autority nebo ID klienta vyžaduje ruční restart aplikace Kavita, aby se změna projevila.",
+        "restart-required": "Změna poskytovatele nebo pokročilých nastavení vyžaduje ruční restart aplikace Kavita, aby se změny projevily.",
         "provider-title": "Poskytovatel",
         "provider-tooltip": "Nastavení poskytovatele vyžaduje ruční kliknutí na tlačítko Uložit. Kavita musí být nakonfigurována jako důvěrný klient a vyžaduje přesměrovací URL. Další podrobnosti najdete na <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>.",
         "behavior-title": "Chování",
@@ -2992,7 +2992,8 @@
         "custom-scopes-label": "Vlastní rozsahy",
         "custom-scopes-tooltip": "Další rozsahy, které můžete požadovat od svého poskytovatele OIDC při přihlášení. Více rozsahů oddělte čárkami. Nesprávné hodnoty mohou zabránit přihlášení.",
         "default-roles-label": "{{common.roles}}",
-        "default-libraries-label": "{{common.libraries}}"
+        "default-libraries-label": "{{common.libraries}}",
+        "tls-required": "Poskytovatel OIDC musí používat tls (https)"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",

@@ -2951,7 +2951,7 @@
         "save": "{{common.save}}",
         "save-success": "Nuashonraíodh do shocruithe OIDC go rathúil",
         "notice": "Fógra",
-        "restart-required": "Éilíonn athrú Údaráis nó Aitheantais Cliant atosú de láimh ar Kavita chun go dtiocfaidh sé i bhfeidhm.",
+        "restart-required": "Éilíonn athrú ar shocruithe an tSoláthraí nó ar shocruithe ardleibhéil atosú de láimh ar Kavita le go dtiocfaidh sé i bhfeidhm.",
         "provider-title": "Soláthraí",
         "provider-tooltip": "Éilíonn socruithe an tsoláthraí ort cliceáil ar Sábháil de láimh. Ní mór Kavita a chumrú mar chliant rúnda agus teastaíonn URL atreoraithe uaidh. Féach ar an <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>vicí</a> le haghaidh tuilleadh sonraí.",
         "behavior-title": "Iompar",
@@ -2992,7 +2992,8 @@
         "custom-scopes-label": "Scóip saincheaptha",
         "custom-scopes-tooltip": "Raon feidhme breise le hiarraidh ó do sholáthraí OIDC le linn logála isteach. Scar il-raon feidhme le camóga. D’fhéadfadh luachanna míchearta cosc a chur ar logáil isteach.",
         "default-roles-label": "{{common.roles}}",
-        "default-libraries-label": "{{common.libraries}}"
+        "default-libraries-label": "{{common.libraries}}",
+        "tls-required": "Ní mór don soláthraí OIDC tls (https) a úsáid"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",

@@ -1902,7 +1902,7 @@
         "save": "{{common.save}}",
         "save-success": "Налаштування OIDC успішно оновлено",
         "notice": "Повідомлення",
-        "restart-required": "Зміна авторизації або ідентифікатора клієнта вимагає ручного перезапуску Kavita, щоб набути чинності.",
+        "restart-required": "Зміна налаштувань постачальника або розширених параметрів вимагає ручного перезапуску Kavita, щоб набути чинності.",
         "provider-title": "Постачальник",
         "provider-tooltip": "Налаштування постачальника вимагають ручного натискання кнопки «Зберегти». Kavita має бути налаштована як конфіденційний клієнт і потребує URL-адреси перенаправлення. Докладніше див. у <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>вікі</a>.",
         "behavior-title": "Поведінка",
@@ -1943,7 +1943,8 @@
         "custom-scopes-label": "Користувацькі області застосування",
         "custom-scopes-tooltip": "Додаткові області видимості, які потрібно запитувати у вашого постачальника OIDC під час входу. Розділяйте кілька областей видимості комами. Неправильні значення можуть перешкодити входу.",
         "default-roles-label": "{{common.roles}}",
-        "default-libraries-label": "{{common.libraries}}"
+        "default-libraries-label": "{{common.libraries}}",
+        "tls-required": "Постачальник OIDC повинен використовувати TLS (https)"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",

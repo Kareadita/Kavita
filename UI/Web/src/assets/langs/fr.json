@@ -2951,7 +2951,7 @@
         "save": "{{common.save}}",
         "save-success": "La mise à jour des paramètres OIDC a été effectuée avec succès",
         "notice": "Notification",
-        "restart-required": "La modification de l'autorité ou de l'identifiant du client nécessite un redémarrage manuel de Kavita pour prendre effet.",
+        "restart-required": "Changer le fournisseur ou les paramètres avancés nécessite un redémarrage manuel de Kavita pour prendre effet.",
         "provider-title": "Fournisseur",
         "provider-tooltip": "Les paramètres du fournisseur nécessitent de cliquer manuellement sur \"Enregistrer\". Kavita doit être configuré comme client confidentiel et nécessite une URL de redirection. Consultez le <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> pour plus de détails.",
         "behavior-title": "Comportement",
@@ -2992,7 +2992,8 @@
         "custom-scopes-label": "Portées personnalisées",
         "custom-scopes-tooltip": "Portées supplémentaires à demander à votre fournisseur OIDC lors de la connexion. Séparez les champs d'application multiples par des virgules. Des valeurs incorrectes peuvent empêcher la connexion.",
         "default-roles-label": "{{common.roles}}",
-        "default-libraries-label": "{{common.libraries}}"
+        "default-libraries-label": "{{common.libraries}}",
+        "tls-required": "Le fournisseur OIDC doit utiliser des tls (https)"
     },
     "import-mappings": {
         "import-step": "Importer",

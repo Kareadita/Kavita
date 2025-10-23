@@ -2983,7 +2983,7 @@
         "save": "{{common.save}}",
         "save-success": "已成功更新您的 OIDC 设置",
         "notice": "注意",
-        "restart-required": "更改权限或客户端 ID 需要手动重启 Kavita 才能生效。",
+        "restart-required": "更改提供商或高级设置需要手动重启 Kavita 才能生效。",
         "provider-title": "提供商",
         "provider-tooltip": "提供商设置需要您手动点击“保存”。Kavita 必须配置为机密客户端，并且需要重定向网址。更多详情，请参阅<a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>。",
         "behavior-title": "行为",
@@ -3024,7 +3024,8 @@
         "custom-scopes-label": "自定义范围",
         "custom-scopes-tooltip": "登录期间向 OIDC 提供商请求的附加范围。多个范围请用逗号分隔。值不正确可能会导致登录失败。",
         "default-roles-label": "{{common.roles}}",
-        "default-libraries-label": "{{common.libraries}}"
+        "default-libraries-label": "{{common.libraries}}",
+        "tls-required": "OIDC 提供商必须使用 tls (https)"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",

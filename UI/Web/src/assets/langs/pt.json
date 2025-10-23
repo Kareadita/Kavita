@@ -2951,7 +2951,7 @@
         "save": "{{common.save}}",
         "save-success": "Atualizou com sucesso as suas configurações do OIDC",
         "notice": "Comunicado",
-        "restart-required": "A alteração da autoridade ou do ID do cliente requer uma reinicialização manual do Kavita para entrar em vigor.",
+        "restart-required": "A alteração do provedor ou definições avançadas requer uma reinicialização manual do Kavita para ser efetivada.",
         "provider-title": "Provedor",
         "provider-tooltip": "As configurações do provedor exigem que clique manualmente em Gravar. O Kavita deve ser configurado como um cliente confidencial e precisa de uma URL de redirecionamento. Veja o <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> para mais pormenores.",
         "behavior-title": "Comportamento",
@@ -2992,7 +2992,8 @@
         "custom-scopes-label": "Escopos personalizados",
         "custom-scopes-tooltip": "Escopos adicionais a serem solicitados ao provedor OIDC durante o logon. Separe vários escopos com vírgulas. Valores incorretos podem impedir o login.",
         "default-roles-label": "{{common.roles}}",
-        "default-libraries-label": "{{common.libraries}}"
+        "default-libraries-label": "{{common.libraries}}",
+        "tls-required": "O provedor OIDC tem de usar tls (https)"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",

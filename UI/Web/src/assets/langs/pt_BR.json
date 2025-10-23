@@ -2731,7 +2731,7 @@
         "remove-field-mapping-label": "Remover mapeamento de campo",
         "series-header": "Campos de Séries",
         "people-header": "Pessoas",
-        "tags-header": "Etiqetas",
+        "tags-header": "Etiquetas",
         "source-genre-tags-placeholder": "Fonte de gênero/etiqueta",
         "dest-genre-tags-placeholder": "Destino do gênero/etiqueta"
     },
@@ -2983,7 +2983,7 @@
         "save": "{{common.save}}",
         "save-success": "Atualizou com sucesso suas configurações do OIDC",
         "notice": "Comunicado",
-        "restart-required": "A alteração da autoridade ou do ID do cliente requer uma reinicialização manual do Kavita para entrar em vigor.",
+        "restart-required": "A alteração do provedor ou das configurações avançadas requer uma reinicialização manual do Kavita para entrar em vigor.",
         "provider-title": "Provedor",
         "provider-tooltip": "As configurações do provedor exigem que você clique manualmente em Salvar. O Kavita deve ser configurado como um cliente confidencial e precisa de uma URL de redirecionamento. Veja o <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> para mais detalhes.",
         "behavior-title": "Comportamento",
@@ -3024,7 +3024,8 @@
         "custom-scopes-label": "Escopos personalizados",
         "custom-scopes-tooltip": "Escopos adicionais a serem solicitados ao provedor OIDC durante o logon. Separe vários escopos com vírgulas. Valores incorretos podem impedir o login.",
         "default-roles-label": "{{common.roles}}",
-        "default-libraries-label": "{{common.libraries}}"
+        "default-libraries-label": "{{common.libraries}}",
+        "tls-required": "O provedor OIDC deve usar tls (https)"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",

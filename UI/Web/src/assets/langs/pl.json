@@ -146,8 +146,8 @@
         "social-max-age-rating-tooltip": "Maksymalna ocena wiekowa, przy której działają funkcje społecznościowe",
         "social-include-unknowns-label": "Uwzględnij nieznane",
         "social-include-unknowns-tooltip": "Włącz funkcje społecznościowe dla serii i rozdziałów z nieznaną oceną wiekową",
-        "data-saver-label": "Data saver",
-        "data-saver-tooltip": "Minimalizuje użycie danych poprzez zapobieganie automatycznego przechwycenia (np. czytelnika PDF)"
+        "data-saver-label": "Oszczędzanie danych",
+        "data-saver-tooltip": "Minimalizuje zużycie danych poprzez zapobieganie automatycznemu pobieraniu danych (np. czytnik plików PDF)"
     },
     "user-holds": {
         "description": "To jest lista serii zarządzana przez użytkownika, które nie będą scrobblowane do zewnętrznych dostawców. Możesz usunąć serię w dowolnym momencie, a następne zdarzenie umożliwiające scrobblowanie (postęp czytania, ocena, status 'chcę przeczytać') wywoła scrobblowanie.",
@@ -2046,7 +2046,7 @@
             "non-unique-age-ratings": "Klucze mapowania ocen wiekowych nie są unikalne, popraw plik importu",
             "non-unique-fields": "Mapowania pól nie mają unikalnego identyfikatora, popraw plik importu"
         },
-        "upload-too-large": "Plik jest zbyt duży, aby załadować, wybrać mniejszy obraz i powtórzyć."
+        "upload-too-large": "Plik jest zbyt duży, aby go przesłać. Wybierz mniejszy obraz i spróbuj ponownie."
     },
     "metadata-builder": {
         "or": "Dopasuj dowolne z poniższych",
@@ -2956,7 +2956,7 @@
         "no-restriction": "{{restriction-selector.no-restriction}}",
         "save-success": "Ustawienia OIDC zostały pomyślnie zaktualizowane",
         "notice": "Uwaga",
-        "restart-required": "Zmiana wartości Authority lub Client ID wymaga ręcznego ponownego uruchomienia Kavita, aby zmiany odniosły skutek.",
+        "restart-required": "Zmiana Dostawcy, lub zaawansowanych ustawień wymaga ręcznego ponownego uruchomienia Kavita, aby zmiany odniosły skutek.",
         "provider-title": "Dostawca",
         "provider-tooltip": "Ustawienia dostawcy wymagają ręcznego zapisania zmian. Kavita musi być skonfigurowana jako poufny klient i potrzebuje adresu przekierowania. Zobacz <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>, aby uzyskać więcej szczegółów.",
         "behavior-title": "Zachowanie",
@@ -2992,7 +2992,8 @@
         "roles-claim-label": "Atrybut ról (claim)",
         "roles-claim-tooltip": "Atrybut (claim), którego Kavita użyje do pobierania ról. Pozostaw puste, aby użyć domyślnego.",
         "custom-scopes-label": "Niestandardowe zakresy",
-        "custom-scopes-tooltip": "Dodatkowe zakresy (scopes) do pobrania od dostawcy OIDC podczas logowania. Oddzielaj wiele wartości przecinkami. Nieprawidłowe wartości mogą uniemożliwić logowanie."
+        "custom-scopes-tooltip": "Dodatkowe zakresy (scopes) do pobrania od dostawcy OIDC podczas logowania. Oddzielaj wiele wartości przecinkami. Nieprawidłowe wartości mogą uniemożliwić logowanie.",
+        "tls-required": "Dostawca OIDC musi używać tls (https)"
     },
     "import-mappings": {
         "replace": "Zamień",
