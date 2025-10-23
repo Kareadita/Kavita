@@ -579,7 +579,11 @@
                       <div class="mb-3">
                         <app-setting-item [title]="t('max-items-title')" [subtitle]="t('highest-count-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
                           <ng-template #view>
-                            {{metadata.maxCount}}
+                            @if (metadata.maxCount === LooseLeafOrDefaultNumber) {
+                              {{t('no-data')}}
+                            } @else {
+                              {{metadata.maxCount}}
+                            }
                           </ng-template>
                         </app-setting-item>
                       </div>

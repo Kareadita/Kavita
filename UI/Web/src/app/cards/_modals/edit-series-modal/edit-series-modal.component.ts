@@ -669,4 +669,6 @@ export class EditSeriesModalComponent implements OnInit {
         break;
     }
   }
+
+  protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
 }

@@ -2463,7 +2463,8 @@
         "loose-leaf-volume": "Loose Leaf Chapters",
         "specials-volume": "Specials",
         "release-year-validation": "{{validation.year-validation}}",
-        "volumes-title": "{{tab.volumes-tab}}"
+        "volumes-title": "{{tab.volumes-tab}}",
+        "no-data": "{{common.no-data}}"
     },
 
     "edit-chapter-modal": {
