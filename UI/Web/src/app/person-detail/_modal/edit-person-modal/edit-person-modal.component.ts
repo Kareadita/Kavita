@@ -179,17 +179,18 @@ export class EditPersonModalComponent implements OnInit {
 
   aliasValidator(): AsyncValidatorFn {
     return (control: AbstractControl) => {
-      const name = control.value;
-      if (!name || name.trim().length === 0) {
+      const alias = control.value;
+      if (!alias || alias.trim().length === 0) {
         return of(null);
       }
 
-      return this.personService.isValidAlias(this.person.id, name).pipe(map(valid => {
+      const name = this.editForm.get('name')!.value;
+      return this.personService.isValidAlias(this.person.id, alias, name).pipe(map(valid => {
         if (valid) {
           return null;
         }
 
-        return { 'invalidAlias': {'alias': name} } as ValidationErrors;
+        return { 'invalidAlias': {'alias': alias} } as ValidationErrors;
       }));
     }
   }

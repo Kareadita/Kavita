@@ -396,7 +396,8 @@ public class PersonRepository : IPersonRepository
 
     public async Task<bool> AnyAliasExist(string alias)
     {
-        return await _context.PersonAlias.AnyAsync(pa => pa.NormalizedAlias == alias.ToNormalized());
+        var normalizedAlias = alias.ToNormalized();
+        return await _context.PersonAlias.AnyAsync(pa => pa.NormalizedAlias == normalizedAlias);
     }
 
 

@@ -17,6 +17,7 @@ using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Nager.ArticleNumber;
 
 namespace API.Controllers;
@@ -112,12 +113,14 @@ public class PersonController : BaseApiController
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-name-unique"));
         }
 
+        // Update name first, in case it got moved to aliases
+        person.Name = dto.Name.Trim();
+        person.NormalizedName = person.Name.ToNormalized();
+
         var success = await _personService.UpdatePersonAliasesAsync(person, dto.Aliases);
         if (!success) return BadRequest(await _localizationService.Translate(User.GetUserId(), "aliases-have-overlap"));
 
 
-        person.Name = dto.Name?.Trim();
-        person.NormalizedName = person.Name.ToNormalized();
         person.Description = dto.Description ?? string.Empty;
         person.CoverImageLocked = dto.CoverImageLocked;
 
@@ -236,17 +239,17 @@ public class PersonController : BaseApiController
     /// <summary>
     /// Ensure the alias is valid to be added. For example, the alias cannot be on another person or be the same as the current person name/alias.
     /// </summary>
-    /// <param name="personId"></param>
-    /// <param name="alias"></param>
+    /// <param name="dto">alias check request</param>
     /// <returns></returns>
-    [HttpGet("valid-alias")]
-    public async Task<ActionResult<bool>> IsValidAlias(int personId, string alias)
+    [HttpPost("valid-alias")]
+    public async Task<ActionResult<bool>> IsValidAlias(PersonAliasCheckDto dto)
     {
-        var person = await _unitOfWork.PersonRepository.GetPersonById(personId, PersonIncludes.Aliases);
+        var person = await _unitOfWork.PersonRepository.GetPersonById(dto.PersonId, PersonIncludes.Aliases);
         if (person == null) return NotFound();
 
-        var existingAlias = await _unitOfWork.PersonRepository.AnyAliasExist(alias);
-        return Ok(!existingAlias && person.NormalizedName != alias.ToNormalized());
+        var aliasIsName = dto.Name.ToNormalized() == dto.Alias.ToNormalized();
+        var existingAlias = await _unitOfWork.PersonRepository.AnyAliasExist(dto.Alias);
+        return Ok(!existingAlias && !aliasIsName);
     }
 
 
