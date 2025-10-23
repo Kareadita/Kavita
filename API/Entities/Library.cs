@@ -56,6 +56,10 @@ public class Library : IEntityDate, IHasCoverImage
     /// Should Kavita remove sort articles "The" for the sort name
     /// </summary>
     public bool RemovePrefixForSortName { get; set; } = false;
+    /// <summary>
+    /// Should series inherit web links from the first chapter/volume
+    /// </summary>
+    public bool InheritWebLinksFromFirstChapter { get; set; } = false;
 
 
     public DateTime Created { get; set; }

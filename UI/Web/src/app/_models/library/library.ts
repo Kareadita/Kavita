@@ -34,6 +34,7 @@ export interface Library {
     enableMetadata: boolean;
     removePrefixForSortName: boolean;
     collapseSeriesRelationships: boolean;
+    inheritWebLinksFromFirstChapter: boolean;
     libraryFileTypes: Array<FileTypeGroup>;
     excludePatterns: Array<string>;
 }

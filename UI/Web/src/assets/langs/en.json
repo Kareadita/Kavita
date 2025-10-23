@@ -1368,6 +1368,8 @@
         "enable-metadata-tooltip": "Allow Kavita to read metadata files which override filename parsing.",
         "remove-prefix-for-sortname-label": "Remove common prefixes for Sort Name",
         "remove-prefix-for-sortname-tooltip": "Kavita will remove common prefixes like 'The', 'A', 'An' from titles for sort name. Does not override set metadata.",
+        "inherit-web-links-label": "Inherit web links from first chapter",
+        "inherit-web-links-tooltip": "Should series inherit web links from their first chapter",
         "force-scan": "Force Scan",
         "force-scan-tooltip": "This will force a scan on the library, treating like a fresh scan",
         "reset": "{{common.reset}}",

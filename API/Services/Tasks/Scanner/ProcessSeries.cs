@@ -336,6 +336,10 @@ public class ProcessSeries : IProcessSeries
             series.Metadata.Language = firstChapter.Language;
         }
 
+        if (!string.IsNullOrEmpty(firstChapter?.WebLinks) && library.InheritWebLinksFromFirstChapter)
+        {
+            series.Metadata.WebLinks = firstChapter.WebLinks;
+        }
 
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {

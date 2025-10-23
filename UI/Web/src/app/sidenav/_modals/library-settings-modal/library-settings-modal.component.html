@@ -226,6 +226,16 @@
               </app-setting-switch>
             </div>
 
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('inherit-web-links-label')" [subtitle]="t('inherit-web-links-tooltip')">
+                <ng-template #switch>
+                  <div class="form-check form-switch float-end">
+                    <input type="checkbox" id="inherit-web-links" role="switch" formControlName="inheritWebLinksFromFirstChapter" class="form-check-input">
+                  </div>
+                </ng-template>
+              </app-setting-switch>
+            </div>
+
             <div class="setting-section-break"></div>
 
             <div class="row g-0 mt-4 pb-4">
