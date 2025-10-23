@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {ReplaySubject} from 'rxjs';
 import {filter} from 'rxjs/operators';
@@ -156,7 +156,7 @@ export class BulkSelectionService {
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'bookmark').length > 0) {
-      return this.actionFactory.getBookmarkActions(callback);
+      return this.applyFilterToList(this.actionFactory.getBookmarkActions(callback), [Action.DownloadBookmark, Action.Delete]);
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'sideNavStream').length > 0) {
