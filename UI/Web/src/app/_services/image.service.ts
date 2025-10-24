@@ -28,12 +28,12 @@ export class ImageService {
       if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
         this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
-        this.errorWebLinkImage = 'assets/images/broken-black-32x32.png';
+        this.errorWebLinkImage = 'assets/images/broken-white-32x32.png';
         this.noPersonImage = 'assets/images/error-person-missing.dark.min.png';
       } else {
         this.placeholderImage = 'assets/images/image-placeholder-min.png';
         this.errorImage = 'assets/images/error-placeholder2-min.png';
-        this.errorWebLinkImage = 'assets/images/broken-white-32x32.png';
+        this.errorWebLinkImage = 'assets/images/broken-black-32x32.png';
         this.noPersonImage = 'assets/images/error-person-missing.min.png';
       }
     });
