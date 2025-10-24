@@ -12,6 +12,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import { ThemeService } from 'src/app/_services/theme.service';
 import { AsyncPipe } from '@angular/common';
+import {catchError, of, tap} from "rxjs";
 
 @Component({
     selector: 'app-match-series-modal',
@@ -55,13 +56,23 @@ export class MatchSeriesModalComponent implements OnInit {
     const model: any = this.formGroup.value;
     model.seriesId = this.series.id;
 
-    if (model.dontMatch) return;
-
-    this.seriesService.matchSeries(model).subscribe(results => {
+    if (model.dontMatch) {
       this.isLoading = false;
-      this.matches = results;
-      this.cdRef.markForCheck();
-    });
+      return;
+    }
+
+    this.seriesService.matchSeries(model).pipe(
+      tap(results => {
+        this.isLoading = false;
+        this.matches = results;
+        this.cdRef.markForCheck();
+      }),
+      catchError(() => {
+        this.isLoading = false;
+        this.cdRef.markForCheck();
+        return of([]);
+      })
+    ).subscribe();
   }
 
   close() {
