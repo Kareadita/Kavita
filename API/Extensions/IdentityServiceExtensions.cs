@@ -261,7 +261,19 @@ public static class IdentityServiceExtensions
 
             options.Events = new OpenIdConnectEvents
             {
-                OnTicketReceived = OidcClaimsPrincipalConverter,
+                OnTicketReceived = async ctx =>
+                {
+                    try
+                    {
+                        await OidcClaimsPrincipalConverter(ctx);
+                    }
+                    catch (KavitaException ex)
+                    {
+                        Log.Error(ex, "an exception occured during initial oidc flow");
+                        ctx.Response.Redirect(baseUrl + "login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ex.Message));
+                        ctx.HandleResponse();
+                    }
+                },
                 OnUserInformationReceived = ctx =>
                 {
                     if (ctx.Principal?.Identity == null)
