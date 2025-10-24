@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols;
@@ -56,8 +57,15 @@ public interface IOidcService
     Task ClearOidcIds();
 }
 
+/// <summary>
+/// The ConfigurationManager will refresh the configuration periodically to ensure the data stays up to date
+/// We can store the same one indefinitely as the authority does not change unless Kavita is restarted
+/// </summary>
+/// <remarks>The ConfigurationManager has its own lock, it loads data thread safe</remarks>
+/// <remarks>It is registered as a singleton only if oidc is enabled. So must be nullable and optional</remarks>
 public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userManager,
-    IUnitOfWork unitOfWork, IAccountService accountService, IEmailService emailService): IOidcService
+    IUnitOfWork unitOfWork, IAccountService accountService, IEmailService emailService,
+    [FromServices] ConfigurationManager<OpenIdConnectConfiguration>? configurationManager = null): IOidcService
 {
     public const string LibraryAccessPrefix = "library-";
     public const string AgeRestrictionPrefix = "age-restriction-";
@@ -68,29 +76,8 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// The name of the Auth Cookie set by .NET
     public const string CookieName = ".AspNetCore.Cookies";
 
-    /// <summary>
-    /// The ConfigurationManager will refresh the configuration periodically to ensure the data stays up to date
-    /// We can store the same one indefinitely as the authority does not change unless Kavita is restarted
-    /// </summary>
-    /// <remarks>The ConfigurationManager has its own lock, it loads data thread safe</remarks>
-    private static readonly ConfigurationManager<OpenIdConnectConfiguration> OidcConfigurationManager;
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
     private static readonly ConcurrentDictionary<string, DateTimeOffset> LastFailedRefresh = new();
-
-#pragma warning disable S3963
-    static OidcService()
-    {
-        var authority = Configuration.OidcSettings.Authority;
-        var hasTrailingSlash = authority.EndsWith('/');
-        var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
-
-        OidcConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
-            url,
-            new OpenIdConnectConfigurationRetriever(),
-            new HttpDocumentRetriever { RequireHttps = url.StartsWith("https") }
-        );
-    }
-#pragma warning restore S3963
 
     public async Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal)
     {
@@ -171,9 +158,9 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
 
             var tokenResponse = await RefreshTokenAsync(settings, refreshToken);
-            if (!string.IsNullOrEmpty(tokenResponse.Error))
+            if (tokenResponse == null || !string.IsNullOrEmpty(tokenResponse.Error))
             {
-                logger.LogTrace("Failed to refresh token : {Error} - {Description}", tokenResponse.Error, tokenResponse.ErrorDescription);
+                logger.LogTrace("Failed to refresh token : {Error} - {Description}", tokenResponse?.Error, tokenResponse?.ErrorDescription);
                 LastFailedRefresh.TryAdd(key, DateTimeOffset.UtcNow);
                 return user;
             }
@@ -392,6 +379,10 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         try
         {
             var newPrincipal = await ParseIdToken(settings, idToken);
+            if (newPrincipal == null)
+            {
+                throw new KavitaException("errors.oidc.no-account");
+            }
             await SyncUserSettings(ctx.HttpContext.Request, settings, newPrincipal, user);
         }
         catch (KavitaException ex)
@@ -609,10 +600,14 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <param name="refreshToken"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private static async Task<OpenIdConnectMessage> RefreshTokenAsync(OidcConfigDto dto, string refreshToken)
+    private async Task<OpenIdConnectMessage?> RefreshTokenAsync(OidcConfigDto dto, string refreshToken)
     {
+        if (configurationManager == null)
+        {
+            return null; // never happens failsafe
+        }
 
-        var discoveryDocument = await OidcConfigurationManager.GetConfigurationAsync();
+        var discoveryDocument = await configurationManager.GetConfigurationAsync();
 
         var msg = new
         {
@@ -637,9 +632,14 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <param name="idToken"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private static async Task<ClaimsPrincipal> ParseIdToken(OidcConfigDto dto, string idToken)
+    private async Task<ClaimsPrincipal?> ParseIdToken(OidcConfigDto dto, string idToken)
     {
-        var discoveryDocument = await OidcConfigurationManager.GetConfigurationAsync();
+        if (configurationManager == null)
+        {
+            return null; // never happens failsafe
+        }
+
+        var discoveryDocument = await configurationManager.GetConfigurationAsync();
 
         var tokenValidationParameters = new TokenValidationParameters
         {

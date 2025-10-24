@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -161,6 +162,8 @@ public static class IdentityServiceExtensions
             new HttpDocumentRetriever { RequireHttps = !isDevelopment }
         );
 
+        services.AddSingleton(configurationManager);
+
         ICollection<string> supportedScopes;
         try
         {
@@ -242,11 +245,11 @@ public static class IdentityServiceExtensions
             options.GetClaimsFromUserInfoEndpoint = true;
 
             // Due to some (Authelia) OIDC providers, we need to map these claims explicitly. Such that no flow breaks in the
-            // OidcService
+            // OidcService. Claims from the UserInfoEndPoint are not added automatically, we map some to the claim we need.
+            // And copy all over down below
             options.MapInboundClaims = true;
             options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
             options.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
-            options.ClaimActions.MapJsonKey(JwtRegisteredClaimNames.PreferredUsername, "preferred_username");
             options.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "given_name");
 
             options.Scope.Clear();
@@ -259,6 +262,34 @@ public static class IdentityServiceExtensions
             options.Events = new OpenIdConnectEvents
             {
                 OnTicketReceived = OidcClaimsPrincipalConverter,
+                OnUserInformationReceived = ctx =>
+                {
+                    if (ctx.Principal?.Identity == null)
+                    {
+                        return Task.CompletedTask;
+                    }
+
+                    var identity = (ClaimsIdentity) ctx.Principal.Identity;
+
+                    // Copy all claims over as in, the ones we need mapped to something specific are above
+                    foreach (var property in ctx.User.RootElement.EnumerateObject())
+                    {
+                        var claimType = property.Name;
+                        if (property.Value.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var element in property.Value.EnumerateArray())
+                            {
+                                identity.AddClaim(new Claim(claimType, element.ToString(), ClaimValueTypes.String, OpenIdConnect));
+                            }
+                        }
+                        else
+                        {
+                            identity.AddClaim(new Claim(claimType, property.Value.ToString(), ClaimValueTypes.String, OpenIdConnect));
+                        }
+                    }
+
+                    return  Task.CompletedTask;
+                },
                 OnAuthenticationFailed = ctx =>
                 {
                     ctx.Response.Redirect(baseUrl + "login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ctx.Exception.Message));
