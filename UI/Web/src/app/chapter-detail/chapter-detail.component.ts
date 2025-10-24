@@ -265,7 +265,7 @@ export class ChapterDetailComponent implements OnInit {
       this.series = results.series;
       this.chapter = results.chapter;
       this.size = this.chapter.files.reduce((sum, f) => sum + f.bytes, 0);
-      this.weblinks = this.chapter.webLinks.split(',');
+      this.weblinks = this.chapter.webLinks.length > 0 ? this.chapter.webLinks.split(',') : [];
       this.libraryType = results.libraryType;
       this.userReviews = results.chapterDetail.reviews.filter(r => !r.isExternal);
       this.plusReviews = results.chapterDetail.reviews.filter(r => r.isExternal);
