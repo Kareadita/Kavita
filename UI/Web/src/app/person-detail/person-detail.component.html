@@ -8,9 +8,9 @@
             <app-card-actionables [entity]="person" [inputActions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v" />
             <span>{{person.name}}</span>
 
-            @if (person.aniListId) {
-              <a class="ms-1" [href]="anilistUrl | safeUrl"  target="_blank" rel="noopener noreferrer">
-                <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(anilistUrl)"
+            @for (webLink of (person.webLinks ?? []); track webLink) {
+              <a class="ms-1" [href]="webLink | safeUrl"  target="_blank" rel="noopener noreferrer">
+                <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(webLink)"
                            [errorImage]="imageService.errorWebLinkImage" />
               </a>
             }
@@ -58,11 +58,11 @@
             }
 
 
-            @if (roles$ | async; as roles) {
-              @if (roles.length > 0) {
+            @if (person$ | async; as person) {
+              @if (person.roles && person.roles.length > 0) {
                 <span class="fw-bold mt-2">{{t('all-roles')}}</span>
                 <div>
-                  <app-badge-expander [items]="roles"
+                  <app-badge-expander [items]="person.roles"
                                       [itemsTillExpander]="6">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="loadFilterByRole(item)">{{item | personRole}}</a>
@@ -103,8 +103,8 @@
 
 
    <!-- Individual Works Carousel -->
-   @if (roles$ | async; as roles) {
-     @for(role of roles; track role) {
+   @if (person$ | async; as person) {
+     @for(role of (person.roles || []); track role) {
        <div class="row mt-2">
          <app-carousel-reel [items]="(chaptersByRole[role] | async)!" [title]="t('individual-role-title', {role: (role | personRole)})" (sectionClick)="loadFilterByRole(role)">
            <ng-template #carouselItem let-item>

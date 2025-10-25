@@ -168,10 +168,13 @@ public class ScrobblingService : IScrobblingService
 
     public const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
+    public const string MalStaffWebsite = "https://myanimelist.net/people/";
+    public const string MalCharacterWebsite = "https://myanimelist.net/character/";
     public const string GoogleBooksWeblinkWebsite = "https://books.google.com/books?id=";
     public const string MangaDexWeblinkWebsite = "https://mangadex.org/title/";
     public const string AniListStaffWebsite = "https://anilist.co/staff/";
     public const string AniListCharacterWebsite = "https://anilist.co/character/";
+    public const string HardcoverStaffWebsite = "https://hardcover.app/authors/";
 
 
     private static readonly Dictionary<string, int> WeblinkExtractionMap = new()

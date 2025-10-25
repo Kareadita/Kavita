@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using API.Entities.Enums;
 
 namespace API.DTOs.Person;
 #nullable enable
@@ -38,4 +39,16 @@ public class PersonDto
     /// </summary>
     /// <remarks>Kavita+ Only</remarks>
     public string? HardcoverId { get; set; }
+
+    /// <summary>
+    /// Web links derived from the various id of external websites
+    /// </summary>
+    /// <remarks>Only present when retrieving from person info endpoint</remarks>
+    public IList<string>? WebLinks { get; set; } = [];
+    /// <summary>
+    ///
+    /// </summary>
+    /// <remarks>Only present when retrieving from person info endpoint</remarks>
+    public IList<PersonRole>? Roles { get; set; } = [];
+
 }

@@ -24,7 +24,7 @@ import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carou
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
-import {allPeople, FilterField, personRoleForFilterField} from "../_models/metadata/v2/filter-field";
+import {FilterField, personRoleForFilterField} from "../_models/metadata/v2/filter-field";
 import {Series} from "../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
@@ -97,21 +97,13 @@ export class PersonDetailComponent implements OnInit {
 
   personName!: string;
   person: Person | null = null;
-  roles$: Observable<PersonRole[]> | null = null;
-  roles: PersonRole[] | null = null;
   works$: Observable<Series[]> | null = null;
   filter: FilterV2<FilterField> | null = null;
   personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions(this.handleAction.bind(this));
   chaptersByRole: any = {};
-  anilistUrl: string = '';
 
   private readonly personSubject = new BehaviorSubject<Person | null>(null);
-  protected readonly person$ = this.personSubject.asObservable().pipe(tap(p => {
-    if (p?.aniListId) {
-      this.anilistUrl = translate('person-detail.anilist-url').replace('{AniListId}', p!.aniListId! + '');
-      this.cdRef.markForCheck();
-    }
-  }));
+  protected readonly person$ = this.personSubject.asObservable();
 
   get HasCoverImage() {
     return (this.person as Person).coverImage;
@@ -158,22 +150,18 @@ export class PersonDetailComponent implements OnInit {
     this.personSubject.next(person); // emit the person data for subscribers
     this.themeService.setColorScape(person.primaryColor || '', person.secondaryColor);
 
-    // Fetch roles and process them
-    this.roles$ = this.personService.getRolesForPerson(this.person.id).pipe(
-      tap(roles => {
-        this.roles = roles;
-        this.filter = this.createFilter(roles);
-        this.chaptersByRole = {}; // Reset chaptersByRole for each person
+    const roles = person.roles;
+    if (roles) {
+      this.filter = this.createFilter(roles);
+      this.chaptersByRole = {}; // Reset chaptersByRole for each person
 
-        // Populate chapters by role
-        roles.forEach(role => {
-          this.chaptersByRole[role] = this.personService.getChaptersByRole(person.id, role)
-            .pipe(takeUntilDestroyed(this.destroyRef));
-        });
-        this.cdRef.markForCheck();
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    );
+      // Populate chapters by role
+      roles.forEach(role => {
+        this.chaptersByRole[role] = this.personService.getChaptersByRole(person.id, role)
+          .pipe(takeUntilDestroyed(this.destroyRef));
+      });
+      this.cdRef.markForCheck();
+    }
 
     // Fetch series known for this person
     this.works$ = this.personService.getSeriesMostKnownFor(person.id).pipe(
@@ -234,26 +222,7 @@ export class PersonDetailComponent implements OnInit {
   handleAction(action: ActionItem<Person>, person: Person) {
     switch (action.action) {
       case(Action.Edit):
-        const ref = this.modalService.open(EditPersonModalComponent, DefaultModalOptions);
-        ref.componentInstance.person = this.person;
-
-        ref.closed.subscribe(r => {
-          if (r.success) {
-            const nameChanged = this.personName !== r.person.name;
-            this.person = {...r.person};
-            this.personName = this.person!.name;
-
-            this.personSubject.next(this.person);
-
-            // Update the url to reflect the new name change
-            if (nameChanged) {
-              const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
-              window.history.replaceState({}, '', `${baseUrl}/${encodeURIComponent(this.personName)}`);
-            }
-
-            this.cdRef.markForCheck();
-          }
-        });
+        this.editPersonAction();
         break;
       case (Action.Merge):
         this.mergePersonAction();
@@ -261,6 +230,30 @@ export class PersonDetailComponent implements OnInit {
       default:
         break;
     }
+  }
+
+  private editPersonAction() {
+    const ref = this.modalService.open(EditPersonModalComponent, DefaultModalOptions);
+    ref.componentInstance.person = this.person;
+
+    ref.closed.subscribe(r => {
+      if (r.success) {
+        const nameChanged = this.personName !== r.person.name;
+
+        // Reload person as the web links (and roles) may have changed
+        this.personService.get(r.person.name).subscribe(person => {
+          this.setPerson(person!);
+
+          // Update the url to reflect the new name change
+          if (nameChanged) {
+            const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
+            window.history.replaceState({}, '', `${baseUrl}/${encodeURIComponent(this.personName)}`);
+          }
+
+          this.cdRef.markForCheck();
+        });
+      }
+    });
   }
 
   private mergePersonAction() {
@@ -273,7 +266,7 @@ export class PersonDetailComponent implements OnInit {
         this.personService.get(r.person.name).subscribe(person => {
           this.setPerson(person!);
           this.cdRef.markForCheck();
-        })
+        });
       }
     });
   }

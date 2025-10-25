@@ -12,6 +12,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
+using API.Services.Plus;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using AutoMapper;
@@ -49,7 +50,44 @@ public class PersonController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<PersonDto>> GetPersonByName(string name)
     {
-        return Ok(await _unitOfWork.PersonRepository.GetPersonDtoByName(name, User.GetUserId()));
+        var person = await _unitOfWork.PersonRepository.GetPersonDtoByName(name, User.GetUserId());
+        if (person == null) return NotFound();
+
+        person.Roles = (await _unitOfWork.PersonRepository.GetRolesForPersonByName(person.Id, User.GetUserId())).ToList();
+
+        EnrichWithWebLinks(person);
+        return Ok(person);
+    }
+
+    /// <summary>
+    /// Populate <see cref="PersonDto.WebLinks"/> from set ids
+    /// </summary>
+    /// <param name="personDto"></param>
+    /// <remarks><see cref="PersonDto.Roles"/> must be set for this to work</remarks>
+    private static void EnrichWithWebLinks(PersonDto personDto)
+    {
+        if (personDto.Roles == null) return;
+
+        var isCharacter = personDto.Roles.Count == 1 && personDto.Roles.Contains(PersonRole.Character);
+        personDto.WebLinks = [];
+
+        if (personDto.AniListId != 0)
+        {
+            var urlPrefix = isCharacter ? ScrobblingService.AniListCharacterWebsite : ScrobblingService.AniListStaffWebsite;
+            personDto.WebLinks.Add($"{urlPrefix}{personDto.AniListId}");
+        }
+
+        if (personDto.MalId != 0)
+        {
+            var urlPrefix = isCharacter ? ScrobblingService.MalCharacterWebsite : ScrobblingService.MalStaffWebsite;
+            personDto.WebLinks.Add($"{urlPrefix}{personDto.MalId}");
+        }
+
+        // Hardcover currently does not seem to have characters
+        if (!string.IsNullOrEmpty(personDto.HardcoverId) && !isCharacter)
+        {
+            personDto.WebLinks.Add($"{ScrobblingService.HardcoverStaffWebsite}{personDto.HardcoverId}");
+        }
     }
 
     /// <summary>
