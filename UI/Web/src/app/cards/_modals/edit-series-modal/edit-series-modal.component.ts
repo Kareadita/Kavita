@@ -596,7 +596,6 @@ export class EditSeriesModalComponent implements OnInit {
 
   updatePerson(persons: Person[], role: PersonRole) {
     this.metadataService.updatePerson(this.metadata, persons, role);
-    this.metadata.locationLocked = true;
     this.cdRef.markForCheck();
   }
 
