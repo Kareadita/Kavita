@@ -56,6 +56,7 @@ public class PersonController : BaseApiController
         person.Roles = (await _unitOfWork.PersonRepository.GetRolesForPersonByName(person.Id, User.GetUserId())).ToList();
 
         EnrichWithWebLinks(person);
+
         return Ok(person);
     }
 
@@ -287,6 +288,7 @@ public class PersonController : BaseApiController
 
         var aliasIsName = dto.Name.ToNormalized() == dto.Alias.ToNormalized();
         var existingAlias = await _unitOfWork.PersonRepository.AnyAliasExist(dto.Alias);
+
         return Ok(!existingAlias && !aliasIsName);
     }
 
