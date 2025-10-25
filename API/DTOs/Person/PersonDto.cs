@@ -46,7 +46,7 @@ public class PersonDto
     /// <remarks>Only present when retrieving from person info endpoint</remarks>
     public IList<string>? WebLinks { get; set; } = [];
     /// <summary>
-    ///
+    /// All roles as if returned by the /api/person/roles endpoint
     /// </summary>
     /// <remarks>Only present when retrieving from person info endpoint</remarks>
     public IList<PersonRole>? Roles { get; set; } = [];

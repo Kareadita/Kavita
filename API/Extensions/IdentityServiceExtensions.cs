@@ -269,7 +269,7 @@ public static class IdentityServiceExtensions
                     }
                     catch (KavitaException ex)
                     {
-                        Log.Error(ex, "an exception occured during initial oidc flow");
+                        Log.Error(ex, "An exception occured during initial OIDC flow");
                         ctx.Response.Redirect(baseUrl + "login?skipAutoLogin=true&error=" + Uri.EscapeDataString(ex.Message));
                         ctx.HandleResponse();
                     }
