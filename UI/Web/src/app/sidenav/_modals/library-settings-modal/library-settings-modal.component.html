@@ -74,7 +74,7 @@
           <a ngbNavLink>{{t(TabID.Folder)}}</a>
           <ng-template ngbNavContent>
 
-            @if (filesAtRoot()) {
+            @if (filesAtRoot().length > 0) {
               <p class="alert alert-warning">{{t('files-at-root-warning')}}</p>
             }
 
@@ -83,7 +83,15 @@
               @for(folder of selectedFolders; track folder) {
                 <li class="list-group-item">
                   {{folder}}
-                  <button class="btn float-end btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+
+                  <div class="float-end d-flex flex-row align-items-center">
+                    @if (filesAtRoot().includes(folder)) {
+                      <i class="fa fa-warning text-danger" [ngbTooltip]="t('files-at-root-warning')"></i>
+                    }
+
+                    <button class="btn btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+                  </div>
+
                 </li>
               }
             </ul>

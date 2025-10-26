@@ -137,7 +137,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   setupStep = StepID.General;
   fileTypeGroups = allFileTypeGroup;
   excludePatterns: Array<string> = [''];
-  filesAtRoot = model<boolean>(false);
+  filesAtRoot = model<Array<string>>([]);
 
   tasks: ActionItem<Library>[] = this.getTasks();
 
@@ -159,8 +159,6 @@ export class LibrarySettingsModalComponent implements OnInit {
     if (this.library === undefined) {
       this.isAddLibrary = true;
       this.cdRef.markForCheck();
-    } else {
-      this.checkForFilesAtRoot();
     }
 
     if (this.library?.coverImage != null && this.library?.coverImage !== '') {
@@ -294,6 +292,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.removePrefixForSortName);
       this.libraryForm.get('inheritWebLinksFromFirstChapter')?.setValue(this.library.inheritWebLinksFromFirstChapter);
       this.selectedFolders = this.library.folders;
+      this.checkForFilesAtRoot(); // check after selectedFolders has been set
 
       this.madeChanges = false;
 
@@ -427,7 +426,7 @@ export class LibrarySettingsModalComponent implements OnInit {
         if (!this.selectedFolders.includes(closeResult.folderPath)) {
           this.selectedFolders.push(closeResult.folderPath);
           this.madeChanges = true;
-          this.checkForFilesAtRoot();
+          this.checkForFilesAtRoot(true);
           this.cdRef.markForCheck();
         }
       }
@@ -478,17 +477,14 @@ export class LibrarySettingsModalComponent implements OnInit {
     }
   }
 
-  checkForFilesAtRoot() {
+  checkForFilesAtRoot(showToast: boolean = false) {
     this.libraryService.hasFilesAtRoot(this.selectedFolders).subscribe(results => {
-      let containsMultipleFiles = false;
-      Object.keys(results).forEach(key => {
-        if (results[key]) {
-          containsMultipleFiles = true;
-          return;
-        }
-      });
+      const newValues = results.filter(item => !this.filesAtRoot().includes(item));
+      if (showToast && newValues.length > 0) {
+        this.toastr.error(translate('library-settings-modal.files-at-root-warning'))
+      }
 
-      this.filesAtRoot.set(containsMultipleFiles);
+      this.filesAtRoot.set(results);
     })
   }
 }
