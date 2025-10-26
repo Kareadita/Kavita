@@ -34,7 +34,7 @@
                 <div class="row g-0">
                   <div class="mb-3 col-md-6 col-xs-12 pe-2">
                     @if (editForm.get('malId'); as formControl) {
-                      <app-setting-item [title]="t('mal-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('mal-tooltip')">
+                      <app-setting-item [title]="t('mal-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('mal-tooltip'+tooltip)">
                         <ng-template #view>
                           <input id="mal-id" class="form-control" formControlName="malId" type="number"
                                  [class.is-invalid]="formControl.invalid && !formControl.untouched">
@@ -45,7 +45,7 @@
 
                   <div class="mb-3 col-md-6 col-xs-12">
                     @if (editForm.get('aniListId'); as formControl) {
-                      <app-setting-item [title]="t('anilist-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('anilist-tooltip')">
+                      <app-setting-item [title]="t('anilist-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('anilist-tooltip'+tooltip)">
                         <ng-template #view>
                           <input id="anilist-id" class="form-control" formControlName="aniListId" type="number"
                                  [class.is-invalid]="formControl.invalid && !formControl.untouched">

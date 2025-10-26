@@ -9,7 +9,7 @@ import {
   ValidationErrors,
   Validators
 } from "@angular/forms";
-import {Person} from "../../../_models/metadata/person";
+import {Person, PersonRole} from "../../../_models/metadata/person";
 import {
   NgbActiveModal,
   NgbNav,
@@ -22,7 +22,7 @@ import {
 import {PersonService} from "../../../_services/person.service";
 import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
-import {concat, forkJoin, map, of} from "rxjs";
+import {concat, map, of} from "rxjs";
 import {UploadService} from "../../../_services/upload.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../../_services/account.service";
@@ -84,6 +84,11 @@ export class EditPersonModalComponent implements OnInit {
   coverImageReset = false;
   touchedCoverImage = false;
   fetchDisabled: boolean = false;
+  /**
+   * Suffix to include in the tooltip for external ids if they support characters
+   */
+  tooltip: string = '';
+
 
   ngOnInit() {
     if (this.person) {
@@ -96,6 +101,11 @@ export class EditPersonModalComponent implements OnInit {
 
       this.editForm.addControl('coverImageIndex', new FormControl(0, []));
       this.editForm.addControl('coverImageLocked', new FormControl(this.person.coverImageLocked, []));
+
+      const roles = (this.person.roles ?? []);
+      if (roles.length === 1 && roles.includes(PersonRole.Character)) {
+        this.tooltip = '-character';
+      }
 
       this.cdRef.markForCheck();
     } else {
