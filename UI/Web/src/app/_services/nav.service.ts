@@ -1,6 +1,6 @@
 import {DOCUMENT} from '@angular/common';
-import {DestroyRef, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
-import {filter, ReplaySubject, take} from 'rxjs';
+import {DestroyRef, effect, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
+import {filter, ReplaySubject, take, tap} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
@@ -11,6 +11,8 @@ import {NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {WikiLink} from "../_models/wiki";
 import {AuthGuard} from "../_guards/auth.guard";
+import {KeyBindService} from "./key-bind.service";
+import {KeyBindTarget} from "../_models/preferences/preferences";
 
 /**
  * NavItem used to construct the dropdown or NavLinkModal on mobile
@@ -39,6 +41,7 @@ export class NavService {
   private readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly keyBindService = inject(KeyBindService);
 
   public localStorageSideNavKey = 'kavita--sidenav--expanded';
 
@@ -123,6 +126,14 @@ export class NavService {
     const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
     this.sideNavCollapseSource.next(sideNavState);
     this.showSideNav();
+
+    effect(() => {
+      const event = this.keyBindService.events();
+
+      if (event?.target === KeyBindTarget.ToggleSideNav) {
+        this.toggleSideNav();
+      }
+    });
   }
 
   getSideNavStreams(visibleOnly = true) {

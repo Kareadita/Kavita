@@ -13,8 +13,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251026184104_DefaultSeriesLanguage")]
-    partial class DefaultSeriesLanguage
+    [Migration("20251026203401_LibraryDefaultLanguageCustomKeyBinds")]
+    partial class LibraryDefaultLanguageCustomKeyBinds
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -573,6 +573,11 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
+
+                    b.Property<string>("CustomKeyBinds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{}");
 
                     b.Property<bool>("DataSaver")
                         .HasColumnType("INTEGER");

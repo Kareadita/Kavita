@@ -16,6 +16,7 @@ export interface Preferences {
   bookReaderHighlightSlots: HighlightSlot[];
   colorScapeEnabled: boolean;
   dataSaver: boolean;
+  customKeyBinds: Partial<Record<KeyBindTarget, string[]>>;
 
   // Kavita+
   aniListScrobblingEnabled: boolean;
@@ -32,5 +33,9 @@ export interface SocialPreferences {
   socialLibraries: number[];
   socialMaxAgeRating: AgeRating;
   socialIncludeUnknowns: boolean;
+}
+
+export enum KeyBindTarget {
+  ToggleSideNav = "ToggleSideNav",
 }
 

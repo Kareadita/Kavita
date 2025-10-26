@@ -52,6 +52,7 @@ export enum SettingsTabId {
   // Non-Admin
   Account = 'account',
   Preferences = 'preferences',
+  CustomKeyBinds = 'custom-key-binds',
   ReadingProfiles = 'reading-profiles',
   Font = 'font',
   Clients = 'clients',
@@ -219,8 +220,9 @@ export class PreferenceNavComponent implements AfterViewInit {
       {
         title: SettingSectionId.AccountSection,
         children: [
-          new SideNavItem(SettingsTabId.Account, []),
+          new SideNavItem(SettingsTabId.Account),
           new SideNavItem(SettingsTabId.Preferences),
+          new SideNavItem(SettingsTabId.CustomKeyBinds),
           new SideNavItem(SettingsTabId.ReadingProfiles),
           new SideNavItem(SettingsTabId.Customize, [], undefined, [Role.ReadOnly]),
           new SideNavItem(SettingsTabId.Clients),

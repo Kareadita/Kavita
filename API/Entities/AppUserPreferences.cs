@@ -175,8 +175,14 @@ public class AppUserPreferences
     /// <summary>
     /// Enable data saver mode across Kavita, limiting information that is pre-fetched
     /// </summary>
-    /// <remarks>Currenty only integrated into the PDF reader</remarks>
+    /// <remarks>Currently only integrated into the PDF reader</remarks>
     public bool DataSaver { get; set; } = false;
+
+    /// <summary>
+    /// JSON dictionary mappings for custom keybinds across the web app.
+    /// Values are a list of key codes that need to be pressed at the same time for the keybind to be valid
+    /// </summary>
+    public Dictionary<KeyBindTarget, IList<string>> CustomKeyBinds { get; set; }
 
     #endregion
 

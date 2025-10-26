@@ -1,0 +1,8 @@
+<input
+  type="text"
+  [value]="selectedKeys().join('+')"
+  (focus)="startListening()"
+  (blur)="stopListening()"
+  readonly
+  class="form-control"
+/>

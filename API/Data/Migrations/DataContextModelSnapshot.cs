@@ -571,6 +571,11 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
+                    b.Property<string>("CustomKeyBinds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{}");
+
                     b.Property<bool>("DataSaver")
                         .HasColumnType("INTEGER");
 

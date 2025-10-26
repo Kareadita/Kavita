@@ -5,7 +5,7 @@
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class DefaultSeriesLanguage : Migration
+    public partial class LibraryDefaultLanguageCustomKeyBinds : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,6 +16,13 @@ namespace API.Data.Migrations
                 type: "TEXT",
                 nullable: true,
                 defaultValue: "");
+
+            migrationBuilder.AddColumn<string>(
+                name: "CustomKeyBinds",
+                table: "AppUserPreferences",
+                type: "TEXT",
+                nullable: true,
+                defaultValue: "{}");
         }
 
         /// <inheritdoc />
@@ -24,6 +31,10 @@ namespace API.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "DefaultLanguage",
                 table: "Library");
+
+            migrationBuilder.DropColumn(
+                name: "CustomKeyBinds",
+                table: "AppUserPreferences");
         }
     }
 }

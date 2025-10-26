@@ -8,19 +8,20 @@ if [ ${#migrations[@]} -lt 2 ]; then
 fi
 
 second_last=$(basename "${migrations[1]}" .cs)
-
 last=$(basename "${migrations[0]}" .cs)
 last_name=$(echo "$last" | sed 's/^[0-9]*_//')
 
+new_name=${1:-$last_name}
+
 echo "Rolling back to: $second_last"
-echo "Removing and re-adding: $last_name"
+echo "Removing $last_name and re-adding as $new_name"
 read -p "Continue? (y/N) " -n 1 -r
 echo ""
 
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     dotnet ef database update "$second_last" && \
     dotnet ef migrations remove && \
-    dotnet ef migrations add "$last_name"
+    dotnet ef migrations add "$new_name"
 else
     echo "Cancelled"
     exit 0

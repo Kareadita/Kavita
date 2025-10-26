@@ -177,6 +177,14 @@
           }
         }
 
+        @defer (when fragment === SettingsTabId.CustomKeyBinds; prefetch on idle) {
+          @if (fragment === SettingsTabId.CustomKeyBinds) {
+            <div class="col-xxl-6 col-12">
+              <app-manage-custom-key-binds />
+            </div>
+          }
+        }
+
         @defer (when fragment === SettingsTabId.Customize; prefetch on idle) {
           @if (fragment === SettingsTabId.Customize) {
             <div class="scale col-md-12">

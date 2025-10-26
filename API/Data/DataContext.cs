@@ -296,6 +296,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<HighlightSlot>());
 
+        builder.Entity<AppUserPreferences>()
+            .Property(p => p.CustomKeyBinds)
+            .HasJsonConversion([])
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new Dictionary<KeyBindTarget, IList<string>>());
+
         builder.Entity<AppUser>()
             .Property(user => user.IdentityProvider)
             .HasDefaultValue(IdentityProvider.Kavita);
