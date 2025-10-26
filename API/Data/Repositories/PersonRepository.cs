@@ -366,7 +366,8 @@ public class PersonRepository : IPersonRepository
             .Select(cp => cp.Chapter)
             .RestrictAgainstAgeRestriction(ageRating)
             .RestrictByLibrary(userLibs)
-            .OrderBy(ch => ch.SortOrder)
+            .OrderBy(ch => ch.Volume.MinNumber) // Group/Sort volumes as well
+            .ThenBy(ch => ch.SortOrder)
             .Take(20)
             .ProjectTo<StandaloneChapterDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
