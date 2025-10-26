@@ -24,6 +24,7 @@
                                    [libraryType]="libraryType"
                                    [mangaFormat]="series.format"
                                    [totalBytes]="size"
+                                   [releaseYear]="(chapter.releaseDate | utcToLocaleDate)?.getFullYear()"
           />
 
 

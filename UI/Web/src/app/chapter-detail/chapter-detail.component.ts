@@ -80,6 +80,7 @@ import {AnnotationService} from "../_services/annotation.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationsTabComponent} from "../_single-module/annotations-tab/annotations-tab.component";
 import {UtcToLocalTimePipe} from "../_pipes/utc-to-local-time.pipe";
+import {UtcToLocaleDatePipe} from "../_pipes/utc-to-locale-date.pipe";
 
 enum TabID {
   Related = 'related-tab',
@@ -121,7 +122,8 @@ enum TabID {
     ReviewsComponent,
     ExternalRatingComponent,
     AnnotationsTabComponent,
-    UtcToLocalTimePipe
+    UtcToLocalTimePipe,
+    UtcToLocaleDatePipe
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
