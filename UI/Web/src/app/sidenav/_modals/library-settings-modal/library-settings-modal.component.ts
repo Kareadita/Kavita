@@ -55,7 +55,7 @@ import {ActionService} from "../../../_services/action.service";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
-import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {setupLanguageSettings, TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
 import {Language} from "../../../_models/metadata/language";
 import {map} from "rxjs/operators";
 import {MetadataService} from "../../../_services/metadata.service";
@@ -336,33 +336,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     return this.metadataService.getAllValidLanguages()
       .pipe(
         tap(validLanguages => {
-          this.validLanguages = validLanguages;
-
-          this.languageSettings.minCharacters = 0;
-          this.languageSettings.multiple = false;
-          this.languageSettings.id = 'language';
-          this.languageSettings.unique = true;
-          this.languageSettings.showLocked = false;
-          this.languageSettings.addIfNonExisting = false;
-          this.languageSettings.compareFn = (options: Language[], filter: string) => {
-            return options.filter(m => this.utilityService.filter(m.title, filter));
-          }
-          this.languageSettings.compareFnForAdd = (options: Language[], filter: string) => {
-            return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-          }
-          this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
-            .pipe(map(items => this.languageSettings.compareFn(items, filter)));
-
-          this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
-            return a.isoCode == b.isoCode;
-          }
-
-          const l = this.validLanguages.find(l => l.isoCode === this.library?.defaultLanguage);
-          if (l !== undefined) {
-            this.languageSettings.savedData = l;
-          }
-          this.languageSettings.trackByIdentityFn = (index, value) => value.isoCode;
-
+          setupLanguageSettings(this.languageSettings, false, this.utilityService, validLanguages, this.library?.defaultLanguage)
           this.cdRef.markForCheck();
         }),
         switchMap(_ => of(true))

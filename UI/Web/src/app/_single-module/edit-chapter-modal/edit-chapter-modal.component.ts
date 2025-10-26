@@ -7,7 +7,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {Chapter} from "../../_models/chapter";
 import {LibraryType} from "../../_models/library/library";
-import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
+import {setupLanguageSettings, TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
 import {Tag} from "../../_models/tag";
 import {Language} from "../../_models/metadata/language";
 import {Person, PersonRole} from "../../_models/metadata/person";
@@ -192,7 +192,7 @@ export class EditChapterModalComponent implements OnInit {
         this.validLanguages = validLanguages;
         this.cdRef.markForCheck();
       }),
-      switchMap(_ => this.setupLanguageTypeahead())
+      tap(_ => this.setupLanguageTypeahead())
     ).subscribe();
 
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
@@ -384,31 +384,7 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   setupLanguageTypeahead() {
-    this.languageSettings.minCharacters = 0;
-    this.languageSettings.multiple = false;
-    this.languageSettings.id = 'language';
-    this.languageSettings.unique = true;
-    this.languageSettings.showLocked = true;
-    this.languageSettings.addIfNonExisting = false;
-    this.languageSettings.compareFn = (options: Language[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.title, filter));
-    }
-    this.languageSettings.compareFnForAdd = (options: Language[], filter: string) => {
-      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-    }
-    this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
-      .pipe(map(items => this.languageSettings.compareFn(items, filter)));
-
-    this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
-      return a.isoCode == b.isoCode;
-    }
-    this.languageSettings.trackByIdentityFn = (index, value) => value.isoCode;
-
-    const l = this.validLanguages.find(l => l.isoCode === this.chapter.language);
-    if (l !== undefined) {
-      this.languageSettings.savedData = l;
-    }
-    return of(true);
+    setupLanguageSettings(this.languageSettings, true, this.utilityService, this.validLanguages, this.chapter.language);
   }
 
 
