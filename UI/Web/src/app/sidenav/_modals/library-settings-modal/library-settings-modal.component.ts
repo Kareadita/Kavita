@@ -21,7 +21,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
+import {debounceTime, distinctUntilChanged, of, switchMap, tap} from 'rxjs';
 import {
   DirectoryPickerComponent,
   DirectoryPickerResult
@@ -54,6 +54,11 @@ import {Action, ActionFactoryService, ActionItem} from "../../../_services/actio
 import {ActionService} from "../../../_services/action.service";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
+import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
+import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {Language} from "../../../_models/metadata/language";
+import {map} from "rxjs/operators";
+import {MetadataService} from "../../../_services/metadata.service";
 
 enum TabID {
   General = 'general-tab',
@@ -74,7 +79,7 @@ enum StepID {
     selector: 'app-library-settings-modal',
   imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe, TypeaheadComponent],
     templateUrl: './library-settings-modal.component.html',
     styleUrls: ['./library-settings-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -93,6 +98,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly imageService = inject(ImageService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
+  private readonly metadataService = inject(MetadataService);
 
   protected readonly LibraryType = LibraryType;
   protected readonly Breakpoint = Breakpoint;
@@ -124,6 +130,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     enableMetadata: new FormControl<boolean>(true, { nonNullable: true, validators: [] }), // required validator doesn't check value, just if true
     removePrefixForSortName: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
     inheritWebLinksFromFirstChapter: new FormControl<boolean>(false, { nonNullable: true, validators: []}),
+    defaultLanguage: new FormControl<string>('', {nonNullable: true, validators: []}),
     // TODO: Missing excludePatterns
   });
 
@@ -132,6 +139,9 @@ export class LibrarySettingsModalComponent implements OnInit {
   libraryTypes = allLibraryTypes.map(f => {
     return {title: this.libraryTypePipe.transform(f), value: f};
   }).sort((a, b) => a.title.localeCompare(b.title));
+
+  validLanguages: Array<Language> = [];
+  languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
 
   isAddLibrary = false;
   setupStep = StepID.General;
@@ -199,6 +209,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
 
     this.setValues();
+    this.setupLanguageTypeahead().subscribe();
 
     // Turn on/off manage collections/rl
     this.libraryForm.get('enableMetadata')?.valueChanges.pipe(
@@ -291,6 +302,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata);
       this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.removePrefixForSortName);
       this.libraryForm.get('inheritWebLinksFromFirstChapter')?.setValue(this.library.inheritWebLinksFromFirstChapter);
+      this.libraryForm.get('defaultLanguage')?.setValue(this.library.defaultLanguage);
       this.selectedFolders = this.library.folders;
       this.checkForFilesAtRoot(); // check after selectedFolders has been set
 
@@ -318,6 +330,47 @@ export class LibrarySettingsModalComponent implements OnInit {
     }
 
     this.cdRef.markForCheck();
+  }
+
+  setupLanguageTypeahead() {
+    return this.metadataService.getAllValidLanguages()
+      .pipe(
+        tap(validLanguages => {
+          this.validLanguages = validLanguages;
+
+          this.languageSettings.minCharacters = 0;
+          this.languageSettings.multiple = false;
+          this.languageSettings.id = 'language';
+          this.languageSettings.unique = true;
+          this.languageSettings.showLocked = false;
+          this.languageSettings.addIfNonExisting = false;
+          this.languageSettings.compareFn = (options: Language[], filter: string) => {
+            return options.filter(m => this.utilityService.filter(m.title, filter));
+          }
+          this.languageSettings.compareFnForAdd = (options: Language[], filter: string) => {
+            return options.filter(m => this.utilityService.filterMatches(m.title, filter));
+          }
+          this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
+            .pipe(map(items => this.languageSettings.compareFn(items, filter)));
+
+          this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
+            return a.isoCode == b.isoCode;
+          }
+
+          const l = this.validLanguages.find(l => l.isoCode === this.library?.defaultLanguage);
+          if (l !== undefined) {
+            this.languageSettings.savedData = l;
+          }
+          this.languageSettings.trackByIdentityFn = (index, value) => value.isoCode;
+
+          this.cdRef.markForCheck();
+        }),
+        switchMap(_ => of(true))
+      );
+  }
+
+  updateLanguage(languages: Array<Language>) {
+    this.libraryForm.get("defaultLanguage")!.setValue(languages.at(0)?.isoCode ?? '');
   }
 
   updateGlobs(items: Array<string>) {

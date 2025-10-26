@@ -331,9 +331,16 @@ public class ProcessSeries : IProcessSeries
             series.Metadata.Summary = firstChapter.Summary;
         }
 
-        if (!string.IsNullOrEmpty(firstChapter?.Language) && !series.Metadata.LanguageLocked)
+        if (!series.Metadata.LanguageLocked)
         {
-            series.Metadata.Language = firstChapter.Language;
+            if (!string.IsNullOrEmpty(firstChapter?.Language))
+            {
+                series.Metadata.Language = firstChapter.Language;
+            }
+            else if (!string.IsNullOrEmpty(library.DefaultLanguage))
+            {
+                series.Metadata.Language = library.DefaultLanguage;
+            }
         }
 
         if (!string.IsNullOrEmpty(firstChapter?.WebLinks) && library.InheritWebLinksFromFirstChapter)

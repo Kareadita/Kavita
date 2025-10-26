@@ -655,6 +655,7 @@ public class LibraryController : BaseApiController
         library.EnableMetadata = dto.EnableMetadata;
         library.RemovePrefixForSortName = dto.RemovePrefixForSortName;
         library.InheritWebLinksFromFirstChapter = dto.InheritWebLinksFromFirstChapter;
+        library.DefaultLanguage = dto.DefaultLanguage;
 
         library.LibraryFileTypes = dto.FileGroupTypes
             .Select(t => new LibraryFileTypeGroup() {FileTypeGroup = t, LibraryId = library.Id})

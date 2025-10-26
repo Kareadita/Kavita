@@ -1370,6 +1370,8 @@
         "remove-prefix-for-sortname-tooltip": "Kavita will remove common prefixes like 'The', 'A', 'An' from titles for sort name. Does not override set metadata.",
         "inherit-web-links-label": "Inherit web links from first chapter",
         "inherit-web-links-tooltip": "Should series inherit web links from their first chapter",
+        "default-language-label": "Default language",
+        "default-language-tooltip": "Language to assign to series, if none of the chapters have any language set in their metadata",
         "force-scan": "Force Scan",
         "force-scan-tooltip": "This will force a scan on the library, treating like a fresh scan",
         "reset": "{{common.reset}}",

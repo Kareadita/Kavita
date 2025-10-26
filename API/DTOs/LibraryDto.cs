@@ -77,4 +77,6 @@ public sealed record LibraryDto
     public bool RemovePrefixForSortName { get; set; } = false;
     /// <inheritdoc cref="Library.InheritWebLinksFromFirstChapter"/>
     public bool InheritWebLinksFromFirstChapter { get; init; }
+    /// <inheritdoc cref="Library.DefaultLanguage"/>
+    public string DefaultLanguage { get; init; }
 }

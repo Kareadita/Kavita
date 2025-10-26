@@ -244,6 +244,21 @@
               </app-setting-switch>
             </div>
 
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-item [title]="t('default-language-label')" [subtitle]="t('default-language-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updateLanguage($event)" [settings]="languageSettings" [locked]="false">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.title}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.title}} ({{item.isoCode}})
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            </div>
+
             <div class="setting-section-break"></div>
 
             <div class="row g-0 mt-4 pb-4">
