@@ -30,7 +30,7 @@ public interface ICoverDbService
     Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat);
     Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url);
-    Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false);
+    Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false, bool chooseBetterImage = true);
     Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true, bool chooseBetterImage = false);
     Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true, bool chooseBetterImage = false);
 }
@@ -472,7 +472,8 @@ public class CoverDbService : ICoverDbService
     /// <param name="url"></param>
     /// <param name="fromBase64"></param>
     /// <param name="checkNoImagePlaceholder">Will check against all known null image placeholders to avoid writing it</param>
-    public async Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false)
+    /// <param name="chooseBetterImage">If we check cross-reference the current cover for the better option</param>
+    public async Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false, bool chooseBetterImage = true)
     {
         if (!string.IsNullOrEmpty(url))
         {
@@ -504,7 +505,7 @@ public class CoverDbService : ICoverDbService
 
                 try
                 {
-                    if (!string.IsNullOrEmpty(person.CoverImage))
+                    if (!string.IsNullOrEmpty(person.CoverImage) && chooseBetterImage)
                     {
                         var existingPath = Path.Combine(_directoryService.CoverImageDirectory, person.CoverImage);
                         var betterImage = existingPath.GetBetterImage(tempFullPath)!;
