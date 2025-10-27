@@ -36,6 +36,7 @@ import {AccountService} from "../../_services/account.service";
 import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badge.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {LongClickDirective} from "../../_directives/long-click.directive";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 type KeyBindFormGroup = FormGroup<{
   [K in KeyBindTarget]: FormArray<FormControl<string[]>>
@@ -49,7 +50,8 @@ type KeyBindFormGroup = FormGroup<{
     SettingKeyBindPickerComponent,
     TagBadgeComponent,
     DefaultValuePipe,
-    LongClickDirective
+    LongClickDirective,
+    NgbTooltip
   ],
   templateUrl: './manage-custom-key-binds.component.html',
   styleUrl: './manage-custom-key-binds.component.scss',
@@ -92,7 +94,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   }
 
   private toFormControls(combos: string[][]): FormControl<string[]>[] {
-    return combos.map(combo => this.fb.control(combo, Validators.minLength(1)));
+    return combos.map(combo => this.fb.control(combo, this.keyBindComboValidator()));
   }
 
   getFormArray(key: string): FormArray<FormControl<string[]>> | null {
@@ -120,7 +122,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     if (!array) return;
 
     if (array.controls.length < 5) {
-      array.push(this.fb.control([], this.keyBindComboValidator));
+      array.push(this.fb.control([], this.keyBindComboValidator()));
     }
   }
 
@@ -138,14 +140,28 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   private keyBindComboValidator(): ValidatorFn {
     return (control) => {
       const combo = (control as FormControl<string[]>).value;
-      if (combo.length === 0) return { 'minLength': {'length': 0} } as ValidationErrors;
+      if (combo.length === 0) return { 'need-at-least-one-key': {'length': 0} } as ValidationErrors;
 
       if (combo.filter(key => !ModifierKeyCodes.includes(key as KeyCode)).length === 0) {
-        return { 'nonModifierRequired': { 'combo': combo } } as ValidationErrors;
+        return { 'non-modifier-required': { 'combo': combo } } as ValidationErrors;
+      }
+
+      if (this.keyBindService.isReservedKeyCombo(combo)) {
+        return { 'reserved-combo': { 'combo': combo }} as ValidationErrors
       }
 
       return null;
     }
+  }
+
+  protected errorToolTip(errors: ValidationErrors | null): string | null {
+    if (!errors) return null;
+
+    let toolTip = '';
+    for (let key of Object.keys(errors)) {
+      toolTip += ' ' + this.transLoco.translate('custom-key-binds.combo-error-' + key)
+    }
+    return toolTip.length > 0 ? toolTip.trim() : null;
   }
 
   protected t(key: string, params?: any) {

@@ -19,7 +19,12 @@
                                  [selectionMode]="TagBadgeCursor.Clickable"
                                  (click)="selectIndex(key, $index)"
                                  (longClick)="removeKeyBind(key, $index)"
+                                 [ngbTooltip]="errorToolTip(combo.errors)"
                   >
+                    @if (!combo.valid) {
+                      <i class="fa fa-warning text-danger"></i>
+                    }
+
                     {{getReadableComboLabel(combo.value) | defaultValue}}
                   </app-tag-badge>
                 }
@@ -39,13 +44,6 @@
               </div>
 
             </div>
-
-            @if (!array.valid) {
-              <span class="text-danger error-text" (click)="$event.preventDefault(); $event.stopPropagation()">
-                {{t('invalid-key-combos')}}
-              </span>
-            }
-
           </ng-template>
           <ng-template #edit>
             <div [formArrayName]="key">

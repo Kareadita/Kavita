@@ -144,6 +144,15 @@ export interface KeyBindEvent {
 }
 
 /**
+ * Add any combo's in this array which cannot be used by any KeyBinds
+ * Example: Page refresh
+ */
+export const ReservedKeyBinds: string[][] = [
+  [KEY_CODES.CONTROL, KeyCode.KeyR],
+  [KEY_CODES.META, KeyCode.KeyR]
+]
+
+/**
  * This record should hold all KeyBinds Kavita has to offer, with their default combination(s).
  * To add a new keybind to the system, all you have to do it add it here. Event system, and settings page
  * Will update automatically.
@@ -165,7 +174,13 @@ export class KeyBindService {
    * @private
    */
   private readonly activeKeyBinds = computed<Record<KeyBindTarget, string[][]>>(() => {
-    const customKeyBinds =  this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
+    const customKeyBindsRaw =  this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
+
+    const customKeyBinds: Partial<Record<KeyBindTarget, string[][]>> = {};
+    for (const [target, combos] of Object.entries(customKeyBindsRaw) as [KeyBindTarget, string[][]][]) {
+      customKeyBinds[target] = combos.filter(combo => !this.isReservedKeyCombo(combo));
+    }
+
     return {
       ...DefaultKeyBinds,
       ...customKeyBinds,
@@ -174,7 +189,14 @@ export class KeyBindService {
   /**
    * A record of all possible keybinds in Kavita, as configured by the user
    */
-  public readonly allKeyBinds = this.activeKeyBinds;
+  public readonly allKeyBinds = computed(() => {
+    const customKeyBinds =  this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
+
+    return {
+      ...DefaultKeyBinds,
+      ...customKeyBinds,
+    } satisfies Record<KeyBindTarget, readonly string[][]>;
+  });
 
   /**
    * A set of all keys used in all keybinds, other keys should not be tracked
@@ -264,5 +286,15 @@ export class KeyBindService {
     ).subscribe();
   }
 
+  public isReservedKeyCombo(combo: string[]) {
+    for (let reservedKeyBind of ReservedKeyBinds) {
+      if (combo.length !== reservedKeyBind.length) continue;
+
+      const allMatch = combo.every((key => reservedKeyBind.includes(key)));
+      if (allMatch) return true;
+    }
+
+    return false;
+  }
 
 }

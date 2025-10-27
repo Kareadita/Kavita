@@ -1978,7 +1978,9 @@
         "description": "Customize all your key bindings for the app. Press any key or combination to assign, add, or remove bindings, with changes saved to your account. Long press a key bind combo to remove",
         "key-bind-title-ToggleSideNav": "Side nav toggle",
         "key-bind-tooltip-ToggleSideNav": "Toggle the side nav in settings or home page",
-        "invalid-key-combos": "One or more key bind combos are invalid"
+        "combo-error-reserved-combo": "This combo is reserved and cannot be used as a key bind",
+        "combo-error-non-modifier-required": "Your combo needs at least one non-modifier key",
+        "combo-error-need-at-least-one-key": "Your combo needs at least one key"
     },
 
     "collection-detail": {
