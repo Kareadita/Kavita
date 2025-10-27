@@ -1,8 +1,8 @@
-import {computed, DestroyRef, inject, Injectable} from '@angular/core';
+import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {AccountService} from "./account.service";
 import {KeyBind, KeyBindTarget} from "../_models/preferences/preferences";
 import {DOCUMENT} from "@angular/common";
-import {filter, Subject, tap} from "rxjs";
+import {filter, finalize, Subject, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
@@ -154,10 +154,13 @@ export class KeyBindService {
    */
   private readonly activeKeyBinds = computed<Record<KeyBindTarget, KeyBind[]>>(() => {
     const customKeyBindsRaw =  this.customKeyBinds();
+    const activeTargets = this.activeTargetsSet();
 
     const customKeyBinds: Partial<Record<KeyBindTarget, KeyBind[]>> = {};
     for (const [target, combos] of Object.entries(customKeyBindsRaw) as [KeyBindTarget, KeyBind[]][]) {
-      customKeyBinds[target] = combos.filter(combo => !this.isReservedKeyBind(combo));
+      if (activeTargets.has(target)) {
+        customKeyBinds[target] = combos.filter(combo => !this.isReservedKeyBind(combo));
+      }
     }
 
     return {
@@ -189,11 +192,16 @@ export class KeyBindService {
     return new Set(allKeys);
   });
 
-  private readonly eventsSubject = new Subject<KeyBindEvent>();
+  private readonly activeTargets = signal<KeyBindTarget[]>([]);
+  private readonly activeTargetsSet = computed(() => new Set(this.activeTargets()));
+
   /**
-   * KeyBindPressEvent events. Subscribe here for full control, otherwise use KeyBindService#registerListener
+   * We do not allow subscribing to the events$ directly, as there is some extra state management for performance
+   * reasons. See registerListener for details
+   * @private
    */
-  public readonly events$ = this.eventsSubject.asObservable();
+  private readonly eventsSubject = new Subject<KeyBindEvent>();
+  private readonly events$ = this.eventsSubject.asObservable();
 
   constructor() {
     // We use keydown as to intercept before native browser keybinds, in case we want to cancel the event
@@ -250,26 +258,60 @@ export class KeyBindService {
   }
 
   /**
-   * QOL method to register a listener for targets. When a match is found will set KeyBindEvent#triggered to true
-   * @param destroyRef$
+   * Register a listener for targets. When a match is found will set KeyBindEvent#triggered to true
+   * @param destroyRef$ destroy ref used for lifetime management
    * @param callback
    * @param targetFilter
    * @param fireInEditable if the callback should be called if the events target is editable
    */
-  public registerListener(destroyRef$: DestroyRef, callback: (e: KeyBindEvent) => void, targetFilter: KeyBindTarget[], fireInEditable: boolean = false) {
+  public registerListener(
+    destroyRef$: DestroyRef,
+    callback: (e: KeyBindEvent) => void,
+    targetFilter: KeyBindTarget[],
+    fireInEditable: boolean = false,
+  ) {
     if (targetFilter.length === 0) return;
+
+    this.activeTargets.update(s => [...s, ...targetFilter]);
 
     this.events$.pipe(
       takeUntilDestroyed(destroyRef$),
       filter(e => !e.inEditableElement || fireInEditable),
-      filter(e => !targetFilter || targetFilter.includes(e.target)),
+      filter(e => targetFilter.includes(e.target)),
       tap(e => {
-        e.triggered = true;
+        e.triggered = true; // Set before callback so consumers may override
+
         callback(e);
-      })
+      }),
+      finalize(() => { // Remove all targets when the consumer has finished
+        this.activeTargets.update(targets => {
+          const updated = [...targets];
+          // Remove only once in case others have registered the same target
+          targetFilter.forEach(target => this.removeOnce(updated, target));
+          return updated;
+        });
+      }),
     ).subscribe();
   }
 
+  /**
+   * Remove the first occurrence of element in the array
+   * @param array
+   * @param element
+   * @private
+   */
+  private removeOnce<T>(array: T[], element: T) {
+    const index = array.indexOf(element);
+    if (index != -1) {
+      array.splice(index, 1);
+    }
+  }
+
+  /**
+   * Returns true if the keybinds are semantic equal
+   * @param k1
+   * @param k2
+   */
   public areKeyBindsEqual(k1: KeyBind, k2: KeyBind) {
     return (
       (k1.alt ?? false) === (k2.alt ?? false) &&
@@ -279,7 +321,6 @@ export class KeyBindService {
       k1.key === k2.key
     );
   }
-
 
   /**
    * Checks the given combo against the ReservedKeyBinds list. If true, combo should be considered invalid and unusable
