@@ -49,12 +49,13 @@ export enum KeyCode {
   Digit8 = "8",
   Digit9 = "9",
 
-  ArrowUp = "ArrowUp",
-  ArrowDown = "ArrowDown",
-  ArrowLeft = "ArrowLeft",
-  ArrowRight = "ArrowRight",
+  ArrowUp = "arrowup",
+  ArrowDown = "arrowdown",
+  ArrowLeft = "arrowleft",
+  ArrowRight = "arrowright",
 
   Comma = ',',
+  Space = 'space',
 
   // These are not real codes, but ones we map. As we do not want to make
   // a distinction between ShiftLeft and ShiftRight
@@ -113,6 +114,11 @@ export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyBind[]>> = {
   [KeyBindTarget.NavigateToSettings]: [{meta: true, key: KeyCode.Comma}],
   [KeyBindTarget.OpenSearch]: [{control: true, key: KeyCode.KeyK}, {meta: true, key: KeyCode.KeyK}],
   [KeyBindTarget.NavigateToScrobbling]: [],
+  [KeyBindTarget.ToggleFullScreen]: [{key: KeyCode.KeyF}],
+  [KeyBindTarget.BookmarkPage]: [{key: KeyCode.KeyB, control: true}],
+  [KeyBindTarget.OpenHelp]: [{key: KeyCode.KeyH}],
+  [KeyBindTarget.GoTo]: [{key: KeyCode.KeyG}],
+  [KeyBindTarget.ToggleMenu]: [{key: KeyCode.Space}],
 } as const;
 
 type KeyBindGroup = {
@@ -136,7 +142,13 @@ export const KeyBindGroups: KeyBindGroup[] = [
   },
   {
     title: 'image-reader',
-    elements: [],
+    elements: [
+      {target: KeyBindTarget.ToggleFullScreen},
+      {target: KeyBindTarget.BookmarkPage},
+      {target: KeyBindTarget.OpenHelp},
+      {target: KeyBindTarget.GoTo},
+      {target: KeyBindTarget.ToggleMenu},
+    ],
   },
   {
     title: 'book-reader',

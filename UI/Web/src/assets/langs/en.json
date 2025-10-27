@@ -1994,6 +1994,16 @@
         "key-bind-tooltip-NavigateToScrobbling": "Open settings page on the Scrobbling tab",
 
         "image-reader": "Image Reader",
+        "key-bind-title-ToggleFullScreen":  "Toggle full screen",
+        "key-bind-tooltip-ToggleFullScreen":  "",
+        "key-bind-title-BookmarkPage":  "Bookmark current page",
+        "key-bind-tooltip-BookmarkPage":  "Saves the current image as a bookmark",
+        "key-bind-title-OpenHelp":  "Open help menu",
+        "key-bind-tooltip-OpenHelp":  "Opens a help modal with all relevant keybinds",
+        "key-bind-title-GoTo":  "Goto page",
+        "key-bind-tooltip-GoTo":  "Open a prompt to switch pages",
+        "key-bind-title-ToggleMenu":  "Toggle menu",
+        "key-bind-tooltip-ToggleMenu":  "Toggles to reader menu",
 
         "book-reader": "Book Reader"
     },

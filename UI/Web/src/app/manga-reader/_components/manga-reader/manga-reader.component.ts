@@ -11,7 +11,7 @@ import {
   inject,
   model,
   OnDestroy,
-  OnInit,
+  OnInit, signal,
   Signal,
   ViewChild
 } from '@angular/core';
@@ -81,6 +81,8 @@ import {
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
+import {KeyBindService} from "../../../_services/key-bind.service";
+import {KeyBindTarget} from "../../../_models/preferences/preferences";
 
 
 const PREFETCH_PAGES = 10;
@@ -166,6 +168,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly readerService = inject(ReaderService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly mangaReaderService = inject(MangaReaderService);
+  private readonly keyBindService = inject(KeyBindService);
 
 
   protected readonly KeyDirection = KeyDirection;
@@ -504,6 +507,31 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return chapterInfo?.chapterTitle || chapterInfo?.subtitle || '';
     });
 
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      async (e) => {
+        switch (e.target) {
+          case KeyBindTarget.ToggleFullScreen:
+            this.toggleFullscreen();
+            break;
+          case KeyBindTarget.BookmarkPage:
+            this.bookmarkPage();
+            break;
+          case KeyBindTarget.GoTo:
+            const goToPageNum = await this.promptForPage();
+            if (goToPageNum === null) { return; }
+            this.goToPage(parseInt(goToPageNum.trim(), 10));
+            break;
+          case KeyBindTarget.ToggleMenu:
+            this.toggleMenu();
+            break;
+          case KeyBindTarget.OpenHelp:
+            this.openShortcutModal();
+            break;
+        }
+      },
+      [KeyBindTarget.ToggleFullScreen, KeyBindTarget.BookmarkPage, KeyBindTarget.OpenHelp, KeyBindTarget.GoTo, KeyBindTarget.ToggleMenu]
+    )
 
 
   }
@@ -655,18 +683,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       this.closeReader();
-    } else if (event.key === KEY_CODES.SPACE) {
-      this.toggleMenu();
-    } else if (event.key === KEY_CODES.G) {
-      const goToPageNum = await this.promptForPage();
-      if (goToPageNum === null) { return; }
-      this.goToPage(parseInt(goToPageNum.trim(), 10));
-    } else if (event.key === KEY_CODES.B) {
-      this.bookmarkPage();
-    } else if (event.key === KEY_CODES.F) {
-      this.toggleFullscreen();
-    } else if (event.key === KEY_CODES.H) {
-      this.openShortcutModal();
     }
   }
 
@@ -1824,8 +1840,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  shortCutModalOpen = signal(false);
+
   // This is menu only code
   openShortcutModal() {
+    if (this.shortCutModalOpen()) return;
+
+    this.shortCutModalOpen.set(true);
     const ref = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
     ref.componentInstance.shortcuts = [
       {key: '⇽', description: 'prev-page'},
@@ -1838,6 +1859,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       {key: 'ESC', description: 'close-reader'},
       {key: 'SPACE', description: 'toggle-menu'},
     ];
+
+    ref.closed.pipe(
+      tap(() => this.shortCutModalOpen.set(false)),
+    ).subscribe();
   }
 
   // menu only code
