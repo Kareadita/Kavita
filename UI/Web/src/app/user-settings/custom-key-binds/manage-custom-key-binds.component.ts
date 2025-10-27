@@ -1,18 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   DestroyRef,
-  effect,
   inject,
   OnInit,
-  signal,
-  Signal
+  signal
 } from '@angular/core';
 import {
   DefaultKeyBinds,
   getReadableComboLabel,
-  getReadableKeyLabel,
   KeyBindService, KeyCode, ModifierKeyCodes
 } from "../../_services/key-bind.service";
 import {
@@ -20,11 +16,10 @@ import {
   FormControl,
   FormGroup,
   NonNullableFormBuilder,
-  ReactiveFormsModule, ValidationErrors, ValidatorFn,
-  Validators
+  ReactiveFormsModule, ValidationErrors, ValidatorFn
 } from "@angular/forms";
 import {KeyBindTarget} from "../../_models/preferences/preferences";
-import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {
   SettingKeyBindPickerComponent
@@ -176,7 +171,6 @@ export class ManageCustomKeyBindsComponent implements OnInit {
 
   protected readonly Object = Object;
   protected readonly DefaultKeyBinds = DefaultKeyBinds;
-  protected readonly getReadableKeyLabel = getReadableKeyLabel;
   protected readonly getReadableComboLabel = getReadableComboLabel;
   protected readonly TagBadgeCursor = TagBadgeCursor;
 }

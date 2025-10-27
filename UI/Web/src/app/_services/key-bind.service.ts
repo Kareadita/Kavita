@@ -6,6 +6,9 @@ import {filter, ReplaySubject, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {KEY_CODES} from "../shared/_services/utility.service";
 
+/**
+ * Codes as returned by KeyBoardEvent.code
+ */
 export enum KeyCode {
   KeyA = "KeyA",
   KeyB = "KeyB",
@@ -87,6 +90,9 @@ export enum KeyCode {
   ContextMenu = "ContextMenu"
 }
 
+/**
+ * KeyCodes we consider modifiers
+ */
 export const ModifierKeyCodes: KeyCode[] = [
   KeyCode.ShiftLeft,
   KeyCode.ShiftRight,
@@ -98,11 +104,19 @@ export const ModifierKeyCodes: KeyCode[] = [
   KeyCode.MetaRight,
 ];
 
+/**
+ * Returns a more human-readable string for the given combo
+ * @param combo
+ */
 export function getReadableComboLabel(combo: string[]): string {
   return combo.map(getReadableKeyLabel).join("+")
 }
 
-export function getReadableKeyLabel(code: string): string {
+/**
+ * Returns a more human-readable string for the give key
+ * @param code
+ */
+function getReadableKeyLabel(code: string): string {
   if (code.startsWith('Key')) {
     return code.slice(3);
   }
@@ -134,11 +148,17 @@ export function getReadableKeyLabel(code: string): string {
   return code;
 }
 
-
+/**
+ * Emitted if a combo has been recorded
+ */
 export interface KeyBindEvent {
+  /**
+   * Target of the event
+   */
   target: KeyBindTarget;
   /**
-   * Set triggered to true, if the event is used to trigger a flow
+   * Set triggered to true, if the event is used to trigger a flow. This must be done in the sync callback of your
+   * observable. When true after all observables have completed, will cancel the event that triggered it
    */
   triggered: boolean;
 }
@@ -147,7 +167,7 @@ export interface KeyBindEvent {
  * Add any combo's in this array which cannot be used by any KeyBinds
  * Example: Page refresh
  */
-export const ReservedKeyBinds: string[][] = [
+const ReservedKeyBinds: string[][] = [
   [KEY_CODES.CONTROL, KeyCode.KeyR],
   [KEY_CODES.META, KeyCode.KeyR]
 ]
@@ -186,10 +206,11 @@ export class KeyBindService {
       ...customKeyBinds,
     } satisfies Record<KeyBindTarget, readonly string[][]>;
   });
+
   /**
    * A record of all possible keybinds in Kavita, as configured by the user
    */
-  public readonly allKeyBinds = computed(() => {
+  public readonly allKeyBinds = computed<Record<KeyBindTarget, string[][]>>(() => {
     const customKeyBinds =  this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
 
     return {
@@ -243,23 +264,28 @@ export class KeyBindService {
         if (combo.length !== activeCombo.size) continue;
 
         const allPressed = combo.every(key => activeCombo.has(key));
-        if (allPressed) {
-          const event = {
-            target: target as KeyBindTarget,
-            triggered: false,
-          };
+        if (!allPressed) continue
 
-          this.eventsSubject.next(event);
+        const event = {
+          target: target as KeyBindTarget,
+          triggered: false,
+        };
 
-          if (event.triggered) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
+        this.eventsSubject.next(event);
+
+        if (event.triggered) {
+          e.preventDefault();
+          e.stopPropagation();
         }
       }
     }
   }
 
+  /**
+   * Key events while in this target should be ignored
+   * @param target
+   * @private
+   */
   private isEditableTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) return false;
 
@@ -286,6 +312,10 @@ export class KeyBindService {
     ).subscribe();
   }
 
+  /**
+   * Checks the given combo against the ReservedKeyBinds list. If true, combo should be considered invalid and unusable
+   * @param combo
+   */
   public isReservedKeyCombo(combo: string[]) {
     for (let reservedKeyBind of ReservedKeyBinds) {
       if (combo.length !== reservedKeyBind.length) continue;
