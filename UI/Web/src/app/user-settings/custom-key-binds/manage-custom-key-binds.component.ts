@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {DefaultKeyBinds, KeyBindGroups, KeyBindService, KeyCode,} from "../../_services/key-bind.service";
 import {
   FormArray,
@@ -25,6 +25,7 @@ import {LongClickDirective} from "../../_directives/long-click.directive";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ToastrService} from "ngx-toastr";
 import {KeyBindPipe} from "../../_pipes/key-bind.pipe";
+import {LicenseService} from "../../_services/license.service";
 
 type KeyBindFormGroup = FormGroup<{
   [K in KeyBindTarget]: FormArray<FormControl<KeyBind>>
@@ -56,10 +57,25 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly licenseService = inject(LicenseService);
 
   protected keyBindForm!: KeyBindFormGroup;
 
   protected selectedIndexes = signal<Map<string, number>>(new Map());
+  protected filteredKeyBindGroups = computed(() => {
+    const roles = this.accountService.currentUserSignal()!.roles;
+    const hasKPlus = this.licenseService.hasValidLicenseSignal();
+
+    return KeyBindGroups.map(g => {
+      g.elements = g.elements.filter(e => {
+        if (e.roles && !e.roles.some(r => roles.includes(r))) return false;
+        if (e.restrictedRoles && e.restrictedRoles.some(r => roles.includes(r))) return false;
+
+        return hasKPlus || !e.kavitaPlus;
+      })
+      return g;
+    }).filter(g => g.elements.length > 0);
+  });
 
   ngOnInit(): void {
     const keyBinds = this.keyBindService.allKeyBinds();
@@ -111,6 +127,18 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    */
   getFormArray(key: KeyBindTarget): FormArray<FormControl<KeyBind>> | null {
     return this.keyBindForm.get(key) as FormArray<FormControl<KeyBind>> | null;
+  }
+
+  getSelectedControlIndex(key: KeyBindTarget): number {
+    const array = this.getFormArray(key);
+    if (!array) return 0;
+    const index = this.selectedIndexes().get(key);
+
+    if (array.controls.length === 0) {
+      array.push(this.toFormControls([{key: KeyCode.Empty}]));
+    }
+
+    return index ?? 0;
   }
 
   /**
@@ -225,5 +253,4 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   protected readonly Object = Object;
   protected readonly TagBadgeCursor = TagBadgeCursor;
   protected readonly MAX_KEYBINDS_PER_TARGET = MAX_KEYBINDS_PER_TARGET;
-  protected readonly keyBindGroups = KeyBindGroups;
 }

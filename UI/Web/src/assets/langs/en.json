@@ -1976,7 +1976,6 @@
 
     "custom-key-binds": {
         "description": "Customize all your key bindings for the app. Each option allows for up to {{max}} different keybinds. Long press to remove",
-        "invalid-keybinds": "One or more keybinds are invalid, resolve the issues to save changes",
         "key-bind-error-reserved-key-bind": "This combo is reserved and cannot be used as a key bind",
         "key-bind-error-non-modifier-required": "Your combo needs at least one non-modifier key",
         "key-bind-error-need-at-least-one-key": "Your combo needs at least one key",
@@ -1991,6 +1990,8 @@
         "key-bind-tooltip-NavigateToSettings": "Open settings while not in a reader",
         "key-bind-title-OpenSearch": "Open search",
         "key-bind-tooltip-OpenSearch": "Open the top search bar",
+        "key-bind-title-NavigateToScrobbling": "Open Scrobbling",
+        "key-bind-tooltip-NavigateToScrobbling": "Open settings page on the Scrobbling tab",
 
         "image-reader": "Image Reader",
 

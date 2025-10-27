@@ -3,28 +3,22 @@
     {{t('description', {max: MAX_KEYBINDS_PER_TARGET})}}
   </p>
 
-  @if (!keyBindForm.valid) {
-    <div class="alert alert-warning" role="alert">
-      {{t('invalid-keybinds')}}
-    </div>
-  }
-
   <form [formGroup]="keyBindForm" class="row">
 
-    @for (keyBindGroup of keyBindGroups; track keyBindGroup.title) {
+    @for (keyBindGroup of filteredKeyBindGroups(); track keyBindGroup.title) {
       @if (!$first) {
         <div class="setting-section-break"></div>
       }
 
       <h4>{{t(keyBindGroup.title)}}</h4>
 
-      @for (key of keyBindGroup.keyBindTargets; track key) {
-        @if (getFormArray(key); as array) {
+      @for (element of keyBindGroup.elements; track element.target) {
+        @if (getFormArray(element.target); as array) {
           <div class="col-12 mt-4">
             <app-setting-item
-              [title]="t('key-bind-title-' + key)"
-              [subtitle]="t('key-bind-tooltip-' + key)"
-              [labelId]="key + ''"
+              [title]="t('key-bind-title-' + element.target)"
+              [subtitle]="t('key-bind-tooltip-' + element.target)"
+              [labelId]="element.target + ''"
             >
               <ng-template #view>
                 <div class="d-flex flex-row justify-content-between">
@@ -32,34 +26,36 @@
                     @for (keyBindControl of array.controls; track $index;) {
                       <app-tag-badge appLongClick
                                      [selectionMode]="TagBadgeCursor.Clickable"
-                                     (click)="selectIndex(key, $index)"
-                                     (longClick)="removeKeyBind(key, $index)"
+                                     (click)="selectIndex(element.target, $index)"
+                                     (longClick)="removeKeyBind(element.target, $index)"
                                      [ngbTooltip]="errorToolTip(keyBindControl.errors)"
                       >
                         @if (!keyBindControl.valid) {
                           <i class="fa fa-warning text-danger"
-                             [attr.aria-label]="t('errors-control', {target: key, index: $index + 1})"></i>
+                             [attr.aria-label]="t('errors-control', {target: element.target, index: $index + 1})"></i>
                         }
 
                         {{keyBindControl.value | keyBind | defaultValue}}
                       </app-tag-badge>
+                    } @empty {
+                      {{null | defaultValue}}
                     }
                   </div>
 
                   <div class="float-end">
 
                     @if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
-                      <button class="btn btn-sm" (click)="addKeyBind(key); $event.preventDefault(); $event.stopPropagation()">
-                        <i class="fa fa-add" [attr.aria-label]="t('close', {target: key})"></i>
+                      <button class="btn btn-sm" (click)="addKeyBind(element.target); $event.preventDefault(); $event.stopPropagation()">
+                        <i class="fa fa-add" [attr.aria-label]="t('close', {target: element.target})"></i>
                       </button>
                     }
 
-                    <button class="btn btn-sm" (click)="resetKeybindsToDefaults(key); $event.preventDefault(); $event.stopPropagation()">
-                      <i class="fa fa-recycle" [attr.aria-label]="t('reset', {target: key})"></i>
+                    <button class="btn btn-sm" (click)="resetKeybindsToDefaults(element.target); $event.preventDefault(); $event.stopPropagation()">
+                      <i class="fa fa-recycle" [attr.aria-label]="t('reset', {target: element.target})"></i>
                     </button>
 
                     @if (!array.valid) {
-                      <i class="fa fa-warning text-danger" [attr.aria-label]="t('errors-array', {target: key})" [ngbTooltip]="errorToolTip(array.errors)"></i>
+                      <i class="fa fa-warning text-danger" [attr.aria-label]="t('errors-array', {target: element.target})" [ngbTooltip]="errorToolTip(array.errors)"></i>
                     }
 
                   </div>
@@ -68,8 +64,8 @@
 
               </ng-template>
               <ng-template #edit>
-                <div [formArrayName]="key">
-                  @let index = (selectedIndexes().get(key) ?? 0) + '';
+                <div [formArrayName]="element.target">
+                  @let index = getSelectedControlIndex(element.target) + '';
                   @if (array.get(index)) {
                     <app-setting-key-bind-picker [formControlName]="index" />
                   }

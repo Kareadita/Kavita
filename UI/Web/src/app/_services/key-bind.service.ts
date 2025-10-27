@@ -1,5 +1,5 @@
 import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
-import {AccountService} from "./account.service";
+import {AccountService, Role} from "./account.service";
 import {KeyBind, KeyBindTarget} from "../_models/preferences/preferences";
 import {DOCUMENT} from "@angular/common";
 import {filter, finalize, Subject, tap} from "rxjs";
@@ -111,25 +111,35 @@ const ReservedKeyBinds: KeyBind[] = [
 export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyBind[]>> = {
   [KeyBindTarget.NavigateToSettings]: [{meta: true, key: KeyCode.Comma}],
   [KeyBindTarget.OpenSearch]: [{control: true, key: KeyCode.KeyK}, {meta: true, key: KeyCode.KeyK}],
+  [KeyBindTarget.NavigateToScrobbling]: [],
 } as const;
 
 type KeyBindGroup = {
   title: string,
-  keyBindTargets: KeyBindTarget[];
+  elements: {
+    target: KeyBindTarget,
+    roles?: Role[];
+    restrictedRoles?: Role[],
+    kavitaPlus?: boolean;
+  }[];
 }
 
 export const KeyBindGroups: KeyBindGroup[] = [
   {
     title: 'global',
-    keyBindTargets: [KeyBindTarget.NavigateToSettings, KeyBindTarget.OpenSearch]
+    elements: [
+      {target: KeyBindTarget.NavigateToSettings},
+      {target: KeyBindTarget.OpenSearch},
+      {target: KeyBindTarget.NavigateToScrobbling, kavitaPlus: true}
+    ]
   },
   {
     title: 'image-reader',
-    keyBindTargets: [],
+    elements: [],
   },
   {
     title: 'book-reader',
-    keyBindTargets: []
+    elements: []
   }
 ];
 

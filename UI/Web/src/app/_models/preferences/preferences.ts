@@ -47,5 +47,6 @@ export interface KeyBind {
 export enum KeyBindTarget {
   NavigateToSettings = 'NavigateToSettings',
   OpenSearch = 'OpenSearch',
+  NavigateToScrobbling = 'NavigateToScrobbling',
 }
 

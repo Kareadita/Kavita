@@ -8,4 +8,6 @@ public enum KeyBindTarget
     NavigateToSettings = 0,
     [Description(nameof(OpenSearch))]
     OpenSearch = 1,
+    [Description(nameof(NavigateToScrobbling))]
+    NavigateToScrobbling = 2,
 }

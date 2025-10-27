@@ -155,6 +155,11 @@ export class SideNavComponent implements OnInit {
       (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Account}),
       [KeyBindTarget.NavigateToSettings],
     );
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Scrobbling}),
+      [KeyBindTarget.NavigateToScrobbling],
+    );
   }
 
   ngOnInit(): void {
