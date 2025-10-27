@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, effect, inject, OnInit} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {distinctUntilChanged, filter, map, take, tap} from 'rxjs/operators';
@@ -155,11 +155,14 @@ export class SideNavComponent implements OnInit {
       (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Account}),
       [KeyBindTarget.NavigateToSettings],
     );
+
     this.keyBindService.registerListener(
       this.destroyRef,
       (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Scrobbling}),
       [KeyBindTarget.NavigateToScrobbling],
+      {condition$: this.licenseService.hasValidLicense$}
     );
+
   }
 
   ngOnInit(): void {

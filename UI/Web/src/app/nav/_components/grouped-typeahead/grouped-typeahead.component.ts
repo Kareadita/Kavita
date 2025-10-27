@@ -157,7 +157,7 @@ export class GroupedTypeaheadComponent implements OnInit {
       this.destroyRef,
       (e) => this.focusElement(e),
       [KeyBindTarget.OpenSearch],
-      true,
+      {fireInEditable: true},
     );
 
     this.searchSettingsForm.get('includeExtras')!.valueChanges.pipe(

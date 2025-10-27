@@ -2,8 +2,9 @@ import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {AccountService, Role} from "./account.service";
 import {KeyBind, KeyBindTarget} from "../_models/preferences/preferences";
 import {DOCUMENT} from "@angular/common";
-import {filter, finalize, Subject, tap} from "rxjs";
+import {filter, finalize, Observable, of, Subject, tap, withLatestFrom} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {map} from "rxjs/operators";
 
 /**
  * Codes as returned by KeyBoardEvent.key.toLowerCase()
@@ -143,6 +144,11 @@ export const KeyBindGroups: KeyBindGroup[] = [
   }
 ];
 
+interface RegisterListenerOptions {
+  fireInEditable?: boolean;
+  condition$?: Observable<boolean>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -272,15 +278,20 @@ export class KeyBindService {
    * @param destroyRef$ destroy ref used for lifetime management
    * @param callback
    * @param targetFilter
-   * @param fireInEditable if the callback should be called if the events target is editable
+   * @param options
    */
   public registerListener(
     destroyRef$: DestroyRef,
     callback: (e: KeyBindEvent) => void,
     targetFilter: KeyBindTarget[],
-    fireInEditable: boolean = false,
+    options?: RegisterListenerOptions,
   ) {
     if (targetFilter.length === 0) return;
+
+    const {
+      fireInEditable = false,
+      condition$ = of(true),
+    } = options ?? {};
 
     this.activeTargets.update(s => [...s, ...targetFilter]);
 
@@ -288,6 +299,9 @@ export class KeyBindService {
       takeUntilDestroyed(destroyRef$),
       filter(e => !e.inEditableElement || fireInEditable),
       filter(e => targetFilter.includes(e.target)),
+      withLatestFrom(condition$),
+      filter(([_, ok]) => ok),
+      map(([e, _]) => e),
       tap(e => {
         e.triggered = true; // Set before callback so consumers may override
 
