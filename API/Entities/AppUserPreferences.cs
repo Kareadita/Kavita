@@ -182,7 +182,7 @@ public class AppUserPreferences
     /// JSON dictionary mappings for custom keybinds across the web app.
     /// Values are a list of key codes that need to be pressed at the same time for the keybind to be valid
     /// </summary>
-    public Dictionary<KeyBindTarget, IList<string>> CustomKeyBinds { get; set; }
+    public Dictionary<KeyBindTarget, IList<IList<string>>> CustomKeyBinds { get; set; }
 
     #endregion
 

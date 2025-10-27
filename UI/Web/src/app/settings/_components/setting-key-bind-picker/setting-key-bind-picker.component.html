@@ -1,6 +1,6 @@
 <input
   type="text"
-  [value]="selectedKeys().join('+')"
+  [value]="getReadableComboLabel(selectedKeys())"
   (focus)="startListening()"
   (blur)="stopListening()"
   readonly

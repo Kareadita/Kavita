@@ -1,6 +1,28 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, OnInit, Signal} from '@angular/core';
-import {DefaultKeyBinds, KeyBindService} from "../../_services/key-bind.service";
-import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  OnInit,
+  signal,
+  Signal
+} from '@angular/core';
+import {
+  DefaultKeyBinds,
+  getReadableComboLabel,
+  getReadableKeyLabel,
+  KeyBindService, KeyCode, ModifierKeyCodes
+} from "../../_services/key-bind.service";
+import {
+  FormArray,
+  FormControl,
+  FormGroup,
+  NonNullableFormBuilder,
+  ReactiveFormsModule, ValidationErrors, ValidatorFn,
+  Validators
+} from "@angular/forms";
 import {KeyBindTarget} from "../../_models/preferences/preferences";
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -8,12 +30,15 @@ import {
   SettingKeyBindPickerComponent
 } from "../../settings/_components/setting-key-bind-picker/setting-key-bind-picker.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, distinctUntilChanged, switchMap, tap} from "rxjs";
+import {debounceTime, distinctUntilChanged, filter, switchMap, tap} from "rxjs";
 import {map} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
+import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badge.component";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {LongClickDirective} from "../../_directives/long-click.directive";
 
 type KeyBindFormGroup = FormGroup<{
-  [K in KeyBindTarget]: FormControl<string[]>
+  [K in KeyBindTarget]: FormArray<FormControl<string[]>>
 }>;
 
 @Component({
@@ -21,7 +46,10 @@ type KeyBindFormGroup = FormGroup<{
   imports: [
     ReactiveFormsModule,
     SettingItemComponent,
-    SettingKeyBindPickerComponent
+    SettingKeyBindPickerComponent,
+    TagBadgeComponent,
+    DefaultValuePipe,
+    LongClickDirective
   ],
   templateUrl: './manage-custom-key-binds.component.html',
   styleUrl: './manage-custom-key-binds.component.scss',
@@ -37,12 +65,14 @@ export class ManageCustomKeyBindsComponent implements OnInit {
 
   protected keyBindForm!: KeyBindFormGroup;
 
+  protected selectedIndexes = signal<Map<string, number>>(new Map());
+
   ngOnInit(): void {
     const keyBinds = this.keyBindService.allKeyBinds();
     const groupConfig = Object.entries(keyBinds).reduce((acc, [key, value]) => {
-      acc[key as KeyBindTarget] = this.fb.control<string[]>(value);
+      acc[key as KeyBindTarget] = this.fb.array(this.toFormControls(value));
       return acc;
-    }, {} as Record<KeyBindTarget, FormControl<string[]>>);
+    }, {} as Record<KeyBindTarget, FormArray<FormControl<string[]>>>);
 
     this.keyBindForm = this.fb.group(groupConfig);
 
@@ -50,6 +80,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
       debounceTime(500),
       distinctUntilChanged(),
+      filter(() => this.keyBindForm.valid),
       map((customKeyBinds) => {
         return {
           ...this.accountService.currentUserSignal()!.preferences,
@@ -58,6 +89,63 @@ export class ManageCustomKeyBindsComponent implements OnInit {
       }),
       switchMap(p => this.accountService.updatePreferences(p))
     ).subscribe();
+  }
+
+  private toFormControls(combos: string[][]): FormControl<string[]>[] {
+    return combos.map(combo => this.fb.control(combo, Validators.minLength(1)));
+  }
+
+  getFormArray(key: string): FormArray<FormControl<string[]>> | null {
+    return this.keyBindForm.get(key) as FormArray<FormControl<string[]>> | null;
+  }
+
+  resetKeybindsToDefaults(key: string) {
+    const array = this.getFormArray(key);
+    if (!array) return;
+
+    array.clear()
+    array.push(this.toFormControls(DefaultKeyBinds[key as KeyBindTarget]))
+  }
+
+  selectIndex(key: string, index: number) {
+    this.selectedIndexes.update(m => {
+      const newMap = new Map(m);
+      newMap.set(key, index);
+      return newMap;
+    })
+  }
+
+  addKeyBind(key: string) {
+    const array = this.getFormArray(key);
+    if (!array) return;
+
+    if (array.controls.length < 5) {
+      array.push(this.fb.control([], this.keyBindComboValidator));
+    }
+  }
+
+  removeKeyBind(key: string, index: number) {
+    const array = this.getFormArray(key);
+    if (!array) return;
+
+    if (array.controls.length === 1) {
+      this.resetKeybindsToDefaults(key);
+    } else {
+      array.removeAt(index)
+    }
+  }
+
+  private keyBindComboValidator(): ValidatorFn {
+    return (control) => {
+      const combo = (control as FormControl<string[]>).value;
+      if (combo.length === 0) return { 'minLength': {'length': 0} } as ValidationErrors;
+
+      if (combo.filter(key => !ModifierKeyCodes.includes(key as KeyCode)).length === 0) {
+        return { 'nonModifierRequired': { 'combo': combo } } as ValidationErrors;
+      }
+
+      return null;
+    }
   }
 
   protected t(key: string, params?: any) {
@@ -72,4 +160,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
 
   protected readonly Object = Object;
   protected readonly DefaultKeyBinds = DefaultKeyBinds;
+  protected readonly getReadableKeyLabel = getReadableKeyLabel;
+  protected readonly getReadableComboLabel = getReadableComboLabel;
+  protected readonly TagBadgeCursor = TagBadgeCursor;
 }

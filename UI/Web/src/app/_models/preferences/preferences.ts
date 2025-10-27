@@ -16,7 +16,7 @@ export interface Preferences {
   bookReaderHighlightSlots: HighlightSlot[];
   colorScapeEnabled: boolean;
   dataSaver: boolean;
-  customKeyBinds: Partial<Record<KeyBindTarget, string[]>>;
+  customKeyBinds: Partial<Record<KeyBindTarget, string[][]>>;
 
   // Kavita+
   aniListScrobblingEnabled: boolean;

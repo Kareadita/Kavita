@@ -1,5 +1,5 @@
 import {DOCUMENT} from '@angular/common';
-import {DestroyRef, effect, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
+import {DestroyRef, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
 import {filter, ReplaySubject, take, tap} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
@@ -127,13 +127,7 @@ export class NavService {
     this.sideNavCollapseSource.next(sideNavState);
     this.showSideNav();
 
-    effect(() => {
-      const event = this.keyBindService.events();
-
-      if (event?.target === KeyBindTarget.ToggleSideNav) {
-        this.toggleSideNav();
-      }
-    });
+    this.keyBindService.registerListener(this.destroyRef, () => this.toggleSideNav(), [KeyBindTarget.ToggleSideNav]);
   }
 
   getSideNavStreams(visibleOnly = true) {

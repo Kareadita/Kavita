@@ -26,7 +26,10 @@ export enum KEY_CODES {
   K = 'k',
   BACKSPACE = 'Backspace',
   DELETE = 'Delete',
-  SHIFT = 'Shift'
+  SHIFT = 'Shift',
+  CONTROL = 'Control',
+  META = 'Meta',
+  ALT = 'Alt',
 }
 
 /**

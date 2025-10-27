@@ -1,5 +1,7 @@
 import {ChangeDetectionStrategy, Component, effect, forwardRef, signal} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
+import {KEY_CODES} from "../../../shared/_services/utility.service";
+import {getReadableComboLabel, KeyCode, ModifierKeyCodes} from "../../../_services/key-bind.service";
 
 @Component({
   selector: 'app-setting-key-bind-picker',
@@ -56,20 +58,21 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor {
   }
 
   private onKeyDown = (event: KeyboardEvent) => {
-    const keys: string[] = [];
-    if (event.ctrlKey) keys.push('Ctrl');
-    if (event.altKey) keys.push('Alt');
-    if (event.shiftKey) keys.push('Shift');
-    if (event.metaKey) keys.push('Meta');
+    const keys = new Set<string>();
+    if (event.ctrlKey) keys.add(KEY_CODES.CONTROL);
+    if (event.altKey) keys.add(KEY_CODES.ALT);
+    if (event.shiftKey) keys.add(KEY_CODES.SHIFT);
+    if (event.metaKey) keys.add(KEY_CODES.META);
 
-    if (event.key && !['Control', 'Shift', 'Alt', 'Meta'].includes(event.key)) {
-      keys.push(event.key);
+    if (!ModifierKeyCodes.includes(event.code as KeyCode)) {
+      keys.add(event.code)
     }
 
-    this.selectedKeys.set(keys);
+    this.selectedKeys.set([...keys]);
 
     event.preventDefault();
     event.stopPropagation();
   };
 
+  protected readonly getReadableComboLabel = getReadableComboLabel;
 }

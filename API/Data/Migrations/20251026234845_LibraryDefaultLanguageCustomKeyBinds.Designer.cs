@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251026203401_LibraryDefaultLanguageCustomKeyBinds")]
+    [Migration("20251026234845_LibraryDefaultLanguageCustomKeyBinds")]
     partial class LibraryDefaultLanguageCustomKeyBinds
     {
         /// <inheritdoc />
