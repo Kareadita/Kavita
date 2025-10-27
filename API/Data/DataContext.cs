@@ -300,7 +300,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(p => p.CustomKeyBinds)
             .HasJsonConversion([])
             .HasColumnType("TEXT")
-            .HasDefaultValue(new Dictionary<KeyBindTarget, IList<IList<string>>>());
+            .HasDefaultValue(new Dictionary<KeyBindTarget, IList<KeyBind>>());
 
         builder.Entity<AppUser>()
             .Property(user => user.IdentityProvider)

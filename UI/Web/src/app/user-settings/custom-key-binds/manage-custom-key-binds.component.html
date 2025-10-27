@@ -14,18 +14,18 @@
           <ng-template #view>
             <div class="d-flex flex-row justify-content-between">
               <div>
-                @for (combo of array.controls; track $index;) {
+                @for (keyBindControl of array.controls; track $index;) {
                   <app-tag-badge appLongClick
                                  [selectionMode]="TagBadgeCursor.Clickable"
                                  (click)="selectIndex(key, $index)"
                                  (longClick)="removeKeyBind(key, $index)"
-                                 [ngbTooltip]="errorToolTip(combo.errors)"
+                                 [ngbTooltip]="errorToolTip(keyBindControl.errors)"
                   >
-                    @if (!combo.valid) {
+                    @if (!keyBindControl.valid) {
                       <i class="fa fa-warning text-danger"></i>
                     }
 
-                    {{keyBindService.getReadableComboLabel(combo.value) | defaultValue}}
+                    {{keyBindControl.value | keyBind | defaultValue}}
                   </app-tag-badge>
                 }
               </div>

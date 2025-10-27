@@ -4,7 +4,6 @@ import {
   DefaultKeyBinds,
   KeyBindService,
   KeyCode,
-  KeyCombo,
   ModifierKeyCodes
 } from "../../_services/key-bind.service";
 import {
@@ -16,7 +15,7 @@ import {
   ValidationErrors,
   ValidatorFn
 } from "@angular/forms";
-import {KeyBindTarget} from "../../_models/preferences/preferences";
+import {KeyBind, KeyBindTarget} from "../../_models/preferences/preferences";
 import {TranslocoService} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {
@@ -31,9 +30,10 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {LongClickDirective} from "../../_directives/long-click.directive";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ToastrService} from "ngx-toastr";
+import {KeyBindPipe} from "../../_pipes/key-bind.pipe";
 
 type KeyBindFormGroup = FormGroup<{
-  [K in KeyBindTarget]: FormArray<FormControl<KeyCombo>>
+  [K in KeyBindTarget]: FormArray<FormControl<KeyBind>>
 }>;
 
 const MAX_KEYBINDS_PER_TARGET = 5;
@@ -47,7 +47,8 @@ const MAX_KEYBINDS_PER_TARGET = 5;
     TagBadgeComponent,
     DefaultValuePipe,
     LongClickDirective,
-    NgbTooltip
+    NgbTooltip,
+    KeyBindPipe
   ],
   templateUrl: './manage-custom-key-binds.component.html',
   styleUrl: './manage-custom-key-binds.component.scss',
@@ -71,7 +72,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     const groupConfig = Object.entries(keyBinds).reduce((acc, [key, value]) => {
       acc[key as KeyBindTarget] = this.fb.array(this.toFormControls(value));
       return acc;
-    }, {} as Record<KeyBindTarget, FormArray<FormControl<KeyCombo>>>);
+    }, {} as Record<KeyBindTarget, FormArray<FormControl<KeyBind>>>);
 
     this.keyBindForm = this.fb.group(groupConfig);
 
@@ -84,7 +85,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
         Object.entries(customKeyBinds).filter(([target, combos]) => {
           return !this.keyBindService.isDefaultKeyBinds(target as KeyBindTarget, combos);
         })
-      ) as Partial<Record<KeyBindTarget, KeyCombo[]>>),
+      ) as Partial<Record<KeyBindTarget, KeyBind[]>>),
       map((customKeyBinds) => {
         return {
           ...this.accountService.currentUserSignal()!.preferences,
@@ -99,7 +100,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     ).subscribe();
   }
 
-  private toFormControls(combos: KeyCombo[]): FormControl<KeyCombo>[] {
+  private toFormControls(combos: KeyBind[]): FormControl<KeyBind>[] {
     return combos.map(combo => this.fb.control(combo, this.keyBindComboValidator()));
   }
 
@@ -107,8 +108,8 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * Typed getting for the FormArray
    * @param key
    */
-  getFormArray(key: KeyBindTarget): FormArray<FormControl<KeyCombo>> | null {
-    return this.keyBindForm.get(key) as FormArray<FormControl<KeyCombo>> | null;
+  getFormArray(key: KeyBindTarget): FormArray<FormControl<KeyBind>> | null {
+    return this.keyBindForm.get(key) as FormArray<FormControl<KeyBind>> | null;
   }
 
   /**
@@ -145,7 +146,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     if (!array) return;
 
     if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
-      array.push(this.fb.control([], this.keyBindComboValidator()));
+      array.push(this.fb.control({key: KeyCode.Empty}, this.keyBindComboValidator()));
     }
   }
 
@@ -171,15 +172,11 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    */
   private keyBindComboValidator(): ValidatorFn {
     return (control) => {
-      const combo = (control as FormControl<KeyCombo>).value;
-      if (combo.length === 0) return { 'need-at-least-one-key': {'length': 0} } as ValidationErrors;
+      const keyBind = (control as FormControl<KeyBind>).value;
+      if (keyBind.key.length === 0) return { 'need-at-least-one-key': {'length': 0} } as ValidationErrors;
 
-      if (combo.filter(key => !ModifierKeyCodes.includes(key as KeyCode)).length === 0) {
-        return { 'non-modifier-required': { 'combo': combo } } as ValidationErrors;
-      }
-
-      if (this.keyBindService.isReservedKeyCombo(combo)) {
-        return { 'reserved-combo': { 'combo': combo }} as ValidationErrors
+      if (this.keyBindService.isReservedKeyBind(keyBind)) {
+        return { 'reserved-combo': { 'keyBind': keyBind }} as ValidationErrors
       }
 
       return null;

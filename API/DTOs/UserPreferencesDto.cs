@@ -42,7 +42,7 @@ public sealed record UserPreferencesDto
     public bool DataSaver { get; set; } = false;
     /// <inheritdoc cref="API.Entities.AppUserPreferences.CustomKeyBinds"/>
     [Required]
-    public Dictionary<KeyBindTarget, IList<IList<string>>> CustomKeyBinds { get; set; } = [];
+    public Dictionary<KeyBindTarget, IList<KeyBind>> CustomKeyBinds { get; set; } = [];
 
     /// <inheritdoc cref="API.Entities.AppUserPreferences.AniListScrobblingEnabled"/>
     public bool AniListScrobblingEnabled { get; set; }

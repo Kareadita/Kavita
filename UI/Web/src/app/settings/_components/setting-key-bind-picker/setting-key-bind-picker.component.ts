@@ -1,10 +1,14 @@
 import {ChangeDetectionStrategy, Component, effect, forwardRef, inject, signal} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
-import {KeyBindService, KeyCode, KeyCombo, ModifierKeyCodes} from "../../../_services/key-bind.service";
+import {KeyBindService, KeyCode, ModifierKeyCodes} from "../../../_services/key-bind.service";
+import {KeyBind} from "../../../_models/preferences/preferences";
+import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
 
 @Component({
   selector: 'app-setting-key-bind-picker',
-  imports: [],
+  imports: [
+    KeyBindPipe
+  ],
   templateUrl: './setting-key-bind-picker.component.html',
   styleUrl: './setting-key-bind-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,25 +24,25 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor {
 
   protected readonly keyBindService = inject(KeyBindService);
 
-  selectedKeys = signal<KeyCombo>([]);
+  selectedKeyBind = signal<KeyBind>({key: KeyCode.Empty});
   disabled = signal(false);
 
-  private _onChange: (value: KeyCombo) => void = () => {};
+  private _onChange: (value: KeyBind) => void = () => {};
   private _onTouched: () => void = () => {};
 
   constructor() {
     effect(() => {
-      const selectedKeys = this.selectedKeys();
+      const selectedKeys = this.selectedKeyBind();
       this._onChange(selectedKeys);
       this._onTouched();
     });
   }
 
-  writeValue(keys: KeyCode[]): void {
-      this.selectedKeys.set(keys)
+  writeValue(keyBind: KeyBind): void {
+      this.selectedKeyBind.set(keyBind)
   }
 
-  registerOnChange(fn: (_: string[]) => void): void {
+  registerOnChange(fn: (_: KeyBind) => void): void {
     this._onChange = fn;
   }
 
@@ -59,17 +63,15 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor {
   }
 
   private onKeyDown = (event: KeyboardEvent) => {
-    const keys = new Set<KeyCode>();
-    if (event.ctrlKey) keys.add(KeyCode.Control);
-    if (event.altKey) keys.add(KeyCode.Alt);
-    if (event.shiftKey) keys.add(KeyCode.Shift);
-    if (event.metaKey) keys.add(KeyCode.Meta);
+    const eventKey = event.key.toLowerCase() as KeyCode;
 
-    if (!ModifierKeyCodes.includes(event.code as KeyCode)) {
-      keys.add(event.code as KeyCode)
-    }
-
-    this.selectedKeys.set([...keys]);
+    this.selectedKeyBind.set({
+      key: ModifierKeyCodes.includes(eventKey) ? KeyCode.Empty : eventKey,
+      meta: event.metaKey,
+      alt: event.altKey,
+      control: event.ctrlKey,
+      shift: event.shiftKey,
+    });
 
     event.preventDefault();
     event.stopPropagation();

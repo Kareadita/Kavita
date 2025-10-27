@@ -182,7 +182,7 @@ public class AppUserPreferences
     /// JSON dictionary mappings for custom keybinds across the web app.
     /// Values are a list of key codes that need to be pressed at the same time for the keybind to be valid
     /// </summary>
-    public Dictionary<KeyBindTarget, IList<IList<string>>> CustomKeyBinds { get; set; }
+    public Dictionary<KeyBindTarget, IList<KeyBind>> CustomKeyBinds { get; set; }
 
     #endregion
 
@@ -251,4 +251,13 @@ public class AppUserSocialPreferences
     /// UI Site Global Setting: Enable social features for unknown age ratings
     /// </summary>
     public bool SocialIncludeUnknowns { get; set; } = true;
+}
+
+public sealed record KeyBind
+{
+    public string Key { get; set; }
+    public bool Control { get; set; }
+    public bool Shift { get; set; }
+    public bool Meta { get; set; }
+    public bool Alt { get; set; }
 }

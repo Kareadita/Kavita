@@ -1,153 +1,77 @@
 import {computed, DestroyRef, inject, Injectable} from '@angular/core';
 import {AccountService} from "./account.service";
-import {KeyBindTarget} from "../_models/preferences/preferences";
+import {KeyBind, KeyBindTarget} from "../_models/preferences/preferences";
 import {DOCUMENT} from "@angular/common";
 import {filter, ReplaySubject, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
- * Codes as returned by KeyBoardEvent.code
+ * Codes as returned by KeyBoardEvent.key.toLowerCase()
  */
 export enum KeyCode {
-  KeyA = "KeyA",
-  KeyB = "KeyB",
-  KeyC = "KeyC",
-  KeyD = "KeyD",
-  KeyE = "KeyE",
-  KeyF = "KeyF",
-  KeyG = "KeyG",
-  KeyH = "KeyH",
-  KeyI = "KeyI",
-  KeyJ = "KeyJ",
-  KeyK = "KeyK",
-  KeyL = "KeyL",
-  KeyM = "KeyM",
-  KeyN = "KeyN",
-  KeyO = "KeyO",
-  KeyP = "KeyP",
-  KeyQ = "KeyQ",
-  KeyR = "KeyR",
-  KeyS = "KeyS",
-  KeyT = "KeyT",
-  KeyU = "KeyU",
-  KeyV = "KeyV",
-  KeyW = "KeyW",
-  KeyX = "KeyX",
-  KeyY = "KeyY",
-  KeyZ = "KeyZ",
+  KeyA = "a",
+  KeyB = "b",
+  KeyC = "c",
+  KeyD = "d",
+  KeyE = "e",
+  KeyF = "f",
+  KeyG = "g",
+  KeyH = "h",
+  KeyI = "i",
+  KeyJ = "j",
+  KeyK = "k",
+  KeyL = "l",
+  KeyM = "m",
+  KeyN = "n",
+  KeyO = "o",
+  KeyP = "p",
+  KeyQ = "q",
+  KeyR = "r",
+  KeyS = "s",
+  KeyT = "t",
+  KeyU = "u",
+  KeyV = "v",
+  KeyW = "w",
+  KeyX = "x",
+  KeyY = "y",
+  KeyZ = "z",
 
-  Digit0 = "Digit0",
-  Digit1 = "Digit1",
-  Digit2 = "Digit2",
-  Digit3 = "Digit3",
-  Digit4 = "Digit4",
-  Digit5 = "Digit5",
-  Digit6 = "Digit6",
-  Digit7 = "Digit7",
-  Digit8 = "Digit8",
-  Digit9 = "Digit9",
 
-  F1 = "F1",
-  F2 = "F2",
-  F3 = "F3",
-  F4 = "F4",
-  F5 = "F5",
-  F6 = "F6",
-  F7 = "F7",
-  F8 = "F8",
-  F9 = "F9",
-  F10 = "F10",
-  F11 = "F11",
-  F12 = "F12",
-
-  ShiftLeft = "ShiftLeft",
-  ShiftRight = "ShiftRight",
-  ControlLeft = "ControlLeft",
-  ControlRight = "ControlRight",
-  AltLeft = "AltLeft",
-  AltRight = "AltRight",
-  MetaLeft = "MetaLeft",
-  MetaRight = "MetaRight",
+  Digit0 = "0",
+  Digit1 = "1",
+  Digit2 = "2",
+  Digit3 = "3",
+  Digit4 = "4",
+  Digit5 = "5",
+  Digit6 = "6",
+  Digit7 = "7",
+  Digit8 = "8",
+  Digit9 = "9",
 
   ArrowUp = "ArrowUp",
   ArrowDown = "ArrowDown",
   ArrowLeft = "ArrowLeft",
   ArrowRight = "ArrowRight",
 
-  Space = "Space",
-  Enter = "Enter",
-  Tab = "Tab",
-  Backspace = "Backspace",
-  Delete = "Delete",
-  Escape = "Escape",
-  Home = "Home",
-  End = "End",
-  PageUp = "PageUp",
-  PageDown = "PageDown",
-  Insert = "Insert",
-  CapsLock = "CapsLock",
-  ContextMenu = "ContextMenu",
-
   // These are not real codes, but ones we map. As we do not want to make
   // a distinction between ShiftLeft and ShiftRight
-  Control = "Control",
-  Alt = "Alt",
-  Shift = "Shift",
-  Meta = "Meta",
-}
+  Control = "control",
+  Alt = "alt",
+  Shift = "shift",
+  Meta = "meta",
 
-export type KeyCombo = KeyCode[];
+  Empty = '',
+}
 
 /**
  * KeyCodes we consider modifiers
  */
 export const ModifierKeyCodes: KeyCode[] = [
-  KeyCode.ShiftLeft,
-  KeyCode.ShiftRight,
-  KeyCode.ControlLeft,
-  KeyCode.ControlRight,
-  KeyCode.AltLeft,
-  KeyCode.AltRight,
-  KeyCode.MetaLeft,
-  KeyCode.MetaRight,
+  KeyCode.Control,
+  KeyCode.Alt,
+  KeyCode.Shift,
+  KeyCode.Meta,
 ];
-
-
-/**
- * Returns a more human-readable string for the give key
- * @param code
- */
-function getReadableKeyLabel(code: KeyCode): string {
-  if (code.startsWith('Key')) {
-    return code.slice(3);
-  }
-
-  if (code.startsWith('Digit')) {
-    return code.slice(5);
-  }
-
-  if (code.startsWith("Shift")) {
-    return "Shift";
-  }
-
-  if (code.startsWith("Control")) {
-    return "Ctrl";
-  }
-
-  if (code.startsWith("Alt")) {
-    return "Alt";
-  }
-
-  if (code.startsWith("Meta")) {
-    return "Meta ⌘";
-  }
-
-  if (code.startsWith("Arrow")) {
-    return code.slice(5);
-  }
-
-  return code;
-}
 
 /**
  * Emitted if a combo has been recorded
@@ -168,9 +92,9 @@ export interface KeyBindEvent {
  * Add any combo's in this array which cannot be used by any KeyBinds
  * Example: Page refresh
  */
-const ReservedKeyBinds: KeyCombo[] = [
-  [KeyCode.Control, KeyCode.KeyR],
-  [KeyCode.Meta, KeyCode.KeyR]
+const ReservedKeyBinds: KeyBind[] = [
+  {control: true, key: KeyCode.KeyR},
+  {meta: true, key: KeyCode.KeyR},
 ]
 
 /**
@@ -178,8 +102,8 @@ const ReservedKeyBinds: KeyCombo[] = [
  * To add a new keybind to the system, all you have to do it add it here. Event system, and settings page
  * Will update automatically.
  */
-export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyCombo[]>> = {
-  [KeyBindTarget.ToggleSideNav]: [[KeyCode.KeyH]]
+export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyBind[]>> = {
+  [KeyBindTarget.ToggleSideNav]: [{key: KeyCode.KeyH}]
 } as const;
 
 export const AllKeyBindTargets: KeyBindTarget[] = Object.keys(KeyBindTarget) as KeyBindTarget[];
@@ -196,30 +120,30 @@ export class KeyBindService {
    * All key binds that could be activated
    * @private
    */
-  private readonly activeKeyBinds = computed<Record<KeyBindTarget, KeyCombo[]>>(() => {
+  private readonly activeKeyBinds = computed<Record<KeyBindTarget, KeyBind[]>>(() => {
     const customKeyBindsRaw =  this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
 
-    const customKeyBinds: Partial<Record<KeyBindTarget, KeyCombo[]>> = {};
-    for (const [target, combos] of Object.entries(customKeyBindsRaw) as [KeyBindTarget, KeyCombo[]][]) {
-      customKeyBinds[target] = combos.filter(combo => !this.isReservedKeyCombo(combo));
+    const customKeyBinds: Partial<Record<KeyBindTarget, KeyBind[]>> = {};
+    for (const [target, combos] of Object.entries(customKeyBindsRaw) as [KeyBindTarget, KeyBind[]][]) {
+      customKeyBinds[target] = combos.filter(combo => !this.isReservedKeyBind(combo));
     }
 
     return {
       ...DefaultKeyBinds,
       ...customKeyBinds,
-    } satisfies Record<KeyBindTarget, readonly KeyCombo[]>;
+    } satisfies Record<KeyBindTarget, readonly KeyBind[]>;
   });
 
   /**
    * A record of all possible keybinds in Kavita, as configured by the user
    */
-  public readonly allKeyBinds = computed<Record<KeyBindTarget, KeyCombo[]>>(() => {
+  public readonly allKeyBinds = computed<Record<KeyBindTarget, KeyBind[]>>(() => {
     const customKeyBinds =  this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
 
     return {
       ...DefaultKeyBinds,
       ...customKeyBinds,
-    } satisfies Record<KeyBindTarget, readonly KeyCombo[]>;
+    } satisfies Record<KeyBindTarget, readonly KeyBind[]>;
   });
 
   /**
@@ -229,7 +153,7 @@ export class KeyBindService {
   private readonly listenedKeys = computed(() => {
     const keyBinds = this.activeKeyBinds();
     const combos = Object.values(keyBinds);
-    const allKeys = combos.flatMap(c => c).flatMap(c => c);
+    const allKeys = combos.flatMap(c => c).flatMap(c => c).map(kb => kb.key);
     return new Set(allKeys);
   });
 
@@ -244,49 +168,32 @@ export class KeyBindService {
     this.document.addEventListener('keydown', e => this.handleKeyEvent(e));
   }
 
-  /**
-   * Returns a more human-readable string for the given combo
-   * @param combo
-   */
-  public getReadableComboLabel(combo: KeyCombo): string {
-    return combo.map(getReadableKeyLabel).join("+")
-  }
-
   private handleKeyEvent(event: KeyboardEvent) {
-    if (!this.listenedKeys().has(event.code as KeyCode)) return;
+    const eventKey = event.key.toLowerCase() as KeyCode;
+
+    if (!this.listenedKeys().has(eventKey)) return;
     if (this.isEditableTarget(event.target)) return;
 
-    const combo = new Set<KeyCode>();
-    if (event.ctrlKey) combo.add(KeyCode.Control);
-    if (event.altKey) combo.add(KeyCode.Alt);
-    if (event.shiftKey) combo.add(KeyCode.Shift);
-    if (event.metaKey) combo.add(KeyCode.Meta);
+    const activeKeyBinds = this.activeKeyBinds();
+    for (const [target, keybinds] of Object.entries(activeKeyBinds)) {
+      for (const keybind of keybinds) {
 
-    combo.add(event.code as KeyCode)
-    this.checkCombo(combo, event);
-  }
+        if (event.altKey !== keybind.alt) continue;
+        if (event.metaKey !== keybind.meta) continue;
+        if (event.ctrlKey !== keybind.control) continue;
+        if (event.shiftKey !== keybind.shift) continue;
+        if (eventKey !== keybind.key) continue;
 
-  private checkCombo(activeCombo: Set<KeyCode>, e: KeyboardEvent) {
-    const keybinds = this.activeKeyBinds();
-    if (!activeCombo) return;
-
-    for (const [target, combos] of Object.entries(keybinds)) {
-      for (const combo of combos) {
-        if (combo.length !== activeCombo.size) continue;
-
-        const allPressed = combo.every(key => activeCombo.has(key));
-        if (!allPressed) continue
-
-        const event = {
+        const keyBindEvent = {
           target: target as KeyBindTarget,
           triggered: false,
         };
 
-        this.eventsSubject.next(event);
+        this.eventsSubject.next(keyBindEvent);
 
-        if (event.triggered) {
-          e.preventDefault();
-          e.stopPropagation();
+        if (keyBindEvent.triggered) {
+          event.preventDefault();
+          event.stopPropagation();
         }
       }
     }
@@ -323,46 +230,49 @@ export class KeyBindService {
     ).subscribe();
   }
 
+  public areKeyBindsEqual(k1: KeyBind, k2: KeyBind) {
+    return (
+      (k1.alt ?? false) === (k2.alt ?? false) &&
+      (k1.shift ?? false) === (k2.shift ?? false) &&
+      (k1.control ?? false) === (k2.control ?? false) &&
+      (k1.meta ?? false) === (k2.meta ?? false) &&
+      k1.key === k2.key
+    );
+  }
+
+
   /**
    * Checks the given combo against the ReservedKeyBinds list. If true, combo should be considered invalid and unusable
-   * @param combo
+   * @param keyBind
    */
-  public isReservedKeyCombo(combo: KeyCombo) {
+  public isReservedKeyBind(keyBind: KeyBind) {
     for (let reservedKeyBind of ReservedKeyBinds) {
-      if (combo.length !== reservedKeyBind.length) continue;
-
-      const allMatch = combo.every((key => reservedKeyBind.includes(key)));
-      if (allMatch) return true;
+      console.log(reservedKeyBind, keyBind, this.areKeyBindsEqual(reservedKeyBind, keyBind))
+      if (this.areKeyBindsEqual(reservedKeyBind, keyBind)) {
+        return true;
+      }
     }
 
     return false;
   }
 
   /**
-   * Returns true if the given combos are equal to the default ones, and can be skipped when saving to user preferences
+   * Returns true if the given keyBinds are equal to the default ones for the target, and can be skipped when saving to user preferences
    * @param target
-   * @param combos
+   * @param keyBinds
    */
-  public isDefaultKeyBinds(target: KeyBindTarget, combos: KeyCombo[]) {
-    const defaultCombos = DefaultKeyBinds[target];
-    if (defaultCombos.length !== combos.length) return false;
+  public isDefaultKeyBinds(target: KeyBindTarget, keyBinds: KeyBind[]) {
+    const defaultKeyBinds = DefaultKeyBinds[target];
 
-    for (let combo of combos) {
-      let foundMatch = false;
+    if (defaultKeyBinds.length !== keyBinds.length) return false;
 
-      for (let defaultCombo of defaultCombos) {
-        if (defaultCombo.length !== combo.length) continue;
-
-        if (combo.every(k => defaultCombo.includes(k))) {
-          foundMatch = true;
-          break;
-        }
+    for (let keyBind of keyBinds) {
+      if (defaultKeyBinds.some(k => this.areKeyBindsEqual(k, keyBind))) {
+        return true;
       }
-
-      if (!foundMatch) return false;
     }
 
-    return true;
+    return false;
   }
 
 }
