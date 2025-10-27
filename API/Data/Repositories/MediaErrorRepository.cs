@@ -16,7 +16,7 @@ public interface IMediaErrorRepository
     void Attach(MediaError error);
     void Remove(MediaError error);
     void Remove(IList<MediaError> errors);
-    Task<MediaError> Find(string filename);
+    Task<MediaError?> Find(string filename);
     IEnumerable<MediaErrorDto> GetAllErrorDtosAsync();
     Task<bool> ExistsAsync(MediaError error);
     Task DeleteAll();

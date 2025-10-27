@@ -274,7 +274,7 @@ export class SideNavComponent implements OnInit {
 
     const stream = $event.item.data;
     // Offset the home, back, and customize button
-    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex - 3).subscribe({
+    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex - 3, false).subscribe({
       next: () => {
         this.showAllSubject.next(this.showAll);
         this.cdRef.markForCheck();
