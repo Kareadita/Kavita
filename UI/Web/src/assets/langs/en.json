@@ -1992,8 +1992,10 @@
         "key-bind-tooltip-OpenSearch": "Open the top search bar",
         "key-bind-title-NavigateToScrobbling": "Open Scrobbling",
         "key-bind-tooltip-NavigateToScrobbling": "Open settings page on the Scrobbling tab",
+        "key-bind-title-Escape": "Escape",
+        "key-bind-tooltip-Escape": "Close the currently open context",
 
-        "image-reader": "Image Reader",
+        "readers": "Readers",
         "key-bind-title-ToggleFullScreen":  "Toggle full screen",
         "key-bind-tooltip-ToggleFullScreen":  "",
         "key-bind-title-BookmarkPage":  "Bookmark current page",
@@ -2004,8 +2006,10 @@
         "key-bind-tooltip-GoTo":  "Open a prompt to switch pages",
         "key-bind-title-ToggleMenu":  "Toggle menu",
         "key-bind-tooltip-ToggleMenu":  "Toggles to reader menu",
-
-        "book-reader": "Book Reader"
+        "key-bind-title-PageLeft": "Page left",
+        "key-bind-tooltip-PageLeft": "Move one page to the left",
+        "key-bind-title-PageRight": "Page right",
+        "key-bind-tooltip-PageRight": "Move one page to the right"
     },
 
     "collection-detail": {

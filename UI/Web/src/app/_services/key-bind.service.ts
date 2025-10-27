@@ -55,7 +55,8 @@ export enum KeyCode {
   ArrowRight = "arrowright",
 
   Comma = ',',
-  Space = 'space',
+  Space = ' ',
+  Escape = 'escape',
 
   // These are not real codes, but ones we map. As we do not want to make
   // a distinction between ShiftLeft and ShiftRight
@@ -119,6 +120,9 @@ export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyBind[]>> = {
   [KeyBindTarget.OpenHelp]: [{key: KeyCode.KeyH}],
   [KeyBindTarget.GoTo]: [{key: KeyCode.KeyG}],
   [KeyBindTarget.ToggleMenu]: [{key: KeyCode.Space}],
+  [KeyBindTarget.PageLeft]: [{key: KeyCode.ArrowLeft}, {key: KeyCode.ArrowUp}],
+  [KeyBindTarget.PageRight]: [{key: KeyCode.ArrowRight}, {key: KeyCode.ArrowDown}],
+  [KeyBindTarget.Escape]: [{key: KeyCode.Escape}]
 } as const;
 
 type KeyBindGroup = {
@@ -137,28 +141,28 @@ export const KeyBindGroups: KeyBindGroup[] = [
     elements: [
       {target: KeyBindTarget.NavigateToSettings},
       {target: KeyBindTarget.OpenSearch},
-      {target: KeyBindTarget.NavigateToScrobbling, kavitaPlus: true}
+      {target: KeyBindTarget.NavigateToScrobbling, kavitaPlus: true},
+      {target: KeyBindTarget.Escape},
     ]
   },
   {
-    title: 'image-reader',
+    title: 'readers',
     elements: [
       {target: KeyBindTarget.ToggleFullScreen},
       {target: KeyBindTarget.BookmarkPage},
       {target: KeyBindTarget.OpenHelp},
       {target: KeyBindTarget.GoTo},
       {target: KeyBindTarget.ToggleMenu},
+      {target: KeyBindTarget.PageRight},
+      {target: KeyBindTarget.PageLeft},
     ],
-  },
-  {
-    title: 'book-reader',
-    elements: []
   }
 ];
 
 interface RegisterListenerOptions {
-  fireInEditable?: boolean;
-  condition$?: Observable<boolean>;
+  fireInEditable?: boolean; // default false
+  condition$?: Observable<boolean>; // default of(true)
+  markAsTriggered?: boolean; // default true
 }
 
 @Injectable({
@@ -298,11 +302,10 @@ export class KeyBindService {
     targetFilter: KeyBindTarget[],
     options?: RegisterListenerOptions,
   ) {
-    if (targetFilter.length === 0) return;
-
     const {
       fireInEditable = false,
       condition$ = of(true),
+      markAsTriggered = true,
     } = options ?? {};
 
     this.activeTargets.update(s => [...s, ...targetFilter]);
@@ -315,7 +318,7 @@ export class KeyBindService {
       filter(([_, ok]) => ok),
       map(([e, _]) => e),
       tap(e => {
-        e.triggered = true; // Set before callback so consumers may override
+        e.triggered = markAsTriggered; // Set before callback so consumers may override
 
         callback(e);
       }),

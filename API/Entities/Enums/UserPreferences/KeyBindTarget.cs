@@ -26,5 +26,14 @@ public enum KeyBindTarget
     GoTo = 6,
 
     [Description(nameof(ToggleMenu))]
-    ToggleMenu = 7
+    ToggleMenu = 7,
+
+    [Description(nameof(PageLeft))]
+    PageLeft = 8,
+
+    [Description(nameof(PageRight))]
+    PageRight = 9,
+
+    [Description(nameof(Escape))]
+    Escape = 10,
 }

@@ -1,12 +1,21 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {KeyBind} from "../_models/preferences/preferences";
+import {KeyCode} from "../_services/key-bind.service";
 
 @Pipe({
   name: 'keyBind'
 })
 export class KeyBindPipe implements PipeTransform {
 
-  transform(keyBind?: KeyBind): string {
+  private readonly customMappings: Partial<Record<KeyCode, string>> = {
+    [KeyCode.ArrowDown]: '↓',
+    [KeyCode.ArrowUp]: '↑',
+    [KeyCode.ArrowLeft]: '⇽',
+    [KeyCode.ArrowRight]: '⇾',
+    [KeyCode.Space]: 'space',
+  } as const;
+
+  transform(keyBind: KeyBind | undefined): string {
     if (!keyBind) return '';
 
     let keys: string[] = [];
@@ -19,7 +28,7 @@ export class KeyBindPipe implements PipeTransform {
     const isMac = navigator.platform.includes('Mac');
     if (keyBind.meta) keys.push(isMac ? '⌘' : 'Win');
 
-    keys.push(keyBind.key.toUpperCase())
+    keys.push(this.customMappings[keyBind.key] ?? keyBind.key.toUpperCase())
 
     return keys.join("+")
   }

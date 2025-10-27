@@ -54,5 +54,8 @@ export enum KeyBindTarget {
   OpenHelp = 'OpenHelp',
   GoTo = "GoTo",
   ToggleMenu = 'ToggleMenu',
+  PageLeft = 'PageLeft',
+  PageRight = 'PageRight',
+  Escape = 'Escape',
 }
 

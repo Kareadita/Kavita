@@ -11,7 +11,8 @@ import {
   inject,
   model,
   OnDestroy,
-  OnInit, signal,
+  OnInit,
+  signal,
   Signal,
   ViewChild
 } from '@angular/core';
@@ -39,7 +40,7 @@ import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import {Stack} from 'src/app/shared/data-structures/stack';
-import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
@@ -511,6 +512,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.destroyRef,
       async (e) => {
         switch (e.target) {
+          case KeyBindTarget.Escape:
+            e.triggered = false; // Ensure escape gets propagated
+            if (this.menuOpen) {
+              this.toggleMenu();
+              return;
+            }
+            if (this.shortCutModalOpen()){
+              return;
+            }
+            this.closeReader();
+            break;
+          case KeyBindTarget.PageLeft:
+            this.handlePageLeft();
+            break;
+          case KeyBindTarget.PageRight:
+            this.handlePageRight();
+            break
           case KeyBindTarget.ToggleFullScreen:
             this.toggleFullscreen();
             break;
@@ -530,10 +548,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             break;
         }
       },
-      [KeyBindTarget.ToggleFullScreen, KeyBindTarget.BookmarkPage, KeyBindTarget.OpenHelp, KeyBindTarget.GoTo, KeyBindTarget.ToggleMenu]
+      [KeyBindTarget.ToggleFullScreen, KeyBindTarget.BookmarkPage, KeyBindTarget.OpenHelp, KeyBindTarget.GoTo,
+        KeyBindTarget.ToggleMenu, KeyBindTarget.PageRight, KeyBindTarget.PageLeft, KeyBindTarget.Escape],
     )
-
-
   }
 
   ngOnInit(): void {
@@ -643,47 +660,38 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.readerService.disableWakeLock();
   }
 
+  private handlePageLeft() {
+    switch (this.readerMode) {
+      case ReaderMode.LeftRight:
+        if (this.checkIfPaginationAllowed(KeyDirection.Left)) {
+          this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
+        }
+        break
+      case ReaderMode.UpDown:
+        if (this.checkIfPaginationAllowed(KeyDirection.Down)) {
+          this.nextPage();
+        }
+    }
+  }
+
+  private handlePageRight() {
+    switch (this.readerMode) {
+      case ReaderMode.LeftRight:
+        if (this.checkIfPaginationAllowed(KeyDirection.Left)) {
+          this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
+        }
+        break
+      case ReaderMode.UpDown:
+        if (this.checkIfPaginationAllowed(KeyDirection.Down)) {
+          this.prevPage();
+        }
+    }
+  }
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
   onResize() {
     this.disableDoubleRendererIfScreenTooSmall();
-  }
-
-  @HostListener('window:keyup', ['$event'])
-  async handleKeyPress(event: KeyboardEvent) {
-    switch (this.readerMode) {
-      case ReaderMode.LeftRight:
-        if (event.key === KEY_CODES.RIGHT_ARROW) {
-          if (!this.checkIfPaginationAllowed(KeyDirection.Right)) return;
-          this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
-        } else if (event.key === KEY_CODES.LEFT_ARROW) {
-          if (!this.checkIfPaginationAllowed(KeyDirection.Left)) return;
-          this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
-        }
-        break;
-      case ReaderMode.UpDown:
-        if (event.key === KEY_CODES.UP_ARROW) {
-          if (!this.checkIfPaginationAllowed(KeyDirection.Up)) return;
-          this.prevPage();
-        } else if (event.key === KEY_CODES.DOWN_ARROW) {
-          if (!this.checkIfPaginationAllowed(KeyDirection.Down)) return;
-          this.nextPage();
-        }
-        break;
-      case ReaderMode.Webtoon:
-        break;
-    }
-
-    if (event.key === KEY_CODES.ESC_KEY) {
-      if (this.menuOpen) {
-        this.toggleMenu();
-        event.stopPropagation();
-        event.preventDefault();
-        return;
-      }
-      this.closeReader();
-    }
   }
 
   setupReaderSettings() {
@@ -1849,20 +1857,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.shortCutModalOpen.set(true);
     const ref = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
     ref.componentInstance.shortcuts = [
-      {key: '⇽', description: 'prev-page'},
-      {key: '⇾', description: 'next-page'},
-      {key: '↑', description: 'prev-page'},
-      {key: '↓', description: 'next-page'},
-      {key: 'G', description: 'go-to'},
-      {key: 'B', description: 'bookmark'},
+      {keyBindTarget: KeyBindTarget.PageLeft, description: 'prev-page'},
+      {keyBindTarget: KeyBindTarget.PageRight, description: 'next-page'},
+      {keyBindTarget: KeyBindTarget.GoTo, description: 'go-to'},
+      {keyBindTarget: KeyBindTarget.ToggleFullScreen},
+      {keyBindTarget: KeyBindTarget.ToggleMenu},
+      {keyBindTarget: KeyBindTarget.OpenHelp},
+      {keyBindTarget: KeyBindTarget.BookmarkPage, description: 'bookmark'},
       {key: translate('shortcuts-modal.double-click'), description: 'bookmark'},
-      {key: 'ESC', description: 'close-reader'},
-      {key: 'SPACE', description: 'toggle-menu'},
     ];
 
-    ref.closed.pipe(
-      tap(() => this.shortCutModalOpen.set(false)),
-    ).subscribe();
+    merge(ref.closed, ref.dismissed).subscribe(() => this.shortCutModalOpen.set(false));
   }
 
   // menu only code
