@@ -3,7 +3,7 @@
     {{t('description', {max: MAX_KEYBINDS_PER_TARGET})}}
   </p>
 
-  <form [formGroup]="keyBindForm" class="row">
+  <form [formGroup]="keyBindForm" class="row mb-4">
 
     @for (keyBindGroup of filteredKeyBindGroups(); track keyBindGroup.title) {
       @if (!$first) {

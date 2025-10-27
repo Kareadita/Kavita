@@ -36,7 +36,7 @@ import {
 import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalRef, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import {Stack} from 'src/app/shared/data-structures/stack';
@@ -513,12 +513,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       async (e) => {
         switch (e.target) {
           case KeyBindTarget.Escape:
-            e.triggered = false; // Ensure escape gets propagated
             if (this.menuOpen) {
               this.toggleMenu();
               return;
             }
             if (this.shortCutModalOpen()){
+              this.closeShortCutModal();
               return;
             }
             this.closeReader();
@@ -1849,14 +1849,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   shortCutModalOpen = signal(false);
+  shortCutModalRef: NgbModalRef | undefined;
+
+  private closeShortCutModal() {
+    if (this.shortCutModalRef) {
+      this.shortCutModalRef.dismiss();
+      this.shortCutModalRef = undefined;
+    }
+  }
 
   // This is menu only code
   openShortcutModal() {
     if (this.shortCutModalOpen()) return;
 
     this.shortCutModalOpen.set(true);
-    const ref = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
-    ref.componentInstance.shortcuts = [
+    this.shortCutModalRef = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
+    this.shortCutModalRef.componentInstance.shortcuts = [
       {keyBindTarget: KeyBindTarget.PageLeft, description: 'prev-page'},
       {keyBindTarget: KeyBindTarget.PageRight, description: 'next-page'},
       {keyBindTarget: KeyBindTarget.GoTo, description: 'go-to'},
@@ -1867,7 +1875,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       {key: translate('shortcuts-modal.double-click'), description: 'bookmark'},
     ];
 
-    merge(ref.closed, ref.dismissed).subscribe(() => this.shortCutModalOpen.set(false));
+    merge(this.shortCutModalRef.closed, this.shortCutModalRef.dismissed).subscribe(() => this.shortCutModalOpen.set(false));
   }
 
   // menu only code

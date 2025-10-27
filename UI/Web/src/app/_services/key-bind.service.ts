@@ -160,9 +160,18 @@ export const KeyBindGroups: KeyBindGroup[] = [
 ];
 
 interface RegisterListenerOptions {
-  fireInEditable?: boolean; // default false
-  condition$?: Observable<boolean>; // default of(true)
-  markAsTriggered?: boolean; // default true
+  /**
+   * @default false
+   */
+  fireInEditable?: boolean;
+  /**
+   * @default of(true)
+   */
+  condition$?: Observable<boolean>;
+  /**
+   * @default true
+   */
+  markAsTriggered?: boolean;
 }
 
 @Injectable({

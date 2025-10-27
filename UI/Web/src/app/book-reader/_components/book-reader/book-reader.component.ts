@@ -69,6 +69,8 @@ import {environment} from "../../../../environments/environment";
 import {LoadPageEvent} from "../_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
 import {FontService} from "../../../_services/font.service";
 import afterFrame from "afterframe";
+import {KeyBindService} from "../../../_services/key-bind.service";
+import {KeyBindTarget} from "../../../_models/preferences/preferences";
 
 
 interface HistoryPoint {
@@ -158,6 +160,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly layoutService = inject(LayoutMeasurementService);
   private readonly colorscapeService = inject(ColorscapeService);
   private readonly fontService = inject(FontService);
+  private readonly keyBindService = inject(KeyBindService);
 
   libraryId!: number;
   seriesId!: number;
@@ -652,6 +655,48 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
+
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      async (e) => {
+        const activeElement = this.document.activeElement as HTMLElement;
+        const isInputFocused = activeElement.tagName === 'INPUT'
+          || activeElement.tagName === 'TEXTAREA' ||
+          activeElement.contentEditable === 'true' ||
+          activeElement.closest('.ql-editor'); // Quill editor class
+
+        if (isInputFocused) {
+          e.triggered = false;
+          return;
+        }
+
+        switch (e.target) {
+          case KeyBindTarget.PageLeft:
+            this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+            break;
+          case KeyBindTarget.PageRight:
+            this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
+            break;
+          case KeyBindTarget.Escape:
+            const isHighlighting = window.getSelection()?.toString() != '';
+            if (isHighlighting && this.isLineOverlayOpen()) return;
+
+            this.closeReader();
+            break;
+          case KeyBindTarget.GoTo:
+            await this.goToPage();
+            break;
+          case KeyBindTarget.ToggleFullScreen:
+            this.applyFullscreen();
+            break;
+          case KeyBindTarget.ToggleMenu:
+            this.actionBarVisible.update(x => !x);
+            break;
+        }
+      },
+      [KeyBindTarget.PageLeft, KeyBindTarget.PageRight, KeyBindTarget.Escape, KeyBindTarget.GoTo,
+        KeyBindTarget.ToggleFullScreen, KeyBindTarget.ToggleMenu],
+    );
   }
 
   /**
@@ -993,41 +1038,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.scrollTo(resumeElement, 30); // This works pretty well, but not perfect
-    }
-  }
-
-  @HostListener('window:keydown', ['$event'])
-  async handleKeyPress(event: KeyboardEvent) {
-    const activeElement = document.activeElement as HTMLElement;
-    const isInputFocused = activeElement.tagName === 'INPUT'
-      || activeElement.tagName === 'TEXTAREA' ||
-      activeElement.contentEditable === 'true' ||
-      activeElement.closest('.ql-editor'); // Quill editor class
-
-    if (isInputFocused) return;
-
-    switch (event.key) {
-      case KEY_CODES.RIGHT_ARROW:
-        this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
-        break;
-      case KEY_CODES.LEFT_ARROW:
-        this.movePage(this.readingDirection() === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
-        break;
-      case KEY_CODES.ESC_KEY:
-        const isHighlighting = window.getSelection()?.toString() != '';
-        if (isHighlighting || this.isLineOverlayOpen()) return;
-
-        this.closeReader();
-        break;
-      case KEY_CODES.G:
-        await this.goToPage();
-        break;
-      case KEY_CODES.F:
-        this.applyFullscreen();
-        break;
-      case KEY_CODES.SPACE:
-        this.actionBarVisible.update(x => !x);
-        break;
     }
   }
 
