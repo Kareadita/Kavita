@@ -64,7 +64,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   ngOnInit(): void {
     const keyBinds = this.keyBindService.allKeyBinds();
     const groupConfig = Object.entries(keyBinds).reduce((acc, [key, value]) => {
-      acc[key as KeyBindTarget] = this.fb.array(this.toFormControls(value));
+      acc[key as KeyBindTarget] = this.fb.array(this.toFormControls(value), this.keyBindArrayValidator());
       return acc;
     }, {} as Record<KeyBindTarget, FormArray<FormControl<KeyBind>>>);
 
@@ -118,7 +118,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * @param key
    */
   resetKeybindsToDefaults(key: KeyBindTarget) {
-    this.keyBindForm.setControl(key, this.fb.array(this.toFormControls(DefaultKeyBinds[key])));
+    this.keyBindForm.setControl(key, this.fb.array(this.toFormControls(DefaultKeyBinds[key]), this.keyBindArrayValidator()));
   }
 
   /**
@@ -173,6 +173,23 @@ export class ManageCustomKeyBindsComponent implements OnInit {
       }
 
       return null;
+    }
+  }
+
+  private keyBindArrayValidator(): ValidatorFn {
+    return (control) => {
+      const controls = (control as FormArray<FormControl<KeyBind>>).controls;
+
+      const anyOverlap = controls.some((c, i) => controls.some((c2, i2)=> {
+        return i !== i2 && this.keyBindService.areKeyBindsEqual(c.value, c2.value);
+      }))
+
+      if (anyOverlap) {
+        return { 'overlap-in-target': { '': '' } }
+      }
+
+      return null;
+
     }
   }
 

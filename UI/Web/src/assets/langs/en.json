@@ -1980,6 +1980,7 @@
         "key-bind-error-reserved-key-bind": "This combo is reserved and cannot be used as a key bind",
         "key-bind-error-non-modifier-required": "Your combo needs at least one non-modifier key",
         "key-bind-error-need-at-least-one-key": "Your combo needs at least one key",
+        "key-bind-error-overlap-in-target": "One or more keybinds are the same",
 
         "global": "Global",
         "key-bind-title-NavigateToSettings": "Open settings",
