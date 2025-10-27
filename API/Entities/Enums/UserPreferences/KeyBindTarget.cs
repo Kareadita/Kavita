@@ -4,6 +4,8 @@ namespace API.Entities.Enums.UserPreferences;
 
 public enum KeyBindTarget
 {
-    [Description(nameof(ToggleSideNav))]
-    ToggleSideNav = 0,
+    [Description(nameof(NavigateToSettings))]
+    NavigateToSettings = 0,
+    [Description(nameof(OpenSearch))]
+    OpenSearch = 1,
 }

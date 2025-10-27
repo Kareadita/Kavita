@@ -1,11 +1,5 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
-import {
-  AllKeyBindTargets,
-  DefaultKeyBinds,
-  KeyBindService,
-  KeyCode,
-  ModifierKeyCodes
-} from "../../_services/key-bind.service";
+import {DefaultKeyBinds, KeyBindGroups, KeyBindService, KeyCode,} from "../../_services/key-bind.service";
 import {
   FormArray,
   FormControl,
@@ -22,7 +16,7 @@ import {
   SettingKeyBindPickerComponent
 } from "../../settings/_components/setting-key-bind-picker/setting-key-bind-picker.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from "rxjs";
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap} from "rxjs";
 import {map} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
 import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badge.component";
@@ -81,27 +75,34 @@ export class ManageCustomKeyBindsComponent implements OnInit {
       debounceTime(500),
       distinctUntilChanged(),
       filter(() => this.keyBindForm.valid),
-      map(customKeyBinds => Object.fromEntries(
-        Object.entries(customKeyBinds).filter(([target, combos]) => {
-          return !this.keyBindService.isDefaultKeyBinds(target as KeyBindTarget, combos);
-        })
-      ) as Partial<Record<KeyBindTarget, KeyBind[]>>),
-      map((customKeyBinds) => {
-        return {
-          ...this.accountService.currentUserSignal()!.preferences,
-          customKeyBinds,
-        }
-      }),
+      map(formValue => this.extractCustomKeyBinds(formValue)),
+      map(customKeyBinds => this.combinePreferences(customKeyBinds)),
       switchMap(p => this.accountService.updatePreferences(p)),
       catchError(err => {
+        console.log(err);
         this.toastr.error(err)
         return of(null);
       }),
     ).subscribe();
   }
 
-  private toFormControls(combos: KeyBind[]): FormControl<KeyBind>[] {
-    return combos.map(combo => this.fb.control(combo, this.keyBindComboValidator()));
+  private extractCustomKeyBinds(formValue: Partial<Record<KeyBindTarget, KeyBind[]>>): Partial<Record<KeyBindTarget, KeyBind[]>> {
+    return Object.fromEntries(
+      Object.entries(formValue).filter(([target, keybinds]) =>
+        !this.keyBindService.isDefaultKeyBinds(target as KeyBindTarget, keybinds)
+      )
+    ) as Partial<Record<KeyBindTarget, KeyBind[]>>;
+  }
+
+  private combinePreferences(customKeyBinds: Partial<Record<KeyBindTarget, KeyBind[]>>) {
+    return {
+      ...this.accountService.currentUserSignal()!.preferences,
+      customKeyBinds,
+    };
+  }
+
+  private toFormControls(keybinds: KeyBind[]): FormControl<KeyBind>[] {
+    return keybinds.map(keyBind => this.fb.control(keyBind, this.keyBindValidator()));
   }
 
   /**
@@ -117,11 +118,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * @param key
    */
   resetKeybindsToDefaults(key: KeyBindTarget) {
-    const array = this.getFormArray(key);
-    if (!array) return;
-
-    array.clear();
-    array.push(this.toFormControls(DefaultKeyBinds[key as KeyBindTarget]));
+    this.keyBindForm.setControl(key, this.fb.array(this.toFormControls(DefaultKeyBinds[key])));
   }
 
   /**
@@ -130,11 +127,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * @param index
    */
   selectIndex(key: KeyBindTarget, index: number) {
-    this.selectedIndexes.update(m => {
-      const newMap = new Map(m);
-      newMap.set(key, index);
-      return newMap;
-    });
+    this.selectedIndexes.update(map => new Map(map).set(key, index));
   }
 
   /**
@@ -146,7 +139,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     if (!array) return;
 
     if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
-      array.push(this.fb.control({key: KeyCode.Empty}, this.keyBindComboValidator()));
+      array.push(this.fb.control({key: KeyCode.Empty}, this.keyBindValidator()));
     }
   }
 
@@ -167,16 +160,16 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   }
 
   /**
-   * Custom validator for FormControl<KeyCombo>
+   * Custom validator for FormControl<KeyBind>
    * @private
    */
-  private keyBindComboValidator(): ValidatorFn {
+  private keyBindValidator(): ValidatorFn {
     return (control) => {
       const keyBind = (control as FormControl<KeyBind>).value;
       if (keyBind.key.length === 0) return { 'need-at-least-one-key': {'length': 0} } as ValidationErrors;
 
       if (this.keyBindService.isReservedKeyBind(keyBind)) {
-        return { 'reserved-combo': { 'keyBind': keyBind }} as ValidationErrors
+        return { 'reserved-key-bind': { 'keyBind': keyBind }} as ValidationErrors
       }
 
       return null;
@@ -184,18 +177,16 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   }
 
   /**
-   * Combined tooltip for FormControl<KeyCombo> errors
+   * Combined tooltip for FormControl<KeyBind> errors
    * @param errors
    * @protected
    */
   protected errorToolTip(errors: ValidationErrors | null): string | null {
     if (!errors) return null;
-
-    let toolTip = '';
-    for (let key of Object.keys(errors)) {
-      toolTip += ' ' + this.transLoco.translate('custom-key-binds.combo-error-' + key)
-    }
-    return toolTip.length > 0 ? toolTip.trim() : null;
+    return Object.keys(errors)
+      .map(key => this.transLoco.translate(`custom-key-binds.key-bind-error-${key}`))
+      .join(' ')
+      .trim() || null;
   }
 
   /**
@@ -216,6 +207,6 @@ export class ManageCustomKeyBindsComponent implements OnInit {
 
   protected readonly Object = Object;
   protected readonly TagBadgeCursor = TagBadgeCursor;
-  protected readonly AllKeyBindTargets = AllKeyBindTargets;
   protected readonly MAX_KEYBINDS_PER_TARGET = MAX_KEYBINDS_PER_TARGET;
+  protected readonly keyBindGroups = KeyBindGroups;
 }

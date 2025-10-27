@@ -41,7 +41,6 @@ export class NavService {
   private readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly keyBindService = inject(KeyBindService);
 
   public localStorageSideNavKey = 'kavita--sidenav--expanded';
 
@@ -126,8 +125,6 @@ export class NavService {
     const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
     this.sideNavCollapseSource.next(sideNavState);
     this.showSideNav();
-
-    this.keyBindService.registerListener(this.destroyRef, () => this.toggleSideNav(), [KeyBindTarget.ToggleSideNav]);
   }
 
   getSideNavStreams(visibleOnly = true) {

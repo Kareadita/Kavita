@@ -6,10 +6,12 @@ import {KeyBind} from "../_models/preferences/preferences";
 })
 export class KeyBindPipe implements PipeTransform {
 
-  transform(keyBind: KeyBind): string {
+  transform(keyBind?: KeyBind): string {
+    if (!keyBind) return '';
+
     let keys: string[] = [];
 
-    if (keyBind.control) keys.push('Control');
+    if (keyBind.control) keys.push('Ctrl');
     if (keyBind.shift) keys.push('Shift');
     if (keyBind.alt) keys.push('Alt');
 

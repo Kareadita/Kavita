@@ -2,7 +2,7 @@ import {computed, DestroyRef, inject, Injectable} from '@angular/core';
 import {AccountService} from "./account.service";
 import {KeyBind, KeyBindTarget} from "../_models/preferences/preferences";
 import {DOCUMENT} from "@angular/common";
-import {filter, ReplaySubject, tap} from "rxjs";
+import {filter, Subject, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
@@ -53,6 +53,8 @@ export enum KeyCode {
   ArrowLeft = "ArrowLeft",
   ArrowRight = "ArrowRight",
 
+  Comma = ',',
+
   // These are not real codes, but ones we map. As we do not want to make
   // a distinction between ShiftLeft and ShiftRight
   Control = "control",
@@ -86,6 +88,10 @@ export interface KeyBindEvent {
    * observable. When true after all observables have completed, will cancel the event that triggered it
    */
   triggered: boolean;
+  /**
+   * If the original event's target was editable
+   */
+  inEditableElement: boolean;
 }
 
 /**
@@ -99,14 +105,33 @@ const ReservedKeyBinds: KeyBind[] = [
 
 /**
  * This record should hold all KeyBinds Kavita has to offer, with their default combination(s).
- * To add a new keybind to the system, all you have to do it add it here. Event system, and settings page
- * Will update automatically.
+ * To add a new keybind to the system, add it here and in the backend enum. Add it to the KeyBindGroups
+ * array to be displayed on the settings page
  */
 export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyBind[]>> = {
-  [KeyBindTarget.ToggleSideNav]: [{key: KeyCode.KeyH}]
+  [KeyBindTarget.NavigateToSettings]: [{meta: true, key: KeyCode.Comma}],
+  [KeyBindTarget.OpenSearch]: [{control: true, key: KeyCode.KeyK}, {meta: true, key: KeyCode.KeyK}],
 } as const;
 
-export const AllKeyBindTargets: KeyBindTarget[] = Object.keys(KeyBindTarget) as KeyBindTarget[];
+type KeyBindGroup = {
+  title: string,
+  keyBindTargets: KeyBindTarget[];
+}
+
+export const KeyBindGroups: KeyBindGroup[] = [
+  {
+    title: 'global',
+    keyBindTargets: [KeyBindTarget.NavigateToSettings, KeyBindTarget.OpenSearch]
+  },
+  {
+    title: 'image-reader',
+    keyBindTargets: [],
+  },
+  {
+    title: 'book-reader',
+    keyBindTargets: []
+  }
+];
 
 @Injectable({
   providedIn: 'root'
@@ -116,12 +141,19 @@ export class KeyBindService {
   private readonly accountService = inject(AccountService);
   private readonly document = inject(DOCUMENT);
 
+  private readonly customKeyBinds = computed(() => {
+    const customKeyBinds = this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
+    return Object.fromEntries(Object.entries(customKeyBinds).filter(([target, _]) => {
+      return DefaultKeyBinds[target as KeyBindTarget] !== undefined; // Filter out unused or old targets
+    }))
+  });
+
   /**
    * All key binds that could be activated
    * @private
    */
   private readonly activeKeyBinds = computed<Record<KeyBindTarget, KeyBind[]>>(() => {
-    const customKeyBindsRaw =  this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
+    const customKeyBindsRaw =  this.customKeyBinds();
 
     const customKeyBinds: Partial<Record<KeyBindTarget, KeyBind[]>> = {};
     for (const [target, combos] of Object.entries(customKeyBindsRaw) as [KeyBindTarget, KeyBind[]][]) {
@@ -138,7 +170,7 @@ export class KeyBindService {
    * A record of all possible keybinds in Kavita, as configured by the user
    */
   public readonly allKeyBinds = computed<Record<KeyBindTarget, KeyBind[]>>(() => {
-    const customKeyBinds =  this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
+    const customKeyBinds =  this.customKeyBinds();
 
     return {
       ...DefaultKeyBinds,
@@ -157,7 +189,7 @@ export class KeyBindService {
     return new Set(allKeys);
   });
 
-  private readonly eventsSubject = new ReplaySubject<KeyBindEvent>(1);
+  private readonly eventsSubject = new Subject<KeyBindEvent>();
   /**
    * KeyBindPressEvent events. Subscribe here for full control, otherwise use KeyBindService#registerListener
    */
@@ -172,21 +204,25 @@ export class KeyBindService {
     const eventKey = event.key.toLowerCase() as KeyCode;
 
     if (!this.listenedKeys().has(eventKey)) return;
-    if (this.isEditableTarget(event.target)) return;
+
+    const activeKeyBind: KeyBind = {
+      key: eventKey,
+      control: event.ctrlKey,
+      meta: event.metaKey,
+      shift: event.shiftKey,
+      alt: event.altKey,
+    }
 
     const activeKeyBinds = this.activeKeyBinds();
     for (const [target, keybinds] of Object.entries(activeKeyBinds)) {
       for (const keybind of keybinds) {
 
-        if (event.altKey !== keybind.alt) continue;
-        if (event.metaKey !== keybind.meta) continue;
-        if (event.ctrlKey !== keybind.control) continue;
-        if (event.shiftKey !== keybind.shift) continue;
-        if (eventKey !== keybind.key) continue;
+        if (!this.areKeyBindsEqual(activeKeyBind, keybind)) continue;
 
-        const keyBindEvent = {
+        const keyBindEvent: KeyBindEvent = {
           target: target as KeyBindTarget,
           triggered: false,
+          inEditableElement: this.isEditableTarget(event.target),
         };
 
         this.eventsSubject.next(keyBindEvent);
@@ -218,10 +254,14 @@ export class KeyBindService {
    * @param destroyRef$
    * @param callback
    * @param targetFilter
+   * @param fireInEditable if the callback should be called if the events target is editable
    */
-  public registerListener(destroyRef$: DestroyRef, callback: (e: KeyBindEvent) => void, targetFilter?: KeyBindTarget[]) {
+  public registerListener(destroyRef$: DestroyRef, callback: (e: KeyBindEvent) => void, targetFilter: KeyBindTarget[], fireInEditable: boolean = false) {
+    if (targetFilter.length === 0) return;
+
     this.events$.pipe(
       takeUntilDestroyed(destroyRef$),
+      filter(e => !e.inEditableElement || fireInEditable),
       filter(e => !targetFilter || targetFilter.includes(e.target)),
       tap(e => {
         e.triggered = true;
@@ -247,7 +287,6 @@ export class KeyBindService {
    */
   public isReservedKeyBind(keyBind: KeyBind) {
     for (let reservedKeyBind of ReservedKeyBinds) {
-      console.log(reservedKeyBind, keyBind, this.areKeyBindsEqual(reservedKeyBind, keyBind))
       if (this.areKeyBindsEqual(reservedKeyBind, keyBind)) {
         return true;
       }
@@ -263,16 +302,15 @@ export class KeyBindService {
    */
   public isDefaultKeyBinds(target: KeyBindTarget, keyBinds: KeyBind[]) {
     const defaultKeyBinds = DefaultKeyBinds[target];
+    if (!defaultKeyBinds) {
+      throw Error("Could not find default keybinds for " + target)
+    }
 
     if (defaultKeyBinds.length !== keyBinds.length) return false;
 
-    for (let keyBind of keyBinds) {
-      if (defaultKeyBinds.some(k => this.areKeyBindsEqual(k, keyBind))) {
-        return true;
-      }
-    }
-
-    return false;
+    return keyBinds.every(keyBind =>
+      defaultKeyBinds.some(defaultKeyBind => this.areKeyBindsEqual(defaultKeyBind, keyBind))
+    );
   }
 
 }

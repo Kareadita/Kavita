@@ -26,6 +26,8 @@ import {LicenseService} from "../../../_services/license.service";
 import {CdkDrag, CdkDragDrop, CdkDropList} from "@angular/cdk/drag-drop";
 import {ToastrService} from "ngx-toastr";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
+import {KeyBindService} from "../../../_services/key-bind.service";
+import {KeyBindTarget} from "../../../_models/preferences/preferences";
 
 @Component({
   selector: 'app-side-nav',
@@ -57,6 +59,7 @@ export class SideNavComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly readingProfilesService = inject(ReadingProfileService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly keyBindService = inject(KeyBindService);
 
 
   cachedData: SideNavStream[] | null = null;
@@ -146,6 +149,12 @@ export class SideNavComponent implements OnInit {
         this.navService.collapseSideNav(false);
         this.cdRef.markForCheck();
     });
+
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Account}),
+      [KeyBindTarget.NavigateToSettings],
+    );
   }
 
   ngOnInit(): void {
