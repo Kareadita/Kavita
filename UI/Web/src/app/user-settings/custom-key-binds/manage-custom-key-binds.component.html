@@ -4,7 +4,7 @@
   </p>
 
   <form [formGroup]="keyBindForm">
-    @for (key of Object.keys(DefaultKeyBinds); track key) {
+    @for (key of AllKeyBindTargets; track key) {
       @if (getFormArray(key); as array) {
         <app-setting-item
           [title]="t('key-bind-title-' + key)"
@@ -25,14 +25,14 @@
                       <i class="fa fa-warning text-danger"></i>
                     }
 
-                    {{getReadableComboLabel(combo.value) | defaultValue}}
+                    {{keyBindService.getReadableComboLabel(combo.value) | defaultValue}}
                   </app-tag-badge>
                 }
               </div>
 
               <div class="float-end">
 
-                @if (array.controls.length < 5) {
+                @if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
                   <button class="btn btn-sm" (click)="addKeyBind(key); $event.preventDefault(); $event.stopPropagation()">
                     <i class="fa fa-add"></i>
                   </button>
@@ -47,7 +47,7 @@
           </ng-template>
           <ng-template #edit>
             <div [formArrayName]="key">
-              @let index = selectedIndexes().get(key) + '';
+              @let index = (selectedIndexes().get(key) ?? 0) + '';
               @if (array.get(index)) {
                 <app-setting-key-bind-picker [formControlName]="index" />
               }

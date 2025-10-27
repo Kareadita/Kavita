@@ -2,6 +2,7 @@ import {PageLayoutMode} from '../page-layout-mode';
 import {SiteTheme} from './site-theme';
 import {HighlightSlot} from "../../book-reader/_models/annotations/highlight-slot";
 import {AgeRating} from "../metadata/age-rating";
+import {KeyCombo} from "../../_services/key-bind.service";
 
 export interface Preferences {
 
@@ -16,7 +17,7 @@ export interface Preferences {
   bookReaderHighlightSlots: HighlightSlot[];
   colorScapeEnabled: boolean;
   dataSaver: boolean;
-  customKeyBinds: Partial<Record<KeyBindTarget, string[][]>>;
+  customKeyBinds: Partial<Record<KeyBindTarget, KeyCombo[]>>;
 
   // Kavita+
   aniListScrobblingEnabled: boolean;

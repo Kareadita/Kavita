@@ -1,6 +1,6 @@
 <input
   type="text"
-  [value]="getReadableComboLabel(selectedKeys())"
+  [value]="keyBindService.getReadableComboLabel(selectedKeys())"
   (focus)="startListening()"
   (blur)="stopListening()"
   readonly

@@ -4,7 +4,6 @@ import {KeyBindTarget} from "../_models/preferences/preferences";
 import {DOCUMENT} from "@angular/common";
 import {filter, ReplaySubject, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {KEY_CODES} from "../shared/_services/utility.service";
 
 /**
  * Codes as returned by KeyBoardEvent.code
@@ -87,8 +86,17 @@ export enum KeyCode {
   PageDown = "PageDown",
   Insert = "Insert",
   CapsLock = "CapsLock",
-  ContextMenu = "ContextMenu"
+  ContextMenu = "ContextMenu",
+
+  // These are not real codes, but ones we map. As we do not want to make
+  // a distinction between ShiftLeft and ShiftRight
+  Control = "Control",
+  Alt = "Alt",
+  Shift = "Shift",
+  Meta = "Meta",
 }
+
+export type KeyCombo = KeyCode[];
 
 /**
  * KeyCodes we consider modifiers
@@ -104,19 +112,12 @@ export const ModifierKeyCodes: KeyCode[] = [
   KeyCode.MetaRight,
 ];
 
-/**
- * Returns a more human-readable string for the given combo
- * @param combo
- */
-export function getReadableComboLabel(combo: string[]): string {
-  return combo.map(getReadableKeyLabel).join("+")
-}
 
 /**
  * Returns a more human-readable string for the give key
  * @param code
  */
-function getReadableKeyLabel(code: string): string {
+function getReadableKeyLabel(code: KeyCode): string {
   if (code.startsWith('Key')) {
     return code.slice(3);
   }
@@ -167,9 +168,9 @@ export interface KeyBindEvent {
  * Add any combo's in this array which cannot be used by any KeyBinds
  * Example: Page refresh
  */
-const ReservedKeyBinds: string[][] = [
-  [KEY_CODES.CONTROL, KeyCode.KeyR],
-  [KEY_CODES.META, KeyCode.KeyR]
+const ReservedKeyBinds: KeyCombo[] = [
+  [KeyCode.Control, KeyCode.KeyR],
+  [KeyCode.Meta, KeyCode.KeyR]
 ]
 
 /**
@@ -177,9 +178,11 @@ const ReservedKeyBinds: string[][] = [
  * To add a new keybind to the system, all you have to do it add it here. Event system, and settings page
  * Will update automatically.
  */
-export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, string[][]>> = {
+export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyCombo[]>> = {
   [KeyBindTarget.ToggleSideNav]: [[KeyCode.KeyH]]
 } as const;
+
+export const AllKeyBindTargets: KeyBindTarget[] = Object.keys(KeyBindTarget) as KeyBindTarget[];
 
 @Injectable({
   providedIn: 'root'
@@ -193,30 +196,30 @@ export class KeyBindService {
    * All key binds that could be activated
    * @private
    */
-  private readonly activeKeyBinds = computed<Record<KeyBindTarget, string[][]>>(() => {
+  private readonly activeKeyBinds = computed<Record<KeyBindTarget, KeyCombo[]>>(() => {
     const customKeyBindsRaw =  this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
 
-    const customKeyBinds: Partial<Record<KeyBindTarget, string[][]>> = {};
-    for (const [target, combos] of Object.entries(customKeyBindsRaw) as [KeyBindTarget, string[][]][]) {
+    const customKeyBinds: Partial<Record<KeyBindTarget, KeyCombo[]>> = {};
+    for (const [target, combos] of Object.entries(customKeyBindsRaw) as [KeyBindTarget, KeyCombo[]][]) {
       customKeyBinds[target] = combos.filter(combo => !this.isReservedKeyCombo(combo));
     }
 
     return {
       ...DefaultKeyBinds,
       ...customKeyBinds,
-    } satisfies Record<KeyBindTarget, readonly string[][]>;
+    } satisfies Record<KeyBindTarget, readonly KeyCombo[]>;
   });
 
   /**
    * A record of all possible keybinds in Kavita, as configured by the user
    */
-  public readonly allKeyBinds = computed<Record<KeyBindTarget, string[][]>>(() => {
+  public readonly allKeyBinds = computed<Record<KeyBindTarget, KeyCombo[]>>(() => {
     const customKeyBinds =  this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
 
     return {
       ...DefaultKeyBinds,
       ...customKeyBinds,
-    } satisfies Record<KeyBindTarget, readonly string[][]>;
+    } satisfies Record<KeyBindTarget, readonly KeyCombo[]>;
   });
 
   /**
@@ -241,21 +244,29 @@ export class KeyBindService {
     this.document.addEventListener('keydown', e => this.handleKeyEvent(e));
   }
 
+  /**
+   * Returns a more human-readable string for the given combo
+   * @param combo
+   */
+  public getReadableComboLabel(combo: KeyCombo): string {
+    return combo.map(getReadableKeyLabel).join("+")
+  }
+
   private handleKeyEvent(event: KeyboardEvent) {
-    if (!this.listenedKeys().has(event.code)) return;
+    if (!this.listenedKeys().has(event.code as KeyCode)) return;
     if (this.isEditableTarget(event.target)) return;
 
-    const combo = new Set<string>();
-    if (event.ctrlKey) combo.add(KEY_CODES.CONTROL);
-    if (event.altKey) combo.add(KEY_CODES.ALT);
-    if (event.shiftKey) combo.add(KEY_CODES.SHIFT);
-    if (event.metaKey) combo.add(KEY_CODES.META);
+    const combo = new Set<KeyCode>();
+    if (event.ctrlKey) combo.add(KeyCode.Control);
+    if (event.altKey) combo.add(KeyCode.Alt);
+    if (event.shiftKey) combo.add(KeyCode.Shift);
+    if (event.metaKey) combo.add(KeyCode.Meta);
 
-    combo.add(event.code)
+    combo.add(event.code as KeyCode)
     this.checkCombo(combo, event);
   }
 
-  private checkCombo(activeCombo: Set<string>, e: KeyboardEvent) {
+  private checkCombo(activeCombo: Set<KeyCode>, e: KeyboardEvent) {
     const keybinds = this.activeKeyBinds();
     if (!activeCombo) return;
 
@@ -316,7 +327,7 @@ export class KeyBindService {
    * Checks the given combo against the ReservedKeyBinds list. If true, combo should be considered invalid and unusable
    * @param combo
    */
-  public isReservedKeyCombo(combo: string[]) {
+  public isReservedKeyCombo(combo: KeyCombo) {
     for (let reservedKeyBind of ReservedKeyBinds) {
       if (combo.length !== reservedKeyBind.length) continue;
 
@@ -325,6 +336,33 @@ export class KeyBindService {
     }
 
     return false;
+  }
+
+  /**
+   * Returns true if the given combos are equal to the default ones, and can be skipped when saving to user preferences
+   * @param target
+   * @param combos
+   */
+  public isDefaultKeyBinds(target: KeyBindTarget, combos: KeyCombo[]) {
+    const defaultCombos = DefaultKeyBinds[target];
+    if (defaultCombos.length !== combos.length) return false;
+
+    for (let combo of combos) {
+      let foundMatch = false;
+
+      for (let defaultCombo of defaultCombos) {
+        if (defaultCombo.length !== combo.length) continue;
+
+        if (combo.every(k => defaultCombo.includes(k))) {
+          foundMatch = true;
+          break;
+        }
+      }
+
+      if (!foundMatch) return false;
+    }
+
+    return true;
   }
 
 }

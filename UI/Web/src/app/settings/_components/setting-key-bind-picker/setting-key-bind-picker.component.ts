@@ -1,7 +1,6 @@
-import {ChangeDetectionStrategy, Component, effect, forwardRef, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, forwardRef, inject, signal} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
-import {KEY_CODES} from "../../../shared/_services/utility.service";
-import {getReadableComboLabel, KeyCode, ModifierKeyCodes} from "../../../_services/key-bind.service";
+import {KeyBindService, KeyCode, KeyCombo, ModifierKeyCodes} from "../../../_services/key-bind.service";
 
 @Component({
   selector: 'app-setting-key-bind-picker',
@@ -19,10 +18,12 @@ import {getReadableComboLabel, KeyCode, ModifierKeyCodes} from "../../../_servic
 })
 export class SettingKeyBindPickerComponent implements ControlValueAccessor {
 
-  selectedKeys = signal<string[]>([]);
+  protected readonly keyBindService = inject(KeyBindService);
+
+  selectedKeys = signal<KeyCombo>([]);
   disabled = signal(false);
 
-  private _onChange: (value: string[]) => void = () => {};
+  private _onChange: (value: KeyCombo) => void = () => {};
   private _onTouched: () => void = () => {};
 
   constructor() {
@@ -33,7 +34,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor {
     });
   }
 
-  writeValue(keys: string[]): void {
+  writeValue(keys: KeyCode[]): void {
       this.selectedKeys.set(keys)
   }
 
@@ -58,14 +59,14 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor {
   }
 
   private onKeyDown = (event: KeyboardEvent) => {
-    const keys = new Set<string>();
-    if (event.ctrlKey) keys.add(KEY_CODES.CONTROL);
-    if (event.altKey) keys.add(KEY_CODES.ALT);
-    if (event.shiftKey) keys.add(KEY_CODES.SHIFT);
-    if (event.metaKey) keys.add(KEY_CODES.META);
+    const keys = new Set<KeyCode>();
+    if (event.ctrlKey) keys.add(KeyCode.Control);
+    if (event.altKey) keys.add(KeyCode.Alt);
+    if (event.shiftKey) keys.add(KeyCode.Shift);
+    if (event.metaKey) keys.add(KeyCode.Meta);
 
     if (!ModifierKeyCodes.includes(event.code as KeyCode)) {
-      keys.add(event.code)
+      keys.add(event.code as KeyCode)
     }
 
     this.selectedKeys.set([...keys]);
@@ -73,6 +74,4 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor {
     event.preventDefault();
     event.stopPropagation();
   };
-
-  protected readonly getReadableComboLabel = getReadableComboLabel;
 }
