@@ -3,6 +3,12 @@
     {{t('description')}}
   </p>
 
+  @if (!keyBindForm.valid) {
+    <div class="alert alert-warning" role="alert">
+      {{t('invalid-keybinds')}}
+    </div>
+  }
+
   <form [formGroup]="keyBindForm">
     @for (key of AllKeyBindTargets; track key) {
       @if (getFormArray(key); as array) {

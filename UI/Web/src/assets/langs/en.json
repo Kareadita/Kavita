@@ -1976,6 +1976,7 @@
 
     "custom-key-binds": {
         "description": "Customize all your key bindings for the app. Press any key or combination to assign, add, or remove bindings, with changes saved to your account. Long press a key bind combo to remove",
+        "invalid-keybinds": "One or more keybinds are invalid, resolve the issues to save changes",
         "key-bind-title-ToggleSideNav": "Side nav toggle",
         "key-bind-tooltip-ToggleSideNav": "Toggle the side nav in settings or home page",
         "combo-error-reserved-combo": "This combo is reserved and cannot be used as a key bind",
