@@ -1,6 +1,6 @@
 <ng-container>
   <p>
-    {{t('description')}}
+    {{t('description', {max: MAX_KEYBINDS_PER_TARGET})}}
   </p>
 
   @if (!keyBindForm.valid) {
@@ -37,7 +37,8 @@
                                      [ngbTooltip]="errorToolTip(keyBindControl.errors)"
                       >
                         @if (!keyBindControl.valid) {
-                          <i class="fa fa-warning text-danger"></i>
+                          <i class="fa fa-warning text-danger"
+                             [attr.aria-label]="t('errors-control', {target: key, index: $index + 1})"></i>
                         }
 
                         {{keyBindControl.value | keyBind | defaultValue}}
@@ -49,16 +50,16 @@
 
                     @if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
                       <button class="btn btn-sm" (click)="addKeyBind(key); $event.preventDefault(); $event.stopPropagation()">
-                        <i class="fa fa-add"></i>
+                        <i class="fa fa-add" [attr.aria-label]="t('close', {target: key})"></i>
                       </button>
                     }
 
                     <button class="btn btn-sm" (click)="resetKeybindsToDefaults(key); $event.preventDefault(); $event.stopPropagation()">
-                      <i class="fa fa-recycle"></i>
+                      <i class="fa fa-recycle" [attr.aria-label]="t('reset', {target: key})"></i>
                     </button>
 
                     @if (!array.valid) {
-                      <i class="fa fa-warning text-danger" [ngbTooltip]="errorToolTip(array.errors)"></i>
+                      <i class="fa fa-warning text-danger" [attr.aria-label]="t('errors-array', {target: key})" [ngbTooltip]="errorToolTip(array.errors)"></i>
                     }
 
                   </div>

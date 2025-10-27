@@ -1975,12 +1975,16 @@
     },
 
     "custom-key-binds": {
-        "description": "Customize all your key bindings for the app. Press any key or combination to assign, add, or remove bindings, with changes saved to your account. Long press a key bind combo to remove",
+        "description": "Customize all your key bindings for the app. Each option allows for up to {{max}} different keybinds. Long press to remove",
         "invalid-keybinds": "One or more keybinds are invalid, resolve the issues to save changes",
         "key-bind-error-reserved-key-bind": "This combo is reserved and cannot be used as a key bind",
         "key-bind-error-non-modifier-required": "Your combo needs at least one non-modifier key",
         "key-bind-error-need-at-least-one-key": "Your combo needs at least one key",
         "key-bind-error-overlap-in-target": "One or more keybinds are the same",
+        "close": "{{common.close}} {{target}}",
+        "reset": "Reset {{target}}",
+        "errors-array": "Keybinds for {{target}} contain errors",
+        "errors-control": "Keybind {{index}} for {{target}} contains errors",
 
         "global": "Global",
         "key-bind-title-NavigateToSettings": "Open settings",
