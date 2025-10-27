@@ -12,9 +12,12 @@ export class KeyBindPipe implements PipeTransform {
     if (keyBind.control) keys.push('Control');
     if (keyBind.shift) keys.push('Shift');
     if (keyBind.alt) keys.push('Alt');
-    if (keyBind.meta) keys.push('⌘');
 
-    keys.push(keyBind.key)
+    // TODO: Use new device code after progress merge?
+    const isMac = navigator.platform.includes('Mac');
+    if (keyBind.meta) keys.push(isMac ? '⌘' : 'Win');
+
+    keys.push(keyBind.key.toUpperCase())
 
     return keys.join("+")
   }
