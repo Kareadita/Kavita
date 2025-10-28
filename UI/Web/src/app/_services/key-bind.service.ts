@@ -5,6 +5,7 @@ import {DOCUMENT} from "@angular/common";
 import {filter, finalize, Observable, of, Subject, tap, withLatestFrom} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map} from "rxjs/operators";
+import {GamePadService} from "./game-pad.service";
 
 /**
  * Codes as returned by KeyBoardEvent.key.toLowerCase()
@@ -180,6 +181,7 @@ interface RegisterListenerOptions {
 export class KeyBindService {
 
   private readonly accountService = inject(AccountService);
+  private readonly gamePadService = inject(GamePadService);
   private readonly document = inject(DOCUMENT);
 
   /**
@@ -257,6 +259,16 @@ export class KeyBindService {
   constructor() {
     // We use keydown as to intercept before native browser keybinds, in case we want to cancel the event
     this.document.addEventListener('keydown', e => this.handleKeyEvent(e));
+
+    this.gamePadService.keyDownEvents$.pipe(
+      map(e => {
+        return {
+          key: KeyCode.Empty,
+          controllerSequence: e.pressedButtons,
+        } as KeyBind;
+      }),
+      tap(kb => this.checkForKeyBind(kb)),
+    ).subscribe()
   }
 
   private handleKeyEvent(event: KeyboardEvent) {
@@ -274,6 +286,10 @@ export class KeyBindService {
       alt: event.altKey,
     }
 
+    this.checkForKeyBind(activeKeyBind, event);
+  }
+
+  private checkForKeyBind(activeKeyBind: KeyBind, event?: KeyboardEvent) {
     const activeKeyBinds = this.activeKeyBinds();
     for (const [target, keybinds] of Object.entries(activeKeyBinds)) {
       for (const keybind of keybinds) {
@@ -283,12 +299,12 @@ export class KeyBindService {
         const keyBindEvent: KeyBindEvent = {
           target: target as KeyBindTarget,
           triggered: false,
-          inEditableElement: this.isEditableTarget(event.target),
+          inEditableElement: event ? this.isEditableTarget(event.target) : false,
         };
 
         this.eventsSubject.next(keyBindEvent);
 
-        if (keyBindEvent.triggered) {
+        if (event && keyBindEvent.triggered) {
           event.preventDefault();
           event.stopPropagation();
         }
@@ -373,6 +389,11 @@ export class KeyBindService {
    * @param k2
    */
   public areKeyBindsEqual(k1: KeyBind, k2: KeyBind) {
+    // If a controller sequence is present, it takes full priority
+    if (k1.controllerSequence || k2.controllerSequence) {
+      return k1.controllerSequence?.every(k => k2.controllerSequence?.includes(k)) || false;
+    }
+
     return (
       (k1.alt ?? false) === (k2.alt ?? false) &&
       (k1.shift ?? false) === (k2.shift ?? false) &&

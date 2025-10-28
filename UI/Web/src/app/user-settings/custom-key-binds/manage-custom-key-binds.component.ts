@@ -226,7 +226,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   private keyBindValidator(): ValidatorFn {
     return (control) => {
       const keyBind = (control as FormControl<KeyBind>).value;
-      if (keyBind.key.length === 0) return { 'need-at-least-one-key': {'length': 0} } as ValidationErrors;
+      if (keyBind.key.length === 0 && !keyBind.controllerSequence) return { 'need-at-least-one-key': {'length': 0} } as ValidationErrors;
 
       if (this.keyBindService.isReservedKeyBind(keyBind)) {
         return { 'reserved-key-bind': { 'keyBind': keyBind }} as ValidationErrors

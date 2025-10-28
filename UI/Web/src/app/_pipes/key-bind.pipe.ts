@@ -18,6 +18,10 @@ export class KeyBindPipe implements PipeTransform {
   transform(keyBind: KeyBind | undefined): string {
     if (!keyBind) return '';
 
+    if (keyBind.controllerSequence) {
+      return keyBind.controllerSequence.join('+');
+    }
+
     let keys: string[] = [];
 
     if (keyBind.control) keys.push('Ctrl');
@@ -30,7 +34,7 @@ export class KeyBindPipe implements PipeTransform {
 
     keys.push(this.customMappings[keyBind.key] ?? keyBind.key.toUpperCase())
 
-    return keys.join("+")
+    return keys.join('+')
   }
 
 }

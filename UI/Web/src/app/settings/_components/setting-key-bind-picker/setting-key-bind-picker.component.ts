@@ -4,6 +4,8 @@ import {KeyBindService, KeyCode, ModifierKeyCodes} from "../../../_services/key-
 import {KeyBind} from "../../../_models/preferences/preferences";
 import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
 import {DOCUMENT} from "@angular/common";
+import {GamePadService} from "../../../_services/game-pad.service";
+import {Subscription, tap} from "rxjs";
 
 @Component({
   selector: 'app-setting-key-bind-picker',
@@ -24,6 +26,7 @@ import {DOCUMENT} from "@angular/common";
 export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDestroy {
 
   protected readonly keyBindService = inject(KeyBindService);
+  private readonly gamePadService = inject(GamePadService);
   private readonly document = inject(DOCUMENT);
 
   selectedKeyBind = signal<KeyBind>({key: KeyCode.Empty});
@@ -31,6 +34,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
 
   private _onChange: (value: KeyBind) => void = () => {};
   private _onTouched: () => void = () => {};
+  private readonly subscriptions: Subscription[] = [];
 
   constructor() {
     effect(() => {
@@ -58,16 +62,27 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
 
   ngOnDestroy() {
     this.keyBindService.disabled.set(false);
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 
   startListening() {
     this.keyBindService.disabled.set(true);
     this.document.addEventListener('keydown', this.onKeyDown);
+
+    const sub = this.gamePadService.keyDownEvents$.pipe(
+      tap(e => this.selectedKeyBind.set({
+        key: KeyCode.Empty,
+        controllerSequence: e.pressedButtons,
+      })),
+    ).subscribe()
+
+    this.subscriptions.push(sub);
   }
 
   stopListening() {
     this.keyBindService.disabled.set(false);
     this.document.removeEventListener('keydown', this.onKeyDown);
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 
   private onKeyDown = (event: KeyboardEvent) => {

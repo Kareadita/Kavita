@@ -41,6 +41,7 @@ export interface KeyBind {
   control?: boolean;
   alt?: boolean;
   shift?: boolean;
+  controllerSequence?: readonly string[];
   key: KeyCode;
 }
 
