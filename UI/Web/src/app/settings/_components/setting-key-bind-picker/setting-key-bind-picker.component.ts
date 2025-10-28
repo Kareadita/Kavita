@@ -1,8 +1,9 @@
-import {ChangeDetectionStrategy, Component, effect, forwardRef, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, forwardRef, inject, OnDestroy, signal} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
 import {KeyBindService, KeyCode, ModifierKeyCodes} from "../../../_services/key-bind.service";
 import {KeyBind} from "../../../_models/preferences/preferences";
 import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
+import {DOCUMENT} from "@angular/common";
 
 @Component({
   selector: 'app-setting-key-bind-picker',
@@ -20,9 +21,10 @@ import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
     }
   ]
 })
-export class SettingKeyBindPickerComponent implements ControlValueAccessor {
+export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDestroy {
 
   protected readonly keyBindService = inject(KeyBindService);
+  private readonly document = inject(DOCUMENT);
 
   selectedKeyBind = signal<KeyBind>({key: KeyCode.Empty});
   disabled = signal(false);
@@ -54,12 +56,18 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor {
     this.disabled.set(isDisabled);
   }
 
+  ngOnDestroy() {
+    this.keyBindService.disabled.set(false);
+  }
+
   startListening() {
-    window.addEventListener('keydown', this.onKeyDown);
+    this.keyBindService.disabled.set(true);
+    this.document.addEventListener('keydown', this.onKeyDown);
   }
 
   stopListening() {
-    window.removeEventListener('keydown', this.onKeyDown);
+    this.keyBindService.disabled.set(false);
+    this.document.removeEventListener('keydown', this.onKeyDown);
   }
 
   private onKeyDown = (event: KeyboardEvent) => {

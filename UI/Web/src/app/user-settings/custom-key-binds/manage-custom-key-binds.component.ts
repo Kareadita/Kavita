@@ -90,7 +90,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
 
     this.keyBindForm.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
-      debounceTime(500),
+      debounceTime(250),
       distinctUntilChanged(),
       map(formValue => this.extractDuplicated(formValue)),
       tap(d => this.duplicatedKeyBinds.set(d)),

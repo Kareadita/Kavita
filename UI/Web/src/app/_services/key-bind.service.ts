@@ -182,6 +182,16 @@ export class KeyBindService {
   private readonly accountService = inject(AccountService);
   private readonly document = inject(DOCUMENT);
 
+  /**
+   * Global disable switch for the keybind listener. Make sure you enable again after using
+   * so keybinds don't stop working across the app.
+   */
+  public readonly disabled = signal(false);
+
+  /**
+   * Valid custom keybinds as configured by the authenticated user
+   * @private
+   */
   private readonly customKeyBinds = computed(() => {
     const customKeyBinds = this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
     return Object.fromEntries(Object.entries(customKeyBinds).filter(([target, _]) => {
@@ -190,7 +200,7 @@ export class KeyBindService {
   });
 
   /**
-   * All key binds that could be activated
+   * All key binds for which the target is currently active
    * @private
    */
   private readonly activeKeyBinds = computed<Record<KeyBindTarget, KeyBind[]>>(() => {
@@ -250,6 +260,8 @@ export class KeyBindService {
   }
 
   private handleKeyEvent(event: KeyboardEvent) {
+    if (this.disabled()) return;
+
     const eventKey = event.key.toLowerCase() as KeyCode;
 
     if (!this.listenedKeys().has(eventKey)) return;
