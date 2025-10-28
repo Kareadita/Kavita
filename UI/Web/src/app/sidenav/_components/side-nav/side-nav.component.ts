@@ -154,13 +154,14 @@ export class SideNavComponent implements OnInit {
       this.destroyRef,
       (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Account}),
       [KeyBindTarget.NavigateToSettings],
+      {condition$: this.navService.sideNavVisibility$},
     );
 
     this.keyBindService.registerListener(
       this.destroyRef,
       (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Scrobbling}),
       [KeyBindTarget.NavigateToScrobbling],
-      {condition$: this.licenseService.hasValidLicense$}
+      {condition$: this.licenseService.hasValidLicense$},
     );
 
   }

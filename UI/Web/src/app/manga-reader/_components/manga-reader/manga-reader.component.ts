@@ -550,7 +550,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       [KeyBindTarget.ToggleFullScreen, KeyBindTarget.BookmarkPage, KeyBindTarget.OpenHelp, KeyBindTarget.GoTo,
         KeyBindTarget.ToggleMenu, KeyBindTarget.PageRight, KeyBindTarget.PageLeft, KeyBindTarget.Escape],
-    )
+    );
+
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      () => {
+        this.toggleMenu();
+        this.settingsOpen = !this.settingsOpen;
+        this.cdRef.markForCheck();
+      },
+      [KeyBindTarget.NavigateToSettings]
+    );
   }
 
   ngOnInit(): void {

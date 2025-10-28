@@ -8,7 +8,6 @@ import {
   effect,
   ElementRef,
   EventEmitter,
-  HostListener,
   inject,
   model,
   OnDestroy,
@@ -31,7 +30,7 @@ import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from 'sr
 import {SeriesService} from 'src/app/_services/series.service';
 import {DomSanitizer, SafeHtml, Title} from '@angular/platform-browser';
 import {BookService} from '../../_services/book.service';
-import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {BookChapterItem} from '../../_models/book-chapter-item';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {Stack} from 'src/app/shared/data-structures/stack';
@@ -696,6 +695,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       [KeyBindTarget.PageLeft, KeyBindTarget.PageRight, KeyBindTarget.Escape, KeyBindTarget.GoTo,
         KeyBindTarget.ToggleFullScreen, KeyBindTarget.ToggleMenu],
+    );
+
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      () => {
+        this.toggleDrawer();
+      },
+      [KeyBindTarget.NavigateToSettings]
     );
   }
 
