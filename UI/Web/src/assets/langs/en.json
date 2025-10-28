@@ -1975,15 +1975,16 @@
     },
 
     "custom-key-binds": {
-        "description": "Customize all your key bindings for the app. Each option allows for up to {{max}} different keybinds. Long press to remove",
-        "key-bind-error-reserved-key-bind": "This combo is reserved and cannot be used as a key bind",
-        "key-bind-error-non-modifier-required": "Your combo needs at least one non-modifier key",
-        "key-bind-error-need-at-least-one-key": "Your combo needs at least one key",
+        "description": "Sometimes clicking and dragging your mouse is just too slow. Use your preferred keybinds to speed things up. Each option allows for up to {{max}} different keybinds. Long press a keybind to remove it.",
+        "key-bind-error-reserved-key-bind": "This keybind is reserved and cannot be used",
+        "key-bind-error-need-at-least-one-key": "Your keybind cannot be only modifiers",
         "key-bind-error-overlap-in-target": "One or more keybinds are the same",
         "close": "{{common.close}} {{target}}",
         "reset": "Reset {{target}}",
         "errors-array": "Keybinds for {{target}} contain errors",
         "errors-control": "Keybind {{index}} for {{target}} contains errors",
+        "warning-duplicated-control": "Keybind {{index}} for {{target}} has been used for an other target as well",
+        "warning-duplicate-key-bind": "This keybind has also been used elsewhere",
 
         "global": "Global",
         "key-bind-title-NavigateToSettings": "Open settings",

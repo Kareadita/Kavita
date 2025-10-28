@@ -9,14 +9,14 @@ import {
   ValidationErrors,
   ValidatorFn
 } from "@angular/forms";
-import {KeyBind, KeyBindTarget} from "../../_models/preferences/preferences";
+import {KeyBind, KeyBindTarget, Preferences} from "../../_models/preferences/preferences";
 import {TranslocoService} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {
   SettingKeyBindPickerComponent
 } from "../../settings/_components/setting-key-bind-picker/setting-key-bind-picker.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap} from "rxjs";
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from "rxjs";
 import {map} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
 import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badge.component";
@@ -62,6 +62,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   protected keyBindForm!: KeyBindFormGroup;
 
   protected selectedIndexes = signal<Map<string, number>>(new Map());
+  protected duplicatedKeyBinds = signal<Partial<Record<KeyBindTarget, number[]>>>({});
   protected filteredKeyBindGroups = computed(() => {
     const roles = this.accountService.currentUserSignal()!.roles;
     const hasKPlus = this.licenseService.hasValidLicenseSignal();
@@ -85,6 +86,15 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     }, {} as Record<KeyBindTarget, FormArray<FormControl<KeyBind>>>);
 
     this.keyBindForm = this.fb.group(groupConfig);
+    this.duplicatedKeyBinds.set(this.extractDuplicated(keyBinds)); // Set initial
+
+    this.keyBindForm.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      debounceTime(500),
+      distinctUntilChanged(),
+      map(formValue => this.extractDuplicated(formValue)),
+      tap(d => this.duplicatedKeyBinds.set(d)),
+    ).subscribe()
 
     this.keyBindForm.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
@@ -102,6 +112,28 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     ).subscribe();
   }
 
+  private extractDuplicated(formValue: Partial<Record<KeyBindTarget, KeyBind[]>>): Partial<Record<KeyBindTarget, number[]>> {
+    const entries = Object.entries(formValue);
+
+    return Object.fromEntries(entries
+        .map(([target, keyBinds]) => {
+          const duplicatedIndices = keyBinds.map((keyBind, index) => {
+              const isDuplicated = entries.some(([otherTarget, otherKeyBinds]) => {
+                if (otherTarget === target) return false;
+
+                return otherKeyBinds.some(kb => this.keyBindService.areKeyBindsEqual(keyBind, kb));
+              });
+
+              return isDuplicated ? index : -1;
+            })
+            .filter(index => index !== -1) ?? [];
+
+          return [target, duplicatedIndices];
+        })
+      .filter(([_, indices]) => (indices as number[]).length > 0)
+    ) as Partial<Record<KeyBindTarget, number[]>>;
+  }
+
   private extractCustomKeyBinds(formValue: Partial<Record<KeyBindTarget, KeyBind[]>>): Partial<Record<KeyBindTarget, KeyBind[]>> {
     return Object.fromEntries(
       Object.entries(formValue).filter(([target, keybinds]) =>
@@ -110,7 +142,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     ) as Partial<Record<KeyBindTarget, KeyBind[]>>;
   }
 
-  private combinePreferences(customKeyBinds: Partial<Record<KeyBindTarget, KeyBind[]>>) {
+  private combinePreferences(customKeyBinds: Partial<Record<KeyBindTarget, KeyBind[]>>): Preferences {
     return {
       ...this.accountService.currentUserSignal()!.preferences,
       customKeyBinds,
@@ -223,15 +255,24 @@ export class ManageCustomKeyBindsComponent implements OnInit {
 
   /**
    * Combined tooltip for FormControl<KeyBind> errors
+   * @param target
+   * @param index
    * @param errors
    * @protected
    */
-  protected errorToolTip(errors: ValidationErrors | null): string | null {
-    if (!errors) return null;
-    return Object.keys(errors)
-      .map(key => this.transLoco.translate(`custom-key-binds.key-bind-error-${key}`))
-      .join(' ')
-      .trim() || null;
+  protected errorToolTip(target: KeyBindTarget, index: number, errors: ValidationErrors | null): string | null {
+    if (errors) {
+      return Object.keys(errors)
+        .map(key => this.transLoco.translate(`custom-key-binds.key-bind-error-${key}`))
+        .join(' ')
+        .trim() || null;
+    }
+
+    if (this.duplicatedKeyBinds()[target]?.includes(index)) {
+      return this.transLoco.translate('custom-key-binds.warning-duplicate-key-bind');
+    }
+
+    return null;
   }
 
   /**

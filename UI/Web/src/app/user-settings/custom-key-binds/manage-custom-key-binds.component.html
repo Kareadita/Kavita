@@ -28,8 +28,14 @@
                                      [selectionMode]="TagBadgeCursor.Clickable"
                                      (click)="selectIndex(element.target, $index)"
                                      (longClick)="removeKeyBind(element.target, $index)"
-                                     [ngbTooltip]="errorToolTip(keyBindControl.errors)"
+                                     [ngbTooltip]="errorToolTip(element.target, $index, keyBindControl.errors)"
                       >
+
+                        @if (duplicatedKeyBinds()[element.target]?.includes($index)) {
+                          <i class="fa fa-warning text-warning"
+                             [attr.aria-label]="t('warning-duplicated-control', {target: element.target, index: $index + 1})"></i>
+                        }
+
                         @if (!keyBindControl.valid) {
                           <i class="fa fa-warning text-danger"
                              [attr.aria-label]="t('errors-control', {target: element.target, index: $index + 1})"></i>
@@ -55,7 +61,11 @@
                     </button>
 
                     @if (!array.valid) {
-                      <i class="fa fa-warning text-danger" [attr.aria-label]="t('errors-array', {target: element.target})" [ngbTooltip]="errorToolTip(array.errors)"></i>
+                      <i class="fa fa-warning text-danger"
+                         [attr.aria-label]="t('errors-array', {target: element.target})"
+                         [ngbTooltip]="errorToolTip(element.target, -1, array.errors)">
+
+                      </i>
                     }
 
                   </div>
