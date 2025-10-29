@@ -25,6 +25,7 @@
         "provider-tooltip": "Provider settings require you to manually click Save. Kavita must be configured as a confidential client and needs a redirect URL. See the <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> for more details.",
         "behavior-title": "Behavior",
         "other-field-required": "{{validation.other-field-required}}",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
         "invalid-uri": "{{validation.invalid-uri}}",
         "tls-required": "The OIDC provider must use tls (https)",
         "manual-save-label": "Changing provider settings requires a manual save",
@@ -2764,6 +2765,7 @@
         "font-manual-upload": "There was an issue creating Font from manual upload",
         "font-already-in-use": "Font already exists by that name",
         "upload-too-large": "The file is too large for upload, select a smaller image and try again.",
+        "invalid-form": "The form you're trying to submit contains errors",
         "import-fields": {
             "non-unique-age-ratings": "Age rating mapping keys aren't unique, please correct your import file",
             "non-unique-fields": "Field mappings do not have a unique id, please correct your import file"
@@ -3365,6 +3367,7 @@
     "validation": {
         "required-field": "This field is required",
         "other-field-required": "{{name}} is required when {{other}} is set",
+        "other-field-invalid": "Cannot check validity, {{other}} is invalid",
         "valid-email": "This must be a valid email",
         "password-validation": "Password must be between 6 and 256 characters in length",
         "year-validation": "This must be a valid year greater than 1000 and 4 characters long",

@@ -55,6 +55,9 @@
                     @if (formControl.errors && formControl.errors.requiredIf) {
                       <div>{{t('other-field-required', {name: 'clientId', other: formControl.errors.requiredIf.other})}}</div>
                     }
+                    @if (formControl.errors && formControl.errors.requiredIfOtherInvalid) {
+                      <div>{{t('other-field-invalid', {other: formControl.errors.requiredIfOtherInvalid.other})}}</div>
+                    }
                   </div>
                 }
 
@@ -67,7 +70,7 @@
           @if (settingsForm.get('secret'); as formControl) {
             <app-setting-item [title]="t('secret-label')" [subtitle]="t('secret-tooltip')">
               <ng-template #view>
-                {{formControl.value | defaultValue}}
+                {{formControl.value | slice:0:40 | defaultValue}}
               </ng-template>
               <ng-template #edit>
                 <input id="oid-secret" aria-describedby="oidc-secret-validations" class="form-control"
@@ -78,6 +81,9 @@
                   <div id="oidc-secret-validations" class="invalid-feedback">
                     @if (formControl.errors && formControl.errors.requiredIf) {
                       <div>{{t('other-field-required', {name: 'secret', other: formControl.errors.requiredIf.other})}}</div>
+                    }
+                    @if (formControl.errors && formControl.errors.requiredIfOtherInvalid) {
+                      <div>{{t('other-field-invalid', {other: formControl.errors.requiredIfOtherInvalid.other})}}</div>
                     }
                   </div>
                 }
