@@ -172,21 +172,22 @@ export class TypeaheadComponent implements OnInit {
       );
 
 
-    if (this.settings.savedData) {
-      if (this.settings.multiple) {
-        this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
-      }
-       else {
-         const isArray = this.settings.savedData.hasOwnProperty('length');
-         if (isArray) {
-          this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
-         } else {
-          this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
-         }
-      }
-    } else {
+    if (!this.settings.savedData) {
       this.optionSelection = new SelectionModel<any>();
+      return;
     }
+
+    if (this.settings.multiple) {
+      this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
+      return;
+    }
+
+    if (Array.isArray(this.settings.savedData)) {
+      this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
+      return;
+    }
+
+    this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
   }
 
 

@@ -140,8 +140,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     return {title: this.libraryTypePipe.transform(f), value: f};
   }).sort((a, b) => a.title.localeCompare(b.title));
 
-  validLanguages: Array<Language> = [];
-  languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
+  languageSettings: TypeaheadSettings<Language> | null = null;
 
   isAddLibrary = false;
   setupStep = StepID.General;
@@ -336,7 +335,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     return this.metadataService.getAllValidLanguages()
       .pipe(
         tap(validLanguages => {
-          setupLanguageSettings(this.languageSettings, false, this.utilityService, validLanguages, this.library?.defaultLanguage)
+          this.languageSettings = setupLanguageSettings(false, this.utilityService, validLanguages, this.library?.defaultLanguage)
           this.cdRef.markForCheck();
         }),
         switchMap(_ => of(true))

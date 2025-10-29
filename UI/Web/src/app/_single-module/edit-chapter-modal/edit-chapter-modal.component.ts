@@ -125,7 +125,7 @@ export class EditChapterModalComponent implements OnInit {
   coverImageReset = false;
 
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
-  languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
+  languageSettings: TypeaheadSettings<Language> | null = null;
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
@@ -384,7 +384,7 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   setupLanguageTypeahead() {
-    setupLanguageSettings(this.languageSettings, true, this.utilityService, this.validLanguages, this.chapter.language);
+    this.languageSettings = setupLanguageSettings(true, this.utilityService, this.validLanguages, this.chapter.language);
   }
 
 

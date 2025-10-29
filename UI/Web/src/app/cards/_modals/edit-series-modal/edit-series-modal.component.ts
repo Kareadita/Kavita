@@ -165,7 +165,7 @@ export class EditSeriesModalComponent implements OnInit {
 
   // Typeaheads
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
-  languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
+  languageSettings: TypeaheadSettings<Language> | null = null;
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
@@ -438,7 +438,7 @@ export class EditSeriesModalComponent implements OnInit {
     return this.metadataService.getAllValidLanguages()
       .pipe(
         tap(validLanguages => {
-          setupLanguageSettings(this.languageSettings, true, this.utilityService, validLanguages, this.metadata.language);
+          this.languageSettings = setupLanguageSettings(true, this.utilityService, validLanguages, this.metadata.language);
           this.cdRef.markForCheck();
         }),
         switchMap(_ => of(true))

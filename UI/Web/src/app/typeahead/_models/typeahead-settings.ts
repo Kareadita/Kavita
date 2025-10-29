@@ -76,19 +76,19 @@ export class TypeaheadSettings<T> {
 
 /**
  * Configure the given TypeaheadSettings<Language> as a language type ahead
- * @param settings
  * @param showLocked
  * @param utilityService
  * @param allLanguages
  * @param currentSelectedLanguage
+ * @returns settings
  */
 export function setupLanguageSettings(
-  settings: TypeaheadSettings<Language>,
   showLocked: boolean,
   utilityService: UtilityService,
   allLanguages: Array<Language>,
   currentSelectedLanguage: string | Array<string> | undefined,
-) {
+): TypeaheadSettings<Language> {
+  const settings = new TypeaheadSettings<Language>();
 
   settings.minCharacters = 0;
   settings.multiple = false;
@@ -115,4 +115,6 @@ export function setupLanguageSettings(
   if (l !== undefined) {
     settings.savedData = l;
   }
+
+  return settings;
 }
