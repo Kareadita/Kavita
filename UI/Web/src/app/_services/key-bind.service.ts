@@ -138,7 +138,7 @@ type KeyBindGroup = {
 
 export const KeyBindGroups: KeyBindGroup[] = [
   {
-    title: 'global',
+    title: 'global-header',
     elements: [
       {target: KeyBindTarget.NavigateToSettings},
       {target: KeyBindTarget.OpenSearch},
@@ -147,7 +147,7 @@ export const KeyBindGroups: KeyBindGroup[] = [
     ]
   },
   {
-    title: 'readers',
+    title: 'readers-header',
     elements: [
       {target: KeyBindTarget.ToggleFullScreen},
       {target: KeyBindTarget.BookmarkPage},

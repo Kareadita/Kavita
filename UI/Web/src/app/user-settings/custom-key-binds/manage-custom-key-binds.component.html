@@ -15,9 +15,10 @@
       @for (element of keyBindGroup.elements; track element.target) {
         @if (getFormArray(element.target); as array) {
           <div class="col-12 mt-4">
+            @let settingDesc = element.target | keybindSettingDescription;
             <app-setting-item
-              [title]="t('key-bind-title-' + element.target)"
-              [subtitle]="t('key-bind-tooltip-' + element.target)"
+              [title]="settingDesc.title"
+              [subtitle]="settingDesc.tooltip"
               [labelId]="element.target + ''"
               [showEdit]="false"
             >
@@ -52,12 +53,12 @@
                   <div class="float-end">
 
                     @if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
-                      <button class="btn btn-sm" (click)="addKeyBind(element.target); $event.preventDefault(); $event.stopPropagation()">
-                        <i class="fa fa-add" [attr.aria-label]="t('close', {target: element.target})"></i>
+                      <button class="btn btn-sm" (click)="addKeyBind(element.target); $event.preventDefault(); $event.stopPropagation()" [ngbTooltip]="t('add', {target: element.target})">
+                        <i class="fa fa-add" [attr.aria-label]="t('add', {target: element.target})"></i>
                       </button>
                     }
 
-                    <button class="btn btn-sm" (click)="resetKeybindsToDefaults(element.target); $event.preventDefault(); $event.stopPropagation()">
+                    <button class="btn btn-sm" (click)="resetKeybindsToDefaults(element.target); $event.preventDefault(); $event.stopPropagation()" [ngbTooltip]="t('reset', {target: element.target})">
                       <i class="fa fa-recycle" [attr.aria-label]="t('reset', {target: element.target})"></i>
                     </button>
 

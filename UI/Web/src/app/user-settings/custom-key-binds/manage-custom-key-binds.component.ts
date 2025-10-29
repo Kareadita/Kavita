@@ -26,6 +26,7 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ToastrService} from "ngx-toastr";
 import {KeyBindPipe} from "../../_pipes/key-bind.pipe";
 import {LicenseService} from "../../_services/license.service";
+import {KeybindSettingDescriptionPipe} from "../../_pipes/keybind-setting-description.pipe";
 
 type KeyBindFormGroup = FormGroup<{
   [K in KeyBindTarget]: FormArray<FormControl<KeyBind>>
@@ -43,7 +44,8 @@ const MAX_KEYBINDS_PER_TARGET = 5;
     DefaultValuePipe,
     LongClickDirective,
     NgbTooltip,
-    KeyBindPipe
+    KeyBindPipe,
+    KeybindSettingDescriptionPipe
   ],
   templateUrl: './manage-custom-key-binds.component.html',
   styleUrl: './manage-custom-key-binds.component.scss',

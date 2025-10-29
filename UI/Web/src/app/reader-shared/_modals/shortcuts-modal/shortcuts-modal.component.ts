@@ -21,11 +21,11 @@ export interface KeyboardShortcut {
 }
 
 @Component({
-    selector: 'app-shortcuts-modal',
+  selector: 'app-shortcuts-modal',
   imports: [NgbModalModule, TranslocoDirective, KeyBindPipe],
-    templateUrl: './shortcuts-modal.component.html',
-    styleUrls: ['./shortcuts-modal.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './shortcuts-modal.component.html',
+  styleUrls: ['./shortcuts-modal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ShortcutsModalComponent {
 
