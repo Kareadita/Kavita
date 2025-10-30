@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   ElementRef,
   forwardRef,
@@ -16,9 +17,10 @@ import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
 import {DOCUMENT} from "@angular/common";
 import {GamePadService} from "../../../_services/game-pad.service";
 import {filter, fromEvent, Subscription, tap} from "rxjs";
-import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
+import {TagBadgeComponent, TagBadgeCursor} from "../../../shared/tag-badge/tag-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
+import {AccountService} from "../../../_services/account.service";
 
 @Component({
   selector: 'app-setting-key-bind-picker',
@@ -43,6 +45,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
 
   protected readonly keyBindService = inject(KeyBindService);
   private readonly gamePadService = inject(GamePadService);
+  private readonly accountService = inject(AccountService);
   private readonly document = inject(DOCUMENT);
   private readonly elementRef = inject(ElementRef);
 
@@ -57,6 +60,9 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
   private _onChange: (value: KeyBind) => void = () => {};
   private _onTouched: () => void = () => {};
   protected readonly subscriptions = signal<Subscription[]>([]);
+  protected readonly isListening = computed(() => this.subscriptions().length > 0);
+  protected readonly tagBadgeCursor = computed(() =>
+    this.accountService.isReadOnly() ? TagBadgeCursor.NotAllowed : TagBadgeCursor.Clickable);
 
   constructor() {
     effect(() => {
@@ -70,7 +76,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
         filter((event: Event) => {
           return !this.elementRef.nativeElement.contains(event.target);
         }),
-        filter(() => this.subscriptions().length > 0),
+        filter(() => this.isListening()),
         tap(() => this.stopListening()),
       ).subscribe();
 
@@ -98,6 +104,8 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
   }
 
   startListening() {
+    if (this.isListening() || this.accountService.isReadOnly()) return;
+
     this.keyBindService.disabled.set(true);
     this.document.addEventListener('keydown', this.onKeyDown);
 

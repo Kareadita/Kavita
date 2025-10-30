@@ -1,11 +1,16 @@
 
 
-<app-tag-badge *transloco="let t; prefix: 'custom-key-binds'">
-  <div (click)="startListening()" class="d-flex align-items-center">
+<app-tag-badge *transloco="let t; prefix: 'custom-key-binds'" [selectionMode]="tagBadgeCursor()">
+  <div id="key-bind-{{target()}}-{{index()}}" tabindex="-1" (click)="startListening()" (focus)="startListening()" class="d-flex align-items-center">
 
-    <span>{{selectedKeyBind() | keyBind | defaultValue}}</span>
+    @let keybind = selectedKeyBind() | keyBind;
+    @if (!this.isListening()) {
+      {{keybind | defaultValue}}
+    } @else {
+      {{keybind}}
+    }
 
-    @if (this.subscriptions().length > 0) {
+    @if (this.isListening()) {
       <span class="typing-cursor"></span>
     }
 

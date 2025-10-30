@@ -28,6 +28,7 @@ import {KeyBindPipe} from "../../_pipes/key-bind.pipe";
 import {LicenseService} from "../../_services/license.service";
 import {KeybindSettingDescriptionPipe} from "../../_pipes/keybind-setting-description.pipe";
 import {DblClickDirective} from "../../_directives/dbl-click.directive";
+import {DOCUMENT} from "@angular/common";
 
 type KeyBindFormGroup = FormGroup<{
   [K in KeyBindTarget]: FormArray<FormControl<KeyBind>>
@@ -61,6 +62,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly licenseService = inject(LicenseService);
+  private readonly document = inject(DOCUMENT);
 
   protected keyBindForm!: KeyBindFormGroup;
 
@@ -108,7 +110,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
       switchMap(p => this.accountService.updatePreferences(p)),
       catchError(err => {
         console.log(err);
-        this.toastr.error(err)
+        this.toastr.error(err);
         return of(null);
       }),
     ).subscribe();
@@ -168,6 +170,8 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * @param key
    */
   resetKeybindsToDefaults(key: KeyBindTarget) {
+    if (this.accountService.isReadOnly()) return;
+
     this.keyBindForm.setControl(key, this.fb.array(this.toFormControls(DefaultKeyBinds[key]), this.keyBindArrayValidator()));
   }
 
@@ -176,12 +180,23 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * @param key
    */
   addKeyBind(key: KeyBindTarget) {
+    if (this.accountService.isReadOnly()) return;
+
     const array = this.getFormArray(key);
     if (!array) return;
 
     if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
       array.push(this.fb.control({key: KeyCode.Empty}, this.keyBindValidator()));
     }
+
+    setTimeout(() => {
+      const id = `key-bind-${key}-${array.length-1}`;
+      const newElement = this.document.getElementById(id);
+      if (newElement) {
+        newElement.focus();
+      }
+
+    }, 100);
   }
 
   /**
@@ -190,6 +205,8 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * @param index
    */
   removeKeyBind(key: KeyBindTarget, index: number) {
+    if (this.accountService.isReadOnly()) return;
+
     const array = this.getFormArray(key);
     if (!array) return;
 
