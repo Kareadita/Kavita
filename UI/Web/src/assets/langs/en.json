@@ -1978,7 +1978,7 @@
     "custom-key-binds": {
         "description": "Sometimes clicking and dragging your mouse is just too slow. Use your preferred keybinds to speed things up. Each option allows for up to {{max}} different keybinds. Long press a keybind to remove it.",
         "key-bind-error-reserved-key-bind": "This keybind is reserved and cannot be used",
-        "key-bind-error-need-at-least-one-key": "Your keybind cannot be only modifiers",
+        "key-bind-error-need-at-least-one-key": "Your keybind must contain at least one key",
         "key-bind-error-overlap-in-target": "One or more keybinds are the same",
         "add": "Add alternative key",
         "reset": "Reset {{target}}",
@@ -2002,7 +2002,7 @@
         "key-bind-tooltip-escape": "Close the currently open context",
 
         "key-bind-title-toggle-fullscreen":  "Toggle full screen",
-        "key-bind-tooltip-toggle-fullscreen":  "",
+        "key-bind-tooltip-toggle-fullscreen":  "Alternative to F11",
         "key-bind-title-bookmark-page":  "Bookmark current page",
         "key-bind-tooltip-bookmark-page":  "Saves the current image as a bookmark",
         "key-bind-title-open-help":  "Open help menu",

@@ -10,7 +10,7 @@ import {
   ValidatorFn
 } from "@angular/forms";
 import {KeyBind, KeyBindTarget, Preferences} from "../../_models/preferences/preferences";
-import {TranslocoService} from "@jsverse/transloco";
+import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {
   SettingKeyBindPickerComponent
@@ -27,6 +27,7 @@ import {ToastrService} from "ngx-toastr";
 import {KeyBindPipe} from "../../_pipes/key-bind.pipe";
 import {LicenseService} from "../../_services/license.service";
 import {KeybindSettingDescriptionPipe} from "../../_pipes/keybind-setting-description.pipe";
+import {DblClickDirective} from "../../_directives/dbl-click.directive";
 
 type KeyBindFormGroup = FormGroup<{
   [K in KeyBindTarget]: FormArray<FormControl<KeyBind>>
@@ -40,12 +41,12 @@ const MAX_KEYBINDS_PER_TARGET = 5;
     ReactiveFormsModule,
     SettingItemComponent,
     SettingKeyBindPickerComponent,
-    TagBadgeComponent,
     DefaultValuePipe,
-    LongClickDirective,
     NgbTooltip,
-    KeyBindPipe,
-    KeybindSettingDescriptionPipe
+    KeybindSettingDescriptionPipe,
+    TranslocoDirective,
+    DblClickDirective,
+    LongClickDirective
   ],
   templateUrl: './manage-custom-key-binds.component.html',
   styleUrl: './manage-custom-key-binds.component.scss',
@@ -63,7 +64,6 @@ export class ManageCustomKeyBindsComponent implements OnInit {
 
   protected keyBindForm!: KeyBindFormGroup;
 
-  protected selectedIndexes = signal<Map<string, number>>(new Map());
   protected duplicatedKeyBinds = signal<Partial<Record<KeyBindTarget, number[]>>>({});
   protected filteredKeyBindGroups = computed(() => {
     const roles = this.accountService.currentUserSignal()!.roles;
@@ -163,33 +163,12 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     return this.keyBindForm.get(key) as FormArray<FormControl<KeyBind>> | null;
   }
 
-  getSelectedControlIndex(key: KeyBindTarget): number {
-    const array = this.getFormArray(key);
-    if (!array) return 0;
-    const index = this.selectedIndexes().get(key);
-
-    if (array.controls.length === 0) {
-      array.push(this.toFormControls([{key: KeyCode.Empty}]));
-    }
-
-    return index ?? 0;
-  }
-
   /**
    * Reset keybinds to default configured values
    * @param key
    */
   resetKeybindsToDefaults(key: KeyBindTarget) {
     this.keyBindForm.setControl(key, this.fb.array(this.toFormControls(DefaultKeyBinds[key]), this.keyBindArrayValidator()));
-  }
-
-  /**
-   * Select which FromControl to display in edit mode
-   * @param key
-   * @param index
-   */
-  selectIndex(key: KeyBindTarget, index: number) {
-    this.selectedIndexes.update(map => new Map(map).set(key, index));
   }
 
   /**
@@ -277,23 +256,6 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     return null;
   }
 
-  /**
-   * Wrapper around TransLocoService#translate to allow for empty translations
-   * @param key
-   * @param params
-   * @protected
-   */
-  protected t(key: string, params?: any) {
-    key = `custom-key-binds.${key}`
-    const translation = this.transLoco.translate(key, params);
-    if (translation === key) {
-      return '';
-    }
-
-    return translation;
-  }
-
   protected readonly Object = Object;
-  protected readonly TagBadgeCursor = TagBadgeCursor;
   protected readonly MAX_KEYBINDS_PER_TARGET = MAX_KEYBINDS_PER_TARGET;
 }

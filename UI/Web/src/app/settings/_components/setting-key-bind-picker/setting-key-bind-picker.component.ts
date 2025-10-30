@@ -1,16 +1,32 @@
-import {ChangeDetectionStrategy, Component, effect, forwardRef, inject, OnDestroy, signal} from '@angular/core';
-import {ControlValueAccessor, NG_VALUE_ACCESSOR} from "@angular/forms";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  ElementRef,
+  forwardRef,
+  inject,
+  input,
+  OnDestroy,
+  signal
+} from '@angular/core';
+import {ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR} from "@angular/forms";
 import {KeyBindService, KeyCode, ModifierKeyCodes} from "../../../_services/key-bind.service";
-import {KeyBind} from "../../../_models/preferences/preferences";
+import {KeyBind, KeyBindTarget} from "../../../_models/preferences/preferences";
 import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
 import {DOCUMENT} from "@angular/common";
 import {GamePadService} from "../../../_services/game-pad.service";
-import {Subscription, tap} from "rxjs";
+import {filter, fromEvent, Subscription, tap} from "rxjs";
+import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
+import {TranslocoDirective} from "@jsverse/transloco";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 
 @Component({
   selector: 'app-setting-key-bind-picker',
   imports: [
-    KeyBindPipe
+    KeyBindPipe,
+    TagBadgeComponent,
+    TranslocoDirective,
+    DefaultValuePipe
   ],
   templateUrl: './setting-key-bind-picker.component.html',
   styleUrl: './setting-key-bind-picker.component.scss',
@@ -28,13 +44,19 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
   protected readonly keyBindService = inject(KeyBindService);
   private readonly gamePadService = inject(GamePadService);
   private readonly document = inject(DOCUMENT);
+  private readonly elementRef = inject(ElementRef);
+
+  control = input.required<FormControl<KeyBind>>();
+  target = input.required<KeyBindTarget>();
+  index = input.required<number>();
+  duplicated = input.required<boolean>();
 
   selectedKeyBind = signal<KeyBind>({key: KeyCode.Empty});
   disabled = signal(false);
 
   private _onChange: (value: KeyBind) => void = () => {};
   private _onTouched: () => void = () => {};
-  private readonly subscriptions: Subscription[] = [];
+  protected readonly subscriptions = signal<Subscription[]>([]);
 
   constructor() {
     effect(() => {
@@ -42,6 +64,16 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
       this._onChange(selectedKeys);
       this._onTouched();
     });
+
+    fromEvent(this.document, 'click')
+      .pipe(
+        filter((event: Event) => {
+          return !this.elementRef.nativeElement.contains(event.target);
+        }),
+        filter(() => this.subscriptions().length > 0),
+        tap(() => this.stopListening()),
+      ).subscribe();
+
   }
 
   writeValue(keyBind: KeyBind): void {
@@ -62,7 +94,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
 
   ngOnDestroy() {
     this.keyBindService.disabled.set(false);
-    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions().forEach(s => s.unsubscribe());
   }
 
   startListening() {
@@ -76,13 +108,14 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
       })),
     ).subscribe()
 
-    this.subscriptions.push(sub);
+    this.subscriptions.update(s => [sub, ...s]);
   }
 
   stopListening() {
     this.keyBindService.disabled.set(false);
     this.document.removeEventListener('keydown', this.onKeyDown);
-    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions().forEach(s => s.unsubscribe());
+    this.subscriptions.set([]);
   }
 
   private onKeyDown = (event: KeyboardEvent) => {

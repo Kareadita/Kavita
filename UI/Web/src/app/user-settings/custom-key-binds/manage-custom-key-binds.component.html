@@ -1,4 +1,4 @@
-<ng-container>
+<ng-container *transloco="let t; prefix: 'custom-key-binds'">
   <p>
     {{t('description', {max: MAX_KEYBINDS_PER_TARGET})}}
   </p>
@@ -14,37 +14,30 @@
 
       @for (element of keyBindGroup.elements; track element.target) {
         @if (getFormArray(element.target); as array) {
-          <div class="col-12 mt-4">
+          <div class="col-12 mt-4" [formArrayName]="element.target">
             @let settingDesc = element.target | keybindSettingDescription;
             <app-setting-item
               [title]="settingDesc.title"
               [subtitle]="settingDesc.tooltip"
               [labelId]="element.target + ''"
               [showEdit]="false"
+              [canEdit]="false"
+              [allowClickEvents]="true"
             >
               <ng-template #view>
                 <div class="d-flex flex-row justify-content-between">
                   <div>
                     @for (keyBindControl of array.controls; track $index;) {
-                      <app-tag-badge appLongClick
-                                     [selectionMode]="TagBadgeCursor.Clickable"
-                                     (click)="selectIndex(element.target, $index)"
-                                     (longClick)="removeKeyBind(element.target, $index)"
-                                     [ngbTooltip]="errorToolTip(element.target, $index, keyBindControl.errors)"
-                      >
-
-                        @if (duplicatedKeyBinds()[element.target]?.includes($index)) {
-                          <i class="fa fa-warning text-warning"
-                             [attr.aria-label]="t('warning-duplicated-control', {target: element.target, index: $index + 1})"></i>
-                        }
-
-                        @if (!keyBindControl.valid) {
-                          <i class="fa fa-warning text-danger"
-                             [attr.aria-label]="t('errors-control', {target: element.target, index: $index + 1})"></i>
-                        }
-
-                        {{keyBindControl.value | keyBind | defaultValue}}
-                      </app-tag-badge>
+                      <app-setting-key-bind-picker
+                        appLongClick
+                        [control]="keyBindControl"
+                        [formControlName]="$index + ''"
+                        [target]="element.target"
+                        [index]="$index"
+                        [duplicated]="duplicatedKeyBinds()[element.target]?.includes($index) ?? false"
+                        [ngbTooltip]="errorToolTip(element.target, $index, keyBindControl.errors)"
+                        (longClick)="removeKeyBind(element.target, $index)"
+                      />
                     } @empty {
                       {{null | defaultValue}}
                     }
@@ -53,12 +46,12 @@
                   <div class="float-end">
 
                     @if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
-                      <button class="btn btn-sm" (click)="addKeyBind(element.target); $event.preventDefault(); $event.stopPropagation()" [ngbTooltip]="t('add', {target: element.target})">
+                      <button class="btn btn-sm" (click)="addKeyBind(element.target); $event.preventDefault(); $event.stopPropagation()" [ngbTooltip]="t('add', {target: settingDesc.title})">
                         <i class="fa fa-add" [attr.aria-label]="t('add', {target: element.target})"></i>
                       </button>
                     }
 
-                    <button class="btn btn-sm" (click)="resetKeybindsToDefaults(element.target); $event.preventDefault(); $event.stopPropagation()" [ngbTooltip]="t('reset', {target: element.target})">
+                    <button class="btn btn-sm" (click)="resetKeybindsToDefaults(element.target); $event.preventDefault(); $event.stopPropagation()" [ngbTooltip]="t('reset', {target: settingDesc.title})">
                       <i class="fa fa-recycle" [attr.aria-label]="t('reset', {target: element.target})"></i>
                     </button>
 
@@ -74,14 +67,6 @@
 
                 </div>
 
-              </ng-template>
-              <ng-template #edit>
-                <div [formArrayName]="element.target">
-                  @let index = getSelectedControlIndex(element.target) + '';
-                  @if (array.get(index)) {
-                    <app-setting-key-bind-picker [formControlName]="index" />
-                  }
-                </div>
               </ng-template>
             </app-setting-item>
           </div>
