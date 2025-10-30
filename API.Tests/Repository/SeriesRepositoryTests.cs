@@ -17,109 +17,19 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Repository;
 
 #nullable enable
 
-public class SeriesRepositoryTests
+public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper): AbstractDbTest(testOutputHelper)
 {
-    private readonly IUnitOfWork _unitOfWork;
 
-    private readonly DbConnection? _connection;
-    private readonly DataContext _context;
-
-    private const string CacheDirectory = "C:/kavita/config/cache/";
-    private const string CoverImageDirectory = "C:/kavita/config/covers/";
-    private const string BackupDirectory = "C:/kavita/config/backups/";
-    private const string DataDirectory = "C:/data/";
-
-    public SeriesRepositoryTests()
-    {
-        var contextOptions = new DbContextOptionsBuilder().UseSqlite(CreateInMemoryDatabase()).Options;
-        _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
-
-        _context = new DataContext(contextOptions);
-        Task.Run(SeedDb).GetAwaiter().GetResult();
-
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
-        var mapper = config.CreateMapper();
-        _unitOfWork = new UnitOfWork(_context, mapper, null!);
-    }
-
-     #region Setup
-
-    private static DbConnection CreateInMemoryDatabase()
-    {
-        var connection = new SqliteConnection("Filename=:memory:");
-
-        connection.Open();
-
-        return connection;
-    }
-
-    private async Task<bool> SeedDb()
-    {
-        await _context.Database.MigrateAsync();
-        var filesystem = CreateFileSystem();
-
-        await Seed.SeedSettings(_context,
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
-
-        var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
-        setting.Value = CacheDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
-        setting.Value = BackupDirectory;
-
-        _context.ServerSetting.Update(setting);
-
-        var lib = new LibraryBuilder("Manga")
-            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
-            .Build();
-
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            Libraries = new List<Library>()
-            {
-                lib
-            }
-        });
-
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    private async Task ResetDb()
-    {
-        _context.Series.RemoveRange(_context.Series.ToList());
-        _context.AppUserRating.RemoveRange(_context.AppUserRating.ToList());
-        _context.Genre.RemoveRange(_context.Genre.ToList());
-        _context.CollectionTag.RemoveRange(_context.CollectionTag.ToList());
-        _context.Person.RemoveRange(_context.Person.ToList());
-
-        await _context.SaveChangesAsync();
-    }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(DataDirectory);
-
-        return fileSystem;
-    }
-
-    #endregion
-
-    private async Task SetupSeriesData()
+    private async Task SetupSeriesData(IUnitOfWork unitOfWork)
     {
         var library = new LibraryBuilder("GetFullSeriesByAnyName Manga", LibraryType.Manga)
-            .WithFolderPath(new FolderPathBuilder("C:/data/manga/").Build())
+            .WithFolderPath(new FolderPathBuilder(DataDirectory+"manga/").Build())
             .WithSeries(new SeriesBuilder("The Idaten Deities Know Only Peace")
                 .WithLocalizedName("Heion Sedai no Idaten-tachi")
                 .WithFormat(MangaFormat.Archive)
@@ -130,8 +40,8 @@ public class SeriesRepositoryTests
                 .Build())
             .Build();
 
-        _unitOfWork.LibraryRepository.Add(library);
-        await _unitOfWork.CommitAsync();
+        unitOfWork.LibraryRepository.Add(library);
+        await unitOfWork.CommitAsync();
     }
 
 
@@ -142,11 +52,11 @@ public class SeriesRepositoryTests
     [InlineData("Hitomi-chan wa Hitomishiri", MangaFormat.Archive, "", "Hitomi-chan is Shy With Strangers")]
     public async Task GetFullSeriesByAnyName_Should(string seriesName, MangaFormat format, string localizedName, string? expected)
     {
-        await ResetDb();
-        await SetupSeriesData();
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await SetupSeriesData(unitOfWork);
 
         var series =
-            await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(seriesName, localizedName,
+            await unitOfWork.SeriesRepository.GetFullSeriesByAnyName(seriesName, localizedName,
                 2, format, false);
         if (expected == null)
         {
@@ -165,8 +75,8 @@ public class SeriesRepositoryTests
     [InlineData(0, "", null)] // Case 3: Return null if neither exist
     public async Task GetPlusSeriesDto_Should_PrioritizeAniListId_Correctly(int externalAniListId, string? webLinks, int? expectedAniListId)
     {
-        // Arrange
-        await ResetDb();
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await SetupSeriesData(unitOfWork);
 
         var series = new SeriesBuilder("Test Series")
             .WithFormat(MangaFormat.Archive)
@@ -195,12 +105,12 @@ public class SeriesRepositoryTests
             ReleaseYear = 2021
         };
 
-        _unitOfWork.LibraryRepository.Add(library);
-        _unitOfWork.SeriesRepository.Add(series);
-        await _unitOfWork.CommitAsync();
+        unitOfWork.LibraryRepository.Add(library);
+        unitOfWork.SeriesRepository.Add(series);
+        await unitOfWork.CommitAsync();
 
         // Act
-        var result = await _unitOfWork.SeriesRepository.GetPlusSeriesDto(series.Id);
+        var result = await unitOfWork.SeriesRepository.GetPlusSeriesDto(series.Id);
 
         // Assert
         Assert.NotNull(result);
