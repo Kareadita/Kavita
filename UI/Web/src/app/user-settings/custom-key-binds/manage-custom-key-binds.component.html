@@ -44,7 +44,6 @@
                   </div>
 
                   <div class="float-end">
-
                     @if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
                       <button class="btn btn-sm" (click)="addKeyBind(element.target)" [ngbTooltip]="t('add', {target: settingDesc.title})">
                         <i class="fa fa-add" [attr.aria-label]="t('add', {target: element.target})"></i>
@@ -62,17 +61,13 @@
 
                       </i>
                     }
-
                   </div>
-
                 </div>
-
               </ng-template>
             </app-setting-item>
           </div>
         }
       }
-
     }
   </form>
 

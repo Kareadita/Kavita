@@ -59,8 +59,6 @@ export enum KeyCode {
   Space = ' ',
   Escape = 'escape',
 
-  // These are not real codes, but ones we map. As we do not want to make
-  // a distinction between ShiftLeft and ShiftRight
   Control = "control",
   Alt = "alt",
   Shift = "shift",
@@ -80,7 +78,7 @@ export const ModifierKeyCodes: KeyCode[] = [
 ];
 
 /**
- * Emitted if a combo has been recorded
+ * Emitted if a keybind has been recorded
  */
 export interface KeyBindEvent {
   /**
@@ -88,24 +86,27 @@ export interface KeyBindEvent {
    */
   target: KeyBindTarget;
   /**
-   * Set triggered to true, if the event is used to trigger a flow. This must be done in the sync callback of your
+   * Overriding this value must be done in the sync callback of your
    * observable. When true after all observables have completed, will cancel the event that triggered it
+   *
+   * @default true
    */
   triggered: boolean;
   /**
-   * If the original event's target was editable
+   * If the original event's target was editable. This is only relevant for KeyBoard events, GamePad events do not
+   * contain this information
    */
   inEditableElement: boolean;
 }
 
 /**
- * Add any combo's in this array which cannot be used by any KeyBinds
+ * Add any keybinds in this array which cannot be used users ever
  * Example: Page refresh
  */
 const ReservedKeyBinds: KeyBind[] = [
   {control: true, key: KeyCode.KeyR},
   {meta: true, key: KeyCode.KeyR},
-]
+];
 
 /**
  * This record should hold all KeyBinds Kavita has to offer, with their default combination(s).
@@ -268,7 +269,7 @@ export class KeyBindService {
         } as KeyBind;
       }),
       tap(kb => this.checkForKeyBind(kb)),
-    ).subscribe()
+    ).subscribe();
   }
 
   private handleKeyEvent(event: KeyboardEvent) {
@@ -284,7 +285,7 @@ export class KeyBindService {
       meta: event.metaKey,
       shift: event.shiftKey,
       alt: event.altKey,
-    }
+    };
 
     this.checkForKeyBind(activeKeyBind, event);
   }
@@ -355,7 +356,9 @@ export class KeyBindService {
       filter(([_, ok]) => ok),
       map(([e, _]) => e),
       tap(e => {
-        e.triggered = markAsTriggered; // Set before callback so consumers may override
+        if (markAsTriggered) {
+          e.triggered = true;  // Set before callback so consumers may override
+        }
 
         callback(e);
       }),
@@ -384,12 +387,12 @@ export class KeyBindService {
   }
 
   /**
-   * Returns true if the keybinds are semantic equal
+   * Returns true if the keybinds are semantically equal
    * @param k1
    * @param k2
    */
   public areKeyBindsEqual(k1: KeyBind, k2: KeyBind) {
-    // If a controller sequence is present, it takes full priority
+    // If a controller sequence is present on either, it takes full and the only priority
     if (k1.controllerSequence || k2.controllerSequence) {
       return k1.controllerSequence?.every(k => k2.controllerSequence?.includes(k)) || false;
     }
@@ -404,7 +407,7 @@ export class KeyBindService {
   }
 
   /**
-   * Checks the given combo against the ReservedKeyBinds list. If true, combo should be considered invalid and unusable
+   * Checks the given keybind against the ReservedKeyBinds list. If true, keybind should be considered invalid and unusable
    * @param keyBind
    */
   public isReservedKeyBind(keyBind: KeyBind) {

@@ -11,8 +11,6 @@ import {NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {WikiLink} from "../_models/wiki";
 import {AuthGuard} from "../_guards/auth.guard";
-import {KeyBindService} from "./key-bind.service";
-import {KeyBindTarget} from "../_models/preferences/preferences";
 
 /**
  * NavItem used to construct the dropdown or NavLinkModal on mobile

@@ -75,7 +75,7 @@ export class TypeaheadSettings<T> {
 }
 
 /**
- * Configure the given TypeaheadSettings<Language> as a language type ahead
+ * Configure a new TypeaheadSettings<Language> as a language type ahead
  * @param showLocked
  * @param utilityService
  * @param allLanguages
@@ -106,7 +106,7 @@ export function setupLanguageSettings(
     .pipe(map(items => settings.compareFn(items, filter)));
 
   settings.selectionCompareFn = (a: Language, b: Language) => {
-    return a.isoCode == b.isoCode;
+    return a.isoCode === b.isoCode;
   }
 
   settings.trackByIdentityFn = (_, value) => value.isoCode;

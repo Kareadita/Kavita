@@ -292,6 +292,7 @@ export class PreferenceNavComponent implements AfterViewInit {
       () => this.router.navigate(['/settings'], { fragment: SettingsTabId.Scrobbling})
         .then(() => this.scrollToActiveItem()),
       [KeyBindTarget.NavigateToScrobbling],
+      {condition$: this.licenseService.hasValidLicense$},
     );
   }
 

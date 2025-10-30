@@ -132,7 +132,6 @@ export class EditChapterModalComponent implements OnInit {
   tags: Tag[] = [];
   genres: Genre[] = [];
   ageRatings: Array<AgeRatingDto> = [];
-  validLanguages: Array<Language> = [];
 
   tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getChapterActions(this.runTask.bind(this)), blackList);
   /**
@@ -189,10 +188,9 @@ export class EditChapterModalComponent implements OnInit {
 
     this.metadataService.getAllValidLanguages().pipe(
       tap(validLanguages => {
-        this.validLanguages = validLanguages;
+        this.languageSettings = setupLanguageSettings(true, this.utilityService, validLanguages, this.chapter.language);
         this.cdRef.markForCheck();
       }),
-      tap(_ => this.setupLanguageTypeahead())
     ).subscribe();
 
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
@@ -313,7 +311,6 @@ export class EditChapterModalComponent implements OnInit {
       this.setupTagSettings(),
       this.setupGenreTypeahead(),
       this.setupPersonTypeahead(),
-      this.setupLanguageTypeahead()
     ]).subscribe(results => {
       this.cdRef.markForCheck();
     });
@@ -381,10 +378,6 @@ export class EditChapterModalComponent implements OnInit {
       this.genreSettings.savedData = this.chapter.genres;
     }
     return of(true);
-  }
-
-  setupLanguageTypeahead() {
-    this.languageSettings = setupLanguageSettings(true, this.utilityService, this.validLanguages, this.chapter.language);
   }
 
 

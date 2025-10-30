@@ -282,7 +282,7 @@ public class StreamService : IStreamService
         if (!dto.PositionIncludesInvisible)
         {
             var visibleItems = list.Where(i => i.Visible).ToList();
-            if (dto.ToPosition > visibleItems.Count) return;
+            if (dto.ToPosition < 0 || dto.ToPosition >= visibleItems.Count) return;
 
             var itemAtWantedPosition = visibleItems[dto.ToPosition];
             wantedPosition = list.IndexOf(itemAtWantedPosition);

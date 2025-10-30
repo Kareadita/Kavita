@@ -19,15 +19,12 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from "rxjs";
 import {map} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
-import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badge.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {LongClickDirective} from "../../_directives/long-click.directive";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ToastrService} from "ngx-toastr";
-import {KeyBindPipe} from "../../_pipes/key-bind.pipe";
 import {LicenseService} from "../../_services/license.service";
 import {KeybindSettingDescriptionPipe} from "../../_pipes/keybind-setting-description.pipe";
-import {DblClickDirective} from "../../_directives/dbl-click.directive";
 import {DOCUMENT} from "@angular/common";
 
 type KeyBindFormGroup = FormGroup<{
@@ -46,7 +43,6 @@ const MAX_KEYBINDS_PER_TARGET = 5;
     NgbTooltip,
     KeybindSettingDescriptionPipe,
     TranslocoDirective,
-    DblClickDirective,
     LongClickDirective
   ],
   templateUrl: './manage-custom-key-binds.component.html',
@@ -82,7 +78,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     }).filter(g => g.elements.length > 0);
   });
 
-  ngOnInit(): void {
+  ngOnInit() {
     const keyBinds = this.keyBindService.allKeyBinds();
     const groupConfig = Object.entries(keyBinds).reduce((acc, [key, value]) => {
       acc[key as KeyBindTarget] = this.fb.array(this.toFormControls(value), this.keyBindArrayValidator());
@@ -158,7 +154,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   }
 
   /**
-   * Typed getting for the FormArray
+   * Typed getter for the FormArray of a given target
    * @param key
    */
   getFormArray(key: KeyBindTarget): FormArray<FormControl<KeyBind>> | null {

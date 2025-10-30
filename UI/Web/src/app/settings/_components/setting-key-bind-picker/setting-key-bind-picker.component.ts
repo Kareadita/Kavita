@@ -114,7 +114,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
         key: KeyCode.Empty,
         controllerSequence: e.pressedButtons,
       })),
-    ).subscribe()
+    ).subscribe();
 
     this.subscriptions.update(s => [sub, ...s]);
   }
