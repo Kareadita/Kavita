@@ -61,7 +61,9 @@ public class KoreaderService : IKoreaderService
             };
         }
         // Update the bookScrollId if possible
+        var reportedProgress = koreaderBookDto.progress;
         KoreaderHelper.UpdateProgressDto(userProgressDto, koreaderBookDto.progress);
+        _logger.LogDebug("Converting KOReader progress from {ReportedProgress} to {ScopedProgress}", reportedProgress.Sanitize(), userProgressDto.BookScrollId?.Sanitize());
 
         await _readerService.SaveReadingProgress(userProgressDto, userId);
     }
@@ -81,7 +83,10 @@ public class KoreaderService : IKoreaderService
         if (file == null) throw new KavitaException(await _localizationService.Translate(userId, "file-missing"));
 
         var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
+        var originalScrollId = progressDto?.BookScrollId;
         var koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
+        _logger.LogDebug("Converting KOReader progress from {KavitaProgress} to {KOReaderProgress}", originalScrollId.Sanitize(), progressDto.BookScrollId?.Sanitize());
+
 
         return new KoreaderBookDtoBuilder(bookHash).WithProgress(koreaderProgress)
             .WithPercentage(progressDto?.PageNum, file.Pages)

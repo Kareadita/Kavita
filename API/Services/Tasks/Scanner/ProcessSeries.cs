@@ -876,7 +876,7 @@ public class ProcessSeries : IProcessSeries
 
     private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {
-        chapter.Files ??= new List<MangaFile>();
+        chapter.Files ??= [];
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
         var fileInfo = _directoryService.FileSystem.FileInfo.New(info.FullFilePath);
         if (existingFile != null)

@@ -77,6 +77,7 @@ public partial class BookService : IBookService
     private static readonly RecyclableMemoryStreamManager StreamManager = new ();
     private const string CssScopeClass = ".book-content";
     private const string BookApiUrl = "book-resources?file=";
+    public const string BookReaderBodyScope = "//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]";
     private readonly PdfComicInfoExtractor _pdfComicInfoExtractor;
 
     /// <summary>
@@ -327,7 +328,7 @@ public partial class BookService : IBookService
             {
                 var unscopedSelector = bookmark.BookScrollId!
                     .Replace(
-                        "//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]",
+                        BookReaderBodyScope,
                         "//BODY").ToLowerInvariant();
                 var elem = doc.DocumentNode.SelectSingleNode(unscopedSelector);
                 if (elem == null) continue;
