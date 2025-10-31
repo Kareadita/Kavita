@@ -17,7 +17,7 @@ public class KoreaderHelperTests
     public void GetEpubPositionDto(string koreaderPosition, int page, int? pNumber)
     {
         var expected = EmptyProgressDto();
-        expected.BookScrollId = pNumber.HasValue ? $"//html[1]/BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]/P[{pNumber}]" : null;
+        expected.BookScrollId = pNumber.HasValue ? $"//html[1]/BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]/DIV/P[{pNumber}]" : null;
         expected.PageNum = page;
         var actual = EmptyProgressDto();
 
@@ -28,7 +28,7 @@ public class KoreaderHelperTests
 
 
     [Theory]
-    [InlineData("//html[1]/BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]/P[20]", 5, "/body/DocFragment[6]/body/div/p[20]")]
+    [InlineData("//html[1]/BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]/P[20]", 5, "/body/DocFragment[6]/body/p[20]")]
     [InlineData(null, 10, "/body/DocFragment[11]/body/div/a")]
     public void GetKoreaderPosition(string scrollId, int page, string koreaderPosition)
     {

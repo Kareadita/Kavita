@@ -52,7 +52,12 @@ public sealed record UserPreferencesDto
     #region Social
 
     /// <inheritdoc cref="AppUserPreferences.SocialPreferences"/>
+    [Required]
     public AppUserSocialPreferences SocialPreferences { get; set; } = new();
 
     #endregion
+
+    /// <inheritdoc cref="AppUserPreferences.OpdsPreferences"/>
+    [Required]
+    public AppUserOpdsPreferences OpdsPreferences { get; set; } = new();
 }

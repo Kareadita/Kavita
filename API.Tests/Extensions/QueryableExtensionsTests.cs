@@ -3,6 +3,7 @@ using System.Linq;
 using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.UserPreferences;
 using API.Entities.Metadata;
 using API.Entities.Person;
 using API.Extensions.QueryExtensions;

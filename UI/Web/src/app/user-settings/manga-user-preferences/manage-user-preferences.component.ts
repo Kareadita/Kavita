@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  DestroyRef, effect,
-  inject,
-  OnInit,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Preferences} from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
@@ -60,6 +51,11 @@ type UserPreferencesForm = FormGroup<{
     socialMaxAgeRating: FormControl<AgeRating>,
     socialIncludeUnknowns: FormControl<boolean>,
   }>,
+
+  opdsPreferences: FormGroup<{
+    embedProgressIndicator: FormControl<boolean>,
+    includeContinueFrom: FormControl<boolean>,
+  }>
 }>
 
 @Component({
@@ -176,6 +172,11 @@ export class ManageUserPreferencesComponent implements OnInit {
           socialMaxAgeRating: this.fb.control<AgeRating>(pref.socialPreferences.socialMaxAgeRating),
           socialIncludeUnknowns: this.fb.control<boolean>(pref.socialPreferences.socialIncludeUnknowns),
         }),
+
+        opdsPreferences: this.fb.group({
+          embedProgressIndicator: this.fb.control<boolean>(pref.opdsPreferences.embedProgressIndicator),
+          includeContinueFrom: this.fb.control<boolean>(pref.opdsPreferences.includeContinueFrom),
+        })
       });
 
       // Automatically save settings as we edit them

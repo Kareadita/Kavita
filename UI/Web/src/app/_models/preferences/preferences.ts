@@ -23,6 +23,8 @@ export interface Preferences {
 
   // Social
   socialPreferences: SocialPreferences;
+
+  opdsPreferences: OpdsPreferences;
 }
 
 export interface SocialPreferences {
@@ -32,5 +34,10 @@ export interface SocialPreferences {
   socialLibraries: number[];
   socialMaxAgeRating: AgeRating;
   socialIncludeUnknowns: boolean;
+}
+
+export interface OpdsPreferences {
+  embedProgressIndicator: boolean;
+  includeContinueFrom: boolean;
 }
 

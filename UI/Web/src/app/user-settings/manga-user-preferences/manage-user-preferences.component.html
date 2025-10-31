@@ -201,7 +201,33 @@
         </div>
       </ng-container>
 
+      <div class="setting-section-break"></div>
 
+      <h4>{{t('opds-settings-title')}}</h4>
+      <ng-container formGroupName="opdsPreferences">
+        <div class="row g-0 mt-4">
+          <app-setting-switch [title]="t('embed-progress-indicator-label')" [subtitle]="t('embed-progress-indicator-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch" id="embed-progress-indicator"
+                       formControlName="embedProgressIndicator" class="form-check-input"
+                       aria-labelledby="auto-close-label">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+
+        <div class="row g-0 mt-4">
+          <app-setting-switch [title]="t('include-continue-from-label')" [subtitle]="t('include-continue-from-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch" id="include-continue-from"
+                       formControlName="includeContinueFrom" class="form-check-input">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+      </ng-container>
 
       @if (licenseService.hasValidLicense$ | async) {
         <div class="setting-section-break"></div>

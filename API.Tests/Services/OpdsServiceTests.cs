@@ -242,6 +242,37 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     [Fact]
+    public async Task ContinuePoint_WithProgress_NotEnabled()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (opdsService, readerService) = SetupService(unitOfWork, mapper);
+        var user = await SetupSeriesAndUser(context, unitOfWork);
+
+        // Disable Continue Point
+        var user2 = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id, AppUserIncludes.UserPreferences);
+        user2.UserPreferences.OpdsPreferences.IncludeContinueFrom = false;
+        unitOfWork.UserRepository.Update(user2);
+        await unitOfWork.CommitAsync();
+
+        var firstChapter = await unitOfWork.ChapterRepository.GetChapterAsync(1);
+        await readerService.MarkChaptersAsRead(user, 1, [firstChapter]);
+        await unitOfWork.CommitAsync();
+
+        var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
+        {
+            ApiKey = user.ApiKey,
+            Prefix = OpdsService.DefaultApiPrefix,
+            BaseUrl = string.Empty,
+            UserId = user.Id,
+            EntityId = 1,
+            PageNumber = 0
+        });
+
+        Assert.Equal(2, feed.Entries.Count);
+        Assert.False(feed.Entries.First().Title.StartsWith("Continue Reading from"));
+    }
+
+    [Fact]
     public async Task ContinuePoint_DoesntExist_WhenNoProgress()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
@@ -307,6 +338,48 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var expectedIcon = typeof(OpdsService).GetField(expectedIconField)?.GetValue(null) as string;
         Assert.NotNull(expectedIcon);
         Assert.Contains(expectedIcon, feed.Entries[entryIndex].Title);
+    }
+
+    [Fact]
+    public async Task ReadingIcon_NotEnabled()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (opdsService, readerService) = SetupService(unitOfWork, mapper);
+        var user = await SetupSeriesAndUser(context, unitOfWork);
+
+        // Disable Continue Point
+        var user2 = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id, AppUserIncludes.UserPreferences);
+        user2.UserPreferences.OpdsPreferences.EmbedProgressIndicator = false;
+        unitOfWork.UserRepository.Update(user2);
+        await unitOfWork.CommitAsync();
+
+        var firstChapter = await unitOfWork.ChapterRepository.GetChapterAsync(1);
+        Assert.NotNull(firstChapter);
+
+        await readerService.SaveReadingProgress(new ProgressDto
+        {
+            VolumeId = firstChapter.VolumeId,
+            ChapterId = firstChapter.Id,
+            PageNum = 2,
+            SeriesId = 1,
+            LibraryId = 1,
+            BookScrollId = null,
+            LastModifiedUtc = default
+        }, user.Id);
+
+        var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
+        {
+            ApiKey = user.ApiKey,
+            Prefix = OpdsService.DefaultApiPrefix,
+            BaseUrl = string.Empty,
+            UserId = user.Id,
+            EntityId = 1,
+            PageNumber = 0
+        });
+
+        List<string> icons = [OpdsService.NoReadingProgressIcon, OpdsService.QuarterReadingProgressIcon, OpdsService.HalfReadingProgressIcon, OpdsService.AboveHalfReadingProgressIcon, OpdsService.FullReadingProgressIcon];
+        Assert.NotEmpty(feed.Entries);
+        Assert.DoesNotContain(feed.Entries, e => icons.Any(icon => e.Title.Contains(icon)));
     }
 
     #endregion

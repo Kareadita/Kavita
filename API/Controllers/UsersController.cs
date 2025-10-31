@@ -129,6 +129,8 @@ public class UsersController : BaseApiController
             .Where(l => allLibs.Contains(l)).ToList();
         existingPreferences.SocialPreferences = preferencesDto.SocialPreferences;
 
+        existingPreferences.OpdsPreferences = preferencesDto.OpdsPreferences;
+
         if (await _licenseService.HasActiveLicense())
         {
             existingPreferences.AniListScrobblingEnabled = preferencesDto.AniListScrobblingEnabled;

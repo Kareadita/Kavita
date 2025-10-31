@@ -195,6 +195,7 @@
 
         "global-settings-title": "Global Settings",
         "social-settings-title": "Social Settings",
+        "opds-settings-title": "OPDS Settings",
         "page-layout-mode-label": "Page Layout Mode",
         "page-layout-mode-tooltip": "Show items as cards or list view on Series Detail page.",
         "locale-label": "Locale",
@@ -232,6 +233,11 @@
         "social-max-age-rating-tooltip": "Max age rating on which social features will work",
         "social-include-unknowns-label": "Include unknowns",
         "social-include-unknowns-tooltip": "Enable social features for series and chapters with an unknown age rating",
+
+        "embed-progress-indicator-label": "Embed Progress Indicator",
+        "embed-progress-indicator-tooltip": "Embed Progress Indicator in Title",
+        "include-continue-from-label": "Include Continue From Entry",
+        "include-continue-from-tooltip": "Insert a \"Continue From X\" entry in OPDS fields to avoid finding your last reading point (Emulates Kavita's Continue button)",
 
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
         "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",

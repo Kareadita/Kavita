@@ -303,6 +303,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasColumnType("TEXT")
             .HasDefaultValue(new AppUserSocialPreferences());
 
+        builder.Entity<AppUserPreferences>()
+            .Property(a => a.OpdsPreferences)
+            .HasJsonConversion(new AppUserOpdsPreferences())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new AppUserOpdsPreferences());
+
         builder.Entity<AppUserAnnotation>()
             .Property(a => a.Likes)
             .HasJsonConversion(new HashSet<int>())
