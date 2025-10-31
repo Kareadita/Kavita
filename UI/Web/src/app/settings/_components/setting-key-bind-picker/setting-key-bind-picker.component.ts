@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
+  computed, DestroyRef,
   effect,
   ElementRef,
   forwardRef,
@@ -16,11 +16,13 @@ import {KeyBind, KeyBindTarget} from "../../../_models/preferences/preferences";
 import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
 import {DOCUMENT} from "@angular/common";
 import {GamePadService} from "../../../_services/game-pad.service";
-import {filter, fromEvent, Subscription, tap} from "rxjs";
+import {filter, fromEvent, merge, Subscription, tap} from "rxjs";
 import {TagBadgeComponent, TagBadgeCursor} from "../../../shared/tag-badge/tag-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {AccountService} from "../../../_services/account.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {debounceTime, take} from "rxjs/operators";
 
 @Component({
   selector: 'app-setting-key-bind-picker',
@@ -43,6 +45,7 @@ import {AccountService} from "../../../_services/account.service";
 })
 export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDestroy {
 
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly keyBindService = inject(KeyBindService);
   private readonly gamePadService = inject(GamePadService);
   private readonly accountService = inject(AccountService);
@@ -73,6 +76,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
 
     fromEvent(this.document, 'click')
       .pipe(
+        takeUntilDestroyed(this.destroyRef),
         filter((event: Event) => {
           return !this.elementRef.nativeElement.contains(event.target);
         }),
@@ -109,11 +113,23 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
     this.keyBindService.disabled.set(true);
     this.document.addEventListener('keydown', this.onKeyDown);
 
-    const sub = this.gamePadService.keyDownEvents$.pipe(
+    const keydown$ = fromEvent(this.document, 'keydown').pipe(
+      tap((e) => this.onKeyDown(e as KeyboardEvent)),
+    );
+
+    const gamePad$ = this.gamePadService.keyDownEvents$.pipe(
       tap(e => this.selectedKeyBind.set({
         key: KeyCode.Empty,
         controllerSequence: e.pressedButtons,
       })),
+    );
+
+    const sub = merge(keydown$, gamePad$).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      debounceTime(700),
+      filter(() => this.control().valid),
+      take(1),
+      tap(() => this.stopListening()),
     ).subscribe();
 
     this.subscriptions.update(s => [sub, ...s]);
@@ -121,7 +137,6 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
 
   stopListening() {
     this.keyBindService.disabled.set(false);
-    this.document.removeEventListener('keydown', this.onKeyDown);
     this.subscriptions().forEach(s => s.unsubscribe());
     this.subscriptions.set([]);
   }
