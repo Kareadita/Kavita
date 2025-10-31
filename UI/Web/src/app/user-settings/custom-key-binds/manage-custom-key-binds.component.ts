@@ -94,7 +94,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
       distinctUntilChanged(),
       map(formValue => this.extractDuplicated(formValue)),
       tap(d => this.duplicatedKeyBinds.set(d)),
-    ).subscribe()
+    ).subscribe();
 
     this.keyBindForm.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
@@ -105,8 +105,9 @@ export class ManageCustomKeyBindsComponent implements OnInit {
       map(customKeyBinds => this.combinePreferences(customKeyBinds)),
       switchMap(p => this.accountService.updatePreferences(p)),
       catchError(err => {
-        console.log(err);
+        console.error(err);
         this.toastr.error(err);
+        
         return of(null);
       }),
     ).subscribe();
