@@ -26,6 +26,7 @@ import {ToastrService} from "ngx-toastr";
 import {LicenseService} from "../../_services/license.service";
 import {KeybindSettingDescriptionPipe} from "../../_pipes/keybind-setting-description.pipe";
 import {DOCUMENT} from "@angular/common";
+import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 
 type KeyBindFormGroup = FormGroup<{
   [K in KeyBindTarget]: FormArray<FormControl<KeyBind>>
@@ -43,7 +44,8 @@ const MAX_KEYBINDS_PER_TARGET = 5;
     NgbTooltip,
     KeybindSettingDescriptionPipe,
     TranslocoDirective,
-    LongClickDirective
+    LongClickDirective,
+    SafeHtmlPipe
   ],
   templateUrl: './manage-custom-key-binds.component.html',
   styleUrl: './manage-custom-key-binds.component.scss',
@@ -107,7 +109,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
       catchError(err => {
         console.error(err);
         this.toastr.error(err);
-        
+
         return of(null);
       }),
     ).subscribe();
@@ -258,13 +260,13 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   protected errorToolTip(target: KeyBindTarget, index: number, errors: ValidationErrors | null): string | null {
     if (errors) {
       return Object.keys(errors)
-        .map(key => this.transLoco.translate(`custom-key-binds.key-bind-error-${key}`))
+        .map(key => this.transLoco.translate(`manage-custom-key-binds.key-bind-error-${key}`))
         .join(' ')
         .trim() || null;
     }
 
     if (this.duplicatedKeyBinds()[target]?.includes(index)) {
-      return this.transLoco.translate('custom-key-binds.warning-duplicate-key-bind');
+      return this.transLoco.translate('manage-custom-key-binds.warning-duplicate-key-bind');
     }
 
     return null;

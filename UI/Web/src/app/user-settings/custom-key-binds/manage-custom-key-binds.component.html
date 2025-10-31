@@ -1,6 +1,6 @@
-<ng-container *transloco="let t; prefix: 'custom-key-binds'">
-  <p>
-    {{t('description', {max: MAX_KEYBINDS_PER_TARGET})}}
+<ng-container *transloco="let t; prefix: 'manage-custom-key-binds'">
+  <p [innerHTML]="t('description', {max: MAX_KEYBINDS_PER_TARGET}) | safeHtml">
+
   </p>
 
   <form [formGroup]="keyBindForm" class="row mb-4">

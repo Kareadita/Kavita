@@ -1975,8 +1975,8 @@
         "admin-public-metadata": "Manage Metadata"
     },
 
-    "custom-key-binds": {
-        "description": "Sometimes clicking and dragging your mouse is just too slow. Use your preferred keybinds to speed things up. Each option allows for up to {{max}} different keybinds. Long press a keybind to remove it.",
+    "manage-custom-key-binds": {
+        "description": "Sometimes clicking and dragging your mouse is just too slow. Use your preferred keybinds to speed things up. Each option allows for up to {{max}} different keybinds. <b> Long press a keybind to remove it. </b>",
         "key-bind-error-reserved-key-bind": "This keybind is reserved and cannot be used",
         "key-bind-error-need-at-least-one-key": "Your keybind must contain at least one key",
         "key-bind-error-overlap-in-target": "One or more keybinds are the same",

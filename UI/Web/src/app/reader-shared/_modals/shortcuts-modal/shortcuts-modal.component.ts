@@ -4,6 +4,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
+import {KeybindSettingDescriptionPipe} from "../../../_pipes/keybind-setting-description.pipe";
 
 export interface KeyboardShortcut {
   /**
@@ -22,7 +23,7 @@ export interface KeyboardShortcut {
 
 @Component({
   selector: 'app-shortcuts-modal',
-  imports: [NgbModalModule, TranslocoDirective, KeyBindPipe],
+  imports: [NgbModalModule, TranslocoDirective, KeyBindPipe, KeybindSettingDescriptionPipe],
   templateUrl: './shortcuts-modal.component.html',
   styleUrls: ['./shortcuts-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
