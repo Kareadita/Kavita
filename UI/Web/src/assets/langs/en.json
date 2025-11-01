@@ -1986,6 +1986,7 @@
         "errors-control": "Keybind {{index}} for {{target}} contains errors",
         "warning-duplicated-control": "Keybind {{index}} for {{target}} has been used for an other target as well",
         "warning-duplicate-key-bind": "This keybind has also been used elsewhere",
+        "key-bind-tooltip": "Long press a keybind to remove it.",
 
         "global-header": "Global",
         "readers-header": "Readers"

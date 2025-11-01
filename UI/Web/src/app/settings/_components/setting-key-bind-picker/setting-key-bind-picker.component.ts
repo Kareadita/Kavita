@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed, DestroyRef,
+  computed,
+  DestroyRef,
   effect,
   ElementRef,
   forwardRef,
@@ -23,6 +24,7 @@ import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {AccountService} from "../../../_services/account.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, take} from "rxjs/operators";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-setting-key-bind-picker',
@@ -30,7 +32,8 @@ import {debounceTime, take} from "rxjs/operators";
     KeyBindPipe,
     TagBadgeComponent,
     TranslocoDirective,
-    DefaultValuePipe
+    DefaultValuePipe,
+    NgbTooltip
   ],
   templateUrl: './setting-key-bind-picker.component.html',
   styleUrl: './setting-key-bind-picker.component.scss',
