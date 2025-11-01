@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251031210700_OpdsSettings")]
+    [Migration("20251101152738_OpdsSettings")]
     partial class OpdsSettings
     {
         /// <inheritdoc />
@@ -573,6 +573,11 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
+
+                    b.Property<string>("CustomKeyBinds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{}");
 
                     b.Property<bool>("DataSaver")
                         .HasColumnType("INTEGER");
@@ -1473,6 +1478,11 @@ namespace API.Data.Migrations
 
                     b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("DefaultLanguage")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("");
 
                     b.Property<bool>("EnableMetadata")
                         .ValueGeneratedOnAdd()
