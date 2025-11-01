@@ -528,7 +528,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             break;
           case KeyBindTarget.PageRight:
             this.handlePageRight();
-            break
+            break;
           case KeyBindTarget.ToggleFullScreen:
             this.toggleFullscreen();
             break;

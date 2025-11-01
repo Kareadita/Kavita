@@ -506,7 +506,7 @@ public class UploadController : BaseApiController
             var person = await _unitOfWork.PersonRepository.GetPersonById(uploadFileDto.Id);
             if (person == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
 
-            await _coverDbService.SetPersonCoverByUrl(person, uploadFileDto.Url, chooseBetterImage:false);
+            await _coverDbService.SetPersonCoverByUrl(person, uploadFileDto.Url, chooseBetterImage: false);
             return Ok();
         }
         catch (Exception e)
