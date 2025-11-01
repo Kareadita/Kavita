@@ -101,7 +101,7 @@ public static class KoreaderHelper
         else
         {
             // The format that Kavita accepts as a progress string. It tells Kavita where Koreader last left off.
-            progress.BookScrollId = $"//html[1]/{BookService.BookReaderBodyScope[2..]}/{lastPart}";
+            progress.BookScrollId = $"//html[1]/{BookService.BookReaderBodyScope[2..].ToLowerInvariant()}/{lastPart}";
         }
     }
 
