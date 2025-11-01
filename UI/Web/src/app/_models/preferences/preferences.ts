@@ -38,6 +38,11 @@ export interface SocialPreferences {
   socialIncludeUnknowns: boolean;
 }
 
+export interface OpdsPreferences {
+  embedProgressIndicator: boolean;
+  includeContinueFrom: boolean;
+}
+
 export interface KeyBind {
   meta?: boolean;
   control?: boolean;

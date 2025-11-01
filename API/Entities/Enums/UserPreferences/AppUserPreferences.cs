@@ -6,6 +6,7 @@ using API.Entities.Enums.UserPreferences;
 using API.Services.Tasks;
 
 namespace API.Entities;
+#nullable enable
 
 public class AppUserPreferences
 {

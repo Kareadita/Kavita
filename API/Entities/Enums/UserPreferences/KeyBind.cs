@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 
 namespace API.Entities.Enums.UserPreferences;
-
 #nullable enable
 
 public sealed record KeyBind
