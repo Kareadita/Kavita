@@ -43,7 +43,7 @@ public class KoreaderHelperTests
 
     [Theory]
     [InlineData("//html[1]/BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]/P[20]", 5, "/body/DocFragment[6]/body/p[20]")]
-    [InlineData(null, 10, "/body/DocFragment[11]/body/a")] // I'm not sure how to test this actually
+    [InlineData(null, 10, "/body/DocFragment[11]/body/a")] // I've not seen a null/just an a from Koreader in testing
     public void GetKoreaderPosition(string scrollId, int page, string koreaderPosition)
     {
         var given = EmptyProgressDto();

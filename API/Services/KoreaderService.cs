@@ -85,7 +85,7 @@ public class KoreaderService : IKoreaderService
         var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
         var originalScrollId = progressDto?.BookScrollId;
         var koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
-        _logger.LogDebug("Converting KOReader progress from {KavitaProgress} to {KOReaderProgress}", originalScrollId.Sanitize(), progressDto.BookScrollId?.Sanitize());
+        _logger.LogDebug("Converting KOReader progress from {KavitaProgress} to {KOReaderProgress}", originalScrollId?.Sanitize() ?? string.Empty, progressDto?.BookScrollId?.Sanitize() ?? string.Empty);
 
 
         return new KoreaderBookDtoBuilder(bookHash).WithProgress(koreaderProgress)
