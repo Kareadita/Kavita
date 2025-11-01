@@ -224,6 +224,10 @@ export class ManageUserPreferencesComponent implements OnInit {
   }
 
   packSettings(): Preferences {
-    return this.settingsForm.getRawValue();
+    const customKeyBinds = this.accountService.currentUserSignal()!.preferences.customKeyBinds;
+    return {
+      customKeyBinds,
+      ...this.settingsForm.getRawValue(),
+    };
   }
 }

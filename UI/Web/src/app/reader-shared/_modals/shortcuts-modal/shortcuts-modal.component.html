@@ -1,18 +1,42 @@
 <ng-container *transloco="let t; prefix: 'shortcuts-modal'">
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <h4 class="modal-title" id="modal-basic-title">{{ t('title') }}</h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="modal.close()"></button>
   </div>
   <div class="modal-body">
     <div class="row g-0">
-      @for(shortcut of shortcuts; track shortcut.key) {
-        <div class="col-md-6  mb-2">
-          <span><code>{{shortcut.key}}</code> {{t(shortcut.description)}}</span>
-        </div>
+      @for(shortcut of shortcuts; track shortcut.keyBindTarget ?? shortcut.key ?? $index) {
+        @if (shortcut.keyBindTarget) {
+          <!-- Show at most 2 of the keybinds to not make the modal too long -->
+          @for(keyBind of keyBindService.allKeyBinds()[shortcut.keyBindTarget].slice(0, 2); track $index) {
+            <div class="col-md-6 mb-2">
+              <span>
+                <code>{{ keyBind | keyBind }}</code>
+                @if (shortcut.description) {
+                  {{ t(shortcut.description) }}
+                } @else {
+                  @let settingDesc = shortcut.keyBindTarget | keybindSettingDescription;
+                  <span>
+                  {{ settingDesc.tooltip }}
+                </span>
+                }
+              </span>
+            </div>
+          }
+        } @else {
+          <div class="col-md-6 mb-2">
+            <span>
+              <code>{{ shortcut.key }}</code>
+              @if (shortcut.description) {
+                {{ t(shortcut.description) }}
+              }
+            </span>
+          </div>
+        }
       }
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="modal.close()">{{t('close')}}</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close()">{{ t('close') }}</button>
   </div>
 </ng-container>

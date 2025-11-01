@@ -78,7 +78,7 @@ export class LibraryService {
   }
 
   hasFilesAtRoot(roots: Array<string>) {
-    return this.httpClient.post<{[key: string]: boolean}>(this.baseUrl + 'library/has-files-at-root', {roots});
+    return this.httpClient.post<Array<string>>(this.baseUrl + 'library/has-files-at-root', {roots});
   }
 
   getJumpBar(libraryId: number) {

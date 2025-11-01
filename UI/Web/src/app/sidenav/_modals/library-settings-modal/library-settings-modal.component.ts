@@ -21,7 +21,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
+import {debounceTime, distinctUntilChanged, of, switchMap, tap} from 'rxjs';
 import {
   DirectoryPickerComponent,
   DirectoryPickerResult
@@ -54,6 +54,11 @@ import {Action, ActionFactoryService, ActionItem} from "../../../_services/actio
 import {ActionService} from "../../../_services/action.service";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
+import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
+import {setupLanguageSettings, TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {Language} from "../../../_models/metadata/language";
+import {map} from "rxjs/operators";
+import {MetadataService} from "../../../_services/metadata.service";
 
 enum TabID {
   General = 'general-tab',
@@ -74,7 +79,7 @@ enum StepID {
     selector: 'app-library-settings-modal',
   imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe, TypeaheadComponent],
     templateUrl: './library-settings-modal.component.html',
     styleUrls: ['./library-settings-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -93,6 +98,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly imageService = inject(ImageService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
+  private readonly metadataService = inject(MetadataService);
 
   protected readonly LibraryType = LibraryType;
   protected readonly Breakpoint = Breakpoint;
@@ -124,6 +130,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     enableMetadata: new FormControl<boolean>(true, { nonNullable: true, validators: [] }), // required validator doesn't check value, just if true
     removePrefixForSortName: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
     inheritWebLinksFromFirstChapter: new FormControl<boolean>(false, { nonNullable: true, validators: []}),
+    defaultLanguage: new FormControl<string>('', {nonNullable: true, validators: []}),
     // TODO: Missing excludePatterns
   });
 
@@ -133,11 +140,13 @@ export class LibrarySettingsModalComponent implements OnInit {
     return {title: this.libraryTypePipe.transform(f), value: f};
   }).sort((a, b) => a.title.localeCompare(b.title));
 
+  languageSettings: TypeaheadSettings<Language> | null = null;
+
   isAddLibrary = false;
   setupStep = StepID.General;
   fileTypeGroups = allFileTypeGroup;
   excludePatterns: Array<string> = [''];
-  filesAtRoot = model<boolean>(false);
+  filesAtRoot = model<Array<string>>([]);
 
   tasks: ActionItem<Library>[] = this.getTasks();
 
@@ -159,8 +168,6 @@ export class LibrarySettingsModalComponent implements OnInit {
     if (this.library === undefined) {
       this.isAddLibrary = true;
       this.cdRef.markForCheck();
-    } else {
-      this.checkForFilesAtRoot();
     }
 
     if (this.library?.coverImage != null && this.library?.coverImage !== '') {
@@ -201,6 +208,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
 
     this.setValues();
+    this.setupLanguageTypeahead().subscribe();
 
     // Turn on/off manage collections/rl
     this.libraryForm.get('enableMetadata')?.valueChanges.pipe(
@@ -293,7 +301,9 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata);
       this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.removePrefixForSortName);
       this.libraryForm.get('inheritWebLinksFromFirstChapter')?.setValue(this.library.inheritWebLinksFromFirstChapter);
+      this.libraryForm.get('defaultLanguage')?.setValue(this.library.defaultLanguage);
       this.selectedFolders = this.library.folders;
+      this.checkForFilesAtRoot(); // check after selectedFolders has been set
 
       this.madeChanges = false;
 
@@ -319,6 +329,21 @@ export class LibrarySettingsModalComponent implements OnInit {
     }
 
     this.cdRef.markForCheck();
+  }
+
+  setupLanguageTypeahead() {
+    return this.metadataService.getAllValidLanguages()
+      .pipe(
+        tap(validLanguages => {
+          this.languageSettings = setupLanguageSettings(false, this.utilityService, validLanguages, this.library?.defaultLanguage)
+          this.cdRef.markForCheck();
+        }),
+        switchMap(_ => of(true))
+      );
+  }
+
+  updateLanguage(languages: Array<Language>) {
+    this.libraryForm.get("defaultLanguage")!.setValue(languages.at(0)?.isoCode ?? '');
   }
 
   updateGlobs(items: Array<string>) {
@@ -427,7 +452,7 @@ export class LibrarySettingsModalComponent implements OnInit {
         if (!this.selectedFolders.includes(closeResult.folderPath)) {
           this.selectedFolders.push(closeResult.folderPath);
           this.madeChanges = true;
-          this.checkForFilesAtRoot();
+          this.checkForFilesAtRoot(true);
           this.cdRef.markForCheck();
         }
       }
@@ -478,17 +503,14 @@ export class LibrarySettingsModalComponent implements OnInit {
     }
   }
 
-  checkForFilesAtRoot() {
+  checkForFilesAtRoot(showToast: boolean = false) {
     this.libraryService.hasFilesAtRoot(this.selectedFolders).subscribe(results => {
-      let containsMultipleFiles = false;
-      Object.keys(results).forEach(key => {
-        if (results[key]) {
-          containsMultipleFiles = true;
-          return;
-        }
-      });
+      const newValues = results.filter(item => !this.filesAtRoot().includes(item));
+      if (showToast && newValues.length > 0) {
+        this.toastr.error(translate('library-settings-modal.files-at-root-warning'))
+      }
 
-      this.filesAtRoot.set(containsMultipleFiles);
+      this.filesAtRoot.set(results);
     })
   }
 }

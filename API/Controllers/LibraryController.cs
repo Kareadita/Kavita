@@ -182,18 +182,15 @@ public class LibraryController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("has-files-at-root")]
-    public ActionResult<IDictionary<string, bool>> AnyFilesAtRoot(CheckForFilesInFolderRootsDto dto)
+    public ActionResult<IList<string>> AnyFilesAtRoot(CheckForFilesInFolderRootsDto dto)
     {
-        var results = new Dictionary<string, bool>();
-        foreach (var root in dto.Roots)
-        {
-            results.TryAdd(root,
-                _directoryService
-                    .GetFilesWithCertainExtensions(root, Parser.SupportedExtensions, SearchOption.TopDirectoryOnly)
-                    .Any());
-        }
+        var foldersWithFilesAtRoot = dto.Roots
+            .Where(root => _directoryService
+                .GetFilesWithCertainExtensions(root, Parser.SupportedExtensions, SearchOption.TopDirectoryOnly)
+                .Any())
+            .ToList();
 
-        return Ok(results);
+        return Ok(foldersWithFilesAtRoot);
     }
 
     /// <summary>
@@ -658,6 +655,7 @@ public class LibraryController : BaseApiController
         library.EnableMetadata = dto.EnableMetadata;
         library.RemovePrefixForSortName = dto.RemovePrefixForSortName;
         library.InheritWebLinksFromFirstChapter = dto.InheritWebLinksFromFirstChapter;
+        library.DefaultLanguage = dto.DefaultLanguage;
 
         library.LibraryFileTypes = dto.FileGroupTypes
             .Select(t => new LibraryFileTypeGroup() {FileTypeGroup = t, LibraryId = library.Id})

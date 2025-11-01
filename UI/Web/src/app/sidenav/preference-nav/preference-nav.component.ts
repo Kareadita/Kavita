@@ -24,6 +24,8 @@ import {Breakpoint, UtilityService} from "../../shared/_services/utility.service
 import {LicenseService} from "../../_services/license.service";
 import {ManageService} from "../../_services/manage.service";
 import {MatchStateOption} from "../../_models/kavitaplus/match-state-option";
+import {KeyBindService} from "../../_services/key-bind.service";
+import {KeyBindTarget} from "../../_models/preferences/preferences";
 
 export enum SettingsTabId {
 
@@ -52,6 +54,7 @@ export enum SettingsTabId {
   // Non-Admin
   Account = 'account',
   Preferences = 'preferences',
+  CustomKeyBinds = 'custom-key-binds',
   ReadingProfiles = 'reading-profiles',
   Font = 'font',
   Clients = 'clients',
@@ -135,6 +138,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   protected readonly utilityService = inject(UtilityService);
   private readonly manageService = inject(ManageService);
   private readonly document = inject(DOCUMENT);
+  private readonly keyBindService = inject(KeyBindService);
 
   /**
    * This links to settings.component.html which has triggers on what underlying component to render out.
@@ -219,8 +223,9 @@ export class PreferenceNavComponent implements AfterViewInit {
       {
         title: SettingSectionId.AccountSection,
         children: [
-          new SideNavItem(SettingsTabId.Account, []),
+          new SideNavItem(SettingsTabId.Account),
           new SideNavItem(SettingsTabId.Preferences),
+          new SideNavItem(SettingsTabId.CustomKeyBinds),
           new SideNavItem(SettingsTabId.ReadingProfiles),
           new SideNavItem(SettingsTabId.Customize, [], undefined, [Role.ReadOnly]),
           new SideNavItem(SettingsTabId.Clients),
@@ -281,6 +286,14 @@ export class PreferenceNavComponent implements AfterViewInit {
       this.licenseService.hasValidLicenseSignal();
       this.cdRef.markForCheck();
     });
+
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      () => this.router.navigate(['/settings'], { fragment: SettingsTabId.Scrobbling})
+        .then(() => this.scrollToActiveItem()),
+      [KeyBindTarget.NavigateToScrobbling],
+      {condition$: this.licenseService.hasValidLicense$},
+    );
   }
 
   ngAfterViewInit() {

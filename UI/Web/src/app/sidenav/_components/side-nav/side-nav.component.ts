@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, effect, inject, OnInit} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {distinctUntilChanged, filter, map, take, tap} from 'rxjs/operators';
@@ -26,6 +26,8 @@ import {LicenseService} from "../../../_services/license.service";
 import {CdkDrag, CdkDragDrop, CdkDropList} from "@angular/cdk/drag-drop";
 import {ToastrService} from "ngx-toastr";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
+import {KeyBindService} from "../../../_services/key-bind.service";
+import {KeyBindTarget} from "../../../_models/preferences/preferences";
 
 @Component({
   selector: 'app-side-nav',
@@ -57,6 +59,7 @@ export class SideNavComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly readingProfilesService = inject(ReadingProfileService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly keyBindService = inject(KeyBindService);
 
 
   cachedData: SideNavStream[] | null = null;
@@ -146,6 +149,21 @@ export class SideNavComponent implements OnInit {
         this.navService.collapseSideNav(false);
         this.cdRef.markForCheck();
     });
+
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Account}),
+      [KeyBindTarget.NavigateToSettings],
+      {condition$: this.navService.sideNavVisibility$},
+    );
+
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Scrobbling}),
+      [KeyBindTarget.NavigateToScrobbling],
+      {condition$: this.licenseService.hasValidLicense$},
+    );
+
   }
 
   ngOnInit(): void {
@@ -257,7 +275,7 @@ export class SideNavComponent implements OnInit {
 
     const stream = $event.item.data;
     // Offset the home, back, and customize button
-    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex - 3).subscribe({
+    this.navService.updateSideNavStreamPosition(stream.name, stream.id, stream.order, $event.currentIndex - 3, false).subscribe({
       next: () => {
         this.showAllSubject.next(this.showAll);
         this.cdRef.markForCheck();

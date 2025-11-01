@@ -21,7 +21,7 @@ import {
 import {concat, forkJoin, Observable, of, tap} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
-import {TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
+import {setupLanguageSettings, TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Genre} from 'src/app/_models/metadata/genre';
 import {AgeRatingDto} from 'src/app/_models/metadata/age-rating-dto';
@@ -165,7 +165,7 @@ export class EditSeriesModalComponent implements OnInit {
 
   // Typeaheads
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
-  languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
+  languageSettings: TypeaheadSettings<Language> | null = null;
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
@@ -173,7 +173,6 @@ export class EditSeriesModalComponent implements OnInit {
   genres: Genre[] = [];
   ageRatings: Array<AgeRatingDto> = [];
   publicationStatuses: Array<PublicationStatusDto> = [];
-  validLanguages: Array<Language> = [];
 
   metadata!: SeriesMetadata;
   imageUrls: Array<string> = [];
@@ -439,33 +438,7 @@ export class EditSeriesModalComponent implements OnInit {
     return this.metadataService.getAllValidLanguages()
       .pipe(
         tap(validLanguages => {
-          this.validLanguages = validLanguages;
-
-          this.languageSettings.minCharacters = 0;
-          this.languageSettings.multiple = false;
-          this.languageSettings.id = 'language';
-          this.languageSettings.unique = true;
-          this.languageSettings.showLocked = true;
-          this.languageSettings.addIfNonExisting = false;
-          this.languageSettings.compareFn = (options: Language[], filter: string) => {
-            return options.filter(m => this.utilityService.filter(m.title, filter));
-          }
-          this.languageSettings.compareFnForAdd = (options: Language[], filter: string) => {
-            return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-          }
-          this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
-            .pipe(map(items => this.languageSettings.compareFn(items, filter)));
-
-          this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
-            return a.isoCode == b.isoCode;
-          }
-
-          const l = this.validLanguages.find(l => l.isoCode === this.metadata.language);
-          if (l !== undefined) {
-            this.languageSettings.savedData = l;
-          }
-          this.languageSettings.trackByIdentityFn = (index, value) => value.isoCode;
-
+          this.languageSettings = setupLanguageSettings(true, this.utilityService, validLanguages, this.metadata.language);
           this.cdRef.markForCheck();
         }),
         switchMap(_ => of(true))
@@ -596,7 +569,6 @@ export class EditSeriesModalComponent implements OnInit {
 
   updatePerson(persons: Person[], role: PersonRole) {
     this.metadataService.updatePerson(this.metadata, persons, role);
-    this.metadata.locationLocked = true;
     this.cdRef.markForCheck();
   }
 

@@ -74,6 +74,7 @@ public class ImageService : IImageService
     public const string SeriesCoverImageRegex = @"series\d+";
     public const string CollectionTagCoverImageRegex = @"tag\d+";
     public const string ReadingListCoverImageRegex = @"readinglist\d+";
+    public const string PersonCoverImageRegex = @"person\d+";
 
     private const double WhiteThreshold = 0.95; // Colors with lightness above this are considered too close to white
     private const double BlackThreshold = 0.25; // Colors with lightness below this are considered too close to black

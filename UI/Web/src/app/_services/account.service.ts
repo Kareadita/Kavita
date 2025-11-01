@@ -69,6 +69,7 @@ export class AccountService {
 
   public readonly currentUserSignal = toSignal(this.currentUser$);
   public readonly userId = computed(() => this.currentUserSignal()?.id);
+  public readonly isReadOnly = computed(() => this.currentUserSignal()?.roles.includes(Role.ReadOnly) ?? true);
 
   /**
    * SetTimeout handler for keeping track of refresh token call

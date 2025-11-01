@@ -44,6 +44,7 @@ import {
   SettingMultiTextFieldComponent
 } from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
 import {environment} from "../../../environments/environment";
+import {SlicePipe} from "@angular/common";
 
 type OidcFormGroup = FormGroup<{
   autoLogin: FormControl<boolean>;
@@ -75,7 +76,8 @@ type OidcFormGroup = FormGroup<{
     SafeHtmlPipe,
     DefaultValuePipe,
     SettingMultiCheckBox,
-    SettingMultiTextFieldComponent
+    SettingMultiTextFieldComponent,
+    SlicePipe
   ],
   templateUrl: './manage-open-idconnect.component.html',
   styleUrl: './manage-open-idconnect.component.scss',
@@ -166,8 +168,16 @@ export class ManageOpenIDConnectComponent implements OnInit {
     return newSettings;
   }
 
-  save(showConfirmation: boolean = false) {
-    if (!this.settingsForm.valid || !this.serverSettings || !this.oidcSettings()) return;
+  save(showToasts: boolean = false) {
+    if (!this.settingsForm.valid) {
+      if (showToasts) {
+        this.toastr.error(translate('errors.invalid-form'));
+      }
+
+      return;
+    }
+
+    if (!this.serverSettings || !this.oidcSettings()) return;
 
     const newSettings = this.packData();
     this.settingsService.updateServerSettings(newSettings).subscribe({
@@ -176,7 +186,7 @@ export class ManageOpenIDConnectComponent implements OnInit {
         this.oidcSettings.set(data.oidcConfig);
         this.cdRef.markForCheck();
 
-        if (showConfirmation) {
+        if (showToasts) {
           this.toastr.success(translate('manage-oidc-connect.save-success'))
         }
       },
@@ -219,7 +229,9 @@ export class ManageOpenIDConnectComponent implements OnInit {
       const otherControl = this.settingsForm.get(other);
       if (!otherControl) return null;
 
-      if (otherControl.invalid) return null;
+      if (otherControl.invalid) {
+        return { 'requiredIfOtherInvalid': { 'other': other, 'errors': otherControl.errors } }
+      }
 
       const v = otherControl.value;
       if (!v || v.length === 0) return null;

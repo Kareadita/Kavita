@@ -21,7 +21,7 @@ public interface ICleanupService
 {
     Task Cleanup();
     Task CleanupDbEntries();
-    void CleanupCacheAndTempDirectories();
+    Task CleanupCacheAndTempDirectories();
     void CleanupCacheDirectory();
     Task DeleteSeriesCoverImages();
     Task DeleteChapterCoverImages();
@@ -80,38 +80,34 @@ public class CleanupService : ICleanupService
         }
 
         _logger.LogInformation("Starting Cleanup");
+
+        var cleanupSteps = new List<(Func<Task>, string)>
+        {
+            (() => Task.Run(() => _directoryService.ClearDirectory(_directoryService.TempDirectory)), "Cleaning temp directory"),
+            (CleanupCacheAndTempDirectories, "Cleaning cache and temp directories"),
+            (CleanupBackups, "Cleaning old database backups"),
+            (ConsolidateProgress, "Consolidating Progress Events"),
+            (CleanupMediaErrors, "Consolidating Media Errors"),
+            (CleanupDbEntries, "Cleaning abandoned database rows"), // Cleanup DB before removing files linked to DB entries
+            (DeleteSeriesCoverImages, "Cleaning deleted series cover images"),
+            (DeleteChapterCoverImages, "Cleaning deleted chapter cover images"),
+            (() => Task.WhenAll(DeleteTagCoverImages(), DeleteReadingListCoverImages(), DeletePersonCoverImages()), "Cleaning deleted cover images"),
+            (CleanupLogs, "Cleaning old logs"),
+            (EnsureChapterProgressIsCapped, "Cleaning progress events that exceed 100%")
+        };
+
         await SendProgress(0F, "Starting cleanup");
 
-        _logger.LogInformation("Cleaning temp directory");
-        _directoryService.ClearDirectory(_directoryService.TempDirectory);
+        for (var i = 0; i < cleanupSteps.Count; i++)
+        {
+            var (method, subtitle) = cleanupSteps[i];
+            var progress = (float)(i + 1) / (cleanupSteps.Count + 1);
 
-        await SendProgress(0.1F, "Cleaning temp directory");
-        CleanupCacheAndTempDirectories();
+            _logger.LogInformation("{Message}", subtitle);
+            await method();
+            await SendProgress(progress, subtitle);
+        }
 
-        await SendProgress(0.25F, "Cleaning old database backups");
-        _logger.LogInformation("Cleaning old database backups");
-        await CleanupBackups();
-
-        await SendProgress(0.35F, "Consolidating Progress Events");
-        await ConsolidateProgress();
-
-        await SendProgress(0.4F, "Consolidating Media Errors");
-        await CleanupMediaErrors();
-
-        await SendProgress(0.50F, "Cleaning deleted cover images");
-        _logger.LogInformation("Cleaning deleted cover images");
-        await DeleteSeriesCoverImages();
-        await SendProgress(0.6F, "Cleaning deleted cover images");
-        await DeleteChapterCoverImages();
-        await SendProgress(0.7F, "Cleaning deleted cover images");
-        await DeleteTagCoverImages();
-        await DeleteReadingListCoverImages();
-        await SendProgress(0.8F, "Cleaning old logs");
-        await CleanupLogs();
-        await SendProgress(0.9F, "Cleaning progress events that exceed 100%");
-        await EnsureChapterProgressIsCapped();
-        await SendProgress(0.95F, "Cleaning abandoned database rows");
-        await CleanupDbEntries();
         await SendProgress(1F, "Cleanup finished");
         _logger.LogInformation("Cleanup finished");
     }
@@ -175,9 +171,19 @@ public class CleanupService : ICleanupService
     }
 
     /// <summary>
+    /// Remove all person cover images no longer associated with a person in the database
+    /// </summary>
+    public async Task DeletePersonCoverImages()
+    {
+        var images = await _unitOfWork.PersonRepository.GetAllCoverImagesAsync();
+        var files = _directoryService.GetFiles(_directoryService.CoverImageDirectory, ImageService.PersonCoverImageRegex);
+        _directoryService.DeleteFiles(files.Where(file => !images.Contains(_directoryService.FileSystem.Path.GetFileName(file))));
+    }
+
+    /// <summary>
     /// Removes all files and directories in the cache and temp directory
     /// </summary>
-    public void CleanupCacheAndTempDirectories()
+    public Task CleanupCacheAndTempDirectories()
     {
         _logger.LogInformation("Performing cleanup of Cache & Temp directories");
         _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
@@ -194,6 +200,8 @@ public class CleanupService : ICleanupService
         }
 
         _logger.LogInformation("Cache and temp directory purged");
+
+        return Task.CompletedTask;
     }
 
     public void CleanupCacheDirectory()

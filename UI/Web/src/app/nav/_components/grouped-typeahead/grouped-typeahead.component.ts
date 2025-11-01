@@ -23,6 +23,9 @@ import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {map, startWith, tap} from "rxjs";
 import {AccountService} from "../../../_services/account.service";
+import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service";
+import {KeyBindTarget} from "../../../_models/preferences/preferences";
+import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
 
 export interface SearchEvent {
   value: string;
@@ -34,12 +37,13 @@ export interface SearchEvent {
   templateUrl: './grouped-typeahead.component.html',
   styleUrls: ['./grouped-typeahead.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective]
+  imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective, KeyBindPipe]
 })
 export class GroupedTypeaheadComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
+  protected readonly keyBindService = inject(KeyBindService);
 
   /**
    * Unique id to tie with a label element
@@ -126,36 +130,35 @@ export class GroupedTypeaheadComponent implements OnInit {
 
   @HostListener('document:keydown', ['$event'])
   handleKeyPress(event: KeyboardEvent) {
-
-    const isCtrlOrMeta = event.ctrlKey || event.metaKey;
-
-
     switch(event.key) {
       case KEY_CODES.ESC_KEY:
         if (!this.hasFocus) { return; }
         this.close();
         event.stopPropagation();
         break;
-
-      case KEY_CODES.K:
-        if (isCtrlOrMeta) {
-          if (this.inputElem.nativeElement) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            this.inputElem.nativeElement.focus();
-            this.inputElem.nativeElement.click();
-          }
-        }
-        break;
       default:
         break;
+    }
+  }
+
+  private focusElement(e: KeyBindEvent) {
+    if (this.inputElem.nativeElement) {
+      e.triggered = true;
+      this.inputElem.nativeElement.focus();
+      this.inputElem.nativeElement.click();
     }
   }
 
   ngOnInit(): void {
     this.typeaheadForm.get('typeahead')?.setValue(this.initialValue);
     this.cdRef.markForCheck();
+
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      (e) => this.focusElement(e),
+      [KeyBindTarget.OpenSearch],
+      {fireInEditable: true},
+    );
 
     this.searchSettingsForm.get('includeExtras')!.valueChanges.pipe(
       startWith(false),

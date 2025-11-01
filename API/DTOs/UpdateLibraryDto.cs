@@ -48,6 +48,8 @@ public sealed record UpdateLibraryDto
     /// <inheritdoc cref="Library.InheritWebLinksFromFirstChapter"/>
     [Required]
     public bool InheritWebLinksFromFirstChapter { get; init; }
+    /// <inheritdoc cref="Library.DefaultLanguage"/>
+    public string DefaultLanguage { get; init; }
     /// <summary>
     /// What types of files to allow the scanner to pickup
     /// </summary>

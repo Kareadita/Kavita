@@ -14,6 +14,7 @@ using API.SignalR;
 using Flurl.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
@@ -62,9 +63,15 @@ public class UploadController : BaseApiController
     public async Task<ActionResult<string>> GetImageFromFile(UploadUrlDto dto)
     {
         var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow.ToLongTimeString()}".Replace('/', '_').Replace(':', '_');
-        var format = _directoryService.FileSystem.Path.GetExtension(dto.Url.Split('?')[0]).Replace(".", string.Empty);
         try
         {
+            var format = await dto.Url.GetFileFormatAsync();
+            if (string.IsNullOrEmpty(format))
+            {
+                // Fallback to unreliable parsing if needed
+                format = _directoryService.FileSystem.Path.GetExtension(dto.Url.Split('?')[0]).Replace(".", string.Empty);
+            }
+
             var path = await dto.Url
                 .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}");
 
@@ -499,7 +506,7 @@ public class UploadController : BaseApiController
             var person = await _unitOfWork.PersonRepository.GetPersonById(uploadFileDto.Id);
             if (person == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
 
-            await _coverDbService.SetPersonCoverByUrl(person, uploadFileDto.Url, true);
+            await _coverDbService.SetPersonCoverByUrl(person, uploadFileDto.Url, chooseBetterImage: false);
             return Ok();
         }
         catch (Exception e)

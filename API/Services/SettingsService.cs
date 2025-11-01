@@ -618,7 +618,8 @@ public class SettingsService : ISettingsService
 
         if (currentConfig.Authority != updateSettingsDto.OidcConfig.Authority)
         {
-            if (!await IsValidAuthority(updateSettingsDto.OidcConfig.Authority + string.Empty))
+            // Only check validity if we're changing into a value that would be used
+            if (!string.IsNullOrEmpty(updateSettingsDto.OidcConfig.Authority) && !await IsValidAuthority(updateSettingsDto.OidcConfig.Authority + string.Empty))
             {
                 throw new KavitaException("oidc-invalid-authority");
             }

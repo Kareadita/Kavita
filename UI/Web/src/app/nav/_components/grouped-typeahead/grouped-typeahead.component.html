@@ -17,7 +17,7 @@
           }
         } @else {
           <div class="input-hint d-none d-lg-block">
-            Ctrl+K
+            {{keyBindService.allKeyBinds().OpenSearch.at(0) | keyBind}}
           </div>
         }
       </div>

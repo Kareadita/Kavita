@@ -1,0 +1,74 @@
+<ng-container *transloco="let t; prefix: 'manage-custom-key-binds'">
+  <p [innerHTML]="t('description', {max: MAX_KEYBINDS_PER_TARGET}) | safeHtml">
+
+  </p>
+
+  <form [formGroup]="keyBindForm" class="row mb-4">
+
+    @for (keyBindGroup of filteredKeyBindGroups(); track keyBindGroup.title) {
+      @if (!$first) {
+        <div class="setting-section-break"></div>
+      }
+
+      <h4>{{t(keyBindGroup.title)}}</h4>
+
+      @for (element of keyBindGroup.elements; track element.target) {
+        @if (getFormArray(element.target); as array) {
+          <div class="col-12 mt-4" [formArrayName]="element.target">
+            @let settingDesc = element.target | keybindSettingDescription;
+            <app-setting-item
+              [title]="settingDesc.title"
+              [subtitle]="settingDesc.tooltip"
+              [labelId]="element.target + ''"
+              [showEdit]="false"
+              [canEdit]="false"
+              [allowClickEvents]="true"
+            >
+              <ng-template #view>
+                <div class="d-flex flex-row justify-content-between">
+                  <div>
+                    @for (keyBindControl of array.controls; track $index;) {
+                      <app-setting-key-bind-picker
+                        appLongClick
+                        [control]="keyBindControl"
+                        [formControlName]="$index + ''"
+                        [target]="element.target"
+                        [index]="$index"
+                        [duplicated]="duplicatedKeyBinds()[element.target]?.includes($index) ?? false"
+                        [ngbTooltip]="errorToolTip(element.target, $index, keyBindControl.errors)"
+                        (longClick)="removeKeyBind(element.target, $index)"
+                      />
+                    } @empty {
+                      {{null | defaultValue}}
+                    }
+                  </div>
+
+                  <div class="float-end">
+                    @if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
+                      <button class="btn btn-sm" (click)="addKeyBind(element.target)" [ngbTooltip]="t('add', {target: settingDesc.title})">
+                        <i class="fa fa-add" [attr.aria-label]="t('add', {target: element.target})"></i>
+                      </button>
+                    }
+
+                    <button class="btn btn-sm" (click)="resetKeybindsToDefaults(element.target)" [ngbTooltip]="t('reset', {target: settingDesc.title})">
+                      <i class="fa fa-recycle" [attr.aria-label]="t('reset', {target: element.target})"></i>
+                    </button>
+
+                    @if (!array.valid) {
+                      <i class="fa fa-warning text-danger"
+                         [attr.aria-label]="t('errors-array', {target: element.target})"
+                         [ngbTooltip]="errorToolTip(element.target, -1, array.errors)">
+
+                      </i>
+                    }
+                  </div>
+                </div>
+              </ng-template>
+            </app-setting-item>
+          </div>
+        }
+      }
+    }
+  </form>
+
+</ng-container>

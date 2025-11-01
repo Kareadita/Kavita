@@ -85,6 +85,7 @@ import {User} from "../_models/user";
 import {AnnotationService} from "../_services/annotation.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationsTabComponent} from "../_single-module/annotations-tab/annotations-tab.component";
+import {UtcToLocaleDatePipe} from "../_pipes/utc-to-locale-date.pipe";
 
 enum TabID {
 
@@ -158,7 +159,8 @@ interface VolumeCast extends IHasCast {
     CoverImageComponent,
     ReviewsComponent,
     ExternalRatingComponent,
-    AnnotationsTabComponent
+    AnnotationsTabComponent,
+    UtcToLocaleDatePipe
   ],
     templateUrl: './volume-detail.component.html',
     styleUrl: './volume-detail.component.scss',

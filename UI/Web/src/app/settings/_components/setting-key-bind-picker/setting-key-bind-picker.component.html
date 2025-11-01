@@ -1,0 +1,28 @@
+
+
+<app-tag-badge *transloco="let t; prefix: 'manage-custom-key-binds'" [selectionMode]="tagBadgeCursor()" [ngbTooltip]="t('key-bind-tooltip')">
+  <div id="key-bind-{{target()}}-{{index()}}" tabindex="-1" (click)="startListening()" (focus)="startListening()" class="d-flex align-items-center">
+
+    @let keybind = selectedKeyBind() | keyBind;
+    @if (!this.isListening()) {
+      {{keybind | defaultValue}}
+    } @else {
+      {{keybind}}
+    }
+
+    @if (this.isListening()) {
+      <span class="typing-cursor"></span>
+    }
+
+    @if (duplicated()) {
+      <i class="fa fa-warning text-warning ms-2"
+         [attr.aria-label]="t('warning-duplicated-control', {target: target(), index: index() + 1})"></i>
+    }
+
+    @if (!control().valid) {
+      <i class="fa fa-warning text-danger ms-2"
+         [attr.aria-label]="t('errors-control', {target: target(), index: index() + 1})"></i>
+    }
+
+  </div>
+</app-tag-badge>

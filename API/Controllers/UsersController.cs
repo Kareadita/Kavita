@@ -121,6 +121,7 @@ public class UsersController : BaseApiController
         existingPreferences.ColorScapeEnabled = preferencesDto.ColorScapeEnabled;
         existingPreferences.BookReaderHighlightSlots = preferencesDto.BookReaderHighlightSlots;
         existingPreferences.DataSaver = preferencesDto.DataSaver;
+        existingPreferences.CustomKeyBinds = preferencesDto.CustomKeyBinds;
 
         var allLibs = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id))
             .Select(l => l.Id).ToList();

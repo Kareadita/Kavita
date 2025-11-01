@@ -277,7 +277,18 @@ public class StreamService : IStreamService
         if (stream.Order == dto.ToPosition) return;
 
         var list = user!.SideNavStreams.OrderBy(s => s.Order).ToList();
-        OrderableHelper.ReorderItems(list, stream.Id, dto.ToPosition);
+
+        var wantedPosition = dto.ToPosition;
+        if (!dto.PositionIncludesInvisible)
+        {
+            var visibleItems = list.Where(i => i.Visible).ToList();
+            if (dto.ToPosition < 0 || dto.ToPosition >= visibleItems.Count) return;
+
+            var itemAtWantedPosition = visibleItems[dto.ToPosition];
+            wantedPosition = list.IndexOf(itemAtWantedPosition);
+        }
+
+        OrderableHelper.ReorderItems(list, stream.Id, wantedPosition);
         user.SideNavStreams = list;
 
         _unitOfWork.UserRepository.Update(user);

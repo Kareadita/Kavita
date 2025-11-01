@@ -9,7 +9,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DatePipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
+import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
 import {
@@ -61,7 +61,7 @@ import {
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
 import {hasAnyCast} from "../_models/common/i-has-cast";
-import {Breakpoint, UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
+import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {CoverUpdateEvent} from "../_models/events/cover-update-event";
 import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
@@ -79,6 +79,8 @@ import {Rating} from "../_models/rating";
 import {AnnotationService} from "../_services/annotation.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationsTabComponent} from "../_single-module/annotations-tab/annotations-tab.component";
+import {UtcToLocalTimePipe} from "../_pipes/utc-to-local-time.pipe";
+import {UtcToLocaleDatePipe} from "../_pipes/utc-to-locale-date.pipe";
 
 enum TabID {
   Related = 'related-tab',
@@ -115,12 +117,13 @@ enum TabID {
     BadgeExpanderComponent,
     MetadataDetailRowComponent,
     DownloadButtonComponent,
-    DatePipe,
     DefaultDatePipe,
     CoverImageComponent,
     ReviewsComponent,
     ExternalRatingComponent,
-    AnnotationsTabComponent
+    AnnotationsTabComponent,
+    UtcToLocalTimePipe,
+    UtcToLocaleDatePipe
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',

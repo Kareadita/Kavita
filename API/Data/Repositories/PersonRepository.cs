@@ -49,6 +49,7 @@ public interface IPersonRepository
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null, PersonIncludes includes = PersonIncludes.None);
 
     Task<string?> GetCoverImageAsync(int personId);
+    Task<IList<string?>> GetAllCoverImagesAsync();
     Task<string?> GetCoverImageByNameAsync(string name);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId);
     Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, BrowsePersonFilterDto filter, UserParams userParams);
@@ -165,6 +166,13 @@ public class PersonRepository : IPersonRepository
             .Where(c => c.Id == personId)
             .Select(c => c.CoverImage)
             .SingleOrDefaultAsync();
+    }
+
+    public async Task<IList<string?>> GetAllCoverImagesAsync()
+    {
+        return await _context.Person
+            .Select(p => p.CoverImage)
+            .ToListAsync();
     }
 
     public async Task<string?> GetCoverImageByNameAsync(string name)
@@ -358,7 +366,8 @@ public class PersonRepository : IPersonRepository
             .Select(cp => cp.Chapter)
             .RestrictAgainstAgeRestriction(ageRating)
             .RestrictByLibrary(userLibs)
-            .OrderBy(ch => ch.SortOrder)
+            .OrderBy(ch => ch.Volume.MinNumber) // Group/Sort volumes as well
+            .ThenBy(ch => ch.SortOrder)
             .Take(20)
             .ProjectTo<StandaloneChapterDto>(_mapper.ConfigurationProvider)
             .ToListAsync();

@@ -155,6 +155,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<Library>()
             .Property(b => b.EnableMetadata)
             .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(l => l.DefaultLanguage)
+            .HasDefaultValue(string.Empty);
 
         builder.Entity<Chapter>()
             .Property(b => b.WebLinks)
@@ -292,6 +295,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion([])
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<HighlightSlot>());
+
+        builder.Entity<AppUserPreferences>()
+            .Property(p => p.CustomKeyBinds)
+            .HasJsonConversion([])
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new Dictionary<KeyBindTarget, IList<KeyBind>>());
 
         builder.Entity<AppUser>()
             .Property(user => user.IdentityProvider)
