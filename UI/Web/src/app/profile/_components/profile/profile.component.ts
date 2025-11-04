@@ -1,11 +1,13 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {ReadingPaceComponent, ReadingStats} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {AccountService} from "../../../_services/account.service";
+import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
 
 @Component({
   selector: 'app-profile',
   imports: [
-    ReadingPaceComponent
+    ReadingPaceComponent,
+    ActivityGraphComponent
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',

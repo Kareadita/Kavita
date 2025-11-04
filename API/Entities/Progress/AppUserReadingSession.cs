@@ -18,6 +18,10 @@ public class AppUserReadingSession : IEntityDate
     public DateTime? EndTime { get; set; }
     public DateTime? EndTimeUtc { get; set; }
     public bool IsActive { get; set; } = true;
+    /// <summary>
+    /// Actual activity data recorded during the session
+    /// </summary>
+    /// <remarks>JSON Column</remarks>
     public IList<AppUserReadingSessionActivityData> ActivityData { get; set; }
     public DateTime Created { get; set; }
     public DateTime CreatedUtc { get; set; }

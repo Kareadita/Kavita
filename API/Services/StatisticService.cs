@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -37,6 +38,7 @@ public interface IStatisticService
     Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
+    Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year);
 }
 
 /// <summary>
@@ -616,6 +618,154 @@ public class StatisticService : IStatisticService
             .ToList();
 
         return result;
+    }
+
+    public async Task<ReadingActivityGraphDto> GetReadingActivityGraphData(int userId, int year)
+    {
+        var startDate = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var endDate = startDate.AddYears(1).AddSeconds(-1);
+
+        var sessions = await _context.AppUserReadingSession
+            .Where(s => s.AppUserId == userId)
+            .Where(s => s.StartTimeUtc >= startDate && s.EndTimeUtc <= endDate)
+            .OrderBy(s => s.StartTimeUtc)
+            .ToListAsync();
+
+        var result = new ReadingActivityGraphDto();
+
+        // Pre-populate all days of the year with empty entries
+        var currentDate = startDate;
+        while (currentDate.Year == year)
+        {
+            var dateKey = currentDate.ToString("yyyy-MM-dd");
+            result[dateKey] = new ReadingActivityGraphEntryDto
+            {
+                Text = null, // Or set to "0" if you want to show zero activity
+                Title = $"{currentDate:MMMM d, yyyy} - No reading activity",
+                Parts = ["no-activity"],
+                ExtraData = new ReadingActivityGraphExtraDataDto
+                {
+                    TotalTimeReadingSeconds = 0,
+                    TotalPages = 0,
+                    TotalWords = 0,
+                    TotalChaptersFullyRead = 0
+                }
+            };
+            currentDate = currentDate.AddDays(1);
+        }
+
+        // Group sessions by day and aggregate data
+        foreach (var session in sessions)
+        {
+            if (session.EndTimeUtc == null || session.ActivityData == null)
+                continue;
+
+            var sessionDate = session.StartTimeUtc.Date;
+            var dateKey = sessionDate.ToString("yyyy-MM-dd");
+
+            if (!result.TryGetValue(dateKey, out var entry))
+                continue; // Skip if date is somehow outside our year range
+
+            // Calculate session duration
+            var sessionDuration = (int)(session.EndTimeUtc.Value - session.StartTimeUtc).TotalSeconds;
+            entry.ExtraData.TotalTimeReadingSeconds += sessionDuration;
+
+            // Aggregate activity data from the session
+            var processedChapters = new HashSet<int>(); // Track unique chapters per day
+
+            foreach (var activity in session.ActivityData)
+            {
+                entry.ExtraData.TotalPages += activity.PagesRead;
+                entry.ExtraData.TotalWords += activity.WordsRead;
+
+                // Check if chapter was fully read (comparing pages read to total pages)
+                if (activity.PagesRead > 0 && activity.TotalPages > 0
+                    && activity.PagesRead >= activity.TotalPages)
+                {
+                    processedChapters.Add(activity.ChapterId);
+                }
+            }
+
+            entry.ExtraData.TotalChaptersFullyRead += processedChapters.Count;
+
+            // Update display text and title based on aggregated data
+            var hours = entry.ExtraData.TotalTimeReadingSeconds / 3600;
+            var minutes = (entry.ExtraData.TotalTimeReadingSeconds % 3600) / 60;
+
+            // TODO: Likely will just send blank title and generate on FE with localization
+            if (hours > 0)
+            {
+                entry.Text = $"{hours}h";
+            }
+            else if (minutes > 0)
+            {
+                entry.Text = $"{minutes}m";
+            }
+            else if (entry.ExtraData.TotalPages > 0)
+            {
+                entry.Text = entry.ExtraData.TotalPages.ToString();
+            }
+
+            // Build accessible title with all metrics
+            var titleParts = new List<string> { $"{sessionDate:MMMM d, yyyy}" };
+
+            if (entry.ExtraData.TotalTimeReadingSeconds > 0)
+            {
+                titleParts.Add($"Time: {hours}h {minutes}m");
+            }
+            if (entry.ExtraData.TotalPages > 0)
+            {
+                titleParts.Add($"Pages: {entry.ExtraData.TotalPages:N0}");
+            }
+            if (entry.ExtraData.TotalWords > 0)
+            {
+                titleParts.Add($"Words: {entry.ExtraData.TotalWords:N0}");
+            }
+            if (entry.ExtraData.TotalChaptersFullyRead > 0)
+            {
+                titleParts.Add($"Chapters completed: {entry.ExtraData.TotalChaptersFullyRead}");
+            }
+
+            entry.Title = string.Join(" | ", titleParts);
+
+            // Update CSS parts for styling based on activity intensity
+            entry.Parts = GetActivityIntensityParts(entry.ExtraData);
+        }
+
+        return result;
+    }
+
+    private List<string> GetActivityIntensityParts(ReadingActivityGraphExtraDataDto data)
+    {
+        var parts = new List<string> { "activity" };
+
+        // Add intensity levels based on reading time
+        var hours = data.TotalTimeReadingSeconds / 3600.0;
+
+        parts.Add(hours switch
+        {
+            >= 4 => "intensity-high",
+            >= 2 => "intensity-medium",
+            >= 0.5 => "intensity-low",
+            > 0 => "intensity-minimal",
+            _ => "no-activity"
+        });
+
+        // Add achievement indicators
+        if (data.TotalChaptersFullyRead >= 5)
+        {
+            parts.Add("milestone-chapters");
+        }
+        if (data.TotalPages >= 100)
+        {
+            parts.Add("milestone-pages");
+        }
+        if (data.TotalWords >= 50000)
+        {
+            parts.Add("milestone-words");
+        }
+
+        return parts;
     }
 
     private static string CapitalizeDeviceType(string deviceType)

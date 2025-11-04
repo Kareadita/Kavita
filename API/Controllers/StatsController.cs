@@ -250,4 +250,20 @@ public class StatsController : BaseApiController
 
     #endregion
 
+
+    #region Reading History
+
+    [HttpGet("reading-activity")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<ReadingActivityGraphDto>> GetReadingActivity(int userId, int year)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        if (!isAdmin && userId != user!.Id) userId = user.Id;
+
+        return Ok(await _statService.GetReadingActivityGraphData(userId, year));
+    }
+
+    #endregion
+
 }

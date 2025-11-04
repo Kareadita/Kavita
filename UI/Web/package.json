@@ -31,6 +31,7 @@
     "@angular/platform-browser-dynamic": "^20.3.2",
     "@angular/router": "^20.3.2",
     "@fortawesome/fontawesome-free": "^7.0.1",
+    "@hsablonniere/activity-graph": "^1.0.2",
     "@iharbeck/ngx-virtual-scroller": "^19.0.1",
     "@iplab/ngx-color-picker": "^20.0.0",
     "@iplab/ngx-file-upload": "^20.0.0",
