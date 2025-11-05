@@ -37,7 +37,6 @@ public interface IReaderService
     Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
-    HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub);
     IDictionary<int, int> GetPairs(IEnumerable<FileDimensionDto> dimensions);
     Task<string> GetThumbnail(Chapter chapter, int pageNum, IEnumerable<string> cachedImages);
 }
@@ -694,7 +693,7 @@ public class ReaderService : IReaderService
         }
     }
 
-    public HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub)
+    public static HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub)
     {
         if (isEpub)
         {

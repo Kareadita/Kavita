@@ -607,7 +607,7 @@ public class ReadingListController : BaseApiController
 
         if (result == null) return Ok(null);
 
-        var timeEstimate = _readerService.GetTimeEstimate(result.WordCount, result.Pages, result.IsAllEpub);
+        var timeEstimate = ReaderService.GetTimeEstimate(result.WordCount, result.Pages, result.IsAllEpub);
 
         result.MinHoursToRead = timeEstimate.MinHours;
         result.AvgHoursToRead = timeEstimate.AvgHours;

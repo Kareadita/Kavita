@@ -69,7 +69,7 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var cacheService = new CacheHelper(new FileService());
         var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
-            Substitute.For<IEventHub>(), cacheService, readerService, Substitute.For<IMediaErrorService>());
+            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>());
 
 
         await service.ScanSeries(1, 1);
@@ -123,7 +123,7 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var cacheService = new CacheHelper(new FileService());
         var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
-            Substitute.For<IEventHub>(), cacheService, readerService, Substitute.For<IMediaErrorService>());
+            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>());
         await service.ScanSeries(1, 1);
 
         var chapter2 = new ChapterBuilder("2")

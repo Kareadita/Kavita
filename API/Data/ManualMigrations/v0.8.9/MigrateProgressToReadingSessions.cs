@@ -6,6 +6,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.History;
 using API.Entities.Progress;
+using API.Services.Reading;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -77,15 +78,19 @@ public static class MigrateProgressToReadingSessions
                         var sessionDate = firstItem.Progress.LastModified.Date;
                         var sessionDateUtc = firstItem.Progress.LastModifiedUtc.Date;
 
+                        var activityData = group.Select(item =>
+                            CreateSessionActivityDataFromProgress(item.Progress, item.Chapter, item.Format))
+                            .ToList();
+
                         var session = new AppUserReadingSession
                         {
                             AppUserId = group.Key.AppUserId,
                             StartTime = sessionDate,
                             StartTimeUtc = sessionDateUtc,
-                            EndTime = sessionDate.AddHours(23).AddMinutes(59).AddSeconds(59),
-                            EndTimeUtc = sessionDateUtc.AddHours(23).AddMinutes(59).AddSeconds(59),
+                            EndTime = activityData[0].EndTime,
+                            EndTimeUtc = activityData[0].EndTimeUtc,
                             IsActive = false,
-                            ActivityData = [.. group.Select(item => CreateSessionActivityDataFromProgress(item.Progress, item.Chapter, item.Format))],
+                            ActivityData = [.. activityData],
                             Created = sessionDate,
                             CreatedUtc = sessionDateUtc,
                             LastModified = sessionDate,
@@ -139,10 +144,43 @@ public static class MigrateProgressToReadingSessions
         var sessionDateUtc = progress.LastModifiedUtc.Date;
 
         var totalWordsRead = 0;
-        if (format == MangaFormat.Epub && chapter.WordCount > 0 && chapter.Pages > 0)
+        var isEpub = format == MangaFormat.Epub;
+
+        if (isEpub && chapter.WordCount > 0 && chapter.Pages > 0)
         {
             totalWordsRead = (int)Math.Round(chapter.WordCount * (progress.PagesRead / (1.0f * chapter.Pages)));
         }
+
+        // NOTE: I'm seeing a lot of off by 1 pages read issues here
+        // var estimatedTime = ReaderService.GetTimeEstimate(totalWordsRead, progress.PagesRead, isEpub);
+        // var totalEstimatedTime = ReaderService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
+
+        //var diff = totalEstimatedTime - estimatedTime;
+
+        var progressPercentage = progress.PagesRead / (float)chapter.Pages;
+        var totalEstimatedTime = ReaderService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
+
+        var estimatedSessionHours = Math.Min(
+            totalEstimatedTime.AvgHours * progressPercentage * 0.1f, // Assume ~10% was read in this session
+            3.0f // Cap at 3 hours for a single session
+        );
+
+        // Ensure minimum session time
+        estimatedSessionHours = Math.Max(estimatedSessionHours, 0.25f); // At least 15 minutes
+
+        var endDate = new DateTime(
+            Math.Min(
+                sessionDate.AddHours(estimatedSessionHours).Ticks,
+                sessionDate.Date.AddDays(1).AddTicks(-1).Ticks
+            ), DateTimeKind.Local
+        );
+        var endDateUtc = new DateTime(
+            Math.Min(
+                sessionDateUtc.AddHours(estimatedSessionHours).Ticks,
+                sessionDateUtc.Date.AddDays(1).AddTicks(-1).Ticks
+            ), DateTimeKind.Utc
+        );
+
 
         return new AppUserReadingSessionActivityData
         {
@@ -156,8 +194,8 @@ public static class MigrateProgressToReadingSessions
             EndBookScrollId = progress.BookScrollId,
             StartTime = sessionDate,
             StartTimeUtc = sessionDateUtc,
-            EndTime = sessionDate.AddHours(23).AddMinutes(59).AddSeconds(59),
-            EndTimeUtc = sessionDateUtc.AddHours(23).AddMinutes(59).AddSeconds(59),
+            EndTime = endDate,
+            EndTimeUtc = endDateUtc,
             PagesRead = progress.PagesRead,
             WordsRead = totalWordsRead,
             TotalPages = chapter.Pages,

@@ -1,8 +1,12 @@
 <h1>My Profile</h1>
 @let user = accountService.currentUserSignal();
 @if (user) {
-  <app-reading-pace [stats]="testReadingPace" [userName]="user.username"/>
 
   <app-activity-graph />
+
+
+  <app-reading-pace [stats]="testReadingPace" [userName]="user.username"/>
+
+
 }
 

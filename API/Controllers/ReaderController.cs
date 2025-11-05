@@ -872,13 +872,13 @@ public class ReaderController : BaseApiController
             // Word count
             var progressCount = chapters.Sum(c => c.WordCount);
             var wordsLeft = series.WordCount - progressCount;
-            return _readerService.GetTimeEstimate(wordsLeft, 0, true);
+            return ReaderService.GetTimeEstimate(wordsLeft, 0, true);
         }
 
         var progressPageCount = progress.Sum(p => p.PagesRead);
         var pagesLeft = series.Pages - progressPageCount;
 
-        return Ok(_readerService.GetTimeEstimate(0, pagesLeft, false));
+        return Ok(ReaderService.GetTimeEstimate(0, pagesLeft, false));
     }
 
 
@@ -905,7 +905,7 @@ public class ReaderController : BaseApiController
         {
             // Get the word counts for all the pages
             var pageCounts = await _bookService.GetWordCountsPerPage(chapter.Files.First().FilePath); // TODO: Cache
-            if (pageCounts == null) return _readerService.GetTimeEstimate(series.WordCount, 0, true);
+            if (pageCounts == null) return ReaderService.GetTimeEstimate(series.WordCount, 0, true);
 
             // Sum character counts only for pages that have been read
             var totalCharactersRead = pageCounts
@@ -914,12 +914,12 @@ public class ReaderController : BaseApiController
 
             var progressCount = WordCountAnalyzerService.GetWordCount(totalCharactersRead);
             var wordsLeft = series.WordCount - progressCount;
-            return _readerService.GetTimeEstimate(wordsLeft, 0, true);
+            return ReaderService.GetTimeEstimate(wordsLeft, 0, true);
         }
 
         var pagesLeft = chapter.Pages - chapter.PagesRead;
 
-        return Ok(_readerService.GetTimeEstimate(0, pagesLeft, false));
+        return Ok(ReaderService.GetTimeEstimate(0, pagesLeft, false));
     }
 
 

@@ -751,20 +751,6 @@ public class StatisticService : IStatisticService
             _ => "no-activity"
         });
 
-        // Add achievement indicators
-        if (data.TotalChaptersFullyRead >= 5)
-        {
-            parts.Add("milestone-chapters");
-        }
-        if (data.TotalPages >= 100)
-        {
-            parts.Add("milestone-pages");
-        }
-        if (data.TotalWords >= 50000)
-        {
-            parts.Add("milestone-words");
-        }
-
         return parts;
     }
 

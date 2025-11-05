@@ -1,0 +1,302 @@
+:root {
+  --activity-graph-hover-cell-color: rgba(27, 31, 35, 0.3);
+}
+
+.activity-graph-container {
+  padding: 1rem;
+  background: var(--bs-body-bg);
+  border-radius: 0.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+.graph-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--bs-body-color);
+}
+
+.graph-wrapper {
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  min-width: 0; // Prevent flex/grid issues
+}
+
+.activity-graph-table {
+  border-spacing: 4px;
+  border-collapse: separate;
+  position: relative;
+  width: max-content; // Ensure table doesn't get compressed
+
+  // Hide screen reader only content
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+// Day labels column
+.day-label-column {
+  width: 28px;
+}
+
+.day-label {
+  width: 28px;
+  text-align: right;
+  padding-right: 8px;
+  font-size: 12px;
+  color: var(--bs-secondary);
+  position: relative;
+
+  span[aria-hidden] {
+    position: absolute;
+    right: 8px;
+    opacity: 0;
+
+    &.visible {
+      opacity: 1;
+    }
+  }
+}
+
+// Month labels
+.month-label {
+  padding: 0 4px;
+  font-size: 12px;
+  color: var(--bs-secondary);
+  text-align: left;
+  position: relative;
+  height: 15px;
+  vertical-align: bottom;
+
+  span[aria-hidden] {
+    position: absolute;
+    top: 0;
+    left: 4px;
+  }
+}
+
+// Activity cells
+.activity-cell,
+.empty-cell {
+  width: 11px;
+  height: 11px;
+  border: none;
+  outline: none;
+  border-radius: 2px;
+  position: relative;
+}
+
+.empty-cell {
+  background: transparent;
+}
+
+.activity-cell {
+  cursor: pointer;
+  transition: all 0.2s;
+
+
+  &:hover {
+    outline: 2px solid var(--activity-graph-hover-cell-color);
+    outline-offset: 1px;
+  }
+
+  &:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 1px;
+  }
+}
+
+// Activity levels - Default light theme
+.activity-level-0 {
+  background-color: #161b22; // Dark gray for no activity
+}
+
+.activity-level-1 {
+  background-color: #0e4429; // Darkest green
+}
+
+.activity-level-2 {
+  background-color: #006d32; // Dark green
+}
+
+.activity-level-3 {
+  background-color: #26a641; // Medium green
+}
+
+.activity-level-4 {
+  background-color: #39d353; // Bright green
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .activity-level-0 {
+    background-color: #161b22;
+  }
+
+  .activity-level-1 {
+    background-color: #0e4429;
+  }
+
+  .activity-level-2 {
+    background-color: #006d32;
+  }
+
+  .activity-level-3 {
+    background-color: #26a641;
+  }
+
+  .activity-level-4 {
+    background-color: #39d353;
+  }
+
+  .activity-cell,
+  .empty-cell {
+    outline: 1px solid rgba(240, 246, 252, 0.1);
+  }
+
+  .activity-cell:hover {
+    outline: 1px solid rgba(240, 246, 252, 0.3);
+  }
+}
+
+// Bootstrap dark mode support
+[data-bs-theme="dark"] {
+  .activity-level-0 {
+    background-color: #161b22;
+  }
+
+  .activity-level-1 {
+    background-color: #0e4429;
+  }
+
+  .activity-level-2 {
+    background-color: #006d32;
+  }
+
+  .activity-level-3 {
+    background-color: #26a641;
+  }
+
+  .activity-level-4 {
+    background-color: #39d353;
+  }
+
+  .activity-cell,
+  .empty-cell {
+    outline: 1px solid rgba(240, 246, 252, 0.1);
+  }
+
+  .activity-cell:hover {
+    outline: 1px solid rgba(240, 246, 252, 0.3);
+  }
+}
+
+// Legend
+.activity-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 12px;
+  color: var(--bs-secondary);
+}
+
+.legend-cells {
+  display: flex;
+  gap: 3px;
+}
+
+.legend-cell {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+}
+
+.legend-label {
+  font-size: 11px;
+}
+
+// Tooltip
+.activity-tooltip {
+  position: fixed;
+  z-index: 1070;
+  padding: 0.5rem;
+  background: var(--bs-dark);
+  color: var(--bs-white);
+  border-radius: 6px;
+  font-size: 12px;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  margin-top: -8px;
+  max-width: 250px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--bs-dark) transparent transparent transparent;
+  }
+}
+
+.tooltip-header {
+  margin-bottom: 0.25rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tooltip-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  i {
+    width: 14px;
+    opacity: 0.8;
+  }
+}
+
+.no-activity {
+  opacity: 0.8;
+  font-style: italic;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .activity-graph-table {
+    font-size: 10px;
+  }
+
+  .activity-cell,
+  .empty-cell,
+  .legend-cell {
+    width: 9px;
+    height: 9px;
+  }
+
+  .day-label {
+    font-size: 10px;
+  }
+
+  .month-label {
+    font-size: 10px;
+  }
+}
