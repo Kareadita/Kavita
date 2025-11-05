@@ -152,31 +152,18 @@ public static class MigrateProgressToReadingSessions
         }
 
         // NOTE: I'm seeing a lot of off by 1 pages read issues here
-        // var estimatedTime = ReaderService.GetTimeEstimate(totalWordsRead, progress.PagesRead, isEpub);
-        // var totalEstimatedTime = ReaderService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
 
-        //var diff = totalEstimatedTime - estimatedTime;
-
-        var progressPercentage = progress.PagesRead / (float)chapter.Pages;
-        var totalEstimatedTime = ReaderService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
-
-        var estimatedSessionHours = Math.Min(
-            totalEstimatedTime.AvgHours * progressPercentage * 0.1f, // Assume ~10% was read in this session
-            3.0f // Cap at 3 hours for a single session
-        );
-
-        // Ensure minimum session time
-        estimatedSessionHours = Math.Max(estimatedSessionHours, 0.25f); // At least 15 minutes
+        var estimatedTime = ReaderService.GetTimeEstimate(totalWordsRead, progress.PagesRead, isEpub);
 
         var endDate = new DateTime(
             Math.Min(
-                sessionDate.AddHours(estimatedSessionHours).Ticks,
+                sessionDate.AddHours(estimatedTime.AvgHours).Ticks,
                 sessionDate.Date.AddDays(1).AddTicks(-1).Ticks
             ), DateTimeKind.Local
         );
         var endDateUtc = new DateTime(
             Math.Min(
-                sessionDateUtc.AddHours(estimatedSessionHours).Ticks,
+                sessionDateUtc.AddHours(estimatedTime.AvgHours).Ticks,
                 sessionDateUtc.Date.AddDays(1).AddTicks(-1).Ticks
             ), DateTimeKind.Utc
         );

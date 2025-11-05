@@ -1,6 +1,6 @@
 import {DOCUMENT} from '@angular/common';
 import {DestroyRef, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
-import {filter, ReplaySubject, take, tap} from 'rxjs';
+import {filter, ReplaySubject, take} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
@@ -45,7 +45,7 @@ export class NavService {
   public navItems: NavItem[] = [
     {
       transLocoKey: 'my-profile',
-      routerLink: '/profiles/',
+      routerLink: '/profile/',
     },
     {
       transLocoKey: 'all-filters',
