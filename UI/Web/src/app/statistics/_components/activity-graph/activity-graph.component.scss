@@ -1,7 +1,7 @@
 :root {
-  --activity-cell-size: 11px;
-  --activity-cell-gap: 4px;
-  --activity-cell-radius: 2px;
+  --activity-graph-cell-size: 11px;
+  --activity-graph-cell-gap: 4px;
+  --activity-graph-cell-radius: 2px;
 
   --activity-level-0: #161b22;
   --activity-level-1: #0e4429;
@@ -14,7 +14,7 @@
 
   --activity-hover-outline-color: rgba(240, 246, 252, 0.3);
   --activity-focus-outline-color: var(--bs-primary);
-  --activity-cell-outline-color: rgba(240, 246, 252, 0.1);
+  --activity-graph-cell-outline-color: rgba(240, 246, 252, 0.1);
 
   --activity-tooltip-bg: var(--bs-dark);
   --activity-tooltip-color: var(--bs-white);
@@ -87,8 +87,8 @@
 // Activity cells
 .activity-cell,
 .empty-cell {
-  width: var(--activity-cell-size, 11px);
-  height: var(--activity-cell-size, 11px);
+  width: var(--activity-graph-cell-size, 11px);
+  height: var(--activity-graph-cell-size, 11px);
   border: none;
   outline: none;
   border-radius: 2px;
@@ -137,11 +137,11 @@
 
 .activity-cell,
 .empty-cell {
-  outline: 1px solid var(--activity-cell-outline-color, rgba(240, 246, 252, 0.1));
+  outline: 1px solid var(--activity-graph-cell-outline-color, rgba(240, 246, 252, 0.1));
 }
 
 .activity-cell:hover {
-  outline: 1px solid var(--activity-cell-outline-hover-color, rgba(240, 246, 252, 0.3));
+  outline: 1px solid var(--activity-graph-cell-outline-hover-color, rgba(240, 246, 252, 0.3));
 }
 
 // Legend
@@ -160,8 +160,8 @@
 }
 
 .legend-cell {
-  width: var(--activity-cell-size, 11px);
-  height: var(--activity-cell-size, 11px);
+  width: var(--activity-graph-cell-size, 11px);
+  height: var(--activity-graph-cell-size, 11px);
   border-radius: 2px;
 }
 
