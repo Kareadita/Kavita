@@ -47,7 +47,6 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
 
             if (userId.HasValue)
             {
-                // Successfully resolved user
                 userContext.SetUserContext(userId.Value, username!, authType);
 
                 logger.LogTrace(
@@ -93,7 +92,6 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
             return ResolveFromClaims(context);
         }
 
-        // No authentication found
         return (null, null, AuthenticationType.Unknown);
     }
 

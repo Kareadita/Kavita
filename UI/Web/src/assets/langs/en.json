@@ -2804,6 +2804,64 @@
         "view-label": "View"
     },
 
+    "activity-graph": {
+        "title": "Reading Activity",
+        "contribution-graph-caption": "contribution-graph-caption",
+        "day-of-week-alt": "Day of the Week",
+        "less": "Less",
+        "more": "More",
+        "reading-time": "Reading Time",
+        "pages": "Pages",
+        "words": "Words",
+        "chapters": "Chapters",
+        "no-activity": "No Activity"
+
+    },
+
+    "month-label-pipe": {
+        "january": "January",
+        "january-short": "Jan",
+        "february": "February",
+        "february-short": "Feb",
+        "march": "March",
+        "march-short": "Mar",
+        "april": "April",
+        "april-short": "Apr",
+        "may": "May",
+        "may-short": "May",
+        "june": "June",
+        "june-short": "Jun",
+        "july": "July",
+        "july-short": "Jul",
+        "august": "August",
+        "august-short": "Aug",
+        "september": "September",
+        "september-short": "Sep",
+        "october": "October",
+        "october-short": "Oct",
+        "november": "November",
+        "november-short": "Nov",
+        "december": "December",
+        "december-short": "Dec"
+    },
+
+    "day-label-pipe": {
+        "sunday": "Sunday",
+        "sunday-short": "Sun",
+        "monday": "Monday",
+        "monday-short": "Mon",
+        "tuesday": "Tuesday",
+        "tuesday-short": "Tue",
+        "wednesday": "Wednesday",
+        "wednesday-short": "Wed",
+        "thursday": "Thursday",
+        "thursday-short": "Thu",
+        "friday": "Friday",
+        "friday-short": "Fri",
+        "saturday": "Saturday",
+        "saturday-short": "Sat"
+    },
+
 
     "errors": {
         "series-doesnt-exist": "This series no longer exists",

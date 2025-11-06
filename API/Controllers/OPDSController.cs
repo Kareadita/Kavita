@@ -38,8 +38,6 @@ public class OpdsController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly XmlSerializer _xmlOpenSearchSerializer;
 
-    public const string UserId = nameof(UserId);
-
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
         IReaderService readerService, IAccountService accountService,

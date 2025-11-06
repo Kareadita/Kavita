@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix: 'activity-graph'">
 
   <div class="activity-graph-container">
-    <h3 class="graph-title">{{ t('reading-activity') }} {{ year() }}</h3>
+    <h3 class="graph-title">{{ t('title') }} {{ year() }}</h3>
 
     <div class="graph-wrapper" role="region" aria-label="Reading activity graph">
       <table class="activity-graph-table" role="grid" aria-readonly="true">
@@ -10,7 +10,7 @@
         <thead>
         <tr>
           <td class="day-label-column">
-            <span class="visually-hidden">{{ t('day-of-week') }}</span>
+            <span class="visually-hidden">{{ t('day-of-week-alt') }}</span>
           </td>
           @for (month of months(); track month.label) {
             <td [attr.colspan]="month.colSpan" class="month-label">
@@ -25,16 +25,16 @@
           @for (dayIndex of [0, 1, 2, 3, 4, 5, 6]; track dayIndex) {
             <tr>
               <td class="day-label">
-                <span class="visually-hidden">{{ dayLabels[dayIndex] }}</span>
+                <span class="visually-hidden">{{ dayIndex | dayLabel }}</span>
                 <span aria-hidden="true"
                       [class.visible]="dayIndex === 1 || dayIndex === 3 || dayIndex === 5">
-                  {{ dayLabels[dayIndex].slice(0, 3) }}
+                  {{ dayIndex | dayLabel:true }}
                 </span>
               </td>
 
               @for (week of weeks(); track $index) {
                 @let day = week.days[dayIndex];
-                @if (day) {
+                @if (day && (day.extraData?.totalTimeReadingSeconds || 0) > 0) {
                   <td class="activity-cell"
                       [class]="getLevelClass(day.level)"
                       [attr.data-date]="day.date"

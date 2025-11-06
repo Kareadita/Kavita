@@ -14,6 +14,8 @@ import {StatisticsService} from "../../../_services/statistics.service";
 import {AccountService} from "../../../_services/account.service";
 import {DecimalPipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
+import {DayLabelPipe} from "../../../_pipes/day-label.pipe";
 
 
 export interface ActivityGraphData {
@@ -52,7 +54,8 @@ interface WeekRow {
   imports: [
     TranslocoDirective,
     DecimalPipe,
-    NgbTooltip
+    NgbTooltip,
+    DayLabelPipe
   ],
   templateUrl: './activity-graph.component.html',
   styleUrl: './activity-graph.component.scss',
@@ -138,8 +141,8 @@ export class ActivityGraphComponent {
   private generateMonthLabels(): Array<{ label: string; colSpan: number }> {
     const year = this.year();
     const months: Array<{ label: string; colSpan: number }> = [];
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const monthLabelPipe = new MonthLabelPipe();
 
     for (let month = 0; month < 12; month++) {
       const firstDay = new Date(year, month, 1);
@@ -152,7 +155,7 @@ export class ActivityGraphComponent {
 
       if (colSpan > 0) {
         months.push({
-          label: monthNames[month],
+          label: monthLabelPipe.transform(month + 1, true),
           colSpan: Math.min(colSpan, 5)
         });
       }

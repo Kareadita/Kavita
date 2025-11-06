@@ -16,7 +16,6 @@
   --activity-focus-outline-color: var(--bs-primary);
   --activity-cell-outline-color: rgba(240, 246, 252, 0.1);
 
-  // Tooltip
   --activity-tooltip-bg: var(--bs-dark);
   --activity-tooltip-color: var(--bs-white);
   --activity-tooltip-border: rgba(255, 255, 255, 0.2);
@@ -29,10 +28,7 @@
 }
 
 .graph-title {
-  font-size: 1.25rem;
-  font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--bs-body-color);
 }
 
 .graph-wrapper {
