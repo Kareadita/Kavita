@@ -6,16 +6,17 @@ import {
   effect,
   inject,
   input,
-  model,
-  signal
+  model
 } from '@angular/core';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {AccountService} from "../../../_services/account.service";
-import {DecimalPipe} from "@angular/common";
+import {DatePipe, DecimalPipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
 import {DayLabelPipe} from "../../../_pipes/day-label.pipe";
+import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
+import {OrdinalDatePipe} from "../../../_pipes/ordinal-date.pipe";
 
 
 export interface ActivityGraphData {
@@ -24,8 +25,7 @@ export interface ActivityGraphData {
 
 export interface ActivityGraphDataEntry {
   text?: string;
-  title?: string;
-  parts?: string[];
+  date: string;
   extraData?: {
     totalTimeReadingSeconds: number;
     totalPages: number;
@@ -37,7 +37,6 @@ export interface ActivityGraphDataEntry {
 interface DayCell {
   date: string;
   level: number;
-  title: string;
   extraData?: ActivityGraphDataEntry['extraData'];
   isCurrentMonth: boolean;
   dayOfMonth: number;
@@ -55,7 +54,10 @@ interface WeekRow {
     TranslocoDirective,
     DecimalPipe,
     NgbTooltip,
-    DayLabelPipe
+    DayLabelPipe,
+    UtcToLocaleDatePipe,
+    OrdinalDatePipe,
+    DatePipe
   ],
   templateUrl: './activity-graph.component.html',
   styleUrl: './activity-graph.component.scss',
@@ -69,8 +71,6 @@ export class ActivityGraphComponent {
   year = input<number>(new Date().getFullYear());
 
   data = model<ActivityGraphData>({});
-  hoveredCell = signal<DayCell | null>(null);
-  tooltipPosition = signal<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Computed values for the grid
   weeks = computed(() => this.generateWeeks());
@@ -119,7 +119,6 @@ export class ActivityGraphComponent {
           week.push({
             date: dateStr,
             level: this.getActivityLevel(entry),
-            title: entry?.title || this.generateDefaultTitle(currentDate),
             extraData: entry?.extraData,
             isCurrentMonth: true,
             dayOfMonth: currentDate.getDate()
@@ -200,15 +199,6 @@ export class ActivityGraphComponent {
     return `${year}-${month}-${day}`;
   }
 
-  private generateDefaultTitle(date: Date): string {
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    };
-    return date.toLocaleDateString('en-US', options);
-  }
 
   formatTime(seconds: number): string {
     if (seconds < 60) return `${seconds} seconds`;
@@ -219,34 +209,20 @@ export class ActivityGraphComponent {
     return minutes > 0 ? `${hours}h ${minutes}m` : `${hours} hours`;
   }
 
-  onCellHover(event: MouseEvent, day: DayCell | null): void {
-    if (day) {
-      this.hoveredCell.set(day);
-      const rect = (event.target as HTMLElement).getBoundingClientRect();
-      this.tooltipPosition.set({
-        x: rect.left + rect.width / 2,
-        y: rect.top - 10
-      });
-    }
-  }
-
-  onCellLeave(): void {
-    this.hoveredCell.set(null);
-  }
-
   getLevelClass(level: number): string {
     return `activity-level-${level}`;
   }
 
   getLevelDescription(level: number): string {
     const descriptions = [
-      'No activity',
-      'Low activity',
-      'Moderate activity',
-      'Good activity',
-      'High activity'
+      'activity-graph.no-activity',
+      'activity-graph.low-activity',
+      'activity-graph.moderate-activity',
+      'activity-graph.good-activity',
+      'activity-graph.high-activity'
     ];
-    return descriptions[level] || 'No activity';
+
+    return translate(descriptions[level]) || 'activity-graph.no-activity';
   }
 
 }

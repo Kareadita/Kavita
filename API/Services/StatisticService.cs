@@ -640,9 +640,7 @@ public class StatisticService : IStatisticService
             var dateKey = currentDate.ToString("yyyy-MM-dd");
             result[dateKey] = new ReadingActivityGraphEntryDto
             {
-                Text = null, // Or set to "0" if you want to show zero activity
-                Title = $"{currentDate:MMMM d, yyyy} - No reading activity",
-                Parts = ["no-activity"],
+                Date = currentDate,
                 ExtraData = new ReadingActivityGraphExtraDataDto
                 {
                     TotalTimeReadingSeconds = 0,
@@ -689,46 +687,8 @@ public class StatisticService : IStatisticService
             entry.ExtraData.TotalChaptersFullyRead += processedChapters.Count;
 
             // Update display text and title based on aggregated data
-            var hours = entry.ExtraData.TotalTimeReadingSeconds / 3600;
-            var minutes = (entry.ExtraData.TotalTimeReadingSeconds % 3600) / 60;
-
-            // TODO: Likely will just send blank title and generate on FE with localization
-            // if (hours > 0)
-            // {
-            //     entry.Text = $"{hours}h";
-            // }
-            // else if (minutes > 0)
-            // {
-            //     entry.Text = $"{minutes}m";
-            // }
-            // else if (entry.ExtraData.TotalPages > 0)
-            // {
-            //     entry.Text = entry.ExtraData.TotalPages.ToString();
-            // }
-
-            // Build accessible title with all metrics
-            //var titleParts = new List<string> { $"{sessionDate:MMMM d, yyyy}" };
-
             entry.Title = $"{sessionDate:MMMM d, yyyy}";
 
-            // if (entry.ExtraData.TotalTimeReadingSeconds > 0)
-            // {
-            //     titleParts.Add($"Time: {hours}h {minutes}m");
-            // }
-            // if (entry.ExtraData.TotalPages > 0)
-            // {
-            //     titleParts.Add($"Pages: {entry.ExtraData.TotalPages:N0}");
-            // }
-            // if (entry.ExtraData.TotalWords > 0)
-            // {
-            //     titleParts.Add($"Words: {entry.ExtraData.TotalWords:N0}");
-            // }
-            // if (entry.ExtraData.TotalChaptersFullyRead > 0)
-            // {
-            //     titleParts.Add($"Chapters completed: {entry.ExtraData.TotalChaptersFullyRead}");
-            // }
-            //
-            // entry.Title = string.Join(" | ", titleParts);
 
             // Update CSS parts for styling based on activity intensity
             entry.Parts = GetActivityIntensityParts(entry.ExtraData);

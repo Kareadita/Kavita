@@ -2806,7 +2806,6 @@
 
     "activity-graph": {
         "title": "Reading Activity",
-        "contribution-graph-caption": "contribution-graph-caption",
         "day-of-week-alt": "Day of the Week",
         "less": "Less",
         "more": "More",
@@ -2814,8 +2813,12 @@
         "pages": "Pages",
         "words": "Words",
         "chapters": "Chapters",
-        "no-activity": "No Activity"
-
+        "no-activity": "No Activity",
+        "no-activity-tooltip": "No reading activity on {{date}}.",
+        "low-activity": "Low Activity",
+        "moderate-activity": "Moderate Activity",
+        "good-activity": "Good Activity",
+        "high-activity": "High Activity"
     },
 
     "month-label-pipe": {
@@ -2860,6 +2863,16 @@
         "friday-short": "Fri",
         "saturday": "Saturday",
         "saturday-short": "Sat"
+    },
+
+    "ordinal-date-pipe": {
+        "ordinalFormat": "{{month}} {{day}}",
+        "ordinal": {
+            "st": "st",
+            "nd": "nd",
+            "rd": "rd",
+            "th": "th"
+        }
     },
 
 

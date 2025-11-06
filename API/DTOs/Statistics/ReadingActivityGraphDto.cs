@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace API.DTOs.Statistics;
@@ -5,20 +6,8 @@ namespace API.DTOs.Statistics;
 
 public sealed record ReadingActivityGraphEntryDto
 {
-    /// <summary>
-    /// Used for the day "cell" inner text
-    /// </summary>
-    public string? Text { get; set; }
+    public DateTime Date { get; set; }
 
-    /// <summary>
-    /// Used for the day "cell" title attribute, for tooltips and accessibility
-    /// </summary>
-    public string? Title { get; set; }
-
-    /// <summary>
-    /// Used for the day "cell" part attribute, as in CSS shadow part for styling purposes
-    /// </summary>
-    public List<string>? Parts { get; set; }
     /// <summary>
     /// Extra data that needs to be packed in
     /// </summary>

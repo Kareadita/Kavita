@@ -5,8 +5,6 @@
 
     <div class="graph-wrapper" role="region" aria-label="Reading activity graph">
       <table class="activity-graph-table" role="grid" aria-readonly="true">
-        <caption class="visually-hidden">{{ t('contribution-graph-caption', { year: year() }) }}</caption>
-
         <thead>
         <tr>
           <td class="day-label-column">
@@ -39,7 +37,6 @@
                       [class]="getLevelClass(day.level)"
                       [attr.data-date]="day.date"
                       [attr.data-level]="day.level"
-                      [attr.aria-label]="day.title"
                       [attr.aria-describedby]="'activity-level-' + day.level"
                       [ngbTooltip]="tooltip"
                       container="body"
@@ -51,7 +48,12 @@
                       >
                   </td>
                 } @else {
-                  <td class="empty-cell"></td>
+                  <td class="empty-cell"
+                      [ngbTooltip]="noActivityTooltip"
+                      container="body"
+                      [tooltipContext]="{'item': day}"
+                      [tooltipClass]="'activity-tooltip'"
+                  ></td>
                 }
               }
             </tr>
@@ -76,13 +78,16 @@
     </div>
 
 
+    <ng-template #noActivityTooltip let-item="item">
+      <div class="activity-tooltip">
+        {{t('no-activity-tooltip', {date: item.date | utcToLocaleDate | ordinalDate})}}
+      </div>
+    </ng-template>
 
     <ng-template #tooltip let-item="item">
-      <div class="activity-tooltip"
-           role="tooltip"
-           >
+      <div class="activity-tooltip">
         <div class="tooltip-header">
-          <strong>{{ item!.title }}</strong>
+          <strong>{{ item!.date | utcToLocaleDate | date:'MMMM d, yyyy' }}</strong>
         </div>
         @if (item!.extraData) {
           <div class="tooltip-content">
