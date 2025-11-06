@@ -41,10 +41,14 @@
                       [attr.data-level]="day.level"
                       [attr.aria-label]="day.title"
                       [attr.aria-describedby]="'activity-level-' + day.level"
+                      [ngbTooltip]="tooltip"
+                      container="body"
+                      [tooltipContext]="{'item': day}"
+                      [tooltipClass]="'activity-tooltip'"
                       role="gridcell"
+                      autoClose="false"
                       tabindex="-1"
-                      (mouseenter)="onCellHover($event, day)"
-                      (mouseleave)="onCellLeave()">
+                      >
                   </td>
                 } @else {
                   <td class="empty-cell"></td>
@@ -71,32 +75,32 @@
       </div>
     </div>
 
-    <!-- Tooltip -->
-    @if (hoveredCell()) {
+
+
+    <ng-template #tooltip let-item="item">
       <div class="activity-tooltip"
            role="tooltip"
-           [style.left.px]="tooltipPosition().x"
-           [style.top.px]="tooltipPosition().y">
+           >
         <div class="tooltip-header">
-          <strong>{{ hoveredCell()!.title }}</strong>
+          <strong>{{ item!.title }}</strong>
         </div>
-        @if (hoveredCell()!.extraData) {
+        @if (item!.extraData) {
           <div class="tooltip-content">
             <div class="tooltip-stat">
               <i class="fa fa-clock" aria-hidden="true"></i>
-              <span>{{ t('reading-time') }}: {{ formatTime(hoveredCell()!.extraData!.totalTimeReadingSeconds) }}</span>
+              <span>{{ t('reading-time') }}: {{ formatTime(item.extraData!.totalTimeReadingSeconds) }}</span>
             </div>
             <div class="tooltip-stat">
               <i class="fa fa-file-alt" aria-hidden="true"></i>
-              <span>{{ t('pages') }}: {{ hoveredCell()!.extraData!.totalPages }}</span>
+              <span>{{ t('pages') }}: {{ item!.extraData!.totalPages }}</span>
             </div>
             <div class="tooltip-stat">
               <i class="fa fa-font" aria-hidden="true"></i>
-              <span>{{ t('words') }}: {{ hoveredCell()!.extraData!.totalWords | number }}</span>
+              <span>{{ t('words') }}: {{ item!.extraData!.totalWords | number }}</span>
             </div>
             <div class="tooltip-stat">
               <i class="fa fa-book-open" aria-hidden="true"></i>
-              <span>{{ t('chapters') }}: {{ hoveredCell()!.extraData!.totalChaptersFullyRead }}</span>
+              <span>{{ t('chapters') }}: {{ item!.extraData!.totalChaptersFullyRead }}</span>
             </div>
           </div>
         } @else {
@@ -105,7 +109,7 @@
           </div>
         }
       </div>
-    }
+    </ng-template>
   </div>
 
 </ng-container>

@@ -2,15 +2,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  CUSTOM_ELEMENTS_SCHEMA, effect, ElementRef,
+  CUSTOM_ELEMENTS_SCHEMA,
+  effect,
   inject,
   input,
-  model, signal, viewChild
+  model,
+  signal
 } from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {AccountService} from "../../../_services/account.service";
 import {DecimalPipe} from "@angular/common";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 
 export interface ActivityGraphData {
@@ -48,7 +51,8 @@ interface WeekRow {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [
     TranslocoDirective,
-    DecimalPipe
+    DecimalPipe,
+    NgbTooltip
   ],
   templateUrl: './activity-graph.component.html',
   styleUrl: './activity-graph.component.scss',
@@ -61,9 +65,7 @@ export class ActivityGraphComponent {
 
   year = input<number>(new Date().getFullYear());
 
-  activityGraphElement = viewChild<ElementRef<any>>('activityGraph');
   data = model<ActivityGraphData>({});
-
   hoveredCell = signal<DayCell | null>(null);
   tooltipPosition = signal<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -79,16 +81,6 @@ export class ActivityGraphComponent {
       const userId = this.accountService.currentUserSignal()?.id;
       if (userId) {
         this.loadActivityData(userId, this.year());
-      }
-    });
-
-
-    // Update web component when data changes
-    effect(() => {
-      const element = this.activityGraphElement()?.nativeElement;
-      if (element && this.data()) {
-        // Web components often need data set as a property, not attribute
-        element.data = Object.assign({}, this.data());
       }
     });
   }
@@ -161,7 +153,7 @@ export class ActivityGraphComponent {
       if (colSpan > 0) {
         months.push({
           label: monthNames[month],
-          colSpan: Math.min(colSpan, 5) // Cap at 5 columns max
+          colSpan: Math.min(colSpan, 5)
         });
       }
     }
@@ -220,6 +212,7 @@ export class ActivityGraphComponent {
     if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes`;
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
+
     return minutes > 0 ? `${hours}h ${minutes}m` : `${hours} hours`;
   }
 

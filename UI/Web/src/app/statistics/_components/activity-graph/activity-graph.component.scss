@@ -1,12 +1,31 @@
 :root {
-  --activity-graph-hover-cell-color: rgba(27, 31, 35, 0.3);
+  --activity-cell-size: 11px;
+  --activity-cell-gap: 4px;
+  --activity-cell-radius: 2px;
+
+  --activity-level-0: #161b22;
+  --activity-level-1: #0e4429;
+  --activity-level-2: #006d32;
+  --activity-level-3: #26a641;
+  --activity-level-4: #39d353;
+
+  --activity-text-primary: var(--bs-body-color);
+  --activity-text-secondary: var(--bs-secondary);
+
+  --activity-hover-outline-color: rgba(240, 246, 252, 0.3);
+  --activity-focus-outline-color: var(--bs-primary);
+  --activity-cell-outline-color: rgba(240, 246, 252, 0.1);
+
+  // Tooltip
+  --activity-tooltip-bg: var(--bs-dark);
+  --activity-tooltip-color: var(--bs-white);
+  --activity-tooltip-border: rgba(255, 255, 255, 0.2);
 }
 
 .activity-graph-container {
   padding: 1rem;
   background: var(--bs-body-bg);
   border-radius: 0.5rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 .graph-title {
@@ -19,30 +38,16 @@
 .graph-wrapper {
   overflow-x: auto;
   padding-bottom: 1rem;
-  min-width: 0; // Prevent flex/grid issues
+  min-width: 0;
 }
 
 .activity-graph-table {
   border-spacing: 4px;
   border-collapse: separate;
   position: relative;
-  width: max-content; // Ensure table doesn't get compressed
-
-  // Hide screen reader only content
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+  width: max-content;
 }
 
-// Day labels column
 .day-label-column {
   width: 28px;
 }
@@ -86,8 +91,8 @@
 // Activity cells
 .activity-cell,
 .empty-cell {
-  width: 11px;
-  height: 11px;
+  width: var(--activity-cell-size, 11px);
+  height: var(--activity-cell-size, 11px);
   border: none;
   outline: none;
   border-radius: 2px;
@@ -114,89 +119,33 @@
   }
 }
 
-// Activity levels - Default light theme
 .activity-level-0 {
-  background-color: #161b22; // Dark gray for no activity
+  background-color: var(--activity-level-0, #161b22);
 }
 
 .activity-level-1 {
-  background-color: #0e4429; // Darkest green
+  background-color: var(--activity-level-1, #0e4429);
 }
 
 .activity-level-2 {
-  background-color: #006d32; // Dark green
+  background-color: var(--activity-level-2, #006d32);
 }
 
 .activity-level-3 {
-  background-color: #26a641; // Medium green
+  background-color: var(--activity-level-3, #26a641);
 }
 
 .activity-level-4 {
-  background-color: #39d353; // Bright green
+  background-color: var(--activity-level-4, #39d353);
 }
 
-// Dark theme support
-@media (prefers-color-scheme: dark) {
-  .activity-level-0 {
-    background-color: #161b22;
-  }
-
-  .activity-level-1 {
-    background-color: #0e4429;
-  }
-
-  .activity-level-2 {
-    background-color: #006d32;
-  }
-
-  .activity-level-3 {
-    background-color: #26a641;
-  }
-
-  .activity-level-4 {
-    background-color: #39d353;
-  }
-
-  .activity-cell,
-  .empty-cell {
-    outline: 1px solid rgba(240, 246, 252, 0.1);
-  }
-
-  .activity-cell:hover {
-    outline: 1px solid rgba(240, 246, 252, 0.3);
-  }
+.activity-cell,
+.empty-cell {
+  outline: 1px solid var(--activity-cell-outline-color, rgba(240, 246, 252, 0.1));
 }
 
-// Bootstrap dark mode support
-[data-bs-theme="dark"] {
-  .activity-level-0 {
-    background-color: #161b22;
-  }
-
-  .activity-level-1 {
-    background-color: #0e4429;
-  }
-
-  .activity-level-2 {
-    background-color: #006d32;
-  }
-
-  .activity-level-3 {
-    background-color: #26a641;
-  }
-
-  .activity-level-4 {
-    background-color: #39d353;
-  }
-
-  .activity-cell,
-  .empty-cell {
-    outline: 1px solid rgba(240, 246, 252, 0.1);
-  }
-
-  .activity-cell:hover {
-    outline: 1px solid rgba(240, 246, 252, 0.3);
-  }
+.activity-cell:hover {
+  outline: 1px solid var(--activity-cell-outline-hover-color, rgba(240, 246, 252, 0.3));
 }
 
 // Legend
@@ -215,8 +164,8 @@
 }
 
 .legend-cell {
-  width: 11px;
-  height: 11px;
+  width: var(--activity-cell-size, 11px);
+  height: var(--activity-cell-size, 11px);
   border-radius: 2px;
 }
 
@@ -224,31 +173,31 @@
   font-size: 11px;
 }
 
-// Tooltip
 .activity-tooltip {
-  position: fixed;
+  //position: fixed;
   z-index: 1070;
-  padding: 0.5rem;
-  background: var(--bs-dark);
-  color: var(--bs-white);
-  border-radius: 6px;
+  //padding: 0.5rem;
+  //background: var(--bs-dark);
+  //color: var(--bs-white);
+  //border-radius: 6px;
   font-size: 12px;
   pointer-events: none;
-  transform: translate(-50%, -100%);
-  margin-top: -8px;
+  //transform: translate(-50%, -100%);
+  //margin-top: -8px;
   max-width: 250px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  //box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 
-  &::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: var(--bs-dark) transparent transparent transparent;
-  }
+  //
+  //&::after {
+  //  content: '';
+  //  position: absolute;
+  //  top: 100%;
+  //  left: 50%;
+  //  margin-left: -5px;
+  //  border-width: 5px;
+  //  border-style: solid;
+  //  border-color: var(--bs-dark) transparent transparent transparent;
+  //}
 }
 
 .tooltip-header {

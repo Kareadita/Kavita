@@ -693,40 +693,42 @@ public class StatisticService : IStatisticService
             var minutes = (entry.ExtraData.TotalTimeReadingSeconds % 3600) / 60;
 
             // TODO: Likely will just send blank title and generate on FE with localization
-            if (hours > 0)
-            {
-                entry.Text = $"{hours}h";
-            }
-            else if (minutes > 0)
-            {
-                entry.Text = $"{minutes}m";
-            }
-            else if (entry.ExtraData.TotalPages > 0)
-            {
-                entry.Text = entry.ExtraData.TotalPages.ToString();
-            }
+            // if (hours > 0)
+            // {
+            //     entry.Text = $"{hours}h";
+            // }
+            // else if (minutes > 0)
+            // {
+            //     entry.Text = $"{minutes}m";
+            // }
+            // else if (entry.ExtraData.TotalPages > 0)
+            // {
+            //     entry.Text = entry.ExtraData.TotalPages.ToString();
+            // }
 
             // Build accessible title with all metrics
-            var titleParts = new List<string> { $"{sessionDate:MMMM d, yyyy}" };
+            //var titleParts = new List<string> { $"{sessionDate:MMMM d, yyyy}" };
 
-            if (entry.ExtraData.TotalTimeReadingSeconds > 0)
-            {
-                titleParts.Add($"Time: {hours}h {minutes}m");
-            }
-            if (entry.ExtraData.TotalPages > 0)
-            {
-                titleParts.Add($"Pages: {entry.ExtraData.TotalPages:N0}");
-            }
-            if (entry.ExtraData.TotalWords > 0)
-            {
-                titleParts.Add($"Words: {entry.ExtraData.TotalWords:N0}");
-            }
-            if (entry.ExtraData.TotalChaptersFullyRead > 0)
-            {
-                titleParts.Add($"Chapters completed: {entry.ExtraData.TotalChaptersFullyRead}");
-            }
+            entry.Title = $"{sessionDate:MMMM d, yyyy}";
 
-            entry.Title = string.Join(" | ", titleParts);
+            // if (entry.ExtraData.TotalTimeReadingSeconds > 0)
+            // {
+            //     titleParts.Add($"Time: {hours}h {minutes}m");
+            // }
+            // if (entry.ExtraData.TotalPages > 0)
+            // {
+            //     titleParts.Add($"Pages: {entry.ExtraData.TotalPages:N0}");
+            // }
+            // if (entry.ExtraData.TotalWords > 0)
+            // {
+            //     titleParts.Add($"Words: {entry.ExtraData.TotalWords:N0}");
+            // }
+            // if (entry.ExtraData.TotalChaptersFullyRead > 0)
+            // {
+            //     titleParts.Add($"Chapters completed: {entry.ExtraData.TotalChaptersFullyRead}");
+            // }
+            //
+            // entry.Title = string.Join(" | ", titleParts);
 
             // Update CSS parts for styling based on activity intensity
             entry.Parts = GetActivityIntensityParts(entry.ExtraData);
@@ -735,7 +737,7 @@ public class StatisticService : IStatisticService
         return result;
     }
 
-    private List<string> GetActivityIntensityParts(ReadingActivityGraphExtraDataDto data)
+    private static List<string> GetActivityIntensityParts(ReadingActivityGraphExtraDataDto data)
     {
         var parts = new List<string> { "activity" };
 
