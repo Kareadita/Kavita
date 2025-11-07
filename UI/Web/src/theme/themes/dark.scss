@@ -457,7 +457,10 @@
     --setting-tablet-breakpoint: 1280;
     --setting-desktop-breakpoint: 1440;
 
-    /** Activity Graph **/
+    /** Tooltips **/
+    --tooltips-bg-color: var(--bs-dark, var(--popover-body-bg-color));
+    --tooltip-outline-color: white;
+    --tooltip-carrot-color: var(--tooltip-outline-color);
 
 
 }

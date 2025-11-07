@@ -15,10 +15,6 @@
   --activity-graph-cell-focus-outline-color: var(--bs-primary);
   --activity-graph-cell-outline-color: rgba(240, 246, 252, 0.1);
 
-  --activity-graph-cell-tooltip-bg: var(--bs-dark);
-  --activity-graph-cell-tooltip-color: var(--bs-white);
-  --activity-graph-cell-tooltip-border: rgba(255, 255, 255, 0.2);
-
   --activity-graph-text-color: var(--bs-secondary);
 }
 
@@ -78,7 +74,7 @@
   position: relative;
 
   &:hover {
-    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-outline-color);
+    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-hover-outline-color);
     outline-offset: 1px;
   }
 
@@ -94,7 +90,7 @@
 
 
   &:hover {
-    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-outline-color);
+    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-hover-outline-color);
     outline-offset: 1px;
   }
 
@@ -169,7 +165,7 @@
   .tooltip-header {
     margin-bottom: 0.25rem;
     padding-bottom: 0.25rem;
-    border-bottom: 1px solid var(--activity-graph-cell-tooltip-border);
+    border-bottom: 1px solid var(--tooltip-outline-color);
   }
 
   .tooltip-content {
@@ -192,11 +188,6 @@
 }
 
 
-
-.no-activity {
-  opacity: 0.8;
-  font-style: italic;
-}
 
 // Responsive adjustments
 @media (max-width: 768px) {
