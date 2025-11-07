@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Metadata.Browse.Requests;
 using API.DTOs.Reader;
 using API.Extensions;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
 using API.SignalR;
 using Kavita.Common;
@@ -82,6 +84,7 @@ public class AnnotationController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("create")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<AnnotationDto>> CreateAnnotation(AnnotationDto dto)
     {
         try
@@ -100,6 +103,7 @@ public class AnnotationController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<AnnotationDto>> UpdateAnnotation(AnnotationDto dto)
     {
         try
@@ -118,6 +122,7 @@ public class AnnotationController(
     /// <param name="ids"></param>
     /// <returns></returns>
     [HttpPost("like")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> LikeAnnotations(IList<int> ids)
     {
         var userId = UserId;
@@ -149,6 +154,7 @@ public class AnnotationController(
     /// <param name="ids"></param>
     /// <returns></returns>
     [HttpPost("unlike")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UnLikeAnnotations(IList<int> ids)
     {
         var userId = UserId;
@@ -180,6 +186,7 @@ public class AnnotationController(
     /// <param name="annotationId"></param>
     /// <returns></returns>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteAnnotation(int annotationId)
     {
         var annotation = await unitOfWork.AnnotationRepository.GetAnnotation(annotationId);
@@ -197,6 +204,7 @@ public class AnnotationController(
     /// <param name="annotationIds"></param>
     /// <returns></returns>
     [HttpPost("bulk-delete")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteAnnotationsBulk(IList<int> annotationIds)
     {
         var userId = UserId;

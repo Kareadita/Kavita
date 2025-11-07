@@ -602,23 +602,6 @@ public class DeviceTrackingServiceTests : AbstractDbTest
             PagesRead = 10
         });
 
-        // foreach (var deviceId in deviceIds)
-        // {
-        //     session.ActivityData.Add(new AppUserReadingSessionActivityData
-        //     {
-        //         ChapterId = 1,
-        //         VolumeId = 1,
-        //         SeriesId = 1,
-        //         LibraryId = 1,
-        //         DeviceIds = [deviceId],
-        //         StartPage = 0,
-        //         EndPage = 10,
-        //         StartTime = DateTime.Now,
-        //         StartTimeUtc = DateTime.UtcNow,
-        //         PagesRead = 10
-        //     });
-        // }
-
         return session;
     }
 
