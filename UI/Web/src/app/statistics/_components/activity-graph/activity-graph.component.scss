@@ -1,6 +1,6 @@
 // Host is like root but scoped only to the component
 :host {
-  --activity-graph-cell-size: 11px;
+  --activity-graph-cell-size: 1.5rem;
   --activity-graph-cell-gap: 4px;
   --activity-graph-cell-radius: 2px;
 
@@ -10,8 +10,6 @@
   --activity-graph-cell-level-3: #26a641;
   --activity-graph-cell-level-4: #39d353;
 
-  --activity-text-primary: var(--bs-body-color);
-  --activity-text-secondary: var(--bs-secondary);
 
   --activity-graph-cell-hover-outline-color: rgba(240, 246, 252, 0.3);
   --activity-graph-cell-focus-outline-color: var(--bs-primary);
@@ -20,6 +18,8 @@
   --activity-graph-cell-tooltip-bg: var(--bs-dark);
   --activity-graph-cell-tooltip-color: var(--bs-white);
   --activity-graph-cell-tooltip-border: rgba(255, 255, 255, 0.2);
+
+  --activity-graph-text-color: var(--bs-secondary);
 }
 
 .activity-graph-container {
@@ -51,52 +51,34 @@
 
 .day-label {
   width: 28px;
-  text-align: right;
-  padding-right: 8px;
   font-size: 12px;
-  color: var(--bs-secondary);
+  color: var(--activity-graph-text-color);
   position: relative;
-
-  span[aria-hidden] {
-    position: absolute;
-    right: 8px;
-    opacity: 0;
-
-    &.visible {
-      opacity: 1;
-    }
-  }
 }
 
 // Month labels
 .month-label {
   padding: 0 4px;
   font-size: 12px;
-  color: var(--bs-secondary);
+  color: var(--activity-graph-text-color);
   text-align: left;
   position: relative;
   height: 15px;
   vertical-align: bottom;
-
-  span[aria-hidden] {
-    position: absolute;
-    top: 0;
-    left: 4px;
-  }
 }
 
 // Activity cells
 .activity-cell,
 .empty-cell {
-  width: var(--activity-graph-cell-size, 11px);
-  height: var(--activity-graph-cell-size, 11px);
+  width: var(--activity-graph-cell-size);
+  height: var(--activity-graph-cell-size);
   border: none;
   outline: none;
-  border-radius: 2px;
+  border-radius: var(--activity-graph-cell-radius);
   position: relative;
 
   &:hover {
-    outline: 2px solid var(--activity-graph-cell-outline-color);
+    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-outline-color);
     outline-offset: 1px;
   }
 
@@ -112,12 +94,12 @@
 
 
   &:hover {
-    outline: 2px solid var(--activity-graph-cell-outline-color);
+    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-outline-color);
     outline-offset: 1px;
   }
 
   &:focus {
-    outline: 2px solid var(--bs-primary);
+    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-focus-outline-color);
     outline-offset: 1px;
   }
 }
@@ -158,7 +140,7 @@
   gap: 0.5rem;
   margin-top: 1rem;
   font-size: 12px;
-  color: var(--bs-secondary);
+  color: var(--activity-graph-text-color);
 }
 
 .legend-cells {

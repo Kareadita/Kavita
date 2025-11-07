@@ -24,7 +24,6 @@ export interface ActivityGraphData {
 }
 
 export interface ActivityGraphDataEntry {
-  text?: string;
   date: string;
   extraData?: {
     totalTimeReadingSeconds: number;
@@ -38,8 +37,6 @@ interface DayCell {
   date: string;
   level: number;
   extraData?: ActivityGraphDataEntry['extraData'];
-  isCurrentMonth: boolean;
-  dayOfMonth: number;
 }
 
 interface WeekRow {
@@ -120,8 +117,6 @@ export class ActivityGraphComponent {
             date: dateStr,
             level: this.getActivityLevel(entry),
             extraData: entry?.extraData,
-            isCurrentMonth: true,
-            dayOfMonth: currentDate.getDate()
           });
         } else {
           // Outside the year, add null for empty cells

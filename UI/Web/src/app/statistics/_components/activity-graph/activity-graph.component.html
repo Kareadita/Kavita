@@ -25,7 +25,7 @@
               <td class="day-label">
                 <span class="visually-hidden">{{ dayIndex | dayLabel }}</span>
                 <span aria-hidden="true"
-                      [class.visible]="dayIndex === 1 || dayIndex === 3 || dayIndex === 5">
+                      [class.visually-hidden]="dayIndex !== 1 && dayIndex !== 3 && dayIndex !== 5">
                   {{ dayIndex | dayLabel:true }}
                 </span>
               </td>
@@ -35,15 +35,12 @@
                 @if (day && (day.extraData?.totalTimeReadingSeconds || 0) > 0) {
                   <td class="activity-cell"
                       [class]="getLevelClass(day.level)"
-                      [attr.data-date]="day.date"
-                      [attr.data-level]="day.level"
                       [attr.aria-describedby]="'activity-level-' + day.level"
                       [ngbTooltip]="tooltip"
                       container="body"
                       [tooltipContext]="{'item': day}"
                       [tooltipClass]="'activity-tooltip'"
                       role="gridcell"
-                      autoClose="false"
                       tabindex="-1"
                       >
                   </td>
