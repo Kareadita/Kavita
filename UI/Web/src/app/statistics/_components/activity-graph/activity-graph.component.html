@@ -88,7 +88,7 @@
         <div class="tooltip-content">
           <div class="tooltip-stat">
             <i class="fa fa-clock" aria-hidden="true"></i>
-            <span>{{ t('reading-time') }}: {{ formatTime(item.totalTimeReadingSeconds) }}</span>
+            <span>{{ t('reading-time') }}: {{ item.totalTimeReadingSeconds | duration}}</span>
           </div>
           <div class="tooltip-stat">
             <i class="fa fa-file-alt" aria-hidden="true"></i>

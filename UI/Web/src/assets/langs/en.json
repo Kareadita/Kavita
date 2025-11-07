@@ -614,6 +614,15 @@
         "years-ago": "{{value}} years ago"
     },
 
+    "duration-pipe": {
+        "seconds": "{{num}} seconds",
+        "minutes": "{{num}} minutes",
+        "hours": "{{num}} hours",
+        "combo": "{{hour}}h {{min}}m"
+
+    },
+
+
     "relationship-pipe": {
         "adaptation": "Adaptation",
         "alternative-setting": "Alternative Setting",

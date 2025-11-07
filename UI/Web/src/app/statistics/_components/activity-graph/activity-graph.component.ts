@@ -11,12 +11,13 @@ import {
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {AccountService} from "../../../_services/account.service";
-import {DatePipe, DecimalPipe, JsonPipe} from "@angular/common";
+import {DatePipe, DecimalPipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
 import {DayLabelPipe} from "../../../_pipes/day-label.pipe";
 import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {OrdinalDatePipe} from "../../../_pipes/ordinal-date.pipe";
+import {DurationPipe} from "../../../_pipes/duration.pipe";
 
 
 export interface ActivityGraphData {
@@ -52,7 +53,7 @@ interface WeekRow {
     UtcToLocaleDatePipe,
     OrdinalDatePipe,
     DatePipe,
-    JsonPipe
+    DurationPipe
   ],
   templateUrl: './activity-graph.component.html',
   styleUrl: './activity-graph.component.scss',
@@ -70,9 +71,6 @@ export class ActivityGraphComponent {
   // Computed values for the grid
   weeks = computed(() => this.generateWeeks());
   months = computed(() => this.generateMonthLabels());
-
-  protected readonly dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
 
   constructor() {
     effect(() => {
@@ -176,9 +174,9 @@ export class ActivityGraphComponent {
     if (!entry) return 0;
 
     if (entry.totalTimeReadingSeconds === 0 && entry.totalPages === 0) return 0;
-    if (entry.totalTimeReadingSeconds < 900) return 1; // Less than 15 minutes
-    if (entry.totalTimeReadingSeconds < 1800) return 2; // Less than 30 minutes
-    if (entry.totalTimeReadingSeconds < 3600) return 3; // Less than 1 hour
+    if (entry.totalTimeReadingSeconds < 15 * 60) return 1; // Less than 15 minutes
+    if (entry.totalTimeReadingSeconds < 45 * 60) return 2; // Less than 45 minutes
+    if (entry.totalTimeReadingSeconds < 360 * 60) return 3; // Less than 1 hour
     return 4; // 1 hour or more
   }
 
@@ -187,16 +185,6 @@ export class ActivityGraphComponent {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  }
-
-
-  formatTime(seconds: number): string {
-    if (seconds < 60) return `${seconds} seconds`;
-    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes`;
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-
-    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours} hours`;
   }
 
   getLevelClass(level: number): string {
