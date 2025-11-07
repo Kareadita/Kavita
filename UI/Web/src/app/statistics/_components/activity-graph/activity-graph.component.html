@@ -32,7 +32,7 @@
 
               @for (week of weeks(); track $index) {
                 @let day = week.days[dayIndex];
-                @if (day && (day.extraData?.totalTimeReadingSeconds || 0) > 0) {
+                @if (day && day.totalTimeReadingSeconds > 0) {
                   <td class="activity-cell"
                       [class]="getLevelClass(day.level)"
                       [attr.aria-describedby]="'activity-level-' + day.level"
@@ -41,8 +41,7 @@
                       [tooltipContext]="{'item': day}"
                       [tooltipClass]="'activity-tooltip'"
                       role="gridcell"
-                      tabindex="-1"
-                      >
+                      tabindex="-1">
                   </td>
                 } @else {
                   <td class="empty-cell"
@@ -84,32 +83,26 @@
     <ng-template #tooltip let-item="item">
       <div class="activity-tooltip">
         <div class="tooltip-header">
-          <strong>{{ item!.date | utcToLocaleDate | date:'MMMM d, yyyy' }}</strong>
+          <strong>{{ item.date | utcToLocaleDate | date:'MMMM d, yyyy' }}</strong>
         </div>
-        @if (item!.extraData) {
-          <div class="tooltip-content">
-            <div class="tooltip-stat">
-              <i class="fa fa-clock" aria-hidden="true"></i>
-              <span>{{ t('reading-time') }}: {{ formatTime(item.extraData!.totalTimeReadingSeconds) }}</span>
-            </div>
-            <div class="tooltip-stat">
-              <i class="fa fa-file-alt" aria-hidden="true"></i>
-              <span>{{ t('pages') }}: {{ item!.extraData!.totalPages }}</span>
-            </div>
-            <div class="tooltip-stat">
-              <i class="fa fa-font" aria-hidden="true"></i>
-              <span>{{ t('words') }}: {{ item!.extraData!.totalWords | number }}</span>
-            </div>
-            <div class="tooltip-stat">
-              <i class="fa fa-book-open" aria-hidden="true"></i>
-              <span>{{ t('chapters') }}: {{ item!.extraData!.totalChaptersFullyRead }}</span>
-            </div>
+        <div class="tooltip-content">
+          <div class="tooltip-stat">
+            <i class="fa fa-clock" aria-hidden="true"></i>
+            <span>{{ t('reading-time') }}: {{ formatTime(item.totalTimeReadingSeconds) }}</span>
           </div>
-        } @else {
-          <div class="tooltip-content">
-            <span class="no-activity">{{ t('no-activity') }}</span>
+          <div class="tooltip-stat">
+            <i class="fa fa-file-alt" aria-hidden="true"></i>
+            <span>{{ t('pages') }}: {{ item.totalPages }}</span>
           </div>
-        }
+          <div class="tooltip-stat">
+            <i class="fa fa-font" aria-hidden="true"></i>
+            <span>{{ t('words') }}: {{ item.totalWords | number }}</span>
+          </div>
+          <div class="tooltip-stat">
+            <i class="fa fa-book-open" aria-hidden="true"></i>
+            <span>{{ t('chapters') }}: {{ item.totalChaptersFullyRead }}</span>
+          </div>
+        </div>
       </div>
     </ng-template>
   </div>

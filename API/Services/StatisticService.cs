@@ -641,13 +641,10 @@ public class StatisticService : IStatisticService
             result[dateKey] = new ReadingActivityGraphEntryDto
             {
                 Date = currentDate,
-                ExtraData = new ReadingActivityGraphExtraDataDto
-                {
-                    TotalTimeReadingSeconds = 0,
-                    TotalPages = 0,
-                    TotalWords = 0,
-                    TotalChaptersFullyRead = 0
-                }
+                TotalTimeReadingSeconds = 0,
+                TotalPages = 0,
+                TotalWords = 0,
+                TotalChaptersFullyRead = 0
             };
             currentDate = currentDate.AddDays(1);
         }
@@ -666,15 +663,15 @@ public class StatisticService : IStatisticService
 
             // Calculate session duration
             var sessionDuration = (int)(session.EndTimeUtc.Value - session.StartTimeUtc).TotalSeconds;
-            entry.ExtraData.TotalTimeReadingSeconds += sessionDuration;
+            entry.TotalTimeReadingSeconds += sessionDuration;
 
             // Aggregate activity data from the session
             var processedChapters = new HashSet<int>(); // Track unique chapters per day
 
             foreach (var activity in session.ActivityData)
             {
-                entry.ExtraData.TotalPages += activity.PagesRead;
-                entry.ExtraData.TotalWords += activity.WordsRead;
+                entry.TotalPages += activity.PagesRead;
+                entry.TotalWords += activity.WordsRead;
 
                 // Check if chapter was fully read (comparing pages read to total pages)
                 if (activity.PagesRead > 0 && activity.TotalPages > 0
@@ -684,36 +681,10 @@ public class StatisticService : IStatisticService
                 }
             }
 
-            entry.ExtraData.TotalChaptersFullyRead += processedChapters.Count;
-
-            // Update display text and title based on aggregated data
-            entry.Title = $"{sessionDate:MMMM d, yyyy}";
-
-
-            // Update CSS parts for styling based on activity intensity
-            entry.Parts = GetActivityIntensityParts(entry.ExtraData);
+            entry.TotalChaptersFullyRead += processedChapters.Count;
         }
 
         return result;
-    }
-
-    private static List<string> GetActivityIntensityParts(ReadingActivityGraphExtraDataDto data)
-    {
-        var parts = new List<string> { "activity" };
-
-        // Add intensity levels based on reading time
-        var hours = data.TotalTimeReadingSeconds / 3600.0;
-
-        parts.Add(hours switch
-        {
-            >= 4 => "intensity-high",
-            >= 2 => "intensity-medium",
-            >= 0.5 => "intensity-low",
-            > 0 => "intensity-minimal",
-            _ => "no-activity"
-        });
-
-        return parts;
     }
 
     private static string CapitalizeDeviceType(string deviceType)
@@ -723,7 +694,7 @@ public class StatisticService : IStatisticService
             "mobile" => "Mobile",
             "desktop" => "Desktop",
             "tablet" => "Tablet",
-            _ => System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(deviceType)
+            _ => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(deviceType)
         };
     }
 

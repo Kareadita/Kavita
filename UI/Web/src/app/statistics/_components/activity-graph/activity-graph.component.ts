@@ -11,7 +11,7 @@ import {
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {AccountService} from "../../../_services/account.service";
-import {DatePipe, DecimalPipe} from "@angular/common";
+import {DatePipe, DecimalPipe, JsonPipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
 import {DayLabelPipe} from "../../../_pipes/day-label.pipe";
@@ -25,18 +25,15 @@ export interface ActivityGraphData {
 
 export interface ActivityGraphDataEntry {
   date: string;
-  extraData?: {
-    totalTimeReadingSeconds: number;
-    totalPages: number;
-    totalWords: number;
-    totalChaptersFullyRead: number;
-  };
+  totalTimeReadingSeconds: number;
+  totalPages: number;
+  totalWords: number;
+  totalChaptersFullyRead: number;
 }
 
-interface DayCell {
+interface DayCell extends ActivityGraphDataEntry {
   date: string;
   level: number;
-  extraData?: ActivityGraphDataEntry['extraData'];
 }
 
 interface WeekRow {
@@ -54,7 +51,8 @@ interface WeekRow {
     DayLabelPipe,
     UtcToLocaleDatePipe,
     OrdinalDatePipe,
-    DatePipe
+    DatePipe,
+    JsonPipe
   ],
   templateUrl: './activity-graph.component.html',
   styleUrl: './activity-graph.component.scss',
@@ -114,9 +112,9 @@ export class ActivityGraphComponent {
           const entry = this.data()[dateStr];
 
           week.push({
+            ...entry,
             date: dateStr,
-            level: this.getActivityLevel(entry),
-            extraData: entry?.extraData,
+            level: this.getActivityLevel(entry)
           });
         } else {
           // Outside the year, add null for empty cells
@@ -175,15 +173,12 @@ export class ActivityGraphComponent {
 
 
   private getActivityLevel(entry: ActivityGraphDataEntry | undefined): number {
-    if (!entry || !entry.extraData) return 0;
+    if (!entry) return 0;
 
-    const { totalTimeReadingSeconds, totalPages } = entry.extraData;
-
-    // Define thresholds for activity levels
-    if (totalTimeReadingSeconds === 0 && totalPages === 0) return 0;
-    if (totalTimeReadingSeconds < 900) return 1; // Less than 15 minutes
-    if (totalTimeReadingSeconds < 1800) return 2; // Less than 30 minutes
-    if (totalTimeReadingSeconds < 3600) return 3; // Less than 1 hour
+    if (entry.totalTimeReadingSeconds === 0 && entry.totalPages === 0) return 0;
+    if (entry.totalTimeReadingSeconds < 900) return 1; // Less than 15 minutes
+    if (entry.totalTimeReadingSeconds < 1800) return 2; // Less than 30 minutes
+    if (entry.totalTimeReadingSeconds < 3600) return 3; // Less than 1 hour
     return 4; // 1 hour or more
   }
 
