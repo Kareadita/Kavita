@@ -216,7 +216,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
             .Returns(device);
 
         // Act
-        await service.TrackDeviceAsync(user.Id, clientInfo, "", CancellationToken.None);
+        await service.TrackDeviceAsync(user.Id, clientInfo, string.Empty, CancellationToken.None);
 
         // Assert - Verify "unknown" is used when clientDeviceId is empty
         await _cache.Received(1).GetOrCreateAsync(
@@ -402,14 +402,14 @@ public class DeviceTrackingServiceTests : AbstractDbTest
             Arg.Any<HybridCacheEntryOptions>(),
             Arg.Any<string[]>(),
             Arg.Any<CancellationToken>())
-            .Returns("");
+            .Returns(string.Empty);
 
         // Act
         await service.ClearDeviceCacheAsync(deviceId);
 
         // Assert - Should only remove mapping key
         await _cache.Received(1).RemoveAsync($"device_key_mapping_{deviceId}", Arg.Any<CancellationToken>());
-        await _cache.DidNotReceive().RemoveAsync("", Arg.Any<CancellationToken>());
+        await _cache.DidNotReceive().RemoveAsync(string.Empty, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -420,8 +420,8 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
 
-        var deviceId = 999;
-        var cacheKey = "device_tracking_1_device-999";
+        const int deviceId = 999;
+        const string cacheKey = "device_tracking_1_device-999";
 
         _cache.GetOrCreateAsync<string?>(
             Arg.Any<string>(),
@@ -451,7 +451,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         var clientDeviceService = Substitute.For<IClientDeviceService>();
         var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
 
-        var deviceId = 111;
+        const int deviceId = 111;
 
         // Setup cache to throw exception
         _cache.GetOrCreateAsync<string?>(

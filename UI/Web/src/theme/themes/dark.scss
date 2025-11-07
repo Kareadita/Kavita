@@ -458,7 +458,7 @@
     --setting-desktop-breakpoint: 1440;
 
     /** Tooltips **/
-    --tooltips-bg-color: var(--bs-dark, var(--popover-body-bg-color));
+    --tooltip-bg-color: var(--bs-dark, var(--popover-body-bg-color));
     --tooltip-outline-color: white;
     --tooltip-caret-color: var(--tooltip-outline-color);
 
