@@ -1,3 +1,5 @@
+@use 'theme/variables' as theme;
+
 // Host is like root but scoped only to the component
 :host {
   --activity-graph-cell-size: 1.5rem;
@@ -16,6 +18,7 @@
   --activity-graph-cell-outline-color: rgba(240, 246, 252, 0.1);
 
   --activity-graph-text-color: var(--bs-secondary);
+  --activity-graph-font-size: 12px;
 }
 
 .activity-graph-container {
@@ -47,7 +50,7 @@
 
 .day-label {
   width: 28px;
-  font-size: 12px;
+  font-size: var(--activity-graph-font-size);
   color: var(--activity-graph-text-color);
   position: relative;
 }
@@ -55,7 +58,7 @@
 // Month labels
 .month-label {
   padding: 0 4px;
-  font-size: 12px;
+  font-size: var(--activity-graph-font-size);
   color: var(--activity-graph-text-color);
   text-align: left;
   position: relative;
@@ -68,13 +71,18 @@
 .empty-cell {
   width: var(--activity-graph-cell-size);
   height: var(--activity-graph-cell-size);
+  outline: 1px solid var(--activity-graph-cell-outline-color);
   border: none;
-  outline: none;
   border-radius: var(--activity-graph-cell-radius);
   position: relative;
 
   &:hover {
     outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-hover-outline-color);
+    outline-offset: 1px;
+  }
+
+  &:focus {
+    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-focus-outline-color);
     outline-offset: 1px;
   }
 
@@ -120,14 +128,7 @@
   background-color: var(--activity-graph-cell-level-4);
 }
 
-.activity-cell,
-.empty-cell {
-  outline: 1px solid var(--activity-graph-cell-outline-color);
-}
 
-.activity-cell:hover {
-  outline: 1px solid var(--activity-graph-cell-outline-hover-color);
-}
 
 // Legend
 .activity-legend {
@@ -135,7 +136,7 @@
   align-items: center;
   gap: 0.5rem;
   margin-top: 1rem;
-  font-size: 12px;
+  font-size: var(--activity-graph-font-size);
   color: var(--activity-graph-text-color);
 }
 
@@ -156,11 +157,9 @@
 
 .activity-tooltip {
   z-index: 1070;
-  font-size: 12px;
-  pointer-events: none;
+  font-size: var(--activity-graph-font-size);
   max-width: 250px;
   background: var(--bs-dark);
-  //box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 
   .tooltip-header {
     margin-bottom: 0.25rem;
@@ -184,29 +183,24 @@
       opacity: 0.8;
     }
   }
-
 }
 
-
-
-// Responsive adjustments
-@media (max-width: 768px) {
-  .activity-graph-table {
-    font-size: 10px;
-  }
-
-  .activity-cell,
-  .empty-cell,
-  .legend-cell {
-    width: 9px;
-    height: 9px;
-  }
-
-  .day-label {
-    font-size: 10px;
-  }
-
-  .month-label {
-    font-size: 10px;
+@media(max-width: theme.$grid-breakpoints-md) {
+  :host {
+    --activity-graph-cell-size: 11px;
+    --activity-graph-font-size: 10px;
   }
 }
+@media(max-width: theme.$grid-breakpoints-sm) {
+  :host {
+    --activity-graph-cell-size: 9px;
+    --activity-graph-font-size: 10px;
+  }
+}
+@media(max-width: theme.$grid-breakpoints-xs) {
+  :host {
+    --activity-graph-cell-size: 9px;
+    --activity-graph-font-size: 10px;
+  }
+}
+
