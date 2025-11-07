@@ -78,15 +78,15 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
                 return new ClientInfoData
                 {
                     ClientType = ClientDeviceType.WebApp,
-                    AppVersion = match.Groups[1].Value,
-                    Browser = match.Groups[2].Value,
-                    BrowserVersion = match.Groups[3].Value,
-                    Platform = Enum.Parse<ClientDevicePlatform>(match.Groups[4].Value),
-                    DeviceType = match.Groups[5].Value,
-                    ScreenWidth = int.Parse(match.Groups[6].Value),
-                    ScreenHeight = int.Parse(match.Groups[7].Value),
-                    Orientation = match.Groups.Count > 8 && match.Groups[8].Success
-                        ? match.Groups[8].Value
+                    AppVersion = match.Groups["appVersion"].Value,
+                    Browser = match.Groups["browser"].Value,
+                    BrowserVersion = match.Groups["browserVersion"].Value,
+                    Platform = Enum.Parse<ClientDevicePlatform>(match.Groups["platform"].Value),
+                    DeviceType = match.Groups["deviceType"].Value,
+                    ScreenWidth = int.Parse(match.Groups["screenWidth"].Value),
+                    ScreenHeight = int.Parse(match.Groups["screenHeight"].Value),
+                    Orientation = match.Groups["orientation"].Success
+                        ? match.Groups["orientation"].Value
                         : null,
                     UserAgent = fallbackUa
                 };
@@ -128,7 +128,7 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
     }
 
 
-    [GeneratedRegex(@"web-app/([^\s]+) \(([^/]+)/([^;]+); ([^;]+); ([^;]+); (\d+)x(\d+)(?:; ([^\)]+))?\)")]
+    [GeneratedRegex(@"web-app/(?<appVersion>[^\s]+) \((?<browser>[^/]+)/(?<browserVersion>[^;]+); (?<platform>[^;]+); (?<deviceType>[^;]+); (?<screenWidth>\d+)x(?<screenHeight>\d+)(?:; (?<orientation>[^\)]+))?\)")]
     private static partial Regex UserAgentRegex();
 }
 

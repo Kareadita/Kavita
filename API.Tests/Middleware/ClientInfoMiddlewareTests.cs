@@ -364,7 +364,7 @@ public class ClientInfoMiddlewareTests
 
         // Assert
         Assert.NotNull(capturedClientInfo);
-        Assert.Equal("Unknown", capturedClientInfo.IpAddress);
+        Assert.Equal(string.Empty, capturedClientInfo.IpAddress);
     }
 
     [Fact]

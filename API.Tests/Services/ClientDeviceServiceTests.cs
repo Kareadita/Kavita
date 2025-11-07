@@ -9,6 +9,7 @@ using API.Entities.Progress;
 using API.Entities.User;
 using API.Helpers.Builders;
 using API.Services;
+using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -592,7 +593,7 @@ public class ClientDeviceServiceTests : AbstractDbTest
         var device = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, null);
 
         // Assert
-        Assert.Equal("OPDS Client", device.FriendlyName);
+        Assert.Equal("OPDS Client on Unknown", device.FriendlyName);
     }
 
     #endregion
@@ -724,10 +725,10 @@ public class ClientDeviceServiceTests : AbstractDbTest
         await context.SaveChangesAsync();
 
         // Act
-        var result = await service.DeleteDeviceAsync(user.Id, 999);
+        var exception = await Assert.ThrowsAsync<KavitaException>(async () =>
+            await service.DeleteDeviceAsync(user.Id, 999));
 
-        // Assert
-        Assert.False(result);
+        Assert.Contains("client-device-doesnt-exist", exception.Message);
     }
 
     #endregion
