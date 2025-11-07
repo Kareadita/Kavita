@@ -812,7 +812,7 @@ public class SeriesRepository : ISeriesRepository
 
             if (userProgress.Count > 0)
             {
-                s.LatestReadDate = userProgress.Max(p => p.LastModified);
+                s.LatestReadDate = userProgress.Where(p => p.SeriesId == s.Id).Max(p => p.LastModified);
             }
         }
     }
