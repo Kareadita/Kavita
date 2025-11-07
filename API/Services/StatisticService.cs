@@ -674,8 +674,7 @@ public class StatisticService : IStatisticService
                 entry.TotalWords += activity.WordsRead;
 
                 // Check if chapter was fully read (comparing pages read to total pages)
-                if (activity.PagesRead > 0 && activity.TotalPages > 0
-                    && activity.PagesRead >= activity.TotalPages)
+                if (activity.PagesRead > 0 && activity.TotalPages > 0 && activity.PagesRead >= activity.TotalPages)
                 {
                     processedChapters.Add(activity.ChapterId);
                 }

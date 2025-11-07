@@ -176,7 +176,7 @@ export class ActivityGraphComponent {
     if (entry.totalTimeReadingSeconds === 0 && entry.totalPages === 0) return 0;
     if (entry.totalTimeReadingSeconds < 15 * 60) return 1; // Less than 15 minutes
     if (entry.totalTimeReadingSeconds < 45 * 60) return 2; // Less than 45 minutes
-    if (entry.totalTimeReadingSeconds < 360 * 60) return 3; // Less than 1 hour
+    if (entry.totalTimeReadingSeconds < 60 * 60) return 3; // Less than 1 hour
     return 4; // 1 hour or more
   }
 

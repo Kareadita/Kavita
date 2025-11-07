@@ -25,7 +25,7 @@
               <td class="day-label">
                 <span class="visually-hidden">{{ dayIndex | dayLabel }}</span>
                 <span aria-hidden="true"
-                      [class.visually-hidden]="dayIndex !== 1 && dayIndex !== 3 && dayIndex !== 5">
+                      [class.visually-hidden]="dayIndex % 2">
                   {{ dayIndex | dayLabel:true }}
                 </span>
               </td>
