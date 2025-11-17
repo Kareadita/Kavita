@@ -106,8 +106,11 @@ export class SeriesService {
     );
   }
 
-  getRecentlyUpdatedSeries() {
-    return this.httpClient.post<SeriesGroup[]>(this.baseUrl + 'series/recently-updated-series', {});
+  getRecentlyUpdatedSeries(pageNum?: number, itemsPerPage?: number) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.post<SeriesGroup[]>(this.baseUrl + 'series/recently-updated-series', {}, {params});
   }
 
   getWantToRead(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>): Observable<PaginatedResult<Series[]>> {
