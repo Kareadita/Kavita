@@ -96,6 +96,8 @@ public class LibraryController : BaseApiController
             .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
             .Distinct()
             .ToList();
+        library.RemovePrefixForSortName = dto.RemovePrefixForSortName;
+        library.DefaultLanguage = dto.DefaultLanguage;
 
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
         if (library.Type == LibraryType.Comic)
