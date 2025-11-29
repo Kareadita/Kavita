@@ -55,7 +55,7 @@
                 }
                 @if (message.name === EVENTS.ScanProgress && message.body.leftToProcess > 0) {
                   <div class="accent-text mb-1" [title]="t('left-to-process', {leftToProcess: message.body.leftToProcess})">
-                    {{t('left-to-process', {leftToProcess: message.body.leftToProcess})}}
+                    {{t('left-to-process', {leftToProcess: message.body.leftToProcess, totalToProcess: message.body.totalToProcess})}}
                   </div>
                 }
                 <div class="progress-container row g-0 align-items-center">
@@ -81,6 +81,11 @@
                          aria-valuemin="0" aria-valuemax="100"></div>
                   </div>
                 </div>
+                @if (message.name === EVENTS.ScanProgress && message.body.leftToProcess > 0) {
+                  <div class="accent-text mb-1" [title]="t('left-to-process', {leftToProcess: message.body.leftToProcess})">
+                    {{t('left-to-process', {leftToProcess: message.body.leftToProcess, totalToProcess: message.body.totalToProcess})}}
+                  </div>
+                }
               </li>
             }
           }

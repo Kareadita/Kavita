@@ -31,7 +31,15 @@ namespace API.Services.Tasks.Scanner;
 
 public interface IProcessSeries
 {
-    Task<int?> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
+    Task<int?> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, ProcessSeriesArgs args);
+}
+
+public class ProcessSeriesArgs
+{
+    public required Library Library { get; init; }
+    public required int TotalToProcess { get; init; }
+    public required int LeftToProcess { get; init; }
+    public required bool ForceUpdate { get; init; }
 }
 
 /// <summary>
@@ -72,16 +80,18 @@ public class ProcessSeries : IProcessSeries
     }
 
 
-    public async Task<int?> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false)
+    public async Task<int?> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, ProcessSeriesArgs args)
     {
         if (!parsedInfos.Any()) return null;
+
+        var library = args.Library;
 
         var seriesAdded = false;
         var scanWatch = Stopwatch.StartNew();
         var seriesName = parsedInfos[0].Series;
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Updated, seriesName, totalToProcess));
-        _logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}, Forced: {ForceUpdate}", seriesName, forceUpdate);
+            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Updated, seriesName, args.LeftToProcess, args.TotalToProcess));
+        _logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}, Forced: {ForceUpdate}", seriesName, args.ForceUpdate);
 
         // Check if there is a Series
         var firstInfo = parsedInfos[0];
@@ -118,7 +128,7 @@ public class ProcessSeries : IProcessSeries
             // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
 
-            await UpdateVolumes(settings, series, parsedInfos, forceUpdate);
+            await UpdateVolumes(settings, series, parsedInfos, args.ForceUpdate);
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = series.Name.ToNormalized();

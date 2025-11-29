@@ -217,11 +217,12 @@ public class MetadataService : IMetadataService
     /// <param name="series"></param>
     /// <param name="forceUpdate"></param>
     /// <param name="encodeFormat"></param>
-    private void ProcessSeriesCoverGen(Series series, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceColorScape = false)
+    private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceColorScape = false)
     {
         _logger.LogDebug("[MetadataService] Processing cover image generation for series: {SeriesName}", series.OriginalName);
         try
         {
+            var totalVolumes = series.Volumes.Count;
             var volumeIndex = 0;
             var firstVolumeUpdated = false;
             foreach (var volume in series.Volumes)
@@ -246,6 +247,10 @@ public class MetadataService : IMetadataService
                 {
                     firstVolumeUpdated = true;
                 }
+
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                    MessageFactory.CoverUpdateProgressEvent(series.LibraryId, volumeIndex / (float) totalVolumes, ProgressEventType.Started, series.Name));
+
                 volumeIndex++;
             }
 
@@ -315,7 +320,7 @@ public class MetadataService : IMetadataService
 
                 try
                 {
-                    ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
+                    await ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
                 }
                 catch (Exception ex)
                 {
@@ -385,7 +390,7 @@ public class MetadataService : IMetadataService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(series.LibraryId, 0F, ProgressEventType.Started, series.Name));
 
-        ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
+        await ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize, forceColorScape);
 
 
         if (_unitOfWork.HasChanges())

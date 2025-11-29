@@ -708,6 +708,7 @@ public class ScannerService : IScannerService
     {
         var totalFiles = 0;
         var seriesLeftToProcess = toProcess.Count;
+        var totalSeriesToProcess = toProcess.Count;
 
         foreach (var pSeries in toProcess)
         {
@@ -720,7 +721,14 @@ public class ScannerService : IScannerService
             // Library needs to be returned from the used UnitOfWork
             var library = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
 
-            var seriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, library, seriesLeftToProcess, forceUpdate);
+            var seriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
+            {
+                Library = library,
+                LeftToProcess =  seriesLeftToProcess,
+                TotalToProcess = totalSeriesToProcess,
+                ForceUpdate = forceUpdate,
+            });
+
             if (seriesId != null)
             {
                 await channel.Writer.WriteAsync(seriesId.Value);

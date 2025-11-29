@@ -513,21 +513,27 @@ public static class MessageFactory
     /// <param name="libraryName"></param>
     /// <param name="eventType"></param>
     /// <param name="seriesName"></param>
+    /// <param name="leftToProcess"></param>
+    /// <param name="totalToProcess"></param>
     /// <returns></returns>
-    public static SignalRMessage LibraryScanProgressEvent(string libraryName, string eventType, string seriesName = "", int? totalToProcess = null)
+    public static SignalRMessage LibraryScanProgressEvent(string libraryName, string eventType, string seriesName = "", int? leftToProcess = null, int? totalToProcess = null)
     {
+        var hasProgress = totalToProcess.HasValue && leftToProcess.HasValue;
+
         return new SignalRMessage()
         {
             Name = ScanProgress,
             Title = $"Processing {seriesName}",
             SubTitle = seriesName,
             EventType = eventType,
-            Progress = ProgressType.Indeterminate,
+            Progress = hasProgress ?  ProgressType.Determinate : ProgressType.Indeterminate,
             Body = new
             {
                 SeriesName = seriesName,
                 LibraryName = libraryName,
-                LeftToProcess = totalToProcess
+                LeftToProcess = leftToProcess,
+                TotalToProcess = totalToProcess,
+                Progress = hasProgress ? (totalToProcess - leftToProcess) / (float) totalToProcess.Value : null,
             }
         };
     }
