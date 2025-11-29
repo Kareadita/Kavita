@@ -710,34 +710,39 @@ public class ScannerService : IScannerService
         var seriesLeftToProcess = toProcess.Count;
         var totalSeriesToProcess = toProcess.Count;
 
-        foreach (var pSeries in toProcess)
+        try
         {
-            totalFiles += pSeries.Count;
-
-            using var scope = _scopeFactory.CreateScope();
-            var unitOfWork =  scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
-
-            // Library needs to be returned from the used UnitOfWork
-            var library = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
-
-            var seriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
+            foreach (var pSeries in toProcess)
             {
-                Library = library,
-                LeftToProcess =  seriesLeftToProcess,
-                TotalToProcess = totalSeriesToProcess,
-                ForceUpdate = forceUpdate,
-            });
+                totalFiles += pSeries.Count;
 
-            if (seriesId != null)
-            {
-                await channel.Writer.WriteAsync(seriesId.Value);
+                using var scope = _scopeFactory.CreateScope();
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
+
+                // Library needs to be returned from the used UnitOfWork
+                var library = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
+
+                var seriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, new ProcessSeriesArgs
+                {
+                    Library = library,
+                    LeftToProcess = seriesLeftToProcess,
+                    TotalToProcess = totalSeriesToProcess,
+                    ForceUpdate = forceUpdate,
+                });
+
+                if (seriesId != null)
+                {
+                    await channel.Writer.WriteAsync(seriesId.Value);
+                }
+
+                seriesLeftToProcess--;
             }
-
-            seriesLeftToProcess--;
         }
-
-        channel.Writer.Complete();
+        finally // Ensure the channel is closed in case of an exception that we didn't expect
+        {
+            channel.Writer.Complete();
+        }
 
         return totalFiles;
     }
