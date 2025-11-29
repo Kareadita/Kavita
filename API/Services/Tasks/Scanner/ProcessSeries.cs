@@ -31,7 +31,7 @@ namespace API.Services.Tasks.Scanner;
 
 public interface IProcessSeries
 {
-    Task ProcessSeriesAsync(MetadataSettingsDto settings, Channel<int> channel, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
+    Task<int?> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
 }
 
 /// <summary>
@@ -72,9 +72,9 @@ public class ProcessSeries : IProcessSeries
     }
 
 
-    public async Task ProcessSeriesAsync(MetadataSettingsDto settings, Channel<int> channel, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false)
+    public async Task<int?> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false)
     {
-        if (!parsedInfos.Any()) return;
+        if (!parsedInfos.Any()) return null;
 
         var seriesAdded = false;
         var scanWatch = Stopwatch.StartNew();
@@ -97,7 +97,7 @@ public class ProcessSeries : IProcessSeries
         catch (Exception ex)
         {
             await ReportDuplicateSeriesLookup(library, firstInfo, ex);
-            return;
+            return null;
         }
 
         if (series == null)
@@ -174,7 +174,7 @@ public class ProcessSeries : IProcessSeries
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series.OriginalName}",
                             ex.Message));
-                    return;
+                    return null;
                 }
                 catch (Exception ex)
                 {
@@ -186,7 +186,7 @@ public class ProcessSeries : IProcessSeries
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series.OriginalName}",
                             ex.Message));
-                    return;
+                    return null;
                 }
 
 
@@ -217,7 +217,7 @@ public class ProcessSeries : IProcessSeries
         catch (Exception ex)
         {
             _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
-            return;
+            return null;
         }
 
         if (seriesAdded)
@@ -225,7 +225,7 @@ public class ProcessSeries : IProcessSeries
             await _externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type);
         }
 
-        await channel.Writer.WriteAsync(series.Id);
+        return series.Id;
     }
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)

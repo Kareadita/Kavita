@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.KavitaPlus.Metadata;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -319,17 +320,12 @@ public class ScannerService : IScannerService
 
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
 
-        var channel = Channel.CreateUnbounded<int>();
-
         var toProcessList = toProcess.Select(k => parsedSeries[k]).ToList();
-        var dbWriter = ProcessParserInfo(settings, toProcessList, library.Id, bypassFolderOptimizationChecks, channel);
-
-        var ioWriter = IoTasks(channel, library.Id, bypassFolderOptimizationChecks);
-
-        await Task.WhenAll(dbWriter, ioWriter);
+        await ProcessParserInfo(settings, toProcessList, library.Id, bypassFolderOptimizationChecks);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name, 0));
+
         // Tell UI that this series is done
         await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
             MessageFactory.ScanSeriesEvent(library.Id, seriesId, series.Name));
@@ -671,25 +667,32 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("[ScannerService] Found {SeriesCount} Series that need processing in {Time} ms", toProcess.Count, scanSw.ElapsedMilliseconds + scanElapsedTime);
 
-        var channel = Channel.CreateUnbounded<int>();
-
-        var dbWriter = ProcessParserInfo(settings, toProcess.Values.ToList(), library.Id, forceUpdate, channel);
-        var ioWriter = IoTasks(channel, library.Id, forceUpdate);
-
-        await Task.WhenAll(dbWriter, ioWriter);
+        var totalFiles = await ProcessParserInfo(settings, toProcess.Values.ToList(), library.Id, forceUpdate);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
-        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
+        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanSw.ElapsedMilliseconds + scanElapsedTime);
 
-        return dbWriter.Result;
+        return totalFiles;
     }
 
-    private async Task IoTasks(Channel<int> channel, int libraryId, bool forceUpdate)
+    private async Task<int> ProcessParserInfo(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, bool forceUpdate)
     {
+        var channel = Channel.CreateUnbounded<int>();
+
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
+        var dbTask = DbTasks(settings, toProcess, libraryId, forceUpdate, channel);
+        var ioTask = IoTasks(channel, serverSettings, libraryId, forceUpdate);
+
+        await Task.WhenAll(dbTask, ioTask);
+
+        return dbTask.Result;
+    }
+
+    private async Task IoTasks(Channel<int> channel, ServerSettingDto serverSettings, int libraryId, bool forceUpdate)
+    {
         await foreach (var seriesId in channel.Reader.ReadAllAsync())
         {
             using var scope = _scopeFactory.CreateScope();
@@ -701,7 +704,7 @@ public class ScannerService : IScannerService
         }
     }
 
-    private async Task<int> ProcessParserInfo(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, bool forceUpdate, Channel<int> channel)
+    private async Task<int> DbTasks(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, bool forceUpdate, Channel<int> channel)
     {
         var totalFiles = 0;
         var seriesLeftToProcess = toProcess.Count;
@@ -709,7 +712,6 @@ public class ScannerService : IScannerService
         foreach (var pSeries in toProcess)
         {
             totalFiles += pSeries.Count;
-            var seriesProcessStopWatch = Stopwatch.StartNew();
 
             using var scope = _scopeFactory.CreateScope();
             var unitOfWork =  scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -718,9 +720,12 @@ public class ScannerService : IScannerService
             // Library needs to be returned from the used UnitOfWork
             var library = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
 
-            await processSeries.ProcessSeriesAsync(settings, channel, pSeries, library, seriesLeftToProcess, forceUpdate);
+            var seriesId = await processSeries.ProcessSeriesAsync(settings, pSeries, library, seriesLeftToProcess, forceUpdate);
+            if (seriesId != null)
+            {
+                await channel.Writer.WriteAsync(seriesId.Value);
+            }
 
-            _logger.LogTrace("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, pSeries[0].Series);
             seriesLeftToProcess--;
         }
 
