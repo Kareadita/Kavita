@@ -88,6 +88,9 @@ public class ScannerHelper
         var serviceProvider = Substitute.For<IServiceProvider>();
         serviceProvider.GetService(typeof(IUnitOfWork)).Returns(_unitOfWork);
         serviceProvider.GetService(typeof(IProcessSeries)).Returns(processSeries);
+        serviceProvider.GetService(typeof(IMetadataService)).Returns(Substitute.For<IMetadataService>());
+        serviceProvider.GetService(typeof(IWordCountAnalyzerService))
+            .Returns(Substitute.For<IWordCountAnalyzerService>());
 
         var scope = Substitute.For<IServiceScope>();
         scope.ServiceProvider.Returns(serviceProvider);
