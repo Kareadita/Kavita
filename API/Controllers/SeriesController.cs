@@ -245,7 +245,7 @@ public class SeriesController : BaseApiController
 
         if (needsRefreshMetadata)
         {
-            _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
+            await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
         }
 
         return Ok();
@@ -402,9 +402,9 @@ public class SeriesController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("refresh-metadata")]
-    public ActionResult RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
+    public async Task<ActionResult> RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
     {
-        _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, refreshSeriesDto.ForceUpdate, refreshSeriesDto.ForceColorscape);
+        await _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, refreshSeriesDto.ForceUpdate, refreshSeriesDto.ForceColorscape);
         return Ok();
     }
 

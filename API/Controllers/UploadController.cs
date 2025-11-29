@@ -130,7 +130,7 @@ public class UploadController : BaseApiController
                 // Refresh covers
                 if (string.IsNullOrEmpty(uploadFileDto.Url))
                 {
-                    _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
+                    await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                 }
 
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
@@ -305,7 +305,7 @@ public class UploadController : BaseApiController
                 if (string.IsNullOrEmpty(uploadFileDto.Url))
                 {
                     var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume!.SeriesId))!;
-                    _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
+                    await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                 }
 
 
@@ -365,7 +365,7 @@ public class UploadController : BaseApiController
                 if (string.IsNullOrEmpty(uploadFileDto.Url))
                 {
                     var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId))!;
-                    _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
+                    await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                 }
 
 
@@ -477,7 +477,7 @@ public class UploadController : BaseApiController
             {
                 await _unitOfWork.CommitAsync();
                 if (originalFile != null) System.IO.File.Delete(originalFile);
-                _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
+                await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                 return Ok();
             }
 

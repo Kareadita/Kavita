@@ -226,7 +226,9 @@ public class ScannerService : IScannerService
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
         if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel)
         {
-            BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false, false));
+            var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+
+            BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(serverSettings, series.LibraryId, seriesId, false, false));
             BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, bypassFolderOptimizationChecks));
             return;
         }
@@ -686,13 +688,15 @@ public class ScannerService : IScannerService
 
     private async Task IoTasks(Channel<int> channel, int libraryId, bool forceUpdate)
     {
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+
         await foreach (var seriesId in channel.Reader.ReadAllAsync())
         {
             using var scope = _scopeFactory.CreateScope();
             var metadataService = scope.ServiceProvider.GetRequiredService<IMetadataService>();
             var wordCountAnalyzerService = scope.ServiceProvider.GetRequiredService<IWordCountAnalyzerService>();
 
-            await metadataService.GenerateCoversForSeries(libraryId, seriesId, false, false);
+            await metadataService.GenerateCoversForSeries(serverSettings, libraryId, seriesId, false, false);
             await wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate);
         }
     }

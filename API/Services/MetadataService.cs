@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
@@ -34,7 +35,7 @@ public interface IMetadataService
     /// <param name="seriesId"></param>
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
 
-    Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true, bool forceColorScape = true);
+    Task GenerateCoversForSeries(ServerSettingDto serverSetting, int libraryId, int seriesId, bool forceUpdate = true, bool forceColorScape = true);
     Task GenerateCoversForSeries(Series series, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceUpdate = false, bool forceColorScape = true);
     Task RemoveAbandonedMetadataKeys();
 }
@@ -356,7 +357,7 @@ public class MetadataService : IMetadataService
     /// <param name="seriesId"></param>
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
     /// <param name="forceColorScape">Will ensure that the colorscape is regenerated</param>
-    public async Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true, bool forceColorScape = true)
+    public async Task GenerateCoversForSeries(ServerSettingDto serverSetting, int libraryId, int seriesId, bool forceUpdate = true, bool forceColorScape = true)
     {
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         if (series == null)
@@ -365,10 +366,8 @@ public class MetadataService : IMetadataService
             return;
         }
 
-        // TODO: Cache this because it's called a lot during scans
-        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        var encodeFormat = settings.EncodeMediaAs;
-        var coverImageSize = settings.CoverImageSize;
+        var encodeFormat = serverSetting.EncodeMediaAs;
+        var coverImageSize = serverSetting.CoverImageSize;
 
         await GenerateCoversForSeries(series, encodeFormat, coverImageSize, forceUpdate, forceColorScape);
     }
