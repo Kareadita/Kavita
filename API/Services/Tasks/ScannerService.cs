@@ -683,7 +683,7 @@ public class ScannerService : IScannerService
 
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
-        var dbTask = Task.Run(async () => await DbTasks(settings, toProcess, libraryId, forceUpdate, channel));
+        var dbTask = Task.Run(async () => await DbTasks(channel, settings, toProcess, libraryId, forceUpdate));
         var ioTask = Task.Run(async () => await IoTasks(channel, serverSettings, libraryId, forceUpdate));
 
         await Task.WhenAll(dbTask, ioTask);
@@ -704,7 +704,7 @@ public class ScannerService : IScannerService
         }
     }
 
-    private async Task<int> DbTasks(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, bool forceUpdate, Channel<int> channel)
+    private async Task<int> DbTasks(Channel<int> channel, MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, bool forceUpdate)
     {
         var totalFiles = 0;
         var seriesLeftToProcess = toProcess.Count;
