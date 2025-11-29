@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
@@ -30,7 +31,7 @@ namespace API.Services.Tasks.Scanner;
 
 public interface IProcessSeries
 {
-    Task ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
+    Task ProcessSeriesAsync(MetadataSettingsDto settings, Channel<int> channel, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false);
 }
 
 /// <summary>
@@ -71,7 +72,7 @@ public class ProcessSeries : IProcessSeries
     }
 
 
-    public async Task ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false)
+    public async Task ProcessSeriesAsync(MetadataSettingsDto settings, Channel<int> channel, IList<ParserInfo> parsedInfos, Library library, int totalToProcess, bool forceUpdate = false)
     {
         if (!parsedInfos.Any()) return;
 
@@ -223,8 +224,8 @@ public class ProcessSeries : IProcessSeries
         {
             await _externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type);
         }
-        await _metadataService.GenerateCoversForSeries(series.LibraryId, series.Id, false, false);
-        await _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, forceUpdate);
+
+        await channel.Writer.WriteAsync(series.Id);
     }
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)

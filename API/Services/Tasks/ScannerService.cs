@@ -5,9 +5,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.KavitaPlus.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -313,25 +315,16 @@ public class ScannerService : IScannerService
             key.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
             .ToList();
 
-        var seriesLeftToProcess = toProcess.Count;
-        foreach (var pSeries in toProcess)
-        {
-            // Process Series
-            var seriesProcessStopWatch = Stopwatch.StartNew();
-            var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
+        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
 
-            using var scope = _scopeFactory.CreateScope();
-            var unitOfWork =  scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
+        var channel = Channel.CreateUnbounded<int>();
 
-            // Library needs to be returned from the used UnitOfWork
-            library = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
+        var toProcessList = toProcess.Select(k => parsedSeries[k]).ToList();
+        var dbWriter = ProcessParserInfo(settings, toProcessList, library.Id, bypassFolderOptimizationChecks, channel);
 
-            await processSeries.ProcessSeriesAsync(settings, parsedSeries[pSeries], library, seriesLeftToProcess, bypassFolderOptimizationChecks);
+        var ioWriter = IoTasks(channel, library.Id, bypassFolderOptimizationChecks);
 
-            _logger.LogTrace("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, parsedSeries[pSeries][0].Series);
-            seriesLeftToProcess--;
-        }
+        await Task.WhenAll(dbWriter, ioWriter);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name, 0));
@@ -674,13 +667,44 @@ public class ScannerService : IScannerService
             await CreateAllTagsAsync(processedTags);
         }
 
+        _logger.LogInformation("[ScannerService] Found {SeriesCount} Series that need processing in {Time} ms", toProcess.Count, scanSw.ElapsedMilliseconds + scanElapsedTime);
+
+        var channel = Channel.CreateUnbounded<int>();
+
+        var dbWriter = ProcessParserInfo(settings, toProcess.Values.ToList(), library.Id, forceUpdate, channel);
+        var ioWriter = IoTasks(channel, library.Id, forceUpdate);
+
+        await Task.WhenAll(dbWriter, ioWriter);
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
+
+        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
+
+        return dbWriter.Result;
+    }
+
+    private async Task IoTasks(Channel<int> channel, int libraryId, bool forceUpdate)
+    {
+        await foreach (var seriesId in channel.Reader.ReadAllAsync())
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var metadataService = scope.ServiceProvider.GetRequiredService<IMetadataService>();
+            var wordCountAnalyzerService = scope.ServiceProvider.GetRequiredService<IWordCountAnalyzerService>();
+
+            await metadataService.GenerateCoversForSeries(libraryId, seriesId, false, false);
+            await wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate);
+        }
+    }
+
+    private async Task<int> ProcessParserInfo(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, bool forceUpdate, Channel<int> channel)
+    {
         var totalFiles = 0;
         var seriesLeftToProcess = toProcess.Count;
-        _logger.LogInformation("[ScannerService] Found {SeriesCount} Series that need processing in {Time} ms", toProcess.Count, scanSw.ElapsedMilliseconds + scanElapsedTime);
 
         foreach (var pSeries in toProcess)
         {
-            totalFiles += pSeries.Value.Count;
+            totalFiles += pSeries.Count;
             var seriesProcessStopWatch = Stopwatch.StartNew();
 
             using var scope = _scopeFactory.CreateScope();
@@ -688,19 +712,15 @@ public class ScannerService : IScannerService
             var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
 
             // Library needs to be returned from the used UnitOfWork
-            library = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
+            var library = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
 
-            await processSeries.ProcessSeriesAsync(settings, pSeries.Value, library, seriesLeftToProcess, forceUpdate);
+            await processSeries.ProcessSeriesAsync(settings, channel, pSeries, library, seriesLeftToProcess, forceUpdate);
 
-            _logger.LogTrace("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, pSeries.Value[0].Series);
+            _logger.LogTrace("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, pSeries[0].Series);
             seriesLeftToProcess--;
         }
 
-
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
-
-        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
+        channel.Writer.Complete();
 
         return totalFiles;
     }
