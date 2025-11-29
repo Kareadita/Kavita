@@ -683,8 +683,8 @@ public class ScannerService : IScannerService
 
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
-        var dbTask = DbTasks(settings, toProcess, libraryId, forceUpdate, channel);
-        var ioTask = IoTasks(channel, serverSettings, libraryId, forceUpdate);
+        var dbTask = Task.Run(async () => await DbTasks(settings, toProcess, libraryId, forceUpdate, channel));
+        var ioTask = Task.Run(async () => await IoTasks(channel, serverSettings, libraryId, forceUpdate));
 
         await Task.WhenAll(dbTask, ioTask);
 
