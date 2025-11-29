@@ -21,6 +21,7 @@ using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit.Abstractions;
@@ -75,6 +76,7 @@ public class ScannerHelper
             Substitute.For<IImageService>(), ds, Substitute.For<ILogger<ReadingItemService>>());
 
 
+
         var processSeries = new ProcessSeries(_unitOfWork, Substitute.For<ILogger<ProcessSeries>>(),
             Substitute.For<IEventHub>(),
             ds, Substitute.For<ICacheHelper>(), readingItemService, new FileService(fs),
@@ -83,10 +85,20 @@ public class ScannerHelper
             Substitute.For<IReadingListService>(),
             Substitute.For<IExternalMetadataService>());
 
+        var serviceProvider = Substitute.For<IServiceProvider>();
+        serviceProvider.GetService(typeof(IUnitOfWork)).Returns(_unitOfWork);
+        serviceProvider.GetService(typeof(IProcessSeries)).Returns(processSeries);
+
+        var scope = Substitute.For<IServiceScope>();
+        scope.ServiceProvider.Returns(serviceProvider);
+
+        var scopeFactory = Substitute.For<IServiceScopeFactory>();
+        scopeFactory.CreateScope().Returns(scope);
+
         var scanner = new ScannerService(_unitOfWork, Substitute.For<ILogger<ScannerService>>(),
             Substitute.For<IMetadataService>(),
             Substitute.For<ICacheService>(), Substitute.For<IEventHub>(), ds,
-            readingItemService, processSeries, Substitute.For<IWordCountAnalyzerService>());
+            readingItemService, scopeFactory, Substitute.For<IWordCountAnalyzerService>());
         return scanner;
     }
 
