@@ -19,6 +19,7 @@ using API.Services.Tasks.Scanner;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -86,13 +87,13 @@ public class ScannerService : IScannerService
     private readonly IEventHub _eventHub;
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
-    private readonly IProcessSeries _processSeries;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IEventHub eventHub,
         IDirectoryService directoryService, IReadingItemService readingItemService,
-        IProcessSeries processSeries, IWordCountAnalyzerService wordCountAnalyzerService)
+        IServiceScopeFactory scopeFactory, IWordCountAnalyzerService wordCountAnalyzerService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -101,7 +102,7 @@ public class ScannerService : IScannerService
         _eventHub = eventHub;
         _directoryService = directoryService;
         _readingItemService = readingItemService;
-        _processSeries = processSeries;
+        _scopeFactory = scopeFactory;
         _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
@@ -318,7 +319,16 @@ public class ScannerService : IScannerService
             // Process Series
             var seriesProcessStopWatch = Stopwatch.StartNew();
             var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
-            await _processSeries.ProcessSeriesAsync(settings, parsedSeries[pSeries], library, seriesLeftToProcess, bypassFolderOptimizationChecks);
+
+            using var scope = _scopeFactory.CreateScope();
+            var unitOfWork =  scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
+
+            // Library needs to be returned from the used UnitOfWork
+            library = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
+
+            await processSeries.ProcessSeriesAsync(settings, parsedSeries[pSeries], library, seriesLeftToProcess, bypassFolderOptimizationChecks);
+
             _logger.LogTrace("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, parsedSeries[pSeries][0].Series);
             seriesLeftToProcess--;
         }
@@ -672,7 +682,16 @@ public class ScannerService : IScannerService
         {
             totalFiles += pSeries.Value.Count;
             var seriesProcessStopWatch = Stopwatch.StartNew();
-            await _processSeries.ProcessSeriesAsync(settings, pSeries.Value, library, seriesLeftToProcess, forceUpdate);
+
+            using var scope = _scopeFactory.CreateScope();
+            var unitOfWork =  scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            var processSeries = scope.ServiceProvider.GetRequiredService<IProcessSeries>();
+
+            // Library needs to be returned from the used UnitOfWork
+            library = (await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns))!;
+
+            await processSeries.ProcessSeriesAsync(settings, pSeries.Value, library, seriesLeftToProcess, forceUpdate);
+
             _logger.LogTrace("[TIME] Kavita took {Time} ms to process {SeriesName}", seriesProcessStopWatch.ElapsedMilliseconds, pSeries.Value[0].Series);
             seriesLeftToProcess--;
         }
