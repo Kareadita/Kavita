@@ -31,6 +31,14 @@ public static class PersonHelper
         }
         return dict;
     }
+
+    /// <summary>
+    /// Update people of a specific role for this series. Removes removed people, and adds missing ones.
+    /// </summary>
+    /// <param name="databasePeople">All people references in the series chapters as build by <see cref="ConstructNameAndAliasDictionary"/></param>
+    /// <param name="metadata">Series metadata</param>
+    /// <param name="chapterPeople">All chapter people with</param>
+    /// <param name="role">The role to link with</param>
     public static void UpdateSeriesMetadataPeople(
         Dictionary<string, Person> databasePeople,
         SeriesMetadata metadata,
@@ -65,7 +73,7 @@ public static class PersonHelper
 
         foreach (var person in newPeople)
         {
-            if (metadata.People.Any(mp => mp.PersonId == person.Id && mp.Role == role)) continue;
+            if (metadata.People.Any(mp => mp.Person.NormalizedName == person.NormalizedName && mp.Role == role)) continue;
 
             metadata.People.Add(new SeriesMetadataPeople
             {
@@ -73,11 +81,18 @@ public static class PersonHelper
                 Person = person,
                 SeriesMetadataId = metadata.Id,
                 SeriesMetadata = metadata,
-                Role = role
+                Role = role,
             });
         }
     }
 
+    /// <summary>
+    /// Update people of a specific role for this chapter. Removes removed people, and adds missing ones.
+    /// </summary>
+    /// <param name="databasePeople">All people references in the series chapters as build by <see cref="ConstructNameAndAliasDictionary"/></param>
+    /// <param name="chapter">The chapter</param>
+    /// <param name="comicInfoPeople">The people as defined in the chapters ComicInfo</param>
+    /// <param name="role">The role to link them with</param>
     public static void UpdateChapterPeople(
         Dictionary<string, Person> databasePeople,
         Chapter chapter,
@@ -106,14 +121,14 @@ public static class PersonHelper
 
         foreach (var person in newPeople)
         {
-            if (chapter.People.Any(cp => cp.PersonId == person.Id && cp.Role == role)) continue;
+            if (chapter.People.Any(cp => cp.Person.NormalizedName == person.NormalizedName && cp.Role == role)) continue;
 
             chapter.People.Add(new ChapterPeople
             {
                 PersonId = person.Id,
                 Person = person,
                 ChapterId = chapter.Id,
-                Role = role
+                Role = role,
             });
         }
     }
