@@ -672,7 +672,7 @@ public class ScannerService : IScannerService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
-        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanSw.ElapsedMilliseconds + scanElapsedTime);
+        _logger.LogInformation("[ScannerService] Finished scan in {ScanAndUpdateTime} milliseconds.", scanSw.ElapsedMilliseconds + scanElapsedTime);
 
         return totalFiles;
     }
@@ -684,15 +684,34 @@ public class ScannerService : IScannerService
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
         var dbTask = Task.Run(async () => await DbTasks(channel, settings, toProcess, libraryId, forceUpdate));
-        var ioTask = Task.Run(async () => await IoTasks(channel, serverSettings, libraryId, forceUpdate));
 
-        await Task.WhenAll(dbTask, ioTask);
+        var amountOfProcessors = Environment.ProcessorCount;
+        var usingCount = Math.Max(1, amountOfProcessors / 2);
+        _logger.LogDebug("[ScannerService] Going to use {Cores} / {TotalCores} threads for I/O tasks this scan",
+            usingCount, amountOfProcessors);
 
-        return dbTask.Result;
+        IList<Task<long>> tasks = [];
+        for (var i = 0; i < usingCount; i++)
+        {
+            tasks.Add(Task.Run(async () => await IoTasks(channel, serverSettings, libraryId, forceUpdate)));
+        }
+
+        tasks.Add(dbTask);
+
+        await Task.WhenAll(tasks);
+
+        var totalIoTime = tasks.Select(t => t.Result).Sum() - dbTask.Result;
+        var avgTimePerThread = totalIoTime / usingCount;
+        _logger.LogDebug("[ScannerService] Spend {Elapsed}ms processing covers & word count, {Average}ms per thread",
+            totalIoTime, avgTimePerThread);
+
+        return (int) dbTask.Result;
     }
 
-    private async Task IoTasks(Channel<int> channel, ServerSettingDto serverSettings, int libraryId, bool forceUpdate)
+    private async Task<long> IoTasks(Channel<int> channel, ServerSettingDto serverSettings, int libraryId, bool forceUpdate)
     {
+        var sw = Stopwatch.StartNew();
+
         await foreach (var seriesId in channel.Reader.ReadAllAsync())
         {
             using var scope = _scopeFactory.CreateScope();
@@ -702,13 +721,16 @@ public class ScannerService : IScannerService
             await metadataService.GenerateCoversForSeries(serverSettings, libraryId, seriesId, false, false);
             await wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate);
         }
+
+        return sw.ElapsedMilliseconds;
     }
 
-    private async Task<int> DbTasks(Channel<int> channel, MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, bool forceUpdate)
+    private async Task<long> DbTasks(Channel<int> channel, MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, bool forceUpdate)
     {
         var totalFiles = 0;
         var seriesLeftToProcess = toProcess.Count;
         var totalSeriesToProcess = toProcess.Count;
+        var sw = Stopwatch.StartNew();
 
         try
         {
@@ -743,6 +765,8 @@ public class ScannerService : IScannerService
         {
             channel.Writer.Complete();
         }
+
+        _logger.LogDebug("[ScannerService] Finished writing metadata for {Count} series in {Elasped}ms", toProcess.Count, sw.ElapsedMilliseconds);
 
         return totalFiles;
     }
