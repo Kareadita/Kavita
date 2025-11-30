@@ -80,8 +80,6 @@ public class ScannerHelper
         var processSeries = new ProcessSeries(_unitOfWork, Substitute.For<ILogger<ProcessSeries>>(),
             Substitute.For<IEventHub>(),
             ds, Substitute.For<ICacheHelper>(), readingItemService, new FileService(fs),
-            Substitute.For<IMetadataService>(),
-            Substitute.For<IWordCountAnalyzerService>(),
             Substitute.For<IReadingListService>(),
             Substitute.For<IExternalMetadataService>());
 

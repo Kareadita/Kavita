@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+using System.Collections.Generic;
 using System.Linq;
 using API.Entities.Person;
 using API.Extensions;
@@ -10,12 +11,12 @@ public class PersonBuilder : IEntityBuilder<Person>
     private readonly Person _person;
     public Person Build() => _person;
 
-    public PersonBuilder(string name)
+    public PersonBuilder(string name, string? normalizedName = null)
     {
         _person = new Person()
         {
             Name = name.Trim(),
-            NormalizedName = name.ToNormalized(),
+            NormalizedName = string.IsNullOrEmpty(normalizedName) ? name.ToNormalized() : normalizedName,
             SeriesMetadataPeople = new List<SeriesMetadataPeople>(),
             ChapterPeople = new List<ChapterPeople>()
         };

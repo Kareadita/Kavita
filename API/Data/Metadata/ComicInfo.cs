@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.Services;
 using Kavita.Common.Extensions;
 using Nager.ArticleNumber;
@@ -132,6 +134,24 @@ public class ComicInfo
     public string Teams { get; set; } = string.Empty;
     public string Locations { get; set; } = string.Empty;
 
+    public IList<string> GetPeopleForRole(PersonRole role) => role switch
+    {
+        PersonRole.Other => [],
+        PersonRole.Writer => TagHelper.GetTagValues(Writer),
+        PersonRole.Penciller => TagHelper.GetTagValues(Penciller),
+        PersonRole.Inker => TagHelper.GetTagValues(Inker),
+        PersonRole.Colorist => TagHelper.GetTagValues(Colorist),
+        PersonRole.Letterer => TagHelper.GetTagValues(Letterer),
+        PersonRole.CoverArtist => TagHelper.GetTagValues(CoverArtist),
+        PersonRole.Editor => TagHelper.GetTagValues(Editor),
+        PersonRole.Publisher => TagHelper.GetTagValues(Publisher),
+        PersonRole.Character => TagHelper.GetTagValues(Characters),
+        PersonRole.Translator => [],
+        PersonRole.Imprint => TagHelper.GetTagValues(Imprint),
+        PersonRole.Team => TagHelper.GetTagValues(Teams),
+        PersonRole.Location => TagHelper.GetTagValues(Locations),
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
+    };
 
     public static AgeRating ConvertAgeRatingToEnum(string value)
     {

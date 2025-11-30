@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Metadata;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
@@ -29,6 +30,92 @@ public static class PersonHelper
             }
         }
         return dict;
+    }
+    public static void UpdateSeriesMetadataPeople(
+        Dictionary<string, Person> databasePeople,
+        SeriesMetadata metadata,
+        IEnumerable<ChapterPeople> chapterPeople,
+        PersonRole role)
+    {
+        var normalizedPeople = chapterPeople
+            .Where(cp => cp.Role == role)
+            .Select(cp => cp.Person.NormalizedName)
+            .Distinct()
+            .ToList();
+
+        var existingMetadataPeople = metadata.People
+            .Where(mp => mp.Role == role)
+            .ToList();
+
+        var existingPeopleNames = new HashSet<string>(
+            existingMetadataPeople.Select(mp => mp.Person.NormalizedName));
+
+        var toRemove = existingMetadataPeople
+            .Where(mp => !normalizedPeople.Contains(mp.Person.NormalizedName));
+
+        foreach (var existingMetadataPerson in toRemove)
+        {
+            metadata.People.Remove(existingMetadataPerson);
+        }
+
+        var newPeople = normalizedPeople
+            .Where(p => !existingPeopleNames.Contains(p))
+            .Select(p => databasePeople[p])
+            .ToList();
+
+        foreach (var person in newPeople)
+        {
+            if (metadata.People.Any(mp => mp.PersonId == person.Id && mp.Role == role)) continue;
+
+            metadata.People.Add(new SeriesMetadataPeople
+            {
+                PersonId = person.Id,
+                Person = person,
+                SeriesMetadataId = metadata.Id,
+                SeriesMetadata = metadata,
+                Role = role
+            });
+        }
+    }
+
+    public static void UpdateChapterPeople(
+        Dictionary<string, Person> databasePeople,
+        Chapter chapter,
+        IList<string> comicInfoPeople,
+        PersonRole role)
+    {
+        var normalizedPeople = comicInfoPeople.Select(p => p.ToNormalized()).Distinct().ToList();
+
+        var existingChapterPeople = chapter.People
+            .Where(cp => cp.Role == role)
+            .ToList();
+
+        var existingPeopleNames = new HashSet<string>(existingChapterPeople.Select(cp => cp.Person.NormalizedName));
+
+        var toRemove = existingChapterPeople
+            .Where(p => !normalizedPeople.Contains(p.Person.NormalizedName));
+        foreach (var existingChapterPerson in toRemove)
+        {
+            chapter.People.Remove(existingChapterPerson);
+        }
+
+        var newPeople = normalizedPeople
+            .Where(p => !existingPeopleNames.Contains(p))
+            .Select(p => databasePeople[p])
+            .ToList();
+
+        foreach (var person in newPeople)
+        {
+            if (chapter.People.Any(cp => cp.PersonId == person.Id && cp.Role == role)) continue;
+
+            chapter.People.Add(new ChapterPeople
+            {
+                PersonId = person.Id,
+                Person = person,
+                ChapterId = chapter.Id,
+                Role = role
+            });
+        }
     }
 
     public static async Task UpdateSeriesMetadataPeopleAsync(SeriesMetadata metadata, ICollection<SeriesMetadataPeople> metadataPeople,
@@ -119,7 +206,6 @@ public static class PersonHelper
             await unitOfWork.CommitAsync();
         }
     }
-
 
 
     public static async Task UpdateChapterPeopleAsync(Chapter chapter, IList<string> people, PersonRole role, IUnitOfWork unitOfWork)
