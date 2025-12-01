@@ -34,31 +34,31 @@ public interface IProcessSeries
     Task<int?> ProcessSeriesAsync(MetadataSettingsDto settings, IList<ParserInfo> parsedInfos, ProcessSeriesArgs args);
 }
 
-public class ProcessSeriesArgs
+public sealed record ProcessSeriesArgs
 {
     public required Library Library { get; init; }
     public required int TotalToProcess { get; init; }
     public required int LeftToProcess { get; init; }
-    public required bool ForceUpdate { get; init; }
+    public bool ForceUpdate { get; init; } = false;
 }
 
-internal class UpdateChapterArgs
+internal sealed record UpdateChapterArgs
 {
-    public required MetadataSettingsDto Settings { get; set; }
-    public required Series Series { get; set; }
-    public required Volume Volume { get; set; }
-    public required IList<ParserInfo> ParsedInfos { get; set; }
-    public required Dictionary<string, Person> DatabasePeople { get; set; }
-    public required bool ForceUpdate { get; set; }
+    public required MetadataSettingsDto Settings { get; init; }
+    public required Series Series { get; init; }
+    public required Volume Volume { get; init; }
+    public required IList<ParserInfo> ParsedInfos { get; init; }
+    public required Dictionary<string, Person> DatabasePeople { get; init; }
+    public bool ForceUpdate { get; init; } = false;
 }
 
-internal class UpdateChapterComicInfoArgs
+internal sealed record UpdateChapterComicInfoArgs
 {
-    public required MetadataSettingsDto Settings { get; set; }
-    public required Chapter Chapter { get; set; }
-    public required ComicInfo? ComicInfo { get; set; }
-    public required Dictionary<string, Person> DatabasePeople { get; set; }
-    public required bool ForceUpdate { get; set; }
+    public required MetadataSettingsDto Settings { get; init; }
+    public required Chapter Chapter { get; init; }
+    public required ComicInfo? ComicInfo { get; init; }
+    public required Dictionary<string, Person> DatabasePeople { get; init; }
+    public bool ForceUpdate { get; init; } = false;
 }
 
 /// <summary>

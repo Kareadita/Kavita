@@ -146,7 +146,7 @@ public class ComicInfo
         PersonRole.Editor => TagHelper.GetTagValues(Editor),
         PersonRole.Publisher => TagHelper.GetTagValues(Publisher),
         PersonRole.Character => TagHelper.GetTagValues(Characters),
-        PersonRole.Translator => [],
+        PersonRole.Translator => TagHelper.GetTagValues(Translator),
         PersonRole.Imprint => TagHelper.GetTagValues(Imprint),
         PersonRole.Team => TagHelper.GetTagValues(Teams),
         PersonRole.Location => TagHelper.GetTagValues(Locations),

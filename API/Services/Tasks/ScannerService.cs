@@ -321,10 +321,7 @@ public class ScannerService : IScannerService
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto();
 
         var toProcessList = toProcess.Select(k => parsedSeries[k]).ToList();
-        await ProcessParserInfo(settings, toProcessList, library.Id, bypassFolderOptimizationChecks);
-
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name, 0));
+        await ProcessParserInfo(settings, toProcessList, library, bypassFolderOptimizationChecks);
 
         // Tell UI that this series is done
         await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
@@ -665,23 +662,28 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("[ScannerService] Found {SeriesCount} Series that need processing in {Time} ms", toProcess.Count, scanSw.ElapsedMilliseconds + scanElapsedTime);
 
-        var totalFiles = await ProcessParserInfo(settings, toProcess.Values.ToList(), library.Id, forceUpdate);
-
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
+        var totalFiles = await ProcessParserInfo(settings, toProcess.Values.ToList(), library, forceUpdate);
 
         _logger.LogInformation("[ScannerService] Finished scan in {ScanAndUpdateTime} milliseconds.", scanSw.ElapsedMilliseconds + scanElapsedTime);
 
         return totalFiles;
     }
 
-    private async Task<int> ProcessParserInfo(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, bool forceUpdate)
+    /// <summary>
+    /// Runs metadata updates (database heavy) and extra tasks (I/O heavy) in parallel
+    /// </summary>
+    /// <param name="settings"></param>
+    /// <param name="toProcess"></param>
+    /// <param name="library"></param>
+    /// <param name="forceUpdate"></param>
+    /// <returns>Total amount of processed files</returns>
+    private async Task<int> ProcessParserInfo(MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, Library library, bool forceUpdate)
     {
         var channel = Channel.CreateUnbounded<int>();
 
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
-        var dbTask = Task.Run(async () => await DbTasks(channel, settings, toProcess, libraryId, forceUpdate));
+        var dbTask = Task.Run(async () => await DbMetadataTask(channel, settings, toProcess, library.Id, library.Name, forceUpdate));
 
         var amountOfProcessors = Environment.ProcessorCount;
         var usingCount = Math.Max(1, amountOfProcessors / 2);
@@ -691,14 +693,14 @@ public class ScannerService : IScannerService
         IList<Task<long>> tasks = [];
         for (var i = 0; i < usingCount; i++)
         {
-            tasks.Add(Task.Run(async () => await IoTasks(channel, serverSettings, libraryId, forceUpdate)));
+            tasks.Add(Task.Run(async () => await ExtraWorkTask(channel, serverSettings, library.Id, forceUpdate)));
         }
 
         tasks.Add(dbTask);
 
         await Task.WhenAll(tasks);
 
-        var totalIoTime = tasks.Select(t => t.Result).Sum() - dbTask.Result;
+        var totalIoTime = tasks.Select(t => t.Result).Sum();
         var avgTimePerThread = totalIoTime / usingCount;
         _logger.LogDebug("[ScannerService] Spend {Elapsed}ms processing covers & word count, {Average}ms per thread",
             totalIoTime, avgTimePerThread);
@@ -706,7 +708,15 @@ public class ScannerService : IScannerService
         return (int) dbTask.Result;
     }
 
-    private async Task<long> IoTasks(Channel<int> channel, ServerSettingDto serverSettings, int libraryId, bool forceUpdate)
+    /// <summary>
+    /// A thread handling cover generation and word count. Completes when the channel completes
+    /// </summary>
+    /// <param name="channel"></param>
+    /// <param name="serverSettings"></param>
+    /// <param name="libraryId"></param>
+    /// <param name="forceUpdate"></param>
+    /// <returns></returns>
+    private async Task<long> ExtraWorkTask(Channel<int> channel, ServerSettingDto serverSettings, int libraryId, bool forceUpdate)
     {
         var sw = Stopwatch.StartNew();
 
@@ -723,7 +733,17 @@ public class ScannerService : IScannerService
         return sw.ElapsedMilliseconds;
     }
 
-    private async Task<long> DbTasks(Channel<int> channel, MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, bool forceUpdate)
+    /// <summary>
+    /// Processes all founds series sequentially, and writes the seriesIds to the channel afterwards
+    /// </summary>
+    /// <param name="channel"></param>
+    /// <param name="settings"></param>
+    /// <param name="toProcess"></param>
+    /// <param name="libraryId"></param>
+    /// <param name="libraryName"></param>
+    /// <param name="forceUpdate"></param>
+    /// <returns>The total amount of processed files</returns>
+    private async Task<long> DbMetadataTask(Channel<int> channel, MetadataSettingsDto settings, IList<IList<ParserInfo>> toProcess, int libraryId, string libraryName, bool forceUpdate)
     {
         var totalFiles = 0;
         var seriesLeftToProcess = toProcess.Count;
@@ -764,11 +784,13 @@ public class ScannerService : IScannerService
             channel.Writer.Complete();
         }
 
-        _logger.LogDebug("[ScannerService] Finished writing metadata for {Count} series in {Elasped}ms", toProcess.Count, sw.ElapsedMilliseconds);
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.FileScanProgressEvent(string.Empty, libraryName, ProgressEventType.Ended));
+
+        _logger.LogDebug("[ScannerService] Finished writing metadata for {Count} series in {Elapsed}ms", toProcess.Count, sw.ElapsedMilliseconds);
 
         return totalFiles;
     }
-
 
     private static void UpdateLastScanned(Library library)
     {
