@@ -579,7 +579,7 @@ public class ReadingListService : IReadingListService
             CblName = cblReading.Name,
             Success = CblImportResult.Success,
             Results = [],
-            SuccessfulInserts = new List<CblBookResult>()
+            SuccessfulInserts = []
         };
 
         if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;

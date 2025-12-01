@@ -643,20 +643,18 @@ public class ScannerService : IScannerService
             var allGenres = toProcess
                 .SelectMany(s => s.Value
                     .SelectMany(p => p.ComicInfo?.Genre?
-                                         .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                                         .Select(g => g.Trim())
-                                         .Where(g => !string.IsNullOrWhiteSpace(g))
+                                         .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                                      ?? []))
-                .Distinct().ToList();
+                .Distinct()
+                .ToList();
 
             var allTags = toProcess
                 .SelectMany(s => s.Value
                     .SelectMany(p => p.ComicInfo?.Tags?
-                                         .Split(",", StringSplitOptions.RemoveEmptyEntries)
-                                         .Select(g => g.Trim())
-                                         .Where(g => !string.IsNullOrWhiteSpace(g))
+                                         .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                                      ?? []))
-                .Distinct().ToList();
+                .Distinct()
+                .ToList();
 
             ExternalMetadataService.GenerateExternalGenreAndTagsList(allGenres, allTags, settings,
                 out var processedTags, out var processedGenres);
