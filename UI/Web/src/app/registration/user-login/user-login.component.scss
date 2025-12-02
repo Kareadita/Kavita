@@ -15,6 +15,7 @@ a {
     color: #fff !important;
     border-color: var(--login-input-border-color);
     font-family: var(--login-input-font-family);
+    font-size: 1rem;
 
     &:focus {
         border-color: var(--login-input-border-color-focus);
