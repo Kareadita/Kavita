@@ -10,6 +10,7 @@ using API.Logging;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common.EnvironmentInfo;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -44,10 +45,7 @@ public class BackupService : IBackupService
 
         _backupFiles = new List<string>()
         {
-            "appsettings.json",
-            "kavita.db",
-            "kavita.db-shm", // This wont always be there
-            "kavita.db-wal" // This wont always be there
+            "appsettings.json"
         };
     }
 
@@ -104,7 +102,10 @@ public class BackupService : IBackupService
         _directoryService.ExistOrCreate(tempDirectory);
         _directoryService.ClearDirectory(tempDirectory);
 
-        await SendProgress(0.1F, "Copying config files");
+        await SendProgress(0.1F, "Backing up database");
+        await BackupDatabaseFile(tempDirectory);
+
+        await SendProgress(0.15F, "Copying config files");
         _directoryService.CopyFilesToDirectory(
             _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(_directoryService.ConfigDirectory, file)), tempDirectory);
 
@@ -151,6 +152,39 @@ public class BackupService : IBackupService
     {
         var files = GetLogFiles();
         _directoryService.CopyFilesToDirectory(files, _directoryService.FileSystem.Path.Join(tempDirectory, "logs"));
+    }
+
+    /// <summary>
+    /// Creates a backup of the SQLite database using VACUUM INTO command.
+    /// This method safely backs up the database while it's in use, without locking issues.
+    /// </summary>
+    /// <param name="tempDirectory">The directory where the backup file will be created</param>
+    private async Task BackupDatabaseFile(string tempDirectory)
+    {
+        var backupPath = _directoryService.FileSystem.Path.Join(tempDirectory, "kavita.db");
+
+        // Validate the backup path to prevent SQL injection
+        // The path must not contain single quotes which could break the SQL command
+        if (backupPath.Contains('\''))
+        {
+            throw new ArgumentException("Backup path contains invalid characters", nameof(tempDirectory));
+        }
+
+        try
+        {
+            // Use VACUUM INTO to create a safe backup of the database while it's running
+            // This creates a consistent snapshot without locking the main database
+            // Note: VACUUM INTO requires a literal path and cannot use SQL parameters
+            #pragma warning disable EF1002 // The backup path is validated above to not contain SQL injection characters
+            await _unitOfWork.DataContext.Database.ExecuteSqlRawAsync($"VACUUM INTO '{backupPath}'");
+            #pragma warning restore EF1002
+            _logger.LogDebug("Database backup created successfully at {BackupPath}", backupPath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create database backup using VACUUM INTO at {BackupPath}", backupPath);
+            throw new InvalidOperationException($"Failed to create database backup at {backupPath}", ex);
+        }
     }
 
     private void CopyFaviconsToBackupDirectory(string tempDirectory)
