@@ -127,9 +127,22 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         }
         finally
         {
-            // Cleanup
-            if (File.Exists(tempDbPath)) File.Delete(tempDbPath);
-            if (Directory.Exists(tempBackupDir)) Directory.Delete(tempBackupDir, true);
+            try
+            {
+            if (File.Exists(tempDbPath))
+            {
+                File.Delete(tempDbPath);
+            }
+
+            if (Directory.Exists(tempBackupDir))
+            {
+                Directory.Delete(tempBackupDir, true);
+            }
+            }
+            catch (Exception)
+            {
+                // Ignore cleanup exceptions
+            }
         }
     }
 
