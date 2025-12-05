@@ -24,7 +24,7 @@ public class UpdateUserAsActiveMiddleware(RequestDelegate next)
                 await unitOfWork.UserRepository.UpdateUserAsActive(userId.Value);
             }
         }
-        catch (Exception _)
+        catch (Exception)
         {
             await next(context);
             return;

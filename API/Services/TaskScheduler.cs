@@ -542,17 +542,19 @@ public class TaskScheduler : ITaskScheduler
         await _themeService.SyncThemes();
     }
 
+    /// <summary>
+    /// Checks for soon to be expired and expired Auth keys and attempts to email the users
+    /// </summary>
     public async Task CheckExpiredOrExpiringAuthKeys()
     {
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         if (!settings.IsEmailSetup()) return;
 
-        // TODO: Need a check if we've already informed the user
-
         _logger.LogInformation("Checking for Expired or Expiring Auth Keys");
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.AuthKeys);
         foreach (var user in users)
         {
+            // Implies only the default keys
             if (user.AuthKeys.Count == 2) continue;
 
             // Check if key is expired
