@@ -128,10 +128,8 @@ public class Program
                 await Seed.SeedFonts(context);
                 await Seed.SeedDefaultStreams(unitOfWork);
                 await Seed.SeedDefaultSideNavStreams(unitOfWork);
-                //await Seed.SeedUserApiKeys(context);
                 await Seed.SeedMetadataSettings(context);
                 await Seed.SeedDefaultHighlightSlots(unitOfWork);
-                await Seed.SeedAuthKeys(context);
             }
             catch (Exception ex)
             {
