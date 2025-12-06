@@ -23,7 +23,7 @@ import {ActivityGraphData} from "../statistics/_components/activity-graph/activi
 import {ReadingPace} from "../statistics/_components/reading-pace/reading-pace.component";
 import {Breakdown} from "../statistics/_models/breakdown";
 import {SpreadStats} from "../statistics/_models/stats/spread-stats";
-import {FavouriteAuthor} from "../statistics/_models/favourite-author";
+import {FavoriteAuthor} from "../statistics/_models/favorite-author";
 import {StatsFilter} from "../statistics/_models/stats-filter";
 import {ProfileStatBar} from "../profile/_components/profile-stat-bar/profile-stat-bar.component";
 import {
@@ -236,7 +236,7 @@ export class StatisticsService {
   }
 
   getFavouriteAuthors(statsFilter: () => StatsFilter | undefined, userId: () => number) {
-    return this.filterResource<FavouriteAuthor[]>(statsFilter, userId, 'favorite-authors');
+    return this.filterResource<FavoriteAuthor[]>(statsFilter, userId, 'favorite-authors');
   }
 
   getReadsByMonths(statsFilter: () => StatsFilter | undefined, userId: () => number) {

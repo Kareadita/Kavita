@@ -1,20 +1,9 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  EventEmitter,
-  forwardRef,
-  inject,
-  OnInit,
-  Output,
-  signal
-} from '@angular/core';
-import {ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, ReactiveFormsModule} from "@angular/forms";
-import { tap } from "rxjs";
-import { CommonModule } from '@angular/common';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, output, signal} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {tap} from "rxjs";
+import {CommonModule} from '@angular/common';
 import {toSignal} from "@angular/core/rxjs-interop";
-import {ServerService} from "../../_services/server.service";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingsService} from "../../admin/settings.service";
 
 export type TimeRangeFormGroup = FormGroup<{
@@ -39,7 +28,7 @@ export class SmartTimeRangePickerComponent implements OnInit {
 
   private settingsService = inject(SettingsService);
 
-  @Output() timeRangeUpdate = new EventEmitter<TimeRange>();
+  timeRangeUpdate = output<TimeRange>();
 
   readonly formGroup: TimeRangeFormGroup = new FormGroup({
     startDate: new FormControl<Date | null>(null),
@@ -58,7 +47,7 @@ export class SmartTimeRangePickerComponent implements OnInit {
     const end = selectedTime.endDate;
 
     if (!start && !end) {
-      return 'during their entire life';
+      return translate('smart-time-picker.during-entire-life');
     }
 
     if (start && end) {
@@ -68,13 +57,13 @@ export class SmartTimeRangePickerComponent implements OnInit {
       if (startDate.getMonth() === 0 && startDate.getDate() === 1 &&
         endDate.getMonth() === 11 && endDate.getDate() === 31 &&
         startDate.getFullYear() === endDate.getFullYear()) {
-        return `during ${startDate.getFullYear()}`;
+        return translate('smart-time-picker.during-year', {year: startDate.getFullYear()});
       }
 
-      return `from ${this.formatDate(startDate)} to ${this.formatDate(endDate)}`;
+      return translate('smart-time-picker.during-from-to', {startYear: this.formatDate(startDate), endYear: this.formatDate(endDate)});
     }
 
-    return 'select a time range';
+    return translate('smart-time-picker.during-select');
   });
   readonly yearOptions = signal<number[]>([]);
 

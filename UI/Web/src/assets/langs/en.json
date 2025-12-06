@@ -2989,7 +2989,11 @@
     "smart-time-picker": {
         "forever": "Forever",
         "select-year": "Select Year",
-        "custom-range": "Custom range"
+        "custom-range": "Custom range",
+        "during-entire-life": "during their entire life",
+        "during-year": "during {{year}}",
+        "during-from-to": "from {{startYear}} to {{endYear}}",
+        "during-select": "Select a time range"
     },
 
     "client-device-type-pipe": {

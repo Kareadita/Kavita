@@ -114,7 +114,7 @@ export class ReadingPaceComponent {
     } else if (value >= 1) {
       return value.toFixed(1);
     } else {
-      return value.toFixed(3);
+      return value.toFixed(1);
     }
   }
 }
