@@ -30,7 +30,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, debounceTime, firstValueFrom, forkJoin, Observable, of, ReplaySubject, tap} from 'rxjs';
+import {catchError, debounceTime, firstValueFrom, forkJoin, Observable, of, ReplaySubject, switchMap, tap} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {
@@ -1059,27 +1059,19 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  async read(incognitoMode: boolean = false) {
-    if (this.readingProgressStatus() === ReadingProgressStatus.FullyRead && !incognitoMode) { // We are re-reading the series
-      await firstValueFrom(this.seriesService.markUnread(this.seriesId));
-      this.currentlyReadingChapter = undefined;
-    }
+  read(incognitoMode: boolean = false) {
+    if (this.bulkSelectionService.hasSelections()) return;
 
-    if (this.currentlyReadingChapter !== undefined) {
-      this.openChapter(this.currentlyReadingChapter, incognitoMode);
-      return;
-    }
-
-    this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => {
-      this.openChapter(chapter, incognitoMode);
+    this.readerService.readSeries(this.series()!, incognitoMode, (chapter) => {
+      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
     });
   }
 
-  openChapter(chapter: Chapter, incognitoMode = false) {
+  openChapter(chapter: Chapter, incognitoMode = false, promptForReread: boolean = true) {
     if (this.bulkSelectionService.hasSelections()) return;
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
 
-    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode);
+    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode, promptForReread);
 
   }
 

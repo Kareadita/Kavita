@@ -67,7 +67,7 @@ export class ListSelectModalComponent<T> {
   }
 
   confirm() {
-    this.modal.close(this.selectedItem());
+    this.modal.close(this.selectedItem()?.value);
   }
 
 }

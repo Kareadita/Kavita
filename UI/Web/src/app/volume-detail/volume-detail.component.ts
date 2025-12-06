@@ -87,6 +87,8 @@ import {AnnotationService} from "../_services/annotation.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationsTabComponent} from "../_single-module/annotations-tab/annotations-tab.component";
 import {UtcToLocaleDatePipe} from "../_pipes/utc-to-locale-date.pipe";
+import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
+import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 
 enum TabID {
 
@@ -161,7 +163,8 @@ interface VolumeCast extends IHasCast {
     ReviewsComponent,
     ExternalRatingComponent,
     AnnotationsTabComponent,
-    UtcToLocaleDatePipe
+    UtcToLocaleDatePipe,
+    ReadingProgressStatusPipePipe
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
@@ -227,6 +230,7 @@ export class VolumeDetailComponent implements OnInit {
 
     return chapters.reduce((min, curr) => Math.min(min, curr.totalReads), Infinity);
   });
+  readingProgressStatus: ReadingProgressStatus = ReadingProgressStatus.NoProgress;
 
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
@@ -420,6 +424,12 @@ export class VolumeDetailComponent implements OnInit {
       this.size = this.volume.chapters.reduce((sum, c) =>
         sum + c.files.reduce((fileSum, f) => fileSum + f.bytes, 0), 0);
       this.libraryType = results.libraryType;
+
+      if (this.volume.pagesRead > 0 && this.volume.pagesRead < this.volume.pages) {
+        this.readingProgressStatus = ReadingProgressStatus.Progress;
+      } else if (this.volume.pagesRead >= this.volume.pages) {
+        this.readingProgressStatus = ReadingProgressStatus.FullyRead;
+      }
 
       if (this.volume.chapters.length === 1) {
         this.chapterService.chapterDetailPlus(this.seriesId, this.volume.chapters[0].id).subscribe(detail => {

@@ -32,7 +32,7 @@ import {DownloadIndicatorComponent} from "../download-indicator/download-indicat
 import {FormsModule} from "@angular/forms";
 import {ImageComponent} from "../../shared/image/image.component";
 import {DownloadEvent, DownloadService} from "../../shared/_services/download.service";
-import {Observable} from "rxjs";
+import {Observable, of, switchMap, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
@@ -368,14 +368,10 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   read(event: any) {
-
     event.stopPropagation();
     if (this.bulkSelectionService.hasSelections()) return;
 
-    // Get Continue Reading point and open directly
-    this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => {
-      this.readerService.readChapter(this.libraryId, this.series.id, chapter, false);
-    });
+    this.readerService.readSeries(this.series, false);
   }
 
 }
