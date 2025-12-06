@@ -189,7 +189,9 @@ public class Startup
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
             .UseInMemoryStorage());
-            //.UseSQLiteStorage("config/Hangfire.db")); // UseSQLiteStorage - SQLite has some issues around resuming jobs when aborted (and locking can cause high utilization) (NOTE: There is code to clear jobs on startup a redditor gave me)
+            //.UseSQLiteStorage("config/Hangfire.db"));
+            //// UseSQLiteStorage - SQLite has some issues around resuming jobs when aborted (and locking can cause high utilization)
+            /// (NOTE: There is code to clear jobs on startup a redditor gave me)
 
         // Add the processing server as IHostedService
         services.AddHangfireServer(options =>
@@ -316,6 +318,7 @@ public class Startup
         app.UseMiddleware<UserContextMiddleware>();
         app.UseMiddleware<ClientInfoMiddleware>();
         app.UseMiddleware<DeviceTrackingMiddleware>(); // This must be after ClientInfo and Authorization
+        app.UseMiddleware<UpdateUserAsActiveMiddleware>(); // This must be LAST
 
         app.UseDefaultFiles();
 
@@ -469,10 +472,11 @@ public class Startup
                     await ManualMigrateBookReadingProgress.Migrate(dataContext, unitOfWork, logger);
 
                     // v0.8.9
-                    await MigrateProgressToReadingSessions.Migrate(dataContext, logger);
-                    await MigrateMissingCreatedUtcDate.Migrate(dataContext, logger);
+                    await new MigrateProgressToReadingSessions().RunAsync(dataContext, logger);
+                    await new MigrateMissingCreatedUtcDate().RunAsync(dataContext, logger);
                     await MigrateProfilePreferences.Migrate(dataContext, logger);
-                    await MigrateTotalReads.Migrate(dataContext, logger);
+                    await new MigrateTotalReads().RunAsync(dataContext, logger);
+                    await new MigrateToAuthKeys().RunAsync(dataContext, logger);
 
                     #endregion
 

@@ -48,8 +48,6 @@ public static class MigrateSmartFilterEncoding
         dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
         {
             Name = "MigrateSmartFilterEncoding",
-            ProductVersion = BuildInfo.Version.ToString(),
-            RanAt = DateTime.UtcNow
         });
         await dataContext.SaveChangesAsync();
 

@@ -14,8 +14,11 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Font;
 using API.Entities.Enums.Theme;
+using API.Entities.Enums.User;
 using API.Entities.MetadataMatching;
+using API.Entities.User;
 using API.Extensions;
+using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner.Parser;
@@ -502,15 +505,53 @@ public static class Seed
 
     }
 
-    public static async Task SeedUserApiKeys(DataContext context)
+    // public static async Task SeedUserApiKeys(DataContext context)
+    // {
+    //     await context.Database.EnsureCreatedAsync();
+    //
+    //     var users = await context.AppUser.ToListAsync();
+    //     foreach (var user in users.Where(user => string.IsNullOrEmpty(user.ApiKey)))
+    //     {
+    //         user.ApiKey = HashUtil.ApiKey();
+    //     }
+    //     await context.SaveChangesAsync();
+    // }
+
+    public static async Task SeedAuthKeys(DataContext context)
     {
         await context.Database.EnsureCreatedAsync();
 
-        var users = await context.AppUser.ToListAsync();
-        foreach (var user in users.Where(user => string.IsNullOrEmpty(user.ApiKey)))
+        var users = await context.AppUser
+            .Include(u => u.AuthKeys)
+            .ToListAsync();
+
+        foreach (var user in users.Where(user => user.AuthKeys.Count == 0))
         {
-            user.ApiKey = HashUtil.ApiKey();
+            user.AuthKeys = CreateDefaultAuthKeys();
         }
         await context.SaveChangesAsync();
+    }
+
+    public static List<AppUserAuthKey> CreateDefaultAuthKeys()
+    {
+        return
+        [
+            new AppUserAuthKey()
+            {
+                Name = AuthKeyHelper.OpdsKeyName,
+                Key = AuthKeyHelper.GenerateKey(32),
+                CreatedAtUtc = DateTime.UtcNow,
+                ExpiresAtUtc = null,
+                Provider = AuthKeyProvider.System,
+            },
+            new AppUserAuthKey()
+            {
+                Name = AuthKeyHelper.ImageOnlyKeyName,
+                Key = AuthKeyHelper.GenerateKey(32),
+                CreatedAtUtc = DateTime.UtcNow,
+                ExpiresAtUtc = null,
+                Provider = AuthKeyProvider.System,
+            }
+        ];
     }
 }

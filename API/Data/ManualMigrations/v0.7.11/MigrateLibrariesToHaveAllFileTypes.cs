@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.History;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -16,6 +19,7 @@ public static class MigrateLibrariesToHaveAllFileTypes
     {
         if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateLibrariesToHaveAllFileTypes"))
         {
+            await SaveManualHistoryItem(dataContext);
             return;
         }
 
@@ -74,6 +78,18 @@ public static class MigrateLibrariesToHaveAllFileTypes
         {
             await dataContext.SaveChangesAsync();
         }
+
+        await SaveManualHistoryItem(dataContext);
+
         logger.LogCritical("Running MigrateLibrariesToHaveAllFileTypes migration - Completed. This is not an error");
+    }
+
+    private static async Task SaveManualHistoryItem(DataContext context)
+    {
+        await context.ManualMigrationHistory.AddAsync(new ManualMigrationHistory()
+        {
+            Name = "MigrateLibrariesToHaveAllFileTypes",
+        });
+        await context.SaveChangesAsync();
     }
 }

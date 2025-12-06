@@ -40,6 +40,8 @@ public class ClientDevice
     /// </summary>
     public bool IsActive { get; set; } = true;
 
+    // TODO: Put an optional string? for AppUserAuthKey used (it might change, so it should be last seen)
+
     // Navigation properties
     public int AppUserId { get; set; }
     public virtual AppUser AppUser { get; set; } = null!;

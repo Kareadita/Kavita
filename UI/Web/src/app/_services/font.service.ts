@@ -23,10 +23,9 @@ export class FontService {
 
   constructor() {
     effect(() => {
-      const user = this.accountService.currentUserSignal();
-
-      if (user) {
-        this.apiKey = user.apiKey;
+      const apiKey = this.accountService.currentUserGenericApiKey();
+      if (apiKey) {
+        this.apiKey = apiKey;
         this.encodedKey = encodeURIComponent(this.apiKey);
       }
     });

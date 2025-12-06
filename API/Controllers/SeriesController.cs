@@ -137,7 +137,7 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns>If the series was deleted or not</returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpDelete("{seriesId}")]
     public async Task<ActionResult<bool>> DeleteSeries(int seriesId)
     {
@@ -147,7 +147,7 @@ public class SeriesController : BaseApiController
         return Ok(await _seriesService.DeleteMultipleSeries([seriesId]));
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("delete-multiple")]
     public async Task<ActionResult> DeleteMultipleSeries(DeleteSeriesDto dto)
     {
@@ -404,7 +404,7 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="refreshSeriesDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("refresh-metadata")]
     public async Task<ActionResult> RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
     {
@@ -417,7 +417,7 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="refreshSeriesDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("scan")]
     public ActionResult ScanSeries(RefreshSeriesDto refreshSeriesDto)
     {
@@ -430,7 +430,7 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="refreshSeriesDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("analyze")]
     public ActionResult AnalyzeSeries(RefreshSeriesDto refreshSeriesDto)
     {
@@ -567,7 +567,7 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy="RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("update-related")]
     public async Task<ActionResult> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
     {
@@ -579,7 +579,7 @@ public class SeriesController : BaseApiController
         return BadRequest(await _localizationService.Translate(UserId, "generic-relationship"));
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("external-series-detail")]
     public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? seriesId)
     {

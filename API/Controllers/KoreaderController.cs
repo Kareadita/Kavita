@@ -114,7 +114,7 @@ public class KoreaderController : BaseApiController
     {
         try
         {
-            return await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+            return await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
         }
         catch
         {

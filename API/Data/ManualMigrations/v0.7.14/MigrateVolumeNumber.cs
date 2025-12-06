@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using API.Entities.History;
 using API.Services.Tasks.Scanner.Parser;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -21,6 +22,7 @@ public static class MigrateVolumeNumber
         {
             logger.LogCritical(
                 "Running MigrateVolumeNumber migration - Completed. This is not an error");
+            await SaveManualHistoryItem(dataContext);
             return;
         }
 
@@ -35,7 +37,17 @@ public static class MigrateVolumeNumber
         }
 
         await dataContext.SaveChangesAsync();
-        logger.LogCritical(
-            "Running MigrateVolumeNumber migration - Completed. This is not an error");
+        await SaveManualHistoryItem(dataContext);
+
+        logger.LogCritical("Running MigrateVolumeNumber migration - Completed. This is not an error");
+    }
+
+    private static async Task SaveManualHistoryItem(DataContext context)
+    {
+        await context.ManualMigrationHistory.AddAsync(new ManualMigrationHistory()
+        {
+            Name = nameof(MigrateVolumeNumber),
+        });
+        await context.SaveChangesAsync();
     }
 }

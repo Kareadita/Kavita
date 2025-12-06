@@ -76,7 +76,7 @@ public class ReaderController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "apiKey"])]
     public async Task<ActionResult> GetPdf(int chapterId, string apiKey, bool extractPdf = false)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
+        if (await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return NoContent();
 
@@ -116,7 +116,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
     {
         if (page < 0) page = 0;
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
 
         try
@@ -150,7 +150,7 @@ public class ReaderController : BaseApiController
     [AllowAnonymous]
     public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, true);
         if (chapter == null) return NoContent();
@@ -174,7 +174,7 @@ public class ReaderController : BaseApiController
     [AllowAnonymous]
     public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
         if (userId == 0) return Unauthorized();
 
         if (page < 0) page = 0;

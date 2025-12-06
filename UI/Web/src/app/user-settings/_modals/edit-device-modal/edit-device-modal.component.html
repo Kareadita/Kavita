@@ -44,23 +44,23 @@
       </div>
 
       <div class="row g-0 mb-2">
-          <label for="device-platform" class="form-label">{{t('device-platform-label')}}</label>
-          @if(settingsForm.get('platform'); as formControl) {
-            <select id="device-platform" aria-describedby="device-platform-help" class="form-select" formControlName="platform"
-                    [class.is-invalid]="formControl.invalid && formControl.touched">
-              @for(platform of devicePlatforms; track platform) {
-                <option [value]="platform">{{platform | devicePlatform}}</option>
-              }
-            </select>
-            @if (formControl.errors; as errors) {
-              @if (errors.required) {
-                <p class="invalid-feedback">{{t('required-field')}}</p>
-              }
-              @if (errors.email) {
-                <p class="invalid-feedback">{{t('valid-email')}}</p>
-              }
+        <label for="device-platform" class="form-label">{{t('device-platform-label')}}</label>
+        @if(settingsForm.get('platform'); as formControl) {
+          <select id="device-platform" aria-describedby="device-platform-help" class="form-select" formControlName="platform"
+                  [class.is-invalid]="formControl.invalid && formControl.touched">
+            @for(platform of devicePlatforms; track platform) {
+              <option [value]="platform">{{platform | devicePlatform}}</option>
+            }
+          </select>
+          @if (formControl.errors; as errors) {
+            @if (errors.required) {
+              <p class="invalid-feedback">{{t('required-field')}}</p>
+            }
+            @if (errors.email) {
+              <p class="invalid-feedback">{{t('valid-email')}}</p>
             }
           }
+        }
 
       </div>
     </form>

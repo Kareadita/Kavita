@@ -61,7 +61,7 @@ public class FontController : BaseApiController
     [AllowAnonymous]
     public async Task<IActionResult> GetFont(int fontId, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
 
         var font = await _unitOfWork.EpubFontRepository.GetFontAsync(fontId);

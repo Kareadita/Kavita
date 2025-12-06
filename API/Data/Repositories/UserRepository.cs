@@ -46,10 +46,12 @@ public enum AppUserIncludes
     ExternalSources = 1 << 13,
     Collections = 1 << 14,
     ChapterRatings = 1 << 15,
+    AuthKeys = 1 << 16
 }
 
 public interface IUserRepository
 {
+    void Add(AppUserAuthKey key);
     void Add(AppUserBookmark bookmark);
     void Add(AppUser bookmark);
     void Update(AppUser user);
@@ -58,6 +60,7 @@ public interface IUserRepository
     void Update(AppUserDashboardStream stream);
     void Update(AppUserSideNavStream stream);
     void Delete(AppUser? user);
+    void Delete(AppUserAuthKey? key);
     void Delete(AppUserBookmark bookmark);
     void Delete(IEnumerable<AppUserDashboardStream> streams);
     void Delete(AppUserDashboardStream stream);
@@ -67,7 +70,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
     Task<IList<string>> GetRoles(int userId);
-    Task<IList<string>> GetRolesByApiKey(string? apiKey);
+    Task<IList<string>> GetRolesByAuthKey(string? apiKey);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
     Task<AppUserChapterRating?> GetUserChapterRatingAsync(int userId, int chapterId);
     Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId);
@@ -80,8 +83,8 @@ public interface IUserRepository
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
     Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int imageOffset, int userId);
     Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId);
-    Task<int> GetUserIdByApiKeyAsync(string apiKey);
-    Task<UserDto?> GetUserDtoByApiKeyAsync(string apiKey);
+    Task<UserDto?> GetUserDtoByAuthKeyAsync(string authKey);
+    Task<int> GetUserIdByAuthKeyAsync(string authKey);
     Task<UserDto?> GetUserDtoById(int userId);
     Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
@@ -129,6 +132,8 @@ public interface IUserRepository
     Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, int requestingUserId, string? query = null, float? ratingFilter = null);
     Task<string?> GetCoverImageAsync(int userId, int requestingUserId);
     Task<string?> GetPersonCoverImageAsync(int personId);
+    Task<IList<AuthKeyDto>> GetAuthKeysForUserId(int userId);
+    Task<AppUserAuthKey?> GetAuthKeyById(int authKeyId);
     Task<AppUserSocialPreferences> GetSocialPreferencesForUser(int userId);
     Task<AppUserPreferences> GetPreferencesForUser(int userId);
 
@@ -145,6 +150,11 @@ public class UserRepository : IUserRepository
         _context = context;
         _userManager = userManager;
         _mapper = mapper;
+    }
+
+    public void Add(AppUserAuthKey key)
+    {
+        _context.AppUserAuthKey.Add(key);
     }
 
     public void Add(AppUserBookmark bookmark)
@@ -186,6 +196,12 @@ public class UserRepository : IUserRepository
     {
         if (user == null) return;
         _context.AppUser.Remove(user);
+    }
+
+    public void Delete(AppUserAuthKey? key)
+    {
+        if (key == null) return;
+        _context.AppUserAuthKey.Remove(key);
     }
 
     public void Delete(AppUserBookmark bookmark)
@@ -750,11 +766,15 @@ public class UserRepository : IUserRepository
         return await _userManager.GetRolesAsync(user);
     }
 
-    public async Task<IList<string>> GetRolesByApiKey(string? apiKey)
+    public async Task<IList<string>> GetRolesByAuthKey(string? apiKey)
     {
         if (string.IsNullOrEmpty(apiKey)) return ArraySegment<string>.Empty;
 
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.ApiKey == apiKey);
+        var user = await _context.AppUserAuthKey
+            .Where(k => k.Key == apiKey)
+            .IsNotExpired()
+            .Select(k => k.AppUser)
+            .FirstOrDefaultAsync();
         if (user == null) return ArraySegment<string>.Empty;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
@@ -762,7 +782,7 @@ public class UserRepository : IUserRepository
         {
             // userManager is null on Unit Tests only
             return await _context.UserRoles
-                .Where(ur => ur.User.ApiKey == apiKey)
+                .Where(ur => ur.User.AuthKeys.Any(k => k.Key == apiKey && (k.ExpiresAtUtc == null || k.ExpiresAtUtc < DateTime.UtcNow)))
                 .Select(ur => ur.Role.Name)
                 .ToListAsync();
         }
@@ -943,25 +963,26 @@ public class UserRepository : IUserRepository
         return limit <= 0 ? query : query.Take(limit);
     }
 
-
-    /// <summary>
-    /// Fetches the AppUserId by API Key. This does not include any extra information
-    /// </summary>
-    /// <param name="apiKey"></param>
-    /// <returns></returns>
-    public async Task<int> GetUserIdByApiKeyAsync(string apiKey)
+    public async Task<UserDto?> GetUserDtoByAuthKeyAsync(string authKey)
     {
-        return await _context.AppUser
-            .Where(u => u.ApiKey != null && u.ApiKey.Equals(apiKey))
-            .Select(u => u.Id)
+        if (string.IsNullOrEmpty(authKey)) return null;
+
+        return await _context.AppUserAuthKey
+            .Where(k => k.Key == authKey)
+            .IsNotExpired()
+            .Select(k => k.AppUser)
+            .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
     }
 
-    public async Task<UserDto?> GetUserDtoByApiKeyAsync(string apiKey)
+    public async Task<int> GetUserIdByAuthKeyAsync(string authKey)
     {
-        return await _context.AppUser
-            .Where(u => u.ApiKey != null && u.ApiKey.Equals(apiKey))
-            .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+        if (string.IsNullOrEmpty(authKey)) return 0;
+
+        return await _context.AppUserAuthKey
+            .Where(k => k.Key == authKey)
+            .IsNotExpired()
+            .Select(k => k.AppUserId)
             .FirstOrDefaultAsync();
     }
 
@@ -1041,6 +1062,21 @@ public class UserRepository : IUserRepository
         return await _context.Person
             .Where(p => p.Id == personId)
             .Select(p => p.CoverImage)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<IList<AuthKeyDto>> GetAuthKeysForUserId(int userId)
+    {
+        return await _context.AppUserAuthKey
+            .Where(k => k.AppUserId == userId)
+            .ProjectTo<AuthKeyDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<AppUserAuthKey?> GetAuthKeyById(int authKeyId)
+    {
+        return await _context.AppUserAuthKey
+            .Where(k => k.Id == authKeyId)
             .FirstOrDefaultAsync();
     }
 

@@ -296,7 +296,6 @@ public class ScrobblingService : IScrobblingService
                            h.SendDate >= tokenExpiry);
 
         return !hasAlreadySentExpirationEmail;
-
     }
 
     public async Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider)

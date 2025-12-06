@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.KavitaPlus.Account;
@@ -137,7 +138,7 @@ public class ScrobblingController : BaseApiController
     /// </summary>
     /// <remarks>Requires admin</remarks>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("scrobble-errors")]
     public async Task<ActionResult<IEnumerable<ScrobbleErrorDto>>> GetScrobbleErrors()
     {
@@ -148,7 +149,7 @@ public class ScrobblingController : BaseApiController
     /// Clears the scrobbling errors table
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("clear-errors")]
     public async Task<ActionResult> ClearScrobbleErrors()
     {

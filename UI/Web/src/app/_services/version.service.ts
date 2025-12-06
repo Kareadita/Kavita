@@ -7,6 +7,7 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {NewUpdateModalComponent} from "../announcements/_components/new-update-modal/new-update-modal.component";
 import {OutOfDateModalComponent} from "../announcements/_components/out-of-date-modal/out-of-date-modal.component";
 import {Router} from "@angular/router";
+import {OpdsName} from "../_models/user/auth-key";
 
 @Injectable({
   providedIn: 'root'
@@ -65,7 +66,7 @@ export class VersionService implements OnDestroy{
       .pipe(
         filter(user => !!user),
         take(1),
-        switchMap(user => this.serverService.getVersion(user!.apiKey))
+        switchMap(user => this.serverService.getVersion(user!.authKeys.filter(k => k.name === OpdsName)[0].key))
       )
       .subscribe(serverVersion => {
         const cachedVersion = localStorage.getItem(VersionService.SERVER_VERSION_KEY);
@@ -86,7 +87,7 @@ export class VersionService implements OnDestroy{
       .pipe(
         switchMap(() => this.accountService.currentUser$),
         filter(user => !!user && !this.modalOpen),
-        switchMap(user => this.serverService.getVersion(user!.apiKey)),
+        switchMap(user => this.serverService.getVersion(user!.authKeys.filter(k => k.name === OpdsName)[0].key)),
         filter(update => !!update),
       ).subscribe(version => this.handleVersionUpdate(version));
   }

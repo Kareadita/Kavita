@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
-import { computed, Injectable, signal, inject } from '@angular/core';
-import {map, of, tap} from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { TextResonse } from '../_types/text-response';
-import { ServerSettings } from './_models/server-settings';
+import {HttpClient, httpResource} from '@angular/common/http';
+import {inject, Injectable} from '@angular/core';
+import {map, of} from 'rxjs';
+import {environment} from 'src/environments/environment';
+import {TextResonse} from '../_types/text-response';
+import {ServerSettings} from './_models/server-settings';
 import {MetadataSettings} from "./_models/metadata-settings";
 import {MetadataMappingsExport} from "./manage-metadata-mappings/manage-metadata-mappings.component";
 import {FieldMappingsImportResult, ImportSettings} from "../_models/import-field-mappings";
@@ -90,8 +90,8 @@ export class SettingsService {
     return this.http.get<string[]>(this.baseUrl + 'settings/library-types');
   }
 
-  getOpdsEnabled() {
-    return this.http.get<string>(this.baseUrl + 'settings/opds-enabled', TextResonse).pipe(map(d => d === 'true'));
+  getOpdsEnabledResource() {
+    return httpResource<boolean>(() => this.baseUrl + 'settings/opds-enabled').asReadonly();
   }
 
   isValidCronExpression(val: string) {

@@ -149,7 +149,7 @@
         }
 
         @defer (when fragment === SettingsTabId.Scrobbling; prefetch on idle) {
-          @if(hasActiveLicense && fragment === SettingsTabId.Scrobbling) {
+          @if(hasActiveLicense() && fragment === SettingsTabId.Scrobbling) {
             <div class="scale col-md-12">
               <app-manage-scrobling />
             </div>
@@ -157,7 +157,7 @@
         }
 
         @defer (when fragment === SettingsTabId.Metadata; prefetch on idle) {
-          @if(hasActiveLicense && fragment === SettingsTabId.Metadata) {
+          @if(hasActiveLicense() && fragment === SettingsTabId.Metadata) {
             <div class="scale col-md-12">
               <app-manage-metadata-settings />
             </div>
@@ -165,7 +165,7 @@
         }
 
         @defer (when fragment === SettingsTabId.ScrobblingHolds; prefetch on idle) {
-          @if(hasActiveLicense && fragment === SettingsTabId.ScrobblingHolds) {
+          @if(hasActiveLicense() && fragment === SettingsTabId.ScrobblingHolds) {
             <div class="scale col-md-12">
               <app-user-holds />
             </div>
@@ -213,8 +213,8 @@
 
         @defer (when fragment === SettingsTabId.Clients; prefetch on idle) {
           @if (fragment === SettingsTabId.Clients) {
-            <div class="col-xxl-6 col-12">
-              <app-manage-opds />
+            <div class="scale col-md-12">
+              <app-manage-auth-keys />
             </div>
           }
         }
@@ -269,7 +269,7 @@
 
 
         @defer (when fragment === SettingsTabId.MALStackImport; prefetch on idle) {
-          @if(hasActiveLicense && fragment === SettingsTabId.MALStackImport) {
+          @if(hasActiveLicense() && fragment === SettingsTabId.MALStackImport) {
             <div class="scale col-md-12">
               <app-import-mal-collection />
             </div>

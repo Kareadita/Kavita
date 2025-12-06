@@ -38,7 +38,7 @@ public class UsersController : BaseApiController
         _licenseService = licenseService;
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpDelete("delete-user")]
     public async Task<ActionResult> DeleteUser(string username)
     {
@@ -68,7 +68,7 @@ public class UsersController : BaseApiController
     /// </summary>
     /// <param name="includePending">This will include pending members</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers(bool includePending = false)
     {
@@ -195,7 +195,7 @@ public class UsersController : BaseApiController
     /// Returns a list of the user names within the system
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("names")]
     public async Task<ActionResult<IEnumerable<string>>> GetUserNames()
     {
@@ -207,7 +207,7 @@ public class UsersController : BaseApiController
     /// </summary>
     /// <remarks>Kavita+ only</remarks>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("tokens")]
     public async Task<ActionResult<IEnumerable<UserTokenInfo>>> GetUserTokens()
     {

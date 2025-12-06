@@ -18,7 +18,7 @@ public class ClientInfoData
     public string IpAddress { get; set; } = string.Empty;
 
     /// <summary>
-    /// How the user authenticated (JWT token vs API key)
+    /// How the user authenticated (JWT token vs Auth key)
     /// </summary>
     public AuthenticationType AuthType { get; set; }
 
@@ -78,6 +78,6 @@ public enum AuthenticationType
 {
     Unknown = 0,
     JWT = 1,
-    ApiKey = 2,
-    OIDC = 3
+    AuthKey = 2,
+    OIDC = 3,
 }

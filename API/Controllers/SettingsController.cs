@@ -63,7 +63,7 @@ public class SettingsController : BaseApiController
     /// Returns the server settings
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet]
     public async Task<ActionResult<ServerSettingDto>> GetSettings()
     {
@@ -74,7 +74,7 @@ public class SettingsController : BaseApiController
         return Ok(settingsDto);
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("reset")]
     public async Task<ActionResult<ServerSettingDto>> ResetSettings()
     {
@@ -87,7 +87,7 @@ public class SettingsController : BaseApiController
     /// Resets the IP Addresses
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("reset-ip-addresses")]
     public async Task<ActionResult<ServerSettingDto>> ResetIpAddressesSettings()
     {
@@ -108,7 +108,7 @@ public class SettingsController : BaseApiController
     /// Resets the Base url
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("reset-base-url")]
     public async Task<ActionResult<ServerSettingDto>> ResetBaseUrlSettings()
     {
@@ -143,7 +143,7 @@ public class SettingsController : BaseApiController
     /// </summary>
     /// <param name="updateSettingsDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost]
     public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
     {
@@ -169,21 +169,21 @@ public class SettingsController : BaseApiController
     /// All values allowed for Task Scheduling APIs. A custom cron job is not included. Disabled is not applicable for Cleanup.
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("task-frequencies")]
     public ActionResult<IEnumerable<string>> GetTaskFrequencies()
     {
         return Ok(CronConverter.Options);
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("library-types")]
     public ActionResult<IEnumerable<string>> GetLibraryTypes()
     {
         return Ok(Enum.GetValues<LibraryType>().Select(t => t.ToDescription()));
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("log-levels")]
     public ActionResult<IEnumerable<string>> GetLogLevels()
     {
@@ -213,7 +213,7 @@ public class SettingsController : BaseApiController
     /// Sends a test email to see if email settings are hooked up correctly
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("test-email-url")]
     public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl()
     {
@@ -226,7 +226,7 @@ public class SettingsController : BaseApiController
     /// Get the metadata settings for Kavita+ users.
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("metadata-settings")]
     public async Task<ActionResult<MetadataSettingsDto>> GetMetadataSettings()
     {
@@ -239,7 +239,7 @@ public class SettingsController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("metadata-settings")]
     public async Task<ActionResult<MetadataSettingsDto>> UpdateMetadataSettings(MetadataSettingsDto dto)
     {
@@ -258,7 +258,7 @@ public class SettingsController : BaseApiController
     /// Import field mappings
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("import-field-mappings")]
     public async Task<ActionResult<FieldMappingsImportResultDto>> ImportFieldMappings([FromBody] ImportFieldMappingsDto dto)
     {

@@ -26,7 +26,7 @@ public interface IUserContext
     string? GetUsername();
 
     /// <summary>
-    /// Gets the authentication method used (JWT, ApiKey, OIDC).
+    /// Gets the authentication method used (JWT, Auth Key, OIDC).
     /// </summary>
     AuthenticationType GetAuthenticationType();
 

@@ -6,9 +6,11 @@ import {
   ElementRef,
   EventEmitter,
   HostListener,
-  inject, input,
+  inject,
+  input,
   Input,
   OnChanges,
+  OnInit,
   Output,
   SimpleChange,
   SimpleChanges,
@@ -32,7 +34,7 @@ import {AbstractControl} from "@angular/forms";
     styleUrl: './setting-item.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SettingItemComponent implements OnChanges {
+export class SettingItemComponent implements OnInit, OnChanges {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly elementRef = inject(ElementRef);
@@ -81,8 +83,8 @@ export class SettingItemComponent implements OnChanges {
     event.stopPropagation(); // Prevent the click from bubbling up
   }
 
-  constructor() {
-    const elementRef = inject(ElementRef);
+  ngOnInit() {
+
 
     if (!this.toggleOnViewClick) return;
 
@@ -95,7 +97,7 @@ export class SettingItemComponent implements OnChanges {
           const mouseEvent = event as MouseEvent;
           const selection = window.getSelection();
           const hasSelection = selection !== null && selection.toString().trim() === '';
-          return !elementRef.nativeElement.contains(mouseEvent.target) && hasSelection;
+          return !this.elementRef.nativeElement.contains(mouseEvent.target) && hasSelection;
         }),
         tap(() => {
           this.isEditMode = false;

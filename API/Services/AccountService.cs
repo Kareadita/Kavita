@@ -274,6 +274,7 @@ public partial class AccountService : IAccountService
     {
         AddDefaultStreamsToUser(user);
         AddDefaultHighlightSlotsToUser(user);
+        AddAuthKeys(user);
         await AddDefaultReadingProfileToUser(user); // Commits
     }
 
@@ -299,6 +300,14 @@ public partial class AccountService : IAccountService
         if (user.UserPreferences.BookReaderHighlightSlots.Any()) return;
 
         user.UserPreferences.BookReaderHighlightSlots = Seed.DefaultHighlightSlots.ToList();
+        _unitOfWork.UserRepository.Update(user);
+    }
+
+    private void AddAuthKeys(AppUser user)
+    {
+        if (user.AuthKeys.Any()) return;
+
+        user.AuthKeys = Seed.CreateDefaultAuthKeys();
         _unitOfWork.UserRepository.Update(user);
     }
 

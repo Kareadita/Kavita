@@ -220,7 +220,7 @@ public class ClientInfoMiddlewareTests
             kavitaClient: "invalid-format-here"
         );
 
-        _userContext.GetAuthenticationType().Returns(AuthenticationType.ApiKey);
+        _userContext.GetAuthenticationType().Returns(AuthenticationType.AuthKey);
 
         // Act
         await middleware.InvokeAsync(context, _userContext);

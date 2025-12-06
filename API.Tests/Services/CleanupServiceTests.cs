@@ -264,7 +264,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
-        cleanupService.CleanupCacheAndTempDirectories();
+        await cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
 
@@ -280,7 +280,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
-        cleanupService.CleanupCacheAndTempDirectories();
+        await cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using API.DTOs.Account;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.User;
 using API.Entities.Interfaces;
 using NotImplementedException = System.NotImplementedException;
 
@@ -26,6 +27,10 @@ public sealed record UserDto : IHasCoverImage
     public IdentityProvider IdentityProvider { get; init; }
     public DateTime Created { get; set; }
     public DateTime CreatedUtc { get; set; }
+    /// <summary>
+    /// Only System-provided Auth Keys
+    /// </summary>
+    public ICollection<AuthKeyDto> AuthKeys { get; set; }
 
     public string? CoverImage { get; set; }
     public string? PrimaryColor { get; set; }

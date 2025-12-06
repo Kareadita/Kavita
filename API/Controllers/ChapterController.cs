@@ -58,7 +58,7 @@ public class ChapterController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpDelete]
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<bool>> DeleteChapter(int chapterId)
     {
@@ -114,7 +114,7 @@ public class ChapterController : BaseApiController
     /// <param name="seriesId">The ID of the series</param>
     /// <param name="dto">The IDs of the chapters to be deleted</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("delete-multiple")]
     public async Task<ActionResult<bool>> DeleteMultipleChapters([FromQuery] int seriesId, DeleteChaptersDto dto)
     {
@@ -190,7 +190,7 @@ public class ChapterController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("update")]
     public async Task<ActionResult> UpdateChapterMetadata(UpdateChapterDto dto)
     {

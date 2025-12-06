@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Email;
 using API.Helpers;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-[Authorize(Policy = "RequireAdminRole")]
+[Authorize(Policy = PolicyGroups.AdminPolicy)]
 public class EmailController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;

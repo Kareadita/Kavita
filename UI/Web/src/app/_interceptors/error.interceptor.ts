@@ -24,25 +24,25 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       switch (error.status) {
         case 400:
-          handleValidationError(error, toastr, translocoService);
+          handleValidationError(error, toastr);
           break;
         case 401:
           handleAuthError(req, error, accountService, toastr, baseURL);
           break;
         case 404:
-          handleNotFound(toastr, translocoService);
+          handleNotFound(toastr);
           break;
         case 500:
-          handleServerException(error, toastr, translocoService);
+          handleServerException(error, toastr);
           break;
         case 413:
-          handlePayloadTooLargeException(toastr, translocoService);
+          handlePayloadTooLargeException(toastr);
           break;
         default:
           const genericError = translate('errors.generic');
           if (toastr.previousToastMessage !== 'Something unexpected went wrong.' &&
             toastr.previousToastMessage !== genericError) {
-            toast(genericError, toastr, translocoService);
+            toast(genericError, toastr);
           }
           break;
       }
@@ -51,7 +51,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   );
 };
 
-function handleValidationError(error: any, toastr: ToastrService, translocoService: TranslocoService) {
+function handleValidationError(error: any, toastr: ToastrService) {
   if (Array.isArray(error.error)) {
     const modalStateErrors: any[] = [];
     if (error.error.length > 0 && error.error[0].hasOwnProperty('message')) {
@@ -82,34 +82,34 @@ function handleValidationError(error: any, toastr: ToastrService, translocoServi
     console.error('error:', error);
     if (error.statusText === 'Bad Request') {
       if (error.error instanceof Blob) {
-        toast('errors.download', toastr, translocoService, error.status);
+        toast('errors.download', toastr, error.status);
         return;
       }
-      toast(error.error, toastr, translocoService,
-        translocoService.translate('errors.error-code', {num: error.status}));
+      toast(error.error, toastr,
+        translate('errors.error-code', {num: error.status}));
     } else {
       toast(error.statusText === 'OK' ? error.error : error.statusText,
-        toastr, translocoService,
-        translocoService.translate('errors.error-code', {num: error.status}));
+        toastr,
+        translate('errors.error-code', {num: error.status}));
     }
   }
 }
 
-function handleNotFound(toastr: ToastrService, translocoService: TranslocoService) {
-  toast('errors.not-found', toastr, translocoService);
+function handleNotFound(toastr: ToastrService) {
+  toast('errors.not-found', toastr);
 }
 
-function handlePayloadTooLargeException(toastr: ToastrService, translocoService: TranslocoService) {
-  toast('errors.upload-too-large', toastr, translocoService);
+function handlePayloadTooLargeException(toastr: ToastrService) {
+  toast('errors.upload-too-large', toastr);
 }
 
-function handleServerException(error: any, toastr: ToastrService, translocoService: TranslocoService) {
+function handleServerException(error: any, toastr: ToastrService) {
   const err = error.error;
   if (err.hasOwnProperty('message') && err.message.trim() !== '') {
     if (err.message !== 'User is not authenticated' && error.message !== 'errors.user-not-auth') {
       console.error('500 error: ', error);
     }
-    toast(err.message, toastr, translocoService);
+    toast(err.message, toastr);
     return;
   }
   if (error.hasOwnProperty('message') && error.message.trim() !== '') {
@@ -119,7 +119,7 @@ function handleServerException(error: any, toastr: ToastrService, translocoServi
     return;
   }
 
-  toast('errors.unknown-crit', toastr, translocoService);
+  toast('errors.unknown-crit', toastr);
   console.error('500 error:', error);
 }
 
@@ -140,16 +140,16 @@ function handleAuthError(
   }
 
   if (error.error && error.error !== 'Unauthorized') {
-    toast(translate(error.error), toastr, inject(TranslocoService));
+    toast(translate(error.error), toastr);
   }
 
   accountService.logout(req.method === 'GET' && req.url.endsWith('/api/account'));
 }
 
-function toast(message: string, toastr: ToastrService, translocoService: TranslocoService, title?: string | number) {
+function toast(message: string, toastr: ToastrService, title?: string | number) {
   const titleStr = typeof title === 'number' ? title.toString() : title;
   if ((message + '').startsWith('errors.')) {
-    toastr.error(translocoService.translate(message), titleStr);
+    toastr.error(translate(message), titleStr);
   } else {
     toastr.error(message, titleStr);
   }

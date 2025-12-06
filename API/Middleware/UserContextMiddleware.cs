@@ -80,13 +80,14 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
     {
         // Priority 1: ALWAYS check for API Key first (query string or path parameter)
         // API keys work even on [AllowAnonymous] endpoints (like OPDS)
-        var apiKeyResult = await TryResolveFromApiKeyAsync(context, unitOfWork);
+        var apiKeyResult = await TryResolveFromAuthKeyAsync(context, unitOfWork);
         if (apiKeyResult.userId.HasValue)
         {
             return apiKeyResult;
         }
 
-        // Priority 2: Check for JWT or OIDC claims
+
+        // Priority 3: Check for JWT or OIDC claims
         if (context.User.Identity?.IsAuthenticated == true)
         {
             return ResolveFromClaims(context);
@@ -95,7 +96,10 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
         return (null, null, AuthenticationType.Unknown);
     }
 
-    private async Task<(int? userId, string? username, AuthenticationType authType)> TryResolveFromApiKeyAsync(
+    /// <summary>
+    /// Tries to resolve auth key and support apiKey from pre-v0.8.6 (switching from apikey -> auth keys)
+    /// </summary>
+    private async Task<(int? userId, string? username, AuthenticationType authType)> TryResolveFromAuthKeyAsync(
         HttpContext context,
         IUnitOfWork unitOfWork)
     {
@@ -124,7 +128,7 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
             }
         }
 
-        // Check if embeded in route parameters (e.g., /api/somepath/{apiKey}/other)
+        // Check if embedded in route parameters (e.g., /api/somepath/{apiKey}/other)
         if (string.IsNullOrEmpty(apiKey) && context.Request.RouteValues.TryGetValue("apiKey", out var _))
         {
             apiKey = apiKeyQuery.ToString();
@@ -137,14 +141,15 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
 
         try
         {
-            var cacheKey = $"apikey_{apiKey}";
+            var cacheKey = $"authKey_{apiKey}";
 
             var result = await cache.GetOrCreateAsync(
                 cacheKey,
                 (apiKey, unitOfWork),
                 async (state, cancel) =>
                 {
-                    var user = await state.unitOfWork.UserRepository.GetUserDtoByApiKeyAsync(state.apiKey);
+                    // Auth key will work with legacy apiKey and new auth key
+                    var user = await state.unitOfWork.UserRepository.GetUserDtoByAuthKeyAsync(state.apiKey);
                     return (user?.Id, user?.Username);
                 },
                 ApiKeyCacheOptions,
@@ -154,7 +159,7 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
             {
                 logger.LogTrace("Resolved user {UserId} from API key for path {Path}", result.Id, context.Request.Path);
 
-                return (result.Id, result.Username, AuthenticationType.ApiKey);
+                return (result.Id, result.Username, AuthenticationType.AuthKey);
             }
 
             logger.LogWarning("Invalid API key provided for path {Path}", context.Request.Path);

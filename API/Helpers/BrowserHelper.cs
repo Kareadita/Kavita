@@ -56,8 +56,12 @@ public static class BrowserHelper
             return ClientDevicePlatform.MacOs;
         if (ua.Contains("iphone") || ua.Contains("ipad") || ua.Contains("ipod") || ua.Contains("mac os"))
             return ClientDevicePlatform.Ios;
-        if (ua.Contains("android") || ua.Contains("linux"))
+
+        // Linux and Android are easy to mix-up, we need to use some extra logic
+        if (ua.Contains("android"))
             return ClientDevicePlatform.Android;
+        if (ua.Contains("linux") && ua.Contains("ubuntu"))
+            return ClientDevicePlatform.Linux;
         if (ua.Contains("linux") && !ua.Contains("android"))
             return ClientDevicePlatform.Linux;
 

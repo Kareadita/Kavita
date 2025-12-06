@@ -172,20 +172,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             ctx.Properties.UpdateTokenValue(IdToken, tokenResponse.IdToken);
             ctx.ShouldRenew = true;
 
-            try
-            {
-                user.UpdateLastActive();
-
-                if (unitOfWork.HasChanges())
-                {
-                    await unitOfWork.CommitAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
-            }
-
             if (string.IsNullOrEmpty(tokenResponse.IdToken))
             {
                 logger.LogTrace("The OIDC provider did not return an id token in the refresh response, continuous sync is not supported");

@@ -69,7 +69,7 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("create")]
     public async Task<ActionResult> AddLibrary(UpdateLibraryDto dto)
     {
@@ -162,7 +162,7 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("list")]
     public ActionResult<IEnumerable<DirectoryDto>> GetDirectories(string? path)
     {
@@ -184,7 +184,7 @@ public class LibraryController : BaseApiController
     /// For each root, checks if there are any supported files at root to warn the user during library creation about an invalid setup
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("has-files-at-root")]
     public ActionResult<IList<string>> AnyFilesAtRoot(CheckForFilesInFolderRootsDto dto)
     {
@@ -201,7 +201,7 @@ public class LibraryController : BaseApiController
     /// Return a specific library
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet]
     public async Task<ActionResult<LibraryDto?>> GetLibrary(int libraryId)
     {
@@ -283,7 +283,7 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <param name="updateLibraryForUserDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("grant-access")]
     public async Task<ActionResult<MemberDto>> UpdateUserLibraries(UpdateLibraryForUserDto updateLibraryForUserDto)
     {
@@ -339,7 +339,7 @@ public class LibraryController : BaseApiController
     /// <param name="libraryId"></param>
     /// <param name="force">If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("scan")]
     public async Task<ActionResult> Scan(int libraryId, bool force = false)
     {
@@ -352,7 +352,7 @@ public class LibraryController : BaseApiController
     /// Enqueues a bunch of library scans
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("scan-multiple")]
     public async Task<ActionResult> ScanMultiple(BulkActionDto dto)
     {
@@ -369,7 +369,7 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <param name="force">If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("scan-all")]
     public ActionResult ScanAll(bool force = false)
     {
@@ -377,7 +377,7 @@ public class LibraryController : BaseApiController
         return Ok();
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("refresh-metadata")]
     public ActionResult RefreshMetadata(int libraryId, bool force = true, bool forceColorscape = true)
     {
@@ -385,7 +385,7 @@ public class LibraryController : BaseApiController
         return Ok();
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("refresh-metadata-multiple")]
     public ActionResult RefreshMetadataMultiple(BulkActionDto dto, bool forceColorscape = true)
     {
@@ -402,7 +402,7 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("copy-settings-from")]
     public async Task<ActionResult> CopySettingsFromLibraryToLibraries(CopySettingsFromLibraryDto dto)
     {
@@ -448,7 +448,7 @@ public class LibraryController : BaseApiController
     [HttpPost("scan-folder")]
     public async Task<ActionResult> ScanFolder(ScanFolderDto dto)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(dto.ApiKey);
+        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(dto.ApiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
 
@@ -478,7 +478,7 @@ public class LibraryController : BaseApiController
     /// <remarks>This does not touch any files</remarks>
     /// <param name="libraryId"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpDelete("delete")]
     public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
     {
@@ -500,7 +500,7 @@ public class LibraryController : BaseApiController
     /// <remarks>This does not touch any files</remarks>
     /// <param name="libraryIds"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpDelete("delete-multiple")]
     public async Task<ActionResult<bool>> DeleteMultipleLibraries([FromQuery] List<int> libraryIds)
     {
@@ -606,7 +606,7 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <param name="name">If empty or null, will return true as that is invalid</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("name-exists")]
     public async Task<ActionResult<bool>> IsLibraryNameValid(string name)
     {
@@ -620,7 +620,7 @@ public class LibraryController : BaseApiController
     /// <remarks>Any folder or type change will invoke a scan.</remarks>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("update")]
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {

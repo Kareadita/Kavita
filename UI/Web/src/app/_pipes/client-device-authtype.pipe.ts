@@ -13,8 +13,8 @@ export class ClientDeviceAuthTypePipe implements PipeTransform {
         return translate('client-device-auth-type-pipe.unknown');
       case AuthenticationType.JWT:
         return translate('client-device-auth-type-pipe.jwt');
-      case AuthenticationType.ApiKey:
-        return translate('client-device-auth-type-pipe.api-key');
+      case AuthenticationType.AuthKey:
+        return translate('client-device-auth-type-pipe.auth-key');
       case AuthenticationType.OIDC:
         return translate('client-device-auth-type-pipe.oidc');
     }

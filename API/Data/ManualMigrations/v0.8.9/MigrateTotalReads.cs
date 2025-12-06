@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Misc;
 using API.Entities.History;
 using API.Entities.Progress;
 using Kavita.Common.EnvironmentInfo;
@@ -10,23 +11,15 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Data.ManualMigrations;
 
-public static class MigrateTotalReads
+public class MigrateTotalReads : ManualMigration
 {
     private const int BatchSize = 1000;
 
-    public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
+    protected override string MigrationName => nameof(MigrateTotalReads);
+
+    protected override async Task ExecuteAsync(DataContext dataContext, ILogger<Program> logger)
     {
-        try
-        {
-            if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateTotalReads"))
-            {
-                return;
-            }
-
-            logger.LogCritical(
-                "Running MigrateTotalReads migration - Please be patient, this may take some time. This is not an error");
-
-            var totalProgressRecords = await dataContext.AppUserProgresses.CountAsync();
+        var totalProgressRecords = await dataContext.AppUserProgresses.CountAsync();
             if (totalProgressRecords > 0)
             {
                 logger.LogInformation("Found {Count} progress records to migrate", totalProgressRecords);
@@ -77,22 +70,5 @@ public static class MigrateTotalReads
             {
                 logger.LogInformation("No progress records found to migrate");
             }
-
-            logger.LogCritical(
-                "Running MigrateTotalReads migration - Completed. This is not an error");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error during MigrateTotalReads migration");
-            throw;
-        }
-
-        dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
-        {
-            Name = "MigrateTotalReads",
-            ProductVersion = BuildInfo.Version.ToString(),
-            RanAt = DateTime.UtcNow
-        });
-        await dataContext.SaveChangesAsync();
     }
 }

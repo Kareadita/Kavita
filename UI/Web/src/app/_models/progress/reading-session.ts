@@ -36,6 +36,6 @@ export enum AuthenticationType
 {
   Unknown = 0,
   JWT = 1,
-  ApiKey = 2,
+  AuthKey = 2,
   OIDC = 3
 }

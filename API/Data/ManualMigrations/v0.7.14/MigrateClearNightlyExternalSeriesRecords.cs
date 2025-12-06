@@ -30,8 +30,6 @@ public static class MigrateClearNightlyExternalSeriesRecords
         dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
         {
             Name = "MigrateClearNightlyExternalSeriesRecords",
-            ProductVersion = BuildInfo.Version.ToString(),
-            RanAt = DateTime.UtcNow
         });
 
         await dataContext.SaveChangesAsync();

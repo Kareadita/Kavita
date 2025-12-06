@@ -469,5 +469,7 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Chapter,
                 opt => opt.MapFrom(src => src.Chapter));
 
+        CreateMap<AppUserAuthKey, AuthKeyDto>();
+
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.History;
@@ -17,23 +18,71 @@ namespace API.Data.ManualMigrations;
 /// <summary>
 /// v0.8.9 - Convert past progress into Reading Sessions
 /// </summary>
-public static class MigrateProgressToReadingSessions
+public class MigrateProgressToReadingSessions : ManualMigration
 {
     private const int BatchSize = 1000;
     public const string Name = nameof(MigrateProgressToReadingSessions);
 
-    public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
+    private static AppUserReadingSessionActivityData CreateSessionActivityDataFromProgress(AppUserProgress progress, Chapter chapter, MangaFormat format)
+    {
+
+        var sessionDate = progress.LastModified.Date;
+        var sessionDateUtc = progress.LastModifiedUtc.Date;
+
+        var totalWordsRead = 0;
+        var isEpub = format == MangaFormat.Epub;
+
+        if (isEpub && chapter.WordCount > 0 && chapter.Pages > 0)
+        {
+            totalWordsRead = (int)Math.Round(chapter.WordCount * (progress.PagesRead / (1.0f * chapter.Pages)));
+        }
+
+        // NOTE: I'm seeing a lot of off by 1 pages read issues here
+
+        var estimatedTime = ReaderService.GetTimeEstimate(totalWordsRead, progress.PagesRead, isEpub);
+
+        var endDate = new DateTime(
+            Math.Min(
+                sessionDate.AddHours(estimatedTime.AvgHours).Ticks,
+                sessionDate.Date.AddDays(1).AddTicks(-1).Ticks
+            ), DateTimeKind.Local
+        );
+        var endDateUtc = new DateTime(
+            Math.Min(
+                sessionDateUtc.AddHours(estimatedTime.AvgHours).Ticks,
+                sessionDateUtc.Date.AddDays(1).AddTicks(-1).Ticks
+            ), DateTimeKind.Utc
+        );
+
+
+        return new AppUserReadingSessionActivityData
+        {
+            ChapterId = progress.ChapterId,
+            VolumeId = progress.VolumeId,
+            SeriesId = progress.SeriesId,
+            LibraryId = progress.LibraryId,
+            StartPage = 0,
+            EndPage = progress.PagesRead,
+            StartBookScrollId = null,
+            EndBookScrollId = progress.BookScrollId,
+            StartTime = sessionDate,
+            StartTimeUtc = sessionDateUtc,
+            EndTime = endDate,
+            EndTimeUtc = endDateUtc,
+            PagesRead = progress.PagesRead,
+            WordsRead = totalWordsRead,
+            TotalPages = chapter.Pages,
+            TotalWords = chapter.WordCount,
+            ClientInfo = null,
+            DeviceIds = []
+        };
+    }
+
+    protected override string MigrationName => nameof(MigrateProgressToReadingSessions);
+    protected override async Task ExecuteAsync(DataContext dataContext, ILogger<Program> logger)
     {
         try
         {
-            if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateProgressToReadingSessions"))
-            {
-                return;
-            }
-
-            logger.LogCritical(
-                "Running MigrateProgressToReadingSessions migration - Please be patient, this may take some time. This is not an error");
-
             var totalProgressRecords = await dataContext.AppUserProgresses.CountAsync();
             if (totalProgressRecords > 0)
             {
@@ -119,77 +168,11 @@ public static class MigrateProgressToReadingSessions
             {
                 logger.LogInformation("No progress records found to migrate");
             }
-
-            logger.LogCritical(
-                "Running MigrateProgressToReadingSessions migration - Completed. This is not an error");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error during MigrateProgressToReadingSessions migration");
             throw;
         }
-
-        dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
-        {
-            Name = "MigrateProgressToReadingSessions",
-            ProductVersion = BuildInfo.Version.ToString(),
-            RanAt = DateTime.UtcNow
-        });
-        await dataContext.SaveChangesAsync();
-    }
-
-    private static AppUserReadingSessionActivityData CreateSessionActivityDataFromProgress(AppUserProgress progress, Chapter chapter, MangaFormat format)
-    {
-
-        var sessionDate = progress.LastModified.Date;
-        var sessionDateUtc = progress.LastModifiedUtc.Date;
-
-        var totalWordsRead = 0;
-        var isEpub = format == MangaFormat.Epub;
-
-        if (isEpub && chapter.WordCount > 0 && chapter.Pages > 0)
-        {
-            totalWordsRead = (int)Math.Round(chapter.WordCount * (progress.PagesRead / (1.0f * chapter.Pages)));
-        }
-
-        // NOTE: I'm seeing a lot of off by 1 pages read issues here
-
-        var estimatedTime = ReaderService.GetTimeEstimate(totalWordsRead, progress.PagesRead, isEpub);
-
-        var endDate = new DateTime(
-            Math.Min(
-                sessionDate.AddHours(estimatedTime.AvgHours).Ticks,
-                sessionDate.Date.AddDays(1).AddTicks(-1).Ticks
-            ), DateTimeKind.Local
-        );
-        var endDateUtc = new DateTime(
-            Math.Min(
-                sessionDateUtc.AddHours(estimatedTime.AvgHours).Ticks,
-                sessionDateUtc.Date.AddDays(1).AddTicks(-1).Ticks
-            ), DateTimeKind.Utc
-        );
-
-
-        return new AppUserReadingSessionActivityData
-        {
-            ChapterId = progress.ChapterId,
-            VolumeId = progress.VolumeId,
-            SeriesId = progress.SeriesId,
-            LibraryId = progress.LibraryId,
-            StartPage = 0,
-            EndPage = progress.PagesRead,
-            StartBookScrollId = null,
-            EndBookScrollId = progress.BookScrollId,
-            StartTime = sessionDate,
-            StartTimeUtc = sessionDateUtc,
-            EndTime = endDate,
-            EndTimeUtc = endDateUtc,
-            PagesRead = progress.PagesRead,
-            WordsRead = totalWordsRead,
-            TotalPages = chapter.Pages,
-            TotalWords = chapter.WordCount,
-            ClientInfo = null,
-            DeviceIds = []
-        };
     }
 }

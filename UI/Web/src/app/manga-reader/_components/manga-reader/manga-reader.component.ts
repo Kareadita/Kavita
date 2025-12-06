@@ -84,6 +84,7 @@ import {ConfirmService} from "../../../shared/confirm.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
+import {ImageOnlyName} from "../../../_models/user/auth-key";
 
 
 const PREFETCH_PAGES = 10;
@@ -438,7 +439,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
 
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
-    if (this.bookmarkMode()) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
+    if (this.bookmarkMode()) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.authKeys.filter(k => k.name === ImageOnlyName)[0].key, pageNum);
     return this.readerService.getPageUrl(chapterId, pageNum);
   }
 

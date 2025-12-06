@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
@@ -34,7 +35,7 @@ public class VolumeController : BaseApiController
         return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId));
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpDelete]
     public async Task<ActionResult<bool>> DeleteVolume(int volumeId)
     {
@@ -54,7 +55,7 @@ public class VolumeController : BaseApiController
         return Ok(false);
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("multiple")]
     public async Task<ActionResult<bool>> DeleteMultipleVolumes(int[] volumesIds)
     {

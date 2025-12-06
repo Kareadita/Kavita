@@ -21,10 +21,7 @@ using MimeTypes;
 namespace API.Controllers;
 #nullable enable
 
-
-
 [AllowAnonymous]
-[ServiceFilter(typeof(OpdsActiveUserMiddlewareAttribute))]
 public class OpdsController : BaseApiController
 {
     private readonly IOpdsService _opdsService;

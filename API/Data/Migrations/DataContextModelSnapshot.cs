@@ -2765,6 +2765,47 @@ namespace API.Data.Migrations
                     b.ToTable("Tag");
                 });
 
+            modelBuilder.Entity("API.Entities.User.AppUserAuthKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ExpiresAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastAccessedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Provider")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("ExpiresAtUtc");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("AppUserAuthKey");
+                });
+
             modelBuilder.Entity("API.Entities.User.AppUserChapterRating", b =>
                 {
                     b.Property<int>("Id")
@@ -3957,6 +3998,17 @@ namespace API.Data.Migrations
                     b.Navigation("Library");
                 });
 
+            modelBuilder.Entity("API.Entities.User.AppUserAuthKey", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("AuthKeys")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("API.Entities.User.AppUserChapterRating", b =>
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
@@ -4187,6 +4239,8 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.AppUser", b =>
                 {
                     b.Navigation("Annotations");
+
+                    b.Navigation("AuthKeys");
 
                     b.Navigation("Bookmarks");
 

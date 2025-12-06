@@ -120,8 +120,10 @@ public static class IdentityServiceExtensions
 
         services.AddAuthorizationBuilder()
             .AddPolicy(PolicyGroups.AdminPolicy, policy => policy.RequireRole(PolicyConstants.AdminRole))
-            .AddPolicy(PolicyGroups.DownloadPolicy, policy => policy.RequireRole(PolicyConstants.DownloadRole, PolicyConstants.AdminRole))
-            .AddPolicy(PolicyGroups.ChangePasswordPolicy, policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
+            .AddPolicy(PolicyGroups.DownloadPolicy,
+                policy => policy.RequireRole(PolicyConstants.DownloadRole, PolicyConstants.AdminRole))
+            .AddPolicy(PolicyGroups.ChangePasswordPolicy,
+                policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
 
         return services;
     }

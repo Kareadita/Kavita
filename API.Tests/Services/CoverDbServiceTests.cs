@@ -31,7 +31,7 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         "../../../Services/Test Data/CoverDbService/Temp");
 
 
-    private static async Task<(IDirectoryService, ICoverDbService)> Setup(IUnitOfWork unitOfWork)
+    private static Task<(IDirectoryService, ICoverDbService)> Setup(IUnitOfWork unitOfWork)
     {
 
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateFileSystem());
@@ -40,7 +40,7 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var coverDbService = new CoverDbService(Substitute.For<ILogger<CoverDbService>>(), directoryService, CacheFactory,
             Substitute.For<IHostEnvironment>(), imageService, unitOfWork, Substitute.For<IEventHub>());
 
-        return (directoryService, coverDbService);
+        return Task.FromResult<(IDirectoryService, ICoverDbService)>((directoryService, coverDbService));
     }
 
 

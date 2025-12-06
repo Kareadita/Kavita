@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, inject, Injectable} from '@angular/core';
+import {DestroyRef, effect, inject, Injectable} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import {Router} from '@angular/router';
 import {environment} from 'src/environments/environment';
@@ -14,7 +14,6 @@ import {FileDimension} from '../manga-reader/_models/file-dimension';
 import screenfull from 'screenfull';
 import {TextResonse} from '../_types/text-response';
 import {AccountService} from './account.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {PersonalToC} from "../_models/readers/personal-toc";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import NoSleep from 'nosleep.js';
@@ -53,11 +52,12 @@ export class ReaderService {
   private noSleep: NoSleep = new NoSleep();
 
   constructor() {
-      this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-        if (user) {
-          this.encodedKey = encodeURIComponent(user.apiKey);
-        }
-      });
+    effect(() => {
+      const apiKey = this.accountService.currentUserGenericApiKey();
+      if (apiKey) {
+        this.encodedKey = encodeURIComponent(apiKey);
+      }
+    })
   }
 
 

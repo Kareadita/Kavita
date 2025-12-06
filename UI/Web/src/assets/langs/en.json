@@ -69,6 +69,39 @@
         "custom-scopes-tooltip": "Additional scopes to request from your OIDC provider during login. Separate multiple scopes with commas. Incorrect values may prevent login."
     },
 
+    "manage-auth-keys": {
+        "auth-keys-title": "Manage Authorization Keys",
+        "name-label": "Name",
+        "key-label": "Key",
+        "expires-label": "Expiration",
+        "last-accessed-label": "Last Accessed",
+        "actions-label": "Actions",
+        "rotate": "Rotate",
+        "delete": "{{common.delete}}",
+        "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
+        "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
+        "clients-opds-description": "{{user-preferences.clients-opds-description}}",
+        "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
+        "opds": "OPDS",
+        "image-only": "Images",
+        "add-auth-key": "New",
+        "description": "An Auth Key is like a password. Rotating it will invalidate any existing clients."
+    },
+
+    "create-auth-key": {
+        "create-title": "Create Auth Key",
+        "rotate-title": "Rotate Auth Key",
+        "name-label": "Name",
+        "key-length-label": "Key Length",
+        "expiration-label": "Expiration",
+        "required-field": "{{validations.required-field}}",
+        "total-key-length": "Total Key Length: {{length}}",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "never": "Never"
+    },
+
     "identity-provider-pipe": {
         "kavita": "Kavita",
         "oidc": "OpenID Connect"
@@ -249,10 +282,8 @@
         "include-continue-from-tooltip": "Insert a \"Continue From X\" entry in OPDS fields to avoid finding your last reading point (Emulates Kavita's Continue button)",
 
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
-        "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",
-        "clients-api-key-tooltip": "The API key is like a password. Resetting it will invalidate any existing clients.",
+        "clients-opds-description": "All 3rd Party clients will either use the OPDS Auth key or the Connection Url below. These are like passwords, keep it private.",
         "clients-opds-url-label": "OPDS URL",
-        "clients-api-key-label": "API Key",
         "clients-opds-url-tooltip": "See a list of supported OPDS clients: ",
 
         "reset": "{{common.reset}}",
@@ -261,7 +292,8 @@
 
     "multi-check-box-form": {
         "select-all": "Select all",
-        "deselect-all": "Deselect all"
+        "deselect-all": "Deselect all",
+        "no-data": "{{typeahead.no-data}}"
     },
 
     "user-holds": {
@@ -438,10 +470,7 @@
         "show": "Show",
         "hide": "Hide",
         "regen-warning": "Regenerating your API key will invalidate any existing clients.",
-        "no-key": "ERROR - KEY NOT SET",
-        "confirm-reset": "This will invalidate any OPDS configurations you have setup. Are you sure you want to continue?",
-        "key-reset": "API Key reset",
-        "reset": "Reset"
+        "no-key": "ERROR - KEY NOT SET"
     },
 
     "scrobbling-providers": {
@@ -2010,7 +2039,7 @@
         "preferences": "Preferences",
         "custom-key-binds": "Key Binds",
         "reading-profiles": "Reading Profiles",
-        "clients": "API Key / OPDS",
+        "clients": "Auth Keys / OPDS",
         "devices": "Devices",
         "user-stats": "Stats",
         "scrobbling": "Scrobbling",
@@ -2213,7 +2242,7 @@
         "unknown": "Unknown",
         "oidc": "OIDC",
         "jwt": "JWT",
-        "api-key": "API Key"
+        "auth-key": "Auth Key"
     },
 
     "client-device-platform-pipe": {
@@ -3356,6 +3385,7 @@
         "confirm-delete-series": "Are you sure you want to delete this series? It will not modify files on disk.",
         "confirm-delete-chapter": "Are you sure you want to delete this chapter? It will not modify files on disk.",
         "confirm-delete-volume": "Are you sure you want to delete this volume? It will not modify files on disk.",
+        "confirm-delete-auth-key": "Are you sure you want to delete this Auth Key?",
         "alert-bad-theme": "There is invalid or unsafe css in the theme. Please reach out to your admin to have this corrected. Defaulting to dark theme.",
         "confirm-library-delete": "Are you sure you want to delete the {{name}} library? You cannot undo this action.",
         "confirm-library-type-change": "Changing library type will trigger a new scan with different parsing rules and may lead to series being re-created and hence you may lose progress and bookmarks. You should backup before you do this. Are you sure you want to continue?",

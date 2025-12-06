@@ -529,7 +529,7 @@ public class ReadingListController : BaseApiController
     /// </summary>
     /// <param name="name">If empty or null, will return true as that is invalid</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("name-exists")]
     public async Task<ActionResult<bool>> DoesNameExists(string name)
     {

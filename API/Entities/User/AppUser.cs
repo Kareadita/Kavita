@@ -2,11 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Progress;
 using API.Entities.Scrobble;
 using API.Entities.User;
+using API.Helpers;
 using Microsoft.AspNetCore.Identity;
 
 
@@ -56,6 +58,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// <summary>
     /// An API Key to interact with external services, like OPDS
     /// </summary>
+    [Obsolete("Migrated to AuthKey in v0.8.9")]
     public string? ApiKey { get; set; }
     /// <summary>
     /// The confirmation token for the user (invite). This will be set to null after the user confirms.
@@ -128,6 +131,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// </summary>
     public IList<AppUserSideNavStream> SideNavStreams { get; set; } = null!;
     public IList<AppUserExternalSource> ExternalSources { get; set; } = null!;
+    /// <summary>
+    /// Auth keys for access to Kavita
+    /// </summary>
+    public ICollection<AppUserAuthKey> AuthKeys { get; set; } = null!;
 
 
     /// <inheritdoc />
@@ -150,6 +157,16 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     {
         PrimaryColor = string.Empty;
         SecondaryColor = string.Empty;
+    }
+
+    public string GetOpdsAuthKey()
+    {
+        if (AuthKeys == null || AuthKeys.Count == 0)
+        {
+            throw new ArgumentNullException("AuthKeys not loaded");
+        }
+
+        return AuthKeys.Where(k => k.Name == AuthKeyHelper.OpdsKeyName).Select(k => k.Key).First();
     }
 
 }

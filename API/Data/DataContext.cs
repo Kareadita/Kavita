@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.User;
 using API.Entities.Enums.UserPreferences;
 using API.Entities.History;
 using API.Entities.Interfaces;
@@ -93,6 +94,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserReadingHistory> AppUserReadingHistory { get; set; } = null!;
     public DbSet<ClientDevice> ClientDevice { get; set; } = null!;
     public DbSet<ClientDeviceHistory> ClientDeviceHistory { get; set; } = null!;
+    public DbSet<AppUserAuthKey> AppUserAuthKey { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -377,6 +379,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasMany(sm => sm.Genres)
             .WithMany(t => t.SeriesMetadatas)
             .UsingEntity<GenreSeriesMetadata>();
+
+        builder.Entity<AppUserAuthKey>()
+            .Property(a => a.Provider)
+            .HasDefaultValue(AuthKeyProvider.User);
     }
 
     #nullable enable

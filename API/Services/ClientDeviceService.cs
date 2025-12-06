@@ -344,14 +344,14 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
             FirstSeenUtc = DateTime.UtcNow,
             LastSeenUtc = DateTime.UtcNow,
             IsActive = true,
-            History = new List<ClientDeviceHistory>
-            {
-                new()
+            History =
+            [
+                new ClientDeviceHistory
                 {
                     ClientInfo = clientInfo,
                     CapturedAtUtc = DateTime.UtcNow
                 }
-            }
+            ]
         };
 
         context.ClientDevice.Add(newDevice);

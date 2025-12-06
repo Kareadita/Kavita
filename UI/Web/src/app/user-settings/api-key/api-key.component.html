@@ -6,18 +6,9 @@
              aria-describedby="button-addon4" [value]="key" (click)="selectAll()" (focus)="toggleVisibility(true)" (blur)="toggleVisibility(false)">
 
       <div class="d-inline-flex">
-<!--        @if (hideData) {-->
-<!--          <button class="btn btn-secondary-text" type="button" (click)="toggleVisibility()">-->
-<!--            {{isDataHidden ? t('show') : t('hide')}}-->
-<!--          </button>-->
-<!--        }-->
-
         <button class="btn btn-primary-text" type="button" (click)="copy()" [title]="t('copy')">
           {{t('copy')}}
         </button>
-        @if (showRefresh) {
-          <button class="btn btn-danger-text" [ngbTooltip]="t('regen-warning')" (click)="refresh()">{{t('reset')}}</button>
-        }
       </div>
     </ng-template>
   </app-setting-item>

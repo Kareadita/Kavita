@@ -72,6 +72,8 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             .WithRole(PolicyConstants.AdminRole)
             .Build());
 
+        await Seed.SeedAuthKeys(context);
+
         await context.SaveChangesAsync();
 
         Assert.NotEmpty(await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(1));
@@ -230,7 +232,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -261,7 +263,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -282,7 +284,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -327,7 +329,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -370,7 +372,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -398,7 +400,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         {
             await opdsService.Search(new OpdsSearchRequest
             {
-                ApiKey = user.ApiKey,
+                ApiKey = user.GetOpdsAuthKey(),
                 Prefix = OpdsService.DefaultApiPrefix,
                 BaseUrl = string.Empty,
                 UserId = user.Id,
@@ -440,7 +442,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetCatalogue(new OpdsCatalogueRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id
@@ -475,7 +477,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetSmartFilters(new OpdsPaginatedCatalogueRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -496,7 +498,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetLibraries(new OpdsPaginatedCatalogueRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -532,7 +534,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetWantToRead(new OpdsPaginatedCatalogueRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -564,7 +566,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetCollections(new OpdsPaginatedCatalogueRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -599,7 +601,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetReadingLists(new OpdsPaginatedCatalogueRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -620,7 +622,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetRecentlyAdded(new OpdsPaginatedCatalogueRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -652,7 +654,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetRecentlyUpdated(new OpdsPaginatedCatalogueRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -683,7 +685,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetOnDeck(new OpdsPaginatedCatalogueRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -709,7 +711,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetSeriesFromLibrary(new OpdsItemsFromEntityIdRequest()
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -724,7 +726,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 2
         var feed2 = await opdsService.GetSeriesFromLibrary(new OpdsItemsFromEntityIdRequest()
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -767,7 +769,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetMoreInGenre(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -796,7 +798,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetSeriesFromSmartFilter(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -822,7 +824,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetSeriesFromCollection(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -860,7 +862,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetSeriesFromLibrary(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -890,7 +892,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1
         var feed = await opdsService.GetReadingListItems(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -945,7 +947,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         // Test page 1 - should include continue reading item at the top
         var feed = await opdsService.GetReadingListItems(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -973,7 +975,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -994,7 +996,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetItemsFromVolume(new OpdsItemsFromCompoundEntityIdsRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -1017,7 +1019,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetItemsFromChapter(new OpdsItemsFromCompoundEntityIdsRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
@@ -1044,7 +1046,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
         {
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,

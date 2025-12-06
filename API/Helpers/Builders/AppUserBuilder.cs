@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.User;
 using API.Entities.User;
 using Kavita.Common;
 
@@ -19,7 +21,6 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
         {
             UserName = username,
             Email = email,
-            ApiKey = HashUtil.ApiKey(),
             UserPreferences = new AppUserPreferences
             {
                 Theme = theme ?? Seed.DefaultThemes.First(),
@@ -35,6 +36,7 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             DashboardStreams = [],
             SideNavStreams = [],
             ReadingProfiles = [],
+            AuthKeys = Seed.CreateDefaultAuthKeys()
         };
     }
 

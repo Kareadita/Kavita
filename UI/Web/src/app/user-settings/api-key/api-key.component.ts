@@ -9,33 +9,28 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
-import {ConfirmService} from 'src/app/shared/confirm.service';
 import {AccountService} from 'src/app/_services/account.service';
 import {Clipboard} from '@angular/cdk/clipboard';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {OpdsName} from "../../_models/user/auth-key";
 
 @Component({
     selector: 'app-api-key',
     templateUrl: './api-key.component.html',
     styleUrls: ['./api-key.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgbTooltip, TranslocoDirective, SettingItemComponent]
+  imports: [TranslocoDirective, SettingItemComponent]
 })
 export class ApiKeyComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
-  private readonly confirmService = inject(ConfirmService);
   private readonly accountService = inject(AccountService);
-  private readonly toastr = inject(ToastrService);
   private readonly clipboard = inject(Clipboard);
   private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input() title: string = 'API Key';
-  @Input() showRefresh: boolean = true;
   @Input() transform: (val: string) => string = (val: string) => val;
   @Input() tooltipText: string = '';
   @Input() hideData = true;
@@ -53,13 +48,9 @@ export class ApiKeyComponent implements OnInit {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       let key = '';
       if (user) {
-        key = user.apiKey;
+        key = user.authKeys.filter(k => k.name === OpdsName)[0].key;
       } else {
         key = translate('api-key.no-key');
-      }
-
-      if (this.showRefresh) {
-        this.showRefresh = !this.accountService.hasReadOnlyRole(user!);
       }
 
       if (this.transform != undefined) {
@@ -76,17 +67,6 @@ export class ApiKeyComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  async refresh() {
-    if (!await this.confirmService.confirm(translate('api-key.confirm-reset'))) {
-      return;
-    }
-    this.accountService.resetApiKey().subscribe(newKey => {
-      this.key = newKey;
-      this.cdRef.markForCheck();
-      this.toastr.success(translate('api-key.key-reset'));
-    });
-  }
-
   selectAll() {
     if (this.inputElem) {
       this.inputElem.nativeElement.setSelectionRange(0, this.key.length);
@@ -96,7 +76,7 @@ export class ApiKeyComponent implements OnInit {
 
   toggleVisibility(forceState: boolean | null = null) {
     if (!this.hideData) return;
-    
+
     if (forceState == null) {
       this.isDataHidden = !this.isDataHidden;
     } else {
