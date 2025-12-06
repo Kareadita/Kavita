@@ -24,16 +24,18 @@ import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {ModalService} from "./modal.service";
-import {map, mergeWith, Observable, of, switchMap, tap} from "rxjs";
+import {filter, map, of, switchMap, tap} from "rxjs";
 import {ListSelectModalComponent} from "../shared/_components/list-select-modal/list-select-modal.component";
 import {take, takeUntil} from "rxjs/operators";
-import {ChapterService} from "./chapter.service";
-import {ActionService} from "./action.service";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {SeriesService} from "./series.service";
 import {Series} from "../_models/series";
 
+enum RereadPromptResult {
+  Cancel = 0,
+  Reread = 1,
+  ReadIncognito = 3,
+  Continue = 4,
+}
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -615,14 +617,22 @@ export class ReaderService {
     }
 
     this.getCurrentChapter(series.id).pipe(
-      switchMap(chapter => this.promptForReread(chapter, incognitoMode).pipe(
-        switchMap(reread => {
-          if (!reread) return of(chapter);
-
-          return this.seriesService.markUnread(series.id).pipe(
-            map(() => chapter),
-          )
-        })
+      switchMap(chapter => this.promptForReread('series', chapter, incognitoMode).pipe(
+        switchMap(result => {
+          switch (result) {
+            case RereadPromptResult.Cancel:
+              return of(false);
+            case RereadPromptResult.Continue:
+              return of(true);
+            case RereadPromptResult.ReadIncognito:
+              incognitoMode = true;
+              return of(true);
+            case RereadPromptResult.Reread:
+              return this.seriesService.markUnread(series.id).pipe(map(() => true));
+          }
+        }),
+        filter(cont => cont),
+        map(() => chapter),
       )),
       tap(chapter => {
         if (callback) {
@@ -656,12 +666,21 @@ export class ReaderService {
     }
 
     const lastChapter = volume.chapters[volume.chapters.length - 1];
-    this.promptForReread(lastChapter, incognitoMode).pipe(
-      switchMap(reread => {
-        if (!reread) return of(null);
-
-        return this.markVolumeUnread(seriesId, volume.id);
+    this.promptForReread('volume', lastChapter, incognitoMode).pipe(
+      switchMap(result => {
+        switch (result) {
+          case RereadPromptResult.Cancel:
+            return of(false);
+          case RereadPromptResult.Continue:
+            return of(true);
+          case RereadPromptResult.ReadIncognito:
+            incognitoMode = true;
+            return of(true);
+          case RereadPromptResult.Reread:
+            return this.markVolumeUnread(seriesId, volume.id).pipe(map(() => true));
+        }
       }),
+      filter(cont => cont),
       map(() => [...volume.chapters].sort(this.utilityService.sortChapters)[0]), // Parity with old behavior for fully read volumes
       tap(chapterToRead => this.readChapter(libraryId, seriesId, chapterToRead, incognitoMode, false)),
     ).subscribe();
@@ -680,20 +699,31 @@ export class ReaderService {
       return;
     }
 
-    this.promptForReread(chapter, incognitoMode).pipe(
-      switchMap(isRereading => {
-        if (!isRereading) return of(null);
-
-        return this.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0);
+    this.promptForReread('chapter', chapter, incognitoMode).pipe(
+      switchMap(result => {
+        switch (result) {
+          case RereadPromptResult.Cancel:
+            return of(false);
+          case RereadPromptResult.Continue:
+            return of(true);
+          case RereadPromptResult.ReadIncognito:
+            incognitoMode = true;
+            return of(true);
+          case RereadPromptResult.Reread:
+            return this.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0).pipe(map(() => true));
+        }
       }),
+      filter(cont => cont),
       tap(() => this.router.navigate(
         this.getNavigationArray(libraryId, seriesId, chapter.id, chapter.files[0].format), { queryParams: { incognitoMode } }
         )),
     ).subscribe();
   }
 
-  promptForReread(chapter: Chapter, incognitoMode: boolean) {
-    if (!this.shouldPromptForReread(chapter, incognitoMode)) return of(false);
+  promptForReread(entityType: 'series' | 'volume' | 'chapter', chapter: Chapter, incognitoMode: boolean) {
+    if (!this.shouldPromptForReread(chapter, incognitoMode)) return of(RereadPromptResult.Continue);
+
+    const fullyRead = chapter.pagesRead >= chapter.pages;
 
     const [modal, component] = this.modalService.open(ListSelectModalComponent, {
       centered: true,
@@ -705,26 +735,28 @@ export class ReaderService {
     const daysSinceRead = Math.round((new Date().getTime() - new Date(chapter.lastReadingProgress).getTime()) / MS_IN_DAY);
 
     if (chapter.pagesRead >= chapter.pages) {
-      component.description.set(translate('reread-modal.description-full-read'));
+      component.description.set(translate('reread-modal.description-full-read', { entityType: translate('entity-type.' + entityType) }));
     } else {
-      component.description.set(translate('reread-modal.description-time-passed', { days: daysSinceRead }));
+      component.description.set(translate('reread-modal.description-time-passed', { days: daysSinceRead, entityType: translate('entity-type.' + entityType) }));
     }
 
-    component.items.set([
-      {
-        label: translate('reread-modal.continue'),
-        value: false,
-      },
-      {
-        label: translate('reread-modal.reread'),
-        value: true,
-      },
-    ]);
+    const options = [{label: translate('reread-modal.reread'), value: RereadPromptResult.Reread}]
+
+    if (fullyRead) {
+      options.push({label: translate('reread-modal.read-incognito'), value: RereadPromptResult.ReadIncognito})
+    } else {
+      options.push({label: translate('reread-modal.continue'), value: RereadPromptResult.Continue})
+    }
+
+    options.push({label: translate('reread-modal.cancel'), value: RereadPromptResult.Cancel})
+
+
+    component.items.set(options);
 
     return modal.closed.pipe(
       takeUntil(modal.dismissed),
       take(1),
-      map(res => !!res),
+      map(res => res as RereadPromptResult),
     );
   }
 
