@@ -1213,6 +1213,12 @@ public class AccountController : BaseApiController
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<AuthKeyDto>> CreateAuthKey(RotateAuthKeyRequestDto dto)
     {
+        // Upper bound check might not be needed, it doesn't *realy* matter if users have bigger keys
+        if (string.IsNullOrEmpty(dto.Name) || dto.KeyLength < 8 || dto.KeyLength > 32)
+        {
+            return BadRequest();
+        }
+
         // Validate the name doesn't collide
         var authKeys = await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId);
         if (authKeys.Any(k => string.Equals(k.Name, dto.Name, StringComparison.InvariantCultureIgnoreCase)))
