@@ -4,6 +4,7 @@ using API.DTOs.Person;
 using API.Entities.Enums;
 
 namespace API.DTOs;
+#nullable enable
 
 public sealed record SeriesMetadataDto
 {

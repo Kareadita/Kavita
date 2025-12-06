@@ -16,7 +16,7 @@ public static class MessageFactoryEntityTypes
     public const string Collection = "collection";
     public const string ReadingList = "readingList";
     public const string Person = "person";
-    public const string User = "User";
+    public const string User = "user";
 }
 public static class MessageFactory
 {
