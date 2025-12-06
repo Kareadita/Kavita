@@ -2944,7 +2944,8 @@
     "avg-time-reading-by-hour": {
         "title": "Average time spent reading by hour",
         "minutes": "Minutes",
-        "most-time-spend-reading": "{{name}} spends most of their time reading between {{startHour}} and {{endHour}} with an average of {{amount}} minutes"
+        "most-time-spend-reading": "{{name}} spends most of their time reading between {{startHour}} and {{endHour}} with an average of {{amount}} minutes",
+        "data-since": "Only includes reads since {{date}}"
     },
 
     "profile-overview": {

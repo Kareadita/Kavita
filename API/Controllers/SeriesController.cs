@@ -368,18 +368,14 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="userParams"></param>
     /// <param name="libraryId">Default of 0 meaning all libraries</param>
-    /// <param name="userId">Optional user id to request the OnDeck for someone else. They must have profile sharing enabled when doing so</param>
     /// <returns></returns>
     [HttpPost("on-deck")]
-    [ProfilePrivacy(allowMissingUserId: true)]
     [ResponseCache(CacheProfileName = "Instant")]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0, [FromQuery] int? userId = null)
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
-        var onDeckForUser = userId ?? UserId;
+        var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(UserId, libraryId, userParams, null);
 
-        var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(onDeckForUser, libraryId, userParams, null);
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(onDeckForUser, pagedList);
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(UserId, pagedList);
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
@@ -398,6 +394,26 @@ public class SeriesController : BaseApiController
         await _unitOfWork.SeriesRepository.RemoveFromOnDeck(seriesId, UserId);
         return Ok();
     }
+
+    /// <summary>
+    /// Get series a user is currently reading, requires the user to share their profile
+    /// </summary>
+    /// <param name="userParams"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [ProfilePrivacy]
+    [HttpGet("currently-reading")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetCurrentlyReadingForUser([FromQuery] UserParams userParams, [FromQuery] int userId)
+    {
+        var pagedList = await _seriesService.GetCurrentlyReading(userId, UserId, userParams);
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, pagedList);
+
+        Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+
+        return Ok(pagedList);
+    }
+
 
     /// <summary>
     /// Runs a Cover Image Generation task

@@ -14,8 +14,6 @@
       })}}</span>
     }
 
-
-
     <app-bar-chart
       [axisLabels]="axisLabels()"
       [data]="data()"
@@ -25,6 +23,8 @@
       [showToolTips]="true"
       labelPosition="insideTop"
     />
+
+    <span class="text-muted">{{t('data-since', {date: dataSince() | utcToLocalTime:'shortDate' })}}</span>
   </div>
 
 </ng-container>

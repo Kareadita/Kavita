@@ -46,7 +46,7 @@ export class ManageAuthKeysComponent {
 
   opdsUrl = model<string>('');
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl(); };
-  isReadOnly = computed(() => this.accountService.hasReadOnlyRole(this.accountService.currentUserSignal()!));
+  isReadOnly = this.accountService.isReadOnly;
 
   protected readonly authKeysResource = this.accountService.getAuthKeysResource();
   protected readonly isOpdsEnabledResource = this.settingsService.getOpdsEnabledResource();

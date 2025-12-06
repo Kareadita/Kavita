@@ -356,11 +356,14 @@ public class StatsController(
     [ProfilePrivacy]
     [HttpGet("avg-time-by-hour")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<int>>>> GetAverageTimePerHour([FromQuery] StatsFilterDto filter, int userId)
+    public async Task<ActionResult<ReadTimeByHourDto>> GetAverageTimePerHour([FromQuery] StatsFilterDto filter, int userId)
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetTimeReadingByHour(filter, userId, UserId));
+        var dto = await statService.GetTimeReadingByHour(filter, userId, UserId);
+        if (dto == null) return BadRequest();
+
+        return Ok(dto);
     }
 
     /// <summary>

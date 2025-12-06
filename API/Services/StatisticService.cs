@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -51,7 +52,7 @@ public interface IStatisticService
     Task<IList<StatCount<YearMonthGroupingDto>>> GetReadsPerMonth(StatsFilterDto filter, int userId, int requestingUserId);
     Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId, int requestingUserId);
     Task<int> GetTotalReads(int userId, int requestingUserId);
-    Task<IList<StatCount<int>>> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId);
+    Task<ReadTimeByHourDto?> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId);
     Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId);
 }
 
@@ -1117,7 +1118,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
 
     }
 
-    public async Task<IList<StatCount<int>>> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId)
+    public async Task<ReadTimeByHourDto?> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId)
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
@@ -1128,7 +1129,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         if (sessionRecordedSince == null)
         {
             logger.LogWarning("{Migration} never happened? Cannot compute time by hour", MigrateProgressToReadingSessions.Name);
-            return [];
+            return null;
         }
 
         var sessions = await context.AppUserReadingSessionActivityData
@@ -1164,13 +1165,19 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 g => (long)g.Average(x => x.timeSpent.TotalMinutes)
             );
 
-        return Enumerable.Range(0, 24)
+        var data = Enumerable.Range(0, 24)
             .Select(hour => new StatCount<int>
             {
                 Value = hour,
                 Count = hourStats.GetValueOrDefault(hour, 0),
             })
             .ToList();
+
+        return new ReadTimeByHourDto
+        {
+            DataSince = sessionRecordedSince.RanAt,
+            Stats = data,
+        };
     }
 
     public async Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId)

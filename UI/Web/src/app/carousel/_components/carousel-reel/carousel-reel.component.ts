@@ -67,6 +67,7 @@ export class CarouselReelComponent {
 
   paginationEnabled = computed(() => this.nextPageLoader() != null);
   loadingNextPage = signal(false);
+  totalPages = signal<number>(999_999_999_999);
 
   swiper: Swiper | undefined;
 
@@ -78,7 +79,16 @@ export class CarouselReelComponent {
     const oldSize = this.items.length;
 
     this.nextPageLoader()!(this.currentPage(), this.pageSize()).pipe(
-      map(items => Array.isArray(items) ? items : (items as PaginatedResult<any[]>).result),
+      map(items => {
+        if (Array.isArray(items)) {
+          return items;
+        }
+
+        const pagedList = items as PaginatedResult<any[]>;
+        this.totalPages.set(pagedList.pagination.totalPages)
+
+        return pagedList.result;
+      }),
       tap(items => {
         this.items = [...this.items, ...items];
 
