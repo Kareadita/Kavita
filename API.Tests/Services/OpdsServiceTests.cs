@@ -72,8 +72,6 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             .WithRole(PolicyConstants.AdminRole)
             .Build());
 
-        await Seed.SeedAuthKeys(context);
-
         await context.SaveChangesAsync();
 
         Assert.NotEmpty(await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(1));
