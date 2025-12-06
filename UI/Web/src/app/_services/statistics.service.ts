@@ -26,6 +26,9 @@ import {SpreadStats} from "../statistics/_models/stats/spread-stats";
 import {FavouriteAuthor} from "../statistics/_models/favourite-author";
 import {StatsFilter} from "../statistics/_models/stats-filter";
 import {ProfileStatBar} from "../profile/_components/profile-stat-bar/profile-stat-bar.component";
+import {
+  ReadTimeByHour
+} from "../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
 
 export enum DayOfWeek
 {
@@ -241,7 +244,7 @@ export class StatisticsService {
   }
 
   getAvgTimeSpendReadingByHour(statsFilter: () => StatsFilter | undefined, userId: () => number) {
-    return this.filterResource<StatCount<number>[]>(statsFilter, userId, 'avg-time-by-hour');
+    return this.filterResource<ReadTimeByHour>(statsFilter, userId, 'avg-time-by-hour');
   }
 
   getUserOverallStats(statsFilter: () => StatsFilter | undefined, userId: () => number) {
