@@ -107,6 +107,8 @@ export class ReadingPaceComponent {
 
 
   private formatNumber(value: number): string {
+    if (value === 0) return '0';
+
     if (value >= 1000) {
       return this.compactNumberPipe.transform(Math.round(value));
     } else if (value >= 1) {

@@ -477,6 +477,7 @@ public class Startup
                     await MigrateProfilePreferences.Migrate(dataContext, logger);
                     await new MigrateTotalReads().RunAsync(dataContext, logger);
                     await new MigrateToAuthKeys().RunAsync(dataContext, logger);
+                    await new MigrateMissingAppUserRatingDateColumns().RunAsync(dataContext, logger);
 
                     #endregion
 

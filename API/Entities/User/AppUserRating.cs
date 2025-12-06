@@ -35,6 +35,4 @@ public class AppUserRating : IEntityDate
     // Relationships
     public int AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;
-
-
 }

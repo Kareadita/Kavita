@@ -21,8 +21,12 @@
       <div class="card-footer bg-transparent text-muted p-2">
         <div>
           @if (!reviewValue.isExternal) {
-            <app-profile-icon [userId]="reviewValue.userId" [size]="16" class="me-2" />
-            <a routerLink="/profile/{{reviewValue.userId}}" (click)="$event.stopPropagation()">{{reviewValue.username}}</a>
+            <span (click)="$event.stopPropagation()">
+              <a routerLink="/profile/{{reviewValue.userId}}">
+                <app-profile-icon [userId]="reviewValue.userId" [size]="16" />
+                <span class="ms-2">{{reviewValue.username}}</span>
+              </a>
+            </span>
           } @else {
             {{(reviewValue.username | defaultValue:'')}}
           }
