@@ -110,6 +110,7 @@ public class BrowserHelperTests
     [InlineData("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36", ClientDevicePlatform.Linux)]
     [InlineData("Mozilla/5.0 (X11; Ubuntu; Linux x86_64)", ClientDevicePlatform.Linux)]
     [InlineData("linux", ClientDevicePlatform.Linux)]
+    [InlineData("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:34.0) Gecko/20100101 Firefox/34.0", ClientDevicePlatform.Linux)]
     public void DetectPlatform_ReturnsLinux_ForLinuxUserAgents(string userAgent, ClientDevicePlatform expected)
     {
         var result = BrowserHelper.DetectPlatform(userAgent);
@@ -136,6 +137,8 @@ public class BrowserHelperTests
     [InlineData("Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36", ClientDevicePlatform.Android)]
     [InlineData("Mozilla/5.0 (Linux; Android 11; SM-G991B)", ClientDevicePlatform.Android)]
     [InlineData("android", ClientDevicePlatform.Android)]
+    [InlineData("Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36", ClientDevicePlatform.Android)]
+    [InlineData("Mozilla/5.0 (Linux; Android 15; SM-S931B Build/AP3A.240905.015.A2; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/127.0.6533.103 Mobile Safari/537.36", ClientDevicePlatform.Android)]
     public void DetectPlatform_ReturnsAndroid_ForAndroidUserAgents(string userAgent, ClientDevicePlatform expected)
     {
         var result = BrowserHelper.DetectPlatform(userAgent);
