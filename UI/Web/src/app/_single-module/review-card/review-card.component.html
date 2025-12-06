@@ -22,12 +22,11 @@
         <div>
           @if (!reviewValue.isExternal) {
             <app-profile-icon [userId]="reviewValue.userId" [size]="16" class="me-2" />
+            <a routerLink="/profile/{{reviewValue.userId}}" (click)="$event.stopPropagation()">{{reviewValue.username}}</a>
+          } @else {
+            {{(reviewValue.username | defaultValue:'')}}
           }
 
-          @if (isMyReview()) {
-            {{reviewValue.username}}
-          }
-          {{(isMyReview() ? '' : reviewValue.username | defaultValue:'')}}
           @if (reviewValue.authority === RatingAuthority.Critic) {
             ({{t('critic')}})
           }

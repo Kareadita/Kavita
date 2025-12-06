@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component, computed,
-  EventEmitter,
-  inject,
-  input,
-  Output
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, EventEmitter, inject, input, Output} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 import {UserReview} from "../../_models/user-review";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
@@ -13,16 +6,17 @@ import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.c
 import {AccountService} from "../../_services/account.service";
 import {ReviewModalCloseEvent, ReviewModalComponent} from "../review-modal/review-modal.component";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {RatingAuthority} from "../../_models/rating";
 import {ProfileIconComponent} from "../profile-icon/profile-icon.component";
+import {RouterLink} from "@angular/router";
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 @Component({
   selector: 'app-review-card',
-  imports: [ReadMoreComponent, DefaultValuePipe, NgOptimizedImage, ProviderImagePipe, TranslocoDirective, ProfileIconComponent],
+  imports: [ReadMoreComponent, NgOptimizedImage, ProviderImagePipe, TranslocoDirective, ProfileIconComponent, RouterLink, DefaultValuePipe],
   templateUrl: './review-card.component.html',
   styleUrls: ['./review-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
