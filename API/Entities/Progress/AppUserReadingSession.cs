@@ -21,7 +21,6 @@ public class AppUserReadingSession : IEntityDate
     /// <summary>
     /// Actual activity data recorded during the session
     /// </summary>
-    /// <remarks>JSON Column</remarks>
     public IList<AppUserReadingSessionActivityData> ActivityData { get; set; }
     public DateTime Created { get; set; }
     public DateTime CreatedUtc { get; set; }
