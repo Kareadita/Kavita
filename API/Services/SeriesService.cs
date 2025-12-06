@@ -970,7 +970,8 @@ public class SeriesService : ISeriesService
             Combination = FilterCombination.And,
             SortOptions = new SortOptions
             {
-                SortField = SortField.SortName,
+                SortField = SortField.ReadProgress,
+                IsAscending = false,
             },
             Statements = [
                 new FilterStatementDto
