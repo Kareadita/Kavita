@@ -4,6 +4,7 @@ import {SpreadStats} from "../../_models/stats/spread-stats";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {BarChartComponent, ToolTipFormatterContext} from "../bar-chart/bar-chart.component";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 
 @Component({
   selector: 'app-bucket-spread-chart',
@@ -17,6 +18,8 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BucketSpreadChartComponent {
+
+  private readonly compactNumberPipe = new CompactNumberPipe();
 
   userId = input.required<number>();
   userName = input.required<string>();
@@ -42,10 +45,13 @@ export class BucketSpreadChartComponent {
     .map(d => this.rangeFormatter(d)) ?? []);
 
   rangeFormatter = (params: StatBucket) => {
-    const end = params.rangeEnd ?? this.endRangeFallback();
-    if (!end) return `${params.rangeStart}+`
+    const start = this.compactNumberPipe.transform(params.rangeStart);
+    const endRange = params.rangeEnd ?? this.endRangeFallback();
+    if (!endRange) return `${start}+`
 
-    return `${params.rangeStart}-${params.rangeEnd ?? this.endRangeFallback()}`;
+    const end = typeof endRange === 'string' ? endRange : this.compactNumberPipe.transform(endRange);
+
+    return `${start}-${end}`;
   }
 
   toolTipFormatter = (ctx: ToolTipFormatterContext) => {

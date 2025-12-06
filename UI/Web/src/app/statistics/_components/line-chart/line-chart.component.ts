@@ -83,6 +83,9 @@ export class LineChartComponent {
     legend: {
       show: this.showLegend(),
       data: this.legendLabels(),
+      textStyle: {
+        color: this.themeService.getCssVariable('--body-text-color'),
+      }
     },
     tooltip: {
       show: true,
@@ -99,9 +102,15 @@ export class LineChartComponent {
       type: 'category',
       boundaryGap: false,
       data: this.axisLabels(),
+      axisLabel: {
+        color: this.themeService.getCssVariable('--body-text-color'),
+      }
     },
     yAxis: {
-      type: 'value'
+      type: 'value',
+      axisLabel: {
+        color: this.themeService.getCssVariable('--body-text-color'),
+      }
     },
     series: this.seriesOption(),
   }));

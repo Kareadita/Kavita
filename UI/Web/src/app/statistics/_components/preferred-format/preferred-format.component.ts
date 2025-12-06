@@ -52,7 +52,10 @@ export class PreferredFormatComponent {
       name: 'Format',
       legend: {
         top: '5%',
-        left: 'center'
+        left: 'center',
+        textStyle: {
+          color: this.themeService.getCssVariable('--body-text-color'),
+        }
       },
       tooltip: {
         trigger: 'item'
@@ -69,7 +72,10 @@ export class PreferredFormatComponent {
             value: r.count,
             name: pipe.transform(r.value)
           }
-        })
+        }),
+        label: {
+          color: this.themeService.getCssVariable('--body-text-color'),
+        }
       }],
     };
   });
