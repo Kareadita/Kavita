@@ -282,6 +282,10 @@ public class ReaderService : IReaderService
                 userProgress.VolumeId = progressDto.VolumeId;
                 userProgress.LibraryId = progressDto.LibraryId;
                 userProgress.BookScrollId = progressDto.BookScrollId;
+                if (userProgress.PagesRead >= totalPages)
+                {
+                    userProgress.TotalReads += 1;
+                }
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
