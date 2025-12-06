@@ -44,10 +44,10 @@ export class ProfileOverviewComponent {
       {
         title: translate('profile-overview.currently-reading'),
         api: this.seriesService
-          .getOnDeck(0, 20, undefined, undefined, memberId)
+          .getCurrentlyReading(memberId, 0, 20)
           .pipe(map(pr => pr.result)),
         nextPageLoader: (pageNum, pageSize) => this.seriesService
-          .getOnDeck(pageNum, pageSize, undefined, undefined, memberId),
+          .getCurrentlyReading(memberId, pageNum, pageSize),
       },
       {
         title: translate('profile-overview.want-to-read'),

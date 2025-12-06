@@ -58,6 +58,18 @@ export class SeriesService {
     );
   }
 
+  getCurrentlyReading(userid: number, pageNum: number, itemsPerPage: number) {
+    let params = new HttpParams().set('userId', userid);
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+
+    return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'series/currently-reading', {observe: 'response', params }).pipe(
+      map((response: any) => {
+        return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
+      })
+    );
+  }
+
   getAllSeriesByIds(seriesIds: Array<number>) {
     return this.httpClient.post<Series[]>(this.baseUrl + 'series/series-by-ids', {seriesIds: seriesIds});
   }

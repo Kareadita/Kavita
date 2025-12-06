@@ -7,6 +7,8 @@ using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.Person;
 using API.DTOs.SeriesDetail;
 using API.Entities;
@@ -39,6 +41,7 @@ public interface ISeriesService
         bool withHash);
     Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
     Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId);
+    Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams);
 
 }
 
@@ -953,6 +956,84 @@ public class SeriesService : ISeriesService
 
 
         return result;
+    }
+
+    public async Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams)
+    {
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = (await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId))!;
+
+        var filter = new FilterV2Dto
+        {
+            Combination = FilterCombination.And,
+            SortOptions = new SortOptions
+            {
+                SortField = SortField.SortName,
+            },
+            Statements = [
+                new FilterStatementDto
+                {
+                  Comparison = FilterComparison.GreaterThan,
+                  Field = FilterField.ReadLast,
+                  Value = serverSettings.OnDeckProgressDays.ToString(),
+                },
+                new FilterStatementDto
+                {
+                    Comparison = FilterComparison.LessThan,
+                    Field = FilterField.ReadProgress,
+                    Value = "100",
+                },
+                new FilterStatementDto
+                {
+                    Comparison = FilterComparison.GreaterThan,
+                    Field = FilterField.ReadProgress,
+                    Value = "0",
+                },
+            ],
+        };
+
+        if (userId == requestingUserId)
+            return await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter);
+
+        var librariesUser = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
+        var librariesRequestingUser = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(requestingUserId);
+
+        var libIds = librariesRequestingUser.Intersect(librariesUser).Except(socialPreferences.SocialLibraries);
+        var libraries = libIds.Select(id => id.ToString());
+
+        var ageRating = socialPreferences.SocialMaxAgeRating < requestingUser.AgeRestriction ? socialPreferences.SocialMaxAgeRating : requestingUser.AgeRestriction;
+        var includeUnknowns = socialPreferences.SocialIncludeUnknowns && requestingUser.AgeRestrictionIncludeUnknowns;
+
+        filter.Statements.Add(new FilterStatementDto
+        {
+            Comparison = FilterComparison.Contains,
+            Field = FilterField.Libraries,
+            Value = string.Join(",", libraries),
+        });
+
+        if (!includeUnknowns)
+        {
+            filter.Statements.Add(new FilterStatementDto
+            {
+                Comparison = FilterComparison.NotEqual,
+                Field = FilterField.AgeRating,
+                Value = nameof(AgeRating.Unknown),
+            });
+        }
+
+        if (ageRating != AgeRating.NotApplicable)
+        {
+            filter.Statements.Add(new FilterStatementDto
+            {
+                Comparison = FilterComparison.LessThanEqual,
+                Field = FilterField.AgeRating,
+                Value = ageRating.ToString(),
+            });
+        }
+
+        return await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter);
     }
 
     private static double ExponentialSmoothing(IList<double> data, double alpha)
