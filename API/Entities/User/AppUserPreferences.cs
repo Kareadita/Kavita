@@ -171,12 +171,16 @@ public class AppUserPreferences
     /// UI Site Global Setting: Should Kavita render ColorScape gradients
     /// </summary>
     public bool ColorScapeEnabled { get; set; } = true;
-
     /// <summary>
     /// Enable data saver mode across Kavita, limiting information that is pre-fetched
     /// </summary>
     /// <remarks>Currently only integrated into the PDF reader</remarks>
     public bool DataSaver { get; set; } = false;
+    /// <summary>
+    /// After how many days should the UI prompt to reread
+    /// </summary>
+    /// <remarks>0 days will disable the feature</remarks>
+    public int PromptForRereadsAfter { get; set; }
 
     /// <summary>
     /// JSON dictionary mappings for custom keybinds across the web app.

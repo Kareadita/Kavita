@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -139,6 +140,7 @@ public class UsersController : BaseApiController
         existingPreferences.ColorScapeEnabled = preferencesDto.ColorScapeEnabled;
         existingPreferences.BookReaderHighlightSlots = preferencesDto.BookReaderHighlightSlots;
         existingPreferences.DataSaver = preferencesDto.DataSaver;
+        existingPreferences.PromptForRereadsAfter = Math.Max(preferencesDto.PromptForRereadsAfter, 0);
         existingPreferences.CustomKeyBinds = preferencesDto.CustomKeyBinds;
 
         var allLibs = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id))

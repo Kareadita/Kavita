@@ -157,6 +157,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserPreferences>()
             .Property(b => b.ColorScapeEnabled)
             .HasDefaultValue(true);
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.PromptForRereadsAfter)
+            .HasDefaultValue(30);
 
         builder.Entity<Library>()
             .Property(b => b.AllowScrobbling)

@@ -17,6 +17,7 @@ export interface Preferences {
   bookReaderHighlightSlots: HighlightSlot[];
   colorScapeEnabled: boolean;
   dataSaver: boolean;
+  promptForRereadsAfter: number;
   customKeyBinds: Partial<Record<KeyBindTarget, KeyBind[]>>;
 
   // Kavita+

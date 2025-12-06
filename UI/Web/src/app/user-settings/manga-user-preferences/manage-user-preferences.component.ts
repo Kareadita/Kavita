@@ -39,6 +39,7 @@ type UserPreferencesForm = FormGroup<{
   bookReaderHighlightSlots: FormArray<FormControl<HighlightSlot>>,
   colorScapeEnabled: FormControl<boolean>,
   dataSaver: FormControl<boolean>,
+  promptForRereadsAfter: FormControl<number>,
 
   aniListScrobblingEnabled: FormControl<boolean>,
   wantToReadSync: FormControl<boolean>,
@@ -161,6 +162,7 @@ export class ManageUserPreferencesComponent implements OnInit {
         bookReaderHighlightSlots: this.fb.array(pref.bookReaderHighlightSlots.map(s => this.fb.control(s))),
         colorScapeEnabled: this.fb.control<boolean>(pref.colorScapeEnabled),
         dataSaver: this.fb.control<boolean>(pref.dataSaver),
+        promptForRereadsAfter: this.fb.control<number>(pref.promptForRereadsAfter),
 
         aniListScrobblingEnabled: this.fb.control<boolean>(pref.aniListScrobblingEnabled),
         wantToReadSync: this.fb.control<boolean>(pref.wantToReadSync),

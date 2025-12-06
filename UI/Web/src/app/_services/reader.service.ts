@@ -23,10 +23,19 @@ import {UtilityService} from "../shared/_services/utility.service";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {FilterField} from "../_models/metadata/v2/filter-field";
+import {ModalService} from "./modal.service";
+import {map, mergeWith, of, switchMap, tap} from "rxjs";
+import {ListSelectModalComponent} from "../shared/_components/list-select-modal/list-select-modal.component";
+import {take, takeUntil} from "rxjs/operators";
+import {ChapterService} from "./chapter.service";
+import {ActionService} from "./action.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
+
+const MS_IN_DAY = 1000 * 60 * 60 * 24;
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +50,7 @@ export class ReaderService {
   private readonly toastr = inject(ToastrService);
   private readonly httpClient = inject(HttpClient);
   private readonly document = inject(DOCUMENT);
+  private readonly modalService = inject(ModalService);
 
   baseUrl = environment.apiUrl;
   encodedKey: string = '';
@@ -611,8 +621,66 @@ export class ReaderService {
       return;
     }
 
-    this.router.navigate(this.getNavigationArray(libraryId, seriesId, chapter.id, chapter.files[0].format),
-      {queryParams: {incognitoMode}});
+    this.shouldPromptForReread(chapter, incognitoMode).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      switchMap(prompt => {
+        if (!prompt) return of(false);
+
+        const [modal, component] = this.modalService.open(ListSelectModalComponent, {
+          centered: true,
+        });
+
+        component.showFooter.set(false);
+        component.title.set(translate('reread-modal.title'));
+
+        const daysSinceRead = Math.round((new Date().getTime() - new Date(chapter.lastReadingProgress).getTime()) / MS_IN_DAY);
+
+        if (chapter.pagesRead >= chapter.pages) {
+          component.description.set(translate('reread-modal.description-full-read'));
+        } else {
+          component.description.set(translate('reread-modal.description-time-passed', { days: daysSinceRead }));
+        }
+
+        component.items.set([
+          {
+            label: translate('reread-modal.continue'),
+            value: false,
+          },
+          {
+            label: translate('reread-modal.reread'),
+            value: true,
+          },
+        ]);
+
+        return modal.closed.pipe(
+          takeUntil(modal.dismissed),
+          take(1),
+          map(res => !!res),
+        );
+      }),
+      switchMap(isRereading => {
+        if (!isRereading) return of(null);
+        return this.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0);
+      }),
+      tap(() => this.router.navigate(
+        this.getNavigationArray(libraryId, seriesId, chapter.id, chapter.files[0].format),
+        { queryParams: { incognitoMode } }
+      )),
+    ).subscribe();
+  }
+
+  private shouldPromptForReread(chapter: Chapter, incognitoMode: boolean) {
+    if (incognitoMode) return of(false);
+    if (chapter.pagesRead >= chapter.pages) return of(true);
+
+    const userPreferences = this.accountService.currentUserSignal()!.preferences;
+
+    if (!userPreferences.promptForRereadsAfter) {
+      return of(false);
+    }
+
+    const daysSinceRead = (new Date().getTime() - new Date(chapter.lastReadingProgress).getTime()) / MS_IN_DAY;
+    return of(daysSinceRead > userPreferences.promptForRereadsAfter);
   }
 
 }

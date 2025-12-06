@@ -1,17 +1,18 @@
-import {AsyncPipe, DOCUMENT, JsonPipe, Location, NgClass, NgStyle, NgTemplateOutlet} from '@angular/common';
+import {DOCUMENT, Location, NgClass, NgStyle, NgTemplateOutlet} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   computed,
-  DestroyRef, ElementRef,
+  DestroyRef,
+  ElementRef,
   inject,
   OnInit,
   signal,
   ViewChild
 } from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {
@@ -29,7 +30,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, debounceTime, forkJoin, Observable, of, ReplaySubject, tap} from 'rxjs';
+import {catchError, debounceTime, firstValueFrom, forkJoin, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {
@@ -48,7 +49,6 @@ import {Series} from 'src/app/_models/series';
 import {RelatedSeries} from 'src/app/_models/series-detail/related-series';
 import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
-import {User} from 'src/app/_models/user/user';
 import {Volume} from 'src/app/_models/volume';
 import {AccountService} from 'src/app/_services/account.service';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
@@ -61,7 +61,6 @@ import {ReaderService} from 'src/app/_services/reader.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {SeriesService} from 'src/app/_services/series.service';
-import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_models/user-review";
 import {ExternalSeriesCardComponent} from '../../../cards/external-series-card/external-series-card.component';
@@ -114,6 +113,8 @@ import {ReadingProfileService} from "../../../_services/reading-profile.service"
 import {AnnotationsTabComponent} from "../../../_single-module/annotations-tab/annotations-tab.component";
 import {Annotation} from "../../../book-reader/_models/annotations/annotation";
 import {AnnotationService} from "../../../_services/annotation.service";
+import {ReadingProgressStatus} from "../../../_models/series-detail/reading-progress";
+import {ReadingProgressStatusPipePipe} from "../../../_pipes/reading-progress-status-pipe.pipe";
 
 
 enum TabID {
@@ -146,7 +147,7 @@ interface StoryLineItem {
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
-    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent]
+    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent, ReadingProgressStatusPipePipe]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -212,6 +213,17 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   currentlyReadingChapter: Chapter | undefined = undefined;
   hasReadingProgress = signal<boolean>(false);
+  readingProgressStatus = computed(() => {
+    const hasProgress = this.hasReadingProgress();
+    const series = this.series();
+    if (!series || !hasProgress) return ReadingProgressStatus.NoProgress;
+
+    if (series.pagesRead >= series.pages) {
+      return ReadingProgressStatus.FullyRead;
+    }
+
+    return ReadingProgressStatus.Progress;
+  });
 
 
   seriesActions: ActionItem<Series>[] = [];
@@ -326,7 +338,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   download$: Observable<DownloadEvent | null> | null = null;
 
   bulkActionCallback = async (action: ActionItem<any>, data: any) => {
-    if (this.series === undefined) {
+    if (this.series() === undefined) {
       return;
     }
     const seriesId = this.seriesId;
@@ -1008,7 +1020,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   markVolumeAsRead(vol: Volume) {
-    if (this.series === undefined) {
+    if (this.series() === undefined) {
       return;
     }
 
@@ -1018,7 +1030,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   markVolumeAsUnread(vol: Volume) {
-    if (this.series === undefined) {
+    if (this.series() === undefined) {
       return;
     }
 
@@ -1028,7 +1040,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   markChapterAsRead(chapter: Chapter) {
-    if (this.series === undefined) {
+    if (this.series() === undefined) {
       return;
     }
 
@@ -1038,7 +1050,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   markChapterAsUnread(chapter: Chapter) {
-    if (this.series === undefined) {
+    if (this.series() === undefined) {
       return;
     }
 
@@ -1047,7 +1059,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  read(incognitoMode: boolean = false) {
+  async read(incognitoMode: boolean = false) {
+    if (this.readingProgressStatus() === ReadingProgressStatus.FullyRead && !incognitoMode) { // We are re-reading the series
+      await firstValueFrom(this.seriesService.markUnread(this.seriesId));
+      this.currentlyReadingChapter = undefined;
+    }
+
     if (this.currentlyReadingChapter !== undefined) {
       this.openChapter(this.currentlyReadingChapter, incognitoMode);
       return;
@@ -1169,4 +1186,5 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly AgeRating = AgeRating;
   protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly encodeURIComponent = encodeURIComponent;
+  protected readonly ReadingProgressStatus = ReadingProgressStatus;
 }

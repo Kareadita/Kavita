@@ -253,6 +253,8 @@
         "colorscape-tooltip": "Global toggle to enable/disable the dynamic gradient feature. Will override theme settings",
         "data-saver-label": "Data saver",
         "data-saver-tooltip": "Minimizes data usage by preventing automatic prefetching (e.g., PDF reader)",
+        "prompt-for-rereads-after-label": "Prompt for rereads",
+        "prompt-for-rereads-after-tooltip": "Prompt for rereads if you haven't read in n days. 0 disables the prompt.",
 
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobbling",
@@ -288,6 +290,14 @@
 
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
+    },
+
+    "reread-modal": {
+        "title": "Reread?",
+        "description-full-read": "You've already fully read this, would you like to start over?",
+        "description-time-passed": "It has been {{days}} days since you've last read this, need a refresher?",
+        "continue": "Continue where you last left off",
+        "reread": "Reread"
     },
 
     "multi-check-box-form": {
@@ -1246,6 +1256,15 @@
         "off": "{{reader-settings.off}}",
         "loading": "{{common.loading}}",
         "read-count-tooltip": "Total Reads"
+    },
+
+    "reading-progress-status-pipe": {
+        "no-progress": "Read",
+        "no-progress-incognito": "Read incognito",
+        "progress": "Continue",
+        "progress-incognito": "Continue incognito",
+        "full-read": "Reread",
+        "full-read-incognito": "Reread incognito"
     },
 
     "match-series-modal": {

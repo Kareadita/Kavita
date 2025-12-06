@@ -4,6 +4,7 @@
   <app-bulk-operations [actionCallback]="bulkActionCallback" [marginLeft]="12" [marginRight]="0" />
 
   @let hasReadingProgressValue = hasReadingProgress();
+  @let readingProgressStatusValue = readingProgressStatus();
   @let totalSizeValue = totalSize();
   @let useBookLogicValue = useBookLogic();
   @let libraryTypeValue = libraryType();
@@ -68,8 +69,8 @@
                 <div class="btn-group">
                   <button type="button" class="btn btn-outline-primary" (click)="read()">
                     <span>
-                      <i class="fa {{hasReadingProgressValue ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
-                      <span class="read-btn--text">&nbsp;{{(hasReadingProgressValue) ? t('continue') : t('read')}}</span>
+                      <i class="fa {{readingProgressStatusValue === ReadingProgressStatus.Progress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                      <span class="read-btn--text">&nbsp;{{readingProgressStatusValue | readingProgressStatusPipe}}</span>
                     </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
@@ -78,7 +79,7 @@
                       <button ngbDropdownItem (click)="read(true)">
                         <span>
                           <i class="fa fa-glasses" aria-hidden="true"></i>
-                          <span class="read-btn--text">&nbsp;{{(hasReadingProgressValue) ? t('continue-incognito') : t('read-incognito')}}</span>
+                          <span class="read-btn--text">&nbsp;{{readingProgressStatusValue | readingProgressStatusPipe:true}}</span>
                         </span>
                       </button>
                     </div>
