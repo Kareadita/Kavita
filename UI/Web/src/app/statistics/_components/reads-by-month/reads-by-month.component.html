@@ -6,7 +6,7 @@
 
     @let mostReadValue = highestRead();
     @if (mostReadValue) {
-      <span class="stats-subtitle mb-4">{{t('sub-title', {username: userName(), year: mostReadValue.year, month: mostReadValue.month, reads: mostReadValue.count | number})}}</span>
+      <h6 class="stats-subtitle">{{t('sub-title', {username: userName(), year: mostReadValue.year, month: mostReadValue.month, reads: mostReadValue.count | number})}}</h6>
     }
 
     <app-line-chart

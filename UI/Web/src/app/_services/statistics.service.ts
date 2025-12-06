@@ -236,7 +236,7 @@ export class StatisticsService {
   }
 
   getFavouriteAuthors(statsFilter: () => StatsFilter | undefined, userId: () => number) {
-    return this.filterResource<FavouriteAuthor[]>(statsFilter, userId, 'favourite-authors');
+    return this.filterResource<FavouriteAuthor[]>(statsFilter, userId, 'favorite-authors');
   }
 
   getReadsByMonths(statsFilter: () => StatsFilter | undefined, userId: () => number) {

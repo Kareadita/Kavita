@@ -1,9 +1,9 @@
-.reading-pace-container {
-  background-color: #1a2332;
-  color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 8px;
-}
+//.reading-pace-container {
+//  background-color: #1a2332;
+//  color: #ffffff;
+//  padding: 1.5rem;
+//  border-radius: 8px;
+//}
 
 .reading-pace-header {
   margin-bottom: 2rem;
@@ -28,6 +28,7 @@
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 0.75rem;
+  justify-content: space-evenly; // Kinda looks better
 }
 
 .stat-icon {
@@ -59,23 +60,18 @@
 
 .stat-label {
   font-size: 0.75rem;
-  color: #8b95a5;
+  color: var(--offwhite-text-color);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .stat-arrow {
-  color: #4a5568;
+  color: var(--text-muted-color);
   font-size: 1.25rem;
   flex-shrink: 0;
 }
 
-/* Mobile responsive */
 @media (max-width: 768px) {
-  .reading-pace-header h4 {
-    font-size: 1.25rem;
-  }
-
   .stat-primary .stat-value {
     font-size: 2rem;
   }
@@ -95,14 +91,6 @@
 }
 
 @media (max-width: 576px) {
-  .reading-pace-container {
-    padding: 1rem;
-  }
-
-  .reading-pace-header h4 {
-    font-size: 1.1rem;
-  }
-
   .stat-primary .stat-value {
     font-size: 1.75rem;
   }

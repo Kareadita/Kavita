@@ -1,7 +1,8 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {StatsFilter} from "../../_models/stats-filter";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 
 export interface ReadingPace {
   hoursRead: number;
@@ -15,7 +16,8 @@ export interface ReadingPace {
 @Component({
   selector: 'app-reading-pace',
   imports: [
-    TranslocoDirective
+    TranslocoDirective,
+    CompactNumberPipe
   ],
   templateUrl: './reading-pace.component.html',
   styleUrl: './reading-pace.component.scss',
@@ -23,6 +25,8 @@ export interface ReadingPace {
 })
 export class ReadingPaceComponent {
   private readonly statsService = inject(StatisticsService);
+
+  private readonly compactNumberPipe = new CompactNumberPipe();
 
   userName = input.required<string>();
   userId = input.required<number>();
@@ -101,9 +105,10 @@ export class ReadingPaceComponent {
     return this.formatNumber(projected);
   }
 
+
   private formatNumber(value: number): string {
     if (value >= 1000) {
-      return Math.round(value).toLocaleString();
+      return this.compactNumberPipe.transform(Math.round(value));
     } else if (value >= 1) {
       return value.toFixed(1);
     } else {

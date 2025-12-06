@@ -3,12 +3,14 @@ import {StatBucket} from "../../_models/stats/stat-bucket";
 import {SpreadStats} from "../../_models/stats/spread-stats";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {BarChartComponent, ToolTipFormatterContext} from "../bar-chart/bar-chart.component";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 @Component({
   selector: 'app-bucket-spread-chart',
   imports: [
     TranslocoDirective,
-    BarChartComponent
+    BarChartComponent,
+    LoadingComponent
   ],
   templateUrl: './bucket-spread-chart.component.html',
   styleUrl: './bucket-spread-chart.component.scss',
@@ -22,7 +24,7 @@ export class BucketSpreadChartComponent {
   bucketSpreadResource = input.required<Resource<SpreadStats | undefined>>();
   endRangeFallback = input<string>('');
 
-  protected highestBucket = computed(() => {
+  protected readonly highestBucket = computed(() => {
     if (!this.bucketSpreadResource().hasValue()) return null;
 
     return this.rangeFormatter(this.bucketSpreadResource().value()!.buckets

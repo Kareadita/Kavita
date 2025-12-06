@@ -11,7 +11,7 @@ import {StatsFilter} from "../../_models/stats-filter";
 import {RouterLink} from "@angular/router";
 
 @Component({
-  selector: 'app-favourite-authors',
+  selector: 'app-favorite-authors',
   imports: [
     TranslocoDirective,
     LoadingComponent,

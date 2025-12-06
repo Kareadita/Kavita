@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  CUSTOM_ELEMENTS_SCHEMA,
-  inject,
-  input
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, inject, input} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {DatePipe, DecimalPipe} from "@angular/common";
@@ -66,15 +59,15 @@ export class ActivityGraphComponent {
   year = input.required<number>();
   filter = input.required<StatsFilter>();
 
-  readingActivity = this.statsService.getReadingActivityResource(
+  protected readonly readingActivityResource = this.statsService.getReadingActivityResource(
     () => this.filter(),
     () => this.userId(),
     () => this.year(),
   );
 
   data = computed(() => {
-    if (this.readingActivity.hasValue()) {
-      return this.readingActivity.value();
+    if (this.readingActivityResource.hasValue()) {
+      return this.readingActivityResource.value();
     }
 
     return {};

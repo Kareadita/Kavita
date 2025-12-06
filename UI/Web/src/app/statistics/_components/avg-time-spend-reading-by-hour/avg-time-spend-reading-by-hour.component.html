@@ -6,12 +6,16 @@
 
     @let mostTimeSpendReadingValue = mostTimeSpentReading();
     @if (mostTimeSpendReadingValue !== null) {
-      <span class="stats-subtitle mb-4">{{t('most-time-spend-reading', {
+      <h6 class="stats-subtitle">{{t('most-time-spend-reading', {
         name: userName(),
         startHour: startHourLocalized(),
         endHour: endHourLocalized(),
         amount: mostTimeSpendReadingValue.count
-      })}}</span>
+      })}}</h6>
+    }
+
+    @if (timeByHourResource().isLoading()) {
+      <app-loading [loading]="true" />
     }
 
     <app-bar-chart
@@ -24,7 +28,7 @@
       labelPosition="insideTop"
     />
 
-    <span class="text-muted">{{t('data-since', {date: dataSince() | utcToLocalTime:'shortDate' })}}</span>
+    <span class="stats-note text-muted">{{t('data-since', {date: dataSince() | utcToLocalTime:'shortDate' })}}</span>
   </div>
 
 </ng-container>

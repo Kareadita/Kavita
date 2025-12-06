@@ -7,14 +7,13 @@
 
     @let favAuthors = favoriteAuthors.value();
 
-    <span class="stats-subtitle mb-4">{{t('sub-title', {name: userName(), author: mostReadAuthor()?.authorName, count: mostReadCount()})}}</span>
+    <h6 class="stats-subtitle">{{t('sub-title', {name: userName(), author: mostReadAuthor()?.authorName, count: mostReadCount()})}}</h6>
 
     @for (fAuthor of favAuthors; track fAuthor.authorName + $index) {
 
       <div class="row mb-4 align-items-start">
 
         <div class="col-12 col-md-4 d-flex flex-row align-items-center text-center">
-
           <app-image
             routerLink="/person/{{fAuthor.authorName}}"
             objectFit="cover"
@@ -54,6 +53,8 @@
 
         </div>
       </div>
+
+      <div class="setting-section-break"></div>
     }
   }
 </div>

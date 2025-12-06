@@ -3,6 +3,7 @@ import {StatCount} from "../../_models/stat-count";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {BarChartComponent} from "../bar-chart/bar-chart.component";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 export type ReadTimeByHour = {
   dataSince: string,
@@ -13,7 +14,8 @@ export type ReadTimeByHour = {
   imports: [
     TranslocoDirective,
     BarChartComponent,
-    UtcToLocalTimePipe
+    UtcToLocalTimePipe,
+    LoadingComponent
   ],
   templateUrl: './avg-time-spend-reading-by-hour.component.html',
   styleUrl: './avg-time-spend-reading-by-hour.component.scss',

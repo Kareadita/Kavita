@@ -538,6 +538,7 @@ UI/Web/.vscode/settings.json
 UI/Web/.angular/
 BenchmarkDotNet.Artifacts
 .claude/
+API/config/*backup.zip
 
 
 API.Tests/Services/Test Data/ImageService/**/*_output*

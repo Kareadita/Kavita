@@ -4,7 +4,7 @@
 
   <h4 class="stats-title">{{t('title')}}</h4>
 
-  <span class="stats-subtitle mb-4">{{t('sub-title', {name: userName(), mostUsed: mostUsed()?.value})}}</span>
+  <h6 class="stats-subtitle">{{t('sub-title', {name: userName(), mostUsed: mostUsed()?.value})}}</h6>
 
   <app-loading [loading]="breakDown().isLoading()" />
 
@@ -19,6 +19,6 @@
     [multiColor]="true"
   />
 
-  <span class="text-muted">{{t('missing', {amount: breakDown().value()?.missing})}}</span>
+  <span class="stats-note text-muted">{{t('missing', {amount: breakDown().value()?.missing})}}</span>
 
 </div>

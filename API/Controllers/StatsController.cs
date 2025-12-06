@@ -338,7 +338,7 @@ public class StatsController(
     }
 
     [ProfilePrivacy]
-    [HttpGet("favourite-authors")]
+    [HttpGet("favorite-authors")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<MostReadAuthorsDto>> GetMostReadAuthors([FromQuery] StatsFilterDto filter, int userId)
     {

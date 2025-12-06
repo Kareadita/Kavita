@@ -26,7 +26,6 @@ import {
 } from "../../../statistics/_components/bucket-spread-chart/bucket-spread-chart.component";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {ProfileImageComponent} from "../profile-image/profile-image.component";
-import {FavoriteAuthorsComponent} from "../../../statistics/_components/favourite-authors/favorite-authors.component";
 import {
   LibraryAndTimeFilterGroup,
   LibraryAndTimeSelectorComponent
@@ -45,6 +44,7 @@ import {
 import {ProfileStatBarComponent} from "../profile-stat-bar/profile-stat-bar.component";
 import {ProfileOverviewComponent} from "../profile-overview/profile-overview.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {FavoriteAuthorsComponent} from "../../../statistics/_components/favorite-authors/favorite-authors.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -72,7 +72,6 @@ enum TabID {
     BucketSpreadChartComponent,
     ReactiveFormsModule,
     ProfileImageComponent,
-    FavoriteAuthorsComponent,
     LibraryAndTimeSelectorComponent,
     LoadingComponent,
     ReadsByMonthComponent,
@@ -83,6 +82,7 @@ enum TabID {
     ProfileStatBarComponent,
     ProfileOverviewComponent,
     CompactNumberPipe,
+    FavoriteAuthorsComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',

@@ -4,7 +4,7 @@
 
   @if (user) {
 
-    <div class="main-container container-fluid pt-2 pb-2 mb-5 ms-md-2 me-md-2 w-auto"
+    <div class="main-container container-fluid pt-2 pb-2 mb-2 ms-md-2 me-md-2 w-auto"
           [class.has-bg]="backgroundImage()"
           [style.--profile-bg]="backgroundImage() ? 'url(' + backgroundImage() + ')' : null">
       <div class="row mb-0 mb-xl-3 info-container align-items-center justify-content-center justify-content-lg-start">
@@ -115,7 +115,7 @@
                 </div>
 
                 <div class="row mt-4">
-                  <app-favourite-authors [userId]="user.id" [userName]="username" [statsFilter]="filterValue" />
+                  <app-favorite-authors [userId]="user.id" [userName]="username" [statsFilter]="filterValue" />
                 </div>
               }
 
