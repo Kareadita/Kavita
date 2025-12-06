@@ -24,7 +24,7 @@ import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {ModalService} from "./modal.service";
-import {filter, map, of, switchMap, tap} from "rxjs";
+import {filter, map, Observable, of, switchMap, tap} from "rxjs";
 import {ListSelectModalComponent} from "../shared/_components/list-select-modal/list-select-modal.component";
 import {take, takeUntil} from "rxjs/operators";
 import {SeriesService} from "./series.service";
@@ -605,84 +605,83 @@ export class ReaderService {
     return parentPath ? `${parentPath}/${currentPath}` : currentPath;
   }
 
+  private handleRereadPrompt(
+    type: 'series' | 'volume' | 'chapter',
+    target: Chapter,
+    incognitoMode: boolean,
+    onReread: () => Observable<any>
+  ): Observable<{ shouldContinue: boolean; incognitoMode: boolean }> {
+    return this.promptForReread(type, target, incognitoMode).pipe(
+      switchMap(result => {
+        switch (result) {
+          case RereadPromptResult.Cancel:
+            return of({ shouldContinue: false, incognitoMode });
+          case RereadPromptResult.Continue:
+            return of({ shouldContinue: true, incognitoMode });
+          case RereadPromptResult.ReadIncognito:
+            return of({ shouldContinue: true, incognitoMode: true });
+          case RereadPromptResult.Reread:
+            return onReread().pipe(map(() => ({ shouldContinue: true, incognitoMode })));
+        }
+      })
+    );
+  }
+
   readSeries(series: Series, incognitoMode: boolean = false, callback?: (chapter: Chapter) => void) {
     const fullyRead = series.pagesRead >= series.pages;
+    const shouldPromptForReread = fullyRead && !incognitoMode;
 
-    // Not fully read, let the chapter reader handle the popup
-    if (!fullyRead || incognitoMode) {
+    if (!shouldPromptForReread) {
       this.getCurrentChapter(series.id).subscribe(chapter => {
         this.readChapter(series.libraryId, series.id, chapter, incognitoMode);
-      })
+      });
       return;
     }
 
     this.getCurrentChapter(series.id).pipe(
-      switchMap(chapter => this.promptForReread('series', chapter, incognitoMode).pipe(
-        switchMap(result => {
-          switch (result) {
-            case RereadPromptResult.Cancel:
-              return of(false);
-            case RereadPromptResult.Continue:
-              return of(true);
-            case RereadPromptResult.ReadIncognito:
-              incognitoMode = true;
-              return of(true);
-            case RereadPromptResult.Reread:
-              return this.seriesService.markUnread(series.id).pipe(map(() => true));
-          }
-        }),
-        filter(cont => cont),
-        map(() => chapter),
-      )),
-      tap(chapter => {
+      switchMap(chapter =>
+        this.handleRereadPrompt('series', chapter, incognitoMode,
+          () => this.seriesService.markUnread(series.id)).pipe(
+            map(result => ({ chapter, result }))
+        )),
+      filter(({ result }) => result.shouldContinue),
+      tap(({ chapter, result }) => {
         if (callback) {
           callback(chapter);
         }
-      }),
-      tap(chapter => this.readChapter(series.libraryId, series.id, chapter, incognitoMode, false))
+
+        this.readChapter(series.libraryId, series.id, chapter, result.incognitoMode, false);
+      })
     ).subscribe();
   }
 
   readVolume(libraryId: number, seriesId: number, volume: Volume, incognitoMode: boolean = false) {
     if (volume.chapters.length === 0) return;
 
-    // Sort the chapters, then grab first if no reading progress
-    if (volume.pagesRead === 0) {
-      this.readChapter(libraryId, seriesId, [...volume.chapters].sort(this.utilityService.sortChapters)[0], incognitoMode);
+    const sortedChapters = [...volume.chapters].sort(this.utilityService.sortChapters);
+
+    // No reading progress or incognito - start from first chapter
+    if (volume.pagesRead === 0 || incognitoMode) {
+      this.readChapter(libraryId, seriesId, sortedChapters[0], incognitoMode);
       return;
     }
 
-
-    // Not fully read, let the chapter reader handle the popup
+    // Not fully read - continue from current position
     if (volume.pagesRead < volume.pages) {
-      // Find the continue point chapter and load it
       const unreadChapters = volume.chapters.filter(item => item.pagesRead < item.pages);
-      if (unreadChapters.length > 0) {
-        this.readChapter(libraryId, seriesId, unreadChapters[0], incognitoMode);
-        return;
-      }
-      this.readChapter(libraryId, seriesId, volume.chapters[0], incognitoMode);
+      const chapterToRead = unreadChapters.length > 0 ? unreadChapters[0] : sortedChapters[0];
+      this.readChapter(libraryId, seriesId, chapterToRead, incognitoMode);
       return;
     }
 
+    // Fully read - prompt for reread
     const lastChapter = volume.chapters[volume.chapters.length - 1];
-    this.promptForReread('volume', lastChapter, incognitoMode).pipe(
-      switchMap(result => {
-        switch (result) {
-          case RereadPromptResult.Cancel:
-            return of(false);
-          case RereadPromptResult.Continue:
-            return of(true);
-          case RereadPromptResult.ReadIncognito:
-            incognitoMode = true;
-            return of(true);
-          case RereadPromptResult.Reread:
-            return this.markVolumeUnread(seriesId, volume.id).pipe(map(() => true));
-        }
-      }),
-      filter(cont => cont),
-      map(() => [...volume.chapters].sort(this.utilityService.sortChapters)[0]), // Parity with old behavior for fully read volumes
-      tap(chapterToRead => this.readChapter(libraryId, seriesId, chapterToRead, incognitoMode, false)),
+    this.handleRereadPrompt('volume', lastChapter, incognitoMode,
+      () => this.markVolumeUnread(seriesId, volume.id)).pipe(
+        filter(result => result.shouldContinue),
+      tap(result => {
+        this.readChapter(libraryId, seriesId, sortedChapters[0], result.incognitoMode, false);
+      })
     ).subscribe();
   }
 
@@ -692,31 +691,23 @@ export class ReaderService {
       return;
     }
 
-    if (!promptForReread) {
+    const navigateToReader = (useIncognitoMode: boolean) => {
       this.router.navigate(
-        this.getNavigationArray(libraryId, seriesId, chapter.id, chapter.files[0].format), { queryParams: { incognitoMode } }
+        this.getNavigationArray(libraryId, seriesId, chapter.id, chapter.files[0].format),
+        { queryParams: { incognitoMode: useIncognitoMode } }
       );
+    };
+
+    if (!promptForReread) {
+      navigateToReader(incognitoMode);
       return;
     }
 
-    this.promptForReread('chapter', chapter, incognitoMode).pipe(
-      switchMap(result => {
-        switch (result) {
-          case RereadPromptResult.Cancel:
-            return of(false);
-          case RereadPromptResult.Continue:
-            return of(true);
-          case RereadPromptResult.ReadIncognito:
-            incognitoMode = true;
-            return of(true);
-          case RereadPromptResult.Reread:
-            return this.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0).pipe(map(() => true));
-        }
-      }),
-      filter(cont => cont),
-      tap(() => this.router.navigate(
-        this.getNavigationArray(libraryId, seriesId, chapter.id, chapter.files[0].format), { queryParams: { incognitoMode } }
-        )),
+    this.handleRereadPrompt('chapter', chapter, incognitoMode,
+      () => this.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0)
+    ).pipe(
+      filter(result => result.shouldContinue),
+      tap(result => navigateToReader(result.incognitoMode))
     ).subscribe();
   }
 
