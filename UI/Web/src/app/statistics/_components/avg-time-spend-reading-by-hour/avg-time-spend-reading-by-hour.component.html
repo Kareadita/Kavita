@@ -4,12 +4,12 @@
 
     <h4 class="stats-title">{{t('title')}}</h4>
 
-    @let mostTimeSpendReadingValue = mostTimeSpendReading();
+    @let mostTimeSpendReadingValue = mostTimeSpentReading();
     @if (mostTimeSpendReadingValue !== null) {
       <span class="stats-subtitle mb-4">{{t('most-time-spend-reading', {
         name: userName(),
-        startHour: mostTimeSpendReadingValue.value,
-        endHour: (mostTimeSpendReadingValue.value + 1) % 24,
+        startHour: startHourLocalized(),
+        endHour: endHourLocalized(),
         amount: mostTimeSpendReadingValue.count
       })}}</span>
     }

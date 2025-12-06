@@ -24,27 +24,30 @@ export class AvgTimeSpendReadingByHourComponent {
   userName = input.required<string>();
   timeByHourResource = input.required<Resource<ReadTimeByHour | undefined>>();
 
-  mostTimeSpendReading = computed(() => {
+  mostTimeSpentReading = computed(() => {
     const rsc = this.timeByHourResource();
     if (!rsc.hasValue()) return null;
 
     return rsc.value()!.stats.reduce((prev, cur)=>
       prev.count > cur.count ? prev : cur, {count: -1, value: 0});
-  })
+  });
+
+  startHourLocalized = computed(() => {
+    const data = this.mostTimeSpentReading();
+    if (!data) return null;
+
+    return this.localizeHour(data.value);
+  });
+
+  endHourLocalized = computed(() => {
+    const data = this.mostTimeSpentReading();
+    if (!data) return null;
+
+    return this.localizeHour((data.value + 1) % 24);
+  });
 
   axisLabels = computed(() => {
-    const locale = navigator.language;
-    const use12Hours = Intl.DateTimeFormat(locale,  { hour: 'numeric' }).resolvedOptions().hour12 ?? false;
-
-    return Array.from({length: 24}, (_, i) => {
-      if (use12Hours) {
-        const hour = i % 12 || 12;
-        const period = i < 12 ? 'am' : 'pm';
-        return `${hour}${period}`;
-      }
-
-      return `${i}h`;
-    });
+    return Array.from({length: 24}, (_, i) => this.localizeHour(i));
   });
 
   labelFormatter = (input: any) => {
@@ -63,5 +66,18 @@ export class AvgTimeSpendReadingByHourComponent {
 
     return this.timeByHourResource().value()!.dataSince;
   });
+
+  private localizeHour(slot: number) {
+      const locale = navigator.language;
+      const use12Hours = Intl.DateTimeFormat(locale,  { hour: 'numeric' }).resolvedOptions().hour12 ?? false;
+
+    if (use12Hours) {
+      const hour = slot % 12 || 12;
+      const period = slot < 12 ? 'am' : 'pm';
+      return `${hour}${period}`;
+    }
+
+    return `${slot}h`;
+  }
 
 }
