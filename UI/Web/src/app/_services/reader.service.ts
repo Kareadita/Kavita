@@ -605,6 +605,8 @@ export class ReaderService {
 
   readSeries(series: Series, incognitoMode: boolean = false, callback?: (chapter: Chapter) => void) {
     const fullyRead = series.pagesRead >= series.pages;
+
+    // Not fully read, let the chapter reader handle the popup
     if (!fullyRead || incognitoMode) {
       this.getCurrentChapter(series.id).subscribe(chapter => {
         this.readChapter(series.libraryId, series.id, chapter, incognitoMode);
@@ -632,7 +634,17 @@ export class ReaderService {
   }
 
   readVolume(libraryId: number, seriesId: number, volume: Volume, incognitoMode: boolean = false) {
-    if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
+    if (volume.chapters.length === 0) return;
+
+    // Sort the chapters, then grab first if no reading progress
+    if (volume.pagesRead === 0) {
+      this.readChapter(libraryId, seriesId, [...volume.chapters].sort(this.utilityService.sortChapters)[0], incognitoMode);
+      return;
+    }
+
+
+    // Not fully read, let the chapter reader handle the popup
+    if (volume.pagesRead < volume.pages) {
       // Find the continue point chapter and load it
       const unreadChapters = volume.chapters.filter(item => item.pagesRead < item.pages);
       if (unreadChapters.length > 0) {
@@ -643,8 +655,16 @@ export class ReaderService {
       return;
     }
 
-    // Sort the chapters, then grab first if no reading progress
-    this.readChapter(libraryId, seriesId, [...volume.chapters].sort(this.utilityService.sortChapters)[0], incognitoMode);
+    const lastChapter = volume.chapters[volume.chapters.length - 1];
+    this.promptForReread(lastChapter, incognitoMode).pipe(
+      switchMap(reread => {
+        if (!reread) return of(null);
+
+        return this.markVolumeUnread(seriesId, volume.id);
+      }),
+      map(() => [...volume.chapters].sort(this.utilityService.sortChapters)[0]), // Parity with old behavior for fully read volumes
+      tap(chapterToRead => this.readChapter(libraryId, seriesId, chapterToRead, incognitoMode, false)),
+    ).subscribe();
   }
 
   readChapter(libraryId: number, seriesId: number, chapter: Chapter, incognitoMode: boolean = false, promptForReread: boolean = true) {

@@ -293,11 +293,11 @@
     },
 
     "reread-modal": {
-        "title": "Reread?",
-        "description-full-read": "You've already fully read this, would you like to start over?",
+        "title": "Reread",
+        "description-full-read": "You've finished this! Would you like to start over?",
         "description-time-passed": "It has been {{days}} days since you've last read this, need a refresher?",
-        "continue": "Continue where you last left off",
-        "reread": "Reread"
+        "continue": "Pick up where you left off",
+        "reread": "Start Over"
     },
 
     "multi-check-box-form": {

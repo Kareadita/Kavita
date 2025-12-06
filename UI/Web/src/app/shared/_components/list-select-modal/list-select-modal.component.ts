@@ -63,7 +63,7 @@ export class ListSelectModalComponent<T> {
   }
 
   close() {
-    this.modal.close();
+    this.modal.dismiss();
   }
 
   confirm() {
