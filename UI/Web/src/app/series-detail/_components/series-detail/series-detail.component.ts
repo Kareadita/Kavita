@@ -298,7 +298,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   weblinks = computed(() => {
     const seriesMetadataValue = this.seriesMetadata();
-    return (seriesMetadataValue?.webLinks || '').split(',');
+    const webLinks = seriesMetadataValue?.webLinks || '';
+    if (!webLinks) return [];
+
+    return webLinks.split(',');
   });
 
   /**
