@@ -213,7 +213,7 @@ public class Startup
             options.Providers.Add<GzipCompressionProvider>();
             options.MimeTypes =
                 ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "image/jpeg", "image/jpg", "image/png", "image/avif", "image/gif", "image/webp", "image/tiff" });
+                    ["image/jpeg", "image/jpg", "image/png", "image/avif", "image/gif", "image/webp", "image/tiff"]);
             options.EnableForHttps = true;
         });
         services.Configure<BrotliCompressionProviderOptions>(options =>
@@ -418,7 +418,7 @@ public class Startup
 
                     // v0.7.11
                     await MigrateSmartFilterEncoding.Migrate(unitOfWork, dataContext, logger);
-                    await MigrateLibrariesToHaveAllFileTypes.Migrate(unitOfWork, dataContext, logger);
+                    await new MigrateLibrariesToHaveAllFileTypes().RunAsync(dataContext, logger);
 
 
                     // v0.7.14

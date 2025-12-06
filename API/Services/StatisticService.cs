@@ -652,7 +652,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .Where(s => s.EndTimeUtc != null)
             .Join(
                 context.AppUserReadingSessionActivityData
-                    .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, false),
+                    .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, false, true),
                 session => session.Id,
                 activity => activity.AppUserReadingSessionId,
                 (session, activity) => new
@@ -843,7 +843,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
 
         // Get series IDs from reading sessions
         var sessionSeriesIds = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .AsNoTracking()
             .Select(a => a.SeriesId)
             .Distinct()
@@ -1023,7 +1023,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
         var fullyReadChapters = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .Join(
                 context.Chapter,
                 progress => progress.ChapterId,
@@ -1064,7 +1064,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
         var wordsInFullyReadChapters = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .Join(
                 context.Chapter,
                 progress => progress.ChapterId,
@@ -1136,7 +1136,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         }
 
         var sessions = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .Where(session => session.ReadingSession.CreatedUtc > sessionRecordedSince.RanAt)
             .ToListAsync();
 
@@ -1191,7 +1191,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
         var fullyReadChapters = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .Where(d => d.PagesRead >= d.TotalPages) // Ensure fully read
             .Select(d => new {
                 d.ChapterId,
@@ -1289,7 +1289,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         filter.EndDate = null;
 
         return await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .GroupBy(s => new {s.ReadingSession.CreatedUtc.Year, s.ReadingSession.CreatedUtc.Month})
             .Select(g => new StatCount<YearMonthGroupingDto>()
             {
@@ -1362,7 +1362,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         };
 
         return await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .CountAsync();
     }
 
