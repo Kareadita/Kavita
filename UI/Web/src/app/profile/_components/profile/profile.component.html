@@ -17,8 +17,8 @@
             <h1 class="mb-0 me-2">{{username}}</h1>
             <div class="badges d-flex align-items-center mt-2 mt-lg-0">
               <span class="badge reads-badge me-2">
-                <app-loading [loading]="totalReadsResource.isLoading()">
-                  {{t('total-reads-badge', {reads: totalReads()})}}
+                <app-loading [loading]="totalReadsResource.isLoading()" size="spinner-border-sm">
+                  {{t('total-reads-badge', {reads: totalReads() | compactNumber})}}
                 </app-loading>
               </span>
 

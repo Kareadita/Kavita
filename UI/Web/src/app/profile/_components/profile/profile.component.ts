@@ -14,11 +14,9 @@ import {
   NgbNavLink,
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
-import {ReviewService} from "../../../_services/review.service";
 import {tap} from "rxjs";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
-import {ReviewListItemComponent} from "../review-list-item/review-list-item.component";
 import {PreferredFormatComponent} from "../../../statistics/_components/preferred-format/preferred-format.component";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {StringBreakdownComponent} from "../../../statistics/_components/string-breakdown/string-breakdown.component";
@@ -40,13 +38,13 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {ReadsByMonthComponent} from "../../../statistics/_components/reads-by-month/reads-by-month.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {NgxStarsModule} from "ngx-stars";
-import {ThemeService} from "../../../_services/theme.service";
 import {ProfileReviewListComponent} from "../profile-review-list/profile-review-list.component";
 import {
   AvgTimeSpendReadingByHourComponent
 } from "../../../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
 import {ProfileStatBarComponent} from "../profile-stat-bar/profile-stat-bar.component";
 import {ProfileOverviewComponent} from "../profile-overview/profile-overview.component";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -84,6 +82,7 @@ enum TabID {
     AvgTimeSpendReadingByHourComponent,
     ProfileStatBarComponent,
     ProfileOverviewComponent,
+    CompactNumberPipe,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',

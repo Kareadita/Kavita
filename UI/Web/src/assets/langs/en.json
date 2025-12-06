@@ -2901,7 +2901,7 @@
 
     "preferred-format": {
         "title": "Preferred format",
-        "sub-title": "Most chapters {{name}} reads are {{format}}(s)"
+        "sub-title": "{{name}} prefers to read {{format}}"
     },
 
     "favorite-authors": {

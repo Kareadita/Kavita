@@ -3,12 +3,14 @@ import {StatCount} from "../../_models/stat-count";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LineChartComponent} from "../line-chart/line-chart.component";
 import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
+import {DecimalPipe} from "@angular/common";
 
 @Component({
   selector: 'app-reads-by-month',
   imports: [
     TranslocoDirective,
-    LineChartComponent
+    LineChartComponent,
+    DecimalPipe
   ],
   templateUrl: './reads-by-month.component.html',
   styleUrl: './reads-by-month.component.scss',
