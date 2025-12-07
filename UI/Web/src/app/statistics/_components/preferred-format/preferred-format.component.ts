@@ -3,8 +3,6 @@ import {StatisticsService} from "../../../_services/statistics.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {PieChartModule} from "@swimlane/ngx-charts";
-import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
-import {ThemeService} from "../../../_services/theme.service";
 import {MangaFormat} from "../../../_models/manga-format";
 import {StatsFilter} from "../../_models/stats-filter";
 import {PieChartComponent} from "../../../shared/_charts/pie-chart/pie-chart.component";
@@ -14,7 +12,6 @@ import {PieChartComponent} from "../../../shared/_charts/pie-chart/pie-chart.com
   imports: [
     TranslocoDirective,
     PieChartModule,
-    EChartsDirective,
     PieChartComponent
   ],
   templateUrl: './preferred-format.component.html',
@@ -38,6 +35,8 @@ export class PreferredFormatComponent {
 
       const format = this.formatsResource.value()!.reduce((prev, cur) =>
         prev.count > cur.count ? prev : cur, {count: -1, value: MangaFormat.UNKNOWN}).value;
+
+      if (format === MangaFormat.UNKNOWN) return null;
 
       return this.pipe.transform(format);
     }

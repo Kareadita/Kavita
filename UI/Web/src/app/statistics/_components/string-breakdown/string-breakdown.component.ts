@@ -26,7 +26,10 @@ export class StringBreakdownComponent {
   mostUsed = computed(() => {
     if (!this.breakDown().hasValue()) return null;
 
-    return this.breakDown().value()!.data
+    const breakdown = this.breakDown().value()!;
+    if (breakdown.data.length === 0) return null;
+
+    return breakdown.data
       .reduce((prev, cur) => prev.count > cur.count ? prev : cur,
         {count: -1, value: ""});
   });

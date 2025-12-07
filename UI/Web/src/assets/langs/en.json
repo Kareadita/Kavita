@@ -2925,12 +2925,14 @@
 
     "preferred-format": {
         "title": "Preferred format",
-        "sub-title": "{{name}} prefers to read {{format}}"
+        "sub-title": "{{name}} prefers to read {{format}}",
+        "no-data": "{{common.no-data}}"
     },
 
     "favorite-authors": {
         "title": "Most Read Authors",
-        "sub-title": "{{name}}'s most read author is {{author}}, with {{count}} total reads"
+        "sub-title": "{{name}}'s most read author is {{author}}, with {{count}} total reads",
+        "no-data": "{{common.no-data}}"
     },
 
     "page-spread": {
@@ -2954,24 +2956,28 @@
     "tag-breakdown": {
         "title": "Most read tags",
         "sub-title": "{{name}} most read tag is {{mostUsed}}",
-        "missing": "Missing tags for {{amount}} series"
+        "missing": "Missing tags for {{amount}} series",
+        "no-data": "{{common.no-data}}"
     },
     "genre-breakdown": {
         "title": "Most read genres",
         "sub-title": "{{name}} most read genre is {{mostUsed}}",
-        "missing": "Missing genres for {{amount}} series"
+        "missing": "Missing genres for {{amount}} series",
+        "no-data": "{{common.no-data}}"
     },
 
     "reads-by-month": {
         "title": "Total reads by month",
-        "sub-title": "{{username}} has read the most in {{month}} {{year}} with {{reads}} chapters read"
+        "sub-title": "{{username}} has read the most in {{month}} {{year}} with {{reads}} chapters read",
+        "no-data": "{{common.no-data}}"
     },
 
     "avg-time-reading-by-hour": {
         "title": "Average time spent reading by hour",
         "minutes": "Minutes",
         "most-time-spend-reading": "{{name}} spends most of their time reading between {{startHour}} and {{endHour}} with an average of {{amount}} minutes",
-        "data-since": "Only includes reads since {{date}}"
+        "data-since": "Only includes reads since {{date}}",
+        "no-data": "{{common.no-data}}"
     },
 
     "profile-overview": {
@@ -2999,7 +3005,7 @@
 
     "reading-pace": {
         "title": "Reading Pace",
-        "sub-title": "{{username}} reads a chapter every {{count}} days",
+        "sub-title": "{{username}} reads a book every {{count}} days",
         "hours-read": "Hours Read",
         "pages-read": "Pages Read",
         "words-read": "Words Read",
@@ -3007,7 +3013,9 @@
         "books-read": "Books Read",
         "per-year": "Per Year",
         "per-month": "Per Month",
-        "per-day": "Per Day"
+        "per-day": "Per Day",
+        "no-data": "{{common.no-data}}",
+        "disclaimer": "Only takes books into account"
     },
 
     "smart-time-picker": {

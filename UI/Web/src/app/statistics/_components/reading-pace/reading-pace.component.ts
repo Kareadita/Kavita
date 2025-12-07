@@ -3,6 +3,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {StatsFilter} from "../../_models/stats-filter";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 export interface ReadingPace {
   hoursRead: number;
@@ -17,7 +18,8 @@ export interface ReadingPace {
   selector: 'app-reading-pace',
   imports: [
     TranslocoDirective,
-    CompactNumberPipe
+    CompactNumberPipe,
+    UtcToLocalTimePipe
   ],
   templateUrl: './reading-pace.component.html',
   styleUrl: './reading-pace.component.scss',
@@ -40,11 +42,17 @@ export class ReadingPaceComponent {
   );
 
   stats = computed(() => {
-    if (this.readingPace.hasValue()) {
-      return this.readingPace.value();
+    if (!this.readingPace.hasValue()) {
+      return null;
     }
 
-    return null;
+    const stats = this.readingPace.value()!;
+
+    if (stats.booksRead === 0) {
+      return null;
+    }
+
+    return stats;
   });
 
   // Calculate pace in days - books per day inverted

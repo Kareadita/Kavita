@@ -30,8 +30,12 @@ export class AvgTimeSpendReadingByHourComponent {
     const rsc = this.timeByHourResource();
     if (!rsc.hasValue()) return null;
 
-    return rsc.value()!.stats.reduce((prev, cur)=>
-      prev.count > cur.count ? prev : cur, {count: -1, value: 0});
+    const statCount = rsc.value()!.stats.reduce((prev, cur)=>
+      prev.count >= cur.count ? prev : cur, {count: 0, value: -1});
+
+    if (statCount.value === -1) return null;
+
+    return statCount;
   });
 
   startHourLocalized = computed(() => {

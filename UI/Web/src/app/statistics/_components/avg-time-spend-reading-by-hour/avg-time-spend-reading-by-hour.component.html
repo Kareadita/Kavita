@@ -12,6 +12,8 @@
         endHour: endHourLocalized(),
         amount: mostTimeSpendReadingValue.count
       })}}</h6>
+    } @else if (!timeByHourResource().isLoading())  {
+      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
     }
 
     @if (timeByHourResource().isLoading()) {

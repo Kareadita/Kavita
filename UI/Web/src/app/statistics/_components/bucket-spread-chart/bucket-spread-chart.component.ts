@@ -27,10 +27,20 @@ export class BucketSpreadChartComponent {
   bucketSpreadResource = input.required<Resource<SpreadStats | undefined>>();
   endRangeFallback = input<string>('');
 
-  protected readonly highestBucket = computed(() => {
+  protected readonly spreadStats = computed(() => {
     if (!this.bucketSpreadResource().hasValue()) return null;
 
-    return this.rangeFormatter(this.bucketSpreadResource().value()!.buckets
+    const spreadStats = this.bucketSpreadResource().value()!;
+    if (spreadStats.totalCount === 0) return null;
+
+    return spreadStats;
+  });
+
+  protected readonly highestBucket = computed(() => {
+    const spreadStats = this.spreadStats();
+    if (!spreadStats) return null;
+
+    return this.rangeFormatter(spreadStats.buckets
       .reduce((prev, cur) => prev.count > cur.count ? prev : cur, {
         count: -1,
         rangeStart: 0,

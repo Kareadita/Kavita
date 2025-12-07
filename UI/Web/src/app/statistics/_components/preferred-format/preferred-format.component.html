@@ -7,9 +7,13 @@
     @let mostReadFormatValue = mostReadFormat();
     @if (mostReadFormatValue) {
       <h6 class="stats-subtitle">{{t('sub-title', {name: userName(), format: mostReadFormat()})}}</h6>
+
+      <app-pie-chart [data]="data()" [valueTransformer]="valueTransformer.bind(this)" />
+    }  @else if (!formatsResource.isLoading())  {
+      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
     }
 
-    <app-pie-chart [data]="data()" [valueTransformer]="valueTransformer.bind(this)" />
+
   </div>
 
 </ng-container>

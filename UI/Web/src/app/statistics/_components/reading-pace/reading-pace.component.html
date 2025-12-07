@@ -1,14 +1,20 @@
 <ng-container *transloco="let t; prefix: 'reading-pace'">
   @let paceStats = stats();
-  @if (paceStats) {
-    <div class="stats-card card p-4">
-      <h4 class="stats-title">{{t('title')}}</h4>
-      <h6 class="stats-subtitle">{{t('sub-title', {username: userName(), count: paceInDays()})}}</h6>
 
+  <div class="stats-card card p-4">
+    <h4 class="stats-title">{{t('title')}}</h4>
+
+    @if (paceStats) {
+      <h6 class="stats-subtitle">{{t('sub-title', {username: userName(), count: paceInDays()})}}</h6>
+    } @else if (!readingPace.isLoading()) {
+      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+    }
+
+    @if (paceStats) {
       <!-- Hours Row -->
       <div class="stats-row">
         <div class="stat-icon">
-          <i class="fas fa-headphones" aria-hidden="true"></i>
+          <i class="fas fa-clock" aria-hidden="true"></i>
         </div>
         <div class="stat-item stat-primary">
           <div class="stat-value">{{ paceStats.hoursRead | compactNumber }}</div>
@@ -102,6 +108,7 @@
       </div>
 
       <!-- Comics Row (if applicable) -->
+      <!--
       @if (paceStats.comicsRead > 0) {
         <div class="stats-row">
           <div class="stat-icon">
@@ -134,6 +141,7 @@
           </div>
         </div>
       }
+      -->
 
       <!-- Books Row -->
       <div class="stats-row">
@@ -166,8 +174,10 @@
           <div class="stat-label text-uppercase">{{t('per-day')}}</div>
         </div>
       </div>
-    </div>
-  }
 
+      <span class="stats-note text-muted">{{t('disclaimer')}}</span>
+    }
+
+  </div>
 
 </ng-container>

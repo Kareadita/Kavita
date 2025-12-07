@@ -7,14 +7,17 @@
     @let mostReadValue = highestRead();
     @if (mostReadValue) {
       <h6 class="stats-subtitle">{{t('sub-title', {username: userName(), year: mostReadValue.year, month: mostReadValue.month, reads: mostReadValue.count | number})}}</h6>
-    }
 
-    <app-line-chart
-      [axisLabels]="axisLabels()"
-      [data]="data()"
-      [legendLabels]="legendLabels()"
-      [showLegend]="false"
-    />
+      <app-line-chart
+        [axisLabels]="axisLabels()"
+        [data]="data()"
+        [legendLabels]="legendLabels()"
+        [showLegend]="false"
+      />
+
+    } @else if (!readsByMonthResource().isLoading())  {
+      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+    }
   </div>
 
 </ng-container>

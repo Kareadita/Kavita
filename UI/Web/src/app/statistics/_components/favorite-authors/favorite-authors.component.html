@@ -6,8 +6,13 @@
     <h4 class="stats-title">{{t('title')}}</h4>
 
     @let favAuthors = favoriteAuthors.value();
+    @let mostReadAuthorValue = mostReadAuthor();
+    @if (mostReadAuthorValue) {
+      <h6 class="stats-subtitle">{{t('sub-title', {name: userName(), author: mostReadAuthor()?.authorName, count: mostReadCount()})}}</h6>
+    } @else if (!favoriteAuthors.isLoading())  {
+      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+    }
 
-    <h6 class="stats-subtitle">{{t('sub-title', {name: userName(), author: mostReadAuthor()?.authorName, count: mostReadCount()})}}</h6>
 
     @for (fAuthor of favAuthors; track fAuthor.authorName + $index) {
 
