@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class ReadingSessionsAndDevices : Migration
+    public partial class StatsRevampPartOne : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -79,6 +79,13 @@ namespace API.Data.Migrations
                 oldNullable: true,
                 oldDefaultValue: "{\"ShareReviews\":false,\"ShareAnnotations\":false,\"ViewOtherAnnotations\":false,\"SocialLibraries\":[],\"SocialMaxAgeRating\":-1,\"SocialIncludeUnknowns\":true}");
 
+            migrationBuilder.AddColumn<int>(
+                name: "PromptForRereadsAfter",
+                table: "AppUserPreferences",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: 30);
+
             migrationBuilder.AddColumn<DateTime>(
                 name: "Created",
                 table: "AppUserChapterRating",
@@ -108,6 +115,31 @@ namespace API.Data.Migrations
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.CreateTable(
+                name: "AppUserAuthKey",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Key = table.Column<string>(type: "TEXT", nullable: true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ExpiresAtUtc = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    LastAccessedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    Provider = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
+                    AppUserId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppUserAuthKey", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppUserAuthKey_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AppUserReadingHistory",
                 columns: table => new
                 {
@@ -115,7 +147,7 @@ namespace API.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     DateUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreatedUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Data = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "{\"TotalMinutesRead\":0,\"TotalPagesRead\":0,\"TotalWordsRead\":0,\"LongestSessionMinutes\":0}"),
+                    Data = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "{\"TotalMinutesRead\":0,\"TotalPagesRead\":0,\"TotalWordsRead\":0,\"LongestSessionMinutes\":0,\"SeriesIds\":null,\"ChapterIds\":null}"),
                     ClientInfoUsed = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "[]"),
                     AppUserId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -141,7 +173,6 @@ namespace API.Data.Migrations
                     EndTime = table.Column<DateTime>(type: "TEXT", nullable: true),
                     EndTimeUtc = table.Column<DateTime>(type: "TEXT", nullable: true),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: true),
-                    ActivityData = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "[]"),
                     Created = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreatedUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
                     LastModified = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -186,6 +217,55 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppUserReadingSessionActivityData",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AppUserReadingSessionId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ChapterId = table.Column<int>(type: "INTEGER", nullable: false),
+                    VolumeId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SeriesId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LibraryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    StartPage = table.Column<int>(type: "INTEGER", nullable: false),
+                    EndPage = table.Column<int>(type: "INTEGER", nullable: false),
+                    StartBookScrollId = table.Column<string>(type: "TEXT", nullable: true),
+                    EndBookScrollId = table.Column<string>(type: "TEXT", nullable: true),
+                    StartTime = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    StartTimeUtc = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    EndTimeUtc = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    PagesRead = table.Column<int>(type: "INTEGER", nullable: false),
+                    WordsRead = table.Column<int>(type: "INTEGER", nullable: false),
+                    TotalPages = table.Column<int>(type: "INTEGER", nullable: false),
+                    TotalWords = table.Column<long>(type: "INTEGER", nullable: false),
+                    DeviceIds = table.Column<string>(type: "TEXT", nullable: false),
+                    ClientInfo = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppUserReadingSessionActivityData", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppUserReadingSessionActivityData_AppUserReadingSession_AppUserReadingSessionId",
+                        column: x => x.AppUserReadingSessionId,
+                        principalTable: "AppUserReadingSession",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AppUserReadingSessionActivityData_Chapter_ChapterId",
+                        column: x => x.ChapterId,
+                        principalTable: "Chapter",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AppUserReadingSessionActivityData_Series_SeriesId",
+                        column: x => x.SeriesId,
+                        principalTable: "Series",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ClientDeviceHistory",
                 columns: table => new
                 {
@@ -205,6 +285,22 @@ namespace API.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserAuthKey_AppUserId",
+                table: "AppUserAuthKey",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserAuthKey_ExpiresAtUtc",
+                table: "AppUserAuthKey",
+                column: "ExpiresAtUtc");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserAuthKey_Key",
+                table: "AppUserAuthKey",
+                column: "Key",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppUserReadingHistory_AppUserId",
@@ -228,6 +324,21 @@ namespace API.Data.Migrations
                 column: "IsActive");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppUserReadingSessionActivityData_AppUserReadingSessionId",
+                table: "AppUserReadingSessionActivityData",
+                column: "AppUserReadingSessionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserReadingSessionActivityData_ChapterId",
+                table: "AppUserReadingSessionActivityData",
+                column: "ChapterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserReadingSessionActivityData_SeriesId",
+                table: "AppUserReadingSessionActivityData",
+                column: "SeriesId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ClientDevice_AppUserId",
                 table: "ClientDevice",
                 column: "AppUserId");
@@ -242,13 +353,19 @@ namespace API.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AppUserAuthKey");
+
+            migrationBuilder.DropTable(
                 name: "AppUserReadingHistory");
 
             migrationBuilder.DropTable(
-                name: "AppUserReadingSession");
+                name: "AppUserReadingSessionActivityData");
 
             migrationBuilder.DropTable(
                 name: "ClientDeviceHistory");
+
+            migrationBuilder.DropTable(
+                name: "AppUserReadingSession");
 
             migrationBuilder.DropTable(
                 name: "ClientDevice");
@@ -284,6 +401,10 @@ namespace API.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "TotalReads",
                 table: "AppUserProgresses");
+
+            migrationBuilder.DropColumn(
+                name: "PromptForRereadsAfter",
+                table: "AppUserPreferences");
 
             migrationBuilder.DropColumn(
                 name: "Created",

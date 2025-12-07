@@ -11,11 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace API.Migrations
+namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251206134621_PromptForRereadsAfter")]
-    partial class PromptForRereadsAfter
+    [Migration("20251207204514_StatsRevampPartOne")]
+    partial class StatsRevampPartOne
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
