@@ -767,7 +767,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Updates the TOC current page anchor, last scene path and saves progress
    */
-  handleScrollEvent() {
+  handleScrollEvent(bypassSave: boolean = false) {
 
     // TODO: See if we can move this to a service for ToC
     // Highlight the current chapter we are on
@@ -791,7 +791,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.lastSeenScrollPartPath = xpath; // Keep this scoped so we can appropriately handle before saving
     }
 
-    if (this.lastSeenScrollPartPath !== '') {
+    if (this.lastSeenScrollPartPath !== '' && !bypassSave) {
       this.saveProgress();
 
       if (this.debugMode()) {
@@ -1451,7 +1451,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // we need to click the document before arrow keys will scroll down.
     this.reader.nativeElement.focus();
-    afterFrame(() => this.handleScrollEvent()); // Will set lastSeenXPath and save progress
+    afterFrame(() => this.handleScrollEvent(true)); // Will set lastSeenXPath
     this.isLoading.set(false);
     this.cdRef.markForCheck();
 
