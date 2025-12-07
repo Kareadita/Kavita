@@ -6,6 +6,7 @@ import {PieChartModule} from "@swimlane/ngx-charts";
 import {MangaFormat} from "../../../_models/manga-format";
 import {StatsFilter} from "../../_models/stats-filter";
 import {PieChartComponent} from "../../../shared/_charts/pie-chart/pie-chart.component";
+import {StatCount} from "../../_models/stat-count";
 
 @Component({
   selector: 'app-preferred-format',
@@ -46,8 +47,8 @@ export class PreferredFormatComponent {
 
   data = computed(() => this.formatsResource.hasValue() ?  this.formatsResource.value() : []);
 
-  valueTransformer(v: any) {
-    return this.pipe.transform(v);
+  valueTransformer(v: StatCount<MangaFormat>) {
+    return this.pipe.transform(v.value);
   }
 
 }

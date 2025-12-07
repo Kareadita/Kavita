@@ -1,14 +1,14 @@
-import {ChangeDetectionStrategy, Component, inject, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, model, OnInit} from '@angular/core';
 import {DeviceService} from "../../_services/device.service";
 import {ClientDevice} from "../../_models/client-device";
 import {ClientDeviceCardComponent} from "../../_single-module/client-device-card/client-device-card.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {PieChartModule} from "@swimlane/ngx-charts";
-import {PieDataItem} from "../../statistics/_models/pie-data-item";
 import {StatisticsService} from "../../_services/statistics.service";
 import {ClientDeviceClientTypePipe} from "../../_pipes/client-device-client-type.pipe";
 import {ClientDeviceTypePipe} from "../../_pipes/client-device-type.pipe";
+import {PieChartComponent} from "../../shared/_charts/pie-chart/pie-chart.component";
+import {StatCount} from "../../statistics/_models/stat-count";
 
 @Component({
   selector: 'app-server-devices',
@@ -16,47 +16,44 @@ import {ClientDeviceTypePipe} from "../../_pipes/client-device-type.pipe";
     ClientDeviceCardComponent,
     LoadingComponent,
     TranslocoDirective,
-    PieChartModule
+    PieChartComponent
   ],
   templateUrl: './server-devices.component.html',
   styleUrl: './server-devices.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ServerDevicesComponent {
+export class ServerDevicesComponent implements OnInit {
 
   private readonly deviceService = inject(DeviceService);
   private readonly statsService = inject(StatisticsService);
 
-  clientDevices = model<ClientDevice[]>([]);
-  clientDeviceTypeBreakdown = model<PieDataItem[]>([]);
-  mobileVsDesktop = model<PieDataItem[]>([]);
+  private readonly clientDeviceClientTypePipe = new ClientDeviceClientTypePipe();
+  private readonly clientDeviceTypePipe = new ClientDeviceTypePipe();
 
-  constructor() {
+  clientDevices = model<ClientDevice[]>([]);
+  clientDeviceTypeBreakdown = model<StatCount<number>[]>([]);
+  mobileVsDesktop = model<StatCount<string>[]>([]);
+
+  ngOnInit() {
     this.deviceService.getAllDevices().subscribe(devices => {
       this.clientDevices.set([...devices]);
     });
 
     this.statsService.getClientDeviceBreakdown().subscribe(clientDeviceBreakdown => {
-      const pipe = new ClientDeviceClientTypePipe();
-      this.clientDeviceTypeBreakdown.set(
-        clientDeviceBreakdown.records.map(record => ({
-          name: pipe.transform(record.value),
-          value: record.count,
-          extra: { clientType: record.value }
-        }))
-      );
+      this.clientDeviceTypeBreakdown.set(clientDeviceBreakdown.records);
     });
 
     this.statsService.getClientDeviceTypeCounts().subscribe(data => {
-      const pipe = new ClientDeviceTypePipe();
-      this.mobileVsDesktop.set(
-        data.map(record => ({
-          name: pipe.transform(record.value),
-          value: record.count,
-          extra: { clientType: record.value }
-        }))
-      );
+      this.mobileVsDesktop.set(data);
     });
+  }
+
+  clientDeviceClientTypeTransformer(r: StatCount<number>) {
+    return this.clientDeviceClientTypePipe.transform(r.value);
+  }
+
+  clientDeviceTypeTransformer(r: StatCount<string>) {
+    return this.clientDeviceTypePipe.transform(r.value);
   }
 
 

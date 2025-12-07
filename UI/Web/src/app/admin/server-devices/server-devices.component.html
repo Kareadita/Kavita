@@ -12,11 +12,11 @@
   <div class="row">
     <div class="col-md-6 col-sm-12" style="height: 400px">
       <h4>{{t('client-devices-this-month-header')}}</h4>
-      <ngx-charts-advanced-pie-chart [results]="clientDeviceTypeBreakdown()" />
+      <app-pie-chart [data]="clientDeviceTypeBreakdown()" [valueTransformer]="clientDeviceClientTypeTransformer.bind(this)" />
     </div>
     <div class="col-md-6 col-sm-12" style="height: 400px">
       <h4>{{t('client-devices-mobile-vs-pc-header')}}</h4>
-      <ngx-charts-advanced-pie-chart [results]="mobileVsDesktop()" />
+      <app-pie-chart [data]="mobileVsDesktop()" [valueTransformer]="clientDeviceTypeTransformer.bind(this)" />
     </div>
   </div>
 

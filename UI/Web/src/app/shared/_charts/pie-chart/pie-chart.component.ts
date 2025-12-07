@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
 import {ThemeService} from "../../../_services/theme.service";
+import {StatCount} from "../../../statistics/_models/stat-count";
 
 @Component({
   selector: 'app-pie-chart',
@@ -11,12 +12,12 @@ import {ThemeService} from "../../../_services/theme.service";
   styleUrl: './pie-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PieChartComponent {
+export class PieChartComponent<T> {
 
   private readonly themeService = inject(ThemeService);
 
-  data = input.required<any[]>();
-  valueTransformer = input.required<(v: any) => string>();
+  data = input.required<StatCount<T>[]>();
+  valueTransformer = input.required<(v: StatCount<T>) => string>();
 
   options = computed<ECOption>(() => {
     return {
@@ -41,7 +42,7 @@ export class PieChartComponent {
         data: (this.data() || []).map(r => {
           return {
             value: r.count,
-            name: this.valueTransformer()(r.value)
+            name: this.valueTransformer()(r)
           }
         }),
         label: {
