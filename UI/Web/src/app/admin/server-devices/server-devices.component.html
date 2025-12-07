@@ -10,12 +10,12 @@
 
   <!--Client Type Breakdown - Percentage distribution (Web App vs OPDS vs KOReader, etc.)-->
   <div class="row">
-    <div class="col-auto" style="height: 400px">
-      <h4>Client Devices this Month</h4>
+    <div class="col-md-6 col-sm-12" style="height: 400px">
+      <h4>{{t('client-devices-this-month-header')}}</h4>
       <ngx-charts-advanced-pie-chart [results]="clientDeviceTypeBreakdown()" />
     </div>
-    <div class="col-auto" style="height: 400px">
-      <h4>Mobile vs PC this Month</h4>
+    <div class="col-md-6 col-sm-12" style="height: 400px">
+      <h4>{{t('client-devices-mobile-vs-pc-header')}}</h4>
       <ngx-charts-advanced-pie-chart [results]="mobileVsDesktop()" />
     </div>
   </div>
@@ -26,7 +26,7 @@
   <h3 class="my-3">{{t('client-devices-header')}}</h3>
   <div class="row">
     @for(clientDevice of clientDevices(); track clientDevice) {
-      <div class="col-auto mb-4">
+      <div class="col-md-6 col-sm-12 mb-4">
         <app-client-device-card [clientDevice]="clientDevice" />
       </div>
     } @empty {
