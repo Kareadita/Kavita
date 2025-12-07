@@ -889,7 +889,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      await this.init();
+      await this.init(true);
     });
 
 
@@ -905,7 +905,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe();
   }
 
-  async init() {
+  async init(firstLoad: boolean) {
     this.nextChapterId = CHAPTER_ID_NOT_FETCHED;
     this.prevChapterId = CHAPTER_ID_NOT_FETCHED;
     this.nextChapterDisabled = false;
@@ -943,7 +943,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }).subscribe({
         next: ({chapter, progress, chapters}) => {
           this.authorText.set(chapter.writers.map(p => p.name).join(', '));
-          this.setupBookReader(chapter, progress, chapters);
+          this.setupBookReader(chapter, progress, chapters, firstLoad);
         },
         error: () => {
           setTimeout(() => {
@@ -954,7 +954,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private setupBookReader(chapter: Chapter, progress: ProgressBookmark, chapters: BookChapterItem[]) {
+  private setupBookReader(chapter: Chapter, progress: ProgressBookmark, chapters: BookChapterItem[], firstLoad: boolean) {
     this.chapter = chapter;
     this.volumeId = chapter.volumeId;
     this.chapters = chapters;
@@ -974,7 +974,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     if (this.pageNum() >= this.maxPages()) {
-      this.pageNum.set(this.maxPages() - 1);
+      const newPageNum = firstLoad ? this.maxPages() - 1 : 0;
+      this.pageNum.set(newPageNum);
       this.saveProgress();
     }
 
@@ -1107,7 +1108,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (prevChapter != this.chapterId) {
       if (prevChapter !== undefined) {
         this.chapterId = prevChapter;
-        this.init();
+        this.init(false);
         return;
       }
     }
@@ -1141,7 +1142,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
       this.cdRef.markForCheck();
-      this.init();
+      this.init(false);
       return;
     }
 
