@@ -471,6 +471,24 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
                     .SetProperty(x => x.LastModified, DateTime.Now)
                     .SetProperty(x => x.LastModifiedUtc, DateTime.UtcNow));
 
+            // Ensure we increment total reads for any closed sessions
+            var chapterIds = await context.AppUserReadingSession
+                .Where(s => sessionIds.Contains(s.Id))
+                .Include(s => s.ActivityData)
+                .SelectMany(s => s.ActivityData
+                    .Where(d => d.EndPage >= d.TotalPages)
+                    .Select(d => d.ChapterId))
+                .Distinct()
+                .ToListAsync();
+
+            if (chapterIds.Count > 0)
+            {
+                await context.AppUserProgresses
+                    .Where(p => chapterIds.Contains(p.ChapterId))
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(x => x.TotalReads, x => x.TotalReads + 1));
+            }
+
             foreach (var sessionId in sessionIds)
             {
                 await ClearSessionChapterCaches(sessionId);
