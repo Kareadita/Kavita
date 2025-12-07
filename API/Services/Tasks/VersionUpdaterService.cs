@@ -76,6 +76,10 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     /// The latest release cache
     /// </summary>
     private readonly string _cacheLatestReleaseFilePath;
+    private readonly string _cacheNightlyInfoFilePath;
+    private readonly string _cacheCommitsFilePath;
+    private readonly string _cachePrInfoDirectory;
+
     private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
@@ -83,8 +87,14 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         _logger = logger;
         _eventHub = eventHub;
+
         _cacheFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_releases_cache.json");
         _cacheLatestReleaseFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_latest_release_cache.json");
+        _cacheNightlyInfoFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_nightly_cache.json");
+        _cacheCommitsFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_commits_cache.json");
+
+        _cachePrInfoDirectory = Path.Combine(directoryService.LongTermCacheDirectory, "pr_cache");
+        directoryService.ExistOrCreate(_cachePrInfoDirectory);
 
         FlurlConfiguration.ConfigureClientForUrl(GithubLatestReleasesUrl);
         FlurlConfiguration.ConfigureClientForUrl(GithubAllReleasesUrl);
@@ -179,12 +189,32 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
     private async Task<PullRequestInfo?> FetchPullRequestInfo(int prNumber)
     {
+        var cacheFile = Path.Combine(_cachePrInfoDirectory, $"pr_{prNumber}.json");
+
+        if (File.Exists(cacheFile))
+        {
+            var fileInfo = new FileInfo(cacheFile);
+            if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= TimeSpan.FromDays(7)) // PRs don't change
+            {
+                var cachedData = await File.ReadAllTextAsync(cacheFile);
+                return JsonSerializer.Deserialize<PullRequestInfo>(cachedData);
+            }
+        }
+
         try
         {
-            return await $"{GithubPullsUrl}{prNumber}"
+            var prInfo = await $"{GithubPullsUrl}{prNumber}"
                 .WithHeader(HeaderNames.Accept, "application/json")
                 .WithHeader(HeaderNames.UserAgent, "Kavita")
                 .GetJsonAsync<PullRequestInfo>();
+
+            // Cache the result
+            var tempPath = $"{cacheFile}.tmp";
+            var json = JsonSerializer.Serialize(prInfo, JsonOptions);
+            await File.WriteAllTextAsync(tempPath, json);
+            File.Move(tempPath, cacheFile, overwrite: true);
+
+            return prInfo;
         }
         catch (Exception ex)
         {
@@ -195,6 +225,12 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
     private async Task<List<NightlyInfo>> GetNightlyReleases(Version currentVersion, Version latestStableVersion)
     {
+        var cached = await TryGetCachedNightlyInfo();
+        if (cached != null)
+        {
+            return cached.Where(n => Version.Parse(n.Version) > latestStableVersion).ToList();
+        }
+
         try
         {
             var nightlyReleases = new List<NightlyInfo>();
@@ -205,7 +241,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                 .GetJsonAsync<IList<CommitInfo>>();
 
             var commitList = commits.ToList();
-            bool foundLastStable = false;
+            var foundLastStable = false;
 
             for (var i = 0; i < commitList.Count - 1; i++)
             {
@@ -266,6 +302,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                     }
                 }
             }
+
+            await CacheNightlyInfoAsync(nightlyReleases);
 
             return nightlyReleases.OrderByDescending(x => x.Date).ToList();
         }
@@ -396,9 +434,14 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         try
         {
-            // BUG: This can throw an exception due to the file being in-use. Should use a temp file and move it instead.
+            var tempPath = Path.Combine(Path.GetDirectoryName(_cacheFilePath)!,
+                $"{Path.GetFileName(_cacheFilePath)}.tmp");
+
             var json = JsonSerializer.Serialize(updates, JsonOptions);
-            await File.WriteAllTextAsync(_cacheFilePath, json);
+            await File.WriteAllTextAsync(tempPath, json);
+
+            // Atomic replace - handles file in use scenarios
+            File.Move(tempPath, _cacheFilePath, overwrite: true);
         }
         catch (Exception ex)
         {
@@ -410,8 +453,13 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         try
         {
+            var tempPath = Path.Combine(Path.GetDirectoryName(_cacheLatestReleaseFilePath)!,
+                $"{Path.GetFileName(_cacheLatestReleaseFilePath)}.tmp");
+
             var json = JsonSerializer.Serialize(update, JsonOptions);
-            await File.WriteAllTextAsync(_cacheLatestReleaseFilePath, json);
+            await File.WriteAllTextAsync(tempPath, json);
+
+            File.Move(tempPath, _cacheLatestReleaseFilePath, overwrite: true);
         }
         catch (Exception ex)
         {
@@ -458,6 +506,13 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         {
             File.Delete(_cacheFilePath);
             File.Delete(_cacheLatestReleaseFilePath);
+            File.Delete(_cacheNightlyInfoFilePath);
+            File.Delete(_cacheCommitsFilePath);
+
+            if (!Directory.Exists(_cachePrInfoDirectory)) return;
+
+            Directory.Delete(_cachePrInfoDirectory, recursive: true);
+            Directory.CreateDirectory(_cachePrInfoDirectory);
         } catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to clear Github cache");
@@ -616,6 +671,38 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         }
 
         return item;
+    }
+
+    private async Task<List<NightlyInfo>?> TryGetCachedNightlyInfo()
+    {
+        if (!File.Exists(_cacheNightlyInfoFilePath)) return null;
+
+        var fileInfo = new FileInfo(_cacheNightlyInfoFilePath);
+        if (DateTime.UtcNow - fileInfo.LastWriteTimeUtc <= CacheDuration)
+        {
+            var cachedData = await File.ReadAllTextAsync(_cacheNightlyInfoFilePath);
+            return JsonSerializer.Deserialize<List<NightlyInfo>>(cachedData);
+        }
+
+        return null;
+    }
+
+    private async Task CacheNightlyInfoAsync(List<NightlyInfo> nightlyInfo)
+    {
+        try
+        {
+            var tempPath = Path.Combine(Path.GetDirectoryName(_cacheNightlyInfoFilePath)!,
+                $"{Path.GetFileName(_cacheNightlyInfoFilePath)}.tmp");
+
+            var json = JsonSerializer.Serialize(nightlyInfo, JsonOptions);
+            await File.WriteAllTextAsync(tempPath, json);
+
+            File.Move(tempPath, _cacheNightlyInfoFilePath, overwrite: true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to cache nightly info");
+        }
     }
 
     private sealed class PullRequestInfo

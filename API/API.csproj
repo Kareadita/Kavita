@@ -129,7 +129,7 @@
     <None Remove="config\kavita.db" />
     <None Remove="config\covers\**" />
     <None Remove="wwwroot\**" />
-    <None Remove="cache\cache-long\**" />
+    <None Remove="config\cache\cache-long\**" />
     <None Remove="config\cache\**" />
     <None Remove="config\logs\**" />
     <None Remove="config\covers\**" />
