@@ -22,6 +22,7 @@ public class ReadingSessionRepository(DataContext context, IMapper mapper) : IRe
             .Where(s => !isActiveOnly || s.IsActive);
 
         var sessions = await query
+            .Include(s => s.ActivityData)
             .Include(s => s.AppUser)
             .ToListAsync();
 

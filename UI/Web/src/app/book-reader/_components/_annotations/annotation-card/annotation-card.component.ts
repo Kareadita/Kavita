@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   effect,
   EventEmitter,
   inject,
@@ -58,7 +57,6 @@ export class AnnotationCardComponent {
   private readonly highlightSlotPipe = new SlotColorPipe();
   protected readonly accountService = inject(AccountService);
   private readonly messageHub = inject(MessageHubService);
-  private readonly destroyRef = inject(DestroyRef);
 
   annotation = model.required<Annotation>();
   allowEdit = input<boolean>(true);
