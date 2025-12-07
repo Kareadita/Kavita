@@ -8,12 +8,12 @@ public enum ClientDevicePlatform
     Unknown = 0,
     [Description("Windows")]
     Windows = 1,
-    [Description("MacOs")]
+    [Description("macOS")]
     MacOs = 2,
     [Description("IOs")]
     Ios = 3,
     [Description("Linux")]
     Linux = 4,
     [Description("Android")]
-    Android = 5
+    Android = 5,
 }

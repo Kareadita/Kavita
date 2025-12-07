@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Entities.Enums;
 using API.Entities.Progress;
+using API.Extensions;
 using API.Helpers;
 using API.Services.Reading;
 using API.Services.Store;
@@ -47,7 +48,6 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
             parsed.IpAddress = ipAddress;
             parsed.AuthType = authType;
             parsed.CapturedAt = DateTime.UtcNow;
-            parsed.Platform = platform;
 
             return parsed;
         }
@@ -75,13 +75,16 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
 
             if (match.Success)
             {
+                // We can ignore if it fails or not as the default will be Unknown, which is fine
+                EnumExtensions.TryParse<ClientDevicePlatform>(match.Groups["platform"].Value, out var clientDevicePlatform);
+
                 return new ClientInfoData
                 {
                     ClientType = ClientDeviceType.WebApp,
                     AppVersion = match.Groups["appVersion"].Value,
                     Browser = match.Groups["browser"].Value,
                     BrowserVersion = match.Groups["browserVersion"].Value,
-                    Platform = Enum.Parse<ClientDevicePlatform>(match.Groups["platform"].Value),
+                    Platform = clientDevicePlatform,
                     DeviceType = match.Groups["deviceType"].Value,
                     ScreenWidth = int.Parse(match.Groups["screenWidth"].Value),
                     ScreenHeight = int.Parse(match.Groups["screenHeight"].Value),
