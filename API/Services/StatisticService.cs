@@ -1333,7 +1333,12 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         {
             var randomChapters = await context.Chapter
                 .Where(c => m.ChapterIds.Contains(c.Id))
-                .ProjectTo<ChapterDto>(mapper.ConfigurationProvider)
+                .Select(c => new
+                {
+                    Chapter = c,
+                    SeriesId = c.Volume.Series.Id,
+                    LibraryId = c.Volume.Series.LibraryId,
+                })
                 .ToListAsync();
 
 
@@ -1342,7 +1347,13 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 AuthorId = m.PersonId,
                 AuthorName = m.AuthorName,
                 TotalChaptersRead = m.TotalChaptersRead,
-                Chapters = randomChapters,
+                Chapters = randomChapters.Select(x => new AuthorChapterDto
+                {
+                    LibraryId = x.LibraryId,
+                    SeriesId = x.SeriesId,
+                    ChapterId = x.Chapter.Id,
+                    Title = x.Chapter.TitleName, // TODO: Use that method that makes a smart title? Do we have that? Where it falls back to Chapter #3 or whatever
+                }).ToList(),
             });
         }
 

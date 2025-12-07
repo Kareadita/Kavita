@@ -44,14 +44,14 @@
 
         <div class="col-12 col-md-8 d-flex flex-wrap gap-2">
 
-          @for (chapter of fAuthor.chapters; track chapter.id) {
-            <div [ngbTooltip]="chapter.titleName">
+          @for (chapter of fAuthor.chapters; track chapter.chapterId) {
+            <div class="clickable" [routerLink]="`/library/${chapter.libraryId}/series/${chapter.seriesId}/chapter/${chapter.chapterId}`" [ngbTooltip]="chapter.title">
             <app-image
               objectFit="cover"
               [styles]="{ 'object-position': 'top' }"
               height="150px"
               width="150px"
-              [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+              [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)"
               [errorImage]="imageService.errorImage"
               [classes]="'rounded shadow-sm'"
             ></app-image>
