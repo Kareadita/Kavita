@@ -38,6 +38,8 @@ import {
 } from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 import {ConfirmService} from "../../../../shared/confirm.service";
 import {AnnotationLikesComponent} from "../../_annotations/annotation-likes/annotation-likes.component";
+import {ProfileIconComponent} from "../../../../_single-module/profile-icon/profile-icon.component";
+import {RouterLink} from "@angular/router";
 
 export enum AnnotationMode {
   View = 0,
@@ -61,7 +63,9 @@ const INIT_HIGHLIGHT_DELAY = 200;
     DatePipe,
     UtcToLocaleDatePipe,
     OffCanvasResizeComponent,
-    AnnotationLikesComponent
+    AnnotationLikesComponent,
+    ProfileIconComponent,
+    RouterLink
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',

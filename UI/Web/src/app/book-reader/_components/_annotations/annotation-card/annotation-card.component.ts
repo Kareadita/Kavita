@@ -27,6 +27,7 @@ import {AccountService} from "../../../../_services/account.service";
 import {EVENTS, MessageHubService} from "../../../../_services/message-hub.service";
 import {AnnotationUpdateEvent} from "../../../../_models/events/annotation-update-event";
 import {AnnotationLikesComponent} from "../annotation-likes/annotation-likes.component";
+import {ProfileIconComponent} from "../../../../_single-module/profile-icon/profile-icon.component";
 
 @Component({
   selector: 'app-annotation-card',
@@ -40,7 +41,8 @@ import {AnnotationLikesComponent} from "../annotation-likes/annotation-likes.com
     RouterLink,
     NgClass,
     NgbTooltip,
-    AnnotationLikesComponent
+    AnnotationLikesComponent,
+    ProfileIconComponent
   ],
   templateUrl: './annotation-card.component.html',
   styleUrl: './annotation-card.component.scss',

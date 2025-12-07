@@ -3,10 +3,15 @@
     <div #username class="card-header d-flex justify-content-between align-items-center py-2 px-3 clickable" [ngStyle]="{'background-color': titleColor()}" (click)="viewAnnotation()">
 
       <div class="d-flex align-items-center">
+
         @if (showLocationInformation()) {
-          <i tabindex="0" class="fas fa-book me-2" [ngbTooltip]="t('location-tooltip', {series: annotation().seriesName, library: annotation().libraryName})"></i>
+          <i tabindex="0" class="fas fa-book" [ngbTooltip]="t('location-tooltip', {series: annotation().seriesName, library: annotation().libraryName})"></i>
+        } @else { <!-- Displaying both looks really bad -->
+          <app-profile-icon [userId]="annotation().ownerUserId" />
         }
-        <strong [style.color]="colorscapeService.getContrastingTextColor(username)">{{ annotation().ownerUsername }}</strong>
+        <a class="ms-2" routerLink="/profile/{{annotation().ownerUserId}}" (click)="$event.stopPropagation()">
+          <strong [style.color]="colorscapeService.getContrastingTextColor(username)">{{ annotation().ownerUsername }}</strong>
+        </a>
       </div>
       <div [style.color]="colorscapeService.getContrastingTextColor(username)" class="ms-2">{{ annotation().createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
     </div>
