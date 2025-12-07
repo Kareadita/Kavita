@@ -9,8 +9,8 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
         <PackageReference Include="NSubstitute" Version="5.3.0" />
-        <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="22.0.16" />
-        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.0.16" />
+        <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="22.1.0" />
+        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.1.0" />
         <PackageReference Include="xunit" Version="2.9.3" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
