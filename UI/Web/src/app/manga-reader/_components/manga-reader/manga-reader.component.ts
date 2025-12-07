@@ -617,7 +617,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
 
-      this.init();
+      this.init(true);
 
       // Update implicit reading profile while changing settings
       this.generalSettingsForm.valueChanges.pipe(
@@ -1027,7 +1027,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 
-  init() {
+  init(firstLoad: boolean) {
     this.nextChapterId = CHAPTER_ID_NOT_FETCHED;
     this.prevChapterId = CHAPTER_ID_NOT_FETCHED;
     this.nextChapterDisabled = false;
@@ -1096,8 +1096,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
       let page = results.progress.pageNum;
-      if (page > this.maxPages) {
-        page = this.maxPages - 1;
+      if (page >= this.maxPages) {
+        page = !firstLoad ? 0 : this.maxPages - 1;
       }
 
       page = this.adjustPagesForDoubleRenderer(page);
@@ -1491,7 +1491,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (prevChapter != this.chapterId) {
       if (prevChapter !== undefined) {
         this.chapterId = prevChapter;
-        this.init();
+        this.init(false);
         return;
       }
     }
@@ -1516,7 +1516,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Load chapter Id onto route but don't reload
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
-      this.init();
+      this.init(false);
       const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
     } else {

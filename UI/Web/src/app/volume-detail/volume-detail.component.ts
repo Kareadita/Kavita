@@ -7,7 +7,7 @@ import {
   ElementRef,
   inject,
   model,
-  OnInit,
+  OnInit, signal,
   ViewChild
 } from '@angular/core';
 import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
@@ -223,7 +223,7 @@ export class VolumeDetailComponent implements OnInit {
   rating: number = 0;
   hasBeenRated: boolean = false;
   size: number = 0;
-  annotations = model<Annotation[]>([]);
+  annotations = signal<Annotation[]>([]);
   totalReads = computed(() => {
     const chapters = this.volume?.chapters || [];
     if (chapters.length === 0) return 0;
