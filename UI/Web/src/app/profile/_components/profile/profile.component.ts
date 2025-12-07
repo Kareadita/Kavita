@@ -45,6 +45,7 @@ import {ProfileStatBarComponent} from "../profile-stat-bar/profile-stat-bar.comp
 import {ProfileOverviewComponent} from "../profile-overview/profile-overview.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {FavoriteAuthorsComponent} from "../../../statistics/_components/favorite-authors/favorite-authors.component";
+import {ProfileStatsComponent} from "../profile-stats/profile-stats.component";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -56,8 +57,6 @@ enum TabID {
   selector: 'app-profile',
   standalone: true,
   imports: [
-    ReadingPaceComponent,
-    ActivityGraphComponent,
     TranslocoDirective,
     TimeAgoPipe,
     NgbNav,
@@ -65,24 +64,17 @@ enum TabID {
     NgbNavLink,
     NgbNavItem,
     NgbNavOutlet,
-    PreferredFormatComponent,
     TitleCasePipe,
-    StringBreakdownComponent,
     UtcToLocaleDatePipe,
-    BucketSpreadChartComponent,
     ReactiveFormsModule,
     ProfileImageComponent,
-    LibraryAndTimeSelectorComponent,
     LoadingComponent,
-    ReadsByMonthComponent,
     VirtualScrollerModule,
     NgxStarsModule,
     ProfileReviewListComponent,
-    AvgTimeSpendReadingByHourComponent,
-    ProfileStatBarComponent,
     ProfileOverviewComponent,
     CompactNumberPipe,
-    FavoriteAuthorsComponent,
+    ProfileStatsComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -103,29 +95,9 @@ export class ProfileComponent {
   userId = computed(() => this.memberInfo().id);
 
 
-  protected readonly genreBreakdown = this.statsService.getGenreBreakDownResource(() => this.filter(), () => this.userId());
-  protected readonly tagsBreakdown = this.statsService.getTagBreakDownResource(() => this.filter(), () => this.userId());
-  protected readonly wordSpreadResource = this.statsService.getWordSpread(() => this.filter(), () => this.userId());
-  protected readonly pageSpreadResource = this.statsService.getPageSpread(() => this.filter(), () => this.userId());
-  protected readonly readsByMonth = this.statsService.getReadsByMonths(() => this.filter(), () => this.userId());
-  protected readonly avgTimeSpendReadingByHour = this.statsService.getAvgTimeSpendReadingByHour(() => this.filter(), () => this.userId());
   protected readonly totalReadsResource = this.statsService.getTotalReads(() => this.userId());
 
   activeTabId = TabID.Overview;
-
-
-  filterForm = new FormGroup<LibraryAndTimeFilterGroup>({
-    timeFilter: new FormGroup({
-      startDate: new FormControl<Date | null>(null),
-      endDate: new FormControl<Date | null>(null),
-    }),
-    libraries: new FormControl<number[]>([], { nonNullable: true }),
-  });
-
-  filter = toSignal(this.filterForm.valueChanges.pipe(
-    map(value => value as StatsFilter),
-  ));
-  year = computed(() => this.filter()?.timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
 
   totalReads = computed(() => {
     if (!this.totalReadsResource.hasValue()) {

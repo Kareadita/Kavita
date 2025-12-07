@@ -1,0 +1,64 @@
+<ng-container *transloco="let t; prefix: 'profile'">
+  <app-library-and-time-selector [filterForm]="filterForm" [userId]="userId()" [label]="t('stats-title', {username: username(), libraryName: ''})" />
+  @let filterValue = filter();
+
+  @if (filterValue) {
+
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <app-profile-stat-bar [userId]="userId()" [year]="year()" [filter]="filterValue" />
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <app-activity-graph [userId]="userId()" [year]="year()" [filter]="filterValue" />
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <app-reads-by-month [userName]="username()" [readsByMonthResource]="readsByMonth" />
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <app-avg-time-spend-reading-by-hour [userName]="username()" [timeByHourResource]="avgTimeSpendReadingByHour" />
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <app-reading-pace [userId]="userId()" [year]="year()" [userName]="username()"  [filter]="filterValue" />
+      </div>
+      <div class="col-md-6">
+        <app-preferred-format [filter]="filterValue" [userId]="userId()" [userName]="username()" />
+      </div>
+    </div>
+
+    <!--TODO: In the component, use defer to avoid extra loading on the initial page-->
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <app-string-breakdown [userId]="userId()" [userName]="username()" [breakDown]="genreBreakdown" translationKey="genre-breakdown" />
+      </div>
+      <div class="col-md-6">
+        <app-string-breakdown [userId]="userId()" [userName]="username()" [breakDown]="tagsBreakdown" translationKey="tag-breakdown" />
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <app-bucket-spread-chart [userId]="userId()" [userName]="username()" [bucketSpreadResource]="pageSpreadResource" endRangeFallback="1000+" translationKey="page-spread" />
+      </div>
+      <div class="col-md-6">
+        <app-bucket-spread-chart [userId]="userId()" [userName]="username()" [bucketSpreadResource]="wordSpreadResource" translationKey="word-spread" />
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <app-favorite-authors [userId]="userId()" [userName]="username()" [statsFilter]="filterValue" />
+    </div>
+  }
+</ng-container>
