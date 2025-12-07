@@ -9,11 +9,7 @@
       <h6 class="stats-subtitle">{{t('sub-title', {name: userName(), format: mostReadFormat()})}}</h6>
     }
 
-    <div style="height: 300px; width: 100%"
-         appECharts
-         [options]="options()"
-         [ignoreFirstResize]="false"
-    ></div>
+    <app-pie-chart [data]="data()" [valueTransformer]="valueTransformer.bind(this)" />
   </div>
 
 </ng-container>

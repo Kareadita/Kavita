@@ -7,13 +7,15 @@ import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive
 import {ThemeService} from "../../../_services/theme.service";
 import {MangaFormat} from "../../../_models/manga-format";
 import {StatsFilter} from "../../_models/stats-filter";
+import {PieChartComponent} from "../../../shared/_charts/pie-chart/pie-chart.component";
 
 @Component({
   selector: 'app-preferred-format',
   imports: [
     TranslocoDirective,
     PieChartModule,
-    EChartsDirective
+    EChartsDirective,
+    PieChartComponent
   ],
   templateUrl: './preferred-format.component.html',
   styleUrl: './preferred-format.component.scss',
@@ -22,7 +24,7 @@ import {StatsFilter} from "../../_models/stats-filter";
 export class PreferredFormatComponent {
 
   private readonly statsService = inject(StatisticsService);
-  private readonly themeService = inject(ThemeService);
+  private readonly pipe = new MangaFormatPipe();
 
   userName = input.required<string>();
   userId = input.required<number>();
@@ -33,53 +35,20 @@ export class PreferredFormatComponent {
 
   mostReadFormat = computed(() => {
     if (this.formatsResource.hasValue()) {
-      const pipe = new MangaFormatPipe();
 
       const format = this.formatsResource.value()!.reduce((prev, cur) =>
         prev.count > cur.count ? prev : cur, {count: -1, value: MangaFormat.UNKNOWN}).value;
 
-      return pipe.transform(format);
+      return this.pipe.transform(format);
     }
 
     return null;
-  })
-
-  options = computed<ECOption>(() => {
-    const data = this.formatsResource.hasValue() ?  this.formatsResource.value() : [];
-    const pipe = new MangaFormatPipe();
-
-    return {
-      name: 'Format',
-      legend: {
-        top: '5%',
-        left: 'center',
-        textStyle: {
-          color: this.themeService.getCssVariable('--body-text-color'),
-        }
-      },
-      tooltip: {
-        trigger: 'item'
-      },
-      series: [{
-        type: 'pie',
-        radius: ['40%', '70%'],
-        center: ['50%', '70%'],
-        startAngle: 180,
-        endAngle: 360,
-        color: this.themeService.chartsColourPalette(),
-        data: (data || []).map(r => {
-          return {
-            value: r.count,
-            name: pipe.transform(r.value)
-          }
-        }),
-        label: {
-          color: this.themeService.getCssVariable('--body-text-color'),
-        }
-      }],
-    };
   });
 
+  data = computed(() => this.formatsResource.hasValue() ?  this.formatsResource.value() : []);
 
+  valueTransformer(v: any) {
+    return this.pipe.transform(v);
+  }
 
 }

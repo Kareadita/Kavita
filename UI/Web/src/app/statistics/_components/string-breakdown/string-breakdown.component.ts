@@ -1,9 +1,9 @@
 import {ChangeDetectionStrategy, Component, computed, input, Resource} from '@angular/core';
 import {Breakdown} from "../../_models/breakdown";
 import {StatCount} from "../../_models/stat-count";
-import {BarChartComponent} from "../bar-chart/bar-chart.component";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {BarChartComponent} from "../../../shared/_charts/bar-chart/bar-chart.component";
 
 @Component({
   selector: 'app-string-breakdown',

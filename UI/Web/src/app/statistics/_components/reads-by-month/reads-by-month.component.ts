@@ -1,9 +1,9 @@
 import {ChangeDetectionStrategy, Component, computed, input, Resource} from '@angular/core';
 import {StatCount} from "../../_models/stat-count";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {LineChartComponent} from "../line-chart/line-chart.component";
 import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
 import {DecimalPipe} from "@angular/common";
+import {LineChartComponent} from "../../../shared/_charts/line-chart/line-chart.component";
 
 @Component({
   selector: 'app-reads-by-month',

@@ -1,9 +1,9 @@
 import {ChangeDetectionStrategy, Component, computed, input, Resource} from '@angular/core';
 import {StatCount} from "../../_models/stat-count";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {BarChartComponent} from "../bar-chart/bar-chart.component";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {BarChartComponent} from "../../../shared/_charts/bar-chart/bar-chart.component";
 
 export type ReadTimeByHour = {
   dataSince: string,

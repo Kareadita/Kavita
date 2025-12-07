@@ -2,9 +2,9 @@ import {ChangeDetectionStrategy, Component, computed, input, Resource} from '@an
 import {StatBucket} from "../../_models/stats/stat-bucket";
 import {SpreadStats} from "../../_models/stats/spread-stats";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {BarChartComponent, ToolTipFormatterContext} from "../bar-chart/bar-chart.component";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {BarChartComponent, ToolTipFormatterContext} from "../../../shared/_charts/bar-chart/bar-chart.component";
 
 @Component({
   selector: 'app-bucket-spread-chart',
