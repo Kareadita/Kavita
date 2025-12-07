@@ -20,12 +20,10 @@ namespace API.Tests.Services;
 public class DeviceTrackingServiceTests : AbstractDbTest
 {
     private readonly ILogger<DeviceTrackingService> _logger;
-    private readonly HybridCache _cache;
 
     public DeviceTrackingServiceTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
         _logger = Substitute.For<ILogger<DeviceTrackingService>>();
-        _cache = Substitute.For<HybridCache>();
     }
 
     #region TrackDeviceAsync Tests
@@ -33,10 +31,10 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task TrackDeviceAsync_ReturnsDeviceId_FromClientDeviceService()
     {
-
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var user = new AppUserBuilder("testuser", "test@localhost").Build();
         context.AppUser.Add(user);
@@ -46,14 +44,14 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         var expectedDevice = CreateDevice(user.Id, 123);
 
         // Setup cache to miss and invoke the factory
-        _cache.GetOrCreateAsync(
-                Arg.Any<string>(),
-                Arg.Any<(int, ClientInfoData, string?, IClientDeviceService)>(),
-                Arg.Any<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(),
-                Arg.Any<HybridCacheEntryOptions?>(),
-                Arg.Any<string[]?>(),
-                Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
+        cache.GetOrCreateAsync<(int, ClientInfoData, string?, IClientDeviceService), int>(
+                default,
+                default,
+                default!,
+                default,
+                default,
+                default)
+            .ReturnsForAnyArgs(callInfo =>
             {
                 var state = callInfo.ArgAt<(int, ClientInfoData, string?, IClientDeviceService)>(1);
                 var factory = callInfo.ArgAt<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(2);
@@ -82,10 +80,10 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     [Fact]
     public async Task TrackDeviceAsync_CachesDeviceId_WithCorrectKey()
     {
-
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var user = new AppUserBuilder("testuser", "test@localhost").Build();
         context.AppUser.Add(user);
@@ -95,14 +93,14 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         var device = CreateDevice(user.Id, 123);
 
 
-        _cache.GetOrCreateAsync(
-                Arg.Any<string>(),
-                Arg.Any<(int, ClientInfoData, string?, IClientDeviceService)>(),
-                Arg.Any<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(),
-                Arg.Any<HybridCacheEntryOptions?>(),
-                Arg.Any<string[]?>(),
-                Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
+        cache.GetOrCreateAsync<(int, ClientInfoData, string?, IClientDeviceService), int>(
+                default,
+                default,
+                default!,
+                default,
+                default,
+                default)
+            .ReturnsForAnyArgs(callInfo =>
             {
                 var state = callInfo.ArgAt<(int, ClientInfoData, string?, IClientDeviceService)>(1);
                 var factory = callInfo.ArgAt<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(2);
@@ -120,7 +118,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         await service.TrackDeviceAsync(user.Id, clientInfo, "device-123", CancellationToken.None);
 
         // Assert - Verify cache was called with correct key
-        await _cache.Received(1).GetOrCreateAsync(
+        await cache.Received(1).GetOrCreateAsync(
             $"device_tracking_{user.Id}_device-123",
             Arg.Any<object?>(),
             Arg.Any<Func<object?, CancellationToken, ValueTask<int>>>(),
@@ -134,9 +132,10 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     public async Task TrackDeviceAsync_UsesUnknownInCacheKey_WhenClientDeviceIdNull()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var user = new AppUserBuilder("testuser", "test@localhost").Build();
         context.AppUser.Add(user);
@@ -145,14 +144,14 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         var clientInfo = CreateClientInfo();
         var device = CreateDevice(user.Id, 456);
 
-        _cache.GetOrCreateAsync(
-                Arg.Any<string>(),
-                Arg.Any<(int, ClientInfoData, string?, IClientDeviceService)>(),
-                Arg.Any<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(),
-                Arg.Any<HybridCacheEntryOptions?>(),
-                Arg.Any<string[]?>(),
-                Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
+        cache.GetOrCreateAsync<(int, ClientInfoData, string?, IClientDeviceService), int>(
+                default,
+                default,
+                default!,
+                default,
+                default,
+                default)
+            .ReturnsForAnyArgs(callInfo =>
             {
                 var state = callInfo.ArgAt<(int, ClientInfoData, string?, IClientDeviceService)>(1);
                 var factory = callInfo.ArgAt<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(2);
@@ -170,7 +169,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         await service.TrackDeviceAsync(user.Id, clientInfo, null, CancellationToken.None);
 
         // Assert - Verify "unknown" is used when clientDeviceId is null
-        await _cache.Received(1).GetOrCreateAsync(
+        await cache.Received(1).GetOrCreateAsync(
             $"device_tracking_{user.Id}_unknown",
             Arg.Any<object>(),
             Arg.Any<Func<object, CancellationToken, ValueTask<int>>>(),
@@ -183,9 +182,10 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     public async Task TrackDeviceAsync_UsesUnknownInCacheKey_WhenClientDeviceIdEmpty()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var user = new AppUserBuilder("testuser", "test@localhost").Build();
         context.AppUser.Add(user);
@@ -194,14 +194,14 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         var clientInfo = CreateClientInfo();
         var device = CreateDevice(user.Id, 789);
 
-        _cache.GetOrCreateAsync(
-                Arg.Any<string>(),
-                Arg.Any<(int, ClientInfoData, string?, IClientDeviceService)>(),
-                Arg.Any<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(),
-                Arg.Any<HybridCacheEntryOptions?>(),
-                Arg.Any<string[]?>(),
-                Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
+        cache.GetOrCreateAsync<(int, ClientInfoData, string?, IClientDeviceService), int>(
+                default,
+                default,
+                default!,
+                default,
+                default,
+                default)
+            .ReturnsForAnyArgs(callInfo =>
             {
                 var state = callInfo.ArgAt<(int, ClientInfoData, string?, IClientDeviceService)>(1);
                 var factory = callInfo.ArgAt<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(2);
@@ -219,7 +219,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         await service.TrackDeviceAsync(user.Id, clientInfo, string.Empty, CancellationToken.None);
 
         // Assert - Verify "unknown" is used when clientDeviceId is empty
-        await _cache.Received(1).GetOrCreateAsync(
+        await cache.Received(1).GetOrCreateAsync(
             $"device_tracking_{user.Id}_unknown",
             Arg.Any<object>(),
             Arg.Any<Func<object, CancellationToken, ValueTask<int>>>(),
@@ -232,9 +232,10 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     public async Task TrackDeviceAsync_StoresReverseMappingInCache()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var user = new AppUserBuilder("testuser", "test@localhost").Build();
         context.AppUser.Add(user);
@@ -243,14 +244,14 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         var clientInfo = CreateClientInfo();
         var device = CreateDevice(user.Id, 999);
 
-        _cache.GetOrCreateAsync(
-                Arg.Any<string>(),
-                Arg.Any<(int, ClientInfoData, string?, IClientDeviceService)>(),
-                Arg.Any<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(),
-                Arg.Any<HybridCacheEntryOptions?>(),
-                Arg.Any<string[]?>(),
-                Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
+        cache.GetOrCreateAsync<(int, ClientInfoData, string?, IClientDeviceService), int>(
+                default,
+                default,
+                default!,
+                default,
+                default,
+                default)
+            .ReturnsForAnyArgs(callInfo =>
             {
                 var state = callInfo.ArgAt<(int, ClientInfoData, string?, IClientDeviceService)>(1);
                 var factory = callInfo.ArgAt<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(2);
@@ -268,7 +269,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         await service.TrackDeviceAsync(user.Id, clientInfo, "device-xyz", CancellationToken.None);
 
         // Assert - Verify reverse mapping is stored: deviceId -> cacheKey
-        await _cache.Received(1).SetAsync(
+        await cache.Received(1).SetAsync(
             $"device_key_mapping_{device.Id}",
             $"device_tracking_{user.Id}_device-xyz",
             Arg.Any<HybridCacheEntryOptions>(),
@@ -280,9 +281,10 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     public async Task TrackDeviceAsync_PropagatesCancellationToken()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var user = new AppUserBuilder("testuser", "test@localhost").Build();
         context.AppUser.Add(user);
@@ -292,14 +294,14 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         var device = CreateDevice(user.Id, 111);
         var cts = new CancellationTokenSource();
 
-        _cache.GetOrCreateAsync(
-                Arg.Any<string>(),
-                Arg.Any<(int, ClientInfoData, string?, IClientDeviceService)>(),
-                Arg.Any<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(),
-                Arg.Any<HybridCacheEntryOptions?>(),
-                Arg.Any<string[]?>(),
-                Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
+        cache.GetOrCreateAsync<(int, ClientInfoData, string?, IClientDeviceService), int>(
+                default,
+                default,
+                default!,
+                default,
+                default,
+                default)
+            .ReturnsForAnyArgs(callInfo =>
             {
                 var state = callInfo.ArgAt<(int, ClientInfoData, string?, IClientDeviceService)>(1);
                 var factory = callInfo.ArgAt<Func<(int, ClientInfoData, string?, IClientDeviceService), CancellationToken, ValueTask<int>>>(2);
@@ -317,7 +319,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         await service.TrackDeviceAsync(user.Id, clientInfo, "device-abc", cts.Token);
 
         // Assert - Verify CancellationToken was propagated
-        await _cache.Received(1).GetOrCreateAsync(
+        await cache.Received(1).GetOrCreateAsync(
             Arg.Any<string>(),
             Arg.Any<object>(),
             Arg.Any<Func<object, CancellationToken, ValueTask<int>>>(),
@@ -334,102 +336,106 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     public async Task ClearDeviceCacheAsync_RemovesBothCacheEntries()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var deviceId = 123;
         var cacheKey = "device_tracking_1_device-123";
 
         // Setup cache to return the mapping key
-        _cache.GetOrCreateAsync<string?>(
-            $"device_key_mapping_{deviceId}",
-            Arg.Any<Func<CancellationToken, ValueTask<string?>>>(),
-            Arg.Any<HybridCacheEntryOptions>(),
-            Arg.Any<string[]>(),
-            Arg.Any<CancellationToken>())
-            .Returns(cacheKey);
+        cache.GetOrCreateAsync<string?>(
+            default,
+            default!,
+            default,
+            default,
+            default)
+            .ReturnsForAnyArgs(cacheKey);
 
         // Act
         await service.ClearDeviceCacheAsync(deviceId);
 
         // Assert - Both cache entries should be removed
-        await _cache.Received(1).RemoveAsync(cacheKey, Arg.Any<CancellationToken>());
-        await _cache.Received(1).RemoveAsync($"device_key_mapping_{deviceId}", Arg.Any<CancellationToken>());
+        await cache.Received(1).RemoveAsync(cacheKey, Arg.Any<CancellationToken>());
+        await cache.Received(1).RemoveAsync($"device_key_mapping_{deviceId}", Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task ClearDeviceCacheAsync_HandlesNullCacheKey_Gracefully()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var deviceId = 456;
 
         // Setup cache to return null (no mapping found)
-        _cache.GetOrCreateAsync<string?>(
-            $"device_key_mapping_{deviceId}",
-            Arg.Any<Func<CancellationToken, ValueTask<string?>>>(),
-            Arg.Any<HybridCacheEntryOptions>(),
-            Arg.Any<string[]>(),
-            Arg.Any<CancellationToken>())
-            .Returns((string?)null);
+        cache.GetOrCreateAsync<string?>(
+            default,
+            default!,
+            default,
+            default,
+            default)
+            .ReturnsForAnyArgs((string?)null);
 
         // Act
         await service.ClearDeviceCacheAsync(deviceId);
 
         // Assert - Should only remove mapping key, not the null cache key
-        await _cache.DidNotReceive().RemoveAsync(Arg.Is<string>(s => s != $"device_key_mapping_{deviceId}"), Arg.Any<CancellationToken>());
-        await _cache.Received(1).RemoveAsync($"device_key_mapping_{deviceId}", Arg.Any<CancellationToken>());
+        await cache.DidNotReceive().RemoveAsync(Arg.Is<string>(s => s != $"device_key_mapping_{deviceId}"), Arg.Any<CancellationToken>());
+        await cache.Received(1).RemoveAsync($"device_key_mapping_{deviceId}", Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task ClearDeviceCacheAsync_HandlesEmptyCacheKey_Gracefully()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var deviceId = 789;
 
         // Setup cache to return empty string
-        _cache.GetOrCreateAsync<string?>(
-            $"device_key_mapping_{deviceId}",
-            Arg.Any<Func<CancellationToken, ValueTask<string?>>>(),
-            Arg.Any<HybridCacheEntryOptions>(),
-            Arg.Any<string[]>(),
-            Arg.Any<CancellationToken>())
-            .Returns(string.Empty);
+        cache.GetOrCreateAsync<string?>(
+            default,
+            default!,
+            default,
+            default,
+            default)
+            .ReturnsForAnyArgs(string.Empty);
 
         // Act
         await service.ClearDeviceCacheAsync(deviceId);
 
         // Assert - Should only remove mapping key
-        await _cache.Received(1).RemoveAsync($"device_key_mapping_{deviceId}", Arg.Any<CancellationToken>());
-        await _cache.DidNotReceive().RemoveAsync(string.Empty, Arg.Any<CancellationToken>());
+        await cache.Received(1).RemoveAsync($"device_key_mapping_{deviceId}", Arg.Any<CancellationToken>());
+        await cache.DidNotReceive().RemoveAsync(string.Empty, Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task ClearDeviceCacheAsync_LogsDebug_OnSuccess()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         const int deviceId = 999;
         const string cacheKey = "device_tracking_1_device-999";
 
-        _cache.GetOrCreateAsync<string?>(
-            Arg.Any<string>(),
-            Arg.Any<Func<CancellationToken, ValueTask<string?>>>(),
-            Arg.Any<HybridCacheEntryOptions>(),
-            Arg.Any<string[]>(),
-            Arg.Any<CancellationToken>())
-            .Returns(cacheKey);
+        cache.GetOrCreateAsync<string?>(
+            default,
+            default!,
+            default,
+            default,
+            default)
+            .ReturnsForAnyArgs(cacheKey);
 
         // Act
         await service.ClearDeviceCacheAsync(deviceId);
@@ -447,20 +453,21 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     public async Task ClearDeviceCacheAsync_LogsWarning_OnException()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         const int deviceId = 111;
 
         // Setup cache to throw exception
-        _cache.GetOrCreateAsync<string?>(
-            Arg.Any<string>(),
-            Arg.Any<Func<CancellationToken, ValueTask<string?>>>(),
-            Arg.Any<HybridCacheEntryOptions>(),
-            Arg.Any<string[]>(),
-            Arg.Any<CancellationToken>())
-            .Returns<string?>(_ => throw new InvalidOperationException("Cache error"));
+        cache.GetOrCreateAsync<string?>(
+            default,
+            default!,
+            default,
+            default,
+            default)
+            .ReturnsForAnyArgs<string?>(_ => throw new InvalidOperationException("Cache error"));
 
         // Act
         await service.ClearDeviceCacheAsync(deviceId);
@@ -482,9 +489,10 @@ public class DeviceTrackingServiceTests : AbstractDbTest
     public async Task ClearUserDeviceCachesAsync_ClearsAllDeviceCaches_ForUser()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var user = new AppUserBuilder("testuser", "test@localhost").Build();
         context.AppUser.Add(user);
@@ -497,31 +505,32 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         context.AppUserReadingSession.AddRange(session1, session2);
         await context.SaveChangesAsync();
 
-        _cache.GetOrCreateAsync<string?>(
-            Arg.Any<string>(),
-            Arg.Any<Func<CancellationToken, ValueTask<string?>>>(),
-            Arg.Any<HybridCacheEntryOptions>(),
-            Arg.Any<string[]>(),
-            Arg.Any<CancellationToken>())
-            .Returns("some-cache-key");
+        cache.GetOrCreateAsync<string?>(
+            default,
+            default!,
+            default,
+            default,
+            default)
+            .ReturnsForAnyArgs("some-cache-key");
 
         // Act
         await service.ClearUserDeviceCachesAsync(user.Id);
 
         // Assert - Should clear cache for devices 1, 2, and 3 (distinct)
-        await _cache.Received().RemoveAsync("some-cache-key", Arg.Any<CancellationToken>());
-        await _cache.Received().RemoveAsync("device_key_mapping_1", Arg.Any<CancellationToken>());
-        await _cache.Received().RemoveAsync("device_key_mapping_2", Arg.Any<CancellationToken>());
-        await _cache.Received().RemoveAsync("device_key_mapping_3", Arg.Any<CancellationToken>());
+        await cache.Received().RemoveAsync("some-cache-key", Arg.Any<CancellationToken>());
+        await cache.Received().RemoveAsync("device_key_mapping_1", Arg.Any<CancellationToken>());
+        await cache.Received().RemoveAsync("device_key_mapping_2", Arg.Any<CancellationToken>());
+        await cache.Received().RemoveAsync("device_key_mapping_3", Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task ClearUserDeviceCachesAsync_HandlesUserWithNoSessions()
     {
 
+        var cache = Substitute.For<HybridCache>();
         var (_, context, mapper) = await CreateDatabase();
         var clientDeviceService = Substitute.For<IClientDeviceService>();
-        var service = new DeviceTrackingService(_cache, context, _logger, clientDeviceService);
+        var service = new DeviceTrackingService(cache, context, _logger, clientDeviceService);
 
         var user = new AppUserBuilder("testuser", "test@localhost").Build();
         context.AppUser.Add(user);
@@ -531,7 +540,7 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         await service.ClearUserDeviceCachesAsync(user.Id);
 
         // Assert - Should not throw, and not call cache remove
-        await _cache.DidNotReceive().RemoveAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await cache.DidNotReceive().RemoveAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     #endregion

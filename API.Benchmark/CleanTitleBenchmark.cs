@@ -5,7 +5,7 @@ using BenchmarkDotNet.Attributes;
 namespace API.Benchmark;
 
 [MemoryDiagnoser]
-public static class CleanTitleBenchmarks
+public class CleanTitleBenchmarks
 {
     private static IList<string> _names;
 
