@@ -30,7 +30,6 @@ public interface IReaderService
     Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters);
     Task MarkChaptersAsUnread(AppUser user, int seriesId, IList<Chapter> chapters);
     Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId);
-    Task<Tuple<int, int>> CapPageToChapter(int chapterId, int page);
     int CapPageToChapter(Chapter chapter, int page);
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
@@ -186,9 +185,8 @@ public class ReaderService : IReaderService
                 MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
 
             // Send out volume events for each distinct volume
-            if (!seenVolume.ContainsKey(chapter.VolumeId))
+            if (seenVolume.TryAdd(chapter.VolumeId, true))
             {
-                seenVolume[chapter.VolumeId] = true;
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                     MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
                         chapter.VolumeId, 0, 0));
@@ -282,10 +280,6 @@ public class ReaderService : IReaderService
                 userProgress.VolumeId = progressDto.VolumeId;
                 userProgress.LibraryId = progressDto.LibraryId;
                 userProgress.BookScrollId = progressDto.BookScrollId;
-                if (userProgress.PagesRead >= totalPages)
-                {
-                    userProgress.TotalReads += 1;
-                }
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
@@ -331,7 +325,7 @@ public class ReaderService : IReaderService
     /// <param name="chapterId"></param>
     /// <param name="page"></param>
     /// <returns></returns>
-    public async Task<Tuple<int, int>> CapPageToChapter(int chapterId, int page)
+    private async Task<Tuple<int, int>> CapPageToChapter(int chapterId, int page)
     {
         if (page < 0)
         {
