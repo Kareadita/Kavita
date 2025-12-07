@@ -7,6 +7,7 @@ using API.Data;
 using API.DTOs.Progress;
 using API.Entities.Enums;
 using API.Entities.Progress;
+using API.Extensions;
 using API.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
@@ -246,6 +247,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             {
                 var session = await context.AppUserReadingSession
                     .Where(s => s.Id == sessionTimeout.Value)
+                    .Include(s => s.ActivityData)
                     .FirstOrDefaultAsync();
 
                 if (session != null) return session;
@@ -255,6 +257,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         // Look up in the DB for an active reading session
         var dbSession = await context.AppUserReadingSession
             .Where(s => s.IsActive && s.AppUserId == userId)
+            .Include(s => s.ActivityData)
             .FirstOrDefaultAsync();
 
         if (dbSession != null)
@@ -273,7 +276,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
                 IsActive = true,
                 ActivityData =
                 [
-                    NewActivityData(dto)
+                    NewActivityData(dto),
                 ]
             };
 
@@ -301,7 +304,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             PagesRead = 0,
             WordsRead = 0,
             ClientInfo = null,
-            DeviceIds = []
+            DeviceIds = [],
         };
     }
 
@@ -403,6 +406,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         // Check if the user fully read any chapter and increment totalReads for said chapter
         var sessionEntry = await context.AppUserReadingSession
             .Where(s => s.Id == sessionId)
+            .Include(s => s.ActivityData)
             .FirstAsync();
 
         var chapterIds = sessionEntry.ActivityData
