@@ -40,6 +40,7 @@ export class CreateAuthKeyComponent implements OnInit {
       this.settingsForm.get('name')?.disable();
       this.settingsForm.get('name')?.setValue(authKey.name);
       this.settingsForm.get('keyLength')?.setValue(authKey.key.length);
+      this.settingsForm.get('expiresUtc')?.disable();
       this.settingsForm.get('expiresUtc')?.setValue(authKey.expiresAtUtc);
     }
   }

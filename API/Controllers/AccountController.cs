@@ -1189,7 +1189,6 @@ public class AccountController : BaseApiController
     {
         var authKey = await _unitOfWork.UserRepository.GetAuthKeyById(authKeyId);
         if (authKey?.AppUserId != UserId) return BadRequest();
-        if (authKey.Provider != AuthKeyProvider.User) return BadRequest();
 
         // Get original expiresAt - createdAt for offset to reset expiresAt
         if (authKey.ExpiresAtUtc != null)

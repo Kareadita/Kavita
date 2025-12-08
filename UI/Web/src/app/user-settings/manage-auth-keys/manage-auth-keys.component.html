@@ -26,10 +26,13 @@
     }
   </h4>
   <p>{{t('description')}}</p>
-  @if (authKeysResource.hasValue()) {
+
+  @let authKeysValue = authKeys();
+
+  @if (authKeysValue) {
     <ngx-datatable
       class="bootstrap"
-      [rows]="authKeysResource.value()"
+      [rows]="authKeysValue"
       [columnMode]="ColumnMode.flex"
       rowHeight="auto"
       [footerHeight]="50"
@@ -84,7 +87,7 @@
           {{t('actions-label')}}
         </ng-template>
         <ng-template let-item="row" ngx-datatable-cell-template>
-          <button class="btn btn-primary me-2" (click)="rotate(item)" [disabled]="item.provider === AuthKeyProvider.System || isReadOnly()">
+          <button class="btn btn-primary me-2" (click)="rotate(item)" [disabled]="isReadOnly()">
             <i class="fa-solid fa-rotate" aria-hidden="true"></i>
             <span class="visually-hidden">{{t('rotate')}}</span>
           </button>

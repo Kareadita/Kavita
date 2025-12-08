@@ -45,7 +45,7 @@
 
       @if(settingsForm.get('expiresUtc'); as formControl) {
         <div class="row g-0 mb-2">
-          <app-setting-item [title]="t('expiration-label')" [canEdit]="true"
+          <app-setting-item [title]="t('expiration-label')" [canEdit]="!formControl.disabled"
                             [control]="formControl" labelId="expiration">
             <ng-template #view>
               @if (formControl.value === '' || formControl.value === null) {

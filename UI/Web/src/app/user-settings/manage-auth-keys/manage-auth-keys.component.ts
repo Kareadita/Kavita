@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit, signal} from '@angular/core';
 import {ApiKeyComponent} from "../api-key/api-key.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
@@ -33,7 +33,7 @@ import {ToastrService} from "ngx-toastr";
   styleUrl: './manage-auth-keys.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ManageAuthKeysComponent {
+export class ManageAuthKeysComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly settingsService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
@@ -44,17 +44,21 @@ export class ManageAuthKeysComponent {
 
   protected readonly opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
 
-  opdsUrl = model<string>('');
-  makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl(); };
   isReadOnly = this.accountService.isReadOnly;
+  opdsUrl = signal<string>('');
+  authKeys = signal<AuthKey[] | null>(null);
 
-  protected readonly authKeysResource = this.accountService.getAuthKeysResource();
+  makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl(); };
+
   protected readonly isOpdsEnabledResource = this.settingsService.getOpdsEnabledResource();
 
-  constructor() {
-    this.accountService.getOpdsUrl().subscribe(res => {
-      this.opdsUrl.set(res);
-    });
+  ngOnInit() {
+    this.loadAuthKeys();
+  }
+
+  loadAuthKeys() {
+    this.accountService.getAuthKeys().subscribe(authKeys => this.authKeys.set(authKeys));
+    this.accountService.getOpdsUrl().subscribe(res => this.opdsUrl.set(res));
   }
 
   createAuthKey() {
@@ -62,7 +66,8 @@ export class ManageAuthKeysComponent {
 
     ref.closed.subscribe((result: AuthKey | null) => {
       if (result === null) return;
-      this.authKeysResource.reload();
+
+      this.loadAuthKeys();
     });
   }
 
@@ -72,7 +77,8 @@ export class ManageAuthKeysComponent {
 
     ref.closed.subscribe((result: AuthKey | null) => {
       if (result === null) return;
-      this.authKeysResource.reload();
+
+      this.loadAuthKeys();
     });
   }
 
@@ -81,7 +87,7 @@ export class ManageAuthKeysComponent {
       return;
     }
     this.accountService.deleteAuthKey(authKey.id).subscribe(res => {
-      this.authKeysResource.reload();
+      this.loadAuthKeys();
     })
   }
 

@@ -443,8 +443,15 @@ export class AccountService {
     return this.httpClient.get<string>(this.baseUrl + 'account/opds-url', TextResonse);
   }
 
-  getAuthKeysResource() {
-    return httpResource<AuthKey[]>(() => this.baseUrl + `account/auth-keys`);
+  getAuthKeys() {
+    return this.httpClient.get<AuthKey[]>(this.baseUrl + `account/auth-keys`).pipe(
+      tap(authKeys => {
+        this.setCurrentUser({
+          ...this.currentUser!,
+          authKeys: authKeys,
+        }, false);
+      }),
+    );
   }
 
   createAuthKey(data: {keyLength: number, name: string, expiresUtc: string | null}) {
