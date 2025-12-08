@@ -413,22 +413,24 @@ public class Startup
 
                     #region Migrations
 
-                    // v0.7.9
+                    #region v0.7.9
                     await MigrateUserLibrarySideNavStream.Migrate(unitOfWork, dataContext, logger);
+                    #endregion
 
-                    // v0.7.11
+                    #region v0.7.11
                     await MigrateSmartFilterEncoding.Migrate(unitOfWork, dataContext, logger);
                     await new MigrateLibrariesToHaveAllFileTypes().RunAsync(dataContext, logger);
+                    #endregion
 
-
-                    // v0.7.14
+                    #region v0.7.14
                     await MigrateEmailTemplates.Migrate(directoryService, logger);
                     await MigrateVolumeNumber.Migrate(dataContext, logger);
                     await MigrateWantToReadImport.Migrate(unitOfWork, dataContext, directoryService, logger);
                     await MigrateManualHistory.Migrate(dataContext, logger);
                     await MigrateClearNightlyExternalSeriesRecords.Migrate(dataContext, logger);
+                    #endregion
 
-                    // v0.8.0
+                    #region v0.8.0
                     await MigrateVolumeLookupName.Migrate(dataContext, unitOfWork, logger);
                     await MigrateChapterNumber.Migrate(dataContext, logger);
                     await MigrateProgressExport.Migrate(dataContext, directoryService, logger);
@@ -438,46 +440,54 @@ public class Startup
                     await MigrateChapterRange.Migrate(dataContext, unitOfWork, logger);
                     await MigrateMangaFilePath.Migrate(dataContext, logger);
                     await MigrateCollectionTagToUserCollections.Migrate(dataContext, unitOfWork, logger);
+                    #endregion
 
-                    // v0.8.1
+                    #region v0.8.1
                     await MigrateLowestSeriesFolderPath.Migrate(dataContext, unitOfWork, logger);
+                    #endregion
 
-                    // v0.8.2
+                    #region v0.8.2
                     await ManualMigrateThemeDescription.Migrate(dataContext, logger);
                     await MigrateInitialInstallData.Migrate(dataContext, logger, directoryService);
                     await MigrateSeriesLowestFolderPath.Migrate(dataContext, logger, directoryService);
+                    #endregion
 
-                    // v0.8.4
+                    #region v0.8.4
                     await MigrateLowestSeriesFolderPath2.Migrate(dataContext, unitOfWork, logger);
                     await ManualMigrateRemovePeople.Migrate(dataContext, logger);
                     await MigrateDuplicateDarkTheme.Migrate(dataContext, logger);
                     await ManualMigrateUnscrobbleBookLibraries.Migrate(dataContext, logger);
+                    #endregion
 
-                    // v0.8.5
+                    #region v0.8.5
                     await ManualMigrateBlacklistTableToSeries.Migrate(dataContext, logger);
                     await ManualMigrateInvalidBlacklistSeries.Migrate(dataContext, logger);
                     await ManualMigrateScrobbleErrors.Migrate(dataContext, logger);
                     await ManualMigrateNeedsManualMatch.Migrate(dataContext, logger);
                     await MigrateProgressExportForV085.Migrate(dataContext, directoryService, logger);
+                    #endregion
 
-                    // v0.8.6
+                    #region v0.8.6
                     await ManualMigrateScrobbleSpecials.Migrate(dataContext, logger);
                     await ManualMigrateScrobbleEventGen.Migrate(dataContext, logger);
+                    #endregion
 
-                    // v0.8.7
+                    #region v0.8.7
                     await ManualMigrateReadingProfiles.Migrate(dataContext, logger);
+                    #endregion
 
-                    // v0.8.8
+                    #region v0.8.8
                     await ManualMigrateEnableMetadataMatchingDefault.Migrate(dataContext, unitOfWork, logger);
                     await ManualMigrateBookReadingProgress.Migrate(dataContext, unitOfWork, logger);
+                    #endregion
 
-                    // v0.8.9
+                    #region v0.8.9
                     await new MigrateProgressToReadingSessions().RunAsync(dataContext, logger);
                     await new MigrateMissingCreatedUtcDate().RunAsync(dataContext, logger);
-                    await MigrateProfilePreferences.Migrate(dataContext, logger);
                     await new MigrateTotalReads().RunAsync(dataContext, logger);
                     await new MigrateToAuthKeys().RunAsync(dataContext, logger);
                     await new MigrateMissingAppUserRatingDateColumns().RunAsync(dataContext, logger);
+                    #endregion
 
                     #endregion
 
