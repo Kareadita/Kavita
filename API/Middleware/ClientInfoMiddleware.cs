@@ -48,6 +48,10 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
             parsed.IpAddress = ipAddress;
             parsed.AuthType = authType;
             parsed.CapturedAt = DateTime.UtcNow;
+            if (parsed.Platform == ClientDevicePlatform.Unknown)
+            {
+                parsed.Platform = platform;
+            }
 
             return parsed;
         }
