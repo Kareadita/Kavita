@@ -46,12 +46,6 @@
           <span class="badge bg-secondary clickable" (click)="loadAnnotation()">{{t('page-num', {page: annotation().pageNumber + 1})}}</span>
         }
 
-<!--TODO: Upvote button-->
-        @if (false) {
-          <button class="btn btn-sm btn-outline-primary">
-            <i class="fa-solid fa-thumbs-up" aria-hidden="true"></i>
-          </button>
-        }
 
         @if(allowEdit()) {
           <button class="btn btn-sm btn-outline-secondary" (click)="editAnnotation()">

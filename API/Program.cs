@@ -106,7 +106,7 @@ public class Program
                                 // v0.8.4
                                 await ManualMigrateEncodeSettings.Migrate(context, logger);
                             }
-                            catch (Exception ex)
+                            catch (Exception)
                             {
                                 /* Swallow */
                             }

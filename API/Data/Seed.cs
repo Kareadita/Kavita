@@ -311,7 +311,7 @@ public static class Seed
         foreach (var user in allUsers)
         {
             if (user.DashboardStreams.Count != 0) continue;
-            user.DashboardStreams ??= new List<AppUserDashboardStream>();
+            user.DashboardStreams ??= [];
             foreach (var defaultStream in DefaultStreams)
             {
                 var newStream = new AppUserDashboardStream
@@ -335,7 +335,7 @@ public static class Seed
         var allUsers = await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams);
         foreach (var user in allUsers)
         {
-            user.SideNavStreams ??= new List<AppUserSideNavStream>();
+            user.SideNavStreams ??= [];
             foreach (var defaultStream in DefaultSideNavStreams)
             {
                 if (user.SideNavStreams.Any(s => s.Name == defaultStream.Name && s.StreamType == defaultStream.StreamType)) continue;
@@ -400,11 +400,11 @@ public static class Seed
                 new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
                 new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
                 new() {Key = ServerSettingKey.HostName, Value = string.Empty},
-                new() {Key = ServerSettingKey.EncodeMediaAs, Value = EncodeFormat.PNG.ToString()},
+                new() {Key = ServerSettingKey.EncodeMediaAs, Value = nameof(EncodeFormat.PNG)},
                 new() {Key = ServerSettingKey.LicenseKey, Value = string.Empty},
                 new() {Key = ServerSettingKey.OnDeckProgressDays, Value = "30"},
                 new() {Key = ServerSettingKey.OnDeckUpdateDays, Value = "7"},
-                new() {Key = ServerSettingKey.CoverImageSize, Value = CoverImageSize.Default.ToString()},
+                new() {Key = ServerSettingKey.CoverImageSize, Value = nameof(CoverImageSize.Default)},
                 new() {
                     Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
                 }, // Not used from DB, but DB is sync with appSettings.json
