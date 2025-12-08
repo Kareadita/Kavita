@@ -16,9 +16,9 @@ export class ClientDevicePlatformPipe implements PipeTransform {
       case ClientDevicePlatform.Windows:
         return 'Windows';
       case ClientDevicePlatform.MacOs:
-        return 'MacOs';
+        return 'macOs';
       case ClientDevicePlatform.Ios:
-        return 'IOs';
+        return 'iOS';
       case ClientDevicePlatform.Linux:
         return 'Linux';
       case ClientDevicePlatform.Android:
