@@ -88,7 +88,7 @@ export class AnnotationCardComponent {
   /**
    * If enabled, listens to annotation updates
    */
-  listedToUpdates = input<boolean>(false);
+  listenToUpdates = input<boolean>(false);
   /**
    * If the card is rendered inside the book reader. Used for styling the confirm button
    */
@@ -108,7 +108,7 @@ export class AnnotationCardComponent {
   constructor() {
 
     effect(() => {
-      const enabled = this.listedToUpdates();
+      const enabled = this.listenToUpdates();
       const event = this.messageHub.messageSignal();
       if (!enabled || event?.event !== EVENTS.AnnotationUpdate) return;
 
