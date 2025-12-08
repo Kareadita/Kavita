@@ -731,16 +731,16 @@ export class ReaderService {
       component.description.set(translate('reread-modal.description-time-passed', { days: daysSinceRead, entityType: translate('entity-type.' + entityType) }));
     }
 
-    const options = [{label: translate('reread-modal.reread'), value: RereadPromptResult.Reread}]
+    const options = [
+      {label: translate('reread-modal.reread'), value: RereadPromptResult.Reread},
+      {label: translate('reread-modal.continue'), value: RereadPromptResult.Continue},
+    ];
 
     if (fullyRead) {
-      options.push({label: translate('reread-modal.read-incognito'), value: RereadPromptResult.ReadIncognito})
-    } else {
-      options.push({label: translate('reread-modal.continue'), value: RereadPromptResult.Continue})
+      options.push({label: translate('reread-modal.read-incognito'), value: RereadPromptResult.ReadIncognito});
     }
 
-    options.push({label: translate('reread-modal.cancel'), value: RereadPromptResult.Cancel})
-
+    options.push({label: translate('reread-modal.cancel'), value: RereadPromptResult.Cancel});
 
     component.items.set(options);
 
