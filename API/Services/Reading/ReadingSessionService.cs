@@ -381,8 +381,8 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             .Where(s => s.Id == sessionId)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(x => x.IsActive, false)
-                .SetProperty(x => x.EndTime, DateTime.Now)
-                .SetProperty(x => x.EndTimeUtc, DateTime.UtcNow)
+                .SetProperty(x => x.EndTime, DateTime.Now.Subtract(TimeSpan.FromMinutes(_defaultTimeoutMinutes)))
+                .SetProperty(x => x.EndTimeUtc, DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(_defaultTimeoutMinutes)))
                 .SetProperty(x => x.LastModified, DateTime.Now)
                 .SetProperty(x => x.LastModifiedUtc, DateTime.UtcNow));
 
