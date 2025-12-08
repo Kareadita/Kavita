@@ -253,8 +253,8 @@
         "colorscape-tooltip": "Global toggle to enable/disable the dynamic gradient feature. Will override theme settings",
         "data-saver-label": "Data saver",
         "data-saver-tooltip": "Minimizes data usage by preventing automatic prefetching (e.g., PDF reader)",
-        "prompt-for-rereads-after-label": "Prompt for rereads",
-        "prompt-for-rereads-after-tooltip": "Prompt for rereads if you haven't read in n days. 0 disables the prompt.",
+        "prompt-for-rereads-after-label": "Prompt for Re-Reads",
+        "prompt-for-rereads-after-tooltip": "Show the Re-Read Prompt if no progress since X days ago. 0 disables the prompt entirely.",
 
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobbling",
