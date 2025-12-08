@@ -5,7 +5,7 @@
 
       <div class="person-badge">
         @let image = currentImageUrl();
-        @if (image) {
+        @if (image && accountService.currentUserSignal()?.coverImage) {
           <app-image objectFit="cover"
                      [styles]="{'object-position': 'top'}"
                      height="200px"
@@ -14,7 +14,7 @@
                      [errorImage]="imageService.noPersonImage" />
         } @else {
           <div class="d-flex align-items-center justify-content-center">
-            <i class="fa-solid fa-user-circle align-self-center"  aria-hidden="true"></i>
+            <i class="fa-solid fa-user-circle align-self-center" style="font-size: 13rem" aria-hidden="true"></i>
           </div>
         }
       </div>
@@ -29,8 +29,6 @@
 
         <span class="visually-hidden">{{t('reset-image-alt')}}</span>
       </button>
-
-
     }
 
     @if (showEditButton() && canUploadImage()) {

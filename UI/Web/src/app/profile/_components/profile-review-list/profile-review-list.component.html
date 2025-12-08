@@ -6,8 +6,9 @@
     } @else {
       <form [formGroup]="formGroup">
         <div class="row mb-3">
-          <div class="col-9">
-            <input class="form-control" type="text" [placeholder]="t('filter-label')" formControlName="query"/>
+          <div class="col-9 ps-0">
+            <label for="review-filter" class="visually-hidden">{{t('filter-label')}}</label>
+            <input id="review-filter" class="form-control" type="text" [placeholder]="t('filter-label')" formControlName="query"/>
           </div>
           <div class="col-3 d-flex">
             <ngx-stars [size]="1" style="margin-top: 4px"

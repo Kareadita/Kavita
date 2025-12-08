@@ -36,7 +36,7 @@ interface ImageUploadResult {
 })
 export class ProfileImageComponent {
   protected readonly imageService = inject(ImageService);
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly uploadService = inject(UploadService);
   private readonly toastr = inject(ToastrService);
 
