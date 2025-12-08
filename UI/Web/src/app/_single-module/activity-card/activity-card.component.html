@@ -4,7 +4,6 @@
 
   <div class="activity-card">
     <div class="activity-content">
-      <!-- Cover Images -->
       <div class="cover-container">
         <div class="series-cover">
           <app-image [imageUrl]="imageService.getSeriesCoverImage(activeData.seriesId)" width="100%" height="100%" [objectFit]="'cover'" />
@@ -14,7 +13,6 @@
         </div>
       </div>
 
-      <!-- Activity Details -->
       <div class="activity-details">
         <div class="activity-header">
           <div class="media-info">
@@ -27,25 +25,19 @@
             }
           </span>
           </div>
-
-          <div class="stream-info">
-            <!-- We don't need this as they will always be active, but we can use the space for other things -->
-            <span class="badge badge-stream">{{session().isActive ? 'Reading' : 'Finished'}}</span>
-          </div>
         </div>
 
         <div class="session-metadata">
           <div class="metadata-row">
             <span class="label text-uppercase">{{t('started-label')}}</span>
-            <span class="value">{{activeData.startTimeUtc | timeAgo}}</span>
+            <span class="value">{{activeData.startTimeUtc | utcToLocalDate | timeAgo}}</span>
           </div>
         </div>
 
-        <!-- Progress Bar (for active sessions) -->
         <div class="progress-container">
           <div class="progress" style="height: 4px;">
             <div class="progress-bar bg-warning"
-                 [style.width.%]="(activeData.startPage + activeData.pagesRead) / activeData.totalPages"
+                 [style.width.%]="((activeData.startPage + activeData.pagesRead) / activeData.totalPages) * 100"
                  role="progressbar">
             </div>
           </div>
@@ -54,7 +46,6 @@
           </div>
         </div>
 
-        <!-- Title and Chapter Info -->
         <div class="title-section">
           <div class="play-icon">
             <i class="fas fa-book-open" aria-hidden="true"></i>

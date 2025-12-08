@@ -8,6 +8,7 @@ import {RouterLink} from "@angular/router";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ClientDeviceClientTypePipe} from "../../_pipes/client-device-client-type.pipe";
 import {ClientDevicePlatformPipe} from "../../_pipes/client-device-platform.pipe";
+import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 
 @Component({
   selector: 'app-activity-card',
@@ -18,7 +19,8 @@ import {ClientDevicePlatformPipe} from "../../_pipes/client-device-platform.pipe
     RouterLink,
     ImageComponent,
     ClientDeviceClientTypePipe,
-    ClientDevicePlatformPipe
+    ClientDevicePlatformPipe,
+    UtcToLocalDatePipe
   ],
   templateUrl: './activity-card.component.html',
   styleUrl: './activity-card.component.scss',
