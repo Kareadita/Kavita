@@ -28,6 +28,8 @@ public class MigrateToAuthKeys : ManualMigration
 
         foreach (var user in allUsers)
         {
+            if (user.AuthKeys.Count != 0) continue;
+            
             var key = new AppUserAuthKey()
             {
                 Name = AuthKeyHelper.OpdsKeyName,
