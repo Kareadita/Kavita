@@ -35,9 +35,7 @@ export class ServerDevicesComponent implements OnInit {
   mobileVsDesktop = model<StatCount<string>[]>([]);
 
   ngOnInit() {
-    this.deviceService.getAllDevices().subscribe(devices => {
-      this.clientDevices.set([...devices]);
-    });
+    this.loadDevices();
 
     this.statsService.getClientDeviceBreakdown().subscribe(clientDeviceBreakdown => {
       this.clientDeviceTypeBreakdown.set(clientDeviceBreakdown.records);
@@ -48,12 +46,23 @@ export class ServerDevicesComponent implements OnInit {
     });
   }
 
+  loadDevices() {
+    this.deviceService.getAllDevices().subscribe(devices => {
+      this.clientDevices.set([...devices]);
+    });
+
+  }
+
   clientDeviceClientTypeTransformer(r: StatCount<number>) {
     return this.clientDeviceClientTypePipe.transform(r.value);
   }
 
   clientDeviceTypeTransformer(r: StatCount<string>) {
     return this.clientDeviceTypePipe.transform(r.value);
+  }
+
+  deviceDeleted(id: number) {
+    this.clientDevices.update(x => [...x.filter(d => d.id != id)])
   }
 
 

@@ -402,8 +402,8 @@
     "server-devices": {
         "client-devices-header": "{{manage-devices.client-devices-header}}",
         "client-devices-this-month-header": "Client Devices this Month",
-        "client-devices-mobile-vs-pc-header": "Mobile vs PC this Month"
-
+        "client-devices-mobile-vs-pc-header": "Mobile vs PC this Month",
+        "no-data": "{{common.no-data}}"
     },
 
     "edit-device-modal": {

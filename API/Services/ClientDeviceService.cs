@@ -182,7 +182,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     public async Task UpdateFriendlyNameAsync(int userId, UpdateClientDeviceNameDto dto)
     {
         var device = await context.ClientDevice
-            .Where(d => d.AppUserId == userId)
+            .Where(d => d.AppUserId == userId && d.Id == dto.DeviceId)
             .FirstOrDefaultAsync() ?? throw new KavitaException("client-device-doesnt-exist");
 
         if (!string.IsNullOrWhiteSpace(dto.Name))
