@@ -19,7 +19,7 @@ namespace API.Services.Reading;
 
 public interface IReadingSessionService
 {
-    Task UpdateProgress(int userId, ProgressDto progressDto);
+    Task UpdateProgress(int userId, ProgressDto progressDto, ClientInfoData? clientInfo, int? deviceId);
 }
 
 internal sealed record SessionTimeout<T>
@@ -37,7 +37,6 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<ReadingSessionService> _logger;
-    private readonly IClientInfoAccessor _clientInfoAccessor;
     private readonly HybridCache _cache;
     private readonly ConcurrentDictionary<string, SessionTimeout<int>> _activeSessions = new();
     private readonly int _defaultTimeoutMinutes;
@@ -51,13 +50,11 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         LocalCacheExpiration = TimeSpan.FromMinutes(30)
     };
 
-    public ReadingSessionService(IServiceScopeFactory serviceScopeFactory, ILogger<ReadingSessionService> logger,
-        IClientInfoAccessor clientInfoAccessor, HybridCache cache,
+    public ReadingSessionService(IServiceScopeFactory serviceScopeFactory, ILogger<ReadingSessionService> logger, HybridCache cache,
         int defaultTimeoutMinutes = 30, int timerRefreshDebounceSeconds = 5)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
-        _clientInfoAccessor = clientInfoAccessor;
         _cache = cache;
 
         _defaultTimeoutMinutes = defaultTimeoutMinutes;
@@ -67,12 +64,9 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
     }
 
 
-    public async Task UpdateProgress(int userId, ProgressDto progressDto)
+    public async Task UpdateProgress(int userId, ProgressDto progressDto, ClientInfoData? clientInfo, int? deviceId)
     {
         _logger.LogDebug("Creating/Updating Reading Session for {UserId} on {ChapterId}", userId, progressDto.ChapterId);
-
-        var clientInfo = _clientInfoAccessor.Current;
-        var deviceId = _clientInfoAccessor.CurrentDeviceId;
 
         var session = await GetOrCreateSession(userId, progressDto);
 

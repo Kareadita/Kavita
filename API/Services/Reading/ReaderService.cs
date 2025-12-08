@@ -40,15 +40,12 @@ public interface IReaderService
     Task<string> GetThumbnail(Chapter chapter, int pageNum, IEnumerable<string> cachedImages);
 }
 
-public class ReaderService : IReaderService
+public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
+    IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService,
+    IClientInfoAccessor clientInfoAccessor)
+    : IReaderService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<ReaderService> _logger;
-    private readonly IEventHub _eventHub;
-    private readonly IImageService _imageService;
-    private readonly IDirectoryService _directoryService;
-    private readonly IScrobblingService _scrobblingService;
-    private readonly IReadingSessionService _readingSessionService;
+    private readonly IClientInfoAccessor _clientInfoAccessor = clientInfoAccessor;
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
     private readonly ChapterSortComparerDefaultFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerDefaultFirst.Default;
     private readonly ChapterSortComparerSpecialsLast _chapterSortComparerSpecialsLast = ChapterSortComparerSpecialsLast.Default;
@@ -60,18 +57,6 @@ public class ReaderService : IReaderService
     private const float MaxPagesPerMinute = 2.75F;
     public const float AvgPagesPerMinute = (MaxPagesPerMinute + MinPagesPerMinute) / 2F; //3.04
 
-
-    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
-        IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService)
-    {
-        _unitOfWork = unitOfWork;
-        _logger = logger;
-        _eventHub = eventHub;
-        _imageService = imageService;
-        _directoryService = directoryService;
-        _scrobblingService = scrobblingService;
-        _readingSessionService = readingSessionService;
-    }
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
     {
@@ -85,7 +70,7 @@ public class ReaderService : IReaderService
     /// <param name="seriesId"></param>
     public async Task MarkSeriesAsRead(AppUser user, int seriesId)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumes(seriesId);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumes(seriesId);
         user.Progresses ??= new List<AppUserProgress>();
         foreach (var volume in volumes)
         {
@@ -100,7 +85,7 @@ public class ReaderService : IReaderService
     /// <param name="seriesId"></param>
     public async Task MarkSeriesAsUnread(AppUser user, int seriesId)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumes(seriesId);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumes(seriesId);
         user.Progresses ??= new List<AppUserProgress>();
         foreach (var volume in volumes)
         {
@@ -118,7 +103,7 @@ public class ReaderService : IReaderService
     public async Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters)
     {
         var seenVolume = new Dictionary<int, bool>();
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         if (series == null) throw new KavitaException("series-doesnt-exist");
 
         foreach (var chapter in chapters)
@@ -146,19 +131,19 @@ public class ReaderService : IReaderService
 
             userProgress?.MarkModified();
 
-            await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+            await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                 MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
 
             // Send out volume events for each distinct volume
             if (seenVolume.TryAdd(chapter.VolumeId, true))
             {
-                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                     MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
                         chapter.VolumeId, 0, chapters.Where(c => c.VolumeId == chapter.VolumeId).Sum(c => c.Pages)));
             }
         }
 
-        _unitOfWork.UserRepository.Update(user);
+        unitOfWork.UserRepository.Update(user);
     }
 
     /// <summary>
@@ -181,18 +166,18 @@ public class ReaderService : IReaderService
             userProgress.VolumeId = chapter.VolumeId;
             userProgress.MarkModified();
 
-            await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+            await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                 MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
 
             // Send out volume events for each distinct volume
             if (seenVolume.TryAdd(chapter.VolumeId, true))
             {
-                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                     MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
                         chapter.VolumeId, 0, 0));
             }
         }
-        _unitOfWork.UserRepository.Update(user);
+        unitOfWork.UserRepository.Update(user);
     }
 
     /// <summary>
@@ -226,7 +211,7 @@ public class ReaderService : IReaderService
                 firstProgress.PagesRead = highestProgress;
                 user.Progresses = [firstProgress];
                 userProgress = user.Progresses.First();
-                _logger.LogInformation("Trying to save progress and multiple progress entries exist, deleting and rewriting with highest progress rate: {@Progress}", userProgress);
+                logger.LogInformation("Trying to save progress and multiple progress entries exist, deleting and rewriting with highest progress rate: {@Progress}", userProgress);
             }
         }
 
@@ -248,7 +233,7 @@ public class ReaderService : IReaderService
 
         try
         {
-            var userProgress = await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
+            var userProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
             // Don't create an empty progress record if there isn't any progress. This prevents Last Read date from being updated when
             // opening a chapter
@@ -257,7 +242,7 @@ public class ReaderService : IReaderService
             if (userProgress == null)
             {
                 // Create a user object
-                var userWithProgress = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
+                var userWithProgress = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
                 if (userWithProgress == null) return false;
 
                 userWithProgress.Progresses ??= [];
@@ -271,7 +256,7 @@ public class ReaderService : IReaderService
                     BookScrollId = progressDto.BookScrollId,
                 };
                 userWithProgress.Progresses.Add(userProgress);
-                _unitOfWork.UserRepository.Update(userWithProgress);
+                unitOfWork.UserRepository.Update(userWithProgress);
             }
             else
             {
@@ -280,28 +265,28 @@ public class ReaderService : IReaderService
                 userProgress.VolumeId = progressDto.VolumeId;
                 userProgress.LibraryId = progressDto.LibraryId;
                 userProgress.BookScrollId = progressDto.BookScrollId;
-                _unitOfWork.AppUserProgressRepository.Update(userProgress);
+                unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
-            _logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum}", progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum);
+            logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum}", progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum);
             userProgress?.MarkModified();
 
-            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
+            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync())
             {
-                BackgroundJob.Enqueue(() => _readingSessionService.UpdateProgress(userId, progressDto));
+                BackgroundJob.Enqueue(() => readingSessionService.UpdateProgress(userId, progressDto, clientInfoAccessor.Current, clientInfoAccessor.CurrentDeviceId));
 
-                var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
+                await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                     MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId,
                         progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
 
                 if (progressDto.PageNum >= totalPages)
                 {
                     // Inform Scrobble service that a chapter is read
-                    BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, progressDto.SeriesId));
+                    BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, progressDto.SeriesId));
                 }
 
-                BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(progressDto.SeriesId, userId));
+                BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemoval(progressDto.SeriesId, userId));
 
                 return true;
             }
@@ -312,8 +297,8 @@ public class ReaderService : IReaderService
             if (exception.Message.StartsWith(
                     "The database operation was expected to affect 1 row(s), but actually affected 0 row(s)"))
                 return true;
-            _logger.LogError(exception, "Could not save progress");
-            await _unitOfWork.RollbackAsync();
+            logger.LogError(exception, "Could not save progress");
+            await unitOfWork.RollbackAsync();
         }
 
         return false;
@@ -332,7 +317,7 @@ public class ReaderService : IReaderService
             page = 0;
         }
 
-        var totalPages = await _unitOfWork.ChapterRepository.GetChapterTotalPagesAsync(chapterId);
+        var totalPages = await unitOfWork.ChapterRepository.GetChapterTotalPagesAsync(chapterId);
         if (page > totalPages)
         {
             page = totalPages;
@@ -381,7 +366,7 @@ public class ReaderService : IReaderService
     /// <returns>-1 if nothing can be found</returns>
     public async Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
 
         var currentVolume = volumes.FirstOrDefault(v => v.Id == volumeId);
         if (currentVolume == null)
@@ -471,7 +456,7 @@ public class ReaderService : IReaderService
     /// <returns>-1 if nothing can be found</returns>
     public async Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId)
     {
-        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+        var volumes = (await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
         var currentVolume = volumes.Single(v => v.Id == volumeId);
         var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
 
@@ -547,10 +532,10 @@ public class ReaderService : IReaderService
     /// <returns></returns>
     public async Task<ChapterDto> GetContinuePoint(int seriesId, int userId)
     {
-        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+        var volumes = (await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
 
         var anyUserProgress =
-            await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId);
+            await unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId);
 
         if (!anyUserProgress)
         {
@@ -668,7 +653,7 @@ public class ReaderService : IReaderService
     /// <param name="chapterNumber"></param>
     public async Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
         foreach (var volume in volumes.OrderBy(v => v.MinNumber))
         {
             var chapters = volume.Chapters
@@ -680,7 +665,7 @@ public class ReaderService : IReaderService
 
     public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
         foreach (var volume in volumes.Where(v => v.MinNumber <= volumeNumber && v.MinNumber > 0).OrderBy(v => v.MinNumber))
         {
             await MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
@@ -766,30 +751,30 @@ public class ReaderService : IReaderService
     public async Task<string> GetThumbnail(Chapter chapter, int pageNum, IEnumerable<string> cachedImages)
     {
         var outputDirectory =
-            _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, ImageService.GetThumbnailFormat(chapter.Id));
+            directoryService.FileSystem.Path.Join(directoryService.TempDirectory, ImageService.GetThumbnailFormat(chapter.Id));
         try
         {
             var encodeFormat =
-                (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+                (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
             if (!Directory.Exists(outputDirectory))
             {
                 var outputtedThumbnails = cachedImages
                     .Select((img, idx) =>
-                        _directoryService.FileSystem.Path.Join(outputDirectory,
-                            _imageService.WriteCoverThumbnail(img, $"{idx}", outputDirectory, encodeFormat)))
+                        directoryService.FileSystem.Path.Join(outputDirectory,
+                            imageService.WriteCoverThumbnail(img, $"{idx}", outputDirectory, encodeFormat)))
                     .ToArray();
                 return CacheService.GetPageFromFiles(outputtedThumbnails, pageNum);
             }
 
-            var files = _directoryService.GetFilesWithExtension(outputDirectory,
+            var files = directoryService.GetFilesWithExtension(outputDirectory,
                 Parser.ImageFileExtensions);
             return CacheService.GetPageFromFiles(files, pageNum);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an error when trying to get thumbnail for Chapter {ChapterId}, Page {PageNum}", chapter.Id, pageNum);
-            _directoryService.ClearAndDeleteDirectory(outputDirectory);
+            logger.LogError(ex, "There was an error when trying to get thumbnail for Chapter {ChapterId}, Page {PageNum}", chapter.Id, pageNum);
+            directoryService.ClearAndDeleteDirectory(outputDirectory);
             throw;
         }
     }

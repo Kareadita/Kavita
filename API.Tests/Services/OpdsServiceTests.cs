@@ -42,7 +42,9 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
 
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
-            Substitute.For<IEventHub>(), Substitute.For<IImageService>(), ds, Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>());
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(), ds,
+            Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
+            Substitute.For<IClientInfoAccessor>());
 
         var localizationService =
             new LocalizationService(ds, new MockHostingEnvironment(), Substitute.For<IMemoryCache>(), unitOfWork);

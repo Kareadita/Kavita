@@ -33,7 +33,8 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
         return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>());
+            Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
+            Substitute.For<IClientInfoAccessor>());
     }
 
     [Fact]
