@@ -30,7 +30,7 @@ import {PageChapterLabelPipe} from "../../../../_pipes/page-chapter-label.pipe";
 import {UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
 import {QuillTheme, QuillWrapperComponent} from "../../quill-wrapper/quill-wrapper.component";
 import {ContentChange, QuillViewComponent} from "ngx-quill";
-import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {AccountService} from "../../../../_services/account.service";
 import {
   OffCanvasResizeComponent,
@@ -61,7 +61,7 @@ const INIT_HIGHLIGHT_DELAY = 200;
     QuillWrapperComponent,
     QuillViewComponent,
     DatePipe,
-    UtcToLocaleDatePipe,
+    UtcToLocalDatePipe,
     OffCanvasResizeComponent,
     AnnotationLikesComponent,
     ProfileIconComponent,

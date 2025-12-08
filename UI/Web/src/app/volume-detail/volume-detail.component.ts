@@ -86,7 +86,7 @@ import {User} from "../_models/user/user";
 import {AnnotationService} from "../_services/annotation.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationsTabComponent} from "../_single-module/annotations-tab/annotations-tab.component";
-import {UtcToLocaleDatePipe} from "../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../_pipes/utc-to-locale-date.pipe";
 import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 
@@ -163,7 +163,7 @@ interface VolumeCast extends IHasCast {
     ReviewsComponent,
     ExternalRatingComponent,
     AnnotationsTabComponent,
-    UtcToLocaleDatePipe,
+    UtcToLocalDatePipe,
     ReadingProgressStatusPipePipe
   ],
   templateUrl: './volume-detail.component.html',

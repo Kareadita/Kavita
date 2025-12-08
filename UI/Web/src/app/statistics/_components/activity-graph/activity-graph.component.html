@@ -85,14 +85,14 @@
       <!--TODO: Refactor this to take a template or be useable for multiple people -->
       <ng-template #noActivityTooltip let-item="item">
         <div class="activity-tooltip">
-          {{t('no-activity-tooltip', {date: item.date | utcToLocaleDate | ordinalDate})}}
+          {{t('no-activity-tooltip', {date: item.date | utcToLocalDate | ordinalDate})}}
         </div>
       </ng-template>
 
       <ng-template #tooltip let-item="item">
         <div class="activity-tooltip">
           <div class="tooltip-header">
-            <strong>{{ item.date | utcToLocaleDate | date:'MMMM d, yyyy' }}</strong>
+            <strong>{{ item.date | utcToLocalDate | date:'MMMM d, yyyy' }}</strong>
           </div>
           <div class="tooltip-content">
             <div class="tooltip-stat">

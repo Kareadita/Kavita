@@ -8,7 +8,7 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ClientDevicePlatformPipe} from "../../_pipes/client-device-platform.pipe";
 import {ClientDeviceClientTypePipe} from "../../_pipes/client-device-client-type.pipe";
 import {DateTime, Duration, Interval} from "luxon";
-import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {CardActionablesComponent} from "../card-actionables/card-actionables.component";
@@ -29,7 +29,7 @@ import {User} from "../../_models/user/user";
     DefaultValuePipe,
     ClientDevicePlatformPipe,
     ClientDeviceClientTypePipe,
-    UtcToLocaleDatePipe,
+    UtcToLocalDatePipe,
     DefaultDatePipe,
     UtcToLocalTimePipe,
     CardActionablesComponent,

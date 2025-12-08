@@ -5,7 +5,7 @@ import {DatePipe, DecimalPipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
 import {DayLabelPipe} from "../../../_pipes/day-label.pipe";
-import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {OrdinalDatePipe} from "../../../_pipes/ordinal-date.pipe";
 import {DurationPipe} from "../../../_pipes/duration.pipe";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
@@ -41,7 +41,7 @@ interface WeekRow {
     DecimalPipe,
     NgbTooltip,
     DayLabelPipe,
-    UtcToLocaleDatePipe,
+    UtcToLocalDatePipe,
     OrdinalDatePipe,
     DatePipe,
     DurationPipe,

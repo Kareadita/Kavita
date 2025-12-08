@@ -21,7 +21,7 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
-import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
 import {SettingsService} from "../settings.service";
 import {ServerSettings} from "../_models/server-settings";
@@ -34,7 +34,7 @@ import {ImageComponent} from "../../shared/image/image.component";
   styleUrls: ['./manage-users.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, TranslocoModule, DefaultDatePipe, NgClass,
-    DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, TimeAgoPipe, SentenceCasePipe, UtcToLocaleDatePipe,
+    DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, TimeAgoPipe, SentenceCasePipe, UtcToLocalDatePipe,
     RoleLocalizedPipe, ImageComponent]
 })
 export class ManageUsersComponent implements OnInit {

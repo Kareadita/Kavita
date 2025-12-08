@@ -26,8 +26,8 @@ export interface ReadingActivityData {
   totalPages: number;
   totalWords: number;
 
-  startTimeUtc: Date;
-  endTimeUtc: Date;
+  startTimeUtc: string;
+  endTimeUtc: string;
 
   clientInfo: ClientInfo | null;
 }

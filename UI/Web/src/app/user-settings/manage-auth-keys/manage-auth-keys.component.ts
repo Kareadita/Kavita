@@ -6,7 +6,7 @@ import {SettingsService} from "../../admin/settings.service";
 import {WikiLink} from "../../_models/wiki";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AuthKey, AuthKeyProvider} from "../../_models/user/auth-key";
-import {UtcToLocaleDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {ToggleVisibilityDirective} from "../../_directives/toggle-visibility.directive";
 import {ConfirmService} from "../../shared/confirm.service";
@@ -23,7 +23,7 @@ import {ToastrService} from "ngx-toastr";
     ApiKeyComponent,
     TranslocoDirective,
     NgxDatatableModule,
-    UtcToLocaleDatePipe,
+    UtcToLocalDatePipe,
     DefaultDatePipe,
     ToggleVisibilityDirective,
     DatePipe,

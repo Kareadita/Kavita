@@ -80,7 +80,7 @@ import {AnnotationService} from "../_services/annotation.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationsTabComponent} from "../_single-module/annotations-tab/annotations-tab.component";
 import {UtcToLocalTimePipe} from "../_pipes/utc-to-local-time.pipe";
-import {UtcToLocaleDatePipe} from "../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../_pipes/utc-to-locale-date.pipe";
 import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 
@@ -125,7 +125,7 @@ enum TabID {
     ExternalRatingComponent,
     AnnotationsTabComponent,
     UtcToLocalTimePipe,
-    UtcToLocaleDatePipe,
+    UtcToLocalDatePipe,
     ReadingProgressStatusPipePipe
   ],
   templateUrl: './chapter-detail.component.html',

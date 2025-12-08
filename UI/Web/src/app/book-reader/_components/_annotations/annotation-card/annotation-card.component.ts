@@ -11,7 +11,7 @@ import {
   Signal
 } from '@angular/core';
 import {Annotation} from "../../../_models/annotations/annotation";
-import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {QuillViewComponent} from "ngx-quill";
 import {DatePipe, NgClass, NgStyle} from "@angular/common";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -32,7 +32,7 @@ import {ProfileIconComponent} from "../../../../_single-module/profile-icon/prof
 @Component({
   selector: 'app-annotation-card',
   imports: [
-    UtcToLocaleDatePipe,
+    UtcToLocalDatePipe,
     QuillViewComponent,
     DatePipe,
     TranslocoDirective,
