@@ -117,7 +117,7 @@ public class BookController : BaseApiController
         var cachedFilePath = Path.Join(_cacheService.GetCachePath(chapterId), Path.GetFileName(chapter.Files.ElementAt(0).FilePath));
         var result = await _bookService.GetResourceAsync(cachedFilePath, file);
 
-        if (!result.IsSuccess) return BadRequest(await _localizationService.Translate(UserId, result.ErrorMessage));
+        if (!result.IsSuccess) return BadRequest(await _localizationService.Get("en", result.ErrorMessage));
 
         return File(result.Content, result.ContentType, $"{chapterId}-{file}");
     }
