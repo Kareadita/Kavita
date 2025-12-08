@@ -1,7 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input} from '@angular/core';
 import {Location, TitleCasePipe} from '@angular/common';
-import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
-import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
 import {MemberInfo} from "../../../_models/user/member-info";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../../_services/image.service";
@@ -15,36 +13,19 @@ import {
   NgbNavOutlet
 } from "@ng-bootstrap/ng-bootstrap";
 import {tap} from "rxjs";
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
-import {PreferredFormatComponent} from "../../../statistics/_components/preferred-format/preferred-format.component";
 import {StatisticsService} from "../../../_services/statistics.service";
-import {StringBreakdownComponent} from "../../../statistics/_components/string-breakdown/string-breakdown.component";
 import {UtcToLocaleDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
-import {
-  BucketSpreadChartComponent
-} from "../../../statistics/_components/bucket-spread-chart/bucket-spread-chart.component";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {ReactiveFormsModule} from "@angular/forms";
 import {ProfileImageComponent} from "../profile-image/profile-image.component";
-import {
-  LibraryAndTimeFilterGroup,
-  LibraryAndTimeSelectorComponent
-} from "../../../statistics/_components/library-and-time-selector/library-and-time-selector.component";
-import {map} from "rxjs/operators";
-import {StatsFilter} from "../../../statistics/_models/stats-filter";
 import {LicenseService} from "../../../_services/license.service";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
-import {ReadsByMonthComponent} from "../../../statistics/_components/reads-by-month/reads-by-month.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {NgxStarsModule} from "ngx-stars";
 import {ProfileReviewListComponent} from "../profile-review-list/profile-review-list.component";
-import {
-  AvgTimeSpendReadingByHourComponent
-} from "../../../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
-import {ProfileStatBarComponent} from "../profile-stat-bar/profile-stat-bar.component";
 import {ProfileOverviewComponent} from "../profile-overview/profile-overview.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
-import {FavoriteAuthorsComponent} from "../../../statistics/_components/favorite-authors/favorite-authors.component";
 import {ProfileStatsComponent} from "../profile-stats/profile-stats.component";
 
 enum TabID {
@@ -110,6 +91,9 @@ export class ProfileComponent {
   protected readonly backgroundImage = computed(() => {
     const m = this.memberInfo();
     if (!m) return '';
+
+
+
     try {
       return this.imageService.getUserCoverImage(this.userId());
     } catch {

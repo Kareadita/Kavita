@@ -2920,7 +2920,8 @@
     },
 
     "profile-image": {
-        "edit-image-alt": "Edit Image"
+        "edit-image-alt": "Edit Image",
+        "reset-image-alt": "Reset Image"
     },
 
     "preferred-format": {

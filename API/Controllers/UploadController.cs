@@ -546,5 +546,4 @@ public class UploadController : BaseApiController
         return BadRequest(await _localizationService.Translate(UserId, "generic-cover-person-save"));
     }
 
-
 }

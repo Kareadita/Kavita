@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import { environment } from 'src/environments/environment';
-import { TextResonse } from '../_types/text-response';
+import {environment} from 'src/environments/environment';
+import {TextResonse} from '../_types/text-response';
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {tap} from "rxjs";

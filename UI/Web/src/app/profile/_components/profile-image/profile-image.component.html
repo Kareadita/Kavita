@@ -20,16 +20,31 @@
       </div>
     </div>
 
+    @if (canDeleteImage()) {
+      <button class="btn btn-icon reset-button"
+              (click)="restProfileImage()"
+              [attr.aria-label]="t('reset-image-alt')">
+
+        <i class="fa-solid fa-times remove-button" aria-hidden="true"></i>
+
+        <span class="visually-hidden">{{t('reset-image-alt')}}</span>
+      </button>
+
+
+    }
+
     @if (showEditButton() && canUploadImage()) {
       <button class="btn btn-icon edit-button"
               (click)="openFileSelector()"
               [disabled]="uploadInProgress()"
               [attr.aria-label]="t('edit-image-alt')">
+
         @if (uploadInProgress()) {
           <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
         } @else {
           <i class="fa-solid fa-pen-alt" aria-hidden="true"></i>
         }
+
         <span class="visually-hidden">{{t('edit-image-alt')}}</span>
       </button>
     }

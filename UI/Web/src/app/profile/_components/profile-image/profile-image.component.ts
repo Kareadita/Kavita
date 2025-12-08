@@ -6,15 +6,16 @@ import {
   ElementRef,
   inject,
   input,
-  model, Signal,
-  signal, ViewChild
+  model,
+  signal,
+  ViewChild
 } from '@angular/core';
 import {ImageService} from "../../../_services/image.service";
 import {AccountService} from "../../../_services/account.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {UploadService} from "../../../_services/upload.service";
-import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
+import {NgxFileDropModule} from "ngx-file-drop";
 import {ToastrService} from "ngx-toastr";
 
 interface ImageUploadResult {
@@ -57,6 +58,10 @@ export class ProfileImageComponent {
     return this.accountService.currentUserSignal()?.id === this.userId();
   });
 
+  canDeleteImage = computed(() => {
+    return !this.uploadInProgress() && this.showEditButton();
+  });
+
   isImageUploadMode = computed(() => {
     return this.canUploadImage() && !this.uploadInProgress();
   });
@@ -91,18 +96,10 @@ export class ProfileImageComponent {
     input.value = '';
   }
 
-  // I might just remove the drag and drop, the complexity doesn't match the benefit and UX is confusing
-  handleFileDrop(files: NgxFileDropEntry[]): void {
-    if (files.length === 0) return;
-
-    const droppedFile = files[0];
-    if (droppedFile.fileEntry.isFile) {
-      const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
-      fileEntry.file((file: File) => {
-        this.processFile(file);
-      });
-    }
+  restProfileImage() {
+    this.uploadService.updateUserCoverImage(this.userId(), '').pipe().subscribe();
   }
+
 
   private processFile(file: File): void {
     if (!this.validateFileType(file)) {
