@@ -20,6 +20,7 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {UserReviewExtended} from "../../../_models/user-review";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, switchMap, tap} from "rxjs";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 @Component({
   selector: 'app-profile-review-list',
@@ -28,7 +29,8 @@ import {debounceTime, distinctUntilChanged, switchMap, tap} from "rxjs";
     NgxStarsModule,
     ReviewListItemComponent,
     VirtualScrollerModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    LoadingComponent
   ],
   templateUrl: './profile-review-list.component.html',
   styleUrl: './profile-review-list.component.scss',
@@ -44,6 +46,7 @@ export class ProfileReviewListComponent implements OnInit {
   memberInfo = input.required<MemberInfo>();
 
   reviews = signal<UserReviewExtended[]>([]);
+  isLoading = model<boolean>(true);
 
   starColor = this.themeService.getCssVariable('--rating-star-color');
   formGroup = new FormGroup({
@@ -65,7 +68,9 @@ export class ProfileReviewListComponent implements OnInit {
 
   ngOnInit() {
     this.reviewService.getReviewsByUser(this.memberInfo().id, null, null).pipe(
+      tap(_ => this.isLoading.set(true)),
       tap(reviews => this.reviews.set(reviews)),
+      tap(_ => this.isLoading.set(false)),
     ).subscribe();
 
     this.formGroup.valueChanges.pipe(

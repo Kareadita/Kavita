@@ -59,7 +59,7 @@ export class ProfileImageComponent {
   });
 
   canDeleteImage = computed(() => {
-    return !this.uploadInProgress() && this.showEditButton();
+    return this.accountService.currentUserSignal()?.coverImage && !this.uploadInProgress() && this.showEditButton();
   });
 
   isImageUploadMode = computed(() => {

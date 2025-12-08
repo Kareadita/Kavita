@@ -1,7 +1,10 @@
 <ng-container *transloco="let t; prefix: 'profile-review-list'">
   @let data = reviews();
   <div class="row mx-2">
-    @if (data.length === 0) {
+
+    @if (isLoading()) {
+      <app-loading />
+    } @else if (data.length === 0) {
       {{t('no-data')}}
     } @else {
       <form [formGroup]="formGroup">
