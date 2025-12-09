@@ -134,7 +134,7 @@ public class AccountController : BaseApiController
         var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName);
         if (user == null) return Ok(); // Don't report BadRequest as that would allow brute forcing to find accounts on system
 
-        _logger.LogInformation("{UserName} is changing {ResetUser}'s password", Username!, resetPasswordDto.UserName);
+        _logger.LogInformation("{UserName} is changing {ResetUser}'s password", Username!, resetPasswordDto.UserName.Sanitize());
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
 
         if (resetPasswordDto.UserName == Username! && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || isAdmin))

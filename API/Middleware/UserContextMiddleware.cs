@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Progress;
+using API.Extensions;
 using API.Services;
 using API.Services.Store;
 using Microsoft.AspNetCore.Authorization;
@@ -16,7 +17,7 @@ namespace API.Middleware;
 
 /// <summary>
 /// Middleware that resolves user identity from various authentication methods
-/// (JWT, API Key, OIDC) and provides a unified IUserContext for downstream components.
+/// (JWT, Auth Key, OIDC) and provides a unified IUserContext for downstream components.
 /// Must run after UseAuthentication() and UseAuthorization().
 /// </summary>
 public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMiddleware> logger, HybridCache cache)
@@ -57,12 +58,12 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
             {
                 // No user resolved on a protected endpoint - this is a problem
                 // Authorization middleware will handle returning 401/403
-                logger.LogWarning("Could not resolve user identity for protected endpoint: {Path}", context.Request.Path);
+                logger.LogWarning("Could not resolve user identity for protected endpoint: {Path}", context.Request.Path.ToString().Sanitize());
             }
             else
             {
                 // No user resolved but endpoint allows anonymous - this is fine
-                logger.LogTrace("No user identity resolved for anonymous endpoint: {Path}", context.Request.Path);
+                logger.LogTrace("No user identity resolved for anonymous endpoint: {Path}", context.Request.Path.ToString().Sanitize());
             }
         }
         catch (Exception ex)
@@ -78,8 +79,8 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
         HttpContext context,
         IUnitOfWork unitOfWork)
     {
-        // Priority 1: ALWAYS check for API Key first (query string or path parameter)
-        // API keys work even on [AllowAnonymous] endpoints (like OPDS)
+        // Priority 1: ALWAYS check for Auth Key first (query string or path parameter)
+        // Auth Keys work even on [AllowAnonymous] endpoints (like OPDS)
         var apiKeyResult = await TryResolveFromAuthKeyAsync(context, unitOfWork);
         if (apiKeyResult.userId.HasValue)
         {
@@ -157,16 +158,16 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
 
             if (result is {Id: not null, Username: not null})
             {
-                logger.LogTrace("Resolved user {UserId} from API key for path {Path}", result.Id, context.Request.Path);
+                logger.LogTrace("Resolved user {UserId} from Auth Key for path {Path}", result.Id, context.Request.Path.ToString().Sanitize());
 
                 return (result.Id, result.Username, AuthenticationType.AuthKey);
             }
 
-            logger.LogWarning("Invalid API key provided for path {Path}", context.Request.Path);
+            logger.LogWarning("Invalid Auth Key provided for path {Path}", context.Request.Path);
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Failed to resolve user from API key");
+            logger.LogWarning(ex, "Failed to resolve user from Auth Key");
         }
 
         return (null, null, AuthenticationType.Unknown);

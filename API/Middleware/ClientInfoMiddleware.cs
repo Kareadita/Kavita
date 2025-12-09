@@ -101,7 +101,7 @@ public partial class ClientInfoMiddleware(RequestDelegate next, ILogger<ClientIn
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Failed to parse X-Kavita-Client header: {Header}", header);
+            logger.LogWarning(ex, "Failed to parse X-Kavita-Client header: {Header}", header.Sanitize());
         }
 
         // Fallback if parsing fails
