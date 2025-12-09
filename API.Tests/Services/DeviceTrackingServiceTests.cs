@@ -13,6 +13,7 @@ using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 using System.Linq;
+using API.Entities;
 
 namespace API.Tests.Services;
 #nullable enable
@@ -398,11 +399,34 @@ public class DeviceTrackingServiceTests : AbstractDbTest
         context.AppUser.Add(user);
         await context.SaveChangesAsync();
 
-        // Create reading sessions with device IDs
-        var session1 = CreateReadingSession(user.Id, [1, 2]);
-        var session2 = CreateReadingSession(user.Id, [3, 2]); // Device 2 appears twice
+        // Make sure we mock up the Series/Chapter Id for the tracking
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .Build();
 
-        context.AppUserReadingSession.AddRange(session1, session2);
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(series)
+            .Build();
+
+        user.Libraries.Add(library);
+        await context.SaveChangesAsync();
+
+        // Create devices first
+        var device1 = CreateDevice(user.Id, 1);
+        var device2 = CreateDevice(user.Id, 2);
+        var device3 = CreateDevice(user.Id, 3);
+        context.ClientDevice.AddRange(device1, device2, device3);
+        await context.SaveChangesAsync();
+
+        // Create reading sessions - but save them separately to isolate FK issues
+        var session1 = CreateReadingSession(user.Id, [1, 2]);
+        context.AppUserReadingSession.Add(session1);
+        await context.SaveChangesAsync();
+
+        var session2 = CreateReadingSession(user.Id, [3, 2]); // Device 2 appears twice
+        context.AppUserReadingSession.Add(session2);
         await context.SaveChangesAsync();
 
         // Pre-seed cache with device mappings and their cache keys
