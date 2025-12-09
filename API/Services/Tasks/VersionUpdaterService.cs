@@ -209,7 +209,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                 .GetJsonAsync<PullRequestInfo>();
 
             // Cache the result
-            var tempPath = $"{cacheFile}.tmp";
+            var tempPath = $"{cacheFile}.{Guid.NewGuid():N}.tmp";
             var json = JsonSerializer.Serialize(prInfo, JsonOptions);
             await File.WriteAllTextAsync(tempPath, json);
             File.Move(tempPath, cacheFile, overwrite: true);
@@ -434,8 +434,9 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         try
         {
-            var tempPath = Path.Combine(Path.GetDirectoryName(_cacheFilePath)!,
-                $"{Path.GetFileName(_cacheFilePath)}.tmp");
+            var tempPath = Path.Combine(
+                Path.GetDirectoryName(_cacheFilePath)!,
+                $"{Path.GetFileName(_cacheFilePath)}.{Guid.NewGuid():N}.tmp");
 
             var json = JsonSerializer.Serialize(updates, JsonOptions);
             await File.WriteAllTextAsync(tempPath, json);
@@ -453,8 +454,9 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         try
         {
-            var tempPath = Path.Combine(Path.GetDirectoryName(_cacheLatestReleaseFilePath)!,
-                $"{Path.GetFileName(_cacheLatestReleaseFilePath)}.tmp");
+            var tempPath = Path.Combine(
+                Path.GetDirectoryName(_cacheLatestReleaseFilePath)!,
+                $"{Path.GetFileName(_cacheLatestReleaseFilePath)}.{Guid.NewGuid():N}.tmp");
 
             var json = JsonSerializer.Serialize(update, JsonOptions);
             await File.WriteAllTextAsync(tempPath, json);
@@ -691,8 +693,9 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     {
         try
         {
-            var tempPath = Path.Combine(Path.GetDirectoryName(_cacheNightlyInfoFilePath)!,
-                $"{Path.GetFileName(_cacheNightlyInfoFilePath)}.tmp");
+            var tempPath = Path.Combine(
+                Path.GetDirectoryName(_cacheNightlyInfoFilePath)!,
+                $"{Path.GetFileName(_cacheNightlyInfoFilePath)}.{Guid.NewGuid():N}.tmp");
 
             var json = JsonSerializer.Serialize(nightlyInfo, JsonOptions);
             await File.WriteAllTextAsync(tempPath, json);
