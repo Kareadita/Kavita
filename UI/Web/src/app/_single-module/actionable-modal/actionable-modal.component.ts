@@ -12,7 +12,7 @@ import {
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {ActionableEntity, ActionItem} from "../../_services/action-factory.service";
+import {Action, ActionableEntity, ActionItem} from "../../_services/action-factory.service";
 import {AccountService} from "../../_services/account.service";
 import {tap} from "rxjs";
 import {User} from "../../_models/user/user";
@@ -48,6 +48,21 @@ export class ActionableModalComponent implements OnInit {
 
   ngOnInit() {
     this.currentItems = this.translateOptions(this.actions);
+
+    // On Mobile, surface download
+    const otherActionIndex = this.currentItems.findIndex(i => i.action === Action.Submenu && i.title === 'actionable.other')
+    if (otherActionIndex) {
+      const downloadActionIndex = this.currentItems[otherActionIndex].children.findIndex(a => a.action === Action.Download);
+      if (downloadActionIndex) {
+        const downloadAction = this.currentItems[otherActionIndex].children.splice(downloadActionIndex, 1)[0];
+        this.currentItems.push(downloadAction);
+
+        // Check if Other has any other children, else remove
+        if (this.currentItems[otherActionIndex].children.length === 0) {
+          this.currentItems.splice(otherActionIndex, 1);
+        }
+      }
+    }
 
     this.accountService.currentUser$.pipe(tap(user => {
       this.user = user;
