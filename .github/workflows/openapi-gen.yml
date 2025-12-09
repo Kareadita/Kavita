@@ -10,6 +10,9 @@ on:
     branches: [ 'develop', '!release/**' ]
   workflow_dispatch:
 
+env:
+  DOTNET_VERSION: 10.0
+
 jobs:
   generate-openapi:
     runs-on: ubuntu-latest
@@ -23,7 +26,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: $DOTNET_VERSION
 
       - name: Install dependencies
         run: dotnet restore
@@ -44,7 +47,7 @@ jobs:
           dotnet tool install Swashbuckle.AspNetCore.Cli --version ${{ steps.swashbuckle-version.outputs.VERSION }}
 
       - name: Generate OpenAPI file
-        run: dotnet swagger tofile --output openapi.json API/bin/Debug/net9.0/API.dll v1
+        run: dotnet swagger tofile --output openapi.json API/bin/Debug/net$DOTNET_VERSION/API.dll v1
 
       - name: Check for changes
         id: git-check

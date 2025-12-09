@@ -19,7 +19,7 @@ public static class Configuration
     public const string DefaultOidcClientId = "kavita";
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
-    public static readonly string KavitaPlusApiUrl = "http://localhost:5020";
+    public static readonly string KavitaPlusApiUrl = "https://plus.kavitareader.com";
     public const string StatsApiUrl = "https://stats.kavitareader.com";
 
     public static int Port
