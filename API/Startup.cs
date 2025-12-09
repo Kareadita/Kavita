@@ -311,17 +311,7 @@ public class Startup
 
         app.UseResponseCaching();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        // Must be first after Auth, will set authentication data for the rest of the Controllers/Middleware
-        app.UseMiddleware<UserContextMiddleware>();
-        app.UseMiddleware<ClientInfoMiddleware>();
-        app.UseMiddleware<DeviceTrackingMiddleware>(); // This must be after ClientInfo and Authorization
-        app.UseMiddleware<UpdateUserAsActiveMiddleware>(); // This must be LAST
-
-        app.UseDefaultFiles();
-
+        // Ensure static files is before our custom middleware stack
         app.UseStaticFiles(new StaticFileOptions
         {
             // bcmap files needed for PDF reader localizations (https://github.com/Kareadita/Kavita/issues/2970)
@@ -341,6 +331,19 @@ public class Startup
                 ctx.Context.Response.Headers[Headers.RobotsTag] = "noindex,nofollow";
             }
         });
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        // Must be first after Auth, will set authentication data for the rest of the Controllers/Middleware
+        app.UseMiddleware<UserContextMiddleware>();
+        app.UseMiddleware<ClientInfoMiddleware>();
+        app.UseMiddleware<DeviceTrackingMiddleware>(); // This must be after ClientInfo and Authorization
+        app.UseMiddleware<UpdateUserAsActiveMiddleware>(); // This must be LAST
+
+        app.UseDefaultFiles();
+
+
 
         app.UseSerilogRequestLogging(opts
             =>
