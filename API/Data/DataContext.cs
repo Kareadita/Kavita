@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs.Progress;
@@ -349,7 +350,14 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
         builder.Entity<AppUserReadingSessionActivityData>(e
             => e.ComplexProperty(d=> d.ClientInfo, b => b.ToJson()));
-
+        builder.Entity<AppUserReadingSessionActivityData>(e =>
+        {
+            e.Property(d => d.DeviceIds)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                    v => JsonSerializer.Deserialize<List<int>>(v, (JsonSerializerOptions)null) ?? new List<int>())
+                .HasColumnType("TEXT");
+        });
         builder.Entity<AppUserReadingHistory>()
             .Property(sm => sm.Data)
             .HasJsonConversion(new DailyReadingDataDto())

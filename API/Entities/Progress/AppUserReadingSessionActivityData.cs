@@ -45,5 +45,9 @@ public class AppUserReadingSessionActivityData
     /// Tracks device, browser, and authentication details.
     /// </summary>
     public ClientInfoData? ClientInfo { get; set; }
-    public IList<int> DeviceIds { get; set; }
+    /// <summary>
+    /// List of device PKs that connected during this reading session
+    /// </summary>
+    /// <remarks>JSON Column</remarks>
+    public List<int> DeviceIds { get; set; } = [];
 }
