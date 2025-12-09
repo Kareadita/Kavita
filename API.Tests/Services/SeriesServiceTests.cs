@@ -928,6 +928,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var seriesService = Setup(unitOfWork);
+
         var s = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .Build();

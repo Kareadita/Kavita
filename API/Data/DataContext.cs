@@ -350,14 +350,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
         builder.Entity<AppUserReadingSessionActivityData>(e
             => e.ComplexProperty(d=> d.ClientInfo, b => b.ToJson()));
-        builder.Entity<AppUserReadingSessionActivityData>(e =>
-        {
-            e.Property(d => d.DeviceIds)
-                .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<int>>(v, (JsonSerializerOptions)null) ?? new List<int>())
-                .HasColumnType("TEXT");
-        });
+
         builder.Entity<AppUserReadingHistory>()
             .Property(sm => sm.Data)
             .HasJsonConversion(new DailyReadingDataDto())
