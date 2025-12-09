@@ -13,6 +13,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Progress;
+using API.Middleware;
 using API.Services;
 using API.Services.Plus;
 using API.Services.Reading;
@@ -71,9 +72,12 @@ public class ReaderController : BaseApiController
     /// Returns the PDF for the chapterId.
     /// </summary>
     /// <param name="chapterId"></param>
+    /// <param name="apiKey">Auth Key for authentication</param>
+    /// <param name="extractPdf">Converts PDF into images per-page - Used for Mihon mainly</param>
     /// <returns></returns>
     [HttpGet("pdf")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "apiKey"])]
+    [SkipDeviceTracking]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "apiKey", "extractPdf"])]
     public async Task<ActionResult> GetPdf(int chapterId, string apiKey, bool extractPdf = false)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey) == 0) return BadRequest();
@@ -110,6 +114,7 @@ public class ReaderController : BaseApiController
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <returns></returns>
     [HttpGet("image")]
+    [SkipDeviceTracking]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "page", "extractPdf", "apiKey"
     ])]
     [AllowAnonymous]
@@ -146,6 +151,7 @@ public class ReaderController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("thumbnail")]
+    [SkipDeviceTracking]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "pageNum", "apiKey"])]
     [AllowAnonymous]
     public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
@@ -170,6 +176,7 @@ public class ReaderController : BaseApiController
     /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
     /// <returns></returns>
     [HttpGet("bookmark-image")]
+    [SkipDeviceTracking]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "page", "apiKey"])]
     [AllowAnonymous]
     public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
@@ -208,6 +215,7 @@ public class ReaderController : BaseApiController
     /// <param name="extractPdf"></param>
     /// <returns></returns>
     [HttpGet("file-dimensions")]
+    [SkipDeviceTracking]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "extractPdf"])]
     public async Task<ActionResult<IEnumerable<FileDimensionDto>>> GetFileDimensions(int chapterId, bool extractPdf = false)
     {
