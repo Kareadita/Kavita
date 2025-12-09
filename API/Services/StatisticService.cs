@@ -1186,7 +1186,11 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     public async Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId)
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
-        if (!socialPreferences.ShareProfile) return new ProfileStatBarDto();
+        if (userId != requestingUserId)
+        {
+            if (!socialPreferences.ShareProfile) return new ProfileStatBarDto();
+        }
+
 
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
