@@ -14,7 +14,7 @@
             <span class="visually-hidden">{{t('remove')}}</span>
           </button>
           @if (item.streamType===SideNavStreamType.SmartFilter) {
-            <button class="btn btn-icon" (click)="delete.emit(item)">
+            <button class="btn btn-danger-text btn-icon" (click)="delete.emit(item)">
               <i class="fa-solid fa-trash" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('delete')}}</span>
             </button>
