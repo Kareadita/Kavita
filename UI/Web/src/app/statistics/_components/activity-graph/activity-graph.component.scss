@@ -2,7 +2,7 @@
 
 // Host is like root but scoped only to the component
 :host {
-  --activity-graph-cell-size: 1.5rem;
+  --activity-graph-cell-size: 1.2rem;
   --activity-graph-cell-gap: 4px;
   --activity-graph-cell-radius: 2px;
 
@@ -38,7 +38,7 @@
 }
 
 .activity-graph-table {
-  border-spacing: 4px;
+  border-spacing: var(--activity-graph-cell-gap);
   border-collapse: separate;
   position: relative;
   width: max-content;
@@ -185,6 +185,7 @@
   }
 }
 
+// TODO: This needs major polish
 @media(max-width: theme.$grid-breakpoints-md) {
   :host {
     --activity-graph-cell-size: 11px;
@@ -193,7 +194,8 @@
 }
 @media(max-width: theme.$grid-breakpoints-sm) {
   :host {
-    --activity-graph-cell-size: 9px;
+    --activity-graph-cell-size: 0.8rem;
+    --activity-graph-cell-gap: 2px;
     --activity-graph-font-size: 10px;
   }
 }
