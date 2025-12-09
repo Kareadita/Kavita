@@ -772,7 +772,7 @@ public class UserRepository : IUserRepository
 
         var user = await _context.AppUserAuthKey
             .Where(k => k.Key == apiKey)
-            .IsNotExpired()
+            .HasNotExpired()
             .Select(k => k.AppUser)
             .FirstOrDefaultAsync();
         if (user == null) return ArraySegment<string>.Empty;
@@ -969,7 +969,7 @@ public class UserRepository : IUserRepository
 
         return await _context.AppUserAuthKey
             .Where(k => k.Key == authKey)
-            .IsNotExpired()
+            .HasNotExpired()
             .Select(k => k.AppUser)
             .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
@@ -981,7 +981,7 @@ public class UserRepository : IUserRepository
 
         return await _context.AppUserAuthKey
             .Where(k => k.Key == authKey)
-            .IsNotExpired()
+            .HasNotExpired()
             .Select(k => k.AppUserId)
             .FirstOrDefaultAsync();
     }

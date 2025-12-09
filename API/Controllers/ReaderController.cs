@@ -80,7 +80,7 @@ public class ReaderController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "apiKey", "extractPdf"])]
     public async Task<ActionResult> GetPdf(int chapterId, string apiKey, bool extractPdf = false)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey) == 0) return BadRequest();
+        if (!UserContext.IsAuthenticated) return Unauthorized();
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return NoContent();
 

@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace API.Helpers;
+#nullable enable
 
 public class OpenIdConnectEventsHelper: OpenIdConnectEvents
 {

@@ -667,7 +667,7 @@ public class LibraryController : BaseApiController
 
     private void UpdateLibrarySettings(UpdateLibraryDto dto, Library library, bool updateType = true)
     {
-        // ALSO ADD NEW FIELDS IN THE CREATE LIBRARY ENDPOINT
+        // Reminder: Add new fields to the Create Library Endpoint!
 
         if (updateType)
         {

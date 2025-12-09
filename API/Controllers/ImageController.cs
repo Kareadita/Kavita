@@ -345,7 +345,7 @@ public class ImageController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["filename", "apiKey"])]
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey) == 0) return BadRequest();
+        if (!UserContext.IsAuthenticated) return Unauthorized();
         if (filename.Contains("..")) return BadRequest(await _localizationService.Translate(UserId, "invalid-filename"));
 
         var roles = await _unitOfWork.UserRepository.GetRolesByAuthKey(apiKey);
