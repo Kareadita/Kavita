@@ -20,7 +20,7 @@ public static class ActivityFilter
     /// <param name="socialPreferences">social preferences of the user <b>owing</b> the data</param>
     /// <param name="requestingUser">the user <b>requesting</b> the data</param>
     /// <param name="onlyCompleted">return only data for fully read chapters</param>
-    /// <param name="isAggregate">If this is aggregate data (counts, etc), the filter will opt-out of restricting based on Social Libraries/Age Rating</param>
+    /// <param name="isAggregate">If this is aggregate data (counts, etc), the filter will opt out of restricting based on Social Libraries/Age Rating</param>
     /// <returns></returns>
     public static IQueryable<AppUserReadingSessionActivityData> ApplyStatsFilter(
         this IQueryable<AppUserReadingSessionActivityData> queryable,
