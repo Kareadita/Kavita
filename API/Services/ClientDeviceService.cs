@@ -451,6 +451,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     public static string GetCacheKey(int userId, string? uiFingerprint, ClientInfoData clientInfo)
     {
         var deviceIdPart = string.IsNullOrEmpty(uiFingerprint) ? clientInfo.Browser : uiFingerprint;
+        deviceIdPart = string.IsNullOrEmpty(deviceIdPart) ? clientInfo.UserAgent : deviceIdPart;
         return $"device_tracking_{userId}_{deviceIdPart}";
     }
 

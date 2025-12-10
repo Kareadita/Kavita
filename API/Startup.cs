@@ -153,18 +153,23 @@ public class Startup
 
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var filePath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
             c.IncludeXmlComments(filePath, true);
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
+
+            c.AddSecurityDefinition("AuthKey", new OpenApiSecurityScheme
+            {
+                Description = "Auth Key authentication. Enter your Auth key from your user settings",
+                Name = Headers.ApiKey,
                 In = ParameterLocation.Header,
-                Description = "Please insert JWT with Bearer into field",
-                Name = "Authorization",
-                Type = SecuritySchemeType.ApiKey
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "ApiKeyScheme"
             });
 
             c.AddSecurityRequirement((document) => new OpenApiSecurityRequirement()
             {
-                [new OpenApiSecuritySchemeReference("bearer", document)] = []
+                [new OpenApiSecuritySchemeReference("apiKey", document)] = []
             });
+
 
             c.AddServer(new OpenApiServer
             {

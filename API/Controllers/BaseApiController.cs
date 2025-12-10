@@ -1,4 +1,6 @@
-﻿using API.Services.Store;
+﻿using API.Middleware;
+using API.Services.Store;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +11,7 @@ namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme},{AuthKeyAuthenticationOptions.SchemeName}")]
 public class BaseApiController : ControllerBase
 {
     private IUserContext? _userContext;

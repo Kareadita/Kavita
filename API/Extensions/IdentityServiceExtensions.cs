@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -8,6 +9,7 @@ using API.Constants;
 using API.Data;
 using API.Entities;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authentication;
@@ -74,28 +76,46 @@ public static class IdentityServiceExtensions
         var auth = services.AddAuthentication(DynamicHybrid);
         var enableOidc = oidcSettings.Enabled && services.SetupOpenIdConnectAuthentication(auth, oidcSettings, environment);
 
-        auth.AddPolicyScheme(DynamicHybrid, JwtBearerDefaults.AuthenticationScheme, options =>
+        auth.AddPolicyScheme(DynamicHybrid, LocalIdentity, options =>
         {
             options.ForwardDefaultSelector = ctx =>
             {
-                if (!enableOidc) return LocalIdentity;
-
-                if (ctx.Request.Path.StartsWithSegments(OidcCallback) ||
-                    ctx.Request.Path.StartsWithSegments(OidcLogoutCallback))
+                // Priority 1: Check for API/Auth Key
+                var apiKey = AuthKeyAuthenticationHandler.ExtractAuthKey(ctx.Request);
+                if (!string.IsNullOrEmpty(apiKey))
                 {
-                    return OpenIdConnect;
+                    //Log.Debug("Routing to AuthKey scheme for path: {Path}", ctx.Request.Path);
+                    return AuthKeyAuthenticationOptions.SchemeName;
                 }
 
+                // Priority 2: OIDC paths and cookies
+                if (enableOidc)
+                {
+                    if (ctx.Request.Path.StartsWithSegments(OidcCallback) ||
+                        ctx.Request.Path.StartsWithSegments(OidcLogoutCallback))
+                    {
+                        //Log.Debug("Routing to OIDC scheme for callback path: {Path}", ctx.Request.Path);
+                        return OpenIdConnect;
+                    }
+
+                    if (ctx.Request.Cookies.ContainsKey(OidcService.CookieName))
+                    {
+                        //Log.Debug("Routing to OIDC scheme (cookie present) for path: {Path}", ctx.Request.Path);
+                        return OpenIdConnect;
+                    }
+                }
+
+                // Priority 3: JWT Bearer token
                 if (ctx.Request.Headers.Authorization.Count != 0)
                 {
+                    // Log.Debug("Routing to LocalIdentity (JWT) scheme for path: {Path}, Auth header: {Header}",
+                    //     ctx.Request.Path,
+                    //     ctx.Request.Headers.Authorization.ToString());
                     return LocalIdentity;
                 }
 
-                if (ctx.Request.Cookies.ContainsKey(OidcService.CookieName))
-                {
-                    return OpenIdConnect;
-                }
-
+                // Default to JWT
+                // Log.Debug("Defaulting to LocalIdentity (JWT) scheme for path: {Path}", ctx.Request.Path);
                 return LocalIdentity;
             };
         });
@@ -109,6 +129,8 @@ public static class IdentityServiceExtensions
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 ValidIssuer = "Kavita",
+                NameClaimType = JwtRegisteredClaimNames.Name,
+                RoleClaimType = "role"
             };
 
             options.Events = new JwtBearerEvents
@@ -116,6 +138,16 @@ public static class IdentityServiceExtensions
                 OnMessageReceived = SetTokenFromQuery,
             };
         });
+
+        // Add Bearer as an alias to LocalIdentity
+        auth.AddPolicyScheme(JwtBearerDefaults.AuthenticationScheme, JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            options.ForwardDefaultSelector = _ => LocalIdentity;
+        });
+
+        auth.AddScheme<AuthKeyAuthenticationOptions, AuthKeyAuthenticationHandler>(
+            AuthKeyAuthenticationOptions.SchemeName,
+            options => { });
 
 
         services.AddAuthorizationBuilder()
