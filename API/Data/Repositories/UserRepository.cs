@@ -970,6 +970,9 @@ public class UserRepository : IUserRepository
         return await _context.AppUserAuthKey
             .Where(k => k.Key == authKey)
             .HasNotExpired()
+            .Include(k => k.AppUser)
+                .ThenInclude(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
             .Select(k => k.AppUser)
             .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();

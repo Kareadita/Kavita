@@ -48,6 +48,7 @@ public static class LogLevelOptions
             // Suppress noisy loggers that add no value
             .MinimumLevel.Override("Microsoft.AspNetCore.ResponseCaching.ResponseCachingMiddleware", LogEventLevel.Error)
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Error)
+            .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Error)
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
             .Enrich.With(new ApiKeyEnricher())

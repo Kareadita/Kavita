@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Entities;
 using API.Entities.Progress;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -23,6 +27,7 @@ public class AuthKeyAuthenticationHandler : AuthenticationHandler<AuthKeyAuthent
 {
 private readonly IUnitOfWork _unitOfWork;
     private readonly HybridCache _cache;
+    private readonly UserManager<AppUser> _userManager;
 
     private static readonly HybridCacheEntryOptions CacheOptions = new()
     {
@@ -35,11 +40,13 @@ private readonly IUnitOfWork _unitOfWork;
         ILoggerFactory logger,
         UrlEncoder encoder,
         IUnitOfWork unitOfWork,
-        HybridCache cache)
+        HybridCache cache,
+        UserManager<AppUser>  userManager)
         : base(options, logger, encoder)
     {
         _unitOfWork = unitOfWork;
         _cache = cache;
+        _userManager = userManager;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -67,12 +74,23 @@ private readonly IUnitOfWork _unitOfWork;
                 return AuthenticateResult.Fail("Invalid API Key");
             }
 
-            var claims = new[]
+            var claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim("AuthType", nameof(AuthenticationType.AuthKey))
             };
+
+            //var roles = await _userManager.GetRolesAsync(user);
+
+            if (user.Roles != null && user.Roles.Any())
+            {
+                foreach (var role in user.Roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                    claims.Add(new Claim("role", role));
+                }
+            }
 
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
