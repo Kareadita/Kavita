@@ -7,15 +7,15 @@
           [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive" [avgHoursPerWeekSpentReading]="userStats.avgHoursPerWeekSpentReading" />
         }
       </div>
-      <div class="row g-0 fixed-row">
-        <app-reading-activity [userId]="userId" [isAdmin]="(accountService.isAdmin$ | async) || false" [individualUserMode]="true" />
-      </div>
-      <div class="row g-0 fixed-row">
-        <app-day-breakdown [userId]="userId" />
-      </div>
-      <div class="row g-0 fixed-row">
-        <app-stat-list [data$]="percentageRead$" [label]="t('read-percentage')" [title]="t('library-read-progress-title')" />
-      </div>
+<!--      <div class="row g-0 fixed-row">-->
+<!--        <app-reading-activity [userId]="userId" [isAdmin]="(accountService.isAdmin$ | async) || false" [individualUserMode]="true" />-->
+<!--      </div>-->
+<!--      <div class="row g-0 fixed-row">-->
+<!--        <app-day-breakdown [userId]="userId" />-->
+<!--      </div>-->
+<!--      <div class="row g-0 fixed-row">-->
+<!--        <app-stat-list [data$]="percentageRead$" [label]="t('read-percentage')" [title]="t('library-read-progress-title')" />-->
+<!--      </div>-->
     </div>
   }
 

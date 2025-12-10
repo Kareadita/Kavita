@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace API.Services.Store;
 
@@ -13,8 +13,7 @@ namespace API.Services.Store;
 /// due the large header size. Instead, the key is used.
 /// </summary>
 /// <param name="cache"></param>
-/// <remarks>Note that this store is in memory, so OIDC authenticated users are logged out after restart</remarks>
-public class CustomTicketStore(IMemoryCache cache): ITicketStore
+public class CustomTicketStore(IDistributedCache cache, TicketSerializer ticketSerializer): ITicketStore
 {
 
     public async Task<string> StoreAsync(AuthenticationTicket ticket)
@@ -31,11 +30,7 @@ public class CustomTicketStore(IMemoryCache cache): ITicketStore
 
     public Task RenewAsync(string key, AuthenticationTicket ticket)
     {
-        var options = new MemoryCacheEntryOptions
-        {
-            Priority = CacheItemPriority.NeverRemove,
-            Size = 1,
-        };
+        var options = new DistributedCacheEntryOptions {};
 
         var expiresUtc = ticket.Properties.ExpiresUtc;
         if (expiresUtc.HasValue)
@@ -47,14 +42,17 @@ public class CustomTicketStore(IMemoryCache cache): ITicketStore
             options.SlidingExpiration = TimeSpan.FromDays(7);
         }
 
-        cache.Set(key, ticket, options);
+        cache.Set(key, ticketSerializer.Serialize(ticket), options);
 
         return Task.CompletedTask;
     }
 
     public Task<AuthenticationTicket> RetrieveAsync(string key)
     {
-        return Task.FromResult(cache.Get<AuthenticationTicket>(key));
+        var bytes = cache.Get(key);
+        if (bytes == null) return null;
+
+        return Task.FromResult(ticketSerializer.Deserialize(bytes));
     }
 
     public Task RemoveAsync(string key)

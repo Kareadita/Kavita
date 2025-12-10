@@ -37,6 +37,12 @@ public class AppUserBookmark : IEntityDate
     // Relationships
     [JsonIgnore]
     public AppUser AppUser { get; set; } = null!;
+    [JsonIgnore]
+    public Series Series { get; set; } = null!;
+    [JsonIgnore]
+    public Volume Volume { get; set; } = null!;
+    [JsonIgnore]
+    public Chapter Chapter { get; set; } = null!;
     public int AppUserId { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }

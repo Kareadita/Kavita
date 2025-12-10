@@ -36,9 +36,5 @@ export class ProfileStatBarComponent {
   data = model<ProfileStatBar>();
   dataResource = this.statsService.getUserOverallStats(() => this.filter(), () => this.userId());
 
-  constructor() {
-
-
-  }
 
 }
