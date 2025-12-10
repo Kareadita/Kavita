@@ -673,7 +673,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
 
         if (sessionActivityData.Count == 0) return result;
 
-        // Group and aggregate in memory (minimal data already fetched)
         var dailyStats = sessionActivityData
             .GroupBy(x => x.SessionDate)
             .Select(dayGroup => new
