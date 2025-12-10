@@ -109,7 +109,7 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .Where(s => s.SeriesId == seriesId)
             .FirstOrDefaultAsync();
 
-        return row == null || row.ValidUntilUtc <= DateTime.UtcNow;
+        return row == null || row.ValidUntilUtc >= DateTime.UtcNow;
     }
 
     public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlusDto(int seriesId)

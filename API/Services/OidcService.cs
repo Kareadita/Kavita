@@ -503,10 +503,16 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             .Where(s => rolesFromToken.Contains(s, StringComparer.OrdinalIgnoreCase))
             .ToList();
 
+        // Ensure that Admin Role and ReadOnly aren't both selected
+        if (roles.Contains(PolicyConstants.AdminRole))
+        {
+            roles = roles.Where(r => r !=  PolicyConstants.ReadOnlyRole).ToList();
+        }
+
         logger.LogDebug("Syncing access roles for user {UserId}, found roles {Roles}", user.Id, roles);
 
         var errors = (await accountService.UpdateRolesForUser(user, roles)).ToList();
-        if (errors.Any())
+        if (errors.Count != 0)
         {
             logger.LogError("Failed to sync roles {Errors}", errors.Select(x => x.Description).ToList());
             throw new KavitaException("errors.oidc.syncing-user");

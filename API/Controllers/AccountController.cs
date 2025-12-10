@@ -717,6 +717,10 @@ public class AccountController : BaseApiController
             {
                 roles.Add(PolicyConstants.PlebRole);
             }
+            else
+            {
+                roles.Remove(PolicyConstants.ReadOnlyRole);
+            }
 
             foreach (var role in roles)
             {
