@@ -1146,7 +1146,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var hourStats = sessions
             .SelectMany(session =>
             {
-                var hours = new List<(int hour, TimeSpan timeSpent)>();
+                var hours = new List<(DateOnly day, int hour, TimeSpan timeSpent)>();
                 var current = session.StartTime;
 
                 while (current < session.EndTime)
@@ -1156,24 +1156,31 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                     var endOfPeriod = new[] { hourEnd, sessionEnd }.Min();
 
                     var timeSpent = endOfPeriod - current;
-                    hours.Add((current.Hour, timeSpent));
+                    hours.Add((DateOnly.FromDateTime(current), current.Hour, timeSpent));
 
                     current = endOfPeriod;
                 }
 
                 return hours;
             })
+            .GroupBy(x => new { x.day, x.hour })
+            .Select(g => new
+            {
+                g.Key.day,
+                g.Key.hour,
+                totalTimeSpent = g.Sum(x => x.timeSpent.TotalMinutes)
+            })
             .GroupBy(x => x.hour)
             .ToDictionary(
                 g => g.Key,
-                g => (long)g.Average(x => x.timeSpent.TotalMinutes)
+                g => g.Average(x => x.totalTimeSpent)
             );
 
         var data = Enumerable.Range(0, 24)
             .Select(hour => new StatCount<int>
             {
                 Value = hour,
-                Count = hourStats.GetValueOrDefault(hour, 0),
+                Count = (long) Math.Ceiling(hourStats.TryGetValue(hour, out var value) ? value : 0),
             })
             .ToList();
 
