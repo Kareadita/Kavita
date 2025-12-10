@@ -44,8 +44,8 @@ public static class ActivityFilter
         queryable = queryable
             .Where(d => filter.Libraries.Contains(d.LibraryId) && d.ReadingSession.AppUserId == userId)
             .WhereIf(onlyCompleted, d => d.EndPage >= d.Chapter.Pages)
-            .WhereIf(startTime != null, d => d.StartTime >= startTime)
-            .WhereIf(endTime != null, d => d.EndTime <= endTime);
+            .WhereIf(startTime != null, d => d.StartTimeUtc >= startTime)
+            .WhereIf(endTime != null, d => d.EndTimeUtc <= endTime);
 
         if (isAggregate)
         {
