@@ -1148,7 +1148,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var hourStats = sessions
             .SelectMany(session =>
             {
-                var hours = new List<(int hour, TimeSpan timeSpent)>();
+                var hours = new List<(DateOnly day, int hour, TimeSpan timeSpent)>();
                 var current = session.StartTime;
 
                 while (current < session.EndTime)
@@ -1158,24 +1158,31 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                     var endOfPeriod = new[] { hourEnd, sessionEnd }.Min();
 
                     var timeSpent = endOfPeriod - current;
-                    hours.Add((current.Hour, timeSpent));
+                    hours.Add((DateOnly.FromDateTime(current), current.Hour, timeSpent));
 
                     current = endOfPeriod;
                 }
 
                 return hours;
             })
+            .GroupBy(x => new { x.day, x.hour })
+            .Select(g => new
+            {
+                g.Key.day,
+                g.Key.hour,
+                totalTimeSpent = g.Sum(x => x.timeSpent.TotalMinutes)
+            })
             .GroupBy(x => x.hour)
             .ToDictionary(
                 g => g.Key,
-                g => (long)g.Average(x => x.timeSpent.TotalMinutes)
+                g => g.Average(x => x.totalTimeSpent)
             );
 
         var data = Enumerable.Range(0, 24)
             .Select(hour => new StatCount<int>
             {
                 Value = hour,
-                Count = hourStats.GetValueOrDefault(hour, 0),
+                Count = (long) Math.Ceiling(hourStats.TryGetValue(hour, out var value) ? value : 0),
             })
             .ToList();
 
@@ -1351,9 +1358,13 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
-        // It makes no sense to filter this in time. Remove them
-        filter.StartDate = null;
-        filter.EndDate = null;
+        // It makes no sense to filter this in by month etc. Trim to year
+        filter.StartDate = filter.StartDate.HasValue
+            ? new DateTime(filter.StartDate.Value.Year, 1, 1)
+            : null;
+        filter.EndDate = filter.EndDate.HasValue
+            ? new DateTime(filter.EndDate.Value.Year, 12, 31, 23, 59, 59)
+            : null;
 
         return await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
