@@ -949,7 +949,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
-        var readsPerTag = await context.AppUserReadingSessionActivityData
+        var readsPerTagTask =  context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .GroupBy(d => d.SeriesId)
             .Select(d => new
@@ -989,32 +989,34 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .Take(10)
             .ToListAsync();
 
-        var totalMissingData = await context.AppUserReadingSessionActivityData
+        var totalMissingDataTask =  context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .Select(p => p.SeriesId)
             .Distinct()
             .Join(context.SeriesMetadata, p => p, sm => sm.SeriesId, (g, m) => m.Tags)
             .CountAsync(g => !g.Any());
 
-        var totalReads = await context.AppUserReadingSessionActivityData
+        var totalReadsTask =  context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .Select(p => p.SeriesId)
             .Distinct()
             .CountAsync();
 
-        var totalReadTags = await context.AppUserReadingSessionActivityData
+        var totalReadTagsTask =  context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
             .Join(context.Chapter, p => p.ChapterId, c => c.Id, (p, c) => c.Tags)
             .SelectMany(g => g.Select(gg => gg.NormalizedTitle))
             .Distinct()
             .CountAsync();
 
+        await Task.WhenAll(readsPerTagTask, totalMissingDataTask, totalReadsTask, totalReadTagsTask);
+
         return new BreakDownDto<string>()
         {
-            Data = readsPerTag,
-            Missing = totalMissingData,
-            Total = totalReads,
-            TotalOptions = totalReadTags,
+            Data = await readsPerTagTask,
+            Missing = await totalMissingDataTask,
+            Total = await totalReadsTask,
+            TotalOptions = await totalReadTagsTask,
         };
     }
 
