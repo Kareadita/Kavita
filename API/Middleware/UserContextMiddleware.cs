@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using API.Entities.Progress;
@@ -38,12 +39,18 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
                                ?? context.User.FindFirst(JwtRegisteredClaimNames.Name)?.Value
                                ?? context.User.FindFirst("name")?.Value;
 
+                var roles = context.User.FindAll(ClaimTypes.Role)
+                    .Concat(context.User.FindAll("role"))
+                    .Select(c => c.Value)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
                 if (userId.HasValue && username != null)
                 {
                     var authType = TryParseAuthTypeClaim(context.User)
                                    ?? DetectAuthTypeFromCookie(context.Request);
 
-                    userContext.SetUserContext(userId.Value, username, authType);
+                    userContext.SetUserContext(userId.Value, username, authType, roles);
                 }
             }
         }
