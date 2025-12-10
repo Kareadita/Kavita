@@ -12,13 +12,11 @@ namespace API.Controllers;
 [Authorize]
 public class BaseApiController : ControllerBase
 {
-    private IUserContext? _userContext;
-
     /// <summary>
     /// Gets the current user context. Available in all derived controllers.
     /// </summary>
     protected IUserContext UserContext =>
-        _userContext ??= HttpContext.RequestServices.GetRequiredService<IUserContext>();
+        field ??= HttpContext.RequestServices.GetRequiredService<IUserContext>();
 
     /// <summary>
     /// Gets the current authenticated user's ID.
@@ -31,4 +29,5 @@ public class BaseApiController : ControllerBase
     /// </summary>
     /// <remarks>Warning! Username's can contain .. and /, do not use folders or filenames explicitly with the Username</remarks>
     protected string? Username => UserContext.GetUsername();
+
 }

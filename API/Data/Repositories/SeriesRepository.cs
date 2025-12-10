@@ -385,160 +385,165 @@ public class SeriesRepository : ISeriesRepository
     public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery, bool includeChapterAndFiles = true)
     {
         const int maxRecords = 15;
-        var result = new SearchResultGroupDto();
         var searchQueryNormalized = searchQuery.ToNormalized();
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        var seriesIds = await _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .RestrictAgainstAgeRestriction(userRating)
-            .Select(s => s.Id)
-            .ToListAsync();
+        var justYear = _yearRegex.Match(searchQuery).Value;
+        var hasYearInQuery = !string.IsNullOrEmpty(justYear);
+        var yearComparison = hasYearInQuery ? int.Parse(justYear) : 0;
 
-        result.Libraries = await _context.Library
+
+        var baseSeriesQuery = _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .RestrictAgainstAgeRestriction(userRating);
+
+        #region Independent Queries
+        var librariesTask = _context.Library
             .Search(searchQuery, userId, libraryIds)
             .Take(maxRecords)
             .OrderBy(l => l.Name.ToLower())
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Annotations = await _context.AppUserAnnotation
+        var annotationsTask = _context.AppUserAnnotation
             .Where(a => a.AppUserId == userId &&
-                        (EF.Functions.Like(a.Comment,  $"%{searchQueryNormalized}%") || EF.Functions.Like(a.Context, $"%{searchQueryNormalized}%")))
+                        (EF.Functions.Like(a.Comment, $"%{searchQueryNormalized}%") ||
+                         EF.Functions.Like(a.Context, $"%{searchQueryNormalized}%")))
             .Take(maxRecords)
             .OrderBy(l => l.CreatedUtc)
             .ProjectTo<AnnotationDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+        #endregion
 
-        var justYear = _yearRegex.Match(searchQuery).Value;
-        var hasYearInQuery = !string.IsNullOrEmpty(justYear);
-        var yearComparison = hasYearInQuery ? int.Parse(justYear) : 0;
+        var seriesTask = baseSeriesQuery
+        .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
+                    || (s.OriginalName != null && EF.Functions.Like(s.OriginalName, $"%{searchQuery}%"))
+                    || (s.LocalizedName != null && EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
+                    || EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%")
+                    || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
+        .OrderBy(s => s.SortName!.Length)
+        .ThenBy(s => s.SortName!.ToLower())
+        .Take(maxRecords)
+        .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
+        .ToListAsync();
 
-        result.Series = _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
-                         || (s.OriginalName != null && EF.Functions.Like(s.OriginalName, $"%{searchQuery}%"))
-                         || (s.LocalizedName != null && EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
-                         || (EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%"))
-                         || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
-            .RestrictAgainstAgeRestriction(userRating)
-            .Include(s => s.Library)
-            .AsNoTracking()
-            .AsSplitQuery()
-            .OrderBy(s => s.SortName!.Length)
-            .ThenBy(s => s.SortName!.ToLower())
-            .Take(maxRecords)
-            .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
-            .AsEnumerable();
-
-        result.Bookmarks = (await _context.AppUserBookmark
-            .Join(
-                _context.Series,
-                bookmark => bookmark.SeriesId,
-                series => series.Id,
-                (bookmark, series) => new {Bookmark = bookmark, Series = series}
-            )
-            .Where(joined => joined.Bookmark.AppUserId == userId &&
-                             (EF.Functions.Like(joined.Series.Name, $"%{searchQuery}%") ||
-                              (joined.Series.OriginalName != null &&
-                               EF.Functions.Like(joined.Series.OriginalName, $"%{searchQuery}%")) ||
-                              (joined.Series.LocalizedName != null &&
-                               EF.Functions.Like(joined.Series.LocalizedName, $"%{searchQuery}%"))))
-            .OrderBy(joined => joined.Series.NormalizedName.Length)
-            .ThenBy(joined => joined.Series.NormalizedName)
-            .Take(maxRecords)
-            .Select(joined => new BookmarkSearchResultDto()
-            {
-                SeriesName = joined.Series.Name,
-                LocalizedSeriesName = joined.Series.LocalizedName,
-                LibraryId = joined.Series.LibraryId,
-                SeriesId = joined.Bookmark.SeriesId,
-                ChapterId = joined.Bookmark.ChapterId,
-                VolumeId = joined.Bookmark.VolumeId
-            })
-            .ToListAsync()).DistinctBy(s => s.SeriesId);
-
-
-        result.ReadingLists = await _context.ReadingList
+        var readingListsTask = _context.ReadingList
             .Search(searchQuery, userId, userRating)
             .Take(maxRecords)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Collections =  await _context.AppUserCollection
+        var collectionsTask = _context.AppUserCollection
             .Search(searchQuery, userId, userRating)
             .Take(maxRecords)
             .OrderBy(c => c.NormalizedTitle)
             .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        // I can't work out how to map people in DB layer
-        var personIds = await _context.SeriesMetadata
-            .SearchPeople(searchQuery, seriesIds)
-            .Select(p => p.Id)
+        var bookmarksTask = _context.AppUserBookmark
+            .Where(b => b.AppUserId == userId)
+            .Where(b => libraryIds.Contains(b.Series.LibraryId))
+            .Where(b => EF.Functions.Like(b.Series.Name, $"%{searchQuery}%") ||
+                        (b.Series.OriginalName != null && EF.Functions.Like(b.Series.OriginalName, $"%{searchQuery}%")) ||
+                        (b.Series.LocalizedName != null && EF.Functions.Like(b.Series.LocalizedName, $"%{searchQuery}%")))
+            .OrderBy(b => b.Series.NormalizedName.Length)
+            .ThenBy(b => b.Series.NormalizedName)
+            .Select(b => new BookmarkSearchResultDto
+            {
+                SeriesName = b.Series.Name,
+                LocalizedSeriesName = b.Series.LocalizedName,
+                LibraryId = b.Series.LibraryId,
+                SeriesId = b.SeriesId,
+                ChapterId = b.ChapterId,
+                VolumeId = b.VolumeId
+            })
             .Distinct()
-            .OrderBy(id => id)
             .Take(maxRecords)
             .ToListAsync();
 
-        result.Persons = await _context.Person
-            .Where(p => personIds.Contains(p.Id))
+        var seriesIdsSubquery = baseSeriesQuery.Select(s => s.Id);
+
+        var personsTask = _context.Person
+            .Where(p => _context.SeriesMetadataPeople
+                .Any(smp => smp.PersonId == p.Id &&
+                            seriesIdsSubquery.Contains(smp.SeriesMetadata.SeriesId) &&
+                            EF.Functions.Like(p.NormalizedName, $"%{searchQueryNormalized}%")))
             .OrderBy(p => p.NormalizedName.Length)
             .ThenBy(p => p.NormalizedName)
+            .Take(maxRecords)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Genres = await _context.SeriesMetadata
-            .SearchGenres(searchQuery, seriesIds)
+        var genresTask = _context.Genre
+            .Where(g => _context.SeriesMetadata
+                .Any(sm => seriesIdsSubquery.Contains(sm.SeriesId) &&
+                           sm.Genres.Any(sg => sg.Id == g.Id)) &&
+                EF.Functions.Like(g.NormalizedTitle, $"%{searchQueryNormalized}%"))
             .Take(maxRecords)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Tags = await _context.SeriesMetadata
-            .SearchTags(searchQuery, seriesIds)
+        var tagsTask = _context.Tag
+            .Where(t => _context.SeriesMetadata
+                .Any(sm => seriesIdsSubquery.Contains(sm.SeriesId) &&
+                           sm.Tags.Any(st => st.Id == t.Id)) &&
+                EF.Functions.Like(t.NormalizedTitle, $"%{searchQueryNormalized}%"))
             .Take(maxRecords)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Files = [];
-        result.Chapters = (List<ChapterDto>) [];
+        // Run separate DB queries in parallel
+        await Task.WhenAll(
+            librariesTask, annotationsTask, seriesTask, readingListsTask,
+            collectionsTask, bookmarksTask, personsTask, genresTask, tagsTask);
 
+        var result = new SearchResultGroupDto
+        {
+            Libraries = await librariesTask,
+            Annotations = await annotationsTask,
+            Series = await seriesTask,
+            ReadingLists = await readingListsTask,
+            Collections = await collectionsTask,
+            Bookmarks = await bookmarksTask,
+            Persons = await personsTask,
+            Genres = await genresTask,
+            Tags = await tagsTask,
+            Files = [],
+            Chapters = []
+        };
 
         if (includeChapterAndFiles)
         {
-            var fileIds = _context.Series
-                .Where(s => seriesIds.Contains(s.Id))
-                .AsSplitQuery()
-                .SelectMany(s => s.Volumes)
-                .SelectMany(v => v.Chapters)
-                .SelectMany(c => c.Files.Select(f => f.Id));
-
-            // Need to check if an admin
-            var user = await _context.AppUser.FirstAsync(u => u.Id == userId);
-            if (await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
-            {
-                result.Files = await _context.MangaFile
-                    .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
-                    .AsSplitQuery()
-                    .OrderBy(f => f.FilePath)
-                    .Take(maxRecords)
-                    .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
-                    .ToListAsync();
-            }
-
-            result.Chapters = await _context.Chapter
-                .Include(c => c.Files)
+            // Use EXISTS subquery pattern instead of loading IDs
+            var chaptersQuery = _context.Chapter
+                .Where(c => c.Volume.Series.LibraryId > 0 && // Ensure navigation works
+                            libraryIds.Contains(c.Volume.Series.LibraryId))
                 .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%")
                             || EF.Functions.Like(c.ISBN, $"%{searchQuery}%")
-                            || EF.Functions.Like(c.Range, $"%{searchQuery}%")
-                )
-                .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
-                .AsSplitQuery()
+                            || EF.Functions.Like(c.Range, $"%{searchQuery}%"));
+
+            // Apply age restriction via series
+            chaptersQuery = chaptersQuery
+                .Where(c => baseSeriesQuery.Any(s => s.Id == c.Volume.SeriesId));
+
+            result.Chapters = await chaptersQuery
                 .OrderBy(c => c.TitleName.Length)
                 .ThenBy(c => c.TitleName)
                 .Take(maxRecords)
                 .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+
+            if (isAdmin)
+            {
+                result.Files = await _context.MangaFile
+                    .Where(f => EF.Functions.Like(f.FilePath, $"%{searchQuery}%"))
+                    .Where(f => libraryIds.Contains(f.Chapter.Volume.Series.LibraryId))
+                    .Where(f => baseSeriesQuery.Any(s => s.Id == f.Chapter.Volume.SeriesId))
+                    .OrderBy(f => f.FilePath)
+                    .Take(maxRecords)
+                    .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
+            }
         }
 
         return result;
