@@ -22,4 +22,9 @@ public static class DateTimeExtensions
         int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
         return dt.AddDays(-1 * diff).Date;
     }
+
+    public static DateTime StartOfMonth(this DateTime date)
+    {
+        return new DateTime(date.Year, date.Month, 1, 0, 0, 0, date.Kind);
+    }
 }

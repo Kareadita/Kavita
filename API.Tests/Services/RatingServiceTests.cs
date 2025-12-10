@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Entities.Enums;
@@ -11,7 +10,6 @@ using Hangfire;
 using Hangfire.InMemory;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 

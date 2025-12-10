@@ -71,8 +71,8 @@ import {ActionService} from "../_services/action.service";
 import {DefaultDatePipe} from "../_pipes/default-date.pipe";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../_models/default-modal-options";
-import {UserReview} from "../_single-module/review-card/user-review";
-import {User} from "../_models/user";
+import {UserReview} from "../_models/user-review";
+import {User} from "../_models/user/user";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {Rating} from "../_models/rating";
@@ -80,7 +80,9 @@ import {AnnotationService} from "../_services/annotation.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationsTabComponent} from "../_single-module/annotations-tab/annotations-tab.component";
 import {UtcToLocalTimePipe} from "../_pipes/utc-to-local-time.pipe";
-import {UtcToLocaleDatePipe} from "../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../_pipes/utc-to-locale-date.pipe";
+import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
+import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 
 enum TabID {
   Related = 'related-tab',
@@ -123,7 +125,8 @@ enum TabID {
     ExternalRatingComponent,
     AnnotationsTabComponent,
     UtcToLocalTimePipe,
-    UtcToLocaleDatePipe
+    UtcToLocalDatePipe,
+    ReadingProgressStatusPipePipe
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -182,6 +185,7 @@ export class ChapterDetailComponent implements OnInit {
   hasBeenRated: boolean = false;
   size: number = 0;
   annotations = model<Annotation[]>([]);
+  readingProgressStatus = ReadingProgressStatus.NoProgress;
 
   weblinks: Array<string> = [];
   activeTabId = TabID.Details;
@@ -275,6 +279,11 @@ export class ChapterDetailComponent implements OnInit {
       this.rating = results.chapterDetail.rating;
       this.hasBeenRated = results.chapterDetail.hasBeenRated;
       this.ratings = results.chapterDetail.ratings;
+      if (this.chapter.pagesRead > 0 && this.chapter.pagesRead < this.chapter.pages) {
+        this.readingProgressStatus = ReadingProgressStatus.Progress;
+      } else if (this.chapter.pagesRead >= this.chapter.pages) {
+        this.readingProgressStatus = ReadingProgressStatus.FullyRead;
+      }
 
       this.themeService.setColorScape(this.chapter.primaryColor, this.chapter.secondaryColor);
 
@@ -326,12 +335,7 @@ export class ChapterDetailComponent implements OnInit {
     if (this.bulkSelectionService.hasSelections()) return;
     if (this.chapter === null) return;
 
-    if (this.chapter.pages === 0) {
-      this.toastr.error(translate('series-detail.no-pages'));
-      return;
-    }
-    this.router.navigate(this.readerService.getNavigationArray(this.series?.libraryId!, this.seriesId, this.chapter.id, this.chapter.files[0].format),
-      {queryParams: {incognitoMode}});
+    this.readerService.readChapter(this.libraryId, this.seriesId, this.chapter, incognitoMode);
   }
 
   openEditModal() {

@@ -6,10 +6,8 @@ using API.Data;
 using API.DTOs.Metadata.Browse;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Helpers;
 using API.Helpers.Builders;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -18,7 +16,7 @@ namespace API.Tests.Repository;
 public class GenreRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
-    private TestGenreSet CreateTestGenres()
+    private static TestGenreSet CreateTestGenres()
     {
         return new TestGenreSet
         {
@@ -117,7 +115,7 @@ public class GenreRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTes
         await context.SaveChangesAsync();
     }
 
-    private async Task AssignLibrariesToUsers(DataContext context, AppUser fullAccess, AppUser restrictedAccess, AppUser restrictedAgeAccess)
+    private static async Task AssignLibrariesToUsers(DataContext context, AppUser fullAccess, AppUser restrictedAccess, AppUser restrictedAgeAccess)
     {
         var lib0 = context.Library.First(l => l.Name == "lib0");
         var lib1 = context.Library.First(l => l.Name == "lib1");
@@ -151,11 +149,11 @@ public class GenreRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTes
     }
 
     [Fact]
-    public async Task GetBrowseableGenrefullAccess_ReturnsAllGenresWithCorrectCounts()
+    public async Task GetBrowseableGenreFullAccess_ReturnsAllGenresWithCorrectCounts()
     {
         var genres = CreateTestGenres();
-        var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (fullAccess, restrictedAccess, restrictedAgeAccess) = await Setup(context, genres);
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (fullAccess, _, _) = await Setup(context, genres);
 
         // Act
         var fullAccessGenres = await unitOfWork.GenreRepository.GetBrowseableGenre(fullAccess.Id, new UserParams());
@@ -178,8 +176,8 @@ public class GenreRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTes
     public async Task GetBrowseableGenre_RestrictedAccess_ReturnsOnlyAccessibleGenres()
     {
         var genres = CreateTestGenres();
-        var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (fullAccess, restrictedAccess, restrictedAgeAccess) = await Setup(context, genres);
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, restrictedAccess, _) = await Setup(context, genres);
 
         // Act
         var restrictedAccessGenres = await unitOfWork.GenreRepository.GetBrowseableGenre(restrictedAccess.Id, new UserParams());
@@ -213,8 +211,8 @@ public class GenreRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTes
     public async Task GetBrowseableGenre_RestrictedAgeAccess_FiltersAgeRestrictedContent()
     {
         var genres = CreateTestGenres();
-        var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (fullAccess, restrictedAccess, restrictedAgeAccess) = await Setup(context, genres);
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (_, _, restrictedAgeAccess) = await Setup(context, genres);
 
         // Act
         var restrictedAgeAccessGenres = await unitOfWork.GenreRepository.GetBrowseableGenre(restrictedAgeAccess.Id, new UserParams());
@@ -245,16 +243,16 @@ public class GenreRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTes
 
     private class TestGenreSet
     {
-        public Genre SharedSeriesChaptersGenre { get; set; }
-        public Genre SharedSeriesGenre { get; set; }
-        public Genre SharedChaptersGenre { get; set; }
-        public Genre Lib0SeriesChaptersGenre { get; set; }
-        public Genre Lib0SeriesGenre { get; set; }
-        public Genre Lib0ChaptersGenre { get; set; }
-        public Genre Lib1SeriesChaptersGenre { get; set; }
-        public Genre Lib1SeriesGenre { get; set; }
-        public Genre Lib1ChaptersGenre { get; set; }
-        public Genre Lib1ChapterAgeGenre { get; set; }
+        public Genre SharedSeriesChaptersGenre { get; init; }
+        public Genre SharedSeriesGenre { get; init; }
+        public Genre SharedChaptersGenre { get; init; }
+        public Genre Lib0SeriesChaptersGenre { get; init; }
+        public Genre Lib0SeriesGenre { get; init; }
+        public Genre Lib0ChaptersGenre { get; init; }
+        public Genre Lib1SeriesChaptersGenre { get; init; }
+        public Genre Lib1SeriesGenre { get; init; }
+        public Genre Lib1ChaptersGenre { get; init; }
+        public Genre Lib1ChapterAgeGenre { get; init; }
 
         public List<Genre> GetAllGenres()
         {

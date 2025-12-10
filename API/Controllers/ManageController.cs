@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs;
 using API.DTOs.KavitaPlus.Manage;
@@ -13,7 +14,7 @@ namespace API.Controllers;
 /// <summary>
 /// All things centered around Managing the Kavita instance, that isn't aligned with an entity
 /// </summary>
-[Authorize("RequireAdminRole")]
+[Authorize(PolicyGroups.AdminPolicy)]
 public class ManageController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -29,7 +30,7 @@ public class ManageController : BaseApiController
     /// Returns a list of all Series that is Kavita+ applicable to metadata match and the status of it
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("series-metadata")]
     public async Task<ActionResult<IList<ManageMatchSeriesDto>>> SeriesMetadata(ManageMatchFilterDto filter)
     {

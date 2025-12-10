@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.KavitaPlus.Metadata;
-using API.DTOs.SeriesDetail;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;

@@ -1,10 +1,10 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, httpResource} from '@angular/common/http';
 import {computed, DestroyRef, inject, Injectable} from '@angular/core';
 import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
 import {Preferences} from '../_models/preferences/preferences';
-import {User} from '../_models/user';
+import {User} from '../_models/user/user';
 import {Router} from '@angular/router';
 import {EVENTS, MessageHubService} from './message-hub.service';
 import {InviteUserResponse} from '../_models/auth/invite-user-response';
@@ -17,6 +17,7 @@ import {Action} from "./action-factory.service";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
+import {AuthKey, OpdsName} from "../_models/user/auth-key";
 
 export enum Role {
   Admin = 'Admin',
@@ -69,6 +70,7 @@ export class AccountService {
 
   public readonly currentUserSignal = toSignal(this.currentUser$);
   public readonly userId = computed(() => this.currentUserSignal()?.id);
+  public readonly currentUserGenericApiKey = computed(() => this.currentUserSignal()?.authKeys.filter(k => k.name === OpdsName)[0].key);
   public readonly isReadOnly = computed(() => this.currentUserSignal()?.roles.includes(Role.ReadOnly) ?? true);
 
   /**
@@ -437,23 +439,32 @@ export class AccountService {
     return undefined;
   }
 
-  resetApiKey() {
-    return this.httpClient.post<string>(this.baseUrl + 'account/reset-api-key', {}, TextResonse).pipe(map(key => {
-      const user = this.getUserFromLocalStorage();
-      if (user) {
-        user.apiKey = key;
-
-        localStorage.setItem(this.userKey, JSON.stringify(user));
-
-        this.currentUserSource.next(user);
-        this.currentUser = user;
-      }
-      return key;
-    }));
-  }
-
   getOpdsUrl() {
     return this.httpClient.get<string>(this.baseUrl + 'account/opds-url', TextResonse);
+  }
+
+  getAuthKeys() {
+    return this.httpClient.get<AuthKey[]>(this.baseUrl + `account/auth-keys`).pipe(
+      tap(authKeys => {
+        this.setCurrentUser({
+          ...this.currentUser!,
+          authKeys: authKeys,
+        }, false);
+      }),
+    );
+  }
+
+  createAuthKey(data: {keyLength: number, name: string, expiresUtc: string | null}) {
+    return this.httpClient.post(this.baseUrl + 'account/create-auth-key', data);
+  }
+
+  rotateAuthKey(id: number, data: {keyLength: number, name: string, expiresUtc: string | null}) {
+    return this.httpClient.post(this.baseUrl + `account/rotate-auth-key?authKeyId=${id}`, data);
+  }
+
+
+  deleteAuthKey(id: number) {
+    return this.httpClient.delete(this.baseUrl + `account/auth-key?authKeyId=${id}`);
   }
 
 

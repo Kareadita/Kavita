@@ -39,10 +39,10 @@ public interface ILibraryRepository
     Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
     Task<bool> LibraryExists(string libraryName);
     Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None);
-    IEnumerable<LibraryDto> GetLibraryDtosForUsernameAsync(string userName);
+    Task<IList<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);
     Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None, bool track = true);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
-    IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
+    Task<IList<int>> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     Task<LibraryType> GetLibraryTypeBySeriesIdAsync(int seriesId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None);
@@ -87,9 +87,9 @@ public class LibraryRepository : ILibraryRepository
         _context.Library.Remove(library);
     }
 
-    public IEnumerable<LibraryDto> GetLibraryDtosForUsernameAsync(string userName)
+    public async Task<IList<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName)
     {
-        return _context.Library
+        return await _context.Library
             .Include(l => l.AppUsers)
             .Include(l => l.LibraryFileTypes)
             .Include(l => l.LibraryExcludePatterns)
@@ -97,7 +97,7 @@ public class LibraryRepository : ILibraryRepository
             .OrderBy(l => l.Name)
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
-            .AsEnumerable();
+            .ToListAsync();
     }
 
     /// <summary>
@@ -131,13 +131,13 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None)
+    public async Task<IList<int>> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None)
     {
-        return _context.Library
+        return await _context.Library
             .IsRestricted(queryContext)
             .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
             .Select(l => l.Id)
-            .AsEnumerable();
+            .ToListAsync();
     }
 
     public async Task<LibraryType> GetLibraryTypeAsync(int libraryId)

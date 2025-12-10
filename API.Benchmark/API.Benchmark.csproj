@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
 
@@ -10,8 +10,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
-      <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.15.2" />
+      <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+      <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.15.8" />
       <PackageReference Include="NSubstitute" Version="5.3.0" />
     </ItemGroup>
 

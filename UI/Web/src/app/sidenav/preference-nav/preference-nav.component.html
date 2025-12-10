@@ -22,10 +22,8 @@
 
         </div>
       </div>
-      @if (utilityService.activeBreakpoint$ | async; as breakpoint) {
-        @if (breakpoint < Breakpoint.Desktop) {
-          <div class="side-nav-overlay" (click)="collapse()" [ngClass]="{'closed' : navService.sideNavCollapsedSignal()}"></div>
-        }
+      @if (utilityService.activeUserBreakpoint() < Breakpoint.Desktop) {
+        <div class="side-nav-overlay" (click)="collapse()" [ngClass]="{'closed' : navService.sideNavCollapsedSignal()}"></div>
       }
     }
 

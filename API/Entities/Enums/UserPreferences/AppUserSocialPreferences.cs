@@ -34,4 +34,9 @@ public class AppUserSocialPreferences
     /// UI Site Global Setting: Enable social features for unknown age ratings
     /// </summary>
     public bool SocialIncludeUnknowns { get; set; } = true;
+
+    /// <summary>
+    /// UI Site Global Setting: Enable sharing of Profile with other users
+    /// </summary>
+    public bool ShareProfile { get; set; }
 }

@@ -1,13 +1,13 @@
 <ng-container *transloco="let t; prefix: 'reading-activity'">
   <ng-container>
-    <div class="dashboard-card-content stat-container">
+    <div class="dashboard-card-content stat-container stats-card">
       <div class="row g-0 mb-2 align-items-center">
         <div class="col-4">
-          <h4>{{t('title')}}</h4>
+          <h4 class="stats-title">{{t('title')}}</h4>
         </div>
         <div class="col-8">
           <form [formGroup]="formGroup" class="d-inline-flex float-end">
-            @if (isAdmin && !individualUserMode) {
+            @if (isAdmin && !individualUserMode()) {
               <div class="d-flex me-1">
                 <label for="time-select-read-by-day" class="form-check-label"></label>
                 <select id="time-select-read-by-day" class="form-select" formControlName="users"

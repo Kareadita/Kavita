@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace API.DTOs.SideNav;
+﻿namespace API.DTOs.SideNav;
 
 public sealed record ExternalSourceDto
 {

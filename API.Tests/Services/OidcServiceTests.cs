@@ -10,13 +10,16 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Tasks.Scanner;
 using AutoMapper;
+using Kavita.Common;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -185,7 +188,7 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
         var (unitOfWork, context, mapper) = await CreateDatabase();
         var (oidcService, user, _, _) = await Setup(unitOfWork, context, mapper);
 
-        var claims = new List<Claim>()
+        var claims = new List<Claim>
         {
             new (ClaimTypes.Role, PolicyConstants.LoginRole),
             new (ClaimTypes.Role, PolicyConstants.DownloadRole),
@@ -214,6 +217,20 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
         userRoles = await unitOfWork.UserRepository.GetRoles(user.Id);
         Assert.Contains(PolicyConstants.LoginRole, userRoles);
         Assert.DoesNotContain(PolicyConstants.DownloadRole, userRoles);
+
+        // Check with non-exact case match
+        claims = [
+            new Claim(ClaimTypes.Role, PolicyConstants.LoginRole),
+            new Claim(ClaimTypes.Role, "doWnLOad"),
+        ];
+        identity = new ClaimsIdentity(claims);
+        principal = new ClaimsPrincipal(identity);
+
+        await oidcService.SyncUserSettings(null!, settings, principal, user);
+
+        userRoles = await unitOfWork.UserRepository.GetRoles(user.Id);
+        Assert.Contains(PolicyConstants.LoginRole, userRoles);
+        Assert.Contains(PolicyConstants.DownloadRole, userRoles);
     }
 
     [Fact]
@@ -517,6 +534,122 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
         Assert.Null(bestName);
     }
 
+    private static readonly List<Claim> BaseClaims =
+    [
+        new(JwtRegisteredClaimNames.PreferredUsername, "mila"),
+        new(ClaimTypes.Email, "mila@localhost"),
+        new("email_verified", "true"),
+        new(ClaimTypes.NameIdentifier, "123")
+    ];
+
+    [Fact]
+    public async Task LoginOrCreate_ShouldThrow_WhenNoRoleProvided()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var settingsService = CreateSettingsService(unitOfWork);
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        settings.OidcConfig.SyncUserSettings = true;
+        settings.OidcConfig.ProvisionAccounts = true;
+
+        await settingsService.UpdateSettings(settings);
+
+        var principal = BuildPrincipal(BaseClaims);
+
+        await Assert.ThrowsAsync<KavitaException>(() =>
+            oidcService.LoginOrCreate(null!, principal));
+    }
+
+    [Fact]
+    public async Task LoginOrCreate_ShouldSucceed_WhenLoginRoleProvided()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var settingsService = CreateSettingsService(unitOfWork);
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        settings.OidcConfig.SyncUserSettings = true;
+        settings.OidcConfig.ProvisionAccounts = true;
+
+        await settingsService.UpdateSettings(settings);
+
+        IList<Claim> claims =
+        [
+            new(ClaimTypes.Role, PolicyConstants.LoginRole),
+            .. BaseClaims,
+        ];
+
+        var principal = BuildPrincipal(claims);
+
+        Assert.NotNull(await oidcService.LoginOrCreate(null!, principal));
+    }
+
+    [Fact]
+    public async Task LoginOrCreate_ShouldSucceed_WhenAdminRoleProvided()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var settingsService = CreateSettingsService(unitOfWork);
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        settings.OidcConfig.SyncUserSettings = true;
+        settings.OidcConfig.ProvisionAccounts = true;
+
+        await settingsService.UpdateSettings(settings);
+
+        IList<Claim> claims =
+        [
+            new(ClaimTypes.Role, PolicyConstants.AdminRole),
+            .. BaseClaims,
+        ];
+
+        var principal = BuildPrincipal(claims);
+
+        Assert.NotNull(await oidcService.LoginOrCreate(null!, principal));
+    }
+
+    [Fact]
+    public async Task LoginOrCreate_ShouldSucceed_WhenRoleMatchesCaseInsensitive()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (oidcService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var settingsService = CreateSettingsService(unitOfWork);
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        settings.OidcConfig.SyncUserSettings = true;
+        settings.OidcConfig.ProvisionAccounts = true;
+
+        await settingsService.UpdateSettings(settings);
+
+        IList<Claim> claims =
+        [
+            new(ClaimTypes.Role, "loGiN"),
+            .. BaseClaims,
+        ];
+
+        var principal = BuildPrincipal(claims);
+
+        Assert.NotNull(await oidcService.LoginOrCreate(null!, principal));
+    }
+
+    private static SettingsService CreateSettingsService(IUnitOfWork unitOfWork)
+        => new(
+            unitOfWork,
+            Substitute.For<IDirectoryService>(),
+            Substitute.For<ILibraryWatcher>(),
+            Substitute.For<ITaskScheduler>(),
+            Substitute.For<ILogger<SettingsService>>(),
+            Substitute.For<IOidcService>()
+        );
+
+    private static ClaimsPrincipal BuildPrincipal(IEnumerable<Claim> claims)
+        => new(new ClaimsIdentity(claims));
+
     private async Task<(OidcService, AppUser, IAccountService, UserManager<AppUser>)> Setup(IUnitOfWork unitOfWork, DataContext context, IMapper mapper)
     {
         // Remove the default library created with the AbstractDbTest class
@@ -556,6 +689,27 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
             }
         }
 
+        var identityOptions = new IdentityOptions();
+        identityOptions.Tokens.ProviderMap[TokenOptions.DefaultProvider] =
+            new TokenProviderDescriptor(typeof(DataProtectorTokenProvider<AppUser>));
+        identityOptions.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultProvider;
+        identityOptions.Tokens.ChangeEmailTokenProvider = TokenOptions.DefaultProvider;
+        identityOptions.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
+
+        var services = new ServiceCollection();
+
+        var dataProtectionProvider = Substitute.For<IDataProtectionProvider>();
+        dataProtectionProvider.CreateProtector(Arg.Any<string>())
+            .Returns(Substitute.For<IDataProtector>());
+
+        services.AddSingleton(dataProtectionProvider);
+        services.AddTransient<DataProtectorTokenProvider<AppUser>>();
+        services.Configure<DataProtectionTokenProviderOptions>(_ => { });
+        services.AddSingleton(Substitute.For<ILogger<DataProtectorTokenProvider<AppUser>>>());
+
+        var serviceProvider = services.BuildServiceProvider();
+
+
         var userStore = new UserStore<
             AppUser,
             AppRole,
@@ -567,14 +721,16 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
             IdentityUserToken<int>,
             IdentityRoleClaim<int>
         >(context);
-        var userManager = new UserManager<AppUser>(userStore,
-            new OptionsWrapper<IdentityOptions>(new IdentityOptions()),
+
+        var userManager = new UserManager<AppUser>(
+            userStore,
+            new OptionsWrapper<IdentityOptions>(identityOptions),
             new PasswordHasher<AppUser>(),
             [new UserValidator<AppUser>()],
             [new PasswordValidator<AppUser>()],
             new UpperInvariantLookupNormalizer(),
             new IdentityErrorDescriber(),
-            null!,
+            serviceProvider,
             Substitute.For<ILogger<UserManager<AppUser>>>());
 
         // Create users with the UserManager such that the SecurityStamp is set

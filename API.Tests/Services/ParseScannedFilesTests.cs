@@ -103,9 +103,9 @@ public class ParseScannedFilesTests: AbstractDbTest
         _outputHelper = testOutputHelper;
     }
 
-    private async Task<ScannerHelper> Setup(IUnitOfWork unitOfWork)
+    private Task<ScannerHelper> Setup(IUnitOfWork unitOfWork)
     {
-        return new ScannerHelper(unitOfWork, _outputHelper);
+        return Task.FromResult(new ScannerHelper(unitOfWork, _outputHelper));
     }
 
     #region MergeName

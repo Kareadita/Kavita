@@ -10,7 +10,7 @@ public class RateLimiterTests
     [Fact]
     public void AcquireTokens_Successful()
     {
-        // Arrange
+
         var limiter = new RateLimiter(3, TimeSpan.FromSeconds(1));
 
         // Act & Assert
@@ -22,7 +22,7 @@ public class RateLimiterTests
     [Fact]
     public void AcquireTokens_ExceedLimit()
     {
-        // Arrange
+
         var limiter = new RateLimiter(2, TimeSpan.FromSeconds(10), false);
 
         // Act
@@ -36,7 +36,7 @@ public class RateLimiterTests
     [Fact]
     public async Task AcquireTokens_Refill()
     {
-        // Arrange
+
         var limiter = new RateLimiter(2, TimeSpan.FromSeconds(1));
 
         // Act
@@ -53,7 +53,7 @@ public class RateLimiterTests
     [Fact]
     public async Task AcquireTokens_Refill_WithOff()
     {
-        // Arrange
+
         var limiter = new RateLimiter(2, TimeSpan.FromSeconds(10), false);
 
         // Act
@@ -70,7 +70,7 @@ public class RateLimiterTests
     [Fact]
     public void AcquireTokens_MultipleKeys()
     {
-        // Arrange
+
         var limiter = new RateLimiter(2, TimeSpan.FromSeconds(1));
 
         // Act & Assert

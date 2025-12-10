@@ -6,6 +6,7 @@ using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 using API.Entities.Metadata;
 using API.Entities.Person;
+using API.Entities.User;
 using API.Extensions.QueryExtensions;
 using API.Helpers.Builders;
 using Xunit;
@@ -135,7 +136,7 @@ public class QueryableExtensionsTests
     public void RestrictAgainstAgeRestriction_Person_ShouldRestrictEverythingAboveTeen(bool includeUnknowns,
         int expectedPeopleCount)
     {
-        // Arrange
+
         var items = new List<Person>
         {
             CreatePersonWithSeriesMetadata("Test1", AgeRating.Teen),

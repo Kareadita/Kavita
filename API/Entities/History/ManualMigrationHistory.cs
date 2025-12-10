@@ -1,4 +1,5 @@
 ﻿using System;
+using Kavita.Common.EnvironmentInfo;
 
 namespace API.Entities.History;
 
@@ -8,7 +9,7 @@ namespace API.Entities.History;
 public class ManualMigrationHistory
 {
     public int Id { get; set; }
-    public string ProductVersion { get; set; }
     public required string Name { get; set; }
-    public DateTime RanAt { get; set; }
+    public string ProductVersion { get; set; } = BuildInfo.Version.ToString();
+    public DateTime RanAt { get; set; } = DateTime.UtcNow;
 }

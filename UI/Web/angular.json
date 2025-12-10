@@ -158,6 +158,7 @@
       "typeSeparator": "."
     },
     "@schematics/angular:pipe": {
+      "skipTests": true,
       "typeSeparator": "."
     },
     "@schematics/angular:resolver": {

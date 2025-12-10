@@ -1,0 +1,67 @@
+<div class="stats-card card p-4" *transloco="let t; prefix: 'favorite-authors'">
+
+  <app-loading [loading]="favoriteAuthors.isLoading()" />
+
+  @if (favoriteAuthors.hasValue()) {
+    <h4 class="stats-title">{{t('title')}}</h4>
+
+    @let favAuthors = favoriteAuthors.value();
+    @let mostReadAuthorValue = mostReadAuthor();
+    @if (mostReadAuthorValue) {
+      <h6 class="stats-subtitle">{{t('sub-title', {name: userName(), author: mostReadAuthor()?.authorName, count: mostReadCount()})}}</h6>
+    } @else if (!favoriteAuthors.isLoading())  {
+      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+    }
+
+
+    @for (fAuthor of favAuthors; track fAuthor.authorName + $index) {
+
+      <div class="row mb-4 align-items-start">
+
+        <div class="col-12 col-md-4 d-flex flex-row align-items-center text-center">
+          <app-image
+            routerLink="/person/{{fAuthor.authorName}}"
+            objectFit="cover"
+            [styles]="{ 'object-position': 'top', 'border-radius': '50%' }"
+            height="150px"
+            width="150px"
+            [imageUrl]="imageService.getPersonImage(fAuthor.authorId)"
+            [errorImage]="imageService.noPersonImage"
+            [classes]="'rounded shadow-sm mb-2 clickable'"
+          ></app-image>
+
+          <div class="ms-4">
+            <h5 class="fw-semibold mb-2">
+              <a routerLink="/person/{{ fAuthor.authorName }}">{{ fAuthor.authorName }}</a>
+            </h5>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <app-tag-badge>{{ fAuthor.totalChaptersRead }} Chapters</app-tag-badge>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-12 col-md-8 d-flex flex-wrap gap-2">
+
+          @for (chapter of fAuthor.chapters; track chapter.chapterId) {
+            <div class="clickable" [routerLink]="`/library/${chapter.libraryId}/series/${chapter.seriesId}/chapter/${chapter.chapterId}`" [ngbTooltip]="chapter.title">
+            <app-image
+              objectFit="cover"
+              [styles]="{ 'object-position': 'top' }"
+              height="150px"
+              width="150px"
+              [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)"
+              [errorImage]="imageService.errorImage"
+              [classes]="'rounded shadow-sm'"
+            ></app-image>
+            </div>
+          }
+
+        </div>
+      </div>
+
+      <div class="setting-section-break"></div>
+    }
+  }
+</div>

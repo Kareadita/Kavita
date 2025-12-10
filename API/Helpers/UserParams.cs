@@ -1,6 +1,12 @@
 ﻿namespace API.Helpers;
 #nullable enable
 
+/// <summary>
+/// User params should be used together with [FromQuery] to add optional pagination to endpoint. If no pagination params are
+/// provided, the default (int.MaxValue) will be used. When adding pagination to an endpoint, ensure the UI sets the correct
+/// query params.
+/// </summary>
+/// <remarks>[FromQuery] always assigns the object, it'll never return null</remarks>
 public class UserParams
 {
     private const int MaxPageSize = int.MaxValue;
@@ -19,6 +25,6 @@ public class UserParams
     public static readonly UserParams Default = new()
     {
         PageSize = 20,
-        PageNumber = 1
+        PageNumber = 1,
     };
 }

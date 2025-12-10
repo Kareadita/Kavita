@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
@@ -11,14 +10,12 @@ using API.DTOs.ReadingLists;
 using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
-using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.SignalR;
 using AutoMapper;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -38,7 +35,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IScrobblingService>());
+            Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>());
 
         return (readingListService, readerService);
     }
@@ -48,7 +45,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task AddChaptersToReadingList_ShouldAddFirstItem_AsOrderZero()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
 
         var library = new LibraryBuilder("Test Lib", LibraryType.Book)
             .WithSeries(new SeriesBuilder("Test")
@@ -99,7 +96,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task AddChaptersToReadingList_ShouldNewItems_AfterLastOrder()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         context.AppUser.Add(new AppUserBuilder("majora2007", "")
             .WithLibrary(new LibraryBuilder("Test LIb", LibraryType.Book)
                 .WithSeries(new SeriesBuilder("Test")
@@ -153,7 +150,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task UpdateReadingListItemPosition_MoveLastToFirst_TwoItemsShouldShift()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
@@ -189,6 +186,8 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
+        Assert.NotNull(user);
+
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -214,7 +213,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task UpdateReadingListItemPosition_MoveLastToFirst_TwoItemsShouldShift_ThenDeleteSecond_OrderShouldBeCorrect()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
@@ -294,7 +293,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task DeleteReadingListItem_DeleteFirstItem_SecondShouldBecomeFirst()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
@@ -326,6 +325,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
+        Assert.NotNull(user);
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -388,6 +388,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists | AppUserIncludes.Progress);
         var readingList = new ReadingListBuilder("test").Build();
+        Assert.NotNull(user);
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -418,7 +419,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task CalculateAgeRating_ShouldUpdateToUnknown_IfNoneSet()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
@@ -467,7 +468,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task CalculateAgeRating_ShouldUpdateToMax()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         var s = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
@@ -500,6 +501,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
+        Assert.NotNull(user);
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -519,7 +521,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task UpdateReadingListAgeRatingForSeries()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         var spiceAndWolf = new SeriesBuilder("Spice and Wolf")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes([
@@ -611,7 +613,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task CalculateStartAndEndDates_ShouldBeNothing_IfNothing()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         var s = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
@@ -642,6 +644,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
+        Assert.NotNull(user);
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -664,7 +667,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task CalculateStartAndEndDates_ShouldBeSomething_IfChapterHasSet()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         var s = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
@@ -697,6 +700,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = new ReadingListBuilder("test").Build();
+        Assert.NotNull(user);
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -813,7 +817,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task CreateReadingList_ShouldCreate_WhenNoOtherListsOnUser()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         await CreateReadingList_SetupBaseData(unitOfWork, context);
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
@@ -830,13 +834,16 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task CreateReadingList_ShouldNotCreate_WhenExistingList()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         await CreateReadingList_SetupBaseData(unitOfWork, context);
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
+
         await readingListService.CreateReadingListForUser(user, "Test List");
-        Assert.NotEmpty((await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
-            .ReadingLists);
+        var afterUser = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(afterUser);
+        Assert.Single(afterUser .ReadingLists);
         try
         {
             await readingListService.CreateReadingListForUser(user, "Test List");
@@ -845,15 +852,17 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
         {
             Assert.Equal("reading-list-name-exists", ex.Message);
         }
-        Assert.Single((await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
-            .ReadingLists);
+
+        afterUser = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(afterUser);
+        Assert.Single(afterUser .ReadingLists);
     }
 
     [Fact]
     public async Task CreateReadingList_ShouldNotCreate_WhenPromotedListExists()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         await CreateReadingList_SetupBaseData(unitOfWork, context);
 
 
@@ -888,7 +897,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task DeleteReadingList_ShouldDelete()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         await CreateReadingList_SetupBaseData(unitOfWork, context);
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
@@ -925,10 +934,11 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task UserHasReadingListAccess_ShouldWorkIfTheirList()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         await CreateReadingList_SetupBaseData(unitOfWork, context);
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
         await readingListService.CreateReadingListForUser(user, "Test List");
 
         var userWithList = await readingListService.UserHasReadingListAccess(1, "majora2007");
@@ -940,10 +950,11 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task UserHasReadingListAccess_ShouldNotWork_IfNotTheirList()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         await CreateReadingList_SetupBaseData(unitOfWork, context);
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
         await readingListService.CreateReadingListForUser(user, "Test List");
 
         var userWithList = await readingListService.UserHasReadingListAccess(1, "majora2007");
@@ -954,11 +965,12 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task UserHasReadingListAccess_ShouldWork_IfNotTheirList_ButUserIsAdmin()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         await CreateReadingList_SetupBaseData(unitOfWork, context);
 
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
         await readingListService.CreateReadingListForUser(user, "Test List");
 
         //var admin = await unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
@@ -978,7 +990,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task ValidateCblFile_ShouldFail_UserHasAccessToNoSeries()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
@@ -1022,7 +1034,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task ValidateCblFile_ShouldFail_ServerHasNoSeries()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
@@ -1081,7 +1093,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task CreateReadingListFromCBL_ShouldCreateList()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
@@ -1138,7 +1150,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task CreateReadingListFromCBL_ShouldCreateList_ButOnlyIncludeSeriesThatUserHasAccessTo()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
@@ -1198,7 +1210,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     public async Task CreateReadingListFromCBL_ShouldUpdateAnExistingList()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
@@ -1235,6 +1247,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
 
         // Create a reading list named Fables and add 2 chapters to it
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        Assert.NotNull(user);
         var readingList = await readingListService.CreateReadingListForUser(user, "Fables");
         Assert.True(await readingListService.AddChaptersToReadingList(1, new List<int>() {1, 3}, readingList));
         Assert.Equal(2, readingList.Items.Count);
@@ -1267,7 +1280,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     {
         // TODO: Implement this correctly
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (readingListService, readerService) = Setup(unitOfWork, context, mapper);
+        var (readingListService, _) = Setup(unitOfWork, context, mapper);
         var cblReadingList = LoadCblFromPath("Annual.cbl");
 
         // Mock up our series

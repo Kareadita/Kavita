@@ -2,459 +2,478 @@
 
 :root, :root .default {
 
-    /* System styles (https://m2.material.io/design/color/dark-theme.html#properties)*/
-    --elevation-layer0: rgba(255,255,255,0);
-    --elevation-layer1: rgba(255,255,255,0.05);
-    --elevation-layer2: rgba(255,255,255,0.07);
-    --elevation-layer3: rgba(255,255,255,0.08);
-    --elevation-layer4: rgba(255,255,255,0.09);
-    --elevation-layer5: rgba(255,255,255,0.11);
-    --elevation-layer6: rgba(255,255,255,0.12);
-    --elevation-layer7: rgba(255,255,255,0.14);
-    --elevation-layer8: rgba(255,255,255,0.15);
-    --elevation-layer9: rgba(255,255,255,0.16);
-    --elevation-layer10: rgba(255,255,255,0.4);
+  /* System styles (https://m2.material.io/design/color/dark-theme.html#properties)*/
+  --elevation-layer0: rgba(255,255,255,0);
+  --elevation-layer1: rgba(255,255,255,0.05);
+  --elevation-layer2: rgba(255,255,255,0.07);
+  --elevation-layer3: rgba(255,255,255,0.08);
+  --elevation-layer4: rgba(255,255,255,0.09);
+  --elevation-layer5: rgba(255,255,255,0.11);
+  --elevation-layer6: rgba(255,255,255,0.12);
+  --elevation-layer7: rgba(255,255,255,0.14);
+  --elevation-layer8: rgba(255,255,255,0.15);
+  --elevation-layer9: rgba(255,255,255,0.16);
+  --elevation-layer10: rgba(255,255,255,0.4);
 
-    --elevation-layer0-dark: rgba(0, 0, 0,0);
-    --elevation-layer1-dark: rgba(0, 0, 0,0.05);
-    --elevation-layer2-dark: rgba(0, 0, 0,0.07);
-    --elevation-layer3-dark: rgba(0, 0, 0,0.08);
-    --elevation-layer4-dark: rgba(0, 0, 0,0.09);
-    --elevation-layer5-dark: rgba(0, 0, 0,0.11);
-    --elevation-layer6-dark: rgba(0, 0, 0,0.12);
-    --elevation-layer7-dark: rgba(0, 0, 0,0.14);
-    --elevation-layer8-dark: rgba(0, 0, 0,0.15);
-    --elevation-layer9-dark: rgba(0, 0, 0,0.16);
-    --elevation-layer10-dark: rgba(0, 0, 0, 0.4);
-    --elevation-layer11-dark: rgba(0, 0, 0, 0.6);
+  --elevation-layer0-dark: rgba(0, 0, 0,0);
+  --elevation-layer1-dark: rgba(0, 0, 0,0.05);
+  --elevation-layer2-dark: rgba(0, 0, 0,0.07);
+  --elevation-layer3-dark: rgba(0, 0, 0,0.08);
+  --elevation-layer4-dark: rgba(0, 0, 0,0.09);
+  --elevation-layer5-dark: rgba(0, 0, 0,0.11);
+  --elevation-layer6-dark: rgba(0, 0, 0,0.12);
+  --elevation-layer7-dark: rgba(0, 0, 0,0.14);
+  --elevation-layer8-dark: rgba(0, 0, 0,0.15);
+  --elevation-layer9-dark: rgba(0, 0, 0,0.16);
+  --elevation-layer10-dark: rgba(0, 0, 0, 0.4);
+  --elevation-layer11-dark: rgba(0, 0, 0, 0.6);
 
-    --elevation-layer0-dark-solid: #121212;
-    --elevation-layer1-dark-solid: #1D1D1D;
-    --elevation-layer2-dark-solid: #212121;
-    --elevation-layer3-dark-solid: #242424;
-    --elevation-layer4-dark-solid: #272727;
-    --elevation-layer5-dark-solid: #2C2C2C;
-    --elevation-layer6-dark-solid: #2D2D2D;
-    --elevation-layer7-dark-solid: #323232;
-    --elevation-layer8-dark-solid: #353535;
-    --elevation-layer9-dark-solid: #373737;
+  --elevation-layer0-dark-solid: #121212;
+  --elevation-layer1-dark-solid: #1D1D1D;
+  --elevation-layer2-dark-solid: #212121;
+  --elevation-layer3-dark-solid: #242424;
+  --elevation-layer4-dark-solid: #272727;
+  --elevation-layer5-dark-solid: #2C2C2C;
+  --elevation-layer6-dark-solid: #2D2D2D;
+  --elevation-layer7-dark-solid: #323232;
+  --elevation-layer8-dark-solid: #353535;
+  --elevation-layer9-dark-solid: #373737;
 
-    /* Base colors */
-    --primary-color: #4ac694;
-    --primary-color-dark-shade: #3B9E76;
-    --primary-color-darker-shade: #338A67;
-    --primary-color-darkest-shade: #25624A;
-    --error-color: #BD362F;
-    --warning-color: #FFECB5;
-    --body-text-color: #efefef;
-    --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
-    --primary-color-scrollbar: rgba(255,255,255,0.3);
-    --default-state-scrollbar: transparent;
-    --text-muted-color: hsla(0,0%,100%,.45);
+  /* Base colors */
+  --primary-color: #4ac694;
+  --primary-color-dark-shade: #3B9E76;
+  --primary-color-darker-shade: #338A67;
+  --primary-color-darkest-shade: #25624A;
+  --error-color: #BD362F;
+  --error-accent-color: #ea0d02;
+  --warning-color: #FFECB5;
+  --body-text-color: #efefef;
+  --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
+  --primary-color-scrollbar: rgba(255,255,255,0.3);
+  --default-state-scrollbar: transparent;
+  --text-muted-color: hsla(0,0%,100%,.45);
 
-    /* Override bootstrap css variables */
-    --bs-body-bg: #1f2020;
-    --bs-primary-rgb: var(--primary-color);
-    --select2-selection-text-color: var(--dropdown-item-hover-text-color);
-    --select2-option-highlighted-background: var(--dropdown-item-hover-bg-color);
-
-
-    /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors.
-     * --colorscape-primary-color and the alpha variants will be updated in real time. the default variant is fixed and represents the default state and should
-     * match the non-default/alpha on launch.
-     */
-    --colorscape-enabled: true;
-
-    /* These are the default background colors for the app. These will be updated on different pages with the generated colors. Must be RGB */
-    --colorscape-primary-color: rgb(38, 38, 38);
-    --colorscape-lighter-color: rgb(32, 32, 32);
-    --colorscape-darker-color: rgb(28, 28, 28);
-    --colorscape-complementary-color: rgb(51, 51, 51);
-
-    /* These need to be an alpha 0 variant. */
-    --colorscape-primary-alpha-color: rgba(38, 38, 38, 0);
-    --colorscape-lighter-alpha-color: rgba(32, 32, 32, 0);
-    --colorscape-darker-alpha-color: rgba(28, 28, 28, 0);
-    --colorscape-complementary-alpha-color: rgba(51, 51, 51, 0);
-
-    /* These are the default background colors. They need to match and cannot be a var reference. They will not be updated. Must be RGB */
-    --colorscape-primary-default-color: rgb(38, 38, 38);
-    --colorscape-lighter-default-color: rgb(32, 32, 32);
-    --colorscape-darker-default-color: rgb(28, 28, 28);
-    --colorscape-complementary-default-color: rgb(51, 51, 51);
-
-    /* Meta and Globals */
-    --theme-color: #000000;
-    --color-scheme: dark;
-    --tile-color: var(--primary-color);
-    --nav-offset: 60px;
-    --nav-mobile-offset: 55px;
-
-    /* Should we render the series cover as background on mobile */
-    --mobile-series-img-background: true;
-
-    /* Setting Item */
-    --setting-header-text-color: #d5d5d5;
-    --setting-header-font-size: 1.2rem;
-    --setting-header-font-weight: bold;
-    --setting-break-color: rgba(255, 255, 255, 0.2);
-
-    /* Table */
-    --table-header-bg-color: rgba(0,0,0,.15);
-    --table-header-text-color: hsla(0,0%,100%,.9);
-    --table-body-bg-color: hsla(0,0%,100%,.02);
-    --table-body-text-color: hsla(0,0%,100%,.85);
-    --table-body-border: hidden;
-    --table-body-striped-bg-color: var(--elevation-layer2);
-
-    /* Navbar */
-    --navbar-bg-color: black;
-    --navbar-text-color: white;
-    --navbar-fa-icon-color: white;
-    --navbar-border-radius: 0px; // 4px for Plex navbar
-    --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
-    --navbar-header-margin: 0px; // 8px allows for the Plex navbar + --nav-offset: 56px;
-    --navbar-header-mobile-x-margin: 0px; // 8px allows for the Plex navbar
-    --navbar-header-mobile-y-margin: 0px; // 12px allows for the Plex navbar
-
-    /* Inputs */
-    --input-bg-color: #343a40;
-    --input-bg-readonly-color: #434648;
-    --input-focused-border-color: #ccc;
-    --input-text-color: #fff;
-    --input-placeholder-color: #aeaeae;
-    --input-border-color: #ccc;
-    --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
-
-    /* Buttons */
-    --btn-focus-boxshadow-color: rgb(255 255 255 / 50%);
-    --btn-primary-text-color: white;
-    --btn-primary-bg-color: var(--primary-color);
-    --btn-primary-border-color: var(--primary-color);
-    --btn-primary-hover-text-color: white;
-    --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
-    --btn-primary-hover-border-color: var(--primary-color-darker-shade);
-    --btn-outline-primary-text-color: white;
-    --btn-outline-primary-bg-color: transparent;
-    --btn-outline-primary-border-color: var(--primary-color);
-    --btn-outline-primary-hover-text-color: white;
-    --btn-outline-primary-hover-bg-color: var(--primary-color-darker-shade);
-    --btn-outline-primary-hover-border-color: var(--primary-color-darker-shade);
-    --btn-secondary-text-color: white;
-    --btn-secondary-bg-color: #6c757d;
-    --btn-secondary-border-color: #6c757d;
-    --btn-secondary-hover-bg-color: var(--bs-btn-hover-bg);
-    --btn-secondary-hover-border-color: var(--bs-btn-hover-border-color);
-    --btn-secondary-font-weight: bold;
-    --btn-secondary-outline-text-color: white;
-    --btn-secondary-outline-bg-color: transparent;
-    --btn-secondary-outline-border-color: #6c757d;
-    --btn-secondary-outline-hover-text-color: #fff;
-    --btn-secondary-outline-hover-bg-color: var(--btn-secondary-bg-color);
-    --btn-secondary-outline-hover-border-color: var(--btn-secondary-bg-color);
-    --btn-secondary-outline-font-weight: bold;
-    --btn-primary-text-text-color: white;
-    --btn-secondary-text-text-color: lightgrey;
-
-    --btn-danger-text-text-color: var(--error-color);
-    --btn-danger-outline-text-color: white;
-    --btn-danger-outline-bg-color: transparent;
-    --btn-danger-outline-border-color: var(--error-color);
-    --btn-danger-outline-hover-text-color: white;
-    --btn-danger-outline-hover-bg-color: var(--error-color);
-    --btn-danger-outline-hover-border-color: var(--error-color);
-
-    --btn-alt-bg-color: #424c72;
-    --btn-alt-border-color: #444f75;
-    --btn-alt-hover-bg-color: #3b4466;
-    --btn-alt-focus-bg-color: #343c59;
-    --btn-alt-focus-boxshadow-color: rgb(255 255 255 / 50%);
-    --btn-fa-icon-color: white;
-    --btn-disabled-bg-color: #343a40;
-    --btn-disabled-text-color: white;
-    --btn-disabled-border-color: #6c757d;
-    --bs-btn-disabled-border-color: transparent;
-    --btn-actions-border-radius: 0.375rem;
-    --btn-actions-hover-bg: rgb(255 255 255 / 18%);
+  /* Override bootstrap css variables */
+  --bs-body-bg: #1f2020;
+  --bs-primary-rgb: var(--primary-color);
+  --select2-selection-text-color: var(--dropdown-item-hover-text-color);
+  --select2-option-highlighted-background: var(--dropdown-item-hover-bg-color);
 
 
-    /* Nav (Tabs) */
-    --nav-item-min-width: 150px;
-    --nav-item-max-width: 150px;
-    --nav-tab-border-color: rgba(44, 118, 88, 0.7);
-    --nav-tab-text-color: var(--elevation-layer10);
-    --nav-tab-bg-color: transparent;
-    --nav-tab-border-width: 0 0 3px 0;
-    --nav-tab-hover-border-color: var(--primary-color);
-    --nav-tab-active-text-color: white;
-    --nav-tab-border-hover-color: transparent;
-    --nav-tab-hover-text-color: white;
-    --nav-tab-hover-bg-color: transparent;
-    --nav-tab-border-top: transparent;
-    --nav-tab-border-left: transparent;
-    --nav-tab-border-bottom: var(--primary-color);
-    --nav-tab-border-right: transparent;
-    --nav-tab-hover-border-top: transparent;
-    --nav-tab-hover-border-left: transparent;
-    --nav-tab-hover-border-bottom: var(--primary-color);
-    --nav-tab-hover-border-right: transparent;
-    --nav-tab-active-hover-bg-color: transparent;
-    --nav-link-bg-color: var(--primary-color);
-    --nav-link-active-text-color: white;
-    --nav-link-text-color: var(--elevation-layer10);
+  /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors.
+   * --colorscape-primary-color and the alpha variants will be updated in real time. the default variant is fixed and represents the default state and should
+   * match the non-default/alpha on launch.
+   */
+  --colorscape-enabled: true;
 
-    /* Modal */
-    --modal-bg-color: #202122; // var(--bs-body-bg)
+  /* These are the default background colors for the app. These will be updated on different pages with the generated colors. Must be RGB */
+  --colorscape-primary-color: rgb(38, 38, 38);
+  --colorscape-lighter-color: rgb(32, 32, 32);
+  --colorscape-darker-color: rgb(28, 28, 28);
+  --colorscape-complementary-color: rgb(51, 51, 51);
 
-    /* Header */
-    --nav-header-text-color: white;
-    --nav-header-bg-color: rgb(22, 27, 34);
+  /* These need to be an alpha 0 variant. */
+  --colorscape-primary-alpha-color: rgba(38, 38, 38, 0);
+  --colorscape-lighter-alpha-color: rgba(32, 32, 32, 0);
+  --colorscape-darker-alpha-color: rgba(28, 28, 28, 0);
+  --colorscape-complementary-alpha-color: rgba(51, 51, 51, 0);
 
-    /* Toasts */
-    --toast-success-bg-color: rgba(59, 158, 118, 0.9);
-    --toast-error-bg-color: #BD362F;
-    --toast-info-bg-color: #2F96B4;
-    --toast-warning-bg-color: #F89406;
+  /* These are the default background colors. They need to match and cannot be a var reference. They will not be updated. Must be RGB */
+  --colorscape-primary-default-color: rgb(38, 38, 38);
+  --colorscape-lighter-default-color: rgb(32, 32, 32);
+  --colorscape-darker-default-color: rgb(28, 28, 28);
+  --colorscape-complementary-default-color: rgb(51, 51, 51);
 
-    /* Alerts */
-    --alert-text-color: #fff3cd;
-    --alert-bg-color: transparent;
+  /* Meta and Globals */
+  --theme-color: #000000;
+  --color-scheme: dark;
+  --tile-color: var(--primary-color);
+  --nav-offset: 60px;
+  --nav-mobile-offset: 55px;
 
-    /* Checkboxes/Switch */
-    --checkbox-checked-bg-color: var(--primary-color);
-    --checkbox-border-color: var(--input-focused-border-color);
-    --checkbox-focus-border-color: var(--primary-color);
-    --checkbox-focus-boxshadow-color: rgb(255 255 255 / 50%);
+  /* Should we render the series cover as background on mobile */
+  --mobile-series-img-background: true;
 
-    /* Tag Badge */
-    --tagbadge-border-color: rgba(239, 239, 239, 0.125);
-    --tagbadge-text-color: var(--body-text-color);
-    --tagbadge-bg-color: var(--nav-tab-hover-bg-color);
-    --tagbadge-filled-border-color: rgba(239, 239, 239, 0.125);
-    --tagbadge-filled-text-color: var(--body-text-color);
-    --tagbadge-filled-bg-color: var(--primary-color);
+  /* Setting Item */
+  --setting-header-text-color: #d5d5d5;
+  --setting-header-font-size: 1.2rem;
+  --setting-header-font-weight: bold;
+  --setting-break-color: rgba(255, 255, 255, 0.2);
 
-    /* Side Nav */
-    --side-nav-width: 230px;
-    --side-nav-icon-size: 0.9rem;
-    --side-nav-bg-color: var(--elevation-layer9-dark);
-    --side-nav-mobile-bg-color: var(--elevation-layer2-dark-solid);
-    --side-nav-openclose-transition: 0.15s ease-in-out;
-    --side-nav-box-shadow: var(--elevation-layer0);
-    --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
-    --side-nav-hover-text-color: white;
-    --side-nav-hover-bg-color: black;
-    --side-nav-text-color: hsla(0, 0%, 100%, .85);
-    --side-nav-header-text-color: white;
-    --side-nav-border-radius: 3px;
-    --side-nav-border: none;
-    --side-nav-border-closed: none;
-    --side-nav-border-transition: 0.5s ease-in-out;
-    --side-nav-companion-bar-transistion: 0.15s linear;
-    --side-nav-bg-color-transition: 0.5s ease-in-out;
-    --side-nav-closed-bg-color: transparent;
-    --side-nav-item-active-color: var(--primary-color);
-    --side-nav-item-active-text-color: #fff;
-    --side-nav-active-bg-color: transparent;
-    --side-nav-overlay-color: var(--elevation-layer11-dark);
-    --side-nav-item-color: rgb(255 255 255 / 9%);
-    --side-nav-item-closed-color: var(--elevation-layer10);
-    --side-nav-item-closed-hover-color: white;
-    --pref-side-nav-header-text-color: #d5d5d5;
+  /* Table */
+  --table-header-bg-color: rgba(0,0,0,.15);
+  --table-header-text-color: hsla(0,0%,100%,.9);
+  --table-body-bg-color: hsla(0,0%,100%,.02);
+  --table-body-text-color: hsla(0,0%,100%,.85);
+  --table-body-border: hidden;
+  --table-body-striped-bg-color: var(--elevation-layer2);
 
-    /* List items */
-    --list-group-item-text-color: var(--body-text-color);
-    --list-group-item-bg-color: transparent;
-    --search-list-group-item-bg-color: rgb(32, 38, 41);
-    --list-group-hover-text-color: white;
-    --list-group-hover-bg-color: rgb(22, 27, 34);
-    --list-group-active-border-color: none;
-    --list-group-item-border-top-left-radius: 0px;
-    --list-group-item-border-top-right-radius: 0px;
-    --list-group-item-border-bottom-left-radius: 0px;
-    --list-group-item-border-bottom-right-radius: 0px;
-    --list-group-item-border-width: 1px 0 1px 0;
-    --list-group-item-border-color: rgba(239, 239, 239, 0.125);
-    --list-group-item-border-style: solid;
-    --list-group-item-first-border-width: 0px 0px 1px 0px;
-    --list-group-item-last-border-width: 0px 0px 0px 0px;
+  /* Navbar */
+  --navbar-bg-color: black;
+  --navbar-text-color: white;
+  --navbar-fa-icon-color: white;
+  --navbar-border-radius: 0px; // 4px for Plex navbar
+  --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
+  --navbar-header-margin: 0px; // 8px allows for the Plex navbar + --nav-offset: 56px;
+  --navbar-header-mobile-x-margin: 0px; // 8px allows for the Plex navbar
+  --navbar-header-mobile-y-margin: 0px; // 12px allows for the Plex navbar
 
-    /* Popover */
-    --popover-body-bg-color: #2C2C2C;
-    --popover-body-text-color: var(--navbar-text-color);
-    --popover-outerarrow-color: transparent;
-    --popover-arrow-color: transparent;
-    --popover-bg-color: black;
-    --popover-border-color: black;
+  /* Inputs */
+  --input-bg-color: #343a40;
+  --input-bg-readonly-color: #434648;
+  --input-focused-border-color: #ccc;
+  --input-text-color: #fff;
+  --input-placeholder-color: #aeaeae;
+  --input-border-color: #ccc;
+  --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
 
-    /* Pagination */
-    --pagination-active-link-border-color: var(--primary-color);
-    --pagination-active-link-bg-color: var(--primary-color);
-    --pagination-active-link-text-color: white;
-    --pagination-link-border-color: rgba(239, 239, 239, 0.125);
-    --pagination-link-text-color: white;
-    --pagination-link-bg-color: rgba(1, 4, 9, 0.5);
-    --pagination-focus-border-color: var(--primary-color);
-    --pagination-link-hover-color: var(--primary-color);
+  /* Buttons */
+  --btn-focus-boxshadow-color: rgb(255 255 255 / 50%);
+  --btn-primary-text-color: white;
+  --btn-primary-bg-color: var(--primary-color);
+  --btn-primary-border-color: var(--primary-color);
+  --btn-primary-hover-text-color: white;
+  --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
+  --btn-primary-hover-border-color: var(--primary-color-darker-shade);
+  --btn-outline-primary-text-color: white;
+  --btn-outline-primary-bg-color: transparent;
+  --btn-outline-primary-border-color: var(--primary-color);
+  --btn-outline-primary-hover-text-color: white;
+  --btn-outline-primary-hover-bg-color: var(--primary-color-darker-shade);
+  --btn-outline-primary-hover-border-color: var(--primary-color-darker-shade);
+  --btn-secondary-text-color: white;
+  --btn-secondary-bg-color: #6c757d;
+  --btn-secondary-border-color: #6c757d;
+  --btn-secondary-hover-bg-color: var(--bs-btn-hover-bg);
+  --btn-secondary-hover-border-color: var(--bs-btn-hover-border-color);
+  --btn-secondary-font-weight: bold;
+  --btn-secondary-outline-text-color: white;
+  --btn-secondary-outline-bg-color: transparent;
+  --btn-secondary-outline-border-color: #6c757d;
+  --btn-secondary-outline-hover-text-color: #fff;
+  --btn-secondary-outline-hover-bg-color: var(--btn-secondary-bg-color);
+  --btn-secondary-outline-hover-border-color: var(--btn-secondary-bg-color);
+  --btn-secondary-outline-font-weight: bold;
+  --btn-primary-text-text-color: white;
+  --btn-secondary-text-text-color: lightgrey;
 
-    /* Progress Bar */
-    --progress-striped-animated-color: linear-gradient(45deg, rgba(74,198,148, 0.75) 25%, rgba(51, 138, 103, 0.75) 25%, rgba(51, 138, 103, 0.75) 50%, rgba(74,198,148, 0.75) 50%, rgba(74,198,148, 0.75) 75%, rgba(51, 138, 103, 0.75) 75%, rgba(51, 138, 103, 0.75));
-    --progress-bg-color: var(--nav-header-bg-color);
-    --progress-bar-color: var(--primary-color-dark-shade);
+  --btn-danger-text-text-color: var(--error-color);
+  --btn-danger-outline-text-color: white;
+  --btn-danger-outline-bg-color: transparent;
+  --btn-danger-outline-border-color: var(--error-color);
+  --btn-danger-outline-hover-text-color: white;
+  --btn-danger-outline-hover-bg-color: var(--error-color);
+  --btn-danger-outline-hover-border-color: var(--error-color);
 
-    /* Dropdown */
-    --dropdown-item-hover-text-color: white;
-    --dropdown-item-hover-bg-color: var(--primary-color-dark-shade);
-    --dropdown-item-text-color: var(--navbar-text-color);
-    --dropdown-item-bg-color: #2C2C2C;
-    --dropdown-overlay-color: var(--elevation-layer1);
+  --btn-alt-bg-color: #424c72;
+  --btn-alt-border-color: #444f75;
+  --btn-alt-hover-bg-color: #3b4466;
+  --btn-alt-focus-bg-color: #343c59;
+  --btn-alt-focus-boxshadow-color: rgb(255 255 255 / 50%);
+  --btn-fa-icon-color: white;
+  --btn-disabled-bg-color: #343a40;
+  --btn-disabled-text-color: white;
+  --btn-disabled-border-color: #6c757d;
+  --bs-btn-disabled-border-color: transparent;
+  --btn-actions-border-radius: 0.375rem;
+  --btn-actions-hover-bg: rgb(255 255 255 / 18%);
 
-    /* Accordion */
-    --accordion-header-text-color: rgba(74, 198, 148, 0.9);
-    --accordion-header-bg-color: rgba(52, 60, 70, 0.5);
-    --accordion-body-bg-color: #292929;
-    --accordion-body-border-color: rgba(239, 239, 239, 0.125);
-    --accordion-body-text-color: var(--body-text-color);
-    --accordion-header-collapsed-text-color: rgba(74, 198, 148, 0.9);
-    --accordion-header-collapsed-bg-color: #292929;
-    --accordion-button-focus-border-color: unset;
-    --accordion-button-focus-box-shadow: unset;
-    --accordion-active-body-bg-color: #292929;
-    --accordion-body-box-shadow: none;
 
-    /* Breadcrumb */
-    --breadcrumb-bg-color: #292d32;
-    --breadcrumb-item-text-color: var(--body-text-color);
+  /* Nav (Tabs) */
+  --nav-item-min-width: 150px;
+  --nav-item-max-width: 150px;
+  --nav-tab-border-color: rgba(44, 118, 88, 0.7);
+  --nav-tab-text-color: var(--elevation-layer10);
+  --nav-tab-bg-color: transparent;
+  --nav-tab-border-width: 0 0 3px 0;
+  --nav-tab-hover-border-color: var(--primary-color);
+  --nav-tab-active-text-color: white;
+  --nav-tab-border-hover-color: transparent;
+  --nav-tab-hover-text-color: white;
+  --nav-tab-hover-bg-color: transparent;
+  --nav-tab-border-top: transparent;
+  --nav-tab-border-left: transparent;
+  --nav-tab-border-bottom: var(--primary-color);
+  --nav-tab-border-right: transparent;
+  --nav-tab-hover-border-top: transparent;
+  --nav-tab-hover-border-left: transparent;
+  --nav-tab-hover-border-bottom: var(--primary-color);
+  --nav-tab-hover-border-right: transparent;
+  --nav-tab-active-hover-bg-color: transparent;
+  --nav-link-bg-color: var(--primary-color);
+  --nav-link-active-text-color: white;
+  --nav-link-text-color: var(--elevation-layer10);
 
-    /* Rating star */
-    --ratingstar-color: white;
-    --rating-star-color: var(--primary-color);
-    --ratingstar-star-empty: #b0c4de;
-    --ratingstar-star-filled: var(--primary-color);
+  /* Modal */
+  --modal-bg-color: #202122; // var(--bs-body-bg)
 
-    /* Global */
-    --hr-color: rgba(239, 239, 239, 0.125);
-    --accent-bg-color: rgba(1, 4, 9, 0.5);
-    --accent-text-color: lightgrey;
-    --grid-breakpoints-xs: theme.$grid-breakpoints-xs;
-    --grid-breakpoints-sm: theme.$grid-breakpoints-sm;
-    --grid-breakpoints-md: theme.$grid-breakpoints-md;
-    --grid-breakpoints-lg: theme.$grid-breakpoints-lg;
-    --grid-breakpoints-xl: theme.$grid-breakpoints-xl;
-    --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
-    --brand-font-family: "Spartan", sans-serif;
-    --html-font-size: 16px;
+  /* Header */
+  --nav-header-text-color: white;
+  --nav-header-bg-color: rgb(22, 27, 34);
 
-    /* Card */
-    --card-bg-color: var(--elevation-layer3);
-    --card-text-color: var(--body-text-color);
-    --card-border-width: 0 1px 1px 1px;
-    --card-border-style: solid;
-    --card-border-color: transparent;
-    --card-border-radius: 5px;
-    --card-progress-bar-color: var(--primary-color);
-    --card-overlay-bg-color: rgba(0, 0, 0, 0);
-    --card-overlay-hover-bg-color: rgba(30,30,30,.6);
-    --card-progress-triangle-size: 28px;
-    --card-body-bg-color: rgba(0,0,0,0.7);
-    --card-title-text-color: var(--card-text-color);
-    --card-overlay-text-color: var(--card-text-color);
-    --card-hover-text-color: var(--card-text-color);
-    --card-hover-bg-color: #3a3a3a;
+  /* Toasts */
+  --toast-success-bg-color: rgba(59, 158, 118, 0.9);
+  --toast-error-bg-color: #BD362F;
+  --toast-info-bg-color: #2F96B4;
+  --toast-warning-bg-color: #F89406;
 
-    /* Slider */
-    --slider-text-color: white;
-    --input-range-color: var(--primary-color);
-    --input-range-active-color: var(--primary-color-darker-shade);
+  /* Alerts */
+  --alert-text-color: #fff3cd;
+  --alert-bg-color: transparent;
 
-    /* Manga Reader */
-    --manga-reader-overlay-filter: blur(10px);
-    --manga-reader-overlay-bg-color: rgba(0,0,0,0.5);
-    --manga-reader-overlay-text-color: white;
-    --manga-reader-next-highlight-bg-color: rgba(65, 225, 100, 0.5);
-    --manga-reader-prev-highlight-bg-color: rgba(65, 105, 225, 0.5);
+  /* Checkboxes/Switch */
+  --checkbox-checked-bg-color: var(--primary-color);
+  --checkbox-border-color: var(--input-focused-border-color);
+  --checkbox-focus-border-color: var(--primary-color);
+  --checkbox-focus-boxshadow-color: rgb(255 255 255 / 50%);
 
-    /* Radios */
-    --radio-accent-color: var(--primary-color);
-    --radio-hover-accent-color: var(--primary-color);
-    --radio-focus-boxshadow-color: rgb(255 255 255 / 50%);
+  /* Tag Badge */
+  --tagbadge-border-color: rgba(239, 239, 239, 0.125);
+  --tagbadge-text-color: var(--body-text-color);
+  --tagbadge-bg-color: var(--nav-tab-hover-bg-color);
+  --tagbadge-filled-border-color: rgba(239, 239, 239, 0.125);
+  --tagbadge-filled-text-color: var(--body-text-color);
+  --tagbadge-filled-bg-color: var(--primary-color);
 
-    /* Carousel */
-    --carousel-header-text-color: var(--body-text-color);
-    --carousel-header-text-decoration: none;
-    --carousel-hover-header-text-decoration: none;
-    --carousel-btn-color: var(--body-text-color);
+  /* Side Nav */
+  --side-nav-width: 230px;
+  --side-nav-icon-size: 0.9rem;
+  --side-nav-bg-color: var(--elevation-layer9-dark);
+  --side-nav-mobile-bg-color: var(--elevation-layer2-dark-solid);
+  --side-nav-openclose-transition: 0.15s ease-in-out;
+  --side-nav-box-shadow: var(--elevation-layer0);
+  --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
+  --side-nav-hover-text-color: white;
+  --side-nav-hover-bg-color: black;
+  --side-nav-text-color: hsla(0, 0%, 100%, .85);
+  --side-nav-header-text-color: white;
+  --side-nav-border-radius: 3px;
+  --side-nav-border: none;
+  --side-nav-border-closed: none;
+  --side-nav-border-transition: 0.5s ease-in-out;
+  --side-nav-companion-bar-transistion: 0.15s linear;
+  --side-nav-bg-color-transition: 0.5s ease-in-out;
+  --side-nav-closed-bg-color: transparent;
+  --side-nav-item-active-color: var(--primary-color);
+  --side-nav-item-active-text-color: #fff;
+  --side-nav-active-bg-color: transparent;
+  --side-nav-overlay-color: var(--elevation-layer11-dark);
+  --side-nav-item-color: rgb(255 255 255 / 9%);
+  --side-nav-item-closed-color: var(--elevation-layer10);
+  --side-nav-item-closed-hover-color: white;
+  --pref-side-nav-header-text-color: #d5d5d5;
 
-    /** Drawer */
-    --drawer-bg-color: #292929;
-    --drawer-text-color: white;
+  /* List items */
+  --list-group-item-text-color: var(--body-text-color);
+  --list-group-item-bg-color: transparent;
+  --search-list-group-item-bg-color: rgb(32, 38, 41);
+  --list-group-hover-text-color: white;
+  --list-group-hover-bg-color: rgb(22, 27, 34);
+  --list-group-active-border-color: none;
+  --list-group-item-border-top-left-radius: 0px;
+  --list-group-item-border-top-right-radius: 0px;
+  --list-group-item-border-bottom-left-radius: 0px;
+  --list-group-item-border-bottom-right-radius: 0px;
+  --list-group-item-border-width: 1px 0 1px 0;
+  --list-group-item-border-color: rgba(239, 239, 239, 0.125);
+  --list-group-item-border-style: solid;
+  --list-group-item-first-border-width: 0px 0px 1px 0px;
+  --list-group-item-last-border-width: 0px 0px 0px 0px;
 
-    /** Event Widget */
-    --event-widget-bg-color: rgb(1, 4, 9);
-    --event-widget-item-bg-color: rgb(1, 4, 9);
-    --event-widget-text-color: var(--body-text-color);
-    --event-widget-item-border-color: rgba(53, 53, 53, 0.5);
-    --event-widget-border-color: rgba(1, 4, 9, 0.5);
-    --event-widget-info-bg-color: #b6d4fe;
-    --event-widget-error-bg-color: var(--error-color);
-    --event-widget-update-bg-color: var(--primary-color);
-    --event-widget-activity-bg-color: var(--primary-color);
+  /* Popover */
+  --popover-body-bg-color: #2C2C2C;
+  --popover-body-text-color: var(--navbar-text-color);
+  --popover-outerarrow-color: transparent;
+  --popover-arrow-color: transparent;
+  --popover-bg-color: black;
+  --popover-border-color: black;
 
-    /* Search */
-    --search-result-text-lite-color: initial;
-    --searchbar-bg-color: rgb(255 255 255 / 12%);
+  /* Pagination */
+  --pagination-active-link-border-color: var(--primary-color);
+  --pagination-active-link-bg-color: var(--primary-color);
+  --pagination-active-link-text-color: white;
+  --pagination-link-border-color: rgba(239, 239, 239, 0.125);
+  --pagination-link-text-color: white;
+  --pagination-link-bg-color: rgba(1, 4, 9, 0.5);
+  --pagination-focus-border-color: var(--primary-color);
+  --pagination-link-hover-color: var(--primary-color);
 
-    /* Bulk Selection */
-    --bulk-selection-text-color: var(--navbar-text-color);
-    --bulk-selection-highlight-text-color: var(--primary-color);
-    --bulk-selection-bg-color: black;
+  /* Progress Bar */
+  --progress-striped-animated-color: linear-gradient(45deg, rgba(74,198,148, 0.75) 25%, rgba(51, 138, 103, 0.75) 25%, rgba(51, 138, 103, 0.75) 50%, rgba(74,198,148, 0.75) 50%, rgba(74,198,148, 0.75) 75%, rgba(51, 138, 103, 0.75) 75%, rgba(51, 138, 103, 0.75));
+  --progress-bg-color: var(--nav-header-bg-color);
+  --progress-bar-color: var(--primary-color-dark-shade);
 
-    /* List Card Item */
-    --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
+  /* Dropdown */
+  --dropdown-item-hover-text-color: white;
+  --dropdown-item-hover-bg-color: var(--primary-color-dark-shade);
+  --dropdown-item-text-color: var(--navbar-text-color);
+  --dropdown-item-bg-color: #2C2C2C;
+  --dropdown-overlay-color: var(--elevation-layer1);
 
-    /* Review Card */
-    --review-card-star-color: gold;
-    --review-spoiler-bg-color: var(--primary-color);
-    --review-spoiler-text-color: var(--body-text-color);
+  /* Accordion */
+  --accordion-header-text-color: rgba(74, 198, 148, 0.9);
+  --accordion-header-bg-color: rgba(52, 60, 70, 0.5);
+  --accordion-body-bg-color: #292929;
+  --accordion-body-border-color: rgba(239, 239, 239, 0.125);
+  --accordion-body-text-color: var(--body-text-color);
+  --accordion-header-collapsed-text-color: rgba(74, 198, 148, 0.9);
+  --accordion-header-collapsed-bg-color: #292929;
+  --accordion-button-focus-border-color: unset;
+  --accordion-button-focus-box-shadow: unset;
+  --accordion-active-body-bg-color: #292929;
+  --accordion-body-box-shadow: none;
 
-    /** Badge **/
-    --badge-text-color: var(--bs-badge-color);
+  /* Breadcrumb */
+  --breadcrumb-bg-color: #292d32;
+  --breadcrumb-item-text-color: var(--body-text-color);
 
-    /** Login **/
-    --login-card-bg-color: #212121;
-    --login-logo-image: url("/assets/images/logo.png");
-    --login-logo-height: 55px;
-    --login-logo-width: 55px;
-    --login-logo-bg-size: contain;
-    --login-logo-bg-repeat: no-repeat;
-    --login-card-border-width: 3px 0px 0px 0px;
-    --login-card-border-style: solid;
-    --login-card-border-color: var(--primary-color);
-    --login-input-border-color: transparent;
-    --login-input-border-color-focus: transparent;
-    --login-input-box-shadow-focus: 0 0 0 1px rgba(74, 198, 148, 0.8);
-    --login-input-background-color: #353535;
-    --login-input-color: #fff;
-    --login-forgot-password-color: var(--primary-color);
-    --login-background-url: url('../../assets/images/login-bg.jpg');
-    --login-background-size: cover;
-    --login-background-opacity: 0.3;
-    --login-background-color: #000;
-    --login-input-font-family: 'League Spartan', sans-serif;
-    --login-input-placeholder-opacity: 0.5;
-    --login-input-placeholder-color: #fff;
+  /* Rating star */
+  --ratingstar-color: white;
+  --rating-star-color: var(--primary-color);
+  --ratingstar-star-empty: #b0c4de;
+  --ratingstar-star-filled: var(--primary-color);
 
-    /** Series Detail **/
-    --detail-title-color: white;
-    --detail-subtitle-color: lightgrey;
+  /* Global */
+  --hr-color: rgba(239, 239, 239, 0.125);
+  --accent-bg-color: rgba(1, 4, 9, 0.5);
+  --accent-text-color: lightgrey;
+  --grid-breakpoints-xs: theme.$grid-breakpoints-xs;
+  --grid-breakpoints-sm: theme.$grid-breakpoints-sm;
+  --grid-breakpoints-md: theme.$grid-breakpoints-md;
+  --grid-breakpoints-lg: theme.$grid-breakpoints-lg;
+  --grid-breakpoints-xl: theme.$grid-breakpoints-xl;
+  --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+  --brand-font-family: "Spartan", sans-serif;
+  --html-font-size: 16px;
 
-    /** Search **/
-    --input-hint-border-color: #aeaeae;
-    --input-hint-text-color: lightgrey;
+  /* Card */
+  --card-bg-color: var(--elevation-layer3);
+  --card-text-color: var(--body-text-color);
+  --card-border-width: 0 1px 1px 1px;
+  --card-border-style: solid;
+  --card-border-color: transparent;
+  --card-border-radius: 5px;
+  --card-progress-bar-color: var(--primary-color);
+  --card-overlay-bg-color: rgba(0, 0, 0, 0);
+  --card-overlay-hover-bg-color: rgba(30,30,30,.6);
+  --card-progress-triangle-size: 28px;
+  --card-body-bg-color: rgba(0,0,0,0.7);
+  --card-title-text-color: var(--card-text-color);
+  --card-overlay-text-color: var(--card-text-color);
+  --card-hover-text-color: var(--card-text-color);
+  --card-hover-bg-color: #3a3a3a;
 
-    /** Breakpoint **/
-    --setting-mobile-breakpoint: 768;
-    --setting-tablet-breakpoint: 1280;
-    --setting-desktop-breakpoint: 1440;
+  /* Slider */
+  --slider-text-color: white;
+  --input-range-color: var(--primary-color);
+  --input-range-active-color: var(--primary-color-darker-shade);
+
+  /* Manga Reader */
+  --manga-reader-overlay-filter: blur(10px);
+  --manga-reader-overlay-bg-color: rgba(0,0,0,0.5);
+  --manga-reader-overlay-text-color: white;
+  --manga-reader-next-highlight-bg-color: rgba(65, 225, 100, 0.5);
+  --manga-reader-prev-highlight-bg-color: rgba(65, 105, 225, 0.5);
+
+  /* Radios */
+  --radio-accent-color: var(--primary-color);
+  --radio-hover-accent-color: var(--primary-color);
+  --radio-focus-boxshadow-color: rgb(255 255 255 / 50%);
+
+  /* Carousel */
+  --carousel-header-text-color: var(--body-text-color);
+  --carousel-header-text-decoration: none;
+  --carousel-hover-header-text-decoration: none;
+  --carousel-btn-color: var(--body-text-color);
+
+  /** Drawer */
+  --drawer-bg-color: #292929;
+  --drawer-text-color: white;
+
+  /** Event Widget */
+  --event-widget-bg-color: rgb(1, 4, 9);
+  --event-widget-item-bg-color: rgb(1, 4, 9);
+  --event-widget-text-color: var(--body-text-color);
+  --event-widget-item-border-color: rgba(53, 53, 53, 0.5);
+  --event-widget-border-color: rgba(1, 4, 9, 0.5);
+  --event-widget-info-bg-color: #b6d4fe;
+  --event-widget-error-bg-color: var(--error-color);
+  --event-widget-update-bg-color: var(--primary-color);
+  --event-widget-activity-bg-color: var(--primary-color);
+
+  /* Search */
+  --search-result-text-lite-color: initial;
+  --searchbar-bg-color: rgb(255 255 255 / 12%);
+
+  /* Bulk Selection */
+  --bulk-selection-text-color: var(--navbar-text-color);
+  --bulk-selection-highlight-text-color: var(--primary-color);
+  --bulk-selection-bg-color: black;
+
+  /* List Card Item */
+  --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
+
+  /* Review Card */
+  --review-card-star-color: gold;
+  --review-spoiler-bg-color: var(--primary-color);
+  --review-spoiler-text-color: var(--body-text-color);
+
+  /** Badge **/
+  --badge-text-color: var(--bs-badge-color);
+
+  /** Login **/
+  --login-card-bg-color: #212121;
+  --login-logo-image: url("/assets/images/logo.png");
+  --login-logo-height: 55px;
+  --login-logo-width: 55px;
+  --login-logo-bg-size: contain;
+  --login-logo-bg-repeat: no-repeat;
+  --login-card-border-width: 3px 0px 0px 0px;
+  --login-card-border-style: solid;
+  --login-card-border-color: var(--primary-color);
+  --login-input-border-color: transparent;
+  --login-input-border-color-focus: transparent;
+  --login-input-box-shadow-focus: 0 0 0 1px rgba(74, 198, 148, 0.8);
+  --login-input-background-color: #353535;
+  --login-input-color: #fff;
+  --login-forgot-password-color: var(--primary-color);
+  --login-background-url: url('../../assets/images/login-bg.jpg');
+  --login-background-size: cover;
+  --login-background-opacity: 0.3;
+  --login-background-color: #000;
+  --login-input-font-family: 'League Spartan', sans-serif;
+  --login-input-placeholder-opacity: 0.5;
+  --login-input-placeholder-color: #fff;
+
+  /** Series Detail **/
+  --detail-title-color: white;
+  --detail-subtitle-color: lightgrey;
+
+  /** Search **/
+  --input-hint-border-color: #aeaeae;
+  --input-hint-text-color: lightgrey;
+
+  /** Breakpoint **/
+  --setting-mobile-breakpoint: 768;
+  --setting-tablet-breakpoint: 1280;
+  --setting-desktop-breakpoint: 1440;
+
+  --charts-palette1: #5470c6;
+  --charts-palette2: #91cc75;
+  --charts-palette3: #fac858;
+  --charts-palette4: #ee6666;
+  --charts-palette5: #73c0de;
+  --charts-palette6: #3ba272;
+  --charts-palette7: #fc8452;
+
+  /** Tooltips **/
+  --tooltip-bg-color: var(--bs-dark, var(--popover-body-bg-color));
+  --tooltip-outline-color: white;
+  --tooltip-caret-color: var(--tooltip-outline-color);
+
+
+  /** Misc **/
+  --offwhite-text-color: #8b95a5;
+
 
 }

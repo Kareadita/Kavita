@@ -1,6 +1,5 @@
 ﻿using API.DTOs.Scrobbling;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Services.Plus;
 
 namespace API.DTOs.KavitaPlus.Metadata;

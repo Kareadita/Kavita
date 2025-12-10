@@ -1,0 +1,19 @@
+<ng-container *transloco="let t; prefix: 'preferred-format'">
+
+  <div class="stats-card card p-4">
+
+    <h4 class="stats-title">{{t('title')}}</h4>
+
+    @let mostReadFormatValue = mostReadFormat();
+    @if (mostReadFormatValue) {
+      <h6 class="stats-subtitle">{{t('sub-title', {name: userName(), format: mostReadFormat()})}}</h6>
+
+      <app-pie-chart [data]="data()" [valueTransformer]="valueTransformer.bind(this)" />
+    }  @else if (!formatsResource.isLoading())  {
+      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+    }
+
+
+  </div>
+
+</ng-container>

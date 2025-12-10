@@ -1,0 +1,104 @@
+<ng-container *transloco="let t; prefix:'manage-auth-keys'">
+  @if (isOpdsEnabledResource.hasValue()) {
+    @let opdsEnabled = isOpdsEnabledResource.value();
+    @if (!opdsEnabled) {
+      <div class="alert alert-warning" role="alert">{{t('clients-opds-alert')}}</div>
+    }
+
+    <p>{{t('clients-opds-description')}}</p>
+
+
+    @if (isOpdsEnabledResource.value() && opdsUrl()) {
+      <div class="mt-4">
+        <app-api-key [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink" [hideData]="true"
+                     [transform]="makeUrl" />
+      </div>
+    }
+  }
+
+  <h4 class="mt-4">
+    {{t('auth-keys-title')}}
+    @if (!isReadOnly()) {
+      <button class="btn btn-outline-primary" (click)="createAuthKey()">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        <span class="ms-1">{{t('add-auth-key')}}</span>
+      </button>
+    }
+  </h4>
+  <p>{{t('description')}}</p>
+
+  @let authKeysValue = authKeys();
+
+  @if (authKeysValue) {
+    <ngx-datatable
+      class="bootstrap"
+      [rows]="authKeysValue"
+      [columnMode]="ColumnMode.flex"
+      rowHeight="auto"
+      [footerHeight]="50"
+      [limit]="15"
+    >
+      <ngx-datatable-column prop="name" [sortable]="true" [draggable]="false" [flexGrow]="2">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{t('name-label')}}
+        </ng-template>
+        <ng-template let-item="row" ngx-datatable-cell-template>
+          @if (item.provider === AuthKeyProvider.System) {
+            {{ t(item.name) }}
+          } @else {
+            {{ item.name }}
+          }
+        </ng-template>
+      </ngx-datatable-column>
+
+
+      <ngx-datatable-column prop="key" [sortable]="true" [draggable]="false" [flexGrow]="3">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{t('key-label')}}
+        </ng-template>
+        <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+          <span [appToggleVisibility]="item.key"></span>
+          <button class="btn btn-icon ms-1" (click)="copy(item.key)">
+            <i class="fa-solid fa-copy" aria-hidden="true"></i>
+          </button>
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column prop="expiresAtUtc" [sortable]="false" [draggable]="false" [flexGrow]="1">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{t('expires-label')}}
+        </ng-template>
+        <ng-template let-item="row" ngx-datatable-cell-template>
+          {{ item.expiresAtUtc | utcToLocalDate | date:'mediumDate' | defaultDate }}
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column prop="lastAccessedAtUtc" [sortable]="false" [draggable]="false" [flexGrow]="1">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{t('last-accessed-label')}}
+        </ng-template>
+        <ng-template let-item="row" ngx-datatable-cell-template>
+          {{ item.lastAccessedAtUtc | utcToLocalDate | defaultDate }}
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [flexGrow]="2">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{t('actions-label')}}
+        </ng-template>
+        <ng-template let-item="row" ngx-datatable-cell-template>
+          <button class="btn btn-primary me-2" (click)="rotate(item)" [disabled]="isReadOnly()">
+            <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+            <span class="visually-hidden">{{t('rotate')}}</span>
+          </button>
+          <button class="btn btn-danger" [disabled]="item.provider === AuthKeyProvider.System || isReadOnly()" (click)="delete(item)">
+            <i class="fa fa-trash" aria-hidden="true"></i>
+            <span class="visually-hidden">{{t('delete')}}</span>
+          </button>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+  }
+
+
+</ng-container>

@@ -1,50 +1,69 @@
 <ng-container *transloco="let t; prefix: 'series-detail'">
+
+  @let releaseYearValue = releaseYear();
+  @let bytesValue = totalBytes();
+  @let readingTimeEntityValue = readingTimeEntity();
+  @let libraryTypeValue = libraryType();
+  @let mangaFormatValue = mangaFormat();
+  @let readingTimeLeftValue = readingTimeLeft();
+  @let entityValue = entity();
+
+
   <div class="mt-2 mb-2">
-    @if (entity.publishers.length > 0) {
+    @if (entityValue.publishers.length > 0) {
       <div class="publisher-img-container d-inline-flex align-items-center me-2 position-relative">
-        <app-image [imageUrl]="imageService.getPublisherImage(entity.publishers[0].name)" [classes]="'me-2'" [hideOnError]="true" width="32px" height="32px"
+        <app-image [imageUrl]="imageService.getPublisherImage(entityValue.publishers[0].name)" [classes]="'me-2'" [hideOnError]="true" width="32px" height="32px"
                   aria-hidden="true" />
-        <div class="position-relative d-inline-block" (click)="openGeneric(FilterField.Publisher, entity.publishers[0].id)">{{entity.publishers[0].name}}</div>
-<!--        <app-publisher-flipper [publishers]="entity.publishers"></app-publisher-flipper>-->
+        <div class="position-relative d-inline-block" (click)="openGeneric(FilterField.Publisher, entityValue.publishers[0].id)">{{entityValue.publishers[0].name}}</div>
+<!--        <app-publisher-flipper [publishers]="entityValue.publishers"></app-publisher-flipper>-->
       </div>
     }
     <span class="me-2">
-      <app-age-rating-image [rating]="ageRating" />
+      <app-age-rating-image [rating]="ageRating()" />
     </span>
 
     <span class="me-2">
-       <app-series-format [format]="mangaFormat" [useTitle]="false" />
+       <app-series-format [format]="mangaFormatValue" [useTitle]="false" />
     </span>
 
-    @if ((libraryType === LibraryType.Book || libraryType === LibraryType.LightNovel) && mangaFormat !== MangaFormat.PDF) {
-      <span class="small-text me-3">{{t('words-count', {num: readingTimeEntity.wordCount | compactNumber})}}</span>
+
+    @if ((libraryTypeValue === LibraryType.Book || libraryTypeValue === LibraryType.LightNovel) && mangaFormatValue !== MangaFormat.PDF) {
+      <span class="small-text me-3">{{t('words-count', {num: readingTimeEntityValue.wordCount | compactNumber})}}</span>
     } @else {
-      <span class="small-text me-3">{{t('pages-count', {num: readingTimeEntity.pages | compactNumber})}}</span>
+      <span class="small-text me-3">{{t('pages-count', {num: readingTimeEntityValue.pages | compactNumber})}}</span>
     }
 
-    @if (hasReadingProgress && readingTimeLeft && readingTimeLeft.avgHours !== 0) {
+    @if (hasReadingProgress() && readingTimeLeftValue && readingTimeLeftValue.avgHours !== 0) {
       <span class="small-text" [ngbTooltip]="t('time-left-alt')">
         <i class="fa-solid fa-clock" aria-hidden="true"></i>
-        {{readingTimeLeft | readTimeLeft }}
+        {{readingTimeLeftValue | readTimeLeft }}
       </span>
     } @else {
       <span class="small-text" [ngbTooltip]="t('time-to-read-alt')">
         <i class="fa-regular fa-clock" aria-hidden="true"></i>
-        {{readingTimeEntity | readTime }}
+        {{readingTimeEntityValue | readTime }}
       </span>
     }
 
-    @if (releaseYear) {
+
+    @if (releaseYearValue) {
       <span class="small-text ms-3">
         <i class="fas fa-calendar" aria-hidden="true"></i>
-        {{releaseYear}}
+        {{releaseYearValue}}
       </span>
     }
 
-    @if (totalBytes) {
+    @if (bytesValue && hasDownloadRole()) {
       <span class="small-text ms-3">
         <i class="fas fa-database" aria-hidden="true"></i>
-        {{totalBytes | bytes}}
+        {{bytesValue| bytes}}
+      </span>
+    }
+
+    @if (totalReads() > 0) {
+      <span class="small-text ms-3" [ngbTooltip]="t('read-count-tooltip')">
+        <i class="fas fa-eye" aria-hidden="true"></i>
+        {{totalReads() | compactNumber}}
       </span>
     }
 

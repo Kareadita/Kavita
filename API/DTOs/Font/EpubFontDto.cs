@@ -1,4 +1,3 @@
-using System;
 using API.Entities.Enums.Font;
 
 namespace API.DTOs.Font;

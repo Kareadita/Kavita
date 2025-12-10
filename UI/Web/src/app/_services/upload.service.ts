@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import { environment } from 'src/environments/environment';
-import { TextResonse } from '../_types/text-response';
+import {environment} from 'src/environments/environment';
+import {TextResonse} from '../_types/text-response';
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {tap} from "rxjs";
@@ -11,10 +11,9 @@ import {tap} from "rxjs";
 })
 export class UploadService {
   private httpClient = inject(HttpClient);
-
+  private readonly toastr = inject(ToastrService);
 
   private baseUrl = environment.apiUrl;
-  private readonly toastr = inject(ToastrService);
 
 
   uploadByUrl(url: string) {
@@ -66,6 +65,12 @@ export class UploadService {
 
   updatePersonCoverImage(personId: number, url: string, lockCover: boolean = true) {
     return this.httpClient.post<number>(this.baseUrl + 'upload/person', {id: personId, url: this._cleanBase64Url(url), lockCover}).pipe(tap(_ => {
+      this.toastr.info(translate('series-detail.cover-change'));
+    }));
+  }
+
+  updateUserCoverImage(userId: number, url: string) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/user', {id: userId, url: this._cleanBase64Url(url), lockCover: false}).pipe(tap(_ => {
       this.toastr.info(translate('series-detail.cover-change'));
     }));
   }

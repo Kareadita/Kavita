@@ -1,38 +1,42 @@
 <ng-container *transloco="let t; prefix:'review-card'">
+  @let reviewValue = review();
   <div class="card review-card clickable mb-3" (click)="showModal()">
     <div class="row g-0">
       <div class="col-md-2 col-sm-2 col-2 d-block p-2">
-        @if (isMyReview) {
+        @if (isMyReview()) {
           <i class="d-none fa-solid fa-star me-2" aria-hidden="true" [title]="t('your-review')"></i>
           <img class="me-2" [ngSrc]="ScrobbleProvider.Kavita | providerImage:true" width="40" height="40" alt="">
         } @else {
-          <img class="me-2" [ngSrc]="review.provider | providerImage:true" width="40" height="40" alt="">
+          <img class="me-2" [ngSrc]="reviewValue.provider | providerImage:true" width="40" height="40" alt="">
         }
       </div>
       <div class="col-md-10 col-sm-10 col-10">
         <div class="card-body p-2">
-          <!--
-          <h6 class="card-title">
-            {{review.isExternal ? t('external-review') : t('local-review')}}
-          </h6>-->
           <p class="card-text no-images">
-            <app-read-more [text]="(review.isExternal ? review.bodyJustText : review.body) || ''" [maxLength]="140" [showToggle]="false" />
+            <app-read-more [text]="(reviewValue.isExternal ? reviewValue.bodyJustText : reviewValue.body) || ''" [maxLength]="140" [showToggle]="false" />
           </p>
         </div>
       </div>
 
       <div class="card-footer bg-transparent text-muted p-2">
         <div>
-          @if (isMyReview) {
-            {{review.username}}
+          @if (!reviewValue.isExternal) {
+            <span (click)="$event.stopPropagation()">
+              <a routerLink="/profile/{{reviewValue.userId}}">
+                <app-profile-icon [userId]="reviewValue.userId" [size]="16" />
+                <span class="ms-2">{{reviewValue.username}}</span>
+              </a>
+            </span>
+          } @else {
+            {{(reviewValue.username | defaultValue:'')}}
           }
-          {{(isMyReview ? '' : review.username | defaultValue:'')}}
-          @if (review.authority === RatingAuthority.Critic) {
+
+          @if (reviewValue.authority === RatingAuthority.Critic) {
             ({{t('critic')}})
           }
         </div>
-        @if (review.isExternal){
-          <span class="review-score">{{t('rating-percentage', {r: review.score})}}</span>
+        @if (reviewValue.isExternal){
+          <span class="review-score">{{t('rating-percentage', {r: reviewValue.score})}}</span>
         }
       </div>
     </div>

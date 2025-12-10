@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.KavitaPlus.Metadata;
-using API.DTOs.Recommendation;
-using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -14,7 +12,6 @@ using Flurl.Http;
 using Hangfire;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Bcpg.Sig;
 
 namespace API.Services.Plus;
 

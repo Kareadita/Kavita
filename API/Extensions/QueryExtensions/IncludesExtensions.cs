@@ -271,6 +271,11 @@ public static class IncludesExtensions
             query = query.Include(u => u.ChapterRatings);
         }
 
+        if (includeFlags.HasFlag(AppUserIncludes.AuthKeys))
+        {
+            query = query.Include(u => u.AuthKeys);
+        }
+
         return query.AsSplitQuery();
     }
 

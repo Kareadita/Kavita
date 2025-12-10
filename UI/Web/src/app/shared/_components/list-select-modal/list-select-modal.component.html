@@ -1,0 +1,55 @@
+<ng-container *transloco="let t">
+
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{title()}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('common.close')" (click)="close()"></button>
+  </div>
+
+  <div class="modal-body">
+    @let itemsValue = items();
+    @let filteredItemsValue = filteredItems();
+    @let selectedItemValue = selectedItem();
+    @let descriptionValue = description();
+
+    @if (descriptionValue) {
+      <span class="text-muted"> {{descriptionValue}} </span>
+    }
+
+    <form [formGroup]="filterForm">
+
+      @if (itemsValue.length > itemsBeforeFilter()) {
+        <div class="mb-3">
+          <label for="filter" class="form-label">{{t('filter-label')}}</label>
+          <div class="input-group">
+            <input id="filter" autocomplete="off" class="form-control" formControlName="query" type="text" aria-describedby="reset-input">
+            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="clear()">{{t('common.clear')}}</button>
+          </div>
+        </div>
+      }
+    </form>
+
+    <ul class="list-group mt-4">
+      @for(item of filteredItemsValue; track $index) {
+        <li class="list-group-item clickable" tabindex="0" role="option" (click)="select(item)">
+          <div class="p-2 group-item d-flex justify-content-between align-items-center">
+
+            <div class="fw-bold">{{item.label | sentenceCase}}</div>
+
+            @if (selectedItemValue && selectedItemValue.label === item.label) {
+              <span class="pill p-1 ms-1">{{t('common.selected')}}</span>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+
+  </div>
+
+  @if (showFooter()) {
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.cancel')}}</button>
+      <button type="button" class="btn btn-primary" (click)="confirm()">{{t('common.confirm')}}</button>
+    </div>
+  }
+
+</ng-container>

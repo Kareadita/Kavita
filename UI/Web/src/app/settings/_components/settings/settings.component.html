@@ -7,8 +7,26 @@
     </app-side-nav-companion-bar>
     <div class="container-fluid row col-me-4 pb-3">
 
-      @if (accountService.currentUser$ | async; as user) {
+      @let user = accountService.currentUserSignal();
+      @if (user) {
         @if (accountService.hasAdminRole(user)) {
+
+          @defer (when fragment === SettingsTabId.Activity; prefetch on idle) {
+            @if (fragment === SettingsTabId.Activity) {
+              <div class="col-xxl-6 col-12">
+                <app-server-activity />
+              </div>
+            }
+          }
+
+          @defer (when fragment === SettingsTabId.AdminDevices; prefetch on idle) {
+            @if (fragment === SettingsTabId.AdminDevices) {
+              <div class="col-xxl-12 col-12">
+                <app-server-devices />
+              </div>
+            }
+          }
+
           @defer (when fragment === SettingsTabId.General; prefetch on idle) {
             @if (fragment === SettingsTabId.General) {
               <div class="col-xxl-6 col-12">
@@ -131,7 +149,7 @@
         }
 
         @defer (when fragment === SettingsTabId.Scrobbling; prefetch on idle) {
-          @if(hasActiveLicense && fragment === SettingsTabId.Scrobbling) {
+          @if(hasActiveLicense() && fragment === SettingsTabId.Scrobbling) {
             <div class="scale col-md-12">
               <app-manage-scrobling />
             </div>
@@ -139,7 +157,7 @@
         }
 
         @defer (when fragment === SettingsTabId.Metadata; prefetch on idle) {
-          @if(hasActiveLicense && fragment === SettingsTabId.Metadata) {
+          @if(hasActiveLicense() && fragment === SettingsTabId.Metadata) {
             <div class="scale col-md-12">
               <app-manage-metadata-settings />
             </div>
@@ -147,7 +165,7 @@
         }
 
         @defer (when fragment === SettingsTabId.ScrobblingHolds; prefetch on idle) {
-          @if(hasActiveLicense && fragment === SettingsTabId.ScrobblingHolds) {
+          @if(hasActiveLicense() && fragment === SettingsTabId.ScrobblingHolds) {
             <div class="scale col-md-12">
               <app-user-holds />
             </div>
@@ -195,8 +213,8 @@
 
         @defer (when fragment === SettingsTabId.Clients; prefetch on idle) {
           @if (fragment === SettingsTabId.Clients) {
-            <div class="col-xxl-6 col-12">
-              <app-manage-opds />
+            <div class="scale col-md-12">
+              <app-manage-auth-keys />
             </div>
           }
         }
@@ -251,7 +269,7 @@
 
 
         @defer (when fragment === SettingsTabId.MALStackImport; prefetch on idle) {
-          @if(hasActiveLicense && fragment === SettingsTabId.MALStackImport) {
+          @if(hasActiveLicense() && fragment === SettingsTabId.MALStackImport) {
             <div class="scale col-md-12">
               <app-import-mal-collection />
             </div>

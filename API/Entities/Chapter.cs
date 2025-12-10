@@ -6,6 +6,8 @@ using API.Entities.Interfaces;
 using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
 using API.Entities.Person;
+using API.Entities.Progress;
+using API.Entities.User;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 

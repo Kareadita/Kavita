@@ -1,0 +1,38 @@
+<ng-container *transloco="let t; prefix: 'profile-review-list'">
+  @let data = reviews();
+  <div class="row mx-2">
+
+    @if (isLoading()) {
+      <app-loading />
+    } @else if (data.length === 0) {
+      {{t('no-data')}}
+    } @else {
+      <form [formGroup]="formGroup">
+        <div class="row mb-3">
+          <div class="col-9 ps-0">
+            <label for="review-filter" class="visually-hidden">{{t('filter-label')}}</label>
+            <input id="review-filter" class="form-control" type="text" [placeholder]="t('filter-label')" formControlName="query"/>
+          </div>
+          <div class="col-3 d-flex">
+            <ngx-stars [size]="1" style="margin-top: 4px"
+                       [maxStars]="5" [color]="starColor" (ratingOutput)="updateRating($event)"/>
+            <button class="btn btn-icon ms-1" (click)="resetRating()" style="padding: 0 0 9px;">
+              <i class="fas fa-ban" style="font-size: 0.8rem; color: var(--primary-color)" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('clear-rating-alt')}}</span>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <virtual-scroller #scroll [items]="data" [childHeight]="2"
+                        [parentScroll]="scroll.window" [bufferAmount]="10" [compareItems]="compareReviews">
+        @for (review of scroll.viewPortItems; let index = $index; track trackByReview(index, review)) {
+          <div class="col-md-12">
+            <app-review-list-item [review]="review" />
+            <div class="setting-section-break"></div>
+          </div>
+        }
+      </virtual-scroller>
+    }
+  </div>
+</ng-container>

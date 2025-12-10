@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
 using API.Data;
-using API.DTOs;
 using API.DTOs.Progress;
-using API.Services;
+using API.Services.Reading;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,7 +34,7 @@ public class PanelsController : BaseApiController
     public async Task<ActionResult> SaveProgress(ProgressDto dto, [FromQuery] string apiKey)
     {
         if (string.IsNullOrEmpty(apiKey)) return Unauthorized("ApiKey is required");
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
         await _readerService.SaveReadingProgress(dto, userId);
         return Ok();
     }
@@ -50,7 +49,7 @@ public class PanelsController : BaseApiController
     public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId, [FromQuery] string apiKey)
     {
         if (string.IsNullOrEmpty(apiKey)) return Unauthorized("ApiKey is required");
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
 
         var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, userId);
         if (progress == null) return Ok(new ProgressDto()

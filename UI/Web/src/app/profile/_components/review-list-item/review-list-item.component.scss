@@ -1,0 +1,100 @@
+$image-height: 125px;
+$clamp-lines: 3;
+
+.reading-list-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--card-border-color);
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.progress-banner {
+  height: 5px;
+
+  .progress {
+    color: var(--card-progress-bar-color);
+    background-color: transparent;
+  }
+}
+
+.badge-container {
+  border-radius: 4px;
+  display: block;
+  height: $image-height;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  width: 106px;
+}
+
+.not-read-badge {
+  position: relative;
+  top: -125px;
+  left: 78px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 var(--card-progress-triangle-size) var(--card-progress-triangle-size) 0;
+  border-color: transparent var(--primary-color) transparent transparent;
+}
+
+::ng-deep .read-more-cont div {
+  -webkit-line-clamp: $clamp-lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  display:-webkit-box;
+;
+}
+
+@media (max-width: 576px) {
+  ::ng-deep .read-more-cont div {
+    -webkit-line-clamp: $clamp-lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    display:-webkit-box;
+  ;
+  }
+}
+
+@media (max-width: 800px) {
+  ::ng-deep .read-more-cont div {
+    -webkit-line-clamp: $clamp-lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    display:-webkit-box;
+  ;
+  }
+}
+
+@media (max-width: 768px) {
+  .actions {
+    display:flex;
+    flex-direction: column-reverse;
+    margin-left: 10px;
+
+    .btn-primary {
+      margin-bottom: 10px;
+      margin-left: 0 !important;
+    }
+  }
+}
+
+.review-meta {
+  a { color: var(--link-color); }
+
+  ngx-stars { vertical-align: middle; }
+}
+
+.review-body {
+  margin-top: 4px;
+  color: var(--text-color);
+}
+
+.reading-list-item .actions {
+  display: inline-flex;
+  align-items: center;
+}
+
+.reading-list-item .text-muted small, .reading-list-item .small {
+  font-size: .85rem;
+}

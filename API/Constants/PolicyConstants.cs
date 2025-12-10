@@ -49,5 +49,5 @@ public static class PolicyConstants
 
 
     public static readonly ImmutableArray<string> ValidRoles =
-        ImmutableArray.Create(AdminRole, PlebRole, DownloadRole, ChangePasswordRole, BookmarkRole, ChangeRestrictionRole, LoginRole, ReadOnlyRole, PromoteRole);
+        [AdminRole, PlebRole, DownloadRole, ChangePasswordRole, BookmarkRole, ChangeRestrictionRole, LoginRole, ReadOnlyRole, PromoteRole ];
 }

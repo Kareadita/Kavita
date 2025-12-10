@@ -1,5 +1,4 @@
-﻿using API.Entities;
-using API.Entities.Enums;
+﻿using API.Entities.Enums;
 using API.Services.Plus;
 
 namespace API.DTOs.SeriesDetail;
@@ -37,6 +36,10 @@ public sealed record UserReviewDto
     /// The user who wrote this
     /// </summary>
     public string Username { get; set; }
+    /// <summary>
+    /// UserId of the reviewer, only applicable for <see cref="ScrobbleProvider.Kavita"/>
+    /// </summary>
+    public int UserId { get; set; }
     public int TotalVotes { get; set; }
     public float Rating { get; set; }
     public string? RawBody { get; set; }

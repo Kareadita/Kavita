@@ -271,6 +271,7 @@ export class MetadataService {
   private getAnnotationOptionsForFilterField(field: AnnotationsFilterField): Observable<{value: number, label: string, color?: RgbaColor}[]> {
     switch (field) {
       case AnnotationsFilterField.Owner:
+      case AnnotationsFilterField.LikedBy:
         return this.memberService.getMembers(false).pipe(map(members => members.map(member => {
           return {value: member.id, label: member.username};
         })));

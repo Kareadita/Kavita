@@ -114,7 +114,6 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
     if (this.isListening() || this.accountService.isReadOnly()) return;
 
     this.keyBindService.disabled.set(true);
-    this.document.addEventListener('keydown', this.onKeyDown);
 
     const keydown$ = fromEvent(this.document, 'keydown').pipe(
       tap((e) => this.onKeyDown(e as KeyboardEvent)),

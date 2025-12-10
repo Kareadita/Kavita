@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Entities.Person;
+using API.Entities.User;
 
 namespace API.Extensions.QueryExtensions;
 #nullable enable
@@ -153,7 +152,7 @@ public static class RestrictByAgeExtensions
         return q;
     }
 
-    private static IQueryable<AppUserRating> RestrictAgainstAgeRestriction(this IQueryable<AppUserRating> queryable, AgeRestriction restriction, int userId)
+    public static IQueryable<AppUserRating> RestrictAgainstAgeRestriction(this IQueryable<AppUserRating> queryable, AgeRestriction restriction, int userId)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
         var q = queryable.Where(r => r.Series.Metadata.AgeRating <= restriction.AgeRating || r.AppUserId == userId);
@@ -166,7 +165,7 @@ public static class RestrictByAgeExtensions
         return q;
     }
 
-    private static IQueryable<AppUserChapterRating> RestrictAgainstAgeRestriction(this IQueryable<AppUserChapterRating> queryable, AgeRestriction restriction, int userId)
+    public static IQueryable<AppUserChapterRating> RestrictAgainstAgeRestriction(this IQueryable<AppUserChapterRating> queryable, AgeRestriction restriction, int userId)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
         var q = queryable.Where(r => r.Series.Metadata.AgeRating <= restriction.AgeRating || r.AppUserId == userId);

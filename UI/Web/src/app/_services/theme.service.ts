@@ -1,6 +1,15 @@
 import {DOCUMENT} from '@angular/common';
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, effect, inject, Injectable, Renderer2, RendererFactory2, SecurityContext} from '@angular/core';
+import {
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  Injectable,
+  Renderer2,
+  RendererFactory2,
+  SecurityContext
+} from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ToastrService} from 'ngx-toastr';
 import {map, ReplaySubject, take, tap} from 'rxjs';
@@ -10,7 +19,7 @@ import {NotificationProgressEvent} from '../_models/events/notification-progress
 import {SiteTheme, ThemeProvider} from '../_models/preferences/site-theme';
 import {TextResonse} from '../_types/text-response';
 import {EVENTS, MessageHubService} from './message-hub.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {translate} from "@jsverse/transloco";
 import {DownloadableSiteTheme} from "../_models/theme/downloadable-site-theme";
 import {NgxFileDropEntry} from "ngx-file-drop";
@@ -39,6 +48,8 @@ export class ThemeService {
 
   private currentThemeSource = new ReplaySubject<SiteTheme>(1);
   public currentTheme$ = this.currentThemeSource.asObservable();
+  public currentTheme = toSignal(this.currentTheme$);
+  public chartsColourPalette = computed(() => this.loadChartColours(this.currentTheme()));
 
   private themesSource = new ReplaySubject<SiteTheme[]>(1);
   public themes$ = this.themesSource.asObservable();
@@ -277,5 +288,17 @@ export class ThemeService {
 
   private unsetBookThemes() {
     Array.from(this.document.body.classList).filter(cls => cls.startsWith('brtheme-')).forEach(c => this.document.body.classList.remove(c));
+  }
+
+  private loadChartColours(_: SiteTheme | undefined) {
+     return [
+       '--charts-palette1',
+       '--charts-palette2',
+       '--charts-palette3',
+       '--charts-palette4',
+       '--charts-palette5',
+       '--charts-palette6',
+       '--charts-palette7',
+     ].map(ccsVarName => this.getCssVariable(ccsVarName))
   }
 }

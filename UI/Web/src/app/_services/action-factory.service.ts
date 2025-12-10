@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {map, Observable, shareReplay} from 'rxjs';
 import {Chapter} from '../_models/chapter';
 import {UserCollection} from '../_models/collection-tag';
@@ -13,8 +13,9 @@ import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {translate} from "@jsverse/transloco";
 import {Person} from "../_models/metadata/person";
-import {User} from '../_models/user';
+import {User} from '../_models/user/user';
 import {Annotation} from "../book-reader/_models/annotations/annotation";
+import {ClientDevice} from "../_models/client-device";
 
 export enum Action {
   Submenu = -1,
@@ -178,7 +179,7 @@ export interface ActionItem<T> {
 /**
  * Entities that can be actioned upon
  */
-export type ActionableEntity = Volume | Series | Chapter | ReadingList | UserCollection | Person | Library | SideNavStream | SmartFilter | null;
+export type ActionableEntity = Volume | Series | Chapter | ReadingList | UserCollection | Person | Library | SideNavStream | SmartFilter | ClientDevice | null;
 
 @Injectable({
   providedIn: 'root',
@@ -199,6 +200,7 @@ export class ActionFactoryService {
   private smartFilterActions: Array<ActionItem<SmartFilter>> = [];
   private sideNavHomeActions: Array<ActionItem<void>> = [];
   private annotationActions: Array<ActionItem<Annotation>> = [];
+  private clientDeviceActions: Array<ActionItem<ClientDevice>> = [];
 
   constructor() {
     this.accountService.currentUser$.subscribe((_) => {
@@ -252,6 +254,10 @@ export class ActionFactoryService {
 
   getAnnotationActions(callback: ActionCallback<Annotation>, shouldRenderFunc: ActionShouldRenderFunc<Annotation> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.annotationActions, callback, shouldRenderFunc);
+  }
+
+  getClientDeviceActions(callback: ActionCallback<ClientDevice>, shouldRenderFunc: ActionShouldRenderFunc<ClientDevice> = this.dummyShouldRender) {
+    return this.applyCallbackToList(this.clientDeviceActions, callback, shouldRenderFunc);
   }
 
   dummyCallback(action: ActionItem<any>, entity: any) {}
@@ -1147,6 +1153,27 @@ export class ActionFactoryService {
         requiredRoles: [],
         children: [],
       },
+    ];
+
+    this.clientDeviceActions = [
+      {
+        action: Action.Edit,
+        title: 'edit-device-name',
+        description: '',
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+        requiredRoles: [],
+        children: [],
+      },
+      {
+        action: Action.Delete,
+        title: 'delete',
+        description: '',
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+        requiredRoles: [],
+        children: [],
+      }
     ];
 
 

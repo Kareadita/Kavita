@@ -1,0 +1,35 @@
+/*This is for stats card on Profile/Stats page*/
+
+.stats-card {
+  background: var(--bs-body-bg);
+
+  .stats-title {
+    font-size: 0.875rem;
+    color: var(--text-muted-color); //#8b95a5;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .stats-subtitle {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 2rem;
+  }
+
+  // A note at the bottom, like "Missing genres for X series"
+  .stats-note {
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-subtitle {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .stats-subtitle {
+    font-size: 1rem;
+  }
+}

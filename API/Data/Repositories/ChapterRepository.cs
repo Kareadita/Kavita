@@ -329,6 +329,7 @@ public class ChapterRepository : IChapterRepository
             chapter.PagesRead = progress.PagesRead ;
             chapter.LastReadingProgressUtc = progress.LastModifiedUtc;
             chapter.LastReadingProgress = progress.LastModified;
+            chapter.TotalReads = progress.TotalReads;
         }
         else
         {

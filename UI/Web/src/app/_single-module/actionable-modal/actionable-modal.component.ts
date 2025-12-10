@@ -15,7 +15,7 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ActionableEntity, ActionItem} from "../../_services/action-factory.service";
 import {AccountService} from "../../_services/account.service";
 import {tap} from "rxjs";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({

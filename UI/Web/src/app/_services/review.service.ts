@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import {UserReview} from "../_single-module/review-card/user-review";
+import {inject, Injectable, Signal} from '@angular/core';
+import {UserReview, UserReviewExtended} from "../_models/user-review";
 import {environment} from "../../environments/environment";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpParams, httpResource} from "@angular/common/http";
 import {Rating} from "../_models/rating";
 
 @Injectable({
@@ -51,6 +51,36 @@ export class ReviewService {
     }
 
     return this.httpClient.get<Rating>(this.baseUrl + `rating/overall-series?seriesId=${seriesId}`);
+  }
+
+  getReviewsByUserResource(userId: () => number, filterQuery: () => string | null, rating: () => number | null) {
+    const params = new HttpParams();
+    params.set('userId', userId())
+    if (filterQuery()) {
+      params.set('filterQuery', filterQuery()!);
+    }
+    if (rating()) {
+      params.set('rating', rating()!);
+    }
+
+    return httpResource<UserReviewExtended[]>(() => this.baseUrl + `review/all?${params.toString()}`).asReadonly();
+  }
+
+  getReviewsByUser(userId: number, filterQuery: string | null, rating: number | null) {
+    const paramObject: Record<string, string> = {
+      userId: userId.toString()
+    };
+
+    if (filterQuery) {
+      paramObject.filterQuery = filterQuery;
+    }
+    if (rating !== null) {
+      paramObject.rating = rating.toString();
+    }
+
+    const params = new HttpParams({ fromObject: paramObject });
+
+    return this.httpClient.get<UserReviewExtended[]>(this.baseUrl + 'review/all', { params });
   }
 
 }

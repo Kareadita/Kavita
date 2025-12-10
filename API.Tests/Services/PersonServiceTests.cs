@@ -1,14 +1,11 @@
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data;
 using API.Data.Repositories;
-using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Person;
 using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 

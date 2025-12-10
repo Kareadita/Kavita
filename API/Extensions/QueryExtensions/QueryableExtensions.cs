@@ -5,16 +5,13 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using API.Data.Misc;
 using API.Data.Repositories;
-using API.DTOs;
 using API.DTOs.Annotations;
 using API.DTOs.Filtering;
 using API.DTOs.KavitaPlus.Manage;
-using API.DTOs.Metadata.Browse;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Person;
 using API.Entities.Scrobble;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions;

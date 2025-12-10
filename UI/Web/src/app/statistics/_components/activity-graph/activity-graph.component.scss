@@ -1,0 +1,208 @@
+@use 'theme/variables' as theme;
+
+// Host is like root but scoped only to the component
+:host {
+  --activity-graph-cell-size: 1.2rem;
+  --activity-graph-cell-gap: 4px;
+  --activity-graph-cell-radius: 2px;
+
+  --activity-graph-cell-level-0: #161b22;
+  --activity-graph-cell-level-1: #0e4429;
+  --activity-graph-cell-level-2: #006d32;
+  --activity-graph-cell-level-3: #26a641;
+  --activity-graph-cell-level-4: #39d353;
+
+
+  --activity-graph-cell-hover-outline-color: rgba(240, 246, 252, 0.3);
+  --activity-graph-cell-focus-outline-color: var(--bs-primary);
+  --activity-graph-cell-outline-color: rgba(240, 246, 252, 0.1);
+
+  --activity-graph-text-color: var(--bs-secondary);
+  --activity-graph-font-size: 12px;
+}
+
+.activity-graph-container {
+  padding: 1rem;
+  background: var(--bs-body-bg);
+  border-radius: 0.5rem;
+}
+
+.graph-title {
+  margin-bottom: 1rem;
+}
+
+.graph-wrapper {
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  min-width: 0;
+}
+
+.activity-graph-table {
+  border-spacing: var(--activity-graph-cell-gap);
+  border-collapse: separate;
+  position: relative;
+  width: max-content;
+}
+
+.day-label-column {
+  width: 28px;
+}
+
+.day-label {
+  width: 28px;
+  font-size: var(--activity-graph-font-size);
+  color: var(--activity-graph-text-color);
+  position: relative;
+}
+
+// Month labels
+.month-label {
+  padding: 0 4px;
+  font-size: var(--activity-graph-font-size);
+  color: var(--activity-graph-text-color);
+  text-align: left;
+  position: relative;
+  height: 15px;
+  vertical-align: bottom;
+}
+
+// Activity cells
+.activity-cell,
+.empty-cell {
+  width: var(--activity-graph-cell-size);
+  height: var(--activity-graph-cell-size);
+  outline: 1px solid var(--activity-graph-cell-outline-color);
+  border: none;
+  border-radius: var(--activity-graph-cell-radius);
+  position: relative;
+
+  &:hover {
+    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-hover-outline-color);
+    outline-offset: 1px;
+  }
+
+  &:focus {
+    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-focus-outline-color);
+    outline-offset: 1px;
+  }
+
+}
+
+.empty-cell {
+  background: transparent;
+}
+
+.activity-cell {
+  cursor: pointer;
+  transition: all 0.2s;
+
+
+  &:hover {
+    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-hover-outline-color);
+    outline-offset: 1px;
+  }
+
+  &:focus {
+    outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-focus-outline-color);
+    outline-offset: 1px;
+  }
+}
+
+.activity-level-0 {
+  background-color: var(--activity-graph-cell-level-0);
+}
+
+.activity-level-1 {
+  background-color: var(--activity-graph-cell-level-1);
+}
+
+.activity-level-2 {
+  background-color: var(--activity-graph-cell-level-2);
+}
+
+.activity-level-3 {
+  background-color: var(--activity-graph-cell-level-3);
+}
+
+.activity-level-4 {
+  background-color: var(--activity-graph-cell-level-4);
+}
+
+
+
+// Legend
+.activity-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: var(--activity-graph-font-size);
+  color: var(--activity-graph-text-color);
+}
+
+.legend-cells {
+  display: flex;
+  gap: 3px;
+}
+
+.legend-cell {
+  width: var(--activity-graph-cell-size);
+  height: var(--activity-graph-cell-size);
+  border-radius: 2px;
+}
+
+.legend-label {
+  font-size: 11px;
+}
+
+.activity-tooltip {
+  z-index: 1070;
+  font-size: var(--activity-graph-font-size);
+  max-width: 250px;
+  background: var(--bs-dark);
+
+  .tooltip-header {
+    margin-bottom: 0.25rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--tooltip-outline-color);
+  }
+
+  .tooltip-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .tooltip-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      width: 14px;
+      opacity: 0.8;
+    }
+  }
+}
+
+// TODO: This needs major polish
+@media(max-width: theme.$grid-breakpoints-md) {
+  :host {
+    --activity-graph-cell-size: 11px;
+    --activity-graph-font-size: 10px;
+  }
+}
+@media(max-width: theme.$grid-breakpoints-sm) {
+  :host {
+    --activity-graph-cell-size: 0.8rem;
+    --activity-graph-cell-gap: 2px;
+    --activity-graph-font-size: 10px;
+  }
+}
+@media(max-width: theme.$grid-breakpoints-xs) {
+  :host {
+    --activity-graph-cell-size: 9px;
+    --activity-graph-font-size: 10px;
+  }
+}
+

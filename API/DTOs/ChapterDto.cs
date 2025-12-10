@@ -38,9 +38,14 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public ICollection<MangaFileDto> Files { get; init; } = default!;
     /// <summary>
-    /// Calculated at API time. Number of pages read for this Chapter for logged in user.
+    /// Calculated at API time. Number of pages read for this Chapter for logged-in user.
     /// </summary>
     public int PagesRead { get; set; }
+    /// <summary>
+    /// Total number of complete reads
+    /// </summary>
+    /// <remarks>Calculated at API-time</remarks>
+    public int TotalReads { get; set; }
     /// <summary>
     /// The last time a chapter was read by current authenticated user
     /// </summary>
@@ -152,7 +157,12 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
     public bool LocationLocked { get; set; }
     /// <inheritdoc cref="API.Entities.Chapter.CoverArtistLocked"/>
     public bool CoverArtistLocked { get; set; }
-    public bool ReleaseYearLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.ReleaseDateLocked"/>
+    public bool ReleaseDateLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.TitleNameLocked"/>
+    public bool TitleNameLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Chapter.SortOrderLocked"/>
+    public bool SortOrderLocked { get; set; }
 
     #endregion
 

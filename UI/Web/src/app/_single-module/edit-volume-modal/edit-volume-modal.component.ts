@@ -27,7 +27,7 @@ import {forkJoin} from "rxjs";
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
 import {VolumeService} from "../../_services/volume.service";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 
 enum TabID {
   General = 'general-tab',

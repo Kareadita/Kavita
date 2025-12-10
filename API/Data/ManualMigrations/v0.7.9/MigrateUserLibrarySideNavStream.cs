@@ -1,7 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Repositories;
 using API.Entities;
+using API.Entities.History;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -26,6 +29,7 @@ public static class MigrateUserLibrarySideNavStream
         if (usersWithLibraryStreams)
         {
             logger.LogCritical("Running MigrateUserLibrarySideNavStream migration - complete. Nothing to do");
+            await SaveManualHistoryItem(dataContext);
             return;
         }
 
@@ -53,6 +57,18 @@ public static class MigrateUserLibrarySideNavStream
 
         await unitOfWork.CommitAsync();
 
+        await SaveManualHistoryItem(dataContext);
+
         logger.LogCritical("Running MigrateUserLibrarySideNavStream migration - Completed. This is not an error");
+    }
+
+    private static async Task SaveManualHistoryItem(DataContext context)
+    {
+        var d = new ManualMigrationHistory()
+        {
+            Name = "MigrateUserLibrarySideNavStream",
+        };
+        await context.ManualMigrationHistory.AddAsync(d);
+        await context.SaveChangesAsync();
     }
 }

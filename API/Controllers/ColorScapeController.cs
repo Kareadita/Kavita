@@ -2,7 +2,6 @@
 using API.Data;
 using API.DTOs.Theme;
 using API.Entities.Interfaces;
-using API.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +25,7 @@ public class ColorScapeController : BaseApiController
     [HttpGet("series")]
     public async Task<ActionResult<ColorScapeDto>> GetColorScapeForSeries(int id)
     {
-        var entity = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(id, User.GetUserId());
+        var entity = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(id, UserId);
         return GetColorSpaceDto(entity);
     }
 
@@ -38,7 +37,7 @@ public class ColorScapeController : BaseApiController
     [HttpGet("volume")]
     public async Task<ActionResult<ColorScapeDto>> GetColorScapeForVolume(int id)
     {
-        var entity = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(id, User.GetUserId());
+        var entity = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(id, UserId);
         return GetColorSpaceDto(entity);
     }
 
@@ -50,7 +49,7 @@ public class ColorScapeController : BaseApiController
     [HttpGet("chapter")]
     public async Task<ActionResult<ColorScapeDto>> GetColorScapeForChapter(int id)
     {
-        var entity = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(id, User.GetUserId());
+        var entity = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(id, UserId);
         return GetColorSpaceDto(entity);
     }
 

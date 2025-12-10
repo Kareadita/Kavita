@@ -23,7 +23,7 @@ import {MangaFormat} from 'src/app/_models/manga-format';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {RecentlyAddedItem} from 'src/app/_models/recently-added-item';
 import {Series} from 'src/app/_models/series';
-import {User} from 'src/app/_models/user';
+import {User} from 'src/app/_models/user/user';
 import {Volume} from 'src/app/_models/volume';
 import {AccountService} from 'src/app/_services/account.service';
 import {Action, ActionableEntity, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';

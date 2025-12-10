@@ -1,10 +1,8 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.Extensions;
 using API.Services;
 using API.SignalR;
 using Microsoft.AspNetCore.Authorization;
@@ -34,17 +32,17 @@ public class VolumeController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
-        return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, User.GetUserId()));
+        return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId));
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpDelete]
     public async Task<ActionResult<bool>> DeleteVolume(int volumeId)
     {
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId,
             VolumeIncludes.Chapters | VolumeIncludes.People | VolumeIncludes.Tags);
         if (volume == null)
-            return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
+            return BadRequest(_localizationService.Translate(UserId, "volume-doesnt-exist"));
 
         _unitOfWork.VolumeRepository.Remove(volume);
 
@@ -57,14 +55,14 @@ public class VolumeController : BaseApiController
         return Ok(false);
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("multiple")]
     public async Task<ActionResult<bool>> DeleteMultipleVolumes(int[] volumesIds)
     {
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesById(volumesIds);
         if (volumes.Count != volumesIds.Length)
         {
-            return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
+            return BadRequest(_localizationService.Translate(UserId, "volume-doesnt-exist"));
         }
 
         _unitOfWork.VolumeRepository.Remove(volumes);

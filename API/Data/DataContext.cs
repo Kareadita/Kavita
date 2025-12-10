@@ -4,16 +4,21 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.User;
 using API.Entities.Enums.UserPreferences;
 using API.Entities.History;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
 using API.Entities.Person;
+using API.Entities.Progress;
 using API.Entities.Scrobble;
+using API.Entities.User;
 using API.Extensions;
+using Hangfire.Storage.SQLite.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +47,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ServerSetting> ServerSetting { get; set; } = null!;
     public DbSet<AppUserPreferences> AppUserPreferences { get; set; } = null!;
     public DbSet<SeriesMetadata> SeriesMetadata { get; set; } = null!;
+    public DbSet<SeriesMetadataTag> SeriesMetadataTag { get; set; } = null;
+    public DbSet<GenreSeriesMetadata> GenreSeriesMetadata { get; set; } = null;
     [Obsolete("Use AppUserCollection")]
     public DbSet<CollectionTag> CollectionTag { get; set; } = null!;
     public DbSet<AppUserBookmark> AppUserBookmark { get; set; } = null!;
@@ -83,6 +90,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserReadingProfile> AppUserReadingProfiles { get; set; } = null!;
     public DbSet<AppUserAnnotation> AppUserAnnotation { get; set; } = null!;
     public DbSet<EpubFont> EpubFont { get; set; } = null!;
+    public DbSet<AppUserReadingSession> AppUserReadingSession { get; set; } = null!;
+    public DbSet<AppUserReadingSessionActivityData> AppUserReadingSessionActivityData { get; set; } = null!;
+    public DbSet<AppUserReadingHistory> AppUserReadingHistory { get; set; } = null!;
+    public DbSet<ClientDevice> ClientDevice { get; set; } = null!;
+    public DbSet<ClientDeviceHistory> ClientDeviceHistory { get; set; } = null!;
+    public DbSet<AppUserAuthKey> AppUserAuthKey { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -145,6 +158,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserPreferences>()
             .Property(b => b.ColorScapeEnabled)
             .HasDefaultValue(true);
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.PromptForRereadsAfter)
+            .HasDefaultValue(30);
 
         builder.Entity<Library>()
             .Property(b => b.AllowScrobbling)
@@ -319,10 +335,58 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(new AppUserOpdsPreferences());
 
         builder.Entity<AppUserAnnotation>()
-            .Property(a => a.Likes)
-            .HasJsonConversion(new HashSet<int>())
+            .PrimitiveCollection(a => a.Likes)
+            .HasDefaultValue(new List<int>());
+
+        builder.Entity<AppUserReadingSession>()
+            .Property(b => b.IsActive)
+            .HasDefaultValue(true);
+
+        builder.Entity<AppUserReadingSession>()
+            .HasMany(x => x.ActivityData)
+            .WithOne(a => a.ReadingSession)
+            .HasForeignKey(a => a.AppUserReadingSessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<AppUserReadingSessionActivityData>(e
+            => e.ComplexProperty(d=> d.ClientInfo, b => b.ToJson()));
+
+        builder.Entity<AppUserReadingHistory>()
+            .Property(sm => sm.Data)
+            .HasJsonConversion(new DailyReadingDataDto())
             .HasColumnType("TEXT")
-            .HasDefaultValue(new HashSet<int>());
+            .HasDefaultValue(new DailyReadingDataDto());
+        builder.Entity<AppUserReadingHistory>()
+            .Property(sm => sm.ClientInfoUsed)
+            .HasJsonConversion([])
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new List<ClientInfoData>());
+
+        builder.Entity<ClientDevice>()
+            .Property(sm => sm.CurrentClientInfo)
+            .HasJsonConversion(new ClientInfoData())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new ClientInfoData());
+
+        builder.Entity<ClientDeviceHistory>()
+            .Property(sm => sm.ClientInfo)
+            .HasJsonConversion(new ClientInfoData())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new ClientInfoData());
+
+        builder.Entity<SeriesMetadata>()
+            .HasMany(sm => sm.Tags)
+            .WithMany(t => t.SeriesMetadatas)
+            .UsingEntity<SeriesMetadataTag>();
+
+        builder.Entity<SeriesMetadata>()
+            .HasMany(sm => sm.Genres)
+            .WithMany(t => t.SeriesMetadatas)
+            .UsingEntity<GenreSeriesMetadata>();
+
+        builder.Entity<AppUserAuthKey>()
+            .Property(a => a.Provider)
+            .HasDefaultValue(AuthKeyProvider.User);
     }
 
     #nullable enable

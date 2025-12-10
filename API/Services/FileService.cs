@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.IO.Abstractions;
-using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Unicode;
 using API.Extensions;
 
 namespace API.Services;

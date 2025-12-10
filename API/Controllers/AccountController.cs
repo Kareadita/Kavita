@@ -12,15 +12,20 @@ using API.DTOs.Email;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.User;
+using API.Entities.User;
 using API.Errors;
 using API.Extensions;
+using API.Helpers;
 using API.Helpers.Builders;
+using API.Middleware;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
 using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +55,7 @@ public class AccountController : BaseApiController
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
+    private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -58,7 +64,8 @@ public class AccountController : BaseApiController
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
         IEmailService emailService, IEventHub eventHub,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IAuthenticationSchemeProvider authenticationSchemeProvider)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -70,18 +77,21 @@ public class AccountController : BaseApiController
         _emailService = emailService;
         _eventHub = eventHub;
         _localizationService = localizationService;
+        _authenticationSchemeProvider = authenticationSchemeProvider;
     }
 
     /// <summary>
-    /// Returns true if OIDC authentication cookies are present
+    /// Returns true if OIDC authentication cookies are present and the <see cref="IdentityServiceExtensions.OpenIdConnect"/>
+    /// scheme has been registered
     /// </summary>
     /// <remarks>Makes not guarantee about their validity</remarks>
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("oidc-authenticated")]
-    public ActionResult<bool> OidcAuthenticated()
+    public async Task<ActionResult<bool>> OidcAuthenticated()
     {
-        return HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName);
+        var oidcScheme = await _authenticationSchemeProvider.GetSchemeAsync(IdentityServiceExtensions.OpenIdConnect);
+        return Ok(oidcScheme != null && HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName));
     }
 
     /// <summary>
@@ -94,7 +104,7 @@ public class AccountController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams | AppUserIncludes.AuthKeys);
         if (user == null) throw new UnauthorizedAccessException();
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -118,32 +128,31 @@ public class AccountController : BaseApiController
     /// <param name="resetPasswordDto"></param>
     /// <returns></returns>
     [HttpPost("reset-password")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
     {
         var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName);
         if (user == null) return Ok(); // Don't report BadRequest as that would allow brute forcing to find accounts on system
 
-        _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        _logger.LogInformation("{UserName} is changing {ResetUser}'s password", Username!, resetPasswordDto.UserName.Sanitize());
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
 
-        if (resetPasswordDto.UserName == User.GetUsername() && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || isAdmin))
-            return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (resetPasswordDto.UserName == Username! && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || isAdmin))
+            return Unauthorized(await _localizationService.Translate(UserId, "permission-denied"));
 
-        if (resetPasswordDto.UserName != User.GetUsername() && !isAdmin)
-            return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (resetPasswordDto.UserName != Username! && !isAdmin)
+            return Unauthorized(await _localizationService.Translate(UserId, "permission-denied"));
 
         if (string.IsNullOrEmpty(resetPasswordDto.OldPassword) && !isAdmin)
             return BadRequest(
                 new ApiException(400,
-                    await _localizationService.Translate(User.GetUserId(), "password-required")));
+                    await _localizationService.Translate(UserId, "password-required")));
 
         // If you're an admin and the username isn't yours, you don't need to validate the password
-        var isResettingOtherUser = (resetPasswordDto.UserName != User.GetUsername() && isAdmin);
+        var isResettingOtherUser = (resetPasswordDto.UserName != Username! && isAdmin);
         if (!isResettingOtherUser && !await _userManager.CheckPasswordAsync(user, resetPasswordDto.OldPassword))
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-password"));
+            return BadRequest(await _localizationService.Translate(UserId, "invalid-password"));
         }
 
         var errors = await _accountService.ChangeUserPassword(user, resetPasswordDto.Password);
@@ -205,7 +214,7 @@ public class AccountController : BaseApiController
                 Email = user.Email,
                 Token = await _tokenService.CreateToken(user),
                 RefreshToken = await _tokenService.CreateRefreshToken(user),
-                ApiKey = user.ApiKey,
+                ApiKey = user.GetOpdsAuthKey(),
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
                 KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
             };
@@ -237,13 +246,15 @@ public class AccountController : BaseApiController
         {
             user = await _userManager.Users
                 .Include(u => u.UserPreferences)
+                .Include(u => u.AuthKeys)
                 .AsSplitQuery()
-                .SingleOrDefaultAsync(x => x.ApiKey == loginDto.ApiKey);
+                .SingleOrDefaultAsync(x => x.GetOpdsAuthKey() == loginDto.ApiKey);
         }
         else
         {
             user = await _userManager.Users
                 .Include(u => u.UserPreferences)
+                .Include(u => u.AuthKeys)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpperInvariant());
         }
@@ -287,22 +298,6 @@ public class AccountController : BaseApiController
             }
         }
 
-        // Update LastActive on account
-        try
-        {
-            await _unitOfWork.UserRepository.UpdateUserAsActive(user.Id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
-        }
-
-        // NOTE: This can likely be removed
-        user.UserPreferences ??= new AppUserPreferences
-        {
-            Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
-        };
-
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
 
@@ -313,6 +308,7 @@ public class AccountController : BaseApiController
 
     private async Task<UserDto> ConstructUserDto(AppUser user, IList<string> roles, bool includeTokens = true)
     {
+        // TODO: Clean this up to be streamlined
         var dto = _mapper.Map<UserDto>(user);
 
         if (includeTokens)
@@ -322,13 +318,14 @@ public class AccountController : BaseApiController
         }
 
         dto.Roles = roles;
-        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value;
+        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value; // Why are we getting this from the DB?
 
         var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!);
         if (pref == null) return dto;
 
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
+        dto.AuthKeys = _mapper.Map<List<AuthKeyDto>>(user.AuthKeys);
         return dto;
     }
 
@@ -339,7 +336,7 @@ public class AccountController : BaseApiController
     [HttpGet("refresh-account")]
     public async Task<ActionResult<UserDto>> RefreshAccount()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys);
         if (user == null) return Unauthorized();
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -381,30 +378,6 @@ public class AccountController : BaseApiController
 
 
     /// <summary>
-    /// Resets the API Key assigned with a user
-    /// </summary>
-    /// <remarks>This will log unauthorized requests to Security log</remarks>
-    /// <returns></returns>
-    [HttpPost("reset-api-key")]
-    public async Task<ActionResult<string>> ResetApiKey()
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername()) ?? throw new KavitaUnauthenticatedUserException();
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        user.ApiKey = HashUtil.ApiKey();
-
-        if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
-        {
-            await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
-                MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
-            return Ok(user.ApiKey);
-        }
-
-        await _unitOfWork.RollbackAsync();
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "unable-to-reset-key"));
-    }
-
-
-    /// <summary>
     /// Initiates the flow to update a user's email address.
     ///
     /// If email is not setup, then the email address is not changed in this API. A confirmation link is sent/dumped which will
@@ -413,32 +386,30 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns>Returns just if the email was sent or server isn't reachable</returns>
     [HttpPost("update/email")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<InviteUserResponse>> UpdateEmail(UpdateEmailDto? dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null || User.IsInRole(PolicyConstants.ReadOnlyRole))
-            return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
-        if (dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-payload"));
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+        if (user == null || dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
+            return BadRequest(await _localizationService.Translate(UserId, "invalid-payload"));
 
 
         // Validate this user's password
         if (! await _userManager.CheckPasswordAsync(user, dto.Password))
         {
             _logger.LogWarning("A user tried to change {UserName}'s email, but password didn't validate", user.UserName);
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+            return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         }
 
         // Validate no other users exist with this email
         if (user.Email!.Equals(dto.Email))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+            return BadRequest(await _localizationService.Translate(UserId, "nothing-to-do"));
 
         // Check if email is used by another user
         var existingUserEmail = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
         if (existingUserEmail != null)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "share-multiple-emails"));
+            return BadRequest(await _localizationService.Translate(UserId, "share-multiple-emails"));
         }
 
         // All validations complete, generate a new token and email it to the user at the new address. Confirm email link will update the email
@@ -446,7 +417,7 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(token))
         {
             _logger.LogError("There was an issue generating a token for the email");
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generate-token"));
+            return BadRequest(await _localizationService.Translate(UserId, "generate-token"));
         }
 
         var isValidEmailAddress = _emailService.IsValidEmail(user.Email);
@@ -527,14 +498,14 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update/age-restriction")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateAgeRestriction(UpdateAgeRestrictionDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+        if (user == null) return Unauthorized(await _localizationService.Translate(UserId, "permission-denied"));
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-        if (!await _accountService.CanChangeAgeRestriction(user)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (!await _accountService.CanChangeAgeRestriction(user)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         user.AgeRestriction = isAdmin ? AgeRating.NotApplicable : dto.AgeRating;
         user.AgeRestrictionIncludeUnknowns = isAdmin || dto.IncludeUnknowns;
@@ -549,7 +520,7 @@ public class AccountController : BaseApiController
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an error updating the age restriction");
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "age-restriction-update"));
+            return BadRequest(await _localizationService.Translate(UserId, "age-restriction-update"));
         }
 
         await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
@@ -563,22 +534,22 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     /// <remarks>Users who's <see cref="AppUser.IdentityProvider"/> is not <see cref="IdentityProvider.Kavita"/> cannot be edited if <see cref="OidcConfigDto.SyncUserSettings"/> is true</remarks>
-    [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateAccount(UpdateUserDto dto)
     {
-        var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (adminUser == null) return Unauthorized();
-        if (!await _unitOfWork.UserRepository.IsUserAdminAsync(adminUser)) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+        if (!await _unitOfWork.UserRepository.IsUserAdminAsync(adminUser)) return Unauthorized(await _localizationService.Translate(UserId, "permission-denied"));
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams);
-        if (user == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-user"));
+        if (user == null) return BadRequest(await _localizationService.Translate(UserId, "no-user"));
 
 
         try
         {
-            if (await _accountService.ChangeIdentityProvider(User.GetUserId(), user, dto.IdentityProvider)) return Ok();
+            if (await _accountService.ChangeIdentityProvider(UserId, user, dto.IdentityProvider)) return Ok();
         }
         catch (KavitaException exception)
         {
@@ -590,7 +561,7 @@ public class AccountController : BaseApiController
         {
             // Validate username change
             var errors = await _accountService.ValidateUsername(dto.Username);
-            if (errors.Any()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "username-taken"));
+            if (errors.Any()) return BadRequest(await _localizationService.Translate(UserId, "username-taken"));
             user.UserName = dto.Username;
             await _userManager.UpdateNormalizedUserNameAsync(user);
             _unitOfWork.UserRepository.Update(user);
@@ -602,7 +573,7 @@ public class AccountController : BaseApiController
         {
             // Validate username change
             var errors = await _accountService.ValidateEmail(dto.Email);
-            if (errors.Any()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "email-taken"));
+            if (errors.Any()) return BadRequest(await _localizationService.Translate(UserId, "email-taken"));
 
             user.Email = dto.Email;
             user.EmailConfirmed = true; // When an admin performs the flow, we assume the email address is able to receive data
@@ -676,7 +647,7 @@ public class AccountController : BaseApiController
         }
 
         await _unitOfWork.RollbackAsync();
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-user-update"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-user-update"));
     }
 
     /// <summary>
@@ -685,16 +656,16 @@ public class AccountController : BaseApiController
     /// <param name="userId"></param>
     /// <param name="withBaseUrl">Include the "https://ip:port/" in the generated link</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("invite-url")]
     public async Task<ActionResult<string>> GetInviteUrl(int userId, bool withBaseUrl)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
         if (user.EmailConfirmed)
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-already-confirmed"));
+            return BadRequest(await _localizationService.Translate(UserId, "user-already-confirmed"));
         if (string.IsNullOrEmpty(user.ConfirmationToken))
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "manual-setup-fail"));
+            return BadRequest(await _localizationService.Translate(UserId, "manual-setup-fail"));
 
         return await _emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", user.Email!, withBaseUrl);
     }
@@ -705,11 +676,11 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("invite")]
     public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
     {
-        var userId = User.GetUserId();
+        var userId = UserId;
         var adminUser = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (adminUser == null) return Unauthorized(await _localizationService.Translate(userId, "permission-denied"));
 
@@ -724,8 +695,8 @@ public class AccountController : BaseApiController
         {
             var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
             if (await _userManager.IsEmailConfirmedAsync(invitedUser!))
-                return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-already-registered", invitedUser!.UserName));
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-already-invited"));
+                return BadRequest(await _localizationService.Translate(UserId, "user-already-registered", invitedUser!.UserName));
+            return BadRequest(await _localizationService.Translate(UserId, "user-already-invited"));
         }
 
         // Create a new user
@@ -783,7 +754,7 @@ public class AccountController : BaseApiController
             if (string.IsNullOrEmpty(token))
             {
                 _logger.LogError("There was an issue generating a token for the email");
-                return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-invite-user"));
+                return BadRequest(await _localizationService.Translate(UserId, "generic-invite-user"));
             }
 
             user.ConfirmationToken = token;
@@ -795,7 +766,7 @@ public class AccountController : BaseApiController
             _logger.LogError(ex, "There was an error during invite user flow, unable to create user. Deleting user for retry");
             _unitOfWork.UserRepository.Delete(user);
             await _unitOfWork.CommitAsync();
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-invite-user"));
+            return BadRequest(await _localizationService.Translate(UserId, "generic-invite-user"));
         }
 
         try
@@ -833,7 +804,7 @@ public class AccountController : BaseApiController
             _logger.LogError(ex, "There was an error during invite user flow, unable to send an email");
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-invite-user"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-invite-user"));
     }
 
     /// <summary>
@@ -886,7 +857,7 @@ public class AccountController : BaseApiController
 
 
         user = (await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
-            AppUserIncludes.UserPreferences))!;
+            AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys))!;
 
         // Perform Login code
         return new UserDto
@@ -895,7 +866,7 @@ public class AccountController : BaseApiController
             Email = user.Email!,
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
             KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
         };
@@ -1029,7 +1000,7 @@ public class AccountController : BaseApiController
     [HttpGet("email-confirmed")]
     public async Task<ActionResult<bool>> IsEmailConfirmed()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user == null) return Unauthorized();
 
         return Ok(user.EmailConfirmed);
@@ -1051,7 +1022,7 @@ public class AccountController : BaseApiController
         await _unitOfWork.CommitAsync();
 
         user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName!,
-            AppUserIncludes.UserPreferences);
+            AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys);
 
         // Perform Login code
         return new UserDto
@@ -1060,7 +1031,8 @@ public class AccountController : BaseApiController
             Email = user.Email!,
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
-            ApiKey = user.ApiKey,
+            ApiKey = user.GetOpdsAuthKey(),
+            AuthKeys = _mapper.Map<IList<AuthKeyDto>>(user.AuthKeys),
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
             KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
         };
@@ -1071,7 +1043,7 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("resend-confirmation-email")]
     [EnableRateLimiting("Authentication")]
     public async Task<ActionResult<InviteUserResponse>> ResendConfirmationSendEmail([FromQuery] int userId)
@@ -1115,7 +1087,7 @@ public class AccountController : BaseApiController
         BackgroundJob.Enqueue(() => _emailService.SendInviteEmail(new ConfirmationEmailDto()
         {
             EmailAddress = user.Email!,
-            InvitingUser = User.GetUsername(),
+            InvitingUser = Username!,
             ServerConfirmationLink = emailLink,
             InstallId = serverSettings.InstallId
         }));
@@ -1151,7 +1123,7 @@ public class AccountController : BaseApiController
     [HttpGet("opds-url")]
     public async Task<ActionResult<string>> GetOpdsUrl()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId);
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var origin = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
         if (!string.IsNullOrEmpty(serverSettings.HostName)) origin = serverSettings.HostName;
@@ -1171,7 +1143,13 @@ public class AccountController : BaseApiController
                 baseUrl = baseUrl.Substring(1, baseUrl.Length - 1);
             }
         }
-        return Ok(origin + "/" + baseUrl + "api/opds/" + user!.ApiKey);
+
+        var opdsAuthKey = (await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId))
+            .Where(k => k is {Name: AuthKeyHelper.OpdsKeyName, Provider: AuthKeyProvider.System})
+            .Select(k => k.Key)
+            .FirstOrDefault();
+
+        return Ok(origin + "/" + baseUrl + "api/opds/" + opdsAuthKey);
     }
 
 
@@ -1182,10 +1160,101 @@ public class AccountController : BaseApiController
     [HttpGet("is-email-valid")]
     public async Task<ActionResult<bool>> IsEmailValid()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId);
         if (user == null) return Unauthorized();
         if (string.IsNullOrEmpty(user.Email)) return Ok(false);
 
         return Ok(_emailService.IsValidEmail(user.Email));
+    }
+
+    /// <summary>
+    /// Returns all Auth Keys with the account
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("auth-keys")]
+    public async Task<ActionResult<IList<AuthKeyDto>>> GetAuthKeys()
+    {
+        return Ok(await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId));
+    }
+
+    /// <summary>
+    /// Rotate the Auth Key
+    /// </summary>
+    /// <param name="authKeyId"></param>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("rotate-auth-key")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult<AuthKeyDto>> RotateAuthKey([FromQuery] int authKeyId, RotateAuthKeyRequestDto dto)
+    {
+        var authKey = await _unitOfWork.UserRepository.GetAuthKeyById(authKeyId);
+        if (authKey?.AppUserId != UserId) return BadRequest();
+
+        // Get original expiresAt - createdAt for offset to reset expiresAt
+        if (authKey.ExpiresAtUtc != null)
+        {
+            var originalDuration = authKey.ExpiresAtUtc.Value - authKey.CreatedAtUtc;
+            authKey.ExpiresAtUtc = DateTime.UtcNow.Add(originalDuration);
+        }
+        authKey.Key = AuthKeyHelper.GenerateKey(dto.KeyLength);
+
+        await _unitOfWork.CommitAsync();
+
+        return Ok(_mapper.Map<AuthKeyDto>(authKey));
+    }
+
+    /// <summary>
+    /// Creates a new Auth Key for a user.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("create-auth-key")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult<AuthKeyDto>> CreateAuthKey(RotateAuthKeyRequestDto dto)
+    {
+        // Upper bound check might not be needed, it doesn't *realy* matter if users have bigger keys
+        if (string.IsNullOrEmpty(dto.Name) || dto.KeyLength < 8 || dto.KeyLength > 32)
+        {
+            return BadRequest();
+        }
+
+        // Validate the name doesn't collide
+        var authKeys = await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId);
+        if (authKeys.Any(k => string.Equals(k.Name, dto.Name, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            return BadRequest(await _localizationService.Translate(UserId, "auth-key-unique"));
+        }
+
+        var newKey = new AppUserAuthKey()
+        {
+            Name = dto.Name,
+            Key = AuthKeyHelper.GenerateKey(dto.KeyLength),
+            AppUserId = UserId,
+            CreatedAtUtc = DateTime.UtcNow,
+            ExpiresAtUtc = string.IsNullOrEmpty(dto?.ExpiresUtc) ? null : DateTime.Parse(dto.ExpiresUtc),
+            Provider = AuthKeyProvider.User,
+        };
+        _unitOfWork.UserRepository.Add(newKey);
+        await _unitOfWork.CommitAsync();
+
+        return Ok(_mapper.Map<AuthKeyDto>(newKey));
+    }
+
+    /// <summary>
+    /// Delete the Auth Key
+    /// </summary>
+    /// <param name="authKeyId"></param>
+    /// <returns></returns>
+    [HttpDelete("auth-key")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult> DeleteAuthKey(int authKeyId)
+    {
+        var authKey = await _unitOfWork.UserRepository.GetAuthKeyById(authKeyId);
+        if (authKey?.AppUserId != UserId) return BadRequest();
+        if (authKey.Provider != AuthKeyProvider.User) return BadRequest();
+
+        _unitOfWork.UserRepository.Delete(authKey);
+        await _unitOfWork.CommitAsync();
+        return Ok();
     }
 }

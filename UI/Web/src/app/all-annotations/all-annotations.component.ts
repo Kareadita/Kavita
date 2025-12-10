@@ -36,7 +36,7 @@ import {
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
-import {User} from "../_models/user";
+import {User} from "../_models/user/user";
 import {AccountService} from "../_services/account.service";
 
 @Component({

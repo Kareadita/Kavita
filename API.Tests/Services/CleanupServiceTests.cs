@@ -9,11 +9,13 @@ using API.Data.Repositories;
 using API.DTOs.Filtering;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Progress;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.Services.Tasks;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
@@ -28,7 +30,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
     #region Setup
 
-    private async Task<(ILogger<CleanupService>, IEventHub, IReaderService)> Setup(IUnitOfWork unitOfWork, DataContext context)
+    private Task<(ILogger<CleanupService>, IEventHub, IReaderService)> Setup(IUnitOfWork unitOfWork, DataContext context)
     {
         context.Library.Add(new LibraryBuilder("Manga")
             .WithFolderPath(new FolderPathBuilder(Root + "data/").Build())
@@ -38,9 +40,10 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var messageHub = Substitute.For<IEventHub>();
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>(),
             Substitute.For<IImageService>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()), Substitute.For<IScrobblingService>());
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>());
 
-        return (logger, messageHub, readerService);
+        return Task.FromResult<(ILogger<CleanupService>, IEventHub, IReaderService)>((logger, messageHub, readerService));
     }
 
     #endregion
@@ -261,7 +264,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
-        cleanupService.CleanupCacheAndTempDirectories();
+        await cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
 
@@ -277,7 +280,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cleanupService = new CleanupService(logger, unitOfWork, messageHub, ds);
-        cleanupService.CleanupCacheAndTempDirectories();
+        await cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
 

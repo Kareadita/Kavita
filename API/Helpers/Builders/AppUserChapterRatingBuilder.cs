@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using API.Entities;
+using API.Entities.User;
 
 namespace API.Helpers.Builders;
 

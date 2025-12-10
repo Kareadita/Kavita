@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Scrobbling;
-using API.Entities;
 using API.Entities.Scrobble;
 using API.Extensions.QueryExtensions;
 using API.Helpers;

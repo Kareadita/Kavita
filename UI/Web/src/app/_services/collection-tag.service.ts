@@ -1,11 +1,11 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {inject, Injectable} from '@angular/core';
 import {environment} from 'src/environments/environment';
 import {UserCollection} from '../_models/collection-tag';
 import {TextResonse} from '../_types/text-response';
 import {MalStack} from "../_models/collection/mal-stack";
 import {Action, ActionItem} from "./action-factory.service";
-import {User} from "../_models/user";
+import {User} from "../_models/user/user";
 import {AccountService} from "./account.service";
 
 @Injectable({

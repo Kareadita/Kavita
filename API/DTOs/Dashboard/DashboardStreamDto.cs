@@ -1,6 +1,4 @@
-﻿using API.DTOs.Filtering.v2;
-using API.Entities;
-using API.Entities.Enums;
+﻿using API.Entities.Enums;
 
 namespace API.DTOs.Dashboard;
 

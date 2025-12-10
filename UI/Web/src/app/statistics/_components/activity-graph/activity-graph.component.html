@@ -1,0 +1,120 @@
+<ng-container *transloco="let t; prefix: 'activity-graph'">
+
+  <div class="activity-graph-container stats-card">
+    <h3 class="graph-title d-flex">
+      <span class="stats-title me-2">{{ t('title') }} {{ timeFrameLabel() }}</span>
+    </h3>
+
+    <app-loading [loading]="readingActivityResource.isLoading()" />
+
+    @if (readingActivityResource.hasValue()) {
+      <div class="graph-wrapper" role="region">
+        <table class="activity-graph-table" role="grid" aria-readonly="true">
+          <thead>
+          <tr>
+            <td class="day-label-column">
+              <span class="visually-hidden">{{ t('day-of-week-alt') }}</span>
+            </td>
+            @for (month of months(); track month.label) {
+              <td [attr.colspan]="month.colSpan" class="month-label">
+                <span class="visually-hidden">{{ month.label }}</span>
+                <span aria-hidden="true">{{ month.label }}</span>
+              </td>
+            }
+          </tr>
+          </thead>
+
+          <tbody>
+            @for (dayIndex of [0, 1, 2, 3, 4, 5, 6]; track dayIndex) {
+              <tr>
+                <td class="day-label">
+                  <span class="visually-hidden">{{ dayIndex | dayLabel }}</span>
+                  <span aria-hidden="true"
+                        [class.visually-hidden]="dayIndex % 2">
+                  {{ dayIndex | dayLabel:true }}
+                </span>
+                </td>
+
+                @for (week of weeks(); track $index) {
+                  @let day = week.days[dayIndex];
+                  @if (day && day.totalTimeReadingSeconds > 0) {
+                    <td class="activity-cell"
+                        [class]="getLevelClass(day.level)"
+                        [attr.aria-describedby]="'activity-level-' + day.level"
+                        [ngbTooltip]="tooltip"
+                        container="body"
+                        [tooltipContext]="{'item': day}"
+                        [tooltipClass]="'activity-tooltip'"
+                        role="gridcell"
+                        tabindex="-1">
+                    </td>
+                  } @else if (day !== null) {
+                    <td class="empty-cell"
+                        [ngbTooltip]="noActivityTooltip"
+                        container="body"
+                        [tooltipContext]="{'item': day}"
+                        [tooltipClass]="'activity-tooltip'"
+                    ></td>
+                  } @else {
+                    <td class="empty-cell"></td>
+                  }
+                }
+              </tr>
+            }
+          </tbody>
+
+
+        </table>
+
+        <!-- Legend -->
+        <div class="activity-legend" role="presentation">
+          <span class="legend-label">{{ t('less') }}</span>
+          <div class="legend-cells">
+            @for (level of [0, 1, 2, 3, 4]; track level) {
+              <div class="legend-cell"
+                   [class]="getLevelClass(level)"
+                   [id]="'activity-level-' + level"
+                   [attr.aria-label]="getLevelDescription(level)">
+              </div>
+            }
+          </div>
+          <span class="legend-label">{{ t('more') }}</span>
+        </div>
+      </div>
+
+      <!--TODO: Refactor this to take a template or be useable for multiple people -->
+      <ng-template #noActivityTooltip let-item="item">
+        <div class="activity-tooltip">
+          {{t('no-activity-tooltip', {date: item.date | utcToLocalDate | ordinalDate})}}
+        </div>
+      </ng-template>
+
+      <ng-template #tooltip let-item="item">
+        <div class="activity-tooltip">
+          <div class="tooltip-header">
+            <strong>{{ item.date | utcToLocalDate | date:'MMMM d, yyyy' }}</strong>
+          </div>
+          <div class="tooltip-content">
+            <div class="tooltip-stat">
+              <i class="fa fa-clock" aria-hidden="true"></i>
+              <span>{{ t('reading-time') }}: {{ item.totalTimeReadingSeconds | duration}}</span>
+            </div>
+            <div class="tooltip-stat">
+              <i class="fa fa-file-alt" aria-hidden="true"></i>
+              <span>{{ t('pages') }}: {{ item.totalPages }}</span>
+            </div>
+            <div class="tooltip-stat">
+              <i class="fa fa-font" aria-hidden="true"></i>
+              <span>{{ t('words') }}: {{ item.totalWords | number }}</span>
+            </div>
+            <div class="tooltip-stat">
+              <i class="fa fa-book-open" aria-hidden="true"></i>
+              <span>{{ t('chapters') }}: {{ item.totalChaptersFullyRead }}</span>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    }
+  </div>
+
+</ng-container>

@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Email;
-using API.Entities;
 using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;

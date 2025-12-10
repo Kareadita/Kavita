@@ -1,20 +1,21 @@
   <ng-container *transloco="let t; prefix: 'actionable'">
-    @if (actions.length > 0) {
+    @let labelId = 'actions-' + labelBy();
+    @if (actions().length > 0) {
       @if ((utilityService.activeBreakpoint$ | async)! <= Breakpoint.Tablet) {
-        <button [disabled]="disabled" class="btn {{btnClass}}" id="actions-{{labelBy}}"
+        <button [disabled]="disabled()" class="btn {{btnClass()}}" id="{{labelId}}"
                 (click)="openMobileActionableMenu($event)">
-          {{label}}
-          <i class="fa {{iconClass}}" aria-hidden="true"></i>
+          {{label()}}
+          <i class="fa {{iconClass()}}" aria-hidden="true"></i>
         </button>
       } @else {
         <div ngbDropdown container="body" class="d-inline-block">
-          <button [disabled]="disabled" class="btn {{btnClass}}" id="actions-{{labelBy}}" ngbDropdownToggle
+          <button [disabled]="disabled()" class="btn {{btnClass()}}" id="{{labelId}}" ngbDropdownToggle
                   (click)="preventEvent($event)">
-            {{label}}
-            <i class="fa {{iconClass}}" aria-hidden="true"></i>
+            {{label()}}
+            <i class="fa {{iconClass()}}" aria-hidden="true"></i>
           </button>
-          <div ngbDropdownMenu attr.aria-labelledby="actions-{{labelBy}}">
-            <ng-container *ngTemplateOutlet="submenu; context: { list: actions }" />
+          <div ngbDropdownMenu attr.aria-labelledby="{{labelId}}">
+            <ng-container *ngTemplateOutlet="submenu; context: { list: actions() }" />
           </div>
         </div>
         <ng-template #submenu let-list="list">

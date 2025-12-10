@@ -2,6 +2,9 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import {TranslocoDirective} from "@jsverse/transloco";
 
+/**
+ * Simple loading circle, displays content if loading is false for easy wrapping
+ */
 @Component({
     selector: 'app-loading',
     imports: [TranslocoDirective],

@@ -156,6 +156,14 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     return keybinds.map(keyBind => this.fb.control(keyBind, this.keyBindValidator()));
   }
 
+  trackByKeyBind(index: number, keyBind: KeyBind) {
+    let key = `${index}_${keyBind.key}_ctrl_${keyBind.control}_meta_${keyBind.meta}_alt_${keyBind.alt}_shift_${keyBind.shift}`;
+    if (keyBind.controllerSequence) {
+      key += `controller_${keyBind.controllerSequence.join('_')}`;
+    }
+    return key;
+  }
+
   /**
    * Typed getter for the FormArray of a given target
    * @param key

@@ -14,7 +14,6 @@ using API.Services.Plus;
 using API.SignalR;
 using Kavita.Common;
 using NSubstitute;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -175,7 +174,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task UpdateTag_ShouldThrowException_WhenTagDoesNotExist()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -193,7 +192,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task UpdateTag_ShouldThrowException_WhenUserDoesNotOwnTag()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -216,7 +215,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task UpdateTag_ShouldThrowException_WhenTitleIsEmpty()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -234,7 +233,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task UpdateTag_ShouldThrowException_WhenTitleAlreadyExists()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -252,7 +251,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task UpdateTag_ShouldUpdateCoverImageSettings()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -286,7 +285,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task UpdateTag_ShouldAllowPromoteForAdminRole()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -313,7 +312,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task UpdateTag_ShouldAllowPromoteForPromoteRole()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -341,7 +340,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task UpdateTag_ShouldNotChangePromotion_WhenUserHasNoPermission()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -444,7 +443,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task RemoveTagFromSeries_ShouldHandleEmptySeriesIdsList()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -465,7 +464,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task RemoveTagFromSeries_ShouldHandleNonExistentSeriesIds()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -486,7 +485,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task RemoveTagFromSeries_ShouldHandleNullItemsList()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 
@@ -511,7 +510,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
     [Fact]
     public async Task RemoveTagFromSeries_ShouldUpdateAgeRating_WhenMultipleSeriesRemain()
     {
-        // Arrange
+
         var (unitOfWork, context, _) = await CreateDatabase();
         var service = await Setup(unitOfWork, context);
 

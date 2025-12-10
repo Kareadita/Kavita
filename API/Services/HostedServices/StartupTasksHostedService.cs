@@ -10,18 +10,11 @@ using Microsoft.Extensions.Hosting;
 namespace API.Services.HostedServices;
 #nullable enable
 
-public class StartupTasksHostedService : IHostedService
+public class StartupTasksHostedService(IServiceProvider serviceProvider) : IHostedService
 {
-    private readonly IServiceProvider _provider;
-
-    public StartupTasksHostedService(IServiceProvider serviceProvider)
-    {
-        _provider = serviceProvider;
-    }
-
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var scope = _provider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
 
         var taskScheduler = scope.ServiceProvider.GetRequiredService<ITaskScheduler>();
         await taskScheduler.ScheduleTasks();

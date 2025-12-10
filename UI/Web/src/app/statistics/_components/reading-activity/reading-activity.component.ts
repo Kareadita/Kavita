@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, input, Input, OnInit} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { filter, map, Observable, of, shareReplay, switchMap } from 'rxjs';
 import { Member } from 'src/app/_models/auth/member';
@@ -13,7 +13,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 
-
 @Component({
     selector: 'app-reading-activity',
     templateUrl: './reading-activity.component.html',
@@ -22,16 +21,15 @@ const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
     imports: [ReactiveFormsModule, LineChartModule, AsyncPipe, TranslocoDirective]
 })
 export class ReadingActivityComponent implements OnInit {
-  /**
-   * Only show for one user
-   */
-  @Input() userId: number = 0;
-  @Input() isAdmin: boolean = true;
-  @Input() individualUserMode: boolean = false;
-
   private readonly destroyRef = inject(DestroyRef);
   private readonly statService = inject(StatisticsService);
   private readonly memberService = inject(MemberService);
+
+  @Input() userId: number = 0;
+  @Input() isAdmin: boolean = true;
+  individualUserMode = input<boolean>(false);
+
+
 
   view: [number, number] = [0, 400];
   formGroup: FormGroup = new FormGroup({

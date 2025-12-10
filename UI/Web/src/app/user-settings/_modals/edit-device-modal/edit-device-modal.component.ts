@@ -52,7 +52,7 @@ export class EditDeviceModalComponent implements OnInit {
 
   save() {
     if (this.device !== null) {
-      this.deviceService.updateDevice(this.device.id, this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email)
+      this.deviceService.updateEmailDevice(this.device.id, this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email)
         .subscribe((device) => {
           this.settingsForm.reset();
           this.toastr.success(translate('toasts.device-updated'));
@@ -62,7 +62,7 @@ export class EditDeviceModalComponent implements OnInit {
       return;
     }
 
-    this.deviceService.createDevice(this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email)
+    this.deviceService.createEmailDevice(this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email)
       .subscribe((device) => {
         this.settingsForm.reset();
         this.toastr.success(translate('toasts.device-created'));

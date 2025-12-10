@@ -1,5 +1,5 @@
-import { MangaFormat } from './manga-format';
-import { Volume } from './volume';
+import {MangaFormat} from './manga-format';
+import {Volume} from './volume';
 import {IHasCover} from "./common/i-has-cover";
 import {IHasReadingTime} from "./common/i-has-reading-time";
 import {IHasProgress} from "./common/i-has-progress";
@@ -49,6 +49,10 @@ export interface Series extends IHasCover, IHasReadingTime, IHasProgress {
    */
   lastChapterAdded: string;
   /**
+   * DateTime representing last time a chapter was added to the Series
+   */
+  lastChapterAddedUtc: string;
+  /**
    * DateTime representing last time the series folder was scanned
    */
   lastFolderScanned: string;
@@ -79,4 +83,9 @@ export interface Series extends IHasCover, IHasReadingTime, IHasProgress {
    * Kavita+ only. Did this series not match and won't without manual match
    */
   isBlacklisted: boolean;
+  /**
+   * Min number of reads across all chapters
+   */
+  totalReads: number;
+
 }

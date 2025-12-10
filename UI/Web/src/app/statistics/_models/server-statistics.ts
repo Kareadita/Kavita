@@ -1,7 +1,7 @@
-import { Library } from "src/app/_models/library/library";
-import { Series } from "src/app/_models/series";
-import { User } from "src/app/_models/user";
-import { StatCount } from "./stat-count";
+import {Library} from "src/app/_models/library/library";
+import {Series} from "src/app/_models/series";
+import {User} from "src/app/_models/user/user";
+import {StatCount} from "./stat-count";
 
 export interface ServerStatistics {
     chapterCount: number;

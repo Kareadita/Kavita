@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Entities;
 using API.Entities.Enums;
 using API.Entities.History;
 using API.Services;

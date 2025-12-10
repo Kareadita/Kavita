@@ -4,7 +4,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.History;
 using API.Extensions;
-using API.Helpers.Builders;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

@@ -9,7 +9,6 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Helpers;
 using API.Helpers.Builders;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -18,7 +17,7 @@ namespace API.Tests.Repository;
 public class TagRepositoryTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
 
-    private TestTagSet CreateTestTags()
+    private static TestTagSet CreateTestTags()
     {
         return new TestTagSet
         {

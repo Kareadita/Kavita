@@ -12,9 +12,11 @@ using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.SignalR;
 using Hangfire;
 using Hangfire.InMemory;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -31,7 +33,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
      return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
          Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
          new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-         Substitute.For<IScrobblingService>());
+         Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>());
     }
 
     #region FormatBookmarkFolderPath
@@ -69,9 +71,11 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
         await context.SaveChangesAsync();
 
+        var chapter = await context.Chapter.FirstAsync(cp => cp.Id == 1);
 
-        Assert.Equal(0, (await readerService.CapPageToChapter(1, -1)).Item1);
-        Assert.Equal(1, (await readerService.CapPageToChapter(1, 10)).Item1);
+
+        Assert.Equal(0, readerService.CapPageToChapter(chapter, -1));
+        Assert.Equal(1, readerService.CapPageToChapter(chapter, 10));
     }
 
     #endregion

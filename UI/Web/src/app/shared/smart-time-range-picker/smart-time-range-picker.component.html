@@ -1,0 +1,62 @@
+<div class="dropdown ms-2" [class.show]="isOpen()" *transloco="let t; prefix: 'smart-time-picker'">
+  <button
+    class="btn btn-outline-secondary dropdown-toggle w-100 text-start"
+    type="button"
+    (click)="toggleDropdown()"
+  >
+    <span class="dropdown-display-text">{{ displayText() }}</span>
+  </button>
+
+  @if (isOpen()) {
+    <div class="dropdown-menu show w-100">
+
+      @switch (dropDownMode()) {
+        @case ('all') {
+          <button class="dropdown-item" type="button" (click)="selectForever()">
+            <i class="bi bi-infinity me-2"></i>
+            {{t('forever')}}
+          </button>
+
+          <button class="dropdown-item" type="button" (click)="dropDownMode.set('year')">
+            <i class="bi bi-calendar3 me-2"></i>
+            {{t('select-year')}}
+          </button>
+
+          <button class="dropdown-item" type="button" (click)="dropDownMode.set('date')">
+            <i class="bi bi-calendar3 me-2"></i>
+            {{t('custom-range')}}
+          </button>
+        }
+        @case ('year') {
+          @for (year of yearOptions(); track year) {
+            <button class="dropdown-item" type="button" (click)="setYearRange(year)">
+              {{year}}
+            </button>
+          }
+        }
+        @case ('date') {
+          <form class="px-3 py-2" [formGroup]="formGroup">
+            <div class="mb-2">
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                formControlName="startDate"
+              >
+            </div>
+            <div class="mb-2">
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                formControlName="endDate"
+              >
+            </div>
+          </form>
+        }
+      }
+    </div>
+  }
+</div>
+
+@if (isOpen()) {
+  <div class="dropdown-backdrop" (click)="closeDropdown()"></div>
+}

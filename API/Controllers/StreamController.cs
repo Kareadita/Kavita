@@ -4,10 +4,9 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Dashboard;
 using API.DTOs.SideNav;
-using API.Extensions;
+using API.Middleware;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
@@ -36,7 +35,7 @@ public class StreamController : BaseApiController
     [HttpGet("dashboard")]
     public async Task<ActionResult<IEnumerable<DashboardStreamDto>>> GetDashboardLayout(bool visibleOnly = true)
     {
-        return Ok(await _streamService.GetDashboardStreams(User.GetUserId(), visibleOnly));
+        return Ok(await _streamService.GetDashboardStreams(UserId, visibleOnly));
     }
 
     /// <summary>
@@ -45,7 +44,7 @@ public class StreamController : BaseApiController
     [HttpGet("sidenav")]
     public async Task<ActionResult<IEnumerable<SideNavStreamDto>>> GetSideNav(bool visibleOnly = true)
     {
-        return Ok(await _streamService.GetSidenavStreams(User.GetUserId(), visibleOnly));
+        return Ok(await _streamService.GetSidenavStreams(UserId, visibleOnly));
     }
 
     /// <summary>
@@ -54,7 +53,7 @@ public class StreamController : BaseApiController
     [HttpGet("external-sources")]
     public async Task<ActionResult<IEnumerable<ExternalSourceDto>>> GetExternalSources()
     {
-        return Ok(await _streamService.GetExternalSources(User.GetUserId()));
+        return Ok(await _streamService.GetExternalSources(UserId));
     }
 
     /// <summary>
@@ -66,7 +65,7 @@ public class StreamController : BaseApiController
     public async Task<ActionResult<ExternalSourceDto>> CreateExternalSource(ExternalSourceDto dto)
     {
         // Check if a host and api key exists for the current user
-        return Ok(await _streamService.CreateExternalSource(User.GetUserId(), dto));
+        return Ok(await _streamService.CreateExternalSource(UserId, dto));
     }
 
     /// <summary>
@@ -75,11 +74,11 @@ public class StreamController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-external-source")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<ExternalSourceDto>> UpdateExternalSource(ExternalSourceDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
         // Check if a host and api key exists for the current user
-        return Ok(await _streamService.UpdateExternalSource(User.GetUserId(), dto));
+        return Ok(await _streamService.UpdateExternalSource(UserId, dto));
     }
 
     /// <summary>
@@ -88,10 +87,10 @@ public class StreamController : BaseApiController
     /// <param name="host"></param>
     /// <returns></returns>
     [HttpGet("external-source-exists")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<bool>> ExternalSourceExists(string host, string name, string apiKey)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        return Ok(await _unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(User.GetUserId(), name, host, apiKey));
+        return Ok(await _unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(UserId, name, host, apiKey));
     }
 
     /// <summary>
@@ -100,10 +99,10 @@ public class StreamController : BaseApiController
     /// <param name="externalSourceId"></param>
     /// <returns></returns>
     [HttpDelete("delete-external-source")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> ExternalSourceExists(int externalSourceId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        await _streamService.DeleteExternalSource(User.GetUserId(), externalSourceId);
+        await _streamService.DeleteExternalSource(UserId, externalSourceId);
         return Ok();
     }
 
@@ -114,10 +113,10 @@ public class StreamController : BaseApiController
     /// <param name="smartFilterId"></param>
     /// <returns></returns>
     [HttpPost("add-dashboard-stream")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<DashboardStreamDto>> AddDashboard([FromQuery] int smartFilterId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        return Ok(await _streamService.CreateDashboardStreamFromSmartFilter(User.GetUserId(), smartFilterId));
+        return Ok(await _streamService.CreateDashboardStreamFromSmartFilter(UserId, smartFilterId));
     }
 
     /// <summary>
@@ -126,10 +125,10 @@ public class StreamController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-dashboard-stream")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateDashboardStream(DashboardStreamDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        await _streamService.UpdateDashboardStream(User.GetUserId(), dto);
+        await _streamService.UpdateDashboardStream(UserId, dto);
         return Ok();
     }
 
@@ -139,10 +138,10 @@ public class StreamController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-dashboard-position")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateDashboardStreamPosition(UpdateStreamPositionDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        await _streamService.UpdateDashboardStreamPosition(User.GetUserId(), dto);
+        await _streamService.UpdateDashboardStreamPosition(UserId, dto);
         return Ok();
     }
 
@@ -153,10 +152,10 @@ public class StreamController : BaseApiController
     /// <param name="smartFilterId"></param>
     /// <returns></returns>
     [HttpPost("add-sidenav-stream")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<SideNavStreamDto>> AddSideNav([FromQuery] int smartFilterId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        return Ok(await _streamService.CreateSideNavStreamFromSmartFilter(User.GetUserId(), smartFilterId));
+        return Ok(await _streamService.CreateSideNavStreamFromSmartFilter(UserId, smartFilterId));
     }
 
     /// <summary>
@@ -165,10 +164,10 @@ public class StreamController : BaseApiController
     /// <param name="externalSourceId"></param>
     /// <returns></returns>
     [HttpPost("add-sidenav-stream-from-external-source")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<SideNavStreamDto>> AddSideNavFromExternalSource([FromQuery] int externalSourceId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        return Ok(await _streamService.CreateSideNavStreamFromExternalSource(User.GetUserId(), externalSourceId));
+        return Ok(await _streamService.CreateSideNavStreamFromExternalSource(UserId, externalSourceId));
     }
 
     /// <summary>
@@ -177,10 +176,10 @@ public class StreamController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-sidenav-stream")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateSideNavStream(SideNavStreamDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        await _streamService.UpdateSideNavStream(User.GetUserId(), dto);
+        await _streamService.UpdateSideNavStream(UserId, dto);
         return Ok();
     }
 
@@ -190,18 +189,18 @@ public class StreamController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-sidenav-position")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateSideNavStreamPosition(UpdateStreamPositionDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        await _streamService.UpdateSideNavStreamPosition(User.GetUserId(), dto);
+        await _streamService.UpdateSideNavStreamPosition(UserId, dto);
         return Ok();
     }
 
     [HttpPost("bulk-sidenav-stream-visibility")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> BulkUpdateSideNavStream(BulkUpdateSideNavStreamVisibilityDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        await _streamService.UpdateSideNavStreamBulk(User.GetUserId(), dto);
+        await _streamService.UpdateSideNavStreamBulk(UserId, dto);
         return Ok();
     }
 
@@ -211,10 +210,10 @@ public class StreamController : BaseApiController
     /// <param name="sideNavStreamId"></param>
     /// <returns></returns>
     [HttpDelete("smart-filter-side-nav-stream")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteSmartFilterSideNavStream([FromQuery] int sideNavStreamId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        await _streamService.DeleteSideNavSmartFilterStream(User.GetUserId(), sideNavStreamId);
+        await _streamService.DeleteSideNavSmartFilterStream(UserId, sideNavStreamId);
         return Ok();
     }
 
@@ -224,10 +223,10 @@ public class StreamController : BaseApiController
     /// <param name="dashboardStreamId"></param>
     /// <returns></returns>
     [HttpDelete("smart-filter-dashboard-stream")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteSmartFilterDashboardStream([FromQuery] int dashboardStreamId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-        await _streamService.DeleteDashboardSmartFilterStream(User.GetUserId(), dashboardStreamId);
+        await _streamService.DeleteDashboardSmartFilterStream(UserId, dashboardStreamId);
         return Ok();
     }
 }

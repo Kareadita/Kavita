@@ -61,7 +61,7 @@ export class DashboardComponent implements OnInit {
   private readonly recommendationService = inject(RecommendationService);
   protected readonly accountService = inject(AccountService);
   private readonly libraryService = inject(LibraryService);
-  private readonly seriesService = inject(SeriesService);
+  protected readonly seriesService = inject(SeriesService);
   private readonly router = inject(Router);
   private readonly titleService = inject(Title);
   public readonly imageService = inject(ImageService);
@@ -138,6 +138,13 @@ export class DashboardComponent implements OnInit {
     this.titleService.setTitle('Kavita');
   }
 
+  smartFilterNextPage(stream: DashboardStream) {
+    if (!stream.smartFilterDecoded) return null;
+
+    return (pageNum: number, pageSize: number) => {
+      return this.seriesService.getAllSeriesV2(pageNum, pageSize, stream.smartFilterDecoded, QueryContext.Dashboard);
+    }
+  }
 
   loadDashboard() {
     this.isLoadingDashboard = true;
@@ -150,7 +157,7 @@ export class DashboardComponent implements OnInit {
       this.streams.forEach(s => {
         switch (s.streamType) {
           case StreamType.OnDeck:
-            s.api = this.seriesService.getOnDeck(0, 1, 20)
+            s.api = this.seriesService.getOnDeck(1, 20)
                 .pipe(map(d => d.result), tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.NewlyAdded:
@@ -164,6 +171,7 @@ export class DashboardComponent implements OnInit {
           case StreamType.SmartFilter:
             s.api = this.filterUtilityService.decodeFilter(s.smartFilterEncoded!).pipe(
               switchMap(filter => {
+                s.smartFilterDecoded = filter;
                 return this.seriesService.getAllSeriesV2(0, 20, filter, QueryContext.Dashboard);
               }))
                 .pipe(map(d => d.result),tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));

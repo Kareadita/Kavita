@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using API.DTOs.Recommendation;
 
 namespace API.DTOs.Scrobbling;
 #nullable enable

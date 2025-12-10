@@ -4,11 +4,9 @@ using API.Constants;
 using API.Data;
 using API.DTOs.KavitaPlus.License;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Services;
 using API.Services.Plus;
 using EasyCaching.Core;
-using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -53,7 +51,7 @@ public class LicenseController(
     /// Has any license registered with the instance. Does not validate against Kavita+ API
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("has-license")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasLicense()
@@ -67,7 +65,7 @@ public class LicenseController(
     /// </summary>
     /// <param name="forceCheck">Force checking the API and skip the 8 hour cache</param>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("info")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<LicenseInfoDto?>> GetLicenseInfo(bool forceCheck = false)
@@ -86,7 +84,7 @@ public class LicenseController(
     /// Remove the Kavita+ License on the Server
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpDelete]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult> RemoveLicense()
@@ -103,7 +101,7 @@ public class LicenseController(
     }
 
 
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("reset")]
     public async Task<ActionResult> ResetLicense(UpdateLicenseDto dto)
     {
@@ -114,7 +112,7 @@ public class LicenseController(
             return Ok();
         }
 
-        return BadRequest(localizationService.Translate(User.GetUserId(), "unable-to-reset-k+"));
+        return BadRequest(localizationService.Translate(UserId, "unable-to-reset-k+"));
     }
 
     /// <summary>
@@ -132,7 +130,7 @@ public class LicenseController(
     /// </summary>
     /// <remarks>Caches the result</remarks>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost]
     public async Task<ActionResult> UpdateLicense(UpdateLicenseDto dto)
     {
@@ -143,7 +141,7 @@ public class LicenseController(
         }
         catch (Exception ex)
         {
-            return BadRequest(await localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await localizationService.Translate(UserId, ex.Message));
         }
         return Ok();
     }

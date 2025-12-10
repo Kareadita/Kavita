@@ -1,0 +1,76 @@
+<ng-container *transloco="let t; prefix: 'activity-card'">
+
+  @let activeData = this.session().activityData[0];
+
+  <div class="activity-card">
+    <div class="activity-content">
+      <div class="cover-container">
+        <div class="series-cover">
+          <app-image [imageUrl]="imageService.getSeriesCoverImage(activeData.seriesId)" width="100%" height="100%" [objectFit]="'cover'" />
+        </div>
+        <div class="chapter-cover">
+          <app-image [imageUrl]="imageService.getChapterCoverImage(activeData.chapterId)" />
+        </div>
+      </div>
+
+      <div class="activity-details">
+        <div class="activity-header">
+          <div class="media-info">
+            <span class="badge bg-secondary product-badge">{{ activeData.clientInfo?.platform | clientDevicePlatform }}</span>
+            <span class="badge bg-primary player-badge">{{activeData.clientInfo?.clientType | clientDeviceClientType}}</span>
+            <span class="quality-badge">
+            {{t('pages-count', {num: activeData.pagesRead})}}
+            @if (activeData.wordsRead > 0) {
+              <span> ({{t('words-count', {num: activeData.wordsRead})}})</span>
+            }
+          </span>
+          </div>
+        </div>
+
+        <div class="session-metadata">
+          <div class="metadata-row">
+            <span class="label text-uppercase">{{t('started-label')}}</span>
+            <span class="value">{{activeData.startTimeUtc | utcToLocalDate | timeAgo}}</span>
+          </div>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress" style="height: 4px;">
+            <div class="progress-bar bg-warning"
+                 [style.width.%]="((activeData.startPage + activeData.pagesRead) / activeData.totalPages) * 100"
+                 role="progressbar">
+            </div>
+          </div>
+          <div class="progress-time">
+            <span>{{(activeData.startPage + activeData.pagesRead)}}/{{activeData.totalPages}}</span>
+          </div>
+        </div>
+
+        <div class="title-section">
+          <div class="play-icon">
+            <i class="fas fa-book-open" aria-hidden="true"></i>
+          </div>
+          <div class="title-text">
+            <h5 class="series-title mb-0">
+              <a [routerLink]="['/library', activeData.libraryId, 'series', activeData.seriesId]">{{activeData.seriesName}}</a>
+            </h5>
+            <p class="chapter-info text-muted mb-0">
+              @if (activeData.chapterTitle) {
+                <small>{{activeData.chapterTitle}}</small>
+              } @else {
+                <small><a [routerLink]="['/library', activeData.libraryId, 'series', activeData.seriesId, 'chapter', activeData.chapterId]">{{t('view-label')}}</a></small>
+              }
+              <span class="mx-1">•</span>
+              <small>{{activeData.libraryName}}</small>
+            </p>
+          </div>
+        </div>
+
+        <!-- User Info -->
+        <div class="user-info">
+          <span class="username">{{session().username}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>

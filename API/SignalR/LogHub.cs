@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using API.Extensions;
+using API.Middleware;
 using API.SignalR.Presence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -13,6 +14,7 @@ public interface ILogHub : Serilog.Sinks.AspNetCore.SignalR.Interfaces.IHub
 }
 
 [Authorize]
+[SkipDeviceTracking]
 public class LogHub : Hub<ILogHub>
 {
     private readonly IEventHub _eventHub;

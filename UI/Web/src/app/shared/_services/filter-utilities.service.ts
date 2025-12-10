@@ -181,7 +181,8 @@ export class FilterUtilitiesService {
       case "annotation":
         return [
           AnnotationsFilterField.Owner, AnnotationsFilterField.Library,
-          AnnotationsFilterField.HighlightSlots, AnnotationsFilterField.Series
+          AnnotationsFilterField.HighlightSlots, AnnotationsFilterField.Series,
+          AnnotationsFilterField.LikedBy,
         ] as T[];
       case 'series':
         return [
@@ -225,7 +226,7 @@ export class FilterUtilitiesService {
     switch (type) {
       case "annotation":
         return [
-
+          AnnotationsFilterField.Likes,
         ] as T[];
       case 'series':
         return [

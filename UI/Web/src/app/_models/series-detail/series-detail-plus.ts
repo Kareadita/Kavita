@@ -1,5 +1,5 @@
 import {Recommendation} from "./recommendation";
-import {UserReview} from "../../_single-module/review-card/user-review";
+import {UserReview} from "../user-review";
 import {Rating} from "../rating";
 
 export interface SeriesDetailPlus {

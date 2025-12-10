@@ -1,12 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { StatisticsService } from 'src/app/_services/statistics.service';
-import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
-import { TimeAgoPipe } from '../../../_pipes/time-ago.pipe';
-import { TimeDurationPipe } from '../../../_pipes/time-duration.pipe';
-import { DecimalPipe } from '@angular/common';
-import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
-import {AccountService} from "../../../_services/account.service";
+import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {StatisticsService} from 'src/app/_services/statistics.service';
+import {GenericListModalComponent} from '../_modals/generic-list-modal/generic-list-modal.component';
+import {TimeAgoPipe} from '../../../_pipes/time-ago.pipe';
+import {TimeDurationPipe} from '../../../_pipes/time-duration.pipe';
+import {DecimalPipe} from '@angular/common';
+import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 
@@ -20,7 +19,6 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 export class UserStatsInfoCardsComponent {
   private statsService = inject(StatisticsService);
   private modalService = inject(NgbModal);
-  private accountService = inject(AccountService);
 
 
   @Input() totalPagesRead: number = 0;

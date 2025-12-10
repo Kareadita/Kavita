@@ -23,7 +23,7 @@ import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
-import {User} from "../../../_models/user";
+import {User} from "../../../_models/user/user";
 
 @Component({
     selector: 'app-reading-lists',

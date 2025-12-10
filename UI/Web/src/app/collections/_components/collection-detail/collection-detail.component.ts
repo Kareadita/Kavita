@@ -1,5 +1,16 @@
-import {AsyncPipe, DatePipe, DOCUMENT} from '@angular/common';
-import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, EventEmitter, inject, OnInit, ViewChild } from '@angular/core';
+import {DatePipe, DOCUMENT} from '@angular/common';
+import {
+  AfterContentChecked,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  ElementRef,
+  EventEmitter,
+  inject,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgbModal, NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
@@ -8,7 +19,7 @@ import {debounceTime, take} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {Breakpoint, UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-to-collection-event';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
@@ -38,7 +49,7 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {AccountService} from "../../../_services/account.service";
-import {User} from "../../../_models/user";
+import {User} from "../../../_models/user/user";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
@@ -60,7 +71,7 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, ReadMoreComponent,
     BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip,
-    DatePipe, DefaultDatePipe, ProviderImagePipe, AsyncPipe, ScrobbleProviderNamePipe, PromotedIconComponent]
+    DatePipe, DefaultDatePipe, ProviderImagePipe, ScrobbleProviderNamePipe, PromotedIconComponent]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   private document = inject<Document>(DOCUMENT);

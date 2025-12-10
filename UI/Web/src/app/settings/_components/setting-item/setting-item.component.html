@@ -4,7 +4,7 @@
       <div class="col-auto {{fixedExtras ? 'setting-title no-anim edit' : 'setting-title edit'}}">
         <h6 class="section-title">
           @if (labelId) {
-            <label class="reset-label" [for]="labelId">{{title}}</label>
+            <label [for]="labelId">{{title}}</label>
           } @else {
             {{title}}
           }

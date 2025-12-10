@@ -33,6 +33,7 @@ public interface ICoverDbService
     Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false, bool chooseBetterImage = true);
     Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true, bool chooseBetterImage = false);
     Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true, bool chooseBetterImage = false);
+    Task SetUserCoverByUrl(AppUser user, string url, bool fromBase64 = true, bool chooseBetterImage = false);
 }
 
 
@@ -715,6 +716,47 @@ public class CoverDbService : ICoverDbService
                 MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter),
                 false
             );
+        }
+    }
+
+    public async Task SetUserCoverByUrl(AppUser user, string url, bool fromBase64 = true, bool chooseBetterImage = false)
+    {
+        if (!string.IsNullOrEmpty(url))
+        {
+            var tempDir = _directoryService.TempDirectory;
+            var finalFileName = ImageService.GetUserFormat(user.Id) + ".webp";
+            var tempFileName = ImageService.GetUserFormat(user.Id) + "_new";
+            var finalFullPath = Path.Combine(_directoryService.CoverImageDirectory, finalFileName);
+
+            // This is writing the image to CoverDirectory
+            var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDir);
+
+            if (!string.IsNullOrEmpty(tempFilePath))
+            {
+                var tempFullPath = Path.Combine(tempDir, tempFilePath);
+
+
+                _directoryService.CopyFile(tempFullPath, finalFullPath);
+                _directoryService.DeleteFiles([tempFullPath]);
+
+                user.CoverImage = finalFileName;
+                _unitOfWork.UserRepository.Update(user);
+                _imageService.UpdateColorScape(user);
+                _unitOfWork.UserRepository.Update(user);
+            }
+        }
+        else
+        {
+            user.CoverImage = string.Empty;
+            _imageService.UpdateColorScape(user);
+            _unitOfWork.UserRepository.Update(user);
+        }
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                MessageFactory.CoverUpdateEvent(user.Id, MessageFactoryEntityTypes.User), false);
         }
     }
 

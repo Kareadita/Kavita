@@ -5,6 +5,7 @@ using API.DTOs.Progress;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services.Reading;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 

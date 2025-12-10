@@ -1,0 +1,14 @@
+.clickable:hover, .clickable:focus {
+  background-color: var(--list-group-hover-bg-color, var(--primary-color));
+}
+
+.pill {
+  font-size: .8rem;
+  background-color: var(--card-bg-color);
+  border-radius: 0.375rem;
+  color: var(--badge-text-color);
+
+  &.active {
+    background-color : var(--primary-color);
+  }
+}

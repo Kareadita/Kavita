@@ -24,7 +24,8 @@
                                    [libraryType]="libraryType"
                                    [mangaFormat]="series.format"
                                    [totalBytes]="size"
-                                   [releaseYear]="(chapter.releaseDate | utcToLocaleDate)?.getFullYear()"
+                                   [releaseYear]="(chapter.releaseDate | utcToLocalDate)?.getFullYear()"
+                                   [totalReads]="chapter.totalReads"
           />
 
 
@@ -45,8 +46,8 @@
                 <div class="btn-group">
                   <button type="button" class="btn btn-outline-primary" (click)="read()">
                   <span>
-                <i class="fa {{chapter.pagesRead > 0 ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
-                <span class="read-btn--text">&nbsp;{{(chapter.pagesRead > 0) ? t('continue') : t('read')}}</span>
+                <i class="fa {{chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                <span class="read-btn--text">&nbsp;{{readingProgressStatus | readingProgressStatusPipe}}</span>
               </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
@@ -55,7 +56,7 @@
                       <button ngbDropdownItem (click)="read(true)">
                       <span>
                         <i class="fa fa-glasses" aria-hidden="true"></i>
-                        <span class="read-btn--text">&nbsp;{{(chapter.pagesRead > 0) ? t('continue-incognito') : t('read-incognito')}}</span>
+                        <span class="read-btn--text">&nbsp;{{readingProgressStatus | readingProgressStatusPipe:true}}</span>
                       </span>
                       </button>
                     </div>

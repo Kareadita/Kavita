@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using API.DTOs.KavitaPlus.Metadata;
 
 namespace API.DTOs;

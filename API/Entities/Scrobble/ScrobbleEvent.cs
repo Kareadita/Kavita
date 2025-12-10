@@ -1,7 +1,6 @@
 ﻿using System;
 using API.DTOs.Scrobbling;
 using API.Entities.Interfaces;
-using API.Services;
 
 namespace API.Entities.Scrobble;
 #nullable enable

@@ -1,0 +1,44 @@
+<ng-container *transloco="let t; prefix: 'server-devices'">
+
+
+  <!-- High level stats here -->
+  <!--Average connections per week, X different platforms, X different clientTypes,
+  Peak Connection Hours - When are users most active (from CapturedAt timestamps)
+  Screen Resolution Distribution - Common viewport sizes for optimization
+  Mobile vs Desktop Ratio - Overall usage pattern
+  -->
+
+  <!--Client Type Breakdown - Percentage distribution (Web App vs OPDS vs KOReader, etc.)-->
+  <div class="row">
+    <div class="col-md-6 col-sm-12" style="height: 300px">
+      <h4>{{t('client-devices-this-month-header')}}</h4>
+      @if (clientDevices().length === 0) {
+        <span>{{t('no-data')}}</span>
+      } @else {
+        <app-pie-chart [data]="clientDeviceTypeBreakdown()" [valueTransformer]="clientDeviceClientTypeTransformer.bind(this)" />
+      }
+    </div>
+    <div class="col-md-6 col-sm-12" style="height: 300px">
+      <h4>{{t('client-devices-mobile-vs-pc-header')}}</h4>
+      @if (clientDevices().length === 0) {
+        <span>{{t('no-data')}}</span>
+      } @else {
+        <app-pie-chart [data]="mobileVsDesktop()" [valueTransformer]="clientDeviceTypeTransformer.bind(this)" />
+      }
+    </div>
+  </div>
+
+
+  <div class="setting-section-break"></div>
+
+  <h3 class="my-3">{{t('client-devices-header')}}</h3>
+  <div class="row">
+    @for(clientDevice of clientDevices(); track clientDevice) {
+      <div class="col-md-6 col-sm-12 mb-4">
+        <app-client-device-card [clientDevice]="clientDevice" (deviceDeleted)="deviceDeleted($event)" (refresh)="loadDevices()" />
+      </div>
+    } @empty {
+      <app-loading/>
+    }
+  </div>
+</ng-container>

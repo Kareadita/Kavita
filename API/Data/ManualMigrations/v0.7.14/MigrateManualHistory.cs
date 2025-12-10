@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using API.Entities;
 using API.Entities.History;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

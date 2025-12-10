@@ -1,8 +1,6 @@
 ﻿using System.Linq;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.Data;
 using API.SignalR.Presence;
 using Microsoft.AspNetCore.SignalR;
 

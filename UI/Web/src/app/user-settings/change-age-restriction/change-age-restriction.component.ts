@@ -11,7 +11,7 @@ import {ToastrService} from 'ngx-toastr';
 import {map, Observable, of, shareReplay, take} from 'rxjs';
 import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
 import {AgeRating} from 'src/app/_models/metadata/age-rating';
-import {User} from 'src/app/_models/user';
+import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AgeRatingPipe} from '../../_pipes/age-rating.pipe';

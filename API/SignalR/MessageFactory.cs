@@ -13,9 +13,10 @@ public static class MessageFactoryEntityTypes
     public const string Series = "series";
     public const string Volume = "volume";
     public const string Chapter = "chapter";
-    public const string CollectionTag = "collection";
+    public const string Collection = "collection";
     public const string ReadingList = "readingList";
     public const string Person = "person";
+    public const string User = "user";
 }
 public static class MessageFactory
 {
@@ -161,6 +162,10 @@ public static class MessageFactory
     /// Annotation is updated within the reader
     /// </summary>
     public const string AnnotationUpdate = "AnnotationUpdate";
+    /// <summary>
+    /// A Session is closing
+    /// </summary>
+    public const string SessionClose = "SessionClose";
 
 
 
@@ -719,6 +724,18 @@ public static class MessageFactory
             {
                 Annotation = dto
             },
+        };
+    }
+
+    public static SignalRMessage SessionCloseEvent(int sessionId)
+    {
+        return new SignalRMessage()
+        {
+            Name = SessionClose,
+            Body = new
+            {
+                SessionId = sessionId
+            }
         };
     }
 }

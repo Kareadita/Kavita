@@ -1,0 +1,36 @@
+<ng-container *transloco="let t; prefix: 'avg-time-reading-by-hour'">
+
+  <div class="card stats-card p-4">
+
+    <h4 class="stats-title">{{t('title')}}</h4>
+
+    @let mostTimeSpendReadingValue = mostTimeSpentReading();
+    @if (mostTimeSpendReadingValue !== null) {
+      <h6 class="stats-subtitle">{{t('most-time-spend-reading', {
+        name: userName(),
+        startHour: startHourLocalized(),
+        endHour: endHourLocalized(),
+        amount: mostTimeSpendReadingValue.count
+      })}}</h6>
+    } @else if (!timeByHourResource().isLoading())  {
+      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+    }
+
+    @if (timeByHourResource().isLoading()) {
+      <app-loading [loading]="true" />
+    }
+
+    <app-bar-chart
+      [axisLabels]="axisLabels()"
+      [data]="data()"
+      [yAxisMax]="60"
+      [showLabels]="false"
+      [toolTipFormatter]="labelFormatter"
+      [showToolTips]="true"
+      labelPosition="insideTop"
+    />
+
+    <span class="stats-note text-muted">{{t('data-since', {date: dataSince() | utcToLocalTime:'shortDate' })}}</span>
+  </div>
+
+</ng-container>

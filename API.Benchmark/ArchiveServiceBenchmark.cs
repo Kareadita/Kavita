@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using API.Services;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
-using EasyCaching.Core;
 using NSubstitute;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;

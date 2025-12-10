@@ -1,0 +1,60 @@
+<ng-container *transloco="let t; prefix:'profile-image'">
+  <div class="profile-image-wrapper">
+    <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mt-2"
+         [class.drop-zone-active]="isImageUploadMode()">
+
+      <div class="person-badge">
+        @let image = currentImageUrl();
+        @if (image && accountService.currentUserSignal()?.coverImage) {
+          <app-image objectFit="cover"
+                     [styles]="{'object-position': 'top'}"
+                     height="200px"
+                     width="200px"
+                     [imageUrl]="image"
+                     [errorImage]="imageService.noPersonImage" />
+        } @else {
+          <div class="d-flex align-items-center justify-content-center">
+            <i class="fa-solid fa-user-circle align-self-center" style="font-size: 13rem" aria-hidden="true"></i>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (canDeleteImage()) {
+      <button class="btn btn-icon reset-button"
+              (click)="restProfileImage()"
+              [attr.aria-label]="t('reset-image-alt')">
+
+        <i class="fa-solid fa-times remove-button" aria-hidden="true"></i>
+
+        <span class="visually-hidden">{{t('reset-image-alt')}}</span>
+      </button>
+    }
+
+    @if (showEditButton() && canUploadImage()) {
+      <button class="btn btn-icon edit-button"
+              (click)="openFileSelector()"
+              [disabled]="uploadInProgress()"
+              [attr.aria-label]="t('edit-image-alt')">
+
+        @if (uploadInProgress()) {
+          <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+        } @else {
+          <i class="fa-solid fa-pen-alt" aria-hidden="true"></i>
+        }
+
+        <span class="visually-hidden">{{t('edit-image-alt')}}</span>
+      </button>
+    }
+
+    <!-- Hidden file input for direct file selection -->
+    <input #fileInput
+           type="file"
+           [accept]="acceptableExtensions"
+           (change)="handleFileInput($event)"
+           class="d-none"
+           aria-hidden="true">
+
+
+  </div>
+</ng-container>

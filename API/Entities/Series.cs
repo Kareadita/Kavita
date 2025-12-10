@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
+using API.Entities.Progress;
 
 namespace API.Entities;
 

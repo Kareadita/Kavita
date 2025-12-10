@@ -27,7 +27,7 @@ import {
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 import {AccountService} from "../../_services/account.service";
 import {debounceTime, distinctUntilChanged, tap} from "rxjs/operators";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";

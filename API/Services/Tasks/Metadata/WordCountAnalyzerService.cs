@@ -6,6 +6,7 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
+using API.Services.Reading;
 using API.SignalR;
 using Hangfire;
 using HtmlAgilityPack;
@@ -32,19 +33,17 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly ICacheHelper _cacheHelper;
-    private readonly IReaderService _readerService;
     private readonly IMediaErrorService _mediaErrorService;
 
     public const int AverageCharactersPerWord = 5;
 
     public WordCountAnalyzerService(ILogger<WordCountAnalyzerService> logger, IUnitOfWork unitOfWork, IEventHub eventHub,
-        ICacheHelper cacheHelper, IReaderService readerService, IMediaErrorService mediaErrorService)
+        ICacheHelper cacheHelper, IMediaErrorService mediaErrorService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _cacheHelper = cacheHelper;
-        _readerService = readerService;
         _mediaErrorService = mediaErrorService;
     }
 
@@ -179,6 +178,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                         var pageCounter = 1;
                         try
                         {
+                            // TODO: Replace with BookService method, we will loose progress but these tasks are usually fast
                             using var book = await EpubReader.OpenBookAsync(filePath, BookService.LenientBookReaderOptions);
 
                             var totalPages = book.Content.Html.Local;
@@ -213,7 +213,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                     volume.WordCount += sum;
                 }
 
-                var est = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
+                var est = ReaderService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
                 chapter.MinHoursToRead = est.MinHours;
                 chapter.MaxHoursToRead = est.MaxHours;
                 chapter.AvgHoursToRead = est.AvgHours;
@@ -225,7 +225,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 _unitOfWork.ChapterRepository.Update(chapter);
             }
 
-            var volumeEst = _readerService.GetTimeEstimate(volume.WordCount, volume.Pages, isEpub);
+            var volumeEst = ReaderService.GetTimeEstimate(volume.WordCount, volume.Pages, isEpub);
             volume.MinHoursToRead = volumeEst.MinHours;
             volume.MaxHoursToRead = volumeEst.MaxHours;
             volume.AvgHoursToRead = volumeEst.AvgHours;
@@ -234,7 +234,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         }
 
         if (series.WordCount == 0 && existingWordCount != 0) series.WordCount = existingWordCount; // Restore original word count if the file hasn't changed
-        var seriesEstimate = _readerService.GetTimeEstimate(series.WordCount, series.Pages, isEpub);
+        var seriesEstimate = ReaderService.GetTimeEstimate(series.WordCount, series.Pages, isEpub);
         series.MinHoursToRead = seriesEstimate.MinHours;
         series.MaxHoursToRead = seriesEstimate.MaxHours;
         series.AvgHoursToRead = seriesEstimate.AvgHours;

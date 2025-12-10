@@ -1,0 +1,75 @@
+<ng-container *transloco="let t; prefix: 'profile'">
+  @let user = memberInfo();
+  @let username = user.username | titlecase;
+
+  @if (user) {
+
+    <div class="main-container container-fluid pt-2 pb-2 mb-2 ms-md-2 me-md-2 w-auto"
+          [class.has-bg]="backgroundImage()"
+          [style.--profile-bg]="backgroundImage() ? 'url(' + backgroundImage() + ')' : null">
+      <div class="row mb-0 mb-xl-3 info-container align-items-center justify-content-center justify-content-lg-start">
+        <div class="col-auto d-flex justify-content-center justify-content-lg-start">
+          <app-profile-image [userId]="user.id" />
+        </div>
+
+        <div class="col-xl-7 col-lg-7 col-md-12 col-xs-12 col-sm-12 mt-2 text-center text-lg-start">
+          <div class="d-flex flex-column flex-lg-row align-items-center">
+            <h1 class="mb-0 me-2">{{username}}</h1>
+            <div class="badges d-flex align-items-center mt-2 mt-lg-0">
+              <span class="badge reads-badge me-2">
+                <app-loading [loading]="totalReadsResource.isLoading()" size="spinner-border-sm">
+                  {{t('total-reads-badge', {reads: totalReads() | compactNumber})}}
+                </app-loading>
+              </span>
+
+              @if (licenseService.hasValidLicenseSignal()) {
+                <span class="badge kplus-badge">{{t('k+-badge')}}</span>
+              }
+
+            </div>
+          </div>
+
+          <div class="joined-label small mt-2">
+            {{t('joined-label', {date: user.createdUtc | utcToLocalDate | timeAgo})}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="carousel-tabs-container mb-2 ms-md-2 me-md-2 w-auto">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="true" (navChange)="onNavChange($event)">
+
+        <li [ngbNavItem]="TabID.Overview">
+          <a ngbNavLink>{{t(TabID.Overview)}}</a>
+          <ng-template ngbNavContent>
+            @defer (when activeTabId === TabID.Overview; prefetch on idle) {
+              <app-profile-overview [memberInfo]="memberInfo()" />
+            }
+          </ng-template>
+        </li>
+
+        <li [ngbNavItem]="TabID.Stats">
+          <a ngbNavLink>{{t(TabID.Stats)}}</a>
+          <ng-template ngbNavContent>
+            @defer (when activeTabId === TabID.Stats; prefetch on idle) {
+              <app-profile-stats [userId]="memberInfo().id" [username]="username" />
+            }
+          </ng-template>
+
+
+        <li [ngbNavItem]="TabID.Reviews">
+          <a ngbNavLink>{{t(TabID.Reviews)}}</a>
+          <ng-template ngbNavContent>
+            @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
+              <app-profile-review-list [memberInfo]="user" />
+            }
+          </ng-template>
+        </li>
+      </ul>
+    </div>
+
+    <div [ngbNavOutlet]="nav" class="pt-2 m-2 ms-md-2 me-md-2 w-auto"></div>
+  }
+
+
+</ng-container>

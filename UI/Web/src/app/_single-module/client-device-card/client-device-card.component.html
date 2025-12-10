@@ -1,0 +1,91 @@
+<ng-container *transloco="let t; prefix: 'client-device-card'">
+  <form [formGroup]="deviceForm">
+    <div class="card client-device-card">
+      <div class="card-body">
+        <!-- Header Section -->
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div class="flex-grow-1">
+            <h5 class="card-title d-flex align-items-center mb-1">
+              <i [class]="deviceIcon()"></i>
+              @if (isEditMode()) {
+                <input [id]="'client-device-' + clientDevice().id" class="form-control flex-grow-1 ms-2" style="width: 80%" type="text" formControlName="name" />
+                <button class="btn btn-sm btn-primary ms-1" (click)="saveName()">{{t('save')}}</button>
+              } @else {
+                <span class="ms-2">
+                  {{clientDevice().friendlyName}}
+                </span>
+              }
+            </h5>
+            <div class="text-muted small">
+              <span class="badge" [class]="clientTypeBadgeClass()">
+                {{clientDevice().currentClientInfo.clientType | clientDeviceClientType}}
+              </span>
+              <span class="ms-2 badge bg-secondary" [title]="t('auth-type-label')">
+                {{clientDevice().currentClientInfo.authType | clientDeviceAuthType}}
+              </span>
+              <span class="ms-2">{{clientDevice().ownerUsername}}</span>
+              <!--TODO: I'm not happy with how ip address renders out-->
+<!--              <span class="ms-1">-->
+<!--                <i class="fa-solid fa-network-wired" aria-hidden="true"></i>-->
+<!--                {{ ipAddress() | defaultValue }}-->
+<!--              </span>-->
+            </div>
+          </div>
+          <div class="text-end">
+            <app-card-actionables [inputActions]="actions()" [entity]="clientDevice()" />
+          </div>
+        </div>
+
+        <!-- Device Info Section -->
+        <div class="row g-2 mb-3">
+          <div class="col-sm-6">
+            <div class="info-item">
+              <i class="{{browserIcon()}} me-1" aria-hidden="true"></i>
+              <span class="text-muted small">{{ t('browser-label') }}:</span>
+              <span class="ms-1">{{browserInfo() | defaultValue}}</span>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="info-item">
+              <i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>
+              <span class="text-muted small">{{ t('platform-label') }}:</span>
+              <span class="ms-1">{{clientDevice().currentClientInfo.platform | clientDevicePlatform}}</span>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="info-item">
+              <i class="fa-solid fa-display me-1" aria-hidden="true"></i>
+              <span class="text-muted small">{{ t('screen-label') }}:</span>
+              <span class="ms-1">{{screenInfo() | defaultValue}}</span>
+            </div>
+          </div>
+          @if (clientDevice().currentClientInfo.appVersion) {
+            <div class="col-sm-6">
+              <div class="info-item">
+                <i class="fa-solid fa-code-commit me-1" aria-hidden="true"></i>
+                <span class="text-muted small">{{ t('version-label') }}:</span>
+                <span class="ms-1">{{clientDevice().currentClientInfo.appVersion}}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Activity Section -->
+        <div class="border-top pt-3">
+          <div class="row g-2 small text-muted">
+            <div class="col-sm-6">
+              <i class="fa-regular fa-calendar me-1" aria-hidden="true"></i>
+              <span>{{ t('first-seen-label') }}:</span>
+              <span class="ms-1">{{clientDevice().firstSeenUtc | utcToLocalTime: 'shortDate' | defaultDate}}</span>
+            </div>
+            <div class="col-sm-6">
+              <i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
+              <span>{{ t('last-seen-label') }}:</span>
+              <span class="ms-1">{{clientDevice().lastSeenUtc | utcToLocalDate | timeAgo | sentenceCase}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</ng-container>

@@ -14,7 +14,7 @@ export class ReaderModeIconPipe implements PipeTransform {
       case ReaderMode.UpDown:
         return 'fa-exchange-alt fa-rotate-90';
       case ReaderMode.Webtoon:
-        return 'fa-arrows-alt-v';
+        return 'fa-arrows-up-down';
       default:
         return '';
     }

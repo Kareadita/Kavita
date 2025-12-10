@@ -1,15 +1,11 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {SeriesService} from 'src/app/_services/series.service';
-import {UserReview} from "../review-card/user-review";
+import {UserReview} from "../../_models/user-review";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmService} from "../../shared/confirm.service";
 import {ToastrService} from "ngx-toastr";
-import {ChapterService} from "../../_services/chapter.service";
-import {of} from "rxjs";
 import {NgxStarsModule} from "ngx-stars";
-import {ThemeService} from "../../_services/theme.service";
 import {ReviewService} from "../../_services/review.service";
 
 export enum ReviewModalCloseAction {

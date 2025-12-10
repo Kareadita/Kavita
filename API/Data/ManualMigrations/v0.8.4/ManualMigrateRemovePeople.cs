@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using API.Entities;
 using API.Entities.History;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;

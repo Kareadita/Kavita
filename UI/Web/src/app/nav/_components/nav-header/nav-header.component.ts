@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   HostListener,
@@ -50,6 +51,8 @@ import {MetadataService} from "../../../_services/metadata.service";
 import {Annotation} from "../../../book-reader/_models/annotations/annotation";
 import {QuillViewComponent} from "ngx-quill";
 import {AnnotationService} from "../../../_services/annotation.service";
+import {ProfileImageComponent} from "../../../profile/_components/profile-image/profile-image.component";
+import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile-icon.component";
 
 @Component({
   selector: 'app-nav-header',
@@ -58,7 +61,7 @@ import {AnnotationService} from "../../../_services/annotation.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, GroupedTypeaheadComponent, ImageComponent,
     SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    AsyncPipe, SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent]
+    AsyncPipe, SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileImageComponent, ProfileIconComponent]
 })
 export class NavHeaderComponent implements OnInit {
 
@@ -85,6 +88,10 @@ export class NavHeaderComponent implements OnInit {
   protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('search') searchViewRef!: any;
+
+  profileLink = computed(() => {
+    return `/profile/${this.accountService.currentUserSignal()?.id ?? ''}`
+  })
 
 
   isLoading = false;

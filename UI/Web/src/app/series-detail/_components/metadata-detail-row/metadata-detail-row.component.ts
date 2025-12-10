@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, Input} from '@angular/core';
 import {AgeRatingImageComponent} from "../../../_single-module/age-rating-image/age-rating-image.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
@@ -17,11 +17,11 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {MangaFormat} from "../../../_models/manga-format";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
-import {PublisherFlipperComponent} from "../../../_single-module/publisher-flipper/publisher-flipper.component";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
+import {AccountService} from "../../../_services/account.service";
 
 @Component({
-    selector: 'app-metadata-detail-row',
+  selector: 'app-metadata-detail-row',
   imports: [
     AgeRatingImageComponent,
     CompactNumberPipe,
@@ -31,33 +31,40 @@ import {BytesPipe} from "../../../_pipes/bytes.pipe";
     TranslocoDirective,
     ImageComponent,
     SeriesFormatComponent,
-    PublisherFlipperComponent,
     BytesPipe
   ],
-    templateUrl: './metadata-detail-row.component.html',
-    styleUrl: './metadata-detail-row.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  standalone: true,
+  templateUrl: './metadata-detail-row.component.html',
+  styleUrl: './metadata-detail-row.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataDetailRowComponent {
   protected readonly imageService = inject(ImageService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly accountService = inject(AccountService);
 
-  protected readonly LibraryType = LibraryType;
-  protected readonly FilterField = FilterField;
-  protected readonly MangaFormat = MangaFormat;
+  entity = input.required<IHasCast>();
+  readingTimeEntity = input.required<IHasReadingTime>();
+  hasReadingProgress = input<boolean>(false);
+  readingTimeLeft = input<HourEstimateRange | null>(null);
+  ageRating = input<AgeRating>(AgeRating.Unknown);
+  libraryType = input.required<LibraryType>();
+  mangaFormat = input.required<MangaFormat>();
+  releaseYear = input<number | undefined>(undefined);
+  totalBytes = input<number | undefined>(undefined);
+  totalReads = input(0);
 
-  @Input({required: true}) entity!: IHasCast;
-  @Input({required: true}) readingTimeEntity!: IHasReadingTime;
-  @Input({required: true}) hasReadingProgress: boolean = false;
-  @Input() readingTimeLeft: HourEstimateRange | null = null;
-  @Input({required: true}) ageRating: AgeRating = AgeRating.Unknown;
-  @Input({required: true}) libraryType!: LibraryType;
-  @Input({required: true}) mangaFormat!: MangaFormat;
-  @Input() releaseYear: number | undefined;
-  @Input() totalBytes: number | undefined;
+  hasDownloadRole = computed(() => {
+    const user = this.accountService.currentUserSignal();
+    return user && this.accountService.hasDownloadRole(user);
+  });
 
   openGeneric(queryParamName: FilterField, filter: string | number) {
     if (queryParamName === FilterField.None) return;
     this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter}`).subscribe();
   }
+
+  protected readonly LibraryType = LibraryType;
+  protected readonly FilterField = FilterField;
+  protected readonly MangaFormat = MangaFormat;
 }

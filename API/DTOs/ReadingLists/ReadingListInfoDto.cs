@@ -1,5 +1,4 @@
-﻿using API.DTOs.Reader;
-using API.Entities.Interfaces;
+﻿using API.Entities.Interfaces;
 
 namespace API.DTOs.ReadingLists;
 

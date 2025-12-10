@@ -1,5 +1,4 @@
 ﻿using API.Entities;
-using API.Entities.Enums;
 
 namespace API.DTOs.SideNav;
 #nullable enable

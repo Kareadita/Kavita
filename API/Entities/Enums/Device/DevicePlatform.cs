@@ -2,7 +2,7 @@
 
 namespace API.Entities.Enums.Device;
 
-public enum DevicePlatform
+public enum EmailDevicePlatform
 {
     [Description("Custom")]
     Custom = 0,

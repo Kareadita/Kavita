@@ -1,8 +1,17 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, inject, Input, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Input,
+  ViewChild,
+  ViewContainerRef,
+  ViewEncapsulation
+} from '@angular/core';
 import {DOCUMENT, NgOptimizedImage} from '@angular/common';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReactiveFormsModule} from "@angular/forms";
-import {UserReview} from "../review-card/user-review";
+import {UserReview} from "../../_models/user-review";
 import {SpoilerComponent} from "../spoiler/spoiler.component";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";

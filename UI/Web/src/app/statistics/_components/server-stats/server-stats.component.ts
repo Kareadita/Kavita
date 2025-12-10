@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject} from '@angular/core';
 import {Router} from '@angular/router';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {map, Observable, ReplaySubject, shareReplay} from 'rxjs';
@@ -11,7 +11,7 @@ import {StatisticsService} from 'src/app/_services/statistics.service';
 import {PieDataItem} from '../../_models/pie-data-item';
 import {ServerStatistics} from '../../_models/server-statistics';
 import {GenericListModalComponent} from '../_modals/generic-list-modal/generic-list-modal.component';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {BytesPipe} from '../../../_pipes/bytes.pipe';
 import {TimeDurationPipe} from '../../../_pipes/time-duration.pipe';
 import {CompactNumberPipe} from '../../../_pipes/compact-number.pipe';
@@ -22,18 +22,24 @@ import {FileBreakdownStatsComponent} from '../file-breakdown-stats/file-breakdow
 import {TopReadersComponent} from '../top-readers/top-readers.component';
 import {StatListComponent} from '../stat-list/stat-list.component';
 import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
-import { AsyncPipe, DecimalPipe } from '@angular/common';
+import {AsyncPipe, DecimalPipe} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {AccountService} from "../../../_services/account.service";
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {
+  LibraryAndTimeFilterGroup,
+  LibraryAndTimeSelectorComponent
+} from "../library-and-time-selector/library-and-time-selector.component";
+import {StatsFilter} from "../../_models/stats-filter";
 
 @Component({
     selector: 'app-server-stats',
     templateUrl: './server-stats.component.html',
     styleUrls: ['./server-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective]
+  imports: [IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective, ReactiveFormsModule, LibraryAndTimeSelectorComponent]
 })
 export class ServerStatsComponent {
   private statService = inject(StatisticsService);
@@ -47,6 +53,21 @@ export class ServerStatsComponent {
 
   private readonly destroyRef = inject(DestroyRef);
   protected readonly accountService = inject(AccountService);
+
+  filterForm = new FormGroup<LibraryAndTimeFilterGroup>({
+    timeFilter: new FormGroup({
+      startDate: new FormControl<Date | null>(null),
+      endDate: new FormControl<Date | null>(null),
+    }),
+    libraries: new FormControl<number[]>([], { nonNullable: true }),
+  });
+
+  userId = computed(() => this.accountService.currentUserSignal()?.id);
+
+  filter = toSignal(this.filterForm.valueChanges.pipe(
+    map(value => value as StatsFilter),
+  ));
+  year = computed(() => this.filter()?.timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
 
   releaseYears$!: Observable<Array<PieDataItem>>;
   mostActiveUsers$!: Observable<Array<PieDataItem>>;

@@ -22,9 +22,9 @@ import {
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
 import {BookService} from 'src/app/book-reader/_services/book.service';
-import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter} from 'src/app/_models/chapter';
-import {User} from 'src/app/_models/user';
+import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {NavService} from 'src/app/_services/nav.service';
 import {CHAPTER_ID_DOESNT_EXIST, ReaderService} from 'src/app/_services/reader.service';
@@ -40,7 +40,6 @@ import {PdfSpreadMode} from "../../../_models/preferences/pdf-spread-mode";
 import {SpreadType} from "node_modules/ngx-extended-pdf-viewer/lib/options/spread-type";
 import {PdfScrollModeTypePipe} from "../../_pipe/pdf-scroll-mode.pipe";
 import {PdfSpreadTypePipe} from "../../_pipe/pdf-spread-mode.pipe";
-import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {KeyBindService} from "../../../_services/key-bind.service";
@@ -65,7 +64,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly accountService = inject(AccountService);
-  private readonly readingProfileService = inject(ReadingProfileService);
   public readonly readerService = inject(ReaderService);
   public readonly utilityService = inject(UtilityService);
   public readonly destroyRef = inject(DestroyRef);
@@ -294,7 +292,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
       if (this.currentPage >= this.maxPages) {
         this.currentPage = this.maxPages - 1;
-        this.saveProgress();
+        // Don't save progress on first load to avoid session creation, wait for a page change event
       }
       this.cdRef.markForCheck();
     });

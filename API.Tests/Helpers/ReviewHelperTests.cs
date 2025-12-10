@@ -13,7 +13,7 @@ public class ReviewHelperTests
     [Fact]
     public void SelectSpectrumOfReviews_WhenLessThan10Reviews_ReturnsAllReviews()
     {
-        // Arrange
+
         var reviews = CreateReviewList(8);
 
         // Act
@@ -27,7 +27,7 @@ public class ReviewHelperTests
     [Fact]
     public void SelectSpectrumOfReviews_WhenMoreThan10Reviews_Returns10Reviews()
     {
-        // Arrange
+
         var reviews = CreateReviewList(20);
 
         // Act
@@ -42,7 +42,7 @@ public class ReviewHelperTests
     [Fact]
     public void SelectSpectrumOfReviews_WithExactly10Reviews_ReturnsAllReviews()
     {
-        // Arrange
+
         var reviews = CreateReviewList(10);
 
         // Act
@@ -55,7 +55,7 @@ public class ReviewHelperTests
     [Fact]
     public void SelectSpectrumOfReviews_WithLargeNumberOfReviews_ReturnsCorrectSpectrum()
     {
-        // Arrange
+
         var reviews = CreateReviewList(100);
 
         // Act
@@ -72,7 +72,7 @@ public class ReviewHelperTests
     [Fact]
     public void SelectSpectrumOfReviews_WithEmptyList_ReturnsEmptyList()
     {
-        // Arrange
+
         var reviews = new List<UserReviewDto>();
 
         // Act
@@ -85,7 +85,7 @@ public class ReviewHelperTests
     [Fact]
     public void SelectSpectrumOfReviews_ResultsOrderedByScoreDescending()
     {
-        // Arrange
+
         var reviews = new List<UserReviewDto>
         {
             new UserReviewDto { Tagline = "1", Score = 3 },
@@ -114,7 +114,7 @@ public class ReviewHelperTests
     [Fact]
     public void GetCharacters_WithNullBody_ReturnsNull()
     {
-        // Arrange
+
         string body = null;
 
         // Act
@@ -127,7 +127,7 @@ public class ReviewHelperTests
     [Fact]
     public void GetCharacters_WithEmptyBody_ReturnsEmptyString()
     {
-        // Arrange
+
         var body = string.Empty;
 
         // Act
@@ -140,7 +140,7 @@ public class ReviewHelperTests
     [Fact]
     public void GetCharacters_WithNoTextNodes_ReturnsEmptyString()
     {
-        // Arrange
+
         const string body = "<div></div>";
 
         // Act
@@ -153,7 +153,7 @@ public class ReviewHelperTests
     [Fact]
     public void GetCharacters_WithLessCharactersThanLimit_ReturnsFullText()
     {
-        // Arrange
+
         var body = "<p>This is a short review.</p>";
 
         // Act
@@ -166,7 +166,7 @@ public class ReviewHelperTests
     [Fact]
     public void GetCharacters_WithMoreCharactersThanLimit_TruncatesText()
     {
-        // Arrange
+
         var body = "<p>" + new string('a', 200) + "</p>";
 
         // Act
@@ -180,7 +180,7 @@ public class ReviewHelperTests
     [Fact]
     public void GetCharacters_IgnoresScriptTags()
     {
-        // Arrange
+
         const string body = "<p>Visible text</p><script>console.log('hidden');</script>";
 
         // Act
@@ -194,7 +194,7 @@ public class ReviewHelperTests
     [Fact]
     public void GetCharacters_RemovesMarkdownSymbols()
     {
-        // Arrange
+
         const string body = "<p>This is **bold** and _italic_ text with [link](url).</p>";
 
         // Act
@@ -207,7 +207,7 @@ public class ReviewHelperTests
     [Fact]
     public void GetCharacters_HandlesComplexMarkdownAndHtml()
     {
-        // Arrange
+
         const string body = """
 
                                         <div>

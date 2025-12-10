@@ -6,8 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.XPath;
 using API.Data.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
@@ -52,7 +50,7 @@ public interface IBookService
     /// <returns></returns>
     Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book);
     /// <summary>
-    /// Extracts a PDF file's pages as images to an target directory
+    /// Extracts a PDF file's pages as images to a target directory
     /// </summary>
     /// <remarks>This method relies on Docnet which has explicit patches from Kavita for ARM support. This should only be used with Tachiyomi</remarks>
     /// <param name="fileFilePath"></param>
@@ -62,6 +60,7 @@ public interface IBookService
     Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations);
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
     Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath);
+    Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, string endXpath);
     Task<string> CopyImageToTempFromBook(int chapterId, BookmarkDto bookmarkDto, string cachedBookPath);
     Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey);
 
@@ -950,20 +949,10 @@ public partial class BookService : IBookService
                 var content = await contentFileRef.ReadContentAsync();
                 doc.LoadHtml(content);
 
-                var body = doc.DocumentNode.SelectSingleNode("//body");
-
-                if (body == null)
-                {
-                    _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
-                    doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
-                    body = doc.DocumentNode.SelectSingleNode("//html/body");
-                }
+                var body = GetBodyOrCreate(doc, book);
 
                 // Find all words in the html body
-                // TEMP: REfactor this to use WordCountAnalyzerService
-                var textNodes = body!.SelectNodes("//text()[not(parent::script)]");
-                ret.Add(page, textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) ?? 0);
-
+                ret.Add(page, CountLettersInBody(body));
             }
 
         }
@@ -974,6 +963,209 @@ public partial class BookService : IBookService
         }
 
         return ret;
+    }
+
+    private HtmlNode GetBodyOrCreate(HtmlDocument doc, EpubBookRef book)
+    {
+        var body = doc.DocumentNode.SelectSingleNode("//body");
+
+        if (body == null)
+        {
+            _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
+            doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
+            body = doc.DocumentNode.SelectSingleNode("//html/body");
+        }
+
+        return body;
+    }
+
+    private static int CountLettersUpToNode(HtmlNode root, HtmlNode targetNode)
+    {
+        var letterCount = 0;
+        var foundTarget = false;
+
+        TraverseNodes(root);
+        return letterCount;
+
+        void TraverseNodes(HtmlNode node)
+        {
+            if (foundTarget) return;
+
+            if (node == targetNode)
+            {
+                foundTarget = true;
+                return;
+            }
+
+            // If it's a text node and not inside a script tag
+            if (node.NodeType == HtmlNodeType.Text && node.ParentNode?.Name != "script")
+            {
+                letterCount += node.InnerText.Count(char.IsLetter);
+            }
+
+            // Traverse children
+            foreach (var child in node.ChildNodes)
+            {
+                TraverseNodes(child);
+                if (foundTarget) return;
+            }
+        }
+    }
+
+
+    #region Count Letters Between XPaths
+    /// <summary>
+    /// Counts the (estimated) words for a given book from a starting xpath (or beginning if null) to and ending xpath.
+    /// May cross page boundaries
+    /// </summary>
+    /// <param name="bookFilePath"></param>
+    /// <param name="startXpath"></param>
+    /// <param name="endXpath"></param>
+    /// <returns></returns>
+    public async Task<int> GetWordCountBetweenXPaths(string bookFilePath, string? startXpath, string endXpath)
+    {
+        if (string.IsNullOrEmpty(endXpath)) return 0;
+
+        var totalCharacters = 0;
+        var foundStart = string.IsNullOrEmpty(startXpath); // If no start, begin counting immediately
+        var foundEnd = false;
+
+        try
+        {
+            using var book = await EpubReader.OpenBookAsync(bookFilePath, LenientBookReaderOptions);
+            var doc = new HtmlDocument { OptionFixNestedTags = true };
+
+            var bookPages = await book.GetReadingOrderAsync();
+
+            foreach (var contentFileRef in bookPages)
+            {
+                if (foundEnd) break; // Stop processing once we've found the end
+
+                var content = await contentFileRef.ReadContentAsync();
+                doc.LoadHtml(content);
+
+                var body = GetBodyOrCreate(doc, book);
+
+                var startNode = string.IsNullOrEmpty(startXpath) ? null : body.SelectSingleNode(startXpath);
+                var endNode = body.SelectSingleNode(endXpath);
+
+                // Case 1: Both start and end are on the same page
+                if (startNode != null && endNode != null)
+                {
+                    totalCharacters += CountLettersBetweenNodes(body, startNode, endNode);
+                    foundEnd = true;
+                    break;
+                }
+
+                // Case 2: Found start node - begin counting from this point to end of page
+                if (startNode != null)
+                {
+                    foundStart = true;
+                    totalCharacters += CountLettersFromNode(body, startNode);
+                    continue;
+                }
+
+                // Case 3: Found end node - count from beginning of page up to this point and stop
+                if (endNode != null && foundStart)
+                {
+                    foundEnd = true;
+                    totalCharacters += CountLettersUpToNode(body, endNode);
+                    break;
+                }
+
+                // Case 4: Between start and end - count entire page
+                if (foundStart && !foundEnd)
+                {
+                    totalCharacters += CountLettersInBody(body);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue calculating word counts between XPaths");
+            return 0;
+        }
+
+        return WordCountAnalyzerService.GetWordCount(totalCharacters);
+    }
+
+    /// <summary>
+    /// Counts letters from a starting node to the end of the container
+    /// </summary>
+    private static int CountLettersFromNode(HtmlNode container, HtmlNode startNode)
+    {
+        var letterCount = 0;
+        var countingStarted = false;
+
+        TraverseNodes(container);
+        return letterCount;
+
+        void TraverseNodes(HtmlNode node)
+        {
+            if (node == startNode)
+            {
+                countingStarted = true;
+                // Don't return here - we want to start counting from this node onwards
+            }
+
+            if (countingStarted && node.NodeType == HtmlNodeType.Text && node.ParentNode?.Name != "script")
+            {
+                letterCount += node.InnerText.Count(char.IsLetter);
+            }
+
+            foreach (var child in node.ChildNodes)
+            {
+                TraverseNodes(child);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Counts letters between two nodes in the same container
+    /// </summary>
+    private static int CountLettersBetweenNodes(HtmlNode container, HtmlNode startNode, HtmlNode endNode)
+    {
+        var letterCount = 0;
+        var countingStarted = false;
+        var foundEnd = false;
+
+        TraverseNodes(container);
+        return letterCount;
+
+        void TraverseNodes(HtmlNode node)
+        {
+            if (foundEnd) return;
+
+            if (node == startNode)
+            {
+                countingStarted = true;
+                return; // Start counting after this node
+            }
+
+            if (node == endNode)
+            {
+                foundEnd = true;
+                return;
+            }
+
+            if (countingStarted && node.NodeType == HtmlNodeType.Text && node.ParentNode?.Name != "script")
+            {
+                letterCount += node.InnerText.Count(char.IsLetter);
+            }
+
+            foreach (var child in node.ChildNodes)
+            {
+                TraverseNodes(child);
+            }
+        }
+    }
+    #endregion
+
+
+    private static int CountLettersInBody(HtmlNode body)
+    {
+        var textNodes = body.SelectNodes("//text()[not(parent::script)]");
+        return textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) ?? 0;
     }
 
     public async Task<string> CopyImageToTempFromBook(int chapterId, BookmarkDto bookmarkDto, string cachedBookPath)
@@ -1496,6 +1688,8 @@ public partial class BookService : IBookService
                 content = EscapeTags(content);
 
                 doc.LoadHtml(content);
+
+
                 var body = doc.DocumentNode.SelectSingleNode("//body");
 
                 if (body == null)

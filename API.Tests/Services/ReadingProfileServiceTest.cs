@@ -12,7 +12,6 @@ using AutoMapper;
 using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.History;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -11,18 +14,12 @@ namespace API.Data.ManualMigrations;
 /// <summary>
 /// Introduced in v0.7.11 with the removal of .Kavitaignore files
 /// </summary>
-public static class MigrateLibrariesToHaveAllFileTypes
+public class MigrateLibrariesToHaveAllFileTypes : ManualMigration
 {
-    public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
+    protected override string MigrationName => nameof(MigrateLibrariesToHaveAllFileTypes);
+    protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
     {
-        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateLibrariesToHaveAllFileTypes"))
-        {
-            return;
-        }
-
-        logger.LogCritical("Running MigrateLibrariesToHaveAllFileTypes migration - Please be patient, this may take some time. This is not an error");
-
-        var allLibs = await dataContext.Library
+        var allLibs = await context.Library
             .Include(l => l.LibraryFileTypes)
             .Where(library => library.LibraryFileTypes.Count == 0)
             .ToListAsync();
@@ -66,15 +63,12 @@ public static class MigrateLibrariesToHaveAllFileTypes
                         FileTypeGroup = FileTypeGroup.Images
                     });
                     break;
-                default:
-                    break;
             }
         }
 
-        if (unitOfWork.HasChanges())
+        if (context.ChangeTracker.HasChanges())
         {
-            await dataContext.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
-        logger.LogCritical("Running MigrateLibrariesToHaveAllFileTypes migration - Completed. This is not an error");
     }
 }

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
@@ -12,8 +11,8 @@ using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Flurl.Http;
 using Kavita.Common;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 
 namespace API.Services.Tasks;
 
@@ -242,8 +241,8 @@ public class FontService: IFontService
         try
         {
             content = await url
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
+                .WithHeader(HeaderNames.Accept, "application/json")
+                .WithHeader(HeaderNames.UserAgent, "Kavita")
                 .GetStringAsync();
         } catch (Exception ex)
         {

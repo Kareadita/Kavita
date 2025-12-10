@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using API.DTOs.Filtering.v2;
-using API.DTOs.Reader;
 using API.Entities;
 using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
@@ -128,5 +126,62 @@ public static class AnnotationFilter
             _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
         };
     }
+
+    public static IQueryable<AppUserAnnotation> HasLikes(this IQueryable<AppUserAnnotation> queryable, bool condition,
+        FilterComparison comparison, int value)
+    {
+        if (!condition) return queryable;
+
+        return comparison switch
+        {
+            FilterComparison.Equal => queryable.Where(a => a.Likes.Count == value),
+            FilterComparison.NotEqual => queryable.Where(a => a.Likes.Count != value),
+            FilterComparison.GreaterThan => queryable.Where(a => a.Likes.Count > value),
+            FilterComparison.GreaterThanEqual => queryable.Where(a => a.Likes.Count >= value),
+            FilterComparison.LessThan => queryable.Where(a => a.Likes.Count < value),
+            FilterComparison.LessThanEqual => queryable.Where(a => a.Likes.Count <= value),
+            FilterComparison.BeginsWith or
+            FilterComparison.EndsWith or
+            FilterComparison.Matches or
+            FilterComparison.Contains or
+            FilterComparison.MustContains or
+            FilterComparison.NotContains or
+            FilterComparison.IsBefore or
+            FilterComparison.IsAfter or
+            FilterComparison.IsInLast or
+            FilterComparison.IsNotInLast or
+            FilterComparison.IsEmpty => throw new KavitaException($"{comparison} is not applicable for Annotation.Likes"),
+            _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
+        };
+    }
+
+    public static IQueryable<AppUserAnnotation> IsLikedBy(this IQueryable<AppUserAnnotation> queryable, bool condition,
+        FilterComparison comparison, IList<int> value)
+    {
+        if (value.Count == 0 || !condition) return queryable;
+
+        return comparison switch
+        {
+            FilterComparison.Equal => queryable.Where(a => a.Likes.Contains(value[0])),
+            FilterComparison.NotEqual => queryable.Where(a => a!.Likes.Contains(value[0])),
+            FilterComparison.Contains => queryable.Where(a => a.Likes.Any(value.Contains)),
+            FilterComparison.NotContains => queryable.Where(a => !a.Likes.Any(value.Contains)),
+            FilterComparison.GreaterThan or
+            FilterComparison.GreaterThanEqual or
+            FilterComparison.LessThan or
+            FilterComparison.LessThanEqual or
+            FilterComparison.BeginsWith or
+            FilterComparison.EndsWith or
+            FilterComparison.Matches or
+            FilterComparison.MustContains or
+            FilterComparison.IsBefore or
+            FilterComparison.IsAfter or
+            FilterComparison.IsInLast or
+            FilterComparison.IsNotInLast or
+            FilterComparison.IsEmpty => throw new KavitaException($"{comparison} is not applicable for Annotation.Likes"),
+            _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
+        };
+    }
+
 
 }

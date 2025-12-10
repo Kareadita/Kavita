@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using System;
 using System.Threading.Tasks;
 using API.Extensions;
 using API.Services;
@@ -17,7 +16,6 @@ namespace API.Controllers;
 [Route("[controller]")]
 public class OidcController(ILogger<OidcController> logger, [FromServices] ConfigurationManager<OpenIdConnectConfiguration>? configurationManager = null): ControllerBase
 {
-
     [AllowAnonymous]
     [HttpGet("login")]
     public IActionResult Login(string returnUrl = "/")

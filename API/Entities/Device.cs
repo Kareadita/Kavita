@@ -27,7 +27,7 @@ public class Device : IEntityDate
     /// <summary>
     /// Platform (ie) Windows 10
     /// </summary>
-    public DevicePlatform Platform { get; set; }
+    public EmailDevicePlatform Platform { get; set; }
 
     public int AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;

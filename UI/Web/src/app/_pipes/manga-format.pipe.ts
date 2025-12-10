@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
 import { MangaFormat } from '../_models/manga-format';
-import {TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoService} from "@jsverse/transloco";
 
 /**
  * Returns the string name for the format
@@ -10,21 +10,19 @@ import {TranslocoService} from "@jsverse/transloco";
   standalone: true
 })
 export class MangaFormatPipe implements PipeTransform {
-  private translocoService = inject(TranslocoService);
-
 
   transform(format: MangaFormat): string {
     switch (format) {
       case MangaFormat.EPUB:
-        return this.translocoService.translate('manga-format-pipe.epub');
+        return translate('manga-format-pipe.epub');
       case MangaFormat.ARCHIVE:
-        return this.translocoService.translate('manga-format-pipe.archive');
+        return translate('manga-format-pipe.archive');
       case MangaFormat.IMAGE:
-        return this.translocoService.translate('manga-format-pipe.image');
+        return translate('manga-format-pipe.image');
       case MangaFormat.PDF:
-        return this.translocoService.translate('manga-format-pipe.pdf');
+        return translate('manga-format-pipe.pdf');
       case MangaFormat.UNKNOWN:
-        return this.translocoService.translate('manga-format-pipe.unknown');
+        return translate('manga-format-pipe.unknown');
       default:
         return '';
     }

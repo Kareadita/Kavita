@@ -1,5 +1,5 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import {IdentityProvider} from "../_models/user";
+import {Pipe, PipeTransform} from '@angular/core';
+import {IdentityProvider} from "../_models/user/user";
 import {translate} from "@jsverse/transloco";
 
 @Pipe({

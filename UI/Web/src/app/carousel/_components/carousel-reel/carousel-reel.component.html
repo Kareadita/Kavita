@@ -20,7 +20,10 @@
         @if (swiper) {
           <div class="float-end">
             <button class="btn btn-icon carousel-btn" [disabled]="swiper.isBeginning" (click)="prevPage()"><i class="fa fa-angle-left" aria-hidden="true"></i><span class="visually-hidden">{{t('prev-items')}}</span></button>
-            <button class="btn btn-icon carousel-btn" [disabled]="swiper.isEnd" (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="visually-hidden">{{t('next-items')}}</span></button>
+            <button class="btn btn-icon carousel-btn" [disabled]="swiper.isEnd
+            && (!paginationEnabled() || items.length < pageSize())
+            || (currentPage() >= (totalPages()))"
+                    (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="visually-hidden">{{t('next-items')}}</span></button>
           </div>
         }
 

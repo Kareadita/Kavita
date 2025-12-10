@@ -36,6 +36,7 @@ public interface IUnitOfWork
     IAppUserReadingProfileRepository AppUserReadingProfileRepository { get; }
     IAnnotationRepository AnnotationRepository { get; }
     IEpubFontRepository EpubFontRepository { get; }
+    IReadingSessionRepository ReadingSessionRepository { get; }
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
@@ -80,6 +81,7 @@ public class UnitOfWork : IUnitOfWork
         AppUserReadingProfileRepository = new AppUserReadingProfileRepository(_context, _mapper);
         AnnotationRepository = new AnnotationRepository(_context, _mapper);
         EpubFontRepository = new EpubFontRepository(_context, _mapper);
+        ReadingSessionRepository = new ReadingSessionRepository(_context, _mapper);
     }
 
     /// <summary>
@@ -112,6 +114,7 @@ public class UnitOfWork : IUnitOfWork
     public IAppUserReadingProfileRepository AppUserReadingProfileRepository { get; }
     public IAnnotationRepository AnnotationRepository { get; }
     public IEpubFontRepository EpubFontRepository { get;  }
+    public IReadingSessionRepository ReadingSessionRepository { get;  }
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.

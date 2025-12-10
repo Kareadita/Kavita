@@ -6,7 +6,6 @@ using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using VersOne.Epub;
 using Xunit;
 
 namespace API.Tests.Services;

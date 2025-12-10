@@ -14,7 +14,7 @@ public static class LogEnricher
     public static void EnrichFromRequest(IDiagnosticContext diagnosticContext, HttpContext httpContext)
     {
         diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString());
-        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault());
+        diagnosticContext.Set("UserAgent", httpContext.Request.Headers.UserAgent.FirstOrDefault());
         diagnosticContext.Set("Path", httpContext.Request.Path);
     }
 }

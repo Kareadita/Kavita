@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AnalysisMode>Default</AnalysisMode>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <TieredPGO>true</TieredPGO>
@@ -28,6 +28,7 @@
     <PropertyGroup>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>
+        <NoWarn>$(NoWarn);CA1873</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -49,58 +50,65 @@
     <Deterministic Condition="$(AssemblyVersion.EndsWith('*'))">False</Deterministic>
   </PropertyGroup>
 
+  <!-- Override vulnerable transitive dependencies -->
+  <ItemGroup>
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+  </ItemGroup>
+
   <ItemGroup>
       <PackageReference Include="CsvHelper" Version="33.1.0" />
-      <PackageReference Include="MailKit" Version="4.13.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+      <PackageReference Include="MailKit" Version="4.14.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Docnet.Core" Version="2.6.0" />
     <PackageReference Include="EasyCaching.InMemory" Version="1.9.2" />
-    <PackageReference Include="ExCSS" Version="4.3.0" />
+    <PackageReference Include="ExCSS" Version="4.3.1" />
     <PackageReference Include="Flurl" Version="4.0.0" />
     <PackageReference Include="Flurl.Http" Version="4.0.2" />
-    <PackageReference Include="Hangfire" Version="1.8.20" />
+    <PackageReference Include="Hangfire" Version="1.8.22" />
     <PackageReference Include="Hangfire.InMemory" Version="1.0.0" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.Storage.SQLite" Version="0.4.2" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.12.2" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.20" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.22" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
     <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
     <PackageReference Include="Nager.ArticleNumber" Version="1.0.7" />
     <PackageReference Include="NetVips" Version="3.1.0" />
-    <PackageReference Include="NetVips.Native" Version="8.17.1" />
-    <PackageReference Include="Polly" Version="8.6.2" />
+    <PackageReference Include="NetVips.Native" Version="8.17.3" />
+    <PackageReference Include="Polly" Version="8.6.5" />
     <PackageReference Include="Serilog" Version="4.3.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
-    <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.AspNetCore.SignalR" Version="0.4.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Serilog.Sinks.SignalR.Core" Version="0.1.2" />
-    <PackageReference Include="SharpCompress" Version="0.40.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.15.0.120848">
+    <PackageReference Include="SharpCompress" Version="0.42.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.16.1.129956">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="9.0.0" />
-    <PackageReference Include="System.Drawing.Common" Version="9.0.7" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="22.0.15" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="10.0.1" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="22.1.0" />
     <PackageReference Include="VersOne.Epub" Version="3.3.4" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
@@ -121,7 +129,7 @@
     <None Remove="config\kavita.db" />
     <None Remove="config\covers\**" />
     <None Remove="wwwroot\**" />
-    <None Remove="cache\cache-long\**" />
+    <None Remove="config\cache\cache-long\**" />
     <None Remove="config\cache\**" />
     <None Remove="config\logs\**" />
     <None Remove="config\covers\**" />
@@ -197,7 +205,7 @@
     <Content Include="Assets\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Folder Include="Data\ManualMigrations\v0.8.3\" />
+    <Folder Include="DTOs\Misc\" />
     <Folder Include="Extensions\KavitaPlus\" />
     <None Include="I18N\**" />
   </ItemGroup>

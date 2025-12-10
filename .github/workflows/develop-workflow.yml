@@ -43,7 +43,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-            dotnet-version: 9.0.x
+            dotnet-version: 10.0.x
 
       - name: Bump versions
         uses: majora2007/dotnet-bump-version@v0.0.10
@@ -128,7 +128,7 @@ jobs:
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
 
       - name: Install Swashbuckle CLI
         run: dotnet tool install -g Swashbuckle.AspNetCore.Cli

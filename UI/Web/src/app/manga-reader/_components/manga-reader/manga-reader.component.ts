@@ -47,7 +47,7 @@ import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
 import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
 import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
 import {ScalingOption} from 'src/app/_models/preferences/scaling-option';
-import {User} from 'src/app/_models/user';
+import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {MemberService} from 'src/app/_services/member.service';
 import {NavService} from 'src/app/_services/nav.service';
@@ -84,6 +84,7 @@ import {ConfirmService} from "../../../shared/confirm.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
+import {ImageOnlyName} from "../../../_models/user/auth-key";
 
 
 const PREFETCH_PAGES = 10;
@@ -438,7 +439,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
 
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
-    if (this.bookmarkMode()) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
+    if (this.bookmarkMode()) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.authKeys.filter(k => k.name === ImageOnlyName)[0].key, pageNum);
     return this.readerService.getPageUrl(chapterId, pageNum);
   }
 
@@ -616,7 +617,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
 
-      this.init();
+      this.init(true);
 
       // Update implicit reading profile while changing settings
       this.generalSettingsForm.valueChanges.pipe(
@@ -1026,7 +1027,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 
-  init() {
+  init(firstLoad: boolean) {
     this.nextChapterId = CHAPTER_ID_NOT_FETCHED;
     this.prevChapterId = CHAPTER_ID_NOT_FETCHED;
     this.nextChapterDisabled = false;
@@ -1095,8 +1096,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
       let page = results.progress.pageNum;
-      if (page > this.maxPages) {
-        page = this.maxPages - 1;
+      if (page >= this.maxPages) {
+        page = !firstLoad ? 0 : this.maxPages - 1;
       }
 
       page = this.adjustPagesForDoubleRenderer(page);
@@ -1490,7 +1491,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (prevChapter != this.chapterId) {
       if (prevChapter !== undefined) {
         this.chapterId = prevChapter;
-        this.init();
+        this.init(false);
         return;
       }
     }
@@ -1515,7 +1516,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Load chapter Id onto route but don't reload
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
-      this.init();
+      this.init(false);
       const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
     } else {
@@ -1662,7 +1663,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       tempPageNum = this.pageNum + 1;
     }
 
-    if (!this.incognitoMode && !this.bookmarkMode()) {
+    // We need to avoid calling this on first load
+    if (!this.incognitoMode && !this.bookmarkMode() && !this.inSetup) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum).subscribe(() => {/* No operation */});
     }
   }

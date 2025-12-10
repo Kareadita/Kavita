@@ -2,8 +2,8 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} fr
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {ReviewCardComponent} from "../review-card/review-card.component";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {UserReview} from "../review-card/user-review";
-import {User} from "../../_models/user";
+import {UserReview} from "../../_models/user-review";
+import {User} from "../../_models/user/user";
 import {AccountService} from "../../_services/account.service";
 import {
   ReviewModalCloseAction,

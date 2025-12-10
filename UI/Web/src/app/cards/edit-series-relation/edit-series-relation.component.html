@@ -13,7 +13,7 @@
     }
 
     <form>
-      @for(relation of relations; let idx = $index; track idx) {
+      @for(relation of relations; let idx = $index; track relation.id) {
         <div class="row">
           <div class="col-sm-12 col-md-12 col-lg-7 mb-3">
             <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings" id="relation--{{idx}}" [focus]="focusTypeahead">

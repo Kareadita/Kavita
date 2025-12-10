@@ -87,7 +87,7 @@ public class CollectionTagService : ICollectionTagService
             existingTag.CoverImageLocked = false;
             existingTag.CoverImage = string.Empty;
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(existingTag.Id, MessageFactoryEntityTypes.CollectionTag), false);
+                MessageFactory.CoverUpdateEvent(existingTag.Id, MessageFactoryEntityTypes.Collection), false);
             _unitOfWork.CollectionTagRepository.Update(existingTag);
         }
 

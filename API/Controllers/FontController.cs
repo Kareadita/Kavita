@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -7,7 +6,7 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Font;
 using API.Entities.Enums.Font;
-using API.Extensions;
+using API.Middleware;
 using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner.Parser;
@@ -62,7 +61,7 @@ public class FontController : BaseApiController
     [AllowAnonymous]
     public async Task<IActionResult> GetFont(int fontId, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
 
         var font = await _unitOfWork.EpubFontRepository.GetFontAsync(fontId);
@@ -84,10 +83,9 @@ public class FontController : BaseApiController
     /// <param name="force">If the font is in use by other users and an admin wants it deleted, they must confirm to force delete it. This is prompted in the UI.</param>
     /// <returns></returns>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> DeleteFont(int fontId, bool force = false)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "denied"));
-
         var forceDelete = User.IsInRole(PolicyConstants.AdminRole) && force;
         var fontInUse = await _fontService.IsFontInUse(fontId);
         if (!fontInUse || forceDelete)
@@ -115,10 +113,9 @@ public class FontController : BaseApiController
     /// <param name="formFile"></param>
     /// <returns></returns>
     [HttpPost("upload")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<EpubFontDto>> UploadFont(IFormFile formFile)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "denied"));
-
         if (!_fontFileExtensionRegex.IsMatch(Path.GetExtension(formFile.FileName))) return BadRequest("Invalid file");
 
         if (formFile.FileName.Contains("..")) return BadRequest("Invalid file");
@@ -130,9 +127,9 @@ public class FontController : BaseApiController
     }
 
     [HttpPost("upload-by-url")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UploadFontByUrl([FromQuery]string url)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "denied"));
         // Validate url
         try
         {
@@ -141,7 +138,7 @@ public class FontController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(_localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(_localizationService.Translate(UserId, ex.Message));
         }
     }
 

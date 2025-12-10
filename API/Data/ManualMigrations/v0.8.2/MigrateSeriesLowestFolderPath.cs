@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Entities;
 using API.Entities.History;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;

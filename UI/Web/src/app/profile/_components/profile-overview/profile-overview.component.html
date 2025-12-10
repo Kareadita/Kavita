@@ -1,0 +1,16 @@
+
+<ng-container *transloco="let t; prefix: 'profile-overview'">
+  @for (stream of streams(); track $index) {
+    @if (stream.api | async; as data) {
+      <app-carousel-reel
+        [title]="stream.title"
+        [items]="data"
+        [nextPageLoader]="stream.nextPageLoader"
+      >
+        <ng-template #carouselItem let-item>
+          <app-series-card [series]="item" [libraryId]="item.libraryId"/>
+        </ng-template>
+      </app-carousel-reel>
+    }
+  }
+</ng-container>

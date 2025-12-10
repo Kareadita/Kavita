@@ -2,7 +2,6 @@
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,8 +35,8 @@ public class TachiyomiController : BaseApiController
     [HttpGet("latest-chapter")]
     public async Task<ActionResult<ChapterDto>> GetLatestChapter(int seriesId)
     {
-        if (seriesId < 1) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "SeriesId"));
-        return Ok(await _tachiyomiService.GetLatestChapter(seriesId, User.GetUserId()));
+        if (seriesId < 1) return BadRequest(await _localizationService.Translate(UserId, "greater-0", "SeriesId"));
+        return Ok(await _tachiyomiService.GetLatestChapter(seriesId, UserId));
     }
 
     /// <summary>
@@ -48,7 +47,7 @@ public class TachiyomiController : BaseApiController
     [HttpPost("mark-chapter-until-as-read")]
     public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
     {
-        var user = (await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
+        var user = (await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!,
             AppUserIncludes.Progress))!;
         return Ok(await _tachiyomiService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber));
     }

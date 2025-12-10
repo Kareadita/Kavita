@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
@@ -11,11 +10,11 @@ using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -34,7 +33,8 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
         return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IScrobblingService>());
+            Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
+            Substitute.For<IClientInfoAccessor>());
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var cacheService = new CacheHelper(new FileService());
         var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
-            Substitute.For<IEventHub>(), cacheService, readerService, Substitute.For<IMediaErrorService>());
+            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>());
 
 
         await service.ScanSeries(1, 1);
@@ -124,7 +124,7 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var cacheService = new CacheHelper(new FileService());
         var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
-            Substitute.For<IEventHub>(), cacheService, readerService, Substitute.For<IMediaErrorService>());
+            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>());
         await service.ScanSeries(1, 1);
 
         var chapter2 = new ChapterBuilder("2")

@@ -20,7 +20,7 @@ import {ErrorEvent} from 'src/app/_models/events/error-event';
 import {InfoEvent} from 'src/app/_models/events/info-event';
 import {NotificationProgressEvent} from 'src/app/_models/events/notification-progress-event';
 import {UpdateVersionEvent} from 'src/app/_models/events/update-version-event';
-import {User} from 'src/app/_models/user';
+import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";

@@ -1,13 +1,13 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, computed,
   ContentChild,
   CUSTOM_ELEMENTS_SCHEMA,
   EventEmitter,
-  inject,
-  Input,
-  Output,
+  inject, input,
+  Input, model,
+  Output, signal,
   TemplateRef
 } from '@angular/core';
 import {Swiper} from 'swiper/types';
@@ -17,8 +17,12 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {ActionItem} from "../../../_services/action-factory.service";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
+import {map, Observable, tap} from "rxjs";
+import {PaginatedResult} from "../../../_models/pagination";
 
 register();
+
+export type NextPageLoader = (pageNumber: number, pageSize: number) => Observable<any[] | PaginatedResult<any[]>>;
 
 @Component({
   selector: 'app-carousel-reel',
@@ -57,7 +61,45 @@ export class CarouselReelComponent {
   @Output() sectionClick = new EventEmitter<string>();
   @Output() handleAction = new EventEmitter<ActionItem<any>>();
 
+  currentPage = model<number>(1);
+  pageSize = input(20);
+  nextPageLoader = input<NextPageLoader | null>(null);
+
+  paginationEnabled = computed(() => this.nextPageLoader() != null);
+  loadingNextPage = signal(false);
+  totalPages = signal<number>(999_999_999_999);
+
   swiper: Swiper | undefined;
+
+  private tryLoadNextPage() {
+    if (!this.paginationEnabled() || this.loadingNextPage()) return;
+
+    this.currentPage.update(x => x + 1);
+    this.loadingNextPage.set(true);
+    const oldSize = this.items.length;
+
+    this.nextPageLoader()!(this.currentPage(), this.pageSize()).pipe(
+      map(items => {
+        if (Array.isArray(items)) {
+          return items;
+        }
+
+        const pagedList = items as PaginatedResult<any[]>;
+        this.totalPages.set(pagedList.pagination.totalPages)
+
+        return pagedList.result;
+      }),
+      tap(items => {
+        this.items = [...this.items, ...items];
+
+        const newCurrentProgress = oldSize / this.items.length;
+        this.swiper?.setProgress(newCurrentProgress);
+        this.cdRef.markForCheck();
+      }),
+      tap(() => this.nextPage()),
+      tap(() => this.loadingNextPage.set(false)),
+    ).subscribe();
+  }
 
   get progressChange() {
     const totalItems = this.items.length;
@@ -68,7 +110,10 @@ export class CarouselReelComponent {
 
   nextPage() {
     if (this.swiper) {
-      if (this.swiper.isEnd) return;
+      if (this.swiper.isEnd) {
+        this.tryLoadNextPage();
+        return;
+      }
 
       this.swiper.setProgress(this.swiper.progress + this.progressChange, 600);
       this.cdRef.markForCheck();

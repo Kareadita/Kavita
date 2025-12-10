@@ -24,6 +24,10 @@ export class GenericFilterFieldPipe implements PipeTransform {
 
   private annotationsFilterField(value: AnnotationsFilterField) {
     switch (value) {
+      case AnnotationsFilterField.Likes:
+        return translate('generic-filter-field-pipe.annotation-likes')
+      case AnnotationsFilterField.LikedBy:
+        return translate('generic-filter-field-pipe.annotation-liked-by')
       case AnnotationsFilterField.Selection:
         return translate('generic-filter-field-pipe.annotation-selection')
       case AnnotationsFilterField.Comment:
@@ -36,7 +40,7 @@ export class GenericFilterFieldPipe implements PipeTransform {
         return translate('filter-field-pipe.libraries');
       case AnnotationsFilterField.Spoiler:
         return translate('generic-filter-field-pipe.annotation-spoiler');
-        case AnnotationsFilterField.Series:
+      case AnnotationsFilterField.Series:
         return translate('generic-filter-field-pipe.series');
     }
   }

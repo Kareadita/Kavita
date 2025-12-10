@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
-using API.DTOs.Account;
 using API.DTOs.KavitaPlus.Account;
 using API.DTOs.Scrobbling;
 using API.Entities.Scrobble;
@@ -47,7 +47,7 @@ public class ScrobblingController : BaseApiController
     [HttpGet("anilist-token")]
     public async Task<ActionResult<string>> GetAniListToken()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user == null) return Unauthorized();
 
         return Ok(user.AniListAccessToken);
@@ -60,7 +60,7 @@ public class ScrobblingController : BaseApiController
     [HttpGet("mal-token")]
     public async Task<ActionResult<MalUserInfoDto>> GetMalToken()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user == null) return Unauthorized();
 
         return Ok(new MalUserInfoDto()
@@ -78,7 +78,7 @@ public class ScrobblingController : BaseApiController
     [HttpPost("update-anilist-token")]
     public async Task<ActionResult<bool>> UpdateAniListToken(AniListUpdateDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user == null) return Unauthorized();
 
         var isNewToken = string.IsNullOrEmpty(user.AniListAccessToken);
@@ -97,7 +97,7 @@ public class ScrobblingController : BaseApiController
     [HttpPost("update-mal-token")]
     public async Task<ActionResult<bool>> UpdateMalToken(MalUserInfoDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user == null) return Unauthorized();
 
         var isNewToken = string.IsNullOrEmpty(user.MalAccessToken);
@@ -117,7 +117,7 @@ public class ScrobblingController : BaseApiController
     [HttpPost("generate-scrobble-events")]
     public ActionResult GenerateScrobbleEvents()
     {
-        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(User.GetUserId()));
+        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(UserId));
 
         return Ok();
     }
@@ -130,7 +130,7 @@ public class ScrobblingController : BaseApiController
     [HttpGet("token-expired")]
     public async Task<ActionResult<bool>> HasTokenExpired(ScrobbleProvider provider)
     {
-        return Ok(await _scrobblingService.HasTokenExpired(User.GetUserId(), provider));
+        return Ok(await _scrobblingService.HasTokenExpired(UserId, provider));
     }
 
     /// <summary>
@@ -138,7 +138,7 @@ public class ScrobblingController : BaseApiController
     /// </summary>
     /// <remarks>Requires admin</remarks>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("scrobble-errors")]
     public async Task<ActionResult<IEnumerable<ScrobbleErrorDto>>> GetScrobbleErrors()
     {
@@ -149,7 +149,7 @@ public class ScrobblingController : BaseApiController
     /// Clears the scrobbling errors table
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("clear-errors")]
     public async Task<ActionResult> ClearScrobbleErrors()
     {
@@ -166,7 +166,7 @@ public class ScrobblingController : BaseApiController
     public async Task<ActionResult<PagedList<ScrobbleEventDto>>> GetScrobblingEvents([FromQuery] UserParams pagination, [FromBody] ScrobbleEventFilter filter)
     {
         pagination ??= UserParams.Default;
-        var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId(), filter, pagination);
+        var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(UserId, filter, pagination);
         Response.AddPaginationHeader(events.CurrentPage, events.PageSize, events.TotalCount, events.TotalPages);
 
         return Ok(events);
@@ -179,7 +179,7 @@ public class ScrobblingController : BaseApiController
     [HttpGet("holds")]
     public async Task<ActionResult<IEnumerable<ScrobbleHoldDto>>> GetScrobbleHolds()
     {
-        return Ok(await _unitOfWork.UserRepository.GetHolds(User.GetUserId()));
+        return Ok(await _unitOfWork.UserRepository.GetHolds(UserId));
     }
 
     /// <summary>
@@ -190,7 +190,7 @@ public class ScrobblingController : BaseApiController
     [HttpGet("has-hold")]
     public async Task<ActionResult<bool>> HasHold(int seriesId)
     {
-        return Ok(await _unitOfWork.UserRepository.HasHoldOnSeries(User.GetUserId(), seriesId));
+        return Ok(await _unitOfWork.UserRepository.HasHoldOnSeries(UserId, seriesId));
     }
 
     /// <summary>
@@ -212,7 +212,7 @@ public class ScrobblingController : BaseApiController
     [HttpPost("add-hold")]
     public async Task<ActionResult> AddHold(int seriesId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ScrobbleHolds);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ScrobbleHolds);
         if (user == null) return Unauthorized();
         if (user.ScrobbleHolds.Any(s => s.SeriesId == seriesId))
             return Ok(await _localizationService.Translate(user.Id, "nothing-to-do"));
@@ -249,7 +249,7 @@ public class ScrobblingController : BaseApiController
             // Handle other exceptions or log the error
             _logger.LogError(ex, "An error occurred while adding the hold");
             return StatusCode(StatusCodes.Status500InternalServerError,
-                await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
+                await _localizationService.Translate(UserId, "nothing-to-do"));
         }
     }
 
@@ -261,7 +261,7 @@ public class ScrobblingController : BaseApiController
     [HttpDelete("remove-hold")]
     public async Task<ActionResult> RemoveHold(int seriesId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ScrobbleHolds);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ScrobbleHolds);
         if (user == null) return Unauthorized();
 
         user.ScrobbleHolds = user.ScrobbleHolds.Where(h => h.SeriesId != seriesId).ToList();
@@ -278,7 +278,7 @@ public class ScrobblingController : BaseApiController
     [HttpGet("has-ran-scrobble-gen")]
     public async Task<ActionResult<bool>> HasRanScrobbleGen()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId);
         return Ok(user is {HasRunScrobbleEventGeneration: true});
     }
 
@@ -290,7 +290,7 @@ public class ScrobblingController : BaseApiController
     [HttpPost("bulk-remove-events")]
     public async Task<ActionResult> BulkRemoveScrobbleEvents(IList<long> eventIds)
     {
-        var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId(), eventIds);
+        var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(UserId, eventIds);
         _unitOfWork.ScrobbleRepository.Remove(events);
         await _unitOfWork.CommitAsync();
         return Ok();

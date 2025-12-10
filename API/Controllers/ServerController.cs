@@ -10,7 +10,6 @@ using API.DTOs.MediaErrors;
 using API.DTOs.Stats;
 using API.DTOs.Update;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
@@ -28,7 +27,7 @@ namespace API.Controllers;
 
 #nullable enable
 
-[Authorize(Policy = "RequireAdminRole")]
+[Authorize(PolicyGroups.AdminPolicy)]
 public class ServerController : BaseApiController
 {
     private readonly ILogger<ServerController> _logger;
@@ -69,7 +68,7 @@ public class ServerController : BaseApiController
     [HttpPost("clear-cache")]
     public ActionResult ClearCache()
     {
-        _logger.LogInformation("{UserName} is clearing cache of server from admin dashboard", User.GetUsername());
+        _logger.LogInformation("{UserName} is clearing cache of server from admin dashboard", Username!);
         _cleanupService.CleanupCacheAndTempDirectories();
 
         return Ok();
@@ -82,7 +81,7 @@ public class ServerController : BaseApiController
     [HttpPost("cleanup-want-to-read")]
     public ActionResult CleanupWantToRead()
     {
-        _logger.LogInformation("{UserName} is clearing running want to read cleanup from admin dashboard", User.GetUsername());
+        _logger.LogInformation("{UserName} is clearing running want to read cleanup from admin dashboard", Username!);
         RecurringJob.TriggerJob(TaskScheduler.RemoveFromWantToReadTaskId);
 
         return Ok();
@@ -95,7 +94,7 @@ public class ServerController : BaseApiController
     [HttpPost("cleanup")]
     public ActionResult Cleanup()
     {
-        _logger.LogInformation("{UserName} is clearing running general cleanup from admin dashboard", User.GetUsername());
+        _logger.LogInformation("{UserName} is clearing running general cleanup from admin dashboard", Username!);
         RecurringJob.TriggerJob(TaskScheduler.CleanupTaskId);
 
         return Ok();
@@ -108,7 +107,7 @@ public class ServerController : BaseApiController
     [HttpPost("backup-db")]
     public ActionResult BackupDatabase()
     {
-        _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", User.GetUsername());
+        _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", Username!);
         RecurringJob.TriggerJob(TaskScheduler.BackupTaskId);
         return Ok();
     }
@@ -120,10 +119,10 @@ public class ServerController : BaseApiController
     [HttpPost("analyze-files")]
     public async Task<ActionResult> AnalyzeFiles()
     {
-        _logger.LogInformation("{UserName} is performing file analysis from admin dashboard", User.GetUsername());
+        _logger.LogInformation("{UserName} is performing file analysis from admin dashboard", Username!);
         if (TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "AnalyzeFiles",
-                Array.Empty<object>(), TaskScheduler.DefaultQueue, true))
-            return Ok(await _localizationService.Translate(User.GetUserId(), "job-already-running"));
+                [], TaskScheduler.DefaultQueue, true))
+            return Ok(await _localizationService.Translate(UserId, "job-already-running"));
 
         BackgroundJob.Enqueue(() => _scannerService.AnalyzeFiles());
         return Ok();
@@ -152,7 +151,7 @@ public class ServerController : BaseApiController
         var encoding = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
         if (encoding == EncodeFormat.PNG)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "encode-as-warning"));
+            return BadRequest(await _localizationService.Translate(UserId, "encode-as-warning"));
         }
 
         _taskScheduler.CovertAllCoversToEncoding();
@@ -170,13 +169,13 @@ public class ServerController : BaseApiController
         var files = _backupService.GetLogFiles();
         try
         {
-            var zipPath =  _archiveService.CreateZipForDownload(files, "logs");
+            var zipPath = _archiveService.CreateZipForDownload(files, "logs");
             return PhysicalFile(zipPath, MimeTypeMap.GetMimeType(Path.GetExtension(zipPath)),
                 System.Web.HttpUtility.UrlEncode(Path.GetFileName(zipPath)), true);
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await _localizationService.Translate(UserId, ex.Message));
         }
     }
 
@@ -221,7 +220,7 @@ public class ServerController : BaseApiController
     public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog(int count = 0)
     {
         // Strange bug where [Authorize] doesn't work
-        if (User.GetUserId() == 0) return Unauthorized();
+        if (UserId == 0) return Unauthorized();
 
         return Ok(await _versionUpdaterService.GetAllReleases(count));
     }
@@ -237,7 +236,7 @@ public class ServerController : BaseApiController
             new JobDto()
             {
                 Id = dto.Id,
-                Title = await _localizationService.Translate(User.GetUserId(), dto.Id),
+                Title = await _localizationService.Translate(UserId, dto.Id),
                 Cron = dto.Cron,
                 LastExecutionUtc = dto.LastExecution.HasValue ? new DateTime(dto.LastExecution.Value.Ticks, DateTimeKind.Utc) : null
             });
@@ -249,7 +248,7 @@ public class ServerController : BaseApiController
     /// Returns a list of issues found during scanning or reading in which files may have corruption or bad metadata (structural metadata)
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("media-errors")]
     public ActionResult<PagedList<MediaErrorDto>> GetMediaErrors()
     {
@@ -260,7 +259,7 @@ public class ServerController : BaseApiController
     /// Deletes all media errors
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("clear-media-alerts")]
     public async Task<ActionResult> ClearMediaErrors()
     {
@@ -273,7 +272,7 @@ public class ServerController : BaseApiController
     /// Bust Kavita+ Cache
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("bust-kavitaplus-cache")]
     public async Task<ActionResult> BustReviewAndRecCache()
     {
@@ -287,7 +286,7 @@ public class ServerController : BaseApiController
     /// Runs the Sync Themes task
     /// </summary>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("sync-themes")]
     public async Task<ActionResult> SyncThemes()
     {

@@ -6,7 +6,8 @@ import {
   DestroyRef,
   inject,
   model,
-  OnInit, signal
+  OnInit,
+  signal
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
@@ -22,7 +23,7 @@ import {debounceTime, distinctUntilChanged, Observable, startWith, tap} from "rx
 import {map} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ServerSettings} from "../_models/server-settings";
-import {IdentityProvider, IdentityProviders} from "../../_models/user";
+import {IdentityProvider, IdentityProviders} from "../../_models/user/user";
 import {IdentityProviderPipePipe} from "../../_pipes/identity-provider.pipe";
 import {
   MultiCheckBoxItem,

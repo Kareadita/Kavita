@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities.History;
-using API.Entities.Metadata;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

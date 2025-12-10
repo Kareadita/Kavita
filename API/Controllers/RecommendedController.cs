@@ -30,7 +30,7 @@ public class RecommendedController : BaseApiController
     public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickReads(int libraryId, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
-        var series = await _unitOfWork.SeriesRepository.GetQuickReads(User.GetUserId(), libraryId, userParams);
+        var series = await _unitOfWork.SeriesRepository.GetQuickReads(UserId, libraryId, userParams);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
         return Ok(series);
@@ -46,7 +46,7 @@ public class RecommendedController : BaseApiController
     public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickCatchupReads(int libraryId, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
-        var series = await _unitOfWork.SeriesRepository.GetQuickCatchupReads(User.GetUserId(), libraryId, userParams);
+        var series = await _unitOfWork.SeriesRepository.GetQuickCatchupReads(UserId, libraryId, userParams);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
         return Ok(series);
@@ -61,7 +61,7 @@ public class RecommendedController : BaseApiController
     [HttpGet("highly-rated")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams? userParams)
     {
-        var userId = User.GetUserId();
+        var userId = UserId;
         userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetHighlyRated(userId, libraryId, userParams);
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
@@ -79,7 +79,7 @@ public class RecommendedController : BaseApiController
     [HttpGet("more-in")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetMoreIn(int libraryId, int genreId, [FromQuery] UserParams? userParams)
     {
-        var userId = User.GetUserId();
+        var userId = UserId;
 
         userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetMoreIn(userId, libraryId, genreId, userParams);
@@ -99,7 +99,7 @@ public class RecommendedController : BaseApiController
     public async Task<ActionResult<PagedList<SeriesDto>>> GetRediscover(int libraryId, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
-        var series = await _unitOfWork.SeriesRepository.GetRediscover(User.GetUserId(), libraryId, userParams);
+        var series = await _unitOfWork.SeriesRepository.GetRediscover(UserId, libraryId, userParams);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
         return Ok(series);

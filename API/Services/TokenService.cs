@@ -8,11 +8,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Account;
+using API.DTOs.Internal;
 using API.Entities;
 using API.Helpers;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using static System.Security.Claims.ClaimTypes;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
@@ -37,23 +38,22 @@ public class TokenService : ITokenService
     private readonly IUnitOfWork _unitOfWork;
     private readonly SymmetricSecurityKey _key;
     private const string RefreshTokenName = "RefreshToken";
-    private static readonly SemaphoreSlim _refreshTokenLock = new SemaphoreSlim(1, 1);
+    private static readonly SemaphoreSlim RefreshTokenLock = new(1, 1);
 
-    public TokenService(IConfiguration config, UserManager<AppUser> userManager, ILogger<TokenService> logger, IUnitOfWork unitOfWork)
+    public TokenService(IOptions<AppSettingsDto> config, UserManager<AppUser> userManager, ILogger<TokenService> logger, IUnitOfWork unitOfWork)
     {
-
         _userManager = userManager;
         _logger = logger;
         _unitOfWork = unitOfWork;
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"] ?? string.Empty));
+        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Value.TokenKey ?? string.Empty));
     }
 
     public async Task<string> CreateToken(AppUser user)
     {
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Name, user.UserName!),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Name, user.UserName!),
+            new(NameIdentifier, user.Id.ToString()),
         };
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -83,7 +83,7 @@ public class TokenService : ITokenService
 
     public async Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request)
     {
-        await _refreshTokenLock.WaitAsync();
+        await RefreshTokenLock.WaitAsync();
 
         try
         {
@@ -145,7 +145,7 @@ public class TokenService : ITokenService
         }
         finally
         {
-            _refreshTokenLock.Release();
+            RefreshTokenLock.Release();
         }
     }
 

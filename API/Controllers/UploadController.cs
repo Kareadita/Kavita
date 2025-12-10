@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -8,22 +7,20 @@ using API.DTOs.Uploads;
 using API.Entities.Enums;
 using API.Entities.MetadataMatching;
 using API.Extensions;
+using API.Middleware;
 using API.Services;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Flurl.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
 #nullable enable
 
-/// <summary>
-///
-/// </summary>
+[SkipDeviceTracking]
 public class UploadController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -58,7 +55,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="dto">Escaped url to download from</param>
     /// <returns>filename</returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("upload-by-url")]
     public async Task<ActionResult<string>> GetImageFromFile(UploadUrlDto dto)
     {
@@ -76,9 +73,9 @@ public class UploadController : BaseApiController
                 .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}");
 
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
-                return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-not-valid"));
+                return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
 
-            if (!await _imageService.IsImage(path)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-not-valid"));
+            if (!await _imageService.IsImage(path)) return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
 
             return $"coverupload_{dateString}.{format}";
         }
@@ -86,10 +83,10 @@ public class UploadController : BaseApiController
         {
             // Unauthorized
             if (ex.StatusCode == 401)
-                return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-not-valid"));
+                return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-not-valid"));
+        return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
     }
 
     /// <summary>
@@ -97,7 +94,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("series")]
     public async Task<ActionResult> UploadSeriesCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -108,7 +105,7 @@ public class UploadController : BaseApiController
         {
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadFileDto.Id);
 
-            if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-doesnt-exist"));
+            if (series == null) return BadRequest(await _localizationService.Translate(UserId, "series-doesnt-exist"));
 
             var filePath = string.Empty;
             var lockState = false;
@@ -146,7 +143,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-series-save"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-series-save"));
     }
 
     /// <summary>
@@ -154,7 +151,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("collection")]
     public async Task<ActionResult> UploadCollectionCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -164,7 +161,7 @@ public class UploadController : BaseApiController
         try
         {
             var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(uploadFileDto.Id);
-            if (tag == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "collection-doesnt-exist"));
+            if (tag == null) return BadRequest(await _localizationService.Translate(UserId, "collection-doesnt-exist"));
 
             var filePath = string.Empty;
             var lockState = false;
@@ -183,7 +180,7 @@ public class UploadController : BaseApiController
             {
                 await _unitOfWork.CommitAsync();
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(tag.Id, MessageFactoryEntityTypes.CollectionTag), false);
+                    MessageFactory.CoverUpdateEvent(tag.Id, MessageFactoryEntityTypes.Collection), false);
                 return Ok();
             }
 
@@ -194,7 +191,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-collection-save"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-collection-save"));
     }
 
     /// <summary>
@@ -209,13 +206,13 @@ public class UploadController : BaseApiController
     {
         // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
-        if (await _readingListService.UserHasReadingListAccess(uploadFileDto.Id, User.GetUsername()) == null)
-            return Unauthorized(await _localizationService.Translate(User.GetUserId(), "access-denied"));
+        if (await _readingListService.UserHasReadingListAccess(uploadFileDto.Id, Username!) == null)
+            return Unauthorized(await _localizationService.Translate(UserId, "access-denied"));
 
         try
         {
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadFileDto.Id);
-            if (readingList == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "reading-list-doesnt-exist"));
+            if (readingList == null) return BadRequest(await _localizationService.Translate(UserId, "reading-list-doesnt-exist"));
 
 
             var filePath = string.Empty;
@@ -247,7 +244,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-reading-list-save"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-reading-list-save"));
     }
 
     private async Task<string> CreateThumbnail(UploadFileDto uploadFileDto, string filename)
@@ -265,7 +262,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("chapter")]
     public async Task<ActionResult> UploadChapterCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -275,7 +272,7 @@ public class UploadController : BaseApiController
         try
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-            if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+            if (chapter == null) return BadRequest(await _localizationService.Translate(UserId, "chapter-doesnt-exist"));
 
             var filePath = string.Empty;
             var lockState = false;
@@ -323,7 +320,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-chapter-save"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-chapter-save"));
     }
 
     /// <summary>
@@ -332,7 +329,7 @@ public class UploadController : BaseApiController
     /// <remarks>This will not update the underlying chapter</remarks>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("volume")]
     public async Task<ActionResult> UploadVolumeCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -342,7 +339,7 @@ public class UploadController : BaseApiController
         try
         {
             var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(uploadFileDto.Id, VolumeIncludes.Chapters);
-            if (volume == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
+            if (volume == null) return BadRequest(await _localizationService.Translate(UserId, "volume-doesnt-exist"));
 
             var filePath = string.Empty;
             var lockState = false;
@@ -383,7 +380,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-volume-save"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-volume-save"));
     }
 
 
@@ -392,7 +389,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("library")]
     public async Task<ActionResult> UploadLibraryCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -444,7 +441,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-library-save"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-library-save"));
     }
 
     /// <summary>
@@ -452,15 +449,15 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto">Does not use Url property</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("reset-chapter-lock")]
-    [Obsolete("Use LockCover in UploadFileDto")]
+    [Obsolete("Use LockCover in UploadFileDto, will be removed in v0.9.0")]
     public async Task<ActionResult> ResetChapterLock(UploadFileDto uploadFileDto)
     {
         try
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-            if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+            if (chapter == null) return BadRequest(await _localizationService.Translate(UserId, "chapter-doesnt-exist"));
             var originalFile = chapter.CoverImage;
 
             chapter.CoverImage = string.Empty;
@@ -488,7 +485,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "reset-chapter-lock"));
+        return BadRequest(await _localizationService.Translate(UserId, "reset-chapter-lock"));
     }
 
     /// <summary>
@@ -496,7 +493,7 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("person")]
     public async Task<ActionResult> UploadPersonCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -504,7 +501,7 @@ public class UploadController : BaseApiController
         try
         {
             var person = await _unitOfWork.PersonRepository.GetPersonById(uploadFileDto.Id);
-            if (person == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
+            if (person == null) return BadRequest(await _localizationService.Translate(UserId, "person-doesnt-exist"));
 
             await _coverDbService.SetPersonCoverByUrl(person, uploadFileDto.Url, chooseBetterImage: false);
             return Ok();
@@ -515,8 +512,38 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-person-save"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-person-save"));
     }
 
+
+    /// <summary>
+    /// Replaces user cover image and locks it with a base64 encoded image
+    /// </summary>
+    /// <remarks>You MUST be the user in question</remarks>
+    /// <param name="uploadFileDto"></param>
+    /// <returns></returns>
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
+    [HttpPost("user")]
+    public async Task<ActionResult> UploadUserCoverImageFromUrl(UploadFileDto uploadFileDto)
+    {
+        try
+        {
+            if (uploadFileDto.Id != UserId) return Forbid();
+
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(uploadFileDto.Id);
+            if (user == null) return BadRequest(await _localizationService.Translate(UserId, "user-doesnt-exist"));
+
+            await _coverDbService.SetUserCoverByUrl(user, uploadFileDto.Url, chooseBetterImage: false);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "There was an issue uploading cover image for User {Id}", uploadFileDto.Id);
+            await _unitOfWork.RollbackAsync();
+        }
+
+        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-person-save"));
+    }
 
 }

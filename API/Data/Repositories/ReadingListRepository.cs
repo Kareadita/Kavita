@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data.Misc;
 using API.DTOs.Person;
 using API.DTOs.ReadingLists;
 using API.Entities;
@@ -13,7 +12,6 @@ using API.Helpers;
 using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;

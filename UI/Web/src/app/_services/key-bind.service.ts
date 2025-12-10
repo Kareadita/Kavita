@@ -114,8 +114,8 @@ const ReservedKeyBinds: KeyBind[] = [
  * array to be displayed on the settings page
  */
 export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyBind[]>> = {
-  [KeyBindTarget.NavigateToSettings]: [{meta: true, key: KeyCode.Comma}],
-  [KeyBindTarget.OpenSearch]: [{control: true, key: KeyCode.KeyK}, {meta: true, key: KeyCode.KeyK}],
+  [KeyBindTarget.NavigateToSettings]: [],
+  [KeyBindTarget.OpenSearch]: [{control: true, key: KeyCode.KeyK}],
   [KeyBindTarget.NavigateToScrobbling]: [],
   [KeyBindTarget.ToggleFullScreen]: [{key: KeyCode.KeyF}],
   [KeyBindTarget.BookmarkPage]: [{key: KeyCode.KeyB, control: true}],

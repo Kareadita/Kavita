@@ -2,21 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Constants;
 using API.DTOs;
 using API.DTOs.KavitaPlus.Manage;
 using API.DTOs.Recommendation;
-using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
-using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Services.Plus;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;

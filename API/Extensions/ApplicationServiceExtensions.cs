@@ -1,11 +1,11 @@
 ﻿using System.IO.Abstractions;
 using API.Constants;
-using API.Controllers;
 using API.Data;
 using API.Helpers;
 using API.Middleware;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.Services.Store;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
@@ -28,6 +28,9 @@ public static class ApplicationServiceExtensions
     public static void AddApplicationServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
     {
         services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
+
+        services.AddScoped<UserContext>();
+        services.AddScoped<IUserContext>(sp => sp.GetRequiredService<UserContext>());
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ITokenService, TokenService>();
@@ -91,8 +94,14 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
 
         services.AddScoped<IOidcService, OidcService>();
-        services.AddScoped<OpdsActionFilterAttribute>();
-        services.AddScoped<OpdsActiveUserMiddlewareAttribute>();
+
+        services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
+        services.AddScoped<IClientDeviceService, ClientDeviceService>();
+        services.AddScoped<IDeviceTrackingService, DeviceTrackingService>();
+
+
+        services.AddSingleton<IReadingSessionService, ReadingSessionService>();
+        services.AddSingleton<IClientInfoAccessor, ClientInfoAccessor>();
 
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
@@ -115,7 +124,7 @@ public static class ApplicationServiceExtensions
         services.AddMemoryCache(options =>
         {
             options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 75 MB
-            options.CompactionPercentage = 0.1; // LRU compaction (10%)
+            options.CompactionPercentage = 0.1; // LRU compaction, Evict 10% when limit reached
         });
         // Needs to be registered after the memory cache, as it depends on it
         services.AddSingleton<ITicketStore, CustomTicketStore>();

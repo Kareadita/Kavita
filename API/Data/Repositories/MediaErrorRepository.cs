@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.MediaErrors;
 using API.Entities;
-using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;

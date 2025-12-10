@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,7 +10,6 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
-using ExCSS;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 

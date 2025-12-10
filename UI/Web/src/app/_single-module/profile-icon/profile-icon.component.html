@@ -1,0 +1,11 @@
+  @let image = currentImageUrl();
+  @if (image) {
+    <app-image objectFit="cover"
+               [styles]="{'object-position': 'top', 'border-radius': '50%'}"
+               height="{{size()}}px"
+               width="{{size()}}px"
+               [imageUrl]="image"
+               [errorImage]="imageService.noPersonImage" />
+  } @else {
+    <i class="fa-solid fa-user-circle align-self-center" aria-hidden="true"></i>
+  }

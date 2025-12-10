@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO.Abstractions;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -228,7 +227,7 @@ public class SettingsServiceTests
     [Fact]
     public async Task UpdateMetadataSettings_ShouldUpdateExistingSettings()
     {
-        // Arrange
+
         var existingSettings = new MetadataSettings
         {
             Id = 1,
@@ -333,7 +332,7 @@ public class SettingsServiceTests
     [Fact]
     public async Task UpdateMetadataSettings_WithNullCollections_ShouldUseEmptyCollections()
     {
-        // Arrange
+
         var existingSettings = new MetadataSettings
         {
             Id = 1,
@@ -375,7 +374,7 @@ public class SettingsServiceTests
     [Fact]
     public async Task UpdateMetadataSettings_WithFieldMappings_ShouldReplaceExistingMappings()
     {
-        // Arrange
+
         var existingSettings = new MetadataSettings
         {
             Id = 1,
@@ -450,7 +449,7 @@ public class SettingsServiceTests
     [Fact]
     public async Task UpdateMetadataSettings_WithBlacklistWhitelist_ShouldNormalizeAndDeduplicateEntries()
     {
-        // Arrange
+
         var existingSettings = new MetadataSettings
         {
             Id = 1,

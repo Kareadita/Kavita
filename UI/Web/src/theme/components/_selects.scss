@@ -3,7 +3,7 @@
     color: var(--input-text-color);
     border-color: var(--input-border-color);
 
-    // Chevron
+    // Chevron (TODO: This doesn't render correctly, need a new way to tackle)
     --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3e%3cpath%20fill='none'%20stroke='currentColor'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='2'%20d='m2%205%206%206%206-6'/%3e%3c/svg%3e");
 
 

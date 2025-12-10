@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using API.Extensions;
+using API.Middleware;
 using API.SignalR.Presence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -12,6 +13,7 @@ namespace API.SignalR;
 /// Generic hub for sending messages to UI
 /// </summary>
 [Authorize]
+[SkipDeviceTracking]
 public class MessageHub : Hub
 {
     private readonly IPresenceTracker _tracker;

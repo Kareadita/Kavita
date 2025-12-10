@@ -6,7 +6,6 @@ using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
-using Microsoft.AspNetCore.Identity;
 
 namespace API.Extensions;
 #nullable enable
@@ -68,6 +67,40 @@ public static class EnumerableExtensions
         }
 
         return q;
+    }
+
+    /// <summary>
+    /// Safety net around Max, returning the default value if source contains no elements
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="selector"></param>
+    /// <param name="defaultValue"></param>
+    /// <typeparam name="TSource"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static TResult? MaxOrDefault<TSource, TResult>(
+        this IList<TSource> source,
+        Func<TSource, TResult> selector,
+        TResult? defaultValue)
+    {
+        return source.Count == 0 ? defaultValue : source.Max(selector);
+    }
+
+    /// <summary>
+    /// Safety wrapper around Min, returning the default value if source has no elements
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="selector"></param>
+    /// <param name="defaultValue"></param>
+    /// <typeparam name="TSource"></typeparam>
+    /// <typeparam name="TResult"></typeparam>
+    /// <returns></returns>
+    public static TResult? MinOrDefault<TSource, TResult>(
+        this IList<TSource> source,
+        Func<TSource, TResult> selector,
+        TResult? defaultValue)
+    {
+        return source.Count == 0 ? defaultValue : source.Min(selector);
     }
 
     public static IEnumerable<TSource> WhereNotNull<TSource>(this IEnumerable<TSource?> source)

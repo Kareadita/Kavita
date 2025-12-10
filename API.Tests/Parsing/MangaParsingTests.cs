@@ -90,6 +90,8 @@ public class MangaParsingTests
     [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", Parser.LooseLeafVolume)]
     [InlineData("Alter Ego (2020) (Digital) (v3dio)", Parser.LooseLeafVolume)]
     [InlineData("Alter Ego (2020) (Digital) (t3dio)", Parser.LooseLeafVolume)]
+    [InlineData("The Space Pirate COBRA v11 - Magic Doll Vol.1 [MDKM] (Creek & River)", "11")]
+    [InlineData("Pokémon Adventures v04 - Yellow v01 (AnHeroGold-Empire)", "4")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseVolume(filename, LibraryType.Manga));

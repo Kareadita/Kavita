@@ -1,6 +1,6 @@
 import {AgeRestriction} from '../metadata/age-restriction';
 import {Library} from '../library/library';
-import {IdentityProvider} from "../user";
+import {IdentityProvider} from "../user/user";
 
 export interface Member {
   id: number;
@@ -16,3 +16,4 @@ export interface Member {
   isPending: boolean;
   identityProvider: IdentityProvider;
 }
+

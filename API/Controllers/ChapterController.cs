@@ -6,20 +6,16 @@ using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.DTOs.SeriesDetail;
-using API.Entities;
 using API.Entities.Enums;
 using API.Entities.MetadataMatching;
-using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
-using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Nager.ArticleNumber;
 
@@ -51,7 +47,7 @@ public class ChapterController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
     {
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, User.GetUserId());
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId);
 
         return Ok(chapter);
     }
@@ -61,19 +57,18 @@ public class ChapterController : BaseApiController
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
     [HttpDelete]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<bool>> DeleteChapter(int chapterId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId,
             ChapterIncludes.Files | ChapterIncludes.ExternalReviews | ChapterIncludes.ExternalRatings);
         if (chapter == null)
-            return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+            return BadRequest(_localizationService.Translate(UserId, "chapter-doesnt-exist"));
 
         var vol = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId, VolumeIncludes.Chapters);
-        if (vol == null) return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
+        if (vol == null) return BadRequest(_localizationService.Translate(UserId, "volume-doesnt-exist"));
 
         // If there is only 1 chapter within the volume, then we need to remove the volume
         var needToRemoveVolume = vol.Chapters.Count == 1;
@@ -119,7 +114,7 @@ public class ChapterController : BaseApiController
     /// <param name="seriesId">The ID of the series</param>
     /// <param name="dto">The IDs of the chapters to be deleted</param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("delete-multiple")]
     public async Task<ActionResult<bool>> DeleteMultipleChapters([FromQuery] int seriesId, DeleteChaptersDto dto)
     {
@@ -146,7 +141,7 @@ public class ChapterController : BaseApiController
                 // Fetch the volume
                 var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId, VolumeIncludes.Chapters);
                 if (volume == null)
-                    return BadRequest(_localizationService.Translate(User.GetUserId(), "volume-doesnt-exist"));
+                    return BadRequest(_localizationService.Translate(UserId, "volume-doesnt-exist"));
 
                 // Check if all chapters in the volume are being deleted
                 var isVolumeToBeRemoved = volume.Chapters.Count == chaptersToDelete.Count;
@@ -184,7 +179,7 @@ public class ChapterController : BaseApiController
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occured while deleting chapters");
-            return BadRequest(_localizationService.Translate(User.GetUserId(), "generic-error"));
+            return BadRequest(_localizationService.Translate(UserId, "generic-error"));
         }
 
     }
@@ -195,14 +190,14 @@ public class ChapterController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("update")]
     public async Task<ActionResult> UpdateChapterMetadata(UpdateChapterDto dto)
     {
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(dto.Id,
             ChapterIncludes.People | ChapterIncludes.Genres | ChapterIncludes.Tags);
         if (chapter == null)
-            return BadRequest(_localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+            return BadRequest(_localizationService.Translate(UserId, "chapter-doesnt-exist"));
 
         if (chapter.AgeRating != dto.AgeRating)
         {
@@ -428,12 +423,12 @@ public class ChapterController : BaseApiController
     {
         var ret = new ChapterDetailPlusDto();
 
-        var userReviews = (await _unitOfWork.UserRepository.GetUserRatingDtosForChapterAsync(chapterId, User.GetUserId()))
+        var userReviews = (await _unitOfWork.UserRepository.GetUserRatingDtosForChapterAsync(chapterId, UserId))
             .Where(r => !string.IsNullOrEmpty(r.Body))
-            .OrderByDescending(review => review.Username.Equals(User.GetUsername()) ? 1 : 0)
+            .OrderByDescending(review => review.Username.Equals(Username!) ? 1 : 0)
             .ToList();
 
-        var ownRating = await _unitOfWork.UserRepository.GetUserChapterRatingAsync(User.GetUserId(), chapterId);
+        var ownRating = await _unitOfWork.UserRepository.GetUserChapterRatingAsync(UserId, chapterId);
         if (ownRating != null)
         {
             ret.Rating = ownRating.Rating;

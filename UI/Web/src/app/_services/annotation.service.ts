@@ -6,7 +6,7 @@ import {TextResonse} from "../_types/text-response";
 import {asyncScheduler, map, of, tap} from "rxjs";
 import {switchMap, throttleTime} from "rxjs/operators";
 import {AccountService} from "./account.service";
-import {User} from "../_models/user";
+import {User} from "../_models/user/user";
 import {MessageHubService} from "./message-hub.service";
 import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
 import {Router} from "@angular/router";

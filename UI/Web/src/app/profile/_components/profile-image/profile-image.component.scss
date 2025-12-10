@@ -1,0 +1,177 @@
+/* Minimal component SCSS
+   Global rules in `src/styles.scss` handle the visibility and delayed reveal of the edit/reset buttons. */
+
+.profile-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.profile-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.image-container {
+  position: relative;
+  align-self: flex-start;
+  max-height: 400px;
+  max-width: 280px;
+}
+
+.person-badge {
+  background: var(--card-bg-color);
+  max-height: 200px;
+  height: 200px;
+  width: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+
+  &-placeholder {
+    height: 100%;
+    width: 100%;
+
+    i {
+      max-height: 128px;
+      height: 128px;
+      font-size: 8rem;
+      color: var(--bs-gray-500);
+    }
+  }
+}
+
+.reset-button {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--error-color);
+  color: white;
+  border: 2px solid var(--elevation-layer7-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 5;
+
+  &:hover:not(:disabled) {
+    background-color: var(--error-accent-color);
+    border: 2px solid var(--elevation-layer3-dark);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 2px 4px var(--elevation-layer7-dark);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(1.02);
+    box-shadow: 0 2px 6px rgba(234, 13, 2, 0.4);
+  }
+
+  &:focus {
+    outline: 2px solid var(--error-accent-color);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+.edit-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--primary-color-darker-shade);
+  border: 2px solid var(--elevation-layer7-dark);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 5;
+
+  &:hover:not(:disabled) {
+    background-color: var(--primary-color);
+    border: 2px solid var(--elevation-layer7-dark);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 2px 4px var(--elevation-layer7-dark);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(1.02);
+    box-shadow: 0 2px 6px rgba(74, 198, 148, 0.4);
+  }
+
+  &:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .edit-button {
+    width: 35px;
+    height: 35px;
+    bottom: 5px;
+    right: 5px;
+
+    i {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+/* Profile image controls: hide by default; reveal on hover or focus-within (touch/keyboard) */
+.profile-image-wrapper .reset-button,
+.profile-image-wrapper .edit-button {
+  opacity: 0 !important;
+  transform: translateY(6px) scale(0.9) !important;
+  pointer-events: none !important;
+  transition-property: opacity, transform !important;
+  transition-duration: 180ms !important;
+  transition-timing-function: cubic-bezier(0.2, 0, 0.2, 1) !important;
+  /* delay the reveal by 1000ms */
+  transition-delay: 1000ms !important;
+}
+
+/* Reveal with 1000ms delay on hover/focus-within */
+.profile-image-wrapper:hover .reset-button,
+.profile-image-wrapper:focus-within .reset-button,
+.profile-image-wrapper:hover .edit-button,
+.profile-image-wrapper:focus-within .edit-button {
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+  pointer-events: auto !important;
+  /* default: no delay when hiding */
+  transition-delay: 0ms !important;
+}
+
+/* On very small touch-only devices, allow controls to be visible when the wrapper is active (also delayed) */
+@media (hover: none) and (pointer: coarse) {
+  .profile-image-wrapper:active .reset-button,
+  .profile-image-wrapper:active .edit-button {
+    opacity: 1 !important;
+    transform: translateY(0) scale(1) !important;
+    pointer-events: auto !important;
+    transition-delay: 1000ms !important;
+  }
+}

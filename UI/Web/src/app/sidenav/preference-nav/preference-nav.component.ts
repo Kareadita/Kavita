@@ -18,7 +18,7 @@ import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
 import {map, Observable, of, shareReplay, switchMap, take, tap} from "rxjs";
 import {ServerService} from "../../_services/server.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 import {filter} from "rxjs/operators";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {LicenseService} from "../../_services/license.service";
@@ -30,6 +30,7 @@ import {KeyBindTarget} from "../../_models/preferences/preferences";
 export enum SettingsTabId {
 
   // Admin
+  Activity = 'admin-activity',
   General = 'admin-general',
   OpenIDConnect = 'admin-oidc',
   Email = 'admin-email',
@@ -42,6 +43,7 @@ export enum SettingsTabId {
   MediaIssues = 'admin-media-issues',
   EmailHistory = 'admin-email-history',
   ManageMetadata = 'admin-public-metadata',
+  AdminDevices = 'admin-device',
 
   // Kavita+
   KavitaPlusLicense = 'admin-kavitaplus',
@@ -70,6 +72,7 @@ export enum SettingsTabId {
 export enum SettingSectionId {
   AccountSection = 'account-section-title',
   ServerSection = 'server-section-title',
+  InsightsSection = 'insights-section-title',
   ImportSection = 'import-section-title',
   InfoSection = 'info-section-title',
   KavitaPlusSection = 'kavitaplus-section-title',
@@ -233,6 +236,13 @@ export class PreferenceNavComponent implements AfterViewInit {
           new SideNavItem(SettingsTabId.Font),
           new SideNavItem(SettingsTabId.Devices),
           new SideNavItem(SettingsTabId.UserStats),
+        ]
+      },
+      {
+        title: SettingSectionId.InsightsSection,
+        children: [
+          new SideNavItem(SettingsTabId.Activity, [Role.Admin]),
+          new SideNavItem(SettingsTabId.AdminDevices, [Role.Admin]),
         ]
       },
       {

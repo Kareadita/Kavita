@@ -69,6 +69,39 @@
         "custom-scopes-tooltip": "Additional scopes to request from your OIDC provider during login. Separate multiple scopes with commas. Incorrect values may prevent login."
     },
 
+    "manage-auth-keys": {
+        "auth-keys-title": "Manage Authorization Keys",
+        "name-label": "Name",
+        "key-label": "Key",
+        "expires-label": "Expiration",
+        "last-accessed-label": "Last Accessed",
+        "actions-label": "Actions",
+        "rotate": "Rotate",
+        "delete": "{{common.delete}}",
+        "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
+        "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
+        "clients-opds-description": "{{user-preferences.clients-opds-description}}",
+        "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
+        "opds": "OPDS",
+        "image-only": "Images",
+        "add-auth-key": "New",
+        "description": "An Auth Key is like a password. Rotating it will invalidate any existing clients."
+    },
+
+    "create-auth-key": {
+        "create-title": "Create Auth Key",
+        "rotate-title": "Rotate Auth Key",
+        "name-label": "Name",
+        "key-length-label": "Key Length",
+        "expiration-label": "Expiration",
+        "required-field": "{{validations.required-field}}",
+        "total-key-length": "Total Key Length: {{length}}",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "never": "Never"
+    },
+
     "identity-provider-pipe": {
         "kavita": "Kavita",
         "oidc": "OpenID Connect"
@@ -172,6 +205,11 @@
         "critic": "critic"
     },
 
+    "review-list-item": {
+        "by-label": "By",
+        "created-alt": "Created"
+    },
+
     "want-to-read": {
         "title": "Want To Read",
         "series-count": "{{common.series-count}}",
@@ -215,6 +253,8 @@
         "colorscape-tooltip": "Global toggle to enable/disable the dynamic gradient feature. Will override theme settings",
         "data-saver-label": "Data saver",
         "data-saver-tooltip": "Minimizes data usage by preventing automatic prefetching (e.g., PDF reader)",
+        "prompt-for-rereads-after-label": "Prompt for Re-Reads",
+        "prompt-for-rereads-after-tooltip": "Show the Re-Read Prompt if no progress since X days ago. 0 disables the prompt entirely.",
 
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobbling",
@@ -234,6 +274,9 @@
         "social-max-age-rating-tooltip": "Max age rating on which social features will work",
         "social-include-unknowns-label": "Include unknowns",
         "social-include-unknowns-tooltip": "Enable social features for series and chapters with an unknown age rating",
+        "social-share-profile-label": "Share Profile",
+        "social-share-profile-tooltip": "Enable sharing information about your reading activity to other server members",
+
 
         "embed-progress-indicator-label": "Embed Progress Indicator",
         "embed-progress-indicator-tooltip": "Embed Progress Indicator in Title",
@@ -241,19 +284,28 @@
         "include-continue-from-tooltip": "Insert a \"Continue From X\" entry in OPDS fields to avoid finding your last reading point (Emulates Kavita's Continue button)",
 
         "clients-opds-alert": "OPDS is not enabled on this server. This will not affect Mihon users.",
-        "clients-opds-description": "All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.",
-        "clients-api-key-tooltip": "The API key is like a password. Resetting it will invalidate any existing clients.",
+        "clients-opds-description": "All 3rd Party clients will either use the OPDS Auth key or the Connection Url below. These are like passwords, keep it private.",
         "clients-opds-url-label": "OPDS URL",
-        "clients-api-key-label": "API Key",
         "clients-opds-url-tooltip": "See a list of supported OPDS clients: ",
 
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
 
+    "reread-modal": {
+        "title": "Re-Read",
+        "description-full-read": "You've already finished this {{entityType}}! Would you like to start over?",
+        "description-time-passed": "It has been {{days}} days since you've last read this {{entityType}}, need a refresher?",
+        "continue": "Pick up where you left off",
+        "reread": "Start Over",
+        "cancel": "{{common.cancel}}",
+        "read-incognito": "Read incognito"
+    },
+
     "multi-check-box-form": {
         "select-all": "Select all",
-        "deselect-all": "Deselect all"
+        "deselect-all": "Deselect all",
+        "no-data": "{{typeahead.no-data}}"
     },
 
     "user-holds": {
@@ -332,23 +384,30 @@
 
     "manage-devices": {
         "title": "Device Manager",
-        "description": "This section is for you to setup devices that cannot connect to Kavita via a web browser and instead have an email address that accepts files.",
-        "devices-title": "Devices",
-        "no-devices": "There are no devices setup yet",
+        "description": "This section is for you to setup email devices that cannot connect to Kavita and instead have an email address that accepts files.",
         "platform-label": "Platform",
         "email-label": "Email",
         "name-label": "Name",
-        "email-setup-alert": "Want to send files to your devices? Have your admin setup Email settings first!",
+        "email-setup-alert": "Want to send files to your email? Have your admin setup Email settings first!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
         "actions-header": "{{manage-users.actions-header}}",
-        "warning": "Warning"
+        "warning": "Warning",
+        "client-devices-header": "Client Devices",
+        "sendto-device-header": "Email-based Devices"
+    },
+
+    "server-devices": {
+        "client-devices-header": "{{manage-devices.client-devices-header}}",
+        "client-devices-this-month-header": "Client Devices this Month",
+        "client-devices-mobile-vs-pc-header": "Mobile vs PC this Month",
+        "no-data": "{{common.no-data}}"
     },
 
     "edit-device-modal": {
-        "title": "Edit Device",
+        "title": "Edit Email Device",
         "device-name-label": "{{manage-devices.name-label}}",
         "platform-label": "{{manage-devices.platform-label}}",
 
@@ -361,6 +420,20 @@
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}"
     },
+
+    "client-device-card": {
+        "auth-type-label": "Authentication Type",
+        "browser-label": "Browser",
+        "platform-label": "Platform",
+        "screen-label": "Screen",
+        "version-label": "App Version",
+        "first-seen-label": "First Seen",
+        "last-seen-label": "Last Seen",
+        "active": "Active",
+        "save": "{{common.save}}",
+        "local": "Local"
+    },
+
 
     "change-password": {
         "password-label": "{{common.password}}",
@@ -412,10 +485,7 @@
         "show": "Show",
         "hide": "Hide",
         "regen-warning": "Regenerating your API key will invalidate any existing clients.",
-        "no-key": "ERROR - KEY NOT SET",
-        "confirm-reset": "This will invalidate any OPDS configurations you have setup. Are you sure you want to continue?",
-        "key-reset": "API Key reset",
-        "reset": "Reset"
+        "no-key": "ERROR - KEY NOT SET"
     },
 
     "scrobbling-providers": {
@@ -595,6 +665,15 @@
         "year-ago": "a year ago",
         "years-ago": "{{value}} years ago"
     },
+
+    "duration-pipe": {
+        "seconds": "{{num}} seconds",
+        "minutes": "{{num}} minutes",
+        "hours": "{{num}} hours",
+        "combo": "{{hour}}h {{min}}m"
+
+    },
+
 
     "relationship-pipe": {
         "adaptation": "Adaptation",
@@ -1180,7 +1259,17 @@
         "publication-status-tooltip": "Publication Status",
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "read-count-tooltip": "Total Reads"
+    },
+
+    "reading-progress-status-pipe": {
+        "no-progress": "Read",
+        "no-progress-incognito": "Read incognito",
+        "progress": "Continue",
+        "progress-incognito": "Continue incognito",
+        "full-read": "Reread",
+        "full-read-incognito": "Reread incognito"
     },
 
     "match-series-modal": {
@@ -1944,9 +2033,14 @@
     "settings": {
         "account-section-title": "Account",
         "server-section-title": "Server",
+        "insights-section-title": "Insights",
         "info-section-title": "Info",
         "import-section-title": "Import",
         "kavitaplus-section-title": "Kavita+",
+
+        "admin-activity": "Activity",
+        "admin-device": "Devices",
+
         "admin-general": "General",
         "admin-oidc": "OpenID Connect",
         "admin-users": "Users",
@@ -1969,7 +2063,7 @@
         "preferences": "Preferences",
         "custom-key-binds": "Key Binds",
         "reading-profiles": "Reading Profiles",
-        "clients": "API Key / OPDS",
+        "clients": "Auth Keys / OPDS",
         "devices": "Devices",
         "user-stats": "Stats",
         "scrobbling": "Scrobbling",
@@ -2100,7 +2194,8 @@
         "date-range-title": "Date Range",
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "Reorder Items",
-        "dnd-warning": "Drag and drop is unavailable on mobile devices or when the reading list has more than 100 items."
+        "dnd-warning": "Drag and drop is unavailable on mobile devices or when the reading list has more than 100 items.",
+        "loading-alt": "{{pdf-reader.loading-message}}"
     },
 
     "events-widget": {
@@ -2163,8 +2258,32 @@
         "person-aka-status": "Matches an alias",
         "browse-genres": "Browse Genres",
         "browse-tags": "Browse Tags",
-        "all-annotations": "Browse Annotations"
+        "all-annotations": "Browse Annotations",
+        "my-profile": "My Profile"
     },
+
+    "client-device-auth-type-pipe": {
+        "unknown": "Unknown",
+        "oidc": "OIDC",
+        "jwt": "JWT",
+        "auth-key": "Auth Key"
+    },
+
+    "client-device-platform-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}"
+    },
+
+    "client-device-client-type-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}",
+        "web-browser": "Web Browser",
+        "web-app": "Web App",
+        "koreader": "KOReader",
+        "panels": "Panels",
+        "librera": "Librera",
+        "opds-client": "OPDS Client"
+    },
+
+
 
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -2649,15 +2768,6 @@
         "y-axis-label": "Reading Events"
     },
 
-    "kavitaplus-metadata-breakdown-stats": {
-        "title": "Kavita+ Metadata Breakdown",
-        "description": "Kavita fetches metadata (ratings, reviews, recommendations, etc) slowly over time for eligible series.",
-        "no-data": "{{common.no-data}}",
-        "errored-series-label": "Errored Series",
-        "completed-series-label": "Completed Series",
-        "complete": "All Series have metadata"
-    },
-
     "file-breakdown-stats": {
         "format-title": "Format",
         "format-tooltip": "Not Classified means Kavita has not scanned some files. This occurs on old files existing prior to v0.7. You may need to run a forced scan via Library settings modal.",
@@ -2754,6 +2864,232 @@
         "people": "People",
         "genres": "{{metadata-fields.genres-title}}"
     },
+
+    "server-activity": {
+        "no-data": "Nothing to see here"
+    },
+
+    "fiction-graph": {
+
+    },
+
+    "activity-card": {
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "started-label": "Started",
+        "view-label": "View"
+    },
+
+    "profile": {
+        "title": "{{username}}'s Profile",
+        "joined-label": "Joined: {{date}}",
+        "stats-title": "A look at {{username}}'s journey through {{libraryName}}",
+        "overview-tab": "{{tabs.overview-tab}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "reviews-tab": "{{tabs.reviews-tab}}",
+        "no-reviews": "No Reviews yet",
+        "user-you": "you",
+        "user-possessive-your": "your",
+        "user-possessive": "{{name}}'s",
+        "total-reads-badge": "{{reads}} Reads",
+        "k+-badge": "K+ Subscriber"
+    },
+
+    "profile-review-list": {
+        "no-data": "No Reviews or Reviews aren't being shared",
+        "filter-label": "Filter by Series",
+        "rating-alt": "Filter by Rating",
+        "clear-rating-alt": "Clear Rating Filter"
+    },
+
+    "profile-stat-bar": {
+        "books-read-label": "Books Read",
+        "books-read-tooltip": "Books Read: {{count}}",
+        "comics-read-label": "Comics Read",
+        "comics-read-tooltip": "Comics Read: {{count}}",
+        "pages-read-label": "Pages Read",
+        "pages-read-tooltip": "Pages Read: {{count}}",
+        "words-read-label": "Words Read",
+        "words-read-tooltip": "Words Read: {{count}}",
+        "authors-read-label": "Authors Read",
+        "authors-read-tooltip": "Authors Read: {{count}}",
+        "reviews-label": "Reviews",
+        "reviews-tooltip": "Reviews: {{count}}",
+        "ratings-label": "Ratings",
+        "ratings-tooltip": "Ratings: {{count}}"
+    },
+
+    "profile-image": {
+        "edit-image-alt": "Edit Image",
+        "reset-image-alt": "Reset Image"
+    },
+
+    "preferred-format": {
+        "title": "Preferred format",
+        "sub-title": "{{name}} prefers to read {{format}}",
+        "no-data": "{{common.no-data}}"
+    },
+
+    "favorite-authors": {
+        "title": "Most Read Authors",
+        "sub-title": "{{name}}'s most read author is {{author}}, with {{count}} total reads",
+        "no-data": "{{common.no-data}}"
+    },
+
+    "page-spread": {
+        "title": "Chapters by Page Count",
+        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} pages",
+        "data-type": "{{data}} chapters",
+        "data-of": "{{percentage}}% of your chapters",
+        "range": "Page range: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+
+    "word-spread": {
+        "title": "Chapters by Word Count",
+        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} words",
+        "data-type": "{{data}} chapters",
+        "data-of": "{{percentage}}% of your chapters",
+        "range": "Word range: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+
+    "tag-breakdown": {
+        "title": "Most read tags",
+        "sub-title": "{{name}} most read tag is {{mostUsed}}",
+        "missing": "Missing tags for {{amount}} series",
+        "no-data": "{{common.no-data}}"
+    },
+    "genre-breakdown": {
+        "title": "Most read genres",
+        "sub-title": "{{name}} most read genre is {{mostUsed}}",
+        "missing": "Missing genres for {{amount}} series",
+        "no-data": "{{common.no-data}}"
+    },
+
+    "reads-by-month": {
+        "title": "Total reads by month",
+        "sub-title": "{{username}} has read the most in {{month}} {{year}} with {{reads}} chapters read",
+        "no-data": "{{common.no-data}}"
+    },
+
+    "avg-time-reading-by-hour": {
+        "title": "Average time spent reading by hour",
+        "minutes": "Minutes",
+        "most-time-spend-reading": "{{name}} spends most of their time reading between {{startHour}} and {{endHour}} with an average of {{amount}} minutes",
+        "data-since": "Only includes reads since {{date}}",
+        "no-data": "{{common.no-data}}"
+    },
+
+    "profile-overview": {
+        "currently-reading": "Currently Reading",
+        "want-to-read": "{{side-nav.want-to-read}}"
+    },
+
+    "activity-graph": {
+        "title": "Reading Activity",
+        "day-of-week-alt": "Day of the Week",
+        "less": "Less",
+        "more": "More",
+        "reading-time": "Reading Time",
+        "pages": "Pages",
+        "words": "Words",
+        "chapters": "Chapters",
+        "no-activity": "No Activity",
+        "no-activity-tooltip": "No reading activity on {{date}}.",
+        "low-activity": "Low Activity",
+        "moderate-activity": "Moderate Activity",
+        "good-activity": "Good Activity",
+        "high-activity": "High Activity",
+        "all-time": "All Time"
+    },
+
+    "reading-pace": {
+        "title": "Reading Pace",
+        "sub-title": "{{username}} reads a book every {{count}} days",
+        "hours-read": "Hours Read",
+        "pages-read": "Pages Read",
+        "words-read": "Words Read",
+        "comics-read": "Comics Read",
+        "books-read": "Books Read",
+        "per-year": "Per Year",
+        "per-month": "Per Month",
+        "per-day": "Per Day",
+        "no-data": "{{common.no-data}}",
+        "disclaimer": "Only takes books into account"
+    },
+
+    "smart-time-picker": {
+        "forever": "Forever",
+        "select-year": "Select Year",
+        "custom-range": "Custom range",
+        "during-entire-life": "during their entire life",
+        "during-year": "during {{year}}",
+        "during-from-to": "from {{startYear}} to {{endYear}}",
+        "during-select": "Select a time range"
+    },
+
+    "client-device-type-pipe": {
+        "mobile": "Mobile",
+        "tablet": "Tablet",
+        "desktop": "Desktop",
+        "Unknown": "{{common.unknown}}"
+    },
+
+    "month-label-pipe": {
+        "january": "January",
+        "january-short": "Jan",
+        "february": "February",
+        "february-short": "Feb",
+        "march": "March",
+        "march-short": "Mar",
+        "april": "April",
+        "april-short": "Apr",
+        "may": "May",
+        "may-short": "May",
+        "june": "June",
+        "june-short": "Jun",
+        "july": "July",
+        "july-short": "Jul",
+        "august": "August",
+        "august-short": "Aug",
+        "september": "September",
+        "september-short": "Sep",
+        "october": "October",
+        "october-short": "Oct",
+        "november": "November",
+        "november-short": "Nov",
+        "december": "December",
+        "december-short": "Dec"
+    },
+
+    "day-label-pipe": {
+        "sunday": "Sunday",
+        "sunday-short": "Sun",
+        "monday": "Monday",
+        "monday-short": "Mon",
+        "tuesday": "Tuesday",
+        "tuesday-short": "Tue",
+        "wednesday": "Wednesday",
+        "wednesday-short": "Wed",
+        "thursday": "Thursday",
+        "thursday-short": "Thu",
+        "friday": "Friday",
+        "friday-short": "Fri",
+        "saturday": "Saturday",
+        "saturday-short": "Sat"
+    },
+
+    "ordinal-date-pipe": {
+        "ordinalFormat": "{{month}} {{day}}",
+        "ordinal": {
+            "st": "st",
+            "nd": "nd",
+            "rd": "rd",
+            "th": "th"
+        }
+    },
+
 
     "errors": {
         "series-doesnt-exist": "This series no longer exists",
@@ -3001,6 +3337,8 @@
         "annotation-highlights": "Highlight color",
         "annotation-comment": "Annotation Text",
         "annotation-selection": "Highlight Text",
+        "annotation-likes": "Likes",
+        "annotation-liked-by": "Liked by",
         "series": "{{tabs.series-tab}}"
     },
 
@@ -3089,6 +3427,7 @@
         "confirm-delete-series": "Are you sure you want to delete this series? It will not modify files on disk.",
         "confirm-delete-chapter": "Are you sure you want to delete this chapter? It will not modify files on disk.",
         "confirm-delete-volume": "Are you sure you want to delete this volume? It will not modify files on disk.",
+        "confirm-delete-auth-key": "Are you sure you want to delete this Auth Key?",
         "alert-bad-theme": "There is invalid or unsafe css in the theme. Please reach out to your admin to have this corrected. Defaulting to dark theme.",
         "confirm-library-delete": "Are you sure you want to delete the {{name}} library? You cannot undo this action.",
         "confirm-library-type-change": "Changing library type will trigger a new scan with different parsing rules and may lead to series being re-created and hence you may lose progress and bookmarks. You should backup before you do this. Are you sure you want to continue?",
@@ -3249,7 +3588,8 @@
         "merge": "Merge",
         "export": "Export",
         "like": "Like",
-        "unlike": "Remove likes"
+        "unlike": "Remove likes",
+        "edit-device-name": "Edit Name"
     },
 
     "preferences": {
@@ -3420,7 +3760,8 @@
         "stats-tab": "Stats",
         "scrobbling-tab": "Scrobbling",
         "smart-filters-tab": "Smart Filters",
-        "annotations-tab": "Annotations"
+        "annotations-tab": "Annotations",
+        "overview-tab": "Overview"
     },
 
     "common": {

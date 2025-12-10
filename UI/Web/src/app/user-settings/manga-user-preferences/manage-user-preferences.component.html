@@ -97,6 +97,21 @@
         </div>
 
         <div class="row g-0 mt-4 mb-4">
+          @if (settingsForm.get('promptForRereadsAfter'); as control) {
+            <app-setting-item [title]="t('prompt-for-rereads-after-label')" [subtitle]="t('prompt-for-rereads-after-tooltip')">
+              <ng-template #view>
+                <span> {{control.value}} </span>
+              </ng-template>
+              <ng-template #edit>
+                <input type="number" min="0" id="prompt-for-rereads-after"
+                       formControlName="promptForRereadsAfter" class="form-control"
+                       aria-labelledby="auto-close-label">
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+
+        <div class="row g-0 mt-4 mb-4">
           <app-setting-item [canEdit]="false" [showEdit]="false" [allowClickEvents]="true"
                             [title]="t('highlight-bar-label')" [subtitle]="t('highlight-bar-tooltip')">
             <ng-template #view>
@@ -195,6 +210,17 @@
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch" id="social-include-unknowns"
                        formControlName="socialIncludeUnknowns" class="form-check-input">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+
+        <div class="row g-0 mt-4">
+          <app-setting-switch [title]="t('social-share-profile-label')" [subtitle]="t('social-share-profile-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch" id="social-share-profile"
+                       formControlName="shareProfile" class="form-check-input">
               </div>
             </ng-template>
           </app-setting-switch>

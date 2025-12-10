@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using API.Entities;
+﻿using API.Entities;
 using API.Entities.Metadata;
 using API.Extensions;
 

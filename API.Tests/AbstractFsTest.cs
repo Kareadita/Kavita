@@ -1,7 +1,6 @@
 
 
 using System.IO;
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using API.Services.Tasks.Scanner.Parser;
 

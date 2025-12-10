@@ -64,9 +64,12 @@
 
               <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
                 <div class="d-flex align-items-center">
-                  {{ an.ownerUsername }}
+                  <app-profile-icon [userId]="an.ownerUserId" />
+                  <a class="ms-2" routerLink="/profile/{{an.ownerUserId}}" (click)="$event.stopPropagation()">
+                    {{ an.ownerUsername }}
+                  </a>
                 </div>
-                <div class="ms-2">{{ an.createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
+                <div class="ms-2">{{ an.createdUtc | utcToLocalDate | date: 'shortDate' }}</div>
               </div>
 
               @if (an.ownerUsername === accountService.currentUserSignal()?.username) {

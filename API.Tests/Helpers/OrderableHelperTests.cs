@@ -12,7 +12,7 @@ public class OrderableHelperTests
     [Fact]
     public void ReorderItems_ItemExists_SuccessfullyReorders()
     {
-        // Arrange
+
         var items = new List<AppUserSideNavStream>
         {
             new AppUserSideNavStream { Id = 1, Order = 0, Name = "A" },
@@ -32,7 +32,7 @@ public class OrderableHelperTests
     [Fact]
     public void ReorderItems_ItemNotFound_NoChange()
     {
-        // Arrange
+
         var items = new List<AppUserSideNavStream>
         {
             new AppUserSideNavStream { Id = 1, Order = 0, Name = "A" },
@@ -65,7 +65,7 @@ public class OrderableHelperTests
     [Fact]
     public void ReorderItems_EmptyList_NoChange()
     {
-        // Arrange
+
         var items = new List<AppUserSideNavStream>();
 
         // Act

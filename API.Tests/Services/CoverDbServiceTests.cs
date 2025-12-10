@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.IO.Abstractions;
 using System.Reflection;
 using System.Threading.Tasks;
 using API.Constants;
@@ -32,7 +31,7 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         "../../../Services/Test Data/CoverDbService/Temp");
 
 
-    private static async Task<(IDirectoryService, ICoverDbService)> Setup(IUnitOfWork unitOfWork)
+    private static Task<(IDirectoryService, ICoverDbService)> Setup(IUnitOfWork unitOfWork)
     {
 
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), CreateFileSystem());
@@ -41,7 +40,7 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var coverDbService = new CoverDbService(Substitute.For<ILogger<CoverDbService>>(), directoryService, CacheFactory,
             Substitute.For<IHostEnvironment>(), imageService, unitOfWork, Substitute.For<IEventHub>());
 
-        return (directoryService, coverDbService);
+        return Task.FromResult<(IDirectoryService, ICoverDbService)>((directoryService, coverDbService));
     }
 
 
@@ -56,7 +55,7 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (unitOfWork, context, _) = await CreateDatabase();
         var (directoryService, coverDbService) = await Setup(unitOfWork);
 
-        // Arrange
+
         var testUrl = "https://anilist.co/anime/6205/Kmpfer/";
         var encodeFormat = EncodeFormat.WEBP;
         var expectedFaviconPath = Path.Combine(FaviconPath, "anilist.co.webp");
@@ -101,7 +100,7 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var (unitOfWork, context, _) = await CreateDatabase();
         var (directoryService, coverDbService) = await Setup(unitOfWork);
 
-        // Arrange
+
         var testUrl = "https://example.com";
         var encodeFormat = EncodeFormat.WEBP;
 

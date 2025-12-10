@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using API.Data.Migrations;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Annotations;
@@ -9,9 +8,8 @@ using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Device;
+using API.DTOs.Device.EmailDevice;
 using API.DTOs.Email;
-using API.DTOs.Filtering;
-using API.DTOs.Filtering.v2;
 using API.DTOs.Font;
 using API.DTOs.KavitaPlus.Manage;
 using API.DTOs.KavitaPlus.Metadata;
@@ -34,19 +32,20 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Entities.MetadataMatching;
 using API.Entities.Person;
+using API.Entities.Progress;
 using API.Entities.Scrobble;
+using API.Entities.User;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers.Converters;
-using API.Services;
 using AutoMapper;
 using CollectionTag = API.Entities.CollectionTag;
 using EmailHistory = API.Entities.EmailHistory;
-using ExternalSeriesMetadata = API.Entities.Metadata.ExternalSeriesMetadata;
 using MediaError = API.Entities.MediaError;
 using PublicationStatus = API.Entities.Enums.PublicationStatus;
 using SiteTheme = API.Entities.SiteTheme;
 
 namespace API.Helpers;
+#nullable enable
 
 public class AutoMapperProfiles : Profile
 {
@@ -67,7 +66,6 @@ public class AutoMapperProfiles : Profile
                 opt => opt.MapFrom(src => src.Chapters.OrderBy(c => c.SortOrder)));
         CreateMap<MangaFile, MangaFileDto>();
         CreateMap<Series, SeriesDto>();
-        CreateMap<CollectionTag, CollectionTagDto>();
         CreateMap<AppUserCollection, AppUserCollectionDto>()
             .ForMember(dest => dest.Owner, opt => opt.MapFrom(src => src.AppUser.UserName))
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count));
@@ -98,6 +96,9 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Body,
                 opt =>
                     opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.UserId,
+                opt =>
+                    opt.MapFrom(src => src.AppUser.Id))
             .ForMember(dest => dest.Username,
                 opt =>
                     opt.MapFrom(src => src.AppUser.UserName));
@@ -326,6 +327,7 @@ public class AutoMapperProfiles : Profile
             .AfterMap((ps, pst, context) => context.Mapper.Map(ps.Libraries, pst.Libraries));
 
         CreateMap<RegisterDto, AppUser>();
+        CreateMap<AppUser, MemberInfoDto>();
 
         CreateMap<IList<ServerSetting>, ServerSettingDto>()
             .ConvertUsing<ServerSettingConverter>();
@@ -333,7 +335,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
             .ConvertUsing<ServerSettingConverter>();
 
-        CreateMap<Device, DeviceDto>();
+        CreateMap<Device, EmailDeviceDto>();
         CreateMap<AppUserTableOfContent, PersonalToCDto>();
 
 
@@ -404,5 +406,70 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.AppUserId));
 
         CreateMap<OidcConfigDto, OidcPublicConfigDto>();
+
+        CreateMap<AppUserReadingSessionActivityData, ReadingActivityDataDto>();
+        CreateMap<ClientInfoData, ClientInfoDto>();
+        CreateMap<AppUserReadingSession, ReadingSessionDto>()
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.AppUserId))
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.AppUser.UserName));
+
+        CreateMap<ClientDevice, ClientDeviceDto>()
+            .ForMember(dest => dest.OwnerUserId, opt => opt.MapFrom(src => src.AppUserId))
+            .ForMember(dest => dest.OwnerUsername, opt => opt.MapFrom(src => src.AppUser.UserName));
+
+        CreateMap<AppUserRating, UserReviewExtendedDto>()
+            .ForMember(dest => dest.Body,
+            opt => opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.SeriesId,
+            opt => opt.MapFrom(src => src.SeriesId))
+            .ForMember(dest => dest.ChapterId,
+            opt => opt.MapFrom(src => (int?)null))
+            .ForMember(dest => dest.LibraryId,
+            opt => opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.Username,
+            opt => opt.MapFrom(src => src.AppUser.UserName))
+            .ForMember(dest => dest.Rating,
+            opt => opt.MapFrom(src => src.Rating))
+            .ForMember(dest => dest.Series,
+            opt => opt.MapFrom(src => src.Series))
+            .ForMember(dest => dest.Writers,
+                opt =>
+                    opt.MapFrom(src =>
+                        src.Series.Metadata.People
+                            .Where(p => p.Role == PersonRole.Writer)
+                                .OrderBy(p => p.OrderWeight)
+                                .Select(p => p.Person))
+                    )
+            .ForMember(dest => dest.Chapter,
+            opt => opt.MapFrom(src => (ChapterDto?)null));
+
+        // Map from AppUserChapterRating (chapter-level reviews)
+        CreateMap<AppUserChapterRating, UserReviewExtendedDto>()
+            .ForMember(dest => dest.Body,
+            opt => opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.SeriesId,
+            opt => opt.MapFrom(src => src.SeriesId))
+            .ForMember(dest => dest.ChapterId,
+            opt => opt.MapFrom(src => src.ChapterId))
+            .ForMember(dest => dest.LibraryId,
+            opt => opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.Username,
+                opt => opt.MapFrom(src => src.AppUser.UserName))
+            .ForMember(dest => dest.Rating,
+                opt => opt.MapFrom(src => src.Rating))
+            .ForMember(dest => dest.Series,
+                opt => opt.MapFrom(src => src.Series))
+            .ForMember(dest => dest.Writers,
+                opt => opt.MapFrom(src =>
+                    src.Chapter.People
+                        .Where(p => p.Role == PersonRole.Writer)
+                        .OrderBy(p => p.OrderWeight)
+                        .Select(p => p.Person))
+                )
+            .ForMember(dest => dest.Chapter,
+                opt => opt.MapFrom(src => src.Chapter));
+
+        CreateMap<AppUserAuthKey, AuthKeyDto>();
+
     }
 }

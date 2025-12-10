@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using API.Entities;
 using API.Entities.History;
 using API.Extensions;
-using API.Helpers.Builders;
 using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;

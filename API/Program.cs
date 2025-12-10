@@ -106,7 +106,7 @@ public class Program
                                 // v0.8.4
                                 await ManualMigrateEncodeSettings.Migrate(context, logger);
                             }
-                            catch (Exception ex)
+                            catch (Exception)
                             {
                                 /* Swallow */
                             }
@@ -128,7 +128,6 @@ public class Program
                 await Seed.SeedFonts(context);
                 await Seed.SeedDefaultStreams(unitOfWork);
                 await Seed.SeedDefaultSideNavStreams(unitOfWork);
-                await Seed.SeedUserApiKeys(context);
                 await Seed.SeedMetadataSettings(context);
                 await Seed.SeedDefaultHighlightSlots(unitOfWork);
             }

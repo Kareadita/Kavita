@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
-using API.Entities.Enums;
 
 namespace API.DTOs.Metadata.Browse.Requests;
 #nullable enable

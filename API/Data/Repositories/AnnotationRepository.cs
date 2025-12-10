@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data.Misc;
 using API.DTOs;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata.Browse.Requests;
 using API.DTOs.Annotations;
 using API.DTOs.Reader;
 using API.Entities;
-using API.Entities.Enums;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers;
@@ -176,6 +174,8 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
             AnnotationFilterField.Spoiler => query.Where(a => !(bool) value || !a.ContainsSpoiler),
             AnnotationFilterField.Comment => query.HasCommented(true, statement.Comparison, (string) value),
             AnnotationFilterField.Selection => query.HasSelected(true, statement.Comparison, (string) value),
+            AnnotationFilterField.Likes => query.HasLikes(true, statement.Comparison, (int) value),
+            AnnotationFilterField.LikedBy => query.IsLikedBy(true, statement.Comparison, (IList<int>) value),
             _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
         };
     }

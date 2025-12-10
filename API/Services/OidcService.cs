@@ -75,6 +75,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     public const string ExpiresAt = "expires_at";
     /// The name of the Auth Cookie set by .NET
     public const string CookieName = ".AspNetCore.Cookies";
+    public static readonly List<string> DefaultScopes = ["openid", "profile", "offline_access", "roles", "email"];
 
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
     private static readonly ConcurrentDictionary<string, DateTimeOffset> LastFailedRefresh = new();
@@ -171,20 +172,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             ctx.Properties.UpdateTokenValue(IdToken, tokenResponse.IdToken);
             ctx.ShouldRenew = true;
 
-            try
-            {
-                user.UpdateLastActive();
-
-                if (unitOfWork.HasChanges())
-                {
-                    await unitOfWork.CommitAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
-            }
-
             if (string.IsNullOrEmpty(tokenResponse.IdToken))
             {
                 logger.LogTrace("The OIDC provider did not return an id token in the refresh response, continuous sync is not supported");
@@ -225,18 +212,20 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     /// <exception cref="KavitaException"></exception>
     private async Task<AppUser?> CreateNewAccount(HttpRequest request, ClaimsPrincipal principal, OidcConfigDto settings, string oidcId)
     {
-        var accessRoles = principal.GetClaimsWithPrefix(settings.RolesClaim, settings.RolesPrefix)
-            .Where(s => PolicyConstants.ValidRoles.Contains(s)).ToList();
-        if (settings.SyncUserSettings && accessRoles.Count == 0)
+        // Check if the token contains the login role, or the admin role
+        var isAllowedToBeCreated = principal.GetClaimsWithPrefix(settings.RolesClaim, settings.RolesPrefix)
+            .Intersect([PolicyConstants.LoginRole, PolicyConstants.AdminRole], StringComparer.OrdinalIgnoreCase)
+            .Any();
+
+        if (settings.SyncUserSettings && !isAllowedToBeCreated)
         {
-            logger.LogDebug("No valid roles where found under {Claim} with prefix {Prefix}", settings.RolesClaim, settings.RolesPrefix);
+            logger.LogDebug("Login role was not found under claim {Claim} with prefix {Prefix}", settings.RolesClaim, settings.RolesPrefix);
             throw new KavitaException("errors.oidc.role-not-assigned");
         }
 
-        AppUser? user;
         try
         {
-            user = await NewUserFromOpenIdConnect(request, settings, principal, oidcId);
+            return await NewUserFromOpenIdConnect(request, settings, principal, oidcId);
         }
         catch (KavitaException e)
         {
@@ -248,16 +237,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             throw new KavitaException("errors.oidc.creating-user");
         }
 
-        if (user == null) return null;
-
-        var roles = await userManager.GetRolesAsync(user);
-        if (roles.Count == 0 || (!roles.Contains(PolicyConstants.LoginRole) && !roles.Contains(PolicyConstants.AdminRole)))
-        {
-            logger.LogDebug("User does not have Login or AdminRole assigned. Has: {Roles}", string.Join(",", roles));
-            throw new KavitaException("errors.oidc.disabled-account");
-        }
-
-        return user;
     }
 
     /// <summary>
@@ -302,14 +281,12 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var name = await FindBestAvailableName(claimsPrincipal) ?? emailClaim.Value;
         logger.LogInformation("Creating new user from OIDC: {Name} - {ExternalId}", name.Censor(), externalId);
 
-        var user = new AppUserBuilder(name, emailClaim.Value,
-            await unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
+        var user = new AppUserBuilder(name, emailClaim.Value, await unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
 
         var res = await userManager.CreateAsync(user);
         if (!res.Succeeded)
         {
-            logger.LogError("Failed to create new user from OIDC: {Errors}",
-                res.Errors.Select(x => x.Description).ToList());
+            logger.LogError("Failed to create new user from OIDC: {Errors}", res.Errors.Select(x => x.Description).ToList());
             throw new KavitaException("errors.oidc.creating-user");
         }
 
@@ -520,8 +497,12 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
     private async Task SyncRoles(OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
     {
-        var roles = claimsPrincipal.GetClaimsWithPrefix(settings.RolesClaim, settings.RolesPrefix)
-            .Where(s => PolicyConstants.ValidRoles.Contains(s)).ToList();
+        var rolesFromToken = claimsPrincipal.GetClaimsWithPrefix(settings.RolesClaim, settings.RolesPrefix);
+
+        var roles = PolicyConstants.ValidRoles
+            .Where(s => rolesFromToken.Contains(s, StringComparer.OrdinalIgnoreCase))
+            .ToList();
+
         logger.LogDebug("Syncing access roles for user {UserId}, found roles {Roles}", user.Id, roles);
 
         var errors = (await accountService.UpdateRolesForUser(user, roles)).ToList();
@@ -541,7 +522,10 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
         // Distinct to ensure each library (id) is only present once
-        var librariesIds = allLibraries.Where(l => libraryAccess.Contains(l.Name)).Select(l => l.Id).Distinct().ToList();
+        var librariesIds = allLibraries
+            .Where(l => libraryAccess.Contains(l.Name, StringComparer.OrdinalIgnoreCase))
+            .Select(l => l.Id).Distinct()
+            .ToList();
 
         var hasAdminRole = await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
         await accountService.UpdateLibrariesForUser(user, librariesIds, hasAdminRole);
@@ -561,7 +545,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         var ageRatings = claimsPrincipal.GetClaimsWithPrefix(settings.RolesClaim, ageRatingPrefix);
         logger.LogDebug("Syncing age restriction for user {UserId}, found restrictions {Restrictions}", user.Id, ageRatings);
 
-        if (ageRatings.Count == 0 || (ageRatings.Count == 1 && ageRatings.Contains(IncludeUnknowns)))
+        if (ageRatings.Count == 0 || (ageRatings.Count == 1 && ageRatings.Contains(IncludeUnknowns, StringComparer.OrdinalIgnoreCase)))
         {
             logger.LogDebug("No age restriction found in roles, setting to NotApplicable and Include Unknowns: {IncludeUnknowns}", settings.DefaultIncludeUnknowns);
 
@@ -574,6 +558,9 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         foreach (var ar in ageRatings)
         {
+            if (ar.Equals(IncludeUnknowns, StringComparison.OrdinalIgnoreCase))
+                continue;
+
             if (!EnumExtensions.TryParse(ar, out AgeRating ageRating))
             {
                 logger.LogDebug("Age Restriction role configured that failed to map to a known age rating: {RoleName}", AgeRestrictionPrefix+ar);
@@ -587,7 +574,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
 
         user.AgeRestriction = highestAgeRestriction;
-        user.AgeRestrictionIncludeUnknowns = ageRatings.Contains(IncludeUnknowns);
+        user.AgeRestrictionIncludeUnknowns = ageRatings.Contains(IncludeUnknowns, StringComparer.OrdinalIgnoreCase);
 
         logger.LogDebug("Synced age restriction for user {UserId}, AgeRestriction {AgeRestriction}, IncludeUnknowns: {IncludeUnknowns}",
             user.Id, user.AgeRestriction, user.AgeRestrictionIncludeUnknowns);

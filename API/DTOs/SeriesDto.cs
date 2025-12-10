@@ -21,24 +21,41 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     public int Pages { get; init; }
     /// <inheritdoc cref="API.Entities.Series.CoverImageLocked"/>
     public bool CoverImageLocked { get; set; }
-    /// <summary>
-    /// Sum of pages read from linked Volumes. Calculated at API-time.
-    /// </summary>
-    public int PagesRead { get; set; }
-    /// <summary>
-    /// DateTime representing last time the series was Read. Calculated at API-time.
-    /// </summary>
-    public DateTime LatestReadDate { get; set; }
+
     /// <inheritdoc cref="API.Entities.Series.LastChapterAdded"/>
     public DateTime LastChapterAdded { get; set; }
+    /// <inheritdoc cref="API.Entities.Series.LastChapterAddedUtc"/>
+    public DateTime LastChapterAddedUtc { get; set; }
+
+
+    #region Progress (applied on the fly)
     /// <summary>
-    /// Rating from logged in user. Calculated at API-time.
+    /// Rating from logged-in user
     /// </summary>
+    /// <remarks>Calculated at API-time</remarks>
     public float UserRating { get; set; }
     /// <summary>
     /// If the user has set the rating or not
     /// </summary>
+    /// <remarks>Calculated at API-time</remarks>
     public bool HasUserRated { get; set; }
+    /// <summary>
+    /// Min <see cref="ChapterDto.TotalReads"/> across the series
+    /// </summary>
+    /// <remarks>Calculated at API-time</remarks>
+    public int TotalReads { get; set; }
+    /// <summary>
+    /// Sum of pages read from linked Volumes. Calculated at API-time.
+    /// </summary>
+    /// <remarks>Calculated at API-time</remarks>
+    public int PagesRead { get; set; }
+    /// <summary>
+    /// DateTime representing last time the series was Read. Calculated at API-time.
+    /// </summary>
+    /// <remarks>Calculated at API-time</remarks>
+    public DateTime LatestReadDate { get; set; }
+    #endregion
+
 
     /// <inheritdoc cref="API.Entities.Series.Format"/>
     public MangaFormat Format { get; set; }
@@ -74,16 +91,20 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     public bool IsBlacklisted { get; set; }
     #endregion
 
+    #region ColorScape
     /// <inheritdoc cref="API.Entities.Series.CoverImage"/>
     public string? CoverImage { get; set; }
     /// <inheritdoc cref="API.Entities.Series.PrimaryColor"/>
     public string? PrimaryColor { get; set; } = string.Empty;
     /// <inheritdoc cref="API.Entities.Series.SecondaryColor"/>
     public string? SecondaryColor { get; set; } = string.Empty;
+    #endregion
 
     public void ResetColorScape()
     {
         PrimaryColor = string.Empty;
         SecondaryColor = string.Empty;
     }
+
+
 }

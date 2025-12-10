@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using API.DTOs.Filtering.v2;
 using API.Extensions;
 
@@ -19,6 +18,8 @@ public static class AnnotationFilterFieldValueConverter
             AnnotationFilterField.Spoiler => bool.Parse(value),
             AnnotationFilterField.Selection => value,
             AnnotationFilterField.Comment => value,
+            AnnotationFilterField.Likes => int.Parse(value),
+            AnnotationFilterField.LikedBy => value.ParseIntArray(),
             _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Field is not supported")
         };
     }

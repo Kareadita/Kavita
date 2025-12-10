@@ -8,8 +8,8 @@ using API.Data.Repositories;
 using API.DTOs.Collection;
 using API.DTOs.CollectionTags;
 using API.Entities;
-using API.Extensions;
 using API.Helpers.Builders;
+using API.Middleware;
 using API.Services;
 using API.Services.Plus;
 using API.SignalR;
@@ -57,7 +57,7 @@ public class CollectionController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetAllTags(bool ownedOnly = false)
     {
-        return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(User.GetUserId(), !ownedOnly));
+        return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(UserId, !ownedOnly));
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ public class CollectionController : BaseApiController
     [HttpGet("single")]
     public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetTag(int collectionId)
     {
-        var collections = await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(User.GetUserId(), false);
+        var collections = await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(UserId, false);
         return Ok(collections.FirstOrDefault(c => c.Id == collectionId));
     }
 
@@ -81,7 +81,7 @@ public class CollectionController : BaseApiController
     [HttpGet("all-series")]
     public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetCollectionsBySeries(int seriesId, bool ownedOnly = false)
     {
-        return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtosBySeriesAsync(User.GetUserId(), seriesId, !ownedOnly));
+        return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtosBySeriesAsync(UserId, seriesId, !ownedOnly));
     }
 
 
@@ -93,7 +93,7 @@ public class CollectionController : BaseApiController
     [HttpGet("name-exists")]
     public async Task<ActionResult<bool>> DoesNameExists(string name)
     {
-        return Ok(await _unitOfWork.CollectionTagRepository.CollectionExists(name, User.GetUserId()));
+        return Ok(await _unitOfWork.CollectionTagRepository.CollectionExists(name, UserId));
     }
 
     /// <summary>
@@ -103,25 +103,24 @@ public class CollectionController : BaseApiController
     /// <param name="updatedTag"></param>
     /// <returns></returns>
     [HttpPost("update")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateTag(AppUserCollectionDto updatedTag)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
         try
         {
-            if (await _collectionService.UpdateTag(updatedTag, User.GetUserId()))
+            if (await _collectionService.UpdateTag(updatedTag, UserId))
             {
                 await _eventHub.SendMessageAsync(MessageFactory.CollectionUpdated,
                     MessageFactory.CollectionUpdatedEvent(updatedTag.Id), false);
-                return Ok(await _localizationService.Translate(User.GetUserId(), "collection-updated-successfully"));
+                return Ok(await _localizationService.Translate(UserId, "collection-updated-successfully"));
             }
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await _localizationService.Translate(UserId, ex.Message));
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -130,13 +129,12 @@ public class CollectionController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("promote-multiple")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> PromoteMultipleCollections(PromoteCollectionsDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
         // This needs to take into account owner as I can select other users cards
         var collections = await _unitOfWork.CollectionTagRepository.GetCollectionsByIds(dto.CollectionIds);
-        var userId = User.GetUserId();
+        var userId = UserId;
 
         if (!User.IsInRole(PolicyConstants.PromoteRole) && !User.IsInRole(PolicyConstants.AdminRole))
         {
@@ -163,12 +161,11 @@ public class CollectionController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("delete-multiple")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteMultipleCollections(DeleteCollectionsDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
         // This needs to take into account owner as I can select other users cards
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
         if (user == null) return Unauthorized();
         user.Collections = user.Collections.Where(uc => !dto.CollectionIds.Contains(uc.Id)).ToList();
         _unitOfWork.UserRepository.Update(user);
@@ -186,12 +183,11 @@ public class CollectionController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-for-series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
         // Create a new tag and save
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
         if (user == null) return Unauthorized();
 
         AppUserCollection? tag;
@@ -208,7 +204,7 @@ public class CollectionController : BaseApiController
 
         if (tag == null)
         {
-            return BadRequest(_localizationService.Translate(User.GetUserId(), "collection-doesnt-exists"));
+            return BadRequest(_localizationService.Translate(UserId, "collection-doesnt-exists"));
         }
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false);
@@ -220,7 +216,7 @@ public class CollectionController : BaseApiController
         _unitOfWork.UserRepository.Update(user);
         if (await _unitOfWork.CommitAsync()) return Ok();
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -229,24 +225,23 @@ public class CollectionController : BaseApiController
     /// <param name="updateSeriesForTagDto"></param>
     /// <returns></returns>
     [HttpPost("update-series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> RemoveTagFromMultipleSeries(UpdateSeriesForTagDto updateSeriesForTagDto)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
         try
         {
             var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(updateSeriesForTagDto.Tag.Id, CollectionIncludes.Series);
-            if (tag == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "collection-doesnt-exist"));
+            if (tag == null) return BadRequest(await _localizationService.Translate(UserId, "collection-doesnt-exist"));
 
             if (await _collectionService.RemoveTagFromSeries(tag, updateSeriesForTagDto.SeriesIdsToRemove))
-                return Ok(await _localizationService.Translate(User.GetUserId(), "collection-updated"));
+                return Ok(await _localizationService.Translate(UserId, "collection-updated"));
         }
         catch (Exception)
         {
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -255,20 +250,19 @@ public class CollectionController : BaseApiController
     /// <param name="tagId"></param>
     /// <returns></returns>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteTag(int tagId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
         try
         {
-            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
             if (user == null) return Unauthorized();
             if (user.Collections.All(c => c.Id != tagId))
                 return BadRequest(await _localizationService.Translate(user.Id, "access-denied"));
 
             if (await _collectionService.DeleteTag(tagId, user))
             {
-                return Ok(await _localizationService.Translate(User.GetUserId(), "collection-deleted"));
+                return Ok(await _localizationService.Translate(UserId, "collection-deleted"));
             }
         }
         catch (Exception ex)
@@ -277,7 +271,7 @@ public class CollectionController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+        return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -286,11 +280,10 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("mal-stacks")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<IList<MalStackDto>>> GetMalStacksForUser()
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
-        return Ok(await _externalMetadataService.GetStacksForUser(User.GetUserId()));
+        return Ok(await _externalMetadataService.GetStacksForUser(UserId));
     }
 
     /// <summary>
@@ -299,12 +292,11 @@ public class CollectionController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("import-stack")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> ImportMalStack(MalStackDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.Collections);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
         if (user == null) return Unauthorized();
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
 
         // Validation check to ensure stack doesn't exist already
         if (await _unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, user.Id))

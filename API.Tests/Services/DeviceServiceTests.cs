@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Device;
+using API.DTOs.Device.EmailDevice;
 using API.Entities;
 using API.Entities.Enums.Device;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -18,9 +17,9 @@ public class DeviceServiceDbTests(ITestOutputHelper outputHelper): AbstractDbTes
 {
     private readonly ILogger<DeviceService> _logger = Substitute.For<ILogger<DeviceService>>();
 
-    private async Task<IDeviceService> Setup(IUnitOfWork unitOfWork)
+    private Task<IDeviceService> Setup(IUnitOfWork unitOfWork)
     {
-        return new DeviceService(unitOfWork, _logger, Substitute.For<IEmailService>());
+        return Task.FromResult<IDeviceService>(new DeviceService(unitOfWork, _logger, Substitute.For<IEmailService>()));
     }
 
     [Fact]
@@ -38,11 +37,11 @@ public class DeviceServiceDbTests(ITestOutputHelper outputHelper): AbstractDbTes
         context.Users.Add(user);
         await unitOfWork.CommitAsync();
 
-        var device = await deviceService.Create(new CreateDeviceDto()
+        var device = await deviceService.Create(new CreateEmailDeviceDto()
         {
             EmailAddress = "fake@kindle.com",
             Name = "Test Kindle",
-            Platform = DevicePlatform.Kindle
+            Platform = EmailDevicePlatform.Kindle
         }, user);
 
         Assert.NotNull(device);
@@ -63,11 +62,11 @@ public class DeviceServiceDbTests(ITestOutputHelper outputHelper): AbstractDbTes
         context.Users.Add(user);
         await unitOfWork.CommitAsync();
 
-        var device = await deviceService.Create(new CreateDeviceDto()
+        var device = await deviceService.Create(new CreateEmailDeviceDto()
         {
             EmailAddress = "fake@gmail.com",
             Name = "Test Kindle",
-            Platform = DevicePlatform.Kindle
+            Platform = EmailDevicePlatform.Kindle
         }, user);
 
         Assert.NotNull(device);

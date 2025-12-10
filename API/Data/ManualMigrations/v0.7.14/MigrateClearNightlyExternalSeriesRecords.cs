@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using API.Entities;
 using API.Entities.History;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
@@ -31,8 +30,6 @@ public static class MigrateClearNightlyExternalSeriesRecords
         dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
         {
             Name = "MigrateClearNightlyExternalSeriesRecords",
-            ProductVersion = BuildInfo.Version.ToString(),
-            RanAt = DateTime.UtcNow
         });
 
         await dataContext.SaveChangesAsync();

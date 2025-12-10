@@ -8,19 +8,15 @@ using API.Data.Repositories;
 using API.DTOs.Dashboard;
 using API.DTOs.Filtering.v2;
 using API.Entities;
-using API.Extensions;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
-
 #nullable enable
 
-/// <summary>
-/// This is responsible for Filter caching
-/// </summary>
 public class FilterController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -43,11 +39,11 @@ public class FilterController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> CreateOrUpdateSmartFilter(FilterV2Dto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.SmartFilters);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters);
         if (user == null) return Unauthorized();
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
         if (string.IsNullOrWhiteSpace(dto.Name)) return BadRequest("Name must be set");
         if (Seed.DefaultStreams.Any(s => s.Name.Equals(dto.Name, StringComparison.InvariantCultureIgnoreCase)))
@@ -80,17 +76,26 @@ public class FilterController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// All Smart Filters for the authenticated user
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public ActionResult<IEnumerable<SmartFilterDto>> GetFilters()
     {
-        return Ok(_unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(User.GetUserId()));
+        return Ok(_unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(UserId));
     }
 
+    /// <summary>
+    /// Delete the smart filter for the authenticated user
+    /// </summary>
+    /// <remarks>User must not be in <see cref="PolicyConstants.ReadOnlyRole"/></remarks>
+    /// <param name="filterId"></param>
+    /// <returns></returns>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteFilter(int filterId)
     {
-        if (User.IsInRole(PolicyConstants.ReadOnlyRole)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
-
         var filter = await _unitOfWork.AppUserSmartFilterRepository.GetById(filterId);
         if (filter == null) return Ok();
         // This needs to delete any dashboard filters that have it too
@@ -134,20 +139,16 @@ public class FilterController : BaseApiController
     /// <param name="name"></param>
     /// <returns></returns>
     [HttpPost("rename")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> RenameFilter([FromQuery] int filterId, [FromQuery] string name)
     {
         try
         {
-            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(),
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId,
                 AppUserIncludes.SmartFilters);
             if (user == null) return Unauthorized();
 
             name = name.Trim();
-
-            if (User.IsInRole(PolicyConstants.ReadOnlyRole))
-            {
-                return BadRequest(await _localizationService.Translate(user.Id, "permission-denied"));
-            }
 
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -175,7 +176,7 @@ public class FilterController : BaseApiController
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an exception when renaming smart filter: {FilterId}", filterId);
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+            return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
         }
 
     }

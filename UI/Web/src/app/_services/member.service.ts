@@ -1,8 +1,9 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { environment } from 'src/environments/environment';
-import { Member } from '../_models/auth/member';
+import {HttpClient} from '@angular/common/http';
+import {inject, Injectable} from '@angular/core';
+import {environment} from 'src/environments/environment';
+import {Member} from '../_models/auth/member';
 import {UserTokenInfo} from "../_models/kavitaplus/user-token-info";
+import {MemberInfo} from "../_models/user/member-info";
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,10 @@ export class MemberService {
 
   getMembers(includePending: boolean = false) {
     return this.httpClient.get<Member[]>(this.baseUrl + 'users?includePending=' + includePending);
+  }
+
+  getMemberInfo(userId: number) {
+    return this.httpClient.get<MemberInfo>(this.baseUrl + 'users/profile-info?userId=' + userId);
   }
 
   getMemberNames() {

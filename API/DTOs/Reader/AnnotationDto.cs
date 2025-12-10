@@ -54,7 +54,7 @@ public sealed record AnnotationDto
     public int SelectedSlotIndex { get; set; }
 
     /// <inheritdoc cref="AppUserAnnotation.Likes"/>
-    public ISet<int> Likes { get; set; }
+    public IList<int> Likes { get; set; }
 
     public string SeriesName { get; set; }
     public string LibraryName { get; set; }

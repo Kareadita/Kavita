@@ -2,11 +2,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   inject,
   model,
-  OnInit,
+  OnInit, signal,
   ViewChild
 } from '@angular/core';
 import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
@@ -53,7 +54,7 @@ import {IHasCast} from "../_models/common/i-has-cast";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
-import {Breakpoint, UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
+import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
@@ -77,15 +78,17 @@ import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/ed
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
 import {DefaultModalOptions} from "../_models/default-modal-options";
-import {UserReview} from "../_single-module/review-card/user-review";
+import {UserReview} from "../_models/user-review";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
 import {ChapterService} from "../_services/chapter.service";
-import {User} from "../_models/user";
+import {User} from "../_models/user/user";
 import {AnnotationService} from "../_services/annotation.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationsTabComponent} from "../_single-module/annotations-tab/annotations-tab.component";
-import {UtcToLocaleDatePipe} from "../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../_pipes/utc-to-locale-date.pipe";
+import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
+import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 
 enum TabID {
 
@@ -127,7 +130,7 @@ interface VolumeCast extends IHasCast {
 }
 
 @Component({
-    selector: 'app-volume-detail',
+  selector: 'app-volume-detail',
   imports: [
     LoadingComponent,
     NgbNavOutlet,
@@ -160,11 +163,12 @@ interface VolumeCast extends IHasCast {
     ReviewsComponent,
     ExternalRatingComponent,
     AnnotationsTabComponent,
-    UtcToLocaleDatePipe
+    UtcToLocalDatePipe,
+    ReadingProgressStatusPipePipe
   ],
-    templateUrl: './volume-detail.component.html',
-    styleUrl: './volume-detail.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './volume-detail.component.html',
+  styleUrl: './volume-detail.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VolumeDetailComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
@@ -219,7 +223,14 @@ export class VolumeDetailComponent implements OnInit {
   rating: number = 0;
   hasBeenRated: boolean = false;
   size: number = 0;
-  annotations = model<Annotation[]>([]);
+  annotations = signal<Annotation[]>([]);
+  totalReads = computed(() => {
+    const chapters = this.volume?.chapters || [];
+    if (chapters.length === 0) return 0;
+
+    return chapters.reduce((min, curr) => Math.min(min, curr.totalReads), Infinity);
+  });
+  readingProgressStatus: ReadingProgressStatus = ReadingProgressStatus.NoProgress;
 
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
@@ -413,6 +424,12 @@ export class VolumeDetailComponent implements OnInit {
       this.size = this.volume.chapters.reduce((sum, c) =>
         sum + c.files.reduce((fileSum, f) => fileSum + f.bytes, 0), 0);
       this.libraryType = results.libraryType;
+
+      if (this.volume.pagesRead > 0 && this.volume.pagesRead < this.volume.pages) {
+        this.readingProgressStatus = ReadingProgressStatus.Progress;
+      } else if (this.volume.pagesRead >= this.volume.pages) {
+        this.readingProgressStatus = ReadingProgressStatus.FullyRead;
+      }
 
       if (this.volume.chapters.length === 1) {
         this.chapterService.chapterDetailPlus(this.seriesId, this.volume.chapters[0].id).subscribe(detail => {

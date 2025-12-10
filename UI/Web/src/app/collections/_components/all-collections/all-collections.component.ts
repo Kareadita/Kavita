@@ -30,7 +30,7 @@ import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloc
 import {ToastrService} from "ngx-toastr";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {CollectionOwnerComponent} from "../collection-owner/collection-owner.component";
-import {User} from "../../../_models/user";
+import {User} from "../../../_models/user/user";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {ActionService} from "../../../_services/action.service";

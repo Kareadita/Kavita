@@ -1,4 +1,4 @@
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpParams, httpResource} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {environment} from 'src/environments/environment';
 import {UserReadStatistics} from '../statistics/_models/user-read-statistics';
@@ -18,6 +18,17 @@ import {throttleTime} from "rxjs/operators";
 import {DEBOUNCE_TIME} from "../shared/_services/download.service";
 import {download} from "../shared/_models/download";
 import {Saver, SAVER} from "../_providers/saver.provider";
+import {ClientDeviceBreakdown} from "../statistics/_models/client-device-breakdown";
+import {ActivityGraphData} from "../statistics/_components/activity-graph/activity-graph.component";
+import {ReadingPace} from "../statistics/_components/reading-pace/reading-pace.component";
+import {Breakdown} from "../statistics/_models/breakdown";
+import {SpreadStats} from "../statistics/_models/stats/spread-stats";
+import {FavoriteAuthor} from "../statistics/_models/favorite-author";
+import {StatsFilter} from "../statistics/_models/stats-filter";
+import {ProfileStatBar} from "../profile/_components/profile-stat-bar/profile-stat-bar.component";
+import {
+  ReadTimeByHour
+} from "../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
 
 export enum DayOfWeek
 {
@@ -98,7 +109,7 @@ export class StatisticsService {
     return this.httpClient.get<StatCount<PublicationStatus>[]>(this.baseUrl + 'stats/server/count/publication-status').pipe(
       map(spreads => spreads.map(spread => {
       return {name: this.publicationStatusPipe.transform(spread.value), value: spread.count};
-      })));
+    })));
   }
 
   getMangaFormat() {
@@ -106,6 +117,15 @@ export class StatisticsService {
       map(spreads => spreads.map(spread => {
       return {name: this.mangaFormatPipe.transform(spread.value), value: spread.count};
       })));
+  }
+
+
+  getClientDeviceBreakdown() {
+    return this.httpClient.get<ClientDeviceBreakdown>(this.baseUrl + 'stats/device/client-type');
+  }
+
+  getClientDeviceTypeCounts() {
+    return this.httpClient.get<StatCount<string>[]>(this.baseUrl + 'stats/device/device-type');
   }
 
   getTotalSize() {
@@ -134,7 +154,105 @@ export class StatisticsService {
     return this.httpClient.get<Array<any>>(this.baseUrl + 'stats/reading-count-by-day?userId=' + userId + '&days=' + days);
   }
 
-  getDayBreakdown( userId = 0) {
+  getDayBreakdown(userId = 0) {
     return this.httpClient.get<Array<StatCount<DayOfWeek>>>(this.baseUrl + 'stats/day-breakdown?userId=' + userId);
   }
+
+  getReadingActivityResource(statsFilter: () => (StatsFilter | undefined), userId: () => number, year: () => number) {
+    return httpResource<ActivityGraphData>(() => {
+      const filter = statsFilter();
+      if (!filter) return undefined;
+
+      return {
+        url: this.baseUrl + `stats/reading-activity?year=${year()}`,
+        params: this.filterHttpParams(filter, userId())
+      }
+    }).asReadonly();
+  }
+
+  getReadingPaceResource(statsFilter: () => (StatsFilter | undefined), userId: () => number, year: () => number) {
+    return httpResource<ReadingPace>(() => {
+      const filter = statsFilter();
+      if (!filter) return undefined;
+
+      return {
+        url: this.baseUrl + `stats/reading-pace?year=${year()}`,
+        params: this.filterHttpParams(filter, userId())
+      }
+    }).asReadonly();
+  }
+
+  getPreferredFormatResource(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<StatCount<MangaFormat>[]>(statsFilter, userId, 'preferred-format')
+  }
+
+  private filterHttpParams(filter: StatsFilter, userId: number) {
+    let params = new HttpParams().set('userId', userId);
+
+    if (filter.timeFilter.startDate) {
+      params = params.set('startDate', filter.timeFilter.startDate.toISOString());
+    }
+    if (filter.timeFilter.endDate) {
+      params = params.set('endDate', filter.timeFilter.endDate.toISOString());
+    }
+
+    for (let library of filter.libraries) {
+      params = params.append('libraries', library)
+    }
+
+    return params;
+  }
+
+  private filterResource<T>(
+    statsFilter: () => (StatsFilter | undefined),
+    userId: () => number,
+    path: string
+  ) {
+    return httpResource<T>(() => {
+      const filter = statsFilter();
+      if (!filter) return undefined; // skip request until valid
+
+      return {
+        url: `${this.baseUrl}stats/${path}`,
+        params: this.filterHttpParams(filter, userId()),
+      };
+    }).asReadonly();
+  }
+
+  getGenreBreakDownResource(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<Breakdown<string>>(statsFilter, userId, 'genre-breakdown');
+  }
+
+  getTagBreakDownResource(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<Breakdown<string>>(statsFilter, userId, 'tag-breakdown');
+  }
+
+  getPageSpread(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<SpreadStats>(statsFilter, userId, 'page-spread');
+  }
+
+  getWordSpread(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<SpreadStats>(statsFilter, userId, 'word-spread');
+  }
+
+  getFavouriteAuthors(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<FavoriteAuthor[]>(statsFilter, userId, 'favorite-authors');
+  }
+
+  getReadsByMonths(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<StatCount<{year: number, month: number}>[]>(statsFilter, userId, 'reads-by-month');
+  }
+
+  getAvgTimeSpendReadingByHour(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<ReadTimeByHour>(statsFilter, userId, 'avg-time-by-hour');
+  }
+
+  getUserOverallStats(statsFilter: () => StatsFilter | undefined, userId: () => number) {
+    return this.filterResource<ProfileStatBar>(statsFilter, userId, 'user-stats');
+  }
+
+  getTotalReads(userId: () => number) {
+    return httpResource<number>(() => this.baseUrl + `stats/total-reads?userId=${userId()}`).asReadonly();
+  }
+
 }

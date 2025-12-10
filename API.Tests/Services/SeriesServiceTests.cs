@@ -751,7 +751,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var (unitOfWork, context, _) = await CreateDatabase();
         var seriesService = Setup(unitOfWork);  // Resets the database for a clean state
 
-        // Arrange: Build series, metadata, and existing people
+        // Build series, metadata, and existing people
         var series = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .Build();
@@ -762,9 +762,9 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
 
         series.Metadata.People = new List<SeriesMetadataPeople>
         {
-            new SeriesMetadataPeople { Person = existingWriter, Role = PersonRole.Writer },
-            new SeriesMetadataPeople { Person = new PersonBuilder("Existing Translator").Build(), Role = PersonRole.Translator },
-            new SeriesMetadataPeople { Person = new PersonBuilder("Existing Publisher 2").Build(), Role = PersonRole.Publisher }
+            new() { Person = existingWriter, Role = PersonRole.Writer },
+            new() { Person = new PersonBuilder("Existing Translator").Build(), Role = PersonRole.Translator },
+            new() { Person = new PersonBuilder("Existing Publisher 2").Build(), Role = PersonRole.Publisher }
         };
 
         context.Series.Add(series);
@@ -928,6 +928,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var seriesService = Setup(unitOfWork);
+
         var s = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .Build();

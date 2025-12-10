@@ -3,7 +3,7 @@ import {ToastrService} from 'ngx-toastr';
 import {distinctUntilChanged, map, take, tap} from 'rxjs';
 import {ThemeService} from 'src/app/_services/theme.service';
 import {SiteTheme, ThemeProvider} from 'src/app/_models/preferences/site-theme';
-import {User} from 'src/app/_models/user';
+import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';

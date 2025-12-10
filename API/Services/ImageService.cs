@@ -585,6 +585,7 @@ public class ImageService : IImageService
         {
             targetDirectory ??= _directoryService.CoverImageDirectory;
             using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth);
+
             fileName += encodeFormat.GetExtension();
             thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(targetDirectory, fileName));
 
@@ -679,6 +680,16 @@ public class ImageService : IImageService
     public static string GetPersonFormat(int personId)
     {
         return $"person{personId}";
+    }
+
+    /// <summary>
+    /// Returns the name format for a user cover
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public static string GetUserFormat(int userId)
+    {
+        return $"user{userId}";
     }
 
     public static string GetWebLinkFormat(string url, EncodeFormat encodeFormat)

@@ -11,17 +11,17 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import {NgbActiveModal, NgbActiveOffcanvas, NgbOffcanvas} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveOffcanvas, NgbOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {Annotation} from "../../../_models/annotations/annotation";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, switchMap, tap} from "rxjs/operators";
+import {debounceTime, switchMap} from "rxjs/operators";
 import {of} from "rxjs";
 import {HighlightBarComponent} from "../../_annotations/highlight-bar/highlight-bar.component";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
-import {User} from "../../../../_models/user";
+import {User} from "../../../../_models/user/user";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
 import {DatePipe, DOCUMENT, NgStyle} from "@angular/common";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
@@ -30,7 +30,7 @@ import {PageChapterLabelPipe} from "../../../../_pipes/page-chapter-label.pipe";
 import {UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
 import {QuillTheme, QuillWrapperComponent} from "../../quill-wrapper/quill-wrapper.component";
 import {ContentChange, QuillViewComponent} from "ngx-quill";
-import {UtcToLocaleDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {AccountService} from "../../../../_services/account.service";
 import {
   OffCanvasResizeComponent,
@@ -38,6 +38,8 @@ import {
 } from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 import {ConfirmService} from "../../../../shared/confirm.service";
 import {AnnotationLikesComponent} from "../../_annotations/annotation-likes/annotation-likes.component";
+import {ProfileIconComponent} from "../../../../_single-module/profile-icon/profile-icon.component";
+import {RouterLink} from "@angular/router";
 
 export enum AnnotationMode {
   View = 0,
@@ -59,9 +61,11 @@ const INIT_HIGHLIGHT_DELAY = 200;
     QuillWrapperComponent,
     QuillViewComponent,
     DatePipe,
-    UtcToLocaleDatePipe,
+    UtcToLocalDatePipe,
     OffCanvasResizeComponent,
-    AnnotationLikesComponent
+    AnnotationLikesComponent,
+    ProfileIconComponent,
+    RouterLink
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',

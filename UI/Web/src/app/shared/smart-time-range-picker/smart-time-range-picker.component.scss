@@ -1,0 +1,46 @@
+.dropdown {
+  position: relative;
+  z-index: 1045; // Above backdrop
+
+  .dropdown-display-text {
+    color: var(--dropdown-item-text-color);
+  }
+
+  .dropdown-menu {
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+
+    &.show {
+      display: block;
+    }
+  }
+
+  .dropdown-item {
+    background-color: var(--dropdown-item-bg-color);
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--dropdown-item-hover-bg-color);
+      cursor: pointer;
+    }
+
+    i {
+      color: var(--dropdown-item-text-color);
+    }
+  }
+}
+
+.dropdown-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1040;
+  background: transparent;
+}
+
+.date-picker-text {
+  color: var(--dropdown-item-text-color);
+}

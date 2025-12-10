@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
@@ -12,16 +11,13 @@ using API.Data.Repositories;
 using API.DTOs.KavitaPlus.Metadata;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services.Plus;
-using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
-using Hangfire;
 using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -366,6 +362,8 @@ public class ProcessSeries(
 
         foreach (var personRole in Enum.GetValues<PersonRole>().Where(r => r != PersonRole.Other))
         {
+            if (series.Metadata.IsPersonRoleLocked(personRole)) continue;
+
             var chapterPeople = chapters
                 .SelectMany(c => c.People.Where(p => p.Role == personRole)).ToList();
 
@@ -485,12 +483,9 @@ public class ProcessSeries(
         var metadataTagTitles = new HashSet<string>(metadataTags.Select(mt => mt.NormalizedTitle));
 
         // Add any tags from chapterTags that do not already exist in metadataTags
-        foreach (var tag in chapterTags)
+        foreach (var tag in chapterTags.Where(tag => !metadataTagTitles.Contains(tag.NormalizedTitle)))
         {
-            if (!metadataTagTitles.Contains(tag.NormalizedTitle))
-            {
-                metadataTags.Add(tag);
-            }
+            metadataTags.Add(tag);
         }
     }
 
@@ -513,21 +508,10 @@ public class ProcessSeries(
         var metadataGenreTitles = new HashSet<string>(metadataGenres.Select(mg => mg.NormalizedTitle));
 
         // Add any genres from chapterGenres that are not already in metadataGenres
-        foreach (var genre in chapterGenres)
+        foreach (var genre in chapterGenres.Where(genre => !metadataGenreTitles.Contains(genre.NormalizedTitle)))
         {
-            if (!metadataGenreTitles.Contains(genre.NormalizedTitle))
-            {
-                metadataGenres.Add(genre);
-            }
+            metadataGenres.Add(genre);
         }
-    }
-
-
-
-    private async Task UpdateSeriesMetadataPeople(SeriesMetadata metadata, ICollection<SeriesMetadataPeople> metadataPeople,
-        IEnumerable<ChapterPeople> chapterPeople, PersonRole role)
-    {
-        await PersonHelper.UpdateSeriesMetadataPeopleAsync(metadata, metadataPeople, chapterPeople, role, unitOfWork);
     }
 
     private void DeterminePublicationStatus(Series series, List<Chapter> chapters)
@@ -551,7 +535,7 @@ public class ProcessSeries(
             {
                 series.Metadata.MaxCount = 1;
             }
-            else if (series.Metadata.TotalCount <= 1 && chapters.Count == 1 && chapters[0].IsSpecial)
+            else if (series.Metadata.TotalCount <= 1 && chapters is [{IsSpecial: true}])
             {
                 // If a series has a TotalCount of 1 (or no total count) and there is only a Special, mark it as Complete
                 series.Metadata.MaxCount = series.Metadata.TotalCount;

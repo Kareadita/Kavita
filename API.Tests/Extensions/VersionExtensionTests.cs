@@ -9,7 +9,7 @@ public class VersionHelperTests
     [Fact]
     public void CompareWithoutRevision_ShouldReturnTrue_WhenMajorMinorBuildMatch()
     {
-        // Arrange
+
         var v1 = new Version(1, 2, 3, 4);
         var v2 = new Version(1, 2, 3, 5);
 
@@ -23,7 +23,7 @@ public class VersionHelperTests
     [Fact]
     public void CompareWithoutRevision_ShouldHandleBuildlessVersions()
     {
-        // Arrange
+
         var v1 = new Version(1, 2);
         var v2 = new Version(1, 2);
 

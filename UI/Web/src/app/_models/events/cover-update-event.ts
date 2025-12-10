@@ -3,5 +3,5 @@
  */
 export interface CoverUpdateEvent {
     id: number;
-    entityType: 'series' | 'chapter' | 'volume' | 'collectionTag';
+    entityType: 'series' | 'chapter' | 'volume' | 'library' | 'collection' | 'readingList' | 'person' | 'user';
 }

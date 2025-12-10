@@ -1,0 +1,30 @@
+<ng-container *transloco="let t; prefix: translationKey()">
+  <div class="card stats-card p-4">
+    <h4 class="stats-title">{{t('title')}}</h4>
+
+    @let highestBucketValue = highestBucket();
+    @let spreadStatsValue = spreadStats();
+
+    @if (highestBucketValue) {
+      <h6 class="stats-subtitle">{{t('sub-title', {username: userName(), highestBucket: highestBucket()})}}</h6>
+    } @else if (!bucketSpreadResource().isLoading())  {
+      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+    }
+
+    <app-loading [loading]="bucketSpreadResource().isLoading()" />
+
+    @if (spreadStatsValue && spreadStatsValue.totalCount > 0) {
+      <app-bar-chart
+        [data]="data()"
+        [axisLabels]="labels()"
+        [showLabels]="true"
+        [horizontal]="false"
+        [showToolTips]="true"
+        [toolTipFormatter]="toolTipFormatter"
+        labelPosition="top"
+      />
+    }
+
+  </div>
+</ng-container>
+

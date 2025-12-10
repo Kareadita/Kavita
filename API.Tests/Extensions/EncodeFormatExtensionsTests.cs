@@ -12,7 +12,7 @@ public class EncodeFormatExtensionsTests
     [Fact]
     public void GetExtension_ShouldReturnCorrectExtensionForAllValues()
     {
-        // Arrange
+
         var expectedExtensions = new Dictionary<EncodeFormat, string>
         {
             { EncodeFormat.PNG, ".png" },

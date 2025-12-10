@@ -1,5 +1,4 @@
 using System;
-using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -44,7 +43,7 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
         return (unitOfWork, context, mapper);
     }
 
-    private static DbConnection CreateInMemoryDatabase()
+    private static SqliteConnection CreateInMemoryDatabase()
     {
         var connection = new SqliteConnection("Filename=:memory:");
         connection.Open();

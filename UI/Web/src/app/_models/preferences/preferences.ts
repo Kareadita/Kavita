@@ -17,6 +17,7 @@ export interface Preferences {
   bookReaderHighlightSlots: HighlightSlot[];
   colorScapeEnabled: boolean;
   dataSaver: boolean;
+  promptForRereadsAfter: number;
   customKeyBinds: Partial<Record<KeyBindTarget, KeyBind[]>>;
 
   // Kavita+
@@ -36,6 +37,7 @@ export interface SocialPreferences {
   socialLibraries: number[];
   socialMaxAgeRating: AgeRating;
   socialIncludeUnknowns: boolean;
+  shareProfile: boolean;
 }
 
 export interface OpdsPreferences {

@@ -6,13 +6,14 @@ import {LibraryModifiedEvent} from '../_models/events/library-modified-event';
 import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
 import {ThemeProgressEvent} from '../_models/events/theme-progress-event';
 import {UserUpdateEvent} from '../_models/events/user-update-event';
-import {User} from '../_models/user';
+import {User} from '../_models/user/user';
 import {DashboardUpdateEvent} from "../_models/events/dashboard-update-event";
 import {SideNavUpdateEvent} from "../_models/events/sidenav-update-event";
 import {SiteThemeUpdatedEvent} from "../_models/events/site-theme-updated-event";
 import {ExternalMatchRateLimitErrorEvent} from "../_models/events/external-match-rate-limit-error-event";
 import {AnnotationUpdateEvent} from "../_models/events/annotation-update-event";
 import {toSignal} from "@angular/core/rxjs-interop";
+import {SessionCloseEvent} from "../_models/events/session-close-event";
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -125,6 +126,10 @@ export enum EVENTS {
    * Annotation is updated within the reader
    */
   AnnotationUpdate = 'AnnotationUpdate',
+  /**
+   * Reading Session close
+   */
+  SessionClose = 'SessionClose',
 }
 
 export interface Message<T> {
@@ -176,7 +181,7 @@ export class MessageHubService {
         accessTokenFactory: () => user.token
       })
       .withAutomaticReconnect()
-      //.withStatefulReconnect() // Requires signalr@8.0
+      .withStatefulReconnect()
       .build();
 
     this.hubConnection
@@ -260,6 +265,13 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.AnnotationUpdate,
         payload: resp.body as AnnotationUpdateEvent
+      });
+    });
+
+    this.hubConnection.on(EVENTS.SessionClose, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SessionClose,
+        payload: resp.body as SessionCloseEvent
       });
     });
 

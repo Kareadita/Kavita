@@ -1,18 +1,8 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  inject,
-  Input,
-  OnChanges,
-  OnInit,
-  SimpleChanges
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, model} from '@angular/core';
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
-import {AsyncPipe} from "@angular/common";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
@@ -20,83 +10,58 @@ import {FilterField} from "../../_models/metadata/v2/filter-field";
 const basePath = './assets/images/ratings/';
 
 @Component({
-    selector: 'app-age-rating-image',
-    imports: [
-        ImageComponent,
-        NgbTooltip,
-        AgeRatingPipe,
-    ],
-    templateUrl: './age-rating-image.component.html',
-    styleUrl: './age-rating-image.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-age-rating-image',
+  imports: [
+      ImageComponent,
+      NgbTooltip,
+      AgeRatingPipe,
+  ],
+  standalone: true,
+  templateUrl: './age-rating-image.component.html',
+  styleUrl: './age-rating-image.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AgeRatingImageComponent implements OnInit, OnChanges {
-  private readonly cdRef = inject(ChangeDetectorRef);
+export class AgeRatingImageComponent {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
 
-  protected readonly AgeRating = AgeRating;
+  rating = input.required<AgeRating>();
+  imageUrl = computed(() => this.computeImageUrl());
 
-  @Input({required: true}) rating: AgeRating = AgeRating.Unknown;
-
-  imageUrl: string = 'unknown-rating.png';
-
-  ngOnInit() {
-    this.setImage();
-  }
-
-  ngOnChanges() {
-    this.setImage();
-  }
-
-  setImage() {
-    switch (this.rating) {
+  computeImageUrl() {
+    switch (this.rating()) {
       case AgeRating.Unknown:
-        this.imageUrl = basePath + 'unknown-rating.png';
-        break;
+        return basePath + 'unknown-rating.png';
       case AgeRating.RatingPending:
-        this.imageUrl = basePath + 'rating-pending-rating.png';
-        break;
+        return basePath + 'rating-pending-rating.png';
       case AgeRating.EarlyChildhood:
-        this.imageUrl = basePath + 'early-childhood-rating.png';
-        break;
+        return basePath + 'early-childhood-rating.png';
       case AgeRating.Everyone:
-        this.imageUrl = basePath + 'everyone-rating.png';
-        break;
+        return basePath + 'everyone-rating.png';
       case AgeRating.G:
-        this.imageUrl = basePath + 'g-rating.png';
-        break;
+        return basePath + 'g-rating.png';
       case AgeRating.Everyone10Plus:
-        this.imageUrl = basePath + 'everyone-10+-rating.png';
-        break;
+        return basePath + 'everyone-10+-rating.png';
       case AgeRating.PG:
-        this.imageUrl = basePath + 'pg-rating.png';
-        break;
+        return basePath + 'pg-rating.png';
       case AgeRating.KidsToAdults:
-        this.imageUrl = basePath + 'kids-to-adults-rating.png';
-        break;
+        return basePath + 'kids-to-adults-rating.png';
       case AgeRating.Teen:
-        this.imageUrl = basePath + 'teen-rating.png';
-        break;
+        return basePath + 'teen-rating.png';
       case AgeRating.Mature15Plus:
-        this.imageUrl = basePath + 'ma15+-rating.png';
-        break;
+        return basePath + 'ma15+-rating.png';
       case AgeRating.Mature17Plus:
-        this.imageUrl = basePath + 'mature-17+-rating.png';
-        break;
+        return basePath + 'mature-17+-rating.png';
       case AgeRating.Mature:
-        this.imageUrl = basePath + 'm-rating.png';
-        break;
+        return basePath + 'm-rating.png';
       case AgeRating.R18Plus:
-        this.imageUrl = basePath + 'r18+-rating.png';
-        break;
+        return basePath + 'r18+-rating.png';
       case AgeRating.AdultsOnly:
-        this.imageUrl = basePath + 'adults-only-18+-rating.png';
-        break;
+        return basePath + 'adults-only-18+-rating.png';
       case AgeRating.X18Plus:
-        this.imageUrl = basePath + 'x18+-rating.png';
-        break;
+        return basePath + 'x18+-rating.png';
     }
-    this.cdRef.markForCheck();
+
+    return basePath + 'unknown-rating.png';
   }
 
   openRating() {

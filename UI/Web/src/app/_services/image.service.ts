@@ -1,9 +1,9 @@
 import {DestroyRef, inject, Injectable} from '@angular/core';
 import {environment} from 'src/environments/environment';
 import {ThemeService} from './theme.service';
-import {RecentlyAddedItem} from '../_models/recently-added-item';
 import {AccountService} from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ImageOnlyName} from "../_models/user/auth-key";
 
 @Injectable({
   providedIn: 'root'
@@ -40,17 +40,11 @@ export class ImageService {
 
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (user) {
-        this.apiKey = user.apiKey;
+        // Get the image-only key from the auth keys
+        this.apiKey = user.authKeys.filter(k => k.name === ImageOnlyName)[0].key;
         this.encodedKey = encodeURIComponent(this.apiKey);
       }
     });
-  }
-
-  getRecentlyAddedItem(item: RecentlyAddedItem) {
-    if (item.chapterId === 0) {
-      return this.getVolumeCoverImage(item.volumeId);
-    }
-    return this.getChapterCoverImage(item.chapterId);
   }
 
   /**
@@ -68,8 +62,9 @@ export class ImageService {
   getPersonImage(personId: number) {
     return `${this.baseUrl}image/person-cover?personId=${personId}&apiKey=${this.encodedKey}`;
   }
-  getPersonImageByName(name: string) {
-    return `${this.baseUrl}image/person-cover-by-name?name=${name}&apiKey=${this.encodedKey}`;
+
+  getUserCoverImage(userId: number) {
+    return `${this.baseUrl}image/user-cover?userId=${userId}&apiKey=${this.encodedKey}`;
   }
 
   getLibraryCoverImage(libraryId: number) {

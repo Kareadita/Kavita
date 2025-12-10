@@ -1,0 +1,35 @@
+
+
+<div class="card stats-card p-4" *transloco="let t; prefix: translationKey()">
+
+  <h4 class="stats-title">{{t('title')}}</h4>
+
+  @let mostUsedValue = mostUsed();
+  @let breakDownValue = breakDown().value();
+
+  @if (mostUsedValue) {
+    <h6 class="stats-subtitle">{{t('sub-title', {name: userName(), mostUsed: mostUsedValue.value})}}</h6>
+  } @else if (!breakDown().isLoading())  {
+    <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+  }
+
+  <app-loading [loading]="breakDown().isLoading()" />
+
+  @if (breakDownValue && breakDownValue.total > 0) {
+    <app-bar-chart
+      [data]="data()"
+      [axisLabels]="labels()"
+      [axisLabelsOther]="labelsRight()"
+      [showLabels]="false"
+      [horizontal]="true"
+      [showToolTips]="false"
+      labelPosition="right"
+      [multiColor]="true"
+    />
+  }
+
+  @if (breakDownValue && breakDownValue.missing > 0) {
+    <span class="stats-note text-muted">{{t('missing', {amount: breakDownValue.missing})}}</span>
+  }
+
+</div>

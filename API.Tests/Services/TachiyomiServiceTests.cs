@@ -1,23 +1,19 @@
 ﻿using API.Helpers.Builders;
 using API.Services.Plus;
+using API.Services.Reading;
 using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
-using System.Linq;
 using System.Threading.Tasks;
 using Data;
 using Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
-using API.Helpers;
 using API.Services;
 using SignalR;
 using AutoMapper;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -26,12 +22,13 @@ public class TachiyomiServiceTests(ITestOutputHelper outputHelper): AbstractDbTe
 {
 
 
-    public (IReaderService, ITachiyomiService) Setup(IUnitOfWork unitOfWork, IMapper mapper)
+    public static (IReaderService, ITachiyomiService) Setup(IUnitOfWork unitOfWork, IMapper mapper)
     {
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
-            Substitute.For<IScrobblingService>());
+            Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
+            Substitute.For<IClientInfoAccessor>());
         var tachiyomiService = new TachiyomiService(unitOfWork, mapper, Substitute.For<ILogger<TachiyomiService>>(), readerService);
 
         return (readerService, tachiyomiService);

@@ -1,5 +1,4 @@
 using API.DTOs.KavitaPlus.Metadata;
-using API.DTOs.Recommendation;
 
 namespace API.DTOs.Metadata.Matching;
 

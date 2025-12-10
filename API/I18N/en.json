@@ -74,6 +74,8 @@
     "generic-send-to": "There was an error sending the file(s) to the device",
     "series-doesnt-exist": "Series does not exist",
 
+    "client-device-doesnt-exist": "Client Device does not exist",
+
     "volume-doesnt-exist": "Volume does not exist",
     "bookmarks-empty": "Bookmarks cannot be empty",
 
@@ -244,5 +246,9 @@
     "genre-doesnt-exist": "Genre doesn't exist",
     "font-url-not-allowed": "Uploading a Font by url is only allowed from Google Fonts",
     "annotation-export-failed": "Unable to export Annotations, check logs",
-    "download-not-allowed": "User does not have download permissions"
+    "download-not-allowed": "User does not have download permissions",
+    "auth-key-unique": "The Auth Key name must be unique to your account",
+
+
+    "role-restricted": "Access forbidden: Your role does not permit this action"
 }

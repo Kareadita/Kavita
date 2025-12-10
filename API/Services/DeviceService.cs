@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Device;
+using API.DTOs.Device.EmailDevice;
 using API.DTOs.Email;
 using API.Entities;
 using API.Entities.Enums;
@@ -17,8 +18,8 @@ namespace API.Services;
 
 public interface IDeviceService
 {
-    Task<Device?> Create(CreateDeviceDto dto, AppUser userWithDevices);
-    Task<Device?> Update(UpdateDeviceDto dto, AppUser userWithDevices);
+    Task<Device?> Create(CreateEmailDeviceDto dto, AppUser userWithDevices);
+    Task<Device?> Update(UpdateEmailDeviceDto dto, AppUser userWithDevices);
     Task<bool> Delete(AppUser userWithDevices, int deviceId);
     Task<bool> SendTo(IReadOnlyList<int> chapterIds, int deviceId);
 }
@@ -36,7 +37,7 @@ public class DeviceService : IDeviceService
         _emailService = emailService;
     }
 
-    public async Task<Device?> Create(CreateDeviceDto dto, AppUser userWithDevices)
+    public async Task<Device?> Create(CreateEmailDeviceDto dto, AppUser userWithDevices)
     {
         try
         {
@@ -65,7 +66,7 @@ public class DeviceService : IDeviceService
         return null;
     }
 
-    public async Task<Device?> Update(UpdateDeviceDto dto, AppUser userWithDevices)
+    public async Task<Device?> Update(UpdateEmailDeviceDto dto, AppUser userWithDevices)
     {
         try
         {
@@ -115,7 +116,7 @@ public class DeviceService : IDeviceService
         if (device == null) throw new KavitaException("device-doesnt-exist");
 
         var files = await _unitOfWork.ChapterRepository.GetFilesForChaptersAsync(chapterIds);
-        if (files.Any(f => f.Format is not (MangaFormat.Epub or MangaFormat.Pdf)) && device.Platform == DevicePlatform.Kindle)
+        if (files.Any(f => f.Format is not (MangaFormat.Epub or MangaFormat.Pdf)) && device.Platform == EmailDevicePlatform.Kindle)
             throw new KavitaException("send-to-permission");
 
         // If the size of the files is too big

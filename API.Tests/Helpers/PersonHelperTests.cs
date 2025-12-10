@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Helpers.Builders;
-using Polly;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.KavitaPlus.Manage;
 using API.Entities.History;
-using API.Entities.Metadata;
 using API.Extensions.QueryExtensions;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;

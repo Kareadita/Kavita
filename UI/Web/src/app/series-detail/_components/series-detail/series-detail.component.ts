@@ -1,4 +1,4 @@
-import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle, NgTemplateOutlet} from '@angular/common';
+import {DOCUMENT, Location, NgClass, NgStyle, NgTemplateOutlet} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -8,11 +8,11 @@ import {
   DestroyRef,
   ElementRef,
   inject,
-  model,
-  OnInit, signal,
+  OnInit,
+  signal,
   ViewChild
 } from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {
@@ -30,7 +30,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, debounceTime, forkJoin, Observable, of, ReplaySubject, tap} from 'rxjs';
+import {catchError, debounceTime, firstValueFrom, forkJoin, Observable, of, ReplaySubject, switchMap, tap} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {
@@ -38,7 +38,7 @@ import {
   EditSeriesModalComponent
 } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
-import {Breakpoint, UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Device} from 'src/app/_models/device/device';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
@@ -49,7 +49,6 @@ import {Series} from 'src/app/_models/series';
 import {RelatedSeries} from 'src/app/_models/series-detail/related-series';
 import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
-import {User} from 'src/app/_models/user';
 import {Volume} from 'src/app/_models/volume';
 import {AccountService} from 'src/app/_services/account.service';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
@@ -62,9 +61,8 @@ import {ReaderService} from 'src/app/_services/reader.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {ScrollService} from 'src/app/_services/scroll.service';
 import {SeriesService} from 'src/app/_services/series.service';
-import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {UserReview} from "../../../_single-module/review-card/user-review";
+import {UserReview} from "../../../_models/user-review";
 import {ExternalSeriesCardComponent} from '../../../cards/external-series-card/external-series-card.component';
 import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
 import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
@@ -115,6 +113,8 @@ import {ReadingProfileService} from "../../../_services/reading-profile.service"
 import {AnnotationsTabComponent} from "../../../_single-module/annotations-tab/annotations-tab.component";
 import {Annotation} from "../../../book-reader/_models/annotations/annotation";
 import {AnnotationService} from "../../../_services/annotation.service";
+import {ReadingProgressStatus} from "../../../_models/series-detail/reading-progress";
+import {ReadingProgressStatusPipePipe} from "../../../_pipes/reading-progress-status-pipe.pipe";
 
 
 enum TabID {
@@ -145,21 +145,11 @@ interface StoryLineItem {
     NgbDropdownItem, BulkOperationsComponent,
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
-    NgClass, AsyncPipe, DetailsTabComponent, ChapterCardComponent,
+    NgClass, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
-    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent]
+    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent, ReadingProgressStatusPipePipe]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
-
-  protected readonly LibraryType = LibraryType;
-  protected readonly TabID = TabID;
-  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
-  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
-  protected readonly SettingsTabId = SettingsTabId;
-  protected readonly FilterField = FilterField;
-  protected readonly AgeRating = AgeRating;
-  protected readonly UserBreakpoint = UserBreakpoint;
-  protected readonly encodeURIComponent = encodeURIComponent;
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
@@ -203,22 +193,37 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * Series Id. Set at load before UI renders
    */
   seriesId!: number;
-  series!: Series;
+  series = signal<Series | null>(null);
   volumes: Volume[] = [];
-  chapters = model<Chapter[]>([]);
+  chapters = signal<Chapter[]>([]);
   storyChapters: Chapter[] = [];
   storylineItems: StoryLineItem[] = [];
   libraryId = 0;
-  isAdmin = false;
-  hasDownloadingRole = false;
+
+  isAdmin = computed(() => {
+    return this.accountService.isAdmin();
+  });
+
   isLoading = true;
   isLoadingExtra = false;
   libraryAllowsScrobbling = false;
   isScrobbling: boolean = true;
-  mobileSeriesImgBackground: string | undefined;
+  mobileSeriesImgBackground = getComputedStyle(this.document.documentElement)
+    .getPropertyValue('--mobile-series-img-background').trim();
 
   currentlyReadingChapter: Chapter | undefined = undefined;
-  hasReadingProgress = false;
+  hasReadingProgress = signal<boolean>(false);
+  readingProgressStatus = computed(() => {
+    const hasProgress = this.hasReadingProgress();
+    const series = this.series();
+    if (!series || !hasProgress) return ReadingProgressStatus.NoProgress;
+
+    if (series.pagesRead >= series.pages) {
+      return ReadingProgressStatus.FullyRead;
+    }
+
+    return ReadingProgressStatus.Progress;
+  });
 
 
   seriesActions: ActionItem<Series>[] = [];
@@ -233,8 +238,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   plusReviews: Array<UserReview> = [];
   bookmarks: Array<PageBookmark> = [];
   ratings: Array<Rating> = [];
-  libraryType: LibraryType = LibraryType.Manga;
-  seriesMetadata: SeriesMetadata | null = null;
+  libraryType = signal<LibraryType>(LibraryType.Manga);
+
+  seriesMetadata = signal<SeriesMetadata | null>(null);
   readingLists: Array<ReadingList> = [];
   collections: Array<UserCollection> = [];
   isWantToRead: boolean = false;
@@ -251,6 +257,52 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   nextExpectedChapter: NextExpectedChapter | undefined;
   loadPageSource = new ReplaySubject<boolean>(1);
   loadPage$ = this.loadPageSource.asObservable();
+
+  readonly useBookLogic = computed(() => {
+    const libType = this.libraryType();
+    return libType === LibraryType.Book || libType === LibraryType.LightNovel;
+  });
+
+  readonly shouldShowStorylineTab = computed(() => {
+    const libType = this.libraryType();
+    const chapters = this.chapters();
+
+    if (libType === LibraryType.ComicVine) return false;
+
+    // Edge case for bad pdf parse
+    if ((libType === LibraryType.Book || libType === LibraryType.LightNovel) && (this.volumes.length === 0 && chapters.length === 0 && this.storyChapters.length > 0)) return true;
+
+    return (libType !== LibraryType.Book && libType !== LibraryType.LightNovel && libType !== LibraryType.Comic)
+      && (this.volumes.length > 0 || chapters.length > 0);
+  });
+
+  readonly shouldShowVolumeTab = computed(() => {
+    const libType = this.libraryType();
+    const chapters = this.chapters();
+
+    if (libType === LibraryType.ComicVine) {
+      if (this.volumes.length > 1) return true;
+
+      return this.specials.length === 0 && chapters.length === 0;
+
+    }
+
+    return this.volumes.length > 0;
+  });
+
+  showDetailsTab = computed(() => {
+    const seriesMetadataValue = this.seriesMetadata();
+    return hasAnyCast(seriesMetadataValue) || (seriesMetadataValue?.genres || []).length > 0
+      || (seriesMetadataValue?.tags || []).length > 0 || (seriesMetadataValue?.webLinks || []).length > 0;
+  });
+
+  weblinks = computed(() => {
+    const seriesMetadataValue = this.seriesMetadata();
+    const webLinks = seriesMetadataValue?.webLinks || '';
+    if (!webLinks) return [];
+
+    return webLinks.split(',');
+  });
 
   /**
    * Track by function for Volume to tell when to refresh card data
@@ -280,24 +332,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   combinedRecs: Array<any> = [];
 
-  sortingOptions: Array<{value: string, text: string}> = [
-    {value: 'Storyline', text: 'Storyline'},
-    {value: 'Release', text: 'Release'},
-    {value: 'Added', text: 'Added'},
-  ];
-  renderMode: PageLayoutMode = PageLayoutMode.Cards;
-
-  pageExtrasGroup = new FormGroup({
-    'sortingOption': new FormControl(this.sortingOptions[0].value, []),
-    'renderMode': new FormControl(this.renderMode, []),
-  });
-
-  user: User | undefined;
-  showVolumeTab = true;
-  showStorylineTab = true;
   showChapterTab = computed(() => this.chapters().length > 0);
-  showDetailsTab = true;
-  annotations = model<Annotation[]>([]);
+  annotations = signal<Annotation[]>([]);
 
   /**
    * This is the download we get from download service.
@@ -305,10 +341,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   download$: Observable<DownloadEvent | null> | null = null;
 
   bulkActionCallback = async (action: ActionItem<any>, data: any) => {
-    if (this.series === undefined) {
+    if (this.series() === undefined) {
       return;
     }
-    const seriesId = this.series.id;
+    const seriesId = this.seriesId;
     // we need to figure out what is actually selected now
     const selectedVolumeIndexes = this.bulkSelectionService.getSelectedCardsForSource('volume');
     const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
@@ -383,14 +419,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
 
-  get UseBookLogic() {
-    return this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel;
-  }
-
-  get WebLinks() {
-    if (!this.seriesMetadata || this.seriesMetadata?.webLinks === '') return [];
-    return this.seriesMetadata.webLinks.split(',');
-  }
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
@@ -404,14 +432,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   get ContinuePointTitle() {
-    if (this.currentlyReadingChapter === undefined || !this.hasReadingProgress) return '';
+    if (this.currentlyReadingChapter === undefined || !this.hasReadingProgress()) return '';
 
     if (!this.currentlyReadingChapter.isSpecial) {
       const vol = this.volumes.filter(v => v.id === this.currentlyReadingChapter?.volumeId);
 
       let chapterLocaleKey = 'common.chapter-num-shorthand';
       let volumeLocaleKey = 'common.volume-num-shorthand';
-      switch (this.libraryType) {
+      switch (this.libraryType()) {
         case LibraryType.ComicVine:
         case LibraryType.Comic:
           chapterLocaleKey = 'common.issue-num-shorthand';
@@ -448,18 +476,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-
-
-    this.accountService.currentUser$.subscribe(user => {
-      if (user) {
-        this.user = user;
-        this.isAdmin = this.accountService.hasAdminRole(user);
-        this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
-        this.renderMode = user.preferences.globalPageLayoutMode;
-        this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
-        this.cdRef.markForCheck();
-      }
-    });
   }
 
   ngAfterContentChecked(): void {
@@ -474,13 +490,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
-    this.mobileSeriesImgBackground = getComputedStyle(document.documentElement)
-      .getPropertyValue('--mobile-series-img-background').trim();
-
-
     // Set up the download in progress
     this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
-      return this.downloadService.mapToEntityType(events, this.series);
+      return this.downloadService.mapToEntityType(events, this.series()!);
     }));
 
     this.loadPage$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(300), tap(val => this.loadSeries(this.seriesId, val))).subscribe();
@@ -538,14 +550,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
 
-    //this.loadSeries(this.seriesId, true);
     this.loadPageSource.next(true);
-
-    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
-      if (val == null) return;
-      this.renderMode = val;
-      this.cdRef.markForCheck();
-    });
   }
 
 
@@ -562,7 +567,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   async handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
-    this.cdRef.markForCheck();
+    const seriesValue = this.series();
     switch(action.action) {
       case(Action.MarkAsRead):
         this.actionService.markSeriesAsRead(series, (series: Series) => {
@@ -606,9 +611,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.downloadSeries();
         break;
       case Action.Match:
-        this.actionService.matchSeries(this.series, (refreshNeeded) => {
+        this.actionService.matchSeries(seriesValue!, (refreshNeeded) => {
           if (refreshNeeded) {
-            this.loadSeries(this.series.id, refreshNeeded);
+            this.loadSeries(seriesValue!.id, refreshNeeded);
           }
         });
         break;
@@ -620,7 +625,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           break;
         }
       case Action.SetReadingProfile:
-        this.actionService.setReadingProfileForMultiple([this.series]);
+        this.actionService.setReadingProfileForMultiple([seriesValue!]);
         break;
       case Action.ClearReadingProfile:
         this.readingProfileService.clearSeriesProfiles(this.seriesId).subscribe(() => {
@@ -697,7 +702,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           if (!success) return;
           const chps = this.chapters();
           this.chapters.set(chps.filter(c => c.id != chapter.id));
-          this.cdRef.markForCheck();
         });
         break;
       case (Action.Download):
@@ -720,10 +724,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   loadSeries(seriesId: number, loadExternal: boolean = false) {
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
-      this.seriesMetadata = {...metadata};
-      this.cdRef.markForCheck();
+      this.seriesMetadata.set({...metadata});
 
-      if (![PublicationStatus.Ended, PublicationStatus.OnGoing].includes(this.seriesMetadata.publicationStatus)) return;
+      if (![PublicationStatus.Ended, PublicationStatus.OnGoing].includes(this.seriesMetadata()!.publicationStatus)) return;
 
       this.seriesService.getNextExpectedChapterDate(seriesId).subscribe(date => {
         if (date == null || date.expectedDate === null) {
@@ -788,23 +791,23 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       libType: this.libraryService.getLibraryType(this.libraryId),
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
-      this.libraryType = results.libType;
-      this.series = results.series;
+      this.libraryType.set(results.libType);
+      this.series.set(results.series);
 
-      this.themeService.setColorScape(this.series.primaryColor, this.series.secondaryColor);
+      this.themeService.setColorScape(results.series.primaryColor, results.series.secondaryColor);
 
       if (loadExternal) {
-        this.loadPlusMetadata(this.seriesId, this.libraryType);
+        this.loadPlusMetadata(this.seriesId, results.libType);
       }
 
-      if (this.libraryType === LibraryType.LightNovel) {
-        this.renderMode = PageLayoutMode.List;
-        this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
-        this.cdRef.markForCheck();
-      }
+      // if (results.libType === LibraryType.LightNovel) {
+      //   this.renderMode = PageLayoutMode.List;
+      //   this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
+      //   this.cdRef.markForCheck();
+      // }
 
 
-      this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
+      this.titleService.setTitle('Kavita - ' + results.series.name + ' Details');
 
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
@@ -885,8 +888,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         });
         this.storylineItems.push(...c);
 
-        this.updateWhichTabsToShow();
-
         if (!this.router.url.includes('#')) {
           this.updateSelectedTab();
         } else if (this.activeTabId != TabID.Storyline) {
@@ -902,7 +903,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
               if (this.volumes.length === 0) this.updateSelectedTab();
               break;
             case TabID.Chapters:
-              if (this.chapters.length === 0) this.updateSelectedTab();
+              if (this.chapters().length === 0) this.updateSelectedTab();
               break;
             case TabID.Recommendations:
               if (!this.hasRecommendations) this.updateSelectedTab();
@@ -928,32 +929,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     return {series, relation} as RelatedSeriesPair;
   }
 
-  shouldShowStorylineTab() {
-    if (this.libraryType === LibraryType.ComicVine) return false;
-    // Edge case for bad pdf parse
-    if ((this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) && (this.volumes.length === 0 && this.chapters().length === 0 && this.storyChapters.length > 0)) return true;
 
-    return (this.libraryType !== LibraryType.Book && this.libraryType !== LibraryType.LightNovel && this.libraryType !== LibraryType.Comic)
-      && (this.volumes.length > 0 || this.chapters().length > 0);
-  }
-
-  shouldShowVolumeTab() {
-    if (this.libraryType === LibraryType.ComicVine) {
-      if (this.volumes.length > 1) return true;
-      if (this.specials.length === 0 && this.chapters().length === 0) return true;
-      return false;
-    }
-    return this.volumes.length > 0;
-  }
-
-
-  updateWhichTabsToShow() {
-    this.showVolumeTab = this.shouldShowVolumeTab();
-    this.showStorylineTab = this.shouldShowStorylineTab();
-    this.showDetailsTab = hasAnyCast(this.seriesMetadata) || (this.seriesMetadata?.genres || []).length > 0
-      || (this.seriesMetadata?.tags || []).length > 0 || (this.seriesMetadata?.webLinks || []).length > 0;
-    this.cdRef.markForCheck();
-  }
 
   /**
    * This will update the selected tab
@@ -961,8 +937,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * This assumes loadPage() has already primed all the calculations and state variables. Do not call directly.
    */
   updateSelectedTab() {
+    const libType = this.libraryType();
     // Book libraries only have Volumes or Specials enabled
-    if (this.libraryType === LibraryType.Book || this.libraryType === LibraryType.LightNovel) {
+    if (libType === LibraryType.Book || libType === LibraryType.LightNovel) {
       if (this.volumes.length === 0) {
         if (this.specials.length === 0 && this.storyChapters.length > 0) {
           // NOTE: This is an edge case caused by bad parsing of pdf files. Once the new pdf parser is in place, this should be removed
@@ -981,7 +958,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     if (this.volumes.length === 0 && this.chapters().length === 0 && this.specials.length > 0) {
       this.activeTabId = TabID.Specials;
     } else {
-      if (this.libraryType == LibraryType.Comic || this.libraryType == LibraryType.ComicVine) {
+      if (libType == LibraryType.Comic || libType == LibraryType.ComicVine) {
         if (this.chapters().length === 0) {
           if (this.specials.length > 0) {
             this.activeTabId = TabID.Specials;
@@ -1037,8 +1014,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   setContinuePoint() {
     this.readerService.hasSeriesProgress(this.seriesId).subscribe(hasProgress => {
-      this.hasReadingProgress = hasProgress;
-      this.cdRef.markForCheck();
+      this.hasReadingProgress.set(hasProgress);
     });
     this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => {
       this.currentlyReadingChapter = chapter;
@@ -1047,7 +1023,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   markVolumeAsRead(vol: Volume) {
-    if (this.series === undefined) {
+    if (this.series() === undefined) {
       return;
     }
 
@@ -1057,7 +1033,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   markVolumeAsUnread(vol: Volume) {
-    if (this.series === undefined) {
+    if (this.series() === undefined) {
       return;
     }
 
@@ -1067,7 +1043,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   markChapterAsRead(chapter: Chapter) {
-    if (this.series === undefined) {
+    if (this.series() === undefined) {
       return;
     }
 
@@ -1077,7 +1053,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   markChapterAsUnread(chapter: Chapter) {
-    if (this.series === undefined) {
+    if (this.series() === undefined) {
       return;
     }
 
@@ -1087,31 +1063,29 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   read(incognitoMode: boolean = false) {
-    if (this.currentlyReadingChapter !== undefined) {
-      this.openChapter(this.currentlyReadingChapter, incognitoMode);
-      return;
-    }
+    if (this.bulkSelectionService.hasSelections()) return;
 
-    this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => {
-      this.openChapter(chapter, incognitoMode);
+    this.readerService.readSeries(this.series()!, incognitoMode, (chapter) => {
+      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
     });
   }
 
-  openChapter(chapter: Chapter, incognitoMode = false) {
+  openChapter(chapter: Chapter, incognitoMode = false, promptForReread: boolean = true) {
     if (this.bulkSelectionService.hasSelections()) return;
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
 
-    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode);
+    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode, promptForReread);
 
   }
 
 
   openEditChapter(chapter: Chapter) {
+    const seriesValue = this.series();
     const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);
     ref.componentInstance.chapter = chapter;
-    ref.componentInstance.libraryType = this.libraryType;
-    ref.componentInstance.seriesId = this.series?.id;
-    ref.componentInstance.libraryId = this.series?.libraryId;
+    ref.componentInstance.libraryType = this.libraryType();
+    ref.componentInstance.seriesId = seriesValue?.id;
+    ref.componentInstance.libraryId = seriesValue?.libraryId;
 
     ref.closed.subscribe((res: EditChapterModalCloseResult) => {
       if (res.success && res.isDeleted) {
@@ -1121,11 +1095,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openEditVolume(volume: Volume) {
+    const seriesValue = this.series();
     const ref = this.modalService.open(EditVolumeModalComponent, DefaultModalOptions);
     ref.componentInstance.volume = volume;
-    ref.componentInstance.libraryType = this.libraryType;
-    ref.componentInstance.seriesId = this.series?.id;
-    ref.componentInstance.libraryId = this.series?.libraryId;
+    ref.componentInstance.libraryType = this.libraryType();
+    ref.componentInstance.seriesId = seriesValue?.id;
+    ref.componentInstance.libraryId = seriesValue?.libraryId;
 
     ref.closed.subscribe((res: EditChapterModalCloseResult) => {
       if (res.success && res.isDeleted) {
@@ -1136,7 +1111,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   openEditSeriesModal() {
     const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
-    modalRef.componentInstance.series = this.series;
+    modalRef.componentInstance.series = this.series();
     modalRef.closed.subscribe((closeResult: EditSeriesModalCloseResult) => {
       if (closeResult.success) {
         window.scrollTo(0, 0);
@@ -1148,17 +1123,18 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   downloadSeries() {
-    this.downloadService.download('series', this.series, (d) => {
+    this.downloadService.download('series', this.series()!, (d) => {
       this.downloadInProgress = !!d;
       this.cdRef.markForCheck();
     });
   }
 
   toggleWantToRead() {
+
     if (this.isWantToRead) {
-      this.actionService.removeMultipleSeriesFromWantToReadList([this.series.id]);
+      this.actionService.removeMultipleSeriesFromWantToReadList([this.seriesId]);
     } else {
-      this.actionService.addMultipleSeriesToWantToReadList([this.series.id]);
+      this.actionService.addMultipleSeriesToWantToReadList([this.seriesId]);
     }
 
     this.isWantToRead = !this.isWantToRead;
@@ -1173,12 +1149,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   toggleScrobbling(evt: any) {
     evt.stopPropagation();
     if (this.isScrobbling) {
-      this.scrobbleService.addHold(this.series.id).subscribe(() => {
+      this.scrobbleService.addHold(this.seriesId).subscribe(() => {
         this.isScrobbling = !this.isScrobbling;
         this.cdRef.markForCheck();
       });
     } else {
-      this.scrobbleService.removeHold(this.series.id).subscribe(() => {
+      this.scrobbleService.removeHold(this.seriesId).subscribe(() => {
         this.isScrobbling = !this.isScrobbling;
         this.cdRef.markForCheck();
       });
@@ -1195,4 +1171,15 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
     }, 10);
   }
+
+  protected readonly LibraryType = LibraryType;
+  protected readonly TabID = TabID;
+  protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
+  protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
+  protected readonly SettingsTabId = SettingsTabId;
+  protected readonly FilterField = FilterField;
+  protected readonly AgeRating = AgeRating;
+  protected readonly UserBreakpoint = UserBreakpoint;
+  protected readonly encodeURIComponent = encodeURIComponent;
+  protected readonly ReadingProgressStatus = ReadingProgressStatus;
 }

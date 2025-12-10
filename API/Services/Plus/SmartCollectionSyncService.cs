@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.KavitaPlus.ExternalMetadata;
-using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -15,7 +14,6 @@ using API.Helpers;
 using API.SignalR;
 using Flurl.Http;
 using Kavita.Common;
-using Kavita.Common.EnvironmentInfo;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;

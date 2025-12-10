@@ -1,13 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, DestroyRef,
-  inject,
-  OnInit
-} from '@angular/core';
-import { Device } from 'src/app/_models/device/device';
-import { DeviceService } from 'src/app/_services/device.service';
-import { DevicePlatformPipe } from '../../_pipes/device-platform.pipe';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, model, OnInit} from '@angular/core';
+import {Device} from 'src/app/_models/device/device';
+import {DeviceService} from 'src/app/_services/device.service';
+import {DevicePlatformPipe} from '../../_pipes/device-platform.pipe';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingsService} from "../../admin/settings.service";
@@ -20,13 +14,16 @@ import {shareReplay} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AsyncPipe} from "@angular/common";
+import {ClientDevice} from "../../_models/client-device";
+import {ClientDeviceCardComponent} from "../../_single-module/client-device-card/client-device-card.component";
+import {LoadingComponent} from "../../shared/loading/loading.component";
 
 @Component({
     selector: 'app-manage-devices',
     templateUrl: './manage-devices.component.html',
     styleUrls: ['./manage-devices.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule]
+  imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule, ClientDeviceCardComponent, LoadingComponent]
 })
 export class ManageDevicesComponent implements OnInit {
 
@@ -43,11 +40,18 @@ export class ManageDevicesComponent implements OnInit {
   device: Device | undefined;
   hasEmailSetup = false;
 
+  clientDevices = model<ClientDevice[]>([]);
+
+
   isReadOnly$ = this.accountService.currentUser$.pipe(
     takeUntilDestroyed(this.destroyRef),
     map(c => c && this.accountService.hasReadOnlyRole(c)),
     shareReplay({refCount: true, bufferSize: 1}),
   );
+
+  constructor() {
+    this.loadClientDevices();
+  }
 
   ngOnInit(): void {
     this.settingsService.isEmailSetup().subscribe(res => {
@@ -57,12 +61,17 @@ export class ManageDevicesComponent implements OnInit {
     this.loadDevices();
   }
 
+  loadClientDevices() {
+    this.deviceService.getMyClientDevices().subscribe(devices => {
+      this.clientDevices.set([...devices]);
+    });
+  }
 
   loadDevices() {
     this.isEditingDevice = false;
     this.device = undefined;
     this.cdRef.markForCheck();
-    this.deviceService.getDevices().subscribe(devices => {
+    this.deviceService.getEmailDevices().subscribe(devices => {
       this.devices = devices;
       this.cdRef.markForCheck();
     });
@@ -70,7 +79,7 @@ export class ManageDevicesComponent implements OnInit {
 
   async deleteDevice(device: Device) {
     if (!await this.confirmService.confirm(translate('toasts.delete-device'))) return;
-    this.deviceService.deleteDevice(device.id).subscribe(() => {
+    this.deviceService.deleteEmailDevice(device.id).subscribe(() => {
       const index = this.devices.indexOf(device);
       this.devices.splice(index, 1);
       this.cdRef.markForCheck();
@@ -100,5 +109,5 @@ export class ManageDevicesComponent implements OnInit {
     });
   }
 
-    protected readonly ColumnMode = ColumnMode;
+  protected readonly ColumnMode = ColumnMode;
 }

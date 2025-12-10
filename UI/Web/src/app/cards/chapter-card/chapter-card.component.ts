@@ -19,7 +19,7 @@ import {ScrollService} from "../../_services/scroll.service";
 import {ActionItem} from "../../_services/action-factory.service";
 import {Chapter} from "../../_models/chapter";
 import {Observable} from "rxjs";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {DecimalPipe} from "@angular/common";

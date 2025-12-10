@@ -3,11 +3,11 @@ import {AppComponent} from './app/app.component';
 import {NgCircleProgressModule} from 'ng-circle-progress';
 import {ToastrModule} from 'ngx-toastr';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {AppRoutingModule} from './app/app-routing.module';
+import {routes} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
-import {JwtInterceptor} from './app/_interceptors/jwt.interceptor';
-import {ErrorInterceptor} from './app/_interceptors/error.interceptor';
-import {HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi} from '@angular/common/http';
+import {jwtInterceptor} from './app/_interceptors/jwt.interceptor';
+import {errorInterceptor} from './app/_interceptors/error.interceptor';
+import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
 import {provideTransloco, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
 import {AccountService} from "./app/_services/account.service";
@@ -20,10 +20,21 @@ import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-tr
 import {HttpLoader} from "./httpLoader";
 import {register as registerSwiperElements} from 'swiper/element/bundle';
 import {ColorPickerModule} from "@iplab/ngx-color-picker";
+import {clientInfoInterceptor} from "./app/_interceptors/client-info.interceptor";
+import {
+  PreloadAllModules,
+  provideRouter,
+  withComponentInputBinding,
+  withInMemoryScrolling, withNavigationErrorHandler,
+  withPreloading
+} from "@angular/router";
+import {routingErrorHandler} from "./app/_interceptors/routing-error.handler";
+import {registerECharts} from "./echarts";
 
 const disableAnimations = !('animate' in document.documentElement);
 
 registerSwiperElements();
+registerECharts();
 
 function transformLanguageCodes(arr: Array<string>) {
     const transformedArray: Array<string> = [];
@@ -121,7 +132,6 @@ function bootstrapUser() {
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule,
-          AppRoutingModule,
           BrowserAnimationsModule.withConfig({ disableAnimations }),
           LazyLoadImageModule,
           ToastrModule.forRoot({
@@ -134,6 +144,12 @@ bootstrapApplication(AppComponent, {
           NgCircleProgressModule.forRoot(),
           ColorPickerModule,
         ),
+        provideRouter(routes,
+          withComponentInputBinding(),
+          withPreloading(PreloadAllModules),
+          withInMemoryScrolling({scrollPositionRestoration: 'enabled'}),
+          withNavigationErrorHandler(routingErrorHandler),
+          ),
         provideTransloco(translocoOptions),
         provideTranslocoLocale({
           defaultLocale: 'en'
@@ -143,8 +159,6 @@ bootstrapApplication(AppComponent, {
           storage: { useValue: localStorage },
           ttl: environment.production ? 129600 : 0 // 1.5 days in seconds for prod
         }),
-        { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         Title,
         { provide: SAVER, useFactory: getSaver },
         {
@@ -152,7 +166,7 @@ bootstrapApplication(AppComponent, {
           useFactory: getBaseHref,
           deps: [PlatformLocation]
         },
-        provideHttpClient(withInterceptorsFromDi(), withFetch()),
+        provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor, clientInfoInterceptor]), withFetch()),
         provideAppInitializer(() => bootstrapUser()),
     ]
 } as ApplicationConfig)

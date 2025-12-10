@@ -9,7 +9,6 @@ using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.Collection;
-using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
@@ -18,7 +17,6 @@ using API.DTOs.Metadata;
 using API.DTOs.Person;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
-using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
@@ -33,6 +31,7 @@ using API.Helpers;
 using API.Helpers.Converters;
 using API.Services;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
 using AutoMapper;
@@ -803,7 +802,8 @@ public class SeriesRepository : ISeriesRepository
 
         foreach (var s in series)
         {
-            s.PagesRead = userProgress.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead);
+            var seriesProgress = userProgress.Where(p => p.SeriesId == s.Id).ToList();
+            s.PagesRead = seriesProgress.Sum(p => p.PagesRead);
             var rating = userRatings.SingleOrDefault(r => r.SeriesId == s.Id);
             if (rating != null)
             {
@@ -813,7 +813,8 @@ public class SeriesRepository : ISeriesRepository
 
             if (userProgress.Count > 0)
             {
-                s.LatestReadDate = userProgress.Max(p => p.LastModified);
+                s.LatestReadDate = seriesProgress.MaxOrDefault(p => p.LastModified, DateTime.MinValue);
+                s.TotalReads = seriesProgress.MinOrDefault(p => p.TotalReads, 0);
             }
         }
     }

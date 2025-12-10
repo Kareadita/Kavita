@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
-using API.DTOs.Filtering;
 using API.Services;
 using EasyCaching.Core;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 
 namespace API.Controllers;
 

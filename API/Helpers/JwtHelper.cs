@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 
 namespace API.Helpers;
 

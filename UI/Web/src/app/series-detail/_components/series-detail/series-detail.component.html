@@ -1,17 +1,32 @@
+
+
 <ng-container *transloco="let t; prefix: 'series-detail'">
   <app-bulk-operations [actionCallback]="bulkActionCallback" [marginLeft]="12" [marginRight]="0" />
 
-  @if (series && seriesMetadata && libraryType !== null) {
+  @let hasReadingProgressValue = hasReadingProgress();
+  @let readingProgressStatusValue = readingProgressStatus();
+  @let totalSizeValue = totalSize();
+  @let useBookLogicValue = useBookLogic();
+  @let libraryTypeValue = libraryType();
+  @let shouldShowVolumeTabValue = shouldShowVolumeTab();
+  @let shouldShowStorylineTabValue = shouldShowStorylineTab();
+  @let showDetailsTabValue = showDetailsTab();
+  @let seriesMetadataValue = seriesMetadata();
+  @let weblinksValue = weblinks();
+  @let seriesValue = series();
+  @let chaptersValue = chapters();
+
+  @if (seriesValue && seriesMetadataValue && libraryTypeValue !== null) {
     <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
       <div class="row mb-0 mb-xl-3 info-container">
         <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''"
              class="image-container series col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
-          <app-cover-image [entity]="series" [coverImage]="imageService.getSeriesCoverImage(series.id)" [continueTitle]="ContinuePointTitle" (read)="read()" />
+          <app-cover-image [entity]="seriesValue" [coverImage]="imageService.getSeriesCoverImage(seriesValue.id)" [continueTitle]="ContinuePointTitle" (read)="read()" />
         </div>
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-sm-12 col-xs-12">
           <h4 class="title mb-2">
-            <span>{{series.name}}
+            <span>{{seriesValue.name}}
 
               @if(isLoadingExtra || isLoading) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -22,29 +37,30 @@
 
           </h4>
           <div class="subtitle mt-2 mb-2">
-            @if (series.localizedName !== series.name && series.localizedName) {
-              <span>{{series.localizedName | defaultValue}}</span>
+            @if (seriesValue.localizedName !== seriesValue.name && seriesValue.localizedName) {
+              <span>{{seriesValue.localizedName | defaultValue}}</span>
             }
           </div>
 
-          <app-metadata-detail-row [entity]="seriesMetadata"
+          <app-metadata-detail-row [entity]="seriesMetadataValue"
                                    [readingTimeLeft]="readingTimeLeft"
-                                   [ageRating]="seriesMetadata.ageRating"
-                                   [hasReadingProgress]="hasReadingProgress"
-                                   [readingTimeEntity]="series"
-                                   [libraryType]="libraryType"
-                                   [mangaFormat]="series.format"
-                                   [releaseYear]="seriesMetadata.releaseYear"
-                                   [totalBytes]="totalSize()"
+                                   [ageRating]="seriesMetadataValue.ageRating"
+                                   [hasReadingProgress]="hasReadingProgressValue"
+                                   [readingTimeEntity]="seriesValue"
+                                   [libraryType]="libraryTypeValue"
+                                   [mangaFormat]="seriesValue.format"
+                                   [releaseYear]="seriesMetadataValue.releaseYear"
+                                   [totalBytes]="totalSizeValue"
+                                   [totalReads]="seriesValue.totalReads"
           />
 
           <div class="mt-2 mb-2">
-            <app-external-rating [seriesId]="series.id"
+            <app-external-rating [seriesId]="seriesValue.id"
                                  [ratings]="ratings"
-                                 [userRating]="series.userRating"
-                                 [hasUserRated]="series.hasUserRated"
-                                 [libraryType]="libraryType"
-                                 [webLinks]="WebLinks" />
+                                 [userRating]="seriesValue.userRating"
+                                 [hasUserRated]="seriesValue.hasUserRated"
+                                 [libraryType]="libraryTypeValue"
+                                 [webLinks]="weblinksValue" />
           </div>
 
           <div class="mt-3 mb-3">
@@ -53,8 +69,8 @@
                 <div class="btn-group">
                   <button type="button" class="btn btn-outline-primary" (click)="read()">
                     <span>
-                      <i class="fa {{hasReadingProgress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
-                      <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue') : t('read')}}</span>
+                      <i class="fa {{readingProgressStatusValue === ReadingProgressStatus.Progress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                      <span class="read-btn--text">&nbsp;{{readingProgressStatusValue | readingProgressStatusPipe}}</span>
                     </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
@@ -63,7 +79,7 @@
                       <button ngbDropdownItem (click)="read(true)">
                         <span>
                           <i class="fa fa-glasses" aria-hidden="true"></i>
-                          <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? t('continue-incognito') : t('read-incognito')}}</span>
+                          <span class="read-btn--text">&nbsp;{{readingProgressStatusValue | readingProgressStatusPipe:true}}</span>
                         </span>
                       </button>
                     </div>
@@ -79,7 +95,7 @@
                 </button>
               </div>
 
-              @if (isAdmin) {
+              @if (isAdmin()) {
                 <div class="col-auto ms-2">
                   <button class="btn btn-actions" id="edit-btn--komf" (click)="openEditSeriesModal()" [ngbTooltip]="t('edit-series-alt')">
                     <span><i class="fa fa-pen" aria-hidden="true"></i></span>
@@ -87,7 +103,7 @@
                 </div>
               }
 
-              @if ((licenseService.hasValidLicense$ | async) && libraryAllowsScrobbling) {
+              @if ((licenseService.hasValidLicenseSignal()) && libraryAllowsScrobbling) {
                 <div class="col-auto ms-2">
                   <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip', {value: isScrobbling ? t('on') : t('off')})">
                     <i class="fa-solid fa-tower-{{(isScrobbling) ? 'broadcast' : 'observation'}}" aria-hidden="true"></i>
@@ -97,19 +113,19 @@
 
               <div class="col-auto ms-2">
                 <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables [entity]="series" [inputActions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn" />
+                  <app-card-actionables [entity]="seriesValue" [inputActions]="seriesActions" [labelBy]="seriesValue.name" iconClass="fa-ellipsis-h" btnClass="btn" />
                 </div>
               </div>
 
               <div class="col-auto ms-2 d-none d-md-block btn-actions">
-                <app-download-button [download$]="download$" [entity]="series" entityType="series" />
+                <app-download-button [download$]="download$" [entity]="seriesValue" entityType="series" />
               </div>
 
             </div>
           </div>
 
           <div class="mt-2 mb-3">
-            <app-read-more [text]="seriesMetadata.summary || ''" [maxLength]="utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop ? 170 : 200" />
+            <app-read-more [text]="seriesMetadataValue.summary || ''" [maxLength]="utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop ? 170 : 200" />
           </div>
 
           <div class="mt-2 upper-details">
@@ -117,7 +133,7 @@
               <div class="col-6 pe-5">
                 <span class="fw-bold">{{t('writers-title')}}</span>
                 <div>
-                  <app-badge-expander [items]="seriesMetadata.writers"
+                  <app-badge-expander [items]="seriesMetadataValue.writers"
                                       [itemsTillExpander]="3"
                                       [allowToggle]="false"
                                       (toggle)="switchTabsToDetail()">
@@ -130,12 +146,12 @@
               <div class="col-6">
                 <span class="fw-bold">{{t('publication-status-title')}}</span>
                 <div>
-                  @if (seriesMetadata.publicationStatus | publicationStatus; as pubStatus) {
-                    <a class="dark-exempt btn-icon font-size" (click)="openFilter(FilterField.PublicationStatus, seriesMetadata!.publicationStatus)"
+                  @if (seriesMetadataValue.publicationStatus | publicationStatus; as pubStatus) {
+                    <a class="dark-exempt btn-icon font-size" (click)="openFilter(FilterField.PublicationStatus, seriesMetadataValue!.publicationStatus)"
                        href="javascript:void(0);"
                        [ngbTooltip]="t('publication-status-tooltip') +
-                       ((seriesMetadata.totalCount === 0 || seriesMetadata.maxCount === LooseLeafOrSpecialNumber)
-                       ? '' : ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')')"
+                       ((seriesMetadataValue.totalCount === 0 || seriesMetadataValue.maxCount === LooseLeafOrSpecialNumber)
+                       ? '' : ' (' + seriesMetadataValue?.maxCount + ' / ' + seriesMetadataValue?.totalCount + ')')"
                     >
                       {{pubStatus}}
                     </a>
@@ -150,7 +166,7 @@
               <div class="col-6 pe-5">
                 <span class="fw-bold">{{t('genres-title')}}</span>
                 <div>
-                  <app-badge-expander [items]="seriesMetadata.genres"
+                  <app-badge-expander [items]="seriesMetadataValue.genres"
                                       [itemsTillExpander]="3"
                                       [allowToggle]="false"
                                       (toggle)="switchTabsToDetail()">
@@ -164,7 +180,7 @@
               <div class="col-6">
                 <span class="fw-bold">{{t('tags-title')}}</span>
                 <div>
-                  <app-badge-expander [items]="seriesMetadata.tags"
+                  <app-badge-expander [items]="seriesMetadataValue.tags"
                                       [itemsTillExpander]="3"
                                       [allowToggle]="false"
                                       (toggle)="switchTabsToDetail()">
@@ -182,7 +198,7 @@
       <div class="carousel-tabs-container mb-2">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
-          @if (showStorylineTab) {
+          @if (shouldShowStorylineTabValue) {
             <li [ngbNavItem]="TabID.Storyline">
               <a ngbNavLink>{{t(TabID.Storyline)}}</a>
               <ng-template ngbNavContent>
@@ -207,10 +223,10 @@
           }
 
 
-          @if (showVolumeTab) {
+          @if (shouldShowVolumeTabValue) {
             <li [ngbNavItem]="TabID.Volumes">
               <a ngbNavLink>
-                {{UseBookLogic ? t('books-tab') : t('volumes-tab')}}
+                {{useBookLogicValue ? t('books-tab') : t('volumes-tab')}}
                 <span class="badge rounded-pill text-bg-secondary">{{volumes.length}}</span>
               </a>
               <ng-template ngbNavContent>
@@ -231,15 +247,15 @@
           @if (showChapterTab()) {
             <li [ngbNavItem]="TabID.Chapters">
               <a ngbNavLink>
-                {{utilityService.formatChapterName(libraryType)}}
-                <span class="badge rounded-pill text-bg-secondary">{{chapters().length}}</span>
+                {{utilityService.formatChapterName(libraryTypeValue)}}
+                <span class="badge rounded-pill text-bg-secondary">{{chaptersValue.length}}</span>
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="chapters()" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="chaptersValue" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_chapters') {
-                        <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters().length}" />
+                        <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chaptersValue.length}" />
                       }
                       <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}" />
                     </div>
@@ -260,7 +276,7 @@
                   <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_specials') {
-                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapters().length}" />
+                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chaptersValue.length}" />
                       }
                     </div>
                   </virtual-scroller>
@@ -332,21 +348,21 @@
             </a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
-                <app-reviews [userReviews]="reviews" [plusReviews]="plusReviews" [series]="series" />
+                <app-reviews [userReviews]="reviews" [plusReviews]="plusReviews" [series]="seriesValue" />
               }
             </ng-template>
           </li>
 
-          @if (seriesMetadata && showDetailsTab) {
+          @if (seriesMetadataValue && showDetailsTabValue) {
             <li [ngbNavItem]="TabID.Details" id="details-tab">
               <a ngbNavLink>{{t(TabID.Details)}}</a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Details; prefetch on idle) {
-                  <app-details-tab [metadata]="seriesMetadata"
-                                   [genres]="seriesMetadata.genres"
-                                   [tags]="seriesMetadata.tags"
-                                   [webLinks]="WebLinks"
-                                   [filePaths]="[series.folderPath]"
+                  <app-details-tab [metadata]="seriesMetadataValue"
+                                   [genres]="seriesMetadataValue.genres"
+                                   [tags]="seriesMetadataValue.tags"
+                                   [webLinks]="weblinksValue"
+                                   [filePaths]="[seriesValue.folderPath]"
                   />
                 }
               </ng-template>
@@ -365,44 +381,46 @@
           @case (TabID.Volumes) {
             @if (nextExpectedChapter.volumeNumber !== SpecialVolumeNumber && nextExpectedChapter.chapterNumber === LooseLeafOrSpecialNumber) {
               <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter"
-                                      [imageUrl]="imageService.getSeriesCoverImage(series.id)" />
+                                      [imageUrl]="imageService.getSeriesCoverImage(seriesValue.id)" />
             }
           }
           @case (TabID.Chapters) {
-            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(series.id)" />
+            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(seriesValue.id)" />
           }
           @case (TabID.Storyline) {
-            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(series.id)" />
+            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(seriesValue.id)" />
           }
         }
       }
     </ng-template>
   }
 
+  <ng-template #nonSpecialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
+    <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesValue!.id"
+                      [libraryId]="libraryId"
+                      [actions]="chapterActions"
+                      [libraryType]="libraryTypeValue"
+                      (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                      [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
+  </ng-template>
+
+  <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
+    <app-volume-card class="col-auto mt-2 mb-2" [volume]="item" [seriesId]="seriesId" [libraryId]="libraryId" [libraryType]="libraryTypeValue"
+                     [actions]="volumeActions"
+                     (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                     [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
+  </ng-template>
+
+  <ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
+    <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesValue!.id"
+                      [libraryId]="libraryId"
+                      [actions]="chapterActions"
+                      [libraryType]="libraryTypeValue"
+                      (selection)="bulkSelectionService.handleCardSelection('special', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
+                      [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
+  </ng-template>
+
 
 </ng-container>
 
-<ng-template #nonSpecialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="series.id"
-                    [libraryId]="libraryId"
-                    [actions]="chapterActions"
-                    [libraryType]="libraryType"
-                    (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                    [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
-</ng-template>
 
-<ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  <app-volume-card class="col-auto mt-2 mb-2" [volume]="item" [seriesId]="seriesId" [libraryId]="libraryId" [libraryType]="libraryType"
-                   [actions]="volumeActions"
-                   (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                   [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
-</ng-template>
-
-<ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-  <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="series.id"
-                    [libraryId]="libraryId"
-                    [actions]="chapterActions"
-                    [libraryType]="libraryType"
-                    (selection)="bulkSelectionService.handleCardSelection('special', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                    [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
-</ng-template>

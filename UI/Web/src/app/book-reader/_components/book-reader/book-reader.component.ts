@@ -767,7 +767,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Updates the TOC current page anchor, last scene path and saves progress
    */
-  handleScrollEvent() {
+  handleScrollEvent(bypassSave: boolean = false) {
 
     // TODO: See if we can move this to a service for ToC
     // Highlight the current chapter we are on
@@ -791,7 +791,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.lastSeenScrollPartPath = xpath; // Keep this scoped so we can appropriately handle before saving
     }
 
-    if (this.lastSeenScrollPartPath !== '') {
+    if (this.lastSeenScrollPartPath !== '' && !bypassSave) {
       this.saveProgress();
 
       if (this.debugMode()) {
@@ -889,7 +889,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      await this.init();
+      await this.init(true);
     });
 
 
@@ -905,7 +905,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe();
   }
 
-  async init() {
+  async init(firstLoad: boolean) {
     this.nextChapterId = CHAPTER_ID_NOT_FETCHED;
     this.prevChapterId = CHAPTER_ID_NOT_FETCHED;
     this.nextChapterDisabled = false;
@@ -943,7 +943,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }).subscribe({
         next: ({chapter, progress, chapters}) => {
           this.authorText.set(chapter.writers.map(p => p.name).join(', '));
-          this.setupBookReader(chapter, progress, chapters);
+          this.setupBookReader(chapter, progress, chapters, firstLoad);
         },
         error: () => {
           setTimeout(() => {
@@ -954,12 +954,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private setupBookReader(chapter: Chapter, progress: ProgressBookmark, chapters: BookChapterItem[]) {
+  private setupBookReader(chapter: Chapter, progress: ProgressBookmark, chapters: BookChapterItem[], firstLoad: boolean) {
     this.chapter = chapter;
     this.volumeId = chapter.volumeId;
     this.chapters = chapters;
     this.maxPages.set(chapter.pages);
-    //this.pageNum.set(progress.pageNum);
     this.setPageNum(progress.pageNum);
     this.cdRef.markForCheck();
 
@@ -975,7 +974,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     if (this.pageNum() >= this.maxPages()) {
-      this.pageNum.set(this.maxPages() - 1);
+      const newPageNum = firstLoad ? this.maxPages() - 1 : 0;
+      this.pageNum.set(newPageNum);
       this.saveProgress();
     }
 
@@ -1108,7 +1108,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (prevChapter != this.chapterId) {
       if (prevChapter !== undefined) {
         this.chapterId = prevChapter;
-        this.init();
+        this.init(false);
         return;
       }
     }
@@ -1142,7 +1142,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
       this.cdRef.markForCheck();
-      this.init();
+      this.init(false);
       return;
     }
 
@@ -1325,7 +1325,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const offSetY = Math.min(32, imgRect.height * 0.05);
 
       icon.style.cssText = `
-          position: absolute;
+          ${imgRect.width < 5 ? '' : 'position:  absolute;'}
           left: ${imgRect.width + relativeX - offSetX}px;
           top: ${imgRect.height + relativeY - offSetY}px;
           margin: 0;
@@ -1451,7 +1451,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // we need to click the document before arrow keys will scroll down.
     this.reader.nativeElement.focus();
-    afterFrame(() => this.handleScrollEvent()); // Will set lastSeenXPath and save progress
+    afterFrame(() => this.handleScrollEvent()); // Will set lastSeenXPath
     this.isLoading.set(false);
     this.cdRef.markForCheck();
 

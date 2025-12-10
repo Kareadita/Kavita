@@ -93,6 +93,10 @@ export class LibraryService {
     return this.httpClient.get<Library[]>(this.baseUrl + 'library/libraries');
   }
 
+  getLibrariesForUser(userId: number) {
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library/user-libraries?userId=' + userId);
+  }
+
   updateLibrariesForMember(username: string, selectedLibraries: Library[]) {
     return this.httpClient.post(this.baseUrl + 'library/grant-access', {username, selectedLibraries});
   }

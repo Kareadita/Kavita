@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.Filtering.v2;
-using API.Entities;
 using API.Entities.History;
 using API.Helpers;
 using Kavita.Common.EnvironmentInfo;
@@ -49,8 +48,6 @@ public static class MigrateSmartFilterEncoding
         dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
         {
             Name = "MigrateSmartFilterEncoding",
-            ProductVersion = BuildInfo.Version.ToString(),
-            RanAt = DateTime.UtcNow
         });
         await dataContext.SaveChangesAsync();
 

@@ -72,7 +72,7 @@ public sealed record UserStatV3
     /// <summary>
     /// The number of devices setup and their platforms
     /// </summary>
-    public ICollection<DevicePlatform> DevicePlatforms { get; set; }
+    public ICollection<EmailDevicePlatform> DevicePlatforms { get; set; }
     /// <summary>
     /// Roles for this user
     /// </summary>

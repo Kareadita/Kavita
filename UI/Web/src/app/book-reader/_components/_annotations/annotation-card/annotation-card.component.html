@@ -3,12 +3,17 @@
     <div #username class="card-header d-flex justify-content-between align-items-center py-2 px-3 clickable" [ngStyle]="{'background-color': titleColor()}" (click)="viewAnnotation()">
 
       <div class="d-flex align-items-center">
+
         @if (showLocationInformation()) {
-          <i tabindex="0" class="fas fa-book me-2" [ngbTooltip]="t('location-tooltip', {series: annotation().seriesName, library: annotation().libraryName})"></i>
+          <i tabindex="0" class="fas fa-book" [ngbTooltip]="t('location-tooltip', {series: annotation().seriesName, library: annotation().libraryName})"></i>
+        } @else { <!-- Displaying both looks really bad -->
+          <app-profile-icon [userId]="annotation().ownerUserId" />
         }
-        <strong [style.color]="colorscapeService.getContrastingTextColor(username)">{{ annotation().ownerUsername }}</strong>
+        <a class="ms-2" routerLink="/profile/{{annotation().ownerUserId}}" (click)="$event.stopPropagation()">
+          <strong [style.color]="colorscapeService.getContrastingTextColor(username)">{{ annotation().ownerUsername }}</strong>
+        </a>
       </div>
-      <div  [style.color]="colorscapeService.getContrastingTextColor(username)" class="ms-2">{{ annotation().createdUtc | utcToLocaleDate | date: 'shortDate' }}</div>
+      <div [style.color]="colorscapeService.getContrastingTextColor(username)" class="ms-2">{{ annotation().createdUtc | utcToLocalDate | date: 'shortDate' }}</div>
     </div>
 
     <div class="card-body px-3 py-2" [ngClass]="{'spoilers': annotation().containsSpoiler && !hasClicked()}" (click)="hasClicked.set(true)">
@@ -41,12 +46,6 @@
           <span class="badge bg-secondary clickable" (click)="loadAnnotation()">{{t('page-num', {page: annotation().pageNumber + 1})}}</span>
         }
 
-
-        @if (false) {
-          <button class="btn btn-sm btn-outline-primary">
-            <i class="fa-solid fa-thumbs-up" aria-hidden="true"></i>
-          </button>
-        }
 
         @if(allowEdit()) {
           <button class="btn btn-sm btn-outline-secondary" (click)="editAnnotation()">

@@ -1,4 +1,4 @@
-﻿using API.Services;
+﻿using API.Services.Reading;
 
 namespace API.Entities.Interfaces;
 

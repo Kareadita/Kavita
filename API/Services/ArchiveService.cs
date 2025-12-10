@@ -16,7 +16,6 @@ using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using SharpCompress.Archives;
 using SharpCompress.Common;
-using YamlDotNet.Core;
 
 namespace API.Services;
 

@@ -1,5 +1,4 @@
-﻿using System;
-using API.Entities.Enums;
+﻿using API.Entities.Enums;
 using API.Entities.Interfaces;
 
 namespace API.DTOs.ReadingLists;

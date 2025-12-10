@@ -1,0 +1,76 @@
+/* Align profile avatar and title horizontally and center vertically */
+.info-container {
+	display: flex;
+	align-items: center;
+
+	.profile-image-wrapper {
+		display: flex;
+		align-items: center;
+		margin-right: 12px;
+
+		.image-container {
+			margin-top: 0 !important;
+			align-self: center !important;
+		}
+	}
+
+	h1 {
+		margin: 0;
+		font-size: 1.75rem;
+		line-height: 1;
+	}
+
+	.badges {
+		display: flex;
+		gap: 8px;
+
+		.badge {
+			padding: 4px 8px;
+			border-radius: 999px;
+			font-size: 0.75rem;
+			font-weight: 600;
+		}
+
+		.reads-badge { background: var(--reads-badge-bg, #1f9d5a); color: #fff; }
+		.kplus-badge { background: gold; color: black; }
+	}
+}
+
+/* Blurred profile background when a user image exists */
+.main-container {
+	position: relative;
+	overflow: hidden;
+
+	&.has-bg {
+		/* keep a fallback solid color */
+		background-color: var(--card-bg-color);
+	}
+
+	&.has-bg::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		/* use the CSS variable set inline from the template */
+		background-image: var(--profile-bg);
+		background-size: cover;
+		background-position: center;
+		transform: scale(1.04);
+		filter: blur(12px) saturate(.9) brightness(.7);
+		opacity: 0.45;
+		z-index: 0;
+		pointer-events: none;
+		border-radius: inherit;
+	}
+
+	/* make sure content sits above the blurred background */
+	> * {
+		position: relative;
+		z-index: 1;
+	}
+}
+
+/* Round the background container */
+.main-container.has-bg {
+	border-radius: 5px;
+}
+

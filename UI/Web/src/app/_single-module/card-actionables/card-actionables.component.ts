@@ -2,10 +2,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef, effect,
+  effect,
   EventEmitter,
   inject,
-  Input,
+  input,
+  model,
   OnChanges,
   OnDestroy,
   Output
@@ -18,7 +19,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 
 
 @Component({
@@ -35,30 +36,29 @@ export class CardActionablesComponent implements OnChanges, OnDestroy {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
-  private readonly destroyRef = inject(DestroyRef);
   protected readonly utilityService = inject(UtilityService);
   protected readonly modalService = inject(NgbModal);
 
   protected readonly Breakpoint = Breakpoint;
 
-  @Input() iconClass = 'fa-ellipsis-v';
-  @Input() btnClass = '';
-  @Input() inputActions: ActionItem<any>[] = [];
-  @Input() labelBy = 'card';
+  iconClass = input<string>('fa-ellipsis-v');
+  btnClass = input<string>('');
+  inputActions = input<ActionItem<any>[]>([]);
+  labelBy = input<string>('card');
   /**
    * Text to display as if actionable was a button
    */
-  @Input() label = '';
-  @Input() disabled: boolean = false;
+  label = input<string>('');
+  disabled = input<boolean>(false);
 
-  @Input() entity: ActionableEntity = null;
+  entity = input<ActionableEntity>(null);
   /**
    * This will only emit when the action is clicked and the entity is null. Otherwise, the entity callback handler will be invoked.
    */
   @Output() actionHandler = new EventEmitter<ActionItem<any>>();
 
 
-  actions: ActionItem<ActionableEntity>[] = [];
+  actions = model<ActionItem<ActionableEntity>[]>([]);
   currentUser: User | undefined = undefined;
   submenu: {[key: string]: NgbDropdown} = {};
   private closeTimeout: any = null;
@@ -69,7 +69,7 @@ export class CardActionablesComponent implements OnChanges, OnDestroy {
       if (!user) return;
 
       this.currentUser = user;
-      this.actions = this.inputActions.filter(a => this.willRenderAction(a, user));
+      this.actions.set(this.inputActions().filter(a => this.willRenderAction(a, user)));
       this.cdRef.markForCheck();
     });
   }
@@ -77,7 +77,7 @@ export class CardActionablesComponent implements OnChanges, OnDestroy {
   ngOnChanges() {
     if (!this.currentUser) return; // We can safely return as actionables will never be visible if there is no user
 
-    this.actions = this.inputActions.filter(a => this.willRenderAction(a, this.currentUser!));
+    this.actions.set(this.inputActions().filter(a => this.willRenderAction(a, this.currentUser!)));
     this.cdRef.markForCheck();
   }
 
@@ -94,10 +94,10 @@ export class CardActionablesComponent implements OnChanges, OnDestroy {
     this.preventEvent(event);
 
     if (typeof action.callback === 'function') {
-      if (this.entity === null) {
+      if (this.entity() === null) {
         this.actionHandler.emit(action);
       } else {
-        action.callback(action, this.entity);
+        action.callback(action, this.entity());
       }
     }
   }
@@ -108,7 +108,7 @@ export class CardActionablesComponent implements OnChanges, OnDestroy {
    * @param user
    */
   willRenderAction(action: ActionItem<ActionableEntity>, user: User) {
-    return (!action.requiredRoles?.length || this.accountService.hasAnyRole(user, action.requiredRoles)) && action.shouldRender(action, this.entity, user);
+    return (!action.requiredRoles?.length || this.accountService.hasAnyRole(user, action.requiredRoles)) && action.shouldRender(action, this.entity(), user);
   }
 
   shouldRenderSubMenu(action: ActionItem<any>, dynamicList: null | Array<any>) {
@@ -172,8 +172,8 @@ export class CardActionablesComponent implements OnChanges, OnDestroy {
     this.preventEvent(event);
 
     const ref = this.modalService.open(ActionableModalComponent, {fullscreen: true, centered: true});
-    ref.componentInstance.entity = this.entity;
-    ref.componentInstance.actions = this.actions;
+    ref.componentInstance.entity = this.entity();
+    ref.componentInstance.actions = this.actions();
     ref.componentInstance.willRenderAction = this.willRenderAction.bind(this);
     ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);
     ref.componentInstance.actionPerformed.subscribe((action: ActionItem<any>) => {

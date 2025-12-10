@@ -26,7 +26,7 @@ import {ScrollService} from "../../_services/scroll.service";
 import {ActionItem} from "../../_services/action-factory.service";
 import {ReaderService} from "../../_services/reader.service";
 import {Observable} from "rxjs";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, map} from "rxjs/operators";
 import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update-event";

@@ -1,36 +1,26 @@
 <div class="main-container container-fluid">
   <ng-container *transloco="let t; prefix: 'reading-list-detail'">
     <form [formGroup]="formGroup">
-      @if (readingList) {
+      @let rl = readingList();
+      @if (rl) {
       <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
         <div class="row mb-0 mb-xl-3 info-container">
           <div class="image-container series col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
-            <app-image [styles]="{'max-height': '400px', 'max-width': '300px'}" [imageUrl]="imageService.getReadingListCoverImage(readingList.id)" (click)="read()" />
+            <app-image [styles]="{'max-height': '400px', 'max-width': '300px'}" [imageUrl]="imageService.getReadingListCoverImage(rl.id)" (click)="read()" />
           </div>
 
           <div class="col-xl-10 col-lg-7 col-md-12 col-sm-12 col-xs-12">
             <h4 class="title mb-2">
             <span>
-              <app-promoted-icon [promoted]="readingList.promoted" />
-              <span class="ms-2">{{readingList.title}}</span>
+              <app-promoted-icon [promoted]="rl.promoted" />
+              <span class="ms-2">{{rl.title}}</span>
               @if(isLoading) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
-                  <span class="visually-hidden">loading...</span>
+                  <span class="visually-hidden">{{t('loading-alt')}}</span>
                 </div>
               }
               </span>
-
             </h4>
-
-<!--            <app-metadata-detail-row [entity]="seriesMetadata"-->
-<!--                                     [readingTimeLeft]="readingTimeLeft"-->
-<!--                                     [ageRating]="seriesMetadata.ageRating"-->
-<!--                                     [hasReadingProgress]="hasReadingProgress"-->
-<!--                                     [readingTimeEntity]="series"-->
-<!--                                     [libraryType]="libraryType"-->
-<!--                                     [mangaFormat]="series.format">-->
-<!--            </app-metadata-detail-row>-->
-
 
             <div class="mt-3 mb-3">
               <div class="row g-0" style="align-items: center;">
@@ -76,7 +66,7 @@
 
                 @if (isOwnedReadingList) {
                   <div class="col-auto ms-2">
-                    <button class="btn btn-actions" (click)="editReadingList(readingList)" [ngbTooltip]="t('edit-alt')">
+                    <button class="btn btn-actions" (click)="editReadingList(rl)" [ngbTooltip]="t('edit-alt')">
                       <span><i class="fa fa-pen" aria-hidden="true"></i></span>
                     </button>
                   </div>
@@ -85,7 +75,7 @@
 
                 <div class="col-auto ms-2">
                   <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
-                    <app-card-actionables [entity]="readingList" [inputActions]="actions" [labelBy]="readingList.title" iconClass="fa-ellipsis-h" btnClass="btn" />
+                    <app-card-actionables [entity]="rl" [inputActions]="actions" [labelBy]="rl.title" iconClass="fa-ellipsis-h" btnClass="btn" />
                   </div>
                 </div>
 
@@ -100,7 +90,7 @@
             </div>
 
             <div class="mt-2 mb-3">
-              <app-read-more [text]="readingList.summary || ''" [maxLength]="utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop ? 170 : 200" />
+              <app-read-more [text]="readingListSummary()" [maxLength]="utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop ? 170 : 200" />
             </div>
 
             <div class="mt-2 upper-details">
@@ -108,26 +98,26 @@
                 <div class="col-6 pe-5">
                   <span class="fw-bold">{{t('date-range-title')}}</span>
                   <div>
-                    @if (readingList.startingYear !== 0) {
-                      @if (readingList.startingMonth > 0) {
-                        {{(readingList.startingMonth +'/01/2020')| date:'MMM'}}
+                    @if (rl.startingYear !== 0) {
+                      @if (rl.startingMonth > 0) {
+                        {{(rl.startingMonth +'/01/2020')| date:'MMM'}}
                       }
-                      @if (readingList.startingMonth > 0 && readingList.startingYear > 0) {
+                      @if (rl.startingMonth > 0 && rl.startingYear > 0) {
                         ,
                       }
-                      @if (readingList.startingYear > 0) {
-                        {{readingList.startingYear}}
+                      @if (rl.startingYear > 0) {
+                        {{rl.startingYear}}
                       }
                       —
-                      @if (readingList.endingYear > 0) {
-                        @if (readingList.endingMonth > 0) {
-                          {{(readingList.endingMonth +'/01/2020')| date:'MMM'}}
+                      @if (rl.endingYear > 0) {
+                        @if (rl.endingMonth > 0) {
+                          {{(rl.endingMonth +'/01/2020')| date:'MMM'}}
                         }
-                        @if (readingList.endingMonth > 0 && readingList.endingYear > 0) {
+                        @if (rl.endingMonth > 0 && rl.endingYear > 0) {
                           ,
                         }
-                        @if (readingList.endingYear > 0) {
-                          {{readingList.endingYear}}
+                        @if (rl.endingYear > 0) {
+                          {{rl.endingYear}}
                         }
                       }
                     } @else {
@@ -185,7 +175,7 @@
               <div class="row g-0">
 
                 @if (formGroup.get('edit')?.value) {
-                  @if (!readingList.promoted && this.isOwnedReadingList) {
+                  @if (!rl.promoted && this.isOwnedReadingList) {
                     <div class="col-auto">
                       <button class="btn btn-sm btn-danger" (click)="removeRead()">
                         <i class="fa fa-check me-1" aria-hidden="true"></i>

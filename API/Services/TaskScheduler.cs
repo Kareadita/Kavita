@@ -6,15 +6,17 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.Entities.Enums;
-using API.Extensions;
+using API.Entities.Enums.User;
 using API.Helpers;
 using API.Helpers.Converters;
 using API.Services.Plus;
+using API.Services.Reading;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common.Helpers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
@@ -65,6 +67,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly ISmartCollectionSyncService _smartCollectionSyncService;
     private readonly IWantToReadSyncService _wantToReadSyncService;
     private readonly IEventHub _eventHub;
+    private readonly IEmailService _emailService;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
@@ -85,6 +88,8 @@ public class TaskScheduler : ITaskScheduler
     public const string KavitaPlusDataRefreshId = "kavita+-data-refresh";
     public const string KavitaPlusStackSyncId = "kavita+-stack-sync";
     public const string KavitaPlusWantToReadSyncId = "kavita+-want-to-read-sync";
+    public const string ReadingHistoryAggregationId = "reading-history-aggregation";
+    public const string AuthKeyExpirationId = "auth-key-expiration";
 
     private const int BaseRetryDelay = 60; // 1-minute
 
@@ -110,7 +115,7 @@ public class TaskScheduler : ITaskScheduler
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
         IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
         IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService,
-        IWantToReadSyncService wantToReadSyncService, IEventHub eventHub)
+        IWantToReadSyncService wantToReadSyncService, IEventHub eventHub, IEmailService emailService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -131,6 +136,7 @@ public class TaskScheduler : ITaskScheduler
         _smartCollectionSyncService = smartCollectionSyncService;
         _wantToReadSyncService = wantToReadSyncService;
         _eventHub = eventHub;
+        _emailService = emailService;
 
         _defaultRetryPolicy = Policy
             .Handle<Exception>()
@@ -215,6 +221,13 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(SyncThemesTaskId, () => SyncThemes(),
             Cron.Daily, RecurringJobOptions);
 
+        RecurringJob.AddOrUpdate(AuthKeyExpirationId, () => CheckExpiredOrExpiringAuthKeys(),
+            Cron.Daily, RecurringJobOptions);
+
+
+        RecurringJob.AddOrUpdate<IReadingHistoryService>(ReadingHistoryAggregationId, service => service.AggregateYesterdaysActivity(),
+            "5 0 * * *", RecurringJobOptions); // 12:05 AM daily
+
         await ScheduleKavitaPlusTasks();
     }
 
@@ -227,7 +240,7 @@ public class TaskScheduler : ITaskScheduler
     {
         // KavitaPlus based (needs license check)
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-        if (string.IsNullOrEmpty(license) || !await _licenseService.HasActiveSubscription(license))
+        if (string.IsNullOrEmpty(license) || !await _licenseService.HasActiveSubscription(license)) // TODO: Need to convert this to a non-blocking request
         {
             return;
         }
@@ -237,7 +250,7 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
 
         // Get the License Info (and cache it) on first load. This will internally cache the Github releases for the Version Service
-        await _licenseService.GetLicenseInfo(true); // Kick this off first to cache it then let it refresh every 9 hours (8 hour cache)
+        BackgroundJob.Enqueue(() => _licenseService.GetLicenseInfo(true));  // Kick this off first to cache it then let it refresh every 9 hours (8 hour cache)
         RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(false),
             LicenseService.Cron, RecurringJobOptions);
 
@@ -527,6 +540,63 @@ public class TaskScheduler : ITaskScheduler
     public async Task SyncThemes()
     {
         await _themeService.SyncThemes();
+    }
+
+    /// <summary>
+    /// Checks for soon to be expired and expired Auth keys and attempts to email the users
+    /// </summary>
+    public async Task CheckExpiredOrExpiringAuthKeys()
+    {
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (!settings.IsEmailSetup()) return;
+
+        _logger.LogInformation("Checking for Expired or Expiring Auth Keys");
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.AuthKeys);
+        foreach (var user in users)
+        {
+            // Implies only the default keys
+            if (user.AuthKeys.Count == 2) continue;
+
+            // Check if key is expired
+            var expiredKeys = user.AuthKeys
+                .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc  >= DateTime.UtcNow)
+                .ToList();
+            var expiringSoonKeys = user.AuthKeys
+                .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc  >= DateTime.UtcNow.Subtract(TimeSpan.FromDays(7)))
+                .ToList();
+
+            if (expiringSoonKeys.Any())
+            {
+                var expiringSoonLatestDate = expiringSoonKeys.Max(k => k.ExpiresAtUtc);
+                if (await ShouldSendAuthKeyExpirationReminder(user.Id, expiringSoonLatestDate!.Value, EmailService.AuthKeyExpiringSoonTemplate))
+                {
+                    await _emailService.SendAuthKeyExpiringSoonEmail(user.Id, expiringSoonKeys);
+                }
+
+            }
+
+            if (expiredKeys.Any())
+            {
+                var expiringSoonLatestDate = expiringSoonKeys.Max(k => k.ExpiresAtUtc);
+                if (await ShouldSendAuthKeyExpirationReminder(user.Id, expiringSoonLatestDate!.Value,
+                        EmailService.AuthKeyExpiredTemplate))
+                {
+                    await _emailService.SendAuthKeyExpiredEmail(user.Id, expiredKeys);
+                }
+            }
+        }
+    }
+
+    private async Task<bool> ShouldSendAuthKeyExpirationReminder(int userId, DateTime tokenExpiry, string emailTemplate)
+    {
+        if (tokenExpiry > DateTime.UtcNow) return false;
+
+        var hasAlreadySentExpirationEmail = await _unitOfWork.DataContext.EmailHistory
+            .AnyAsync(h => h.AppUserId == userId && h.Sent &&
+                           h.EmailTemplate == emailTemplate &&
+                           h.SendDate >= tokenExpiry);
+
+        return !hasAlreadySentExpirationEmail;
     }
 
     /// <summary>

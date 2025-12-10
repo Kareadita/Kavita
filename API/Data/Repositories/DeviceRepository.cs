@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Device;
+using API.DTOs.Device.EmailDevice;
 using API.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -13,7 +14,7 @@ namespace API.Data.Repositories;
 public interface IDeviceRepository
 {
     void Update(Device device);
-    Task<IEnumerable<DeviceDto>> GetDevicesForUserAsync(int userId);
+    Task<IEnumerable<EmailDeviceDto>> GetDevicesForUserAsync(int userId);
     Task<Device?> GetDeviceById(int deviceId);
 }
 
@@ -33,12 +34,12 @@ public class DeviceRepository : IDeviceRepository
         _context.Entry(device).State = EntityState.Modified;
     }
 
-    public async Task<IEnumerable<DeviceDto>> GetDevicesForUserAsync(int userId)
+    public async Task<IEnumerable<EmailDeviceDto>> GetDevicesForUserAsync(int userId)
     {
         return await _context.Device
             .Where(d => d.AppUserId == userId)
             .OrderBy(d => d.LastUsed)
-            .ProjectTo<DeviceDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<EmailDeviceDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 

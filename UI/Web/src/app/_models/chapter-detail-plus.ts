@@ -1,4 +1,4 @@
-import {UserReview} from "../_single-module/review-card/user-review";
+import {UserReview} from "./user-review";
 import {Rating} from "./rating";
 
 export type ChapterDetailPlus = {

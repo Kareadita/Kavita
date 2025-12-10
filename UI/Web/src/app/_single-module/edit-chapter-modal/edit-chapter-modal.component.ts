@@ -38,7 +38,7 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {ChapterService} from "../../_services/chapter.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
-import {User} from "../../_models/user";
+import {User} from "../../_models/user/user";
 
 enum TabID {
   General = 'general-tab',

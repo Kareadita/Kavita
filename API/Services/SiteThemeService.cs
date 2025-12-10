@@ -18,6 +18,7 @@ using Kavita.Common.EnvironmentInfo;
 using MarkdownDeep;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 
 namespace API.Services.Tasks;
@@ -200,8 +201,8 @@ public class ThemeService : IThemeService
     private static async Task<IList<GitHubContent>> GetDirectoryContent(string path)
     {
         var json = await $"{GithubBaseUrl}/repos/Kareadita/Themes/contents/{path}"
-            .WithHeader("Accept", "application/vnd.github+json")
-            .WithHeader("User-Agent", "Kavita")
+            .WithHeader(HeaderNames.Accept, "application/vnd.github+json")
+            .WithHeader(HeaderNames.UserAgent, "Kavita")
             .GetStringAsync();
 
         return string.IsNullOrEmpty(json) ? [] : JsonConvert.DeserializeObject<List<GitHubContent>>(json);

@@ -13,11 +13,11 @@ public class DeviceBuilder : IEntityBuilder<Device>
         _device = new Device()
         {
             Name = name,
-            Platform = DevicePlatform.Custom
+            Platform = EmailDevicePlatform.Custom
         };
     }
 
-    public DeviceBuilder WithPlatform(DevicePlatform platform)
+    public DeviceBuilder WithPlatform(EmailDevicePlatform platform)
     {
         _device.Platform = platform;
         return this;

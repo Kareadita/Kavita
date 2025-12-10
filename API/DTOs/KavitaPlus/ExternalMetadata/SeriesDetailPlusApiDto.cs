@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using API.DTOs.KavitaPlus.Metadata;
-using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 

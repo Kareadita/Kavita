@@ -205,8 +205,7 @@
 
             @if((breakpoint$ | async)! <= Breakpoint.Mobile) {
               <button class="btn btn-outline-secondary primary-text" (click)="openLinkSelectionMenu()">
-                <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i>
-                <span class="d-none d-xs-none d-sm-none d-md-inline-block fw-bold">{{user.username | sentenceCase}}</span>
+                <app-profile-icon [userId]="user.id" />
               </button>
             } @else {
               <div class="nav-item not-xs-only">
@@ -218,10 +217,13 @@
 
               <div ngbDropdown class="nav-item dropdown d-sm-none d-md-block" display="dynamic" placement="bottom-right">
                 <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
-                  <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i>
+                  <span class="phone-hidden d-xs-inline-block d-sm-inline-block me-2">
+                    <app-profile-icon [userId]="user.id" />
+                  </span>
                   <span class="d-none d-xs-none d-sm-none d-md-inline-block fw-bold">{{user.username | sentenceCase}}</span>
                 </button>
                 <div ngbDropdownMenu>
+                  <a ngbDropdownItem [routerLink]="profileLink()">{{t('my-profile')}}</a>
                   @for (navItem of navService.navItems; track $index) {
                     @if (navItem.routerLink) {
                       <a ngbDropdownItem [routerLink]="navItem.routerLink" [fragment]="navItem.fragment">{{t(navItem.transLocoKey)}}</a>

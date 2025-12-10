@@ -27,7 +27,7 @@
               <ng-template #view>
                 <div class="d-flex flex-row justify-content-between">
                   <div>
-                    @for (keyBindControl of array.controls; track $index;) {
+                    @for (keyBindControl of array.controls; track trackByKeyBind($index, keyBindControl.value)) {
                       <app-setting-key-bind-picker
                         appLongClick
                         [control]="keyBindControl"

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata.Browse;
 using API.DTOs.Metadata.Browse.Requests;
 using API.DTOs.Person;
@@ -18,7 +18,6 @@ using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Nager.ArticleNumber;
 
 namespace API.Controllers;
@@ -50,10 +49,10 @@ public class PersonController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<PersonDto>> GetPersonByName(string name)
     {
-        var person = await _unitOfWork.PersonRepository.GetPersonDtoByName(name, User.GetUserId());
+        var person = await _unitOfWork.PersonRepository.GetPersonDtoByName(name, UserId);
         if (person == null) return NotFound();
 
-        person.Roles = (await _unitOfWork.PersonRepository.GetRolesForPersonByName(person.Id, User.GetUserId())).ToList();
+        person.Roles = (await _unitOfWork.PersonRepository.GetRolesForPersonByName(person.Id, UserId)).ToList();
 
         EnrichWithWebLinks(person);
 
@@ -110,7 +109,7 @@ public class PersonController : BaseApiController
     [HttpGet("roles")]
     public async Task<ActionResult<IEnumerable<PersonRole>>> GetRolesForPersonByName(int personId)
     {
-        return Ok(await _unitOfWork.PersonRepository.GetRolesForPersonByName(personId, User.GetUserId()));
+        return Ok(await _unitOfWork.PersonRepository.GetRolesForPersonByName(personId, UserId));
     }
 
 
@@ -124,7 +123,7 @@ public class PersonController : BaseApiController
     {
         userParams ??= UserParams.Default;
 
-        var list = await _unitOfWork.PersonRepository.GetBrowsePersonDtos(User.GetUserId(), filter, userParams);
+        var list = await _unitOfWork.PersonRepository.GetBrowsePersonDtos(UserId, filter, userParams);
         Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
 
         return Ok(list);
@@ -135,21 +134,21 @@ public class PersonController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("update")]
     public async Task<ActionResult<PersonDto>> UpdatePerson(UpdatePersonDto dto)
     {
         // This needs to get all people and update them equally
         var person = await _unitOfWork.PersonRepository.GetPersonById(dto.Id, PersonIncludes.Aliases);
-        if (person == null) return BadRequest(_localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
+        if (person == null) return BadRequest(_localizationService.Translate(UserId, "person-doesnt-exist"));
 
-        if (string.IsNullOrEmpty(dto.Name)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-name-required"));
+        if (string.IsNullOrEmpty(dto.Name)) return BadRequest(await _localizationService.Translate(UserId, "person-name-required"));
 
 
         // Validate the name is unique
         if (dto.Name != person.Name && !(await _unitOfWork.PersonRepository.IsNameUnique(dto.Name)))
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-name-unique"));
+            return BadRequest(await _localizationService.Translate(UserId, "person-name-unique"));
         }
 
         // Update name first, in case it got moved to aliases
@@ -157,7 +156,7 @@ public class PersonController : BaseApiController
         person.NormalizedName = person.Name.ToNormalized();
 
         var success = await _personService.UpdatePersonAliasesAsync(person, dto.Aliases);
-        if (!success) return BadRequest(await _localizationService.Translate(User.GetUserId(), "aliases-have-overlap"));
+        if (!success) return BadRequest(await _localizationService.Translate(UserId, "aliases-have-overlap"));
 
 
         person.Description = dto.Description ?? string.Empty;
@@ -212,14 +211,14 @@ public class PersonController : BaseApiController
     {
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var person = await _unitOfWork.PersonRepository.GetPersonById(personId);
-        if (person == null) return BadRequest(_localizationService.Translate(User.GetUserId(), "person-doesnt-exist"));
+        if (person == null) return BadRequest(_localizationService.Translate(UserId, "person-doesnt-exist"));
 
         var personImage = await _coverDbService.DownloadPersonImageAsync(person, settings.EncodeMediaAs);
 
         if (string.IsNullOrEmpty(personImage))
         {
 
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "person-image-doesnt-exist"));
+            return BadRequest(await _localizationService.Translate(UserId, "person-image-doesnt-exist"));
         }
 
         person.CoverImage = personImage;
@@ -239,7 +238,7 @@ public class PersonController : BaseApiController
     [HttpGet("series-known-for")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetKnownSeries(int personId)
     {
-        return Ok(await _unitOfWork.PersonRepository.GetSeriesKnownFor(personId, User.GetUserId()));
+        return Ok(await _unitOfWork.PersonRepository.GetSeriesKnownFor(personId, UserId));
     }
 
     /// <summary>
@@ -251,7 +250,7 @@ public class PersonController : BaseApiController
     [HttpGet("chapters-by-role")]
     public async Task<ActionResult<IEnumerable<StandaloneChapterDto>>> GetChaptersByRole(int personId, PersonRole role)
     {
-        return Ok(await _unitOfWork.PersonRepository.GetChaptersForPersonByRole(personId, User.GetUserId(), role));
+        return Ok(await _unitOfWork.PersonRepository.GetChaptersForPersonByRole(personId, UserId, role));
     }
 
     /// <summary>
@@ -260,7 +259,7 @@ public class PersonController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("merge")]
-    [Authorize("RequireAdminRole")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<PersonDto>> MergePeople(PersonMergeDto dto)
     {
         var dst = await _unitOfWork.PersonRepository.GetPersonById(dto.DestId, PersonIncludes.All);

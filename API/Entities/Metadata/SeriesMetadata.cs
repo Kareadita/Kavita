@@ -130,4 +130,40 @@ public class SeriesMetadata : IHasConcurrencyToken, IHasKPlusMetadata
         if (people.Any()) return people.All(p => p.KavitaPlusConnection);
         return false;
     }
+
+    public bool IsPersonRoleLocked(PersonRole role)
+    {
+        return role switch
+        {
+            PersonRole.Character => CharacterLocked,
+            PersonRole.Writer => WriterLocked,
+            PersonRole.Penciller => PencillerLocked,
+            PersonRole.Inker => InkerLocked,
+            PersonRole.Colorist => ColoristLocked,
+            PersonRole.Letterer => LettererLocked,
+            PersonRole.CoverArtist => CoverArtistLocked,
+            PersonRole.Editor => EditorLocked,
+            PersonRole.Publisher => PublisherLocked,
+            PersonRole.Translator => TranslatorLocked,
+            PersonRole.Imprint => ImprintLocked,
+            PersonRole.Team => TeamLocked,
+            PersonRole.Location => LocationLocked,
+            _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
+        };
+    }
+
+}
+
+[PrimaryKey(nameof(SeriesMetadatasId), nameof(TagsId))]
+public class SeriesMetadataTag
+{
+    public int SeriesMetadatasId { get; set; }
+    public int TagsId { get; set; }
+}
+
+[PrimaryKey(nameof(GenresId), nameof(SeriesMetadatasId))]
+public class GenreSeriesMetadata
+{
+    public int GenresId { get; set; }
+    public int SeriesMetadatasId { get; set; }
 }

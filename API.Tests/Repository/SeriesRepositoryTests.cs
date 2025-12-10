@@ -1,35 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Data.Common;
-using System.IO.Abstractions.TestingHelpers;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using API.Data;
-using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
-using API.Helpers;
 using API.Helpers.Builders;
-using API.Services;
-using AutoMapper;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace API.Tests.Repository;
-
 #nullable enable
 
-public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper): AbstractDbTest(testOutputHelper)
+public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper) : AbstractDbTest(testOutputHelper)
 {
-
-    private async Task SetupSeriesData(IUnitOfWork unitOfWork)
+    private static async Task SetupSeriesData(IUnitOfWork unitOfWork)
     {
         var library = new LibraryBuilder("GetFullSeriesByAnyName Manga", LibraryType.Manga)
-            .WithFolderPath(new FolderPathBuilder(DataDirectory+"manga/").Build())
+            .WithFolderPath(new FolderPathBuilder("C:/data/manga/").Build())
             .WithSeries(new SeriesBuilder("The Idaten Deities Know Only Peace")
                 .WithLocalizedName("Heion Sedai no Idaten-tachi")
                 .WithFormat(MangaFormat.Archive)
@@ -70,11 +55,15 @@ public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper): Abstract
     }
 
     [Theory]
-    [InlineData(12345, null, 12345)] // Case 1: Prioritize existing ExternalSeries id
-    [InlineData(0, "https://anilist.co/manga/100664/Ijiranaide-Nagatorosan/", 100664)] // Case 2: Extract from weblink if no external series id
-    [InlineData(0, "", null)] // Case 3: Return null if neither exist
+    // Case 1: Prioritize existing ExternalSeries id
+    [InlineData(12345, null, 12345)]
+    // Case 2: Extract from weblink if no external series id
+    [InlineData(0, "https://anilist.co/manga/100664/Ijiranaide-Nagatorosan/", 100664)]
+    // Case 3: Return null if neither exist
+    [InlineData(0, "", null)]
     public async Task GetPlusSeriesDto_Should_PrioritizeAniListId_Correctly(int externalAniListId, string? webLinks, int? expectedAniListId)
     {
+
         var (unitOfWork, _, _) = await CreateDatabase();
         await SetupSeriesData(unitOfWork);
 

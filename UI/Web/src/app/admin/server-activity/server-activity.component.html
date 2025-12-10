@@ -1,0 +1,7 @@
+<ng-container *transloco="let t; prefix: 'server-activity'">
+  @for(session of activeSessions(); track session.activityData[0].chapterId + '_' + session.activityData[0].pagesRead + '_' + session.activityData[0].wordsRead) {
+    <app-activity-card [session]="session" />
+  } @empty {
+    {{t('no-data')}}
+  }
+</ng-container>

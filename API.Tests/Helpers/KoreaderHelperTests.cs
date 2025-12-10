@@ -1,7 +1,5 @@
-using API.DTOs.Koreader;
 using API.DTOs.Progress;
 using API.Helpers;
-using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace API.Tests.Helpers;

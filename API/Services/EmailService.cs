@@ -8,8 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using API.Data;
+using API.DTOs.Account;
 using API.DTOs.Email;
 using API.Entities;
+using API.Entities.User;
 using API.Services.Plus;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -42,7 +44,6 @@ internal class EmailOptionsDto
 public interface IEmailService
 {
     Task SendInviteEmail(ConfirmationEmailDto data);
-    Task<bool> CheckIfAccessible(string host);
     Task<bool> SendForgotPasswordEmail(PasswordResetEmailDto dto);
     Task<bool> SendFilesToEmail(SendToDto data);
     Task<EmailTestResultDto> SendTestEmail(string adminEmail);
@@ -54,6 +55,8 @@ public interface IEmailService
 
     Task<bool> SendTokenExpiredEmail(int userId, ScrobbleProvider provider);
     Task<bool> SendTokenExpiringSoonEmail(int userId, ScrobbleProvider provider);
+    Task<bool> SendAuthKeyExpiredEmail(int userId, IList<AppUserAuthKey> keys);
+    Task<bool> SendAuthKeyExpiringSoonEmail(int userId, IList<AppUserAuthKey> keys);
     Task<bool> SendKavitaPlusDebug();
 }
 
@@ -73,9 +76,14 @@ public class EmailService : IEmailService
     public const string EmailChangeTemplate = "EmailChange";
     public const string TokenExpirationTemplate = "TokenExpiration";
     public const string TokenExpiringSoonTemplate = "TokenExpiringSoon";
+    public const string AuthKeyExpiredTemplate = "AuthKeyExpired";
+    public const string AuthKeyExpiringSoonTemplate = "AuthKeyExpiringSoon";
     public const string EmailConfirmTemplate = "EmailConfirm";
     public const string EmailPasswordResetTemplate = "EmailPasswordReset";
     public const string KavitaPlusDebugTemplate = "KavitaPlusDebug";
+
+    private const string AuthKeyExpiringFragment = "AuthKeyExpiringFragment";
+    private const string AuthKeyExpiredFragment = "AuthKeyExpiredFragment";
 
     public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService,
         IHostEnvironment environment, ILocalizationService localizationService)
@@ -263,6 +271,79 @@ public class EmailService : IEmailService
         return true;
     }
 
+    public async Task<bool> SendAuthKeyExpiredEmail(int userId, IList<AppUserAuthKey> keys)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetup()) return false;
+
+        var d = keys.Select(k => new List<KeyValuePair<string, string>>()
+        {
+            new("{{Name}}", k.Name),
+        });
+
+        var placeholders = new List<KeyValuePair<string, string>>
+        {
+            new ("{{UserName}}", user.UserName!),
+            new ("{{AuthKeyFragment}}", await BuildFragment(AuthKeyExpiredFragment, d)),
+            new ("{{Link}}", $"{settings.HostName}/settings#account" ),
+        };
+
+        var emailOptions = new EmailOptionsDto()
+        {
+            Subject = "Kavita - One or more Auth Keys has expired!",
+            Template = AuthKeyExpiredTemplate,
+            Body = UpdatePlaceHolders(await GetEmailBody(TokenExpirationTemplate), placeholders),
+            Preheader = "Kavita - One or more Auth Keys has expired!",
+            ToEmails = new List<string>()
+            {
+                user.Email
+            }
+        };
+
+        await SendEmail(emailOptions);
+
+        return true;
+    }
+
+
+    public async Task<bool> SendAuthKeyExpiringSoonEmail(int userId, IList<AppUserAuthKey> keys)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetup()) return false;
+
+        var d = keys.Select(k => new List<KeyValuePair<string, string>>()
+        {
+            new("{{Name}}", k.Name),
+            new("{{DaysLeft}}", (k.ExpiresAtUtc.Value - DateTime.UtcNow).Days.ToString())
+        });
+
+
+        var placeholders = new List<KeyValuePair<string, string>>
+        {
+            new ("{{UserName}}", user.UserName!),
+            new ("{{AuthKeyFragment}}", await BuildFragment(AuthKeyExpiringFragment, d)),
+            new ("{{Link}}", $"{settings.HostName}/settings#clients" ),
+        };
+
+        var emailOptions = new EmailOptionsDto()
+        {
+            Subject = "Kavita - One or more Auth Keys will expire soon!",
+            Template = AuthKeyExpiringSoonTemplate,
+            Body = UpdatePlaceHolders(await GetEmailBody(AuthKeyExpiringSoonTemplate), placeholders),
+            Preheader = "Kavita - One or more Auth Keys will expire soon!",
+            ToEmails = new List<string>()
+            {
+                user.Email
+            }
+        };
+
+        await SendEmail(emailOptions);
+
+        return true;
+    }
+
     /// <summary>
     /// Sends information about Kavita install for Kavita+ registration
     /// </summary>
@@ -324,10 +405,6 @@ public class EmailService : IEmailService
         await SendEmail(emailOptions);
     }
 
-    public Task<bool> CheckIfAccessible(string host)
-    {
-        return Task.FromResult(true);
-    }
 
     public async Task<bool> SendForgotPasswordEmail(PasswordResetEmailDto dto)
     {
@@ -510,8 +587,7 @@ public class EmailService : IEmailService
     {
         var templatePath = await GetTemplatePath(templateName);
 
-        var body = await File.ReadAllTextAsync(templatePath);
-        return body;
+        return await File.ReadAllTextAsync(templatePath);
     }
 
     private static string UpdatePlaceHolders(string text, IList<KeyValuePair<string, string>>? keyValuePairs)
@@ -527,5 +603,16 @@ public class EmailService : IEmailService
         }
 
         return text;
+    }
+
+    private async Task<string> BuildFragment(string fragment, IEnumerable<IList<KeyValuePair<string, string>>> placeholders)
+    {
+        StringBuilder builder = new();
+        foreach (var placeholder in placeholders)
+        {
+            builder.Append(UpdatePlaceHolders(await GetEmailBody(fragment), placeholder));
+        }
+
+        return builder.ToString();
     }
 }

@@ -1,0 +1,35 @@
+<ng-container *transloco="let t; prefix:'profile'">
+  <form [formGroup]="filterForm()" class="d-flex align-content-center align-items-center">
+    <h4 class="mx-2">{{label()}}</h4>
+    @if (filterForm().get('libraries'); as control) {
+
+      @if (!showLibraryTypeahead()) {
+        <h4 class="me-2 lib-selector" (click)="showLibraryTypeahead.set(true)">
+          @if (allLibraries().length === control.value?.length) {
+            Kavita
+          } @else {
+            @for (lib of (control.value ?? []); track lib) {
+              {{libraryName(lib)}}
+              @if (!$last) {,}
+            }
+          }
+        </h4>
+      }
+
+      @if (showLibraryTypeahead() && libraryTypeaheadSettings) {
+        <app-typeahead [settings]="libraryTypeaheadSettings" (selectedData)="updateSelectedLibraries($event)" id="library-typeahead">
+          <ng-template #optionItem let-lib>
+            {{lib.name}}
+          </ng-template>
+          <ng-template #badgeItem let-lib>
+            {{lib.name}}
+          </ng-template>
+        </app-typeahead>
+      }
+    }
+
+    <app-smart-time-range-picker (timeRangeUpdate)="updateTimeRange($event)" />
+
+  </form>
+
+</ng-container>
