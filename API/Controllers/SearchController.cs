@@ -64,7 +64,7 @@ public class SearchController : BaseApiController
         var libraries = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(UserId, QueryContext.Search);
         if (libraries.Count == 0) return BadRequest(await _localizationService.Translate(UserId, "libraries-restricted"));
 
-        var isAdmin = (await _unitOfWork.UserRepository.GetRoles(UserId)).Contains(PolicyConstants.AdminRole);
+        var isAdmin = UserContext.HasRole(PolicyConstants.AdminRole);
 
         var series = await _unitOfWork.SeriesRepository.SearchSeries(UserId, isAdmin,
             libraries, queryString, includeChapterAndFiles);

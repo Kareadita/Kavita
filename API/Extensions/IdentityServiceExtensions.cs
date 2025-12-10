@@ -84,7 +84,6 @@ public static class IdentityServiceExtensions
                 var apiKey = AuthKeyAuthenticationHandler.ExtractAuthKey(ctx.Request);
                 if (!string.IsNullOrEmpty(apiKey))
                 {
-                    //Log.Debug("Routing to AuthKey scheme for path: {Path}", ctx.Request.Path);
                     return AuthKeyAuthenticationOptions.SchemeName;
                 }
 
@@ -94,13 +93,11 @@ public static class IdentityServiceExtensions
                     if (ctx.Request.Path.StartsWithSegments(OidcCallback) ||
                         ctx.Request.Path.StartsWithSegments(OidcLogoutCallback))
                     {
-                        //Log.Debug("Routing to OIDC scheme for callback path: {Path}", ctx.Request.Path);
                         return OpenIdConnect;
                     }
 
                     if (ctx.Request.Cookies.ContainsKey(OidcService.CookieName))
                     {
-                        //Log.Debug("Routing to OIDC scheme (cookie present) for path: {Path}", ctx.Request.Path);
                         return OpenIdConnect;
                     }
                 }
@@ -108,14 +105,10 @@ public static class IdentityServiceExtensions
                 // Priority 3: JWT Bearer token
                 if (ctx.Request.Headers.Authorization.Count != 0)
                 {
-                    // Log.Debug("Routing to LocalIdentity (JWT) scheme for path: {Path}, Auth header: {Header}",
-                    //     ctx.Request.Path,
-                    //     ctx.Request.Headers.Authorization.ToString());
                     return LocalIdentity;
                 }
 
                 // Default to JWT
-                // Log.Debug("Defaulting to LocalIdentity (JWT) scheme for path: {Path}", ctx.Request.Path);
                 return LocalIdentity;
             };
         });
