@@ -81,8 +81,6 @@ private readonly IUnitOfWork _unitOfWork;
                 new Claim("AuthType", nameof(AuthenticationType.AuthKey))
             };
 
-            //var roles = await _userManager.GetRolesAsync(user);
-
             if (user.Roles != null && user.Roles.Any())
             {
                 foreach (var role in user.Roles)

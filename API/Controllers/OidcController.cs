@@ -17,6 +17,7 @@ namespace API.Controllers;
 [Route("[controller]")]
 public class OidcController(ILogger<OidcController> logger, [FromServices] ConfigurationManager<OpenIdConnectConfiguration>? configurationManager = null): ControllerBase
 {
+    [SkipDeviceTracking]
     [AllowAnonymous]
     [HttpGet("login")]
     public IActionResult Login(string returnUrl = "/")

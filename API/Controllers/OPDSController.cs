@@ -21,7 +21,7 @@ using MimeTypes;
 namespace API.Controllers;
 #nullable enable
 
-[AllowAnonymous]
+[Authorize]
 public class OpdsController : BaseApiController
 {
     private readonly IOpdsService _opdsService;
