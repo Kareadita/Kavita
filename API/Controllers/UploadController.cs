@@ -522,9 +522,9 @@ public class UploadController : BaseApiController
     /// <remarks>You MUST be the user in question</remarks>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("user")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     public async Task<ActionResult> UploadUserCoverImageFromUrl(UploadFileDto uploadFileDto)
     {
         try
