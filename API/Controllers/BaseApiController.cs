@@ -9,6 +9,7 @@ namespace API.Controllers;
 
 #nullable enable
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 //[Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme},{AuthKeyAuthenticationOptions.SchemeName}")]
