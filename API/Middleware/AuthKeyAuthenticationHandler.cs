@@ -56,7 +56,7 @@ private readonly IUnitOfWork _unitOfWork;
 
         try
         {
-            var cacheKey = $"authKey_{apiKey}";
+            var cacheKey = CreateCacheKey(apiKey);
             var user = await _cache.GetOrCreateAsync(
                 cacheKey,
                 (apiKey, _unitOfWork),
@@ -116,5 +116,10 @@ private readonly IUnitOfWork _unitOfWork;
         }
 
         return null;
+    }
+
+    public static string CreateCacheKey(string keyValue)
+    {
+        return $"authKey_{keyValue}";
     }
 }

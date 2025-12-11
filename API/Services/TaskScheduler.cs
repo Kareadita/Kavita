@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Entities.Enums.User;
 using API.Helpers;
 using API.Helpers.Converters;
+using API.Services.Caching;
 using API.Services.Plus;
 using API.Services.Reading;
 using API.Services.Tasks;
@@ -68,6 +69,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly IWantToReadSyncService _wantToReadSyncService;
     private readonly IEventHub _eventHub;
     private readonly IEmailService _emailService;
+    private readonly IAuthKeyCacheInvalidator _authKeyCacheInvalidator;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
@@ -115,7 +117,8 @@ public class TaskScheduler : ITaskScheduler
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
         IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
         IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService,
-        IWantToReadSyncService wantToReadSyncService, IEventHub eventHub, IEmailService emailService)
+        IWantToReadSyncService wantToReadSyncService, IEventHub eventHub, IEmailService emailService,
+        IAuthKeyCacheInvalidator authKeyCacheInvalidator)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -137,6 +140,7 @@ public class TaskScheduler : ITaskScheduler
         _wantToReadSyncService = wantToReadSyncService;
         _eventHub = eventHub;
         _emailService = emailService;
+        _authKeyCacheInvalidator = authKeyCacheInvalidator;
 
         _defaultRetryPolicy = Policy
             .Handle<Exception>()
@@ -277,6 +281,7 @@ public class TaskScheduler : ITaskScheduler
             () => _wantToReadSyncService.Sync(), Cron.Weekly(DayOfWeekHelper.Random()),
             RecurringJobOptions);
     }
+
 
     /// <summary>
     /// Removes any Kavita+ Recurring Jobs
@@ -565,10 +570,10 @@ public class TaskScheduler : ITaskScheduler
 
             // Check if key is expired
             var expiredKeys = user.AuthKeys
-                .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc  >= DateTime.UtcNow)
+                .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc <= DateTime.UtcNow)
                 .ToList();
             var expiringSoonKeys = user.AuthKeys
-                .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc  >= DateTime.UtcNow.Subtract(TimeSpan.FromDays(7)))
+                .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc <= DateTime.UtcNow.Subtract(TimeSpan.FromDays(7)))
                 .ToList();
 
             if (expiringSoonKeys.Any())
@@ -583,11 +588,16 @@ public class TaskScheduler : ITaskScheduler
 
             if (expiredKeys.Any())
             {
-                var expiringSoonLatestDate = expiringSoonKeys.Max(k => k.ExpiresAtUtc);
-                if (await ShouldSendAuthKeyExpirationReminder(user.Id, expiringSoonLatestDate!.Value,
+                var expiredLatestDate = expiredKeys.Max(k => k.ExpiresAtUtc);
+                if (await ShouldSendAuthKeyExpirationReminder(user.Id, expiredLatestDate!.Value,
                         EmailService.AuthKeyExpiredTemplate))
                 {
                     await _emailService.SendAuthKeyExpiredEmail(user.Id, expiredKeys);
+                }
+
+                foreach (var expiredKey in expiredKeys)
+                {
+                    await _authKeyCacheInvalidator.InvalidateAsync(expiredKey.Key);
                 }
             }
         }

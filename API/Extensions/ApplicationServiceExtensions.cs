@@ -4,6 +4,7 @@ using API.Data;
 using API.Helpers;
 using API.Middleware;
 using API.Services;
+using API.Services.Caching;
 using API.Services.Plus;
 using API.Services.Reading;
 using API.Services.Store;
@@ -86,6 +87,7 @@ public static class ApplicationServiceExtensions
 
         services.AddScoped<ILocalizationService, LocalizationService>();
         services.AddScoped<ISettingsService, SettingsService>();
+        services.AddScoped<IAuthKeyCacheInvalidator, AuthKeyCacheInvalidator>();
 
 
         services.AddScoped<IKavitaPlusApiService, KavitaPlusApiService>();

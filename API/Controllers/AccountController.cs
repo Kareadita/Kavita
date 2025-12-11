@@ -20,6 +20,7 @@ using API.Helpers;
 using API.Helpers.Builders;
 using API.Middleware;
 using API.Services;
+using API.Services.Caching;
 using API.SignalR;
 using AutoMapper;
 using Hangfire;
@@ -56,6 +57,7 @@ public class AccountController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
     private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
+    private readonly IAuthKeyCacheInvalidator _authKeyCacheInvalidator;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -65,7 +67,8 @@ public class AccountController : BaseApiController
         IMapper mapper, IAccountService accountService,
         IEmailService emailService, IEventHub eventHub,
         ILocalizationService localizationService,
-        IAuthenticationSchemeProvider authenticationSchemeProvider)
+        IAuthenticationSchemeProvider authenticationSchemeProvider,
+        IAuthKeyCacheInvalidator authKeyCacheInvalidator)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -78,6 +81,7 @@ public class AccountController : BaseApiController
         _eventHub = eventHub;
         _localizationService = localizationService;
         _authenticationSchemeProvider = authenticationSchemeProvider;
+        _authKeyCacheInvalidator = authKeyCacheInvalidator;
     }
 
     /// <summary>
@@ -1194,15 +1198,20 @@ public class AccountController : BaseApiController
         var authKey = await _unitOfWork.UserRepository.GetAuthKeyById(authKeyId);
         if (authKey?.AppUserId != UserId) return BadRequest();
 
+        var oldKeyValue = authKey.Key;
+
         // Get original expiresAt - createdAt for offset to reset expiresAt
         if (authKey.ExpiresAtUtc != null)
         {
             var originalDuration = authKey.ExpiresAtUtc.Value - authKey.CreatedAtUtc;
             authKey.ExpiresAtUtc = DateTime.UtcNow.Add(originalDuration);
         }
+
         authKey.Key = AuthKeyHelper.GenerateKey(dto.KeyLength);
 
         await _unitOfWork.CommitAsync();
+
+        await _authKeyCacheInvalidator.InvalidateAsync(oldKeyValue);
 
         var newDto = _mapper.Map<AuthKeyDto>(authKey);
 

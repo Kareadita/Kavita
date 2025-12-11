@@ -133,6 +133,7 @@ public interface IUserRepository
     Task<string?> GetCoverImageAsync(int userId, int requestingUserId);
     Task<string?> GetPersonCoverImageAsync(int personId);
     Task<IList<AuthKeyDto>> GetAuthKeysForUserId(int userId);
+    Task<IList<AuthKeyDto>> GetAllAuthKeysDtosWithExpiration();
     Task<AppUserAuthKey?> GetAuthKeyById(int authKeyId);
     Task<DateTime?> GetAuthKeyExpiration(string authKey, int userId);
     Task<AppUserSocialPreferences> GetSocialPreferencesForUser(int userId);
@@ -1072,6 +1073,14 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserAuthKey
             .Where(k => k.AppUserId == userId)
+            .ProjectTo<AuthKeyDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<IList<AuthKeyDto>> GetAllAuthKeysDtosWithExpiration()
+    {
+        return await _context.AppUserAuthKey
+            .Where(k => k.ExpiresAtUtc != null)
             .ProjectTo<AuthKeyDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
