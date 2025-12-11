@@ -90,7 +90,7 @@ private readonly IUnitOfWork _unitOfWork;
         }
         catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Auth Key authentication failed");
+            Logger.LogError(ex, "Auth Key authentication failed");
             return AuthenticateResult.Fail("Auth Key authentication failed");
         }
     }
