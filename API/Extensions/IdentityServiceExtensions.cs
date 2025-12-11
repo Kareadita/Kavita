@@ -123,7 +123,7 @@ public static class IdentityServiceExtensions
                 ValidateAudience = false,
                 ValidIssuer = "Kavita",
                 NameClaimType = JwtRegisteredClaimNames.Name,
-                RoleClaimType = "role"
+                RoleClaimType = ClaimTypes.Role,
             };
 
             options.Events = new JwtBearerEvents
