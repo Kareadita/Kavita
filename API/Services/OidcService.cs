@@ -76,6 +76,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     public const string RefreshToken = "refresh_token";
     public const string IdToken = "id_token";
     public const string ExpiresAt = "expires_at";
+
     /// The name of the Auth Cookie set by .NET
     public const string CookieName = ".AspNetCore.Cookies";
     public static readonly List<string> DefaultScopes = ["openid", "profile", "offline_access", "roles", "email"];
@@ -230,7 +231,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         {
             return await NewUserFromOpenIdConnect(request, settings, principal, oidcId);
         }
-        catch (KavitaException e)
+        catch (KavitaException)
         {
             throw;
         }
@@ -398,7 +399,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
                 await SyncAgeRestriction(settings, claimsPrincipal, user);
             }
 
-            await SyncExtras(claimsPrincipal, user);
+            SyncExtras(claimsPrincipal, user);
 
             if (unitOfWork.HasChanges())
             {
@@ -413,7 +414,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
     }
 
-    private async Task SyncExtras(ClaimsPrincipal claimsPrincipal, AppUser user)
+    private void SyncExtras(ClaimsPrincipal claimsPrincipal, AppUser user)
     {
         var picture = claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Picture)?.Value;
 
@@ -425,8 +426,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             // Run in background to not block http thread, pass id to Hangfire doesn't kill itself
             BackgroundJob.Enqueue(() => coverDbService.SetUserCoverByUrl(user.Id, picture, false));
         }
-
-
     }
 
     private async Task SyncEmail(HttpRequest request, OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)

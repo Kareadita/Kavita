@@ -576,7 +576,7 @@ public class TaskScheduler : ITaskScheduler
                 .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc <= DateTime.UtcNow.Subtract(TimeSpan.FromDays(7)))
                 .ToList();
 
-            if (expiringSoonKeys.Any())
+            if (expiringSoonKeys.Count != 0)
             {
                 var expiringSoonLatestDate = expiringSoonKeys.Max(k => k.ExpiresAtUtc);
                 if (await ShouldSendAuthKeyExpirationReminder(user.Id, expiringSoonLatestDate!.Value, EmailService.AuthKeyExpiringSoonTemplate))
@@ -586,7 +586,7 @@ public class TaskScheduler : ITaskScheduler
 
             }
 
-            if (expiredKeys.Any())
+            if (expiredKeys.Count != 0)
             {
                 var expiredLatestDate = expiredKeys.Max(k => k.ExpiresAtUtc);
                 if (await ShouldSendAuthKeyExpirationReminder(user.Id, expiredLatestDate!.Value,
@@ -676,16 +676,13 @@ public class TaskScheduler : ITaskScheduler
 
         if (ret) return true;
 
-        if (checkRunningJobs)
-        {
-            var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-            return runningJobs.Exists(j =>
-                j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
-                j.Value.Job.Method.Name.Equals(methodName) &&
-                j.Value.Job.Method.DeclaringType.Name.Equals(className));
-        }
+        if (!checkRunningJobs) return false;
 
-        return false;
+        var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
+        return runningJobs.Exists(j =>
+            j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
+            j.Value.Job.Method.Name.Equals(methodName) &&
+            j.Value.Job.Method.DeclaringType.Name.Equals(className));
     }
 
 
