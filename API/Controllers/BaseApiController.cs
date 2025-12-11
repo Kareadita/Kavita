@@ -12,7 +12,6 @@ namespace API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-//[Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme},{AuthKeyAuthenticationOptions.SchemeName}")]
 public class BaseApiController : ControllerBase
 {
     /// <summary>

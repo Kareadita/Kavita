@@ -29,26 +29,18 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
 
             if (context.User.Identity?.IsAuthenticated == true)
             {
-                // Try multiple claim types for UserId (nameid can be in different formats)
-                var userId = TryGetUserIdFromClaim(context.User, ClaimTypes.NameIdentifier)
-                             ?? TryGetUserIdFromClaim(context.User, JwtRegisteredClaimNames.NameId)
-                             ?? TryGetUserIdFromClaim(context.User, "nameid");
+                var userId = TryGetUserIdFromClaim(context.User, ClaimTypes.NameIdentifier);
 
-                // Try multiple claim types for Username
-                var username = context.User.FindFirst(ClaimTypes.Name)?.Value
-                               ?? context.User.FindFirst(JwtRegisteredClaimNames.Name)?.Value
-                               ?? context.User.FindFirst("name")?.Value;
+                var username = context.User.FindFirst(JwtRegisteredClaimNames.Name)?.Value;
 
                 var roles = context.User.FindAll(ClaimTypes.Role)
-                    .Concat(context.User.FindAll("role"))
                     .Select(c => c.Value)
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToList();
 
                 if (userId.HasValue && username != null)
                 {
-                    var authType = TryParseAuthTypeClaim(context.User)
-                                   ?? DetectAuthTypeFromCookie(context.Request);
+                    var authType = TryParseAuthTypeClaim(context.User) ?? AuthenticationType.Unknown;
 
                     userContext.SetUserContext(userId.Value, username, authType, roles);
                 }
@@ -69,13 +61,6 @@ public class UserContextMiddleware(RequestDelegate next, ILogger<UserContextMidd
         return authTypeClaim != null && Enum.TryParse<AuthenticationType>(authTypeClaim, out var authType)
             ? authType
             : null;
-    }
-
-    private static AuthenticationType DetectAuthTypeFromCookie(HttpRequest request)
-    {
-        return request.Cookies.ContainsKey(OidcService.CookieName)
-            ? AuthenticationType.OIDC
-            : AuthenticationType.JWT;
     }
 
     private static int? TryGetUserIdFromClaim(ClaimsPrincipal claims, string claimType)

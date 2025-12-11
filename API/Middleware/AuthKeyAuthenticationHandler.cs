@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
-using API.Entities;
 using API.Entities.Progress;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -27,7 +26,6 @@ public class AuthKeyAuthenticationHandler : AuthenticationHandler<AuthKeyAuthent
 {
 private readonly IUnitOfWork _unitOfWork;
     private readonly HybridCache _cache;
-    private readonly UserManager<AppUser> _userManager;
 
     private static readonly HybridCacheEntryOptions CacheOptions = new()
     {
@@ -40,13 +38,11 @@ private readonly IUnitOfWork _unitOfWork;
         ILoggerFactory logger,
         UrlEncoder encoder,
         IUnitOfWork unitOfWork,
-        HybridCache cache,
-        UserManager<AppUser>  userManager)
+        HybridCache cache)
         : base(options, logger, encoder)
     {
         _unitOfWork = unitOfWork;
         _cache = cache;
-        _userManager = userManager;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -76,18 +72,14 @@ private readonly IUnitOfWork _unitOfWork;
 
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim("AuthType", nameof(AuthenticationType.AuthKey))
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(JwtRegisteredClaimNames.Name, user.Username),
+                new("AuthType", nameof(AuthenticationType.AuthKey))
             };
 
             if (user.Roles != null && user.Roles.Any())
             {
-                foreach (var role in user.Roles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                    claims.Add(new Claim("role", role));
-                }
+                claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
             }
 
             var identity = new ClaimsIdentity(claims, Scheme.Name);
@@ -115,20 +107,6 @@ private readonly IUnitOfWork _unitOfWork;
         if (request.Headers.TryGetValue(Headers.ApiKey, out var authHeader))
         {
             return authHeader.ToString();
-        }
-
-        // Check OPDS path: /api/opds/{apiKey}/...
-        var path = request.Path.Value ?? string.Empty;
-        if (path.Contains("/api/opds/", StringComparison.OrdinalIgnoreCase))
-        {
-            var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
-            var opdsIndex = Array.FindIndex(segments, s =>
-                s.Equals("opds", StringComparison.OrdinalIgnoreCase));
-
-            if (opdsIndex >= 0 && opdsIndex + 1 < segments.Length)
-            {
-                return segments[opdsIndex + 1];
-            }
         }
 
         // Check if embedded in route parameters (e.g., /api/somepath/{apiKey}/other)
