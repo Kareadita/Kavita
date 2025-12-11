@@ -130,6 +130,14 @@ export enum EVENTS {
    * Reading Session close
    */
   SessionClose = 'SessionClose',
+  /**
+   * Auth key has been rotated, created
+   */
+  AuthKeyUpdate = 'AuthKeyUpdate',
+  /**
+   * An Auth key has been deleted
+   */
+  AuthKeyDeleted = 'AuthKeyDeleted',
 }
 
 export interface Message<T> {
@@ -385,7 +393,21 @@ export class MessageHubService {
         event: EVENTS.PersonMerged,
         payload: resp.body
       });
-    })
+    });
+
+    this.hubConnection.on(EVENTS.AuthKeyUpdate, resp => {
+      this.messagesSource.next({
+        event: EVENTS.AuthKeyUpdate,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.AuthKeyDeleted, resp => {
+      this.messagesSource.next({
+        event: EVENTS.AuthKeyDeleted,
+        payload: resp.body
+      });
+    });
   }
 
   stopHubConnection() {

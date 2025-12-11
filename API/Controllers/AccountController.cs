@@ -1204,7 +1204,11 @@ public class AccountController : BaseApiController
 
         await _unitOfWork.CommitAsync();
 
-        return Ok(_mapper.Map<AuthKeyDto>(authKey));
+        var newDto = _mapper.Map<AuthKeyDto>(authKey);
+
+        await _eventHub.SendMessageToAsync(MessageFactory.AuthKeyUpdate, MessageFactory.AuthKeyUpdatedEvent(newDto), UserId);
+
+        return Ok(newDto);
     }
 
     /// <summary>
@@ -1216,12 +1220,6 @@ public class AccountController : BaseApiController
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<AuthKeyDto>> CreateAuthKey(RotateAuthKeyRequestDto dto)
     {
-        // Upper bound check might not be needed, it doesn't *realy* matter if users have bigger keys
-        if (string.IsNullOrEmpty(dto.Name) || dto.KeyLength < 8 || dto.KeyLength > 32)
-        {
-            return BadRequest();
-        }
-
         // Validate the name doesn't collide
         var authKeys = await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId);
         if (authKeys.Any(k => string.Equals(k.Name, dto.Name, StringComparison.InvariantCultureIgnoreCase)))
@@ -1241,7 +1239,11 @@ public class AccountController : BaseApiController
         _unitOfWork.UserRepository.Add(newKey);
         await _unitOfWork.CommitAsync();
 
-        return Ok(_mapper.Map<AuthKeyDto>(newKey));
+        var newDto = _mapper.Map<AuthKeyDto>(newKey);
+
+        await _eventHub.SendMessageToAsync(MessageFactory.AuthKeyUpdate, MessageFactory.AuthKeyUpdatedEvent(newDto), UserId);
+
+        return Ok(newDto);
     }
 
     /// <summary>
@@ -1259,6 +1261,9 @@ public class AccountController : BaseApiController
 
         _unitOfWork.UserRepository.Delete(authKey);
         await _unitOfWork.CommitAsync();
+
+        await _eventHub.SendMessageToAsync(MessageFactory.AuthKeyUpdate, MessageFactory.AuthKeyDeletedEvent(authKeyId), UserId);
+
         return Ok();
     }
 }

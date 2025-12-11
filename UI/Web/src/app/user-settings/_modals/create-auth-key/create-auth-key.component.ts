@@ -29,7 +29,7 @@ export class CreateAuthKeyComponent implements OnInit {
 
   settingsForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
-    keyLength: new FormControl(8, [Validators.required]),
+    keyLength: new FormControl(8, [Validators.required, Validators.min(8), Validators.max(32)]),
     expiresUtc: new FormControl('', []),
   });
 

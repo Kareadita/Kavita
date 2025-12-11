@@ -87,6 +87,33 @@ export class AccountService {
         switchMap(() => this.refreshAccount()))
         .subscribe(() => {});
 
+      this.messageHub.messages$.pipe(
+        filter(evt => evt.event === EVENTS.AuthKeyUpdate),
+        map(evt => evt.payload as {authKey: AuthKey}),
+        tap(({authKey}) => {
+          const authKeys = this.currentUser!.authKeys.map(k => k.id === authKey.id ? authKey : k);
+
+          this.setCurrentUser({
+            ...this.currentUser!,
+            authKeys: authKeys,
+          }, false);
+        }),
+      ).subscribe();
+
+    this.messageHub.messages$.pipe(
+      filter(evt => evt.event === EVENTS.AuthKeyDeleted),
+      map(evt => evt.payload as {id: number}),
+      tap(({id}) => {
+        const authKeys = this.currentUser!.authKeys.filter(k => k.id !== id);
+
+        this.setCurrentUser({
+          ...this.currentUser!,
+          authKeys: authKeys,
+        }, false);
+      }),
+    ).subscribe();
+
+
     window.addEventListener("offline", (e) => {
       this.isOnline = false;
     });
@@ -444,14 +471,7 @@ export class AccountService {
   }
 
   getAuthKeys() {
-    return this.httpClient.get<AuthKey[]>(this.baseUrl + `account/auth-keys`).pipe(
-      tap(authKeys => {
-        this.setCurrentUser({
-          ...this.currentUser!,
-          authKeys: authKeys,
-        }, false);
-      }),
-    );
+    return this.httpClient.get<AuthKey[]>(this.baseUrl + `account/auth-keys`);
   }
 
   createAuthKey(data: {keyLength: number, name: string, expiresUtc: string | null}) {

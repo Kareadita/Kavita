@@ -46,18 +46,22 @@ export class ManageAuthKeysComponent implements OnInit {
 
   isReadOnly = this.accountService.isReadOnly;
   opdsUrl = signal<string>('');
-  authKeys = signal<AuthKey[] | null>(null);
+  authKeys = computed(() => {
+    const account = this.accountService.currentUserSignal();
+    if (!account) return null;
+
+    return account.authKeys;
+  })
 
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl(); };
 
   protected readonly isOpdsEnabledResource = this.settingsService.getOpdsEnabledResource();
 
   ngOnInit() {
-    this.loadAuthKeys();
+    this.refreshOpdsUrl();
   }
 
-  loadAuthKeys() {
-    this.accountService.getAuthKeys().subscribe(authKeys => this.authKeys.set(authKeys));
+  refreshOpdsUrl() {
     this.accountService.getOpdsUrl().subscribe(res => this.opdsUrl.set(res));
   }
 
@@ -67,7 +71,7 @@ export class ManageAuthKeysComponent implements OnInit {
     ref.closed.subscribe((result: AuthKey | null) => {
       if (result === null) return;
 
-      this.loadAuthKeys();
+      this.refreshOpdsUrl();
     });
   }
 
@@ -78,7 +82,7 @@ export class ManageAuthKeysComponent implements OnInit {
     ref.closed.subscribe((result: AuthKey | null) => {
       if (result === null) return;
 
-      this.loadAuthKeys();
+      this.refreshOpdsUrl();
     });
   }
 
@@ -87,7 +91,7 @@ export class ManageAuthKeysComponent implements OnInit {
       return;
     }
     this.accountService.deleteAuthKey(authKey.id).subscribe(res => {
-      this.loadAuthKeys();
+      this.refreshOpdsUrl();
     })
   }
 
