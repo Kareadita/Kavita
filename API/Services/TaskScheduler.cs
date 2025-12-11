@@ -255,19 +255,22 @@ public class TaskScheduler : ITaskScheduler
             LicenseService.Cron, RecurringJobOptions);
 
         // KavitaPlus Scrobbling (every hour) - randomise minutes to spread requests out for K+
+        var randomMinute = Rnd.Next(0, 60);
         RecurringJob.AddOrUpdate(ProcessScrobblingEventsId, () => _scrobblingService.ProcessUpdatesSinceLastSync(),
-            Cron.Hourly(Rnd.Next(0, 60)), RecurringJobOptions);
+            Cron.Hourly(randomMinute), RecurringJobOptions);
         RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEventsId, () => _scrobblingService.ClearProcessedEvents(),
             Cron.Daily, RecurringJobOptions);
 
         // Backfilling/Freshening Reviews/Rating/Recommendations
+        var randomKPlusBackfill = Rnd.Next(1, 5);
         RecurringJob.AddOrUpdate(KavitaPlusDataRefreshId,
-            () => _externalMetadataService.FetchExternalDataTask(), Cron.Daily(Rnd.Next(1, 5)),
+            () => _externalMetadataService.FetchExternalDataTask(), Cron.Daily(randomKPlusBackfill),
             RecurringJobOptions);
 
         // This shouldn't be so close to fetching data due to Rate limit concerns
+        var randomKPlusStackSync = Rnd.Next(6, 10);
         RecurringJob.AddOrUpdate(KavitaPlusStackSyncId,
-            () => _smartCollectionSyncService.Sync(), Cron.Daily(Rnd.Next(6, 10)),
+            () => _smartCollectionSyncService.Sync(), Cron.Daily(randomKPlusStackSync),
             RecurringJobOptions);
 
         RecurringJob.AddOrUpdate(KavitaPlusWantToReadSyncId,
@@ -298,11 +301,14 @@ public class TaskScheduler : ITaskScheduler
         if (!allowStatCollection)
         {
             _logger.LogDebug("User has opted out of stat collection, not registering tasks");
+            RecurringJob.RemoveIfExists(ReportStatsTaskId);
             return;
         }
 
-        _logger.LogDebug("Scheduling stat collection daily");
-        RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), RecurringJobOptions);
+        var hour = Rnd.Next(0, 22);
+        _logger.LogDebug("Scheduling stat collection daily at {Hour}:00", hour);
+
+        RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(hour), RecurringJobOptions);
     }
 
 
