@@ -17,6 +17,7 @@ using API.Entities.Enums;
 using API.Entities.Progress;
 using API.Extensions;
 using API.Helpers.Builders;
+using API.Services.Tasks.Metadata;
 using Hangfire;
 using Flurl.Http;
 using Kavita.Common;
@@ -66,6 +67,7 @@ public interface IOidcService
 /// <remarks>It is registered as a singleton only if oidc is enabled. So must be nullable and optional</remarks>
 public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userManager,
     IUnitOfWork unitOfWork, IAccountService accountService, IEmailService emailService,
+    ICoverDbService coverDbService,
     [FromServices] ConfigurationManager<OpenIdConnectConfiguration>? configurationManager = null): IOidcService
 {
     public const string LibraryAccessPrefix = "library-";
@@ -381,19 +383,22 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     {
         if (!settings.SyncUserSettings || user.IdentityProvider != IdentityProvider.OpenIdConnect) return;
 
-        // Never sync the default user
         var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
-        if (defaultAdminUser.Id == user.Id) return;
 
         logger.LogDebug("Syncing user {UserId} from OIDC", user.Id);
         try
         {
 
-            await SyncEmail(request, settings, claimsPrincipal, user);
-            await SyncUsername(claimsPrincipal, user);
-            await SyncRoles(settings, claimsPrincipal, user);
-            await SyncLibraries(settings, claimsPrincipal, user);
-            await SyncAgeRestriction(settings, claimsPrincipal, user);
+            if (user.Id != defaultAdminUser.Id)
+            {
+                await SyncEmail(request, settings, claimsPrincipal, user);
+                await SyncUsername(claimsPrincipal, user);
+                await SyncRoles(settings, claimsPrincipal, user);
+                await SyncLibraries(settings, claimsPrincipal, user);
+                await SyncAgeRestriction(settings, claimsPrincipal, user);
+            }
+
+            await SyncExtras(claimsPrincipal, user);
 
             if (unitOfWork.HasChanges())
             {
@@ -406,6 +411,22 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             await unitOfWork.RollbackAsync();
             throw new KavitaException("errors.oidc.syncing-user", ex);
         }
+    }
+
+    private async Task SyncExtras(ClaimsPrincipal claimsPrincipal, AppUser user)
+    {
+        var picture = claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Picture)?.Value;
+
+        // Only sync if the user has no image, I know this is no true sync as changing it in your idp
+        // will require action on Kavita. But it's less effort than saving if the user has set it themselves
+        // Will just need to be documented on the wiki.
+        if (!string.IsNullOrEmpty(picture) && string.IsNullOrEmpty(user.CoverImage))
+        {
+            // Run in background to not block http thread, pass id to Hangfire doesn't kill itself
+            BackgroundJob.Enqueue(() => coverDbService.SetUserCoverByUrl(user.Id, picture, false));
+        }
+
+
     }
 
     private async Task SyncEmail(HttpRequest request, OidcConfigDto settings, ClaimsPrincipal claimsPrincipal, AppUser user)
