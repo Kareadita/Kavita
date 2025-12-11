@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Entities;
+using API.Entities.Progress;
 using API.Helpers;
 using API.Middleware;
 using API.Services;
@@ -129,6 +130,11 @@ public static class IdentityServiceExtensions
             options.Events = new JwtBearerEvents
             {
                 OnMessageReceived = SetTokenFromQuery,
+                OnTokenValidated = ctx =>
+                {
+                    (ctx.Principal?.Identity as ClaimsIdentity)?.AddClaim(new Claim("AuthType", nameof(AuthenticationType.JWT)));
+                    return Task.CompletedTask;
+                }
             };
         });
 

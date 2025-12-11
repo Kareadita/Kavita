@@ -14,6 +14,7 @@ using API.DTOs.Email;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Progress;
 using API.Extensions;
 using API.Helpers.Builders;
 using Hangfire;
@@ -664,6 +665,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
+            new("AuthType", nameof(AuthenticationType.OIDC))
         };
 
         var userManager = services.GetRequiredService<UserManager<AppUser>>();
