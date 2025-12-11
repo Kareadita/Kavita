@@ -73,7 +73,7 @@ export class EditPersonModalComponent implements OnInit {
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl('', []),
-    asin: new FormControl('', [], [this.asinValidator()]),
+    asin: new FormControl('', [], [this.asinValidator(), this.amazonCodeValidator()]),
     aniListId: new FormControl('', []),
     malId: new FormControl('', []),
     hardcoverId: new FormControl('', []),
@@ -219,6 +219,24 @@ export class EditPersonModalComponent implements OnInit {
 
         return { 'invalidAsin': {'asin': asin} } as ValidationErrors;
       }));
+    }
+  }
+
+  /**
+   * Validates that the string doesn't start with B0, which is a custom code for Amazon that cannot be converted into an ISBN
+   */
+  amazonCodeValidator(): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      const asin = control.value;
+      if (!asin || asin.trim().length === 0) {
+        return of(null);
+      }
+
+      if (asin.toUpperCase().startsWith('B0')) {
+        return of({ 'amazonCode': {'asin': asin} } as ValidationErrors);
+      }
+
+      return of(null);
     }
   }
 

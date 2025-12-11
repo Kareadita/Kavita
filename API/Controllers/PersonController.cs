@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Metadata;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Metadata.Browse;
@@ -197,8 +198,8 @@ public class PersonController : BaseApiController
     [HttpGet("valid-asin")]
     public ActionResult<bool> ValidateAsin(string asin)
     {
-        return Ok(!string.IsNullOrEmpty(asin) &&
-                  (ArticleNumberHelper.IsValidIsbn10(asin) || ArticleNumberHelper.IsValidIsbn13(asin)));
+        var code = ComicInfo.ParseGtin(asin);
+        return Ok(!string.IsNullOrEmpty(code));
     }
 
     /// <summary>

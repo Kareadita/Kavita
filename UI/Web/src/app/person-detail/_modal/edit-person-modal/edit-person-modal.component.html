@@ -78,6 +78,9 @@
                               @if (errors.invalidAsin) {
                                 <div>{{t('invalid-asin')}}</div>
                               }
+                              @if (errors.amazonCode) {
+                                <div>{{t('invalid-amazon-code')}}</div>
+                              }
                             </div>
                           }
 
