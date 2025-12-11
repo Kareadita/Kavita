@@ -33,6 +33,7 @@ public interface ICoverDbService
     Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false, bool chooseBetterImage = true);
     Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true, bool chooseBetterImage = false);
     Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true, bool chooseBetterImage = false);
+    Task SetUserCoverByUrl(int userId, string url, bool fromBase64 = true, bool chooseBetterImage = false);
     Task SetUserCoverByUrl(AppUser user, string url, bool fromBase64 = true, bool chooseBetterImage = false);
 }
 
@@ -717,6 +718,14 @@ public class CoverDbService : ICoverDbService
                 false
             );
         }
+    }
+
+    public async Task SetUserCoverByUrl(int userId, string url, bool fromBase64 = true, bool chooseBetterImage = false)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        if (user == null) return;
+
+        await SetUserCoverByUrl(user, url, fromBase64, chooseBetterImage);
     }
 
     public async Task SetUserCoverByUrl(AppUser user, string url, bool fromBase64 = true, bool chooseBetterImage = false)
