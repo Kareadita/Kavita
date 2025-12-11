@@ -124,6 +124,7 @@
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "invalid-email-warning": "A non-valid email will block some functionalities of Kavita",
+        "warning-read-only": "Read Only accounts have limited permissions",
         "cancel": "{{common.cancel}}",
         "saving": "Saving…",
         "update": "Update",

@@ -90,6 +90,11 @@ export class SettingMultiCheckBox<T> implements ControlValueAccessor {
    * Disable all checkboxes
    */
   disabled = model(false);
+  /**
+   * An optional warning to display underneath the title
+   * @optional
+   */
+  warning = input<string | undefined>(undefined);
 
   isLoading = computed(() => {
     const loading = this.loading();
