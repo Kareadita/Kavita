@@ -444,49 +444,6 @@ public class UploadController : BaseApiController
         return BadRequest(await _localizationService.Translate(UserId, "generic-cover-library-save"));
     }
 
-    /// <summary>
-    /// Replaces chapter cover image and locks it with a base64 encoded image. This will update the parent volume's cover image.
-    /// </summary>
-    /// <param name="uploadFileDto">Does not use Url property</param>
-    /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    [HttpPost("reset-chapter-lock")]
-    [Obsolete("Use LockCover in UploadFileDto, will be removed in v0.9.0")]
-    public async Task<ActionResult> ResetChapterLock(UploadFileDto uploadFileDto)
-    {
-        try
-        {
-            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-            if (chapter == null) return BadRequest(await _localizationService.Translate(UserId, "chapter-doesnt-exist"));
-            var originalFile = chapter.CoverImage;
-
-            chapter.CoverImage = string.Empty;
-            chapter.CoverImageLocked = false;
-            _unitOfWork.ChapterRepository.Update(chapter);
-
-            var volume = (await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId))!;
-            volume.CoverImage = chapter.CoverImage;
-            _unitOfWork.VolumeRepository.Update(volume);
-
-            var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId))!;
-
-            if (_unitOfWork.HasChanges())
-            {
-                await _unitOfWork.CommitAsync();
-                if (originalFile != null) System.IO.File.Delete(originalFile);
-                await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
-                return Ok();
-            }
-
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "There was an issue resetting cover lock for Chapter {Id}", uploadFileDto.Id);
-            await _unitOfWork.RollbackAsync();
-        }
-
-        return BadRequest(await _localizationService.Translate(UserId, "reset-chapter-lock"));
-    }
 
     /// <summary>
     /// Replaces person tag cover image and locks it with a base64 encoded image

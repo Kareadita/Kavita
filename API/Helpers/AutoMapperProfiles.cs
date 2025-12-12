@@ -474,5 +474,12 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<AppUserAuthKey, AuthKeyDto>();
 
+
+        #region Deprecated Code
+
+        CreateMap<Chapter, ChapterMetadataDto>();
+
+        #endregion
+
     }
 }
