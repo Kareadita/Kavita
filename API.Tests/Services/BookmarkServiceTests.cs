@@ -309,7 +309,7 @@ Substitute.For<IMediaConversionService>());
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
 
-        var vol = await unitOfWork.VolumeRepository.GetVolumeAsync(1);
+        var vol = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(1);
         vol.Chapters = new List<Chapter>();
         unitOfWork.VolumeRepository.Update(vol);
         await unitOfWork.CommitAsync();

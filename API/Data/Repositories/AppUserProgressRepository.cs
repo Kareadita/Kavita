@@ -36,6 +36,8 @@ public interface IAppUserProgressRepository
     Task<int> GetHighestFullyReadChapterForSeries(int seriesId, int userId);
     Task<float> GetHighestFullyReadVolumeForSeries(int seriesId, int userId);
     Task<DateTime?> GetLatestProgressForSeries(int seriesId, int userId);
+    Task<DateTime?> GetLatestProgressForVolume(int volumeId, int userId);
+    Task<DateTime?> GetLatestProgressForChapter(int chapterId, int userId);
     Task<DateTime?> GetFirstProgressForSeries(int seriesId, int userId);
     Task UpdateAllProgressThatAreMoreThanChapterPages();
     Task<IList<FullProgressDto>> GetUserProgressForChapter(int chapterId, int userId = 0);
@@ -201,6 +203,22 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .Select(p => p.LastModifiedUtc)
             .ToListAsync();
         return list.Count == 0 ? null : list.DefaultIfEmpty().Max();
+    }
+
+    public async Task<DateTime?> GetLatestProgressForVolume(int volumeId, int userId)
+    {
+        var list = await _context.AppUserProgresses.Where(p => p.AppUserId == userId && p.VolumeId == volumeId)
+            .Select(p => p.LastModifiedUtc)
+            .ToListAsync();
+        return list.Count == 0 ? null : list.DefaultIfEmpty().Max();
+    }
+
+    public async Task<DateTime?> GetLatestProgressForChapter(int chapterId, int userId)
+    {
+        return await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)
+            .Select(p => p.LastModifiedUtc)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<DateTime?> GetFirstProgressForSeries(int seriesId, int userId)

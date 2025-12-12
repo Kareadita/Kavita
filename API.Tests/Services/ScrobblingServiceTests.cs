@@ -249,7 +249,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(4);
         Assert.NotNull(chapter);
 
-        var volume = await unitOfWork.VolumeRepository.GetVolumeAsync(1, VolumeIncludes.Chapters);
+        var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(1, VolumeIncludes.Chapters);
         Assert.NotNull(volume);
 
         // Call Scrobble without having any progress
@@ -280,7 +280,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(4);
         Assert.NotNull(chapter);
 
-        var volume = await unitOfWork.VolumeRepository.GetVolumeAsync(1, VolumeIncludes.Chapters);
+        var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(1, VolumeIncludes.Chapters);
         Assert.NotNull(volume);
 
         // Mark something as read to trigger event creation
@@ -335,7 +335,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
 
-        var volume = await unitOfWork.VolumeRepository.GetVolumeAsync(1, VolumeIncludes.Chapters);
+        var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(1, VolumeIncludes.Chapters);
         Assert.NotNull(volume);
 
         await readerService.MarkChaptersAsRead(user, 1, new List<Chapter>() {volume.Chapters[0]});

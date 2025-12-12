@@ -1064,17 +1064,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   read(incognitoMode: boolean = false) {
     if (this.bulkSelectionService.hasSelections()) return;
 
-    this.readerService.readSeries(this.series()!, incognitoMode, (chapter) => {
-      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
-    });
+    this.readerService.readSeries(this.series()!, incognitoMode);
   }
 
   openChapter(chapter: Chapter, incognitoMode = false, promptForReread: boolean = true) {
     if (this.bulkSelectionService.hasSelections()) return;
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
 
-    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode, promptForReread);
-
+    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode);
   }
 
 

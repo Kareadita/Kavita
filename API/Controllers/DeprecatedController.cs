@@ -166,7 +166,7 @@ public class DeprecatedController : BaseApiController
             chapter.CoverImageLocked = false;
             _unitOfWork.ChapterRepository.Update(chapter);
 
-            var volume = (await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId))!;
+            var volume = (await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId))!;
             volume.CoverImage = chapter.CoverImage;
             _unitOfWork.VolumeRepository.Update(volume);
 

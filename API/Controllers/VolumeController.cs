@@ -39,7 +39,7 @@ public class VolumeController : BaseApiController
     [HttpDelete]
     public async Task<ActionResult<bool>> DeleteVolume(int volumeId)
     {
-        var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId,
+        var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId,
             VolumeIncludes.Chapters | VolumeIncludes.People | VolumeIncludes.Tags);
         if (volume == null)
             return BadRequest(_localizationService.Translate(UserId, "volume-doesnt-exist"));

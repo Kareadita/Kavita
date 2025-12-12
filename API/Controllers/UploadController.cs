@@ -286,7 +286,7 @@ public class UploadController : BaseApiController
             chapter.CoverImageLocked = lockState;
             chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterCovers);
             _unitOfWork.ChapterRepository.Update(chapter);
-            var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId);
             if (volume != null)
             {
                 volume.CoverImage = chapter.CoverImage;
@@ -338,7 +338,7 @@ public class UploadController : BaseApiController
         // See if we can do this all in memory without touching underlying system
         try
         {
-            var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(uploadFileDto.Id, VolumeIncludes.Chapters);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(uploadFileDto.Id, VolumeIncludes.Chapters);
             if (volume == null) return BadRequest(await _localizationService.Translate(UserId, "volume-doesnt-exist"));
 
             var filePath = string.Empty;
