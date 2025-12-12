@@ -36,7 +36,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
-            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<EntityDisplayService>());
+            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityDisplayService>());
 
         return (readingListService, readerService);
     }

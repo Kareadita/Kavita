@@ -10,12 +10,21 @@ using API.Services.Tasks.Scanner.Parser;
 namespace API.Services;
 #nullable enable
 
+public interface IEntityDisplayService
+{
+    Task<(string displayName, bool neededRename)> GetVolumeDisplayName( VolumeDto volume, int userId, EntityDisplayOptions options);
+    Task<string> GetChapterDisplayName(ChapterDto chapter, int userId, EntityDisplayOptions options);
+    Task<string> GetChapterDisplayName(Chapter chapter, int userId, EntityDisplayOptions options);
+    Task<string> GetEntityDisplayName(ChapterDto chapter, int userId, EntityDisplayOptions options);
+
+}
+
 
 /// <summary>
 /// Service responsible for generating user-friendly display names for Volumes and Chapters.
 /// Centralizes naming logic to avoid exposing internal encodings (-100000).
 /// </summary>
-public class EntityDisplayService(ILocalizationService localizationService, IUnitOfWork unitOfWork)
+public class EntityDisplayService(ILocalizationService localizationService, IUnitOfWork unitOfWork) : IEntityDisplayService
 {
     /// <summary>
     /// Generates a user-friendly display name for a Volume.
@@ -24,10 +33,7 @@ public class EntityDisplayService(ILocalizationService localizationService, IUni
     /// <param name="userId">User ID for localization</param>
     /// <param name="options">Display options</param>
     /// <returns>Tuple of (displayName, neededRename) where neededRename indicates if the volume was modified</returns>
-    public async Task<(string displayName, bool neededRename)> GetVolumeDisplayName(
-        VolumeDto volume,
-        int userId,
-        EntityDisplayOptions options)
+    public async Task<(string displayName, bool neededRename)> GetVolumeDisplayName( VolumeDto volume, int userId, EntityDisplayOptions options)
     {
         // Handle special volumes - these shouldn't be displayed as regular volumes
         if (volume.IsSpecial() || volume.IsLooseLeaf())
@@ -92,10 +98,7 @@ public class EntityDisplayService(ILocalizationService localizationService, IUni
     /// <summary>
     /// Generates a user-friendly display name for a Chapter (DTO).
     /// </summary>
-    public async Task<string> GetChapterDisplayName(
-        ChapterDto chapter,
-        int userId,
-        EntityDisplayOptions options)
+    public async Task<string> GetChapterDisplayName( ChapterDto chapter, int userId, EntityDisplayOptions options)
     {
         return await GetChapterDisplayNameCore(
             chapter.IsSpecial,
@@ -108,10 +111,7 @@ public class EntityDisplayService(ILocalizationService localizationService, IUni
     /// <summary>
     /// Generates a user-friendly display name for a Chapter (Entity).
     /// </summary>
-    public async Task<string> GetChapterDisplayName(
-        Chapter chapter,
-        int userId,
-        EntityDisplayOptions options)
+    public async Task<string> GetChapterDisplayName( Chapter chapter, int userId, EntityDisplayOptions options)
     {
         return await GetChapterDisplayNameCore(
             chapter.IsSpecial,
@@ -130,10 +130,7 @@ public class EntityDisplayService(ILocalizationService localizationService, IUni
     /// <param name="userId">User ID for localization</param>
     /// <param name="options">Display options</param>
     /// <returns>User-friendly display name</returns>
-    public async Task<string> GetEntityDisplayName(
-        ChapterDto chapter,
-        int userId,
-        EntityDisplayOptions options)
+    public async Task<string> GetEntityDisplayName( ChapterDto chapter, int userId, EntityDisplayOptions options)
     {
         // Detect if this is a loose leaf volume that should be displayed as a volume name
         if (chapter.Title == Parser.LooseLeafVolume)
@@ -157,12 +154,7 @@ public class EntityDisplayService(ILocalizationService localizationService, IUni
     /// <summary>
     /// Core implementation for chapter display name generation.
     /// </summary>
-    private async Task<string> GetChapterDisplayNameCore(
-        bool isSpecial,
-        string range,
-        string? title,
-        int userId,
-        EntityDisplayOptions options)
+    private async Task<string> GetChapterDisplayNameCore( bool isSpecial, string range, string? title, int userId, EntityDisplayOptions options)
     {
         // Handle special chapters - use cleaned title or fallback to range
         if (isSpecial)

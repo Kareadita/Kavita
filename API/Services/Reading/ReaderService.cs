@@ -47,7 +47,7 @@ public interface IReaderService
 
 public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
     IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService,
-    IClientInfoAccessor clientInfoAccessor, ISeriesService seriesService, EntityDisplayService entityDisplayService)
+    IClientInfoAccessor clientInfoAccessor, ISeriesService seriesService, IEntityDisplayService entityDisplayService)
     : IReaderService
 {
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;

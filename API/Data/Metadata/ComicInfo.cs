@@ -234,12 +234,15 @@ public class ComicInfo
         // This is likely a valid ISBN
         if (gtin[0] == '0')
         {
-            var potentialIsbn = gtin.Substring(1);
+            var offset = gtin[1] == '-'  ? 0 : 1;
+            var potentialIsbn = gtin[offset..];
             if (ArticleNumberHelper.IsValidIsbn13(potentialIsbn))
             {
                 return potentialIsbn;
             }
-        } else if (ArticleNumberHelper.IsValidIsbn10(gtin) || ArticleNumberHelper.IsValidIsbn13(gtin))
+        }
+
+        if (ArticleNumberHelper.IsValidIsbn10(gtin) || ArticleNumberHelper.IsValidIsbn13(gtin))
         {
             return gtin;
         }

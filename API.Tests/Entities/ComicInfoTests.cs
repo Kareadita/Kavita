@@ -100,12 +100,18 @@ public class ComicInfoTests
     [InlineData("978-0-306-40615-7")] // ISBN-13
     [InlineData("99921-58-10-7")]
     [InlineData("85-359-0277-5")]
-    [InlineData("001234567890")] // GTIN-12
-    [InlineData("9504000059437 ")] // GTIN-13
     public void IsValid(string code)
     {
         // Note: ASIN's starting with "B0" are not able to be converted to ISBN
         Assert.Equal(code, ComicInfo.ParseGtin(code));
+    }
+
+    [Theory]
+    [InlineData("001234567890")]
+    [InlineData("9504000059437 ")]
+    public void IsInvalid(string code)
+    {
+        Assert.Equal(string.Empty, ComicInfo.ParseGtin(code));
     }
     #endregion
 }
