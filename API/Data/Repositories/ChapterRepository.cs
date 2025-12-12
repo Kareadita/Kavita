@@ -11,6 +11,7 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +52,7 @@ public interface IChapterRepository
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IList<Chapter>> GetAllChaptersWithCoversInDifferentEncoding(EncodeFormat format);
     Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync();
-    Task<ChapterDto> AddChapterModifiers(int userId, ChapterDto chapter);
+    Task AddChapterModifiers(int userId, ChapterDto chapter);
     IEnumerable<Chapter> GetChaptersForSeries(int seriesId);
     Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId);
     Task<int> GetAverageUserRating(int chapterId, int userId);
@@ -59,6 +60,8 @@ public interface IChapterRepository
     Task<IList<ExternalReview>> GetExternalChapterReview(int chapterId);
     Task<IList<RatingDto>> GetExternalChapterRatingDtos(int chapterId);
     Task<IList<ExternalRating>> GetExternalChapterRatings(int chapterId);
+    Task<ChapterDto?> GetCurrentlyReadingChapterAsync(int seriesId, int userId);
+    Task<ChapterDto?> GetFirstChapterForSeriesAsync(int seriesId, int userId);
 }
 public class ChapterRepository : IChapterRepository
 {
@@ -318,8 +321,10 @@ public class ChapterRepository : IChapterRepository
             .ToListAsync();
     }
 
-    public async Task<ChapterDto> AddChapterModifiers(int userId, ChapterDto chapter)
+    public async Task AddChapterModifiers(int userId, ChapterDto? chapter)
     {
+        if (chapter == null) return;
+
         var progress = await _context.AppUserProgresses.Where(x =>
                 x.AppUserId == userId && x.ChapterId == chapter.Id)
             .AsNoTracking()
@@ -337,8 +342,6 @@ public class ChapterRepository : IChapterRepository
             chapter.LastReadingProgressUtc = DateTime.MinValue;
             chapter.LastReadingProgress = DateTime.MinValue;
         }
-
-        return chapter;
     }
 
     /// <summary>
@@ -415,5 +418,62 @@ public class ChapterRepository : IChapterRepository
             .Where(c => c.Id == chapterId)
             .SelectMany(c => c.ExternalRatings)
             .ToListAsync();
+    }
+
+    public async Task<ChapterDto?> GetCurrentlyReadingChapterAsync(int seriesId, int userId)
+    {
+        var chapterWithProgress = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Join(
+                _context.Chapter.Include(c => c.Volume),
+                p => p.ChapterId,
+                c => c.Id,
+                (p, c) => new { Chapter = c, p.PagesRead }
+            )
+            .Where(x => x.Chapter.Volume.SeriesId == seriesId)
+            .Where(x => x.Chapter.Volume.Number != Parser.LooseLeafVolumeNumber)
+            .Where(x => x.PagesRead > 0 && x.PagesRead < x.Chapter.Pages)
+            .OrderBy(x => x.Chapter.Volume.Number)
+            .ThenBy(x => x.Chapter.SortOrder)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+
+        if (chapterWithProgress == null) return null;
+
+        // Map chapter to DTO
+        var dto = _mapper.Map<ChapterDto>(chapterWithProgress.Chapter);
+        dto.PagesRead = chapterWithProgress.PagesRead;
+
+        return dto;
+    }
+
+    public async Task<ChapterDto?> GetFirstChapterForSeriesAsync(int seriesId, int userId)
+    {
+        // Get the chapter entity with proper ordering
+        var firstChapter = await _context.Chapter
+            .Include(c => c.Volume)
+            .Where(c => c.Volume.SeriesId == seriesId)
+            .OrderBy(c =>
+                // Priority 1: Regular volumes (not loose leaf, not special)
+                c.Volume.Number == Parser.LooseLeafVolumeNumber ||
+                c.Volume.Number == Parser.SpecialVolumeNumber ? 1 : 0)
+            .ThenBy(c =>
+                // Priority 2: Loose leaf over specials
+                c.Volume.Number == Parser.SpecialVolumeNumber ? 1 : 0)
+            .ThenBy(c =>
+                // Priority 3: Non-special chapters
+                c.IsSpecial ? 1 : 0)
+            .ThenBy(c => c.Volume.Number)
+            .ThenBy(c => c.SortOrder)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+
+        if (firstChapter == null) return null;
+
+        var dto = _mapper.Map<ChapterDto>(firstChapter);
+
+        await AddChapterModifiers(userId, dto);
+
+        return dto;
     }
 }

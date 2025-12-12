@@ -536,62 +536,28 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     /// <returns></returns>
     public async Task<ChapterDto> GetContinuePoint(int seriesId, int userId)
     {
-        var volumes = (await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
-
-        var anyUserProgress =
-            await unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId);
-
-        if (!anyUserProgress)
+        var hasProgress = await unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId);
+        if (!hasProgress)
         {
-            // I think i need a way to sort volumes last
-            volumes = volumes.OrderBy(v => v.MinNumber, _chapterSortComparerSpecialsLast).ToList();
-
-            // Check if we have a non-loose leaf volume
-            var nonLooseLeafNonSpecialVolume = volumes.Find(v => !v.IsLooseLeaf() && !v.IsSpecial());
-            if (nonLooseLeafNonSpecialVolume != null)
-            {
-                return nonLooseLeafNonSpecialVolume.Chapters.MinBy(c => c.SortOrder);
-            }
-
-            // We only have a loose leaf or Special left
-
-            var chapters = volumes.First(v => v.IsLooseLeaf() || v.IsSpecial()).Chapters
-                .OrderBy(c => c.SortOrder)
-                .ToList();
-
-            // If there are specials, then return the first Non-special
-            if (chapters.Exists(c => c.IsSpecial))
-            {
-                var firstChapter = chapters.Find(c => !c.IsSpecial);
-                if (firstChapter == null)
-                {
-                    // If there is no non-special chapter, then return first chapter
-                    return chapters[0];
-                }
-
-                return firstChapter;
-            }
-            // Else use normal logic
-            return chapters[0];
+            // Get first chapter only
+            return await unitOfWork.ChapterRepository.GetFirstChapterForSeriesAsync(seriesId, userId);
         }
 
-        // Loop through all chapters that are not in volume 0
-        var volumeChapters = volumes
-            .WhereNotLooseLeaf()
-            .SelectMany(v => v.Chapters)
+        var currentlyReading = await unitOfWork.ChapterRepository.GetCurrentlyReadingChapterAsync(seriesId, userId);
+
+        if (currentlyReading != null)
+        {
+            return currentlyReading;
+        }
+
+        var volumes = (await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+
+        var allChapters = volumes
+            .OrderBy(v => v.MinNumber, _chapterSortComparerDefaultLast)
+            .SelectMany(v => v.Chapters.OrderBy(c => c.SortOrder))
             .ToList();
 
-        // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
-        // If there are any volumes that have progress, return those. If not, move on.
-        var currentlyReadingChapter = volumeChapters
-            .OrderBy(c => c.MinNumber, _chapterSortComparerDefaultLast)
-            .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
-        if (currentlyReadingChapter != null) return currentlyReadingChapter;
-
-        // Order with volume 0 last so we prefer the natural order
-        return FindNextReadingChapter(volumes.OrderBy(v => v.MinNumber, _chapterSortComparerDefaultLast)
-                                             .SelectMany(v => v.Chapters.OrderBy(c => c.SortOrder))
-                                             .ToList());
+        return FindNextReadingChapter(allChapters);
     }
 
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
@@ -785,16 +751,13 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
     public async Task<RereadDto> CheckSeriesForReRead(int userId, int seriesId)
     {
-        var userPreferences = await unitOfWork.UserRepository.GetPreferencesForUser(userId);
-
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
         if (series == null) return RereadDto.Dont();
 
         var libraryType = series.Library.Type;
+        var options = EntityDisplayOptions.Default(libraryType);
         var continuePoint = await GetContinuePoint(seriesId, userId);
         var lastProgress = await unitOfWork.AppUserProgressRepository.GetLatestProgressForSeries(seriesId, userId);
-
-        var options = EntityDisplayOptions.Default(libraryType);
         var continuePointLabel = await entityDisplayService.GetEntityDisplayName(continuePoint, userId, options);
 
         if (lastProgress == null || !await unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
@@ -805,6 +768,8 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                 ChapterOnContinue = new RereadChapterDto(series.LibraryId, seriesId, continuePoint.Id, continuePointLabel, continuePoint.Format)
             };
         }
+
+        var userPreferences = await unitOfWork.UserRepository.GetPreferencesForUser(userId);
 
         return await BuildRereadDto(
             userId,

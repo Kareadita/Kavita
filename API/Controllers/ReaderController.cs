@@ -1054,7 +1054,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    [HttpGet("promptre-read/chapter")]
+    [HttpGet("prompt-reread/chapter")]
     public async Task<ActionResult<RereadDto>> ShouldPromptForChapterReRead(int libraryId, int seriesId, int chapterId)
     {
         return Ok(await _readerService.CheckChapterForReRead(UserId, chapterId, seriesId, libraryId));

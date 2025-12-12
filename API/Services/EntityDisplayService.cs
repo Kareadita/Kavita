@@ -153,50 +153,6 @@ public class EntityDisplayService(ILocalizationService localizationService, IUni
         return await GetChapterDisplayName(chapter, userId, options);
     }
 
-    /// <summary>
-    /// Smart method overload for Chapter entity (non-DTO).
-    /// </summary>
-    public async Task<string> GetEntityDisplayName(
-        Chapter chapter,
-        int userId,
-        EntityDisplayOptions options)
-    {
-        // Detect if this is a loose leaf volume that should be displayed as a volume name
-        if (chapter.Title == Parser.LooseLeafVolume)
-        {
-            var volume = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId);
-            if (volume != null)
-            {
-                var (label, _) = await GetVolumeDisplayName(volume, userId, options);
-                if (!string.IsNullOrEmpty(label))
-                {
-                    return label;
-                }
-            }
-        }
-
-        // Standard chapter display
-        return await GetChapterDisplayName(chapter, userId, options);
-    }
-
-    /// <summary>
-    /// Gets the base chapter/issue/book label without a number (e.g., "Chapter", "Issue #", "Book").
-    /// Useful for UI labels and headers.
-    /// </summary>
-    public async Task<string> GetChapterLabel(int userId, LibraryType libraryType, bool includeHash = false)
-    {
-        var hashSpot = includeHash ? "#" : string.Empty;
-        return (libraryType switch
-        {
-            LibraryType.Book => await localizationService.Translate(userId, "book-num", string.Empty),
-            LibraryType.LightNovel => await localizationService.Translate(userId, "book-num", string.Empty),
-            LibraryType.Comic => await localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
-            LibraryType.ComicVine => await localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
-            LibraryType.Manga => await localizationService.Translate(userId, "chapter-num", string.Empty),
-            LibraryType.Image => await localizationService.Translate(userId, "chapter-num", string.Empty),
-            _ => await localizationService.Translate(userId, "chapter-num", string.Empty)
-        }).Trim();
-    }
 
     /// <summary>
     /// Core implementation for chapter display name generation.

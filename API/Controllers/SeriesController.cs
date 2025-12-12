@@ -157,7 +157,9 @@ public class SeriesController : BaseApiController
     {
         var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId);
         if (chapter == null) return NoContent();
-        return Ok(await _unitOfWork.ChapterRepository.AddChapterModifiers(UserId, chapter));
+        await _unitOfWork.ChapterRepository.AddChapterModifiers(UserId, chapter);
+
+        return Ok(chapter);
     }
 
     /// <summary>
