@@ -24,12 +24,12 @@ import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {ModalService} from "./modal.service";
-import {filter, map, Observable, of, switchMap, tap} from "rxjs";
+import {map, of, switchMap, tap} from "rxjs";
 import {ListSelectModalComponent} from "../shared/_components/list-select-modal/list-select-modal.component";
 import {take, takeUntil} from "rxjs/operators";
 import {SeriesService} from "./series.service";
 import {Series} from "../_models/series";
-import {ReReadChapter, ReReadPrompt} from "../_models/readers/re-read-prompt";
+import {RereadChapter, RereadPrompt} from "../_models/readers/reread-prompt";
 
 enum RereadPromptResult {
   Cancel = 0,
@@ -607,15 +607,15 @@ export class ReaderService {
   }
 
   private shouldPromptForSeriesReread(seriesId: number) {
-    return this.httpClient.get<ReReadPrompt>(this.baseUrl + `reader/prompt-re-read/series?seriesId=${seriesId}`);
+    return this.httpClient.get<RereadPrompt>(this.baseUrl + `reader/prompt-reread/series?seriesId=${seriesId}`);
   }
 
   private shouldPromptForVolumeReread(libraryId: number, seriesId: number, volumeId: number) {
-    return this.httpClient.get<ReReadPrompt>(this.baseUrl + `reader/prompt-re-read/volume?libraryId=${libraryId}&seriesId=${seriesId}&volumeId=${volumeId}`);
+    return this.httpClient.get<RereadPrompt>(this.baseUrl + `reader/prompt-reread/volume?libraryId=${libraryId}&seriesId=${seriesId}&volumeId=${volumeId}`);
   }
 
   private shouldPromptForChapterReread(libraryId: number, seriesId: number, chapterId: number) {
-    return this.httpClient.get<ReReadPrompt>(this.baseUrl + `reader/prompt-re-read/chapter?libraryId=${libraryId}&seriesId=${seriesId}&chapterId=${chapterId}`);
+    return this.httpClient.get<RereadPrompt>(this.baseUrl + `reader/prompt-reread/chapter?libraryId=${libraryId}&seriesId=${seriesId}&chapterId=${chapterId}`);
   }
 
   readSeries(series: Series, incognitoMode: boolean = false) {
@@ -644,15 +644,15 @@ export class ReaderService {
     ).subscribe()
   }
 
-  private handlePromptResult({prompt, result}: {prompt: ReReadPrompt, result: RereadPromptResult}) {
-    let chapter: ReReadChapter;
+  private handlePromptResult({prompt, result}: {prompt: RereadPrompt, result: RereadPromptResult}) {
+    let chapter: RereadChapter;
     let useIncognitoMode = false;
 
     switch (result) {
       case RereadPromptResult.Cancel:
         return;
       case RereadPromptResult.Reread:
-        chapter = prompt.chapterOnReRead;
+        chapter = prompt.chapterOnReread;
         break;
       case RereadPromptResult.ReadIncognito:
         useIncognitoMode = true;
@@ -669,7 +669,7 @@ export class ReaderService {
     ).catch(err => console.error(err));
   }
 
-  private handlePrompt(prompt: ReReadPrompt, incognitoMode: boolean) {
+  private handlePrompt(prompt: RereadPrompt, incognitoMode: boolean) {
     if (!prompt.shouldPrompt) return of({prompt: prompt, result: RereadPromptResult.Continue});
 
     if (incognitoMode) return of({prompt: prompt, result: RereadPromptResult.ReadIncognito});
@@ -683,9 +683,9 @@ export class ReaderService {
 
     if (prompt.timePrompt) {
       component.description.set(translate('reread-modal.description-time-passed',
-        { days: prompt.daysSinceLastRead, name: prompt.chapterOnReRead.label }));
+        { days: prompt.daysSinceLastRead, name: prompt.chapterOnReread.label }));
     } else {
-      component.description.set(translate('reread-modal.description-full-read', { name: prompt.chapterOnReRead.label }));
+      component.description.set(translate('reread-modal.description-full-read', { name: prompt.chapterOnReread.label }));
     }
 
     const options = [

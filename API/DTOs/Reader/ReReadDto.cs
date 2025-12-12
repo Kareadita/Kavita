@@ -2,7 +2,7 @@ using API.Entities.Enums;
 
 namespace API.DTOs.Reader;
 
-public sealed record ReReadDto
+public sealed record RereadDto
 {
     /// <summary>
     /// Should the prompt be shown
@@ -13,25 +13,25 @@ public sealed record ReReadDto
     /// </summary>
     public bool TimePrompt { get; init; } = false;
     /// <summary>
-    /// Days elapsed since <see cref="ChapterOnReRead"/> was last read
+    /// Days elapsed since <see cref="ChapterOnReread"/> was last read
     /// </summary>
     public int DaysSinceLastRead { get; init; }
     /// <summary>
     /// The chapter to open if continue is selected
     /// </summary>
-    public ReReadChapterDto ChapterOnContinue { get; init; }
+    public RereadChapterDto ChapterOnContinue { get; init; }
     /// <summary>
     /// The chapter to open if reread is selected, this may be equal to <see cref="ChapterOnContinue"/>
     /// </summary>
-    public ReReadChapterDto ChapterOnReRead { get; init; }
+    public RereadChapterDto ChapterOnReread { get; init; }
 
-    public static ReReadDto Dont()
+    public static RereadDto Dont()
     {
-        return new ReReadDto
+        return new RereadDto
         {
             ShouldPrompt = false
         };
     }
 }
 
-public sealed record ReReadChapterDto(int LibraryId, int SeriesId, int ChapterId, string Label, MangaFormat? Format);
+public sealed record RereadChapterDto(int LibraryId, int SeriesId, int ChapterId, string Label, MangaFormat? Format);

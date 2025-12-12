@@ -1028,8 +1028,8 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpGet("prompt-re-read/series")]
-    public async Task<ActionResult<ReReadDto>> ShouldPromptForSeriesReRead(int seriesId)
+    [HttpGet("prompt-reread/series")]
+    public async Task<ActionResult<RereadDto>> ShouldPromptForSeriesReRead(int seriesId)
     {
         return Ok(await _readerService.CheckSeriesForReRead(UserId, seriesId));
     }
@@ -1041,8 +1041,8 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    [HttpGet("prompt-re-read/volume")]
-    public async Task<ActionResult<ReReadDto>> ShouldPromptForVolumeReRead(int libraryId, int seriesId, int volumeId)
+    [HttpGet("prompt-reread/volume")]
+    public async Task<ActionResult<RereadDto>> ShouldPromptForVolumeReRead(int libraryId, int seriesId, int volumeId)
     {
         return Ok(await _readerService.CheckVolumeForReRead(UserId, volumeId, seriesId, libraryId));
     }
@@ -1054,8 +1054,8 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    [HttpGet("prompt-re-read/chapter")]
-    public async Task<ActionResult<ReReadDto>> ShouldPromptForChapterReRead(int libraryId, int seriesId, int chapterId)
+    [HttpGet("promptre-read/chapter")]
+    public async Task<ActionResult<RereadDto>> ShouldPromptForChapterReRead(int libraryId, int seriesId, int chapterId)
     {
         return Ok(await _readerService.CheckChapterForReRead(UserId, chapterId, seriesId, libraryId));
     }

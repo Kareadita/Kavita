@@ -1,15 +1,15 @@
 import {MangaFormat} from "../manga-format";
 
 
-export type ReReadPrompt = {
+export type RereadPrompt = {
   shouldPrompt: boolean;
   timePrompt: boolean;
   daysSinceLastRead: number;
-  chapterOnContinue: ReReadChapter;
-  chapterOnReRead: ReReadChapter;
+  chapterOnContinue: RereadChapter;
+  chapterOnReread: RereadChapter;
 }
 
-export type ReReadChapter = {
+export type RereadChapter = {
   libraryId: number;
   seriesId: number;
   chapterId: number;
