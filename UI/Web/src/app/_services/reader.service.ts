@@ -606,12 +606,12 @@ export class ReaderService {
   }
 
   private handleRereadPrompt(
-    type: 'series' | 'volume' | 'chapter',
+    name: string,
     target: Chapter,
     incognitoMode: boolean,
     onReread: () => Observable<any>
   ): Observable<{ shouldContinue: boolean; incognitoMode: boolean }> {
-    return this.promptForReread(type, target, incognitoMode).pipe(
+    return this.promptForReread(name, target, incognitoMode).pipe(
       switchMap(result => {
         switch (result) {
           case RereadPromptResult.Cancel:
@@ -640,7 +640,7 @@ export class ReaderService {
 
     this.getCurrentChapter(series.id).pipe(
       switchMap(chapter =>
-        this.handleRereadPrompt('series', chapter, incognitoMode,
+        this.handleRereadPrompt(series.name, chapter, incognitoMode,
           () => this.seriesService.markUnread(series.id)).pipe(
             map(result => ({ chapter, result }))
         )),
@@ -676,7 +676,7 @@ export class ReaderService {
 
     // Fully read - prompt for reread
     const lastChapter = volume.chapters[volume.chapters.length - 1];
-    this.handleRereadPrompt('volume', lastChapter, incognitoMode,
+    this.handleRereadPrompt(translate('common.volume-num-shorthand', { num: volume.minNumber}), lastChapter, incognitoMode,
       () => this.markVolumeUnread(seriesId, volume.id)).pipe(
         filter(result => result.shouldContinue),
       tap(result => {
@@ -703,7 +703,7 @@ export class ReaderService {
       return;
     }
 
-    this.handleRereadPrompt('chapter', chapter, incognitoMode,
+    this.handleRereadPrompt(translate('common.chapter-num-shorthand', {num: chapter.minNumber}), chapter, incognitoMode,
       () => this.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0)
     ).pipe(
       filter(result => result.shouldContinue),
@@ -711,7 +711,7 @@ export class ReaderService {
     ).subscribe();
   }
 
-  promptForReread(entityType: 'series' | 'volume' | 'chapter', chapter: Chapter, incognitoMode: boolean) {
+  private promptForReread(name: string, chapter: Chapter, incognitoMode: boolean) {
     if (!this.shouldPromptForReread(chapter, incognitoMode)) return of(RereadPromptResult.Continue);
 
     const fullyRead = chapter.pagesRead >= chapter.pages;
@@ -726,9 +726,9 @@ export class ReaderService {
     const daysSinceRead = Math.round((new Date().getTime() - new Date(chapter.lastReadingProgress).getTime()) / MS_IN_DAY);
 
     if (chapter.pagesRead >= chapter.pages) {
-      component.description.set(translate('reread-modal.description-full-read', { entityType: translate('entity-type.' + entityType) }));
+      component.description.set(translate('reread-modal.description-full-read', { name: name }));
     } else {
-      component.description.set(translate('reread-modal.description-time-passed', { days: daysSinceRead, entityType: translate('entity-type.' + entityType) }));
+      component.description.set(translate('reread-modal.description-time-passed', { days: daysSinceRead, name: name }));
     }
 
     const options = [

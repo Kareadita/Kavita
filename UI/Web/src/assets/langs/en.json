@@ -295,8 +295,8 @@
 
     "reread-modal": {
         "title": "Re-Read",
-        "description-full-read": "You've already finished this {{entityType}}! Would you like to start over?",
-        "description-time-passed": "It has been {{days}} days since you've last read this {{entityType}}, need a refresher?",
+        "description-full-read": "You've already finished {{name}}! Would you like to start over?",
+        "description-time-passed": "It has been {{days}} days since you've last read {{name}}, need a refresher?",
         "continue": "Pick up where you left off",
         "reread": "Start Over",
         "cancel": "{{common.cancel}}",
