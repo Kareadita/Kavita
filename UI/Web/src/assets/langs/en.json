@@ -2884,6 +2884,9 @@
     "profile": {
         "title": "{{username}}'s Profile",
         "joined-label": "Joined: {{date}}",
+        "last-read-label": "Last Read: {{date}}",
+        "time-reading-label": "Total Read Time: {{date}}",
+        "avg-reading-per-week-label": "Avg Per Week: {{time}}",
         "stats-title": "A look at {{username}}'s journey through {{libraryName}}",
         "overview-tab": "{{tabs.overview-tab}}",
         "stats-tab": "{{tabs.stats-tab}}",

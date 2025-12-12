@@ -91,6 +91,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .Select(p => (int?) p.PagesRead)
             .SumAsync() ?? 0;
 
+        // TODO: this needs to use AppUserReadingSessions
         var timeSpentReading = await TimeSpentReadingForUsersAsync(new List<int>() {userId}, libraryIds);
 
         var totalWordsRead =  (long) Math.Round(await context.AppUserProgresses
@@ -106,9 +107,9 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .Where(p => p.PagesRead >= context.Chapter.Single(c => c.Id == p.ChapterId).Pages)
             .CountAsync();
 
-        var lastActive = await context.AppUserProgresses
+        var lastActive = await context.AppUserReadingSession
             .Where(p => p.AppUserId == userId)
-            .Select(p => p.LastModified)
+            .Select(u => u.EndTimeUtc)
             .DefaultIfEmpty()
             .MaxAsync();
 
@@ -133,6 +134,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .ToListAsync();
 
 
+        // TODO: Move this to ReadingSession
         // New solution. Calculate total hours then divide by number of weeks from time account was created (or min reading event) till now
         var averageReadingTimePerWeek = await context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
@@ -167,15 +169,13 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         }
 
 
-
-
         return new UserReadStatistics()
         {
             TotalPagesRead = totalPagesRead,
             TotalWordsRead = totalWordsRead,
             TimeSpentReading = timeSpentReading,
             ChaptersRead = chaptersRead,
-            LastActive = lastActive,
+            LastActiveUtc = lastActive,
             PercentReadPerLibrary = totalProgressByLibrary,
             AvgHoursPerWeekSpentReading = averageReadingTimePerWeek
         };

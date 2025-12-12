@@ -27,6 +27,8 @@ import {ProfileReviewListComponent} from "../profile-review-list/profile-review-
 import {ProfileOverviewComponent} from "../profile-overview/profile-overview.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {ProfileStatsComponent} from "../profile-stats/profile-stats.component";
+import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
+import {TimeDurationPipe} from "../../../_pipes/time-duration.pipe";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -56,6 +58,8 @@ enum TabID {
     ProfileOverviewComponent,
     CompactNumberPipe,
     ProfileStatsComponent,
+    SentenceCasePipe,
+    TimeDurationPipe,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -77,6 +81,8 @@ export class ProfileComponent {
 
 
   protected readonly totalReadsResource = this.statsService.getTotalReads(() => this.userId());
+  protected readonly userStatsResource = this.statsService.getUserStatisticsResource(() => this.userId());
+
 
   activeTabId = TabID.Overview;
 

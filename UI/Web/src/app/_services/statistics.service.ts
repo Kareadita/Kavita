@@ -55,7 +55,7 @@ export class StatisticsService {
   mangaFormatPipe = new MangaFormatPipe();
 
   getUserStatistics(userId: number, libraryIds: Array<number> = []) {
-    const url = `${this.baseUrl}stats/user/${userId}/read`;
+    const url = `${this.baseUrl}stats/user-read?userId=${userId}`;
 
     let params = new HttpParams();
     if (libraryIds.length > 0) {
@@ -63,6 +63,10 @@ export class StatisticsService {
     }
 
     return this.httpClient.get<UserReadStatistics>(url, { params });
+  }
+
+  getUserStatisticsResource(userId: () => number) {
+    return httpResource<UserReadStatistics>(() => this.baseUrl + `stats/user-read?userId=${userId()}`).asReadonly();
   }
 
   getServerStatistics() {

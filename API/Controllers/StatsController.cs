@@ -35,16 +35,7 @@ public class StatsController(
     IDirectoryService directoryService)
     : BaseApiController
 {
-    [HttpGet("user/{userId}/read")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        if (user!.Id != userId && !await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
-            return Unauthorized(await localizationService.Translate(UserId, "stats-permission-denied"));
 
-        return Ok(await statService.GetUserReadStatistics(userId, new List<int>()));
-    }
 
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/stats")]
@@ -402,6 +393,14 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, userId);
         return Ok(await statService.GetUserStatBar(filter, userId, UserId));
+    }
+
+    [ProfilePrivacy]
+    [HttpGet("user-read")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
+    {
+        return Ok(await statService.GetUserReadStatistics(userId, []));
     }
 
     // TODO: Can we cache this? Can we make an attribute to cache methods based on keys?

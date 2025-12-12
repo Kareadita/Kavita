@@ -7,7 +7,7 @@
       <div class="row g-0 d-flex justify-content-around">
         @if (userStats$ | async; as userStats) {
           <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [totalWordsRead]="userStats.totalWordsRead" [timeSpentReading]="userStats.timeSpentReading"
-          [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive" [avgHoursPerWeekSpentReading]="userStats.avgHoursPerWeekSpentReading" />
+                                     [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActiveUtc" [avgHoursPerWeekSpentReading]="userStats.avgHoursPerWeekSpentReading" />
         }
       </div>
 <!--      <div class="row g-0 fixed-row">-->
