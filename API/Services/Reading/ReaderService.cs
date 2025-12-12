@@ -47,7 +47,7 @@ public interface IReaderService
 
 public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
     IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService,
-    IClientInfoAccessor clientInfoAccessor, ISeriesService seriesService)
+    IClientInfoAccessor clientInfoAccessor, ISeriesService seriesService, EntityDisplayService entityDisplayService)
     : IReaderService
 {
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
@@ -792,8 +792,10 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
         var libraryType = series.Library.Type;
         var continuePoint = await GetContinuePoint(seriesId, userId);
-        var continuePointLabel = await seriesService.FormatChapterTitle(userId, continuePoint, libraryType);
         var lastProgress = await unitOfWork.AppUserProgressRepository.GetLatestProgressForSeries(seriesId, userId);
+
+        var options = EntityDisplayOptions.Default(libraryType);
+        var continuePointLabel = await entityDisplayService.GetEntityDisplayName(continuePoint, userId, options);
 
         if (lastProgress == null || !await unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
         {
@@ -833,7 +835,9 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
         var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId);
         var continuePoint = FindNextReadingChapter([.. volume.Chapters]);
-        var continuePointLabel = await seriesService.FormatChapterTitle(userId, continuePoint, libraryType);
+        var options = EntityDisplayOptions.Default(libraryType);
+        var continuePointLabel = await entityDisplayService.GetEntityDisplayName(continuePoint, userId, options);
+
         var lastProgress = await unitOfWork.AppUserProgressRepository.GetLatestProgressForVolume(volumeId, userId);
 
         // Check if there's no progress on the volume
@@ -936,7 +940,8 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         var lastProgress = await unitOfWork.AppUserProgressRepository.GetLatestProgressForChapter(chapterId, userId);
 
         var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId);
-        var chapterLabel = await seriesService.FormatChapterTitle(userId, chapter, libraryType);
+        var options = EntityDisplayOptions.Default(libraryType);
+        var chapterLabel = await entityDisplayService.GetEntityDisplayName(chapter, userId, options);
         var reReadChapter = new RereadChapterDto(libraryId, seriesId, chapterId, chapterLabel, chapter.Format);
 
         // No progress, read it

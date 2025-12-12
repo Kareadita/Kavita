@@ -98,6 +98,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
 
         services.AddScoped<IOidcService, OidcService>();
+        services.AddScoped<EntityDisplayService>();
 
         services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
         services.AddScoped<IClientDeviceService, ClientDeviceService>();
