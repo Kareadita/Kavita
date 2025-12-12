@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -30,7 +31,7 @@ public class CustomTicketStore(IDistributedCache cache, TicketSerializer ticketS
 
     public Task RenewAsync(string key, AuthenticationTicket ticket)
     {
-        var options = new DistributedCacheEntryOptions {};
+        var options = new DistributedCacheEntryOptions();
 
         var expiresUtc = ticket.Properties.ExpiresUtc;
         if (expiresUtc.HasValue)
@@ -42,23 +43,31 @@ public class CustomTicketStore(IDistributedCache cache, TicketSerializer ticketS
             options.SlidingExpiration = TimeSpan.FromDays(7);
         }
 
-        cache.Set(key, ticketSerializer.Serialize(ticket), options);
-
-        return Task.CompletedTask;
+        return cache.SetAsync(key, ticketSerializer.Serialize(ticket), options);
     }
 
-    public Task<AuthenticationTicket> RetrieveAsync(string key)
+    public async Task<AuthenticationTicket> RetrieveAsync(string key)
     {
-        var bytes = cache.Get(key);
-        if (bytes == null) return null;
+        var bytes = await cache.GetAsync(key);
+        if (bytes == null) return CreateFailureTicket();
 
-        return Task.FromResult(ticketSerializer.Deserialize(bytes));
+        return ticketSerializer.Deserialize(bytes);
     }
 
     public Task RemoveAsync(string key)
     {
-        cache.Remove(key);
+        return cache.RemoveAsync(key);
+    }
 
-        return Task.CompletedTask;
+    private static AuthenticationTicket CreateFailureTicket()
+    {
+        var identity = new ClaimsIdentity();
+        var principal = new ClaimsPrincipal(identity);
+        var properties = new AuthenticationProperties
+        {
+            ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(-1), // Already expired
+        };
+
+        return new AuthenticationTicket(principal, properties, "Cookies");
     }
 }
