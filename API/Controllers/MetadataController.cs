@@ -23,9 +23,7 @@ namespace API.Controllers;
 
 #nullable enable
 
-public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService localizationService,
-    IExternalMetadataService metadataService)
-    : BaseApiController
+public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService metadataService) : BaseApiController
 {
     public const string CacheKey = "kavitaPlusSeriesDetail_";
 
