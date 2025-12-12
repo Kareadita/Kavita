@@ -44,9 +44,11 @@ export class ManageAuthKeysComponent implements OnInit {
 
   protected readonly opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
 
+  refreshData = model<boolean>();
   isReadOnly = this.accountService.isReadOnly;
   opdsUrl = signal<string>('');
   authKeys = computed(() => {
+    const refresh = this.refreshData();
     const account = this.accountService.currentUserSignal();
     if (!account) return null;
 
@@ -70,7 +72,7 @@ export class ManageAuthKeysComponent implements OnInit {
 
     ref.closed.subscribe((result: AuthKey | null) => {
       if (result === null) return;
-
+      this.refreshData.update(x => !x);
       this.refreshOpdsUrl();
     });
   }
@@ -82,6 +84,7 @@ export class ManageAuthKeysComponent implements OnInit {
     ref.closed.subscribe((result: AuthKey | null) => {
       if (result === null) return;
 
+      this.refreshData.update(x => !x);
       this.refreshOpdsUrl();
     });
   }
@@ -91,6 +94,7 @@ export class ManageAuthKeysComponent implements OnInit {
       return;
     }
     this.accountService.deleteAuthKey(authKey.id).subscribe(res => {
+      this.refreshData.update(x => !x);
       this.refreshOpdsUrl();
     })
   }
