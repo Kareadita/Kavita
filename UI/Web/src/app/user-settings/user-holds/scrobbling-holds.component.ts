@@ -7,10 +7,11 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ScrobbleHold} from "../../_models/scrobbling/scrobble-hold";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {APP_BASE_HREF} from "@angular/common";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 
 @Component({
     selector: 'app-user-holds',
-    imports: [TranslocoDirective, ImageComponent, UtcToLocalTimePipe, NgxDatatableModule],
+  imports: [TranslocoDirective, ImageComponent, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent],
     templateUrl: './scrobbling-holds.component.html',
     styleUrls: ['./scrobbling-holds.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -25,6 +26,7 @@ export class ScrobblingHoldsComponent {
 
   isLoading = true;
   data: Array<ScrobbleHold> = [];
+  trackBy = (idx: number, item: ScrobbleHold) => `${item.seriesId}_${idx}`;
 
   constructor() {
     this.loadData();

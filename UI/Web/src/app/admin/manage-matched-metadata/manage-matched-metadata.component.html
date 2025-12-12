@@ -23,6 +23,7 @@
     </div>
   </form>
 
+  <app-responsive-table [rows]="data" [trackByFn]="trackBy">
   <ngx-datatable
     class="bootstrap"
     [rows]="data"
@@ -100,4 +101,68 @@
     </ngx-datatable-column>
 
   </ngx-datatable>
+
+    <ng-template #cardTemplate let-item let-idx="index">
+      <div class="card mb-3">
+        <div class="card-body">
+          <!-- Header with cover, series name and action button -->
+          <div class="d-flex align-items-start mb-3">
+            <app-image
+              [width]="'48px'"
+              [height]="'48px'"
+              [imageUrl]="imageService.getSeriesCoverImage(item.series.id)"
+              class="me-3" />
+            <div class="flex-grow-1">
+              <h5 class="card-title mb-1">
+                <a [href]="baseUrl + 'library/' + item.series.libraryId + '/series/' + item.series.id"
+                   target="_blank">
+                  {{item.series.name}}
+                </a>
+              </h5>
+              <div class="text-muted small">
+                {{item.series.libraryId | libraryName | async}}
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" (click)="fixMatch(item.series)">
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('match-alt', {seriesName: item.series.name})}}</span>
+            </button>
+          </div>
+
+          <!-- Details -->
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="text-muted small">{{t('status-header')}}</div>
+              <div>
+                @if (item.series.isBlacklisted) {
+                  {{t('blacklist-status-label')}}
+                } @else if (item.series.dontMatch) {
+                  {{t('dont-match-status-label')}}
+                } @else {
+                  @if (item.isMatched) {
+                    {{t('matched-status-label')}}
+                  } @else {
+                    {{t('unmatched-status-label')}}
+                  }
+                }
+              </div>
+            </div>
+
+            @if (filterGroup.get('matchState')?.value === MatchStateOption.Matched) {
+              <div class="col-6">
+                <div class="text-muted small">{{t('valid-until-header')}}</div>
+                <div>
+                  @if (item.series.isBlacklisted || item.series.dontMatch || !item.isMatched) {
+                    {{null | defaultValue}}
+                  } @else {
+                    {{item.validUntilUtc | utcToLocalTime}}
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </app-responsive-table>
 </ng-container>

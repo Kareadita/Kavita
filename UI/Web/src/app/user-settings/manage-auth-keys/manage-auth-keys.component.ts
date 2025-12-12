@@ -16,6 +16,8 @@ import {CreateAuthKeyComponent} from "../_modals/create-auth-key/create-auth-key
 import {Clipboard} from "@angular/cdk/clipboard";
 import {DatePipe} from "@angular/common";
 import {ToastrService} from "ngx-toastr";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {Breakpoint} from "../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-manage-auth-keys',
@@ -27,6 +29,7 @@ import {ToastrService} from "ngx-toastr";
     DefaultDatePipe,
     ToggleVisibilityDirective,
     DatePipe,
+    ResponsiveTableComponent,
 
   ],
   templateUrl: './manage-auth-keys.component.html',
@@ -48,12 +51,13 @@ export class ManageAuthKeysComponent implements OnInit {
   isReadOnly = this.accountService.isReadOnly;
   opdsUrl = signal<string>('');
   authKeys = computed(() => {
-    const refresh = this.refreshData();
+    const _ = this.refreshData();
     const account = this.accountService.currentUserSignal();
     if (!account) return null;
 
     return account.authKeys;
-  })
+  });
+  trackByAuthKey = (index: number, item: AuthKey) => `${item.id}_${item.key}_${item.name}`;
 
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl(); };
 
@@ -106,4 +110,5 @@ export class ManageAuthKeysComponent implements OnInit {
 
   protected readonly ColumnMode = ColumnMode;
   protected readonly AuthKeyProvider = AuthKeyProvider;
+  protected readonly Breakpoint = Breakpoint;
 }

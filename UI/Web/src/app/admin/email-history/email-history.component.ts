@@ -5,6 +5,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {EmailHistory} from "../../_models/email-history";
 import {EmailService} from "../../_services/email.service";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 
 @Component({
   selector: 'app-email-history',
@@ -12,7 +13,8 @@ import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
     TranslocoDirective,
     VirtualScrollerModule,
     UtcToLocalTimePipe,
-    NgxDatatableModule
+    NgxDatatableModule,
+    ResponsiveTableComponent
   ],
   templateUrl: './email-history.component.html',
   styleUrl: './email-history.component.scss',
@@ -24,6 +26,8 @@ export class EmailHistoryComponent implements OnInit {
 
   isLoading = true;
   data: Array<EmailHistory> = [];
+
+  trackBy = (index: number, item: EmailHistory) => `${item.sent}_${item.emailTemplate}_${index}`;
 
   ngOnInit() {
     this.emailService.getEmailHistory().subscribe(data => {

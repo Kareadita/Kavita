@@ -85,7 +85,8 @@
         "opds": "OPDS",
         "image-only": "Images",
         "add-auth-key": "New",
-        "description": "An Auth Key is like a password. Rotating it will invalidate any existing clients."
+        "description": "An Auth Key is like a password. Rotating it will invalidate any existing clients.",
+        "copy-key": "{{common.copy}}"
     },
 
     "create-auth-key": {
@@ -2339,16 +2340,6 @@
         "track": "Track"
     },
 
-    "edit-chapter-progress": {
-        "user-header": "User",
-        "page-read-header": "Pages Read",
-        "date-created-header": "Created (UTC)",
-        "date-updated-header": "Last Updated (UTC)",
-        "action-header": "{{common.edit}}",
-        "edit-alt": "{{common.edit}}",
-        "no-data": "{{user-scrobble-history.no-data}}"
-    },
-
     "import-mappings": {
         "import-step": "Import",
         "configure-step": "Configure",
@@ -2675,7 +2666,6 @@
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "tags-tab": "{{tabs.tags-tab}}",
@@ -2700,7 +2690,6 @@
         "title": "Edit",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",

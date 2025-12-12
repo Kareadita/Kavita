@@ -6,6 +6,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UserTokenInfo} from "../../_models/kavitaplus/user-token-info";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 
 @Component({
   selector: 'app-manage-user-tokens',
@@ -14,7 +15,8 @@ import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
     DefaultValuePipe,
     UtcToLocalTimePipe,
     VirtualScrollerModule,
-    NgxDatatableModule
+    NgxDatatableModule,
+    ResponsiveTableComponent
   ],
   templateUrl: './manage-user-tokens.component.html',
   styleUrl: './manage-user-tokens.component.scss',
@@ -27,6 +29,7 @@ export class ManageUserTokensComponent implements OnInit {
 
   isLoading = true;
   users: UserTokenInfo[] = [];
+  trackBy = (idx: number, item: UserTokenInfo) => item;
 
   ngOnInit() {
     this.loadData();

@@ -1,7 +1,8 @@
 <ng-container *transloco="let t; prefix:'email-history'">
   <p>{{t('description')}}</p>
 
-  <ngx-datatable
+  <app-responsive-table [rows]="data" [trackByFn]="trackBy">
+    <ngx-datatable
     class="bootstrap"
     [rows]="data"
     [columnMode]="ColumnMode.force"
@@ -54,4 +55,37 @@
       </ng-template>
     </ngx-datatable-column>
   </ngx-datatable>
+    <ng-template #cardTemplate let-item let-idx="index">
+      <div class="card mb-3">
+        <div class="card-body">
+          <!-- Header with template name and status -->
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h5 class="card-title mb-0">{{item.emailTemplate}}</h5>
+            <div>
+              @if (item.sent) {
+                <i class="fa-solid fa-check-circle text-success" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('sent-tooltip')}}</span>
+              } @else {
+                <i class="fa-solid fa-exclamation-circle text-danger" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('not-sent-tooltip')}}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Details -->
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="text-muted small">{{t('date-header')}}</div>
+              <div>{{item.sendDate | utcToLocalTime}}</div>
+            </div>
+
+            <div class="col-6">
+              <div class="text-muted small">{{t('user-header')}}</div>
+              <div>{{item.toUserName}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </app-responsive-table>
 </ng-container>

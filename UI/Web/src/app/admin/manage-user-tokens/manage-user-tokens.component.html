@@ -1,8 +1,8 @@
 <ng-container *transloco="let t; prefix:'manage-user-tokens'">
   <p>{{t('description')}}</p>
 
-
-  <ngx-datatable
+  <app-responsive-table [rows]="users" [trackByFn]="trackBy">
+    <ngx-datatable
     class="bootstrap"
     [rows]="users"
     [columnMode]="ColumnMode.force"
@@ -45,5 +45,40 @@
         }
       </ng-template>
     </ngx-datatable-column>
+
+      <ng-template #cardTemplate let-item let-idx="index">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title mb-3">{{item.username}}</h5>
+
+            <div class="row g-2">
+              <div class="col-12">
+                <div class="text-muted small">{{t('anilist-header')}}</div>
+                <div>
+                  @if (item.isAniListTokenSet) {
+                    {{t('token-set-label')}}
+                    <span class="text-muted ms-1">{{t('expires-label', {date: item.aniListValidUntilUtc | utcToLocalTime})}}</span>
+                  } @else {
+                    {{null | defaultValue}}
+                  }
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="text-muted small">{{t('mal-header')}}</div>
+                <div>
+                  @if (item.isMalTokenSet) {
+                    {{t('token-set-label')}}
+                  } @else {
+                    {{null | defaultValue}}
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
   </ngx-datatable>
+
+  </app-responsive-table>
 </ng-container>

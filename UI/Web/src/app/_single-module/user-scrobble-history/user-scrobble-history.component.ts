@@ -28,6 +28,7 @@ import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 
 export interface DataTablePage {
   pageNumber: number,
@@ -39,7 +40,7 @@ export interface DataTablePage {
 @Component({
     selector: 'app-user-scrobble-history',
   imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
-    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, AsyncPipe, FormsModule],
+    DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule, AsyncPipe, FormsModule, ResponsiveTableComponent],
     templateUrl: './user-scrobble-history.component.html',
     styleUrls: ['./user-scrobble-history.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -80,6 +81,8 @@ export class UserScrobbleHistoryComponent implements OnInit {
   selectAll: boolean = false;
   isShiftDown: boolean = false;
   lastSelectedIndex: number | null = null;
+
+  trackByEvents = (idx: number, data: ScrobbleEvent) => `${data.isProcessed}_${data.isErrored}_${data.id}`;
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(_: KeyboardEvent) {

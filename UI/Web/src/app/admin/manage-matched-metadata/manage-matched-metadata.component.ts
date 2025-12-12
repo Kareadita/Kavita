@@ -25,6 +25,7 @@ import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
 import {allKavitaPlusMetadataApplicableTypes} from "../../_models/library/library";
 import {ExternalMatchRateLimitErrorEvent} from "../../_models/events/external-match-rate-limit-error-event";
 import {ToastrService} from "ngx-toastr";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -40,6 +41,7 @@ import {ToastrService} from "ngx-toastr";
     LibraryNamePipe,
     AsyncPipe,
     LibraryTypePipe,
+    ResponsiveTableComponent,
   ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',
@@ -68,6 +70,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
     'matchState': new FormControl(MatchStateOption.Error, []),
     'libraryType': new FormControl(-1, []), // Denotes all
   });
+  trackBy = (idx: number, item: ManageMatchSeries) => `${item.isMatched}_${item.series.name}_${idx}`;
 
   ngOnInit() {
     this.licenseService.hasValidLicense$.subscribe(license => {

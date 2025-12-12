@@ -105,18 +105,6 @@
             </li>
           }
 
-          <!-- Progress Tab -->
-          <li [ngbNavItem]="TabID.Progress">
-            <a ngbNavLink>{{t(TabID.Progress)}}</a>
-            <ng-template ngbNavContent>
-              @for(chapter of volume.chapters; track chapter.id) {
-                <h6><app-entity-title [entity]="chapter" [prioritizeTitleName]="false" /></h6>
-                <app-edit-chapter-progress [chapter]="chapter" />
-                <div class="setting-section-break"></div>
-              }
-            </ng-template>
-          </li>
-
           <!-- Tasks Tab -->
           <li [ngbNavItem]="TabID.Tasks">
             <a ngbNavLink>{{t(TabID.Tasks)}}</a>

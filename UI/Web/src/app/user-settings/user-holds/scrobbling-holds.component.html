@@ -1,41 +1,68 @@
 <ng-container *transloco="let t; prefix:'user-holds'">
   <p>{{t('description')}}</p>
 
-  <ngx-datatable
-    class="bootstrap"
-    [rows]="data"
-    [columnMode]="ColumnMode.force"
-    rowHeight="auto"
-    [loadingIndicator]="true"
-    [limit]="15"
-    [footerHeight]="50"
-  >
+  <app-responsive-table [rows]="data" [trackByFn]="trackBy">
+    <ngx-datatable
+      class="bootstrap"
+      [rows]="data"
+      [columnMode]="ColumnMode.force"
+      rowHeight="auto"
+      [loadingIndicator]="true"
+      [limit]="15"
+      [footerHeight]="50"
+    >
 
-    <ngx-datatable-column prop="seriesName" [sortable]="true" [draggable]="false" [resizeable]="false">
-      <ng-template let-column="column" ngx-datatable-header-template>
-        {{t('series-name-header')}}
-      </ng-template>
-      <ng-template let-item="row" ngx-datatable-cell-template>
-        <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
-        <a class="btn-link ms-2" href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
-      </ng-template>
-    </ngx-datatable-column>
+      <ngx-datatable-column prop="seriesName" [sortable]="true" [draggable]="false" [resizeable]="false">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{t('series-name-header')}}
+        </ng-template>
+        <ng-template let-item="row" ngx-datatable-cell-template>
+          <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
+          <a class="btn-link ms-2" href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
+        </ng-template>
+      </ngx-datatable-column>
 
 
-    <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false">
-      <ng-template let-column="column" ngx-datatable-header-template>
-        {{t('created-header')}}
-      </ng-template>
-      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
-        {{item.createdUtc | utcToLocalTime}}
-      </ng-template>
-    </ngx-datatable-column>
+      <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false">
+        <ng-template let-column="column" ngx-datatable-header-template>
+          {{t('created-header')}}
+        </ng-template>
+        <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+          {{item.createdUtc | utcToLocalTime}}
+        </ng-template>
+      </ngx-datatable-column>
 
-    <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
-      <ng-template let-column="column" ngx-datatable-header-template />
-      <ng-template let-item="row" ngx-datatable-cell-template>
-        <button class="btn btn-primary" (click)="removeHold(item)">{{t('delete-label')}}</button>
-      </ng-template>
-    </ngx-datatable-column>
-  </ngx-datatable>
+      <ngx-datatable-column prop="validUntilUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+        <ng-template let-column="column" ngx-datatable-header-template />
+        <ng-template let-item="row" ngx-datatable-cell-template>
+          <button class="btn btn-primary" (click)="removeHold(item)">{{t('delete-label')}}</button>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+
+    <ng-template #cardTemplate let-item let-idx="index">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-start mb-3">
+            <app-image
+              [width]="'48px'"
+              [height]="'48px'"
+              [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
+              class="me-3" />
+            <div class="flex-grow-1">
+              <h5 class="card-title mb-1">
+                <a class="btn-link" href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">
+                  {{item.seriesName}}
+                </a>
+              </h5>
+              <div class="text-muted small">{{item.createdUtc | utcToLocalTime}}</div>
+            </div>
+            <button class="btn btn-primary btn-sm" (click)="removeHold(item)">
+              {{t('delete-label')}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </app-responsive-table>
 </ng-container>

@@ -1,5 +1,5 @@
 import {HttpParams} from '@angular/common/http';
-import { Injectable, signal, Signal, inject } from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {Chapter} from 'src/app/_models/chapter';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
@@ -10,6 +10,7 @@ import {translate} from "@jsverse/transloco";
 import {debounceTime, ReplaySubject, shareReplay} from "rxjs";
 import {DOCUMENT} from "@angular/common";
 import getComputedStyle from "@popperjs/core/lib/dom-utils/getComputedStyle";
+import {toSignal} from "@angular/core/rxjs-interop";
 
 export enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -73,6 +74,7 @@ export class UtilityService {
 
   public readonly activeBreakpointSource = new ReplaySubject<Breakpoint>(1);
   public readonly activeBreakpoint$ = this.activeBreakpointSource.asObservable().pipe(debounceTime(60), shareReplay({bufferSize: 1, refCount: true}));
+  public readonly activeBreakpointSignal = toSignal(this.activeBreakpointSource);
 
   /**
    * The currently active breakpoint, is {@link UserBreakpoint.Never} until the app has loaded

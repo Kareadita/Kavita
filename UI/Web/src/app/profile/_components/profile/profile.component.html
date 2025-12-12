@@ -35,7 +35,7 @@
 
           @if (userStatsResource.hasValue() && userStatsResource.value()) {
             @let data = userStatsResource.value();
-            <div class=" small mt-2">
+            <div class="fw-bold small mt-2">
               {{t('last-read-label', {date: data.lastActiveUtc | utcToLocalDate | timeAgo | sentenceCase})}}
             </div>
 

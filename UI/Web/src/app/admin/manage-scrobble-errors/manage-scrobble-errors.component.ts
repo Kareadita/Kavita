@@ -27,10 +27,11 @@ import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ActionService} from "../../_services/action.service";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 
 @Component({
     selector: 'app-manage-scrobble-errors',
-  imports: [ReactiveFormsModule, FilterPipe, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgxDatatableModule],
+  imports: [ReactiveFormsModule, FilterPipe, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent],
     templateUrl: './manage-scrobble-errors.component.html',
     styleUrls: ['./manage-scrobble-errors.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -60,6 +61,7 @@ export class ManageScrobbleErrorsComponent implements OnInit {
   formGroup = new FormGroup({
     filter: new FormControl('', [])
   });
+  trackBy = (index: number, item: ScrobbleError) => `${item.seriesId}`;
 
 
   ngOnInit() {

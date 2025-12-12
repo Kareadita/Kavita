@@ -22,11 +22,10 @@ import {DownloadService} from "../../shared/_services/download.service";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {concat, forkJoin, Observable, of, tap} from "rxjs";
-import {map, switchMap} from "rxjs/operators";
+import {map} from "rxjs/operators";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
-import {EditChapterProgressComponent} from "../../cards/edit-chapter-progress/edit-chapter-progress.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {MangaFormat} from "../../_models/manga-format";
@@ -46,7 +45,6 @@ enum TabID {
   Info = 'info-tab',
   People = 'people-tab',
   Tasks = 'tasks-tab',
-  Progress = 'progress-tab',
   Tags = 'tags-tab'
 }
 
@@ -62,33 +60,32 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
 @Component({
     selector: 'app-edit-chapter-modal',
-    imports: [
-        FormsModule,
-        NgbNav,
-        NgbNavContent,
-        NgbNavLink,
-        TranslocoDirective,
-        AsyncPipe,
-        NgbNavOutlet,
-        ReactiveFormsModule,
-        NgbNavItem,
-        SettingItemComponent,
-        NgTemplateOutlet,
-        NgClass,
-        TypeaheadComponent,
-        EntityTitleComponent,
-        TitleCasePipe,
-        SettingButtonComponent,
-        CoverImageChooserComponent,
-        EditChapterProgressComponent,
-        CompactNumberPipe,
-        DefaultDatePipe,
-        UtcToLocalTimePipe,
-        BytesPipe,
-        ImageComponent,
-        SafeHtmlPipe,
-        ReadTimePipe,
-    ],
+  imports: [
+    FormsModule,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLink,
+    TranslocoDirective,
+    AsyncPipe,
+    NgbNavOutlet,
+    ReactiveFormsModule,
+    NgbNavItem,
+    SettingItemComponent,
+    NgTemplateOutlet,
+    NgClass,
+    TypeaheadComponent,
+    EntityTitleComponent,
+    TitleCasePipe,
+    SettingButtonComponent,
+    CoverImageChooserComponent,
+    CompactNumberPipe,
+    DefaultDatePipe,
+    UtcToLocalTimePipe,
+    BytesPipe,
+    ImageComponent,
+    SafeHtmlPipe,
+    ReadTimePipe,
+  ],
     templateUrl: './edit-chapter-modal.component.html',
     styleUrl: './edit-chapter-modal.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

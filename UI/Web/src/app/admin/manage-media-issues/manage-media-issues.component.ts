@@ -23,12 +23,13 @@ import {WikiLink} from "../../_models/wiki";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 
 @Component({
     selector: 'app-manage-media-issues',
     templateUrl: './manage-media-issues.component.html',
     styleUrls: ['./manage-media-issues.component.scss'],
-    imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule],
+  imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule, ResponsiveTableComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageMediaIssuesComponent implements OnInit {
@@ -53,6 +54,7 @@ export class ManageMediaIssuesComponent implements OnInit {
   formGroup = new FormGroup({
     filter: new FormControl('', [])
   });
+  trackBy = (idx: number, item: KavitaMediaError) => `${item.filePath}`
 
   ngOnInit(): void {
 

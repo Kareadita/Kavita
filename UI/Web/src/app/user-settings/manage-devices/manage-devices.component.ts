@@ -17,13 +17,14 @@ import {AsyncPipe} from "@angular/common";
 import {ClientDevice} from "../../_models/client-device";
 import {ClientDeviceCardComponent} from "../../_single-module/client-device-card/client-device-card.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 
 @Component({
     selector: 'app-manage-devices',
     templateUrl: './manage-devices.component.html',
     styleUrls: ['./manage-devices.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule, ClientDeviceCardComponent, LoadingComponent]
+  imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule, ClientDeviceCardComponent, LoadingComponent, ResponsiveTableComponent]
 })
 export class ManageDevicesComponent implements OnInit {
 
@@ -39,6 +40,7 @@ export class ManageDevicesComponent implements OnInit {
   isEditingDevice: boolean = false;
   device: Device | undefined;
   hasEmailSetup = false;
+  trackBy = (idx: number, item: Device) => `${item.name}_${item.emailAddress}_${item.platform}_${item.lastUsed}`;
 
   clientDevices = model<ClientDevice[]>([]);
 
