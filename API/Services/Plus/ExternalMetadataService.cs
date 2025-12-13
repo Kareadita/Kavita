@@ -520,9 +520,10 @@ public class ExternalMetadataService : IExternalMetadataService
             externalSeriesMetadata.AverageExternalRating = extRatings.Count != 0 ? (int) extRatings
                 .Average(r => r.AverageScore) : 0;
 
-            if (result.MalId.HasValue) externalSeriesMetadata.MalId = result.MalId.Value;
-            if (result.AniListId.HasValue) externalSeriesMetadata.AniListId = result.AniListId.Value;
-            if (result.CbrId.HasValue) externalSeriesMetadata.CbrId = result.CbrId.Value;
+            // prefer what was passed in (manual match), fall back to what K+ returned
+            externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
+            externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
+            externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
 
             // If there is metadata and the user has metadata download turned on
             var madeMetadataModification = false;
