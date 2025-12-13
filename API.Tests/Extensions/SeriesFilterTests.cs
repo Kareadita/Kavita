@@ -52,7 +52,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
 
@@ -196,7 +195,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
@@ -257,7 +255,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -399,7 +396,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -549,7 +545,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -675,7 +670,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -851,7 +845,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -984,7 +977,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         var ratingService = new RatingService(unitOfWork, Substitute.For<IScrobblingService>(), Substitute.For<ILogger<RatingService>>());
@@ -1166,7 +1158,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -1307,7 +1298,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;

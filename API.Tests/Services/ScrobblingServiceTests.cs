@@ -124,11 +124,11 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await unitOfWork.CommitAsync();
     }
 
-    private async Task<ScrobbleEvent> CreateScrobbleEvent(int? seriesId = null)
+    private async Task<ScrobbleEvent> CreateScrobbleEvent(IUnitOfWork unitOfWork, int? seriesId = null)
     {
-        var (unitOfWork, context, _) = await CreateDatabase();
-        await Setup(unitOfWork, context);
-
+        // var (unitOfWork, context, _) = await CreateDatabase();
+        // await Setup(unitOfWork, context);
+        //
 
         var evt = new ScrobbleEvent
         {
@@ -163,7 +163,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
                 ErrorMessage = "Unauthorized"
             });
 
-        var evt = await CreateScrobbleEvent();
+        var evt = await CreateScrobbleEvent(unitOfWork);
         await Assert.ThrowsAsync<KavitaException>(async () =>
         {
             await service.PostScrobbleUpdate(new ScrobbleDto(), "", evt);
@@ -184,9 +184,9 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
                 ErrorMessage = "Unknown Series"
             });
 
-        var evt = await CreateScrobbleEvent(1);
+        var evt = await CreateScrobbleEvent(unitOfWork, 1);
 
-        await service.PostScrobbleUpdate(new ScrobbleDto(), "", evt);
+        await service.PostScrobbleUpdate(new ScrobbleDto(), string.Empty, evt);
         await unitOfWork.CommitAsync();
         Assert.True(evt.IsErrored);
 
@@ -212,7 +212,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
                 ErrorMessage = "Access token is invalid"
             });
 
-        var evt = await CreateScrobbleEvent();
+        var evt = await CreateScrobbleEvent(unitOfWork);
 
         await Assert.ThrowsAsync<KavitaException>(async () =>
         {

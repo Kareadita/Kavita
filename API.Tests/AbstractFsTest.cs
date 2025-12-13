@@ -1,10 +1,9 @@
-
-
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Tests;
+#nullable enable
 
 public abstract class AbstractFsTest
 {
