@@ -83,6 +83,9 @@ Package()
     rm -rf "$lOutputFolder"/BuildHost-net472
     rm -rf "$lOutputFolder"/BuildHost-netcore
 
+    echo "Removing cache-long from config"
+    rm -rf "$lOutputFolder"/config/cache-long
+
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
 
