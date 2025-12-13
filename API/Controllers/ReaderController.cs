@@ -1029,9 +1029,9 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("prompt-reread/series")]
-    public async Task<ActionResult<RereadDto>> ShouldPromptForSeriesReRead(int seriesId)
+    public async Task<ActionResult<RereadDto>> ShouldPromptForSeriesReRead(int seriesId, int libraryId)
     {
-        return Ok(await _readerService.CheckSeriesForReRead(UserId, seriesId));
+        return Ok(await _readerService.CheckSeriesForReRead(UserId, seriesId, libraryId));
     }
 
     /// <summary>

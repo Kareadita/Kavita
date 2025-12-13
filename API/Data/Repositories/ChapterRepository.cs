@@ -62,6 +62,7 @@ public interface IChapterRepository
     Task<IList<ExternalRating>> GetExternalChapterRatings(int chapterId);
     Task<ChapterDto?> GetCurrentlyReadingChapterAsync(int seriesId, int userId);
     Task<ChapterDto?> GetFirstChapterForSeriesAsync(int seriesId, int userId);
+    Task<ChapterDto?> GetFirstChapterForVolumeAsync(int volumeId, int userId);
 }
 public class ChapterRepository : IChapterRepository
 {
@@ -453,6 +454,36 @@ public class ChapterRepository : IChapterRepository
         var firstChapter = await _context.Chapter
             .Include(c => c.Volume)
             .Where(c => c.Volume.SeriesId == seriesId)
+            .OrderBy(c =>
+                // Priority 1: Regular volumes (not loose leaf, not special)
+                c.Volume.Number == Parser.LooseLeafVolumeNumber ||
+                c.Volume.Number == Parser.SpecialVolumeNumber ? 1 : 0)
+            .ThenBy(c =>
+                // Priority 2: Loose leaf over specials
+                c.Volume.Number == Parser.SpecialVolumeNumber ? 1 : 0)
+            .ThenBy(c =>
+                // Priority 3: Non-special chapters
+                c.IsSpecial ? 1 : 0)
+            .ThenBy(c => c.Volume.Number)
+            .ThenBy(c => c.SortOrder)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+
+        if (firstChapter == null) return null;
+
+        var dto = _mapper.Map<ChapterDto>(firstChapter);
+
+        await AddChapterModifiers(userId, dto);
+
+        return dto;
+    }
+
+    public async Task<ChapterDto?> GetFirstChapterForVolumeAsync(int volumeId, int userId)
+    {
+        // Get the chapter entity with proper ordering
+        var firstChapter = await _context.Chapter
+            .Include(c => c.Volume)
+            .Where(c => c.Volume.Id == volumeId)
             .OrderBy(c =>
                 // Priority 1: Regular volumes (not loose leaf, not special)
                 c.Volume.Number == Parser.LooseLeafVolumeNumber ||

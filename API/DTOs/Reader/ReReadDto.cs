@@ -13,6 +13,10 @@ public sealed record RereadDto
     /// </summary>
     public bool TimePrompt { get; init; } = false;
     /// <summary>
+    /// True if the entity is not atomic and will be fully reread on reread (I.e. rereading a series on volume)
+    /// </summary>
+    public bool FullReread { get; init; } = false;
+    /// <summary>
     /// Days elapsed since <see cref="ChapterOnReread"/> was last read
     /// </summary>
     public int DaysSinceLastRead { get; init; }
@@ -34,4 +38,4 @@ public sealed record RereadDto
     }
 }
 
-public sealed record RereadChapterDto(int LibraryId, int SeriesId, int ChapterId, string Label, MangaFormat? Format);
+public sealed record RereadChapterDto(int LibraryId, int SeriesId, int VolumeId, int ChapterId, string Label, MangaFormat? Format);
