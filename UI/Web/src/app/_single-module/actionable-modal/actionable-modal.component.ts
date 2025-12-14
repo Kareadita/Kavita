@@ -51,9 +51,10 @@ export class ActionableModalComponent implements OnInit {
 
     // On Mobile, surface download
     const otherActionIndex = this.currentItems.findIndex(i => i.action === Action.Submenu && i.title === 'actionable.other')
-    if (otherActionIndex) {
+    if (otherActionIndex >= 0) {
       const downloadActionIndex = this.currentItems[otherActionIndex].children.findIndex(a => a.action === Action.Download);
-      if (downloadActionIndex) {
+
+      if (downloadActionIndex >= 0) {
         const downloadAction = this.currentItems[otherActionIndex].children.splice(downloadActionIndex, 1)[0];
         this.currentItems.push(downloadAction);
 
