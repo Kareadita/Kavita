@@ -1060,4 +1060,10 @@ public class ReaderController : BaseApiController
         return Ok(await _readerService.CheckChapterForReRead(UserId, chapterId, seriesId, libraryId));
     }
 
+    [HttpGet("first-progress-date")]
+    public async Task<ActionResult<DateTime>> GetFirstReadingDate(int userId)
+    {
+        return Ok(await _unitOfWork.AppUserProgressRepository.GetFirstProgressForUser(userId));
+    }
+
 }

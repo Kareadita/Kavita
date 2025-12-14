@@ -245,6 +245,10 @@ export class ReaderService {
     return this.httpClient.get<HourEstimateRange>(this.baseUrl + `reader/time-left-for-chapter?seriesId=${seriesId}&chapterId=${chapterId}`);
   }
 
+  getFirstProgressDateForUser(userId: number) {
+    return this.httpClient.get<Date>(this.baseUrl + 'reader/first-progress-date?userId=' + userId);
+  }
+
   /**
    * Captures current body color and forces background color to be black. Call @see resetOverrideStyles() on destroy of component to revert changes
    */

@@ -39,6 +39,7 @@ public interface IAppUserProgressRepository
     Task<DateTime?> GetLatestProgressForVolume(int volumeId, int userId);
     Task<DateTime?> GetLatestProgressForChapter(int chapterId, int userId);
     Task<DateTime?> GetFirstProgressForSeries(int seriesId, int userId);
+    Task<DateTime?> GetFirstProgressForUser(int userId);
     Task UpdateAllProgressThatAreMoreThanChapterPages();
     Task<IList<FullProgressDto>> GetUserProgressForChapter(int chapterId, int userId = 0);
 }
@@ -227,6 +228,15 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .Select(p => p.LastModifiedUtc)
             .ToListAsync();
         return list.Count == 0 ? null : list.DefaultIfEmpty().Min();
+    }
+
+    public async Task<DateTime?> GetFirstProgressForUser(int userId)
+    {
+        return await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .OrderBy(p => p.CreatedUtc)
+            .Select(p => p.CreatedUtc)
+            .FirstOrDefaultAsync();
     }
 
     public async Task UpdateAllProgressThatAreMoreThanChapterPages()

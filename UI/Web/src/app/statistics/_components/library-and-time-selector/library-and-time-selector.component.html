@@ -32,7 +32,7 @@
         }
       }
 
-      <app-smart-time-range-picker (timeRangeUpdate)="updateTimeRange($event)" />
+      <app-smart-time-range-picker (timeRangeUpdate)="updateTimeRange($event)" [startYear]="startYear()" />
     </div>
   </form>
 </ng-container>
