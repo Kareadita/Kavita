@@ -37,7 +37,7 @@ export class ApiKeyComponent {
     const hide = this.hideData() && this.isDataHidden();
     const key = this.key();
 
-    return hide ? "•".repeat(key.length) : key;
+    return hide ? '•'.repeat(key.length) : key;
   })
 
 
