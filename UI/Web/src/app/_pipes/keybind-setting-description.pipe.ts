@@ -32,7 +32,10 @@ export class KeybindSettingDescriptionPipe implements PipeTransform {
         return this.create('key-bind-title-page-right', 'key-bind-tooltip-page-right');
       case KeyBindTarget.Escape:
         return this.create('key-bind-title-escape', 'key-bind-tooltip-escape');
-
+      case KeyBindTarget.PageUp:
+        return this.create('key-bind-title-page-up', 'key-bind-tooltip-page-up');
+      case KeyBindTarget.PageDown:
+        return this.create('key-bind-title-page-down', 'key-bind-tooltip-page-up');
     }
   }
 

@@ -2117,7 +2117,11 @@
         "key-bind-title-page-left": "Page left",
         "key-bind-tooltip-page-left": "Move one page to the left",
         "key-bind-title-page-right": "Page right",
-        "key-bind-tooltip-page-right": "Move one page to the right"
+        "key-bind-tooltip-page-right": "Move one page to the right",
+        "key-bind-title-page-up": "Page up",
+        "key-bind-tooltip-page-up": "Move one page upwards",
+        "key-bind-title-page-down": "Page down",
+        "key-bind-tooltip-page-down": "Move one page downwards"
     },
 
     "collection-detail": {

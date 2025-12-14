@@ -67,6 +67,8 @@ export enum KeyBindTarget {
   PageLeft = 'PageLeft',
   PageRight = 'PageRight',
   Escape = 'Escape',
+  PageUp = 'PageUp',
+  PageDown = 'PageDown',
 }
 
 export interface OpdsPreferences {

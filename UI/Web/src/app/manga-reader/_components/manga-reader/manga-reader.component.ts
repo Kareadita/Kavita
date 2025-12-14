@@ -82,7 +82,7 @@ import {
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
-import {KeyBindService} from "../../../_services/key-bind.service";
+import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {ImageOnlyName} from "../../../_models/user/auth-key";
 
@@ -518,7 +518,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.toggleMenu();
               return;
             }
-            if (this.shortCutModalOpen()){
+            if (this.shortCutModalOpen()) {
               this.closeShortCutModal();
               return;
             }
@@ -529,6 +529,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             break;
           case KeyBindTarget.PageRight:
             this.handlePageRight();
+            break;
+          case KeyBindTarget.PageUp:
+            this.handlePageUp(e);
+            break;
+          case KeyBindTarget.PageDown:
+            this.handlePageDown(e);
             break;
           case KeyBindTarget.ToggleFullScreen:
             this.toggleFullscreen();
@@ -549,8 +555,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             break;
         }
       },
-      [KeyBindTarget.ToggleFullScreen, KeyBindTarget.BookmarkPage, KeyBindTarget.OpenHelp, KeyBindTarget.GoTo,
-        KeyBindTarget.ToggleMenu, KeyBindTarget.PageRight, KeyBindTarget.PageLeft, KeyBindTarget.Escape],
+      [
+        KeyBindTarget.ToggleFullScreen, KeyBindTarget.BookmarkPage, KeyBindTarget.OpenHelp, KeyBindTarget.GoTo,
+        KeyBindTarget.ToggleMenu, KeyBindTarget.PageRight, KeyBindTarget.PageLeft, KeyBindTarget.Escape,
+        KeyBindTarget.PageUp, KeyBindTarget.PageDown,
+      ],
     );
 
     this.keyBindService.registerListener(
@@ -671,31 +680,36 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.readerService.disableWakeLock();
   }
 
+  private handlePageUp(e: KeyBindEvent) {
+    if (this.readerMode === ReaderMode.UpDown && this.checkIfPaginationAllowed(KeyDirection.Up)) {
+      this.prevPage();
+    }
+
+    if (this.readerMode === ReaderMode.Webtoon) {
+      e.triggered = false;
+    }
+
+  }
+
   private handlePageLeft() {
-    switch (this.readerMode) {
-      case ReaderMode.LeftRight:
-        if (this.checkIfPaginationAllowed(KeyDirection.Left)) {
-          this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
-        }
-        break
-      case ReaderMode.UpDown:
-        if (this.checkIfPaginationAllowed(KeyDirection.Down)) {
-          this.nextPage();
-        }
+    if (this.readerMode === ReaderMode.LeftRight && this.checkIfPaginationAllowed(KeyDirection.Left)) {
+      this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
+    }
+  }
+
+  private handlePageDown(e: KeyBindEvent) {
+    if (this.readerMode === ReaderMode.UpDown && this.checkIfPaginationAllowed(KeyDirection.Down)) {
+      this.nextPage();
+    }
+
+    if (this.readerMode === ReaderMode.Webtoon) {
+      e.triggered = false;
     }
   }
 
   private handlePageRight() {
-    switch (this.readerMode) {
-      case ReaderMode.LeftRight:
-        if (this.checkIfPaginationAllowed(KeyDirection.Left)) {
-          this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
-        }
-        break
-      case ReaderMode.UpDown:
-        if (this.checkIfPaginationAllowed(KeyDirection.Down)) {
-          this.prevPage();
-        }
+    if (this.readerMode === ReaderMode.LeftRight && this.checkIfPaginationAllowed(KeyDirection.Right)) {
+      this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
     }
   }
 

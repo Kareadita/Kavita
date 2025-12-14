@@ -122,9 +122,11 @@ export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyBind[]>> = {
   [KeyBindTarget.OpenHelp]: [{key: KeyCode.KeyH}],
   [KeyBindTarget.GoTo]: [{key: KeyCode.KeyG}],
   [KeyBindTarget.ToggleMenu]: [{key: KeyCode.Space}],
-  [KeyBindTarget.PageLeft]: [{key: KeyCode.ArrowLeft}, {key: KeyCode.ArrowUp}],
-  [KeyBindTarget.PageRight]: [{key: KeyCode.ArrowRight}, {key: KeyCode.ArrowDown}],
-  [KeyBindTarget.Escape]: [{key: KeyCode.Escape}]
+  [KeyBindTarget.PageLeft]: [{key: KeyCode.ArrowLeft}],
+  [KeyBindTarget.PageRight]: [{key: KeyCode.ArrowRight}],
+  [KeyBindTarget.Escape]: [{key: KeyCode.Escape}],
+  [KeyBindTarget.PageUp]: [{key: KeyCode.ArrowUp}],
+  [KeyBindTarget.PageDown]: [{key: KeyCode.ArrowDown}],
 } as const;
 
 type KeyBindGroup = {
@@ -157,6 +159,8 @@ export const KeyBindGroups: KeyBindGroup[] = [
       {target: KeyBindTarget.ToggleMenu},
       {target: KeyBindTarget.PageRight},
       {target: KeyBindTarget.PageLeft},
+      {target: KeyBindTarget.PageUp},
+      {target: KeyBindTarget.PageDown},
     ],
   }
 ];
