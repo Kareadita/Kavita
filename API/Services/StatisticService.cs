@@ -1137,12 +1137,12 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             return null;
         }
 
+        var daysSinceCounting = (DateTime.UtcNow - sessionRecordedSince.RanAt).Days;
+
         var sessions = await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .Where(session => session.ReadingSession.CreatedUtc > sessionRecordedSince.RanAt)
             .ToListAsync();
-
-        logger.LogInformation("Found {Count} session to check", sessions.Count);
 
         var hourStats = sessions
             .SelectMany(session =>
@@ -1174,7 +1174,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .GroupBy(x => x.hour)
             .ToDictionary(
                 g => g.Key,
-                g => g.Average(x => x.totalTimeSpent)
+                g => g.Sum(x => x.totalTimeSpent) / daysSinceCounting
             );
 
         var data = Enumerable.Range(0, 24)

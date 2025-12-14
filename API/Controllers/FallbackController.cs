@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using API.Middleware;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,7 @@ public class FallbackController : Controller
         _taskScheduler = taskScheduler; // TODO: Validate if this is needed as a DI anymore since we have a HostedStartupService
     }
 
+    [SkipDeviceTracking]
     public IActionResult Index()
     {
         if (HttpContext.Request.Path.StartsWithSegments("/api"))
