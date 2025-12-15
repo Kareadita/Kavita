@@ -644,8 +644,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
-        var startDate = filter.StartDate?.ToUniversalTime() ?? new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        var endDate = filter.EndDate?.ToUniversalTime() ?? new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc);
+        var startDate = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
+        var endDate = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
 
         var sessionActivityData = await context.AppUserReadingSession
             .Where(s => s.AppUserId == userId)
