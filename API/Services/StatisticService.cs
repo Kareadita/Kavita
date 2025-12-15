@@ -44,7 +44,7 @@ public interface IStatisticService
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
     Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year, int requestingUserId);
-    Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year);
+    Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly);
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
@@ -732,85 +732,56 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         return result;
     }
 
-    public async Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year)
+    public async Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly)
     {
-        var startTime = filter.StartDate?.ToUniversalTime() ?? new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        var endTime = filter.EndDate?.ToUniversalTime() ?? new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc);
-        var now = DateTime.UtcNow;
+        var startTime = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
+        var endTime = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
 
-        // Don't count future days in the calculation
-        var effectiveEndDate = endTime > now ? now : endTime;
-
-        var readingHistory = await context.AppUserReadingHistory
-            .Where(h => h.AppUserId == userId &&
-                        h.DateUtc >= startTime &&
-                        h.DateUtc <= effectiveEndDate)
-            .Select(h => new { h.DateUtc, h.Data })
+        var activities = await context.AppUserReadingSessionActivityData
+            .Where(a => a.ReadingSession.AppUserId == userId &&
+                        !a.ReadingSession.IsActive &&
+                        a.StartTimeUtc >= startTime &&
+                        a.StartTimeUtc <= endTime)
+            .Select(a => new
+            {
+                a.PagesRead,
+                a.WordsRead,
+                a.ChapterId,
+                a.SeriesId,
+                SeriesFormat = a.Series.Format,
+                SessionStart = a.ReadingSession.StartTimeUtc,
+                SessionEnd = a.ReadingSession.EndTimeUtc
+            })
+            .WhereIf(booksOnly, d => d.SeriesFormat == MangaFormat.Pdf || d.SeriesFormat == MangaFormat.Epub)
+            .WhereIf(!booksOnly, d => d.SeriesFormat != MangaFormat.Pdf && d.SeriesFormat != MangaFormat.Epub)
             .ToListAsync();
 
-        var readingSessions = await context.AppUserReadingSession
-            .Where(s => s.AppUserId == userId &&
-                        s.StartTimeUtc >= startTime &&
-                        s.StartTimeUtc <= effectiveEndDate &&
-                        !s.IsActive)
-            .Select(s => new { s.StartTimeUtc, s.EndTimeUtc, s.ActivityData })
-            .ToListAsync();
+        var sessionDurations = activities
+            .Where(a => a.SessionEnd.HasValue)
+            .GroupBy(a => new { a.SessionStart, a.SessionEnd })
+            .Sum(g => (g.Key.SessionEnd!.Value - g.Key.SessionStart).TotalHours);
 
-        var allSeriesIds = readingSessions.SelectMany(r => r.ActivityData.Select(d => d.SeriesId)).Distinct();
-
-        var seriesFormats = await context.Series
-            .Where(s => allSeriesIds.Contains(s.Id))
-            .ToDictionaryAsync(keySelector: s => s.Id, s => s.Format);
-
-        var hoursRead = 0;
-        var pagesRead = 0;
-        var wordsRead = 0;
         var booksRead = new HashSet<int>();
         var comicsRead = new HashSet<int>();
+        var pagesRead = 0;
+        var wordsRead = 0;
 
-        foreach (var history in readingHistory.Select(x => x.Data))
+        foreach (var activity in activities)
         {
-            if (history == null) continue;
+            pagesRead += activity.PagesRead;
+            wordsRead += activity.WordsRead;
 
-            pagesRead += history.TotalPagesRead;
-            wordsRead += history.TotalWordsRead;
+            if (activity.SeriesFormat is MangaFormat.Epub or MangaFormat.Pdf)
+                booksRead.Add(activity.ChapterId);
+            else
+                comicsRead.Add(activity.ChapterId);
         }
 
-        foreach (var session in readingSessions)
-        {
-            if (session.EndTimeUtc.HasValue)
-            {
-                var duration = (session.EndTimeUtc.Value - session.StartTimeUtc).TotalHours;
-                hoursRead += (int)Math.Round(duration);
-            }
-
-            if (session.ActivityData == null)
-                continue;
-
-            foreach (var activity in session.ActivityData)
-            {
-                pagesRead += activity.PagesRead;
-                wordsRead += activity.WordsRead;
-
-                if (!seriesFormats.TryGetValue(activity.SeriesId, out var seriesFormat)) continue;
-
-                if (seriesFormat == MangaFormat.Epub)
-                {
-                    booksRead.Add(activity.ChapterId);
-                }
-                else
-                {
-                    comicsRead.Add(activity.ChapterId);
-                }
-            }
-
-        }
-
-        var daysInRange = (int)(effectiveEndDate - startTime).TotalDays + 1;
+        var daysInRange = (int)(endTime - startTime).TotalDays + 1;
 
         return new ReadingPaceDto
         {
-            HoursRead = hoursRead,
+            HoursRead = (int)Math.Round(sessionDurations),
             PagesRead = pagesRead,
             WordsRead = wordsRead,
             BooksRead = booksRead.Count,

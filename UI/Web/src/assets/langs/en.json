@@ -2935,7 +2935,7 @@
 
     "page-spread": {
         "title": "Chapters by Page Count",
-        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} pages",
+        "sub-title": "{{username}}'s reads chapters between {{highestBucket}} pages",
         "data-type": "{{data}} chapters",
         "data-of": "{{percentage}}% of your chapters",
         "range": "Page range: {{range}}",
@@ -2944,7 +2944,7 @@
 
     "word-spread": {
         "title": "Chapters by Word Count",
-        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} words",
+        "sub-title": "{{username}}'s reads chapters between {{highestBucket}} words",
         "data-type": "{{data}} chapters",
         "data-of": "{{percentage}}% of your chapters",
         "range": "Word range: {{range}}",
@@ -2953,13 +2953,13 @@
 
     "tag-breakdown": {
         "title": "Most read tags",
-        "sub-title": "{{name}} most read tag is {{mostUsed}}",
+        "sub-title": "{{name}}'s most read tag is {{mostUsed}}",
         "missing": "Missing tags for {{amount}} series",
         "no-data": "{{common.no-data}}"
     },
     "genre-breakdown": {
         "title": "Most read genres",
-        "sub-title": "{{name}} most read genre is {{mostUsed}}",
+        "sub-title": "{{name}}'s most read genre is {{mostUsed}}",
         "missing": "Missing genres for {{amount}} series",
         "no-data": "{{common.no-data}}"
     },
@@ -3002,8 +3002,10 @@
     },
 
     "reading-pace": {
-        "title": "Reading Pace",
-        "sub-title": "{{username}} reads a book every {{count}} days",
+        "title-books": "Reading Pace: Books",
+        "title-comics": "Reading Pace: Comics",
+        "sub-title-books": "{{username}} reads a book every {{count}} days",
+        "sub-title-comics": "{{username}} reads a comic every {{count}} days",
         "hours-read": "Hours Read",
         "pages-read": "Pages Read",
         "words-read": "Words Read",
@@ -3013,7 +3015,8 @@
         "per-month": "Per Month",
         "per-day": "Per Day",
         "no-data": "{{common.no-data}}",
-        "disclaimer": "Only takes books into account"
+        "disclaimer-books": "Applies to Epub/Pdfs",
+        "disclaimer-comics": "Applies to Image/Archives"
     },
 
     "smart-time-picker": {

@@ -250,14 +250,22 @@ public class StatsController(
     #region Profile Stats
 
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <param name="userId"></param>
+    /// <param name="year"></param>
+    /// <param name="booksOnly">This API only returns for Books (epub/pdf) and Comics (Image/Archive) regardless of Library type</param>
+    /// <returns></returns>
     [ProfilePrivacy]
     [HttpGet("reading-pace")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<ReadingPaceDto>> GetReadingPace([FromQuery] StatsFilterDto filter, int userId, int year)
+    public async Task<ActionResult<ReadingPaceDto>> GetReadingPace([FromQuery] StatsFilterDto filter, int userId, int year, bool booksOnly)
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetReadingPaceForUser(filter, userId, year));
+        return Ok(await statService.GetReadingPaceForUser(filter, userId, year, booksOnly));
     }
 
     /// <summary>

@@ -3,7 +3,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {StatsFilter} from "../../_models/stats-filter";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
-import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 export interface ReadingPace {
   hoursRead: number;
@@ -14,12 +13,16 @@ export interface ReadingPace {
   daysInRange: number;
 }
 
+export enum ReadingPaceType {
+  Books = 0,
+  Comics = 1
+}
+
 @Component({
   selector: 'app-reading-pace',
   imports: [
     TranslocoDirective,
-    CompactNumberPipe,
-    UtcToLocalTimePipe
+    CompactNumberPipe
   ],
   templateUrl: './reading-pace.component.html',
   styleUrl: './reading-pace.component.scss',
@@ -33,22 +36,32 @@ export class ReadingPaceComponent {
   userName = input.required<string>();
   userId = input.required<number>();
   year = input.required<number>();
+  type = input.required<ReadingPaceType>();
   filter = input.required<StatsFilter>();
 
   readingPace = this.statsService.getReadingPaceResource(
     () => this.filter(),
     () => this.userId(),
     () => this.year(),
+    () => this.type()
   );
 
+  localePrefix = computed(() => {
+    return this.type() === ReadingPaceType.Books ? 'books' : 'comics';
+  });
+
   stats = computed(() => {
+
+    const formatType = this.type();
     if (!this.readingPace.hasValue()) {
       return null;
     }
 
     const stats = this.readingPace.value()!;
 
-    if (stats.booksRead === 0) {
+    if (stats.booksRead === 0 && formatType === ReadingPaceType.Books) {
+      return null;
+    } else if (stats.comicsRead === 0 && formatType === ReadingPaceType.Comics) {
       return null;
     }
 
@@ -125,4 +138,6 @@ export class ReadingPaceComponent {
       return value.toFixed(1);
     }
   }
+
+  protected readonly ReadingPaceType = ReadingPaceType;
 }

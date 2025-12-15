@@ -30,10 +30,10 @@
 
     <div class="row mt-4">
       <div class="col-md-6">
-        <app-reading-pace [userId]="userId()" [year]="year()" [userName]="username()"  [filter]="filterValue" />
+        <app-reading-pace [userId]="userId()" [year]="year()" [userName]="username()"  [filter]="filterValue" [type]="ReadingPaceType.Books" />
       </div>
       <div class="col-md-6">
-        <app-preferred-format [filter]="filterValue" [userId]="userId()" [userName]="username()" />
+        <app-reading-pace [userId]="userId()" [year]="year()" [userName]="username()"  [filter]="filterValue"  [type]="ReadingPaceType.Comics" />
       </div>
     </div>
 

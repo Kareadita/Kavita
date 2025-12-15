@@ -1,19 +1,21 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {ActivityGraphComponent} from "../../../statistics/_components/activity-graph/activity-graph.component";
 import {
-    AvgTimeSpendReadingByHourComponent
+  AvgTimeSpendReadingByHourComponent
 } from "../../../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
 import {
-    BucketSpreadChartComponent
+  BucketSpreadChartComponent
 } from "../../../statistics/_components/bucket-spread-chart/bucket-spread-chart.component";
 import {FavoriteAuthorsComponent} from "../../../statistics/_components/favorite-authors/favorite-authors.component";
 import {
   LibraryAndTimeFilterGroup,
   LibraryAndTimeSelectorComponent
 } from "../../../statistics/_components/library-and-time-selector/library-and-time-selector.component";
-import {PreferredFormatComponent} from "../../../statistics/_components/preferred-format/preferred-format.component";
 import {ProfileStatBarComponent} from "../profile-stat-bar/profile-stat-bar.component";
-import {ReadingPaceComponent} from "../../../statistics/_components/reading-pace/reading-pace.component";
+import {
+  ReadingPaceComponent,
+  ReadingPaceType
+} from "../../../statistics/_components/reading-pace/reading-pace.component";
 import {ReadsByMonthComponent} from "../../../statistics/_components/reads-by-month/reads-by-month.component";
 import {StringBreakdownComponent} from "../../../statistics/_components/string-breakdown/string-breakdown.component";
 import {FormControl, FormGroup} from "@angular/forms";
@@ -31,7 +33,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
     BucketSpreadChartComponent,
     FavoriteAuthorsComponent,
     LibraryAndTimeSelectorComponent,
-    PreferredFormatComponent,
     ProfileStatBarComponent,
     ReadingPaceComponent,
     ReadsByMonthComponent,
@@ -70,4 +71,5 @@ export class ProfileStatsComponent {
   protected readonly avgTimeSpendReadingByHour = this.statsService.getAvgTimeSpendReadingByHour(() => this.filter(), () => this.userId());
 
 
+  protected readonly ReadingPaceType = ReadingPaceType;
 }

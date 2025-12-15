@@ -20,7 +20,7 @@ import {download} from "../shared/_models/download";
 import {Saver, SAVER} from "../_providers/saver.provider";
 import {ClientDeviceBreakdown} from "../statistics/_models/client-device-breakdown";
 import {ActivityGraphData} from "../statistics/_components/activity-graph/activity-graph.component";
-import {ReadingPace} from "../statistics/_components/reading-pace/reading-pace.component";
+import {ReadingPace, ReadingPaceType} from "../statistics/_components/reading-pace/reading-pace.component";
 import {Breakdown} from "../statistics/_models/breakdown";
 import {SpreadStats} from "../statistics/_models/stats/spread-stats";
 import {FavoriteAuthor} from "../statistics/_models/favorite-author";
@@ -174,14 +174,19 @@ export class StatisticsService {
     }).asReadonly();
   }
 
-  getReadingPaceResource(statsFilter: () => (StatsFilter | undefined), userId: () => number, year: () => number) {
+  getReadingPaceResource(statsFilter: () => (StatsFilter | undefined), userId: () => number, year: () => number, type: () => ReadingPaceType) {
     return httpResource<ReadingPace>(() => {
       const filter = statsFilter();
       if (!filter) return undefined;
 
+      let params = this.filterHttpParams(filter, userId());
+      if (type() === ReadingPaceType.Books) {
+        params = params.append('booksOnly', true)
+      }
+
       return {
         url: this.baseUrl + `stats/reading-pace?year=${year()}`,
-        params: this.filterHttpParams(filter, userId())
+        params: params
       }
     }).asReadonly();
   }
