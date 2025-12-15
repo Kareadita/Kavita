@@ -24,17 +24,17 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
         IClientInfoAccessor clientInfoAccessor,
         IUserContext userContext)
     {
+        var endpoint = context.GetEndpoint();
+        var skipTracking = endpoint?.Metadata.GetMetadata<SkipDeviceTrackingAttribute>() != null;
+
+        if (skipTracking)
+        {
+            await next(context);
+            return;
+        }
+
         try
         {
-            var endpoint = context.GetEndpoint();
-            var skipTracking = endpoint?.Metadata.GetMetadata<SkipDeviceTrackingAttribute>() != null;
-
-            if (skipTracking)
-            {
-                await next(context);
-                return;
-            }
-
             var userId = userContext.GetUserId();
             var clientInfo = clientInfoAccessor.Current;
             var clientUiFingerprint = clientInfoAccessor.CurrentUiFingerprint; // string from webapp header
