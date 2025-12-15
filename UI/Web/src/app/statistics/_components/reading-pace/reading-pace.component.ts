@@ -71,12 +71,15 @@ export class ReadingPaceComponent {
   // Calculate pace in days - books per day inverted
   paceInDays = computed(() => {
     const stats = this.stats();
+    const formatType = this.type();
     if (stats == null) return '∞';
 
-    const booksRead = stats.booksRead;
+    const booksRead = formatType === ReadingPaceType.Books ? stats.booksRead : stats.comicsRead;
     const days = stats.daysInRange;
 
-    if (booksRead === 0) return '∞';
+    if (booksRead === 0) {
+      return '∞';
+    }
 
     return (days / booksRead).toFixed(2);
   });

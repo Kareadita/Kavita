@@ -1171,7 +1171,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             return new ProfileStatBarDto();
         }
 
-        // NOTE: This is expensive and slow, I optimized to what I could (800ms)
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
         var chapterData = await context.AppUserReadingSessionActivityData
@@ -1180,7 +1179,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .Select(d => new
             {
                 d.ChapterId,
-                LibraryType = d.Chapter.Volume.Series.Library.Type,
+                FormatType = d.Chapter.Files.First().Format,
                 d.PagesRead,
                 d.WordsRead
             })
@@ -1199,22 +1198,22 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         }
 
         // Group by ChapterId to deduplicate, then aggregate
-        // This is fast in-memory since we only projected 4 small fields
         var byChapter = chapterData
             .GroupBy(x => x.ChapterId)
             .Select(g => new
             {
                 ChapterId = g.Key,
-                g.First().LibraryType,
+                g.First().FormatType,
                 // Take max to handle potential duplicates with different values
                 PagesRead = g.Max(x => x.PagesRead),
                 WordsRead = g.Max(x => x.WordsRead)
             })
             .ToList();
 
-        var chapterIds = byChapter.Select(x => x.ChapterId).ToHashSet();
+        var chapterIds = byChapter
+            .Select(x => x.ChapterId)
+            .ToHashSet();
 
-        // Categorize and sum in single pass
         var booksRead = 0;
         var comicsRead = 0;
         var pagesRead = 0L;
@@ -1225,12 +1224,12 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             pagesRead += ch.PagesRead;
             wordsRead += ch.WordsRead;
 
-            switch (ch.LibraryType)
+            switch (ch.FormatType)
             {
-                case LibraryType.Book or LibraryType.LightNovel:
+                case MangaFormat.Pdf or MangaFormat.Epub:
                     booksRead++;
                     break;
-                case LibraryType.Comic or LibraryType.Manga:
+                case MangaFormat.Archive or MangaFormat.Image or MangaFormat.Unknown:
                     comicsRead++;
                     break;
             }

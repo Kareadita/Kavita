@@ -273,15 +273,15 @@ public class StatsController(
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    [ProfilePrivacy]
-    [HttpGet("preferred-format")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat([FromQuery] StatsFilterDto filter, int userId)
-    {
-        await CleanStatsFilter(filter, UserId);
-
-        return Ok(await statService.GetPreferredFormatForUser(filter, userId, UserId));
-    }
+    // [ProfilePrivacy]
+    // [HttpGet("preferred-format")]
+    // [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    // public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat([FromQuery] StatsFilterDto filter, int userId)
+    // {
+    //     await CleanStatsFilter(filter, UserId);
+    //
+    //     return Ok(await statService.GetPreferredFormatForUser(filter, userId, UserId));
+    // }
 
     /// <summary>
     /// Returns top 10 genres that user likes reading
