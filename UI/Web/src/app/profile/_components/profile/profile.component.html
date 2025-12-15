@@ -30,20 +30,24 @@
           </div>
 
           <div class="small mt-2">
-            {{t('joined-label', {date: user.createdUtc | utcToLocalDate | timeAgo})}}
+            <span class="fw-bold me-1">{{t('joined-label')}}</span>
+             {{user.createdUtc | utcToLocalDate | timeAgo}}
           </div>
 
           @if (userStatsResource.hasValue() && userStatsResource.value()) {
             @let data = userStatsResource.value();
-            <div class="fw-bold small mt-2">
-              {{t('last-read-label', {date: data.lastActiveUtc | utcToLocalDate | timeAgo | sentenceCase})}}
+            <div class="small mt-2">
+              <span class="fw-bold me-1">{{t('last-read-label')}}</span>
+              {{data.lastActiveUtc | utcToLocalDate | timeAgo | sentenceCase}}
             </div>
 
-            <div class=" small mt-2">
-              {{t('time-reading-label', {date: data.timeSpentReading | timeDuration})}}
+            <div class="fw-bold small mt-2">
+              <span class="fw-bold me-1">{{t('time-reading-label')}}</span>
+              {{data.timeSpentReading | timeDuration}}
             </div>
-            <div class=" small mt-2">
-              {{t('avg-reading-per-week-label', {time: data.avgHoursPerWeekSpentReading | timeDuration})}}
+            <div class="fw-bold small mt-2">
+              <span class="fw-bold me-1">{{t('avg-reading-per-week-label')}}</span>
+              {{data.avgHoursPerWeekSpentReading | timeDuration}}
             </div>
           }
         </div>

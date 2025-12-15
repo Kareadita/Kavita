@@ -92,7 +92,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .SumAsync() ?? 0;
 
         // TODO: this needs to use AppUserReadingSessions
-        var timeSpentReading = await TimeSpentReadingForUsersAsync(new List<int>() {userId}, libraryIds);
+        var timeSpentReading = await TimeSpentReadingForUsersAsync([userId], libraryIds);
 
         var totalWordsRead =  (long) Math.Round(await context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
