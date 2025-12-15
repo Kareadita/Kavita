@@ -2,19 +2,17 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef,
+  computed,
   ElementRef,
   inject,
-  Input,
-  OnInit,
+  input,
+  model,
+  signal,
   ViewChild
 } from '@angular/core';
-import {AccountService} from 'src/app/_services/account.service';
 import {Clipboard} from '@angular/cdk/clipboard';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {OpdsName} from "../../_models/user/auth-key";
 
 @Component({
     selector: 'app-api-key',
@@ -23,42 +21,27 @@ import {OpdsName} from "../../_models/user/auth-key";
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslocoDirective, SettingItemComponent]
 })
-export class ApiKeyComponent implements OnInit {
+export class ApiKeyComponent {
 
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly accountService = inject(AccountService);
   private readonly clipboard = inject(Clipboard);
   private readonly cdRef = inject(ChangeDetectorRef);
 
-  @Input() title: string = 'API Key';
-  @Input() transform: (val: string) => string = (val: string) => val;
-  @Input() tooltipText: string = '';
-  @Input() hideData = true;
+  title = input.required<string>();
+  key = input.required<string>();
+  tooltipText = input<string | undefined>(undefined);
+  hideData = model(true);
+
+  isDataHidden = signal(this.hideData());
+
+  value = computed(() => {
+    const hide = this.hideData() && this.isDataHidden();
+    const key = this.key();
+
+    return hide ? '•'.repeat(key.length) : key;
+  })
+
+
   @ViewChild('apiKey') inputElem!: ElementRef;
-
-  key: string = '';
-  isDataHidden: boolean = this.hideData;
-
-  get InputType() {
-    return (this.hideData && this.isDataHidden) ? 'password' : 'text';
-  }
-
-
-  ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-      let key = '';
-      if (user) {
-        key = user.authKeys.filter(k => k.name === OpdsName)[0].key;
-      } else {
-        key = translate('api-key.no-key');
-      }
-
-      if (this.transform != undefined) {
-        this.key = this.transform(key);
-        this.cdRef.markForCheck();
-      }
-    });
-  }
 
   async copy() {
     this.inputElem.nativeElement.select();
@@ -69,21 +52,19 @@ export class ApiKeyComponent implements OnInit {
 
   selectAll() {
     if (this.inputElem) {
-      this.inputElem.nativeElement.setSelectionRange(0, this.key.length);
+      this.inputElem.nativeElement.setSelectionRange(0, this.key().length);
       this.cdRef.markForCheck();
     }
   }
 
   toggleVisibility(forceState: boolean | null = null) {
-    if (!this.hideData) return;
+    if (!this.hideData()) return;
 
     if (forceState == null) {
-      this.isDataHidden = !this.isDataHidden;
+      this.isDataHidden.update(x => !x);
     } else {
-      this.isDataHidden = !forceState;
+      this.isDataHidden.set(!forceState);
     }
-
-    this.cdRef.markForCheck();
   }
 
 }

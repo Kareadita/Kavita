@@ -146,7 +146,7 @@ public static class IdentityServiceExtensions
 
         auth.AddScheme<AuthKeyAuthenticationOptions, AuthKeyAuthenticationHandler>(
             AuthKeyAuthenticationOptions.SchemeName,
-            options => { });
+            _ => { });
 
 
         services.AddAuthorizationBuilder()
@@ -189,6 +189,7 @@ public static class IdentityServiceExtensions
             options.SlidingExpiration = true;
 
             options.Cookie.HttpOnly = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             options.Cookie.IsEssential = true;
             options.Cookie.MaxAge = TimeSpan.FromDays(7);
             options.Cookie.SameSite = SameSiteMode.Strict;
@@ -256,7 +257,7 @@ public static class IdentityServiceExtensions
         return true;
     }
 
-    private static IList<string> GetValidScopes(
+    private static IEnumerable<string> GetValidScopes(
         ConfigurationManager<OpenIdConnectConfiguration> configurationManager,
         Configuration.OpenIdConnectSettings settings
     )
@@ -288,7 +289,7 @@ public static class IdentityServiceExtensions
 
             Log.Warning("Scope {Scope} is configured, but not supported by your OIDC provider. Skipping", scope);
             return false;
-        }).ToList();
+        });
     }
 
     private static Task SetTokenFromQuery(MessageReceivedContext context)

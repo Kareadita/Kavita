@@ -35,7 +35,8 @@
     "extendedDiagnostics": {
       "nullishCoalescingNotNullable": "warning",
       "checks": {
-        "unusedStandaloneImports": "suppress"
+        "unusedStandaloneImports": "suppress",
+        "uninvokedFunctionInTextInterpolation": "error"
       }
     }
 

@@ -1029,9 +1029,9 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("prompt-reread/series")]
-    public async Task<ActionResult<RereadDto>> ShouldPromptForSeriesReRead(int seriesId)
+    public async Task<ActionResult<RereadDto>> ShouldPromptForSeriesReRead(int seriesId, int libraryId)
     {
-        return Ok(await _readerService.CheckSeriesForReRead(UserId, seriesId));
+        return Ok(await _readerService.CheckSeriesForReRead(UserId, seriesId, libraryId));
     }
 
     /// <summary>
@@ -1058,6 +1058,12 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<RereadDto>> ShouldPromptForChapterReRead(int libraryId, int seriesId, int chapterId)
     {
         return Ok(await _readerService.CheckChapterForReRead(UserId, chapterId, seriesId, libraryId));
+    }
+
+    [HttpGet("first-progress-date")]
+    public async Task<ActionResult<DateTime>> GetFirstReadingDate(int userId)
+    {
+        return Ok(await _unitOfWork.AppUserProgressRepository.GetFirstProgressForUser(userId));
     }
 
 }

@@ -14,6 +14,7 @@ import {LibraryService} from "../../../_services/library.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {AccountService} from "../../../_services/account.service";
+import {ReaderService} from "../../../_services/reader.service";
 
 export interface LibraryAndTimeFilterGroup {
   timeFilter: FormGroup<{
@@ -39,16 +40,16 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
 
   private readonly libraryService = inject(LibraryService);
   private readonly utilityService = inject(UtilityService);
+  private readonly readerService = inject(ReaderService);
 
   filterForm = input.required<FormGroup>();
   label = input.required<string>();
   userId = input.required<number>();
 
+  startYear = signal(new Date().getFullYear())
   allLibraries = signal<Library[]>([]);
   showLibraryTypeahead = signal(false);
   libraryTypeaheadSettings?: TypeaheadSettings<Library>;
-
-
 
   filter = signal<StatsFilter | undefined>(undefined);
   year = computed(() => this.filter()?.timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
@@ -68,6 +69,11 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
       tap(libs => this.filterForm().get('libraries')?.setValue(libs.map(l => l.id))),
       tap(libs => this.libraryTypeaheadSettings = this.setupLibrarySettings(libs, libs))
     ).subscribe();
+
+    this.readerService.getFirstProgressDateForUser(this.userId()).subscribe(date => {
+      const jsDate = new Date(date);
+      this.startYear.set(jsDate.getFullYear());
+    });
   }
 
   setupLibrarySettings(

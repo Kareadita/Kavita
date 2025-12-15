@@ -69,39 +69,39 @@ public class Startup
                 new CacheProfile()
                 {
                     Duration = 30,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.FiveMinute,
                 new CacheProfile()
                 {
                     Duration = 60 * 5,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.TenMinute,
                 new CacheProfile()
                 {
                     Duration = 60 * 10,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.Hour,
                 new CacheProfile()
                 {
                     Duration = 60 * 60,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.Statistics,
                 new CacheProfile()
                 {
                     Duration = _env.IsDevelopment() ? 0 : 60 * 60 * 6,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.Images,
                 new CacheProfile()
                 {
                     Duration = 60,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.Month,
@@ -122,7 +122,7 @@ public class Startup
                 new CacheProfile()
                 {
                     Duration = TimeSpan.FromDays(30).Seconds,
-                    Location = ResponseCacheLocation.Any,
+                    Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
         });

@@ -11,7 +11,7 @@
     @if (isOpdsEnabledResource.value() && opdsUrl()) {
       <div class="mt-4">
         <app-api-key [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink" [hideData]="true"
-                     [transform]="makeUrl" />
+                     [key]="opdsUrl()" />
       </div>
     }
   }
