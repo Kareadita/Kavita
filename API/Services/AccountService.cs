@@ -189,6 +189,8 @@ public partial class AccountService : IAccountService
 
     public async Task<bool> ChangeIdentityProvider(int actingUserId, AppUser user, IdentityProvider identityProvider)
     {
+        if (user.IdentityProvider == identityProvider) return false;
+
         var defaultAdminUser = await _unitOfWork.UserRepository.GetDefaultAdminUser();
         if (user.Id == defaultAdminUser.Id)
         {
