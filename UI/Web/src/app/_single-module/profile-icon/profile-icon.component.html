@@ -5,7 +5,9 @@
                height="{{size()}}px"
                width="{{size()}}px"
                [imageUrl]="image"
-               [errorImage]="imageService.noPersonImage" />
+               [errorImage]="imageService.noPersonImage"
+               [hideOnError]="true"
+    />
   } @else {
     <i class="fa-solid fa-user-circle align-self-center" aria-hidden="true"></i>
   }
