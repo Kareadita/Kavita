@@ -77,7 +77,7 @@ export class ProfileReviewListComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
       debounceTime(300),
       distinctUntilChanged(),
-      switchMap(v => this.reviewService.getReviewsByUser(this.memberInfo().id, v.query ?? null, v.rating ?? null)),
+      switchMap(v => this.reviewService.getReviewsByUser(this.memberInfo().id, v.query?.trim() ?? null, v.rating ?? null)),
       tap(reviews => this.reviews.set(reviews)),
     ).subscribe();
   }
