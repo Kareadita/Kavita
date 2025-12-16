@@ -152,6 +152,12 @@ public class AccountController : BaseApiController
                 new ApiException(400,
                     await _localizationService.Translate(UserId, "password-required")));
 
+        var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
+        {
+            return BadRequest(await _localizationService.Translate(user.Id, "oidc-managed"));
+        }
+
         // If you're an admin and the username isn't yours, you don't need to validate the password
         var isResettingOtherUser = (resetPasswordDto.UserName != Username! && isAdmin);
         if (!isResettingOtherUser && !await _userManager.CheckPasswordAsync(user, resetPasswordDto.OldPassword))
@@ -397,6 +403,11 @@ public class AccountController : BaseApiController
         if (user == null || dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
             return BadRequest(await _localizationService.Translate(UserId, "invalid-payload"));
 
+        var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
+        {
+            return BadRequest(await _localizationService.Translate(user.Id, "oidc-managed"));
+        }
 
         // Validate this user's password
         if (! await _userManager.CheckPasswordAsync(user, dto.Password))
@@ -508,6 +519,12 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user == null) return Unauthorized(await _localizationService.Translate(UserId, "permission-denied"));
 
+        var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
+        {
+            return BadRequest(await _localizationService.Translate(user.Id, "oidc-managed"));
+        }
+
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (!await _accountService.CanChangeAgeRestriction(user)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
@@ -549,7 +566,6 @@ public class AccountController : BaseApiController
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams);
         if (user == null) return BadRequest(await _localizationService.Translate(UserId, "no-user"));
-
 
         try
         {
@@ -969,6 +985,12 @@ public class AccountController : BaseApiController
         {
             _logger.LogError("There are no users with email: {Email} but user is requesting password reset", email);
             return Ok(await _localizationService.Get("en", "forgot-password-generic"));
+        }
+
+        var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
+        {
+            return BadRequest(await _localizationService.Translate(user.Id, "oidc-managed"));
         }
 
         var roles = await _userManager.GetRolesAsync(user);

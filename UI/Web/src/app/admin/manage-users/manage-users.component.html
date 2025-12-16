@@ -103,7 +103,7 @@
                   <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="setup(member)"
                           placement="top" [ngbTooltip]="t('setup-user-tooltip')" [attr.aria-label]="t('setup-user-alt', {user: member.username | titlecase})"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
                 } @else {
-                  <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="updatePassword(member)"
+                  <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="updatePassword(member)" [disabled]="member.identityProvider === IdentityProvider.OpenIdConnect && oidcSyncEnabled"
                           placement="top" [ngbTooltip]="t('change-password-tooltip')" [attr.aria-label]="t('change-password-alt', {user: member.username | titlecase})"><i class="fa fa-key" aria-hidden="true"></i></button>
                 }
               }
