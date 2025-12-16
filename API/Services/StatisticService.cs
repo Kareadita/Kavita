@@ -64,18 +64,6 @@ public interface IStatisticService
 public class StatisticService(ILogger<StatisticService> logger, DataContext context, IMapper mapper, IUnitOfWork unitOfWork): IStatisticService
 {
 
-    private static readonly (int Start, int? End)[] PageBuckets =
-    [
-        (1, 100),
-        (101, 200),
-        (201, 300),
-        (301, 400),
-        (401, 500),
-        (501, 600),
-        (601, 1000),
-        (1001, null), // 1000+
-    ];
-
     public async Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds)
     {
         if (libraryIds.Count == 0)
@@ -1016,18 +1004,37 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .ToListAsync();
 
         var totalCount = fullyReadChapters.Count;
+        var highest = fullyReadChapters.MaxOrDefault(x => x, 0);
 
-        var buckets = PageBuckets.Select(bucket =>
+        if (highest == 0)
         {
+            return new SpreadStatsDto()
+            {
+                Buckets = [],
+                TotalCount = 0
+            };
+        }
+
+        var magnitude = (int) Math.Floor(Math.Log10(highest));
+        var bucketSize = (int) Math.Pow(10, magnitude - 1);
+
+        var bucketCount = 8;
+        var buckets = Enumerable.Range(0, bucketCount).Select(i =>
+        {
+            var isLastBucket = i + 1 == bucketCount;
+
+            var start = i * bucketSize;
+            var end = isLastBucket ? int.MaxValue : (i + 1) * bucketSize;
+
             var count = fullyReadChapters.Count(pages =>
-                pages >= bucket.Start &&
-                (!bucket.End.HasValue || pages <= bucket.End.Value)
+                pages >= start &&
+                (pages <= end)
             );
 
             return new StatBucketDto
             {
-                RangeStart = bucket.Start,
-                RangeEnd = bucket.End,
+                RangeStart = start,
+                RangeEnd = isLastBucket ? null : end,
                 Count = count,
                 Percentage = totalCount > 0 ? (decimal)count / totalCount * 100 : 0
             };
