@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input} from '@angular/core';
 import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
 import {LineSeriesOption} from "echarts/charts";
 import {ThemeService} from "../../../_services/theme.service";
@@ -49,7 +49,12 @@ export class LineChartComponent {
     return Array.isArray(data[0]);
   });
 
-  // TODO: Update colours, move into theme service?
+  constructor() {
+    effect(() => {
+      console.log('data: ', this.seriesOption())
+    })
+  }
+
   private getColorForIndex(index: number): string {
     const palette = this.themeService.chartsColourPalette();
     return palette[index % palette.length];
@@ -63,7 +68,7 @@ export class LineChartComponent {
       return {
         name: this.legendLabels()[0],
         type: 'line',
-        stack: 'Total',
+        smooth: true,
         data: data as any[],
       }
     }
@@ -71,8 +76,8 @@ export class LineChartComponent {
     return data.map((dataSet, index) => ({
       name: this.legendLabels()[index],
       type: 'line',
-      stack: 'Total',
       data: dataSet as any[],
+      smooth: true,
       itemStyle: {
         color: this.getColorForIndex(index),
       }
