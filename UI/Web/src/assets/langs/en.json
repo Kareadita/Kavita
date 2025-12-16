@@ -534,29 +534,6 @@
         "open-filtered-search": "Open a filtered search for {{item}}"
     },
 
-    "user-stats-info-cards": {
-        "total-pages-read-label": "Total Pages Read",
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-label": "Total Words Read",
-        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
-        "time-spent-reading-label": "Time Spent Reading",
-        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-label": "Chapters Read",
-        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "avg-reading-per-week-label": "Average Reading / Week",
-        "last-active-label": "Last Active",
-        "chapters": "{{value}} chapters",
-        "pages-read-by-year-title": "Pages Read By Year",
-        "words-read-by-year-title": "Words Read By Year",
-        "words-count": "{{num}} words",
-        "pages-count": "{{num}} pages"
-    },
-
-    "user-stats": {
-        "library-read-progress-title": "Library Read Progress",
-        "read-percentage": "% Read"
-    },
-
     "top-readers": {
         "title": "Top Readers",
         "time-selection-label": "Timeframe",
@@ -2067,7 +2044,6 @@
         "reading-profiles": "Reading Profiles",
         "clients": "Auth Keys / OPDS",
         "devices": "Devices",
-        "user-stats": "Stats",
         "scrobbling": "Scrobbling",
         "theme": "Theme",
         "font": "Epub Fonts",

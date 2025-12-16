@@ -800,7 +800,7 @@ export class ActionService {
 
     this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
     this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id)
-    this.readingListModalRef.componentInstance.title = ""
+    this.readingListModalRef.componentInstance.title = '';
 
     this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
       this.readingListModalRef = null;

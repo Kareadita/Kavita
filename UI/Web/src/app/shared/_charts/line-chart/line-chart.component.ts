@@ -49,12 +49,6 @@ export class LineChartComponent {
     return Array.isArray(data[0]);
   });
 
-  constructor() {
-    effect(() => {
-      console.log('data: ', this.seriesOption())
-    })
-  }
-
   private getColorForIndex(index: number): string {
     const palette = this.themeService.chartsColourPalette();
     return palette[index % palette.length];

@@ -26,6 +26,7 @@
       <div class="col-auto mb-2">
         <app-icon-and-title [label]="t('pages-read-label')" [clickable]="false"
                             fontClasses="fa-solid fa-file"
+                            (click)="openPageByYearList()"
                             [title]="t('pages-read-tooltip', {count: data?.pagesRead | number})">
           {{data?.pagesRead | number}}
         </app-icon-and-title>
@@ -35,6 +36,7 @@
       <div class="col-auto mb-2">
         <app-icon-and-title [label]="t('words-read-label')" [clickable]="false"
                             fontClasses="fa-solid fa-file-lines"
+                            (click)="openWordByYearList()"
                             [title]="t('words-read-tooltip', {count: data?.wordsRead | number})">
           {{data?.wordsRead | number}}
         </app-icon-and-title>

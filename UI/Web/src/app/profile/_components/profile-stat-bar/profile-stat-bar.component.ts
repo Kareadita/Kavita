@@ -1,9 +1,14 @@
 import {ChangeDetectionStrategy, Component, effect, inject, input, model} from '@angular/core';
 import {StatisticsService} from "../../../_services/statistics.service";
 import {StatsFilter} from "../../../statistics/_models/stats-filter";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {DecimalPipe} from "@angular/common";
 import {IconAndTitleComponent} from "../../../shared/icon-and-title/icon-and-title.component";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {
+  GenericListModalComponent
+} from "../../../statistics/_components/_modals/generic-list-modal/generic-list-modal.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 export interface ProfileStatBar {
   booksRead: number;
@@ -28,6 +33,7 @@ export interface ProfileStatBar {
 })
 export class ProfileStatBarComponent {
   private readonly statsService = inject(StatisticsService);
+  private readonly modalService = inject(NgbModal);
 
   userId = input.required<number>();
   year = input.required<number>();
@@ -35,6 +41,30 @@ export class ProfileStatBarComponent {
 
   data = model<ProfileStatBar>();
   dataResource = this.statsService.getUserOverallStats(() => this.filter(), () => this.userId());
+
+  openPageByYearList() {
+    const numberPipe = new CompactNumberPipe();
+    this.statsService.getPagesPerYear().subscribe(yearCounts => {
+      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
+      ref.componentInstance.items = yearCounts.map(t => {
+        const countStr = translate('user-stats-info-cards.pages-count', {num: numberPipe.transform(t.value)});
+        return `${t.name}: ${countStr}s`;
+      });
+      ref.componentInstance.title = translate('user-stats-info-cards.pages-read-by-year-title');
+    });
+  }
+
+  openWordByYearList() {
+    const numberPipe = new CompactNumberPipe();
+    this.statsService.getWordsPerYear().subscribe(yearCounts => {
+      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
+      ref.componentInstance.items = yearCounts.map(t => {
+        const countStr = translate('user-stats-info-cards.words-count', {num: numberPipe.transform(t.value)});
+        return `${t.name}: ${countStr}`;
+      });
+      ref.componentInstance.title = translate('user-stats-info-cards.words-read-by-year-title');
+    });
+  }
 
 
 }

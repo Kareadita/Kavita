@@ -62,7 +62,6 @@ export enum SettingsTabId {
   Clients = 'clients',
   Theme = 'theme',
   Devices = 'devices',
-  UserStats = 'user-stats',
   Scrobbling = 'scrobbling',
   ScrobblingHolds = 'scrobble-holds',
   Customize = 'customize',
@@ -157,7 +156,7 @@ export class PreferenceNavComponent implements AfterViewInit {
     switchMap(() => this.navService.sideNavCollapsed$),
     take(1),
     filter(collapsed => !collapsed),
-    tap(c => {
+    tap(_ => {
       this.navService.collapseSideNav(true);
     }),
   );
@@ -235,7 +234,6 @@ export class PreferenceNavComponent implements AfterViewInit {
           new SideNavItem(SettingsTabId.Theme),
           new SideNavItem(SettingsTabId.Font),
           new SideNavItem(SettingsTabId.Devices),
-          new SideNavItem(SettingsTabId.UserStats),
         ]
       },
       {
