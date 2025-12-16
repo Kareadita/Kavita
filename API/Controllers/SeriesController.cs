@@ -452,7 +452,7 @@ public class SeriesController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     /// <remarks>Do not rely on this API externally. May change without hesitation. </remarks>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = new [] {"seriesId"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new [] {"seriesId"})]
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {
