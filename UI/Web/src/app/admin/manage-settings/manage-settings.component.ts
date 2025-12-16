@@ -169,7 +169,7 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   resetIPAddresses() {
-    this.settingsService.resetIPAddressesSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.resetIPAddressesSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings.ipAddresses = settings.ipAddresses;
       this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
       this.toastr.success(this.translocoService.translate('toasts.reset-ip-address'));
@@ -179,7 +179,7 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   resetBaseUrl() {
-    this.settingsService.resetBaseUrl().pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.resetBaseUrl().subscribe((settings: ServerSettings) => {
       this.serverSettings.baseUrl = settings.baseUrl;
       this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
       this.toastr.success(this.translocoService.translate('toasts.reset-base-url'));

@@ -103,7 +103,7 @@ export class UserLoginComponent implements OnInit {
       this.oidcConfig.set(config);
     });
 
-    this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
+    this.memberService.adminExists().subscribe(adminExists => {
       if (!adminExists) {
         this.router.navigateByUrl('registration/register');
         return;

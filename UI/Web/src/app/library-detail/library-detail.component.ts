@@ -178,7 +178,7 @@ export class LibraryDetailComponent implements OnInit {
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
-    this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
+    this.libraryService.getLibraryNames().subscribe(names => {
       this.libraryName = names[this.libraryId];
       this.titleService.setTitle('Kavita - ' + this.libraryName);
       this.cdRef.markForCheck();

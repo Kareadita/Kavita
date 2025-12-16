@@ -41,7 +41,7 @@ export class ManageMediaSettingsComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.getServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.settingsForm.addControl('encodeMediaAs', new FormControl(this.serverSettings.encodeMediaAs, [Validators.required]));
       this.settingsForm.addControl('bookmarksDirectory', new FormControl(this.serverSettings.bookmarksDirectory, [Validators.required]));
@@ -106,7 +106,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   async resetToDefaults() {
     if (!await this.confirmService.confirm(translate('toasts.confirm-reset-server-settings'))) return;
 
-    this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.resetServerSettings().subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
