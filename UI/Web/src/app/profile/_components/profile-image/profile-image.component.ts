@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   ElementRef,
   inject,
   input,
@@ -66,19 +65,10 @@ export class ProfileImageComponent {
     return this.canUploadImage() && !this.uploadInProgress();
   });
 
-  currentImageUrl = model<string | null>(null);
-
-  constructor() {
-
-    effect(() => {
-      // Show preview if available, otherwise show existing image
-      const userId = this.userId();
-      const url =  this.previewUrl() || (userId && this.imageService.getUserCoverImage(userId)) || null;
-
-      this.currentImageUrl.set(url);
-    });
-
-  }
+  currentImageUrl = computed(() => {
+    const userId = this.userId();
+    return this.previewUrl() || (userId && this.imageService.getUserCoverImage(userId)) || null;
+  })
 
 
   openFileSelector(): void {

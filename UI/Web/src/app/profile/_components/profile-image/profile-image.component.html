@@ -5,7 +5,7 @@
 
       <div class="person-badge">
         @let image = currentImageUrl();
-        @if (image && accountService.currentUserSignal()?.coverImage) {
+        @if (image) {
           <app-image objectFit="cover"
                      [styles]="{'object-position': 'top'}"
                      height="200px"
