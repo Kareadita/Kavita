@@ -17,8 +17,6 @@ import {ResponsiveTableComponent} from "../../shared/_components/responsive-tabl
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ScrobblingHoldsComponent {
-  protected readonly ColumnMode = ColumnMode;
-
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrobblingService = inject(ScrobblingService);
   protected readonly imageService = inject(ImageService);

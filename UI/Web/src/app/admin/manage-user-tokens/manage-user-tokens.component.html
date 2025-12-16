@@ -24,7 +24,7 @@
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('anilist-header')}}
       </ng-template>
-      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
         @if (item.isAniListTokenSet) {
           {{t('token-set-label')}} <span class="text-muted ms-1">{{t('expires-label', {date: item.aniListValidUntilUtc | utcToLocalTime})}}</span>
         } @else {

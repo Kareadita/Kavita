@@ -52,9 +52,9 @@
             <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-all-label')}}</label>
           </div>
         </ng-template>
-        <ng-template let-event="row" let-idx="index" ngx-datatable-cell-template>
-          <input id="select-event-{{idx}}" type="checkbox" class="form-check-input"
-                 [ngModel]="selections.isSelected(event)" (change)="handleSelection(event, idx)">
+        <ng-template let-event="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+          <input id="select-event-{{rowIndex}}" type="checkbox" class="form-check-input"
+                 [ngModel]="selections.isSelected(event)" (change)="handleSelection(event, rowIndex)">
         </ng-template>
       </ngx-datatable-column>
 
@@ -80,8 +80,8 @@
         <ng-template let-column="column" ngx-datatable-header-template>
           {{t('series-header')}}
         </ng-template>
-        <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
-          <a href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank" id="scrobble-history--{{idx}}">{{item.seriesName}}</a>
+        <ng-template let-item="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
+          <a href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank" id="scrobble-history--{{rowIndex}}">{{item.seriesName}}</a>
         </ng-template>
       </ngx-datatable-column>
 
@@ -123,7 +123,7 @@
         <ng-template let-column="column" ngx-datatable-header-template>
           {{t('is-processed-header')}}
         </ng-template>
-        <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+        <ng-template let-item="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
           @if(item.isProcessed) {
             <i class="fa-solid fa-check-circle icon" aria-hidden="true"></i>
           } @else if (item.isErrored) {
@@ -131,7 +131,7 @@
           } @else {
             <i class="fa-regular fa-circle icon" aria-hidden="true"></i>
           }
-          <span class="visually-hidden" attr.aria-labelledby="scrobble-history--{{idx}}">
+          <span class="visually-hidden" attr.aria-labelledby="scrobble-history--{{rowIndex}}">
               {{item.isProcessed ? t('processed') : t('not-processed')}}
             </span>
         </ng-template>

@@ -175,7 +175,7 @@
             <ng-template let-column="column" ngx-datatable-header-template>
               {{t('last-executed-header')}}
             </ng-template>
-            <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
               {{item.lastExecutionUtc | utcToLocalTime | defaultValue }}
             </ng-template>
           </ngx-datatable-column>

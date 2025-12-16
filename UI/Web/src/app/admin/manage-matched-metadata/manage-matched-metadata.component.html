@@ -57,7 +57,7 @@
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('status-header')}}
       </ng-template>
-      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
         @if (item.series.isBlacklisted) {
           {{t('blacklist-status-label')}}
         } @else if (item.series.dontMatch) {
@@ -92,7 +92,7 @@
       <ng-template let-column="column" ngx-datatable-header-template>
         {{t('actions-header')}}
       </ng-template>
-      <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
+      <ng-template let-item="row" ngx-datatable-cell-template>
         <button class="btn btn-icon" (click)="fixMatch(item.series)">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
           <span class="visually-hidden">{{t('match-alt', {seriesName: item.series.name})}}</span>
