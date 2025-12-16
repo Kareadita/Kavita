@@ -265,7 +265,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetReadingPaceForUser(filter, userId, year, booksOnly));
+        return Ok(await statService.GetReadingPaceForUser(filter, userId, year, booksOnly, UserId));
     }
 
     /// <summary>

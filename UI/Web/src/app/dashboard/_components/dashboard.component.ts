@@ -172,7 +172,7 @@ export class DashboardComponent implements OnInit {
             s.api = this.filterUtilityService.decodeFilter(s.smartFilterEncoded!).pipe(
               switchMap(filter => {
                 s.smartFilterDecoded = filter;
-                return this.seriesService.getAllSeriesV2(0, 20, filter, QueryContext.Dashboard);
+                return this.seriesService.getAllSeriesV2(1, 20, filter, QueryContext.Dashboard);
               }))
                 .pipe(map(d => d.result),tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;

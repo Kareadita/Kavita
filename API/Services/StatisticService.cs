@@ -44,7 +44,7 @@ public interface IStatisticService
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
     Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year, int requestingUserId);
-    Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly);
+    Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly, int requestingUserID);
     Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
@@ -732,16 +732,24 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         return result;
     }
 
-    public async Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly)
+    public async Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly, int requestingUserId)
     {
-        var startTime = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
-        var endTime = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
+        var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+
+        var firstProgress = await unitOfWork.AppUserProgressRepository.GetFirstProgressForUser(userId);
+        if (firstProgress == null)
+        {
+            return new ReadingPaceDto();
+        }
+
+        filter.StartDate ??= firstProgress;
+        filter.StartDate = filter.StartDate > firstProgress ? filter.StartDate : firstProgress;
+        filter.EndDate ??= DateTime.UtcNow;
+        filter.EndDate = filter.EndDate < DateTime.UtcNow ? filter.EndDate : DateTime.UtcNow;
 
         var activities = await context.AppUserReadingSessionActivityData
-            .Where(a => a.ReadingSession.AppUserId == userId &&
-                        !a.ReadingSession.IsActive &&
-                        a.StartTimeUtc >= startTime &&
-                        a.StartTimeUtc <= endTime)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .Select(a => new
             {
                 a.PagesRead,
@@ -777,7 +785,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 comicsRead.Add(activity.ChapterId);
         }
 
-        var daysInRange = (int)(endTime - startTime).TotalDays + 1;
+        var timeSpan = (filter.EndDate - filter.StartDate).Value;
+        var daysInRange = (int)timeSpan.TotalDays + 1;
 
         return new ReadingPaceDto
         {
@@ -1166,22 +1175,16 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     public async Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId)
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
-        if (userId != requestingUserId && !socialPreferences.ShareProfile)
-        {
-            return new ProfileStatBarDto();
-        }
-
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
         var chapterData = await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
-            .Where(d => d.PagesRead >= d.TotalPages)
             .Select(d => new
             {
                 d.ChapterId,
                 FormatType = d.Chapter.Files.First().Format,
                 d.PagesRead,
-                d.WordsRead
+                d.WordsRead,
             })
             .ToListAsync();
 
