@@ -15,9 +15,7 @@
               }
             }
           </h4>
-        }
-
-        @if (showLibraryTypeahead() && libraryTypeaheadSettings) {
+        } @else if (libraryTypeaheadSettings) {
           <app-typeahead
             [settings]="libraryTypeaheadSettings"
             (selectedData)="updateSelectedLibraries($event)"
