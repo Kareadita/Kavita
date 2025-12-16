@@ -95,8 +95,8 @@ export class AppComponent implements OnInit {
     this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
   }
 
-  @HostListener('window:resize', ['$event'])
-  @HostListener('window:orientationchange', ['$event'])
+  @HostListener('window:resize', [])
+  @HostListener('window:orientationchange', [])
   setDocHeight() {
     // Sets a CSS variable for the actual device viewport height. Needed for mobile dev.
     const vh = window.innerHeight * 0.01;

@@ -83,19 +83,19 @@ export class ManageLibraryComponent implements OnInit {
   lastSelectedIndex: number | null = null;
 
   @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(_: KeyboardEvent) {
+  handleKeypress(_: Event) {
     this.isShiftDown = true;
   }
 
   @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(_: KeyboardEvent) {
+  handleKeyUp(_: Event) {
     this.isShiftDown = false;
   }
 
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
-  onResize(){
+  onResize(event: Event){
     this.useActionableSource.next(this.utilityService.getActiveBreakpoint() <= Breakpoint.Tablet);
   }
 

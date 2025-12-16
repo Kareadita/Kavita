@@ -253,15 +253,17 @@ export class LibraryDetailComponent implements OnInit {
 
 
   @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
+  handleKeypress(event: Event) {
+    const evt = event as KeyboardEvent;
+    if (evt.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = true;
     }
   }
 
   @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
+  handleKeyUp(event: Event) {
+    const evt = event as KeyboardEvent;
+    if (evt.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = false;
     }
   }

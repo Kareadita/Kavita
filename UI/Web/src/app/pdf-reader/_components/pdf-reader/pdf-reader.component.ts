@@ -148,7 +148,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
-  onResize(){
+  onResize(event: Event){
     // Update the window Height
     this.calcScrollbarNeeded();
   }

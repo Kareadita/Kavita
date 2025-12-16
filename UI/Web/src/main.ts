@@ -1,4 +1,10 @@
-import {ApplicationConfig, importProvidersFrom, inject, provideAppInitializer,} from '@angular/core';
+import {
+  ApplicationConfig,
+  importProvidersFrom,
+  inject,
+  provideAppInitializer,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import {AppComponent} from './app/app.component';
 import {NgCircleProgressModule} from 'ng-circle-progress';
 import {ToastrModule} from 'ngx-toastr';
@@ -168,6 +174,7 @@ bootstrapApplication(AppComponent, {
         },
         provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor, clientInfoInterceptor]), withFetch()),
         provideAppInitializer(() => bootstrapUser()),
+        provideZoneChangeDetection()
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));

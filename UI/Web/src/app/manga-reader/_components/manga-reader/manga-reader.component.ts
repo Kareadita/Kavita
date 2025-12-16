@@ -715,7 +715,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
-  onResize() {
+  onResize(event: Event) {
     this.disableDoubleRendererIfScreenTooSmall();
   }
 

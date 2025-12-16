@@ -63,16 +63,18 @@ export class BulkOperationsComponent<T> implements OnInit {
   protected readonly Action = Action;
 
   @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
+  handleKeypress(event: Event) {
+    const evt = event as KeyboardEvent;
+    if (evt.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = true;
     }
     // TODO: See if we can figure out a select all (Ctrl+A) by having each method handle the event or pass all the data into this component.
   }
 
   @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.SHIFT) {
+  handleKeyUp(event: Event) {
+    const evt = event as KeyboardEvent;
+    if (evt.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = false;
     }
   }
