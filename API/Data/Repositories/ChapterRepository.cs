@@ -453,6 +453,7 @@ public class ChapterRepository : IChapterRepository
         // Get the chapter entity with proper ordering
         var firstChapter = await _context.Chapter
             .Include(c => c.Volume)
+            .Include(c => c.Files)
             .Where(c => c.Volume.SeriesId == seriesId)
             .OrderBy(c =>
                 // Priority 1: Regular volumes (not loose leaf, not special)
@@ -483,6 +484,7 @@ public class ChapterRepository : IChapterRepository
         // Get the chapter entity with proper ordering
         var firstChapter = await _context.Chapter
             .Include(c => c.Volume)
+            .Include(c => c.Files)
             .Where(c => c.Volume.Id == volumeId)
             .OrderBy(c =>
                 // Priority 1: Regular volumes (not loose leaf, not special)
