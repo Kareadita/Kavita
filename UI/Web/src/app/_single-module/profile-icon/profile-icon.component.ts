@@ -4,11 +4,13 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {CoverUpdateEvent} from "../../_models/events/cover-update-event";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {NgStyle} from "@angular/common";
 
 @Component({
   selector: 'app-profile-icon',
   imports: [
-    ImageComponent
+    ImageComponent,
+    NgStyle
   ],
   templateUrl: './profile-icon.component.html',
   styleUrl: './profile-icon.component.scss',
@@ -28,6 +30,7 @@ export class ProfileIconComponent {
   processEvents = input<boolean>(true);
 
   currentImageUrl = model<string>('');
+  noImage = model<boolean>(false);
 
   constructor() {
 
@@ -61,6 +64,11 @@ export class ProfileIconComponent {
       this.currentImageUrl.set(this.imageService.getUserCoverImage(userId));
     });
 
+  }
+
+  handleErrorLoad() {
+    console.log('no image for ', this.userId())
+    this.noImage.set(true);
   }
 
 }

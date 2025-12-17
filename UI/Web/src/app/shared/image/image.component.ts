@@ -3,10 +3,10 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  ElementRef,
+  ElementRef, EventEmitter,
   inject,
   Input,
-  OnChanges,
+  OnChanges, Output,
   Renderer2,
   RendererStyleFlags2,
   ViewChild
@@ -70,6 +70,10 @@ export class ImageComponent implements OnChanges {
   @Input() objectFit: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down' = 'fill';
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
+  /**
+   * Outputs when the image failed to load
+   */
+  @Output() errorLoad = new EventEmitter<string>();
 
   constructor() {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
@@ -147,6 +151,7 @@ export class ImageComponent implements OnChanges {
         if (this.hideOnError) {
           this.renderer.addClass(image, 'd-none');
         }
+        this.errorLoad.emit(this.imageUrl);
         this.cdRef.markForCheck();
         break;
       case 'finally':
