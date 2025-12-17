@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed, DestroyRef,
+  effect, ElementRef,
+  HostListener,
+  inject,
+  input,
+  OnInit,
+  signal
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {
   SmartTimeRangePickerComponent,
@@ -9,12 +19,13 @@ import {Library} from "../../../_models/library/library";
 import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
 import {map} from "rxjs/operators";
 import {StatsFilter} from "../../_models/stats-filter";
-import {of, tap} from "rxjs";
+import {debounceTime, distinctUntilChanged, of, ReplaySubject, tap} from "rxjs";
 import {LibraryService} from "../../../_services/library.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {AccountService} from "../../../_services/account.service";
 import {ReaderService} from "../../../_services/reader.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 export interface LibraryAndTimeFilterGroup {
   timeFilter: FormGroup<{
@@ -41,6 +52,7 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly utilityService = inject(UtilityService);
   private readonly readerService = inject(ReaderService);
+  private readonly elementRef = inject(ElementRef);
 
   filterForm = input.required<FormGroup>();
   label = input.required<string>();
@@ -53,6 +65,45 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
 
   filter = signal<StatsFilter | undefined>(undefined);
   year = computed(() => this.filter()?.timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
+
+  @HostListener('body:click', ['$event'])
+  handleDocumentClick(event: Event) {
+
+    const target = event.target as HTMLElement;
+
+    if (!this.showLibraryTypeahead()) return;
+
+    // Typeahead will click on the body to prevent multiple instances being open, it's impossible for user to click body
+    if (target.tagName.toLowerCase() === 'body') return;
+
+    // composedPath() returns the path at event dispatch time,
+    // even if nodes are later removed
+    const path = event.composedPath() as HTMLElement[];
+
+    const clickedLibSelector = path.some(el =>
+      el instanceof HTMLElement && el.classList.contains('lib-selector')
+    );
+
+    if (clickedLibSelector) {
+      return; // We are toggling into the typeahead
+    }
+
+    const typeaheadInStack = path.some(el =>
+      el.tagName?.toLowerCase() === 'app-typeahead'
+    );
+
+    if (!typeaheadInStack) {
+      this.showLibraryTypeahead.set(false);
+      return; // We clicked near the typeahead, so close
+    }
+
+    const clickedInElement = path.includes(this.elementRef.nativeElement);
+    if (!clickedInElement) {
+      this.showLibraryTypeahead.set(false);
+      return;
+    }
+  }
+
 
   constructor() {
     effect(() => {
@@ -110,7 +161,6 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
 
     return settings;
   }
-
 
   updateSelectedLibraries(libs: Library[]) {
     this.filterForm().get('libraries')!.setValue(libs.map(l => l.id));
