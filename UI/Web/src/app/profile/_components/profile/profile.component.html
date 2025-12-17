@@ -55,7 +55,7 @@
     </div>
 
     <div class="carousel-tabs-container mb-2 ms-md-2 me-md-2 w-auto">
-      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="true" (navChange)="onNavChange($event)">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="true" syncUrlFragment>
 
         <li [ngbNavItem]="TabID.Overview">
           <a ngbNavLink>{{t(TabID.Overview)}}</a>

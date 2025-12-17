@@ -549,6 +549,10 @@
         "all-time": "{{time-periods.all-time}}"
     },
 
+    "most-active-users": {
+        "title": "Most Active Readers"
+    },
+
     "role-selector": {
         "title": "{{common.roles}}",
         "deselect-all": "{{common.deselect-all}}",
@@ -2802,6 +2806,10 @@
     },
 
     "server-stats": {
+        "stats-title": "Explore",
+        "stats-tab": "{{tabs.stats}}",
+        "management-tab": "{{tabs.management}}",
+
         "total-series-label": "Total Series",
         "total-series-tooltip": "Total Series: {{count}}",
         "total-volumes-label": "Total Volumes",
@@ -3737,7 +3745,8 @@
         "scrobbling-tab": "Scrobbling",
         "smart-filters-tab": "Smart Filters",
         "annotations-tab": "Annotations",
-        "overview-tab": "Overview"
+        "overview-tab": "Overview",
+        "management-tab": "Management"
     },
 
     "common": {

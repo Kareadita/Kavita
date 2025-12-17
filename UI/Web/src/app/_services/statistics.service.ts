@@ -105,6 +105,13 @@ export class StatisticsService {
     return this.httpClient.get<TopUserRead[]>(this.baseUrl + 'stats/server/top/users?days=' + days);
   }
 
+  //statsFilter: () => StatsFilter | undefined
+  getMostActiveUsers() {
+    //return this.filterServerResource<MostActiveUser[]>(statsFilter, 'most-active-users');
+    //return httpResource<TopUserRead[]>(() => this.baseUrl + 'stats/most-active-users').asReadonly();
+    return httpResource<TopUserRead[]>(() => this.baseUrl + 'stats/server/top/users?days=0').asReadonly();
+  }
+
   getReadingHistory(userId: number) {
     return this.httpClient.get<ReadHistoryEvent[]>(this.baseUrl + 'stats/user/reading-history?userId=' + userId);
   }
@@ -195,8 +202,12 @@ export class StatisticsService {
     return this.filterResource<StatCount<MangaFormat>[]>(statsFilter, userId, 'preferred-format')
   }
 
-  private filterHttpParams(filter: StatsFilter, userId: number) {
-    let params = new HttpParams().set('userId', userId);
+  private filterHttpParams(filter: StatsFilter, userId: number | undefined = undefined) {
+    let params = new HttpParams();
+
+    if (userId !== undefined) {
+      params = params.set('userId', userId)
+    }
 
     if (filter.timeFilter.startDate) {
       params = params.set('startDate', filter.timeFilter.startDate.toISOString());
@@ -212,6 +223,7 @@ export class StatisticsService {
     return params;
   }
 
+
   private filterResource<T>(
     statsFilter: () => (StatsFilter | undefined),
     userId: () => number,
@@ -224,6 +236,21 @@ export class StatisticsService {
       return {
         url: `${this.baseUrl}stats/${path}`,
         params: this.filterHttpParams(filter, userId()),
+      };
+    }).asReadonly();
+  }
+
+  private filterServerResource<T>(
+    statsFilter: () => (StatsFilter | undefined),
+    path: string
+  ) {
+    return httpResource<T>(() => {
+      const filter = statsFilter();
+      if (!filter) return undefined; // skip request until valid
+
+      return {
+        url: `${this.baseUrl}stats/${path}`,
+        params: this.filterHttpParams(filter),
       };
     }).asReadonly();
   }

@@ -1,0 +1,31 @@
+<ng-container *transloco="let t; prefix:'most-active-users'">
+  <section class="most-active-users" aria-labelledby="active-users-heading">
+    <div class="section-header d-flex align-items-center justify-content-between mb-3">
+      <h5 id="active-users-heading" class="mb-0 section-title">
+        {{t('title')}}
+      </h5>
+    </div>
+
+    @if (usersResource.isLoading()) {
+      <app-loading></app-loading>
+    } @else {
+      @let users = usersResource.value() || [];
+      @if (users.length === 0) {
+        <div class="empty-state text-center py-4">
+          <i class="fa-solid fa-users-slash fa-2x mb-2" aria-hidden="true"></i>
+          <p class="mb-0">No reading activity {{ timeFrameLabel() }}</p>
+        </div>
+      } @else {
+        <div class="user-cards d-flex flex-column gap-2">
+          @for (user of users; track user.userId) {
+            <app-active-user-card
+              [user]="user"
+              [timeFrameLabel]="timeFrameLabel()" />
+          }
+        </div>
+      }
+    }
+
+
+  </section>
+</ng-container>

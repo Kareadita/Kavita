@@ -336,6 +336,7 @@ public class AccountController : BaseApiController
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
         dto.AuthKeys = _mapper.Map<List<AuthKeyDto>>(user.AuthKeys);
+
         return dto;
     }
 

@@ -1,7 +1,15 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject} from '@angular/core';
-import {Router} from '@angular/router';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {map, Observable, ReplaySubject, shareReplay} from 'rxjs';
+import {ActivatedRoute, Router} from '@angular/router';
+import {
+  NgbModal,
+  NgbNav,
+  NgbNavChangeEvent,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavOutlet
+} from '@ng-bootstrap/ng-bootstrap';
+import {map, Observable, ReplaySubject, shareReplay, tap} from 'rxjs';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Series} from 'src/app/_models/series';
@@ -22,7 +30,7 @@ import {FileBreakdownStatsComponent} from '../file-breakdown-stats/file-breakdow
 import {TopReadersComponent} from '../top-readers/top-readers.component';
 import {StatListComponent} from '../stat-list/stat-list.component';
 import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
-import {AsyncPipe, DecimalPipe} from '@angular/common';
+import {AsyncPipe, DecimalPipe, Location} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
@@ -33,26 +41,40 @@ import {
   LibraryAndTimeSelectorComponent
 } from "../library-and-time-selector/library-and-time-selector.component";
 import {StatsFilter} from "../../_models/stats-filter";
+import {MostActiveUsersComponent} from "../most-active-users/most-active-users.component";
+import {ProfileOverviewComponent} from "../../../profile/_components/profile-overview/profile-overview.component";
+import {NavTabUrlDirective} from "../../../_directives/nav-tab-url.directive";
+
+enum TabID {
+  Stats = 'stats-tab',
+  Management = 'management-tab',
+}
 
 @Component({
     selector: 'app-server-stats',
     templateUrl: './server-stats.component.html',
     styleUrls: ['./server-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective, ReactiveFormsModule, LibraryAndTimeSelectorComponent]
+  imports: [IconAndTitleComponent, StatListComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent,
+    ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe,
+    BytesPipe, TranslocoDirective, ReactiveFormsModule, LibraryAndTimeSelectorComponent, MostActiveUsersComponent,
+    NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, NavTabUrlDirective]
 })
 export class ServerStatsComponent {
-  private statService = inject(StatisticsService);
-  private router = inject(Router);
-  private imageService = inject(ImageService);
-  private metadataService = inject(MetadataService);
-  private modalService = inject(NgbModal);
-  private utilityService = inject(UtilityService);
-  private filterUtilityService = inject(FilterUtilitiesService);
+  private readonly statService = inject(StatisticsService);
+  private readonly router = inject(Router);
+  private readonly imageService = inject(ImageService);
+  private readonly metadataService = inject(MetadataService);
+  private readonly modalService = inject(NgbModal);
+  private readonly utilityService = inject(UtilityService);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly location = inject(Location);
+  private readonly route = inject(ActivatedRoute);
 
 
   private readonly destroyRef = inject(DestroyRef);
   protected readonly accountService = inject(AccountService);
+  protected readonly TabID = TabID;
 
   filterForm = new FormGroup<LibraryAndTimeFilterGroup>({
     timeFilter: new FormGroup({
@@ -61,6 +83,7 @@ export class ServerStatsComponent {
     }),
     libraries: new FormControl<number[]>([], { nonNullable: true }),
   });
+  activeTabId = TabID.Stats;
 
   userId = computed(() => this.accountService.currentUserSignal()?.id);
 
@@ -82,7 +105,6 @@ export class ServerStatsComponent {
   }
 
   breakpointSubject = new ReplaySubject<Breakpoint>(1);
-  breakpoint$: Observable<Breakpoint> = this.breakpointSubject.asObservable();
 
 
 
@@ -92,9 +114,9 @@ export class ServerStatsComponent {
     this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
   }
 
-  get Breakpoint() { return Breakpoint; }
 
   constructor() {
+
     this.seriesImage = (data: PieDataItem) => {
       if (data.extra) return this.imageService.getSeriesCoverImage(data.extra.id);
       return '';
@@ -165,6 +187,13 @@ export class ServerStatsComponent {
       ref.componentInstance.items = [...new Set(people.map(person => person.name))];
       ref.componentInstance.title = translate('server-stats.people');
     });
+  }
+
+
+  updateUrl(activeTab: TabID) {
+    const tokens = this.location.path().split('#');
+    const newUrl = `${tokens[0]}#${activeTab}`;
+    this.location.replaceState(newUrl) // TODO: Look into making this a directive for tabs
   }
 
 

@@ -6,7 +6,6 @@ import {ImageService} from "../../../_services/image.service";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {
   NgbNav,
-  NgbNavChangeEvent,
   NgbNavContent,
   NgbNavItem,
   NgbNavLink,
@@ -29,6 +28,7 @@ import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {ProfileStatsComponent} from "../profile-stats/profile-stats.component";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {TimeDurationPipe} from "../../../_pipes/time-duration.pipe";
+import {NavTabUrlDirective} from "../../../_directives/nav-tab-url.directive";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -60,6 +60,7 @@ enum TabID {
     ProfileStatsComponent,
     SentenceCasePipe,
     TimeDurationPipe,
+    NavTabUrlDirective,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -86,6 +87,7 @@ export class ProfileComponent {
 
   activeTabId = TabID.Overview;
 
+
   totalReads = computed(() => {
     if (!this.totalReadsResource.hasValue()) {
       return 0;
@@ -108,6 +110,7 @@ export class ProfileComponent {
   });
 
   constructor() {
+    // TODO: If ngBootstrap ever supports signal-based activeTabId, we can move this into syncUrlFragment directive
     this.route.fragment.pipe(tap(frag => {
       const fragId = frag as TabID;
       if (frag !== null && this.activeTabId !== fragId) {
@@ -117,15 +120,11 @@ export class ProfileComponent {
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
-  onNavChange(event: NgbNavChangeEvent) {
-    this.updateUrl(event.nextId);
-    this.activeTabId = event.nextId;
-  }
 
   updateUrl(activeTab: TabID) {
     const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
-    this.location.replaceState(newUrl) // TODO: Look into making this a directive for tabs
+    this.location.replaceState(newUrl)
   }
 
 

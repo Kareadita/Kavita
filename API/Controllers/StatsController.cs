@@ -164,16 +164,16 @@ public class StatsController(
 
 
 
-    [HttpGet("user/reading-history")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin && userId != user!.Id) return BadRequest();
-
-        return Ok(await statService.GetReadingHistory(userId));
-    }
+    // [HttpGet("user/reading-history")]
+    // [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    // public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
+    // {
+    //     var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+    //     var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+    //     if (!isAdmin && userId != user!.Id) return BadRequest();
+    //
+    //     return Ok(await statService.GetReadingHistory(userId));
+    // }
 
     /// <summary>
     /// Returns a count of pages read per year for a given userId.
