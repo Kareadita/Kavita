@@ -677,9 +677,10 @@ export class ReaderService {
   }
 
   private handlePrompt(prompt: RereadPrompt, incognitoMode: boolean) {
+    if (incognitoMode) return of({prompt: prompt, result: RereadPromptResult.ReadIncognito});
+
     if (!prompt.shouldPrompt) return of({prompt: prompt, result: RereadPromptResult.Continue});
 
-    if (incognitoMode) return of({prompt: prompt, result: RereadPromptResult.ReadIncognito});
 
     const [modal, component] = this.modalService.open(ListSelectModalComponent, {
       centered: true,
