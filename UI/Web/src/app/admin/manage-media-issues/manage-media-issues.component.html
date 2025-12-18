@@ -15,43 +15,45 @@
 
   @let filteredRows = data | filter: filterList;
   <app-responsive-table [rows]="filteredRows" [trackByFn]="trackBy">
-    <ngx-datatable
-      class="bootstrap"
-      [rows]="filteredRows"
-      [columnMode]="ColumnMode.flex"
-      rowHeight="auto"
-      [footerHeight]="50"
-      [limit]="15"
-    >
+    <ng-template #tableTemplate>
+      <ngx-datatable
+        class="bootstrap"
+        [rows]="filteredRows"
+        [columnMode]="ColumnMode.flex"
+        rowHeight="auto"
+        [footerHeight]="50"
+        [limit]="15"
+      >
 
-      <ngx-datatable-column prop="filePath" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
-        <ng-template let-column="column" ngx-datatable-header-template>
-          {{t('file-header')}}
-        </ng-template>
-        <ng-template let-item="row" ngx-datatable-cell-template>
-          {{item.filePath}}
-        </ng-template>
-      </ngx-datatable-column>
+        <ngx-datatable-column prop="filePath" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('file-header')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.filePath}}
+          </ng-template>
+        </ngx-datatable-column>
 
 
-      <ngx-datatable-column prop="comment" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-        <ng-template let-column="column" ngx-datatable-header-template>
-          {{t('comment-header')}}
-        </ng-template>
-        <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
-          {{item.comment}}
-        </ng-template>
-      </ngx-datatable-column>
+        <ngx-datatable-column prop="comment" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('comment-header')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.comment}}
+          </ng-template>
+        </ngx-datatable-column>
 
-      <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-        <ng-template let-column="column" ngx-datatable-header-template>
-          {{t('created-header')}}
-        </ng-template>
-        <ng-template let-item="row" ngx-datatable-cell-template>
-          {{item.createdUtc | utcToLocalTime | defaultDate}}
-        </ng-template>
-      </ngx-datatable-column>
-    </ngx-datatable>
+        <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('created-header')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.createdUtc | utcToLocalTime | defaultDate}}
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </ng-template>
 
     <ng-template #cardTemplate let-item let-idx="index">
       <div class="card mb-3">

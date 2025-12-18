@@ -9,33 +9,28 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import {PieChartModule} from '@swimlane/ngx-charts';
+import {ReactiveFormsModule} from '@angular/forms';
 import {BehaviorSubject, combineLatest, map, Observable, shareReplay} from 'rxjs';
 import {StatisticsService} from 'src/app/_services/statistics.service';
 import {compare, SortableHeader, SortEvent} from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import {FileExtension, FileExtensionBreakdown} from '../../_models/file-breakdown';
 import {PieDataItem} from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {MangaFormatPipe} from '../../../_pipes/manga-format.pipe';
-import {BytesPipe} from '../../../_pipes/bytes.pipe';
-import { AsyncPipe, DecimalPipe } from '@angular/common';
+import {AsyncPipe} from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
-import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
-
-export interface StackedBarChartDataItem {
-  name: string,
-  series: Array<PieDataItem>;
-}
+import {NgxDatatableModule} from "@siemens/ngx-datatable";
+import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
+import {BytesPipe} from "../../../_pipes/bytes.pipe";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {ResponsiveTableComponent} from "../../../shared/_components/responsive-table/responsive-table.component";
 
 @Component({
-    selector: 'app-file-breakdown-stats',
-    templateUrl: './file-breakdown-stats.component.html',
-    styleUrls: ['./file-breakdown-stats.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, ReactiveFormsModule, PieChartModule, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader, NgxDatatableModule, UtcToLocalTimePipe]
+  selector: 'app-file-breakdown-stats',
+  templateUrl: './file-breakdown-stats.component.html',
+  styleUrls: ['./file-breakdown-stats.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgbTooltip, ReactiveFormsModule, AsyncPipe, TranslocoDirective, NgxDatatableModule, MangaFormatPipe, BytesPipe, CompactNumberPipe, ResponsiveTableComponent]
 })
 export class FileBreakdownStatsComponent {
 
@@ -54,12 +49,12 @@ export class FileBreakdownStatsComponent {
 
   view: [number, number] = [700, 400];
 
-  formControl: FormControl = new FormControl(true, []);
-
   downloadInProgress: {[key: string]: boolean}  = {};
 
   private readonly statService = inject(StatisticsService);
   private readonly translocoService = inject(TranslocoService);
+
+  trackByExtension = (_: number, item: FileExtension) => item.extension + '_' + item.totalFiles;
 
   constructor() {
     this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntilDestroyed(this.destroyRef), shareReplay());
@@ -84,16 +79,6 @@ export class FileBreakdownStatsComponent {
     })));
   }
 
-  onSort(evt: SortEvent<FileExtension>) {
-    this.currentSort.next(evt);
-
-    // Must clear out headers here
-    this.headers.forEach((header) => {
-      if (header.sortable !== evt.column) {
-        header.direction = '';
-      }
-    });
-  }
 
   export(format: string) {
     this.downloadInProgress[format] = true;
@@ -105,6 +90,4 @@ export class FileBreakdownStatsComponent {
         this.cdRef.markForCheck();
       });
   }
-
-  protected readonly ColumnMode = ColumnMode;
 }

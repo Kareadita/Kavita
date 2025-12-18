@@ -1,14 +1,21 @@
 @if (showCards()) {
   <div class="mt-2">
     <ng-content select="[cardHeader]"></ng-content>
-    <div class="card-list">
-      @for (item of rows(); track trackByFn()(idx, item); let idx = $index) {
-        <ng-container
-          *ngTemplateOutlet="cardTemplateRef(); context: {$implicit: item, index: idx}">
-        </ng-container>
-      }
-    </div>
+    @if (isEmpty()) {
+      <ng-content select="[cardEmpty]"></ng-content>
+    } @else {
+      <div class="card-list">
+        @for (item of rows(); track trackByFn()(idx, item); let idx = $index) {
+          <ng-container
+            *ngTemplateOutlet="cardTemplateRef(); context: {$implicit: item, index: idx}">
+          </ng-container>
+        }
+      </div>
+      <ng-content select="[cardFooter]"></ng-content>
+    }
   </div>
 } @else {
-  <ng-content select="ngx-datatable"></ng-content>
+  @if (tableTemplateRef(); as tableTemplate) {
+    <ng-container *ngTemplateOutlet="tableTemplate"></ng-container>
+  }
 }

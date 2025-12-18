@@ -153,42 +153,45 @@
       <h4>{{t('recurring-tasks-title')}}</h4>
       @let data = (recurringTasks$ | async) ?? [];
       <app-responsive-table [rows]="data" [trackByFn]="trackBy">
-        <ngx-datatable
-          class="bootstrap"
-          [rows]="data"
-          [columnMode]="ColumnMode.flex"
-          rowHeight="auto"
-          [footerHeight]="50"
-          [limit]="15"
-        >
-          <ngx-datatable-column prop="title" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
-            <ng-template let-column="column" ngx-datatable-header-template>
-              {{t('job-title-header')}}
-            </ng-template>
-            <ng-template let-item="row" ngx-datatable-cell-template>
-              {{item.title | titlecase}}
-            </ng-template>
-          </ngx-datatable-column>
+        <ng-template #tableTemplate>
+          <ngx-datatable
+            class="bootstrap"
+            [rows]="data"
+            [columnMode]="ColumnMode.flex"
+            rowHeight="auto"
+            [footerHeight]="50"
+            [limit]="15"
+          >
+            <ngx-datatable-column prop="title" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+              <ng-template let-column="column" ngx-datatable-header-template>
+                {{t('job-title-header')}}
+              </ng-template>
+              <ng-template let-item="row" ngx-datatable-cell-template>
+                {{item.title | titlecase}}
+              </ng-template>
+            </ngx-datatable-column>
 
 
-          <ngx-datatable-column prop="lastExecutionUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-            <ng-template let-column="column" ngx-datatable-header-template>
-              {{t('last-executed-header')}}
-            </ng-template>
-            <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
-              {{item.lastExecutionUtc | utcToLocalTime | defaultValue }}
-            </ng-template>
-          </ngx-datatable-column>
+            <ngx-datatable-column prop="lastExecutionUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+              <ng-template let-column="column" ngx-datatable-header-template>
+                {{t('last-executed-header')}}
+              </ng-template>
+              <ng-template let-item="row" ngx-datatable-cell-template>
+                {{item.lastExecutionUtc | utcToLocalTime | defaultValue }}
+              </ng-template>
+            </ngx-datatable-column>
 
-          <ngx-datatable-column prop="cron" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-            <ng-template let-column="column" ngx-datatable-header-template>
-              {{t('cron-header')}}
-            </ng-template>
-            <ng-template let-item="row" ngx-datatable-cell-template>
-              {{item.cron}}
-            </ng-template>
-          </ngx-datatable-column>
-        </ngx-datatable>
+            <ngx-datatable-column prop="cron" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+              <ng-template let-column="column" ngx-datatable-header-template>
+                {{t('cron-header')}}
+              </ng-template>
+              <ng-template let-item="row" ngx-datatable-cell-template>
+                {{item.cron}}
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+        </ng-template>
+
         <ng-template #cardTemplate let-item let-idx="index">
           <div class="card mb-3">
             <div class="card-body">

@@ -85,12 +85,12 @@ export class UserScrobbleHistoryComponent implements OnInit {
   trackByEvents = (idx: number, data: ScrobbleEvent) => `${data.isProcessed}_${data.isErrored}_${data.id}`;
 
   @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(_: KeyboardEvent) {
+  handleKeypress(_: Event) {
     this.isShiftDown = true;
   }
 
   @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(_: KeyboardEvent) {
+  handleKeyUp(_: Event) {
     this.isShiftDown = false;
   }
 

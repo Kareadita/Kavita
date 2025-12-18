@@ -65,7 +65,7 @@ export class ConfirmService {
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });
-      modalRef.dismissed.pipe(take(1)).subscribe(() => {
+      modalRef.dismissed.subscribe(() => {
         return resolve(false);
       });
     });
@@ -93,7 +93,7 @@ export class ConfirmService {
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });
-      modalRef.dismissed.pipe(take(1)).subscribe(() => {
+      modalRef.dismissed.subscribe(() => {
         return resolve(false);
       });
     });
@@ -117,7 +117,7 @@ export class ConfirmService {
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });
-      modalRef.dismissed.pipe(take(1)).subscribe(() => {
+      modalRef.dismissed.subscribe(() => {
         return resolve(false);
       });
     });
@@ -144,7 +144,7 @@ export class ConfirmService {
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
       });
-      modalRef.dismissed.pipe(take(1)).subscribe(() => {
+      modalRef.dismissed.subscribe(() => {
         return resolve('');
       });
     });

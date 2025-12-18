@@ -97,7 +97,7 @@ export class ServerStatsComponent {
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
-  onResize() {
+  onResize(event: Event) {
     this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
   }
 

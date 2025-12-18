@@ -19,58 +19,60 @@
     }
 
     <app-responsive-table [rows]="devices" [trackByFn]="trackBy">
-      <ngx-datatable
-        class="bootstrap"
-        [rows]="devices"
-        [columnMode]="ColumnMode.flex"
-        rowHeight="auto"
-        [footerHeight]="50"
-        [limit]="15"
-      >
+      <ng-template #tableTemplate>
+        <ngx-datatable
+          class="bootstrap"
+          [rows]="devices"
+          [columnMode]="ColumnMode.flex"
+          rowHeight="auto"
+          [footerHeight]="50"
+          [limit]="15"
+        >
 
-        <ngx-datatable-column prop="name" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
-          <ng-template let-column="column" ngx-datatable-header-template>
-            {{t('name-label')}}
-          </ng-template>
-          <ng-template let-item="row" ngx-datatable-cell-template>
-            {{ item.name }}
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-column prop="name" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('name-label')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{ item.name }}
+            </ng-template>
+          </ngx-datatable-column>
 
 
-        <ngx-datatable-column prop="emailAddress" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-          <ng-template let-column="column" ngx-datatable-header-template>
-            {{t('email-label')}}
-          </ng-template>
-          <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
-            {{ item.emailAddress }}
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-column prop="emailAddress" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('email-label')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{ item.emailAddress }}
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ngx-datatable-column prop="platform" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-          <ng-template let-column="column" ngx-datatable-header-template>
-            {{t('platform-label')}}
-          </ng-template>
-          <ng-template let-item="row" ngx-datatable-cell-template>
-            {{ item.platform | devicePlatform }}
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-column prop="platform" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('platform-label')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{ item.platform | devicePlatform }}
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-          <ng-template let-column="column" ngx-datatable-header-template />
-          <ng-template let-item="row" ngx-datatable-cell-template>
-            <button class="btn btn-danger  me-2" (click)="deleteDevice(item)">
-              <i class="fa fa-trash" aria-hidden="true"></i>
-              <span class="visually-hidden">{{t('delete')}}</span>
-            </button>
+          <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+            <ng-template let-column="column" ngx-datatable-header-template />
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              <button class="btn btn-danger  me-2" (click)="deleteDevice(item)">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('delete')}}</span>
+              </button>
 
-            <button class="btn btn-primary" (click)="editDevice(item)">
-              <i class="fa fa-pen" aria-hidden="true"></i>
-              <span class="visually-hidden">{{t('edit')}}</span>
-            </button>
-          </ng-template>
-        </ngx-datatable-column>
-      </ngx-datatable>
+              <button class="btn btn-primary" (click)="editDevice(item)">
+                <i class="fa fa-pen" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('edit')}}</span>
+              </button>
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
+      </ng-template>
 
       <ng-template #cardTemplate let-item let-idx="index">
         <div class="card mb-3">

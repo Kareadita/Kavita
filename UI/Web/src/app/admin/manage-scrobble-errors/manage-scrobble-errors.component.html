@@ -16,55 +16,57 @@
 
   @let filteredData = data | filter: filterList;
   <app-responsive-table [rows]="filteredData" [trackByFn]="trackBy">
-    <ngx-datatable
-      class="bootstrap"
-      [rows]="filteredData"
-      [columnMode]="ColumnMode.flex"
-      rowHeight="auto"
-      [footerHeight]="50"
-      [limit]="15"
-    >
+    <ng-template #tableTemplate>
+      <ngx-datatable
+        class="bootstrap"
+        [rows]="filteredData"
+        [columnMode]="ColumnMode.flex"
+        rowHeight="auto"
+        [footerHeight]="50"
+        [limit]="15"
+      >
 
-      <ngx-datatable-column prop="seriesId" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
-        <ng-template let-column="column" ngx-datatable-header-template>
-          {{t('series-header')}}
-        </ng-template>
-        <ng-template let-item="row" ngx-datatable-cell-template>
-          <a href="library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.details}}</a>
-        </ng-template>
-      </ngx-datatable-column>
+        <ngx-datatable-column prop="seriesId" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('series-header')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            <a href="library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.details}}</a>
+          </ng-template>
+        </ngx-datatable-column>
 
 
-      <ngx-datatable-column prop="created" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-        <ng-template let-column="column" ngx-datatable-header-template>
-          {{t('created-header')}}
-        </ng-template>
-        <ng-template let-item="row" let-idx="index" ngx-datatable-cell-template>
-          {{item.created  | utcToLocalTime | defaultValue }}
-        </ng-template>
-      </ngx-datatable-column>
+        <ngx-datatable-column prop="created" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('created-header')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.created  | utcToLocalTime | defaultValue }}
+          </ng-template>
+        </ngx-datatable-column>
 
-      <ngx-datatable-column prop="comment" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-        <ng-template let-column="column" ngx-datatable-header-template>
-          {{t('comment-header')}}
-        </ng-template>
-        <ng-template let-item="row" ngx-datatable-cell-template>
-          {{item.comment}}
-        </ng-template>
-      </ngx-datatable-column>
+        <ngx-datatable-column prop="comment" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('comment-header')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.comment}}
+          </ng-template>
+        </ngx-datatable-column>
 
-      <ngx-datatable-column name="edit" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
-        <ng-template let-column="column" ngx-datatable-header-template>
-          {{t('edit-header')}}
-        </ng-template>
-        <ng-template let-item="row" ngx-datatable-cell-template>
-          <button class="btn btn-icon" (click)="fixMatch(item.seriesId)">
-            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-            <span class="visually-hidden">{{t('match-alt', {seriesName: item.details})}}</span>
-          </button>
-        </ng-template>
-      </ngx-datatable-column>
-    </ngx-datatable>
+        <ngx-datatable-column name="edit" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('edit-header')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            <button class="btn btn-icon" (click)="fixMatch(item.seriesId)">
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('match-alt', {seriesName: item.details})}}</span>
+            </button>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </ng-template>
 
     <ng-template #cardTemplate let-item let-idx="index">
       <div class="card mb-3">

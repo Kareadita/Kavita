@@ -619,7 +619,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.user = user;
       this.hasBookmarkRights = this.accountService.hasBookmarkRole(user) || this.accountService.hasAdminRole(user);
 
-      this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(progress => {
+      this.memberService.hasReadingProgress(this.libraryId).subscribe(progress => {
         if (!progress) {
           this.toggleMenu();
           this.toastr.info(translate('manga-reader.first-time-reading-manga'));
@@ -715,7 +715,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
-  onResize() {
+  onResize(event: Event) {
     this.disableDoubleRendererIfScreenTooSmall();
   }
 
@@ -1484,7 +1484,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
      }
 
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).subscribe(chapterId => {
         this.nextChapterId = chapterId;
         this.loadChapter(chapterId, 'Next');
       });
@@ -1511,7 +1511,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED || this.prevChapterId === this.chapterId) {
-      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).subscribe(chapterId => {
         this.prevChapterId = chapterId;
         this.loadChapter(chapterId, 'Prev');
       });
@@ -1655,7 +1655,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.pageNum >= this.maxPages - 10) {
       // Tell server to cache the next chapter
       if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
-        this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
+        this.readerService.getChapterInfo(this.nextChapterId).subscribe(res => {
           this.continuousChapterInfos[ChapterInfoPosition.Next] = res;
           this.nextChapterPrefetched = true;
           this.prefetchStartOfChapter(this.nextChapterId, PAGING_DIRECTION.FORWARD);
@@ -1663,7 +1663,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else if (this.pageNum <= 10) {
       if (this.prevChapterId > 0 && !this.prevChapterPrefetched) {
-        this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1)).subscribe(res => {
+        this.readerService.getChapterInfo(this.prevChapterId).subscribe(res => {
           this.continuousChapterInfos[ChapterInfoPosition.Previous] = res;
           this.prevChapterPrefetched = true;
           this.prefetchStartOfChapter(this.nextChapterId, PAGING_DIRECTION.BACKWARDS);
@@ -1841,7 +1841,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.CurrentPageBookmarked) {
       let apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
       if (isDouble) apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
-      forkJoin(apis).pipe(take(1)).subscribe(() => {
+      forkJoin(apis).subscribe(() => {
         delete this.bookmarks[pageNum];
         if (isDouble) delete this.bookmarks[pageNum + 1];
         this.cdRef.detectChanges();
@@ -1849,7 +1849,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       let apis = [this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
       if (isDouble) apis.push(this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
-      forkJoin(apis).pipe(take(1)).subscribe(() => {
+      forkJoin(apis).subscribe(() => {
         this.bookmarks[pageNum] = this.chapterInfo()?.chapterTitle ?? '';
         if (isDouble) this.bookmarks[pageNum + 1] = this.chapterInfo()?.chapterTitle ?? '';
         this.cdRef.detectChanges();
@@ -1870,7 +1870,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     window.history.replaceState({}, '', newRoute);
     this.toastr.info(translate('toasts.incognito-off'));
     if (!this.bookmarkMode()) {
-      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {/* No operation */});
     }
   }
 

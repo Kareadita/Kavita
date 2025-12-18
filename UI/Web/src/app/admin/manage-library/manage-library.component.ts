@@ -83,19 +83,19 @@ export class ManageLibraryComponent implements OnInit {
   lastSelectedIndex: number | null = null;
 
   @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(_: KeyboardEvent) {
+  handleKeypress(_: Event) {
     this.isShiftDown = true;
   }
 
   @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(_: KeyboardEvent) {
+  handleKeyUp(_: Event) {
     this.isShiftDown = false;
   }
 
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
-  onResize(){
+  onResize(event: Event){
     this.useActionableSource.next(this.utilityService.getActiveBreakpoint() <= Breakpoint.Tablet);
   }
 
@@ -121,7 +121,7 @@ export class ManageLibraryComponent implements OnInit {
           }
         }
 
-        this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
+        this.libraryService.getLibraries().subscribe(libraries => {
           const newLibrary = libraries.find(lib => lib.id === libId);
           const existingLibrary = this.libraries.find(lib => lib.id === libId);
           if (existingLibrary !== undefined) {
@@ -177,7 +177,7 @@ export class ManageLibraryComponent implements OnInit {
   async deleteLibrary(library: Library) {
     if (await this.confirmService.confirm(translate('toasts.confirm-library-delete', {name: library.name}))) {
       this.deletionInProgress = true;
-      this.libraryService.delete(library.id).pipe(take(1)).subscribe(() => {
+      this.libraryService.delete(library.id).subscribe(() => {
         this.deletionInProgress = false;
         this.cdRef.markForCheck();
         this.getLibraries();

@@ -150,8 +150,8 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
   });
 
 
-  @HostListener('window:resize', ['$event'])
-  @HostListener('window:orientationchange', ['$event'])
+  @HostListener('window:resize', [])
+  @HostListener('window:orientationchange', [])
   resizeJumpBar() {
     const currentSize = (this.document.querySelector('.viewport-container')?.getBoundingClientRect().height || 10) - 30;
     this.jumpBarKeysToRender = this.jumpbarService.generateJumpBar(this.jumpBarKeys, currentSize);

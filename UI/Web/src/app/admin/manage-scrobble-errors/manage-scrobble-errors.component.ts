@@ -80,18 +80,6 @@ export class ManageScrobbleErrorsComponent implements OnInit {
     });
   }
 
-  onSort(evt: any) {
-    //SortEvent<KavitaMediaError>
-    this.currentSort.next(evt);
-
-    // Must clear out headers here
-    this.headers.forEach((header) => {
-      if (header.sortable !== evt.column) {
-        header.direction = '';
-      }
-    });
-  }
-
   loadData() {
     this.isLoading = true;
     this.cdRef.markForCheck();

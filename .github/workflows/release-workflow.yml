@@ -71,7 +71,7 @@ jobs:
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - run: |
 
           cd UI/Web || exit
