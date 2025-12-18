@@ -29,7 +29,7 @@
 
         <div class="row g-0 mt-2">
           @if(settingsForm.get('pdfRenderResolution'); as formControl) {
-            <app-setting-item [title]="t('pdf-render-resolution')" [subtitle]="t('pdf-render-resolution')">
+            <app-setting-item [title]="t('pdf-render-resolution-label')" [subtitle]="t('pdf-render-resolution-tooltip')">
               <ng-template #view>
                 {{formControl!.value | pdfRenderResolution}}
               </ng-template>
