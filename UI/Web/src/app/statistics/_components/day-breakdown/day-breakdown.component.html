@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix: 'day-breakdown'">
-  <div class="dashboard-card-content">
-    <h4>{{t('title')}}</h4>
+  <div class="card stats-card p-4">
+    <h3 class="stats-title">{{t('title')}}</h3>
 
     @if (hasData()) {
       <app-bar-chart

@@ -39,4 +39,6 @@ export class ResponsiveTableComponent<T> {
     const setting = this.breakpoint();
     return activeBreakpoint && activeBreakpoint <= setting;
   });
+
+  protected readonly isEmpty = computed(() => this.rows().length === 0);
 }
