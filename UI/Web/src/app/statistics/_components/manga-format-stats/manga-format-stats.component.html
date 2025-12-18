@@ -1,57 +1,44 @@
 <ng-container *transloco="let t; prefix: 'manga-format-stats'">
-  <div class="row g-0 mb-2">
-    <div class="col-8">
-      <h4><span>{{t('title')}}</span></h4>
-    </div>
-    <div class="col-4">
-      <form>
-        <div class="form-check form-switch mt-2">
-          <input id="manga-format-viz" type="checkbox" class="form-check-input" [formControl]="formControl" role="switch">
-          <label for="manga-format-viz" class="form-check-label">{{formControl.value ? t('visualisation-label') : t('data-table-label') }}</label>
-        </div>
-      </form>
-    </div>
-  </div>
+  @if (chartData().length > 0) {
+    <div class="row g-3">
+      <!-- Chart - always visible -->
+      <div class="col-12 col-md-6 col-lg-5">
+        <app-pie-chart
+          [data]="chartData()"
+          [valueTransformer]="formatTransformer"
+        />
+      </div>
 
-  @if (formats$ | async; as formats) {
-    @if (formControl.value) {
-      <ngx-charts-pie-chart
-        [view]="view"
-        [results]="formats"
-        [legend]="showLegend"
-        [legendPosition]="legendPosition"
-        [labels]="showLabels"
-        >
-      </ngx-charts-pie-chart>
-    } @else {
-      <table class="table table-striped table-striped table-sm scrollable">
-        <thead>
-          <tr>
-            <th scope="col" sortable="name" (sort)="onSort($event)">
-              {{t('format-header')}}
-            </th>
-            <th scope="col" sortable="value" (sort)="onSort($event)">
-              {{t('count-header')}}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of formats; track item; let idx = $index) {
+      <!-- Table - hidden on mobile -->
+      <div class="col-md-6 col-lg-7 d-none d-md-block">
+        <div class="table-responsive">
+          <table class="table table-striped table-sm" aria-describedby="format-table-description">
+            <caption id="format-table-description" class="visually-hidden">
+              {{t('table-caption-alt')}}
+            </caption>
+            <thead>
             <tr>
-              <td id="adhoctask--{{idx}}">
-                {{item.name}}
-              </td>
-              <td>
-                {{item.value | number:'1.0-0'}}
-              </td>
+              <th scope="col" sortable="name" >
+                {{t('format-header')}}
+              </th>
+              <th scope="col" sortable="value" class="text-end">
+                {{t('count-header')}}
+              </th>
             </tr>
-          }
-        </tbody>
-      </table>
-    }
+            </thead>
+            <tbody>
+              @for (item of chartData(); track item.value; let idx = $index) {
+                <tr>
+                  <td>{{item.value | mangaFormat}}</td>
+                  <td class="text-end">{{item.value | compactNumber}}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <p class="text-muted">{{t('no-data', {fallback: 'No format data available'})}}</p>
   }
-
-
-
-
 </ng-container>

@@ -117,10 +117,11 @@ export class StatisticsService {
   }
 
   getMangaFormat() {
-    return this.httpClient.get<StatCount<MangaFormat>[]>(this.baseUrl + 'stats/server/count/manga-format').pipe(
-      map(spreads => spreads.map(spread => {
-      return {name: this.mangaFormatPipe.transform(spread.value), value: spread.count};
-      })));
+    return this.httpClient.get<StatCount<MangaFormat>[]>(this.baseUrl + 'stats/server/count/manga-format');
+    //   .pipe(
+    //   map(spreads => spreads.map(spread => {
+    //   return {name: this.mangaFormatPipe.transform(spread.value), value: spread.count};
+    // })));
   }
 
 
