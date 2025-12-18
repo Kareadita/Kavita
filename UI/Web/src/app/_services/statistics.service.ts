@@ -4,7 +4,6 @@ import {environment} from 'src/environments/environment';
 import {UserReadStatistics} from '../statistics/_models/user-read-statistics';
 import {PublicationStatusPipe} from '../_pipes/publication-status.pipe';
 import {asyncScheduler, map} from 'rxjs';
-import {MangaFormatPipe} from '../_pipes/manga-format.pipe';
 import {FileExtensionBreakdown} from '../statistics/_models/file-breakdown';
 import {MostActiveUser, TopUserRead} from '../statistics/_models/top-reads';
 import {ServerStatistics} from '../statistics/_models/server-statistics';
@@ -28,6 +27,7 @@ import {
   ReadTimeByHour
 } from "../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
 import {StatBucket} from "../statistics/_models/stats/stat-bucket";
+import {Genre} from "../_models/metadata/genre";
 
 export enum DayOfWeek
 {
@@ -51,18 +51,7 @@ export class StatisticsService {
   baseUrl = environment.apiUrl;
   translocoService = inject(TranslocoService);
   publicationStatusPipe = new PublicationStatusPipe();
-  mangaFormatPipe = new MangaFormatPipe();
 
-  getUserStatistics(userId: number, libraryIds: Array<number> = []) {
-    const url = `${this.baseUrl}stats/user-read?userId=${userId}`;
-
-    let params = new HttpParams();
-    if (libraryIds.length > 0) {
-      params = params.set('libraryIds', libraryIds.join(','));
-    }
-
-    return this.httpClient.get<UserReadStatistics>(url, { params });
-  }
 
   getUserStatisticsResource(userId: () => number) {
     return httpResource<UserReadStatistics>(() => this.baseUrl + `stats/user-read?userId=${userId()}`).asReadonly();
@@ -76,15 +65,8 @@ export class StatisticsService {
     return httpResource<ServerStatistics>(() => this.baseUrl + 'stats/server/stats').asReadonly();
   }
 
-  getYearRange() {
-    return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/server/count/year').pipe(
-      map(spreads => spreads.map(spread => {
-      return {name: spread.value + '', value: spread.count};
-    })));
-  }
-
-  getTopYearsResource() {
-    return httpResource<StatCount<number>[]>(() => this.baseUrl + 'stats/server/top/years').asReadonly();
+  getPopularGenresResource() {
+    return httpResource<StatCount<Genre>[]>(() => this.baseUrl + 'stats/popular-genres').asReadonly();
   }
 
   getPopularDecadesResource() {

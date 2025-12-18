@@ -88,7 +88,17 @@ export class ServerStatsComponent {
       return '';
     }
     return this.imageService.getSeriesCoverImage((popular[0].data as Series).id)
-  })
+  });
+
+  readonly genresResource = this.statService.getPopularGenresResource();
+  readonly popularGenres = computed(() => {
+    return (this.genresResource.value() ?? []).map(r => {
+      return {name: r.value.title, value: r.count};
+    }) as StatListItem[];
+  });
+
+
+
 
   stats$!: Observable<ServerStatistics>;
   openSeries = (data: PieDataItem) => {

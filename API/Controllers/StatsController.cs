@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.Metadata;
 using API.DTOs.Statistics;
 using API.DTOs.Stats.V3;
 using API.DTOs.Stats.V3.ClientDevice;
@@ -75,6 +76,14 @@ public class StatsController(
     public async Task<ActionResult<IEnumerable<StatBucketDto>>> GetPopularDecades()
     {
         return Ok(await statService.GetPopularDecades());
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-genres")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<GenreTagDto>>>> GetPopularGenres()
+    {
+        return Ok(await statService.GetPopularGenres());
     }
 
     /// <summary>

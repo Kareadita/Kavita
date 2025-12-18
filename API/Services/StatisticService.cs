@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.ManualMigrations;
 using API.DTOs;
+using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.DTOs.Statistics;
 using API.DTOs.Stats;
 using API.DTOs.Stats.V3.ClientDevice;
@@ -30,6 +32,7 @@ public interface IStatisticService
     Task<IEnumerable<StatCount<int>>> GetYearCount();
     Task<IEnumerable<StatCount<int>>> GetTopYears();
     Task<IList<StatBucketDto>> GetPopularDecades();
+    Task<IList<StatCount<GenreTagDto>>> GetPopularGenres();
     Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount();
     Task<IEnumerable<StatCount<MangaFormat>>> GetMangaFormatCount();
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
@@ -57,6 +60,7 @@ public interface IStatisticService
     Task<ReadTimeByHourDto?> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId);
     Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId);
     Task<IList<MostActiveUserDto>> GetMostActiveUsers(StatsFilterDto filter);
+
 }
 
 /// <summary>
@@ -234,6 +238,57 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .ToList();
     }
 
+    /// <summary>
+    /// Top 5 genres where there is some reading activity
+    /// </summary>
+    /// <remarks>Since most users only tag the Series level metadata, this will only check against Series. Will count series * totalReads of series</remarks>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task<IList<StatCount<GenreTagDto>>> GetPopularGenres()
+    {
+        var seriesReadCounts = await context.AppUserProgresses
+            .GroupBy(p => p.SeriesId)
+            .Select(g => new { SeriesId = g.Key, TotalReads = g.Sum(p => p.TotalReads) })
+            .Where(x => x.TotalReads > 0)
+            .ToDictionaryAsync(x => x.SeriesId, x => x.TotalReads);
+
+        if (seriesReadCounts.Count == 0) return [];
+
+        return await context.Genre
+            .SelectMany(g => g.SeriesMetadatas, (genre, sm) => new { genre, sm.SeriesId })
+            .Where(x => seriesReadCounts.Keys.Contains(x.SeriesId))
+            .ToListAsync()
+            .ContinueWith(IList<StatCount<GenreTagDto>> (t) => t.Result
+                .GroupBy(x => x.genre)
+                .Select(g => new StatCount<GenreTagDto>
+                {
+                    Value = new GenreTagDto
+                    {
+                        Id = g.Key.Id,
+                        Title = g.Key.Title
+                    },
+                    Count = g.Sum(x => seriesReadCounts.GetValueOrDefault(x.SeriesId, 0))
+                })
+                .OrderByDescending(x => x.Count)
+                .Take(5)
+                .ToList());
+    }
+
+    public Task<IList<StatCount<TagDto>>> GetPopularTags()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IList<StatCount<PersonDto>>> GetPopularAuthors()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IList<StatCount<PersonDto>>> GetPopularArtists()
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount()
     {
         return await context.SeriesMetadata
@@ -262,75 +317,76 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
 
     public async Task<ServerStatisticsDto> GetServerStatistics()
     {
-        var mostActiveUsers = context.AppUserProgresses
-            .AsSplitQuery()
-            .AsEnumerable()
-            .GroupBy(sm => sm.AppUserId)
-            .Select(sm => new StatCount<UserDto>
-            {
-                Value = context.AppUser.Where(u => u.Id == sm.Key).ProjectTo<UserDto>(mapper.ConfigurationProvider)
-                    .Single(),
-                Count = context.AppUserProgresses.Where(u => u.AppUserId == sm.Key).Distinct().Count()
-            })
-            .OrderByDescending(d => d.Count)
-            .Take(5);
+        // TODO: Refactor this to use parallel db queries
+        // var mostActiveUsers = context.AppUserProgresses
+        //     .AsSplitQuery()
+        //     .AsEnumerable()
+        //     .GroupBy(sm => sm.AppUserId)
+        //     .Select(sm => new StatCount<UserDto>
+        //     {
+        //         Value = context.AppUser.Where(u => u.Id == sm.Key).ProjectTo<UserDto>(mapper.ConfigurationProvider)
+        //             .Single(),
+        //         Count = context.AppUserProgresses.Where(u => u.AppUserId == sm.Key).Distinct().Count()
+        //     })
+        //     .OrderByDescending(d => d.Count)
+        //     .Take(5);
+        //
+        // var mostActiveLibrary = context.AppUserProgresses
+        //     .AsSplitQuery()
+        //     .AsEnumerable()
+        //     .Where(sm => sm.LibraryId > 0)
+        //     .GroupBy(sm => sm.LibraryId)
+        //     .Select(sm => new StatCount<LibraryDto>
+        //     {
+        //         Value = context.Library.Where(u => u.Id == sm.Key).ProjectTo<LibraryDto>(mapper.ConfigurationProvider)
+        //             .Single(),
+        //         Count = context.AppUserProgresses.Where(u => u.LibraryId == sm.Key).Distinct().Count()
+        //     })
+        //     .OrderByDescending(d => d.Count)
+        //     .Take(5);
+        //
+        // var mostPopularSeries = context.AppUserProgresses
+        //     .AsSplitQuery()
+        //     .AsEnumerable()
+        //     .GroupBy(sm => sm.SeriesId)
+        //     .Select(sm => new StatCount<SeriesDto>
+        //     {
+        //         Value = context.Series.Where(u => u.Id == sm.Key).ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
+        //             .Single(),
+        //         Count = context.AppUserProgresses.Where(u => u.SeriesId == sm.Key).Distinct().Count()
+        //     })
+        //     .OrderByDescending(d => d.Count)
+        //     .Take(5);
+        //
+        // var mostReadSeries = context.AppUserProgresses
+        //     .AsSplitQuery()
+        //     .AsEnumerable()
+        //     .GroupBy(sm => sm.SeriesId)
+        //     .Select(sm => new StatCount<SeriesDto>
+        //     {
+        //         Value = context.Series.Where(u => u.Id == sm.Key).ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
+        //             .Single(),
+        //         Count = context.AppUserProgresses.Where(u => u.SeriesId == sm.Key).AsEnumerable().DistinctBy(p => p.AppUserId).Count()
+        //     })
+        //     .OrderByDescending(d => d.Count)
+        //     .Take(5);
+        //
+        // // Remember: Ordering does not apply if there is a distinct
+        // var recentlyRead = context.AppUserProgresses
+        //     .Join(context.Series, p => p.SeriesId, s => s.Id,
+        //         (appUserProgresses, series) => new
+        //         {
+        //             Series = series,
+        //             AppUserProgresses = appUserProgresses
+        //         })
+        //     .AsEnumerable()
+        //     .DistinctBy(s => s.AppUserProgresses.SeriesId)
+        //     .OrderByDescending(x => x.AppUserProgresses.LastModified)
+        //     .Select(x => mapper.Map<SeriesDto>(x.Series))
+        //     .Take(5);
 
-        var mostActiveLibrary = context.AppUserProgresses
-            .AsSplitQuery()
-            .AsEnumerable()
-            .Where(sm => sm.LibraryId > 0)
-            .GroupBy(sm => sm.LibraryId)
-            .Select(sm => new StatCount<LibraryDto>
-            {
-                Value = context.Library.Where(u => u.Id == sm.Key).ProjectTo<LibraryDto>(mapper.ConfigurationProvider)
-                    .Single(),
-                Count = context.AppUserProgresses.Where(u => u.LibraryId == sm.Key).Distinct().Count()
-            })
-            .OrderByDescending(d => d.Count)
-            .Take(5);
 
-        var mostPopularSeries = context.AppUserProgresses
-            .AsSplitQuery()
-            .AsEnumerable()
-            .GroupBy(sm => sm.SeriesId)
-            .Select(sm => new StatCount<SeriesDto>
-            {
-                Value = context.Series.Where(u => u.Id == sm.Key).ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
-                    .Single(),
-                Count = context.AppUserProgresses.Where(u => u.SeriesId == sm.Key).Distinct().Count()
-            })
-            .OrderByDescending(d => d.Count)
-            .Take(5);
-
-        var mostReadSeries = context.AppUserProgresses
-            .AsSplitQuery()
-            .AsEnumerable()
-            .GroupBy(sm => sm.SeriesId)
-            .Select(sm => new StatCount<SeriesDto>
-            {
-                Value = context.Series.Where(u => u.Id == sm.Key).ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
-                    .Single(),
-                Count = context.AppUserProgresses.Where(u => u.SeriesId == sm.Key).AsEnumerable().DistinctBy(p => p.AppUserId).Count()
-            })
-            .OrderByDescending(d => d.Count)
-            .Take(5);
-
-        // Remember: Ordering does not apply if there is a distinct
-        var recentlyRead = context.AppUserProgresses
-            .Join(context.Series, p => p.SeriesId, s => s.Id,
-                (appUserProgresses, series) => new
-                {
-                    Series = series,
-                    AppUserProgresses = appUserProgresses
-                })
-            .AsEnumerable()
-            .DistinctBy(s => s.AppUserProgresses.SeriesId)
-            .OrderByDescending(x => x.AppUserProgresses.LastModified)
-            .Select(x => mapper.Map<SeriesDto>(x.Series))
-            .Take(5);
-
-
-        var distinctPeople = context.Person
+        var distinctPeople =  context.Person
             .AsEnumerable()
             .GroupBy(sm => sm.NormalizedName)
             .Select(sm => sm.Key)
@@ -349,11 +405,11 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             TotalSize = await context.MangaFile.SumAsync(m => m.Bytes),
             TotalTags = await context.Tag.CountAsync(),
             VolumeCount = await context.Volume.Where(v => Math.Abs(v.MinNumber - Parser.LooseLeafVolumeNumber) > 0.001f).CountAsync(),
-            MostActiveUsers = mostActiveUsers,
-            MostActiveLibraries = mostActiveLibrary,
-            MostPopularSeries = mostPopularSeries,
-            MostReadSeries = mostReadSeries,
-            RecentlyRead = recentlyRead,
+            // MostActiveUsers = mostActiveUsers,
+            // MostActiveLibraries = mostActiveLibrary,
+            // MostPopularSeries = mostPopularSeries,
+            // MostReadSeries = mostReadSeries,
+            // RecentlyRead = recentlyRead,
             TotalReadingTime = await TimeSpentReadingForUsersAsync(ArraySegment<int>.Empty, ArraySegment<int>.Empty)
         };
     }
