@@ -202,5 +202,9 @@ public enum ServerSettingKey
     /// </summary>
     [Description("OidcConfiguration")]
     OidcConfiguration = 40,
-
+    /// <summary>
+    /// The resolution to render PDFs as when delivering them as images.
+    /// </summary>
+    [Description("pdfRenderResolution")]
+    PdfRenderResolution = 41,
 }

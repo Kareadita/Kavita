@@ -1,6 +1,7 @@
 import {EncodeFormat} from "./encode-format";
 import {CoverImageSize} from "./cover-image-size";
 import {SmtpConfig} from "./smtp-config";
+import {PdfRenderResolution} from "./pdf-render-resolution";
 import {OidcConfig} from "./oidc-config";
 
 export interface ServerSettings {
@@ -25,6 +26,7 @@ export interface ServerSettings {
     onDeckProgressDays: number;
     onDeckUpdateDays: number;
     coverImageSize: CoverImageSize;
+    pdfRenderResolution: PdfRenderResolution;
     smtpConfig: SmtpConfig;
     oidcConfig: OidcConfig;
     installId: string;

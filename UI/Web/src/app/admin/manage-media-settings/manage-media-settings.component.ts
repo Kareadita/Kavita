@@ -9,9 +9,11 @@ import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {allEncodeFormats} from '../_models/encode-format';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {allCoverImageSizes, CoverImageSize} from '../_models/cover-image-size';
+import {PdfRenderResolution, allPdfRenderResolutions} from '../_models/pdf-render-resolution';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {EncodeFormatPipe} from "../../_pipes/encode-format.pipe";
 import {CoverImageSizePipe} from "../../_pipes/cover-image-size.pipe";
+import {PdfRenderResolutionPipe} from "../../_pipes/pdf-render-resolution.pipe"
 import {ConfirmService} from "../../shared/confirm.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {pageLayoutModes} from "../../_models/preferences/reading-profiles";
@@ -21,7 +23,7 @@ import {pageLayoutModes} from "../../_models/preferences/reading-profiles";
   templateUrl: './manage-media-settings.component.html',
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe]
+  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 
@@ -35,6 +37,7 @@ export class ManageMediaSettingsComponent implements OnInit {
 
   protected readonly allEncodeFormats = allEncodeFormats;
   protected readonly allCoverImageSizes = allCoverImageSizes;
+  protected readonly allPdfRenderResolutions = allPdfRenderResolutions;
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
@@ -46,6 +49,8 @@ export class ManageMediaSettingsComponent implements OnInit {
       this.settingsForm.addControl('encodeMediaAs', new FormControl(this.serverSettings.encodeMediaAs, [Validators.required]));
       this.settingsForm.addControl('bookmarksDirectory', new FormControl(this.serverSettings.bookmarksDirectory, [Validators.required]));
       this.settingsForm.addControl('coverImageSize', new FormControl(this.serverSettings.coverImageSize || CoverImageSize.Default, [Validators.required]));
+      this.settingsForm.addControl('pdfRenderResolution', new FormControl(this.serverSettings.pdfRenderResolution || PdfRenderResolution.Default, [Validators.required]));
+
 
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
@@ -89,6 +94,7 @@ export class ManageMediaSettingsComponent implements OnInit {
     this.settingsForm.get('encodeMediaAs')?.setValue(this.serverSettings.encodeMediaAs, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('bookmarksDirectory')?.setValue(this.serverSettings.bookmarksDirectory, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('coverImageSize')?.setValue(this.serverSettings.coverImageSize, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('pdfRenderResolution')?.setValue(this.serverSettings.pdfRenderResolution, {onlySelf: true, emitEvent: false});
     this.settingsForm.markAsPristine();
     this.cdRef.markForCheck();
   }
@@ -98,6 +104,7 @@ export class ManageMediaSettingsComponent implements OnInit {
     modelSettings.encodeMediaAs = parseInt(this.settingsForm.get('encodeMediaAs')?.value, 10);
     modelSettings.bookmarksDirectory = this.settingsForm.get('bookmarksDirectory')?.value;
     modelSettings.coverImageSize = parseInt(this.settingsForm.get('coverImageSize')?.value, 10);
+    modelSettings.pdfRenderResolution = parseInt(this.settingsForm.get('pdfRenderResolution')?.value, 10);
 
     return modelSettings;
   }

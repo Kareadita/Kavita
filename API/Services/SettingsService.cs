@@ -405,6 +405,12 @@ public class SettingsService : ISettingsService
                 setting.Value = ((int)updateSettingsDto.CoverImageSize).ToString();
                 _unitOfWork.SettingsRepository.Update(setting);
             }
+            if (setting.Key == ServerSettingKey.PdfRenderResolution &&
+                ((int)updateSettingsDto.PdfRenderResolution).ToString() != setting.Value)
+            {
+                setting.Value = ((int)updateSettingsDto.PdfRenderResolution).ToString();
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
 
             if (setting.Key == ServerSettingKey.HostName && updateSettingsDto.HostName + string.Empty != setting.Value)
             {
