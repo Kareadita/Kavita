@@ -486,6 +486,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             entity.HasIndex(b => new { b.AppUserId, b.SeriesId })
                 .HasDatabaseName("IX_AppUserBookmark_AppUserId_SeriesId");
         });
+
+        // Cover the date range + library filter on ActivityData
+        builder.Entity<AppUserReadingSessionActivityData>()
+            .HasIndex(a => new { a.StartTimeUtc, a.LibraryId })
+            .HasDatabaseName("IX_ActivityData_StartTimeUtc_LibraryId");
+
         #endregion
     }
 

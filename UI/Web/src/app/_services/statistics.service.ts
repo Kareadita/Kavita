@@ -153,8 +153,16 @@ export class StatisticsService {
 
   }
 
-  getReadCountByDay(userId: number = 0, days: number = 0) {
-    return this.httpClient.get<Array<any>>(this.baseUrl + 'stats/reading-count-by-day?userId=' + userId + '&days=' + days);
+  getReadCountResource(statsFilter: () => StatsFilter, userId: () => number = () => 0) {
+    return httpResource<Array<any>>(() => {
+      const filter = statsFilter();
+      if (!filter) return undefined;
+
+      return {
+        url: this.baseUrl + `stats/reading-counts`,
+        params: this.filterHttpParams(filter, userId())
+      }
+    })
   }
 
   getDayBreakdown(userId = 0) {

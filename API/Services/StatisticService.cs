@@ -36,6 +36,7 @@ public interface IStatisticService
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
     Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0, int days = 0);
+    Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCounts(StatsFilterDto filter, int userId = 0);
     IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown(int userId = 0);
     IEnumerable<StatCount<int>> GetPagesReadCountByYear(int userId = 0);
     IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0);
@@ -482,6 +483,66 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         }
 
         return results.OrderBy(r => r.Value);
+    }
+
+    public async Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCounts(StatsFilterDto filter, int userId = 0)
+    {
+        var startDate = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
+        var endDate = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
+
+        var results = await context.AppUserReadingSessionActivityData
+            .AsNoTracking()
+            .Where(a => a.StartTimeUtc >= startDate && a.StartTimeUtc <= endDate)
+            .WhereIf(userId > 0, a => a.ReadingSession.AppUserId == userId)
+            .WhereIf(filter.Libraries is { Count: > 0 }, a => filter.Libraries.Contains(a.LibraryId))
+            .GroupBy(a => new { Day = a.StartTimeUtc.Date, a.Format })
+            .Select(g => new PagesReadOnADayCount<DateTime>
+            {
+                Value = g.Key.Day,
+                Format = g.Key.Format,
+                Count = (long)g.Sum(a =>
+                    (double)(a.EndTimeUtc!.Value.Ticks - a.StartTimeUtc.Ticks) / TimeSpan.TicksPerHour)
+            })
+            .OrderBy(d => d.Value)
+            .ToListAsync();
+
+        FillMissingDaysAndFormats(results, startDate, endDate);
+
+        return results.OrderBy(r => r.Value);
+    }
+
+    private static void FillMissingDaysAndFormats(List<PagesReadOnADayCount<DateTime>> results, DateTime startDate, DateTime endDate)
+    {
+        if (results.Count == 0)
+            return;
+
+        var validFormats = Enum.GetValues<MangaFormat>()
+            .Where(f => f != MangaFormat.Unknown)
+            .ToArray();
+
+        var minDay = results.Min(d => d.Value);
+        var effectiveStart = minDay > startDate.Date ? minDay : startDate.Date;
+        var effectiveEnd = endDate.Date < DateTime.UtcNow.Date ? endDate.Date : DateTime.UtcNow.Date;
+
+        var existingEntries = results
+            .Select(r => (r.Value, r.Format))
+            .ToHashSet();
+
+        for (var date = effectiveStart; date <= effectiveEnd; date = date.AddDays(1))
+        {
+            foreach (var format in validFormats)
+            {
+                if (existingEntries.Contains((date, format)))
+                    continue;
+
+                results.Add(new PagesReadOnADayCount<DateTime>
+                {
+                    Format = format,
+                    Value = date,
+                    Count = 0
+                });
+            }
+        }
     }
 
     public IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown(int userId = 0)

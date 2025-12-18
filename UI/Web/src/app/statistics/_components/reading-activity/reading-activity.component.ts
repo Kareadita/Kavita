@@ -1,25 +1,17 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  input,
-  OnInit,
-  signal
-} from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { filter, map, Observable, of, shareReplay, switchMap } from 'rxjs';
-import { Member } from 'src/app/_models/auth/member';
-import { MemberService } from 'src/app/_services/member.service';
-import { StatisticsService } from 'src/app/_services/statistics.service';
-import { TimePeriods } from '../top-readers/top-readers.component';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {filter, Observable, of, shareReplay} from 'rxjs';
+import {Member} from 'src/app/_models/auth/member';
+import {MemberService} from 'src/app/_services/member.service';
+import {StatisticsService} from 'src/app/_services/statistics.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { AsyncPipe } from '@angular/common';
+import {AsyncPipe} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LineChartComponent} from "../../../shared/_charts/line-chart/line-chart.component";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {MangaFormat} from "../../../_models/manga-format";
+import {StatsFilter} from "../../_models/stats-filter";
+import {AccountService} from "../../../_services/account.service";
 
 const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 
@@ -37,62 +29,60 @@ interface PagesReadOnADayCount {
 }
 
 @Component({
-    selector: 'app-reading-activity',
-    templateUrl: './reading-activity.component.html',
-    styleUrls: ['./reading-activity.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-reading-activity',
+  templateUrl: './reading-activity.component.html',
+  styleUrls: ['./reading-activity.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, AsyncPipe, TranslocoDirective, LineChartComponent]
 })
 export class ReadingActivityComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly statService = inject(StatisticsService);
   private readonly memberService = inject(MemberService);
+  private readonly accountService = inject(AccountService);
   private readonly mangaFormatPipe = new MangaFormatPipe();
 
+  statsFilter = input.required<StatsFilter>();
   userId = input<number>(0);
-  isAdmin = input<boolean>(true);
   individualUserMode = input<boolean>(false);
 
-  private rawData = signal<ProcessedChartData>({
-    axisLabels: [],
-    legendLabels: [],
-    data: [],
-    hasData: false
+  isAdmin = computed(() => this.accountService.isAdmin() ?? false);
+
+  selectedUserId = signal<number>(0);
+
+  private readCountsResource = this.statService.getReadCountResource(() => this.statsFilter(), () => this.selectedUserId());
+
+  chartData = computed(() => {
+    const data = this.readCountsResource.value();
+    return this.transformData(data ?? []);
   });
 
-  chartData = computed(() => this.rawData());
-
+  isLoading = computed(() => this.readCountsResource.isLoading());
 
   view: [number, number] = [0, 400];
-  formGroup: FormGroup = new FormGroup({
-    'users': new FormControl(-1, []),
-    'days': new FormControl(TimePeriods[0].value, []),
+  formGroup = new FormGroup({
+    users: new FormControl<number>(0)
   });
   users$: Observable<Member[]> | undefined;
-  timePeriods = TimePeriods;
 
   constructor() {
-
-    this.formGroup.valueChanges.pipe(
-      switchMap(() => {
-        const userId = this.formGroup.get('users')!.value ?? 0;
-        const days = this.formGroup.get('days')!.value ?? TimePeriods[0].value;
-        return this.statService.getReadCountByDay(userId, days);
-      }),
-      map(data => this.transformData(data)),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(processed => this.rawData.set(processed));
+    this.formGroup.controls.users.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(userId => this.selectedUserId.set(userId ?? 0));
   }
 
   ngOnInit(): void {
     this.users$ = (this.isAdmin() ? this.memberService.getMembers() : of([])).pipe(
       filter(_ => this.isAdmin()),
       takeUntilDestroyed(this.destroyRef),
-      shareReplay());
-    this.formGroup.get('users')?.setValue(this.userId(), {emitValue: true});
+      shareReplay()
+    );
+
+    this.selectedUserId.set(this.userId());
+    this.formGroup.controls.users.setValue(this.userId(), { emitEvent: false });
 
     if (!this.isAdmin()) {
-      this.formGroup.get('users')?.disable();
+      this.formGroup.controls.users.disable();
     }
   }
 
@@ -101,7 +91,6 @@ export class ReadingActivityComponent implements OnInit {
       return { axisLabels: [], legendLabels: [], data: [], hasData: false };
     }
 
-    // 1. Collect all unique dates and sort them
     const uniqueDates = [...new Set(data.map(d => new Date(d.value).getTime()))]
       .sort((a, b) => a - b);
 
@@ -109,24 +98,19 @@ export class ReadingActivityComponent implements OnInit {
       new Date(ts).toLocaleDateString('en-US', dateOptions)
     );
 
-    // 2. Determine which formats are present in the data
     const presentFormats = [...new Set(data.map(d => d.format))].sort();
     const legendLabels = presentFormats.map(f => this.mangaFormatPipe.transform(f));
 
-    // 3. Build date-to-index lookup for O(1) access
     const dateIndexMap = new Map<number, number>();
     uniqueDates.forEach((ts, idx) => dateIndexMap.set(ts, idx));
 
-    // 4. Build format-to-index lookup
     const formatIndexMap = new Map<MangaFormat, number>();
     presentFormats.forEach((format, idx) => formatIndexMap.set(format, idx));
 
-    // 5. Initialize 2D array: [format][date] = count
     const chartData: number[][] = presentFormats.map(() =>
       new Array(uniqueDates.length).fill(0)
     );
 
-    // 6. Populate data
     for (const entry of data) {
       const dateTs = new Date(entry.value).getTime();
       const dateIdx = dateIndexMap.get(dateTs);

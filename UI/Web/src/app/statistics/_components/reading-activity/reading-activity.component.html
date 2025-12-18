@@ -7,34 +7,27 @@
       <div class="col-8">
         <form [formGroup]="formGroup" class="d-inline-flex float-end">
           @if (isAdmin() && !individualUserMode()) {
-            <div class="d-flex me-1">
-              <label for="time-select-read-by-day" class="form-check-label"></label>
-              <select id="time-select-read-by-day" class="form-select" formControlName="users"
-                      [class.is-invalid]="formGroup.get('users')?.invalid && formGroup.get('users')?.touched">
+            <div class="d-flex">
+              <label for="user-select-read-by-day" class="visually-hidden">{{t('select-user')}}</label>
+              <select id="user-select-read-by-day" class="form-select" formControlName="users"
+                      [attr.aria-busy]="isLoading()">
                 <option [value]="0">{{t('all-users')}}</option>
-                @for (item of users$ | async; track item) {
+                @for (item of users$ | async; track item.id) {
                   <option [value]="item.id">{{item.username}}</option>
                 }
               </select>
             </div>
           }
-          <div class="d-flex">
-            <label for="time-select-top-reads" class="form-check-label">
-              <span class="visually-hidden">{{t('time-frame-label')}}</span>
-            </label>
-            <select id="time-select-top-reads" class="form-select" formControlName="days"
-                    [class.is-invalid]="formGroup.get('days')?.invalid && formGroup.get('days')?.touched">
-              @for (item of timePeriods; track item) {
-                <option [value]="item.value">{{t(item.title)}}</option>
-              }
-            </select>
-          </div>
         </form>
       </div>
     </div>
 
     <div class="row g-0">
-      @if (chartData(); as chart) {
+      @if (isLoading()) {
+        <div class="d-flex justify-content-center p-4" role="status" aria-label="Loading">
+          <span class="spinner-border"></span>
+        </div>
+      } @else if (chartData(); as chart) {
         @if (chart.hasData) {
           <app-line-chart
             [axisLabels]="chart.axisLabels"
