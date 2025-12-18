@@ -13,31 +13,34 @@
 
         <!-- Table - hidden on mobile -->
         <div class="col-md-6 col-lg-7 d-none d-md-block">
-          <div class="table-responsive">
-            <table class="table table-striped table-sm" aria-describedby="format-table-description">
-              <caption id="format-table-description" class="visually-hidden">
-                {{t('table-caption-alt')}}
-              </caption>
-              <thead>
-              <tr>
-                <th scope="col" sortable="name" >
+          <app-responsive-table [rows]="chartData()" [trackByFn]="trackByIdentity">
+            <ngx-datatable
+              class="bootstrap"
+              [rows]="chartData()"
+              [columnMode]="'force'"
+              rowHeight="auto"
+              [headerHeight]="40"
+              [sorts]="[{prop: 'value', dir: 'asc'}]"
+            >
+              <ngx-datatable-column prop="value" [sortable]="true" [draggable]="false" [resizeable]="false">
+                <ng-template ngx-datatable-header-template>
                   {{t('format-header')}}
-                </th>
-                <th scope="col" sortable="value" class="text-end">
-                  {{t('count-header')}}
-                </th>
-              </tr>
-              </thead>
-              <tbody>
-                @for (item of chartData(); track item.value; let idx = $index) {
-                  <tr>
-                    <td>{{item.value | mangaFormat}}</td>
-                    <td class="text-end">{{item.value | compactNumber}}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
+                </ng-template>
+                <ng-template let-value="value" ngx-datatable-cell-template>
+                  {{value | mangaFormat}}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="count" [sortable]="true" [draggable]="false" [resizeable]="false">
+                <ng-template ngx-datatable-header-template>
+                  <span class="d-block text-end">{{t('count-header')}}</span>
+                </ng-template>
+                <ng-template let-value="value" ngx-datatable-cell-template>
+                  <span class="d-block text-end">{{value | compactNumber}}</span>
+                </ng-template>
+              </ngx-datatable-column>
+            </ngx-datatable>
+          </app-responsive-table>
         </div>
       </div>
     } @else {
