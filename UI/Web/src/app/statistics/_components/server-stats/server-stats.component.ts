@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, signal} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Router} from '@angular/router';
 import {NgbModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
-import {map, Observable, ReplaySubject, shareReplay} from 'rxjs';
+import {Observable, ReplaySubject, shareReplay} from 'rxjs';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Series} from 'src/app/_models/series';
@@ -10,7 +10,6 @@ import {MetadataService} from 'src/app/_services/metadata.service';
 import {StatisticsService} from 'src/app/_services/statistics.service';
 import {PieDataItem} from '../../_models/pie-data-item';
 import {ServerStatistics} from '../../_models/server-statistics';
-import {GenericListModalComponent} from '../_modals/generic-list-modal/generic-list-modal.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BytesPipe} from '../../../_pipes/bytes.pipe';
 import {TimeDurationPipe} from '../../../_pipes/time-duration.pipe';
@@ -19,18 +18,13 @@ import {DayBreakdownComponent} from '../day-breakdown/day-breakdown.component';
 import {ReadingActivityComponent} from '../reading-activity/reading-activity.component';
 import {PublicationStatusStatsComponent} from '../publication-status-stats/publication-status-stats.component';
 import {FileBreakdownStatsComponent} from '../file-breakdown-stats/file-breakdown-stats.component';
-import {StatListComponent} from '../stat-list/stat-list.component';
+import {StatListComponent, StatListItem} from '../stat-list/stat-list.component';
 import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
 import {AsyncPipe, DecimalPipe, Location} from '@angular/common';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {
-  LibraryAndTimeFilterGroup,
-  LibraryAndTimeSelectorComponent
-} from "../library-and-time-selector/library-and-time-selector.component";
+import {ReactiveFormsModule} from "@angular/forms";
+import {LibraryAndTimeSelectorComponent} from "../library-and-time-selector/library-and-time-selector.component";
 import {StatsFilter} from "../../_models/stats-filter";
 import {MostActiveUsersComponent} from "../most-active-users/most-active-users.component";
 
@@ -58,34 +52,45 @@ export class ServerStatsComponent {
   private readonly utilityService = inject(UtilityService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly location = inject(Location);
-  private readonly route = inject(ActivatedRoute);
-
-
   private readonly destroyRef = inject(DestroyRef);
   protected readonly accountService = inject(AccountService);
+
   protected readonly TabID = TabID;
 
-  filterForm = new FormGroup<LibraryAndTimeFilterGroup>({
-    timeFilter: new FormGroup({
-      startDate: new FormControl<Date | null>(null),
-      endDate: new FormControl<Date | null>(null),
-    }),
-    libraries: new FormControl<number[]>([], { nonNullable: true }),
-  });
   activeTabId = TabID.Stats;
 
   userId = computed(() => this.accountService.currentUserSignal()?.id);
-  protected filter = signal<StatsFilter | undefined>(undefined);
-  protected year = signal<number>(new Date().getFullYear());
+  readonly filter = signal<StatsFilter | undefined>(undefined);
+  readonly year = signal<number>(new Date().getFullYear());
 
+  readonly releaseYearsResource = this.statService.getTopYearsResource();
+  readonly releaseYears = computed(() => {
+    return (this.releaseYearsResource.value() ?? []).map(r => {
+      return {name: r.value + '', value: r.count};
+    }) as StatListItem[];
+  });
 
-  releaseYears$!: Observable<Array<PieDataItem>>;
-  mostActiveUsers$!: Observable<Array<PieDataItem>>;
-  mostActiveLibrary$!: Observable<Array<PieDataItem>>;
-  mostActiveSeries$!: Observable<Array<PieDataItem>>;
-  recentlyRead$!: Observable<Array<PieDataItem>>;
+  readonly statsResource = this.statService.getServerStatisticsResource();
+  readonly popularLibraries = computed(() => {
+    return (this.statsResource.value()?.mostActiveLibraries ?? []).map(r => {
+      return {name: r.value.name, value: r.count};
+    }) as StatListItem[];
+  });
+
+  readonly popularSeries = computed(() => {
+    return (this.statsResource.value()?.mostReadSeries ?? []).map(r => {
+      return {name: r.value.name, value: r.count, data: r.value};
+    }) as StatListItem[];
+  });
+  readonly mostPopularSeriesCover = computed(() => {
+    const popular = this.popularSeries();
+    if (!popular || popular.length === 0) {
+      return '';
+    }
+    return this.imageService.getSeriesCoverImage((popular[0].data as Series).id)
+  })
+
   stats$!: Observable<ServerStatistics>;
-  seriesImage: (data: PieDataItem) => string;
   openSeries = (data: PieDataItem) => {
     const series = data.extra as Series;
     this.router.navigate(['library', series.libraryId, 'series', series.id]);
@@ -94,95 +99,16 @@ export class ServerStatsComponent {
   breakpointSubject = new ReplaySubject<Breakpoint>(1);
 
 
-
-  @HostListener('window:resize', ['$event'])
-  @HostListener('window:orientationchange', ['$event'])
-  onResize(event: Event) {
+  @HostListener('window:resize', [])
+  @HostListener('window:orientationchange', [])
+  onResize() {
     this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
   }
 
 
   constructor() {
-
-    this.seriesImage = (data: PieDataItem) => {
-      if (data.extra) return this.imageService.getSeriesCoverImage(data.extra.id);
-      return '';
-    }
-
     this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
 
     this.stats$ = this.statService.getServerStatistics().pipe(takeUntilDestroyed(this.destroyRef), shareReplay());
-    this.releaseYears$ = this.statService.getTopYears().pipe(takeUntilDestroyed(this.destroyRef));
-    this.mostActiveUsers$ = this.stats$.pipe(
-      map(d => d.mostActiveUsers),
-      map(userCounts => userCounts.map(count => {
-        return {name: count.value.username, value: count.count};
-      })),
-      takeUntilDestroyed(this.destroyRef)
-    );
-
-    this.mostActiveLibrary$ = this.stats$.pipe(
-      map(d => d.mostActiveLibraries),
-      map(counts => counts.map(count => {
-        return {name: count.value.name, value: count.count};
-      })),
-      takeUntilDestroyed(this.destroyRef)
-    );
-
-    this.mostActiveSeries$ = this.stats$.pipe(
-      map(d => d.mostReadSeries),
-      map(counts => counts.map(count => {
-        return {name: count.value.name, value: count.count, extra: count.value};
-      })),
-      takeUntilDestroyed(this.destroyRef)
-    );
-
-    this.recentlyRead$ = this.stats$.pipe(
-      map(d => d.recentlyRead),
-      map(counts => counts.map(count => {
-        return {name: count.name, value: -1, extra: count};
-      })),
-      takeUntilDestroyed(this.destroyRef)
-    );
   }
-
-  openGenreList() {
-    this.metadataService.getAllGenres().subscribe(genres => {
-      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
-      ref.componentInstance.items = genres.map(t => t.title);
-      ref.componentInstance.title = translate('server-stats.genres');
-      ref.componentInstance.clicked = (item: string) => {
-        this.filterUtilityService.applyFilter(['all-series'], FilterField.Genres, FilterComparison.Contains, genres.filter(g => g.title === item)[0].id + '').subscribe();
-      };
-    });
-  }
-
-  openTagList() {
-    this.metadataService.getAllTags().subscribe(tags => {
-      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
-      ref.componentInstance.items = tags.map(t => t.title);
-      ref.componentInstance.title = translate('server-stats.tags');
-      ref.componentInstance.clicked = (item: string) => {
-        this.filterUtilityService.applyFilter(['all-series'], FilterField.Tags, FilterComparison.Contains, tags.filter(g => g.title === item)[0].id + '').subscribe();
-      };
-    });
-  }
-
-  openPeopleList() {
-    this.metadataService.getAllPeople().subscribe(people => {
-      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
-      ref.componentInstance.items = [...new Set(people.map(person => person.name))];
-      ref.componentInstance.title = translate('server-stats.people');
-    });
-  }
-
-
-  updateUrl(activeTab: TabID) {
-    const tokens = this.location.path().split('#');
-    const newUrl = `${tokens[0]}#${activeTab}`;
-    this.location.replaceState(newUrl) // TODO: Look into making this a directive for tabs
-  }
-
-
-
 }

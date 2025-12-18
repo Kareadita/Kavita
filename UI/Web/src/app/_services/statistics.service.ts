@@ -72,6 +72,10 @@ export class StatisticsService {
     return this.httpClient.get<ServerStatistics>(this.baseUrl + 'stats/server/stats');
   }
 
+  getServerStatisticsResource() {
+    return httpResource<ServerStatistics>(() => this.baseUrl + 'stats/server/stats').asReadonly();
+  }
+
   getYearRange() {
     return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/server/count/year').pipe(
       map(spreads => spreads.map(spread => {
@@ -84,6 +88,10 @@ export class StatisticsService {
       map(spreads => spreads.map(spread => {
         return {name: spread.value + '', value: spread.count};
       })));
+  }
+
+  getTopYearsResource() {
+    return httpResource<StatCount<number>[]>(() => this.baseUrl + 'stats/server/top/years').asReadonly();
   }
 
   getPagesPerYear(userId = 0) {
