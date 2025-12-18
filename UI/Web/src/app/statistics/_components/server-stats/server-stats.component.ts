@@ -63,10 +63,10 @@ export class ServerStatsComponent {
   readonly filter = signal<StatsFilter | undefined>(undefined);
   readonly year = signal<number>(new Date().getFullYear());
 
-  readonly releaseYearsResource = this.statService.getTopYearsResource();
+  readonly releaseYearsResource = this.statService.getPopularDecadesResource();
   readonly releaseYears = computed(() => {
     return (this.releaseYearsResource.value() ?? []).map(r => {
-      return {name: r.value + '', value: r.count};
+      return {name: `${r.rangeStart}s`, value: r.count, data: r};
     }) as StatListItem[];
   });
 

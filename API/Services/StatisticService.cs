@@ -29,6 +29,7 @@ public interface IStatisticService
     Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds);
     Task<IEnumerable<StatCount<int>>> GetYearCount();
     Task<IEnumerable<StatCount<int>>> GetTopYears();
+    Task<IList<StatBucketDto>> GetPopularDecades();
     Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount();
     Task<IEnumerable<StatCount<MangaFormat>>> GetMangaFormatCount();
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
@@ -202,6 +203,34 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .OrderByDescending(d => d.Count)
             .Take(5)
             .ToListAsync();
+    }
+
+    public async Task<IList<StatBucketDto>> GetPopularDecades()
+    {
+        var decadeGroups = await context.SeriesMetadata
+            .Where(sm => sm.ReleaseYear != 0)
+            .GroupBy(sm => (sm.ReleaseYear / 10) * 10) // Floor to decade
+            .Select(g => new
+            {
+                Decade = g.Key,
+                Count = g.Count()
+            })
+            .ToListAsync();
+
+        var totalCount = decadeGroups.Sum(d => d.Count);
+
+        return decadeGroups
+            .OrderBy(d => d.Decade)
+            .Select(d => new StatBucketDto
+            {
+                RangeStart = d.Decade,
+                RangeEnd = d.Decade + 9,
+                Count = d.Count,
+                Percentage = totalCount > 0
+                    ? Math.Round((decimal)d.Count / totalCount * 100, 2)
+                    : 0
+            })
+            .ToList();
     }
 
     public async Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount()
@@ -1229,14 +1258,13 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 a.ReadingSession.AppUserId,
                 a.ChapterId,
                 a.SeriesId,
-                Format = a.Chapter.Files.First().Format,
+                a.Chapter.Files.First().Format,
                 a.StartTimeUtc,
                 EndTimeUtc = a.EndTimeUtc!.Value
             })
             .ToListAsync();
 
-        if (activityData.Count == 0)
-            return new List<MostActiveUserDto>();
+        if (activityData.Count == 0) return [];
 
         // Group by user and calculate stats, take top 5 by hours
         var userStats = activityData
@@ -1277,8 +1305,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .Take(5)
             .ToList();
 
-        if (userStats.Count == 0)
-            return new List<MostActiveUserDto>();
+        if (userStats.Count == 0) return [];
 
         var userIds = userStats.Select(u => u.UserId).ToList();
 
@@ -1289,7 +1316,10 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .ToDictionaryAsync(u => u.Id);
 
         // Fetch TotalReads for each user's series
-        var allSeriesIds = userStats.SelectMany(u => u.SeriesIds).Distinct().ToList();
+        var allSeriesIds = userStats
+            .SelectMany(u => u.SeriesIds)
+            .Distinct()
+            .ToList();
 
         var progressData = await context.AppUserProgresses
             .Where(p => userIds.Contains(p.AppUserId) && allSeriesIds.Contains(p.SeriesId))
@@ -1310,7 +1340,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
             .ToDictionaryAsync(s => s.Id);
 
-        // Build result
         var result = new List<MostActiveUserDto>();
         foreach (var stat in userStats)
         {

@@ -70,11 +70,11 @@ public class StatsController(
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("server/top/years")]
+    [HttpGet("popular-decades")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetTopYears()
+    public async Task<ActionResult<IEnumerable<StatBucketDto>>> GetPopularDecades()
     {
-        return Ok(await statService.GetTopYears());
+        return Ok(await statService.GetPopularDecades());
     }
 
     /// <summary>
@@ -90,6 +90,11 @@ public class StatsController(
         return Ok(await statService.GetTopUsers(days));
     }
 
+    /// <summary>
+    /// Top 5 most active readers for the given timeframe
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("most-active-users")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]

@@ -209,4 +209,12 @@ public class DeprecatedController : BaseApiController
         return Ok(await _statService.GetReadingHistory(userId));
     }
 
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("stats/server/top/years")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetTopYears()
+    {
+        return Ok(await _statService.GetTopYears());
+    }
+
 }

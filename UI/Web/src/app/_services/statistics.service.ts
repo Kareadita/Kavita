@@ -11,7 +11,6 @@ import {ServerStatistics} from '../statistics/_models/server-statistics';
 import {StatCount} from '../statistics/_models/stat-count';
 import {PublicationStatus} from '../_models/metadata/publication-status';
 import {MangaFormat} from '../_models/manga-format';
-import {TextResonse} from '../_types/text-response';
 import {TranslocoService} from "@jsverse/transloco";
 import {throttleTime} from "rxjs/operators";
 import {DEBOUNCE_TIME} from "../shared/_services/download.service";
@@ -28,6 +27,7 @@ import {ProfileStatBar} from "../profile/_components/profile-stat-bar/profile-st
 import {
   ReadTimeByHour
 } from "../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
+import {StatBucket} from "../statistics/_models/stats/stat-bucket";
 
 export enum DayOfWeek
 {
@@ -83,15 +83,12 @@ export class StatisticsService {
     })));
   }
 
-  getTopYears() {
-    return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/server/top/years').pipe(
-      map(spreads => spreads.map(spread => {
-        return {name: spread.value + '', value: spread.count};
-      })));
-  }
-
   getTopYearsResource() {
     return httpResource<StatCount<number>[]>(() => this.baseUrl + 'stats/server/top/years').asReadonly();
+  }
+
+  getPopularDecadesResource() {
+    return httpResource<StatBucket[]>(() => this.baseUrl + 'stats/popular-decades').asReadonly();
   }
 
   getPagesPerYear(userId = 0) {
@@ -137,9 +134,6 @@ export class StatisticsService {
     return this.httpClient.get<StatCount<string>[]>(this.baseUrl + 'stats/device/device-type');
   }
 
-  getTotalSize() {
-    return this.httpClient.get<number>(this.baseUrl + 'stats/server/file-size', TextResonse);
-  }
 
   getFileBreakdown() {
     return this.httpClient.get<FileExtensionBreakdown>(this.baseUrl + 'stats/server/file-breakdown');
