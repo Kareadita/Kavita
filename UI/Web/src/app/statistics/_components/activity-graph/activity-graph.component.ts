@@ -79,9 +79,11 @@ export class ActivityGraphComponent {
 
   timeFrameLabel = computed(() => {
     const filter = this.filter();
+    const year = this.year();
+    if (!filter) return year;
 
     if (filter.timeFilter.startDate == filter.timeFilter.endDate) return translate('activity-graph.all-time');
-    return this.year();
+    return year;
   })
 
   private generateWeeks(): WeekRow[] {

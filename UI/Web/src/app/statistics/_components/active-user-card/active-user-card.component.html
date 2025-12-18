@@ -13,7 +13,7 @@
 
         <div class="hours-period text-end">
           <span class="hours-value">{{ user().timePeriodHours | timeDuration }}</span>
-          <span class="hours-label">{{ timeFrameLabel() }}</span>
+          <span class="hours-label">{{ t(timeFrameLabel()) }}</span>
         </div>
       </div>
 
@@ -29,13 +29,9 @@
               role="listitem"
               [title]="series.name">
               @if (series.coverImage) {
-                <app-image [imageUrl]="imageService.getSeriesCoverImage(series.id)" [width]="'60px'" [height]="'90px'" classes="series-cover" [attr.alt]="series.name" />
-<!--                <img-->
-<!--                  [ngSrc]="imageService.getSeriesCoverImage(series.id)"-->
-<!--                  [alt]="series.name"-->
-<!--                  width="60"-->
-<!--                  height="90"-->
-<!--                  class="series-cover" />-->
+                <app-image [imageUrl]="imageService.getSeriesCoverImage(series.id)"
+                           [width]="'60px'" [height]="'90px'"
+                           classes="series-cover" [attr.alt]="series.name" />
               } @else {
                 <div class="series-cover series-cover--placeholder d-flex align-items-center justify-content-center">
                   <i class="fa-solid fa-book" aria-hidden="true"></i>
@@ -46,24 +42,23 @@
         </div>
       }
 
-      <!-- Stats row -->
       <div class="stats-row">
-          <span class="stat-item">
-            {{ user().totalHours | timeDuration }} total
-          </span>
+        <span class="stat-item">
+          {{ t('total-hours', {duration: user().totalHours | timeDuration}) }}
+        </span>
 
         @if (user().totalComics > 0) {
           <span class="stat-divider" aria-hidden="true">|</span>
           <span class="stat-item">
-              {{ user().totalComics }} comics
-            </span>
+            {{ t('comics-count', {count: user().totalComics}) }}
+          </span>
         }
 
         @if (user().totalBooks > 0) {
           <span class="stat-divider" aria-hidden="true">|</span>
           <span class="stat-item">
-              {{ user().totalComics }} books
-            </span>
+            {{ t('books-count', {count: user().totalBooks}) }}
+          </span>
         }
       </div>
     </div>

@@ -28,8 +28,9 @@ export class MostActiveUsersComponent {
 
   timeFrameLabel = computed(() => {
     const filter = this.statsFilter();
-    const { startDate, endDate } = filter.timeFilter;
+    if (!filter) return 'overall';
 
+    const { startDate, endDate } = filter.timeFilter;
     if (!startDate || !endDate) return 'overall';
 
     const timeFrame = this.detectTimeFrame(startDate, endDate);

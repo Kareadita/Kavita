@@ -1,7 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {tap} from "rxjs";
-import {CommonModule} from '@angular/common';
 import {toSignal} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 
@@ -18,7 +17,7 @@ export type TimeRange = {
 @Component({
   selector: 'app-smart-time-range-picker',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, TranslocoDirective],
+  imports: [ReactiveFormsModule, TranslocoDirective],
   templateUrl: './smart-time-range-picker.component.html',
   styleUrl: './smart-time-range-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

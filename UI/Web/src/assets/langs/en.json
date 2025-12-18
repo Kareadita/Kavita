@@ -550,7 +550,18 @@
     },
 
     "most-active-users": {
-        "title": "Most Active Readers"
+        "title": "Most Active Readers",
+        "no-data": "No reading activity for time period"
+    },
+
+    "active-user-card": {
+        "overall": "Overall",
+        "this-week": "This Week",
+        "this-month": "This Month",
+        "this-year": "This Year",
+        "total-hours": "{{duration}} total",
+        "comics-count": "{{count}} comics",
+        "books-count": "{{count}} books"
     },
 
     "role-selector": {
@@ -2807,8 +2818,8 @@
 
     "server-stats": {
         "stats-title": "Explore",
-        "stats-tab": "{{tabs.stats}}",
-        "management-tab": "{{tabs.management}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "management-tab": "{{tabs.management-tab}}",
 
         "total-series-label": "Total Series",
         "total-series-tooltip": "Total Series: {{count}}",

@@ -7,7 +7,6 @@ import {asyncScheduler, map} from 'rxjs';
 import {MangaFormatPipe} from '../_pipes/manga-format.pipe';
 import {FileExtensionBreakdown} from '../statistics/_models/file-breakdown';
 import {MostActiveUser, TopUserRead} from '../statistics/_models/top-reads';
-import {ReadHistoryEvent} from '../statistics/_models/read-history-event';
 import {ServerStatistics} from '../statistics/_models/server-statistics';
 import {StatCount} from '../statistics/_models/stat-count';
 import {PublicationStatus} from '../_models/metadata/publication-status';
@@ -109,9 +108,6 @@ export class StatisticsService {
     return this.filterServerResource<MostActiveUser[]>(statsFilter, 'most-active-users');
   }
 
-  getReadingHistory(userId: number) {
-    return this.httpClient.get<ReadHistoryEvent[]>(this.baseUrl + 'stats/user/reading-history?userId=' + userId);
-  }
 
   getPublicationStatus() {
     return this.httpClient.get<StatCount<PublicationStatus>[]>(this.baseUrl + 'stats/server/count/publication-status').pipe(
@@ -122,10 +118,6 @@ export class StatisticsService {
 
   getMangaFormat() {
     return this.httpClient.get<StatCount<MangaFormat>[]>(this.baseUrl + 'stats/server/count/manga-format');
-    //   .pipe(
-    //   map(spreads => spreads.map(spread => {
-    //   return {name: this.mangaFormatPipe.transform(spread.value), value: spread.count};
-    // })));
   }
 
 

@@ -4,11 +4,6 @@
     This page is being redesigned!
   </p>
 
-  <div class="mb-2">
-    <app-library-and-time-selector [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUserSignal()!.id"
-                                   (filterChange)="filter.set($event)" (yearChange)="year.set($event)" />
-  </div>
-
 
   <div class="carousel-tabs-container mb-2 ms-md-2 me-md-2 w-auto">
     <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="true">
@@ -17,6 +12,12 @@
         <a ngbNavLink>{{t(TabID.Stats)}}</a>
         <ng-template ngbNavContent>
           @defer (when activeTabId === TabID.Stats; prefetch on idle) {
+
+            <div class="mb-2">
+              <app-library-and-time-selector [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUserSignal()!.id"
+                                             (filterChange)="filter.set($event)" (yearChange)="year.set($event)" />
+            </div>
+
             @if (stats$ | async; as stats) {
               <div class="row g-0 mt-4 mb-3 d-flex justify-content-around">
                 <ng-container>
@@ -90,9 +91,6 @@
                 <app-stat-list [data$]="releaseYears$" [title]="t('release-years-title')" [label]="t('series')" />
               </div>
               <div class="col-auto">
-                <app-stat-list [data$]="mostActiveUsers$" [title]="t('most-active-users-title')" [label]="t('reads')" />
-              </div>
-              <div class="col-auto">
                 <app-stat-list [data$]="mostActiveLibrary$" [title]="t('popular-libraries-title')" [label]="t('reads')" />
               </div>
               <div class="col-auto">
@@ -107,20 +105,9 @@
               <app-most-active-users [statsFilter]="filter()!"  />
             </div>
 
-            <div class="row g-0 pt-4 pb-2">
-              <app-file-breakdown-stats />
-            </div>
-
-            <div class="row g-0 pt-4 pb-2">
-              <app-publication-status-stats />
-            </div>
 
             <div class="row g-0 pt-4 pb-2">
               <app-reading-activity [isAdmin]="true" />
-            </div>
-
-            <div class="row g-0 pt-4 pb-2">
-              <app-day-breakdown />
             </div>
           }
         </ng-template>
@@ -130,7 +117,19 @@
         <a ngbNavLink>{{t(TabID.Management)}}</a>
         <ng-template ngbNavContent>
           @defer (when activeTabId === TabID.Management; prefetch on idle) {
-              Management Tab here
+
+
+            <div class="row g-0 pt-4 pb-2">
+              <app-file-breakdown-stats />
+            </div>
+
+            <div class="row g-0 pt-4 pb-2">
+              <app-publication-status-stats />
+            </div>
+
+            <div class="row g-0 pt-4 pb-2">
+              <app-day-breakdown />
+            </div>
           }
         </ng-template>
       </li>

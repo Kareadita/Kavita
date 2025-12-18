@@ -63,11 +63,9 @@ export class ProfileIconComponent {
       // Set default image
       this.currentImageUrl.set(this.imageService.getUserCoverImage(userId));
     });
-
   }
 
   handleErrorLoad() {
-    console.log('no image for ', this.userId())
     this.noImage.set(true);
   }
 
