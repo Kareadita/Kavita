@@ -7,73 +7,75 @@
     @let files = (files$ | async) || [];
 
     <app-responsive-table [rows]="files" [trackByFn]="trackByExtension">
-      <ngx-datatable
-        class="bootstrap"
-        [rows]="files"
-        [columnMode]="'force'"
-        rowHeight="auto"
-        [headerHeight]="40"
-        [footerHeight]="40"
-        [sorts]="[{prop: 'extension', dir: 'asc'}]"
-      >
-        <ngx-datatable-column prop="extension" [sortable]="true" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>
-            {{t('extension-header')}}
-          </ng-template>
-          <ng-template let-value="value" ngx-datatable-cell-template>
-            {{value || t('not-classified')}}
-          </ng-template>
-        </ngx-datatable-column>
+      <ng-template #tableTemplate>
+        <ngx-datatable
+          class="bootstrap"
+          [rows]="files"
+          [columnMode]="'force'"
+          rowHeight="auto"
+          [headerHeight]="40"
+          [footerHeight]="40"
+          [sorts]="[{prop: 'totalFiles', dir: 'desc'}]"
+        >
+          <ngx-datatable-column prop="extension" [sortable]="true" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>
+              {{t('extension-header')}}
+            </ng-template>
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              {{value || t('not-classified')}}
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ngx-datatable-column prop="format" [sortable]="true" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>
-            {{t('format-header')}}
-          </ng-template>
-          <ng-template let-value="value" ngx-datatable-cell-template>
-            {{value | mangaFormat}}
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-column prop="format" [sortable]="true" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>
+              {{t('format-header')}}
+            </ng-template>
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              {{value | mangaFormat}}
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ngx-datatable-column prop="totalSize" [sortable]="true" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>
-            {{t('total-size-header')}}
-          </ng-template>
-          <ng-template let-value="value" ngx-datatable-cell-template>
-            {{value | bytes}}
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-column prop="totalSize" [sortable]="true" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>
+              {{t('total-size-header')}}
+            </ng-template>
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              {{value | bytes}}
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ngx-datatable-column prop="totalFiles" [sortable]="true" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>
-            {{t('total-files-header')}}
-          </ng-template>
-          <ng-template let-value="value" ngx-datatable-cell-template>
-            {{value | compactNumber}}
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-column prop="totalFiles" [sortable]="true" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>
+              {{t('total-files-header')}}
+            </ng-template>
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              {{value | compactNumber}}
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>
-            {{t('download-file-for-extension-header')}}
-          </ng-template>
-          <ng-template let-item="row" ngx-datatable-cell-template>
-            <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress[item.extension]">
-              @if (downloadInProgress[item.extension]) {
-                <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
-              } @else {
-                <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
-              }
-              <span class="visually-hidden">{{t('download-file-for-extension-alt', {extension: item.extension})}}</span>
-            </button>
-          </ng-template>
-        </ngx-datatable-column>
+          <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>
+              {{t('download-file-for-extension-header')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress[item.extension]">
+                @if (downloadInProgress[item.extension]) {
+                  <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+                } @else {
+                  <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
+                }
+                <span class="visually-hidden">{{t('download-file-for-extension-alt', {extension: item.extension})}}</span>
+              </button>
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ng-template ngx-datatable-footer-template>
-          <div class="d-flex align-items-center px-3 py-2">
-            <span>{{t('total-file-size-title')}}: {{((rawData$ | async)?.totalFileSize || 0) | bytes}}</span>
-          </div>
-        </ng-template>
-      </ngx-datatable>
+          <ng-template ngx-datatable-footer-template>
+            <div class="d-flex align-items-center px-3 py-2">
+              <span>{{t('total-file-size-title')}}: {{((rawData$ | async)?.totalFileSize || 0) | bytes}}</span>
+            </div>
+          </ng-template>
+        </ngx-datatable>
+      </ng-template>
 
       <ng-template #cardTemplate let-item let-idx="index">
         <div class="card mb-3">

@@ -5,32 +5,33 @@
     @let statuses = publicationStatues$ | async;
 
     <app-responsive-table [rows]="statuses || []" [trackByFn]="trackByIdentity">
-      <ngx-datatable
-        class="bootstrap"
-        [rows]="statuses"
-        [columnMode]="'force'"
-        rowHeight="auto"
-        [headerHeight]="40"
-        [sorts]="[{prop: 'value', dir: 'desc'}]"
-      >
-        <ngx-datatable-column prop="name" [sortable]="true" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>
-            {{t('year-header')}}
-          </ng-template>
-          <ng-template let-value="value" ngx-datatable-cell-template>
-            {{value}}
-          </ng-template>
-        </ngx-datatable-column>
+      <ng-template #tableTemplate>
+        <ngx-datatable
+          class="bootstrap"
+          [rows]="statuses"
+          [columnMode]="'force'"
+          rowHeight="auto"
+          [headerHeight]="40"
+        >
+          <ngx-datatable-column prop="name" [sortable]="true" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>
+              {{t('year-header')}}
+            </ng-template>
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              {{value}}
+            </ng-template>
+          </ngx-datatable-column>
 
-        <ngx-datatable-column prop="value" [sortable]="true" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>
-            {{t('count-header')}}
-          </ng-template>
-          <ng-template let-value="value" ngx-datatable-cell-template>
-            {{value | number:'1.0-0'}}
-          </ng-template>
-        </ngx-datatable-column>
-      </ngx-datatable>
+          <ngx-datatable-column prop="value" [sortable]="true" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>
+              {{t('count-header')}}
+            </ng-template>
+            <ng-template let-value="value" ngx-datatable-cell-template>
+              {{value | number:'1.0-0'}}
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
+      </ng-template>
 
       <ng-template #cardTemplate let-item let-idx="index">
         <div class="card mb-3">

@@ -34,6 +34,9 @@ export class ResponsiveTableComponent<T> {
   private cardTemplateSignal = contentChild<TemplateRef<{$implicit: T, index: number}>>('cardTemplate');
   protected readonly cardTemplateRef = computed(() => this.cardTemplateSignal());
 
+  private tableTemplateSignal = contentChild<TemplateRef<void>>('tableTemplate');
+  protected readonly tableTemplateRef = computed(() => this.tableTemplateSignal());
+
   protected readonly showCards = computed(() => {
     const activeBreakpoint = this.utilityService.activeBreakpointSignal();
     const setting = this.breakpoint();
