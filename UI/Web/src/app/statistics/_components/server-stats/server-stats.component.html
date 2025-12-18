@@ -13,10 +13,7 @@
         <ng-template ngbNavContent>
           @defer (when activeTabId === TabID.Stats; prefetch on idle) {
 
-            <div class="mb-2">
-              <app-library-and-time-selector [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUserSignal()!.id"
-                                             (filterChange)="filter.set($event)" (yearChange)="year.set($event)" />
-            </div>
+
 
             @if (stats$ | async; as stats) {
               <div class="row g-0 mt-4 mb-3 d-flex justify-content-around">
@@ -85,6 +82,12 @@
                 </ng-container>
               </div>
             }
+
+            <!--TODO: Figure out how to customize for Server page-->
+            <div class="my-4">
+              <app-library-and-time-selector [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUserSignal()!.id"
+                                             (filterChange)="filter.set($event)" (yearChange)="year.set($event)" />
+            </div>
 
             <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around">
               <div class="col-auto">
