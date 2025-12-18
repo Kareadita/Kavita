@@ -6,7 +6,7 @@ import {PublicationStatusPipe} from '../_pipes/publication-status.pipe';
 import {asyncScheduler, map} from 'rxjs';
 import {MangaFormatPipe} from '../_pipes/manga-format.pipe';
 import {FileExtensionBreakdown} from '../statistics/_models/file-breakdown';
-import {TopUserRead} from '../statistics/_models/top-reads';
+import {MostActiveUser, TopUserRead} from '../statistics/_models/top-reads';
 import {ReadHistoryEvent} from '../statistics/_models/read-history-event';
 import {ServerStatistics} from '../statistics/_models/server-statistics';
 import {StatCount} from '../statistics/_models/stat-count';
@@ -105,11 +105,8 @@ export class StatisticsService {
     return this.httpClient.get<TopUserRead[]>(this.baseUrl + 'stats/server/top/users?days=' + days);
   }
 
-  //statsFilter: () => StatsFilter | undefined
-  getMostActiveUsers() {
-    //return this.filterServerResource<MostActiveUser[]>(statsFilter, 'most-active-users');
-    //return httpResource<TopUserRead[]>(() => this.baseUrl + 'stats/most-active-users').asReadonly();
-    return httpResource<TopUserRead[]>(() => this.baseUrl + 'stats/server/top/users?days=0').asReadonly();
+  getMostActiveUsers(statsFilter: () => StatsFilter | undefined) {
+    return this.filterServerResource<MostActiveUser[]>(statsFilter, 'most-active-users');
   }
 
   getReadingHistory(userId: number) {

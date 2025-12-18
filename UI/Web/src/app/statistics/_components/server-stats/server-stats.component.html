@@ -5,7 +5,8 @@
   </p>
 
   <div class="mb-2">
-    <app-library-and-time-selector [filterForm]="filterForm" [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUserSignal()!.id" />
+    <app-library-and-time-selector [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUserSignal()!.id"
+                                   (filterChange)="filter.set($event)" (yearChange)="year.set($event)" />
   </div>
 
 
@@ -103,8 +104,7 @@
             </div>
 
             <div class="row g-0 pt-2 pb-2">
-              <!--<app-top-readers />-->
-              <app-most-active-users />
+              <app-most-active-users [statsFilter]="filter()!"  />
             </div>
 
             <div class="row g-0 pt-4 pb-2">

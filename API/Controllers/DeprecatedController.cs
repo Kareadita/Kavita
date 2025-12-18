@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
+using API.DTOs.Statistics;
 using API.DTOs.Uploads;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
+using API.Services.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -28,13 +33,15 @@ public class DeprecatedController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<DeprecatedController> _logger;
+    private readonly IStatisticService _statService;
 
-    public DeprecatedController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ITaskScheduler taskScheduler, ILogger<DeprecatedController> logger)
+    public DeprecatedController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ITaskScheduler taskScheduler, ILogger<DeprecatedController> logger, IStatisticService statService)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
         _taskScheduler = taskScheduler;
         _logger = logger;
+        _statService = statService;
     }
 
     /// <summary>
@@ -190,5 +197,16 @@ public class DeprecatedController : BaseApiController
         return BadRequest(await _localizationService.Translate(UserId, "reset-chapter-lock"));
     }
 
+
+    [HttpGet("stats/user/reading-history")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        if (!isAdmin && userId != user!.Id) return BadRequest();
+
+        return Ok(await _statService.GetReadingHistory(userId));
+    }
 
 }

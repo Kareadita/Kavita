@@ -3,40 +3,39 @@
     <div class="card-body">
       <!-- Header row: avatar, name, hours in period -->
       <div class="d-flex align-items-center gap-3 mb-3">
-        <div
-          class="user-avatar rounded-circle d-flex align-items-center justify-content-center"
-          role="img">
+        <div class="user-avatar rounded-circle d-flex align-items-center justify-content-center" role="img">
           <app-profile-icon [userId]="user().userId" [size]="48" />
         </div>
 
         <h6 class="mb-0 flex-grow-1 text-truncate username">
-          {{ user().username }}
+          <a [routerLink]="['/profile', user().userId]">{{user().username}}</a>
         </h6>
 
         <div class="hours-period text-end">
-          <span class="hours-value">{{ totalRead() | number:'1.1-1' }}</span>
-          <span class="hours-label">Hrs {{ timeFrameLabel() }}</span>
+          <span class="hours-value">{{ user().timePeriodHours | timeDuration }}</span>
+          <span class="hours-label">{{ timeFrameLabel() }}</span>
         </div>
       </div>
 
       <!-- Top series covers -->
-      @if (topSeries().length > 0) {
+      @if (user().topSeries.length > 0) {
         <div
           class="series-covers d-flex gap-2 mb-3"
           role="list"
           [attr.aria-label]="'Top series read by ' + user().username">
-          @for (series of topSeries(); track series.id) {
+          @for (series of user().topSeries; track series.id) {
             <div
               class="series-cover-wrapper"
               role="listitem"
               [title]="series.name">
-              @if (series.coverUrl) {
-                <img
-                  [ngSrc]="series.coverUrl"
-                  [alt]="series.name"
-                  width="60"
-                  height="90"
-                  class="series-cover" />
+              @if (series.coverImage) {
+                <app-image [imageUrl]="imageService.getSeriesCoverImage(series.id)" [width]="'60px'" [height]="'90px'" classes="series-cover" [attr.alt]="series.name" />
+<!--                <img-->
+<!--                  [ngSrc]="imageService.getSeriesCoverImage(series.id)"-->
+<!--                  [alt]="series.name"-->
+<!--                  width="60"-->
+<!--                  height="90"-->
+<!--                  class="series-cover" />-->
               } @else {
                 <div class="series-cover series-cover--placeholder d-flex align-items-center justify-content-center">
                   <i class="fa-solid fa-book" aria-hidden="true"></i>
@@ -50,27 +49,20 @@
       <!-- Stats row -->
       <div class="stats-row">
           <span class="stat-item">
-            {{ totalRead() | number:'1.1-1' }} hrs total
+            {{ user().totalHours | timeDuration }} total
           </span>
 
-        @if (1 > 0) {
+        @if (user().totalComics > 0) {
           <span class="stat-divider" aria-hidden="true">|</span>
           <span class="stat-item">
-              {{ 0 }} comics
+              {{ user().totalComics }} comics
             </span>
         }
 
-        @if (1 > 0) {
+        @if (user().totalBooks > 0) {
           <span class="stat-divider" aria-hidden="true">|</span>
           <span class="stat-item">
-              {{ 0 }} manga
-            </span>
-        }
-
-        @if (1 > 0) {
-          <span class="stat-divider" aria-hidden="true">|</span>
-          <span class="stat-item">
-              {{ formatNumber(1) }} books
+              {{ user().totalComics }} books
             </span>
         }
       </div>

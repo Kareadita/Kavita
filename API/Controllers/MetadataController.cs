@@ -20,13 +20,10 @@ using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
-
 #nullable enable
 
 public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService metadataService) : BaseApiController
 {
-    public const string CacheKey = "kavitaPlusSeriesDetail_";
-
     /// <summary>
     /// Fetches genres from the instance
     /// </summary>

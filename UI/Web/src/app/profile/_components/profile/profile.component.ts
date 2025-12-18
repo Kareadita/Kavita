@@ -4,13 +4,7 @@ import {MemberInfo} from "../../../_models/user/member-info";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../../_services/image.service";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
-import {
-  NgbNav,
-  NgbNavContent,
-  NgbNavItem,
-  NgbNavLink,
-  NgbNavOutlet
-} from "@ng-bootstrap/ng-bootstrap";
+import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
@@ -99,8 +93,6 @@ export class ProfileComponent {
   protected readonly backgroundImage = computed(() => {
     const m = this.memberInfo();
     if (!m) return '';
-
-
 
     try {
       return this.imageService.getUserCoverImage(this.userId());

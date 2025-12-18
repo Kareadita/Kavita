@@ -45,7 +45,6 @@ public interface IStatisticService
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
     Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year, int requestingUserId);
     Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly, int requestingUserID);
-    Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId, int requestingUserId);
@@ -55,6 +54,7 @@ public interface IStatisticService
     Task<int> GetTotalReads(int userId, int requestingUserId);
     Task<ReadTimeByHourDto?> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId);
     Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId);
+    Task<IList<MostActiveUserDto>> GetMostActiveUsers(StatsFilterDto filter);
 }
 
 /// <summary>
@@ -787,55 +787,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         };
     }
 
-    public async Task<IList<StatCount<MangaFormat>>> GetPreferredFormatForUser(StatsFilterDto filter, int userId, int requestingUserId)
-    {
-        var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
-        var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
-
-        var startTime = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
-        var endTime = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
-
-        // Get series IDs from reading history
-        var historyData = await context.AppUserReadingHistory
-            .Where(h => h.AppUserId == userId &&
-                        h.DateUtc >= startTime &&
-                        h.DateUtc <= endTime)
-            .Select(h => h.Data)
-            .ToListAsync();
-
-        var historySeriesIds = historyData
-            .Where(d => d != null)
-            .SelectMany(d => d.SeriesIds ?? Enumerable.Empty<int>())
-            .Distinct()
-            .ToList();
-
-        // Get series IDs from reading sessions
-        var sessionSeriesIds = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
-            .AsNoTracking()
-            .Select(a => a.SeriesId)
-            .Distinct()
-            .ToListAsync();
-
-        var allSeriesIds = historySeriesIds.Union(sessionSeriesIds).Distinct();
-        var seriesFormats = await context.Series
-            .Where(s => allSeriesIds.Contains(s.Id))
-            .Select(s => new { s.Id, s.Format })
-            .ToDictionaryAsync(x => x.Id, x => x.Format);
-
-        var formatCounts = seriesFormats.Values
-            .GroupBy(format => format)
-            .Select(g => new StatCount<MangaFormat>
-            {
-                Value = g.Key,
-                Count = g.Count()
-            })
-            .OrderByDescending(s => s.Count)
-            .ToList();
-
-        return formatCounts;
-    }
-
     public async Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId)
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
@@ -1262,6 +1213,133 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             Reviews = reviewCount,
             Ratings = ratingCount
         };
+    }
+
+    public async Task<IList<MostActiveUserDto>> GetMostActiveUsers(StatsFilterDto filter)
+    {
+        var startDate = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
+        var endDate = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
+
+        // Fetch activity data for all users in the time period
+        var activityData = await context.AppUserReadingSessionActivityData
+            .Between(a => a.StartTimeUtc, startDate, endDate)
+            .Where(a => a.EndTimeUtc != null)
+            .Select(a => new
+            {
+                a.ReadingSession.AppUserId,
+                a.ChapterId,
+                a.SeriesId,
+                Format = a.Chapter.Files.First().Format,
+                a.StartTimeUtc,
+                EndTimeUtc = a.EndTimeUtc!.Value
+            })
+            .ToListAsync();
+
+        if (activityData.Count == 0)
+            return new List<MostActiveUserDto>();
+
+        // Group by user and calculate stats, take top 5 by hours
+        var userStats = activityData
+            .GroupBy(a => a.AppUserId)
+            .Select(userGroup =>
+            {
+                var userId = userGroup.Key;
+
+                var hoursRead = userGroup.Sum(a => (a.EndTimeUtc - a.StartTimeUtc).TotalHours);
+
+                var bookChapters = userGroup
+                    .Where(a => a.Format is MangaFormat.Epub or MangaFormat.Pdf)
+                    .Select(a => a.ChapterId)
+                    .Distinct()
+                    .Count();
+
+                var comicChapters = userGroup
+                    .Where(a => a.Format is not MangaFormat.Epub and not MangaFormat.Pdf)
+                    .Select(a => a.ChapterId)
+                    .Distinct()
+                    .Count();
+
+                var seriesIds = userGroup
+                    .Select(a => a.SeriesId)
+                    .Distinct()
+                    .ToList();
+
+                return new
+                {
+                    UserId = userId,
+                    HoursRead = hoursRead,
+                    BooksRead = bookChapters,
+                    ComicsRead = comicChapters,
+                    SeriesIds = seriesIds
+                };
+            })
+            .OrderByDescending(u => u.HoursRead)
+            .Take(5)
+            .ToList();
+
+        if (userStats.Count == 0)
+            return new List<MostActiveUserDto>();
+
+        var userIds = userStats.Select(u => u.UserId).ToList();
+
+        // Fetch user details
+        var users = await context.AppUser
+            .Where(u => userIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.UserName, u.CoverImage })
+            .ToDictionaryAsync(u => u.Id);
+
+        // Fetch TotalReads for each user's series
+        var allSeriesIds = userStats.SelectMany(u => u.SeriesIds).Distinct().ToList();
+
+        var progressData = await context.AppUserProgresses
+            .Where(p => userIds.Contains(p.AppUserId) && allSeriesIds.Contains(p.SeriesId))
+            .GroupBy(p => new { p.AppUserId, p.SeriesId })
+            .Select(g => new
+            {
+                g.Key.AppUserId,
+                g.Key.SeriesId,
+                MinTotalReads = g.Min(p => p.TotalReads)
+            })
+            .ToListAsync();
+
+        var progressLookup = progressData.ToLookup(p => p.AppUserId);
+
+        // Fetch series for projection
+        var seriesLookup = await context.Series
+            .Where(s => allSeriesIds.Contains(s.Id))
+            .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
+            .ToDictionaryAsync(s => s.Id);
+
+        // Build result
+        var result = new List<MostActiveUserDto>();
+        foreach (var stat in userStats)
+        {
+            if (!users.TryGetValue(stat.UserId, out var user))
+                continue;
+
+            var topSeries = progressLookup[stat.UserId]
+                .Where(p => stat.SeriesIds.Contains(p.SeriesId))
+                .OrderByDescending(p => p.MinTotalReads)
+                .Take(5)
+                .Select(p => seriesLookup.GetValueOrDefault(p.SeriesId))
+                .Where(s => s != null)
+                .Cast<SeriesDto>()
+                .ToList();
+
+            result.Add(new MostActiveUserDto
+            {
+                UserId = stat.UserId,
+                Username = user.UserName ?? string.Empty,
+                CoverImage = user.CoverImage,
+                TimePeriodHours = (int)Math.Round(stat.HoursRead),
+                TotalHours = (int)Math.Round(stat.HoursRead),
+                TotalComics = stat.ComicsRead,
+                TotalBooks = stat.BooksRead,
+                TopSeries = topSeries
+            });
+        }
+
+        return result;
     }
 
     private async Task<int> GetAuthorsCount(HashSet<int> chapterIds)

@@ -1,15 +1,7 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {
-  NgbModal,
-  NgbNav,
-  NgbNavChangeEvent,
-  NgbNavContent,
-  NgbNavItem,
-  NgbNavLink,
-  NgbNavOutlet
-} from '@ng-bootstrap/ng-bootstrap';
-import {map, Observable, ReplaySubject, shareReplay, tap} from 'rxjs';
+import {NgbModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
+import {map, Observable, ReplaySubject, shareReplay} from 'rxjs';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Series} from 'src/app/_models/series';
@@ -19,7 +11,7 @@ import {StatisticsService} from 'src/app/_services/statistics.service';
 import {PieDataItem} from '../../_models/pie-data-item';
 import {ServerStatistics} from '../../_models/server-statistics';
 import {GenericListModalComponent} from '../_modals/generic-list-modal/generic-list-modal.component';
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BytesPipe} from '../../../_pipes/bytes.pipe';
 import {TimeDurationPipe} from '../../../_pipes/time-duration.pipe';
 import {CompactNumberPipe} from '../../../_pipes/compact-number.pipe';
@@ -27,7 +19,6 @@ import {DayBreakdownComponent} from '../day-breakdown/day-breakdown.component';
 import {ReadingActivityComponent} from '../reading-activity/reading-activity.component';
 import {PublicationStatusStatsComponent} from '../publication-status-stats/publication-status-stats.component';
 import {FileBreakdownStatsComponent} from '../file-breakdown-stats/file-breakdown-stats.component';
-import {TopReadersComponent} from '../top-readers/top-readers.component';
 import {StatListComponent} from '../stat-list/stat-list.component';
 import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
 import {AsyncPipe, DecimalPipe, Location} from '@angular/common';
@@ -42,8 +33,6 @@ import {
 } from "../library-and-time-selector/library-and-time-selector.component";
 import {StatsFilter} from "../../_models/stats-filter";
 import {MostActiveUsersComponent} from "../most-active-users/most-active-users.component";
-import {ProfileOverviewComponent} from "../../../profile/_components/profile-overview/profile-overview.component";
-import {NavTabUrlDirective} from "../../../_directives/nav-tab-url.directive";
 
 enum TabID {
   Stats = 'stats-tab',
@@ -58,7 +47,7 @@ enum TabID {
   imports: [IconAndTitleComponent, StatListComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent,
     ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe,
     BytesPipe, TranslocoDirective, ReactiveFormsModule, LibraryAndTimeSelectorComponent, MostActiveUsersComponent,
-    NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, NavTabUrlDirective]
+    NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet]
 })
 export class ServerStatsComponent {
   private readonly statService = inject(StatisticsService);
@@ -86,11 +75,9 @@ export class ServerStatsComponent {
   activeTabId = TabID.Stats;
 
   userId = computed(() => this.accountService.currentUserSignal()?.id);
+  protected filter = signal<StatsFilter | undefined>(undefined);
+  protected year = signal<number>(new Date().getFullYear());
 
-  filter = toSignal(this.filterForm.valueChanges.pipe(
-    map(value => value as StatsFilter),
-  ));
-  year = computed(() => this.filter()?.timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
 
   releaseYears$!: Observable<Array<PieDataItem>>;
   mostActiveUsers$!: Observable<Array<PieDataItem>>;

@@ -90,6 +90,14 @@ public class StatsController(
         return Ok(await statService.GetTopUsers(days));
     }
 
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("most-active-users")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IEnumerable<TopReadDto>>> GetMostActiveUsers([FromQuery] StatsFilterDto filter)
+    {
+        return Ok(await statService.GetMostActiveUsers(filter));
+    }
+
     /// <summary>
     /// A breakdown of different files, their size, and format
     /// </summary>
@@ -164,16 +172,7 @@ public class StatsController(
 
 
 
-    // [HttpGet("user/reading-history")]
-    // [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    // public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
-    // {
-    //     var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-    //     var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-    //     if (!isAdmin && userId != user!.Id) return BadRequest();
-    //
-    //     return Ok(await statService.GetReadingHistory(userId));
-    // }
+
 
     /// <summary>
     /// Returns a count of pages read per year for a given userId.
@@ -268,20 +267,7 @@ public class StatsController(
         return Ok(await statService.GetReadingPaceForUser(filter, userId, year, booksOnly, UserId));
     }
 
-    /// <summary>
-    /// Returns each format type read
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <returns></returns>
-    // [ProfilePrivacy]
-    // [HttpGet("preferred-format")]
-    // [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    // public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat([FromQuery] StatsFilterDto filter, int userId)
-    // {
-    //     await CleanStatsFilter(filter, UserId);
-    //
-    //     return Ok(await statService.GetPreferredFormatForUser(filter, userId, UserId));
-    // }
+
 
     /// <summary>
     /// Returns top 10 genres that user likes reading

@@ -1,4 +1,4 @@
-import {StatCount} from "./stat-count";
+import {Series} from "../../_models/series";
 
 export interface TopUserRead {
     userId: number;
@@ -12,6 +12,9 @@ export interface MostActiveUser {
   userId: number;
   username: string;
   coverImage?: string;
-  totalHoursRead: number;
-  librariesRead: Array<StatCount<number>>;
+  timePeriodHours: number;
+  totalHours: number;
+  totalComics: number;
+  totalBooks: number;
+  topSeries: Series[];
 }

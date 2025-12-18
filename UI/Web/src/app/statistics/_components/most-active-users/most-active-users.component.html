@@ -20,6 +20,7 @@
           @for (user of users; track user.userId) {
             <app-active-user-card
               [user]="user"
+              [filter]="statsFilter()"
               [timeFrameLabel]="timeFrameLabel()" />
           }
         </div>
