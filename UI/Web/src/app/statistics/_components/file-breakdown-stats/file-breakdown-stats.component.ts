@@ -10,7 +10,6 @@ import {
   ViewChildren
 } from '@angular/core';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import {PieChartModule} from '@swimlane/ngx-charts';
 import {BehaviorSubject, combineLatest, map, Observable, shareReplay} from 'rxjs';
 import {StatisticsService} from 'src/app/_services/statistics.service';
 import {compare, SortableHeader, SortEvent} from 'src/app/_single-module/table/_directives/sortable-header.directive';
@@ -23,19 +22,13 @@ import { AsyncPipe, DecimalPipe } from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
-import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
-
-export interface StackedBarChartDataItem {
-  name: string,
-  series: Array<PieDataItem>;
-}
 
 @Component({
-    selector: 'app-file-breakdown-stats',
-    templateUrl: './file-breakdown-stats.component.html',
-    styleUrls: ['./file-breakdown-stats.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, ReactiveFormsModule, PieChartModule, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader, NgxDatatableModule, UtcToLocalTimePipe]
+  selector: 'app-file-breakdown-stats',
+  templateUrl: './file-breakdown-stats.component.html',
+  styleUrls: ['./file-breakdown-stats.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgbTooltip, ReactiveFormsModule, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective, SortableHeader, NgxDatatableModule]
 })
 export class FileBreakdownStatsComponent {
 

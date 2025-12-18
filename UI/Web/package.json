@@ -43,7 +43,6 @@
     "@ng-bootstrap/ng-bootstrap": "^20.0.0",
     "@popperjs/core": "^2.11.7",
     "@siemens/ngx-datatable": "^25.0.0",
-    "@swimlane/ngx-charts": "^23.1.0",
     "@tweenjs/tween.js": "^25.0.0",
     "@types/echarts": "^4.9.22",
     "afterframe": "^1.0.2",

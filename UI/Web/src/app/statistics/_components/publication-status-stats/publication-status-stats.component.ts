@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, inject, QueryList, ViewChildren} from '@angular/core';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import {PieChartModule} from '@swimlane/ngx-charts';
 import {BehaviorSubject, combineLatest, map, Observable} from 'rxjs';
 import {StatisticsService} from 'src/app/_services/statistics.service';
 import {compare, SortableHeader, SortEvent} from 'src/app/_single-module/table/_directives/sortable-header.directive';
@@ -15,7 +14,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
     templateUrl: './publication-status-stats.component.html',
     styleUrls: ['./publication-status-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, PieChartModule, SortableHeader_1, AsyncPipe, DecimalPipe, TranslocoDirective]
+    imports: [ReactiveFormsModule, SortableHeader_1, AsyncPipe, DecimalPipe, TranslocoDirective]
 })
 export class PublicationStatusStatsComponent {
   private readonly statService = inject(StatisticsService);

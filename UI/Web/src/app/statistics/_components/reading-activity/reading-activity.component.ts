@@ -15,7 +15,6 @@ import { MemberService } from 'src/app/_services/member.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { TimePeriods } from '../top-readers/top-readers.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { LineChartModule } from '@swimlane/ngx-charts';
 import { AsyncPipe } from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LineChartComponent} from "../../../shared/_charts/line-chart/line-chart.component";
@@ -42,7 +41,7 @@ interface PagesReadOnADayCount {
     templateUrl: './reading-activity.component.html',
     styleUrls: ['./reading-activity.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, LineChartModule, AsyncPipe, TranslocoDirective, LineChartComponent]
+  imports: [ReactiveFormsModule, AsyncPipe, TranslocoDirective, LineChartComponent]
 })
 export class ReadingActivityComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);

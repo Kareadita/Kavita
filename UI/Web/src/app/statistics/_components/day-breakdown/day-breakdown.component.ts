@@ -1,53 +1,46 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import { BarChartModule } from '@swimlane/ngx-charts';
-import {map, Observable} from 'rxjs';
+import {
+  ChangeDetectionStrategy,
+  Component, computed,
+  DestroyRef,
+  inject, input,
+  signal
+} from '@angular/core';
 import {DayOfWeek, StatisticsService} from 'src/app/_services/statistics.service';
-import {PieDataItem} from '../../_models/pie-data-item';
 import {StatCount} from '../../_models/stat-count';
 import {DayOfWeekPipe} from '../../../_pipes/day-of-week.pipe';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AsyncPipe} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {tap} from "rxjs/operators";
+import {BarChartComponent} from "../../../shared/_charts/bar-chart/bar-chart.component";
 
 @Component({
     selector: 'app-day-breakdown',
     templateUrl: './day-breakdown.component.html',
     styleUrls: ['./day-breakdown.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [BarChartModule, AsyncPipe, TranslocoDirective]
+  imports: [TranslocoDirective, BarChartComponent]
 })
-export class DayBreakdownComponent implements OnInit {
-
+export class DayBreakdownComponent {
   private readonly destroyRef = inject(DestroyRef);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly statService = inject(StatisticsService);
+  private readonly dayOfWeekPipe = new DayOfWeekPipe();
 
-  @Input() userId = 0;
+  userId = input<number>(0);
 
-  view: [number, number] = [0,0];
-  showLegend: boolean = true;
-  max: number = 1;
+  private readonly rawData = signal<StatCount<DayOfWeek>[]>([]);
 
-  formControl: FormControl = new FormControl(true, []);
-  dayBreakdown$!: Observable<Array<PieDataItem>>;
+  readonly axisLabels = computed(() =>
+    this.rawData().map(d => this.dayOfWeekPipe.transform(d.value))
+  );
 
+  readonly data = computed(() =>
+    this.rawData().map(d => d.count)
+  );
 
-  ngOnInit() {
-    const dayOfWeekPipe = new DayOfWeekPipe();
-    this.dayBreakdown$ = this.statService.getDayBreakdown(this.userId).pipe(
-      map((data: Array<StatCount<DayOfWeek>>) => {
-        return data.map(d => {
-          return {name: dayOfWeekPipe.transform(d.value), value: d.count};
-        })
-      }),
-      tap(data => {
-        this.max = data.reduce((acc, day) => Math.max(acc, day.value), 0);
-        this.cdRef.markForCheck();
-      }),
+  readonly hasData = computed(() => this.rawData().length > 0);
+
+  constructor() {
+    this.statService.getDayBreakdown(this.userId()).pipe(
       takeUntilDestroyed(this.destroyRef)
-    );
+    ).subscribe(data => this.rawData.set(data));
   }
-
 }
