@@ -1788,6 +1788,12 @@
         "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times."
     },
 
+    "pdf-render-resolution": {
+        "default": "Default (1080x1920)",
+        "high": "High (1920x2560)",
+        "ultra": "Ultra (2160x3840)"
+    },
+
     "cover-image-size": {
         "default": "Default (320x455)",
         "medium": "Medium (640x909)",
