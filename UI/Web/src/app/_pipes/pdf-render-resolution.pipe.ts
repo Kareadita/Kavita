@@ -7,7 +7,6 @@ import {translate} from "@jsverse/transloco";
   standalone: true
 })
 export class PdfRenderResolutionPipe implements PipeTransform {
-
   transform(value: PdfRenderResolution): string {
     switch (value) {
       case PdfRenderResolution.Default:
@@ -16,8 +15,6 @@ export class PdfRenderResolutionPipe implements PipeTransform {
         return translate('pdf-render-resolution.high');
       case PdfRenderResolution.Ultra:
         return translate('pdf-render-resolution.ultra');
-
     }
   }
-
 }
