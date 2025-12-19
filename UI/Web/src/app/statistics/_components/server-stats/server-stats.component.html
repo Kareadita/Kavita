@@ -89,8 +89,8 @@
                                              (filterChange)="filter.set($event)" (yearChange)="year.set($event)" />
             </div>
 
-            <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around">
-              <div class="col-auto">
+            <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around align-items-stretch">
+              <div class="col-auto d-flex">
                 <app-stat-list
                   [title]="t('popular-decades-title')"
                   [items]="releaseYears()"
@@ -98,7 +98,7 @@
                   [config]="{ showRanking: true, showAccentBars: true }"
                 />
               </div>
-              <div class="col-auto">
+              <div class="col-auto d-flex">
                 <app-stat-list
                   [title]="t('popular-libraries-title')"
                   [items]="popularLibraries()"
@@ -106,7 +106,7 @@
                   [config]="{ showRanking: true, showAccentBars: true }"
                 />
               </div>
-              <div class="col-auto">
+              <div class="col-auto d-flex">
                 <app-stat-list
                   [title]="t('popular-series-title')"
                   [items]="popularSeries()"
@@ -118,7 +118,7 @@
                 />
               </div>
 
-              <div class="col-auto">
+              <div class="col-auto d-flex">
                 <app-stat-list
                   [title]="t('popular-genres-title')"
                   [items]="popularGenres()"
@@ -127,7 +127,7 @@
                 />
               </div>
 
-              <div class="col-auto">
+              <div class="col-auto d-flex">
                 <app-stat-list
                   [title]="t('popular-tags-title')"
                   [items]="popularTags()"
@@ -136,7 +136,7 @@
                 />
               </div>
 
-              <div class="col-auto">
+              <div class="col-auto d-flex">
                 <app-stat-list
                   [title]="t('popular-authors-title')"
                   [items]="popularAuthors()"
@@ -145,7 +145,7 @@
                 />
               </div>
 
-              <div class="col-auto">
+              <div class="col-auto d-flex">
                 <app-stat-list
                   [title]="t('popular-artists-title')"
                   [items]="popularArtists()"

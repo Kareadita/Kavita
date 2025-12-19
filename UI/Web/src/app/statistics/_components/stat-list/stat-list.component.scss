@@ -5,6 +5,7 @@
   overflow: hidden;
   min-width: 280px;
   max-width: 400px;
+  min-height: 232px;
 
   &.has-featured {
     min-width: 400px;
@@ -12,14 +13,30 @@
 }
 
 .featured-image {
-  flex: 0 0 120px;
-  min-height: 180px;
-  background-color: var(--elevation-layer3); // Placeholder while no image
+  position: relative;
+  flex: 0 0 140px;
+  background-color: var(--elevation-layer2-dark-solid);
 
   app-image {
     display: block;
     width: 100%;
     height: 100%;
+  }
+
+  // Gradient fade on the right edge blending into list background
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 50%;
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        var(--elevation-layer2-dark-solid) 100%
+    );
+    pointer-events: none;
   }
 }
 
@@ -78,6 +95,7 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  flex: 1;
 }
 
 .stat-list-item {
