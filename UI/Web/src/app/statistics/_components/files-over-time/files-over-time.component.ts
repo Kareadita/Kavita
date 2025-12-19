@@ -1,8 +1,10 @@
 import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {LineChartComponent} from "../../../shared/_charts/line-chart/line-chart.component";
 import {StatisticsService} from "../../../_services/statistics.service";
-import {StatCount} from "../../_models/stat-count";
+import {StatCountWithFormat} from "../../_models/stat-count";
+import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
+import {MangaFormat} from "../../../_models/manga-format";
 
 // TODO: Make this derived from localeService
 const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
@@ -20,6 +22,7 @@ const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric'
 export class FilesOverTimeComponent {
 
   private readonly statService = inject(StatisticsService);
+  private readonly mangaFormatPipe = new MangaFormatPipe();
 
   private filesOverTimeResource = this.statService.getFilesAddedOverTime();
 
@@ -30,23 +33,40 @@ export class FilesOverTimeComponent {
 
   isLoading = computed(() => this.filesOverTimeResource.isLoading());
 
-  private transformData(data: StatCount<string | Date>[]) {
+  private transformData(data: StatCountWithFormat<any>[]) {
     if (!data || data.length === 0) {
       return { axisLabels: [], legendLabels: [], data: [], hasData: false };
     }
 
-    // Sort by date
-    const sortedData = [...data].sort((a, b) =>
-      new Date(a.value).getTime() - new Date(b.value).getTime()
+    const uniqueDates = [...new Set(data.map(d => new Date(d.value).getTime()))]
+      .sort((a, b) => a - b);
+
+    const axisLabels = uniqueDates.map(ts =>
+      new Date(ts).toLocaleDateString('en-US', dateOptions)
     );
 
-    const axisLabels = sortedData.map(d =>
-      new Date(d.value).toLocaleDateString('en-US', dateOptions)
+    const presentFormats = [...new Set(data.map(d => d.format))].sort();
+    const legendLabels = presentFormats.map(f => this.mangaFormatPipe.transform(f));
+
+    const dateIndexMap = new Map<number, number>();
+    uniqueDates.forEach((ts, idx) => dateIndexMap.set(ts, idx));
+
+    const formatIndexMap = new Map<MangaFormat, number>();
+    presentFormats.forEach((format, idx) => formatIndexMap.set(format, idx));
+
+    const chartData: number[][] = presentFormats.map(() =>
+      new Array(uniqueDates.length).fill(0)
     );
 
-    // Single series: "Files Added"
-    const legendLabels = [translate('files-over-time.legend-label')]; // Or use t('legend-label') for i18n
-    const chartData = [sortedData.map(d => d.count)];
+    for (const entry of data) {
+      const dateTs = new Date(entry.value).getTime();
+      const dateIdx = dateIndexMap.get(dateTs);
+      const formatIdx = formatIndexMap.get(entry.format);
+
+      if (dateIdx !== undefined && formatIdx !== undefined) {
+        chartData[formatIdx][dateIdx] = entry.count;
+      }
+    }
 
     return {
       axisLabels,

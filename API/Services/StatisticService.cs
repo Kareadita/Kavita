@@ -43,13 +43,12 @@ public interface IStatisticService
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
-    Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0, int days = 0);
-    Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCounts(StatsFilterDto filter, int userId = 0);
+    Task<IEnumerable<StatCountWithFormat<DateTime>>> ReadCountByDay(int userId = 0, int days = 0);
+    Task<IEnumerable<StatCountWithFormat<DateTime>>> ReadCounts(StatsFilterDto filter, int userId = 0);
     Task<IList<StatCount<DayOfWeek>>> GetDayBreakdown(int userId = 0);
     Task<IList<StatCount<int>>> GetPagesReadCountByYear(int userId = 0);
     Task<IList<StatCount<int>>> GetWordsReadCountByYear(int userId = 0);
     Task UpdateServerStatistics();
-    Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds);
     Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
@@ -65,7 +64,7 @@ public interface IStatisticService
     Task<ReadTimeByHourDto?> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId);
     Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId);
     Task<IList<MostActiveUserDto>> GetMostActiveUsers(StatsFilterDto filter);
-    Task<IList<StatCount<DateTime>>> GetFilesAddedOverTime();
+    Task<IList<StatCountWithFormat<DateTime>>> GetFilesAddedOverTime();
 }
 
 /// <summary>
@@ -510,7 +509,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0, int days = 0)
+    public async Task<IEnumerable<StatCountWithFormat<DateTime>>> ReadCountByDay(int userId = 0, int days = 0)
     {
         var query = context.AppUserProgresses
             .AsSplitQuery()
@@ -530,7 +529,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 Day = x.appUserProgresses.LastModified.Date,
                 x.series.Format,
             })
-            .Select(g => new PagesReadOnADayCount<DateTime>
+            .Select(g => new StatCountWithFormat<DateTime>
             {
                 Value = g.Key.Day,
                 Format = g.Key.Format,
@@ -552,7 +551,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                     var existingFormats = resultsForDay.Select(r => r.Format).Distinct();
                     foreach (var format in Enum.GetValues(typeof(MangaFormat)).Cast<MangaFormat>().Where(f => f != MangaFormat.Unknown && !existingFormats.Contains(f)))
                     {
-                        results.Add(new PagesReadOnADayCount<DateTime>()
+                        results.Add(new StatCountWithFormat<DateTime>()
                         {
                             Format = format,
                             Value = date,
@@ -561,25 +560,25 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                     }
                     continue;
                 }
-                results.Add(new PagesReadOnADayCount<DateTime>()
+                results.Add(new StatCountWithFormat<DateTime>()
                 {
                     Format = MangaFormat.Archive,
                     Value = date,
                     Count = 0
                 });
-                results.Add(new PagesReadOnADayCount<DateTime>()
+                results.Add(new StatCountWithFormat<DateTime>()
                 {
                     Format = MangaFormat.Epub,
                     Value = date,
                     Count = 0
                 });
-                results.Add(new PagesReadOnADayCount<DateTime>()
+                results.Add(new StatCountWithFormat<DateTime>()
                 {
                     Format = MangaFormat.Pdf,
                     Value = date,
                     Count = 0
                 });
-                results.Add(new PagesReadOnADayCount<DateTime>()
+                results.Add(new StatCountWithFormat<DateTime>()
                 {
                     Format = MangaFormat.Image,
                     Value = date,
@@ -591,7 +590,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         return results.OrderBy(r => r.Value);
     }
 
-    public async Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCounts(StatsFilterDto filter, int userId = 0)
+    public async Task<IEnumerable<StatCountWithFormat<DateTime>>> ReadCounts(StatsFilterDto filter, int userId = 0)
     {
         var startDate = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
         var endDate = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
@@ -602,7 +601,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .WhereIf(userId > 0, a => a.ReadingSession.AppUserId == userId)
             .WhereIf(filter.Libraries is { Count: > 0 }, a => filter.Libraries.Contains(a.LibraryId))
             .GroupBy(a => new { Day = a.StartTimeUtc.Date, a.Format })
-            .Select(g => new PagesReadOnADayCount<DateTime>
+            .Select(g => new StatCountWithFormat<DateTime>
             {
                 Value = g.Key.Day,
                 Format = g.Key.Format,
@@ -617,7 +616,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         return results.OrderBy(r => r.Value);
     }
 
-    private static void FillMissingDaysAndFormats(List<PagesReadOnADayCount<DateTime>> results, DateTime startDate, DateTime endDate)
+    private static void FillMissingDaysAndFormats(List<StatCountWithFormat<DateTime>> results, DateTime startDate, DateTime endDate)
     {
         if (results.Count == 0)
             return;
@@ -641,7 +640,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 if (existingEntries.Contains((date, format)))
                     continue;
 
-                results.Add(new PagesReadOnADayCount<DateTime>
+                results.Add(new StatCountWithFormat<DateTime>
                 {
                     Format = format,
                     Value = date,
@@ -1534,18 +1533,21 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         return result;
     }
 
-    public async Task<IList<StatCount<DateTime>>> GetFilesAddedOverTime()
+    public async Task<IList<StatCountWithFormat<DateTime>>> GetFilesAddedOverTime()
     {
-        return await context.MangaFile
+        var results = await context.MangaFile
             .AsNoTracking()
-            .GroupBy(f => f.CreatedUtc.Date)
-            .OrderBy(g => g.Key)
-            .Select(g => new StatCount<DateTime>
+            .GroupBy(f => new { Date = f.CreatedUtc.Date, f.Format })
+            .Select(g => new StatCountWithFormat<DateTime>
             {
-                Value = g.Key,
-                Count = g.Count()
+                Value = g.Key.Date,
+                Count = g.Count(),
+                Format = g.Key.Format
             })
+            .OrderBy(d => d.Value)
             .ToListAsync();
+
+        return results;
     }
 
     private async Task<int> GetAuthorsCount(HashSet<int> chapterIds)

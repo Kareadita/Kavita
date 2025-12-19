@@ -185,7 +185,7 @@ public class StatsController(
     /// <returns></returns>
     [HttpGet("reading-counts")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<PagesReadOnADayCount<DateTime>>>> ReadCounts([FromQuery] StatsFilterDto filter, [FromQuery] int userId)
+    public async Task<ActionResult<IEnumerable<StatCountWithFormat<DateTime>>>> ReadCounts([FromQuery] StatsFilterDto filter, [FromQuery] int userId)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
@@ -239,7 +239,7 @@ public class StatsController(
 
     [HttpGet("files-added-over-time")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
-    public async Task<ActionResult<IList<StatCount<DateTime>>>> GetFilesAddedOverTime()
+    public async Task<ActionResult<IList<StatCountWithFormat<DateTime>>>> GetFilesAddedOverTime()
     {
         return Ok(await statService.GetFilesAddedOverTime());
     }

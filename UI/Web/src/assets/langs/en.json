@@ -2773,7 +2773,6 @@
 
     "files-over-time": {
         "title": "Files added over time",
-        "legend-label": "Files Added",
         "no-data": "{{common.no-data}}"
     },
 
@@ -2987,11 +2986,6 @@
         "chapters": "Chapters",
         "no-activity": "No Activity",
         "no-activity-tooltip": "No reading activity on {{date}}.",
-        "low-activity": "Low Activity",
-        "moderate-activity": "Moderate Activity",
-        "good-activity": "Good Activity",
-        "high-activity": "High Activity",
-        "all-time": "All Time"
     },
 
     "reading-pace": {

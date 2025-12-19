@@ -7,7 +7,7 @@ import {asyncScheduler, map} from 'rxjs';
 import {FileExtensionBreakdown} from '../statistics/_models/file-breakdown';
 import {MostActiveUser} from '../statistics/_models/top-reads';
 import {ServerStatistics} from '../statistics/_models/server-statistics';
-import {StatCount} from '../statistics/_models/stat-count';
+import {StatCount, StatCountWithFormat} from '../statistics/_models/stat-count';
 import {PublicationStatus} from '../_models/metadata/publication-status';
 import {MangaFormat} from '../_models/manga-format';
 import {TranslocoService} from "@jsverse/transloco";
@@ -98,7 +98,7 @@ export class StatisticsService {
   }
 
   getFilesAddedOverTime() {
-    return httpResource<StatCount<string>[]>(() => this.baseUrl + 'stats/files-added-over-time').asReadonly();
+    return httpResource<StatCountWithFormat<string>[]>(() => this.baseUrl + 'stats/files-added-over-time').asReadonly();
   }
 
   getPagesPerYear(userId = 0) {
@@ -160,7 +160,7 @@ export class StatisticsService {
   }
 
   getReadCountResource(statsFilter: () => StatsFilter, userId: () => number = () => 0) {
-    return httpResource<Array<any>>(() => {
+    return httpResource<Array<StatCountWithFormat<any>>>(() => {
       const filter = statsFilter();
       if (!filter) return undefined;
 
@@ -168,7 +168,7 @@ export class StatisticsService {
         url: this.baseUrl + `stats/reading-counts`,
         params: this.filterHttpParams(filter, userId())
       }
-    })
+    });
   }
 
   getDayBreakdown(userId = 0) {

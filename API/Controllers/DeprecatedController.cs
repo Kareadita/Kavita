@@ -225,7 +225,7 @@ public class DeprecatedController : BaseApiController
     /// <returns></returns>
     [HttpGet("stats/reading-count-by-day")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<PagesReadOnADayCount<DateTime>>>> ReadCountByDay(int userId = 0, int days = 0)
+    public async Task<ActionResult<IEnumerable<StatCountWithFormat<DateTime>>>> ReadCountByDay(int userId = 0, int days = 0)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
