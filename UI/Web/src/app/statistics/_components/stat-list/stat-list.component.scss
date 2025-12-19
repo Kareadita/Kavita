@@ -14,6 +14,7 @@
 .featured-image {
   flex: 0 0 120px;
   min-height: 180px;
+  background-color: var(--elevation-layer3); // Placeholder while no image
 
   app-image {
     display: block;
@@ -26,7 +27,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; // Prevent flex overflow
+  min-width: 0;
 }
 
 .stat-list-header {
@@ -93,27 +94,12 @@
   }
 
   &.clickable {
-    cursor: pointer;
-
     &:hover {
       background-color: var(--elevation-layer3);
     }
 
-    &:focus-visible {
-      outline: 2px solid var(--primary-color);
-      outline-offset: -2px;
+    &:has(:focus-visible) {
       background-color: var(--elevation-layer3);
-    }
-
-    .item-name {
-      text-decoration: underline;
-      text-decoration-color: transparent;
-      transition: text-decoration-color 0.15s ease;
-    }
-
-    &:hover .item-name,
-    &:focus-visible .item-name {
-      text-decoration-color: currentColor;
     }
   }
 }
@@ -144,6 +130,48 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.item-name-clickable {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+.item-link {
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  .item-name {
+    display: block;
+  }
 }
 
 .item-value {
