@@ -412,16 +412,19 @@ public class ReaderController : BaseApiController
         try
         {
             await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
+
         }
         catch (KavitaException ex)
         {
             return BadRequest(await _localizationService.Translate(UserId, ex.Message));
         }
+
+
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(UserId, "generic-read-progress"));
+
         await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
             MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, markVolumeReadDto.SeriesId,
                 markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)));
-
-        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(UserId, "generic-read-progress"));
 
         BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
         BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(markVolumeReadDto.SeriesId, user.Id));

@@ -29,7 +29,7 @@ import {ListSelectModalComponent} from "../shared/_components/list-select-modal/
 import {take, takeUntil} from "rxjs/operators";
 import {SeriesService} from "./series.service";
 import {Series} from "../_models/series";
-import {RereadChapter, RereadPrompt} from "../_models/readers/reread-prompt";
+import {RereadPrompt} from "../_models/readers/reread-prompt";
 
 enum RereadPromptResult {
   Cancel = 0,
@@ -663,6 +663,7 @@ export class ReaderService {
         this.getNavigationArray(chapter.libraryId, chapter.seriesId, chapter.chapterId, chapter.format),
         { queryParams: { incognitoMode: useIncognitoMode } }
       ).catch(err => console.error(err));
+      return;
     }
 
     const chapter = prompt.chapterOnReread;
