@@ -17,7 +17,6 @@ import {AccountService} from './account.service';
 import {PersonalToC} from "../_models/readers/personal-toc";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import NoSleep from 'nosleep.js';
-import {FullProgress} from "../_models/readers/full-progress";
 import {Volume} from "../_models/volume";
 import {UtilityService} from "../shared/_services/utility.service";
 import {translate} from "@jsverse/transloco";
@@ -184,10 +183,6 @@ export class ReaderService {
 
   saveProgress(libraryId: number, seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
     return this.httpClient.post(this.baseUrl + 'reader/progress', {libraryId, seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
-  }
-
-  getAllProgressForChapter(chapterId: number) {
-    return this.httpClient.get<Array<FullProgress>>(this.baseUrl + 'reader/all-chapter-progress?chapterId=' + chapterId);
   }
 
   markVolumeRead(seriesId: number, volumeId: number) {

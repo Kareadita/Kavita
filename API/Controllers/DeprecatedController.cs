@@ -7,6 +7,7 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
+using API.DTOs.Progress;
 using API.DTOs.Statistics;
 using API.DTOs.Uploads;
 using API.Entities;
@@ -253,6 +254,19 @@ public class DeprecatedController : BaseApiController
     public async Task<ActionResult<IEnumerable<TopReadDto>>> GetTopReads(int days = 0)
     {
         return Ok(await _statService.GetTopUsers(days));
+    }
+
+    /// <summary>
+    /// Get all progress events for a given chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpGet("reader/all-chapter-progress")]
+    public async Task<ActionResult<IEnumerable<FullProgressDto>>> GetProgressForChapter(int chapterId)
+    {
+        var userId = User.IsInRole(PolicyConstants.AdminRole) ? 0 : UserId;
+        return Ok(await _unitOfWork.AppUserProgressRepository.GetUserProgressForChapter(chapterId, userId));
+
     }
 
 }
