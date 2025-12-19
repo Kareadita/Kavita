@@ -36,7 +36,7 @@
               <ng-template #edit>
                 <select class="form-select" formControlName="pdfRenderResolution">
                   @for (opt of allPdfRenderResolutions; track opt) {
-                    <option [value]="opt">{{opt | pdfRenderResolution}}</option>
+                    <option [ngValue]="opt">{{opt | pdfRenderResolution}}</option>
                   }
                 </select>
               </ng-template>
