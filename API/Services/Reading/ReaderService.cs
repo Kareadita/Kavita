@@ -550,7 +550,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             return currentlyReading;
         }
 
-        var volumes = (await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+        var volumes = (await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId, VolumeIncludes.Files)).ToList();
 
         var allChapters = volumes
             .OrderBy(v => v.MinNumber, _chapterSortComparerDefaultLast)
