@@ -27,7 +27,6 @@ namespace API.Services;
 
 public interface IStatisticService
 {
-    // TODO: Put a region on Deprecated code
     Task<ServerStatisticsDto> GetServerStatistics();
     Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds);
     Task<IEnumerable<StatCount<int>>> GetYearCount();
@@ -81,104 +80,60 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             libraryIds = await context.Library.GetUserLibraries(userId).ToListAsync();
         }
 
-
-        // Total Pages Read
-        var totalPagesRead = await context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
-            .Where(p => libraryIds.Contains(p.LibraryId))
-            .Select(p => (int?) p.PagesRead)
-            .SumAsync() ?? 0;
-
-        // TODO: this needs to use AppUserReadingSessions
-        var timeSpentReading = await TimeSpentReadingForUsersAsync([userId], libraryIds);
-
-        var totalWordsRead =  (long) Math.Round(await context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
-            .Where(p => libraryIds.Contains(p.LibraryId))
-            .Join(context.Chapter, p => p.ChapterId, c => c.Id, (progress, chapter) => new {chapter, progress})
-            .Where(p => p.chapter.WordCount > 0)
-            .SumAsync(p => p.chapter.WordCount * (p.progress.PagesRead / (1.0f * p.chapter.Pages))));
-
-        var chaptersRead = await context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
-            .Where(p => libraryIds.Contains(p.LibraryId))
-            .Where(p => p.PagesRead >= context.Chapter.Single(c => c.Id == p.ChapterId).Pages)
-            .CountAsync();
-
-        var lastActive = await context.AppUserReadingSession
-            .Where(p => p.AppUserId == userId)
-            .Select(u => u.EndTimeUtc)
-            .DefaultIfEmpty()
-            .MaxAsync();
-
-
-        // First get the total pages per library
-        var totalPageCountByLibrary = context.Chapter
-            .Join(context.Volume, c => c.VolumeId, v => v.Id, (chapter, volume) => new { chapter, volume })
-            .Join(context.Series, g => g.volume.SeriesId, s => s.Id, (g, series) => new { g.chapter, series })
-            .AsEnumerable()
-            .GroupBy(g => g.series.LibraryId)
-            .ToDictionary(g => g.Key, g => g.Sum(c => c.chapter.Pages));
-
-        var totalProgressByLibrary = await context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
-            .Where(p => p.LibraryId > 0)
-            .GroupBy(p => p.LibraryId)
-            .Select(g => new StatCount<float>
+        var activityData = await context.AppUserReadingSessionActivityData
+            .AsNoTracking()
+            .Where(a => a.ReadingSession.AppUserId == userId)
+            .Where(a => libraryIds.Contains(a.LibraryId))
+            .Select(a => new
             {
-                Count = g.Key,
-                Value = g.Sum(p => p.PagesRead) / (float) totalPageCountByLibrary[g.Key]
+                a.PagesRead,
+                a.WordsRead,
+                a.TotalPages,
+                a.StartTimeUtc,
+                a.EndTimeUtc,
+                a.LibraryId,
+                a.ChapterId
             })
             .ToListAsync();
 
+        var totalPagesRead = activityData.Sum(a => a.PagesRead);
 
-        // TODO: Move this to ReadingSession
-        // New solution. Calculate total hours then divide by number of weeks from time account was created (or min reading event) till now
-        var averageReadingTimePerWeek = await context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
-            .Join(context.Chapter, p => p.ChapterId, c => c.Id,
-                (p, c) => new
-                {
-                    // TODO: See if this can be done in the DB layer
-                    AverageReadingHours = Math.Min((float) p.PagesRead / (float) c.Pages, 1.0) *
-                                          ((float) c.AvgHoursToRead)
-                })
-            .Select(x => x.AverageReadingHours)
-            .SumAsync();
+        var totalWordsRead = activityData.Sum(a => (long)a.WordsRead);
 
-        var earliestReadDate = await context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
-            .Select(p => p.Created)
+        var timeSpentReading = (long)Math.Round(activityData
+            .Where(a => a.EndTimeUtc != null)
+            .Sum(a => (a.EndTimeUtc!.Value - a.StartTimeUtc).TotalHours));
+
+        var lastActive = await context.AppUserReadingSession
+            .AsNoTracking()
+            .Where(s => s.AppUserId == userId)
+            .Select(s => s.EndTimeUtc)
             .DefaultIfEmpty()
-            .MinAsync();
+            .MaxAsync();
 
-        if (earliestReadDate == DateTime.MinValue)
+        // Average reading time per week
+        var earliestReadDate = activityData
+            .Select(a => a.StartTimeUtc)
+            .DefaultIfEmpty(DateTime.UtcNow)
+            .Min();
+
+        var avgHoursPerWeek = 0f;
+        if (activityData.Count > 0 && earliestReadDate != DateTime.UtcNow)
         {
-            averageReadingTimePerWeek = 0;
-        }
-        else
-        {
-#pragma warning disable S6561
-            var timeDifference = DateTime.Now - earliestReadDate;
-#pragma warning restore S6561
-            var deltaWeeks = (int)Math.Ceiling(timeDifference.TotalDays / 7);
-
-            averageReadingTimePerWeek /= deltaWeeks;
+            var timeDifference = DateTime.UtcNow - earliestReadDate;
+            var deltaWeeks = Math.Max(1, (int)Math.Ceiling(timeDifference.TotalDays / 7));
+            avgHoursPerWeek = (float)timeSpentReading / deltaWeeks;
         }
 
-
-        return new UserReadStatistics()
+        return new UserReadStatistics
         {
             TotalPagesRead = totalPagesRead,
             TotalWordsRead = totalWordsRead,
             TimeSpentReading = timeSpentReading,
-            ChaptersRead = chaptersRead,
             LastActiveUtc = lastActive,
-            PercentReadPerLibrary = totalProgressByLibrary,
-            AvgHoursPerWeekSpentReading = averageReadingTimePerWeek
+            AvgHoursPerWeekSpentReading = avgHoursPerWeek
         };
     }
-
     /// <summary>
     /// Returns the Release Years and their count
     /// </summary>

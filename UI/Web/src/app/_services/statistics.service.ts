@@ -61,10 +61,6 @@ export class StatisticsService {
     return httpResource<UserReadStatistics>(() => this.baseUrl + `stats/user-read?userId=${userId()}`).asReadonly();
   }
 
-  getServerStatistics() {
-    return this.httpClient.get<ServerStatistics>(this.baseUrl + 'stats/server/stats');
-  }
-
   getServerStatisticsResource() {
     return httpResource<ServerStatistics>(() => this.baseUrl + 'stats/server/stats').asReadonly();
   }

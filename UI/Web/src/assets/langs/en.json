@@ -2985,7 +2985,7 @@
         "words": "Words",
         "chapters": "Chapters",
         "no-activity": "No Activity",
-        "no-activity-tooltip": "No reading activity on {{date}}.",
+        "no-activity-tooltip": "No reading activity on {{date}}."
     },
 
     "reading-pace": {
