@@ -71,14 +71,17 @@ export class ServerStatsComponent {
   });
 
   readonly statsResource = this.statService.getServerStatisticsResource();
+
+  readonly popularLibrariesResource = this.statService.getPopularLibraries();
   readonly popularLibraries = computed(() => {
-    return (this.statsResource.value()?.mostActiveLibraries ?? []).map(r => {
-      return {name: r.value.name, value: r.count};
+    return (this.popularLibrariesResource.value() ?? []).map(r => {
+      return {name: r.value.name, value: r.count, data: r.value};
     }) as StatListItem[];
   });
 
+  readonly popularSeriesResource = this.statService.getPopularSeries();
   readonly popularSeries = computed(() => {
-    return (this.statsResource.value()?.mostReadSeries ?? []).map(r => {
+    return (this.popularSeriesResource.value() ?? []).map(r => {
       return {name: r.value.name, value: r.count, data: r.value};
     }) as StatListItem[];
   });
@@ -89,11 +92,33 @@ export class ServerStatsComponent {
     }
     return this.imageService.getSeriesCoverImage((popular[0].data as Series).id)
   });
+  readonly getSeriesImage = (item: StatListItem) => this.imageService.getSeriesCoverImage((item.data as Series).id);
 
   readonly genresResource = this.statService.getPopularGenresResource();
   readonly popularGenres = computed(() => {
     return (this.genresResource.value() ?? []).map(r => {
-      return {name: r.value.title, value: r.count};
+      return {name: r.value.title, value: r.count, data: r.value};
+    }) as StatListItem[];
+  });
+
+  readonly tagsResource = this.statService.getPopularTagsResource();
+  readonly popularTags = computed(() => {
+    return (this.tagsResource.value() ?? []).map(r => {
+      return {name: r.value.title, value: r.count, data: r.value};
+    }) as StatListItem[];
+  });
+
+  readonly artistResource = this.statService.getPopularArtistsResource();
+  readonly popularArtists = computed(() => {
+    return (this.artistResource.value() ?? []).map(r => {
+      return {name: r.value.name, value: r.count, data: r.value};
+    }) as StatListItem[];
+  });
+
+  readonly authorsResource = this.statService.getPopularAuthorsResource();
+  readonly popularAuthors = computed(() => {
+    return (this.authorsResource.value() ?? []).map(r => {
+      return {name: r.value.name, value: r.count, data: r.value};
     }) as StatListItem[];
   });
 

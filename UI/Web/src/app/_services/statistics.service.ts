@@ -28,6 +28,10 @@ import {
 } from "../statistics/_components/avg-time-spend-reading-by-hour/avg-time-spend-reading-by-hour.component";
 import {StatBucket} from "../statistics/_models/stats/stat-bucket";
 import {Genre} from "../_models/metadata/genre";
+import {Library} from "../_models/library/library";
+import {Series} from "../_models/series";
+import {Tag} from "../_models/tag";
+import {Person} from "../_models/metadata/person";
 
 export enum DayOfWeek
 {
@@ -65,8 +69,27 @@ export class StatisticsService {
     return httpResource<ServerStatistics>(() => this.baseUrl + 'stats/server/stats').asReadonly();
   }
 
+  getPopularLibraries() {
+    return httpResource<StatCount<Library>[]>(() => this.baseUrl + 'stats/popular-libraries').asReadonly();
+  }
+
+  getPopularSeries() {
+    return httpResource<StatCount<Series>[]>(() => this.baseUrl + 'stats/popular-series').asReadonly();
+  }
+
   getPopularGenresResource() {
     return httpResource<StatCount<Genre>[]>(() => this.baseUrl + 'stats/popular-genres').asReadonly();
+  }
+
+  getPopularTagsResource() {
+    return httpResource<StatCount<Tag>[]>(() => this.baseUrl + 'stats/popular-tags').asReadonly();
+  }
+
+  getPopularAuthorsResource() {
+    return httpResource<StatCount<Person>[]>(() => this.baseUrl + 'stats/popular-authors').asReadonly();
+  }
+  getPopularArtistsResource() {
+    return httpResource<StatCount<Person>[]>(() => this.baseUrl + 'stats/popular-artists').asReadonly();
   }
 
   getPopularDecadesResource() {

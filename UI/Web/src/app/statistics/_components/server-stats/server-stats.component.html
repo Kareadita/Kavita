@@ -112,46 +112,47 @@
                   [items]="popularSeries()"
                   [valueLabel]="t('series')"
                   [featuredImage]="mostPopularSeriesCover()"
-                  [config]="{ showRanking: true, showAccentBars: true, accentColor: '#d4af37' }"
+                  [itemImage]="getSeriesImage"
+                  [config]="{ showRanking: true, showAccentBars: true }"
                   (itemClick)="openSeries($event)"
                 />
               </div>
 
               <div class="col-auto">
                 <app-stat-list
-                  [title]="t('popular-genre-title')"
+                  [title]="t('popular-genres-title')"
                   [items]="popularGenres()"
                   [valueLabel]="t('series')"
                   [config]="{ showRanking: true, showAccentBars: true }"
                 />
               </div>
 
-<!--              <div class="col-auto">-->
-<!--                <app-stat-list-->
-<!--                  [title]="t('popular-tags-title')"-->
-<!--                  [items]="tags()"-->
-<!--                  [valueLabel]="t('tags')"-->
-<!--                  [config]="{ showRanking: true, showAccentBars: true }"-->
-<!--                />-->
-<!--              </div>-->
+              <div class="col-auto">
+                <app-stat-list
+                  [title]="t('popular-tags-title')"
+                  [items]="popularTags()"
+                  [valueLabel]="t('tags')"
+                  [config]="{ showRanking: true, showAccentBars: true }"
+                />
+              </div>
 
-<!--              <div class="col-auto">-->
-<!--                <app-stat-list-->
-<!--                  [title]="t('popular-authors-title')"-->
-<!--                  [items]="popularAuthors()"-->
-<!--                  [valueLabel]="t('genres')"-->
-<!--                  [config]="{ showRanking: true, showAccentBars: true }"-->
-<!--                />-->
-<!--              </div>-->
+              <div class="col-auto">
+                <app-stat-list
+                  [title]="t('popular-authors-title')"
+                  [items]="popularAuthors()"
+                  [valueLabel]="t('series')"
+                  [config]="{ showRanking: true, showAccentBars: true }"
+                />
+              </div>
 
-<!--              <div class="col-auto">-->
-<!--                <app-stat-list-->
-<!--                  [title]="t('popular-artists-title')"-->
-<!--                  [items]="popularArtists()"-->
-<!--                  [valueLabel]="t('genres')"-->
-<!--                  [config]="{ showRanking: true, showAccentBars: true }"-->
-<!--                />-->
-<!--              </div>-->
+              <div class="col-auto">
+                <app-stat-list
+                  [title]="t('popular-artists-title')"
+                  [items]="popularArtists()"
+                  [valueLabel]="t('series')"
+                  [config]="{ showRanking: true, showAccentBars: true }"
+                />
+              </div>
             </div>
 
             <div class="row g-0 pt-2 pb-2">

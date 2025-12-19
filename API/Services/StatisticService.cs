@@ -27,12 +27,17 @@ namespace API.Services;
 
 public interface IStatisticService
 {
+    // TODO: Put a region on Deprecated code
     Task<ServerStatisticsDto> GetServerStatistics();
     Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds);
     Task<IEnumerable<StatCount<int>>> GetYearCount();
     Task<IEnumerable<StatCount<int>>> GetTopYears();
     Task<IList<StatBucketDto>> GetPopularDecades();
+    Task<IList<StatCount<LibraryDto>>> GetPopularLibraries();
+    Task<IList<StatCount<SeriesDto>>> GetPopularSeries();
     Task<IList<StatCount<GenreTagDto>>> GetPopularGenres();
+    Task<IList<StatCount<TagDto>>> GetPopularTags();
+    Task<IList<StatCount<PersonDto>>> GetPopularPerson(PersonRole role);
     Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount();
     Task<IEnumerable<StatCount<MangaFormat>>> GetMangaFormatCount();
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
@@ -225,7 +230,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var totalCount = decadeGroups.Sum(d => d.Count);
 
         return decadeGroups
-            .OrderBy(d => d.Decade)
+            .OrderByDescending(d => d.Decade)
             .Select(d => new StatBucketDto
             {
                 RangeStart = d.Decade,
@@ -238,56 +243,164 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .ToList();
     }
 
+    public async Task<IList<StatCount<LibraryDto>>> GetPopularLibraries()
+    {
+        var counts = await context.AppUserProgresses
+            .Where(p => p.LibraryId > 0)
+            .GetTopCounts(p => p.LibraryId, take: 5);
+
+        var libraries = await context.Library
+            .Where(l => counts.Select(c => c.Id).Contains(l.Id))
+            .ProjectTo<LibraryDto>(mapper.ConfigurationProvider)
+            .ToDictionaryAsync(l => l.Id);
+
+        return counts
+            .Where(c => libraries.ContainsKey(c.Id))
+            .Select(lc => new StatCount<LibraryDto>
+            {
+                Value = libraries[lc.Id],
+                Count = lc.Count
+            })
+            .ToList();
+    }
+
+    public async Task<IList<StatCount<SeriesDto>>> GetPopularSeries()
+    {
+        var counts = await context.AppUserProgresses
+            .GetTopCounts(p => p.SeriesId, take: 5);
+
+        if (counts.Count == 0) return [];
+
+
+        var series = await context.Series
+            .Where(s => counts.Select(c => c.Id).Contains(s.Id))
+            .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
+            .ToDictionaryAsync(s => s.Id);
+
+        return counts
+            .Where(c => series.ContainsKey(c.Id))
+            .Select(sc => new StatCount<SeriesDto>
+            {
+                Value = series[sc.Id],
+                Count = sc.Count
+            })
+            .ToList();
+    }
+
     /// <summary>
     /// Top 5 genres where there is some reading activity
     /// </summary>
     /// <remarks>Since most users only tag the Series level metadata, this will only check against Series. Will count series * totalReads of series</remarks>
     /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
     public async Task<IList<StatCount<GenreTagDto>>> GetPopularGenres()
     {
-        var seriesReadCounts = await context.AppUserProgresses
-            .GroupBy(p => p.SeriesId)
-            .Select(g => new { SeriesId = g.Key, TotalReads = g.Sum(p => p.TotalReads) })
-            .Where(x => x.TotalReads > 0)
-            .ToDictionaryAsync(x => x.SeriesId, x => x.TotalReads);
+        var counts = await context.AppUserProgresses
+            .GetTopCounts(p => p.SeriesId);
 
-        if (seriesReadCounts.Count == 0) return [];
+        if (counts.Count == 0) return [];
 
-        return await context.Genre
-            .SelectMany(g => g.SeriesMetadatas, (genre, sm) => new { genre, sm.SeriesId })
-            .Where(x => seriesReadCounts.Keys.Contains(x.SeriesId))
-            .ToListAsync()
-            .ContinueWith(IList<StatCount<GenreTagDto>> (t) => t.Result
-                .GroupBy(x => x.genre)
-                .Select(g => new StatCount<GenreTagDto>
+        var countDict = counts.ToDictionary(c => c.Id, c => c.Count);
+
+        var genreStats = await context.Genre
+            .SelectMany(g => g.SeriesMetadatas, (genre, sm) => new
+            {
+                Genre = genre,
+                sm.SeriesId
+            })
+            .Where(x => countDict.Keys.Contains(x.SeriesId))
+            .ToListAsync();
+
+        return genreStats
+            .GroupBy(x => x.Genre)
+            .Select(g => new StatCount<GenreTagDto>
+            {
+                Value = new GenreTagDto
                 {
-                    Value = new GenreTagDto
-                    {
-                        Id = g.Key.Id,
-                        Title = g.Key.Title
-                    },
-                    Count = g.Sum(x => seriesReadCounts.GetValueOrDefault(x.SeriesId, 0))
-                })
-                .OrderByDescending(x => x.Count)
-                .Take(5)
-                .ToList());
+                    Id = g.Key.Id,
+                    Title = g.Key.Title
+                },
+                Count = g.Sum(x => countDict.GetValueOrDefault(x.SeriesId, 0))
+            })
+            .OrderByDescending(x => x.Count)
+            .Take(5)
+            .ToList();
     }
 
-    public Task<IList<StatCount<TagDto>>> GetPopularTags()
+    public async Task<IList<StatCount<TagDto>>> GetPopularTags()
     {
-        throw new NotImplementedException();
+        var counts = await context.AppUserProgresses
+            .GetTopCounts(p => p.SeriesId);
+
+        if (counts.Count == 0)
+            return [];
+
+        var countDict = counts.ToDictionary(c => c.Id, c => c.Count);
+
+        var genreStats = await context.Tag
+            .SelectMany(g => g.SeriesMetadatas, (tag, sm) => new
+            {
+                Tag = tag,
+                sm.SeriesId
+            })
+            .Where(x => countDict.Keys.Contains(x.SeriesId))
+            .ToListAsync();
+
+        return genreStats
+            .GroupBy(x => x.Tag)
+            .Select(g => new StatCount<TagDto>
+            {
+                Value = new TagDto
+                {
+                    Id = g.Key.Id,
+                    Title = g.Key.Title
+                },
+                Count = g.Sum(x => countDict.GetValueOrDefault(x.SeriesId, 0))
+            })
+            .OrderByDescending(x => x.Count)
+            .Take(5)
+            .ToList();
     }
 
-    public Task<IList<StatCount<PersonDto>>> GetPopularAuthors()
+    public async Task<IList<StatCount<PersonDto>>> GetPopularPerson(PersonRole role)
     {
-        throw new NotImplementedException();
+        var counts = await context.AppUserProgresses
+            .GetTopCounts(p => p.SeriesId);
+
+        if (counts.Count == 0) return [];
+
+        var countDict = counts.ToDictionary(c => c.Id, c => c.Count);
+
+        var authorStats = await context.SeriesMetadataPeople
+            .Where(smp => smp.Role == role)
+            .Where(smp => countDict.Keys.Contains(smp.SeriesMetadata.SeriesId))
+            .Select(smp => new
+            {
+                smp.Person,
+                smp.SeriesMetadata.SeriesId
+            })
+            .ToListAsync();
+
+        return authorStats
+            .GroupBy(x => x.Person)
+            .Select(g => new StatCount<PersonDto>
+            {
+                Value = new PersonDto
+                {
+                    Id = g.Key.Id,
+                    Name = g.Key.Name,
+                    CoverImage = g.Key.CoverImage,
+                    PrimaryColor = g.Key.PrimaryColor,
+                    SecondaryColor = g.Key.SecondaryColor,
+                    Description = g.Key.Description
+                },
+                Count = g.Sum(x => countDict.GetValueOrDefault(x.SeriesId, 0))
+            })
+            .OrderByDescending(x => x.Count)
+            .Take(5)
+            .ToList();
     }
 
-    public Task<IList<StatCount<PersonDto>>> GetPopularArtists()
-    {
-        throw new NotImplementedException();
-    }
+
 
     public async Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount()
     {

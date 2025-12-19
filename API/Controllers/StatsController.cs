@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs;
 using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.DTOs.Statistics;
 using API.DTOs.Stats.V3;
 using API.DTOs.Stats.V3.ClientDevice;
@@ -79,11 +81,51 @@ public class StatsController(
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-libraries")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<LibraryDto>>>> GetPopularLibraries()
+    {
+        return Ok(await statService.GetPopularLibraries());
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-series")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<SeriesDto>>>> GetPopularSeries()
+    {
+        return Ok(await statService.GetPopularSeries());
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("popular-genres")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<IList<StatCount<GenreTagDto>>>> GetPopularGenres()
     {
         return Ok(await statService.GetPopularGenres());
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-tags")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<TagDto>>>> GetPopularTags()
+    {
+        return Ok(await statService.GetPopularTags());
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-authors")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularAuthors()
+    {
+        return Ok(await statService.GetPopularPerson(PersonRole.Writer));
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-artists")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularArtists()
+    {
+        return Ok(await statService.GetPopularPerson(PersonRole.CoverArtist));
     }
 
     /// <summary>

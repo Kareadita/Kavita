@@ -2842,6 +2842,12 @@
         "most-active-users-title": "Most Active Users",
         "popular-libraries-title": "Popular Libraries",
         "popular-series-title": "Popular Series",
+        "popular-genres-title": "Popular Genres",
+        "popular-tags-title": "Popular Tags",
+        "popular-artists-title": "Popular Artists",
+        "popular-authors-title": "Popular Authors",
+
+
         "series-count": "{{num}} Series",
         "volume-count": "{{num}} Volumes",
         "file-count": "{{num}} Files",

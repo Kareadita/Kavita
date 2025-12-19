@@ -67,7 +67,7 @@ export class StatListComponent {
 
   protected showRanking = computed(() => this.config().showRanking ?? false);
   protected showAccentBars = computed(() => this.config().showAccentBars ?? false);
-  protected accentColor = computed(() => this.config().accentColor ?? '#d4af37');
+  protected accentColor = computed(() => this.config().accentColor ?? 'var(--primary-color)');
 
   protected hasFeaturedImage = computed(() => {
     const img = this.featuredImage();
