@@ -24,7 +24,7 @@ using TaskScheduler = API.Services.TaskScheduler;
 namespace API.Controllers;
 
 /// <summary>
-/// All APIs here are subject to be removed and are no longer maintained
+/// All APIs here are subject to be removed and are no longer maintained. Will be removed v0.9.0
 /// </summary>
 [Route("api/")]
 public class DeprecatedController : BaseApiController
@@ -232,6 +232,14 @@ public class DeprecatedController : BaseApiController
         if (!isAdmin && userId != user!.Id) return BadRequest();
 
         return Ok(await _statService.ReadCountByDay(userId, days));
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("server/count/year")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetYearStatistics()
+    {
+        return Ok(await _statService.GetYearCount());
     }
 
 }

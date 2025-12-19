@@ -1,16 +1,10 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, signal} from '@angular/core';
 import {Router} from '@angular/router';
-import {NgbModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
-import {Observable, ReplaySubject, shareReplay} from 'rxjs';
-import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {Series} from 'src/app/_models/series';
 import {ImageService} from 'src/app/_services/image.service';
-import {MetadataService} from 'src/app/_services/metadata.service';
 import {StatisticsService} from 'src/app/_services/statistics.service';
-import {PieDataItem} from '../../_models/pie-data-item';
-import {ServerStatistics} from '../../_models/server-statistics';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BytesPipe} from '../../../_pipes/bytes.pipe';
 import {TimeDurationPipe} from '../../../_pipes/time-duration.pipe';
 import {CompactNumberPipe} from '../../../_pipes/compact-number.pipe';
@@ -20,13 +14,21 @@ import {PublicationStatusStatsComponent} from '../publication-status-stats/publi
 import {FileBreakdownStatsComponent} from '../file-breakdown-stats/file-breakdown-stats.component';
 import {StatListComponent, StatListItem} from '../stat-list/stat-list.component';
 import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
-import {AsyncPipe, DecimalPipe, Location} from '@angular/common';
+import {DecimalPipe} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
 import {ReactiveFormsModule} from "@angular/forms";
 import {LibraryAndTimeSelectorComponent} from "../library-and-time-selector/library-and-time-selector.component";
 import {StatsFilter} from "../../_models/stats-filter";
 import {MostActiveUsersComponent} from "../most-active-users/most-active-users.component";
+import {Person} from "../../../_models/metadata/person";
+import {StatBucket} from "../../_models/stats/stat-bucket";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
+import {forkJoin} from "rxjs";
+import {map} from "rxjs/operators";
 
 enum TabID {
   Stats = 'stats-tab',
@@ -39,7 +41,7 @@ enum TabID {
     styleUrls: ['./server-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IconAndTitleComponent, StatListComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent,
-    ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe,
+    ReadingActivityComponent, DayBreakdownComponent, DecimalPipe, CompactNumberPipe, TimeDurationPipe,
     BytesPipe, TranslocoDirective, ReactiveFormsModule, LibraryAndTimeSelectorComponent, MostActiveUsersComponent,
     NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet]
 })
@@ -47,12 +49,8 @@ export class ServerStatsComponent {
   private readonly statService = inject(StatisticsService);
   private readonly router = inject(Router);
   private readonly imageService = inject(ImageService);
-  private readonly metadataService = inject(MetadataService);
-  private readonly modalService = inject(NgbModal);
   private readonly utilityService = inject(UtilityService);
-  private readonly filterUtilityService = inject(FilterUtilitiesService);
-  private readonly location = inject(Location);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly filterUtilities = inject(FilterUtilitiesService);
   protected readonly accountService = inject(AccountService);
 
   protected readonly TabID = TabID;
@@ -69,6 +67,11 @@ export class ServerStatsComponent {
       return {name: `${r.rangeStart}s`, value: r.count, data: r};
     }) as StatListItem[];
   });
+  readonly releaseYearsWithUrls = signal<StatListItem[]>([]);
+  readonly getDecadeUrl = (item: StatListItem) => {
+    const data = item.data as StatBucket & { url?: string };
+    return data?.url ?? null;
+  }
 
   readonly statsResource = this.statService.getServerStatisticsResource();
 
@@ -93,6 +96,11 @@ export class ServerStatsComponent {
     return this.imageService.getSeriesCoverImage((popular[0].data as Series).id)
   });
   readonly getSeriesImage = (item: StatListItem) => this.imageService.getSeriesCoverImage((item.data as Series).id);
+  readonly getSeriesUrl = (item: StatListItem) => {
+    const series = item.data as Series;
+    return `/library/${series.libraryId}/series/${series.id}`;
+  };
+
 
   readonly genresResource = this.statService.getPopularGenresResource();
   readonly popularGenres = computed(() => {
@@ -122,28 +130,42 @@ export class ServerStatsComponent {
     }) as StatListItem[];
   });
 
-
-
-
-  stats$!: Observable<ServerStatistics>;
-  openSeries = (data: PieDataItem) => {
-    const series = data.extra as Series;
-    this.router.navigate(['library', series.libraryId, 'series', series.id]);
-  }
-
-  breakpointSubject = new ReplaySubject<Breakpoint>(1);
-
-
-  @HostListener('window:resize', [])
-  @HostListener('window:orientationchange', [])
-  onResize() {
-    this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
-  }
-
+  readonly getPersonUrl = (item: StatListItem) => {
+    const person = item.data as Person;
+    return `/person/${person.name}`;
+  };
 
   constructor() {
-    this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
+    effect(() => {
+      const items = this.releaseYears();
+      if (!items.length) {
+        this.releaseYearsWithUrls.set([]);
+        return;
+      }
 
-    this.stats$ = this.statService.getServerStatistics().pipe(takeUntilDestroyed(this.destroyRef), shareReplay());
+      // Build all filter encode requests
+      const urlRequests = items.map(item => {
+        const decade = item.data as StatBucket;
+        return this.filterUtilities.encodeFilter({
+          statements: [
+            {comparison: FilterComparison.GreaterThanEqual, field: FilterField.ReleaseYear, value: decade.rangeStart + ''},
+            {comparison: FilterComparison.LessThanEqual, field: FilterField.ReleaseYear, value: decade.rangeEnd + ''},
+          ],
+          combination: FilterCombination.And,
+          limitTo: 0,
+          name: `${decade.rangeStart}s`
+        }).pipe(
+          map(encoded => ({
+            ...item,
+            data: { ...decade, url: '/all-series?' + encoded }
+          }))
+        );
+      });
+
+      forkJoin(urlRequests).subscribe(resolved => {
+        this.releaseYearsWithUrls.set(resolved);
+      });
+    });
   }
+
 }

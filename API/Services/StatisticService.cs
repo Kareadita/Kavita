@@ -430,100 +430,37 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
 
     public async Task<ServerStatisticsDto> GetServerStatistics()
     {
-        // TODO: Refactor this to use parallel db queries
-        // var mostActiveUsers = context.AppUserProgresses
-        //     .AsSplitQuery()
-        //     .AsEnumerable()
-        //     .GroupBy(sm => sm.AppUserId)
-        //     .Select(sm => new StatCount<UserDto>
-        //     {
-        //         Value = context.AppUser.Where(u => u.Id == sm.Key).ProjectTo<UserDto>(mapper.ConfigurationProvider)
-        //             .Single(),
-        //         Count = context.AppUserProgresses.Where(u => u.AppUserId == sm.Key).Distinct().Count()
-        //     })
-        //     .OrderByDescending(d => d.Count)
-        //     .Take(5);
-        //
-        // var mostActiveLibrary = context.AppUserProgresses
-        //     .AsSplitQuery()
-        //     .AsEnumerable()
-        //     .Where(sm => sm.LibraryId > 0)
-        //     .GroupBy(sm => sm.LibraryId)
-        //     .Select(sm => new StatCount<LibraryDto>
-        //     {
-        //         Value = context.Library.Where(u => u.Id == sm.Key).ProjectTo<LibraryDto>(mapper.ConfigurationProvider)
-        //             .Single(),
-        //         Count = context.AppUserProgresses.Where(u => u.LibraryId == sm.Key).Distinct().Count()
-        //     })
-        //     .OrderByDescending(d => d.Count)
-        //     .Take(5);
-        //
-        // var mostPopularSeries = context.AppUserProgresses
-        //     .AsSplitQuery()
-        //     .AsEnumerable()
-        //     .GroupBy(sm => sm.SeriesId)
-        //     .Select(sm => new StatCount<SeriesDto>
-        //     {
-        //         Value = context.Series.Where(u => u.Id == sm.Key).ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
-        //             .Single(),
-        //         Count = context.AppUserProgresses.Where(u => u.SeriesId == sm.Key).Distinct().Count()
-        //     })
-        //     .OrderByDescending(d => d.Count)
-        //     .Take(5);
-        //
-        // var mostReadSeries = context.AppUserProgresses
-        //     .AsSplitQuery()
-        //     .AsEnumerable()
-        //     .GroupBy(sm => sm.SeriesId)
-        //     .Select(sm => new StatCount<SeriesDto>
-        //     {
-        //         Value = context.Series.Where(u => u.Id == sm.Key).ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
-        //             .Single(),
-        //         Count = context.AppUserProgresses.Where(u => u.SeriesId == sm.Key).AsEnumerable().DistinctBy(p => p.AppUserId).Count()
-        //     })
-        //     .OrderByDescending(d => d.Count)
-        //     .Take(5);
-        //
-        // // Remember: Ordering does not apply if there is a distinct
-        // var recentlyRead = context.AppUserProgresses
-        //     .Join(context.Series, p => p.SeriesId, s => s.Id,
-        //         (appUserProgresses, series) => new
-        //         {
-        //             Series = series,
-        //             AppUserProgresses = appUserProgresses
-        //         })
-        //     .AsEnumerable()
-        //     .DistinctBy(s => s.AppUserProgresses.SeriesId)
-        //     .OrderByDescending(x => x.AppUserProgresses.LastModified)
-        //     .Select(x => mapper.Map<SeriesDto>(x.Series))
-        //     .Take(5);
+        var counts = await context.Chapter
+            .Select(_ => new
+            {
+                Chapters = context.Chapter.Count(),
+                Series = context.Series.Count(),
+                Files = context.MangaFile.Count(),
+                Genres = context.Genre.Count(),
+                People = context.Person.Select(p => p.NormalizedName).Distinct().Count(),
+                Tags = context.Tag.Count(),
+                Volumes = context.Volume.Count(v => Math.Abs(v.MinNumber - Parser.LooseLeafVolumeNumber) > 0.001f),
+                TotalBytes = context.MangaFile.Sum(m => m.Bytes)
+            })
+            .FirstAsync();
 
+        var totalReadingHours = await context.AppUserReadingSessionActivityData
+            .Where(a => a.EndTimeUtc != null)
+            .Select(a => new { a.StartTimeUtc, EndTimeUtc = a.EndTimeUtc!.Value })
+            .ToListAsync()
+            .ContinueWith(t => t.Result.Sum(a => (a.EndTimeUtc - a.StartTimeUtc).TotalHours));
 
-        var distinctPeople =  context.Person
-            .AsEnumerable()
-            .GroupBy(sm => sm.NormalizedName)
-            .Select(sm => sm.Key)
-            .Distinct()
-            .Count();
-
-
-
-        return new ServerStatisticsDto()
+        return new ServerStatisticsDto
         {
-            ChapterCount = await context.Chapter.CountAsync(),
-            SeriesCount = await context.Series.CountAsync(),
-            TotalFiles = await context.MangaFile.CountAsync(),
-            TotalGenres = await context.Genre.CountAsync(),
-            TotalPeople = distinctPeople,
-            TotalSize = await context.MangaFile.SumAsync(m => m.Bytes),
-            TotalTags = await context.Tag.CountAsync(),
-            VolumeCount = await context.Volume.Where(v => Math.Abs(v.MinNumber - Parser.LooseLeafVolumeNumber) > 0.001f).CountAsync(),
-            // MostActiveUsers = mostActiveUsers,
-            // MostActiveLibraries = mostActiveLibrary,
-            // MostPopularSeries = mostPopularSeries,
-            // MostReadSeries = mostReadSeries,
-            // RecentlyRead = recentlyRead,
-            TotalReadingTime = await TimeSpentReadingForUsersAsync(ArraySegment<int>.Empty, ArraySegment<int>.Empty)
+            ChapterCount = counts.Chapters,
+            SeriesCount = counts.Series,
+            TotalFiles = counts.Files,
+            TotalGenres = counts.Genres,
+            TotalPeople = counts.People,
+            TotalSize = counts.TotalBytes,
+            TotalTags = counts.Tags,
+            VolumeCount = counts.Volumes,
+            TotalReadingTime = (long) totalReadingHours
         };
     }
 

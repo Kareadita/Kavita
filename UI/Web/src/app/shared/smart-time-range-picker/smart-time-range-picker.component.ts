@@ -25,6 +25,7 @@ export type TimeRange = {
 export class SmartTimeRangePickerComponent {
 
   startYear = input.required<number>();
+  locale = input<'server' | 'profile'>('profile');
 
   timeRangeUpdate = output<TimeRange>();
 
@@ -45,7 +46,7 @@ export class SmartTimeRangePickerComponent {
     const end = selectedTime.endDate;
 
     if (!start && !end) {
-      return translate('smart-time-picker.during-entire-life');
+      return translate('smart-time-picker.during-entire-life-' + this.locale() );
     }
 
     if (start && end) {

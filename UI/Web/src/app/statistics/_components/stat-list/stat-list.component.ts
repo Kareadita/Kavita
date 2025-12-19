@@ -87,7 +87,6 @@ export class StatListComponent {
       }
     }
 
-    // Fall back to explicit featured image
     return this.featuredImage();
   });
 

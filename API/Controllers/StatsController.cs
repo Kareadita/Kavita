@@ -33,8 +33,6 @@ namespace API.Controllers;
 public class StatsController(
     IStatisticService statService,
     IUnitOfWork unitOfWork,
-    UserManager<AppUser> userManager,
-    ILocalizationService localizationService,
     IDirectoryService directoryService)
     : BaseApiController
 {
@@ -48,13 +46,7 @@ public class StatsController(
         return Ok(await statService.GetServerStatistics());
     }
 
-    [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("server/count/year")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetYearStatistics()
-    {
-        return Ok(await statService.GetYearCount());
-    }
+
 
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/count/publication-status")]

@@ -13,9 +13,8 @@
         <ng-template ngbNavContent>
           @defer (when activeTabId === TabID.Stats; prefetch on idle) {
 
-
-
-            @if (stats$ | async; as stats) {
+            @if (statsResource.hasValue()) {
+              @let stats = statsResource.value();
               <div class="row g-0 mt-4 mb-3 d-flex justify-content-around">
                 <ng-container>
                   <div class="col-auto mb-2">
@@ -86,15 +85,16 @@
             <!--TODO: Figure out how to customize for Server page-->
             <div class="my-4">
               <app-library-and-time-selector [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUserSignal()!.id"
-                                             (filterChange)="filter.set($event)" (yearChange)="year.set($event)" />
+                                             (filterChange)="filter.set($event)" (yearChange)="year.set($event)" [locale]="'server'" />
             </div>
 
             <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around align-items-stretch">
               <div class="col-auto d-flex">
                 <app-stat-list
                   [title]="t('popular-decades-title')"
-                  [items]="releaseYears()"
+                  [items]="releaseYearsWithUrls()"
                   [valueLabel]="t('series')"
+                  [itemUrl]="getDecadeUrl"
                   [config]="{ showRanking: true, showAccentBars: true }"
                 />
               </div>
@@ -113,8 +113,8 @@
                   [valueLabel]="t('series')"
                   [featuredImage]="mostPopularSeriesCover()"
                   [itemImage]="getSeriesImage"
+                  [itemUrl]="getSeriesUrl"
                   [config]="{ showRanking: true, showAccentBars: true }"
-                  (itemClick)="openSeries($event)"
                 />
               </div>
 
@@ -141,6 +141,7 @@
                   [title]="t('popular-authors-title')"
                   [items]="popularAuthors()"
                   [valueLabel]="t('series')"
+                  [itemUrl]="getPersonUrl"
                   [config]="{ showRanking: true, showAccentBars: true }"
                 />
               </div>
@@ -150,6 +151,7 @@
                   [title]="t('popular-artists-title')"
                   [items]="popularArtists()"
                   [valueLabel]="t('series')"
+                  [itemUrl]="getPersonUrl"
                   [config]="{ showRanking: true, showAccentBars: true }"
                 />
               </div>

@@ -56,6 +56,7 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
 
   label = input.required<string>();
   userId = input.required<number>();
+  locale = input<'server' | 'profile'>('profile');
 
   filterChange = output<StatsFilter>();
   yearChange = output<number>();
