@@ -5,7 +5,7 @@ import {UserReadStatistics} from '../statistics/_models/user-read-statistics';
 import {PublicationStatusPipe} from '../_pipes/publication-status.pipe';
 import {asyncScheduler, map} from 'rxjs';
 import {FileExtensionBreakdown} from '../statistics/_models/file-breakdown';
-import {MostActiveUser, TopUserRead} from '../statistics/_models/top-reads';
+import {MostActiveUser} from '../statistics/_models/top-reads';
 import {ServerStatistics} from '../statistics/_models/server-statistics';
 import {StatCount} from '../statistics/_models/stat-count';
 import {PublicationStatus} from '../_models/metadata/publication-status';
@@ -88,12 +88,17 @@ export class StatisticsService {
   getPopularAuthorsResource() {
     return httpResource<StatCount<Person>[]>(() => this.baseUrl + 'stats/popular-authors').asReadonly();
   }
+
   getPopularArtistsResource() {
     return httpResource<StatCount<Person>[]>(() => this.baseUrl + 'stats/popular-artists').asReadonly();
   }
 
   getPopularDecadesResource() {
     return httpResource<StatBucket[]>(() => this.baseUrl + 'stats/popular-decades').asReadonly();
+  }
+
+  getFilesAddedOverTime() {
+    return httpResource<StatCount<string>[]>(() => this.baseUrl + 'stats/files-added-over-time').asReadonly();
   }
 
   getPagesPerYear(userId = 0) {
@@ -110,9 +115,6 @@ export class StatisticsService {
       })));
   }
 
-  getTopUsers(days: number = 0) {
-    return this.httpClient.get<TopUserRead[]>(this.baseUrl + 'stats/server/top/users?days=' + days);
-  }
 
   getMostActiveUsers(statsFilter: () => StatsFilter | undefined) {
     return this.filterServerResource<MostActiveUser[]>(statsFilter, 'most-active-users');
@@ -129,7 +131,6 @@ export class StatisticsService {
   getMangaFormat() {
     return this.httpClient.get<StatCount<MangaFormat>[]>(this.baseUrl + 'stats/server/count/manga-format');
   }
-
 
   getClientDeviceBreakdown() {
     return this.httpClient.get<ClientDeviceBreakdown>(this.baseUrl + 'stats/device/client-type');

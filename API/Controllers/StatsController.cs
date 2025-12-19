@@ -38,6 +38,7 @@ public class StatsController(
 {
 
 
+    #region Server Stats
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/stats")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
@@ -195,7 +196,7 @@ public class StatsController(
 
     [HttpGet("day-breakdown")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<StatCount<DayOfWeek>>>> GetDayBreakdown(int userId = 0)
+    public async Task<ActionResult<IList<StatCount<DayOfWeek>>>> GetDayBreakdown(int userId = 0)
     {
         if (userId == 0)
         {
@@ -204,7 +205,7 @@ public class StatsController(
             if (!isAdmin) return BadRequest();
         }
 
-        return Ok(statService.GetDayBreakdown(userId));
+        return Ok(await statService.GetDayBreakdown(userId));
     }
 
 
@@ -215,11 +216,11 @@ public class StatsController(
     /// <returns></returns>
     [HttpGet("pages-per-year")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetPagesReadPerYear(int userId = 0)
+    public async Task<ActionResult<IList<StatCount<int>>>> GetPagesReadPerYear(int userId = 0)
     {
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         if (!isAdmin) userId = await unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
-        return Ok(statService.GetPagesReadCountByYear(userId));
+        return Ok(await statService.GetPagesReadCountByYear(userId));
     }
 
     /// <summary>
@@ -235,6 +236,16 @@ public class StatsController(
         if (!isAdmin) userId = await unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
         return Ok(statService.GetWordsReadCountByYear(userId));
     }
+
+    [HttpGet("files-added-over-time")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
+    public async Task<ActionResult<IList<StatCount<DateTime>>>> GetFilesAddedOverTime()
+    {
+        return Ok(await statService.GetFilesAddedOverTime());
+    }
+
+
+    #endregion
 
     #region Device Insights
 

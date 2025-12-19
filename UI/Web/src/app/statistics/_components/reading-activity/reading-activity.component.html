@@ -2,13 +2,13 @@
   <div class="card stats-card p-4">
     <div class="row g-0 mb-2 align-items-center">
       <div class="col-4">
-        <h4 class="stats-title">{{t('title')}}</h4>
+        <h3 class="stats-title">{{t('title')}}</h3>
       </div>
       <div class="col-8">
         <form [formGroup]="formGroup" class="d-inline-flex float-end">
           @if (isAdmin() && !individualUserMode()) {
             <div class="d-flex">
-              <label for="user-select-read-by-day" class="visually-hidden">{{t('select-user')}}</label>
+              <label for="user-select-read-by-day" class="visually-hidden">{{t('select-user-alt')}}</label>
               <select id="user-select-read-by-day" class="form-select" formControlName="users"
                       [attr.aria-busy]="isLoading()">
                 <option [value]="0">{{t('all-users')}}</option>

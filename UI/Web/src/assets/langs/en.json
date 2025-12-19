@@ -2767,7 +2767,14 @@
         "last-30-days": "{{time-periods.last-30-days}}",
         "last-90-days": "{{time-periods.last-90-days}}",
         "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
+        "all-time": "{{time-periods.all-time}}",
+        "select-user-alt": "Select user to filter"
+    },
+
+    "files-over-time": {
+        "title": "Files added over time",
+        "legend-label": "Files Added",
+        "no-data": "{{common.no-data}}"
     },
 
     "manga-format-stats": {

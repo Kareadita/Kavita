@@ -1,49 +1,52 @@
 import {ChangeDetectionStrategy, Component, computed, effect, inject, signal} from '@angular/core';
-import {Router} from '@angular/router';
-import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {Series} from 'src/app/_models/series';
-import {ImageService} from 'src/app/_services/image.service';
-import {StatisticsService} from 'src/app/_services/statistics.service';
-import {StatListItem} from '../stat-list/stat-list.component';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {AccountService} from "../../../_services/account.service";
-import {ReactiveFormsModule} from "@angular/forms";
-import {StatsFilter} from "../../_models/stats-filter";
-import {Person} from "../../../_models/metadata/person";
-import {StatBucket} from "../../_models/stats/stat-bucket";
+import {BytesPipe} from "../../../_pipes/bytes.pipe";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {DecimalPipe} from "@angular/common";
+import {IconAndTitleComponent} from "../../../shared/icon-and-title/icon-and-title.component";
+import {LibraryAndTimeSelectorComponent} from "../library-and-time-selector/library-and-time-selector.component";
+import {MostActiveUsersComponent} from "../most-active-users/most-active-users.component";
+import {ReadingActivityComponent} from "../reading-activity/reading-activity.component";
+import {StatListComponent, StatListItem} from "../stat-list/stat-list.component";
+import {TimeDurationPipe} from "../../../_pipes/time-duration.pipe";
+import {StatisticsService} from "../../../_services/statistics.service";
+import {ImageService} from "../../../_services/image.service";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {AccountService} from "../../../_services/account.service";
+import {StatsFilter} from "../../_models/stats-filter";
+import {StatBucket} from "../../_models/stats/stat-bucket";
+import {Series} from "../../../_models/series";
+import {Person} from "../../../_models/metadata/person";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
-import {forkJoin} from "rxjs";
 import {map} from "rxjs/operators";
-import {ServerStatsStatsTabComponent} from "../server-stats-stats-tab/server-stats-stats-tab.component";
-import {ServerStatsMgmtTabComponent} from "../server-stats-mgmt-tab/server-stats-mgmt-tab.component";
-
-enum TabID {
-  Stats = 'stats-tab',
-  Management = 'management-tab',
-}
+import {forkJoin} from "rxjs";
 
 @Component({
-    selector: 'app-server-stats',
-    templateUrl: './server-stats.component.html',
-    styleUrls: ['./server-stats.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, ReactiveFormsModule, NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, ServerStatsStatsTabComponent, ServerStatsMgmtTabComponent]
+  selector: 'app-server-stats-stats-tab',
+  imports: [
+    TranslocoDirective,
+    BytesPipe,
+    CompactNumberPipe,
+    DecimalPipe,
+    IconAndTitleComponent,
+    LibraryAndTimeSelectorComponent,
+    MostActiveUsersComponent,
+    ReadingActivityComponent,
+    StatListComponent,
+    TimeDurationPipe
+  ],
+  templateUrl: './server-stats-stats-tab.component.html',
+  styleUrl: './server-stats-stats-tab.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ServerStatsComponent {
+export class ServerStatsStatsTabComponent {
   private readonly statService = inject(StatisticsService);
-  private readonly router = inject(Router);
   private readonly imageService = inject(ImageService);
-  private readonly utilityService = inject(UtilityService);
   private readonly filterUtilities = inject(FilterUtilitiesService);
   protected readonly accountService = inject(AccountService);
 
-  protected readonly TabID = TabID;
-
-  activeTabId = TabID.Stats;
 
   userId = computed(() => this.accountService.currentUserSignal()?.id);
   readonly filter = signal<StatsFilter | undefined>(undefined);
@@ -155,5 +158,4 @@ export class ServerStatsComponent {
       });
     });
   }
-
 }

@@ -45,9 +45,9 @@ public interface IStatisticService
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
     Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0, int days = 0);
     Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCounts(StatsFilterDto filter, int userId = 0);
-    IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown(int userId = 0);
-    IEnumerable<StatCount<int>> GetPagesReadCountByYear(int userId = 0);
-    IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0);
+    Task<IList<StatCount<DayOfWeek>>> GetDayBreakdown(int userId = 0);
+    Task<IList<StatCount<int>>> GetPagesReadCountByYear(int userId = 0);
+    Task<IList<StatCount<int>>> GetWordsReadCountByYear(int userId = 0);
     Task UpdateServerStatistics();
     Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds);
     Task<IEnumerable<FileExtensionExportDto>> GetFilesByExtension(string fileExtension);
@@ -65,7 +65,7 @@ public interface IStatisticService
     Task<ReadTimeByHourDto?> GetTimeReadingByHour(StatsFilterDto filter, int userId, int requestingUserId);
     Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId);
     Task<IList<MostActiveUserDto>> GetMostActiveUsers(StatsFilterDto filter);
-
+    Task<IList<StatCount<DateTime>>> GetFilesAddedOverTime();
 }
 
 /// <summary>
@@ -651,60 +651,56 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         }
     }
 
-    public IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown(int userId = 0)
+    public async Task<IList<StatCount<DayOfWeek>>> GetDayBreakdown(int userId = 0)
     {
-        return context.AppUserProgresses
-            .AsSplitQuery()
+        return await context.AppUserReadingSessionActivityData
             .AsNoTracking()
-            .WhereIf(userId > 0, p => p.AppUserId == userId)
-            .GroupBy(p => p.LastModified.DayOfWeek)
+            .WhereIf(userId > 0, a => a.ReadingSession.AppUserId == userId)
+            .GroupBy(a => a.StartTimeUtc.DayOfWeek)
             .OrderBy(g => g.Key)
-            .Select(g => new StatCount<DayOfWeek>{ Value = g.Key, Count = g.Count() })
-            .AsEnumerable();
+            .Select(g => new StatCount<DayOfWeek>
+            {
+                Value = g.Key,
+                Count = g.Count()
+            })
+            .ToListAsync();
     }
 
     /// <summary>
-    /// Return a list of years for the given userId
+    /// Return a list of pages read per year for the given userId
     /// </summary>
-    /// <param name="userId"></param>
-    /// <returns></returns>
-    public IEnumerable<StatCount<int>> GetPagesReadCountByYear(int userId = 0)
+    public async Task<IList<StatCount<int>>> GetPagesReadCountByYear(int userId = 0)
     {
-        var query = context.AppUserProgresses
-            .AsSplitQuery()
-            .AsNoTracking();
-
-        if (userId > 0)
-        {
-            query = query.Where(p => p.AppUserId == userId);
-        }
-
-        return query.GroupBy(p => p.LastModified.Year)
+        return await context.AppUserReadingSessionActivityData
+            .AsNoTracking()
+            .WhereIf(userId > 0, a => a.ReadingSession.AppUserId == userId)
+            .GroupBy(a => a.StartTimeUtc.Year)
             .OrderBy(g => g.Key)
-            .Select(g => new StatCount<int> {Value = g.Key, Count = g.Sum(x => x.PagesRead)})
-            .AsEnumerable();
+            .Select(g => new StatCount<int>
+            {
+                Value = g.Key,
+                Count = g.Sum(a => a.PagesRead)
+            })
+            .ToListAsync();
     }
 
-    public IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0)
+    /// <summary>
+    /// Return a list of words read per year for the given userId
+    /// </summary>
+    public async Task<IList<StatCount<int>>> GetWordsReadCountByYear(int userId = 0)
     {
-        var query = context.AppUserProgresses
-            .AsSplitQuery()
-            .AsNoTracking();
-
-        if (userId > 0)
-        {
-            query = query.Where(p => p.AppUserId == userId);
-        }
-
-        return query
-            .Join(context.Chapter, p => p.ChapterId, c => c.Id, (progress, chapter) => new {chapter, progress})
-            .Where(p => p.chapter.WordCount > 0)
-            .GroupBy(p => p.progress.LastModified.Year)
-            .Select(g => new StatCount<int>{
+        return await context.AppUserReadingSessionActivityData
+            .AsNoTracking()
+            .Where(a => a.WordsRead > 0)
+            .WhereIf(userId > 0, a => a.ReadingSession.AppUserId == userId)
+            .GroupBy(a => a.StartTimeUtc.Year)
+            .OrderBy(g => g.Key)
+            .Select(g => new StatCount<int>
+            {
                 Value = g.Key,
-                Count = (long) Math.Round(g.Sum(p => p.chapter.WordCount * ((1.0f * p.progress.PagesRead) / p.chapter.Pages)))
+                Count = g.Sum(a => a.WordsRead)
             })
-            .AsEnumerable();
+            .ToListAsync();
     }
 
     /// <summary>
@@ -1536,6 +1532,20 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         }
 
         return result;
+    }
+
+    public async Task<IList<StatCount<DateTime>>> GetFilesAddedOverTime()
+    {
+        return await context.MangaFile
+            .AsNoTracking()
+            .GroupBy(f => f.CreatedUtc.Date)
+            .OrderBy(g => g.Key)
+            .Select(g => new StatCount<DateTime>
+            {
+                Value = g.Key,
+                Count = g.Count()
+            })
+            .ToListAsync();
     }
 
     private async Task<int> GetAuthorsCount(HashSet<int> chapterIds)
