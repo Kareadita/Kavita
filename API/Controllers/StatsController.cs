@@ -120,18 +120,7 @@ public class StatsController(
         return Ok(await statService.GetPopularPerson(PersonRole.CoverArtist));
     }
 
-    /// <summary>
-    /// Returns users with the top reads in the server
-    /// </summary>
-    /// <param name="days"></param>
-    /// <returns></returns>
-    [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("server/top/users")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<TopReadDto>>> GetTopReads(int days = 0)
-    {
-        return Ok(await statService.GetTopUsers(days));
-    }
+
 
     /// <summary>
     /// Top 5 most active readers for the given timeframe
@@ -219,9 +208,6 @@ public class StatsController(
     }
 
 
-
-
-
     /// <summary>
     /// Returns a count of pages read per year for a given userId.
     /// </summary>
@@ -274,7 +260,6 @@ public class StatsController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<StatCount<string>>> GetDeviceTypeCounts()
     {
-        // Mobile vs Desktop Ratio - Overall usage pattern
         return Ok(await statService.GetDeviceTypeCounts(DateTime.UtcNow.StartOfMonth()));
     }
 

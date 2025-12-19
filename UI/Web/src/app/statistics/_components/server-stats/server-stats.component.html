@@ -82,7 +82,6 @@
               </div>
             }
 
-            <!--TODO: Figure out how to customize for Server page-->
             <div class="my-4">
               <app-library-and-time-selector [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUserSignal()!.id"
                                              (filterChange)="filter.set($event)" (yearChange)="year.set($event)" [locale]="'server'" />

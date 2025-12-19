@@ -19,7 +19,6 @@ using API.Services.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
 
@@ -35,7 +34,8 @@ public class DeprecatedController : BaseApiController
     private readonly ILogger<DeprecatedController> _logger;
     private readonly IStatisticService _statService;
 
-    public DeprecatedController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ITaskScheduler taskScheduler, ILogger<DeprecatedController> logger, IStatisticService statService)
+    public DeprecatedController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ITaskScheduler taskScheduler,
+        ILogger<DeprecatedController> logger, IStatisticService statService)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
@@ -240,6 +240,19 @@ public class DeprecatedController : BaseApiController
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetYearStatistics()
     {
         return Ok(await _statService.GetYearCount());
+    }
+
+    /// <summary>
+    /// Returns users with the top reads in the server
+    /// </summary>
+    /// <param name="days"></param>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("stats/server/top/users")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IEnumerable<TopReadDto>>> GetTopReads(int days = 0)
+    {
+        return Ok(await _statService.GetTopUsers(days));
     }
 
 }
