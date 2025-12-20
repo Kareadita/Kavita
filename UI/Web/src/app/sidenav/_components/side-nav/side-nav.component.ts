@@ -11,7 +11,7 @@ import {Action, ActionFactoryService, ActionItem} from '../../../_services/actio
 import {ActionService} from '../../../_services/action.service';
 import {NavService} from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
+import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap, combineLatest} from "rxjs";
 import {AsyncPipe, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
@@ -94,38 +94,83 @@ export class SideNavComponent implements OnInit {
       );
     })
   );
+  // New: Tracks sorting mode
+  sortOrderSubject = new BehaviorSubject<'default' | 'asc' | 'desc'>('default');
+  sortOrder$ = this.sortOrderSubject.asObservable();
 
-  navStreams$: Observable<SideNavStream[]> = merge(
+  navStreams$: Observable<SideNavStream[]> = combineLatest([
+    // Input 1: The Data Stream (Initial Load + Reloads on Events)
+    merge(
+      this.loadDataOnInit$,
+      this.messageHub.messages$.pipe(
+        filter(event => event.event === EVENTS.LibraryModified || event.event === EVENTS.SideNavUpdate),
+        tap(() => this.cachedData = null), // Clear cache so we get fresh data
+        switchMap(() => this.loadDataOnInit$)
+      )
+    ),
+    // Input 2: Show All / Show Less Toggle
     this.showAll$.pipe(
       startWith(false),
       distinctUntilChanged(),
-      tap(showAll => this.showAll = showAll),
-      switchMap(showAll =>
-        showAll
-          ? this.loadDataOnInit$.pipe(
-            tap(d => this.totalSize = d.length),
-          )
-          : this.loadDataOnInit$.pipe(
-            tap(d => this.totalSize = d.length),
-            map(d => d.slice(0, this.ItemLimit))
-          )
-      ),
-      takeUntilDestroyed(this.destroyRef),
-    ), this.messageHub.messages$.pipe(
-      filter(event => event.event === EVENTS.LibraryModified || event.event === EVENTS.SideNavUpdate),
-      tap(() => {
-          this.cachedData = null; // Reset cached data to null to get latest
-      }),
-      switchMap(() => {
-        if (this.showAll) return this.loadDataOnInit$;
-        else return this.loadDataOnInit$.pipe(map(d => d.slice(0, this.ItemLimit)))
-      }), // Reload data when events occur
-      takeUntilDestroyed(this.destroyRef),
-    )
-  ).pipe(
-      startWith(null),
-      filter(data => data !== null),
-      takeUntilDestroyed(this.destroyRef),
+      tap(showAll => this.showAll = showAll)
+    ),
+    // Input 3: The Sort Order
+    this.sortOrder$
+  ]).pipe(
+    map(([data, showAll, sortOrder]) => {
+      this.totalSize = data.length;
+      
+      // If Default, just return the server order (User's custom drag-and-drop order)
+      if (sortOrder === 'default') {
+        const result = [...data];
+        return showAll ? result : result.slice(0, this.ItemLimit);
+      }
+
+      // --- SMART SORT LOGIC ---
+      
+      // 1. Separate "System" items (Provided) from "Sortable" itemss (Libraries/SmartFilters)
+      const systemStreams: SideNavStream[] = [];
+      const libraryStreams: SideNavStream[] = [];
+
+      data.forEach(stream => {
+        // List of types to IGNORE during sort to Keep them pinned at the top
+        const isSystem = [
+          SideNavStreamType.AllSeries,
+          SideNavStreamType.Bookmarks,
+          SideNavStreamType.ReadingLists,
+          SideNavStreamType.Collections,
+          SideNavStreamType.WantToRead,
+          SideNavStreamType.BrowseAuthors,
+          SideNavStreamType.ExternalSource
+        ].includes(stream.streamType);
+
+        if (isSystem) {
+          systemStreams.push(stream);
+        } else {
+          libraryStreams.push(stream);
+        }
+      });
+
+      // 2. Sort ONLY the libraries
+      if (sortOrder === 'asc') {
+        libraryStreams.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortOrder === 'desc') {
+        libraryStreams.sort((a, b) => b.name.localeCompare(a.name));
+      }
+
+      // 3. Combine: System Items (Top) + Sorted Libraries (Bottom)
+      const finalResult = [...systemStreams, ...libraryStreams];
+
+      // 4. Apply Limit
+      if (!showAll) {
+        return finalResult.slice(0, this.ItemLimit);
+      }
+
+      return finalResult;
+    }),
+    startWith(null),
+    filter(d => d !== null),
+    takeUntilDestroyed(this.destroyRef)
   );
 
   collapseSideNavOnMobileNav$ = this.router.events.pipe(
@@ -174,6 +219,21 @@ export class SideNavComponent implements OnInit {
       this.loadDataSubject.next();
     });
   }
+
+  toggleLibrarySort() {
+  const current = this.sortOrderSubject.value;
+  
+  // Cycle the logic
+  if (current === 'default') {
+    this.sortOrderSubject.next('asc');
+  } else if (current === 'asc') {
+    this.sortOrderSubject.next('desc');
+  } else {
+    this.sortOrderSubject.next('default');
+  }
+
+  this.cdRef.markForCheck();
+}
 
   async handleAction(action: ActionItem<Library>, library: Library) {
     const lib = library;
@@ -254,6 +314,11 @@ export class SideNavComponent implements OnInit {
   }
 
   showMore(edit: boolean = false) {
+    // If entering Edit Mode (Reorder), force sort to Default so dragging makes sense
+    if (edit) {
+      this.sortOrderSubject.next('default'); 
+    }
+
     this.showAllSubject.next(true);
     this.editMode = edit;
     this.cdRef.markForCheck();

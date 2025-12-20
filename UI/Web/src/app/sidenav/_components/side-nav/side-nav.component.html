@@ -7,10 +7,28 @@
 
 
         <app-side-nav-item cdkDrag cdkDragDisabled icon="fa-home" [title]="t('home')" link="/home/">
-          <ng-container actions>
-            <app-card-actionables [inputActions]="homeActions" labelBy="home" iconClass="fa-ellipsis-v" (actionHandler)="performHomeAction($event)" />
-          </ng-container>
-        </app-side-nav-item>
+  <ng-container actions>
+          @if (!editMode) {
+            <button type="button" 
+                    class="btn btn-icon btn-sm me-1" 
+                    (mousedown)="$event.stopPropagation()"
+                    (click)="$event.preventDefault(); $event.stopPropagation(); toggleLibrarySort()" 
+                    [title]="'Sort Libraries'">
+              <i class="fa text-muted"
+                style="font-size: 1rem;" 
+                [ngClass]="{
+                  'fa-sort': (sortOrder$ | async) === 'default',
+                  'fa-sort-alpha-down': (sortOrder$ | async) === 'asc',
+                  'fa-sort-alpha-up': (sortOrder$ | async) === 'desc'
+                }">
+              </i>
+            </button>
+          }
+    <app-card-actionables [inputActions]="homeActions" labelBy="home" iconClass="fa-ellipsis-v" (actionHandler)="performHomeAction($event)" />
+  </ng-container>
+</app-side-nav-item>
+
+               
 
         @if (navStreams$ | async; as streams) {
           @if (showAll) {
