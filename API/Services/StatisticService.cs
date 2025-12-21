@@ -1221,7 +1221,10 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             return null;
         }
 
-        var daysSinceCounting = (DateTime.UtcNow - sessionRecordedSince.RanAt).Days;
+        filter.StartDate ??= sessionRecordedSince.RanAt;
+        filter.StartDate = filter.StartDate < sessionRecordedSince.RanAt ? sessionRecordedSince.RanAt : filter.StartDate;
+
+        var daysSinceCounting = (DateTime.UtcNow - filter.StartDate).Value.Days;
 
         var sessions = await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
