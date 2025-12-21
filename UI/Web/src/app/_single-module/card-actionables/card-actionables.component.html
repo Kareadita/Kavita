@@ -26,11 +26,11 @@
                 @for(dynamicItem of dList; track dynamicItem.title) {
                   <button ngbDropdownItem (click)="performDynamicClick($event, action, dynamicItem)">{{dynamicItem.title}}</button>
                 }
-              } @else if (willRenderAction(action, this.currentUser!)) {
+              } @else if (willRenderAction(action, this.currentUser()!)) {
                 <button ngbDropdownItem (click)="performAction($event, action)">{{t(action.title)}}</button>
               }
             } @else {
-              @if (shouldRenderSubMenu(action, action.children?.[0].dynamicList | async) && hasRenderableChildren(action, this.currentUser!)) {
+              @if (shouldRenderSubMenu(action, action.children?.[0].dynamicList | async) && hasRenderableChildren(action, this.currentUser()!)) {
                 <!-- Submenu items -->
                 <div ngbDropdown #subMenuHover="ngbDropdown" placement="right left"
                      (click)="openSubmenu(action.title, subMenuHover)"
@@ -39,7 +39,7 @@
                      class="submenu-wrapper">
 
                   <!-- Check to ensure the submenu has items -->
-                  @if (willRenderAction(action, this.currentUser!)) {
+                  @if (willRenderAction(action, this.currentUser()!)) {
                     <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>
                       {{t(action.title)}} <i class="fa-solid fa-angle-right submenu-icon"></i>
                     </button>
