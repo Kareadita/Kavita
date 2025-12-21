@@ -47,7 +47,8 @@ export class ActionableModalComponent implements OnInit {
   user!: User | undefined;
 
   ngOnInit() {
-    const actionItems = this.actions;
+    // Copy as the list may be shared between entities
+    const actionItems = this.actions.map(action => this.utilityService.copyActionItem(action));
 
     // On Mobile, surface download
     const otherActionIndex = actionItems.findIndex(i => i.action === Action.Submenu && i.title === 'others')
