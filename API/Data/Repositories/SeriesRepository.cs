@@ -467,7 +467,9 @@ public class SeriesRepository : ISeriesRepository
             .Where(p => _context.SeriesMetadataPeople
                 .Any(smp => smp.PersonId == p.Id &&
                             seriesIdsSubquery.Contains(smp.SeriesMetadata.SeriesId) &&
-                            EF.Functions.Like(p.NormalizedName, $"%{searchQueryNormalized}%")))
+                            (EF.Functions.Like(p.NormalizedName, $"%{searchQueryNormalized}%")
+                             || p.Aliases.Any(a => EF.Functions.Like(a.NormalizedAlias, $"%{searchQueryNormalized}%"))
+                             )))
             .OrderBy(p => p.NormalizedName.Length)
             .ThenBy(p => p.NormalizedName)
             .Take(maxRecords)
