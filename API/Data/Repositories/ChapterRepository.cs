@@ -426,7 +426,9 @@ public class ChapterRepository : IChapterRepository
         var chapterWithProgress = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Join(
-                _context.Chapter.Include(c => c.Volume),
+                _context.Chapter
+                    .Include(c => c.Volume)
+                    .Include(c => c.Files),
                 p => p.ChapterId,
                 c => c.Id,
                 (p, c) => new { Chapter = c, p.PagesRead }
