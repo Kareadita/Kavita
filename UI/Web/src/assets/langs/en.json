@@ -18,9 +18,14 @@
 
     "manage-oidc-connect": {
         "save": "{{common.save}}",
+        "reset-label": "Reset ids",
+        "reset-tooltip": "Reset external ids from all users, use this to reset links between users in Kavita and your identity provider",
+        "reset-confirm": "Are you certain you want to reset external ids from all users?",
+        "reset-success": "External ids reset for all users, re-authenticate to link",
         "save-success": "Successfully updated your OIDC settings",
         "notice": "Notice",
         "restart-required": "Changing Provider or advanced settings requires a manual restart of Kavita to take effect.",
+        "auto-save-required": "You've changed critical settings, auto save to persist them",
         "provider-title": "Provider",
         "provider-tooltip": "Provider settings require you to manually click Save. Kavita must be configured as a confidential client and needs a redirect URL. See the <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> for more details.",
         "behavior-title": "Behavior",

@@ -34,10 +34,11 @@ public class SettingsController : BaseApiController
     private readonly ILocalizationService _localizationService;
     private readonly ISettingsService _settingsService;
     private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
+    private readonly IOidcService _oidcService;
 
     public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, IMapper mapper,
         IEmailService emailService, ILocalizationService localizationService, ISettingsService settingsService,
-        IAuthenticationSchemeProvider authenticationSchemeProvider)
+        IAuthenticationSchemeProvider authenticationSchemeProvider, IOidcService oidcService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
@@ -46,6 +47,7 @@ public class SettingsController : BaseApiController
         _localizationService = localizationService;
         _settingsService = settingsService;
         _authenticationSchemeProvider = authenticationSchemeProvider;
+        _oidcService = oidcService;
     }
 
     /// <summary>
@@ -292,6 +294,15 @@ public class SettingsController : BaseApiController
                                !string.IsNullOrEmpty(settings.Secret);
 
         return Ok(publicConfig);
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpPost("reset-external-ids")]
+    public async Task<IActionResult> ResetExternalIds()
+    {
+        await _oidcService.ClearOidcIds();
+
+        return Ok();
     }
 
     /// <summary>

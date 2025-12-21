@@ -1,14 +1,15 @@
 <ng-container *transloco="let t; prefix:'manage-oidc-connect'">
-
-  <div class="position-relative">
-    <button type="button" class="btn btn-primary position-absolute custom-position" (click)="save(true)">{{t('save')}}</button>
-  </div>
-
   @if (!loading()) {
     <form [formGroup]="settingsForm">
       <div class="alert alert-warning" role="alert">
         <strong>{{t('notice')}}</strong> {{t('restart-required')}}
       </div>
+
+      @if (autoSavingBlocked()) {
+        <div class="alert alert-warning" role="alert">
+          {{t('auto-save-required')}}
+        </div>
+      }
 
       <h4>{{t('provider-title')}}</h4>
       <div class="text-muted" [innerHtml]="t('provider-tooltip') | safeHtml"></div>
@@ -91,6 +92,13 @@
               </ng-template>
             </app-setting-item>
           }
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-secondary" [ngbTooltip]="t('reset-tooltip')" (click)="resetIds()">
+            {{t('reset-label')}}
+          </button>
+          <button type="button" class="btn btn-primary ms-2" (click)="save(true)">{{t('save')}}</button>
         </div>
 
       </ng-container>

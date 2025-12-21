@@ -90,6 +90,10 @@ export class SettingsService {
     return httpResource<boolean>(() => this.baseUrl + 'settings/opds-enabled').asReadonly();
   }
 
+  clearExternalIds() {
+    return this.http.post(this.baseUrl + 'settings/reset-external-ids', {})
+  }
+
   isValidCronExpression(val: string) {
     if (val === '' || val === undefined || val === null) return of(false);
     return this.http.get<string>(this.baseUrl + 'settings/is-valid-cron?cronExpression=' + val, TextResonse).pipe(map(d => d === 'true'));
