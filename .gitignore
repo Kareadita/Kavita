@@ -538,6 +538,7 @@ UI/Web/.angular/
 BenchmarkDotNet.Artifacts
 .claude/
 API/config/*backup.zip
+API/config/DataProtection-Keys/*
 
 
 API.Tests/Services/Test Data/ImageService/**/*_output*

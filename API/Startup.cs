@@ -25,6 +25,7 @@ using HtmlAgilityPack;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -62,6 +63,13 @@ public class Startup
     {
         services.Configure<AppSettingsDto>(_config);
         services.AddApplicationServices(_config, _env);
+
+        // Store keys inside config, such that cookies can be de-crypted between container recreations
+        // Without needing user to manually mount the default directory
+        var keysLocation = Path.Combine(Directory.GetCurrentDirectory(), "config", "DataProtection-Keys");
+        services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(keysLocation))
+            .SetApplicationName(BuildInfo.AppName);
 
         services.AddControllers(options =>
         {
