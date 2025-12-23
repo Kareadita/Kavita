@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   HostListener,
@@ -134,6 +135,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   spreadMode: SpreadType = 'off';
   isSearchOpen: boolean = false;
 
+  canDownload = computed(() =>
+    this.accountService.hasDownloadRole(this.accountService.currentUserSignal()!)
+  );
+
   constructor() {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
@@ -161,6 +166,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.navService.showNavBar();
     this.navService.showSideNav();
     this.readerService.disableWakeLock();
+
+    window.removeEventListener('keydown', this.downloadHandler, { capture: true });
   }
 
   ngOnInit(): void {
@@ -197,6 +204,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     this.cdRef.markForCheck();
 
+    window.addEventListener('keydown', this.downloadHandler, { capture: true });
+
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.user = user;
@@ -204,6 +213,15 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  private downloadHandler = (event: KeyboardEvent) => {
+    if (event.ctrlKey && event.key.toLowerCase() === 's') {
+      if (!this.accountService.hasDownloadRole(this.accountService.currentUserSignal()!)) {
+        event.preventDefault();
+        event.stopImmediatePropagation(); // Stops ALL other handlers
+      }
+    }
+  };
 
 
   calcScrollbarNeeded() {
