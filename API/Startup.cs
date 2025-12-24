@@ -64,11 +64,9 @@ public class Startup
         services.Configure<AppSettingsDto>(_config);
         services.AddApplicationServices(_config, _env);
 
-        // Store keys inside config, such that cookies can be de-crypted between container recreations
-        // Without needing user to manually mount the default directory
-        var keysLocation = Path.Combine(Directory.GetCurrentDirectory(), "config", "DataProtection-Keys");
+        // Store keys inside database, such that cookies can be decrypted between container restarts
         services.AddDataProtection()
-            .PersistKeysToFileSystem(new DirectoryInfo(keysLocation))
+            .PersistKeysToDbContext<DataContext>()
             .SetApplicationName(BuildInfo.AppName);
 
         services.AddControllers(options =>
