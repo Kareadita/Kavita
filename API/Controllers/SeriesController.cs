@@ -71,32 +71,6 @@ public class SeriesController : BaseApiController
     /// <summary>
     /// Gets series with the applied Filter
     /// </summary>
-    /// <remarks>This is considered v1 and no longer used by Kavita, but will be supported for sometime. See series/v2</remarks>
-    /// <param name="libraryId"></param>
-    /// <param name="userParams"></param>
-    /// <param name="filterDto"></param>
-    /// <returns></returns>
-    [HttpPost]
-    [Obsolete("use v2")]
-    public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams, [FromBody] FilterDto filterDto)
-    {
-        var userId = UserId;
-        var series =
-            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
-
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
-
-        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-
-        return Ok(series);
-    }
-
-    /// <summary>
-    /// Gets series with the applied Filter
-    /// </summary>
     /// <param name="userParams"></param>
     /// <param name="filterDto"></param>
     /// <returns></returns>
@@ -183,19 +157,9 @@ public class SeriesController : BaseApiController
     {
         var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId);
         if (chapter == null) return NoContent();
-        return Ok(await _unitOfWork.ChapterRepository.AddChapterModifiers(UserId, chapter));
-    }
+        await _unitOfWork.ChapterRepository.AddChapterModifiers(UserId, chapter);
 
-    /// <summary>
-    /// All chapter entities will load this data by default. Will not be maintained as of v0.8.1
-    /// </summary>
-    /// <param name="chapterId"></param>
-    /// <returns></returns>
-    [Obsolete("All chapter entities will load this data by default. Will not be maintained as of v0.8.1")]
-    [HttpGet("chapter-metadata")]
-    public async Task<ActionResult<ChapterMetadataDto>> GetChapterMetadata(int chapterId)
-    {
-        return Ok(await _unitOfWork.ChapterRepository.GetChapterMetadataDtoAsync(chapterId));
+        return Ok(chapter);
     }
 
     /// <summary>
@@ -250,32 +214,6 @@ public class SeriesController : BaseApiController
         }
 
         return Ok();
-    }
-
-    /// <summary>
-    /// Gets all recently added series. Obsolete, use recently-added-v2
-    /// </summary>
-    /// <param name="filterDto"></param>
-    /// <param name="userParams"></param>
-    /// <param name="libraryId"></param>
-    /// <returns></returns>
-    [ResponseCache(CacheProfileName = "Instant")]
-    [HttpPost("recently-added")]
-    [Obsolete("use recently-added-v2")]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
-    {
-        var userId = UserId;
-        var series =
-            await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, userId, userParams, filterDto);
-
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
-
-        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-
-        return Ok(series);
     }
 
     /// <summary>
@@ -338,30 +276,6 @@ public class SeriesController : BaseApiController
         return Ok(series);
     }
 
-    /// <summary>
-    /// Returns all series for the library. Obsolete, use all-v2
-    /// </summary>
-    /// <param name="filterDto"></param>
-    /// <param name="userParams"></param>
-    /// <param name="libraryId"></param>
-    /// <returns></returns>
-    [HttpPost("all")]
-    [Obsolete("Use all-v2")]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
-    {
-        var userId = UserId;
-        var series =
-            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
-
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
-
-        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-
-        return Ok(series);
-    }
 
     /// <summary>
     /// Fetches series that are on deck aka have progress on them.
@@ -538,7 +452,7 @@ public class SeriesController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     /// <remarks>Do not rely on this API externally. May change without hesitation. </remarks>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = new [] {"seriesId"})]
+    //[ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = ["seriesId"])]
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {

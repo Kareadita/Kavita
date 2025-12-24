@@ -14,8 +14,10 @@ using API.DTOs.Email;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Progress;
 using API.Extensions;
 using API.Helpers.Builders;
+using API.Services.Tasks.Metadata;
 using Hangfire;
 using Flurl.Http;
 using Kavita.Common;
@@ -65,6 +67,7 @@ public interface IOidcService
 /// <remarks>It is registered as a singleton only if oidc is enabled. So must be nullable and optional</remarks>
 public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userManager,
     IUnitOfWork unitOfWork, IAccountService accountService, IEmailService emailService,
+    ICoverDbService coverDbService,
     [FromServices] ConfigurationManager<OpenIdConnectConfiguration>? configurationManager = null): IOidcService
 {
     public const string LibraryAccessPrefix = "library-";
@@ -73,6 +76,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     public const string RefreshToken = "refresh_token";
     public const string IdToken = "id_token";
     public const string ExpiresAt = "expires_at";
+
     /// The name of the Auth Cookie set by .NET
     public const string CookieName = ".AspNetCore.Cookies";
     public static readonly List<string> DefaultScopes = ["openid", "profile", "offline_access", "roles", "email"];
@@ -227,7 +231,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         {
             return await NewUserFromOpenIdConnect(request, settings, principal, oidcId);
         }
-        catch (KavitaException e)
+        catch (KavitaException)
         {
             throw;
         }
@@ -380,19 +384,22 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     {
         if (!settings.SyncUserSettings || user.IdentityProvider != IdentityProvider.OpenIdConnect) return;
 
-        // Never sync the default user
         var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
-        if (defaultAdminUser.Id == user.Id) return;
 
         logger.LogDebug("Syncing user {UserId} from OIDC", user.Id);
         try
         {
 
-            await SyncEmail(request, settings, claimsPrincipal, user);
-            await SyncUsername(claimsPrincipal, user);
-            await SyncRoles(settings, claimsPrincipal, user);
-            await SyncLibraries(settings, claimsPrincipal, user);
-            await SyncAgeRestriction(settings, claimsPrincipal, user);
+            if (user.Id != defaultAdminUser.Id)
+            {
+                await SyncEmail(request, settings, claimsPrincipal, user);
+                await SyncUsername(claimsPrincipal, user);
+                await SyncRoles(settings, claimsPrincipal, user);
+                await SyncLibraries(settings, claimsPrincipal, user);
+                await SyncAgeRestriction(settings, claimsPrincipal, user);
+            }
+
+            SyncExtras(claimsPrincipal, user);
 
             if (unitOfWork.HasChanges())
             {
@@ -404,6 +411,20 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             logger.LogError(ex, "Failed to sync user {UserId} from OIDC", user.Id);
             await unitOfWork.RollbackAsync();
             throw new KavitaException("errors.oidc.syncing-user", ex);
+        }
+    }
+
+    private void SyncExtras(ClaimsPrincipal claimsPrincipal, AppUser user)
+    {
+        var picture = claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Picture)?.Value;
+
+        // Only sync if the user has no image, I know this is no true sync as changing it in your idp
+        // will require action on Kavita. But it's less effort than saving if the user has set it themselves
+        // Will just need to be documented on the wiki.
+        if (!string.IsNullOrEmpty(picture) && string.IsNullOrEmpty(user.CoverImage))
+        {
+            // Run in background to not block http thread, pass id to Hangfire doesn't kill itself
+            BackgroundJob.Enqueue(() => coverDbService.SetUserCoverByUrl(user.Id, picture, false));
         }
     }
 
@@ -503,10 +524,16 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             .Where(s => rolesFromToken.Contains(s, StringComparer.OrdinalIgnoreCase))
             .ToList();
 
+        // Ensure that Admin Role and ReadOnly aren't both selected
+        if (roles.Contains(PolicyConstants.AdminRole))
+        {
+            roles = roles.Where(r => r !=  PolicyConstants.ReadOnlyRole).ToList();
+        }
+
         logger.LogDebug("Syncing access roles for user {UserId}, found roles {Roles}", user.Id, roles);
 
         var errors = (await accountService.UpdateRolesForUser(user, roles)).ToList();
-        if (errors.Any())
+        if (errors.Count != 0)
         {
             logger.LogError("Failed to sync roles {Errors}", errors.Select(x => x.Description).ToList());
             throw new KavitaException("errors.oidc.syncing-user");
@@ -658,6 +685,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
+            new("AuthType", nameof(AuthenticationType.OIDC))
         };
 
         var userManager = services.GetRequiredService<UserManager<AppUser>>();

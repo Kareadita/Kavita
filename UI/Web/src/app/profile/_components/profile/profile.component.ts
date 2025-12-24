@@ -4,14 +4,7 @@ import {MemberInfo} from "../../../_models/user/member-info";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../../_services/image.service";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
-import {
-  NgbNav,
-  NgbNavChangeEvent,
-  NgbNavContent,
-  NgbNavItem,
-  NgbNavLink,
-  NgbNavOutlet
-} from "@ng-bootstrap/ng-bootstrap";
+import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
@@ -27,6 +20,9 @@ import {ProfileReviewListComponent} from "../profile-review-list/profile-review-
 import {ProfileOverviewComponent} from "../profile-overview/profile-overview.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {ProfileStatsComponent} from "../profile-stats/profile-stats.component";
+import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
+import {TimeDurationPipe} from "../../../_pipes/time-duration.pipe";
+import {NavTabUrlDirective} from "../../../_directives/nav-tab-url.directive";
 
 enum TabID {
   Overview = 'overview-tab',
@@ -56,6 +52,9 @@ enum TabID {
     ProfileOverviewComponent,
     CompactNumberPipe,
     ProfileStatsComponent,
+    SentenceCasePipe,
+    TimeDurationPipe,
+    NavTabUrlDirective,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -77,8 +76,11 @@ export class ProfileComponent {
 
 
   protected readonly totalReadsResource = this.statsService.getTotalReads(() => this.userId());
+  protected readonly userStatsResource = this.statsService.getUserStatisticsResource(() => this.userId());
+
 
   activeTabId = TabID.Overview;
+
 
   totalReads = computed(() => {
     if (!this.totalReadsResource.hasValue()) {
@@ -92,8 +94,6 @@ export class ProfileComponent {
     const m = this.memberInfo();
     if (!m) return '';
 
-
-
     try {
       return this.imageService.getUserCoverImage(this.userId());
     } catch {
@@ -102,6 +102,7 @@ export class ProfileComponent {
   });
 
   constructor() {
+    // TODO: If ngBootstrap ever supports signal-based activeTabId, we can move this into syncUrlFragment directive
     this.route.fragment.pipe(tap(frag => {
       const fragId = frag as TabID;
       if (frag !== null && this.activeTabId !== fragId) {
@@ -111,15 +112,11 @@ export class ProfileComponent {
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
-  onNavChange(event: NgbNavChangeEvent) {
-    this.updateUrl(event.nextId);
-    this.activeTabId = event.nextId;
-  }
 
   updateUrl(activeTab: TabID) {
     const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
-    this.location.replaceState(newUrl) // TODO: Look into making this a directive for tabs
+    this.location.replaceState(newUrl)
   }
 
 

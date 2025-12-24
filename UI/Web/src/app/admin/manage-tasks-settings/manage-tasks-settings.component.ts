@@ -35,6 +35,7 @@ import {SettingButtonComponent} from "../../settings/_components/setting-button/
 import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AnnotationService} from "../../_services/annotation.service";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 
 interface AdhocTask {
   name: string;
@@ -49,9 +50,9 @@ interface AdhocTask {
     templateUrl: './manage-tasks-settings.component.html',
     styleUrls: ['./manage-tasks-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, AsyncPipe, TitleCasePipe, DefaultValuePipe,
-        TranslocoModule, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent,
-        SettingButtonComponent, NgxDatatableModule]
+  imports: [ReactiveFormsModule, AsyncPipe, TitleCasePipe, DefaultValuePipe,
+    TranslocoModule, TranslocoLocaleModule, UtcToLocalTimePipe, SettingItemComponent,
+    SettingButtonComponent, NgxDatatableModule, ResponsiveTableComponent]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 
@@ -143,6 +144,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   ];
 
   customOption = 'custom';
+  trackBy = (index: number, item: Job) => `${item.id}_${item.lastExecutionUtc}`;
 
 
   ngOnInit(): void {

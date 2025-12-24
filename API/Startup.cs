@@ -69,39 +69,39 @@ public class Startup
                 new CacheProfile()
                 {
                     Duration = 30,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.FiveMinute,
                 new CacheProfile()
                 {
                     Duration = 60 * 5,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.TenMinute,
                 new CacheProfile()
                 {
                     Duration = 60 * 10,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.Hour,
                 new CacheProfile()
                 {
                     Duration = 60 * 60,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.Statistics,
                 new CacheProfile()
                 {
                     Duration = _env.IsDevelopment() ? 0 : 60 * 60 * 6,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.Images,
                 new CacheProfile()
                 {
                     Duration = 60,
-                    Location = ResponseCacheLocation.None,
+                    Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.Month,
@@ -122,7 +122,7 @@ public class Startup
                 new CacheProfile()
                 {
                     Duration = TimeSpan.FromDays(30).Seconds,
-                    Location = ResponseCacheLocation.Any,
+                    Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
         });
@@ -153,18 +153,23 @@ public class Startup
 
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var filePath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
             c.IncludeXmlComments(filePath, true);
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
+
+            c.AddSecurityDefinition("AuthKey", new OpenApiSecurityScheme
+            {
+                Description = "Auth Key authentication. Enter your Auth key from your user settings",
+                Name = Headers.ApiKey,
                 In = ParameterLocation.Header,
-                Description = "Please insert JWT with Bearer into field",
-                Name = "Authorization",
-                Type = SecuritySchemeType.ApiKey
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "ApiKeyScheme"
             });
 
             c.AddSecurityRequirement((document) => new OpenApiSecurityRequirement()
             {
-                [new OpenApiSecuritySchemeReference("bearer", document)] = []
+                [new OpenApiSecuritySchemeReference("apiKey", document)] = []
             });
+
 
             c.AddServer(new OpenApiServer
             {
@@ -490,6 +495,7 @@ public class Startup
                     await new MigrateTotalReads().RunAsync(dataContext, logger);
                     await new MigrateToAuthKeys().RunAsync(dataContext, logger);
                     await new MigrateMissingAppUserRatingDateColumns().RunAsync(dataContext, logger);
+                    await new MigrateFormatToActivityData().RunAsync(dataContext, logger);
                     #endregion
 
                     #endregion

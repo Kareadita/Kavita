@@ -41,7 +41,7 @@ export class RegisterComponent {
     this.navService.hideNavBar();
     this.navService.hideSideNav();
 
-      this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
+      this.memberService.adminExists().subscribe(adminExists => {
       if (adminExists) {
         this.router.navigateByUrl('login');
         return;

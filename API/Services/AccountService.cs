@@ -192,7 +192,12 @@ public partial class AccountService : IAccountService
         var defaultAdminUser = await _unitOfWork.UserRepository.GetDefaultAdminUser();
         if (user.Id == defaultAdminUser.Id)
         {
-            throw new KavitaException(await _localizationService.Translate(actingUserId, "cannot-change-identity-provider-original-user"));
+            if (identityProvider == IdentityProvider.OpenIdConnect)
+            {
+                throw new KavitaException(await _localizationService.Translate(actingUserId, "cannot-change-identity-provider-original-user"));
+            }
+
+            return false;
         }
 
         // Allow changes if users aren't being synced

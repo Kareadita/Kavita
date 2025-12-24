@@ -274,7 +274,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
-    this.seriesService.getAllSeriesV2(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
+    this.seriesService.getAllSeriesV2(undefined, undefined, this.filter).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (series: Series) => series.name);

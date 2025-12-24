@@ -1,9 +1,9 @@
 <ng-container *transloco="let t; prefix:'api-key'">
 
-  <app-setting-item [title]="title" [showEdit]="false" [canEdit]="false" [subtitle]="tooltipText" [toggleOnViewClick]="false">
+  <app-setting-item [title]="title()" [showEdit]="false" [canEdit]="false" [subtitle]="tooltipText()" [toggleOnViewClick]="false">
     <ng-template #view>
-      <input #apiKey [type]="InputType" readonly class="d-inline-flex form-control" style="width: 80%" id="api-key--{{title}}"
-             aria-describedby="button-addon4" [value]="key" (click)="selectAll()" (focus)="toggleVisibility(true)" (blur)="toggleVisibility(false)">
+      <input #apiKey type="text" readonly class="d-inline-flex form-control" style="width: 80%" id="api-key--{{title()}}"
+             aria-describedby="button-addon4" [value]="value()" (click)="selectAll()" (focus)="toggleVisibility(true)" (blur)="toggleVisibility(false)">
 
       <div class="d-inline-flex">
         <button class="btn btn-primary-text" type="button" (click)="copy()" [title]="t('copy')">

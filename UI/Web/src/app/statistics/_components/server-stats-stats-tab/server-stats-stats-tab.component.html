@@ -1,0 +1,153 @@
+<ng-container *transloco="let t; prefix:'server-stats'">
+  @if (statsResource.hasValue()) {
+    @let stats = statsResource.value();
+    <div class="row g-0 mt-4 mb-3 d-flex justify-content-around">
+      <ng-container>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('total-series-label')" [clickable]="false" fontClasses="fa-solid fa-book-open" [title]="t('total-series-tooltip', {count: stats.seriesCount | number})">
+            {{t('series-count', {num: stats.seriesCount | number})}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
+      <ng-container >
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('total-volumes-label')" [clickable]="false" fontClasses="fas fa-book" [title]="t('total-volumes-tooltip', {count: stats.volumeCount | number})">
+            {{t('volume-count', {num: stats.volumeCount | number})}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
+      <ng-container>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('total-files-label')" [clickable]="false" fontClasses="fa-regular fa-file" [title]="t('total-files-tooltip', {count: stats.totalFiles | number})">
+            {{t('file-count', {num: stats.totalFiles | number})}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
+      <ng-container>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('total-size-label')" [clickable]="false" fontClasses="fa-solid fa-scale-unbalanced" [title]="t('total-size-label')">
+            {{stats.totalSize | bytes}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
+      <ng-container>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('total-genres-label')" [clickable]="true" fontClasses="fa-solid fa-tags" [title]="t('total-genres-tooltip', {count: stats.totalGenres | number})">
+            {{t('genre-count', {num: stats.totalGenres | compactNumber})}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
+      <ng-container>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('total-tags-label')" [clickable]="true" fontClasses="fa-solid fa-tags" [title]="t('total-tags-tooltip', {count: stats.totalTags | number})">
+            {{t('tag-count', {num: stats.totalTags | compactNumber})}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
+      <ng-container>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('total-people-label')" [clickable]="true" fontClasses="fa-solid fa-user-tag" [title]="t('total-people-tooltip', {count: stats.totalPeople | number})">
+            {{t('people-count', {num: stats.totalPeople | compactNumber})}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
+      <ng-container>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('total-read-time-label')" [clickable]="false" fontClasses="fas fa-eye" [title]="t('total-read-time-tooltip', {count: stats.totalReadingTime | number})">
+            {{stats.totalReadingTime | timeDuration}}
+          </app-icon-and-title>
+        </div>
+      </ng-container>
+    </div>
+  }
+
+  <div class="my-4">
+    <app-library-and-time-selector [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUserSignal()!.id"
+                                   (filterChange)="filter.set($event)" (yearChange)="year.set($event)" [locale]="'server'" />
+  </div>
+
+  <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around align-items-stretch">
+    <div class="col-auto d-flex">
+      <app-stat-list
+        [title]="t('popular-decades-title')"
+        [items]="releaseYearsWithUrls()"
+        [valueLabel]="t('series')"
+        [itemUrl]="getDecadeUrl"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+    <div class="col-auto d-flex">
+      <app-stat-list
+        [title]="t('popular-libraries-title')"
+        [items]="popularLibraries()"
+        [valueLabel]="t('reads')"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+    <div class="col-auto d-flex">
+      <app-stat-list
+        [title]="t('popular-series-title')"
+        [items]="popularSeries()"
+        [valueLabel]="t('series')"
+        [featuredImage]="mostPopularSeriesCover()"
+        [itemImage]="getSeriesImage"
+        [itemUrl]="getSeriesUrl"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+
+    <div class="col-auto d-flex">
+      <app-stat-list
+        [title]="t('popular-genres-title')"
+        [items]="popularGenres()"
+        [valueLabel]="t('series')"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+
+    <div class="col-auto d-flex">
+      <app-stat-list
+        [title]="t('popular-tags-title')"
+        [items]="popularTags()"
+        [valueLabel]="t('tags')"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+
+    <div class="col-auto d-flex">
+      <app-stat-list
+        [title]="t('popular-authors-title')"
+        [items]="popularAuthors()"
+        [valueLabel]="t('series')"
+        [itemUrl]="getPersonUrl"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+
+    <div class="col-auto d-flex">
+      <app-stat-list
+        [title]="t('popular-artists-title')"
+        [items]="popularArtists()"
+        [valueLabel]="t('series')"
+        [itemUrl]="getPersonUrl"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+  </div>
+
+  <div class="row g-0 pt-2 pb-2">
+    <app-most-active-users [statsFilter]="filter()!"  />
+  </div>
+
+
+  <div class="row g-0 pt-4 pb-2">
+    <app-reading-activity [statsFilter]="filter()!" />
+  </div>
+</ng-container>

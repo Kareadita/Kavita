@@ -54,6 +54,7 @@ export class ManageUsersComponent implements OnInit {
 
   members: Member[] = [];
   settings: ServerSettings | undefined = undefined;
+  oidcSyncEnabled: boolean = false;
   loggedInUsername = '';
   loadingMembers = false;
   libraryCount: number = 0;
@@ -73,6 +74,7 @@ export class ManageUsersComponent implements OnInit {
 
     this.settingsService.getServerSettings().subscribe(settings => {
       this.settings = settings;
+      this.oidcSyncEnabled = settings.oidcConfig.syncUserSettings && settings.oidcConfig.enabled;
     });
   }
 

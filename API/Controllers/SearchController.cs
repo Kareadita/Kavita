@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
@@ -60,15 +61,12 @@ public class SearchController : BaseApiController
     {
         queryString = Services.Tasks.Scanner.Parser.Parser.CleanQuery(queryString);
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        if (user == null) return Unauthorized();
-
-        var libraries = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(user.Id, QueryContext.Search);
+        var libraries = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(UserId, QueryContext.Search);
         if (libraries.Count == 0) return BadRequest(await _localizationService.Translate(UserId, "libraries-restricted"));
 
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+        var isAdmin = UserContext.HasRole(PolicyConstants.AdminRole);
 
-        var series = await _unitOfWork.SeriesRepository.SearchSeries(user.Id, isAdmin,
+        var series = await _unitOfWork.SeriesRepository.SearchSeries(UserId, isAdmin,
             libraries, queryString, includeChapterAndFiles);
 
         return Ok(series);

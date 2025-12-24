@@ -67,7 +67,7 @@ public class ChapterController : BaseApiController
         if (chapter == null)
             return BadRequest(_localizationService.Translate(UserId, "chapter-doesnt-exist"));
 
-        var vol = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId, VolumeIncludes.Chapters);
+        var vol = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId, VolumeIncludes.Chapters);
         if (vol == null) return BadRequest(_localizationService.Translate(UserId, "volume-doesnt-exist"));
 
         // If there is only 1 chapter within the volume, then we need to remove the volume
@@ -139,7 +139,7 @@ public class ChapterController : BaseApiController
                 var chaptersToDelete = volumeGroup.ToList();
 
                 // Fetch the volume
-                var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId, VolumeIncludes.Chapters);
+                var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId, VolumeIncludes.Chapters);
                 if (volume == null)
                     return BadRequest(_localizationService.Translate(UserId, "volume-doesnt-exist"));
 

@@ -163,7 +163,7 @@ export class BookmarksComponent implements OnInit {
     this.loadingBookmarks = true;
     this.cdRef.markForCheck();
 
-    this.readerService.getAllBookmarks(this.filter).pipe(take(1)).subscribe(bookmarks => {
+    this.readerService.getAllBookmarks(this.filter).subscribe(bookmarks => {
       this.bookmarks = bookmarks;
       this.bookmarks.forEach(bmk => {
         this.clearingSeries[bmk.seriesId] = false;

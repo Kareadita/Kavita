@@ -39,26 +39,6 @@ public class WantToReadController : BaseApiController
     }
 
     /// <summary>
-    /// Return all Series that are in the current logged-in user's Want to Read list, filtered (deprecated, use v2)
-    /// </summary>
-    /// <remarks>This will be removed in v0.9.0</remarks>
-    /// <param name="userParams"></param>
-    /// <param name="filterDto"></param>
-    /// <returns></returns>
-    [HttpPost]
-    [Obsolete("use v2 instead. This will be removed in v0.9.0")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToRead([FromQuery] UserParams? userParams, FilterDto filterDto)
-    {
-        userParams ??= new UserParams();
-        var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(UserId, userParams, filterDto);
-        Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(UserId, pagedList);
-
-        return Ok(pagedList);
-    }
-
-    /// <summary>
     /// Return all Series that are in the current logged in user's Want to Read list, filtered
     /// </summary>
     /// <param name="userParams"></param>

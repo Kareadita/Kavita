@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs;
+using API.DTOs.Metadata;
+using API.DTOs.Person;
 using API.DTOs.Statistics;
 using API.DTOs.Stats.V3;
 using API.DTOs.Stats.V3.ClientDevice;
@@ -30,22 +33,12 @@ namespace API.Controllers;
 public class StatsController(
     IStatisticService statService,
     IUnitOfWork unitOfWork,
-    UserManager<AppUser> userManager,
-    ILocalizationService localizationService,
     IDirectoryService directoryService)
     : BaseApiController
 {
-    [HttpGet("user/{userId}/read")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        if (user!.Id != userId && !await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
-            return Unauthorized(await localizationService.Translate(UserId, "stats-permission-denied"));
 
-        return Ok(await statService.GetUserReadStatistics(userId, new List<int>()));
-    }
 
+    #region Server Stats
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/stats")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
@@ -54,13 +47,7 @@ public class StatsController(
         return Ok(await statService.GetServerStatistics());
     }
 
-    [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("server/count/year")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetYearStatistics()
-    {
-        return Ok(await statService.GetYearCount());
-    }
+
 
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/count/publication-status")]
@@ -79,24 +66,74 @@ public class StatsController(
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("server/top/years")]
+    [HttpGet("popular-decades")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetTopYears()
+    public async Task<ActionResult<IEnumerable<StatBucketDto>>> GetPopularDecades()
     {
-        return Ok(await statService.GetTopYears());
+        return Ok(await statService.GetPopularDecades());
     }
 
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-libraries")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<LibraryDto>>>> GetPopularLibraries()
+    {
+        return Ok(await statService.GetPopularLibraries());
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-series")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<SeriesDto>>>> GetPopularSeries()
+    {
+        return Ok(await statService.GetPopularSeries());
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-genres")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<GenreTagDto>>>> GetPopularGenres()
+    {
+        return Ok(await statService.GetPopularGenres());
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-tags")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<TagDto>>>> GetPopularTags()
+    {
+        return Ok(await statService.GetPopularTags());
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-authors")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularAuthors()
+    {
+        return Ok(await statService.GetPopularPerson(PersonRole.Writer));
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-artists")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularArtists()
+    {
+        return Ok(await statService.GetPopularPerson(PersonRole.CoverArtist));
+    }
+
+
+
     /// <summary>
-    /// Returns users with the top reads in the server
+    /// Top 5 most active readers for the given timeframe
     /// </summary>
-    /// <param name="days"></param>
+    /// <param name="filter"></param>
     /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("server/top/users")]
+    [HttpGet("most-active-users")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<TopReadDto>>> GetTopReads(int days = 0)
+    public async Task<ActionResult<IEnumerable<TopReadDto>>> GetMostActiveUsers([FromQuery] StatsFilterDto filter)
     {
-        return Ok(await statService.GetTopUsers(days));
+        return Ok(await statService.GetMostActiveUsers(filter));
     }
 
     /// <summary>
@@ -144,22 +181,22 @@ public class StatsController(
     /// Returns reading history events for a give or all users, broken up by day, and format
     /// </summary>
     /// <param name="userId">If 0, defaults to all users, else just userId</param>
-    /// <param name="days">If 0, defaults to all time, else just those days asked for</param>
+    /// <param name="filter">Filters against a time frame and a set of libraries</param>
     /// <returns></returns>
-    [HttpGet("reading-count-by-day")]
+    [HttpGet("reading-counts")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<PagesReadOnADayCount<DateTime>>>> ReadCountByDay(int userId = 0, int days = 0)
+    public async Task<ActionResult<IEnumerable<StatCountWithFormat<DateTime>>>> ReadCounts([FromQuery] StatsFilterDto filter, [FromQuery] int userId)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         if (!isAdmin && userId != user!.Id) return BadRequest();
 
-        return Ok(await statService.ReadCountByDay(userId, days));
+        return Ok(await statService.ReadCounts(filter, userId));
     }
 
     [HttpGet("day-breakdown")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<StatCount<DayOfWeek>>>> GetDayBreakdown(int userId = 0)
+    public async Task<ActionResult<IList<StatCount<DayOfWeek>>>> GetDayBreakdown(int userId = 0)
     {
         if (userId == 0)
         {
@@ -168,21 +205,9 @@ public class StatsController(
             if (!isAdmin) return BadRequest();
         }
 
-        return Ok(statService.GetDayBreakdown(userId));
+        return Ok(await statService.GetDayBreakdown(userId));
     }
 
-
-
-    [HttpGet("user/reading-history")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin && userId != user!.Id) return BadRequest();
-
-        return Ok(await statService.GetReadingHistory(userId));
-    }
 
     /// <summary>
     /// Returns a count of pages read per year for a given userId.
@@ -191,11 +216,11 @@ public class StatsController(
     /// <returns></returns>
     [HttpGet("pages-per-year")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetPagesReadPerYear(int userId = 0)
+    public async Task<ActionResult<IList<StatCount<int>>>> GetPagesReadPerYear(int userId = 0)
     {
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         if (!isAdmin) userId = await unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
-        return Ok(statService.GetPagesReadCountByYear(userId));
+        return Ok(await statService.GetPagesReadCountByYear(userId));
     }
 
     /// <summary>
@@ -211,6 +236,16 @@ public class StatsController(
         if (!isAdmin) userId = await unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
         return Ok(statService.GetWordsReadCountByYear(userId));
     }
+
+    [HttpGet("files-added-over-time")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
+    public async Task<ActionResult<IList<StatCountWithFormat<DateTime>>>> GetFilesAddedOverTime()
+    {
+        return Ok(await statService.GetFilesAddedOverTime());
+    }
+
+
+    #endregion
 
     #region Device Insights
 
@@ -236,7 +271,6 @@ public class StatsController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<StatCount<string>>> GetDeviceTypeCounts()
     {
-        // Mobile vs Desktop Ratio - Overall usage pattern
         return Ok(await statService.GetDeviceTypeCounts(DateTime.UtcNow.StartOfMonth()));
     }
 
@@ -259,30 +293,25 @@ public class StatsController(
     #region Profile Stats
 
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <param name="userId"></param>
+    /// <param name="year"></param>
+    /// <param name="booksOnly">This API only returns for Books (epub/pdf) and Comics (Image/Archive) regardless of Library type</param>
+    /// <returns></returns>
     [ProfilePrivacy]
     [HttpGet("reading-pace")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<ReadingPaceDto>> GetReadingPace([FromQuery] StatsFilterDto filter, int userId, int year)
+    public async Task<ActionResult<ReadingPaceDto>> GetReadingPace([FromQuery] StatsFilterDto filter, int userId, int year, bool booksOnly)
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetReadingPaceForUser(filter, userId, year));
+        return Ok(await statService.GetReadingPaceForUser(filter, userId, year, booksOnly, UserId));
     }
 
-    /// <summary>
-    /// Returns each format type read
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <returns></returns>
-    [ProfilePrivacy]
-    [HttpGet("preferred-format")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<MangaFormat>>>> GetPreferredMangaFormat([FromQuery] StatsFilterDto filter, int userId)
-    {
-        await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetPreferredFormatForUser(filter, userId, UserId));
-    }
 
     /// <summary>
     /// Returns top 10 genres that user likes reading
@@ -402,6 +431,14 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, userId);
         return Ok(await statService.GetUserStatBar(filter, userId, UserId));
+    }
+
+    [ProfilePrivacy]
+    [HttpGet("user-read")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
+    {
+        return Ok(await statService.GetUserReadStatistics(userId, []));
     }
 
     // TODO: Can we cache this? Can we make an attribute to cache methods based on keys?

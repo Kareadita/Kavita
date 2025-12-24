@@ -105,6 +105,7 @@
               <app-setting-multi-check-box
                 id="roles"
                 [title]="t('roles-label')"
+                [warning]="(readOnlyWarning$ | async) ?? undefined"
                 [options]="roleOptions"
                 formControlName="roles"
               />

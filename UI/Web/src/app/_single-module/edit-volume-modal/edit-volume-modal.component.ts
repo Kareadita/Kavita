@@ -7,7 +7,6 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
-import {EditChapterProgressComponent} from "../../cards/edit-chapter-progress/edit-chapter-progress.component";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -63,7 +62,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     EntityTitleComponent,
     SettingButtonComponent,
     CoverImageChooserComponent,
-    EditChapterProgressComponent,
     CompactNumberPipe,
     DefaultDatePipe,
     UtcToLocalTimePipe,

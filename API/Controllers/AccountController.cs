@@ -20,6 +20,7 @@ using API.Helpers;
 using API.Helpers.Builders;
 using API.Middleware;
 using API.Services;
+using API.Services.Caching;
 using API.SignalR;
 using AutoMapper;
 using Hangfire;
@@ -56,6 +57,7 @@ public class AccountController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
     private readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
+    private readonly IAuthKeyCacheInvalidator _authKeyCacheInvalidator;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -65,7 +67,8 @@ public class AccountController : BaseApiController
         IMapper mapper, IAccountService accountService,
         IEmailService emailService, IEventHub eventHub,
         ILocalizationService localizationService,
-        IAuthenticationSchemeProvider authenticationSchemeProvider)
+        IAuthenticationSchemeProvider authenticationSchemeProvider,
+        IAuthKeyCacheInvalidator authKeyCacheInvalidator)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -78,6 +81,7 @@ public class AccountController : BaseApiController
         _eventHub = eventHub;
         _localizationService = localizationService;
         _authenticationSchemeProvider = authenticationSchemeProvider;
+        _authKeyCacheInvalidator = authKeyCacheInvalidator;
     }
 
     /// <summary>
@@ -147,6 +151,12 @@ public class AccountController : BaseApiController
             return BadRequest(
                 new ApiException(400,
                     await _localizationService.Translate(UserId, "password-required")));
+
+        var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
+        {
+            return BadRequest(await _localizationService.Translate(user.Id, "oidc-managed"));
+        }
 
         // If you're an admin and the username isn't yours, you don't need to validate the password
         var isResettingOtherUser = (resetPasswordDto.UserName != Username! && isAdmin);
@@ -326,6 +336,7 @@ public class AccountController : BaseApiController
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
         dto.AuthKeys = _mapper.Map<List<AuthKeyDto>>(user.AuthKeys);
+
         return dto;
     }
 
@@ -393,6 +404,11 @@ public class AccountController : BaseApiController
         if (user == null || dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
             return BadRequest(await _localizationService.Translate(UserId, "invalid-payload"));
 
+        var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
+        {
+            return BadRequest(await _localizationService.Translate(user.Id, "oidc-managed"));
+        }
 
         // Validate this user's password
         if (! await _userManager.CheckPasswordAsync(user, dto.Password))
@@ -504,6 +520,12 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
         if (user == null) return Unauthorized(await _localizationService.Translate(UserId, "permission-denied"));
 
+        var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
+        {
+            return BadRequest(await _localizationService.Translate(user.Id, "oidc-managed"));
+        }
+
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (!await _accountService.CanChangeAgeRestriction(user)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
@@ -545,7 +567,6 @@ public class AccountController : BaseApiController
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams);
         if (user == null) return BadRequest(await _localizationService.Translate(UserId, "no-user"));
-
 
         try
         {
@@ -716,6 +737,10 @@ public class AccountController : BaseApiController
             if (!hasAdminRole)
             {
                 roles.Add(PolicyConstants.PlebRole);
+            }
+            else
+            {
+                roles.Remove(PolicyConstants.ReadOnlyRole);
             }
 
             foreach (var role in roles)
@@ -963,6 +988,12 @@ public class AccountController : BaseApiController
             return Ok(await _localizationService.Get("en", "forgot-password-generic"));
         }
 
+        var oidcConfig = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        if (user.IdentityProvider == IdentityProvider.OpenIdConnect  && oidcConfig is {Enabled: true, SyncUserSettings: true})
+        {
+            return BadRequest(await _localizationService.Translate(user.Id, "oidc-managed"));
+        }
+
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole or PolicyConstants.ReadOnlyRole))
             return Unauthorized(await _localizationService.Translate(user.Id, "permission-denied"));
@@ -1190,17 +1221,26 @@ public class AccountController : BaseApiController
         var authKey = await _unitOfWork.UserRepository.GetAuthKeyById(authKeyId);
         if (authKey?.AppUserId != UserId) return BadRequest();
 
+        var oldKeyValue = authKey.Key;
+
         // Get original expiresAt - createdAt for offset to reset expiresAt
         if (authKey.ExpiresAtUtc != null)
         {
             var originalDuration = authKey.ExpiresAtUtc.Value - authKey.CreatedAtUtc;
             authKey.ExpiresAtUtc = DateTime.UtcNow.Add(originalDuration);
         }
+
         authKey.Key = AuthKeyHelper.GenerateKey(dto.KeyLength);
 
         await _unitOfWork.CommitAsync();
 
-        return Ok(_mapper.Map<AuthKeyDto>(authKey));
+        await _authKeyCacheInvalidator.InvalidateAsync(oldKeyValue);
+
+        var newDto = _mapper.Map<AuthKeyDto>(authKey);
+
+        await _eventHub.SendMessageToAsync(MessageFactory.AuthKeyUpdate, MessageFactory.AuthKeyUpdatedEvent(newDto), UserId);
+
+        return Ok(newDto);
     }
 
     /// <summary>
@@ -1212,12 +1252,6 @@ public class AccountController : BaseApiController
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<AuthKeyDto>> CreateAuthKey(RotateAuthKeyRequestDto dto)
     {
-        // Upper bound check might not be needed, it doesn't *realy* matter if users have bigger keys
-        if (string.IsNullOrEmpty(dto.Name) || dto.KeyLength < 8 || dto.KeyLength > 32)
-        {
-            return BadRequest();
-        }
-
         // Validate the name doesn't collide
         var authKeys = await _unitOfWork.UserRepository.GetAuthKeysForUserId(UserId);
         if (authKeys.Any(k => string.Equals(k.Name, dto.Name, StringComparison.InvariantCultureIgnoreCase)))
@@ -1237,7 +1271,11 @@ public class AccountController : BaseApiController
         _unitOfWork.UserRepository.Add(newKey);
         await _unitOfWork.CommitAsync();
 
-        return Ok(_mapper.Map<AuthKeyDto>(newKey));
+        var newDto = _mapper.Map<AuthKeyDto>(newKey);
+
+        await _eventHub.SendMessageToAsync(MessageFactory.AuthKeyUpdate, MessageFactory.AuthKeyUpdatedEvent(newDto), UserId);
+
+        return Ok(newDto);
     }
 
     /// <summary>
@@ -1255,6 +1293,9 @@ public class AccountController : BaseApiController
 
         _unitOfWork.UserRepository.Delete(authKey);
         await _unitOfWork.CommitAsync();
+
+        await _eventHub.SendMessageToAsync(MessageFactory.AuthKeyUpdate, MessageFactory.AuthKeyDeletedEvent(authKeyId), UserId);
+
         return Ok();
     }
 }

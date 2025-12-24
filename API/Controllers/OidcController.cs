@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System.Threading.Tasks;
 using API.Extensions;
+using API.Middleware;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authentication;
@@ -16,6 +17,7 @@ namespace API.Controllers;
 [Route("[controller]")]
 public class OidcController(ILogger<OidcController> logger, [FromServices] ConfigurationManager<OpenIdConnectConfiguration>? configurationManager = null): ControllerBase
 {
+    [SkipDeviceTracking]
     [AllowAnonymous]
     [HttpGet("login")]
     public IActionResult Login(string returnUrl = "/")
@@ -29,6 +31,7 @@ public class OidcController(ILogger<OidcController> logger, [FromServices] Confi
         return Challenge(properties, IdentityServiceExtensions.OpenIdConnect);
     }
 
+    [SkipDeviceTracking]
     [HttpGet("logout")]
     public async Task<IActionResult> Logout()
     {

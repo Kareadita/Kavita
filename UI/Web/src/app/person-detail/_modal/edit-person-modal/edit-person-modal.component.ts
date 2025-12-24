@@ -73,7 +73,7 @@ export class EditPersonModalComponent implements OnInit {
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl('', []),
-    asin: new FormControl('', [], [this.asinValidator()]),
+    asin: new FormControl('', [], [this.amazonCodeValidator()]),
     aniListId: new FormControl('', []),
     malId: new FormControl('', []),
     hardcoverId: new FormControl('', []),
@@ -205,20 +205,22 @@ export class EditPersonModalComponent implements OnInit {
     }
   }
 
-  asinValidator(): AsyncValidatorFn {
+  /**
+   * Validates that the string is a high probability of being an asin
+   */
+  amazonCodeValidator(): AsyncValidatorFn {
     return (control: AbstractControl) => {
       const asin = control.value;
       if (!asin || asin.trim().length === 0) {
         return of(null);
       }
 
-      return this.personService.isValidAsin(asin).pipe(map(valid => {
-        if (valid) {
-          return null;
-        }
+      //https://stackoverflow.com/questions/2123131/determine-if-10-digit-string-is-valid-amazon-asin
+      if (!asin.toUpperCase().startsWith('B0') || !/^(B0|BT)[0-9A-Z]{8}$/.test(asin.toUpperCase())) {
+        return of({ 'amazonCode': {'asin': asin} } as ValidationErrors);
+      }
 
-        return { 'invalidAsin': {'asin': asin} } as ValidationErrors;
-      }));
+      return of(null);
     }
   }
 

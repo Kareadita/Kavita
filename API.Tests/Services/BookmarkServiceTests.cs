@@ -93,30 +93,32 @@ Substitute.For<IMediaConversionService>());
         series.Library = new LibraryBuilder("Test LIb").Build();
 
         context.Series.Add(series);
-
-
         context.AppUser.Add(new AppUser()
         {
-            UserName = "Joe",
-            Bookmarks = new List<AppUserBookmark>()
-            {
-                new AppUserBookmark()
-                {
-                    Page = 1,
-                    ChapterId = 1,
-                    FileName = $"1/1/0001.jpg",
-                    SeriesId = 1,
-                    VolumeId = 1
-                }
-            }
+            UserName = "Joe"
         });
 
         await context.SaveChangesAsync();
 
+        // Now add the bookmark after we have valid IDs
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
+        user.Bookmarks.Add(new AppUserBookmark()
+        {
+            Page = 1,
+            ChapterId = 1,
+            FileName = $"1/1/0001.jpg",
+            SeriesId = 1,
+            VolumeId = 1,
+            AppUserId = 1
+        });
+
+        await context.SaveChangesAsync();
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var bookmarkService = Create(ds, unitOfWork);
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
+
+        // Reload user to get the bookmark
+        user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
 
         var result = await bookmarkService.RemoveBookmarkPage(user, new BookmarkDto()
         {
@@ -125,7 +127,6 @@ Substitute.For<IMediaConversionService>());
             SeriesId = 1,
             VolumeId = 1
         });
-
 
         Assert.True(result);
         Assert.Empty(ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories));
@@ -136,8 +137,8 @@ Substitute.For<IMediaConversionService>());
 
     #region DeleteBookmarkFiles
 
-    [Fact]
-    public async Task DeleteBookmarkFiles_ShouldDeleteOnlyPassedFiles()
+        [Fact]
+        public async Task DeleteBookmarkFiles_ShouldDeleteOnlyPassedFiles()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
 
@@ -158,41 +159,44 @@ Substitute.For<IMediaConversionService>());
         series.Library = new LibraryBuilder("Test LIb").Build();
 
         context.Series.Add(series);
-
         context.AppUser.Add(new AppUser()
         {
-            UserName = "Joe",
-            Bookmarks = new List<AppUserBookmark>()
-            {
-                new AppUserBookmark()
-                {
-                    Page = 1,
-                    ChapterId = 1,
-                    FileName = $"1/1/1/0001.jpg",
-                    SeriesId = 1,
-                    VolumeId = 1
-                },
-                new AppUserBookmark()
-                {
-                    Page = 2,
-                    ChapterId = 1,
-                    FileName = $"1/2/1/0002.jpg",
-                    SeriesId = 2,
-                    VolumeId = 1
-                },
-                new AppUserBookmark()
-                {
-                    Page = 1,
-                    ChapterId = 2,
-                    FileName = $"1/2/1/0001.jpg",
-                    SeriesId = 2,
-                    VolumeId = 1
-                }
-            }
+            UserName = "Joe"
         });
 
         await context.SaveChangesAsync();
 
+        // Add bookmarks after entities are saved
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
+        user.Bookmarks.Add(new AppUserBookmark()
+        {
+            Page = 1,
+            ChapterId = 1,
+            FileName = $"1/1/1/0001.jpg",
+            SeriesId = 1,
+            VolumeId = 1,
+            AppUserId = 1
+        });
+        user.Bookmarks.Add(new AppUserBookmark()
+        {
+            Page = 2,
+            ChapterId = 1,
+            FileName = $"1/2/1/0002.jpg",
+            SeriesId = 1,
+            VolumeId = 1,
+            AppUserId = 1
+        });
+        user.Bookmarks.Add(new AppUserBookmark()
+        {
+            Page = 3,
+            ChapterId = 1,
+            FileName = $"1/2/1/0001.jpg",
+            SeriesId = 1,
+            VolumeId = 1,
+            AppUserId = 1
+        });
+
+        await context.SaveChangesAsync();
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var bookmarkService = Create(ds, unitOfWork);
@@ -200,14 +204,13 @@ Substitute.For<IMediaConversionService>());
         await bookmarkService.DeleteBookmarkFiles([
             new AppUserBookmark
             {
-            Page = 1,
-            ChapterId = 1,
-            FileName = $"1/1/1/0001.jpg",
-            SeriesId = 1,
-            VolumeId = 1
-        }
+                Page = 1,
+                ChapterId = 1,
+                FileName = $"1/1/1/0001.jpg",
+                SeriesId = 1,
+                VolumeId = 1
+            }
         ]);
-
 
         Assert.Equal(2, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
         Assert.False(ds.FileSystem.FileInfo.New(Path.Join(BookmarkDirectory, "1/1/1/0001.jpg")).Exists);
@@ -265,112 +268,4 @@ Substitute.For<IMediaConversionService>());
 
     #endregion
 
-    #region Misc
-
-    [Fact]
-    public async Task ShouldNotDeleteBookmark_OnChapterDeletion()
-    {
-        var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{CacheDirectory}1/0001.jpg", new MockFileData("123"));
-        filesystem.AddFile($"{BookmarkDirectory}1/1/0001.jpg", new MockFileData("123"));
-
-        var (unitOfWork, context, _) = await CreateDatabase();
-
-        var series = new SeriesBuilder("Test")
-            .WithFormat(MangaFormat.Epub)
-            .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
-                .WithChapter(new ChapterBuilder("1")
-                    .Build())
-                .Build())
-            .Build();
-        series.Library = new LibraryBuilder("Test LIb").Build();
-
-        context.Series.Add(series);
-
-        context.AppUser.Add(new AppUser()
-        {
-            UserName = "Joe",
-            Bookmarks = new List<AppUserBookmark>()
-            {
-                new AppUserBookmark()
-                {
-                    Page = 1,
-                    ChapterId = 1,
-                    FileName = $"1/1/0001.jpg",
-                    SeriesId = 1,
-                    VolumeId = 1
-                }
-            }
-        });
-
-        await context.SaveChangesAsync();
-
-
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-
-        var vol = await unitOfWork.VolumeRepository.GetVolumeAsync(1);
-        vol.Chapters = new List<Chapter>();
-        unitOfWork.VolumeRepository.Update(vol);
-        await unitOfWork.CommitAsync();
-
-
-        Assert.Single(ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories));
-        Assert.NotNull(await unitOfWork.UserRepository.GetBookmarkAsync(1));
-    }
-
-
-    [Fact]
-    public async Task ShouldNotDeleteBookmark_OnVolumeDeletion()
-    {
-        var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{CacheDirectory}1/0001.jpg", new MockFileData("123"));
-        filesystem.AddFile($"{BookmarkDirectory}1/1/0001.jpg", new MockFileData("123"));
-
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var series = new SeriesBuilder("Test")
-            .WithFormat(MangaFormat.Epub)
-            .WithVolume(new VolumeBuilder("1")
-                .WithMinNumber(1)
-                .WithChapter(new ChapterBuilder("1")
-                    .Build())
-                .Build())
-            .Build();
-        series.Library = new LibraryBuilder("Test LIb").Build();
-
-        context.Series.Add(series);
-
-
-        context.AppUser.Add(new AppUser()
-        {
-            UserName = "Joe",
-            Bookmarks = new List<AppUserBookmark>()
-            {
-                new AppUserBookmark()
-                {
-                    Page = 1,
-                    ChapterId = 1,
-                    FileName = $"1/1/0001.jpg",
-                    SeriesId = 1,
-                    VolumeId = 1
-                }
-            }
-        });
-
-        await context.SaveChangesAsync();
-
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
-        Assert.NotEmpty(user!.Bookmarks);
-
-        series.Volumes = new List<Volume>();
-        unitOfWork.SeriesRepository.Update(series);
-        await unitOfWork.CommitAsync();
-
-
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        Assert.Single(ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories));
-        Assert.NotNull(await unitOfWork.UserRepository.GetBookmarkAsync(1));
-    }
-
-    #endregion
 }

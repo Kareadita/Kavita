@@ -20,15 +20,10 @@ using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
-
 #nullable enable
 
-public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService localizationService,
-    IExternalMetadataService metadataService)
-    : BaseApiController
+public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService metadataService) : BaseApiController
 {
-    public const string CacheKey = "kavitaPlusSeriesDetail_";
-
     /// <summary>
     /// Fetches genres from the instance
     /// </summary>
@@ -259,10 +254,13 @@ public class MetadataController(IUnitOfWork unitOfWork, ILocalizationService loc
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId)!;
 
-        userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(ret.Reviews.ToList()));
-        ret.Reviews = userReviews;
+        if (ret != null)
+        {
+            userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(ret.Reviews.ToList()));
+            ret.Reviews = userReviews;
+        }
 
-        if (!isAdmin && ret.Recommendations != null && user != null)
+        if (!isAdmin && ret?.Recommendations != null && user != null)
         {
             // Re-obtain owned series and take into account age restriction
             ret.Recommendations.OwnedSeries =

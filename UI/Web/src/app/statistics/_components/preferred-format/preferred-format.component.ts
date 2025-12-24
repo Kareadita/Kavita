@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angu
 import {StatisticsService} from "../../../_services/statistics.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
-import {PieChartModule} from "@swimlane/ngx-charts";
 import {MangaFormat} from "../../../_models/manga-format";
 import {StatsFilter} from "../../_models/stats-filter";
 import {PieChartComponent} from "../../../shared/_charts/pie-chart/pie-chart.component";
@@ -12,7 +11,6 @@ import {StatCount} from "../../_models/stat-count";
   selector: 'app-preferred-format',
   imports: [
     TranslocoDirective,
-    PieChartModule,
     PieChartComponent
   ],
   templateUrl: './preferred-format.component.html',

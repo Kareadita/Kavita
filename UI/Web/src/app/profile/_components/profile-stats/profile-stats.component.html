@@ -1,5 +1,6 @@
 <ng-container *transloco="let t; prefix: 'profile'">
-  <app-library-and-time-selector [filterForm]="filterForm" [userId]="userId()" [label]="t('stats-title', {username: username(), libraryName: ''})" />
+  <app-library-and-time-selector [userId]="userId()" [label]="t('stats-title', {username: username(), libraryName: ''})"
+    (filterChange)="filter.set($event)" (yearChange)="year.set($event)" />
   @let filterValue = filter();
 
   @if (filterValue) {
@@ -30,10 +31,10 @@
 
     <div class="row mt-4">
       <div class="col-md-6">
-        <app-reading-pace [userId]="userId()" [year]="year()" [userName]="username()"  [filter]="filterValue" />
+        <app-reading-pace [userId]="userId()" [year]="year()" [userName]="username()"  [filter]="filterValue" [type]="ReadingPaceType.Books" />
       </div>
       <div class="col-md-6">
-        <app-preferred-format [filter]="filterValue" [userId]="userId()" [userName]="username()" />
+        <app-reading-pace [userId]="userId()" [year]="year()" [userName]="username()"  [filter]="filterValue"  [type]="ReadingPaceType.Comics" />
       </div>
     </div>
 
@@ -50,7 +51,7 @@
 
     <div class="row mt-4">
       <div class="col-md-6">
-        <app-bucket-spread-chart [userId]="userId()" [userName]="username()" [bucketSpreadResource]="pageSpreadResource" endRangeFallback="1000+" translationKey="page-spread" />
+        <app-bucket-spread-chart [userId]="userId()" [userName]="username()" [bucketSpreadResource]="pageSpreadResource" translationKey="page-spread" />
       </div>
       <div class="col-md-6">
         <app-bucket-spread-chart [userId]="userId()" [userName]="username()" [bucketSpreadResource]="wordSpreadResource" translationKey="word-spread" />

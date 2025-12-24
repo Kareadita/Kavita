@@ -37,8 +37,6 @@ export class ChangeEmailComponent implements OnInit {
 
   protected get email() { return this.form.get('email'); }
 
-  makeLink: (val: string) => string = (val: string) => {return this.emailLink};
-
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay()).subscribe(user => {

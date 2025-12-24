@@ -82,7 +82,6 @@
         </div>
       </div>
 
-      <!--TODO: Refactor this to take a template or be useable for multiple people -->
       <ng-template #noActivityTooltip let-item="item">
         <div class="activity-tooltip">
           {{t('no-activity-tooltip', {date: item.date | utcToLocalDate | ordinalDate})}}

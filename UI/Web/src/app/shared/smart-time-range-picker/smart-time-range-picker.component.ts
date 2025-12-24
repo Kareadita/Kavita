@@ -1,10 +1,8 @@
-import {ChangeDetectionStrategy, Component, computed, inject, OnInit, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {tap} from "rxjs";
-import {CommonModule} from '@angular/common';
 import {toSignal} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {SettingsService} from "../../admin/settings.service";
 
 export type TimeRangeFormGroup = FormGroup<{
   startDate: FormControl<Date | null>,
@@ -19,14 +17,15 @@ export type TimeRange = {
 @Component({
   selector: 'app-smart-time-range-picker',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, TranslocoDirective],
+  imports: [ReactiveFormsModule, TranslocoDirective],
   templateUrl: './smart-time-range-picker.component.html',
   styleUrl: './smart-time-range-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SmartTimeRangePickerComponent implements OnInit {
+export class SmartTimeRangePickerComponent {
 
-  private settingsService = inject(SettingsService);
+  startYear = input.required<number>();
+  locale = input<'server' | 'profile'>('profile');
 
   timeRangeUpdate = output<TimeRange>();
 
@@ -47,7 +46,7 @@ export class SmartTimeRangePickerComponent implements OnInit {
     const end = selectedTime.endDate;
 
     if (!start && !end) {
-      return translate('smart-time-picker.during-entire-life');
+      return translate('smart-time-picker.during-entire-life-' + this.locale() );
     }
 
     if (start && end) {
@@ -65,7 +64,15 @@ export class SmartTimeRangePickerComponent implements OnInit {
 
     return translate('smart-time-picker.during-select');
   });
-  readonly yearOptions = signal<number[]>([]);
+  readonly yearOptions = computed(() => {
+    const startYear = this.startYear();
+    const amountOfYears = new Date().getFullYear() - startYear + 1;
+
+    return Array.from(
+      {length: amountOfYears},
+      (_, i) => startYear + i,
+    );
+  })
 
   constructor() {
     this.formGroup.valueChanges.pipe(
@@ -74,20 +81,6 @@ export class SmartTimeRangePickerComponent implements OnInit {
           startDate: obj.startDate ? new Date(obj.startDate) : null,
           endDate: obj.endDate ? new Date(obj.endDate) : null,
         });
-      })
-    ).subscribe();
-  }
-
-  ngOnInit() {
-    this.settingsService.getFirstInstallDate().pipe(
-      tap(installDate => {
-        const installYear = new Date(installDate).getFullYear();
-        const amountOfYears = new Date().getFullYear() - installYear + 1;
-
-        this.yearOptions.set(Array.from(
-          {length: amountOfYears},
-          (_, i) => installYear + i,
-        ));
       })
     ).subscribe();
   }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities.Progress;
@@ -11,12 +12,15 @@ public class AppUserReadingSessionActivityData
     public int AppUserReadingSessionId { get; set; }
     public AppUserReadingSession ReadingSession { get; set; }
 
+    public MangaFormat Format { get; set; }
     public int ChapterId { get; set; }
     public virtual Chapter Chapter { get; set; }
     public int VolumeId { get; set; }
+    public virtual Volume Volume { get; set; }
     public int SeriesId { get; set; }
     public virtual Series Series { get; set; }
     public int LibraryId { get; set; }
+    public virtual Library Library { get; set; }
     public int StartPage { get; set; }
     public int EndPage { get; set; }
     public string? StartBookScrollId { get; set; }

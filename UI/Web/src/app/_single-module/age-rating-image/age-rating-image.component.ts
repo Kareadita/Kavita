@@ -65,7 +65,7 @@ export class AgeRatingImageComponent {
   }
 
   openRating() {
-    this.filterUtilityService.applyFilter(['all-series'], FilterField.AgeRating, FilterComparison.Equal, `${this.rating}`).subscribe();
+    this.filterUtilityService.applyFilter(['all-series'], FilterField.AgeRating, FilterComparison.Equal, `${this.rating()}`).subscribe();
   }
 
 

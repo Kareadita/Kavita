@@ -243,13 +243,6 @@
           }
         }
 
-        @defer (when fragment === SettingsTabId.UserStats; prefetch on idle) {
-          @if (fragment === SettingsTabId.UserStats) {
-            <div class="scale col-md-12">
-              <app-user-stats />
-            </div>
-          }
-        }
 
         @defer (when fragment === SettingsTabId.CBLImport; prefetch on idle) {
           @if (fragment === SettingsTabId.CBLImport) {

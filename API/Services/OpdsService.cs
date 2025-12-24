@@ -728,7 +728,7 @@ public class OpdsService : IOpdsService
             throw new OpdsException(await _localizationService.Translate(userId, "series-doesnt-exist"));
         }
 
-        var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId, VolumeIncludes.Chapters);
+        var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId, VolumeIncludes.Chapters);
         if (volume == null)
         {
             throw new OpdsException(await _localizationService.Translate(userId, "volume-doesnt-exist"));
@@ -782,7 +782,7 @@ public class OpdsService : IOpdsService
             throw new OpdsException(await _localizationService.Translate(userId, "chapter-doesnt-exist"));
         }
 
-        var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
+        var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId);
 
         var chapterName = await _seriesService.FormatChapterName(userId, libraryType);
         var feed = CreateFeed( $"{series.Name} - Volume {volume!.Name} - {chapterName} {chapterId}",

@@ -85,7 +85,8 @@
         "opds": "OPDS",
         "image-only": "Images",
         "add-auth-key": "New",
-        "description": "An Auth Key is like a password. Rotating it will invalidate any existing clients."
+        "description": "An Auth Key is like a password. Rotating it will invalidate any existing clients.",
+        "copy-key": "{{common.copy}}"
     },
 
     "create-auth-key": {
@@ -124,6 +125,7 @@
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "invalid-email-warning": "A non-valid email will block some functionalities of Kavita",
+        "warning-read-only": "Read Only accounts have limited permissions",
         "cancel": "{{common.cancel}}",
         "saving": "Saving…",
         "update": "Update",
@@ -294,8 +296,8 @@
 
     "reread-modal": {
         "title": "Re-Read",
-        "description-full-read": "You've already finished this {{entityType}}! Would you like to start over?",
-        "description-time-passed": "It has been {{days}} days since you've last read this {{entityType}}, need a refresher?",
+        "description-full-read": "You've already finished {{name}}! Would you like to start over?",
+        "description-time-passed": "It has been {{days}} days since you've last read {{name}}, need a refresher?",
         "continue": "Pick up where you left off",
         "reread": "Start Over",
         "cancel": "{{common.cancel}}",
@@ -532,42 +534,20 @@
         "open-filtered-search": "Open a filtered search for {{item}}"
     },
 
-    "user-stats-info-cards": {
-        "total-pages-read-label": "Total Pages Read",
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-label": "Total Words Read",
-        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
-        "time-spent-reading-label": "Time Spent Reading",
-        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-label": "Chapters Read",
-        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "avg-reading-per-week-label": "Average Reading / Week",
-        "last-active-label": "Last Active",
-        "chapters": "{{value}} chapters",
-        "pages-read-by-year-title": "Pages Read By Year",
-        "words-read-by-year-title": "Words Read By Year",
-        "words-count": "{{num}} words",
-        "pages-count": "{{num}} pages"
+
+    "most-active-users": {
+        "title": "Most Active Readers",
+        "no-data": "No reading activity for time period"
     },
 
-    "user-stats": {
-        "library-read-progress-title": "Library Read Progress",
-        "read-percentage": "% Read"
-    },
-
-    "top-readers": {
-        "title": "Top Readers",
-        "time-selection-label": "Timeframe",
-        "comics-label": "Comics: {{value}} hrs",
-        "manga-label": "Manga: {{value}} hrs",
-        "books-label": "Books: {{value}} hrs",
-
-        "this-week": "{{time-periods.this-week}}",
-        "last-7-days": "{{time-periods.last-7-days}}",
-        "last-30-days": "{{time-periods.last-30-days}}",
-        "last-90-days": "{{time-periods.last-90-days}}",
-        "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
+    "active-user-card": {
+        "overall": "Overall",
+        "this-week": "This Week",
+        "this-month": "This Month",
+        "this-year": "This Year",
+        "total-hours": "{{duration}} total",
+        "comics-count": "{{count}} comics",
+        "books-count": "{{count}} books"
     },
 
     "role-selector": {
@@ -1268,7 +1248,7 @@
         "no-progress-incognito": "Read incognito",
         "progress": "Continue",
         "progress-incognito": "Continue incognito",
-        "full-read": "Reread",
+        "full-read": "Re-Read",
         "full-read-incognito": "Reread incognito"
     },
 
@@ -2065,7 +2045,6 @@
         "reading-profiles": "Reading Profiles",
         "clients": "Auth Keys / OPDS",
         "devices": "Devices",
-        "user-stats": "Stats",
         "scrobbling": "Scrobbling",
         "theme": "Theme",
         "font": "Epub Fonts",
@@ -2115,7 +2094,11 @@
         "key-bind-title-page-left": "Page left",
         "key-bind-tooltip-page-left": "Move one page to the left",
         "key-bind-title-page-right": "Page right",
-        "key-bind-tooltip-page-right": "Move one page to the right"
+        "key-bind-tooltip-page-right": "Move one page to the right",
+        "key-bind-title-page-up": "Page up",
+        "key-bind-tooltip-page-up": "Move one page upwards",
+        "key-bind-title-page-down": "Page down",
+        "key-bind-tooltip-page-down": "Move one page downwards"
     },
 
     "collection-detail": {
@@ -2336,16 +2319,6 @@
         "restack-count": "{{num}} Restacks",
         "nothing-found": "Nothing found",
         "track": "Track"
-    },
-
-    "edit-chapter-progress": {
-        "user-header": "User",
-        "page-read-header": "Pages Read",
-        "date-created-header": "Created (UTC)",
-        "date-updated-header": "Last Updated (UTC)",
-        "action-header": "{{common.edit}}",
-        "edit-alt": "{{common.edit}}",
-        "no-data": "{{user-scrobble-history.no-data}}"
     },
 
     "import-mappings": {
@@ -2674,7 +2647,6 @@
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "tags-tab": "{{tabs.tags-tab}}",
@@ -2699,7 +2671,6 @@
         "title": "Edit",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -2739,7 +2710,7 @@
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "asin-label": "ASIN",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "invalid-asin": "ASIN must be a valid ISBN-10 or ISBN-13 format",
+        "invalid-amazon-code": "ASIN should start with B0 or BT",
         "description-label": "Description",
         "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
@@ -2796,7 +2767,13 @@
         "last-30-days": "{{time-periods.last-30-days}}",
         "last-90-days": "{{time-periods.last-90-days}}",
         "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
+        "all-time": "{{time-periods.all-time}}",
+        "select-user-alt": "Select user to filter"
+    },
+
+    "files-over-time": {
+        "title": "Files added over time",
+        "no-data": "{{common.no-data}}"
     },
 
     "manga-format-stats": {
@@ -2832,6 +2809,10 @@
     },
 
     "server-stats": {
+        "stats-title": "Explore",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "management-tab": "{{tabs.management-tab}}",
+
         "total-series-label": "Total Series",
         "total-series-tooltip": "Total Series: {{count}}",
         "total-volumes-label": "Total Volumes",
@@ -2849,11 +2830,16 @@
         "total-read-time-tooltip": "Total Read Time: {{count}}",
         "series": "series",
         "reads": "reads",
-        "release-years-title": "Release Years",
+        "popular-decades-title": "Popular Decades",
         "most-active-users-title": "Most Active Users",
         "popular-libraries-title": "Popular Libraries",
         "popular-series-title": "Popular Series",
-        "recently-read-title": "Recently Read",
+        "popular-genres-title": "Popular Genres",
+        "popular-tags-title": "Popular Tags",
+        "popular-artists-title": "Popular Artists",
+        "popular-authors-title": "Popular Authors",
+
+
         "series-count": "{{num}} Series",
         "volume-count": "{{num}} Volumes",
         "file-count": "{{num}} Files",
@@ -2882,7 +2868,10 @@
 
     "profile": {
         "title": "{{username}}'s Profile",
-        "joined-label": "Joined: {{date}}",
+        "joined-label": "Joined:",
+        "last-read-label": "Last Read:",
+        "time-reading-label": "Total Read Time:",
+        "avg-reading-per-week-label": "Avg Per Week:",
         "stats-title": "A look at {{username}}'s journey through {{libraryName}}",
         "overview-tab": "{{tabs.overview-tab}}",
         "stats-tab": "{{tabs.stats-tab}}",
@@ -2938,7 +2927,7 @@
 
     "page-spread": {
         "title": "Chapters by Page Count",
-        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} pages",
+        "sub-title": "{{username}}'s reads chapters between {{highestBucket}} pages",
         "data-type": "{{data}} chapters",
         "data-of": "{{percentage}}% of your chapters",
         "range": "Page range: {{range}}",
@@ -2947,7 +2936,7 @@
 
     "word-spread": {
         "title": "Chapters by Word Count",
-        "sub-title": "Most of {{username}}'s chapters are between {{highestBucket}} words",
+        "sub-title": "{{username}}'s reads chapters between {{highestBucket}} words",
         "data-type": "{{data}} chapters",
         "data-of": "{{percentage}}% of your chapters",
         "range": "Word range: {{range}}",
@@ -2956,13 +2945,13 @@
 
     "tag-breakdown": {
         "title": "Most read tags",
-        "sub-title": "{{name}} most read tag is {{mostUsed}}",
+        "sub-title": "{{name}}'s most read tag is {{mostUsed}}",
         "missing": "Missing tags for {{amount}} series",
         "no-data": "{{common.no-data}}"
     },
     "genre-breakdown": {
         "title": "Most read genres",
-        "sub-title": "{{name}} most read genre is {{mostUsed}}",
+        "sub-title": "{{name}}'s most read genre is {{mostUsed}}",
         "missing": "Missing genres for {{amount}} series",
         "no-data": "{{common.no-data}}"
     },
@@ -2996,17 +2985,14 @@
         "words": "Words",
         "chapters": "Chapters",
         "no-activity": "No Activity",
-        "no-activity-tooltip": "No reading activity on {{date}}.",
-        "low-activity": "Low Activity",
-        "moderate-activity": "Moderate Activity",
-        "good-activity": "Good Activity",
-        "high-activity": "High Activity",
-        "all-time": "All Time"
+        "no-activity-tooltip": "No reading activity on {{date}}."
     },
 
     "reading-pace": {
-        "title": "Reading Pace",
-        "sub-title": "{{username}} reads a book every {{count}} days",
+        "title-books": "Reading Pace: Books",
+        "title-comics": "Reading Pace: Comics",
+        "sub-title-books": "{{username}} reads a book every {{count}} days",
+        "sub-title-comics": "{{username}} reads a comic every {{count}} days",
         "hours-read": "Hours Read",
         "pages-read": "Pages Read",
         "words-read": "Words Read",
@@ -3016,14 +3002,16 @@
         "per-month": "Per Month",
         "per-day": "Per Day",
         "no-data": "{{common.no-data}}",
-        "disclaimer": "Only takes books into account"
+        "disclaimer-books": "Applies to Epub/Pdfs",
+        "disclaimer-comics": "Applies to Image/Archives"
     },
 
     "smart-time-picker": {
         "forever": "Forever",
         "select-year": "Select Year",
         "custom-range": "Custom range",
-        "during-entire-life": "during their entire life",
+        "during-entire-life-profile": "during their entire life",
+        "during-entire-life-server": "since the beginning",
         "during-year": "during {{year}}",
         "during-from-to": "from {{startYear}} to {{endYear}}",
         "during-select": "Select a time range"
@@ -3761,7 +3749,8 @@
         "scrobbling-tab": "Scrobbling",
         "smart-filters-tab": "Smart Filters",
         "annotations-tab": "Annotations",
-        "overview-tab": "Overview"
+        "overview-tab": "Overview",
+        "management-tab": "Management"
     },
 
     "common": {

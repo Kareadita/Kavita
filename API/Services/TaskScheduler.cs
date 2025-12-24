@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Entities.Enums.User;
 using API.Helpers;
 using API.Helpers.Converters;
+using API.Services.Caching;
 using API.Services.Plus;
 using API.Services.Reading;
 using API.Services.Tasks;
@@ -68,6 +69,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly IWantToReadSyncService _wantToReadSyncService;
     private readonly IEventHub _eventHub;
     private readonly IEmailService _emailService;
+    private readonly IAuthKeyCacheInvalidator _authKeyCacheInvalidator;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
@@ -115,7 +117,8 @@ public class TaskScheduler : ITaskScheduler
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
         IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
         IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService,
-        IWantToReadSyncService wantToReadSyncService, IEventHub eventHub, IEmailService emailService)
+        IWantToReadSyncService wantToReadSyncService, IEventHub eventHub, IEmailService emailService,
+        IAuthKeyCacheInvalidator authKeyCacheInvalidator)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -137,6 +140,7 @@ public class TaskScheduler : ITaskScheduler
         _wantToReadSyncService = wantToReadSyncService;
         _eventHub = eventHub;
         _emailService = emailService;
+        _authKeyCacheInvalidator = authKeyCacheInvalidator;
 
         _defaultRetryPolicy = Policy
             .Handle<Exception>()
@@ -255,25 +259,29 @@ public class TaskScheduler : ITaskScheduler
             LicenseService.Cron, RecurringJobOptions);
 
         // KavitaPlus Scrobbling (every hour) - randomise minutes to spread requests out for K+
+        var randomMinute = Rnd.Next(0, 60);
         RecurringJob.AddOrUpdate(ProcessScrobblingEventsId, () => _scrobblingService.ProcessUpdatesSinceLastSync(),
-            Cron.Hourly(Rnd.Next(0, 60)), RecurringJobOptions);
+            Cron.Hourly(randomMinute), RecurringJobOptions);
         RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEventsId, () => _scrobblingService.ClearProcessedEvents(),
             Cron.Daily, RecurringJobOptions);
 
         // Backfilling/Freshening Reviews/Rating/Recommendations
+        var randomKPlusBackfill = Rnd.Next(1, 5);
         RecurringJob.AddOrUpdate(KavitaPlusDataRefreshId,
-            () => _externalMetadataService.FetchExternalDataTask(), Cron.Daily(Rnd.Next(1, 5)),
+            () => _externalMetadataService.FetchExternalDataTask(), Cron.Daily(randomKPlusBackfill),
             RecurringJobOptions);
 
         // This shouldn't be so close to fetching data due to Rate limit concerns
+        var randomKPlusStackSync = Rnd.Next(6, 10);
         RecurringJob.AddOrUpdate(KavitaPlusStackSyncId,
-            () => _smartCollectionSyncService.Sync(), Cron.Daily(Rnd.Next(6, 10)),
+            () => _smartCollectionSyncService.Sync(), Cron.Daily(randomKPlusStackSync),
             RecurringJobOptions);
 
         RecurringJob.AddOrUpdate(KavitaPlusWantToReadSyncId,
             () => _wantToReadSyncService.Sync(), Cron.Weekly(DayOfWeekHelper.Random()),
             RecurringJobOptions);
     }
+
 
     /// <summary>
     /// Removes any Kavita+ Recurring Jobs
@@ -298,11 +306,14 @@ public class TaskScheduler : ITaskScheduler
         if (!allowStatCollection)
         {
             _logger.LogDebug("User has opted out of stat collection, not registering tasks");
+            RecurringJob.RemoveIfExists(ReportStatsTaskId);
             return;
         }
 
-        _logger.LogDebug("Scheduling stat collection daily");
-        RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), RecurringJobOptions);
+        var hour = Rnd.Next(0, 22);
+        _logger.LogDebug("Scheduling stat collection daily at {Hour}:00", hour);
+
+        RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(hour), RecurringJobOptions);
     }
 
 
@@ -559,13 +570,13 @@ public class TaskScheduler : ITaskScheduler
 
             // Check if key is expired
             var expiredKeys = user.AuthKeys
-                .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc  >= DateTime.UtcNow)
+                .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc <= DateTime.UtcNow)
                 .ToList();
             var expiringSoonKeys = user.AuthKeys
-                .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc  >= DateTime.UtcNow.Subtract(TimeSpan.FromDays(7)))
+                .Where(k => k is {Provider: AuthKeyProvider.User, ExpiresAtUtc: not null} && k.ExpiresAtUtc <= DateTime.UtcNow.Subtract(TimeSpan.FromDays(7)))
                 .ToList();
 
-            if (expiringSoonKeys.Any())
+            if (expiringSoonKeys.Count != 0)
             {
                 var expiringSoonLatestDate = expiringSoonKeys.Max(k => k.ExpiresAtUtc);
                 if (await ShouldSendAuthKeyExpirationReminder(user.Id, expiringSoonLatestDate!.Value, EmailService.AuthKeyExpiringSoonTemplate))
@@ -575,13 +586,18 @@ public class TaskScheduler : ITaskScheduler
 
             }
 
-            if (expiredKeys.Any())
+            if (expiredKeys.Count != 0)
             {
-                var expiringSoonLatestDate = expiringSoonKeys.Max(k => k.ExpiresAtUtc);
-                if (await ShouldSendAuthKeyExpirationReminder(user.Id, expiringSoonLatestDate!.Value,
+                var expiredLatestDate = expiredKeys.Max(k => k.ExpiresAtUtc);
+                if (await ShouldSendAuthKeyExpirationReminder(user.Id, expiredLatestDate!.Value,
                         EmailService.AuthKeyExpiredTemplate))
                 {
                     await _emailService.SendAuthKeyExpiredEmail(user.Id, expiredKeys);
+                }
+
+                foreach (var expiredKey in expiredKeys)
+                {
+                    await _authKeyCacheInvalidator.InvalidateAsync(expiredKey.Key);
                 }
             }
         }
@@ -660,16 +676,13 @@ public class TaskScheduler : ITaskScheduler
 
         if (ret) return true;
 
-        if (checkRunningJobs)
-        {
-            var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-            return runningJobs.Exists(j =>
-                j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
-                j.Value.Job.Method.Name.Equals(methodName) &&
-                j.Value.Job.Method.DeclaringType.Name.Equals(className));
-        }
+        if (!checkRunningJobs) return false;
 
-        return false;
+        var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
+        return runningJobs.Exists(j =>
+            j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
+            j.Value.Job.Method.Name.Equals(methodName) &&
+            j.Value.Job.Method.DeclaringType.Name.Equals(className));
     }
 
 

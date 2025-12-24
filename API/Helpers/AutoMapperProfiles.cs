@@ -263,6 +263,9 @@ public class AutoMapperProfiles : Profile
 
 
         CreateMap<AppUser, UserDto>()
+            .ForMember(dest => dest.Roles,
+                opt =>
+                    opt.MapFrom(src => src.UserRoles.Select(r => r.Role.Name)))
             .ForMember(dest => dest.AgeRestriction,
                 opt =>
                     opt.MapFrom(src => new AgeRestrictionDto()
@@ -470,6 +473,13 @@ public class AutoMapperProfiles : Profile
                 opt => opt.MapFrom(src => src.Chapter));
 
         CreateMap<AppUserAuthKey, AuthKeyDto>();
+
+
+        #region Deprecated Code
+
+        CreateMap<Chapter, ChapterMetadataDto>();
+
+        #endregion
 
     }
 }

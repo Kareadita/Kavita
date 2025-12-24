@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
+using API.Data.Migrations;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Progress;
@@ -12,6 +13,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Progress;
+using API.Entities.User;
 using API.Extensions;
 using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
@@ -38,14 +40,16 @@ public interface IReaderService
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
     IDictionary<int, int> GetPairs(IEnumerable<FileDimensionDto> dimensions);
     Task<string> GetThumbnail(Chapter chapter, int pageNum, IEnumerable<string> cachedImages);
+    Task<RereadDto> CheckSeriesForReRead(int userId, int seriesId, int libraryId);
+    Task<RereadDto> CheckVolumeForReRead(int userId, int volumeId, int seriesId, int libraryId);
+    Task<RereadDto> CheckChapterForReRead(int userId, int chapterId, int seriesId, int libraryId);
 }
 
 public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
     IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService,
-    IClientInfoAccessor clientInfoAccessor)
+    IClientInfoAccessor clientInfoAccessor, ISeriesService seriesService, IEntityDisplayService entityDisplayService)
     : IReaderService
 {
-    private readonly IClientInfoAccessor _clientInfoAccessor = clientInfoAccessor;
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
     private readonly ChapterSortComparerDefaultFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerDefaultFirst.Default;
     private readonly ChapterSortComparerSpecialsLast _chapterSortComparerSpecialsLast = ChapterSortComparerSpecialsLast.Default;
@@ -532,62 +536,28 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     /// <returns></returns>
     public async Task<ChapterDto> GetContinuePoint(int seriesId, int userId)
     {
-        var volumes = (await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
-
-        var anyUserProgress =
-            await unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId);
-
-        if (!anyUserProgress)
+        var hasProgress = await unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId);
+        if (!hasProgress)
         {
-            // I think i need a way to sort volumes last
-            volumes = volumes.OrderBy(v => v.MinNumber, _chapterSortComparerSpecialsLast).ToList();
-
-            // Check if we have a non-loose leaf volume
-            var nonLooseLeafNonSpecialVolume = volumes.Find(v => !v.IsLooseLeaf() && !v.IsSpecial());
-            if (nonLooseLeafNonSpecialVolume != null)
-            {
-                return nonLooseLeafNonSpecialVolume.Chapters.MinBy(c => c.SortOrder);
-            }
-
-            // We only have a loose leaf or Special left
-
-            var chapters = volumes.First(v => v.IsLooseLeaf() || v.IsSpecial()).Chapters
-                .OrderBy(c => c.SortOrder)
-                .ToList();
-
-            // If there are specials, then return the first Non-special
-            if (chapters.Exists(c => c.IsSpecial))
-            {
-                var firstChapter = chapters.Find(c => !c.IsSpecial);
-                if (firstChapter == null)
-                {
-                    // If there is no non-special chapter, then return first chapter
-                    return chapters[0];
-                }
-
-                return firstChapter;
-            }
-            // Else use normal logic
-            return chapters[0];
+            // Get first chapter only
+            return await unitOfWork.ChapterRepository.GetFirstChapterForSeriesAsync(seriesId, userId);
         }
 
-        // Loop through all chapters that are not in volume 0
-        var volumeChapters = volumes
-            .WhereNotLooseLeaf()
-            .SelectMany(v => v.Chapters)
+        var currentlyReading = await unitOfWork.ChapterRepository.GetCurrentlyReadingChapterAsync(seriesId, userId);
+
+        if (currentlyReading != null)
+        {
+            return currentlyReading;
+        }
+
+        var volumes = (await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId, VolumeIncludes.Files)).ToList();
+
+        var allChapters = volumes
+            .OrderBy(v => v.MinNumber, _chapterSortComparerDefaultLast)
+            .SelectMany(v => v.Chapters.OrderBy(c => c.SortOrder))
             .ToList();
 
-        // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
-        // If there are any volumes that have progress, return those. If not, move on.
-        var currentlyReadingChapter = volumeChapters
-            .OrderBy(c => c.MinNumber, _chapterSortComparerDefaultLast)
-            .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
-        if (currentlyReadingChapter != null) return currentlyReadingChapter;
-
-        // Order with volume 0 last so we prefer the natural order
-        return FindNextReadingChapter(volumes.OrderBy(v => v.MinNumber, _chapterSortComparerDefaultLast)
-                                             .SelectMany(v => v.Chapters.OrderBy(c => c.SortOrder))
-                                             .ToList());
+        return FindNextReadingChapter(allChapters);
     }
 
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
@@ -777,6 +747,231 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             directoryService.ClearAndDeleteDirectory(outputDirectory);
             throw;
         }
+    }
+
+    public async Task<RereadDto> CheckSeriesForReRead(int userId, int seriesId, int libraryId)
+    {
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        if (series == null) return RereadDto.Dont();
+
+        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId);
+        var options = EntityDisplayOptions.Default(libraryType);
+        var continuePoint = await GetContinuePoint(seriesId, userId);
+        var lastProgress = await unitOfWork.AppUserProgressRepository.GetLatestProgressForSeries(seriesId, userId);
+        var continuePointLabel = await entityDisplayService.GetEntityDisplayName(continuePoint, userId, options);
+
+        if (lastProgress == null || !await unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
+        {
+            return new RereadDto
+            {
+                ShouldPrompt = false,
+                ChapterOnContinue = new RereadChapterDto(libraryId, seriesId, continuePoint.VolumeId, continuePoint.Id, continuePointLabel, continuePoint.Format),
+            };
+        }
+
+        // Series is fully read, prompt for full reread
+        if (series.PagesRead >= series.Pages)
+        {
+            var firstChapter = await unitOfWork.ChapterRepository.GetFirstChapterForSeriesAsync(seriesId, userId);
+
+            if (firstChapter != null)
+            {
+                // We will be rereading the series, use its name as label
+                return new RereadDto
+                {
+                    ShouldPrompt = true,
+                    FullReread = true,
+                    TimePrompt = false,
+                    ChapterOnContinue = new RereadChapterDto(libraryId, seriesId, continuePoint.VolumeId, continuePoint.Id, continuePointLabel, continuePoint.Format),
+                    ChapterOnReread = new RereadChapterDto(libraryId, seriesId, firstChapter.VolumeId, firstChapter.Id, series.Name, continuePoint.Format),
+                };
+            }
+
+        }
+
+        var userPreferences = await unitOfWork.UserRepository.GetPreferencesForUser(userId);
+
+        return await BuildRereadDto(
+            userId,
+            userPreferences,
+            series.LibraryId,
+            seriesId,
+            libraryType,
+            continuePoint,
+            continuePointLabel,
+            lastProgress.Value,
+            getPrevChapter: async () =>
+            {
+                var chapterId = await GetPrevChapterIdAsync(seriesId, continuePoint.VolumeId, continuePoint.Id, userId);
+                if (chapterId == -1) return null;
+
+                return await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
+            },
+            isValidPrevChapter: prevChapter => prevChapter != null
+        );
+    }
+
+    public async Task<RereadDto> CheckVolumeForReRead(int userId, int volumeId, int seriesId, int libraryId)
+    {
+        var userPreferences = await unitOfWork.UserRepository.GetPreferencesForUser(userId);
+
+        var volume = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId);
+        if (volume == null) return RereadDto.Dont();
+
+        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId);
+        var continuePoint = FindNextReadingChapter([.. volume.Chapters]);
+        var options = EntityDisplayOptions.Default(libraryType);
+        var continuePointLabel = await entityDisplayService.GetEntityDisplayName(continuePoint, userId, options);
+
+        var lastProgress = await unitOfWork.AppUserProgressRepository.GetLatestProgressForVolume(volumeId, userId);
+
+        // Check if there's no progress on the volume
+        if (lastProgress == null || volume.PagesRead == 0)
+        {
+            return new RereadDto
+            {
+                ShouldPrompt = false,
+                ChapterOnContinue = new RereadChapterDto(libraryId, seriesId, volumeId, continuePoint.Id, continuePointLabel, continuePoint.Format),
+            };
+        }
+
+        // Volume is fully read, prompt for full reread
+        if (volume.PagesRead >= volume.Pages)
+        {
+            var firstChapter = await unitOfWork.ChapterRepository.GetFirstChapterForVolumeAsync(volumeId, userId);
+
+            if (firstChapter != null)
+            {
+                // We will be rereading the volume, use it's name as label
+                var (displayName, _) = await entityDisplayService.GetVolumeDisplayName(volume, userId, options);
+
+                return new RereadDto
+                {
+                    ShouldPrompt = true,
+                    FullReread = true,
+                    TimePrompt = false,
+                    ChapterOnContinue = new RereadChapterDto(libraryId, seriesId, volumeId, continuePoint.Id, continuePointLabel, continuePoint.Format),
+                    ChapterOnReread = new RereadChapterDto(libraryId, seriesId, volumeId, firstChapter.Id, displayName, continuePoint.Format),
+                };
+            }
+        }
+
+        return await BuildRereadDto(
+            userId,
+            userPreferences,
+            libraryId,
+            seriesId,
+            libraryType,
+            continuePoint,
+            continuePointLabel,
+            lastProgress.Value,
+            getPrevChapter: async () =>
+            {
+                var chapterId = await GetPrevChapterIdAsync(seriesId, continuePoint.VolumeId, continuePoint.Id, userId);
+                if (chapterId == -1) return null;
+
+                return await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
+            },
+            isValidPrevChapter: prevChapter => prevChapter != null && prevChapter.VolumeId == volume.Id
+        );
+    }
+
+    private async Task<RereadDto> BuildRereadDto(
+        int userId,
+        AppUserPreferences userPreferences,
+        int libraryId,
+        int seriesId,
+        LibraryType libraryType,
+        ChapterDto continuePoint,
+        string continuePointLabel,
+        DateTime lastProgress,
+        Func<Task<ChapterDto?>> getPrevChapter,
+        Func<ChapterDto?, bool> isValidPrevChapter)
+    {
+        var daysSinceLastProgress = (DateTime.UtcNow - lastProgress).Days;
+        var reReadForTime = daysSinceLastProgress != 0 && daysSinceLastProgress > userPreferences.PromptForRereadsAfter;
+
+        // Next up chapter has progress, re-read if it's fully read or long ago
+        if (continuePoint.PagesRead > 0)
+        {
+            var reReadChapterDto = new RereadChapterDto(libraryId, seriesId, continuePoint.VolumeId, continuePoint.Id, continuePointLabel, continuePoint.Format);
+
+            return new RereadDto
+            {
+                ShouldPrompt = continuePoint.PagesRead >= continuePoint.Pages || reReadForTime,
+                TimePrompt = continuePoint.PagesRead < continuePoint.Pages,
+                DaysSinceLastRead = daysSinceLastProgress,
+                ChapterOnContinue = reReadChapterDto,
+                ChapterOnReread = reReadChapterDto
+            };
+        }
+
+        var prevChapter = await getPrevChapter();
+
+        // There is no valid previous chapter, use continue point for re-read
+        if (prevChapter == null || !isValidPrevChapter(prevChapter))
+        {
+            var reReadChapterDto = new RereadChapterDto(libraryId, seriesId, continuePoint.VolumeId, continuePoint.Id, continuePointLabel, continuePoint.Format);
+
+            return new RereadDto
+            {
+                ShouldPrompt = continuePoint.PagesRead >= continuePoint.Pages || reReadForTime,
+                TimePrompt = continuePoint.PagesRead < continuePoint.Pages,
+                DaysSinceLastRead = daysSinceLastProgress,
+                ChapterOnContinue = reReadChapterDto,
+                ChapterOnReread = reReadChapterDto,
+            };
+        }
+
+        // Prompt if it's been a while and might need a refresher (start with the prev chapter)
+        var prevChapterLabel = await seriesService.FormatChapterTitle(userId, prevChapter!, libraryType);
+
+        return new RereadDto
+        {
+            ShouldPrompt = reReadForTime,
+            TimePrompt = true,
+            DaysSinceLastRead = daysSinceLastProgress,
+            ChapterOnContinue = new RereadChapterDto(libraryId, seriesId, continuePoint.VolumeId, continuePoint.Id, continuePointLabel, continuePoint.Format),
+            ChapterOnReread = new RereadChapterDto(libraryId, seriesId, prevChapter.VolumeId, prevChapter.Id, prevChapterLabel, prevChapter.Format),
+        };
+    }
+
+    public async Task<RereadDto> CheckChapterForReRead(int userId, int chapterId, int seriesId, int libraryId)
+    {
+        var userPreferences = await unitOfWork.UserRepository.GetPreferencesForUser(userId);
+
+        var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
+        if (chapter == null) return RereadDto.Dont();
+
+        var lastProgress = await unitOfWork.AppUserProgressRepository.GetLatestProgressForChapter(chapterId, userId);
+
+        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId);
+        var options = EntityDisplayOptions.Default(libraryType);
+        var chapterLabel = await entityDisplayService.GetEntityDisplayName(chapter, userId, options);
+        var reReadChapter = new RereadChapterDto(libraryId, seriesId, chapter.VolumeId, chapterId, chapterLabel, chapter.Format);
+
+        // No progress, read it
+        if (lastProgress == null || chapter.PagesRead == 0)
+        {
+            return new RereadDto
+            {
+                ShouldPrompt = false,
+                ChapterOnContinue = reReadChapter,
+            };
+        }
+
+        var daysSinceLastProgress = (DateTime.UtcNow - lastProgress.Value).Days;
+        var reReadForTime = daysSinceLastProgress != 0 && daysSinceLastProgress > userPreferences.PromptForRereadsAfter;
+
+        // Prompt if fully read or long ago
+        return new RereadDto
+        {
+            ShouldPrompt = chapter.PagesRead >= chapter.Pages || reReadForTime,
+            TimePrompt = chapter.PagesRead < chapter.Pages,
+            DaysSinceLastRead = daysSinceLastProgress,
+            ChapterOnContinue = reReadChapter,
+            ChapterOnReread = reReadChapter,
+        };
     }
 
     /// <summary>

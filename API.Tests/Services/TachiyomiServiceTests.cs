@@ -28,7 +28,7 @@ public class TachiyomiServiceTests(ITestOutputHelper outputHelper): AbstractDbTe
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
-            Substitute.For<IClientInfoAccessor>());
+            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityDisplayService>());
         var tachiyomiService = new TachiyomiService(unitOfWork, mapper, Substitute.For<ILogger<TachiyomiService>>(), readerService);
 
         return (readerService, tachiyomiService);

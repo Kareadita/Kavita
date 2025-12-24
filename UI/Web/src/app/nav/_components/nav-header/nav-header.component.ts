@@ -108,7 +108,7 @@ export class NavHeaderComponent implements OnInit {
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
-  onResize(){
+  onResize(event: Event){
     this.breakpointSource.next(this.utilityService.getActiveBreakpoint());
   }
 

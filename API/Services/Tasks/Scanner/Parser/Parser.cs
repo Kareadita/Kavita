@@ -85,6 +85,12 @@ public static partial class Parser
     public static readonly Regex CssImageUrlRegex = new(@"(url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(.\))",
         MatchOptions, RegexTimeout);
 
+    /// <summary>
+    /// An Appropriate guess at an ASIN being valid
+    /// </summary>
+    public static readonly Regex AsinRegex = new(@"^(B0|BT)[0-9A-Z]{8}$",
+        MatchOptions, RegexTimeout);
+
 
     private static readonly Regex ImageRegex = new(ImageFileExtensions,
         MatchOptions, RegexTimeout);
@@ -1298,6 +1304,17 @@ public static partial class Parser
         }
 
         return filename;
+    }
+
+    /// <summary>
+    /// Checks if code is an Amazon ASIN
+    /// </summary>
+    /// <param name="asin"></param>
+    /// <returns></returns>
+    public static bool IsLikelyValidAsin(string? asin)
+    {
+        if (string.IsNullOrEmpty(asin)) return false;
+        return AsinRegex.Match(asin).Success;
     }
 
 

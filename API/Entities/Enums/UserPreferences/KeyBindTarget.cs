@@ -36,4 +36,10 @@ public enum KeyBindTarget
 
     [Description(nameof(Escape))]
     Escape = 10,
+
+    [Description(nameof(PageUp))]
+    PageUp = 11,
+
+    [Description(nameof(PageDown))]
+    PageDown = 12,
 }

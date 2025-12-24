@@ -295,17 +295,6 @@ public class SettingsController : BaseApiController
     }
 
     /// <summary>
-    /// Return the initial installDate of the server
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("first-install-date")]
-    public async Task<ActionResult<DateTime>> GetInstallDate()
-    {
-        var installDate = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).FirstInstallDate;
-        return Ok(installDate);
-    }
-
-    /// <summary>
     /// Validate if the given authority is reachable from the server
     /// </summary>
     /// <param name="authority"></param>

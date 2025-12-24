@@ -133,10 +133,11 @@ public interface IUserRepository
     Task<string?> GetCoverImageAsync(int userId, int requestingUserId);
     Task<string?> GetPersonCoverImageAsync(int personId);
     Task<IList<AuthKeyDto>> GetAuthKeysForUserId(int userId);
+    Task<IList<AuthKeyDto>> GetAllAuthKeysDtosWithExpiration();
     Task<AppUserAuthKey?> GetAuthKeyById(int authKeyId);
+    Task<DateTime?> GetAuthKeyExpiration(string authKey, int userId);
     Task<AppUserSocialPreferences> GetSocialPreferencesForUser(int userId);
     Task<AppUserPreferences> GetPreferencesForUser(int userId);
-
 }
 
 public class UserRepository : IUserRepository
@@ -970,6 +971,9 @@ public class UserRepository : IUserRepository
         return await _context.AppUserAuthKey
             .Where(k => k.Key == authKey)
             .HasNotExpired()
+            .Include(k => k.AppUser)
+                .ThenInclude(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
             .Select(k => k.AppUser)
             .ProjectTo<UserDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
@@ -1073,10 +1077,26 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
+    public async Task<IList<AuthKeyDto>> GetAllAuthKeysDtosWithExpiration()
+    {
+        return await _context.AppUserAuthKey
+            .Where(k => k.ExpiresAtUtc != null)
+            .ProjectTo<AuthKeyDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
     public async Task<AppUserAuthKey?> GetAuthKeyById(int authKeyId)
     {
         return await _context.AppUserAuthKey
             .Where(k => k.Id == authKeyId)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<DateTime?> GetAuthKeyExpiration(string authKey, int userId)
+    {
+        return await _context.AppUserAuthKey
+            .Where(k => k.Key == authKey && k.AppUserId == userId)
+            .Select(k => k.ExpiresAtUtc)
             .FirstOrDefaultAsync();
     }
 

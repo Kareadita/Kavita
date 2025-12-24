@@ -515,10 +515,9 @@ UI/Web/dist/
 /API/config/bookmarks/
 /API/config/favicons/
 /API/config/cache-long/
-/API/config/kavita.db
-/API/config/kavita.db-shm
-/API/config/kavita.db-wal
-/API/config/kavita.db-journal
+/API/config/*.db-shm
+/API/config/*.db-wal
+/API/config/*.db-journal
 /API/config/*.db
 /API/config/*.bak
 /API/config/*.backup

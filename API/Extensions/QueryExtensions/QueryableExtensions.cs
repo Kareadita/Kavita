@@ -372,6 +372,28 @@ public static class QueryableExtensions
         };
     }
 
+    /// <summary>
+    /// Filters a sequence to elements where the specified key falls within an inclusive range.
+    /// </summary>
+    /// <param name="keySelector">Expression to extract the comparable key</param>
+    /// <param name="start">Inclusive lower bound</param>
+    /// <param name="end">Inclusive upper bound</param>
+    public static IQueryable<T> Between<T>(
+        this IQueryable<T> source,
+        Expression<Func<T, DateTime>> keySelector,
+        DateTime start,
+        DateTime end)
+    {
+        var parameter = keySelector.Parameters[0];
+        var memberAccess = keySelector.Body;
+
+        var greaterOrEqual = Expression.GreaterThanOrEqual(memberAccess, Expression.Constant(start));
+        var lessOrEqual = Expression.LessThanOrEqual(memberAccess, Expression.Constant(end));
+        var combined = Expression.AndAlso(greaterOrEqual, lessOrEqual);
+
+        return source.Where(Expression.Lambda<Func<T, bool>>(combined, parameter));
+    }
+
     public static IQueryable<FullAnnotationDto> OrderFullAnnotation(this IQueryable<FullAnnotationDto> query)
     {
         return query

@@ -67,7 +67,6 @@ export class TypeaheadComponent implements OnInit {
   @Output() lockedChange = new EventEmitter<boolean>();
 
 
-
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
   @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
   @ContentChild('badgeItem') badgeTemplate!: TemplateRef<any>;
@@ -103,6 +102,7 @@ export class TypeaheadComponent implements OnInit {
       this.unFocus.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id: string) => {
         if (this.settings.id !== id) return;
         this.hasFocus = false;
+        this.cdRef.markForCheck();
       });
     }
 
@@ -198,6 +198,7 @@ export class TypeaheadComponent implements OnInit {
       return;
     }
     this.hasFocus = false;
+    this.cdRef.markForCheck();
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -231,6 +232,7 @@ export class TypeaheadComponent implements OnInit {
 
               (item as HTMLElement).click();
               this.focusedIndex = 0;
+              this.cdRef.markForCheck();
             });
           }
         });
@@ -252,6 +254,7 @@ export class TypeaheadComponent implements OnInit {
         this.hasFocus = false;
         event.stopPropagation();
         event.preventDefault();
+        this.cdRef.markForCheck();
         break;
       default:
         break;

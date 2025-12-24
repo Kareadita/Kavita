@@ -74,4 +74,15 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
         if (userId <= 0) throw new KavitaUnauthenticatedUserException();
         return Ok((await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value);
     }
+
+    /// <summary>
+    /// Returns the expiration (UTC) of the authenticated Auth key (or null if none set)
+    /// </summary>
+    /// <remarks>Will always return null if the Auth Key does not belong to this account</remarks>
+    /// <returns></returns>
+    [HttpGet("authkey-expires")]
+    public async Task<ActionResult<DateTime?>> GetAuthKeyExpiration([Required] string authKey)
+    {
+        return Ok(await unitOfWork.UserRepository.GetAuthKeyExpiration(authKey, UserId));
+    }
 }

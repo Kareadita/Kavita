@@ -412,16 +412,19 @@ public class ReaderController : BaseApiController
         try
         {
             await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
+
         }
         catch (KavitaException ex)
         {
             return BadRequest(await _localizationService.Translate(UserId, ex.Message));
         }
+
+
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(UserId, "generic-read-progress"));
+
         await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
             MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, markVolumeReadDto.SeriesId,
                 markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)));
-
-        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(UserId, "generic-read-progress"));
 
         BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
         BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(markVolumeReadDto.SeriesId, user.Id));
@@ -1008,19 +1011,47 @@ public class ReaderController : BaseApiController
         return Ok();
     }
 
-
+    /// <summary>
+    /// Check if we should prompt the user for rereads for the given series
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("prompt-reread/series")]
+    public async Task<ActionResult<RereadDto>> ShouldPromptForSeriesReRead(int seriesId, int libraryId)
+    {
+        return Ok(await _readerService.CheckSeriesForReRead(UserId, seriesId, libraryId));
+    }
 
     /// <summary>
-    /// Get all progress events for a given chapter
+    /// Check if we should prompt the user for rereads for the given volume
     /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="volumeId"></param>
+    /// <returns></returns>
+    [HttpGet("prompt-reread/volume")]
+    public async Task<ActionResult<RereadDto>> ShouldPromptForVolumeReRead(int libraryId, int seriesId, int volumeId)
+    {
+        return Ok(await _readerService.CheckVolumeForReRead(UserId, volumeId, seriesId, libraryId));
+    }
+
+    /// <summary>
+    /// Check if we should prompt the user for rereads for the given chapter
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="seriesId"></param>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    [HttpGet("all-chapter-progress")]
-    public async Task<ActionResult<IEnumerable<FullProgressDto>>> GetProgressForChapter(int chapterId)
+    [HttpGet("prompt-reread/chapter")]
+    public async Task<ActionResult<RereadDto>> ShouldPromptForChapterReRead(int libraryId, int seriesId, int chapterId)
     {
-        var userId = User.IsInRole(PolicyConstants.AdminRole) ? 0 : UserId;
-        return Ok(await _unitOfWork.AppUserProgressRepository.GetUserProgressForChapter(chapterId, userId));
+        return Ok(await _readerService.CheckChapterForReRead(UserId, chapterId, seriesId, libraryId));
+    }
 
+    [HttpGet("first-progress-date")]
+    public async Task<ActionResult<DateTime>> GetFirstReadingDate(int userId)
+    {
+        return Ok(await _unitOfWork.AppUserProgressRepository.GetFirstProgressForUser(userId));
     }
 
 }

@@ -46,7 +46,7 @@ public class AccountServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var defaultAdmin = await unitOfWork.UserRepository.GetDefaultAdminUser();
 
         await Assert.ThrowsAsync<KavitaException>(() =>
-            accountService.ChangeIdentityProvider(defaultAdmin.Id, defaultAdmin, IdentityProvider.Kavita));
+            accountService.ChangeIdentityProvider(defaultAdmin.Id, defaultAdmin, IdentityProvider.OpenIdConnect));
     }
 
     [Fact]

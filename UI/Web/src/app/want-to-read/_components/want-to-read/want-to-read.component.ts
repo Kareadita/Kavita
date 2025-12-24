@@ -172,7 +172,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
-    this.seriesService.getWantToRead(undefined, undefined, this.filter).pipe(take(1)).subscribe(paginatedList => {
+    this.seriesService.getWantToRead(undefined, undefined, this.filter).subscribe(paginatedList => {
       this.series = paginatedList.result;
       this.pagination = paginatedList.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (series: Series) => series.name);

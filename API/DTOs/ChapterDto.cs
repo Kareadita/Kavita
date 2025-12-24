@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using API.DTOs.Metadata;
 using API.DTOs.Person;
 using API.Entities.Enums;
@@ -172,6 +173,8 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage
     public string? PrimaryColor { get; set; } = string.Empty;
     /// <inheritdoc cref="API.Entities.Chapter.SecondaryColor"/>
     public string? SecondaryColor { get; set; } = string.Empty;
+
+    public MangaFormat? Format => Files.FirstOrDefault()?.Format;
 
     public void ResetColorScape()
     {

@@ -1,63 +1,44 @@
 <ng-container *transloco="let t; prefix: 'reading-activity'">
-  <ng-container>
-    <div class="dashboard-card-content stat-container stats-card">
-      <div class="row g-0 mb-2 align-items-center">
-        <div class="col-4">
-          <h4 class="stats-title">{{t('title')}}</h4>
-        </div>
-        <div class="col-8">
-          <form [formGroup]="formGroup" class="d-inline-flex float-end">
-            @if (isAdmin && !individualUserMode()) {
-              <div class="d-flex me-1">
-                <label for="time-select-read-by-day" class="form-check-label"></label>
-                <select id="time-select-read-by-day" class="form-select" formControlName="users"
-                  [class.is-invalid]="formGroup.get('users')?.invalid && formGroup.get('users')?.touched">
-                  <option [value]="0">{{t('all-users')}}</option>
-                  @for (item of users$ | async; track item) {
-                    <option [value]="item.id">{{item.username}}</option>
-                  }
-                </select>
-              </div>
-            }
+  <div class="card stats-card p-4">
+    <div class="row g-0 mb-2 align-items-center">
+      <div class="col-4">
+        <h3 class="stats-title">{{t('title')}}</h3>
+      </div>
+      <div class="col-8">
+        <form [formGroup]="formGroup" class="d-inline-flex float-end">
+          @if (isAdmin() && !individualUserMode()) {
             <div class="d-flex">
-              <label for="time-select-top-reads" class="form-check-label">
-                <span class="visually-hidden">{{t('time-frame-label')}}</span>
-              </label>
-              <select id="time-select-top-reads" class="form-select" formControlName="days"
-                [class.is-invalid]="formGroup.get('days')?.invalid && formGroup.get('days')?.touched">
-                @for (item of timePeriods; track item) {
-                  <option [value]="item.value">{{t(item.title)}}</option>
+              <label for="user-select-read-by-day" class="visually-hidden">{{t('select-user-alt')}}</label>
+              <select id="user-select-read-by-day" class="form-select" formControlName="users"
+                      [attr.aria-busy]="isLoading()">
+                <option [value]="0">{{t('all-users')}}</option>
+                @for (item of users$ | async; track item.id) {
+                  <option [value]="item.id">{{item.username}}</option>
                 }
               </select>
             </div>
-          </form>
-        </div>
-      </div>
-
-      <div class="row g-0">
-        @if (data$ | async; as data) {
-          @if (data.length > 0) {
-            <ngx-charts-line-chart class="dark"
-              [legend]="true"
-              [legendTitle]="t('legend-label')"
-              [showXAxisLabel]="true"
-              [showYAxisLabel]="true"
-              [xAxis]="true"
-              [yAxis]="true"
-              [showGridLines]="false"
-              [showRefLines]="true"
-              [roundDomains]="true"
-              [autoScale]="true"
-              [xAxisLabel]="t('x-axis-label')"
-              [yAxisLabel]="t('y-axis-label')"
-              [timeline]="false"
-              [results]="data"
-               />
-          } @else {
-            {{t('no-data')}}
           }
-        }
+        </form>
       </div>
     </div>
-  </ng-container>
+
+    <div class="row g-0">
+      @if (isLoading()) {
+        <div class="d-flex justify-content-center p-4" role="status" aria-label="Loading">
+          <span class="spinner-border"></span>
+        </div>
+      } @else if (chartData(); as chart) {
+        @if (chart.hasData) {
+          <app-line-chart
+            [axisLabels]="chart.axisLabels"
+            [data]="chart.data"
+            [legendLabels]="chart.legendLabels"
+            [showLegend]="true"
+          />
+        } @else {
+          <p>{{t('no-data')}}</p>
+        }
+      }
+    </div>
+  </div>
 </ng-container>

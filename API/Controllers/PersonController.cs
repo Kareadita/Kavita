@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Metadata;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Metadata.Browse;
@@ -14,6 +16,7 @@ using API.Helpers;
 using API.Services;
 using API.Services.Plus;
 using API.Services.Tasks.Metadata;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -177,8 +180,7 @@ public class PersonController : BaseApiController
         }
 
         var asin = dto.Asin?.Trim();
-        if (!string.IsNullOrEmpty(asin) &&
-            (ArticleNumberHelper.IsValidIsbn10(asin) || ArticleNumberHelper.IsValidIsbn13(asin)))
+        if (!string.IsNullOrEmpty(asin) && Parser.IsLikelyValidAsin(asin))
         {
             person.Asin = asin;
         }
@@ -187,18 +189,6 @@ public class PersonController : BaseApiController
         await _unitOfWork.CommitAsync();
 
         return Ok(_mapper.Map<PersonDto>(person));
-    }
-
-    /// <summary>
-    /// Validates if the ASIN (10/13) is valid
-    /// </summary>
-    /// <param name="asin"></param>
-    /// <returns></returns>
-    [HttpGet("valid-asin")]
-    public ActionResult<bool> ValidateAsin(string asin)
-    {
-        return Ok(!string.IsNullOrEmpty(asin) &&
-                  (ArticleNumberHelper.IsValidIsbn10(asin) || ArticleNumberHelper.IsValidIsbn13(asin)));
     }
 
     /// <summary>

@@ -1,27 +1,97 @@
-@if (data$ | async; as data) {
-  <div class="card" style="width: 18rem;">
-    <div class="card-header text-center">
-      {{title}}
-      @if (description && description.length > 0) {
-        <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tooltip" role="button" tabindex="0"></i>
+<div class="stat-list-card" [ngClass]="{'has-featured': hasFeaturedImage()}">
+  @if (hasFeaturedImage()) {
+    <div class="featured-image">
+      @if (displayedFeaturedImage(); as imgUrl) {
+        <app-image
+          [imageUrl]="imgUrl"
+          [styles]="{'object-fit': 'cover', 'width': '100%', 'height': '100%'}"
+        />
       }
     </div>
-    <ul class="list-group list-group-flush">
-      @for(item of data; track item) {
-        <li class="list-group-item" [ngClass]="{'underline': handleClick !== undefined}" (click)="doClick(item)">
-          @if (image && image(item); as url) {
-            @if (url && url.length > 0) {
-              <app-image width="32px" [styles]="{'max-height': '32px'}" class="img-top me-1" [imageUrl]="url" />
-            }
+  }
+
+  <div class="stat-list-content">
+    <header class="stat-list-header">
+      <span class="stat-list-title">
+        {{ title() }}
+        @if (description(); as desc) {
+          <button
+            type="button"
+            class="info-btn"
+            [ngbTooltip]="desc"
+            placement="right"
+            aria-label="More information"
+          >
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+          </button>
+        }
+      </span>
+      @if (valueLabel(); as label) {
+        <span class="stat-list-label">{{ label }}</span>
+      }
+    </header>
+
+    <ul class="stat-list-items" role="list">
+      @for (item of displayItems(); track item.name; let idx = $index) {
+        <li
+          class="stat-list-item"
+          [ngClass]="{
+            'clickable': clickable() || getItemUrl(item)
+          }"
+          (mouseenter)="onItemMouseEnter(item)"
+          (mouseleave)="onItemMouseLeave()"
+        >
+          @if (showAccentBars()) {
+            <span
+              class="accent-bar"
+              [style.background-color]="idx === 0 ? accentColor() : null"
+              aria-hidden="true"
+            ></span>
           }
-          {{item.name}}
+
+          @if (showRanking()) {
+            <span class="ranking" aria-label="Rank {{ idx + 1 }}">{{ idx + 1 }}</span>
+          }
+
+          @if (getItemImage(item); as imgUrl) {
+            <app-image
+              class="item-image"
+              [imageUrl]="imgUrl"
+              width="32px"
+              [styles]="{'height': '32px', 'object-fit': 'cover', 'border-radius': '4px'}"
+            />
+          }
+
+          <!-- Render as anchor if URL function provided and returns a URL -->
+          @if (getItemUrl(item); as url) {
+            <a
+              class="item-link"
+              [href]="url"
+              target="_blank"
+              rel="noopener noreferrer"
+              (click)="onItemClick($event, item)"
+              (keydown)="onItemKeydown($event, item)"
+            >
+              <span class="item-name">{{ item.name }}</span>
+            </a>
+          } @else {
+            <span
+              class="item-name"
+              [class.item-name-clickable]="clickable()"
+              [attr.role]="clickable() ? 'button' : null"
+              [attr.tabindex]="clickable() ? 0 : null"
+              (click)="onItemClick($event, item)"
+              (keydown)="onItemKeydown($event, item)"
+            >
+              {{ item.name }}
+            </span>
+          }
+
           @if (item.value >= 0) {
-            <span class="float-end">{{item.value | compactNumber}} {{label}}</span>
+            <span class="item-value">{{ item.value | compactNumber }}</span>
           }
         </li>
       }
     </ul>
   </div>
-}
-
-<ng-template #tooltip>{{description}}</ng-template>
+</div>

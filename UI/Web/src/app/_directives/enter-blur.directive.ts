@@ -6,7 +6,7 @@ import { Directive, HostListener } from '@angular/core';
 })
 export class EnterBlurDirective {
   @HostListener('keydown.enter', ['$event'])
-  onEnter(event: KeyboardEvent): void {
+  onEnter(event: Event): void {
     event.preventDefault();
     document.body.click();
   }

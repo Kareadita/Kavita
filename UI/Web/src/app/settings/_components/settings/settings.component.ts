@@ -18,7 +18,6 @@ import {
 } from "../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {ThemeManagerComponent} from "../../../user-settings/theme-manager/theme-manager.component";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {UserStatsComponent} from "../../../statistics/_components/user-stats/user-stats.component";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {AccountService} from "../../../_services/account.service";
 import {WikiLink} from "../../../_models/wiki";
@@ -76,7 +75,6 @@ import {ManageCustomKeyBindsComponent} from "../../../user-settings/custom-key-b
     SideNavCompanionBarComponent,
     ThemeManagerComponent,
     TranslocoDirective,
-    UserStatsComponent,
     LicenseComponent,
     ManageEmailSettingsComponent,
     ManageLibraryComponent,

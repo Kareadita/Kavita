@@ -105,11 +105,11 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
     public async Task<bool> NeedsDataRefresh(int seriesId)
     {
         // TODO: Add unit test
-        var row = await _context.ExternalSeriesMetadata
+        return await _context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
-            .FirstOrDefaultAsync();
-
-        return row == null || row.ValidUntilUtc <= DateTime.UtcNow;
+            .Select(s => s.ValidUntilUtc)
+            .Where(date => date < DateTime.UtcNow)
+            .AnyAsync();
     }
 
     public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlusDto(int seriesId)

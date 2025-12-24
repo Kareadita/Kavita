@@ -30,7 +30,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, debounceTime, firstValueFrom, forkJoin, Observable, of, ReplaySubject, switchMap, tap} from 'rxjs';
+import {catchError, debounceTime, forkJoin, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {
@@ -67,7 +67,7 @@ import {ExternalSeriesCardComponent} from '../../../cards/external-series-card/e
 import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
 import {VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {PublicationStatus} from "../../../_models/metadata/publication-status";
 import {NextExpectedChapter} from "../../../_models/series-detail/next-expected-chapter";
@@ -136,10 +136,10 @@ interface StoryLineItem {
 }
 
 @Component({
-    selector: 'app-series-detail',
-    templateUrl: './series-detail.component.html',
-    styleUrls: ['./series-detail.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-series-detail',
+  templateUrl: './series-detail.component.html',
+  styleUrls: ['./series-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CardActionablesComponent, ReactiveFormsModule, NgStyle,
     NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
     NgbDropdownItem, BulkOperationsComponent,
@@ -170,7 +170,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly collectionTagService = inject(CollectionTagService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
-  private readonly translocoService = inject(TranslocoService);
   private readonly readingProfileService = inject(ReadingProfileService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly utilityService = inject(UtilityService);
@@ -501,7 +500,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemovedEvent = event.payload as SeriesRemovedEvent;
         if (seriesRemovedEvent.seriesId === this.seriesId) {
-          this.toastr.info(this.translocoService.translate('errors.series-doesnt-exist'));
+          this.toastr.info(translate('errors.series-doesnt-exist'));
           this.router.navigateByUrl('/home');
         }
       } else if (event.event === EVENTS.ScanSeries) {
@@ -629,7 +628,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         break;
       case Action.ClearReadingProfile:
         this.readingProfileService.clearSeriesProfiles(this.seriesId).subscribe(() => {
-          this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
+          this.toastr.success(translate('actionable.cleared-profile'));
         });
         break;
       default:
@@ -1065,17 +1064,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   read(incognitoMode: boolean = false) {
     if (this.bulkSelectionService.hasSelections()) return;
 
-    this.readerService.readSeries(this.series()!, incognitoMode, (chapter) => {
-      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
-    });
+    this.readerService.readSeries(this.series()!, incognitoMode);
   }
 
   openChapter(chapter: Chapter, incognitoMode = false, promptForReread: boolean = true) {
     if (this.bulkSelectionService.hasSelections()) return;
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
 
-    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode, promptForReread);
-
+    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode);
   }
 
 

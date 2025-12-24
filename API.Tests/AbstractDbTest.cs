@@ -16,39 +16,44 @@ using NSubstitute;
 using Xunit.Abstractions;
 
 namespace API.Tests;
+#nullable enable
 
-public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): AbstractFsTest
+public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): AbstractFsTest, IAsyncDisposable
 {
+
+    private SqliteConnection? _connection;
+    private DataContext? _context;
 
     protected async Task<(IUnitOfWork, DataContext, IMapper)> CreateDatabase()
     {
+        // Dispose any previous connection if CreateDatabase is called multiple times
+        if (_connection != null)
+        {
+            await _context!.DisposeAsync();
+            await _connection.DisposeAsync();
+        }
+        _connection = new SqliteConnection("Filename=:memory:");
+        await _connection.OpenAsync();
+
         var contextOptions = new DbContextOptionsBuilder<DataContext>()
-            .UseSqlite(CreateInMemoryDatabase())
+            .UseSqlite(_connection)
             .EnableSensitiveDataLogging()
             .Options;
 
-        var context = new DataContext(contextOptions);
+        _context = new DataContext(contextOptions);
 
-        await context.Database.EnsureCreatedAsync();
+        await _context.Database.EnsureCreatedAsync();
 
-        await SeedDb(context);
+        await SeedDb(_context);
 
 
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
         var mapper = config.CreateMapper();
 
         GlobalConfiguration.Configuration.UseInMemoryStorage();
-        var unitOfWork = new UnitOfWork(context, mapper, null);
+        var unitOfWork = new UnitOfWork(_context, mapper, null);
 
-        return (unitOfWork, context, mapper);
-    }
-
-    private static SqliteConnection CreateInMemoryDatabase()
-    {
-        var connection = new SqliteConnection("Filename=:memory:");
-        connection.Open();
-
-        return connection;
+        return (unitOfWork, _context, mapper);
     }
 
     private async Task<bool> SeedDb(DataContext context)
@@ -96,7 +101,7 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="roleName"></param>
-    protected async Task AddUserWithRole(DataContext context, int userId, string roleName)
+    protected static async Task AddUserWithRole(DataContext context, int userId, string roleName)
     {
         var role = new AppRole { Id = userId, Name = roleName, NormalizedName = roleName.ToUpper() };
 
@@ -104,6 +109,21 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
         await context.UserRoles.AddAsync(new AppUserRole { UserId = userId, RoleId = userId });
 
         await context.SaveChangesAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_context != null)
+        {
+            await _context.DisposeAsync();
+        }
+
+        if (_connection != null)
+        {
+            await _connection.DisposeAsync();
+        }
+
+        GC.SuppressFinalize(this);
     }
 
 }

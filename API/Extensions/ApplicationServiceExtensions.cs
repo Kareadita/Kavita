@@ -4,6 +4,7 @@ using API.Data;
 using API.Helpers;
 using API.Middleware;
 using API.Services;
+using API.Services.Caching;
 using API.Services.Plus;
 using API.Services.Reading;
 using API.Services.Store;
@@ -13,12 +14,14 @@ using API.Services.Tasks.Scanner;
 using API.SignalR;
 using API.SignalR.Presence;
 using Kavita.Common;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NeoSmart.Caching.Sqlite;
 
 namespace API.Extensions;
 
@@ -84,6 +87,7 @@ public static class ApplicationServiceExtensions
 
         services.AddScoped<ILocalizationService, LocalizationService>();
         services.AddScoped<ISettingsService, SettingsService>();
+        services.AddScoped<IAuthKeyCacheInvalidator, AuthKeyCacheInvalidator>();
 
 
         services.AddScoped<IKavitaPlusApiService, KavitaPlusApiService>();
@@ -94,6 +98,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
 
         services.AddScoped<IOidcService, OidcService>();
+        services.AddScoped<IEntityDisplayService, EntityDisplayService>();
 
         services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
         services.AddScoped<IClientDeviceService, ClientDeviceService>();
@@ -126,7 +131,8 @@ public static class ApplicationServiceExtensions
             options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 75 MB
             options.CompactionPercentage = 0.1; // LRU compaction, Evict 10% when limit reached
         });
-        // Needs to be registered after the memory cache, as it depends on it
+
+        services.AddSingleton<TicketSerializer>();
         services.AddSingleton<ITicketStore, CustomTicketStore>();
 
         services.AddSwaggerGen(g =>
@@ -137,6 +143,8 @@ public static class ApplicationServiceExtensions
 
     private static void AddSqLite(this IServiceCollection services)
     {
+        services.AddSqliteCache("config/cache.db");
+
         services.AddDbContextPool<DataContext>(options =>
         {
             options.UseSqlite("Data source=config/kavita.db", builder =>

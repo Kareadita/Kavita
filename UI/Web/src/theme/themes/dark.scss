@@ -58,6 +58,8 @@
   --bs-primary-rgb: var(--primary-color);
   --select2-selection-text-color: var(--dropdown-item-hover-text-color);
   --select2-option-highlighted-background: var(--dropdown-item-hover-bg-color);
+  --dropdown-icon-white: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNiAxNic+PHBhdGggZmlsbD0nbm9uZScgc3Ryb2tlPScjZmZmJyBzdHJva2UtbGluZWNhcD0ncm91bmQnIHN0cm9rZS1saW5lam9pbj0ncm91bmQnIHN0cm9rZS13aWR0aD0nMicgZD0nbTIgNSA2IDYgNi02Jy8+PC9zdmc+");
+  --dropdown-icon-black: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'><path%20fill='none'%20stroke='currentColor'%20stroke-linecap='round'%20stroke-linejoin='round'%20stroke-width='2'%20d='m2%205%206%206%206-6'/></svg>");
 
 
   /* Theming colors that performs a gradient for background. Can be disabled else automatically applied based on cover image colors.

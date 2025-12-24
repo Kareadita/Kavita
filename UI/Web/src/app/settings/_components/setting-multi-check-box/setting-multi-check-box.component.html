@@ -2,7 +2,12 @@
   <div class="d-flex justify-content-between">
     <div class="w-70">
       <h4>{{title()}}</h4>
-      <span class="text-muted d-block">{{tooltip()}}</span>
+      @if (tooltip(); as tooltipValue) {
+        <span class="text-muted d-block">{{tooltipValue}}</span>
+      }
+      @if (warning(); as warningValue) {
+        <span class="d-block invalid-feedback">{{warningValue}}</span>
+      }
     </div>
 
     @if (!isLoading() && options().length > 0) {

@@ -19,8 +19,22 @@ public static class Configuration
     public const string DefaultOidcClientId = "kavita";
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
-    public static readonly string KavitaPlusApiUrl = "https://plus.kavitareader.com";
+    public static readonly string KavitaPlusApiUrl = GetKavitaPlusApiUrl();
     public const string StatsApiUrl = "https://stats.kavitareader.com";
+
+
+    private static string GetKavitaPlusApiUrl()
+    {
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        var isDevelopment = environment == Environments.Development;
+
+        if (isDevelopment && Environment.UserName.Equals("Joe", StringComparison.OrdinalIgnoreCase))
+        {
+            return "http://localhost:5020";
+        }
+
+        return "https://plus.kavitareader.com";
+    }
 
     public static int Port
     {

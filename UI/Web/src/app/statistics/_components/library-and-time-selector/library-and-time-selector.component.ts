@@ -1,4 +1,15 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  HostListener,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {
   SmartTimeRangePickerComponent,
@@ -13,7 +24,8 @@ import {of, tap} from "rxjs";
 import {LibraryService} from "../../../_services/library.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {UtilityService} from "../../../shared/_services/utility.service";
-import {AccountService} from "../../../_services/account.service";
+import {ReaderService} from "../../../_services/reader.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 export interface LibraryAndTimeFilterGroup {
   timeFilter: FormGroup<{
@@ -39,35 +51,95 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
 
   private readonly libraryService = inject(LibraryService);
   private readonly utilityService = inject(UtilityService);
+  private readonly readerService = inject(ReaderService);
+  private readonly elementRef = inject(ElementRef);
 
-  filterForm = input.required<FormGroup>();
   label = input.required<string>();
   userId = input.required<number>();
+  locale = input<'server' | 'profile'>('profile');
 
+  filterChange = output<StatsFilter>();
+  yearChange = output<number>();
+
+  startYear = signal(new Date().getFullYear())
   allLibraries = signal<Library[]>([]);
   showLibraryTypeahead = signal(false);
   libraryTypeaheadSettings?: TypeaheadSettings<Library>;
-
+  protected filterForm = new FormGroup<LibraryAndTimeFilterGroup>({
+    timeFilter: new FormGroup({
+      startDate: new FormControl<Date | null>(null),
+      endDate: new FormControl<Date | null>(null),
+    }),
+    libraries: new FormControl<number[]>([], { nonNullable: true }),
+  });
 
 
   filter = signal<StatsFilter | undefined>(undefined);
   year = computed(() => this.filter()?.timeFilter.endDate?.getFullYear() ?? new Date().getFullYear());
 
+
+  @HostListener('body:click', ['$event'])
+  handleDocumentClick(event: Event) {
+
+    const target = event.target as HTMLElement;
+
+    if (!this.showLibraryTypeahead()) return;
+
+    // Typeahead will click on the body to prevent multiple instances being open, it's impossible for user to click body
+    if (target.tagName.toLowerCase() === 'body') return;
+
+    // composedPath() returns the path at event dispatch time,
+    // even if nodes are later removed
+    const path = event.composedPath() as HTMLElement[];
+
+    const clickedLibSelector = path.some(el =>
+      el instanceof HTMLElement && el.classList.contains('lib-selector')
+    );
+
+    if (clickedLibSelector) {
+      return; // We are toggling into the typeahead
+    }
+
+    const typeaheadInStack = path.some(el =>
+      el.tagName?.toLowerCase() === 'app-typeahead'
+    );
+
+    if (!typeaheadInStack) {
+      this.showLibraryTypeahead.set(false);
+      return; // We clicked near the typeahead, so close
+    }
+
+    const clickedInElement = path.includes(this.elementRef.nativeElement);
+    if (!clickedInElement) {
+      this.showLibraryTypeahead.set(false);
+      return;
+    }
+  }
+
+
   constructor() {
-    effect(() => {
-      const form = this.filterForm();
-      form.valueChanges.pipe(
-        map(value => value as StatsFilter),
-      ).subscribe(value => this.filter.set(value));
+
+    this.filterForm.valueChanges.pipe(
+      takeUntilDestroyed(),
+    ).subscribe(value => {
+      const filter = value as StatsFilter;
+      this.filterChange.emit(filter);
+      this.yearChange.emit(filter.timeFilter?.endDate?.getFullYear() ?? new Date().getFullYear());
     });
+
   }
 
   ngOnInit() {
     this.libraryService.getLibrariesForUser(this.userId()).pipe(
       tap(libs => this.allLibraries.set(libs)),
-      tap(libs => this.filterForm().get('libraries')?.setValue(libs.map(l => l.id))),
+      tap(libs => this.filterForm.get('libraries')?.setValue(libs.map(l => l.id))),
       tap(libs => this.libraryTypeaheadSettings = this.setupLibrarySettings(libs, libs))
     ).subscribe();
+
+    this.readerService.getFirstProgressDateForUser(this.userId()).subscribe(date => {
+      const jsDate = new Date(date);
+      this.startYear.set(jsDate.getFullYear());
+    });
   }
 
   setupLibrarySettings(
@@ -105,14 +177,13 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
     return settings;
   }
 
-
   updateSelectedLibraries(libs: Library[]) {
-    this.filterForm().get('libraries')!.setValue(libs.map(l => l.id));
+    this.filterForm.get('libraries')!.setValue(libs.map(l => l.id));
     this.libraryTypeaheadSettings = this.setupLibrarySettings(this.allLibraries(), libs);
   }
 
   updateTimeRange(tr: TimeRange) {
-    this.filterForm().get('timeFilter')!.setValue(tr);
+    this.filterForm.get('timeFilter')!.setValue(tr);
   }
 
   libraryName(libraryId: number): string {

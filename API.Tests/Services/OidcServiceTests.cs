@@ -10,6 +10,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using AutoMapper;
 using Kavita.Common;
@@ -740,7 +741,7 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
         var accountService = new AccountService(userManager, Substitute.For<ILogger<AccountService>>(),
             unitOfWork, mapper, Substitute.For<ILocalizationService>());
         var oidcService = new OidcService(Substitute.For<ILogger<OidcService>>(), userManager, unitOfWork,
-            accountService, Substitute.For<IEmailService>());
+            accountService, Substitute.For<IEmailService>(), Substitute.For<ICoverDbService>());
 
         return (oidcService, user, accountService, userManager);
     }

@@ -14,7 +14,13 @@ public class AppUserReadingHistory
     public int Id { get; set; }
     public DateTime DateUtc { get; set; }
     public DateTime CreatedUtc { get; set; }
+    /// <summary>
+    /// JSON Column
+    /// </summary>
     public DailyReadingDataDto Data { get; set; }
+    /// <summary>
+    /// JSON Column
+    /// </summary>
     public IList<ClientInfoData> ClientInfoUsed { get; set; }
 
 

@@ -52,7 +52,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
 
@@ -60,7 +59,8 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             Substitute.For<IDirectoryService>(), Substitute.For<IScrobblingService>(),
-            Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>());
+            Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>(),
+            Substitute.For<ISeriesService>(), Substitute.For<IEntityDisplayService>());
 
         // Select Partial and set pages read to 5 on first chapter
         var partialSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
@@ -195,14 +195,14 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             Substitute.For<IDirectoryService>(),
             Substitute.For<IScrobblingService>(),
-            Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>());
+            Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>(),
+            Substitute.For<ISeriesService>(), Substitute.For<IEntityDisplayService>());
 
         // Set progress to 99.99% (99/100 pages read)
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
@@ -255,7 +255,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -397,7 +396,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -547,7 +545,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -673,7 +670,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -849,7 +845,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -982,7 +977,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         var ratingService = new RatingService(unitOfWork, Substitute.For<IScrobblingService>(), Substitute.For<ILogger<RatingService>>());
@@ -1164,7 +1158,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;
@@ -1305,7 +1298,6 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             .Build();
 
         context.Users.Add(user);
-        context.Library.Add(library);
         await context.SaveChangesAsync();
 
         return user;

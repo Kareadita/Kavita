@@ -41,6 +41,13 @@ Package()
     echo dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder"
     dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder"
 
+    echo "Removing EF Core design-time folders"
+    rm -rf "$lOutputFolder"/BuildHost-net472
+    rm -rf "$lOutputFolder"/BuildHost-netcore
+
+    echo "Removing cache-long from config"
+    rm -rf "$lOutputFolder"/config/cache-long
+
     echo "Renaming API -> Kavita"
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
 

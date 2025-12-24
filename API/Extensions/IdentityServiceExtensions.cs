@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -7,7 +8,9 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Entities;
+using API.Entities.Progress;
 using API.Helpers;
+using API.Middleware;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authentication;
@@ -74,28 +77,39 @@ public static class IdentityServiceExtensions
         var auth = services.AddAuthentication(DynamicHybrid);
         var enableOidc = oidcSettings.Enabled && services.SetupOpenIdConnectAuthentication(auth, oidcSettings, environment);
 
-        auth.AddPolicyScheme(DynamicHybrid, JwtBearerDefaults.AuthenticationScheme, options =>
+        auth.AddPolicyScheme(DynamicHybrid, LocalIdentity, options =>
         {
             options.ForwardDefaultSelector = ctx =>
             {
-                if (!enableOidc) return LocalIdentity;
-
-                if (ctx.Request.Path.StartsWithSegments(OidcCallback) ||
-                    ctx.Request.Path.StartsWithSegments(OidcLogoutCallback))
+                // Priority 1: Check for API/Auth Key
+                var apiKey = AuthKeyAuthenticationHandler.ExtractAuthKey(ctx.Request);
+                if (!string.IsNullOrEmpty(apiKey))
                 {
-                    return OpenIdConnect;
+                    return AuthKeyAuthenticationOptions.SchemeName;
                 }
 
+                // Priority 2: OIDC paths and cookies
+                if (enableOidc)
+                {
+                    if (ctx.Request.Path.StartsWithSegments(OidcCallback) ||
+                        ctx.Request.Path.StartsWithSegments(OidcLogoutCallback))
+                    {
+                        return OpenIdConnect;
+                    }
+
+                    if (ctx.Request.Cookies.ContainsKey(OidcService.CookieName))
+                    {
+                        return OpenIdConnect;
+                    }
+                }
+
+                // Priority 3: JWT Bearer token
                 if (ctx.Request.Headers.Authorization.Count != 0)
                 {
                     return LocalIdentity;
                 }
 
-                if (ctx.Request.Cookies.ContainsKey(OidcService.CookieName))
-                {
-                    return OpenIdConnect;
-                }
-
+                // Default to JWT
                 return LocalIdentity;
             };
         });
@@ -109,13 +123,30 @@ public static class IdentityServiceExtensions
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 ValidIssuer = "Kavita",
+                NameClaimType = JwtRegisteredClaimNames.Name,
+                RoleClaimType = ClaimTypes.Role,
             };
 
             options.Events = new JwtBearerEvents
             {
                 OnMessageReceived = SetTokenFromQuery,
+                OnTokenValidated = ctx =>
+                {
+                    (ctx.Principal?.Identity as ClaimsIdentity)?.AddClaim(new Claim("AuthType", nameof(AuthenticationType.JWT)));
+                    return Task.CompletedTask;
+                }
             };
         });
+
+        // Add Bearer as an alias to LocalIdentity
+        auth.AddPolicyScheme(JwtBearerDefaults.AuthenticationScheme, JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            options.ForwardDefaultSelector = _ => LocalIdentity;
+        });
+
+        auth.AddScheme<AuthKeyAuthenticationOptions, AuthKeyAuthenticationHandler>(
+            AuthKeyAuthenticationOptions.SchemeName,
+            _ => { });
 
 
         services.AddAuthorizationBuilder()
@@ -158,6 +189,7 @@ public static class IdentityServiceExtensions
             options.SlidingExpiration = true;
 
             options.Cookie.HttpOnly = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             options.Cookie.IsEssential = true;
             options.Cookie.MaxAge = TimeSpan.FromDays(7);
             options.Cookie.SameSite = SameSiteMode.Strict;
@@ -225,7 +257,7 @@ public static class IdentityServiceExtensions
         return true;
     }
 
-    private static IList<string> GetValidScopes(
+    private static IEnumerable<string> GetValidScopes(
         ConfigurationManager<OpenIdConnectConfiguration> configurationManager,
         Configuration.OpenIdConnectSettings settings
     )
@@ -257,7 +289,7 @@ public static class IdentityServiceExtensions
 
             Log.Warning("Scope {Scope} is configured, but not supported by your OIDC provider. Skipping", scope);
             return false;
-        }).ToList();
+        });
     }
 
     private static Task SetTokenFromQuery(MessageReceivedContext context)
