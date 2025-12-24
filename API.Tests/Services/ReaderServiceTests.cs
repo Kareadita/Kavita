@@ -30,9 +30,9 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
     private ReaderService Setup(IUnitOfWork unitOfWork)
     {
-     return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+        return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
          Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
-         new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
          Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
          Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityDisplayService>());
     }
@@ -55,16 +55,21 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task CapPageToChapterTest()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithPages(1)
                     .Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
 
         context.Series.Add(series);
@@ -87,16 +92,21 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task SaveReadingProgress_ShouldCreateNewEntity()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithPages(1)
                     .Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -126,16 +136,21 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task SaveReadingProgress_ShouldUpdateExisting()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithPages(1)
                     .Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -183,9 +198,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkChaptersAsReadTest()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithPages(1)
@@ -195,7 +215,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                     .Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -224,9 +244,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task MarkChapterAsUnreadTest()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
                     .WithPages(1)
@@ -236,7 +261,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                     .Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -272,9 +297,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         // V1 -> V2
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -290,7 +320,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -314,9 +344,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         // V1 -> V2
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1-2")
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
                 .Build())
@@ -325,7 +360,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("1").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -348,9 +383,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         // V1 -> V2
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1.0")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .Build())
@@ -369,7 +409,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
 
 
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -392,9 +432,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -410,7 +455,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -432,9 +477,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolumeWithFloat()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -450,7 +500,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -473,9 +523,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldRollIntoChaptersFromVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
@@ -486,7 +541,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -508,9 +563,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextChapter_WhenVolumesAreOnlyOneChapter_AndNextChapterIs0()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("66").Build())
                 .WithChapter(new ChapterBuilder("67").Build())
@@ -524,7 +584,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -549,9 +609,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromSpecial()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -562,7 +627,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
         context.AppUser.Add(new AppUser()
@@ -580,15 +645,20 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
         context.AppUser.Add(new AppUser()
@@ -606,15 +676,20 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_NoSpecials()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
         context.AppUser.Add(new AppUser()
@@ -633,9 +708,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_NoSpecials_FirstIsVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -644,7 +724,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
         context.AppUser.Add(new AppUser()
@@ -662,9 +742,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_WithSpecials()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -681,7 +766,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
         context.AppUser.Add(new AppUser()
@@ -701,9 +786,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldMoveFromVolumeToSpecial_NoLooseLeafChapters()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -720,7 +810,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                     .Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -743,9 +833,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldMoveFromLooseLeafChapterToSpecial()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -759,7 +854,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                     .Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -782,9 +877,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromSpecial_WithVolumeAndLooseLeafChapters()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -802,7 +902,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                     .Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -822,9 +922,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldMoveFromSpecialToSpecial()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -840,7 +945,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                     .Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -863,9 +968,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolume_WhenAllVolumesHaveAChapterToo()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
@@ -874,7 +984,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -903,9 +1013,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         // V1 -> V2
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -921,7 +1036,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -945,9 +1060,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         // V1 -> V2
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -963,7 +1083,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
         context.Series.Add(series);
         context.AppUser.Add(new AppUser()
         {
@@ -984,9 +1104,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldGetPrevVolume_2()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("40").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("50").WithPages(1).Build())
@@ -1013,7 +1138,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
         context.Series.Add(series);
         context.AppUser.Add(new AppUser()
         {
@@ -1036,9 +1161,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldRollIntoPrevVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1054,7 +1184,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1078,9 +1208,14 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     public async Task GetPrevChapterIdAsync_ShouldMoveFromSpecialToVolume()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var readerService = Setup(unitOfWork);
+                var readerService = Setup(unitOfWork);
+
+       var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
         var series = new SeriesBuilder("Test")
+           .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -1091,7 +1226,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 2).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1118,13 +1253,17 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
 
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         context.Series.Add(series);
 
@@ -1134,8 +1273,6 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         });
 
         await context.SaveChangesAsync();
-
-
 
 
         var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
@@ -1148,12 +1285,16 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
 
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         context.Series.Add(series);
 
@@ -1177,6 +1318,10 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
 
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -1186,8 +1331,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         context.Series.Add(series);
 
@@ -1208,6 +1353,10 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
 
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("5").Build())
@@ -1224,8 +1373,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("3").Build())
                 .WithChapter(new ChapterBuilder("4").Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         context.Series.Add(series);
 
@@ -1254,13 +1403,17 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
 
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         context.Series.Add(series);
 
@@ -1284,6 +1437,10 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
 
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -1299,8 +1456,9 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                     .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 2)
                     .Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1328,6 +1486,10 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
 
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -1337,9 +1499,9 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("21").Build())
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
-
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1363,6 +1525,10 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
 
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("12").Build())
@@ -1371,8 +1537,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("12").Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         context.Series.Add(series);
 
@@ -1396,6 +1562,11 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("95").Build())
@@ -1413,9 +1584,9 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("31").Build())
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
-
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1440,6 +1611,10 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(3).Build())
@@ -1448,8 +1623,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .Build())
             .WithPages(4)
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         context.Series.Add(series);
 
@@ -1480,6 +1655,11 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1", "1-11").WithPages(3).Build())
@@ -1488,8 +1668,9 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .Build())
             .WithPages(4)
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1520,6 +1701,11 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -1534,8 +1720,9 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1586,6 +1773,11 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             // Loose chapters
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1614,8 +1806,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         context.Series.Add(series);
 
@@ -1661,6 +1853,11 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             // Loose chapters
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
@@ -1670,8 +1867,9 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
                 .WithChapter(new ChapterBuilder("Prologue").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithPages(1).Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1692,6 +1890,11 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -1704,8 +1907,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         context.Series.Add(series);
 
@@ -1754,6 +1957,11 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("230").WithPages(1).Build())
@@ -1767,8 +1975,9 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
                 .Build())
+            .WithLibraryId(library.Id)
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1791,7 +2000,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("100").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("101").WithPages(1).Build())
@@ -1807,7 +2022,6 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         context.Series.Add(series);
 
@@ -1847,7 +2061,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("100").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("101").WithPages(1).Build())
@@ -1862,7 +2082,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1906,7 +2126,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1916,7 +2142,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -1964,7 +2190,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -1977,7 +2209,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("22").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2005,7 +2237,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -2016,7 +2254,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2064,7 +2302,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("230").WithPages(1).Build())
@@ -2080,7 +2324,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 //.WithChapter(new ChapterBuilder("14.9").WithPages(1).Build()) (added later)
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2117,12 +2361,18 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var readChapter1 = new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build();
         var readChapter2 = new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build();
         var volume = new VolumeBuilder("3").WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build()).Build();
 
         var series = new SeriesBuilder("Test")
-
+            .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("51").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("52").WithPages(1).Build())
@@ -2144,7 +2394,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("41").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2184,7 +2434,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .Build())
@@ -2201,7 +2457,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("Special").WithIsSpecial(true).WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2280,7 +2536,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -2296,7 +2558,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2363,7 +2625,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -2374,7 +2642,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("Some Special Title").WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithIsSpecial(true).WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2403,7 +2671,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
@@ -2415,7 +2689,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                     .WithChapter(new ChapterBuilder("Some Special Title").WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolumeNumber + 1).WithIsSpecial(true).WithPages(1).Build())
                     .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2445,7 +2719,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
 
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
@@ -2454,7 +2734,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2481,7 +2761,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("45").WithPages(5).Build())
@@ -2507,7 +2793,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("14").WithPages(5).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2551,8 +2837,12 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
 
-        var series = new SeriesBuilder("Test")
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
 
+        var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
@@ -2562,7 +2852,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2591,14 +2881,20 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2665,7 +2961,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
 
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("10").WithPages(1).Build())
@@ -2687,7 +2989,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 
@@ -2723,7 +3025,13 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.Manga).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
         var series = new SeriesBuilder("Test")
+            .WithLibraryId(library.Id)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.LooseLeafVolume)
                 .WithChapter(new ChapterBuilder("10").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("20").WithPages(1).Build())
@@ -2744,7 +3052,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         context.Series.Add(series);
 

@@ -24,7 +24,7 @@
         [showOpenFileButton]="false"
         [showPrintButton]="false"
         [showRotateButton]="false"
-        [showDownloadButton]="false"
+        [showDownloadButton]="canDownload()"
         [showPropertiesButton]="false"
         [(zoom)]="zoomSetting"
         [showSecondaryToolbarButton]="true"
@@ -33,7 +33,6 @@
         [backgroundColor]="backgroundColor"
         [customToolbar]="multiToolbar"
         [language]="user.preferences.locale"
-
         [(scrollMode)]="scrollMode"
         [pageViewMode]="pageLayoutMode"
         [spread]="spreadMode"
