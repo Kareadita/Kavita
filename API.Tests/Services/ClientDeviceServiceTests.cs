@@ -112,6 +112,8 @@ public class ClientDeviceServiceTests : AbstractDbTest
         var firstDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, null);
         var fingerprint = firstDevice.DeviceFingerprint;
 
+        context.ChangeTracker.Clear();
+
         // Act - Same device, still no client device ID (e.g., OPDS reader without device ID support)
         var secondDevice = await service.IdentifyOrRegisterDeviceAsync(user.Id, clientInfo, null);
 
