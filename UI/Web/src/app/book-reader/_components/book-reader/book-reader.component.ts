@@ -232,11 +232,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   authorText = model<string>('');
   /**
-   * The boolean that decides if the clickToPaginate overlay is visible or not.
+   * The boolean that decides if the pagination zone indicators should be visible
    */
-  clickToPaginateVisualOverlay = false;
-  clickToPaginateVisualOverlayTimeout: any = undefined; // For animation
-  clickToPaginateVisualOverlayTimeout2: any = undefined; // For kicking off animation, giving enough time to render html
+  showPaginationIndicators = model<boolean>(false);
+  paginationIndicatorsTimeout: any = undefined;
   updateImageSizeTimeout: any = undefined;
   /**
    * This is the html we get from the server
@@ -815,9 +814,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.clearTimeout(this.clickToPaginateVisualOverlayTimeout);
-    this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-
+    this.clearTimeout(this.paginationIndicatorsTimeout);
     this.readerService.disableWakeLock();
 
     // Remove any debug viewport things
@@ -2283,13 +2280,20 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   showPaginationOverlay(clickToPaginate: boolean) {
     this.readerSettingsService.updateClickToPaginate(clickToPaginate);
     this.cdRef.markForCheck();
-
-    this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-    if (!clickToPaginate) { return; }
-
-    this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
-      this.showClickToPaginateVisualOverlay();
-    }, 200);
+    
+    if (clickToPaginate) {
+      this.clearTimeout(this.paginationIndicatorsTimeout);
+      this.showPaginationIndicators.set(true);
+      this.cdRef.detectChanges();
+      this.paginationIndicatorsTimeout = setTimeout(() => {
+        this.showPaginationIndicators.set(false);
+        this.cdRef.detectChanges();
+      }, 2000);
+    } else {
+      this.showPaginationIndicators.set(false);
+      this.clearTimeout(this.paginationIndicatorsTimeout);
+      this.cdRef.detectChanges();
+    }
   }
 
   clearTimeout(timeoutId: number | undefined) {
@@ -2299,50 +2303,73 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  showClickToPaginateVisualOverlay() {
-    this.clickToPaginateVisualOverlay = true;
-    this.cdRef.markForCheck();
-
-    if (this.clickToPaginateVisualOverlay && this.clickToPaginateVisualOverlayTimeout !== undefined) {
-      clearTimeout(this.clickToPaginateVisualOverlayTimeout);
-      this.clickToPaginateVisualOverlayTimeout = undefined;
+  handleReadingSectionMouseDown(event: MouseEvent) {
+    if (this.clickToPaginate() && !this.hidePagination()) {
+      const readingSection = this.readingSectionElemRef?.nativeElement;
+      if (readingSection) {
+        const rect = readingSection.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const sectionWidth = rect.width;
+        const leftZoneThreshold = sectionWidth * 0.2;
+        const rightZoneThreshold = sectionWidth * 0.8;
+        
+        if (clickX < leftZoneThreshold || clickX > rightZoneThreshold) {
+          event.preventDefault();
+          const selection = window.getSelection();
+          if (selection) {
+            selection.removeAllRanges();
+          }
+        }
+      }
     }
-    this.clickToPaginateVisualOverlayTimeout = setTimeout(() => {
-      this.clickToPaginateVisualOverlay = false;
-      this.cdRef.markForCheck();
-    }, 1000);
-
-  }
-
-  /**
-   * Responsible for returning the class to show an overlay or not
-   * @param side
-   * @returns
-   */
-  clickOverlayClass(side: 'right' | 'left') {
-    // TODO: See if we can use RXjs or a component to manage this aka an observable that emits the highlight to show at any given time
-    if (!this.clickToPaginateVisualOverlay) {
-      return '';
-    }
-
-    if (this.readingDirection() === ReadingDirection.LeftToRight) {
-      return side === 'right' ? 'highlight' : 'highlight-2';
-    }
-    return side === 'right' ? 'highlight-2' : 'highlight';
   }
 
   handleReaderClick(event: MouseEvent) {
+    const isHighlighting = window.getSelection()?.toString() != '';
+    
+    if (this.clickToPaginate() && !this.hidePagination()) {
+      if (isHighlighting) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      
+      const readingSection = this.readingSectionElemRef?.nativeElement;
+      if (readingSection) {
+        const rect = readingSection.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const sectionWidth = rect.width;
+        const leftZoneThreshold = sectionWidth * 0.2;
+        const rightZoneThreshold = sectionWidth * 0.8;
+
+        const isLeftToRight = this.readingDirection() === ReadingDirection.LeftToRight;
+        
+        if (clickX < leftZoneThreshold) {
+          this.movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+          event.preventDefault();
+          event.stopPropagation();
+          const selection = window.getSelection();
+          if (selection) {
+            selection.removeAllRanges();
+          }
+          return;
+        } else if (clickX > rightZoneThreshold) {
+          this.movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
+          event.preventDefault();
+          event.stopPropagation();
+          const selection = window.getSelection();
+          if (selection) {
+            selection.removeAllRanges();
+          }
+          return;
+        }
+      }
+    }
+
     if (!this.clickToPaginate() && !this.immersiveMode()) {
       event.preventDefault();
       event.stopPropagation();
       this.toggleMenu(event);
-      return;
-    }
-
-    const isHighlighting = window.getSelection()?.toString() != '';
-    if (isHighlighting) {
-      event.preventDefault();
-      event.stopPropagation();
       return;
     }
   }
