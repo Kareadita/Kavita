@@ -270,13 +270,14 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(true);
 
         builder.Entity<AppUserReadingProfile>()
-            .Property(rp => rp.LibraryIds)
-            .HasJsonConversion([])
-            .HasColumnType("TEXT");
+            .PrimitiveCollection(p => p.LibraryIds)
+            .HasDefaultValue(new List<int>());
         builder.Entity<AppUserReadingProfile>()
-            .Property(rp => rp.SeriesIds)
-            .HasJsonConversion([])
-            .HasColumnType("TEXT");
+            .PrimitiveCollection(p => p.SeriesIds)
+            .HasDefaultValue(new List<int>());
+        builder.Entity<AppUserReadingProfile>()
+            .PrimitiveCollection(p => p.DeviceIds)
+            .HasDefaultValue(new List<int>());
         #endregion
 
         #region AppUser Streams
