@@ -36,6 +36,15 @@ public interface IReadingProfileService
     /// <param name="dto"></param>
     /// <returns></returns>
     Task<UserReadingProfileDto> CreateReadingProfile(int userId, UserReadingProfileDto dto);
+    /// <summary>
+    /// Given an implicit profile, promotes it to a profile of kind <see cref="ReadingProfileKind.User"/>, then removes
+    /// all links to the series this implicit profile was created for from other reading profiles (if the device id matches
+    /// if given)
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="profileId"></param>
+    /// <param name="activeDeviceId"></param>
+    /// <returns></returns>
     Task<UserReadingProfileDto> PromoteImplicitProfile(int userId, int profileId, int? activeDeviceId);
 
     /// <summary>

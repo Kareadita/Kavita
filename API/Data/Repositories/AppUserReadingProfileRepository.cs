@@ -80,9 +80,12 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
         return context.AppUserReadingProfiles
             .Where(rp => rp.AppUserId == userId)
             .WhereIf(skipImplicit, rp => rp.Kind != ReadingProfileKind.Implicit)
-            .WhereIf(activeDeviceId != null, rp => rp.Kind == ReadingProfileKind.Default || rp.DeviceIds.Count == 0 || rp.DeviceIds.Contains(activeDeviceId!.Value))
-            .OrderByDescending(rp => rp.Kind == ReadingProfileKind.Implicit && rp.SeriesIds.Contains(seriesId))
+            .Where(rp => rp.DeviceIds.Count == 0 || activeDeviceId == null || rp.DeviceIds.Contains(activeDeviceId.Value))
+            .OrderByDescending(rp => rp.Kind == ReadingProfileKind.Implicit && rp.SeriesIds.Contains(seriesId) && (rp.DeviceIds.Count == 0 || (activeDeviceId != null && rp.DeviceIds.Contains(activeDeviceId.Value))))
+            .ThenByDescending(rp => rp.Kind == ReadingProfileKind.Implicit && rp.SeriesIds.Contains(seriesId))
+            .ThenByDescending(rp => rp.SeriesIds.Contains(seriesId) && (rp.DeviceIds.Count == 0 || (activeDeviceId != null && rp.DeviceIds.Contains(activeDeviceId.Value))))
             .ThenByDescending(rp => rp.SeriesIds.Contains(seriesId))
+            .ThenByDescending(rp => rp.LibraryIds.Contains(libraryId) && (rp.DeviceIds.Count == 0 || (activeDeviceId != null && rp.DeviceIds.Contains(activeDeviceId.Value))))
             .ThenByDescending(rp => rp.LibraryIds.Contains(libraryId))
             .ThenByDescending(rp => rp.Kind == ReadingProfileKind.Default)
             .FirstAsync();

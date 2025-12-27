@@ -51,5 +51,13 @@ public class AppUserReadingProfileBuilder
         return this;
     }
 
+    public AppUserReadingProfileBuilder WithDeviceId(int deviceId)
+    {
+        if (!_profile.DeviceIds.Contains(deviceId))
+            _profile.DeviceIds.Add(deviceId);
+
+        return this;
+    }
+
 
 }

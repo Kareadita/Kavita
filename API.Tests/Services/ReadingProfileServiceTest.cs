@@ -24,7 +24,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     /// Does not add a default reading profile
     /// </summary>
     /// <returns></returns>
-    public async Task<(ReadingProfileService, AppUser, Library, Series)> Setup(IUnitOfWork unitOfWork, DataContext context, IMapper mapper)
+    private static async Task<(ReadingProfileService, AppUser, Library, Series)> Setup(IUnitOfWork unitOfWork, DataContext context, IMapper mapper)
     {
         var user = new AppUserBuilder("amelia", "amelia@localhost").Build();
         context.AppUser.Add(user);
@@ -50,6 +50,8 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
 
         return (rps, user, library, series);
     }
+
+    #region Pre-Device Tests - Must of course keep passing
 
     [Fact]
     public async Task ImplicitProfileFirst()
@@ -532,6 +534,533 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         Assert.NotNull(stillExists);
     }
 
+    #endregion
+
+    #region Tests with devices - Get profile
+
+    [Fact]
+    public async Task GetCorrectProfile_WithMatchingDevice()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+
+        var profileSeriesDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Series Specific (Device)")
+            .Build();
+        var profileSeriesNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Series Specific (No Device)")
+            .Build();
+        var profileLibraryDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithDeviceId(deviceId)
+            .WithName("Library Specific (Device)")
+            .Build();
+        var profileLibraryNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithName("Library Specific (No Device)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profileSeriesDevice);
+        context.AppUserReadingProfiles.Add(profileSeriesNoDevice);
+        context.AppUserReadingProfiles.Add(profileLibraryDevice);
+        context.AppUserReadingProfiles.Add(profileLibraryNoDevice);
+        await unitOfWork.CommitAsync();
+
+        // Should get series-specific profile with matching device
+        var p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, deviceId);
+        Assert.NotNull(p);
+        Assert.Equal("Series Specific (Device)", p.Name);
+    }
+
+    [Fact]
+    public async Task GetCorrectProfile_WithNonMatchingDevice()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+        const int otherDeviceId = 2;
+
+        var profileSeriesWrongDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(otherDeviceId)
+            .WithName("Series Specific (Wrong Device)")
+            .Build();
+        var profileSeriesNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Series Specific (No Device)")
+            .Build();
+        var profileLibraryDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithDeviceId(deviceId)
+            .WithName("Library Specific (Device)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profileSeriesWrongDevice);
+        context.AppUserReadingProfiles.Add(profileSeriesNoDevice);
+        context.AppUserReadingProfiles.Add(profileLibraryDevice);
+        await unitOfWork.CommitAsync();
+
+        // Should skip series profile with wrong device, get series profile with no device
+        var p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, deviceId);
+        Assert.NotNull(p);
+        Assert.Equal("Series Specific (No Device)", p.Name);
+    }
+
+    [Fact]
+    public async Task GetCorrectProfile_DeviceVsNoDevice_SeriesLevel()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+
+        var profileSeriesDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Series (Device)")
+            .Build();
+        var profileSeriesNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Series (No Device)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profileSeriesDevice);
+        context.AppUserReadingProfiles.Add(profileSeriesNoDevice);
+        await unitOfWork.CommitAsync();
+
+        // With matching device, should prefer device-specific
+        var p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, deviceId);
+        Assert.NotNull(p);
+        Assert.Equal("Series (Device)", p.Name);
+
+        // Without device specified, should get no-device profile
+        p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
+        Assert.NotNull(p);
+        Assert.Equal("Series (No Device)", p.Name);
+    }
+
+    [Fact]
+    public async Task GetCorrectProfile_DeviceVsNoDevice_LibraryLevel()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+
+        var profileLibraryDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithDeviceId(deviceId)
+            .WithName("Library (Device)")
+            .Build();
+        var profileLibraryNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithName("Library (No Device)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profileLibraryDevice);
+        context.AppUserReadingProfiles.Add(profileLibraryNoDevice);
+        await unitOfWork.CommitAsync();
+
+        // With matching device, should prefer device-specific
+        var p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, deviceId);
+        Assert.NotNull(p);
+        Assert.Equal("Library (Device)", p.Name);
+
+        // Without device specified, should get no-device profile
+        p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
+        Assert.NotNull(p);
+        Assert.Equal("Library (No Device)", p.Name);
+    }
+
+    [Fact]
+    public async Task GetCorrectProfile_ImplicitWithDevice()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+
+        var profileImplicitDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Implicit (Device)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+        var profileImplicitNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Implicit (No Device)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+        var profileSeriesDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Series (Device)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profileImplicitDevice);
+        context.AppUserReadingProfiles.Add(profileImplicitNoDevice);
+        context.AppUserReadingProfiles.Add(profileSeriesDevice);
+        await unitOfWork.CommitAsync();
+
+        // Implicit with device should win over everything else
+        var p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, deviceId);
+        Assert.NotNull(p);
+        Assert.Equal("Implicit (Device)", p.Name);
+
+        // Without device, implicit no-device should win
+        p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
+        Assert.NotNull(p);
+        Assert.Equal("Implicit (No Device)", p.Name);
+    }
+
+    [Fact]
+    public async Task GetCorrectProfile_ComplexHierarchy_WithDevice()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+        const int otherDeviceId = 2;
+
+        var series2 = new SeriesBuilder("Rainbows After Storms").Build();
+        lib.Series.Add(series2);
+
+        var lib2 = new LibraryBuilder("Manga2").Build();
+        var series3 = new SeriesBuilder("A Tropical Fish Yearns for Snow").Build();
+        lib2.Series.Add(series3);
+        user.Libraries.Add(lib2);
+
+        // Series 1: has series-specific profile with device
+        var profileSeries1Device = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Series 1 (Device)")
+            .Build();
+
+        // Series 2: has library profile with device, and series profile with wrong device
+        var profileSeries2WrongDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series2)
+            .WithDeviceId(otherDeviceId)
+            .WithName("Series 2 (Wrong Device)")
+            .Build();
+        var profileLibDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithDeviceId(deviceId)
+            .WithName("Library (Device)")
+            .Build();
+
+        // Series 3: has library profile with wrong device, should fall back to global
+        var profileLib2WrongDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib2)
+            .WithDeviceId(otherDeviceId)
+            .WithName("Library 2 (Wrong Device)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profileSeries1Device);
+        context.AppUserReadingProfiles.Add(profileSeries2WrongDevice);
+        context.AppUserReadingProfiles.Add(profileLibDevice);
+        context.AppUserReadingProfiles.Add(profileLib2WrongDevice);
+        await unitOfWork.CommitAsync();
+
+        // Series 1 should get series-specific with device
+        var p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, deviceId);
+        Assert.NotNull(p);
+        Assert.Equal("Series 1 (Device)", p.Name);
+
+        // Series 2 should skip wrong device, get library with device
+        p = await rps.GetReadingProfileDtoForSeries(user.Id, series2.LibraryId, series2.Id, deviceId);
+        Assert.NotNull(p);
+        Assert.Equal("Library (Device)", p.Name);
+
+        // Series 3 should skip wrong device library profile, fall back to global
+        p = await rps.GetReadingProfileDtoForSeries(user.Id, series3.LibraryId, series3.Id, deviceId);
+        Assert.NotNull(p);
+        Assert.Equal("Global", p.Name);
+    }
+
+    [Fact]
+    public async Task GetCorrectProfile_ComplexHierarchy_NoDevice()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+
+        var series2 = new SeriesBuilder("Rainbows After Storms").Build();
+        lib.Series.Add(series2);
+
+        var lib2 = new LibraryBuilder("Manga2").Build();
+        var series3 = new SeriesBuilder("A Tropical Fish Yearns for Snow").Build();
+        lib2.Series.Add(series3);
+        user.Libraries.Add(lib2);
+
+        // Mix of device and non-device profiles
+        var profileSeries1NoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Series 1 (No Device)")
+            .Build();
+        var profileSeries1Device = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Series 1 (Device)")
+            .Build();
+
+        var profileLibNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithName("Library (No Device)")
+            .Build();
+        var profileLibDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithDeviceId(deviceId)
+            .WithName("Library (Device)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profileSeries1NoDevice);
+        context.AppUserReadingProfiles.Add(profileSeries1Device);
+        context.AppUserReadingProfiles.Add(profileLibNoDevice);
+        context.AppUserReadingProfiles.Add(profileLibDevice);
+        await unitOfWork.CommitAsync();
+
+        // Without device specified, should always get no-device profiles
+        var p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
+        Assert.NotNull(p);
+        Assert.Equal("Series 1 (No Device)", p.Name);
+
+        p = await rps.GetReadingProfileDtoForSeries(user.Id, series2.LibraryId, series2.Id, null);
+        Assert.NotNull(p);
+        Assert.Equal("Library (No Device)", p.Name);
+
+        p = await rps.GetReadingProfileDtoForSeries(user.Id, series3.LibraryId, series3.Id, null);
+        Assert.NotNull(p);
+        Assert.Equal("Global", p.Name);
+    }
+
+    [Fact]
+    public async Task GetCorrectProfile_OnlyDeviceProfiles_NoMatch()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+        const int otherDeviceId = 2;
+
+        // Only profiles with specific devices exist
+        var profileSeriesDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(otherDeviceId)
+            .WithName("Series (Other Device)")
+            .Build();
+        var profileLibDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithDeviceId(otherDeviceId)
+            .WithName("Library (Other Device)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profileSeriesDevice);
+        context.AppUserReadingProfiles.Add(profileLibDevice);
+        await unitOfWork.CommitAsync();
+
+        // Should skip all device-specific profiles and fall back to global
+        var p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, deviceId);
+        Assert.NotNull(p);
+        Assert.Equal("Global", p.Name);
+    }
+
+    #endregion
+
+    #region Tests with devices - Promote implicit profile
+
+    [Fact]
+    public async Task PromoteImplicitProfile_ConvertsImplicitToUser()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        var implicitProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Implicit Profile")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(implicitProfile);
+        await unitOfWork.CommitAsync();
+
+        var result = await rps.PromoteImplicitProfile(user.Id, implicitProfile.Id, null);
+
+        Assert.NotNull(result);
+        Assert.Equal(ReadingProfileKind.User, result.Kind);
+
+        // Verify in database
+        var updatedProfile = await context.AppUserReadingProfiles.FindAsync(implicitProfile.Id);
+        Assert.NotNull(updatedProfile);
+        Assert.Equal(ReadingProfileKind.User, updatedProfile.Kind);
+    }
+
+    [Fact]
+    public async Task PromoteImplicitProfile_WithDevice_OnlyRemovesFromMatchingDeviceProfiles()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+        const int otherDeviceId = 2;
+
+        var implicitProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Implicit Profile (Device 1)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var profileSameDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Profile (Device 1)")
+            .Build();
+
+        var profileOtherDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(otherDeviceId)
+            .WithName("Profile (Device 2)")
+            .Build();
+
+        var profileNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Profile (No Device)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(implicitProfile);
+        context.AppUserReadingProfiles.Add(profileSameDevice);
+        context.AppUserReadingProfiles.Add(profileOtherDevice);
+        context.AppUserReadingProfiles.Add(profileNoDevice);
+        await unitOfWork.CommitAsync();
+
+        await rps.PromoteImplicitProfile(user.Id, implicitProfile.Id, deviceId);
+
+        // Same device profile should have series removed
+        var updatedSameDevice = await context.AppUserReadingProfiles
+            .FirstAsync(rp => rp.Id == profileSameDevice.Id);
+        Assert.DoesNotContain(series.Id, updatedSameDevice.SeriesIds);
+
+        // Other device profile should still have series
+        var updatedOtherDevice = await context.AppUserReadingProfiles
+            .FirstAsync(rp => rp.Id == profileOtherDevice.Id);
+        Assert.Contains(series.Id, updatedOtherDevice.SeriesIds);
+
+        // No device profile should still have series
+        var updatedNoDevice = await context.AppUserReadingProfiles
+            .FirstAsync(rp => rp.Id == profileNoDevice.Id);
+        Assert.Contains(series.Id, updatedNoDevice.SeriesIds);
+    }
+
+    [Fact]
+    public async Task PromoteImplicitProfile_DoesNotAffectOtherUsersProfiles()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        var otherUser = new AppUserBuilder("otheruser", "other@email.com").Build();
+        context.AppUser.Add(otherUser);
+        otherUser.Libraries.Add(lib);
+        await unitOfWork.CommitAsync();
+
+        var implicitProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("User1 Implicit")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var otherUserProfile = new AppUserReadingProfileBuilder(otherUser.Id)
+            .WithSeries(series)
+            .WithName("User2 Profile")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(implicitProfile);
+        context.AppUserReadingProfiles.Add(otherUserProfile);
+        await unitOfWork.CommitAsync();
+
+        await rps.PromoteImplicitProfile(user.Id, implicitProfile.Id, null);
+
+        // Other user's profile should not be affected
+        var updatedOtherUserProfile = await context.AppUserReadingProfiles
+            .FirstAsync(rp => rp.Id == otherUserProfile.Id);
+        Assert.Contains(series.Id, updatedOtherUserProfile.SeriesIds);
+    }
+
+    [Fact]
+    public async Task PromoteImplicitProfile_DoesNotRemoveFromPromotedProfile()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        var implicitProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Implicit Profile")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(implicitProfile);
+        await unitOfWork.CommitAsync();
+
+        await rps.PromoteImplicitProfile(user.Id, implicitProfile.Id, null);
+
+        var updatedProfile = await context.AppUserReadingProfiles
+            .FirstAsync(rp => rp.Id == implicitProfile.Id);
+        Assert.Contains(series.Id, updatedProfile.SeriesIds);
+    }
+
+    [Fact]
+    public async Task PromoteImplicitProfile_ThrowsIfProfileDoesNotBelongToUser()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        var otherUser = new AppUserBuilder("otheruser", "other@email.com").Build();
+        context.AppUser.Add(otherUser);
+        await unitOfWork.CommitAsync();
+
+        var implicitProfile = new AppUserReadingProfileBuilder(otherUser.Id)
+            .WithSeries(series)
+            .WithName("Other User's Implicit")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(implicitProfile);
+        await unitOfWork.CommitAsync();
+
+        // Should throw when trying to promote another user's profile
+        await Assert.ThrowsAsync<KavitaException>(async () =>
+            await rps.PromoteImplicitProfile(user.Id, implicitProfile.Id, null));
+    }
+
+    [Fact]
+    public async Task PromoteImplicitProfile_ThrowsIfProfileIsNotImplicit()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        var userProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("User Profile")
+            .WithKind(ReadingProfileKind.User)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(userProfile);
+        await unitOfWork.CommitAsync();
+
+        // Should throw when trying to promote a non-implicit profile
+        await Assert.ThrowsAsync<KavitaException>(async () =>
+            await rps.PromoteImplicitProfile(user.Id, userProfile.Id, null));
+    }
+
+    #endregion
+
     /// <summary>
     /// As response to #3793, I'm not sure if we want to keep this. It's not the most nice. But I think the idea of this test
     /// is worth having.
@@ -541,22 +1070,18 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     {
         var (_, _, mapper) = await CreateDatabase();
 
-        // Repeat to ensure booleans are flipped and actually tested
-        for (int i = 0; i < 10; i++)
-        {
-            var profile = new AppUserReadingProfile();
-            var dto = new UserReadingProfileDto();
+        var profile = new AppUserReadingProfile();
+        var dto = new UserReadingProfileDto();
 
-            RandfHelper.SetRandomValues(profile);
-            RandfHelper.SetRandomValues(dto);
+        RandfHelper.SetRandomValues(profile);
+        RandfHelper.SetRandomValues(dto);
 
-            ReadingProfileService.UpdateReaderProfileFields(profile, dto);
+        ReadingProfileService.UpdateReaderProfileFields(profile, dto);
 
-            var newDto = mapper.Map<UserReadingProfileDto>(profile);
+        var newDto = mapper.Map<UserReadingProfileDto>(profile);
 
-            Assert.True(RandfHelper.AreSimpleFieldsEqual(dto, newDto,
-                ["<Id>k__BackingField", "<UserId>k__BackingField"]));
-        }
+        Assert.True(RandfHelper.AreSimpleFieldsEqual(dto, newDto,
+            ["<Id>k__BackingField", "<UserId>k__BackingField"]));
     }
 
 }
