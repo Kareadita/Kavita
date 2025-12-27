@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Services;
+using API.Services.Reading;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -13,7 +14,7 @@ namespace API.Controllers;
 
 [Route("api/reading-profile")]
 public class ReadingProfileController(ILogger<ReadingProfileController> logger, IUnitOfWork unitOfWork,
-    IReadingProfileService readingProfileService): BaseApiController
+    IReadingProfileService readingProfileService, ClientInfoAccessor clientInfoAccessor): BaseApiController
 {
 
     /// <summary>
@@ -30,13 +31,14 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// Returns the ReadingProfile that should be applied to the given series, walks up the tree.
     /// Series -> Library -> Default
     /// </summary>
+    /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
     /// <param name="skipImplicit"></param>
     /// <returns></returns>
-    [HttpGet("{seriesId:int}")]
-    public async Task<ActionResult<UserReadingProfileDto>> GetProfileForSeries(int seriesId, [FromQuery] bool skipImplicit)
+    [HttpGet("{libraryId:int}/{seriesId:int}")]
+    public async Task<ActionResult<UserReadingProfileDto>> GetProfileForSeries(int libraryId, int seriesId, [FromQuery] bool skipImplicit)
     {
-        return Ok(await readingProfileService.GetReadingProfileDtoForSeries(UserId, seriesId, skipImplicit));
+        return Ok(await readingProfileService.GetReadingProfileDtoForSeries(UserId, libraryId, seriesId, clientInfoAccessor.CurrentDeviceId, skipImplicit));
     }
 
     /// <summary>
@@ -47,7 +49,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpGet("library")]
     public async Task<ActionResult<UserReadingProfileDto?>> GetProfileForLibrary(int libraryId)
     {
-        return Ok(await readingProfileService.GetReadingProfileDtoForLibrary(UserId, libraryId));
+        return Ok(await readingProfileService.GetReadingProfileDtoForLibrary(UserId, libraryId, clientInfoAccessor.CurrentDeviceId));
     }
 
     /// <summary>
@@ -69,7 +71,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("promote")]
     public async Task<ActionResult<UserReadingProfileDto>> PromoteImplicitReadingProfile([FromQuery] int profileId)
     {
-        return Ok(await readingProfileService.PromoteImplicitProfile(UserId, profileId));
+        return Ok(await readingProfileService.PromoteImplicitProfile(UserId, profileId, clientInfoAccessor.CurrentDeviceId));
     }
 
     /// <summary>
@@ -77,12 +79,13 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// </summary>
     /// <remarks>Any modification to the reader settings during reading will create an implicit profile. Use "update-parent" to save to the bound series profile.</remarks>
     /// <param name="dto"></param>
+    /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpPost("series")]
-    public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int seriesId)
+    public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int libraryId, [FromQuery] int seriesId)
     {
-        var updatedProfile = await readingProfileService.UpdateImplicitReadingProfile(UserId, seriesId, dto);
+        var updatedProfile = await readingProfileService.UpdateImplicitReadingProfile(UserId, libraryId, seriesId, dto, clientInfoAccessor.CurrentDeviceId);
         return Ok(updatedProfile);
     }
 
@@ -90,12 +93,13 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// Updates the non-implicit reading profile for the given series, and removes implicit profiles
     /// </summary>
     /// <param name="dto"></param>
+    /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpPost("update-parent")]
-    public async Task<ActionResult<UserReadingProfileDto>> UpdateParentProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int seriesId)
+    public async Task<ActionResult<UserReadingProfileDto>> UpdateParentProfileForSeries([FromBody] UserReadingProfileDto dto, [FromQuery] int libraryId, [FromQuery] int seriesId)
     {
-        var newParentProfile = await readingProfileService.UpdateParent(UserId, seriesId, dto);
+        var newParentProfile = await readingProfileService.UpdateParent(UserId, libraryId, seriesId, dto, clientInfoAccessor.CurrentDeviceId);
         return Ok(newParentProfile);
     }
 
@@ -136,7 +140,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("series/{seriesId:int}")]
     public async Task<IActionResult> AddProfileToSeries(int seriesId, [FromQuery] int profileId)
     {
-        await readingProfileService.AddProfileToSeries(UserId, profileId, seriesId);
+        await readingProfileService.AddProfileToSeries(UserId, profileId, seriesId, clientInfoAccessor.CurrentDeviceId);
         return Ok();
     }
 
@@ -148,7 +152,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpDelete("series/{seriesId:int}")]
     public async Task<IActionResult> ClearSeriesProfile(int seriesId)
     {
-        await readingProfileService.ClearSeriesProfile(UserId, seriesId);
+        await readingProfileService.ClearSeriesProfile(UserId, seriesId, clientInfoAccessor.CurrentDeviceId);
         return Ok();
     }
 
@@ -161,7 +165,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     [HttpPost("library/{libraryId:int}")]
     public async Task<IActionResult> AddProfileToLibrary(int libraryId, [FromQuery] int profileId)
     {
-        await readingProfileService.AddProfileToLibrary(UserId, profileId, libraryId);
+        await readingProfileService.AddProfileToLibrary(UserId, profileId, libraryId, clientInfoAccessor.CurrentDeviceId);
         return Ok();
     }
 
@@ -169,12 +173,11 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// Clears the reading profile for the given library for the currently logged-in user
     /// </summary>
     /// <param name="libraryId"></param>
-    /// <param name="profileId"></param>
     /// <returns></returns>
     [HttpDelete("library/{libraryId:int}")]
     public async Task<IActionResult> ClearLibraryProfile(int libraryId)
     {
-        await readingProfileService.ClearLibraryProfile(UserId, libraryId);
+        await readingProfileService.ClearLibraryProfile(UserId, libraryId, clientInfoAccessor.CurrentDeviceId);
         return Ok();
     }
 
@@ -185,9 +188,9 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="seriesIds"></param>
     /// <returns></returns>
     [HttpPost("bulk")]
-    public async Task<IActionResult> BulkAddReadingProfile([FromQuery] int profileId, [FromBody] IList<int> seriesIds)
+    public async Task<IActionResult> BulkAddReadingProfile([FromQuery] int profileId, [FromBody] List<int> seriesIds)
     {
-        await readingProfileService.BulkAddProfileToSeries(UserId, profileId, seriesIds);
+        await readingProfileService.BulkAddProfileToSeries(UserId, profileId, seriesIds, clientInfoAccessor.CurrentDeviceId);
         return Ok();
     }
 

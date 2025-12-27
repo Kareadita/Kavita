@@ -21,7 +21,8 @@ public class AppUserReadingProfileBuilder
             AppUserId = userId,
             Kind = ReadingProfileKind.User,
             SeriesIds = [],
-            LibraryIds = []
+            LibraryIds = [],
+            DeviceIds = [],
         };
     }
 

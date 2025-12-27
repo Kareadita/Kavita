@@ -37,6 +37,12 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
             .Build();
 
         user.Libraries.Add(library);
+
+        context.AppUserReadingProfiles.Add(new AppUserReadingProfileBuilder(user!.Id)
+            .WithName("Global")
+            .WithKind(ReadingProfileKind.Default)
+            .Build());
+
         await unitOfWork.CommitAsync();
 
         var rps = new ReadingProfileService(unitOfWork, Substitute.For<ILocalizationService>(), mapper);
@@ -66,12 +72,12 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         user.ReadingProfiles.Add(profile2);
         await unitOfWork.CommitAsync();
 
-        var seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id);
+        var seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(seriesProfile);
         Assert.Equal("Implicit Profile", seriesProfile.Name);
 
         // Find parent
-        seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id, true);
+        seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null, true);
         Assert.NotNull(seriesProfile);
         Assert.Equal("Non-implicit Profile", seriesProfile.Name);
     }
@@ -82,11 +88,10 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         var (unitOfWork, context, mapper) = await CreateDatabase();
         var (rps, user, _, _) = await Setup(unitOfWork, context, mapper);
 
-        var profile = new AppUserReadingProfileBuilder(user.Id)
-            .WithKind(ReadingProfileKind.Default)
-            .Build();
-        context.AppUserReadingProfiles.Add(profile);
-        await unitOfWork.CommitAsync();
+        var profile = await context.AppUserReadingProfiles
+            .FirstOrDefaultAsync(rp => rp.Kind == ReadingProfileKind.Default);
+
+        Assert.NotNull(profile);
 
         await Assert.ThrowsAsync<KavitaException>(async () =>
         {
@@ -117,9 +122,9 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
             WidthOverride = 53,
         };
 
-        await rps.UpdateImplicitReadingProfile(user.Id, series.Id, dto);
+        await rps.UpdateImplicitReadingProfile(user.Id, series.LibraryId, series.Id, dto, null);
 
-        var profile = await rps.GetReadingProfileForSeries(user.Id, series.Id);
+        var profile = await rps.GetReadingProfileForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(profile);
         Assert.Contains(profile.SeriesIds, s => s == series.Id);
         Assert.Equal(ReadingProfileKind.Implicit, profile.Kind);
@@ -138,9 +143,9 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
             WidthOverride = 53,
         };
 
-        await rps.UpdateImplicitReadingProfile(user.Id, series.Id, dto);
+        await rps.UpdateImplicitReadingProfile(user.Id, series.LibraryId, series.Id, dto, null);
 
-        var profile =  await rps.GetReadingProfileForSeries(user.Id, series.Id);
+        var profile =  await rps.GetReadingProfileForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(profile);
         Assert.Contains(profile.SeriesIds, s => s == series.Id);
         Assert.Equal(ReadingProfileKind.Implicit, profile.Kind);
@@ -150,8 +155,8 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
             ReaderMode = ReaderMode.LeftRight,
         };
 
-        await rps.UpdateImplicitReadingProfile(user.Id, series.Id, dto);
-        profile =  await rps.GetReadingProfileForSeries(user.Id, series.Id);
+        await rps.UpdateImplicitReadingProfile(user.Id, series.LibraryId, series.Id, dto, null);
+        profile =  await rps.GetReadingProfileForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(profile);
         Assert.Contains(profile.SeriesIds, s => s == series.Id);
         Assert.Equal(ReadingProfileKind.Implicit, profile.Kind);
@@ -177,13 +182,8 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
             .WithLibrary(lib)
             .WithName("Library Specific")
             .Build();
-        var profile3 = new AppUserReadingProfileBuilder(user.Id)
-            .WithKind(ReadingProfileKind.Default)
-            .WithName("Global")
-            .Build();
         context.AppUserReadingProfiles.Add(profile);
         context.AppUserReadingProfiles.Add(profile2);
-        context.AppUserReadingProfiles.Add(profile3);
 
         var series2 = new SeriesBuilder("Rainbows After Storms").Build();
         lib.Series.Add(series2);
@@ -195,15 +195,15 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         user.Libraries.Add(lib2);
         await unitOfWork.CommitAsync();
 
-        var p = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id);
+        var p = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(p);
         Assert.Equal("Series Specific", p.Name);
 
-        p = await rps.GetReadingProfileDtoForSeries(user.Id, series2.Id);
+        p = await rps.GetReadingProfileDtoForSeries(user.Id, series2.LibraryId, series2.Id, null);
         Assert.NotNull(p);
         Assert.Equal("Library Specific", p.Name);
 
-        p = await rps.GetReadingProfileDtoForSeries(user.Id, series3.Id);
+        p = await rps.GetReadingProfileDtoForSeries(user.Id, series3.LibraryId, series3.Id, null);
         Assert.NotNull(p);
         Assert.Equal("Global", p.Name);
     }
@@ -227,12 +227,12 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(profile2);
         await unitOfWork.CommitAsync();
 
-        var profile = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id);
+        var profile = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(profile);
         Assert.Equal("Profile 1", profile.Name);
 
-        await rps.AddProfileToSeries(user.Id, profile2.Id, series.Id);
-        profile = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id);
+        await rps.AddProfileToSeries(user.Id, profile2.Id, series.Id, null);
+        profile = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(profile);
         Assert.Equal("Profile 2", profile.Name);
     }
@@ -251,7 +251,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(profile1);
         await unitOfWork.CommitAsync();
 
-        await rps.ClearSeriesProfile(user.Id, series.Id);
+        await rps.ClearSeriesProfile(user.Id, series.Id, null);
         var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id);
         Assert.DoesNotContain(profiles, rp => rp.SeriesIds.Contains(series.Id));
 
@@ -283,22 +283,22 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
 
         await unitOfWork.CommitAsync();
 
-        var someSeriesIds = lib.Series.Take(lib.Series.Count / 2).Select(s => s.Id).ToList();
-        await rps.BulkAddProfileToSeries(user.Id, profile.Id, someSeriesIds);
+        var someSeriesIds = lib.Series.Take(lib.Series.Count / 2).Select(s => new {s.Id, s.LibraryId}).ToList();
+        await rps.BulkAddProfileToSeries(user.Id, profile.Id, someSeriesIds.Select(x => x.Id).ToList(), null);
 
-        foreach (var id in someSeriesIds)
+        foreach (var x in someSeriesIds)
         {
-            var foundProfile = await rps.GetReadingProfileDtoForSeries(user.Id, id);
+            var foundProfile = await rps.GetReadingProfileDtoForSeries(user.Id, x.LibraryId, x.Id, null);
             Assert.NotNull(foundProfile);
             Assert.Equal(profile.Id, foundProfile.Id);
         }
 
-        var allIds = lib.Series.Select(s => s.Id).ToList();
-        await rps.BulkAddProfileToSeries(user.Id, profile2.Id, allIds);
+        var allIds = lib.Series.Select(s => new {s.Id, s.LibraryId}).ToList();
+        await rps.BulkAddProfileToSeries(user.Id, profile2.Id, allIds.Select(x => x.Id).ToList(), null);
 
-        foreach (var id in allIds)
+        foreach (var x in allIds)
         {
-            var foundProfile = await rps.GetReadingProfileDtoForSeries(user.Id, id);
+            var foundProfile = await rps.GetReadingProfileDtoForSeries(user.Id, x.LibraryId, x.Id, null);
             Assert.NotNull(foundProfile);
             Assert.Equal(profile2.Id, foundProfile.Id);
         }
@@ -327,21 +327,21 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         }
         await unitOfWork.CommitAsync();
 
-        var ids = lib.Series.Select(s => s.Id).ToList();
+        var ids = lib.Series.Select(s => new {s.Id, s.LibraryId}).ToList();
 
-        foreach (var id in ids)
+        foreach (var x in ids)
         {
-            await rps.UpdateImplicitReadingProfile(user.Id, id, implicitProfile);
-            var seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, id);
+            await rps.UpdateImplicitReadingProfile(user.Id, x.LibraryId, x.Id, implicitProfile, null);
+            var seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, x.LibraryId, x.Id, null);
             Assert.NotNull(seriesProfile);
             Assert.Equal(ReadingProfileKind.Implicit, seriesProfile.Kind);
         }
 
-        await rps.BulkAddProfileToSeries(user.Id, profile.Id, ids);
+        await rps.BulkAddProfileToSeries(user.Id, profile.Id, ids.Select(x => x.Id).ToList(), null);
 
-        foreach (var id in ids)
+        foreach (var x in ids)
         {
-            var seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, id);
+            var seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, x.LibraryId, x.Id, null);
             Assert.NotNull(seriesProfile);
             Assert.Equal(ReadingProfileKind.User, seriesProfile.Kind);
         }
@@ -368,15 +368,15 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(profile);
         await unitOfWork.CommitAsync();
 
-        await rps.UpdateImplicitReadingProfile(user.Id, series.Id, implicitProfile);
+        await rps.UpdateImplicitReadingProfile(user.Id, series.LibraryId, series.Id, implicitProfile, null);
 
-        var seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id);
+        var seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(seriesProfile);
         Assert.Equal(ReadingProfileKind.Implicit, seriesProfile.Kind);
 
-        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id, null);
 
-        seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.Id);
+        seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(seriesProfile);
         Assert.Equal(ReadingProfileKind.User, seriesProfile.Kind);
 
@@ -423,7 +423,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         });
 
         var allProfiles = context.AppUserReadingProfiles.ToList();
-        Assert.Equal(2, allProfiles.Count);
+        Assert.Equal(3, allProfiles.Count);
     }
 
     [Fact]
@@ -450,9 +450,12 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         var allBefore = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id);
         Assert.Equal(2, allBefore.Count(rp => rp.SeriesIds.Contains(series.Id)));
 
-        await rps.ClearSeriesProfile(user.Id, series.Id);
+        await rps.ClearSeriesProfile(user.Id, series.Id, null);
 
-        var remainingProfiles = await context.AppUserReadingProfiles.ToListAsync();
+        var remainingProfiles = await context.AppUserReadingProfiles
+            .Where(p => p.Kind != ReadingProfileKind.Default)
+            .ToListAsync();
+
         Assert.Single(remainingProfiles);
         Assert.Equal("Explicit Profile", remainingProfiles[0].Name);
         Assert.Empty(remainingProfiles[0].SeriesIds);
@@ -473,7 +476,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(profile);
         await unitOfWork.CommitAsync();
 
-        await rps.AddProfileToLibrary(user.Id, profile.Id, lib.Id);
+        await rps.AddProfileToLibrary(user.Id, profile.Id, lib.Id, null);
         await unitOfWork.CommitAsync();
 
         var linkedProfile = (await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id))
@@ -487,7 +490,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(newProfile);
         await unitOfWork.CommitAsync();
 
-        await rps.AddProfileToLibrary(user.Id, newProfile.Id, lib.Id);
+        await rps.AddProfileToLibrary(user.Id, newProfile.Id, lib.Id, null);
         await unitOfWork.CommitAsync();
 
         linkedProfile = (await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id))
@@ -509,7 +512,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(implicitProfile);
         await unitOfWork.CommitAsync();
 
-        await rps.ClearLibraryProfile(user.Id, lib.Id);
+        await rps.ClearLibraryProfile(user.Id, lib.Id, null);
         var profile = (await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id))
             .FirstOrDefault(rp => rp.LibraryIds.Contains(lib.Id));
         Assert.Null(profile);
@@ -520,7 +523,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(explicitProfile);
         await unitOfWork.CommitAsync();
 
-        await rps.ClearLibraryProfile(user.Id, lib.Id);
+        await rps.ClearLibraryProfile(user.Id, lib.Id, null);
         profile = (await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id))
             .FirstOrDefault(rp => rp.LibraryIds.Contains(lib.Id));
         Assert.Null(profile);
