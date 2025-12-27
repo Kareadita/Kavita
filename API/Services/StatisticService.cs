@@ -396,7 +396,9 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 Volumes = context.Volume.Count(v => Math.Abs(v.MinNumber - Parser.LooseLeafVolumeNumber) > 0.001f),
                 TotalBytes = context.MangaFile.Sum(m => m.Bytes)
             })
-            .FirstAsync();
+            .FirstOrDefaultAsync();
+
+        if (counts == null) return new ServerStatisticsDto();
 
         var totalReadingHours = await context.AppUserReadingSessionActivityData
             .Where(a => a.EndTimeUtc != null)
