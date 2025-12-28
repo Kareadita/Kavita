@@ -2860,10 +2860,6 @@
         "no-data": "Nothing to see here"
     },
 
-    "fiction-graph": {
-
-    },
-
     "activity-card": {
         "pages-count": "Total Pages",
         "words-count": "Total Words",
@@ -2980,7 +2976,8 @@
 
     "profile-overview": {
         "currently-reading": "Currently Reading",
-        "want-to-read": "{{side-nav.want-to-read}}"
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "just-finished-reading": "Just Finished Reading"
     },
 
     "activity-graph": {

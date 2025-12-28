@@ -10,12 +10,36 @@ import {map, Observable} from "rxjs";
 import {AccountService} from "../../../_services/account.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SeriesService} from "../../../_services/series.service";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
+import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SortField} from "../../../_models/metadata/series-filter";
 
 type OverviewStream = {
   title: string;
   api: Observable<any[]>;
   nextPageLoader: NextPageLoader;
 }
+
+const JustFinishedReadingFilter = {
+  limitTo: 20,
+  offset: 0,
+  combination: FilterCombination.And,
+  statements: [
+    {
+      field: FilterField.ReadProgress,
+      comparison: FilterComparison.GreaterThanEqual,
+      value: '100'
+    } as FilterStatement
+  ],
+  name: translate('profile-overview.just-finished-reading'),
+  sortOptions: {
+    sortField: SortField.ReadProgress,
+    isAscending: true
+  }
+} as FilterV2;
 
 @Component({
   selector: 'app-profile-overview',
@@ -56,6 +80,14 @@ export class ProfileOverviewComponent {
           .pipe(map(pr => pr.result)),
         nextPageLoader: (pageNum, pageSize) => this.seriesService
           .getWantToRead(pageNum, pageSize, undefined, memberId),
+      },
+      {
+        title: translate('profile-overview.just-finished-reading'),
+        api: this.seriesService
+          .getAllSeriesV2(0, 20, JustFinishedReadingFilter, memberId)
+          .pipe(map(pr => pr.result)),
+        nextPageLoader: (pageNum, pageSize) => this.seriesService
+          .getAllSeriesV2(pageNum, pageSize, JustFinishedReadingFilter, memberId),
       }
     ];
   });
