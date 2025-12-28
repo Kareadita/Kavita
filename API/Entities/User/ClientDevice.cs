@@ -30,6 +30,7 @@ public class ClientDevice
     /// <summary>
     /// Most recent stable ClientInfoData (excluding IP/timestamp changes)
     /// </summary>
+    /// <remarks>JSON Column</remarks>
     public ClientInfoData CurrentClientInfo { get; set; } = new();
 
     public DateTime FirstSeenUtc { get; set; }
