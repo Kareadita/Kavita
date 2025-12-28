@@ -2865,8 +2865,11 @@
     },
 
     "activity-card": {
-        "pages-count": "{{series-detail.pages-count}}",
-        "words-count": "{{series-detail.words-count}}",
+        "pages-count": "Total Pages",
+        "words-count": "Total Words",
+        "active-pages-label": "{{series-detail.pages-count}}",
+        "active-words-label": "{{series-detail.words-count}}",
+        "total-chapters-label": "Chapters",
         "started-label": "Started",
         "view-label": "View"
     },

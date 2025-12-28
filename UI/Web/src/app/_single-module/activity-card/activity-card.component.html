@@ -19,10 +19,12 @@
             <span class="badge bg-secondary product-badge">{{ activeData.clientInfo?.platform | clientDevicePlatform }}</span>
             <span class="badge bg-primary player-badge">{{activeData.clientInfo?.clientType | clientDeviceClientType}}</span>
             <span class="quality-badge">
-            {{t('pages-count', {num: activeData.pagesRead})}}
-            @if (activeData.wordsRead > 0) {
-              <span> ({{t('words-count', {num: activeData.wordsRead})}})</span>
-            }
+              @let wordCount = totalWords();
+
+              {{t('pages-count', {num: totalPages()})}}
+              @if (wordCount > 0) {
+                <span> ({{t('words-count', {num: wordCount})}})</span>
+              }
           </span>
           </div>
         </div>
@@ -31,6 +33,24 @@
           <div class="metadata-row">
             <span class="label text-uppercase">{{t('started-label')}}</span>
             <span class="value">{{activeData.startTimeUtc | utcToLocalDate | timeAgo}}</span>
+          </div>
+
+          <div class="metadata-row">
+            <span class="label text-uppercase">{{t('active-pages-label')}}</span>
+            <span class="value">{{activeData.pagesRead | defaultValue}}</span>
+          </div>
+
+
+          @if (activeData.wordsRead > 0) {
+            <div class="metadata-row">
+              <span class="label text-uppercase">{{t('active-words-label')}}</span>
+              <span class="value">{{activeData.wordsRead | defaultValue}}</span>
+            </div>
+          }
+
+          <div class="metadata-row">
+            <span class="label text-uppercase">{{t('total-chapters-label')}}</span>
+            <span class="value">{{distinctChapters() | defaultValue}}</span>
           </div>
         </div>
 
