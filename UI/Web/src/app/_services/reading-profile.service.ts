@@ -11,8 +11,8 @@ export class ReadingProfileService {
   private readonly httpClient = inject(HttpClient);
   baseUrl = environment.apiUrl;
 
-  getForSeries(seriesId: number, skipImplicit: boolean = false) {
-    return this.httpClient.get<ReadingProfile>(this.baseUrl + `reading-profile/${seriesId}?skipImplicit=${skipImplicit}`);
+  getForSeries(libraryId: number, seriesId: number, skipImplicit: boolean = false) {
+    return this.httpClient.get<ReadingProfile>(this.baseUrl + `reading-profile/${libraryId}/${seriesId}?skipImplicit=${skipImplicit}`);
   }
 
   getForLibrary(libraryId: number) {
@@ -23,8 +23,8 @@ export class ReadingProfileService {
     return this.httpClient.post<ReadingProfile>(this.baseUrl + 'reading-profile', profile);
   }
 
-  updateParentProfile(seriesId: number, profile: ReadingProfile) {
-    return this.httpClient.post<ReadingProfile>(this.baseUrl + `reading-profile/update-parent?seriesId=${seriesId}`, profile);
+  updateParentProfile(libraryId: number, seriesId: number, profile: ReadingProfile) {
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + `reading-profile/update-parent?seriesId=${seriesId}&libraryId=${libraryId}`, profile);
   }
 
   createProfile(profile: ReadingProfile) {
@@ -35,8 +35,8 @@ export class ReadingProfileService {
     return this.httpClient.post<ReadingProfile>(this.baseUrl + "reading-profile/promote?profileId=" + profileId, {});
   }
 
-  updateImplicit(profile: ReadingProfile, seriesId: number) {
-    return this.httpClient.post<ReadingProfile>(this.baseUrl + "reading-profile/series?seriesId="+seriesId, profile);
+  updateImplicit(libraryId: number, seriesId: number, profile: ReadingProfile) {
+    return this.httpClient.post<ReadingProfile>(this.baseUrl + `reading-profile/series?seriesId=${seriesId}&libraryId=${libraryId}`, profile);
   }
 
   getAllProfiles() {

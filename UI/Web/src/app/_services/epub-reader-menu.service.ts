@@ -141,13 +141,14 @@ export class EpubReaderMenuService {
   }
 
 
-  openSettingsDrawer(chapterId: number, seriesId: number, readingProfile: ReadingProfile, readerSettingsService: EpubReaderSettingsService) {
+  openSettingsDrawer(chapterId: number, seriesId: number, libraryId: number, readingProfile: ReadingProfile, readerSettingsService: EpubReaderSettingsService) {
     if (this.offcanvasService.hasOpenOffcanvas()) {
       this.offcanvasService.dismiss();
     }
     const ref = this.offcanvasService.open(EpubSettingDrawerComponent, {position: 'start', panelClass: ''});
     ref.componentInstance.chapterId.set(chapterId);
     ref.componentInstance.seriesId.set(seriesId);
+    ref.componentInstance.libraryId.set(libraryId);
     ref.componentInstance.readingProfile.set(readingProfile);
     ref.componentInstance.readerSettingsService.set(readerSettingsService);
 

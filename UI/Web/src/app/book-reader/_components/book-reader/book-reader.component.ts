@@ -928,7 +928,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.titleService.setTitle('Kavita - ' + this.bookTitle());
       this.cdRef.markForCheck();
 
-      await this.readerSettingsService.initialize(this.seriesId, this.readingProfile);
+      await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.readingProfile);
 
       // Ensure any changes in the reader settings are applied to the reader
       this.readerSettingsService.settingUpdates$.pipe(
@@ -2083,7 +2083,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (drawerIsOpen) {
       this.epubMenuService.closeAll();
     } else {
-      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.readingProfile, this.readerSettingsService);
+      this.epubMenuService.openSettingsDrawer(this.chapterId, this.seriesId, this.libraryId, this.readingProfile, this.readerSettingsService);
     }
 
     if (this.immersiveMode()) { // NOTE: Shouldn't this check if drawer is open?

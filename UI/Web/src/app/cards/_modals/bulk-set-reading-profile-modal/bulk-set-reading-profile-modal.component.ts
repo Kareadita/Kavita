@@ -56,8 +56,8 @@ export class BulkSetReadingProfileModalComponent implements OnInit, AfterViewIni
         this.currentProfile = profile;
         this.cdRef.markForCheck();
       });
-    } else if (this.seriesIds.length === 1) {
-      this.readingProfileService.getForSeries(this.seriesIds[0], true).subscribe(profile => {
+    } else if (this.seriesIds.length === 1 && this.libraryId !== undefined) {
+      this.readingProfileService.getForSeries(this.libraryId, this.seriesIds[0], true).subscribe(profile => {
         this.currentProfile = profile;
         this.cdRef.markForCheck();
       });
