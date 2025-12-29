@@ -12,18 +12,18 @@
 
     <p>{{t('description')}}</p>
 
-    @if (!hasEmailSetup) {
+    @if (!hasEmailSetup()) {
       <div class="alert alert-warning" role="alert">
         <strong>{{t('warning')}}</strong> {{t('email-setup-alert')}}
       </div>
     }
 
-    <app-responsive-table [rows]="devices" [trackByFn]="trackBy">
+    <app-responsive-table [rows]="devices()" [trackByFn]="trackBy">
       <ng-template #tableTemplate>
         <ngx-datatable
           class="bootstrap"
-          [rows]="devices"
-          [columnMode]="ColumnMode.flex"
+          [rows]="devices()"
+          [columnMode]="'flex'"
           rowHeight="auto"
           [footerHeight]="50"
           [limit]="15"
