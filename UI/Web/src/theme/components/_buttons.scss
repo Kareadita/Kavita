@@ -201,6 +201,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 
   &:disabled {
     --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: transparent;
   }
 
   &:hover, &:focus, &:focus-visible {
