@@ -356,8 +356,32 @@ public class StatsService : IStatsService
             userDto.SeriesBookmarksCreatedCount = user.Bookmarks.Count;
             userDto.SmartFilterCreatedCount = user.SmartFilters.Count;
             userDto.IsSharingReviews = user.UserPreferences.SocialPreferences.ShareReviews;
+            userDto.IsSharingProfile = user.UserPreferences.SocialPreferences.ShareProfile;
+            userDto.IsSharingAnnotations = user.UserPreferences.SocialPreferences.ShareAnnotations;
             userDto.WantToReadSeriesCount = user.WantToRead.Count;
             userDto.IdentityProvider = user.IdentityProvider;
+
+            // Social Profile
+            var activityData = await _context.AppUserReadingSession
+                .Where(s => s.AppUserId == user.Id)
+                .SelectMany(s => s.ActivityData)
+                .Select(ad => new
+                {
+                    ad.PagesRead,
+                    ad.WordsRead,
+                    ad.StartTime,
+                    ad.EndTime
+                })
+                .ToListAsync();
+
+            userDto.TotalPagesRead = activityData.Sum(ad => ad.PagesRead);
+            userDto.TotalWordsRead = activityData.Sum(ad => ad.WordsRead);
+            userDto.TotalSecondsRead = activityData
+                .Where(ad => ad.EndTime.HasValue)
+                .Sum(ad => (long)(ad.EndTime!.Value - ad.StartTime).TotalSeconds);
+
+            // Since social profiles require some sort of way to identify the user, let's use userId + installId. These can be disassociated, but should be stable enough
+            userDto.UserId = $"{serverSettings.InstallId}_{user.Id}";
 
             if (allLibraries.Count > 0 && userLibraryAccess.TryGetValue(user.Id, out var accessibleLibraries))
             {
