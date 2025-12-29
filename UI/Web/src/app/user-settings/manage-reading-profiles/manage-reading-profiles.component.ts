@@ -64,6 +64,13 @@ import {ColorscapeService} from "../../_services/colorscape.service";
 import {Color} from "@iplab/ngx-color-picker";
 import {FontService} from "../../_services/font.service";
 import {EpubFont} from "../../_models/preferences/epub-font";
+import {DeviceService} from "../../_services/device.service";
+import {ModalService} from "../../_services/modal.service";
+import {
+  GenericListModalComponent
+} from "../../statistics/_components/_modals/generic-list-modal/generic-list-modal.component";
+import {ListSelectModalComponent} from "../../shared/_components/list-select-modal/list-select-modal.component";
+import {ClientDevice} from "../../_models/client-device";
 
 enum TabId {
   ImageReader = "image-reader",
@@ -119,12 +126,15 @@ export class ManageReadingProfilesComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   private readonly transLoco = inject(TranslocoService);
   private readonly fontService = inject(FontService);
+  private readonly deviceService = inject(DeviceService);
+  private readonly modalService = inject(ModalService);
 
   virtualScrollerBreakPoint = 20;
 
   savingProfile = signal(false);
   fonts = signal<EpubFont[]>([]);
 
+  devices: ClientDevice[] = [];
   readingProfiles: ReadingProfile[] = [];
   user!: User;
   activeTabId = TabId.ImageReader;
@@ -150,9 +160,11 @@ export class ManageReadingProfilesComponent implements OnInit {
   ngOnInit(): void {
     forkJoin([
       this.fontService.getFonts(),
-      this.readingProfileService.getAllProfiles()
-    ]).subscribe(([fonts, profiles]) => {
+      this.readingProfileService.getAllProfiles(),
+      this.deviceService.getMyClientDevices(),
+    ]).subscribe(([fonts, profiles, devices]) => {
       this.fonts.set(fonts);
+      this.devices = devices;
 
       this.readingProfiles = profiles;
       this.loading = false;
@@ -188,7 +200,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     return (val <= 0) ? '' : val + '%'
   }
 
-  async setupForm() {
+  setupForm() {
     if (this.selectedProfile == null) {
       return;
     }
@@ -335,6 +347,28 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.selectedProfile.name = "New Profile #" + (this.readingProfiles.length + 1);
     this.setupForm();
     this.cdRef.markForCheck();
+  }
+
+  protected setDevices() {
+    if (this.selectedProfile == null) return;
+
+    const [modal, component] = this.modalService.open(ListSelectModalComponent);
+    component.title.set(`Select devices for ${this.selectedProfile.name}`);
+    component.multiSelect.set(true);
+    component.requireConfirmation.set(true);
+    component.preSelectedItems.set(this.selectedProfile.deviceIds ?? []);
+    component.items.set(this.devices.map(d => ({
+      label: d.friendlyName,
+      value: d.id
+    })));
+
+    modal.closed.pipe(
+      filter(devices => !!devices),
+      switchMap((devices: number[]) => {
+        return this.readingProfileService.setDevices(this.selectedProfile!.id, devices)
+      })
+    ).subscribe();
+
   }
 
   protected readonly readingDirections = readingDirections;

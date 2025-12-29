@@ -8,7 +8,7 @@
   <div class="modal-body">
     @let itemsValue = items();
     @let filteredItemsValue = filteredItems();
-    @let selectedItemValue = selectedItem();
+    @let selectedItemsValue = selectedItems();
     @let descriptionValue = description();
 
     @if (descriptionValue) {
@@ -35,7 +35,7 @@
 
             <div class="fw-bold">{{item.label | sentenceCase}}</div>
 
-            @if (selectedItemValue && selectedItemValue.label === item.label) {
+            @if (selectedItemsValue && selectedItemsValue.includes(item)) {
               <span class="pill p-1 ms-1">{{t('common.selected')}}</span>
             }
           </div>

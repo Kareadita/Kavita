@@ -67,4 +67,8 @@ export class ReadingProfileService {
     return this.httpClient.post(this.baseUrl + `reading-profile/bulk?profileId=${id}`, seriesIds);
   }
 
+  setDevices(id: number, deviceIds: number[]) {
+    return this.httpClient.post(this.baseUrl + `reading-profile/set-devices?profileId=${id}`, deviceIds);
+  }
+
 }

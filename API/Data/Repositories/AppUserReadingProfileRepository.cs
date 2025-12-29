@@ -36,6 +36,13 @@ public interface IAppUserReadingProfileRepository
     /// <returns></returns>
     Task<AppUserReadingProfile?> GetProfileForLibrary(int userId, int libraryId, int? activeDeviceId = null);
     /// <summary>
+    /// Get all profiles assigned to a library
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
+    Task<List<AppUserReadingProfile>> GetProfilesForLibrary(int userId, int libraryId);
+    /// <summary>
     /// Return the given profile if it belongs the user
     /// </summary>
     /// <param name="userId"></param>
@@ -98,6 +105,13 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
             .WhereIf(activeDeviceId != null,
                 rp => rp.DeviceIds.Count == 0 || rp.DeviceIds.Contains(activeDeviceId!.Value))
             .FirstOrDefaultAsync();
+    }
+
+    public Task<List<AppUserReadingProfile>> GetProfilesForLibrary(int userId, int libraryId)
+    {
+        return context.AppUserReadingProfiles
+            .Where(rp => rp.AppUserId == userId && rp.LibraryIds.Contains(libraryId))
+            .ToListAsync();
     }
 
     public async Task<AppUserReadingProfile?> GetUserProfile(int userId, int profileId)

@@ -113,9 +113,8 @@ public interface IReadingProfileService
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
-    /// <param name="activeDeviceId"></param>
     /// <returns></returns>
-    Task ClearSeriesProfile(int userId, int seriesId, int? activeDeviceId);
+    Task ClearSeriesProfile(int userId, int seriesId);
 
     /// <summary>
     /// Bind the reading profile to the library
@@ -132,9 +131,8 @@ public interface IReadingProfileService
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="libraryId"></param>
-    /// <param name="activeDeviceId"></param>
     /// <returns></returns>
-    Task ClearLibraryProfile(int userId, int libraryId, int? activeDeviceId);
+    Task ClearLibraryProfile(int userId, int libraryId);
 
     /// <summary>
     /// Returns the bound Reading Profile to a Library
@@ -144,6 +142,15 @@ public interface IReadingProfileService
     /// <param name="activeDeviceId"></param>
     /// <returns></returns>
     Task<UserReadingProfileDto?> GetReadingProfileDtoForLibrary(int userId, int libraryId, int? activeDeviceId);
+
+    /// <summary>
+    /// Set the assigned devices for the given reading profile
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="profileId"></param>
+    /// <param name="deviceIds"></param>
+    /// <returns></returns>
+    Task SetProfileDevices(int userId, int profileId, List<int> deviceIds);
 }
 
 public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService localizationService, IMapper mapper): IReadingProfileService
@@ -335,9 +342,9 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
-    public async Task ClearSeriesProfile(int userId, int seriesId, int? activeDeviceId)
+    public async Task ClearSeriesProfile(int userId, int seriesId)
     {
-        await DeleteImplicitAndRemoveFromUserProfiles(userId, [seriesId], [], activeDeviceId);
+        await DeleteImplicitAndRemoveFromUserProfiles(userId, [seriesId], [], null);
         await unitOfWork.CommitAsync();
     }
 
@@ -353,17 +360,15 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
-    public async Task ClearLibraryProfile(int userId, int libraryId, int? activeDeviceId)
+    public async Task ClearLibraryProfile(int userId, int libraryId)
     {
-        var libraryProfile =
-            await unitOfWork.AppUserReadingProfileRepository.GetProfileForLibrary(userId, libraryId, activeDeviceId);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForLibrary(userId, libraryId);
 
-        if (libraryProfile != null)
+        foreach (var profile in profiles)
         {
-            libraryProfile.LibraryIds.Remove(libraryId);
-            unitOfWork.AppUserReadingProfileRepository.Update(libraryProfile);
+            profile.LibraryIds.Remove(libraryId);
+            unitOfWork.AppUserReadingProfileRepository.Update(profile);
         }
-
 
         if (unitOfWork.HasChanges())
         {
@@ -376,6 +381,19 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         var libraryProfile =
             await unitOfWork.AppUserReadingProfileRepository.GetProfileForLibrary(userId, libraryId, activeDeviceId);
         return mapper.Map<UserReadingProfileDto>(libraryProfile);
+    }
+
+    public async Task SetProfileDevices(int userId, int profileId, List<int> deviceIds)
+    {
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
+        if (profile == null) throw new KavitaException("profile-doesnt-exist");
+
+        if (profile.Kind == ReadingProfileKind.Default) throw new KavitaException("cant-assign-devices-to-default");
+
+        profile.DeviceIds = deviceIds;
+        unitOfWork.AppUserReadingProfileRepository.Update(profile);
+
+        await unitOfWork.CommitAsync();
     }
 
     private async Task DeleteImplicitAndRemoveFromUserProfiles(int userId, IList<int> seriesIds, IList<int> libraryIds, int? activeDeviceId)

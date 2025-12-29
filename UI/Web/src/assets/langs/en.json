@@ -3789,6 +3789,8 @@
         "chapter-count": "{{num}} Chapters",
         "issue-count": "{{num}} Issues",
         "no-data": "No Data",
+        "confirm": "Confirm",
+        "selected": "Selected",
 
         "book-num": "Book",
         "issue-hash-num": "Issue #",

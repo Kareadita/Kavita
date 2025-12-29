@@ -253,7 +253,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(profile1);
         await unitOfWork.CommitAsync();
 
-        await rps.ClearSeriesProfile(user.Id, series.Id, null);
+        await rps.ClearSeriesProfile(user.Id, series.Id);
         var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id);
         Assert.DoesNotContain(profiles, rp => rp.SeriesIds.Contains(series.Id));
 
@@ -452,7 +452,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         var allBefore = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id);
         Assert.Equal(2, allBefore.Count(rp => rp.SeriesIds.Contains(series.Id)));
 
-        await rps.ClearSeriesProfile(user.Id, series.Id, null);
+        await rps.ClearSeriesProfile(user.Id, series.Id);
 
         var remainingProfiles = await context.AppUserReadingProfiles
             .Where(p => p.Kind != ReadingProfileKind.Default)
@@ -499,39 +499,6 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
             .FirstOrDefault(rp => rp.LibraryIds.Contains(lib.Id));
         Assert.NotNull(linkedProfile);
         Assert.Equal(newProfile.Id, linkedProfile.Id);
-    }
-
-    [Fact]
-    public async Task ClearLibraryProfile_RemovesImplicitOrUnlinksExplicit()
-    {
-        var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, _) = await Setup(unitOfWork, context, mapper);
-
-        var implicitProfile = new AppUserReadingProfileBuilder(user.Id)
-            .WithKind(ReadingProfileKind.Implicit)
-            .WithLibrary(lib)
-            .Build();
-        context.AppUserReadingProfiles.Add(implicitProfile);
-        await unitOfWork.CommitAsync();
-
-        await rps.ClearLibraryProfile(user.Id, lib.Id, null);
-        var profile = (await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id))
-            .FirstOrDefault(rp => rp.LibraryIds.Contains(lib.Id));
-        Assert.Null(profile);
-
-        var explicitProfile = new AppUserReadingProfileBuilder(user.Id)
-            .WithLibrary(lib)
-            .Build();
-        context.AppUserReadingProfiles.Add(explicitProfile);
-        await unitOfWork.CommitAsync();
-
-        await rps.ClearLibraryProfile(user.Id, lib.Id, null);
-        profile = (await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id))
-            .FirstOrDefault(rp => rp.LibraryIds.Contains(lib.Id));
-        Assert.Null(profile);
-
-        var stillExists = await context.AppUserReadingProfiles.FindAsync(explicitProfile.Id);
-        Assert.NotNull(stillExists);
     }
 
     #endregion

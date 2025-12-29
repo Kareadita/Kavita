@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, model, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit, signal} from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
@@ -22,18 +22,20 @@ export type ListSelectionItem<T> = {
   styleUrl: './list-select-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ListSelectModalComponent<T> {
+export class ListSelectModalComponent<T> implements OnInit {
 
   private readonly modal = inject(NgbActiveModal);
 
   title = model.required<string>();
   description = model<string | null>(null);
   items = model.required<ListSelectionItem<T>[]>();
+  preSelectedItems = model<T[]>([]);
   itemsBeforeFilter = model(8);
   requireConfirmation = model(false);
   showFooter = model(true);
+  multiSelect = model(false);
 
-  protected selectedItem = signal<ListSelectionItem<T> | null>(null);
+  protected selectedItems = signal<ListSelectionItem<T>[]>([]);
 
   protected filteredItems = computed(() => {
     const items = this.items();
@@ -49,10 +51,26 @@ export class ListSelectModalComponent<T> {
   });
   protected filterQuery = toSignal(this.filterForm.get('query')!.valueChanges, {initialValue: ''})
 
-  select(item: ListSelectionItem<T>) {
-    this.selectedItem.set(item);
+  ngOnInit() {
+    const items = this.items().filter(item => this.preSelectedItems().includes(item.value));
+    this.selectedItems.set(items);
+  }
 
-    if (!this.requireConfirmation()) {
+  select(item: ListSelectionItem<T>) {
+    if (this.multiSelect()) {
+      const currentlySelected = this.selectedItems().includes(item);
+      if (currentlySelected) {
+        this.selectedItems.update(x => [...x.filter(i => i !== item)])
+      } else {
+        this.selectedItems.update(x => [...x, item])
+      }
+
+
+    } else {
+      this.selectedItems.set([item]);
+    }
+
+    if (!this.requireConfirmation() && !this.multiSelect()) {
       this.confirm();
       return;
     }
@@ -67,7 +85,11 @@ export class ListSelectModalComponent<T> {
   }
 
   confirm() {
-    this.modal.close(this.selectedItem()?.value);
+    if (this.multiSelect()) {
+      this.modal.close(this.selectedItems().map(i => i.value))
+    } else {
+      this.modal.close(this.selectedItems()[0].value);
+    }
   }
 
 }
