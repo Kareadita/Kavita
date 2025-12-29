@@ -94,9 +94,8 @@ public interface IReadingProfileService
     /// <param name="userId"></param>
     /// <param name="profileId"></param>
     /// <param name="seriesId"></param>
-    /// <param name="activeDeviceId"></param>
     /// <returns></returns>
-    Task AddProfileToSeries(int userId, int profileId, int seriesId, int? activeDeviceId);
+    Task AddProfileToSeries(int userId, int profileId, int seriesId);
 
     /// <summary>
     /// Binds the reading profile to many series, and remove the implicit RP from the series if it exists
@@ -104,9 +103,8 @@ public interface IReadingProfileService
     /// <param name="userId"></param>
     /// <param name="profileId"></param>
     /// <param name="seriesIds"></param>
-    /// <param name="activeDeviceId"></param>
     /// <returns></returns>
-    Task BulkAddProfileToSeries(int userId, int profileId, List<int> seriesIds, int? activeDeviceId);
+    Task BulkAddProfileToSeries(int userId, int profileId, List<int> seriesIds);
 
     /// <summary>
     /// Remove all reading profiles bound to the series
@@ -122,9 +120,8 @@ public interface IReadingProfileService
     /// <param name="userId"></param>
     /// <param name="profileId"></param>
     /// <param name="libraryId"></param>
-    /// <param name="activeDeviceId"></param>
     /// <returns></returns>
-    Task AddProfileToLibrary(int userId, int profileId, int libraryId, int? activeDeviceId);
+    Task AddProfileToLibrary(int userId, int profileId, int libraryId);
 
     /// <summary>
     /// Remove the reading profile bound to the library, if it exists
@@ -316,12 +313,12 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
-    public async Task AddProfileToSeries(int userId, int profileId, int seriesId, int? activeDeviceId)
+    public async Task AddProfileToSeries(int userId, int profileId, int seriesId)
     {
         var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
         if (profile == null) throw new KavitaException("profile-doesnt-exist");
 
-        await DeleteImplicitAndRemoveFromUserProfiles(userId, [seriesId], [], activeDeviceId);
+        await DeleteImplicitAndRemoveFromUserProfiles(userId, [seriesId], [], profile.DeviceIds);
 
         profile.SeriesIds.Add(seriesId);
         unitOfWork.AppUserReadingProfileRepository.Update(profile);
@@ -329,12 +326,12 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
-    public async Task BulkAddProfileToSeries(int userId, int profileId, List<int> seriesIds, int? activeDeviceId)
+    public async Task BulkAddProfileToSeries(int userId, int profileId, List<int> seriesIds)
     {
         var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
         if (profile == null) throw new KavitaException("profile-doesnt-exist");
 
-        await DeleteImplicitAndRemoveFromUserProfiles(userId, seriesIds, [], activeDeviceId);
+        await DeleteImplicitAndRemoveFromUserProfiles(userId, seriesIds, [], profile.DeviceIds);
 
         profile.SeriesIds.AddRange(seriesIds.Except(profile.SeriesIds));
         unitOfWork.AppUserReadingProfileRepository.Update(profile);
@@ -344,16 +341,17 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
 
     public async Task ClearSeriesProfile(int userId, int seriesId)
     {
+        // Null device ids, delete all
         await DeleteImplicitAndRemoveFromUserProfiles(userId, [seriesId], [], null);
         await unitOfWork.CommitAsync();
     }
 
-    public async Task AddProfileToLibrary(int userId, int profileId, int libraryId, int? activeDeviceId)
+    public async Task AddProfileToLibrary(int userId, int profileId, int libraryId)
     {
         var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
         if (profile == null) throw new KavitaException("profile-doesnt-exist");
 
-        await DeleteImplicitAndRemoveFromUserProfiles(userId, [], [libraryId], activeDeviceId);
+        await DeleteImplicitAndRemoveFromUserProfiles(userId, [], [libraryId], profile.DeviceIds);
 
         profile.LibraryIds.Add(libraryId);
         unitOfWork.AppUserReadingProfileRepository.Update(profile);
@@ -396,12 +394,20 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
-    private async Task DeleteImplicitAndRemoveFromUserProfiles(int userId, IList<int> seriesIds, IList<int> libraryIds, int? activeDeviceId)
+    /// <summary>
+    /// Deletes all implicit profiles with overlapping ids (For devices 0 overlaps with 0). And removes links with
+    /// series & libraries
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="seriesIds"></param>
+    /// <param name="libraryIds"></param>
+    /// <param name="deviceIds"></param>
+    private async Task DeleteImplicitAndRemoveFromUserProfiles(int userId, IList<int> seriesIds, IList<int> libraryIds, List<int>? deviceIds)
     {
         var profiles =  await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
 
         var implicitProfiles = profiles
-            .Where(rp => activeDeviceId == null || rp.DeviceIds.Count == 0 || rp.DeviceIds.Contains(activeDeviceId.Value))
+            .Where(rp => deviceIds == null || (rp.DeviceIds.Count == 0 && deviceIds.Count == 0) || rp.DeviceIds.Intersect(deviceIds).Any())
             .Where(rp => rp.SeriesIds.Intersect(seriesIds).Any())
             .Where(rp => rp.Kind == ReadingProfileKind.Implicit)
             .ToList();
@@ -409,7 +415,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
 
         var nonImplicitProfiles = profiles
-            .Where(rp => activeDeviceId == null || rp.DeviceIds.Count == 0 || rp.DeviceIds.Contains(activeDeviceId.Value))
+            .Where(rp => deviceIds == null || (rp.DeviceIds.Count == 0 && deviceIds.Count == 0) || rp.DeviceIds.Intersect(deviceIds).Any())
             .Where(rp => rp.SeriesIds.Intersect(seriesIds).Any() || rp.LibraryIds.Intersect(libraryIds).Any())
             .Where(rp => rp.Kind != ReadingProfileKind.Implicit);
 

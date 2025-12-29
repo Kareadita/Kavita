@@ -153,14 +153,11 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="profileId"></param>
-    /// <param name="deviceId">Defaults to currently active device</param>
     /// <returns></returns>
     [HttpPost("series/{seriesId:int}")]
-    public async Task<IActionResult> AddProfileToSeries(int seriesId, [FromQuery] int profileId, [FromQuery] int? deviceId = null)
+    public async Task<IActionResult> AddProfileToSeries(int seriesId, [FromQuery] int profileId)
     {
-        deviceId ??= clientInfoAccessor.CurrentDeviceId;
-
-        await readingProfileService.AddProfileToSeries(UserId, profileId, seriesId, deviceId);
+        await readingProfileService.AddProfileToSeries(UserId, profileId, seriesId);
         return Ok();
     }
 
@@ -181,14 +178,11 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="profileId"></param>
-    /// <param name="deviceId">Defaults to currently active device</param>
     /// <returns></returns>
     [HttpPost("library/{libraryId:int}")]
-    public async Task<IActionResult> AddProfileToLibrary(int libraryId, [FromQuery] int profileId, [FromQuery] int? deviceId = null)
+    public async Task<IActionResult> AddProfileToLibrary(int libraryId, [FromQuery] int profileId)
     {
-        deviceId ??= clientInfoAccessor.CurrentDeviceId;
-
-        await readingProfileService.AddProfileToLibrary(UserId, profileId, libraryId, deviceId);
+        await readingProfileService.AddProfileToLibrary(UserId, profileId, libraryId);
         return Ok();
     }
 
@@ -209,14 +203,11 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// </summary>
     /// <param name="profileId"></param>
     /// <param name="seriesIds"></param>
-    /// <param name="deviceId">Defaults to the currently active device</param>
     /// <returns></returns>
     [HttpPost("bulk")]
-    public async Task<IActionResult> BulkAddReadingProfile([FromQuery] int profileId, [FromBody] List<int> seriesIds, [FromQuery] int? deviceId = null)
+    public async Task<IActionResult> BulkAddReadingProfile([FromQuery] int profileId, [FromBody] List<int> seriesIds)
     {
-        deviceId ??= clientInfoAccessor.CurrentDeviceId;
-
-        await readingProfileService.BulkAddProfileToSeries(UserId, profileId, seriesIds, deviceId);
+        await readingProfileService.BulkAddProfileToSeries(UserId, profileId, seriesIds);
         return Ok();
     }
 
