@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, HostListener, inject, inpu
 import {ClientDevice} from "../../_models/client-device";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
-import {ClientDeviceType} from "../../_services/client-info.service";
+import {ClientDeviceType, ClientInfoService} from "../../_services/client-info.service";
 import {ClientDeviceAuthTypePipe} from "../../_pipes/client-device-authtype.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ClientDevicePlatformPipe} from "../../_pipes/client-device-platform.pipe";
@@ -46,6 +46,7 @@ export class ClientDeviceCardComponent {
   private readonly deviceService = inject(DeviceService);
   private readonly document = inject(DOCUMENT);
   private readonly accountService = inject(AccountService);
+  protected readonly clientInfoService = inject(ClientInfoService);
 
   clientDevice = input.required<ClientDevice>();
 

@@ -17,6 +17,9 @@
               }
             </h5>
             <div class="text-muted small">
+              @if (clientDevice().uiFingerprint === clientInfoService.getDeviceId()) {
+                <span class="badge bg-primary me-2">Active</span>
+              }
               <span class="badge" [class]="clientTypeBadgeClass()">
                 {{clientDevice().currentClientInfo.clientType | clientDeviceClientType}}
               </span>
