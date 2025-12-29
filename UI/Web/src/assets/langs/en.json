@@ -3638,6 +3638,8 @@
         "no-selected": "No profile selected",
         "confirm": "Are you sure you want to delete the reading profile {{name}}?",
         "selection-tip": "Select a profile from the list, or create a new one at the top right",
+        "set-devices": "Set Devices",
+        "select-devices-for": "Set devices for {{name}}",
 
         "image-reader-settings-title": "Image Reader",
         "reading-direction-label": "Reading Direction",

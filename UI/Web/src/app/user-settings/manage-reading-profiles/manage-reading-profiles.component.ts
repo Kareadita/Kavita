@@ -29,7 +29,7 @@ import {NgStyle, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {User} from "../../_models/user/user";
 import {AccountService} from "../../_services/account.service";
-import {debounceTime, distinctUntilChanged, tap} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, map, tap} from "rxjs/operators";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {BookPageLayoutMode} from "../../_models/readers/book-page-layout-mode";
@@ -353,7 +353,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     if (this.selectedProfile == null) return;
 
     const [modal, component] = this.modalService.open(ListSelectModalComponent);
-    component.title.set(`Select devices for ${this.selectedProfile.name}`);
+    component.title.set(translate('manage-reading-profiles.select-devices-for', {name: this.selectedProfile.name}));
     component.multiSelect.set(true);
     component.requireConfirmation.set(true);
     component.preSelectedItems.set(this.selectedProfile.deviceIds ?? []);
@@ -365,8 +365,12 @@ export class ManageReadingProfilesComponent implements OnInit {
     modal.closed.pipe(
       filter(devices => !!devices),
       switchMap((devices: number[]) => {
-        return this.readingProfileService.setDevices(this.selectedProfile!.id, devices)
-      })
+        return this.readingProfileService.setDevices(this.selectedProfile!.id, devices).pipe(map(() => devices))
+      }),
+      tap(devices => {
+        this.selectedProfile!.deviceIds = devices;
+        this.cdRef.markForCheck();
+      }),
     ).subscribe();
 
   }
