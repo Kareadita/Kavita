@@ -542,6 +542,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           case KeyBindTarget.BookmarkPage:
             this.bookmarkPage();
             break;
+          case KeyBindTarget.OffsetDoublePage:
+            this.togglePageOffset();
+            break;
           case KeyBindTarget.GoTo:
             const goToPageNum = await this.promptForPage();
             if (goToPageNum === null) { return; }
@@ -558,7 +561,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       [
         KeyBindTarget.ToggleFullScreen, KeyBindTarget.BookmarkPage, KeyBindTarget.OpenHelp, KeyBindTarget.GoTo,
         KeyBindTarget.ToggleMenu, KeyBindTarget.PageRight, KeyBindTarget.PageLeft, KeyBindTarget.Escape,
-        KeyBindTarget.PageUp, KeyBindTarget.PageDown,
+        KeyBindTarget.PageUp, KeyBindTarget.PageDown, KeyBindTarget.OffsetDoublePage,
       ],
     );
 
@@ -747,7 +750,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       layoutMode: new FormControl(this.layoutMode),
       darkness: new FormControl(100),
       emulateBook: new FormControl(this.readingProfile.emulateBook),
-      swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate)
+      swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate),
+      pageOffset: new FormControl(this.mangaReaderService.getPageOffset()),
     });
 
     this.readerModeSubject.next(this.readerMode);
@@ -793,6 +797,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.generalSettingsForm.get('widthSlider')?.enable();
         this.generalSettingsForm.get('fittingOption')?.enable();
         this.generalSettingsForm.get('emulateBook')?.enable();
+        this.generalSettingsForm.get('pageOffset')?.disable();
       } else {
         this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
         this.generalSettingsForm.get('pageSplitOption')?.disable();
@@ -800,6 +805,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
         this.generalSettingsForm.get('fittingOption')?.disable();
         this.generalSettingsForm.get('emulateBook')?.enable();
+        this.generalSettingsForm.get('pageOffset')?.enable();
       }
       this.cdRef.markForCheck();
 
@@ -813,6 +819,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.generalSettingsForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
       this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
+      const pageOffset = this.generalSettingsForm.get('pageOffset')?.value;
+      if (pageOffset !== undefined) {
+        this.mangaReaderService.setPageOffset(pageOffset ? 1 : 0);
+        const adjustedPage = this.mangaReaderService.adjustForDoubleReader(this.pageNum);
+        this.pageNumSubject.next({pageNum: adjustedPage, maxPages: this.maxPages});
+        this.pageNum = adjustedPage;
+        this.goToPage(this.pageNum);
+      }
 
       const needsSplitting = this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src));
       // If we need to split on a menu change, then we need to re-render.
@@ -1770,6 +1784,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
+  togglePageOffset() {
+    if (this.layoutMode === LayoutMode.Single || this.readerMode === ReaderMode.Webtoon) {
+      this.toastr.info(translate('manga-reader.offset-only-double'));
+      return;
+    }
+
+    const currentValue = this.generalSettingsForm.get('pageOffset')?.value;
+    this.generalSettingsForm.patchValue({pageOffset: !currentValue});
+    
+    if (!currentValue) {
+      this.toastr.info(translate('manga-reader.offset-enabled'));
+    } else {
+      this.toastr.info(translate('manga-reader.offset-disabled'));
+    }
+  }
+
   // This is menu only code
   toggleReaderMode() {
     switch(this.readerMode) {
@@ -1805,6 +1835,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.generalSettingsForm.get('pageSplitOption')?.disable()
       this.generalSettingsForm.get('fittingOption')?.disable()
       this.generalSettingsForm.get('layoutMode')?.disable();
+      this.generalSettingsForm.get('pageOffset')?.disable();
     } else {
       this.generalSettingsForm.get('fittingOption')?.enable()
       this.generalSettingsForm.get('pageSplitOption')?.enable();
@@ -1813,6 +1844,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.layoutMode !== LayoutMode.Single) {
         this.generalSettingsForm.get('pageSplitOption')?.disable();
         this.generalSettingsForm.get('fittingOption')?.disable();
+        this.generalSettingsForm.get('pageOffset')?.enable();
+      } else {
+        this.generalSettingsForm.get('pageOffset')?.disable();
       }
     }
     this.cdRef.markForCheck();
@@ -1898,6 +1932,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       {keyBindTarget: KeyBindTarget.ToggleMenu},
       {keyBindTarget: KeyBindTarget.OpenHelp},
       {keyBindTarget: KeyBindTarget.BookmarkPage, description: 'bookmark'},
+      {keyBindTarget: KeyBindTarget.OffsetDoublePage, description: 'offset-double-page'},
       {key: translate('shortcuts-modal.double-click'), description: 'bookmark'},
     ];
 

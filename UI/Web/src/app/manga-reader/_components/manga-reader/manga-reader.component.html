@@ -281,6 +281,15 @@
                       </div>
                     </div>
                   </div>
+
+                  <div class="mb-3">
+                    <div class="mb-3">
+                      <div class="form-check form-switch" [title]="generalSettingsForm.get('pageOffset')?.disabled ? t('offset-only-double') : ''">
+                        <input type="checkbox" id="page-offset" formControlName="pageOffset" class="form-check-input" switch>
+                        <label class="form-check-label" for="page-offset">{{t('page-offset-label')}}</label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="row mb-2">
