@@ -2658,8 +2658,8 @@
 
         "pages-label": "Pages",
         "words-label": "Length",
-        "pages-count": "{{num}} Pages",
-        "words-count": "{{num}} Words",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
 
         "reading-time-label": "Read Time",
         "date-added-label": "Date Added",
@@ -2861,10 +2861,10 @@
     },
 
     "activity-card": {
-        "pages-count": "Total Pages",
-        "words-count": "Total Words",
-        "active-pages-label": "{{series-detail.pages-count}}",
-        "active-words-label": "{{series-detail.words-count}}",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "active-pages-label": "Total Pages",
+        "active-words-label": "Total Words",
         "total-chapters-label": "Chapters",
         "started-label": "Started",
         "view-label": "View"
