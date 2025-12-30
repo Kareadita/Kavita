@@ -88,6 +88,10 @@ public sealed record ServerSettingDto
     /// </summary>
     public CoverImageSize CoverImageSize { get; set; }
     /// <summary>
+    /// How large rendered PDF images should be
+    /// </summary>
+    public PdfRenderResolution PdfRenderResolution { get; set; }
+    /// <summary>
     /// SMTP Configuration
     /// </summary>
     public SmtpConfigDto SmtpConfig { get; set; }

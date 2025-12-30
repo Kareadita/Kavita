@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Data;
 using API.Data.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
@@ -78,6 +79,7 @@ public partial class BookService : IBookService
     private const string BookApiUrl = "book-resources?file=";
     public const string BookReaderBodyScope = "//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]";
     private readonly PdfComicInfoExtractor _pdfComicInfoExtractor;
+    private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>
     /// Setup the most lenient book parsing options possible as people have some really bad epubs
@@ -124,9 +126,10 @@ public partial class BookService : IBookService
         }
     };
 
-    public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService, IMediaErrorService mediaErrorService)
+    public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService, IMediaErrorService mediaErrorService, IUnitOfWork unitOfWork)
     {
         _logger = logger;
+        _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _imageService = imageService;
         _mediaErrorService = mediaErrorService;
@@ -1415,7 +1418,10 @@ public partial class BookService : IBookService
     {
         _directoryService.ExistOrCreate(targetDirectory);
 
-        using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
+        var settings = _unitOfWork.SettingsRepository.GetSettingsDtoAsync().Result;
+        var dims = settings.PdfRenderResolution.GetDimensions();
+
+        using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(dims.dim1, dims.dim2));
         var pages = docReader.GetPageCount();
         Parallel.For(0, pages, pageNumber =>
         {
