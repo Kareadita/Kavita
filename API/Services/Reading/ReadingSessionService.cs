@@ -375,21 +375,24 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         var context = scope.ServiceProvider.GetRequiredService<DataContext>();
         var eventHub = scope.ServiceProvider.GetRequiredService<IEventHub>();
 
-        // Get the actual last activity time from the session itself
-        var sessionData = await context.AppUserReadingSession
-            .Where(s => s.Id == sessionId)
-            .Select(s => new { s.LastModified, s.LastModifiedUtc })
-            .FirstOrDefaultAsync();
+        // Get the actual last activity end time from ActivityData
+        var lastActivityTime = await context.AppUserReadingSessionActivityData
+            .Where(ad => ad.AppUserReadingSessionId == sessionId && ad.EndTime.HasValue)
+            .MaxAsync(ad => (DateTime?)ad.EndTime);
 
-        if (sessionData == null) return;
+        var lastActivityTimeUtc = await context.AppUserReadingSessionActivityData
+            .Where(ad => ad.AppUserReadingSessionId == sessionId && ad.EndTimeUtc.HasValue)
+            .MaxAsync(ad => (DateTime?)ad.EndTimeUtc);
+
+        if (lastActivityTime == null) return;
 
         // Use the session's LastModified as the EndTime (the actual last activity) and mark session as inactive
         await context.AppUserReadingSession
             .Where(s => s.Id == sessionId)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(x => x.IsActive, false)
-                .SetProperty(x => x.EndTime, sessionData.LastModified)
-                .SetProperty(x => x.EndTimeUtc, sessionData.LastModifiedUtc)
+                .SetProperty(x => x.EndTime, lastActivityTime)
+                .SetProperty(x => x.EndTimeUtc, lastActivityTimeUtc)
                 .SetProperty(x => x.LastModified, DateTime.Now)
                 .SetProperty(x => x.LastModifiedUtc, DateTime.UtcNow));
 
