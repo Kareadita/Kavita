@@ -103,13 +103,6 @@ public class Startup
                     Duration = _env.IsDevelopment() ? 0 : 60 * 60 * 6,
                     Location = ResponseCacheLocation.Client,
                 });
-            options.CacheProfiles.Add(ResponseCacheProfiles.Images,
-                new CacheProfile()
-                {
-                    Duration = 60,
-                    Location = ResponseCacheLocation.Client,
-                    NoStore = false
-                });
             options.CacheProfiles.Add(ResponseCacheProfiles.Month,
                 new CacheProfile()
                 {

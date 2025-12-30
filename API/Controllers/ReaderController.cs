@@ -77,7 +77,6 @@ public class ReaderController : BaseApiController
     /// <returns></returns>
     [HttpGet("pdf")]
     [SkipDeviceTracking]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "apiKey", "extractPdf"])]
     public async Task<ActionResult> GetPdf(int chapterId, string apiKey, bool extractPdf = false)
     {
         if (!UserContext.IsAuthenticated) return Unauthorized();
@@ -93,9 +92,7 @@ public class ReaderController : BaseApiController
         {
 
             var path = _cacheService.GetCachedFile(chapter);
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest(await _localizationService.Translate(UserId, "pdf-doesnt-exist"));
-
-            return PhysicalFile(path, MimeTypeMap.GetMimeType(Path.GetExtension(path)), Path.GetFileName(path), true);
+            return CachedFile(path, maxAge: TimeSpan.FromHours(1).Seconds);
         }
         catch (Exception)
         {
@@ -115,14 +112,10 @@ public class ReaderController : BaseApiController
     /// <returns></returns>
     [HttpGet("image")]
     [SkipDeviceTracking]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "page", "extractPdf", "apiKey"
-    ])]
     [AllowAnonymous]
     public async Task<ActionResult> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
     {
         if (page < 0) page = 0;
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
 
         try
         {
@@ -130,11 +123,7 @@ public class ReaderController : BaseApiController
             if (chapter == null) return NoContent();
 
             var path = _cacheService.GetCachedPagePath(chapter.Id, page);
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
-                return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
-            var format = Path.GetExtension(path);
-
-            return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path), true);
+            return CachedFile(path, maxAge: TimeSpan.FromHours(1).Seconds);
         }
         catch (Exception)
         {
@@ -152,19 +141,15 @@ public class ReaderController : BaseApiController
     /// <returns></returns>
     [HttpGet("thumbnail")]
     [SkipDeviceTracking]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "pageNum", "apiKey"])]
     [AllowAnonymous]
     public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, true);
         if (chapter == null) return NoContent();
         var images = _cacheService.GetCachedPages(chapterId);
 
         var path = await _readerService.GetThumbnail(chapter, pageNum, images);
-        var format = Path.GetExtension(path);
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path), true);
+        return CachedFile(path, maxAge: TimeSpan.FromHours(1).Seconds);
     }
 
     /// <summary>
@@ -177,15 +162,11 @@ public class ReaderController : BaseApiController
     /// <returns></returns>
     [HttpGet("bookmark-image")]
     [SkipDeviceTracking]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "page", "apiKey"])]
     [AllowAnonymous]
     public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return Unauthorized();
-
         if (page < 0) page = 0;
-        var totalPages = await _cacheService.CacheBookmarkForSeries(userId, seriesId);
+        var totalPages = await _cacheService.CacheBookmarkForSeries(UserId, seriesId);
         if (page > totalPages)
         {
             page = totalPages;
@@ -194,10 +175,7 @@ public class ReaderController : BaseApiController
         try
         {
             var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
-            var format = Path.GetExtension(path);
-
-            return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path));
+            return CachedFile(path, maxAge: TimeSpan.FromHours(1).Seconds);
         }
         catch (Exception)
         {

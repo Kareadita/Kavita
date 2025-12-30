@@ -715,9 +715,6 @@ public class OpdsController : BaseApiController
             var content = await _directoryService.ReadFileAsync(path);
             var format = Path.GetExtension(path);
 
-            // Calculates SHA1 Hash for byte[]
-            Response.AddCacheHeader(content);
-
             // Save progress for the user (except Panels, they will use a direct connection)
             var userAgent = Request.Headers.UserAgent.ToString();
 
@@ -745,7 +742,7 @@ public class OpdsController : BaseApiController
                 }, userId);
             }
 
-            return File(content, MimeTypeMap.GetMimeType(format));
+            return CachedContent(content, MimeTypeMap.GetMimeType(format));
         }
         catch (Exception)
         {

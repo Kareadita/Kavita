@@ -11,7 +11,6 @@ using API.Services;
 using API.Services.Tasks.Metadata;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MimeTypes;
 
 namespace API.Controllers;
 
@@ -49,16 +48,10 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("chapter-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["chapterId", "apiKey"])]
     public async Task<ActionResult> GetChapterCoverImage(int chapterId, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
-
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return CachedFile(path);
     }
 
     /// <summary>
@@ -68,16 +61,10 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("library-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["libraryId", "apiKey"])]
     public async Task<ActionResult> GetLibraryCoverImage(int libraryId, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
-
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return CachedFile(path);
     }
 
     /// <summary>
@@ -87,16 +74,10 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("volume-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["volumeId", "apiKey"])]
     public async Task<ActionResult> GetVolumeCoverImage(int volumeId, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
-
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return CachedFile(path);
     }
 
     /// <summary>
@@ -105,19 +86,11 @@ public class ImageController : BaseApiController
     /// <param name="seriesId">Id of Series</param>
     /// <param name="apiKey"></param>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["seriesId", "apiKey"])]
     [HttpGet("series-cover")]
     public async Task<ActionResult> GetSeriesCoverImage(int seriesId, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
-
-        Response.AddCacheHeader(path);
-
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return CachedFile(path);
     }
 
     /// <summary>
@@ -127,24 +100,16 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("collection-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["collectionTagId", "apiKey"])]
     public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
-
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
         {
-            var destFile = await GenerateCollectionCoverImage(collectionTagId);
-            if (string.IsNullOrEmpty(destFile)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
-
-            return PhysicalFile(destFile, MimeTypeMap.GetMimeType(_directoryService.FileSystem.Path.GetExtension(destFile)),
-                _directoryService.FileSystem.Path.GetFileName(destFile));
+            // TODO: Streamline this like ReadingList does
+            path = await GenerateCollectionCoverImage(collectionTagId);
         }
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
 
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return CachedFile(path);
     }
 
     /// <summary>
@@ -154,23 +119,15 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("readinglist-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["readingListId", "apiKey"])]
     public async Task<ActionResult> GetReadingListCoverImage(int readingListId, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
-
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ReadingListRepository.GetCoverImageAsync(readingListId));
-
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
         {
-            var destFile = await _readingListService.GenerateReadingListCoverImage(readingListId);
-            if (string.IsNullOrEmpty(destFile)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
-            return PhysicalFile(destFile, MimeTypeMap.GetMimeType(_directoryService.FileSystem.Path.GetExtension(destFile)), _directoryService.FileSystem.Path.GetFileName(destFile));
+            path = await _readingListService.GenerateReadingListCoverImage(readingListId);
         }
 
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return CachedFile(path);
     }
 
     private async Task<string> GenerateCollectionCoverImage(int collectionId)
@@ -200,20 +157,16 @@ public class ImageController : BaseApiController
     /// <param name="imageOffset">Only applicable for Epubs - handles multiple images on one page</param>
     /// <returns></returns>
     [HttpGet("bookmark")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["chapterId", "pageNum", "apiKey", "imageOffset"])]
     public async Task<ActionResult> GetBookmarkImage(int chapterId, int pageNum, string apiKey, int imageOffset = 0)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
-        var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, imageOffset, userId);
-        if (bookmark == null) return BadRequest(await _localizationService.Translate(userId, "bookmark-doesnt-exist"));
+        var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, imageOffset, UserId);
+        if (bookmark == null) return BadRequest(await _localizationService.Translate(UserId, "bookmark-doesnt-exist"));
 
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
-        var file = new FileInfo(Path.Join(bookmarkDirectory, bookmark.FileName));
-        var format = Path.GetExtension(file.FullName);
+        var path = Path.Join(bookmarkDirectory, bookmark.FileName);
 
-        return PhysicalFile(file.FullName, MimeTypeMap.GetMimeType(format), Path.GetFileName(file.FullName));
+        return CachedFile(path);
     }
 
     /// <summary>
@@ -223,12 +176,9 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("web-link")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = ["url", "apiKey"])]
     public async Task<ActionResult> GetWebLinkImage(string url, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
-        if (string.IsNullOrEmpty(url)) return BadRequest(await _localizationService.Translate(userId, "must-be-defined", "Url"));
+        if (string.IsNullOrEmpty(url)) return BadRequest(await _localizationService.Translate(UserId, "must-be-defined", "Url"));
 
         var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
@@ -244,14 +194,11 @@ public class ImageController : BaseApiController
             }
             catch (Exception)
             {
-                return BadRequest(await _localizationService.Translate(userId, "generic-favicon"));
+                return BadRequest(await _localizationService.Translate(UserId, "generic-favicon"));
             }
         }
 
-        var file = new FileInfo(domainFilePath);
-        var format = Path.GetExtension(file.FullName);
-
-        return PhysicalFile(file.FullName, MimeTypeMap.GetMimeType(format), Path.GetFileName(file.FullName));
+        return CachedFile(domainFilePath);
     }
 
 
@@ -262,12 +209,9 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("publisher")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = ["publisherName", "apiKey"])]
     public async Task<ActionResult> GetPublisherImage(string publisherName, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
-        if (string.IsNullOrEmpty(publisherName)) return BadRequest(await _localizationService.Translate(userId, "must-be-defined", "publisherName"));
+        if (string.IsNullOrEmpty(publisherName)) return BadRequest(await _localizationService.Translate(UserId, "must-be-defined", "publisherName"));
         if (publisherName.Contains("..")) return BadRequest();
 
         var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
@@ -284,14 +228,11 @@ public class ImageController : BaseApiController
             }
             catch (Exception)
             {
-                return BadRequest(await _localizationService.Translate(userId, "generic-favicon"));
+                return BadRequest(await _localizationService.Translate(UserId, "generic-favicon"));
             }
         }
 
-        var file = new FileInfo(domainFilePath);
-        var format = Path.GetExtension(file.FullName);
-
-        return PhysicalFile(file.FullName, MimeTypeMap.GetMimeType(format), Path.GetFileName(file.FullName));
+        return CachedFile(domainFilePath);
     }
 
     /// <summary>
@@ -301,16 +242,10 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("person-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["personId", "apiKey"])]
     public async Task<ActionResult> GetPersonCoverImage(int personId, string apiKey)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.UserRepository.GetPersonCoverImageAsync(personId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
-
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return CachedFile(path);
     }
 
     /// <summary>
@@ -320,18 +255,11 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("user-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["userId", "apiKey"])]
     public async Task<ActionResult> GetUserCoverImage(int userId, string apiKey)
     {
-        var authedUser = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (authedUser == 0 || userId == 0) return BadRequest();
-
-        var filename = await _unitOfWork.UserRepository.GetCoverImageAsync(userId, authedUser);
+        var filename = await _unitOfWork.UserRepository.GetCoverImageAsync(userId, UserId);
         var path = Path.Join(_directoryService.CoverImageDirectory, filename);
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-cover-image"));
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
-
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return CachedFile(path);
     }
 
     /// <summary>
@@ -342,7 +270,6 @@ public class ImageController : BaseApiController
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("cover-upload")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = ["filename", "apiKey"])]
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
         if (!UserContext.IsAuthenticated) return Unauthorized();
@@ -355,10 +282,6 @@ public class ImageController : BaseApiController
         }
 
         var path = Path.Join(_directoryService.TempDirectory, filename);
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
-            return BadRequest(await _localizationService.Translate(UserId, "file-doesnt-exist"));
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
-
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return CachedFile(path);
     }
 }
