@@ -169,13 +169,16 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
     public async Task<UserReadingProfileDto> UpdateParent(int userId, int libraryId, int seriesId,
         UserReadingProfileDto dto, int? activeDeviceId)
     {
+        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, dto.Id);
+        if (profile == null) throw new KavitaException("profile-does-not-exist");
+
         var parentProfile = await GetReadingProfileForSeries(userId, libraryId, seriesId, activeDeviceId, true);
 
         UpdateReaderProfileFields(parentProfile, dto, false);
         unitOfWork.AppUserReadingProfileRepository.Update(parentProfile);
 
-        // Remove the implicit profile when we UpdateParent (from reader) as it is implied that we are already bound with a non-implicit profile
-        await DeleteImplicateReadingProfilesForSeries(userId, [seriesId], activeDeviceId);
+        // Delete profile as we'll be using the parent now
+        unitOfWork.AppUserReadingProfileRepository.Remove(profile);
 
         await unitOfWork.CommitAsync();
         return mapper.Map<UserReadingProfileDto>(parentProfile);
@@ -407,7 +410,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         var profiles =  await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
 
         var implicitProfiles = profiles
-            .Where(rp => deviceIds == null || (rp.DeviceIds.Count == 0 && deviceIds.Count == 0) || rp.DeviceIds.Intersect(deviceIds).Any())
+            .Where(DeviceIdFilter)
             .Where(rp => rp.SeriesIds.Intersect(seriesIds).Any())
             .Where(rp => rp.Kind == ReadingProfileKind.Implicit)
             .ToList();
@@ -415,7 +418,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
 
         var nonImplicitProfiles = profiles
-            .Where(rp => deviceIds == null || (rp.DeviceIds.Count == 0 && deviceIds.Count == 0) || rp.DeviceIds.Intersect(deviceIds).Any())
+            .Where(DeviceIdFilter)
             .Where(rp => rp.SeriesIds.Intersect(seriesIds).Any() || rp.LibraryIds.Intersect(libraryIds).Any())
             .Where(rp => rp.Kind != ReadingProfileKind.Implicit);
 
@@ -426,19 +429,18 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
 
             unitOfWork.AppUserReadingProfileRepository.Update(profile);
         }
-    }
 
-    private async Task DeleteImplicateReadingProfilesForSeries(int userId, IList<int> seriesIds, int? activeDeviceId)
-    {
-        var profiles =  await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        return;
 
-        var implicitProfiles = profiles
-            .Where(rp => activeDeviceId == null || rp.DeviceIds.Count == 0 || rp.DeviceIds.Contains(activeDeviceId.Value))
-            .Where(rp => rp.SeriesIds.Intersect(seriesIds).Any())
-            .Where(rp => rp.Kind == ReadingProfileKind.Implicit)
-            .ToList();
+        bool DeviceIdFilter(AppUserReadingProfile rp)
+        {
+            // We should clean all
+            if (deviceIds == null) return true;
 
-        unitOfWork.AppUserReadingProfileRepository.RemoveRange(implicitProfiles);
+            if (deviceIds.Count == 0 && rp.DeviceIds.Count == 0) return true;
+
+            return rp.DeviceIds.Intersect(deviceIds).Any();
+        }
     }
 
     public static void UpdateReaderProfileFields(AppUserReadingProfile existingProfile, UserReadingProfileDto dto, bool updateName = true)

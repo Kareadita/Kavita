@@ -1028,6 +1028,506 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
 
     #endregion
 
+    #region Tests with devices - Update parent profile
+
+    [Fact]
+    public async Task UpdateParent_WithDevice_OnlyRemovesMatchingImplicitProfiles()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+        const int otherDeviceId = 2;
+
+        var seriesProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Series Profile (Device 1)")
+            .Build();
+
+        var implicitSameDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Implicit (Device 1)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitOtherDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(otherDeviceId)
+            .WithName("Implicit (Device 2)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Implicit (No Device)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(seriesProfile);
+        context.AppUserReadingProfiles.Add(implicitSameDevice);
+        context.AppUserReadingProfiles.Add(implicitOtherDevice);
+        context.AppUserReadingProfiles.Add(implicitNoDevice);
+        await unitOfWork.CommitAsync();
+
+        var dto = new UserReadingProfileDto
+        {
+            Id = implicitSameDevice.Id,
+            Name = "Updated Series Profile",
+        };
+
+        await rps.UpdateParent(user.Id, lib.Id, series.Id, dto, deviceId);
+
+        // Implicit with same device should be removed
+        var implicitSameExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitSameDevice.Id);
+        Assert.False(implicitSameExists);
+
+        // Implicit with other device should still exist
+        var implicitOtherExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitOtherDevice.Id);
+        Assert.True(implicitOtherExists);
+
+        // Implicit with no device should still exist (it's a fallback for other devices)
+        var implicitNoDeviceExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitNoDevice.Id);
+        Assert.True(implicitNoDeviceExists);
+    }
+
+    [Fact]
+    public async Task UpdateParent_NoDevice_OnlyRemovesNoDeviceImplicitProfiles()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+
+        var seriesProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Series Profile (No Device)")
+            .Build();
+
+        var implicitWithDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Implicit (Device)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Implicit (No Device)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(seriesProfile);
+        context.AppUserReadingProfiles.Add(implicitWithDevice);
+        context.AppUserReadingProfiles.Add(implicitNoDevice);
+        await unitOfWork.CommitAsync();
+
+        var dto = new UserReadingProfileDto
+        {
+            Id = implicitNoDevice.Id,
+            Name = "Updated Series Profile",
+        };
+
+        await rps.UpdateParent(user.Id, lib.Id, series.Id, dto, null);
+
+        // Implicit with no device should be removed
+        var implicitNoDeviceExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitNoDevice.Id);
+        Assert.False(implicitNoDeviceExists);
+
+        // Implicit with device should still exist (other devices may use it)
+        var implicitWithDeviceExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitWithDevice.Id);
+        Assert.True(implicitWithDeviceExists);
+    }
+
+    [Fact]
+    public async Task UpdateParent_WithDevice_AllowsMultipleDeviceSpecificImplicits()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+        const int device2 = 2;
+        const int device3 = 3;
+
+        var seriesProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithName("Series Profile (Device 1)")
+            .Build();
+
+        var implicitDevice1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithName("Implicit (Device 1)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitDevice2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device2)
+            .WithName("Implicit (Device 2)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitDevice3 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device3)
+            .WithName("Implicit (Device 3)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Implicit (No Device - Fallback)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(seriesProfile);
+        context.AppUserReadingProfiles.Add(implicitDevice1);
+        context.AppUserReadingProfiles.Add(implicitDevice2);
+        context.AppUserReadingProfiles.Add(implicitDevice3);
+        context.AppUserReadingProfiles.Add(implicitNoDevice);
+        await unitOfWork.CommitAsync();
+
+        var dto = new UserReadingProfileDto
+        {
+            Id = implicitDevice1.Id,
+            Name = "Updated Series Profile",
+        };
+
+        await rps.UpdateParent(user.Id, lib.Id, series.Id, dto, device1);
+
+        // Only implicit for device 1 should be removed
+        var implicit1Exists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitDevice1.Id);
+        Assert.False(implicit1Exists);
+
+        // Other device-specific implicits should remain
+        var implicit2Exists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitDevice2.Id);
+        Assert.True(implicit2Exists);
+
+        var implicit3Exists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitDevice3.Id);
+        Assert.True(implicit3Exists);
+
+        // Fallback (no device) should remain
+        var implicitNoDeviceExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitNoDevice.Id);
+        Assert.True(implicitNoDeviceExists);
+    }
+
+    #endregion
+
+    #region Tests with devices - AddToProfile
+
+    [Fact]
+    public async Task AddProfileToSeries_WithDevice_OnlyRemovesImplicitWithSameDevice()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+        const int otherDeviceId = 2;
+
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithDeviceId(deviceId)
+            .WithName("Profile (Device 1)")
+            .Build();
+
+        var implicitSameDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Implicit (Device 1)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitOtherDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(otherDeviceId)
+            .WithName("Implicit (Device 2)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Implicit (No Device)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile);
+        context.AppUserReadingProfiles.Add(implicitSameDevice);
+        context.AppUserReadingProfiles.Add(implicitOtherDevice);
+        context.AppUserReadingProfiles.Add(implicitNoDevice);
+        await unitOfWork.CommitAsync();
+
+        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+
+        // Implicit with same device should be removed
+        var implicitSameExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitSameDevice.Id);
+        Assert.False(implicitSameExists);
+
+        // Implicit with other device should still exist
+        var implicitOtherExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitOtherDevice.Id);
+        Assert.True(implicitOtherExists);
+
+        // Implicit with no device should still exist (fallback for other devices)
+        var implicitNoDeviceExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitNoDevice.Id);
+        Assert.True(implicitNoDeviceExists);
+    }
+
+    [Fact]
+    public async Task AddProfileToSeries_NoDevice_OnlyRemovesImplicitWithNoDevice()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int deviceId = 1;
+
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithName("Profile (No Device)")
+            .Build();
+
+        var implicitWithDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(deviceId)
+            .WithName("Implicit (Device)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Implicit (No Device)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile);
+        context.AppUserReadingProfiles.Add(implicitWithDevice);
+        context.AppUserReadingProfiles.Add(implicitNoDevice);
+        await unitOfWork.CommitAsync();
+
+        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+
+        // Implicit with no device should be removed
+        var implicitNoDeviceExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitNoDevice.Id);
+        Assert.False(implicitNoDeviceExists);
+
+        // Implicit with device should still exist (for that specific device)
+        var implicitWithDeviceExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitWithDevice.Id);
+        Assert.True(implicitWithDeviceExists);
+    }
+
+    [Fact]
+    public async Task AddProfileToSeries_WithMultipleDevices_RemovesImplicitsForAllDevices()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+        const int device2 = 2;
+        const int device3 = 3;
+
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithDeviceId(device1)
+            .WithDeviceId(device2)
+            .WithName("Profile (Device 1 & 2)")
+            .Build();
+
+        var implicitDevice1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithName("Implicit (Device 1)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitDevice2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device2)
+            .WithName("Implicit (Device 2)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitDevice3 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device3)
+            .WithName("Implicit (Device 3)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Implicit (No Device)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile);
+        context.AppUserReadingProfiles.Add(implicitDevice1);
+        context.AppUserReadingProfiles.Add(implicitDevice2);
+        context.AppUserReadingProfiles.Add(implicitDevice3);
+        context.AppUserReadingProfiles.Add(implicitNoDevice);
+        await unitOfWork.CommitAsync();
+
+        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+
+        // Implicits for device 1 and 2 should be removed
+        var implicit1Exists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitDevice1.Id);
+        Assert.False(implicit1Exists);
+
+        var implicit2Exists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitDevice2.Id);
+        Assert.False(implicit2Exists);
+
+        // Implicit for device 3 should still exist
+        var implicit3Exists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitDevice3.Id);
+        Assert.True(implicit3Exists);
+
+        // Implicit with no device should still exist (fallback)
+        var implicitNoDeviceExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitNoDevice.Id);
+        Assert.True(implicitNoDeviceExists);
+    }
+
+    [Fact]
+    public async Task AddProfileToSeries_ImplicitWithMultipleDevices_RemovedIfAnyDeviceMatches()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+        const int device2 = 2;
+        const int device3 = 3;
+
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithDeviceId(device1)
+            .WithName("Profile (Device 1)")
+            .Build();
+
+        // Implicit with multiple devices including device1
+        var implicitMultiDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithDeviceId(device2)
+            .WithName("Implicit (Device 1 & 2)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        // Implicit with multiple devices NOT including device1
+        var implicitOtherDevices = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device2)
+            .WithDeviceId(device3)
+            .WithName("Implicit (Device 2 & 3)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile);
+        context.AppUserReadingProfiles.Add(implicitMultiDevice);
+        context.AppUserReadingProfiles.Add(implicitOtherDevices);
+        await unitOfWork.CommitAsync();
+
+        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+
+        // Implicit with device1 (among others) should be removed
+        var implicitMultiExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitMultiDevice.Id);
+        Assert.False(implicitMultiExists);
+
+        // Implicit without device1 should still exist
+        var implicitOtherExists = await context.AppUserReadingProfiles
+            .AnyAsync(rp => rp.Id == implicitOtherDevices.Id);
+        Assert.True(implicitOtherExists);
+    }
+
+    [Fact]
+    public async Task AddProfileToSeries_ThrowsIfProfileDoesNotBelongToUser()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        var otherUser = new AppUserBuilder("otheruser", "other@email.com").Build();
+        context.AppUser.Add(otherUser);
+        await unitOfWork.CommitAsync();
+
+        var otherUserProfile = new AppUserReadingProfileBuilder(otherUser.Id)
+            .WithName("Other User's Profile")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(otherUserProfile);
+        await unitOfWork.CommitAsync();
+
+        // Should throw when trying to add series to another user's profile
+        await Assert.ThrowsAsync<KavitaException>(async () =>
+            await rps.AddProfileToSeries(user.Id, otherUserProfile.Id, series.Id));
+    }
+
+    #endregion
+
+    #region Tests with devices - ClearSeriesProfile
+
+    [Fact]
+    public async Task ClearSeriesProfile_RemovesAllProfilesForSeriesRegardlessOfKindOrDevice()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        var userProfileDevice1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(1)
+            .WithName("User (Device 1)")
+            .Build();
+
+        var userProfileDevice2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(2)
+            .WithName("User (Device 2)")
+            .Build();
+
+        var implicitProfileDevice1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(1)
+            .WithName("Implicit (Device 1)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var implicitProfileNoDevice = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Implicit (No Device)")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        context.AppUserReadingProfiles.AddRange(
+            userProfileDevice1,
+            userProfileDevice2,
+            implicitProfileDevice1,
+            implicitProfileNoDevice
+        );
+        await unitOfWork.CommitAsync();
+
+        await rps.ClearSeriesProfile(user.Id, series.Id);
+
+        var remainingProfiles = await context.AppUserReadingProfiles
+            .Where(rp => rp.SeriesIds.Contains(series.Id))
+            .ToListAsync();
+
+        Assert.Empty(remainingProfiles);
+    }
+
+
+    #endregion
+
     /// <summary>
     /// As response to #3793, I'm not sure if we want to keep this. It's not the most nice. But I think the idea of this test
     /// is worth having.
