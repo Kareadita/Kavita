@@ -333,6 +333,7 @@ public partial class BookService : IBookService
                         BookReaderBodyScope,
                         "//BODY").ToLowerInvariant();
                 var elem = doc.DocumentNode.SelectSingleNode(unscopedSelector);
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                 if (elem == null) continue;
 
                 elem.PrependChild(HtmlNode.CreateNode(
@@ -378,16 +379,7 @@ public partial class BookService : IBookService
 
         foreach (var image in images)
         {
-
-            string? key = null;
-            if (image.Attributes["src"] != null)
-            {
-                key = "src";
-            }
-            else if (image.Attributes["xlink:href"] != null)
-            {
-                key = "xlink:href";
-            }
+            var key = GetImageSrcAttributeName(image);
 
             if (string.IsNullOrEmpty(key)) continue;
 
@@ -410,22 +402,6 @@ public partial class BookService : IBookService
         }
     }
 
-    private static void InjectImages(HtmlDocument doc, EpubBookRef book, string apiBase)
-    {
-        var images = doc.DocumentNode.SelectNodes("//img")
-                     ?? doc.DocumentNode.SelectNodes("//image") ?? doc.DocumentNode.SelectNodes("//svg");
-
-        if (images == null) return;
-
-        var parent = images[0].ParentNode;
-
-        foreach (var image in images)
-        {
-            // TODO: How do I make images clickable with state?
-            //image.AddClass("kavita-scale-width");
-        }
-
-    }
 
     /// <summary>
     /// Returns the image key associated with the file. Contains some basic fallback logic.
@@ -461,6 +437,7 @@ public partial class BookService : IBookService
     {
         // Check if any classes on the html node (some r2l books do this) and move them to body tag for scoping
         var htmlNode = doc.DocumentNode.SelectSingleNode("//html");
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (htmlNode == null) return body.InnerHtml;
 
         var bodyClasses = body.Attributes.Contains("class") ? body.Attributes["class"].Value : string.Empty;
@@ -477,6 +454,7 @@ public partial class BookService : IBookService
 
     {
         var anchors = doc.DocumentNode.SelectNodes("//a");
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (anchors == null) return;
 
         foreach (var anchor in anchors)
@@ -488,6 +466,7 @@ public partial class BookService : IBookService
     private async Task InlineStyles(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body)
     {
         var inlineStyles = doc.DocumentNode.SelectNodes("//style");
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (inlineStyles != null)
         {
             foreach (var inlineStyle in inlineStyles)
@@ -498,6 +477,7 @@ public partial class BookService : IBookService
         }
 
         var styleNodes = doc.DocumentNode.SelectNodes("/html/head/link[@href]");
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (styleNodes != null)
         {
             foreach (var styleLinks in styleNodes)
@@ -522,8 +502,8 @@ public partial class BookService : IBookService
                     var cssFile = book.Content.Css.GetLocalFileRefByKey(key);
 
                     var stylesheetHtml = await cssFile.ReadContentAsync();
-                    var styleContent = await ScopeStyles(stylesheetHtml, apiBase,
-                        cssFile.FilePath, book);
+                    var styleContent = await ScopeStyles(stylesheetHtml, apiBase, cssFile.FilePath, book);
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                     if (styleContent != null)
                     {
                         body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
@@ -547,56 +527,58 @@ public partial class BookService : IBookService
         {
             epubBook = OpenEpubWithFallback(filePath, epubBook);
 
-            var publicationDate =
-                epubBook.Schema.Package.Metadata.Dates.Find(pDate => pDate.Event == "publication")?.Date;
+            var publicationDate = epubBook?.Schema.Package.Metadata.Dates.Find(pDate => pDate.Event == "publication")?.Date;
 
             if (string.IsNullOrEmpty(publicationDate))
             {
-                publicationDate = epubBook.Schema.Package.Metadata.Dates.FirstOrDefault()?.Date;
+                publicationDate = epubBook?.Schema.Package.Metadata.Dates.FirstOrDefault()?.Date;
             }
 
             var (year, month, day) = GetPublicationDate(publicationDate);
 
-            var summary = epubBook.Schema.Package.Metadata.Descriptions.FirstOrDefault();
+            var summary = epubBook?.Schema.Package.Metadata.Descriptions.FirstOrDefault();
             var info = new ComicInfo
             {
                 Summary = string.IsNullOrEmpty(summary?.Description) ? string.Empty : summary.Description,
-                Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers.Select(p => p.Publisher)),
+                Publisher = string.Join(",", epubBook?.Schema.Package.Metadata.Publishers.Select(p => p.Publisher) ?? []),
                 Month = month,
                 Day = day,
                 Year = year,
-                Title = epubBook.Title,
+                Title = epubBook?.Title ?? string.Empty,
                 Genre = string.Join(",",
-                    epubBook.Schema.Package.Metadata.Subjects.Select(s => s.Subject.ToLower().Trim())),
-                LanguageISO = ValidateLanguage(epubBook.Schema.Package.Metadata.Languages
+                    epubBook?.Schema.Package.Metadata.Subjects.Select(s => s.Subject.ToLower().Trim()) ?? []),
+                LanguageISO = ValidateLanguage(epubBook?.Schema.Package.Metadata.Languages
                     .Select(l => l.Language)
                     .FirstOrDefault())
             };
             ComicInfo.CleanComicInfo(info);
 
             var weblinks = new List<string>();
-            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers)
+            if (epubBook?.Schema.Package.Metadata.Identifiers != null)
             {
-                if (string.IsNullOrEmpty(identifier.Identifier)) continue;
-                if (!string.IsNullOrEmpty(identifier.Scheme) &&
-                    identifier.Scheme.Equals("ISBN", StringComparison.InvariantCultureIgnoreCase))
+                foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers)
                 {
-                    var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
-                    if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
+                    if (string.IsNullOrEmpty(identifier.Identifier)) continue;
+                    if (!string.IsNullOrEmpty(identifier.Scheme) &&
+                        identifier.Scheme.Equals("ISBN", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        _logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
-                        continue;
+                        var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
+                        if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
+                        {
+                            _logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
+                            continue;
+                        }
+
+                        info.Isbn = isbn;
                     }
 
-                    info.Isbn = isbn;
-                }
-
-                if ((!string.IsNullOrEmpty(identifier.Scheme) &&
-                     identifier.Scheme.Equals("URL", StringComparison.InvariantCultureIgnoreCase)) ||
-                    identifier.Identifier.StartsWith("url:"))
-                {
-                    var url = identifier.Identifier.Replace("url:", string.Empty);
-                    weblinks.Add(url.Trim());
+                    if ((!string.IsNullOrEmpty(identifier.Scheme) &&
+                         identifier.Scheme.Equals("URL", StringComparison.InvariantCultureIgnoreCase)) ||
+                        identifier.Identifier.StartsWith("url:"))
+                    {
+                        var url = identifier.Identifier.Replace("url:", string.Empty);
+                        weblinks.Add(url.Trim());
+                    }
                 }
             }
 
@@ -606,72 +588,76 @@ public partial class BookService : IBookService
             }
 
             // Parse tags not exposed via Library
-            foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
+            if (epubBook?.Schema.Package.Metadata.MetaItems != null)
             {
-                // EPUB 2 and 3
-                switch (metadataItem.Name)
+                foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
                 {
-                    case "calibre:rating":
-                        info.UserRating = metadataItem.Content.AsFloat();
-                        break;
-                    case "calibre:title_sort":
-                        info.TitleSort = metadataItem.Content;
-                        break;
-                    case "calibre:series":
-                        info.Series = metadataItem.Content;
-                        if (string.IsNullOrEmpty(info.SeriesSort))
-                        {
-                            info.SeriesSort = metadataItem.Content;
-                        }
+                    // EPUB 2 and 3
+                    switch (metadataItem.Name)
+                    {
+                        case "calibre:rating":
+                            info.UserRating = metadataItem.Content.AsFloat();
+                            break;
+                        case "calibre:title_sort":
+                            info.TitleSort = metadataItem.Content;
+                            break;
+                        case "calibre:series":
+                            info.Series = metadataItem.Content;
+                            if (string.IsNullOrEmpty(info.SeriesSort))
+                            {
+                                info.SeriesSort = metadataItem.Content;
+                            }
 
-                        break;
-                    case "calibre:series_index":
-                        info.Volume = metadataItem.Content;
-                        break;
-                }
+                            break;
+                        case "calibre:series_index":
+                            info.Volume = metadataItem.Content;
+                            break;
+                    }
 
 
-                // EPUB 3.2+ only
-                switch (metadataItem.Property)
-                {
-                    case "group-position":
-                        info.Volume = metadataItem.Content;
-                        break;
-                    case "belongs-to-collection":
-                        info.Series = metadataItem.Content;
-                        if (string.IsNullOrEmpty(info.SeriesSort))
-                        {
-                            info.SeriesSort = metadataItem.Content;
-                        }
+                    // EPUB 3.2+ only
+                    switch (metadataItem.Property)
+                    {
+                        case "group-position":
+                            info.Volume = metadataItem.Content;
+                            break;
+                        case "belongs-to-collection":
+                            info.Series = metadataItem.Content;
+                            if (string.IsNullOrEmpty(info.SeriesSort))
+                            {
+                                info.SeriesSort = metadataItem.Content;
+                            }
 
-                        break;
-                    case "collection-type":
-                        // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
-                        break;
-                    case "role":
-                        if (metadataItem.Scheme != null && !metadataItem.Scheme.Equals("marc:relators")) break;
+                            break;
+                        case "collection-type":
+                            // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
+                            break;
+                        case "role":
+                            if (metadataItem.Scheme != null && !metadataItem.Scheme.Equals("marc:relators")) break;
 
-                        var creatorId = metadataItem.Refines?.Replace("#", string.Empty);
-                        var person = epubBook.Schema.Package.Metadata.Creators
-                            .SingleOrDefault(c => c.Id == creatorId);
-                        if (person == null) break;
+                            var creatorId = metadataItem.Refines?.Replace("#", string.Empty);
+                            var person = epubBook.Schema.Package.Metadata.Creators
+                                .SingleOrDefault(c => c.Id == creatorId);
+                            if (person == null) break;
 
-                        PopulatePerson(metadataItem, info, person);
-                        break;
-                    case "title-type":
-                        if (metadataItem.Content.Equals("collection"))
-                        {
-                            ExtractCollectionOrReadingList(metadataItem, epubBook, info);
-                        }
+                            PopulatePerson(metadataItem, info, person);
+                            break;
+                        case "title-type":
+                            if (metadataItem.Content.Equals("collection"))
+                            {
+                                ExtractCollectionOrReadingList(metadataItem, epubBook, info);
+                            }
 
-                        if (metadataItem.Content.Equals("main"))
-                        {
-                            ExtractSortTitle(metadataItem, epubBook, info);
-                        }
+                            if (metadataItem.Content.Equals("main"))
+                            {
+                                ExtractSortTitle(metadataItem, epubBook, info);
+                            }
 
-                        break;
+                            break;
+                    }
                 }
             }
+
 
             // If this is a single book and not a collection, set publication status to Completed
             if (string.IsNullOrEmpty(info.Volume) &&
@@ -682,7 +668,7 @@ public partial class BookService : IBookService
 
             // Include regular Writer as well, for cases where there is no special tag
             info.Writer = string.Join(",",
-                epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)));
+                epubBook?.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)) ?? []);
 
             var hasVolumeInSeries = !Parser.ParseVolume(info.Title, LibraryType.Manga)
                 .Equals(Parser.LooseLeafVolume);
@@ -972,6 +958,7 @@ public partial class BookService : IBookService
     {
         var body = doc.DocumentNode.SelectSingleNode("//body");
 
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (body == null)
         {
             _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
@@ -1053,6 +1040,7 @@ public partial class BookService : IBookService
                 var endNode = body.SelectSingleNode(endXpath);
 
                 // Case 1: Both start and end are on the same page
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                 if (startNode != null && endNode != null)
                 {
                     totalCharacters += CountLettersBetweenNodes(body, startNode, endNode);
@@ -1206,15 +1194,7 @@ public partial class BookService : IBookService
             var targetImage = images[bookmarkDto.ImageOffset];
 
             // Get the image source attribute
-            string? srcAttributeName = null;
-            if (targetImage.Attributes["src"] != null)
-            {
-                srcAttributeName = "src";
-            }
-            else if (targetImage.Attributes["xlink:href"] != null)
-            {
-                srcAttributeName = "xlink:href";
-            }
+            var srcAttributeName = GetImageSrcAttributeName(targetImage);
 
             if (string.IsNullOrEmpty(srcAttributeName))
             {
@@ -1272,6 +1252,22 @@ public partial class BookService : IBookService
         }
 
         throw new KavitaException($"Page {bookmarkDto.Page} not found in epub");
+    }
+
+    private static string? GetImageSrcAttributeName(HtmlNode targetImage)
+    {
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (targetImage.Attributes["src"] != null)
+        {
+            return "src";
+        }
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (targetImage.Attributes["xlink:href"] != null)
+        {
+            return "xlink:href";
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -1473,8 +1469,6 @@ public partial class BookService : IBookService
 
         ScopeImages(doc, book, apiBase);
 
-        InjectImages(doc, book, apiBase);
-
         // Inject PTOC Bookmark Icons
         InjectTextBookmarks(doc, ptocBookmarks);
 
@@ -1580,6 +1574,7 @@ public partial class BookService : IBookService
         doc.LoadHtml(content);
 
         var anchors = doc.DocumentNode.SelectNodes("//a");
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (anchors == null) return chaptersList;
 
         foreach (var anchor in anchors)
@@ -1718,6 +1713,7 @@ public partial class BookService : IBookService
 
                 var body = doc.DocumentNode.SelectSingleNode("//body");
 
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                 if (body == null)
                 {
                     if (doc.ParseErrors.Any())
@@ -1741,39 +1737,6 @@ public partial class BookService : IBookService
 
         throw new KavitaException("epub-html-missing");
     }
-
-    // private static void CreateToCChapter(EpubBookRef book, EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
-    //     ICollection<BookChapterItem> chaptersList, IReadOnlyDictionary<string, int> mappings)
-    // {
-    //     if (navigationItem.Link == null)
-    //     {
-    //         var item = new BookChapterItem
-    //         {
-    //             Title = navigationItem.Title,
-    //             Children = nestedChapters
-    //         };
-    //         if (nestedChapters.Count > 0)
-    //         {
-    //             item.Page = nestedChapters[0].Page;
-    //         }
-    //
-    //         chaptersList.Add(item);
-    //     }
-    //     else
-    //     {
-    //         var groupKey = CoalesceKey(book, mappings, navigationItem.Link.ContentFilePath);
-    //         if (mappings.ContainsKey(groupKey))
-    //         {
-    //             chaptersList.Add(new BookChapterItem
-    //             {
-    //                 Title = navigationItem.Title,
-    //                 Page = mappings[groupKey],
-    //                 Children = nestedChapters
-    //             });
-    //         }
-    //     }
-    // }
-
 
     /// <summary>
     /// Extracts the cover image to covers directory and returns file path back
