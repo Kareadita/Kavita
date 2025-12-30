@@ -375,14 +375,21 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         var context = scope.ServiceProvider.GetRequiredService<DataContext>();
         var eventHub = scope.ServiceProvider.GetRequiredService<IEventHub>();
 
+        // Get the actual last activity time from the session itself
+        var sessionData = await context.AppUserReadingSession
+            .Where(s => s.Id == sessionId)
+            .Select(s => new { s.LastModified, s.LastModifiedUtc })
+            .FirstOrDefaultAsync();
 
-        // Mark session as inactive in DB
+        if (sessionData == null) return;
+
+        // Use the session's LastModified as the EndTime (the actual last activity) and mark session as inactive
         await context.AppUserReadingSession
             .Where(s => s.Id == sessionId)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(x => x.IsActive, false)
-                .SetProperty(x => x.EndTime, DateTime.Now.Subtract(TimeSpan.FromMinutes(_defaultTimeoutMinutes)))
-                .SetProperty(x => x.EndTimeUtc, DateTime.UtcNow.Subtract(TimeSpan.FromMinutes(_defaultTimeoutMinutes)))
+                .SetProperty(x => x.EndTime, sessionData.LastModified)
+                .SetProperty(x => x.EndTimeUtc, sessionData.LastModifiedUtc)
                 .SetProperty(x => x.LastModified, DateTime.Now)
                 .SetProperty(x => x.LastModifiedUtc, DateTime.UtcNow));
 

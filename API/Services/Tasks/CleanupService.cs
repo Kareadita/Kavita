@@ -65,12 +65,12 @@ public class CleanupService : ICleanupService
     /// <summary>
     /// Cleans up Temp, cache, deleted cover images,  and old database backups
     /// </summary>
-    [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
+    [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail, DelaysInSeconds = [120, 300, 300])]
     public async Task Cleanup()
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToEncoding", Array.Empty<object>(),
+        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToEncoding", [],
                 TaskScheduler.DefaultQueue, true) ||
-            TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToEncoding", Array.Empty<object>(),
+            TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToEncoding", [],
                 TaskScheduler.DefaultQueue, true))
         {
             _logger.LogInformation("Cleanup put on hold as a media conversion in progress");

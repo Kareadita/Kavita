@@ -66,6 +66,10 @@ export class ClientDeviceCardComponent {
     name: new FormControl('', [Validators.required]),
   });
 
+  currentUserId = computed(() => {
+    return this.accountService.currentUserSignal()?.id;
+  });
+
   ipAddress = computed(() => {
     const address = this.clientDevice().currentClientInfo.ipAddress;
     if (!address) return null;

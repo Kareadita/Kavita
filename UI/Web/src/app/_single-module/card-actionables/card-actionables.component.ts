@@ -1,16 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  effect,
-  EventEmitter,
-  inject,
-  input,
-  model,
-  OnChanges,
-  OnDestroy,
-  Output
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, inject, input, OnDestroy, Output} from '@angular/core';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {AccountService} from 'src/app/_services/account.service';
 import {ActionableEntity, ActionItem} from 'src/app/_services/action-factory.service';
@@ -34,7 +22,6 @@ import {User} from "../../_models/user/user";
 })
 export class CardActionablesComponent implements OnDestroy {
 
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly modalService = inject(NgbModal);
