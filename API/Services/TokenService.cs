@@ -116,15 +116,6 @@ public class TokenService : ITokenService
                 TokenOptions.DefaultProvider,
                 RefreshTokenName);
 
-            try
-            {
-                await _unitOfWork.UserRepository.UpdateUserAsActive(user.Id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
-            }
-
             return new TokenRequestDto()
             {
                 Token = await CreateToken(user),
