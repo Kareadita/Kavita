@@ -1418,16 +1418,36 @@ public partial class BookService : IBookService
     {
         _directoryService.ExistOrCreate(targetDirectory);
 
-        var settings = _unitOfWork.SettingsRepository.GetSettingsDtoAsync().Result;
+        var settings = _unitOfWork.SettingsRepository.GetSettingsDtoAsync().GetAwaiter().GetResult();
         var dims = settings.PdfRenderResolution.GetDimensions();
+        var pageDimensions = new PageDimensions(dims.dim1, dims.dim2);
 
-        using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(dims.dim1, dims.dim2));
-        var pages = docReader.GetPageCount();
-        Parallel.For(0, pages, pageNumber =>
+        int pages;
+        using (var countReader = DocLib.Instance.GetDocReader(fileFilePath, pageDimensions))
         {
+            pages = countReader.GetPageCount();
+        }
+
+        var parallelOptions = new ParallelOptions
+        {
+            MaxDegreeOfParallelism = Math.Min(Environment.ProcessorCount, 4)
+        };
+
+        Parallel.For(0, pages, parallelOptions, pageNumber =>
+        {
+            using var docReader = DocLib.Instance.GetDocReader(fileFilePath, pageDimensions);
             using var stream = StreamManager.GetStream("BookService.GetPdfPage");
+
             GetPdfPage(docReader, pageNumber, stream);
-            using var fileStream = File.Create(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"));
+
+            var outputPath = Path.Combine(targetDirectory, $"Page-{pageNumber}.png");
+            using var fileStream = new FileStream(
+                outputPath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 81920);
+
             stream.Seek(0, SeekOrigin.Begin);
             stream.CopyTo(fileStream);
         });
