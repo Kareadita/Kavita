@@ -2,11 +2,13 @@
 
   <app-list-select-modal
     [title]="t('title')"
-    [items]="listItems()"
+    [inputItems]="listItems()"
     [preSelectedItems]="preSelectedListItems()"
     [loading]="loading()"
     [selectedText]="t('bound')"
+    hiddenTranslationKey="bulk-set-reading-profile-modal.hidden"
     [multiSelect]="true"
+    [hideItemsWhenInvalid]="true"
     [interceptConfirm]="addToProfile.bind(this)"
     [isSelectionValidFunc]="validSelection.bind(this)"
     [isValidItemFunc]="validItem.bind(this)"

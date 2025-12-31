@@ -22,6 +22,9 @@
     @if (invalidSelection) {
       <span class="text-danger"> {{invalidSelectWarningValue}} </span>
     }
+    @if (hideItemsWhenInvalid() && hiddenItems() > 0) {
+      <span class="text-warning" role="alert">{{t(hiddenTranslationKey(), {amount: hiddenItems()})}}</span>
+    }
 
     <form [formGroup]="filterForm">
 

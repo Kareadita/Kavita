@@ -1639,7 +1639,8 @@
         "loading": "{{common.loading}}",
         "create": "{{common.create}}",
         "bound":  "Bound",
-        "warning-duplicate": "Your selection contains overlapping devices, this is not allowed"
+        "warning-duplicate": "Your selection contains overlapping devices, this is not allowed",
+        "hidden": "{{amount}} profile(s) hidden due to invalid state"
     },
 
     "entity-title": {
@@ -3716,6 +3717,10 @@
         "reading-profile-series-settings-title": "Series",
         "reading-profile-library-settings-title": "Library",
         "delete": "{{common.delete}}"
+    },
+
+    "list-select-modal": {
+      "hidden": "{{amount}} items hidden due to invalid state"
     },
 
 

@@ -46,8 +46,9 @@ export class ListSelectModalComponent<T> {
   description = model<string | null>(null);
   selectedText = model(translate('common.selected'));
   invalidSelectionWarning = model<string | null>(null);
+  hiddenTranslationKey = model('list-select-modal.hidden')
 
-  items = model.required<ListSelectionItem<T>[]>();
+  inputItems = model.required<ListSelectionItem<T>[]>();
   preSelectedItems = model<T[]>([]);
   isValidItemFunc = model<(item: T, selection: T[]) => boolean>(() => true);
   isSelectionValidFunc = model<(selection:T[]) => boolean>(() => true);
@@ -57,6 +58,7 @@ export class ListSelectModalComponent<T> {
   requireConfirmation = model(false);
   showFooter = model(true);
   multiSelect = model(false);
+  hideItemsWhenInvalid = model(false);
 
   itemTemplate = input<TemplateRef<any> | null>(null);
 
@@ -82,6 +84,22 @@ export class ListSelectModalComponent<T> {
 
   protected selectedItems = signal<ListSelectionItem<T>[]>([]);
 
+  protected items = computed(() => {
+    const items = this.inputItems();
+    const hideOnInvalid = this.hideItemsWhenInvalid();
+
+    if (!hideOnInvalid) return items;
+
+    return items.filter(item => this.isItemValid(item));
+  });
+
+  protected hiddenItems = computed(() => {
+    const allItems = this.inputItems();
+    const items = this.items();
+
+    return allItems.length - items.length;
+  });
+
   protected filteredItems = computed(() => {
     const items = this.items();
     const filter = this.filterQuery().toLowerCase();
@@ -98,7 +116,7 @@ export class ListSelectModalComponent<T> {
 
   constructor() {
     effect(() => {
-      const items = this.items();
+      const items = this.inputItems();
       const preSelectedItems = this.preSelectedItems();
       const selectedItems = untracked(this.selectedItems); // Don't trigger effect when selected items changes
 

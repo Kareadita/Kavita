@@ -355,7 +355,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     component.multiSelect.set(true);
     component.requireConfirmation.set(true);
     component.preSelectedItems.set(this.selectedProfile.deviceIds ?? []);
-    component.items.set(this.devices.map(d => ({
+    component.inputItems.set(this.devices.map(d => ({
       label: d.friendlyName,
       value: d.id
     })));
