@@ -43,10 +43,10 @@ public class BackupService : IBackupService
         _directoryService = directoryService;
         _eventHub = eventHub;
 
-        _backupFiles = new List<string>()
-        {
+        _backupFiles =
+        [
             "appsettings.json"
-        };
+        ];
     }
 
     /// <summary>
@@ -62,12 +62,12 @@ public class BackupService : IBackupService
         var files = rollFiles
             ? _directoryService.GetFiles(_directoryService.LogDirectory,
                 $@"{_directoryService.FileSystem.Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
-            : new[] {_directoryService.FileSystem.Path.Join(_directoryService.LogDirectory, "kavita.log")};
+            : [_directoryService.FileSystem.Path.Join(_directoryService.LogDirectory, "kavita.log")];
         return files;
     }
 
     /// <summary>
-    /// Will backup anything that needs to be backed up. This includes logs, setting files, bare minimum cover images (just locked and first cover).
+    /// Will back up anything that needs to be backed up. This includes logs, setting files, bare minimum cover images (just locked and first cover).
     /// </summary>
     [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
     public async Task BackupDatabase()
@@ -88,7 +88,7 @@ public class BackupService : IBackupService
         await SendProgress(0.1F, "Copying core files");
 
         var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow:s}Z".Replace("/", "_").Replace(":", "_");
-        var zipPath = _directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_{dateString}_v{BuildInfo.Version}.zip");
+        var zipPath = _directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_v{BuildInfo.Version}_{dateString}.zip");
 
         if (File.Exists(zipPath))
         {
@@ -136,7 +136,7 @@ public class BackupService : IBackupService
 
         try
         {
-            ZipFile.CreateFromDirectory(tempDirectory, zipPath);
+            await ZipFile.CreateFromDirectoryAsync(tempDirectory, zipPath);
         }
         catch (AggregateException ex)
         {

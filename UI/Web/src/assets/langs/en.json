@@ -2112,7 +2112,9 @@
         "key-bind-title-page-up": "Page up",
         "key-bind-tooltip-page-up": "Move one page upwards",
         "key-bind-title-page-down": "Page down",
-        "key-bind-tooltip-page-down": "Move one page downwards"
+        "key-bind-tooltip-page-down": "Move one page downwards",
+        "key-bind-title-offset-double-page": "Offset double page",
+        "key-bind-tooltip-offset-double-page": "Offset pages for double page spread alignment"
     },
 
     "collection-detail": {
@@ -2218,8 +2220,8 @@
         "bookmark": "Bookmark current page",
         "double-click": "double click",
         "close-reader": "Close reader",
-        "toggle-menu": "Toggle Menu"
-
+        "toggle-menu": "Toggle Menu",
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
 
     "grouped-typeahead": {
@@ -2475,7 +2477,8 @@
         "reading-profile-updated": "Reading profile updated",
         "reading-profile-promoted": "Reading profile promoted",
         "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
-        "series-progress": "Series Progress: {{percentage}}"
+        "series-progress": "Series Progress: {{percentage}}",
+        "page-offset-label": "Page Offset"
     },
 
     "metadata-filter": {
@@ -2540,6 +2543,7 @@
         "read-progress": "Last Read",
         "average-rating": "Average Rating",
         "random": "Random",
+        "user-rating": "My rating",
         "person-name": "Name",
         "person-series-count": "Series Count",
         "person-chapter-count": "Chapter Count",
@@ -2870,10 +2874,8 @@
     },
 
     "activity-card": {
-        "pages-count": "{{series-detail.pages-count}}",
-        "words-count": "{{series-detail.words-count}}",
-        "active-pages-label": "Total Pages",
-        "active-words-label": "Total Words",
+        "total-pages-label": "Total Pages",
+        "total-words-label": "Total Words",
         "total-chapters-label": "Chapters",
         "started-label": "Started",
         "view-label": "View"
@@ -2890,8 +2892,6 @@
         "stats-tab": "{{tabs.stats-tab}}",
         "reviews-tab": "{{tabs.reviews-tab}}",
         "no-reviews": "No Reviews yet",
-        "user-you": "you",
-        "user-possessive-your": "your",
         "user-possessive": "{{name}}'s",
         "total-reads-badge": "{{reads}} Reads",
         "k+-badge": "K+ Subscriber"
@@ -2999,7 +2999,8 @@
         "words": "Words",
         "chapters": "Chapters",
         "no-activity": "No Activity",
-        "no-activity-tooltip": "No reading activity on {{date}}."
+        "no-activity-tooltip": "No reading activity on {{date}}.",
+        "all-time": "{{time-periods.all-time}}"
     },
 
     "reading-pace": {

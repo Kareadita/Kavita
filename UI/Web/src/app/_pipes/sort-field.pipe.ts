@@ -71,7 +71,9 @@ export class SortFieldPipe implements PipeTransform {
         return this.translocoService.translate('sort-field-pipe.average-rating');
       case SortField.Random:
         return this.translocoService.translate('sort-field-pipe.random');
-    }
+      case SortField.UserRating:
+          return this.translocoService.translate('sort-field-pipe.user-rating');
+      }
   }
 
 }

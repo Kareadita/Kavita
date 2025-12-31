@@ -1,4 +1,4 @@
-﻿namespace API.DTOs.Filtering;
+namespace API.DTOs.Filtering;
 
 public enum SortField
 {
@@ -38,6 +38,11 @@ public enum SortField
     /// Randomise the order
     /// </summary>
     Random = 9,
+    /// <summary>
+    /// By user rating
+    /// </summary>
+    UserRating = 10,
+
 }
 
 public enum AnnotationSortField

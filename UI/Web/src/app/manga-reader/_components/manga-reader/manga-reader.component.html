@@ -255,30 +255,31 @@
                 </div>
                 <div class="col-md-3 col-sm-12">
                   <div class="mb-3">
-                    <div class="mb-3">
-                      <div class="form-check form-switch">
-                        <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" switch>
-                        <label class="form-check-label" for="auto-close">{{t('auto-close-menu-label')}}</label>
-                      </div>
+                    <div class="form-check form-switch">
+                      <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" switch>
+                      <label class="form-check-label" for="auto-close">{{t('auto-close-menu-label')}}</label>
                     </div>
                   </div>
 
                   <div class="mb-3">
-                    <div class="mb-3">
-                      <div class="form-check form-switch">
-                        <input type="checkbox" id="swipe-to-paginate" formControlName="swipeToPaginate" class="form-check-input" switch>
-                        <label class="form-check-label" for="swipe-to-paginate">{{t('swipe-enabled-label')}}</label>
-                      </div>
+                    <div class="form-check form-switch">
+                      <input type="checkbox" id="swipe-to-paginate" formControlName="swipeToPaginate" class="form-check-input" switch>
+                      <label class="form-check-label" for="swipe-to-paginate">{{t('swipe-enabled-label')}}</label>
                     </div>
                   </div>
                 </div>
                 <div class="col-md-3 col-sm-12">
                   <div class="mb-3">
-                    <div class="mb-3">
-                      <div class="form-check form-switch">
-                        <input type="checkbox" id="emulate-book" formControlName="emulateBook" class="form-check-input" switch>
-                        <label class="form-check-label" for="emulate-book">{{t('emulate-comic-book-label')}}</label>
-                      </div>
+                    <div class="form-check form-switch">
+                      <input type="checkbox" id="emulate-book" formControlName="emulateBook" class="form-check-input" switch>
+                      <label class="form-check-label" for="emulate-book">{{t('emulate-comic-book-label')}}</label>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="form-check form-switch" [title]="generalSettingsForm.get('pageOffset')?.disabled ? t('offset-only-double') : ''">
+                      <input type="checkbox" id="page-offset" formControlName="pageOffset" class="form-check-input" switch>
+                      <label class="form-check-label" for="page-offset">{{t('page-offset-label')}}</label>
                     </div>
                   </div>
                 </div>
