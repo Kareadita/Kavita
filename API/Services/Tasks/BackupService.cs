@@ -87,7 +87,7 @@ public class BackupService : IBackupService
         await SendProgress(0F, "Started backup");
         await SendProgress(0.1F, "Copying core files");
 
-        var dateString = $@"{DateTime.UtcNow:yyyy_MM_dd_HH\H_mm\M}";
+        var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow:s}Z".Replace("/", "_").Replace(":", "_");
         var zipPath = _directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_v{BuildInfo.Version}_{dateString}.zip");
 
         if (File.Exists(zipPath))
