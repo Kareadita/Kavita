@@ -448,8 +448,6 @@
         "new-password-label": "New Password",
         "confirm-password-label": "Confirm Password",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Passwords must match",
@@ -468,13 +466,9 @@
         "invite-url-label": "Invite Url",
         "invite-url-tooltip": "Copy this and paste in a new tab",
         "has-invalid-email": "It looks like you do not have a valid email set. Change email will require the admin to send you a link to complete this action.",
-
-        "permission-error": "You do not have permission to change your email. Reach out to the admin of the server.",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
 
@@ -482,17 +476,11 @@
         "age-restriction-label": "Age Restriction",
         "unknowns": "Unknowns",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
 
     "api-key": {
-        "copy": "Copy",
-        "show": "Show",
-        "hide": "Hide",
-        "regen-warning": "Regenerating your API key will invalidate any existing clients.",
-        "no-key": "ERROR - KEY NOT SET"
+        "copy": "{{book-line-overlay.copy}}"
     },
 
     "scrobbling-providers": {
@@ -546,10 +534,6 @@
     },
 
     "active-user-card": {
-        "overall": "Overall",
-        "this-week": "This Week",
-        "this-month": "This Month",
-        "this-year": "This Year",
         "total-hours": "{{duration}} total",
         "comics-count": "{{count}} comics",
         "books-count": "{{count}} books"
@@ -1034,10 +1018,6 @@
         "not-liked": "Liked by {{amount}} people, you did not like it"
     },
 
-    "annotations-tab": {
-        "title": "{{tabs.annotations-tab}}"
-    },
-
     "view-annotations-drawer": {
         "title": "{{tabs.annotations-tab}}",
         "close": "{{common.close}}",
@@ -1095,27 +1075,11 @@
     },
 
     "book-reader": {
-        "title": "Book Settings",
         "page-label": "Page",
-
-        "pagination-header": "Section",
-        "go-to-first-page": "Go to first page",
-        "go-to-last-page": "Go to last page",
-        "prev-page": "Prev Page",
-        "next-page": "Next Page",
-        "prev-chapter": "Prev Chapter/Volume",
-        "next-chapter": "Next Chapter/Volume",
         "skip-header": "Skip to main content",
-        "virtual-pages": "virtual pages",
-
-        "settings-header": "Settings",
-        "table-of-contents-header": "Table of Contents",
-        "bookmarks-header": "{{side-nav.bookmarks}}",
-        "toc-header": "ToC",
-
         "loading-book": "Loading book…",
         "go-back": "Go Back",
-        "close-reader": "Close Reader",
+        "close-reader-alt": "Close Reader",
         "incognito-mode-alt": "Incognito mode is on. Toggle to turn off.",
         "incognito-mode-label": "Incognito Mode",
         "next": "Next",
@@ -1386,10 +1350,6 @@
 
     "all-annotations": {
         "title": "All Annotations",
-        "filter": {
-            "true": "True",
-            "false": "False"
-        },
         "annotations-count": "{{num}} Annotations",
         "export": "Export"
     },
@@ -1547,7 +1507,6 @@
 
     "card-detail-layout": {
         "total-items": "{{count}} total items",
-        "jumpkey-count": "{{count}} Series",
         "no-data": "{{common.no-data}}"
     },
 
@@ -1637,7 +1596,6 @@
         "clear": "{{common.clear}}",
         "no-data": "No collections created yet",
         "loading": "{{common.loading}}",
-        "create": "{{common.create}}",
         "bound":  "Bound"
     },
 
@@ -2120,7 +2078,6 @@
         "no-data": "There are no items. Try adding a series.",
         "no-data-filtered": "No items match your current filter.",
         "title-alt": "Kavita - {{collectionName}} Collection",
-        "series-header": "Series",
         "sync-progress": "Series Collected: {{title}}",
         "last-sync": "Last Sync: {{date}}",
         "item-count": "{{common.item-count}}"
@@ -2320,10 +2277,6 @@
         "starting-title": "Starting",
         "promote-label": "Promote",
         "promote-tooltip": "Promotion means that the collection can be seen server-wide, not just for you. All series within this collection will still have user-access restrictions placed on them."
-    },
-
-    "browse-themes-modal": {
-        "title": "Browse Themes"
     },
 
     "import-mal-collection-modal": {
@@ -2635,7 +2588,6 @@
         "save": "{{common.save}}",
         "title-label": "Title",
         "sort-order-label": "Sort Order",
-        "sort-order-tooltip": "The reading order in which this chapter is ordered within the volume",
         "isbn-label": "ISBN",
         "release-date-label": "Release",
         "summary-label": "{{edit-series-modal.summary-label}}",
@@ -2751,9 +2703,7 @@
 
     "day-breakdown": {
         "title": "Day Breakdown",
-        "no-data": "No progress, get to reading",
-        "x-axis-label": "Day of Week",
-        "y-axis-label": "Reading Events"
+        "no-data": "No progress, get to reading"
     },
 
     "file-breakdown-stats": {
@@ -2976,7 +2926,6 @@
 
     "avg-time-reading-by-hour": {
         "title": "Average time spent reading by hour",
-        "minutes": "Minutes",
         "most-time-spend-reading": "{{name}} spends most of their time reading between {{startHour}} and {{endHour}} with an average of {{amount}} minutes",
         "data-since": "Only includes reads since {{date}}",
         "no-data": "{{common.no-data}}"
@@ -2997,9 +2946,13 @@
         "pages": "Pages",
         "words": "Words",
         "chapters": "Chapters",
-        "no-activity": "No Activity",
+        "no-activity-alt": "No Activity",
         "no-activity-tooltip": "No reading activity on {{date}}.",
-        "all-time": "{{time-periods.all-time}}"
+        "all-time": "{{time-periods.all-time}}",
+        "low-activity-alt": "Low Activity",
+        "moderate-activity-alt": "Moderate Activity",
+        "good-activity-alt": "Good Activity",
+        "high-activity-alt": "High Activity"
     },
 
     "reading-pace": {
@@ -3141,22 +3094,16 @@
     },
 
     "customize-dashboard-modal": {
-        "title-dashboard": "Customize Dashboard",
-        "title-sidenav": "Customize Side Nav",
-        "title-external-sources": "External Sources",
         "title-smart-filters": "Smart Filters",
-        "close": "{{common.close}}",
         "dashboard": "Dashboard",
         "sidenav": "Side Nav",
         "external-sources": "External Sources",
         "smart-filters": "Smart Filters",
-        "help": "{{common.help}}",
         "description": "You can customize different aspects of Kavita by reordering, toggling visibility, and binding smart filters/external sources to your home page or side nav."
     },
 
     "customize-dashboard-streams": {
         "no-data": "All Smart filters added to Dashboard or none created yet.",
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -3166,7 +3113,6 @@
     "customize-sidenav-streams": {
         "no-data": "All Smart filters added to Side Nav or none created yet.",
         "no-data-external-source": "All External Sources added to Side Nav or none created yet.",
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -3793,7 +3739,6 @@
         "select-all": "Select All",
         "deselect-all": "Deselect All",
         "series-count": "{{num}} Series",
-        "author-count": "{{num}} Authors",
         "item-count": "{{num}} Items",
         "chapter-count": "{{num}} Chapters",
         "issue-count": "{{num}} Issues",
@@ -3808,7 +3753,6 @@
         "book-num-shorthand": "Book {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Vol {{num}}",
-
         "book-nums": "Books",
         "issue-nums": "Issues",
         "chapter-nums": "Chapters",

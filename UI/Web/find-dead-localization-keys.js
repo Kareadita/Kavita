@@ -6,17 +6,24 @@ const CONFIG = {
     i18nFile: './src/assets/langs/en.json',
     searchDirs: ['./src'],
     extensions: ['.ts', '.html'],
+    // Namespaces to skip entirely (dynamic usage too complex to trace)
+    blacklistedNamespaces: [
+        'month-label-pipe',
+        'ordinal-date-pipe',
+    ],
     // Patterns that reference i18n keys
     usagePatterns: [
         // Transloco patterns
         /(?:^|[^a-zA-Z0-9_])t\(['"`]([a-zA-Z0-9._-]+)['"`]/g,  // t('key') or t('key', {params})
         /translocoService\.translate\(['"`]([a-zA-Z0-9._-]+)['"`]/g,  // translocoService.translate('key')
         /translocoService\.selectTranslate\(['"`]([a-zA-Z0-9._-]+)['"`]/g,
-        /\|\s*transloco(?:\s*:\s*\{[^}]*\})?/g,            // | transloco pipe (key before pipe)
+        /(?:^|[^a-zA-Z0-9_.])translate\(['"`]([a-zA-Z0-9._-]+)['"`]/g,  // translate('key') standalone function
+        /transloco\.translate\(['"`]([a-zA-Z0-9._-]+)['"`]/g,  // this.transloco.translate('key')
         /\[transloco\]=['"`]([a-zA-Z0-9._-]+)['"`]/g,      // [transloco]="key"
 
-        // String literals in component metadata / configs (description:, tooltip:, etc.)
-        /:\s*['"`]([a-zA-Z0-9][a-zA-Z0-9_-]*(?:-[a-zA-Z0-9_]+)+)['"`]/g,  // kebab-case keys as values
+        // Template literal translate: translate(`namespace.${var}`) or translate(`key`)
+        /translate\(`([a-zA-Z0-9._-]+)`\)/g,
+        /transloco\.translate\(`([a-zA-Z0-9._-]+)\./g,  // transloco.translate(`namespace. - captures namespace
 
         // ngx-translate fallback patterns
         /['"`]([a-zA-Z0-9._-]+)['"]\s*\|\s*translate/g,
@@ -25,7 +32,26 @@ const CONFIG = {
     ],
     // Pattern for interpolated keys within i18n values: {{key.path}}
     interpolationPattern: /\{\{([a-zA-Z0-9._-]+)\}\}/g,
+    // Patterns indicating dynamic key construction - mark whole namespace as used
+    dynamicKeyPatterns: [
+        /translate\(['"`]([a-zA-Z0-9._-]+)\.\s*['"`]\s*\+/g,  // translate('namespace.' +
+        /t\(['"`]([a-zA-Z0-9._-]+)\.\s*['"`]\s*\+/g,          // t('namespace.' +
+        /translate\([a-zA-Z0-9_]+\s*\+\s*['"`]\.([a-zA-Z0-9._-]+)['"`]/g,  // translate(variable + '.suffix') - captures suffix
+        /\+\s*['"`]\.([a-zA-Z0-9_-]+)['"]\s*[,)]/g,           // + '.suffix', or + '.suffix') - generic dynamic suffix
+        /translate\(`([a-zA-Z0-9._-]+)\.\$\{/g,               // translate(`namespace.${...}`) - template literal dynamic
+        /transloco\.translate\(`([a-zA-Z0-9._-]+)\.\$\{/g,    // this.transloco.translate(`namespace.${...}`)
+    ],
 };
+
+// Check if a key belongs to a blacklisted namespace
+function isBlacklisted(key) {
+    for (const ns of CONFIG.blacklistedNamespaces) {
+        if (key === ns || key.startsWith(ns + '.')) {
+            return true;
+        }
+    }
+    return false;
+}
 
 // Flatten nested JSON to dot-notation keys
 function flattenKeys(obj, prefix = '') {
@@ -55,8 +81,8 @@ function getFiles(dir, exts, files = []) {
     return files;
 }
 
-// Extract Transloco prefixes from a file
-function extractPrefixes(content) {
+// Extract Transloco prefixes from a file (and its sibling template/component)
+function extractPrefixes(filePath, content, fileContentsCache) {
     const prefixes = [];
 
     // *transloco="let t; prefix: 'namespace'"
@@ -73,16 +99,93 @@ function extractPrefixes(content) {
         prefixes.push(match[1]);
     }
 
-    return prefixes;
+    // If this is a .ts file, check sibling .html for prefix
+    if (filePath.endsWith('.ts')) {
+        const htmlPath = filePath.replace(/\.ts$/, '.html');
+        const htmlContent = fileContentsCache.get(htmlPath);
+        if (htmlContent) {
+            structuralPattern.lastIndex = 0;
+            while ((match = structuralPattern.exec(htmlContent)) !== null) {
+                prefixes.push(match[1]);
+            }
+        }
+    }
+
+    // If this is a .html file, check sibling .ts for TRANSLOCO_SCOPE
+    if (filePath.endsWith('.html')) {
+        const tsPath = filePath.replace(/\.html$/, '.ts');
+        const tsContent = fileContentsCache.get(tsPath);
+        if (tsContent) {
+            scopePattern.lastIndex = 0;
+            while ((match = scopePattern.exec(tsContent)) !== null) {
+                prefixes.push(match[1]);
+            }
+        }
+    }
+
+    return [...new Set(prefixes)]; // dedupe
+}
+
+// Extract namespaces that use dynamic key construction
+function extractDynamicNamespaces(content, allI18nKeys) {
+    const namespaces = new Set();
+
+    // Pattern: translate('namespace.' + or t('namespace.' +
+    for (const pattern of CONFIG.dynamicKeyPatterns.slice(0, 2)) {
+        pattern.lastIndex = 0;
+        let match;
+        while ((match = pattern.exec(content)) !== null) {
+            namespaces.add(match[1]);
+        }
+    }
+
+    // Pattern: translate(variable + '.suffix') - find all namespaces that have this suffix
+    for (const pattern of CONFIG.dynamicKeyPatterns.slice(2)) {
+        pattern.lastIndex = 0;
+        let match;
+        while ((match = pattern.exec(content)) !== null) {
+            const suffix = match[1];
+            // Find all namespaces that contain a key ending with this suffix
+            for (const key of allI18nKeys) {
+                if (key.endsWith('.' + suffix)) {
+                    const ns = key.substring(0, key.lastIndexOf('.'));
+                    // Only add top-level namespace
+                    const topNs = ns.includes('.') ? ns.split('.')[0] : ns;
+                    namespaces.add(topNs);
+                }
+            }
+        }
+    }
+
+    return namespaces;
 }
 
 // Extract all i18n key usages from source files
-function findUsedKeys(files, allI18nKeys) {
+function findUsedKeys(files, allI18nKeys, debug = false) {
     const used = new Set();
+    const dynamicNamespaces = new Set();
+
+    // Pre-load all file contents for sibling lookup
+    const fileContentsCache = new Map();
+    for (const file of files) {
+        fileContentsCache.set(file, fs.readFileSync(file, 'utf-8'));
+    }
 
     for (const file of files) {
-        const content = fs.readFileSync(file, 'utf-8');
-        const prefixes = extractPrefixes(content);
+        const content = fileContentsCache.get(file);
+        const prefixes = extractPrefixes(file, content, fileContentsCache);
+
+        // Debug: check specific file
+        if (debug && file.includes('metadata-filter-row')) {
+            console.log(`\n[DEBUG] File: ${file}`);
+            console.log(`[DEBUG] Prefixes found: ${JSON.stringify(prefixes)}`);
+            console.log(`[DEBUG] Contains 'disclaimer-file-size': ${content.includes('disclaimer-file-size')}`);
+        }
+
+        // Collect dynamic namespaces
+        for (const ns of extractDynamicNamespaces(content, allI18nKeys)) {
+            dynamicNamespaces.add(ns);
+        }
 
         // Apply regex patterns
         for (const pattern of CONFIG.usagePatterns) {
@@ -91,9 +194,7 @@ function findUsedKeys(files, allI18nKeys) {
             while ((match = pattern.exec(content)) !== null) {
                 if (match[1]) {
                     const key = match[1];
-                    // Add the raw key (for fully qualified keys)
                     used.add(key);
-                    // Add prefixed versions
                     for (const prefix of prefixes) {
                         used.add(`${prefix}.${key}`);
                     }
@@ -118,12 +219,25 @@ function findUsedKeys(files, allI18nKeys) {
                     for (const prefix of prefixes) {
                         if (key.startsWith(prefix + '.')) {
                             used.add(key);
+                            if (debug && key.includes('disclaimer-file-size')) {
+                                console.log(`[DEBUG] Matched ${key} via prefix ${prefix} in ${file}`);
+                            }
                         }
                     }
                 }
             }
         }
     }
+
+    // Mark all keys under dynamic namespaces as used
+    for (const key of allI18nKeys) {
+        for (const ns of dynamicNamespaces) {
+            if (key.startsWith(ns + '.')) {
+                used.add(key);
+            }
+        }
+    }
+
     return used;
 }
 
@@ -176,6 +290,8 @@ function groupByParent(deadKeys) {
 
 // Main
 function main() {
+    const DEBUG = process.argv.includes('--debug');
+
     console.log('Loading i18n file...');
     const i18n = JSON.parse(fs.readFileSync(CONFIG.i18nFile, 'utf-8'));
     const entries = flattenKeys(i18n);
@@ -186,7 +302,7 @@ function main() {
     const files = CONFIG.searchDirs.flatMap(dir => getFiles(dir, CONFIG.extensions));
     console.log(`Scanning ${files.length} files...`);
 
-    const usedInCode = findUsedKeys(files, [...allKeys]);
+    const usedInCode = findUsedKeys(files, [...allKeys], DEBUG);
     console.log(`Found ${usedInCode.size} key references in code`);
 
     const interpolated = findInterpolatedKeys(entries);
@@ -197,6 +313,7 @@ function main() {
     console.log('Finding dead keys...');
     const deadKeys = [];
     for (const key of allKeys) {
+        if (isBlacklisted(key)) continue;
         if (!isKeyUsed(key, allUsed)) {
             deadKeys.push(key);
         }

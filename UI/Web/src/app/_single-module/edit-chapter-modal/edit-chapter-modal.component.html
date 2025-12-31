@@ -472,9 +472,30 @@
                   </div>
                 </div>
 
-                <!-- translator -->
+                <!-- editor & translator -->
                 <div class="row">
-                  <div class="col-lg-12 col-md-12 pe-2">
+                  <div class="col-lg-6 col-md-12 pe-2">
+                    <div class="mb-3">
+                      @if(getPersonsSettings(PersonRole.Editor); as settings) {
+                        <app-setting-item [title]="t('editor-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                          <ng-template #view>
+                            <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);chapter.editorLocked = true" [settings]="settings"
+                                           [(locked)]="chapter.editorLocked" (onUnlock)="chapter.editorLocked = false"
+                                           (newItemAdded)="chapter.editorLocked = true">
+                              <ng-template #badgeItem let-item let-position="idx">
+                                {{item.name}}
+                              </ng-template>
+                              <ng-template #optionItem let-item let-position="idx">
+                                {{item.name}}
+                              </ng-template>
+                            </app-typeahead>
+                          </ng-template>
+                        </app-setting-item>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="col-lg-6 col-md-12 pe-2">
                     <div class="mb-3">
                       @if(getPersonsSettings(PersonRole.Translator); as settings) {
                         <app-setting-item [title]="t('translator-label')" [toggleOnViewClick]="false" [showEdit]="false">
