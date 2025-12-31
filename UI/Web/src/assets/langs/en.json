@@ -1765,8 +1765,16 @@
 
         "media-issue-title": "Media Issues",
         "scrobble-issue-title": "Scrobble Issues",
+        "pdf-render-resolution-label": "PDF Render Resolution",
+        "pdf-render-resolution-tooltip": "Resolution at which PDFs will be rendered. Higher resolutions will take longer to render and consume more memory. If you experience issues with PDF rendering, try lowering this.",
         "cover-image-size-label": "Cover Image Size",
         "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times."
+    },
+
+    "pdf-render-resolution": {
+        "default": "Default (1080x1920)",
+        "high": "High (1920x2560)",
+        "ultra": "Ultra (2160x3840)"
     },
 
     "cover-image-size": {
@@ -2658,8 +2666,8 @@
 
         "pages-label": "Pages",
         "words-label": "Length",
-        "pages-count": "{{num}} Pages",
-        "words-count": "{{num}} Words",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
 
         "reading-time-label": "Read Time",
         "date-added-label": "Date Added",
@@ -2861,10 +2869,10 @@
     },
 
     "activity-card": {
-        "pages-count": "Total Pages",
-        "words-count": "Total Words",
-        "active-pages-label": "{{series-detail.pages-count}}",
-        "active-words-label": "{{series-detail.words-count}}",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "active-pages-label": "Total Pages",
+        "active-words-label": "Total Words",
         "total-chapters-label": "Chapters",
         "started-label": "Started",
         "view-label": "View"

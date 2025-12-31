@@ -53,10 +53,6 @@ public class OpdsController : BaseApiController
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
     }
 
-    private int GetUserIdFromContext()
-    {
-        return _userContext.GetUserIdOrThrow();
-    }
 
     /// <summary>
     /// Returns the Catalogue for Kavita's OPDS Service
@@ -75,7 +71,7 @@ public class OpdsController : BaseApiController
             ApiKey = apiKey,
             Prefix = prefix,
             BaseUrl =  baseUrl,
-            UserId = GetUserIdFromContext()
+            UserId = UserId
         });
 
 
@@ -103,7 +99,7 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetSmartFilter(string apiKey, int filterId, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
-        var userId = GetUserIdFromContext();
+        var userId = UserId;
         var (baseUrl, prefix) = await GetPrefix();
 
         var feed = await _opdsService.GetSeriesFromSmartFilter(new OpdsItemsFromEntityIdRequest()
@@ -132,7 +128,7 @@ public class OpdsController : BaseApiController
     {
         try
         {
-            var userId = GetUserIdFromContext();
+            var userId = UserId;
             var (baseUrl, prefix) = await GetPrefix();
 
             var feed = await _opdsService.GetSmartFilters(new OpdsPaginatedCatalogueRequest()
@@ -170,7 +166,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber
             });
@@ -201,7 +197,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber
             });
@@ -232,7 +228,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber
             });
@@ -264,7 +260,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber,
                 EntityId = collectionId
@@ -296,7 +292,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber
             });
@@ -328,7 +324,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber,
                 EntityId = readingListId
@@ -362,7 +358,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber,
                 EntityId = libraryId
@@ -393,7 +389,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber,
             });
@@ -424,7 +420,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber,
                 EntityId = genreId
@@ -455,7 +451,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber,
             });
@@ -485,7 +481,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 PageNumber = pageNumber,
             });
@@ -515,7 +511,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 Query = query,
             });
@@ -532,7 +528,7 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetSearchDescriptor(string apiKey)
     {
-        var userId = GetUserIdFromContext();
+        var userId = UserId;
         var (_, prefix) = await GetPrefix();
 
         var feed = new OpenSearchDescription()
@@ -570,7 +566,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 EntityId = seriesId
             });
@@ -602,7 +598,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 SeriesId = seriesId,
                 VolumeId = volumeId
@@ -636,7 +632,7 @@ public class OpdsController : BaseApiController
             {
                 BaseUrl = baseUrl,
                 Prefix = prefix,
-                UserId = GetUserIdFromContext(),
+                UserId = UserId,
                 ApiKey = apiKey,
                 SeriesId = seriesId,
                 VolumeId = volumeId,
@@ -663,7 +659,7 @@ public class OpdsController : BaseApiController
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}")]
     public async Task<ActionResult> DownloadFile(string apiKey, int seriesId, int volumeId, int chapterId, string filename)
     {
-        var userId = GetUserIdFromContext();
+        var userId = UserId;
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (!await _accountService.HasDownloadPermission(user))
         {
@@ -701,7 +697,7 @@ public class OpdsController : BaseApiController
     public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int libraryId, [FromQuery] int seriesId,
         [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber, [FromQuery] bool saveProgress = true)
     {
-        var userId = GetUserIdFromContext();
+        var userId = UserId;
         if (pageNumber < 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "Page"));
         var chapter = await _cacheService.Ensure(chapterId, true);
         if (chapter == null) return BadRequest(await _localizationService.Translate(userId, "cache-file-find"));
@@ -714,9 +710,6 @@ public class OpdsController : BaseApiController
 
             var content = await _directoryService.ReadFileAsync(path);
             var format = Path.GetExtension(path);
-
-            // Calculates SHA1 Hash for byte[]
-            Response.AddCacheHeader(content);
 
             // Save progress for the user (except Panels, they will use a direct connection)
             var userAgent = Request.Headers.UserAgent.ToString();
@@ -745,7 +738,7 @@ public class OpdsController : BaseApiController
                 }, userId);
             }
 
-            return File(content, MimeTypeMap.GetMimeType(format));
+            return CachedContent(content, MimeTypeMap.GetMimeType(format));
         }
         catch (Exception)
         {
@@ -758,9 +751,9 @@ public class OpdsController : BaseApiController
     [ResponseCache(Duration = 60 * 60, Location = ResponseCacheLocation.Client, NoStore = false)]
     public async Task<ActionResult> GetFavicon(string apiKey)
     {
-        var userId = GetUserIdFromContext();
+        var userId = UserId;
         var files = _directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
-        if (files.Length == 0) return BadRequest(await _localizationService.Translate(userId, "favicon-doesnt-exist"));
+        if (files.Length == 0) return BadRequest(await _localizationService.Translate(UserId, "favicon-doesnt-exist"));
 
         var path = files[0];
         var content = await _directoryService.ReadFileAsync(path);

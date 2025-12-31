@@ -2,7 +2,6 @@
 
 public static class ResponseCacheProfiles
 {
-    public const string Images = "Images";
     public const string Hour = "Hour";
     public const string TenMinute = "10Minute";
     public const string FiveMinute = "5Minute";

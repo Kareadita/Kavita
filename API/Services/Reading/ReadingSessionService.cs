@@ -28,12 +28,12 @@ internal sealed record SessionTimeout<T>
     /// <summary>
     /// Expiration time in Utc
     /// </summary>
-    public DateTime Expiration { get; set; }
+    public DateTime ExpirationUtc { get; set; }
     public DateTime LastTimerRefresh { get; set; }
     public Timer? TimeoutTimer { get; set; }
 }
 
-public class ReadingSessionService : IReadingSessionService, IDisposable, IAsyncDisposable
+public sealed class ReadingSessionService : IReadingSessionService, IDisposable, IAsyncDisposable
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<ReadingSessionService> _logger;
@@ -78,6 +78,9 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         // If Chapter doesn't exist already, add
         var existingChapterActivity = session.ActivityData.FirstOrDefault(d => d.ChapterId == progressDto.ChapterId);
 
+        // Use cached chapter format to avoid repeated DB queries
+        var chapterFormat = await GetChapterFormatAsync(progressDto.ChapterId, context);
+
         if (existingChapterActivity != null)
         {
             existingChapterActivity.PagesRead = progressDto.PageNum - existingChapterActivity.StartPage;
@@ -102,8 +105,6 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
             var chapter = await cacheService.Ensure(progressDto.ChapterId);
 
-            // Use cached chapter format to avoid repeated DB queries
-            var chapterFormat = await GetChapterFormatAsync(progressDto.ChapterId, context);
 
             // Store total pages/words in case it changes in the future
             existingChapterActivity.TotalPages = chapter?.Pages ?? 0;
@@ -146,7 +147,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         else
         {
             // Add new ActivityData for a different chapter in the same session
-            var newActivity = NewActivityData(progressDto);
+            var newActivity = NewActivityData(progressDto, chapterFormat);
             if (clientInfo != null)
             {
                 newActivity.ClientInfo = clientInfo;
@@ -232,7 +233,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         var cacheKey = GenerateCacheKey(userId, dto.ChapterId);
         if (_activeSessions.TryGetValue(cacheKey, out var sessionTimeout))
         {
-            if (sessionTimeout.Expiration <= DateTime.Now)
+            if (sessionTimeout.ExpirationUtc <= DateTime.UtcNow)
             {
                 // Expired - close it and create new one
                 await CloseSession(cacheKey, sessionTimeout.Value);
@@ -261,6 +262,8 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             return dbSession;
         }
 
+        var chapterFormat = await GetChapterFormatAsync(dto.ChapterId, context);
+
         // Create a new session and return it
         var newSession = new AppUserReadingSession()
             {
@@ -270,7 +273,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
                 IsActive = true,
                 ActivityData =
                 [
-                    NewActivityData(dto),
+                    NewActivityData(dto, chapterFormat),
                 ]
             };
 
@@ -282,15 +285,16 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         return newSession;
     }
 
-    private static AppUserReadingSessionActivityData NewActivityData(ProgressDto dto)
+    private static AppUserReadingSessionActivityData NewActivityData(ProgressDto dto, MangaFormat format)
     {
+        var page = format == MangaFormat.Epub ? dto.PageNum : Math.Max(dto.PageNum - 1, 0);
         return new AppUserReadingSessionActivityData
         {
             ChapterId = dto.ChapterId,
             VolumeId = dto.VolumeId,
             SeriesId = dto.SeriesId,
             LibraryId = dto.LibraryId,
-            StartPage = dto.PageNum,
+            StartPage = page,
             EndPage = dto.PageNum,
             StartTime = DateTime.Now,
             StartTimeUtc = DateTime.UtcNow,
@@ -312,7 +316,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             key => new SessionTimeout<int>()
             {
                 Value = sessionId,
-                Expiration = now.AddMinutes(_defaultTimeoutMinutes),
+                ExpirationUtc = now.AddMinutes(_defaultTimeoutMinutes),
                 LastTimerRefresh = now,
                 TimeoutTimer = CreateSessionTimer(key, sessionId)
             },
@@ -320,7 +324,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
             (_, existing) =>
             {
                 // Always update expiration
-                existing.Expiration = now.AddMinutes(_defaultTimeoutMinutes);
+                existing.ExpirationUtc = now.AddMinutes(_defaultTimeoutMinutes);
 
                 // Debounce timer refresh (avoid excessive timer churn)
                 var secondsSinceLastRefresh = (now - existing.LastTimerRefresh).TotalSeconds;
@@ -375,21 +379,24 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         var context = scope.ServiceProvider.GetRequiredService<DataContext>();
         var eventHub = scope.ServiceProvider.GetRequiredService<IEventHub>();
 
-        // Get the actual last activity time from the session itself
-        var sessionData = await context.AppUserReadingSession
-            .Where(s => s.Id == sessionId)
-            .Select(s => new { s.LastModified, s.LastModifiedUtc })
-            .FirstOrDefaultAsync();
+        // Get the actual last activity end time from ActivityData
+        var lastActivityTime = await context.AppUserReadingSessionActivityData
+            .Where(ad => ad.AppUserReadingSessionId == sessionId && ad.EndTime.HasValue)
+            .MaxAsync(ad => (DateTime?)ad.EndTime);
 
-        if (sessionData == null) return;
+        var lastActivityTimeUtc = await context.AppUserReadingSessionActivityData
+            .Where(ad => ad.AppUserReadingSessionId == sessionId && ad.EndTimeUtc.HasValue)
+            .MaxAsync(ad => (DateTime?)ad.EndTimeUtc);
+
+        if (lastActivityTime == null) return;
 
         // Use the session's LastModified as the EndTime (the actual last activity) and mark session as inactive
         await context.AppUserReadingSession
             .Where(s => s.Id == sessionId)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(x => x.IsActive, false)
-                .SetProperty(x => x.EndTime, sessionData.LastModified)
-                .SetProperty(x => x.EndTimeUtc, sessionData.LastModifiedUtc)
+                .SetProperty(x => x.EndTime, lastActivityTime)
+                .SetProperty(x => x.EndTimeUtc, lastActivityTimeUtc)
                 .SetProperty(x => x.LastModified, DateTime.Now)
                 .SetProperty(x => x.LastModifiedUtc, DateTime.UtcNow));
 
@@ -524,7 +531,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         GC.SuppressFinalize(this);
     }
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (_disposed) return;
 
@@ -542,7 +549,7 @@ public class ReadingSessionService : IReadingSessionService, IDisposable, IAsync
         _disposed = true;
     }
 
-    protected virtual async ValueTask DisposeAsyncCore()
+    private async ValueTask DisposeAsyncCore()
     {
         if (_disposed) return;
 
