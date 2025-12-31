@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, input} from '@angular/core';
-import {TranslocoDirective} from "@jsverse/transloco";
 import {Annotation} from "../../book-reader/_models/annotations/annotation";
 import {
   AnnotationCardComponent
@@ -9,7 +8,6 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 @Component({
   selector: 'app-annotations-tab',
   imports: [
-    TranslocoDirective,
     AnnotationCardComponent,
     VirtualScrollerModule
   ],

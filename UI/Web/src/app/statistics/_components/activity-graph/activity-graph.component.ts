@@ -201,14 +201,14 @@ export class ActivityGraphComponent {
 
   getLevelDescription(level: number): string {
     const descriptions = [
-      'activity-graph.no-activity',
-      'activity-graph.low-activity',
-      'activity-graph.moderate-activity',
-      'activity-graph.good-activity',
-      'activity-graph.high-activity'
+      'activity-graph.no-activity-alt',
+      'activity-graph.low-activity-alt',
+      'activity-graph.moderate-activity-alt',
+      'activity-graph.good-activity-alt',
+      'activity-graph.high-activity-alt'
     ];
 
-    return translate(descriptions[level]) || 'activity-graph.no-activity';
+    return translate(descriptions[level]) || 'activity-graph.no-activity-alt';
   }
 
 }

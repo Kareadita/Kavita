@@ -20,7 +20,8 @@ export enum SortField {
    * Kavita+ only
    */
   AverageRating = 8,
-  Random = 9
+  Random = 9,
+  UserRating = 10,
 }
 
 export const allSeriesSortFields = Object.keys(SortField)
