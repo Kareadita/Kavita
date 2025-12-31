@@ -1,9 +1,20 @@
-import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ContentChild,
+  inject, input,
+  model,
+  OnInit,
+  signal,
+  TemplateRef, viewChild
+} from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
+import {NgTemplateOutlet} from "@angular/common";
 
 export type ListSelectionItem<T> = {
   label: string,
@@ -16,7 +27,8 @@ export type ListSelectionItem<T> = {
   imports: [
     TranslocoDirective,
     ReactiveFormsModule,
-    SentenceCasePipe
+    SentenceCasePipe,
+    NgTemplateOutlet
   ],
   templateUrl: './list-select-modal.component.html',
   styleUrl: './list-select-modal.component.scss',
@@ -26,6 +38,8 @@ export class ListSelectModalComponent<T> implements OnInit {
 
   private readonly modal = inject(NgbActiveModal);
 
+  defaultTemplate = viewChild.required<TemplateRef<any>>('defaultTemplate');
+
   title = model.required<string>();
   description = model<string | null>(null);
   items = model.required<ListSelectionItem<T>[]>();
@@ -34,6 +48,18 @@ export class ListSelectModalComponent<T> implements OnInit {
   requireConfirmation = model(false);
   showFooter = model(true);
   multiSelect = model(false);
+  itemTemplate = input<TemplateRef<any> | null>(null);
+
+  protected finalItemTemplate = computed(() => {
+    const defaultTemplate = this.defaultTemplate();
+    const itemTemplate = this.itemTemplate();
+
+    if (itemTemplate) {
+      return itemTemplate;
+    }
+
+    return defaultTemplate;
+  })
 
   protected selectedItems = signal<ListSelectionItem<T>[]>([]);
 
