@@ -51,24 +51,26 @@ export class ReadingProfileService {
     return this.httpClient.delete(this.baseUrl + `reading-profile?profileId=${id}`);
   }
 
-  addToSeries(id: number, seriesId: number) {
-    return this.httpClient.post(this.baseUrl + `reading-profile/series/${seriesId}?profileId=${id}`, {});
+  addToSeries(ids: number[], seriesId: number) {
+    return this.httpClient.post(this.baseUrl + `reading-profile/series/${seriesId}`, ids);
   }
 
   clearSeriesProfiles(seriesId: number) {
     return this.httpClient.delete(this.baseUrl + `reading-profile/series/${seriesId}`, {});
   }
 
-  addToLibrary(id: number, libraryId: number) {
-    return this.httpClient.post(this.baseUrl + `reading-profile/library/${libraryId}?profileId=${id}`, {});
+  addToLibrary(ids: number[], libraryId: number) {
+    return this.httpClient.post(this.baseUrl + `reading-profile/library/${libraryId}`, ids);
   }
 
   clearLibraryProfiles(libraryId: number) {
     return this.httpClient.delete(this.baseUrl + `reading-profile/library/${libraryId}`, {});
   }
 
-  bulkAddToSeries(id: number, seriesIds: number[]) {
-    return this.httpClient.post(this.baseUrl + `reading-profile/bulk?profileId=${id}`, seriesIds);
+  bulkAddToSeries(ids: number[], seriesIds: number[]) {
+    const body = {profileIds: ids, seriesIds: seriesIds};
+
+    return this.httpClient.post(this.baseUrl + `reading-profile/bulk`, body);
   }
 
   setDevices(id: number, deviceIds: number[]) {

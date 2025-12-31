@@ -31,7 +31,9 @@ import {ListSelectModalComponent} from "../../../shared/_components/list-select-
 })
 export class BulkSetReadingProfileModalComponent implements OnInit {
 
+  private readonly modal = inject(NgbActiveModal);
   private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly toastr = inject(ToastrService);
 
   /**
    * Series Ids to add to Reading Profile
@@ -87,31 +89,30 @@ export class BulkSetReadingProfileModalComponent implements OnInit {
   }
 
   addToProfile(profileIds: number | number[]) {
-    const profiles = (Array.isArray(profileIds) ? profileIds : [profileIds])
-      .map(id => this.profileMap().get(id)!);
+    profileIds = Array.isArray(profileIds) ? profileIds : [profileIds];
 
-    /*if (this.seriesIds.length == 1) {
-      this.readingProfileService.addToSeries(profile.id, this.seriesIds[0]).subscribe(() => {
-        this.toastr.success(translate('toasts.series-bound-to-reading-profile', {name: profile.name}));
+    if (this.seriesIds.length == 1) {
+      this.readingProfileService.addToSeries(profileIds, this.seriesIds[0]).subscribe(() => {
+        this.toastr.success(translate('toasts.series-bound-to-reading-profile', {amount: profileIds.length}));
         this.modal.close();
       });
       return;
     }
 
     if (this.seriesIds.length > 1) {
-      this.readingProfileService.bulkAddToSeries(profile.id, this.seriesIds).subscribe(() => {
-        this.toastr.success(translate('toasts.series-bound-to-reading-profile', {name: profile.name}));
+      this.readingProfileService.bulkAddToSeries(profileIds, this.seriesIds).subscribe(() => {
+        this.toastr.success(translate('toasts.series-bound-to-reading-profile', {amount: profileIds.length}));
         this.modal.close();
       });
       return;
     }
 
     if (this.libraryId) {
-      this.readingProfileService.addToLibrary(profile.id, this.libraryId).subscribe(() => {
-        this.toastr.success(translate('toasts.library-bound-to-reading-profile', {name: profile.name}));
+      this.readingProfileService.addToLibrary(profileIds, this.libraryId).subscribe(() => {
+        this.toastr.success(translate('toasts.library-bound-to-reading-profile', {amount: profileIds.length}));
         this.modal.close();
       });
-    }*/
+    }
   }
 
   protected readonly ReadingProfileKind = ReadingProfileKind;

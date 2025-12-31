@@ -233,7 +233,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         Assert.NotNull(profile);
         Assert.Equal("Profile 1", profile.Name);
 
-        await rps.AddProfileToSeries(user.Id, profile2.Id, series.Id);
+        await rps.SetSeriesProfiles(user.Id, [profile2.Id], series.Id);
         profile = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(profile);
         Assert.Equal("Profile 2", profile.Name);
@@ -286,7 +286,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         await unitOfWork.CommitAsync();
 
         var someSeriesIds = lib.Series.Take(lib.Series.Count / 2).Select(s => new {s.Id, s.LibraryId}).ToList();
-        await rps.BulkAddProfileToSeries(user.Id, profile.Id, someSeriesIds.Select(x => x.Id).ToList());
+        await rps.BulkSetSeriesProfiles(user.Id, [profile.Id], someSeriesIds.Select(x => x.Id).ToList());
 
         foreach (var x in someSeriesIds)
         {
@@ -296,7 +296,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         }
 
         var allIds = lib.Series.Select(s => new {s.Id, s.LibraryId}).ToList();
-        await rps.BulkAddProfileToSeries(user.Id, profile2.Id, allIds.Select(x => x.Id).ToList());
+        await rps.BulkSetSeriesProfiles(user.Id, [profile2.Id], allIds.Select(x => x.Id).ToList());
 
         foreach (var x in allIds)
         {
@@ -339,7 +339,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
             Assert.Equal(ReadingProfileKind.Implicit, seriesProfile.Kind);
         }
 
-        await rps.BulkAddProfileToSeries(user.Id, profile.Id, ids.Select(x => x.Id).ToList());
+        await rps.BulkSetSeriesProfiles(user.Id, [profile.Id], ids.Select(x => x.Id).ToList());
 
         foreach (var x in ids)
         {
@@ -376,7 +376,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         Assert.NotNull(seriesProfile);
         Assert.Equal(ReadingProfileKind.Implicit, seriesProfile.Kind);
 
-        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+        await rps.SetSeriesProfiles(user.Id, [profile.Id], series.Id);
 
         seriesProfile = await rps.GetReadingProfileDtoForSeries(user.Id, series.LibraryId, series.Id, null);
         Assert.NotNull(seriesProfile);
@@ -478,7 +478,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(profile);
         await unitOfWork.CommitAsync();
 
-        await rps.AddProfileToLibrary(user.Id, profile.Id, lib.Id);
+        await rps.SetLibraryProfiles(user.Id, [profile.Id], lib.Id);
         await unitOfWork.CommitAsync();
 
         var linkedProfile = (await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id))
@@ -492,7 +492,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(newProfile);
         await unitOfWork.CommitAsync();
 
-        await rps.AddProfileToLibrary(user.Id, newProfile.Id, lib.Id);
+        await rps.SetLibraryProfiles(user.Id, [newProfile.Id], lib.Id);
         await unitOfWork.CommitAsync();
 
         linkedProfile = (await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(user.Id))
@@ -1267,7 +1267,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(implicitNoDevice);
         await unitOfWork.CommitAsync();
 
-        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+        await rps.SetSeriesProfiles(user.Id, [profile.Id], series.Id);
 
         // Implicit with same device should be removed
         var implicitSameExists = await context.AppUserReadingProfiles
@@ -1315,7 +1315,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(implicitNoDevice);
         await unitOfWork.CommitAsync();
 
-        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+        await rps.SetSeriesProfiles(user.Id, [profile.Id], series.Id);
 
         // Implicit with no device should be removed
         var implicitNoDeviceExists = await context.AppUserReadingProfiles
@@ -1378,7 +1378,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(implicitNoDevice);
         await unitOfWork.CommitAsync();
 
-        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+        await rps.SetSeriesProfiles(user.Id, [profile.Id], series.Id);
 
         // Implicits for device 1 and 2 should be removed
         var implicit1Exists = await context.AppUserReadingProfiles
@@ -1438,7 +1438,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
         context.AppUserReadingProfiles.Add(implicitOtherDevices);
         await unitOfWork.CommitAsync();
 
-        await rps.AddProfileToSeries(user.Id, profile.Id, series.Id);
+        await rps.SetSeriesProfiles(user.Id, [profile.Id], series.Id);
 
         // Implicit with device1 (among others) should be removed
         var implicitMultiExists = await context.AppUserReadingProfiles
@@ -1470,7 +1470,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
 
         // Should throw when trying to add series to another user's profile
         await Assert.ThrowsAsync<KavitaException>(async () =>
-            await rps.AddProfileToSeries(user.Id, otherUserProfile.Id, series.Id));
+            await rps.SetSeriesProfiles(user.Id, [otherUserProfile.Id], series.Id));
     }
 
     #endregion

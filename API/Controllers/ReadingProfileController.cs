@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+public record BulkSetSeriesProfiles(List<int> ProfileIds, List<int> SeriesIds);
+
 [Route("api/reading-profile")]
 public class ReadingProfileController(ILogger<ReadingProfileController> logger, IUnitOfWork unitOfWork,
     IReadingProfileService readingProfileService, IClientInfoAccessor clientInfoAccessor): BaseApiController
@@ -160,12 +162,12 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// Sets the reading profile for a given series, removes the old one
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="profileId"></param>
+    /// <param name="profileIds"></param>
     /// <returns></returns>
     [HttpPost("series/{seriesId:int}")]
-    public async Task<IActionResult> AddProfileToSeries(int seriesId, [FromQuery] int profileId)
+    public async Task<IActionResult> SetSeriesProfiles(int seriesId, List<int> profileIds)
     {
-        await readingProfileService.AddProfileToSeries(UserId, profileId, seriesId);
+        await readingProfileService.SetSeriesProfiles(UserId, profileIds, seriesId);
         return Ok();
     }
 
@@ -185,12 +187,12 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// Sets the reading profile for a given library, removes the old one
     /// </summary>
     /// <param name="libraryId"></param>
-    /// <param name="profileId"></param>
+    /// <param name="profileIds"></param>
     /// <returns></returns>
     [HttpPost("library/{libraryId:int}")]
-    public async Task<IActionResult> AddProfileToLibrary(int libraryId, [FromQuery] int profileId)
+    public async Task<IActionResult> SetLibraryProfiles(int libraryId, List<int> profileIds)
     {
-        await readingProfileService.AddProfileToLibrary(UserId, profileId, libraryId);
+        await readingProfileService.SetLibraryProfiles(UserId, profileIds, libraryId);
         return Ok();
     }
 
@@ -209,13 +211,12 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <summary>
     /// Assigns the reading profile to all passes series, and deletes their implicit profiles
     /// </summary>
-    /// <param name="profileId"></param>
-    /// <param name="seriesIds"></param>
+    /// <param name="body"></param>
     /// <returns></returns>
     [HttpPost("bulk")]
-    public async Task<IActionResult> BulkAddReadingProfile([FromQuery] int profileId, [FromBody] List<int> seriesIds)
+    public async Task<IActionResult> BulkAddReadingProfile(BulkSetSeriesProfiles body)
     {
-        await readingProfileService.BulkAddProfileToSeries(UserId, profileId, seriesIds);
+        await readingProfileService.BulkSetSeriesProfiles(UserId, body.ProfileIds, body.SeriesIds);
         return Ok();
     }
 

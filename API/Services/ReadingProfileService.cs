@@ -94,19 +94,19 @@ public interface IReadingProfileService
     /// Binds the reading profile to the series, and remove the implicit RP from the series if it exists
     /// </summary>
     /// <param name="userId"></param>
-    /// <param name="profileId"></param>
+    /// <param name="profileIds"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    Task AddProfileToSeries(int userId, int profileId, int seriesId);
+    Task SetSeriesProfiles(int userId, List<int> profileIds, int seriesId);
 
     /// <summary>
     /// Binds the reading profile to many series, and remove the implicit RP from the series if it exists
     /// </summary>
     /// <param name="userId"></param>
-    /// <param name="profileId"></param>
+    /// <param name="profileIds"></param>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
-    Task BulkAddProfileToSeries(int userId, int profileId, List<int> seriesIds);
+    Task BulkSetSeriesProfiles(int userId, List<int> profileIds, List<int> seriesIds);
 
     /// <summary>
     /// Remove all reading profiles bound to the series
@@ -120,10 +120,10 @@ public interface IReadingProfileService
     /// Bind the reading profile to the library
     /// </summary>
     /// <param name="userId"></param>
-    /// <param name="profileId"></param>
+    /// <param name="profileIds"></param>
     /// <param name="libraryId"></param>
     /// <returns></returns>
-    Task AddProfileToLibrary(int userId, int profileId, int libraryId);
+    Task SetLibraryProfiles(int userId, List<int> profileIds, int libraryId);
 
     /// <summary>
     /// Remove the reading profile bound to the library, if it exists
@@ -326,28 +326,50 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
-    public async Task AddProfileToSeries(int userId, int profileId, int seriesId)
+    public async Task SetSeriesProfiles(int userId, List<int> profileIds, int seriesId)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
-        if (profile == null) throw new KavitaException("profile-doesnt-exist");
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
 
-        await DeleteImplicitAndRemoveFromUserProfiles(userId, [seriesId], [], profile.DeviceIds);
+        var selectedProfiles = profiles
+            .Where(rp => profileIds.Contains(rp.Id))
+            .ToList();
+        if (selectedProfiles.Count != profileIds.Count) throw new KavitaException("profile-doesnt-exist");
 
-        profile.SeriesIds.Add(seriesId);
-        unitOfWork.AppUserReadingProfileRepository.Update(profile);
+        DeviceOverlapGuard(selectedProfiles);
+
+        var allDeviceIds = selectedProfiles.SelectMany(p => p.DeviceIds).Distinct().ToList();
+
+        DeleteImplicitAndRemoveFromUserProfiles(profiles, [seriesId], [], allDeviceIds);
+
+        foreach (var profile in selectedProfiles)
+        {
+            profile.SeriesIds.Add(seriesId);
+            unitOfWork.AppUserReadingProfileRepository.Update(profile);
+        }
 
         await unitOfWork.CommitAsync();
     }
 
-    public async Task BulkAddProfileToSeries(int userId, int profileId, List<int> seriesIds)
+    public async Task BulkSetSeriesProfiles(int userId, List<int> profileIds, List<int> seriesIds)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
-        if (profile == null) throw new KavitaException("profile-doesnt-exist");
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
 
-        await DeleteImplicitAndRemoveFromUserProfiles(userId, seriesIds, [], profile.DeviceIds);
+        var selectedProfiles = profiles
+            .Where(rp => profileIds.Contains(rp.Id))
+            .ToList();
+        if (selectedProfiles.Count != profileIds.Count) throw new KavitaException("profile-doesnt-exist");
 
-        profile.SeriesIds.AddRange(seriesIds.Except(profile.SeriesIds));
-        unitOfWork.AppUserReadingProfileRepository.Update(profile);
+        DeviceOverlapGuard(selectedProfiles);
+
+        var allDeviceIds = selectedProfiles.SelectMany(p => p.DeviceIds).Distinct().ToList();
+
+        DeleteImplicitAndRemoveFromUserProfiles(profiles, seriesIds, [], allDeviceIds);
+
+        foreach (var profile in selectedProfiles)
+        {
+            profile.SeriesIds.AddRange(seriesIds.Except(profile.SeriesIds));
+            unitOfWork.AppUserReadingProfileRepository.Update(profile);
+        }
 
         await unitOfWork.CommitAsync();
     }
@@ -355,19 +377,32 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
     public async Task ClearSeriesProfile(int userId, int seriesId)
     {
         // Null device ids, delete all
-        await DeleteImplicitAndRemoveFromUserProfiles(userId, [seriesId], [], null);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        DeleteImplicitAndRemoveFromUserProfiles(profiles, [seriesId], [], null);
         await unitOfWork.CommitAsync();
     }
 
-    public async Task AddProfileToLibrary(int userId, int profileId, int libraryId)
+    public async Task SetLibraryProfiles(int userId, List<int> profileIds, int libraryId)
     {
-        var profile = await unitOfWork.AppUserReadingProfileRepository.GetUserProfile(userId, profileId);
-        if (profile == null) throw new KavitaException("profile-doesnt-exist");
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
 
-        await DeleteImplicitAndRemoveFromUserProfiles(userId, [], [libraryId], profile.DeviceIds);
+        var selectedProfiles = profiles
+            .Where(rp => profileIds.Contains(rp.Id))
+            .ToList();
+        if (selectedProfiles.Count != profileIds.Count) throw new KavitaException("profile-doesnt-exist");
 
-        profile.LibraryIds.Add(libraryId);
-        unitOfWork.AppUserReadingProfileRepository.Update(profile);
+        DeviceOverlapGuard(selectedProfiles);
+
+        var allDeviceIds = selectedProfiles.SelectMany(p => p.DeviceIds).Distinct().ToList();
+
+        DeleteImplicitAndRemoveFromUserProfiles(profiles, [], [libraryId], allDeviceIds);
+
+        foreach (var profile in selectedProfiles)
+        {
+            profile.LibraryIds.Add(libraryId);
+            unitOfWork.AppUserReadingProfileRepository.Update(profile);
+        }
+
         await unitOfWork.CommitAsync();
     }
 
@@ -440,18 +475,29 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         await unitOfWork.CommitAsync();
     }
 
+    private static void DeviceOverlapGuard(List<AppUserReadingProfile> profiles)
+    {
+        var anyOverlap = profiles
+            .Any(rp => profiles
+                .Where(other => other.Id != rp.Id)
+                .Any(other => other.DeviceIds.Intersect(rp.DeviceIds).Any()));
+
+        if (anyOverlap)
+        {
+            throw new KavitaException("reading-profiles-device-overlap");
+        }
+    }
+
     /// <summary>
     /// Deletes all implicit profiles with overlapping ids (For devices 0 overlaps with 0). And removes links with
     /// series & libraries
     /// </summary>
-    /// <param name="userId"></param>
+    /// <param name="profiles"></param>
     /// <param name="seriesIds"></param>
     /// <param name="libraryIds"></param>
     /// <param name="deviceIds"></param>
-    private async Task DeleteImplicitAndRemoveFromUserProfiles(int userId, IList<int> seriesIds, IList<int> libraryIds, List<int>? deviceIds)
+    private void DeleteImplicitAndRemoveFromUserProfiles(IList<AppUserReadingProfile> profiles, IList<int> seriesIds, IList<int> libraryIds, List<int>? deviceIds)
     {
-        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
-
         var implicitProfiles = profiles
             .Where(DeviceIdFilter)
             .Where(rp => rp.SeriesIds.Intersect(seriesIds).Any())
