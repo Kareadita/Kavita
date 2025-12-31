@@ -29,12 +29,14 @@ public class DeviceService : IDeviceService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeviceService> _logger;
     private readonly IEmailService _emailService;
+    private readonly IReadingProfileService _readingProfileService;
 
-    public DeviceService(IUnitOfWork unitOfWork, ILogger<DeviceService> logger, IEmailService emailService)
+    public DeviceService(IUnitOfWork unitOfWork, ILogger<DeviceService> logger, IEmailService emailService, IReadingProfileService readingProfileService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _emailService = emailService;
+        _readingProfileService = readingProfileService;
     }
 
     public async Task<Device?> Create(CreateEmailDeviceDto dto, AppUser userWithDevices)
@@ -95,6 +97,9 @@ public class DeviceService : IDeviceService
         {
             userWithDevices.Devices = userWithDevices.Devices.Where(d => d.Id != deviceId).ToList();
             _unitOfWork.UserRepository.Update(userWithDevices);
+
+            await _readingProfileService.RemoveDeviceLinks(userWithDevices.Id, deviceId);
+
             if (!_unitOfWork.HasChanges()) return true;
             if (await _unitOfWork.CommitAsync()) return true;
         }
