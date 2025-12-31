@@ -2111,7 +2111,9 @@
         "key-bind-title-page-up": "Page up",
         "key-bind-tooltip-page-up": "Move one page upwards",
         "key-bind-title-page-down": "Page down",
-        "key-bind-tooltip-page-down": "Move one page downwards"
+        "key-bind-tooltip-page-down": "Move one page downwards",
+        "key-bind-title-offset-double-page": "Offset double page",
+        "key-bind-tooltip-offset-double-page": "Manually offset pages for double page spread alignment"
     },
 
     "collection-detail": {
@@ -2217,7 +2219,8 @@
         "bookmark": "Bookmark current page",
         "double-click": "double click",
         "close-reader": "Close reader",
-        "toggle-menu": "Toggle Menu"
+        "toggle-menu": "Toggle Menu",
+        "offset-double-page": "Manually offset pages for spread alignment"
 
     },
 
@@ -2474,7 +2477,8 @@
         "reading-profile-updated": "Reading profile updated",
         "reading-profile-promoted": "Reading profile promoted",
         "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
-        "series-progress": "Series Progress: {{percentage}}"
+        "series-progress": "Series Progress: {{percentage}}",
+        "page-offset-label": "Page Offset"
     },
 
     "metadata-filter": {

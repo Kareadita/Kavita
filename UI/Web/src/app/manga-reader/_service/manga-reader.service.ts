@@ -17,6 +17,7 @@ export class MangaReaderService {
   private pageDimensions: DimensionMap = {};
   private pairs: {[key: number]: number} = {};
   private renderer: Renderer2;
+  private hasPageOffset: boolean = false;
 
   constructor() {
     const rendererFactory = inject(RendererFactory2);
@@ -33,9 +34,13 @@ export class MangaReaderService {
       };
     });
     this.pairs = chapterInfo.doublePairs!;
+    this.hasPageOffset = false;
   }
 
   adjustForDoubleReader(page: number) {
+    if (this.hasPageOffset === true) {
+      return Math.floor(page / 2) * 2;
+    }
     if (!this.pairs.hasOwnProperty(page)) return page;
     return this.pairs[page];
   }
@@ -71,7 +76,20 @@ export class MangaReaderService {
    * @returns
    */
   isCoverImage(pageNumber: number) {
+    if (this.hasPageOffset) return false;
     return pageNumber === 0;
+  }
+
+  togglePageOffset() {
+    this.hasPageOffset = !this.hasPageOffset;
+  }
+
+  getPageOffset() {
+    return this.hasPageOffset;
+  }
+
+  setPageOffset(toggle: boolean) {
+    this.hasPageOffset = toggle;
   }
 
   /**
