@@ -39,7 +39,6 @@ export interface ReadingProfile {
   allowAutomaticWebtoonReaderDetection: boolean;
   widthOverride?: number;
   disableWidthOverride: UserBreakpoint;
-  pageOffset: boolean;
 
   // Book Reader
   bookReaderMargin: number;

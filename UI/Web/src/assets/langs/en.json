@@ -2113,7 +2113,7 @@
         "key-bind-title-page-down": "Page down",
         "key-bind-tooltip-page-down": "Move one page downwards",
         "key-bind-title-offset-double-page": "Offset double page",
-        "key-bind-tooltip-offset-double-page": "Manually offset pages for double page spread alignment"
+        "key-bind-tooltip-offset-double-page": "Offset pages for double page spread alignment"
     },
 
     "collection-detail": {
@@ -2220,8 +2220,7 @@
         "double-click": "double click",
         "close-reader": "Close reader",
         "toggle-menu": "Toggle Menu",
-        "offset-double-page": "Manually offset pages for spread alignment"
-
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
 
     "grouped-typeahead": {
@@ -2892,8 +2891,6 @@
         "stats-tab": "{{tabs.stats-tab}}",
         "reviews-tab": "{{tabs.reviews-tab}}",
         "no-reviews": "No Reviews yet",
-        "user-you": "you",
-        "user-possessive-your": "your",
         "user-possessive": "{{name}}'s",
         "total-reads-badge": "{{reads}} Reads",
         "k+-badge": "K+ Subscriber"

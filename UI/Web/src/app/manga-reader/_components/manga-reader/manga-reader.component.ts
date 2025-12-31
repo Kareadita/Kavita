@@ -751,7 +751,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       darkness: new FormControl(100),
       emulateBook: new FormControl(this.readingProfile.emulateBook),
       swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate),
-      pageOffset: new FormControl(this.readingProfile.pageOffset),
+      pageOffset: new FormControl(false),
     });
 
     this.readerModeSubject.next(this.readerMode);

@@ -1,4 +1,4 @@
-import { ElementRef, Injectable, Renderer2, RendererFactory2, inject } from '@angular/core';
+import {ElementRef, inject, Injectable, Renderer2, RendererFactory2} from '@angular/core';
 import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
 import {ScalingOption} from 'src/app/_models/preferences/scaling-option';
 import {ReaderService} from 'src/app/_services/reader.service';
@@ -78,14 +78,6 @@ export class MangaReaderService {
   isCoverImage(pageNumber: number) {
     if (this.hasPageOffset) return false;
     return pageNumber === 0;
-  }
-
-  togglePageOffset() {
-    this.hasPageOffset = !this.hasPageOffset;
-  }
-
-  getPageOffset() {
-    return this.hasPageOffset;
   }
 
   setPageOffset(toggle: boolean) {
