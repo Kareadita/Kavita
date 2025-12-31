@@ -87,6 +87,15 @@ export class BulkSetReadingProfileModalComponent implements OnInit {
     return this.devices().filter(device => profile.deviceIds.includes(device.id));
   }
 
+  validItem(item: number, selection: number[]) {
+    const profile = this.profileMap().get(item)!;
+    const selectedProfiles = selection.map(id => this.profileMap().get(id)!);
+
+    const selectedDevices = new Set(selectedProfiles.flatMap(profile => profile.deviceIds));
+
+    return !profile.deviceIds.some(id => selectedDevices.has(id));
+  }
+
   validSelection(profileIds: number[]) {
     const profiles = (Array.isArray(profileIds) ? profileIds : [profileIds])
       .map(id => this.profileMap().get(id)!);

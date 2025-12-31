@@ -49,6 +49,7 @@ export class ListSelectModalComponent<T> {
 
   items = model.required<ListSelectionItem<T>[]>();
   preSelectedItems = model<T[]>([]);
+  isValidItemFunc = model<(item: T, selection: T[]) => boolean>(() => true);
   isSelectionValidFunc = model<(selection:T[]) => boolean>(() => true);
   interceptConfirm = model<((selection: T|T[]) => void) | null>(null);
 
@@ -108,7 +109,17 @@ export class ListSelectModalComponent<T> {
     });
   }
 
+  isItemValid(item: ListSelectionItem<T>) {
+    // Assume selected items are always valid
+    if (this.selectedItems().includes(item)) return true;
+
+
+    return this.isValidItemFunc()(item.value, this.selectedItems().map(item => item.value));
+  }
+
   select(item: ListSelectionItem<T>) {
+    if (!this.isItemValid(item)) return;
+
     if (this.multiSelect()) {
       const currentlySelected = this.selectedItems().includes(item);
       if (currentlySelected) {

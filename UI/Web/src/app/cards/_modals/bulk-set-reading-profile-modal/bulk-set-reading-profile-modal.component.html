@@ -9,6 +9,7 @@
     [multiSelect]="true"
     [interceptConfirm]="addToProfile.bind(this)"
     [isSelectionValidFunc]="validSelection.bind(this)"
+    [isValidItemFunc]="validItem.bind(this)"
     [invalidSelectionWarning]="t('warning-duplicate')"
     [itemTemplate]="itemTemplate()"
   >
