@@ -8,6 +8,7 @@ import {TextResonse} from '../_types/text-response';
 import {AccountService} from './account.service';
 import {ClientDevice} from "../_models/client-device";
 import {map} from "rxjs/operators";
+import {toSignal} from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,7 @@ export class DeviceService {
 
   private readonly devicesSource: ReplaySubject<Device[]> = new ReplaySubject<Device[]>(1);
   public readonly devices$ = this.devicesSource.asObservable().pipe(shareReplay());
+  public readonly devicesSignal = toSignal(this.devices$, { initialValue: [] });
 
 
 

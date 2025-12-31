@@ -639,7 +639,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         map(_ => this.packReadingProfile()),
         distinctUntilChanged(),
         tap(newProfile => {
-          this.readingProfileService.updateImplicit(newProfile, this.seriesId).subscribe({
+          this.readingProfileService.updateImplicit(this.libraryId, this.seriesId, newProfile).subscribe({
             next: updatedProfile => {
               this.readingProfile = updatedProfile;
               this.cdRef.markForCheck();
@@ -725,7 +725,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   setupReaderSettings() {
 
     if (this.readingProfile.kind === ReadingProfileKind.Implicit) {
-      this.readingProfileService.getForSeries(this.seriesId, true).subscribe(parent => {
+      this.readingProfileService.getForSeries(this.libraryId, this.seriesId, true).subscribe(parent => {
         this.parentReadingProfile = parent;
         this.cdRef.markForCheck();
       })
@@ -1938,7 +1938,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.readingProfileService.updateParentProfile(this.seriesId, this.packReadingProfile()).subscribe(newProfile => {
+    this.readingProfileService.updateParentProfile(this.libraryId, this.seriesId, this.packReadingProfile()).subscribe(newProfile => {
       this.readingProfile = newProfile;
       this.toastr.success(translate('manga-reader.reading-profile-updated'));
       this.cdRef.markForCheck();

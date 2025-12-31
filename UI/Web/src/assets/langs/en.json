@@ -1594,7 +1594,9 @@
         "clear": "{{common.clear}}",
         "no-data": "No collections created yet",
         "loading": "{{common.loading}}",
-        "bound":  "Bound"
+        "bound":  "Bound",
+        "warning-duplicate": "Your selection contains overlapping devices, this is not allowed",
+        "hidden": "{{amount}} profile(s) hidden due to invalid state"
     },
 
     "entity-title": {
@@ -3401,8 +3403,8 @@
         "match-success": "Series matched correctly",
         "webtoon-override": "Switching to Webtoon mode due to images representing a webtoon.",
         "scrobble-gen-init": "Enqueued a job to generate scrobble events from past reading history and ratings, syncing them with connected services.",
-        "series-bound-to-reading-profile": "Series bound to Reading Profile {{name}}",
-        "library-bound-to-reading-profile": "Library bound to Reading Profile {{name}}",
+        "series-bound-to-reading-profile": "Series bound to {{amount}} Reading Profiles",
+        "library-bound-to-reading-profile": "Library bound to {{amount}} Reading Profiles",
         "external-match-rate-error": "Kavita ran out of rate looking up {{seriesName}}. Try again in 5 minutes.",
         "confirm-delete-bookmark": "Are you sure you want to delete this Bookmark?",
         "confirm-delete-annotation": "Are you sure you want to delete this Annotation?",
@@ -3565,7 +3567,7 @@
     },
 
     "manage-reading-profiles": {
-        "description": "Not all your series may be read in the same way, set up distinct reading profiles per library or series to make getting back in your series as seamless as possible.",
+        "description": "Not all your series may be read in the same way, set up distinct reading profiles per library/series/device to make getting back in your series as seamless as possible.",
         "extra-tip": "Assign reading profiles via the action menu on series and libraries, or in bulk. When changing settings in a reader, a hidden profile is created that remembers your choices for that series (not for pdfs). This profile is removed when you assign one of your own reading profiles to the series. More information can be found on the",
         "wiki-title": "wiki",
         "profiles-title": "Your reading profiles",
@@ -3576,6 +3578,8 @@
         "no-selected": "No profile selected",
         "confirm": "Are you sure you want to delete the reading profile {{name}}?",
         "selection-tip": "Select a profile from the list, or create a new one at the top right",
+        "set-devices": "Set Devices",
+        "select-devices-for": "Set devices for {{name}}",
 
         "image-reader-settings-title": "Image Reader",
         "reading-direction-label": "Reading Direction",
@@ -3642,6 +3646,10 @@
         "reading-profile-series-settings-title": "Series",
         "reading-profile-library-settings-title": "Library",
         "delete": "{{common.delete}}"
+    },
+
+    "list-select-modal": {
+      "hidden": "{{amount}} items hidden due to invalid state"
     },
 
 
@@ -3726,6 +3734,8 @@
         "chapter-count": "{{num}} Chapters",
         "issue-count": "{{num}} Issues",
         "no-data": "No Data",
+        "confirm": "Confirm",
+        "selected": "Selected",
 
         "book-num": "Book",
         "issue-hash-num": "Issue #",

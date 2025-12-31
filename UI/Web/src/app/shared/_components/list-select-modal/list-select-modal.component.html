@@ -1,4 +1,7 @@
 <ng-container *transloco="let t">
+  @let invalidSelection = !validSelection();
+  @let invalidSelectWarningValue = invalidSelectionWarning();
+  @let selectedItemsValue = selectedItems();
 
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{title()}}</h4>
@@ -6,13 +9,21 @@
   </div>
 
   <div class="modal-body">
+
+    <app-loading [loading]="loading()"></app-loading>
+
     @let itemsValue = items();
     @let filteredItemsValue = filteredItems();
-    @let selectedItemValue = selectedItem();
     @let descriptionValue = description();
 
     @if (descriptionValue) {
       <span class="text-muted"> {{descriptionValue}} </span>
+    }
+    @if (invalidSelection) {
+      <span class="text-danger"> {{invalidSelectWarningValue}} </span>
+    }
+    @if (hideItemsWhenInvalid() && hiddenItems() > 0) {
+      <span class="text-warning" role="alert">{{t(hiddenTranslationKey(), {amount: hiddenItems()})}}</span>
     }
 
     <form [formGroup]="filterForm">
@@ -29,17 +40,18 @@
     </form>
 
     <ul class="list-group mt-4">
-      @for(item of filteredItemsValue; track $index) {
-        <li class="list-group-item clickable" tabindex="0" role="option" (click)="select(item)">
-          <div class="p-2 group-item d-flex justify-content-between align-items-center">
+      @if (!loading()) {
+        @for(item of filteredItemsValue; track $index) {
+          <li class="list-group-item clickable" tabindex="0" role="option" (click)="select(item)" [class.disabled]="!isItemValid(item)">
+            <div class="p-2 group-item d-flex justify-content-between align-items-center">
 
-            <div class="fw-bold">{{item.label | sentenceCase}}</div>
+              <ng-container [ngTemplateOutlet]="finalItemTemplate()"
+                            [ngTemplateOutletContext]="{ $implicit: item, index: $index, first: $first, last: $last, selectedItems: selectedItemsValue }" >
+              </ng-container>
 
-            @if (selectedItemValue && selectedItemValue.label === item.label) {
-              <span class="pill p-1 ms-1">{{t('common.selected')}}</span>
-            }
-          </div>
-        </li>
+            </div>
+          </li>
+        }
       }
     </ul>
 
@@ -48,8 +60,16 @@
   @if (showFooter()) {
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.cancel')}}</button>
-      <button type="button" class="btn btn-primary" (click)="confirm()">{{t('common.confirm')}}</button>
+      <button type="button" class="btn btn-primary" (click)="confirm()" [disabled]="invalidSelection">{{t('common.confirm')}}</button>
     </div>
   }
 
 </ng-container>
+
+<ng-template #defaultTemplate let-item let-selectedItems='selectedItems'>
+  <div class="fw-bold">{{item.label | sentenceCase}}</div>
+
+  @if (selectedItems && selectedItems.includes(item)) {
+    <span class="pill p-1 ms-1">{{ selectedText() }}</span>
+  }
+</ng-template>

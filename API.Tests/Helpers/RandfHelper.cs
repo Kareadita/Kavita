@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,7 +6,7 @@ using System.Reflection;
 
 namespace API.Tests.Helpers;
 
-public class RandfHelper
+public static class RandfHelper
 {
     private static readonly Random Random = new ();
 
@@ -23,30 +24,29 @@ public class RandfHelper
         if (obj1 == null || obj2 == null)
             throw new ArgumentNullException("Neither object can be null.");
 
-        Type type1 = obj1.GetType();
-        Type type2 = obj2.GetType();
+        var type1 = obj1.GetType();
+        var type2 = obj2.GetType();
 
         if (type1 != type2)
             throw new ArgumentException("Objects must be of the same type.");
 
-        FieldInfo[] fields = type1.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+        var fields = type1.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
 
         foreach (var field in fields)
         {
             if (field.IsInitOnly) continue;
             if (ignoreFields.Contains(field.Name)) continue;
 
-            Type fieldType = field.FieldType;
+            var fieldType = field.FieldType;
 
-            if (IsRelevantType(fieldType))
+            if (!IsRelevantType(fieldType)) continue;
+
+            var value1 = field.GetValue(obj1);
+            var value2 = field.GetValue(obj2);
+
+            if (!Equals(value1, value2))
             {
-                object value1 = field.GetValue(obj1);
-                object value2 = field.GetValue(obj2);
-
-                if (!Equals(value1, value2))
-                {
-                    throw new ArgumentException("Fields must be of the same type: " +  field.Name + " was  " + value1 + " and  " + value2);
-                }
+                throw new ArgumentException("Fields must be of the same type: " +  field.Name + " was  " + value1 + " and  " + value2);
             }
         }
 
@@ -77,7 +77,7 @@ public class RandfHelper
         {
             if (field.IsInitOnly) continue; // Skip readonly fields
 
-            object value = GenerateRandomValue(field.FieldType);
+            var value = GenerateRandomValue(field.FieldType, field.GetValue(obj));
             if (value != null)
             {
                 field.SetValue(obj, value);
@@ -85,7 +85,7 @@ public class RandfHelper
         }
     }
 
-    private static object GenerateRandomValue(Type type)
+    private static object? GenerateRandomValue(Type type, object? value)
     {
         if (type == typeof(int))
             return Random.Next();
@@ -94,7 +94,7 @@ public class RandfHelper
         if (type == typeof(double))
             return Random.NextDouble() * 100;
         if (type == typeof(bool))
-            return Random.Next(2) == 1;
+            return value != null ? !(bool)value : Random.Next(2) == 1;
         if (type == typeof(char))
             return (char)Random.Next('A', 'Z' + 1);
         if (type == typeof(byte))

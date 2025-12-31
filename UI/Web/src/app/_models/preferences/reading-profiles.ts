@@ -24,6 +24,7 @@ export interface ReadingProfile {
   name: string;
   normalizedName: string;
   kind: ReadingProfileKind;
+  deviceIds: number[];
 
   // Manga Reader
   readingDirection: ReadingDirection;

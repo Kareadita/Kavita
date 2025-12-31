@@ -12,5 +12,6 @@ export const readingProfileResolver: ResolveFn<ReadingProfile> = (
 
   // Extract seriesId from route params or parent route
   const seriesId = route.params['seriesId'] || route.parent?.params['seriesId'];
-  return readingProfileService.getForSeries(seriesId);
+  const libraryId = route.params['libraryId'] || route.parent?.params['libraryId'];
+  return readingProfileService.getForSeries(libraryId, seriesId);
 };
