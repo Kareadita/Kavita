@@ -131,7 +131,9 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
                         existingChapterActivity.WordsRead = await bookService.GetWordCountBetweenXPaths(
                             cachedFilePath,
                             existingChapterActivity.StartBookScrollId,
-                            progressDto.BookScrollId
+                            existingChapterActivity.StartPage,
+                            progressDto.BookScrollId,
+                            progressDto.PageNum
                         );
                     }
                     catch (Exception ex)

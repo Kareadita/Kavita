@@ -61,7 +61,7 @@ public interface IBookService
     Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations);
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
     Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath);
-    Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, string endXpath);
+    Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, int startPage, string endXpath, int endPage);
     Task<string> CopyImageToTempFromBook(int chapterId, BookmarkDto bookmarkDto, string cachedBookPath);
     Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey);
 
@@ -1010,65 +1010,85 @@ public partial class BookService : IBookService
     /// </summary>
     /// <param name="bookFilePath"></param>
     /// <param name="startXpath"></param>
+    /// <param name="startPage">Page number of starting xpath</param>
     /// <param name="endXpath"></param>
+    /// <param name="endPage">Page number of ending xpath</param>
     /// <returns></returns>
-    public async Task<int> GetWordCountBetweenXPaths(string bookFilePath, string? startXpath, string endXpath)
+    public async Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, int startPage, string endXpath, int endPage)
     {
         if (string.IsNullOrEmpty(endXpath)) return 0;
+        if (endPage < startPage) return 0;
 
         var totalCharacters = 0;
-        var foundStart = string.IsNullOrEmpty(startXpath); // If no start, begin counting immediately
-        var foundEnd = false;
 
         try
         {
             using var book = await EpubReader.OpenBookAsync(bookFilePath, LenientBookReaderOptions);
             var doc = new HtmlDocument { OptionFixNestedTags = true };
-
             var bookPages = await book.GetReadingOrderAsync();
+            var pageList = bookPages.ToList();
 
-            foreach (var contentFileRef in bookPages)
+            // Validate page bounds
+            if (startPage < 0 || endPage >= pageList.Count) return 0;
+
+            for (var pageIndex = startPage; pageIndex <= endPage; pageIndex++)
             {
-                if (foundEnd) break; // Stop processing once we've found the end
-
+                var contentFileRef = pageList[pageIndex];
                 var content = await contentFileRef.ReadContentAsync();
                 doc.LoadHtml(content);
 
                 var body = GetBodyOrCreate(doc, book);
 
-                var startNode = string.IsNullOrEmpty(startXpath) ? null : body.SelectSingleNode(startXpath);
-                var endNode = body.SelectSingleNode(endXpath);
+                var isStartPage = pageIndex == startPage;
+                var isEndPage = pageIndex == endPage;
 
-                // Case 1: Both start and end are on the same page
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-                if (startNode != null && endNode != null)
+                // Case 1: Start and end on the same page
+                if (isStartPage && isEndPage)
                 {
-                    totalCharacters += CountLettersBetweenNodes(body, startNode, endNode);
-                    foundEnd = true;
+                    var startNode = string.IsNullOrEmpty(startXpath) ? null : body.SelectSingleNode(startXpath);
+                    var endNode = body.SelectSingleNode(endXpath);
+
+                    if (startNode != null && endNode != null)
+                    {
+                        totalCharacters += CountLettersBetweenNodes(body, startNode, endNode);
+                    }
+                    else if (endNode != null)
+                    {
+                        // No start xpath, count from beginning to end node
+                        totalCharacters += CountLettersUpToNode(body, endNode);
+                    }
                     break;
                 }
 
-                // Case 2: Found start node - begin counting from this point to end of page
-                if (startNode != null)
+                // Case 2: Start page - count from start node to end of page
+                if (isStartPage)
                 {
-                    foundStart = true;
-                    totalCharacters += CountLettersFromNode(body, startNode);
+                    if (string.IsNullOrEmpty(startXpath))
+                    {
+                        totalCharacters += CountLettersInBody(body);
+                    }
+                    else
+                    {
+                        var startNode = body.SelectSingleNode(startXpath);
+                        totalCharacters += startNode != null
+                            ? CountLettersFromNode(body, startNode)
+                            : CountLettersInBody(body);
+                    }
                     continue;
                 }
 
-                // Case 3: Found end node - count from beginning of page up to this point and stop
-                if (endNode != null && foundStart)
+                // Case 3: End page - count from beginning to end node
+                if (isEndPage)
                 {
-                    foundEnd = true;
-                    totalCharacters += CountLettersUpToNode(body, endNode);
+                    var endNode = body.SelectSingleNode(endXpath);
+                    totalCharacters += endNode != null
+                        ? CountLettersUpToNode(body, endNode)
+                        : CountLettersInBody(body);
                     break;
                 }
 
-                // Case 4: Between start and end - count entire page
-                if (foundStart && !foundEnd)
-                {
-                    totalCharacters += CountLettersInBody(body);
-                }
+                // Case 4: Middle page - count entire page
+                totalCharacters += CountLettersInBody(body);
             }
         }
         catch (Exception ex)

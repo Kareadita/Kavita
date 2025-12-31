@@ -18,14 +18,6 @@
           <div class="media-info">
             <span class="badge bg-secondary platform-badge">{{ activeData.clientInfo?.platform | clientDevicePlatform }}</span>
             <span class="badge bg-primary device-badge">{{activeData.clientInfo?.clientType | clientDeviceClientType}}</span>
-            <span class="quantity-badge">
-              @let wordCount = totalWords();
-
-              {{t('pages-count', {num: totalPages()})}}
-              @if (wordCount > 0) {
-                <span> ({{t('words-count', {num: wordCount})}})</span>
-              }
-          </span>
           </div>
         </div>
 
@@ -36,15 +28,15 @@
           </div>
 
           <div class="metadata-row">
-            <span class="label text-uppercase">{{t('active-pages-label')}}</span>
-            <span class="value">{{activeData.pagesRead | defaultValue}}</span>
+            <span class="label text-uppercase">{{t('total-pages-label')}}</span>
+            <span class="value">{{totalPages() | defaultValue}}</span>
           </div>
 
 
-          @if (activeData.wordsRead > 0) {
+          @if (totalWords() > 0) {
             <div class="metadata-row">
-              <span class="label text-uppercase">{{t('active-words-label')}}</span>
-              <span class="value">{{activeData.wordsRead | defaultValue}}</span>
+              <span class="label text-uppercase">{{t('total-words-label')}}</span>
+              <span class="value">{{totalWords() | defaultValue}}</span>
             </div>
           }
 
