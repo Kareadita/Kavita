@@ -416,11 +416,9 @@
     "edit-device-modal": {
         "title": "Edit Email Device",
         "device-name-label": "{{manage-devices.name-label}}",
-        "platform-label": "{{manage-devices.platform-label}}",
-
+        "device-platform-label": "{{manage-devices.platform-label}}",
         "email-label": "{{common.email}}",
         "email-tooltip": "This email will be used to accept the file via Send To",
-        "device-platform-label": "Device Platform",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -431,7 +429,7 @@
     "client-device-card": {
         "auth-type-label": "Authentication Type",
         "browser-label": "Browser",
-        "platform-label": "Platform",
+        "platform-label": "{{manage-devices.platform-label}}",
         "screen-label": "Screen",
         "version-label": "App Version",
         "first-seen-label": "First Seen",
@@ -2568,13 +2566,10 @@
         "last-modified-title": "Last Modified",
         "view-files": "View Files",
         "pages-title": "{{edit-chapter-modal.pages-label}}",
-        "words-title": "Words",
         "chapter-title": "Chapter",
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "Highest Count found across all ComicInfo in the Series",
         "max-issue-tooltip": "Max Issue or Volume field from all ComicInfo in the series",
-        "force-refresh": "Force Refresh",
-        "force-refresh-tooltip": "Force refresh external metadata from Kavita+",
         "loose-leaf-volume": "Loose Leaf Chapters",
         "specials-volume": "Specials",
         "release-year-validation": "{{validation.year-validation}}",
@@ -2648,14 +2643,9 @@
         "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
-        "links-label": "{{series-metadata-detail.links-label}}",
-        "last-read-label": "{{edit-chapter-modal.last-read-label}}",
-        "range-hours": "{{value}} {{hourWord}}",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
@@ -2665,10 +2655,8 @@
         "general-tab": "{{edit-series-modal.general-tab}}",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
         "aliases-tab": "Aliases",
-        "loading": "{{common.loading}}",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
-        "role-label": "Role",
         "mal-id-label": "MAL Id",
         "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
@@ -3431,11 +3419,6 @@
         "hours": "Hours",
         "hour-left": "Hour left",
         "hours-left": "Hours left"
-    },
-
-    "epub-page-calc-method-pipe": {
-        "default": "Default",
-        "calc1": "Calc 1"
     },
 
     "metadata-setting-field-pipe": {
