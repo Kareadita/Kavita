@@ -53,8 +53,8 @@ public class AppUserReadingProfileBuilder
 
     public AppUserReadingProfileBuilder WithDeviceId(int deviceId)
     {
-        if (!_profile.DeviceIds.Contains(deviceId))
-            _profile.DeviceIds.Add(deviceId);
+        if (_profile.DeviceIds.Contains(deviceId)) return this;
+        _profile.DeviceIds.Add(deviceId);
 
         return this;
     }

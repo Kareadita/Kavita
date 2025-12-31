@@ -18,7 +18,7 @@ public interface IAppUserReadingProfileRepository
 {
 
     /// <summary>
-    /// Returns the reading profile to use for the givens series
+    /// Returns the reading profile to use for the given series
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="libraryId"></param>
@@ -28,7 +28,7 @@ public interface IAppUserReadingProfileRepository
     /// <returns></returns>
     Task<AppUserReadingProfile> GetProfileForSeries(int userId, int libraryId, int seriesId, int? activeDeviceId = null, bool skipImplicit = false);
     /// <summary>
-    /// Returns the reading profile for a given libraryn, if it exists
+    /// Returns the reading profile for a given library, if it exists
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="libraryId"></param>
@@ -43,7 +43,7 @@ public interface IAppUserReadingProfileRepository
     /// <returns></returns>
     Task<List<AppUserReadingProfile>> GetProfilesForLibrary(int userId, int libraryId);
     /// <summary>
-    /// Return the given profile if it belongs the user
+    /// Return the profile if it belongs the user
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="profileId"></param>

@@ -399,7 +399,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
 
         // Remove series & library links from profiles where there is now overlap with devices
         // E.g. for the same series there are now two profiles that would match
-        var profiles =  await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
 
         var overlappingProfiles = profiles
             .Where(rp => rp.Id != profileId)
@@ -430,7 +430,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
     /// <param name="deviceIds"></param>
     private async Task DeleteImplicitAndRemoveFromUserProfiles(int userId, IList<int> seriesIds, IList<int> libraryIds, List<int>? deviceIds)
     {
-        var profiles =  await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
 
         var implicitProfiles = profiles
             .Where(DeviceIdFilter)

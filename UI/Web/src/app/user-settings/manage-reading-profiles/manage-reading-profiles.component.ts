@@ -66,9 +66,6 @@ import {FontService} from "../../_services/font.service";
 import {EpubFont} from "../../_models/preferences/epub-font";
 import {DeviceService} from "../../_services/device.service";
 import {ModalService} from "../../_services/modal.service";
-import {
-  GenericListModalComponent
-} from "../../statistics/_components/_modals/generic-list-modal/generic-list-modal.component";
 import {ListSelectModalComponent} from "../../shared/_components/list-select-modal/list-select-modal.component";
 import {ClientDevice} from "../../_models/client-device";
 
@@ -353,7 +350,8 @@ export class ManageReadingProfilesComponent implements OnInit {
     if (this.selectedProfile == null) return;
 
     const [modal, component] = this.modalService.open(ListSelectModalComponent);
-    component.title.set(translate('manage-reading-profiles.select-devices-for', {name: this.selectedProfile.name}));
+    const profileName = this.readingProfileForm?.get('name')?.value || this.selectedProfile.name;
+    component.title.set(translate('manage-reading-profiles.select-devices-for', {name: profileName}));
     component.multiSelect.set(true);
     component.requireConfirmation.set(true);
     component.preSelectedItems.set(this.selectedProfile.deviceIds ?? []);
