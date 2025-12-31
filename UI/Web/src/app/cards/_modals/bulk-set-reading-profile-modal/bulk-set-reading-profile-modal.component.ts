@@ -6,7 +6,7 @@ import {
   inject,
   Input,
   model,
-  OnInit, signal,
+  OnInit, signal, TemplateRef, viewChild,
   ViewChild
 } from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
@@ -18,13 +18,17 @@ import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/r
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {ListSelectModalComponent} from "../../../shared/_components/list-select-modal/list-select-modal.component";
+import {ClientDevice} from "../../../_models/client-device";
+import {DeviceService} from "../../../_services/device.service";
+import {forkJoin} from "rxjs";
 
 @Component({
   selector: 'app-bulk-set-reading-profile-modal',
   imports: [
     ReactiveFormsModule,
     TranslocoDirective,
-    ListSelectModalComponent
+    ListSelectModalComponent,
+    SentenceCasePipe
   ],
   templateUrl: './bulk-set-reading-profile-modal.component.html',
   styleUrl: './bulk-set-reading-profile-modal.component.scss'
@@ -34,6 +38,9 @@ export class BulkSetReadingProfileModalComponent implements OnInit {
   private readonly modal = inject(NgbActiveModal);
   private readonly readingProfileService = inject(ReadingProfileService);
   private readonly toastr = inject(ToastrService);
+  private readonly deviceService = inject(DeviceService);
+
+  itemTemplate = viewChild.required<TemplateRef<any>>('listItemTemplate');
 
   /**
    * Series Ids to add to Reading Profile
@@ -43,6 +50,7 @@ export class BulkSetReadingProfileModalComponent implements OnInit {
 
   private profiles = signal<ReadingProfile[]>([]);
   private currentlyBoundProfiles = signal<ReadingProfile[]>([]);
+  protected devices = signal<ClientDevice[]>([]);
   protected loading = signal(true);
 
   private  profileMap = computed(() =>
@@ -63,10 +71,20 @@ export class BulkSetReadingProfileModalComponent implements OnInit {
       });
     }
 
-    this.readingProfileService.getAllProfiles().subscribe(profiles => {
+    forkJoin([
+      this.readingProfileService.getAllProfiles(),
+      this.deviceService.getMyClientDevices(),
+    ]).subscribe(([profiles, devices]) => {
       this.loading.set(false);
       this.profiles.set(profiles);
+      this.devices.set(devices);
     });
+  }
+
+  profileDevice(profileId: number) {
+    const profile = this.profileMap().get(profileId)!;
+
+    return this.devices().filter(device => profile.deviceIds.includes(device.id));
   }
 
   validSelection(profileIds: number[]) {

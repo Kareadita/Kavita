@@ -1,6 +1,7 @@
 <ng-container *transloco="let t">
   @let invalidSelection = !validSelection();
   @let invalidSelectWarningValue = invalidSelectionWarning();
+  @let selectedItemsValue = selectedItems();
 
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{title()}}</h4>
@@ -38,9 +39,15 @@
     <ul class="list-group mt-4">
       @if (!loading()) {
         @for(item of filteredItemsValue; track $index) {
-          <ng-container [ngTemplateOutlet]="finalItemTemplate()"
-                        [ngTemplateOutletContext]="{ $implicit: item, index: $index, first: $first, last: $last }" >
-          </ng-container>
+          <li class="list-group-item clickable" tabindex="0" role="option" (click)="select(item)">
+            <div class="p-2 group-item d-flex justify-content-between align-items-center">
+
+              <ng-container [ngTemplateOutlet]="finalItemTemplate()"
+                            [ngTemplateOutletContext]="{ $implicit: item, index: $index, first: $first, last: $last, selectedItems: selectedItemsValue }" >
+              </ng-container>
+
+            </div>
+          </li>
         }
       }
     </ul>
@@ -56,17 +63,10 @@
 
 </ng-container>
 
-<ng-template #defaultTemplate let-item>
-  @let selectedItemsValue = selectedItems();
+<ng-template #defaultTemplate let-item let-selectedItems='selectedItems'>
+  <div class="fw-bold">{{item.label | sentenceCase}}</div>
 
-  <li class="list-group-item clickable" tabindex="0" role="option" (click)="select(item)">
-    <div class="p-2 group-item d-flex justify-content-between align-items-center">
-
-      <div class="fw-bold">{{item.label | sentenceCase}}</div>
-
-      @if (selectedItemsValue && selectedItemsValue.includes(item)) {
-        <span class="pill p-1 ms-1">{{ selectedText() }}</span>
-      }
-    </div>
-  </li>
+  @if (selectedItems && selectedItems.includes(item)) {
+    <span class="pill p-1 ms-1">{{ selectedText() }}</span>
+  }
 </ng-template>
