@@ -6,6 +6,7 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities.Enums;
+using API.Middleware;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -104,9 +105,10 @@ public class BookController : BaseApiController
     /// <param name="chapterId"></param>
     /// <param name="file"></param>
     /// <returns></returns>
+    [AllowAnonymous]
+    [SkipDeviceTracking]
     [HttpGet("{chapterId}/book-resources")]
     [ResponseCache(Duration = 60 * 1, Location = ResponseCacheLocation.Client, NoStore = false)]
-    [AllowAnonymous]
     public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
     {
         if (chapterId <= 0) return BadRequest(await _localizationService.Get("en", "chapter-doesnt-exist"));

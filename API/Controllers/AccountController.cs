@@ -351,6 +351,7 @@ public class AccountController : BaseApiController
     /// <param name="tokenRequestDto"></param>
     /// <returns></returns>
     [AllowAnonymous]
+    [SkipDeviceTracking]
     [HttpPost("refresh-token")]
     public async Task<ActionResult<TokenRequestDto>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
     {

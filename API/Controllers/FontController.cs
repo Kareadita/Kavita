@@ -59,6 +59,7 @@ public class FontController : BaseApiController
     /// <returns></returns>
     [HttpGet]
     [AllowAnonymous]
+    [SkipDeviceTracking]
     public async Task<IActionResult> GetFont(int fontId, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
