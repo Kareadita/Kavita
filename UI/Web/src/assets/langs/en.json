@@ -2465,10 +2465,7 @@
         "reading-profile-promoted": "Reading profile promoted",
         "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
         "series-progress": "Series Progress: {{percentage}}",
-        "page-offset-label": "Page Offset",
-        "offset-enabled": "Page offset enabled",
-        "offset-disabled": "Page offset disabled",
-        "offset-only-double": "Page offset only works in double page layout"
+        "page-offset-label": "Page Offset"
     },
 
     "metadata-filter": {

@@ -751,7 +751,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       darkness: new FormControl(100),
       emulateBook: new FormControl(this.readingProfile.emulateBook),
       swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate),
-      pageOffset: new FormControl(this.mangaReaderService.getPageOffset()),
+      pageOffset: new FormControl(this.readingProfile.pageOffset),
     });
 
     this.readerModeSubject.next(this.readerMode);
@@ -821,7 +821,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
       const pageOffset = this.generalSettingsForm.get('pageOffset')?.value;
       if (pageOffset !== undefined) {
-        this.mangaReaderService.setPageOffset(pageOffset ? 1 : 0);
+        this.mangaReaderService.setPageOffset(pageOffset);
         const adjustedPage = this.mangaReaderService.adjustForDoubleReader(this.pageNum);
         this.pageNumSubject.next({pageNum: adjustedPage, maxPages: this.maxPages});
         this.pageNum = adjustedPage;
@@ -1786,18 +1786,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   togglePageOffset() {
     if (this.layoutMode === LayoutMode.Single || this.readerMode === ReaderMode.Webtoon) {
-      this.toastr.info(translate('manga-reader.offset-only-double'));
       return;
     }
 
     const currentValue = this.generalSettingsForm.get('pageOffset')?.value;
     this.generalSettingsForm.patchValue({pageOffset: !currentValue});
-    
-    if (!currentValue) {
-      this.toastr.info(translate('manga-reader.offset-enabled'));
-    } else {
-      this.toastr.info(translate('manga-reader.offset-disabled'));
-    }
   }
 
   // This is menu only code
