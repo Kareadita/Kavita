@@ -141,7 +141,8 @@ public interface IReadingProfileService
     Task<UserReadingProfileDto?> GetReadingProfileDtoForLibrary(int userId, int libraryId, int? activeDeviceId);
 
     /// <summary>
-    /// Set the assigned devices for the given reading profile
+    /// Set the assigned devices for the given reading profile. Then removes all duplicate links, ensuring each series
+    /// and library only has one profile per device
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="profileId"></param>
@@ -393,6 +394,28 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
 
         profile.DeviceIds = deviceIds;
         unitOfWork.AppUserReadingProfileRepository.Update(profile);
+
+        await unitOfWork.CommitAsync();
+
+        // Remove series & library links from profiles where there is now overlap with devices
+        // E.g. for the same series there are now two profiles that would match
+        var profiles =  await unitOfWork.AppUserReadingProfileRepository.GetProfilesForUser(userId);
+
+        var overlappingProfiles = profiles
+            .Where(rp => rp.Id != profileId)
+            .Where(rp => rp.Kind == ReadingProfileKind.User)
+            .Where(rp => (rp.DeviceIds.Count == 0 && deviceIds.Count == 0)
+                         || rp.DeviceIds.Intersect(deviceIds).Any())
+            .Where(rp => rp.SeriesIds.Intersect(profile.SeriesIds).Any()
+                         || rp.LibraryIds.Intersect(profile.LibraryIds).Any());
+
+        foreach (var overlap in overlappingProfiles)
+        {
+            overlap.SeriesIds.RemoveAll(profile.SeriesIds.Contains);
+            overlap.LibraryIds.RemoveAll(profile.LibraryIds.Contains);
+
+            unitOfWork.AppUserReadingProfileRepository.Update(overlap);
+        }
 
         await unitOfWork.CommitAsync();
     }

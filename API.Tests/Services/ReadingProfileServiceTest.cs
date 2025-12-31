@@ -1528,6 +1528,479 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
 
     #endregion
 
+    #region Tests with devices - SetProfileDevices
+
+    [Fact]
+    public async Task SetProfileDevices_Basic()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+        const int device2 = 2;
+        const int device3 = 3;
+
+        var profile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithDeviceId(device2)
+            .WithName("Profile")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile);
+        await unitOfWork.CommitAsync();
+
+        // Sets both
+        await rps.SetProfileDevices(user.Id, profile.Id, [device1, device2]);
+
+        var updated = await context.AppUserReadingProfiles
+            .FirstAsync(rp => rp.Id == profile.Id);
+
+        Assert.Equal(2, updated.DeviceIds.Count);
+        Assert.Contains(device1, updated.DeviceIds);
+        Assert.Contains(device2, updated.DeviceIds);
+
+        // Full replace
+        await rps.SetProfileDevices(user.Id, profile.Id, [device3]);
+
+        updated = await context.AppUserReadingProfiles
+
+            .FirstAsync(rp => rp.Id == profile.Id);
+
+        Assert.Single(updated.DeviceIds);
+        Assert.Contains(device3, updated.DeviceIds);
+        Assert.DoesNotContain(device1, updated.DeviceIds);
+        Assert.DoesNotContain(device2, updated.DeviceIds);
+
+        // Allow empty
+        await rps.SetProfileDevices(user.Id, profile.Id, []);
+
+        updated = await context.AppUserReadingProfiles
+
+            .FirstAsync(rp => rp.Id == profile.Id);
+
+        Assert.Empty(updated.DeviceIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_RemovesDuplicateSeriesLinks_SameDevice()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithName("Profile 1")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Profile 2 (will get device 1)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile1);
+        context.AppUserReadingProfiles.Add(profile2);
+        await unitOfWork.CommitAsync();
+
+        // Add device1 to profile2, which should remove series from profile1
+        await rps.SetProfileDevices(user.Id, profile2.Id, [device1]);
+
+        var updatedProfile1 = await context.AppUserReadingProfiles
+
+            .FirstAsync(rp => rp.Id == profile1.Id);
+
+        Assert.DoesNotContain(series.Id, updatedProfile1.SeriesIds);
+
+        var updatedProfile2 = await context.AppUserReadingProfiles
+
+            .FirstAsync(rp => rp.Id == profile2.Id);
+
+        Assert.Contains(series.Id, updatedProfile2.SeriesIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_RemovesDuplicateSeriesLinks_MultipleDevices()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+        const int device2 = 2;
+        const int device3 = 3;
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithDeviceId(device2)
+            .WithName("Profile 1 (Device 1 & 2)")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device3)
+            .WithName("Profile 2 (will get Device 2)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile1);
+        context.AppUserReadingProfiles.Add(profile2);
+        await unitOfWork.CommitAsync();
+
+        // Add device2 to profile2, which should remove series from profile1 only for device2
+        await rps.SetProfileDevices(user.Id, profile2.Id, [device2]);
+
+        var updatedProfile1 = await context.AppUserReadingProfiles
+
+
+            .FirstAsync(rp => rp.Id == profile1.Id);
+
+        // Profile1 should no longer have the series since device2 now conflicts
+        Assert.DoesNotContain(series.Id, updatedProfile1.SeriesIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_RemovesDuplicateLibraryLinks()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, _) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithDeviceId(device1)
+            .WithName("Profile 1")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithLibrary(lib)
+            .WithName("Profile 2 (will get device 1)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile1);
+        context.AppUserReadingProfiles.Add(profile2);
+        await unitOfWork.CommitAsync();
+
+        await rps.SetProfileDevices(user.Id, profile2.Id, [device1]);
+
+        var updatedProfile1 = await context.AppUserReadingProfiles
+
+            .FirstAsync(rp => rp.Id == profile1.Id);
+
+        Assert.DoesNotContain(lib.Id, updatedProfile1.LibraryIds);
+
+        var updatedProfile2 = await context.AppUserReadingProfiles
+
+            .FirstAsync(rp => rp.Id == profile2.Id);
+
+        Assert.Contains(lib.Id, updatedProfile2.LibraryIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_RemovesDuplicates_BothSeriesAndLibrary()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
+
+        var lib2 = new LibraryBuilder("Library 2").Build();
+        user.Libraries.Add(lib2);
+
+        const int device1 = 1;
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithLibrary(lib2)
+            .WithDeviceId(device1)
+            .WithName("Profile 1")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithLibrary(lib2)
+            .WithName("Profile 2 (will get device 1)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile1);
+        context.AppUserReadingProfiles.Add(profile2);
+        await unitOfWork.CommitAsync();
+
+        await rps.SetProfileDevices(user.Id, profile2.Id, [device1]);
+
+        var updatedProfile1 = await context.AppUserReadingProfiles
+
+
+            .FirstAsync(rp => rp.Id == profile1.Id);
+
+        Assert.DoesNotContain(series.Id, updatedProfile1.SeriesIds);
+        Assert.DoesNotContain(lib2.Id, updatedProfile1.LibraryIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_OnlyRemovesConflictingDeviceLinks()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        var series2 = new SeriesBuilder("Series 2").Build();
+        lib.Series.Add(series2);
+        await unitOfWork.CommitAsync();
+
+        const int device1 = 1;
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithSeries(series2)
+            .WithDeviceId(device1)
+            .WithName("Profile 1 (Device 1)")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Profile 2 (will get device 1)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile1);
+        context.AppUserReadingProfiles.Add(profile2);
+        await unitOfWork.CommitAsync();
+
+        await rps.SetProfileDevices(user.Id, profile2.Id, [device1]);
+
+        var updatedProfile1 = await context.AppUserReadingProfiles
+            .FirstAsync(rp => rp.Id == profile1.Id);
+
+        // Only series1 should be removed, series2 should remain
+        Assert.DoesNotContain(series.Id, updatedProfile1.SeriesIds);
+        Assert.Contains(series2.Id, updatedProfile1.SeriesIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_DoesNotAffectNoDeviceProfiles()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Profile 1 (No Device - Fallback)")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Profile 2 (will get device 1)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile1);
+        context.AppUserReadingProfiles.Add(profile2);
+        await unitOfWork.CommitAsync();
+
+        await rps.SetProfileDevices(user.Id, profile2.Id, [device1]);
+
+        var updatedProfile1 = await context.AppUserReadingProfiles
+            .FirstAsync(rp => rp.Id == profile1.Id);
+
+        // Profile1 has no devices, so it's a fallback and should not be affected
+        Assert.Contains(series.Id, updatedProfile1.SeriesIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_SettingToNoDevice_RemovesDuplicatesWithNoDevice()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Profile 1 (No Device)")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithName("Profile 2 (Device 1, will remove device)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile1);
+        context.AppUserReadingProfiles.Add(profile2);
+        await unitOfWork.CommitAsync();
+
+        // Set profile2 to no devices, which conflicts with profile1's no-device fallback
+        await rps.SetProfileDevices(user.Id, profile2.Id, []);
+
+        var updatedProfile1 = await context.AppUserReadingProfiles
+
+            .FirstAsync(rp => rp.Id == profile1.Id);
+
+        Assert.DoesNotContain(series.Id, updatedProfile1.SeriesIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_RemovesMultipleConflicts()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithName("Profile 1")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithName("Profile 2")
+            .Build();
+
+        var profile3 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("Profile 3 (will get device 1)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile1);
+        context.AppUserReadingProfiles.Add(profile2);
+        context.AppUserReadingProfiles.Add(profile3);
+        await unitOfWork.CommitAsync();
+
+        await rps.SetProfileDevices(user.Id, profile3.Id, [device1]);
+
+        var updatedProfile1 = await context.AppUserReadingProfiles
+
+            .FirstAsync(rp => rp.Id == profile1.Id);
+
+        var updatedProfile2 = await context.AppUserReadingProfiles
+
+            .FirstAsync(rp => rp.Id == profile2.Id);
+
+        // Both profile1 and profile2 should have series removed
+        Assert.DoesNotContain(series.Id, updatedProfile1.SeriesIds);
+        Assert.DoesNotContain(series.Id, updatedProfile2.SeriesIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_DoesNotRemoveImplicitProfiles()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
+
+        const int device1 = 1;
+
+        var implicitProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithDeviceId(device1)
+            .WithName("Implicit Profile")
+            .WithKind(ReadingProfileKind.Implicit)
+            .Build();
+
+        var userProfile = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithName("User Profile (will get device 1)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(implicitProfile);
+        context.AppUserReadingProfiles.Add(userProfile);
+        await unitOfWork.CommitAsync();
+
+        await rps.SetProfileDevices(user.Id, userProfile.Id, [device1]);
+
+        var updatedImplicit = await context.AppUserReadingProfiles
+            .FirstAsync(rp => rp.Id == implicitProfile.Id);
+
+        // Implicit profiles should not be affected by duplicate removal
+        Assert.Contains(series.Id, updatedImplicit.SeriesIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_WorksWithComplexScenario()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+
+        var series2 = new SeriesBuilder("Series 2").Build();
+        var series3 = new SeriesBuilder("Series 3").Build();
+        lib.Series.Add(series2);
+        lib.Series.Add(series3);
+        await unitOfWork.CommitAsync();
+
+        const int device1 = 1;
+        const int device2 = 2;
+        const int device3 = 3;
+
+        var profile1 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithSeries(series2)
+            .WithDeviceId(device1)
+            .WithDeviceId(device2)
+            .WithName("Profile 1 (Device 1 & 2)")
+            .Build();
+
+        var profile2 = new AppUserReadingProfileBuilder(user.Id)
+            .WithSeries(series)
+            .WithSeries(series3)
+            .WithDeviceId(device3)
+            .WithName("Profile 2 (will get Device 2)")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(profile1);
+        context.AppUserReadingProfiles.Add(profile2);
+        await unitOfWork.CommitAsync();
+
+        // Set profile2 to device2, which conflicts with profile1
+        await rps.SetProfileDevices(user.Id, profile2.Id, [device2]);
+
+        var updatedProfile1 = await context.AppUserReadingProfiles
+
+            .FirstAsync(rp => rp.Id == profile1.Id);
+
+        // Profile1 should lose series1 (conflicts), but keep series2 (no conflict)
+        Assert.DoesNotContain(series.Id, updatedProfile1.SeriesIds);
+        Assert.Contains(series2.Id, updatedProfile1.SeriesIds);
+
+        var updatedProfile2 = await context.AppUserReadingProfiles
+
+
+            .FirstAsync(rp => rp.Id == profile2.Id);
+
+        // Profile2 should have device2 and keep both series
+        Assert.Single(updatedProfile2.DeviceIds);
+        Assert.Contains(device2, updatedProfile2.DeviceIds);
+        Assert.Contains(series.Id, updatedProfile2.SeriesIds);
+        Assert.Contains(series3.Id, updatedProfile2.SeriesIds);
+    }
+
+    [Fact]
+    public async Task SetProfileDevices_ThrowsIfProfileDoesNotBelongToUser()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (rps, user, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var otherUser = new AppUserBuilder("otheruser", "other@email.com").Build();
+        context.AppUser.Add(otherUser);
+        await unitOfWork.CommitAsync();
+
+        const int device1 = 1;
+
+        var otherUserProfile = new AppUserReadingProfileBuilder(otherUser.Id)
+            .WithName("Other User's Profile")
+            .Build();
+
+        context.AppUserReadingProfiles.Add(otherUserProfile);
+        await unitOfWork.CommitAsync();
+
+        // Should throw when trying to set devices on another user's profile
+        await Assert.ThrowsAsync<KavitaException>(async () =>
+            await rps.SetProfileDevices(user.Id, otherUserProfile.Id, [device1]));
+    }
+
+    #endregion
+
     /// <summary>
     /// As response to #3793, I'm not sure if we want to keep this. It's not the most nice. But I think the idea of this test
     /// is worth having.
