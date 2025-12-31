@@ -2,16 +2,52 @@
 
   <app-list-select-modal
     [title]="t('title')"
-    [items]="listItems()"
+    [inputItems]="listItems()"
     [preSelectedItems]="preSelectedListItems()"
     [loading]="loading()"
     [selectedText]="t('bound')"
+    hiddenTranslationKey="bulk-set-reading-profile-modal.hidden"
     [multiSelect]="true"
+    [hideItemsWhenInvalid]="true"
     [interceptConfirm]="addToProfile.bind(this)"
     [isSelectionValidFunc]="validSelection.bind(this)"
+    [isValidItemFunc]="validItem.bind(this)"
     [invalidSelectionWarning]="t('warning-duplicate')"
+    [itemTemplate]="itemTemplate()"
   >
 
   </app-list-select-modal>
 
 </ng-container>
+
+<ng-template #listItemTemplate let-item let-selectedItems="selectedItems">
+
+  <div class="d-flex flex-column flex-grow-1">
+    <div class="d-flex flex-row justify-content-between" *transloco="let t; prefix: 'bulk-set-reading-profile-modal'">
+      <div class="fw-bold">{{ item.label | sentenceCase }}</div>
+
+      @if (selectedItems && selectedItems.includes(item)) {
+        <span class="pill p-1 ms-1">{{ t('bound') }}</span>
+      }
+    </div>
+
+    @let devices = profileDevice(item.value);
+
+    <div class="mt-1 text-muted small">
+      @if (devices.length <= 3) {
+        @for (device of devices; track device.id) {
+          <span>{{ device.friendlyName }}</span>
+          @if (!$last) {<span>, </span>}
+        }
+      } @else {
+        @for (device of devices.slice(0, 3); track device.id) {
+          <span>{{ device.friendlyName }}</span>
+          @if (!$last) {<span>, </span>}
+        }
+        <span>, …</span>
+      }
+    </div>
+  </div>
+
+</ng-template>
+

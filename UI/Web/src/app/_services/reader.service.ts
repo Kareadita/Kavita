@@ -703,7 +703,7 @@ export class ReaderService {
 
     options.push({label: translate('reread-modal.cancel'), value: RereadPromptResult.Cancel});
 
-    component.items.set(options);
+    component.inputItems.set(options);
 
     return modal.closed.pipe(
       takeUntil(modal.dismissed),

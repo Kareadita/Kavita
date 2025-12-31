@@ -158,6 +158,14 @@ public interface IReadingProfileService
     /// <param name="deviceIds"></param>
     /// <returns></returns>
     Task SetProfileDevices(int userId, int profileId, List<int> deviceIds);
+
+    /// <summary>
+    /// Remove device ids from all profiles, does **NOT** commit
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="deviceId"></param>
+    /// <returns></returns>
+    Task RemoveDeviceLinks(int userId, int deviceId);
 }
 
 public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService localizationService, IMapper mapper): IReadingProfileService
@@ -473,6 +481,19 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         }
 
         await unitOfWork.CommitAsync();
+    }
+
+    public async Task RemoveDeviceLinks(int userId, int deviceId)
+    {
+        var profiles = await unitOfWork.DataContext.AppUserReadingProfiles
+            .Where(rp => rp.AppUserId == userId && rp.DeviceIds.Contains(deviceId))
+            .ToListAsync();
+
+        foreach (var profile in profiles)
+        {
+            profile.DeviceIds.Remove(deviceId);
+            unitOfWork.AppUserReadingProfileRepository.Update(profile);
+        }
     }
 
     private static void DeviceOverlapGuard(List<AppUserReadingProfile> profiles)

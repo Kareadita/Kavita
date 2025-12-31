@@ -46,9 +46,11 @@ export class ListSelectModalComponent<T> {
   description = model<string | null>(null);
   selectedText = model(translate('common.selected'));
   invalidSelectionWarning = model<string | null>(null);
+  hiddenTranslationKey = model('list-select-modal.hidden')
 
-  items = model.required<ListSelectionItem<T>[]>();
+  inputItems = model.required<ListSelectionItem<T>[]>();
   preSelectedItems = model<T[]>([]);
+  isValidItemFunc = model<(item: T, selection: T[]) => boolean>(() => true);
   isSelectionValidFunc = model<(selection:T[]) => boolean>(() => true);
   interceptConfirm = model<((selection: T|T[]) => void) | null>(null);
 
@@ -56,6 +58,7 @@ export class ListSelectModalComponent<T> {
   requireConfirmation = model(false);
   showFooter = model(true);
   multiSelect = model(false);
+  hideItemsWhenInvalid = model(false);
 
   itemTemplate = input<TemplateRef<any> | null>(null);
 
@@ -81,6 +84,22 @@ export class ListSelectModalComponent<T> {
 
   protected selectedItems = signal<ListSelectionItem<T>[]>([]);
 
+  protected items = computed(() => {
+    const items = this.inputItems();
+    const hideOnInvalid = this.hideItemsWhenInvalid();
+
+    if (!hideOnInvalid) return items;
+
+    return items.filter(item => this.isItemValid(item));
+  });
+
+  protected hiddenItems = computed(() => {
+    const allItems = this.inputItems();
+    const items = this.items();
+
+    return allItems.length - items.length;
+  });
+
   protected filteredItems = computed(() => {
     const items = this.items();
     const filter = this.filterQuery().toLowerCase();
@@ -97,7 +116,7 @@ export class ListSelectModalComponent<T> {
 
   constructor() {
     effect(() => {
-      const items = this.items();
+      const items = this.inputItems();
       const preSelectedItems = this.preSelectedItems();
       const selectedItems = untracked(this.selectedItems); // Don't trigger effect when selected items changes
 
@@ -108,7 +127,17 @@ export class ListSelectModalComponent<T> {
     });
   }
 
+  isItemValid(item: ListSelectionItem<T>) {
+    // Assume selected items are always valid
+    if (this.selectedItems().includes(item)) return true;
+
+
+    return this.isValidItemFunc()(item.value, this.selectedItems().map(item => item.value));
+  }
+
   select(item: ListSelectionItem<T>) {
+    if (!this.isItemValid(item)) return;
+
     if (this.multiSelect()) {
       const currentlySelected = this.selectedItems().includes(item);
       if (currentlySelected) {
