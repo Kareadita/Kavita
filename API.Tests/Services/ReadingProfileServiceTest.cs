@@ -57,7 +57,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task ImplicitProfileFirst()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, library, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         var profile = new AppUserReadingProfileBuilder(user.Id)
             .WithKind(ReadingProfileKind.Implicit)
@@ -214,7 +214,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task ReplaceReadingProfile()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         var profile1 = new AppUserReadingProfileBuilder(user.Id)
             .WithSeries(series)
@@ -243,7 +243,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task DeleteReadingProfile()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         var profile1 = new AppUserReadingProfileBuilder(user.Id)
             .WithSeries(series)
@@ -312,7 +312,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task BulkAssignDeletesImplicit()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, lib, _) = await Setup(unitOfWork, context, mapper);
 
         var implicitProfile = mapper.Map<UserReadingProfileDto>(new AppUserReadingProfileBuilder(user.Id)
             .Build());
@@ -358,7 +358,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task AddDeletesImplicit()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         var implicitProfile = mapper.Map<UserReadingProfileDto>(new AppUserReadingProfileBuilder(user.Id)
             .WithKind(ReadingProfileKind.Implicit)
@@ -392,7 +392,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task CreateReadingProfile()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, _) = await Setup(unitOfWork, context, mapper);
 
         var dto = new UserReadingProfileDto
         {
@@ -583,7 +583,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task GetCorrectProfile_DeviceVsNoDevice_SeriesLevel()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         const int deviceId = 1;
 
@@ -649,7 +649,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task GetCorrectProfile_ImplicitWithDevice()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         const int deviceId = 1;
 
@@ -847,7 +847,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task PromoteImplicitProfile_ConvertsImplicitToUser()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         var implicitProfile = new AppUserReadingProfileBuilder(user.Id)
             .WithSeries(series)
@@ -873,7 +873,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task PromoteImplicitProfile_WithDevice_OnlyRemovesFromMatchingDeviceProfiles()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         const int deviceId = 1;
         const int otherDeviceId = 2;
@@ -964,7 +964,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task PromoteImplicitProfile_DoesNotRemoveFromPromotedProfile()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         var implicitProfile = new AppUserReadingProfileBuilder(user.Id)
             .WithSeries(series)
@@ -986,7 +986,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task PromoteImplicitProfile_ThrowsIfProfileDoesNotBelongToUser()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         var otherUser = new AppUserBuilder("otheruser", "other@email.com").Build();
         context.AppUser.Add(otherUser);
@@ -1010,7 +1010,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task PromoteImplicitProfile_ThrowsIfProfileIsNotImplicit()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         var userProfile = new AppUserReadingProfileBuilder(user.Id)
             .WithSeries(series)
@@ -1231,7 +1231,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task AddProfileToSeries_WithDevice_OnlyRemovesImplicitWithSameDevice()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         const int deviceId = 1;
         const int otherDeviceId = 2;
@@ -1289,7 +1289,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task AddProfileToSeries_NoDevice_OnlyRemovesImplicitWithNoDevice()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         const int deviceId = 1;
 
@@ -1332,7 +1332,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task AddProfileToSeries_WithMultipleDevices_RemovesImplicitsForAllDevices()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         const int device1 = 1;
         const int device2 = 2;
@@ -1404,7 +1404,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task AddProfileToSeries_ImplicitWithMultipleDevices_RemovedIfAnyDeviceMatches()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         const int device1 = 1;
         const int device2 = 2;
@@ -1455,7 +1455,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task AddProfileToSeries_ThrowsIfProfileDoesNotBelongToUser()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         var otherUser = new AppUserBuilder("otheruser", "other@email.com").Build();
         context.AppUser.Add(otherUser);
@@ -1481,7 +1481,7 @@ public class ReadingProfileServiceTest(ITestOutputHelper outputHelper): Abstract
     public async Task ClearSeriesProfile_RemovesAllProfilesForSeriesRegardlessOfKindOrDevice()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (rps, user, lib, series) = await Setup(unitOfWork, context, mapper);
+        var (rps, user, _, series) = await Setup(unitOfWork, context, mapper);
 
         var userProfileDevice1 = new AppUserReadingProfileBuilder(user.Id)
             .WithSeries(series)
