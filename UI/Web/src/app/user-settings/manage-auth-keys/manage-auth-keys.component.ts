@@ -1,10 +1,10 @@
-import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {ApiKeyComponent} from "../api-key/api-key.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {SettingsService} from "../../admin/settings.service";
 import {WikiLink} from "../../_models/wiki";
-import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {AuthKey, AuthKeyProvider} from "../../_models/user/auth-key";
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
@@ -103,7 +103,6 @@ export class ManageAuthKeysComponent implements OnInit {
     this.toastr.success(translate('toasts.copied-to-clipboard'));
   }
 
-  protected readonly ColumnMode = ColumnMode;
   protected readonly AuthKeyProvider = AuthKeyProvider;
   protected readonly Breakpoint = Breakpoint;
 }
