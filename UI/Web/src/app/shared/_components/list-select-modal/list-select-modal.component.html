@@ -1,4 +1,6 @@
 <ng-container *transloco="let t">
+  @let invalidSelection = !validSelection();
+  @let invalidSelectWarningValue = invalidSelectionWarning();
 
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{title()}}</h4>
@@ -6,12 +8,18 @@
   </div>
 
   <div class="modal-body">
+
+    <app-loading [loading]="loading()"></app-loading>
+
     @let itemsValue = items();
     @let filteredItemsValue = filteredItems();
     @let descriptionValue = description();
 
     @if (descriptionValue) {
       <span class="text-muted"> {{descriptionValue}} </span>
+    }
+    @if (invalidSelection) {
+      <span class="text-danger"> {{invalidSelectWarningValue}} </span>
     }
 
     <form [formGroup]="filterForm">
@@ -28,10 +36,12 @@
     </form>
 
     <ul class="list-group mt-4">
-      @for(item of filteredItemsValue; track $index) {
-        <ng-container [ngTemplateOutlet]="finalItemTemplate()"
-                      [ngTemplateOutletContext]="{ $implicit: item, index: $index, first: $first, last: $last }" >
-        </ng-container>
+      @if (!loading()) {
+        @for(item of filteredItemsValue; track $index) {
+          <ng-container [ngTemplateOutlet]="finalItemTemplate()"
+                        [ngTemplateOutletContext]="{ $implicit: item, index: $index, first: $first, last: $last }" >
+          </ng-container>
+        }
       }
     </ul>
 
@@ -40,7 +50,7 @@
   @if (showFooter()) {
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.cancel')}}</button>
-      <button type="button" class="btn btn-primary" (click)="confirm()">{{t('common.confirm')}}</button>
+      <button type="button" class="btn btn-primary" (click)="confirm()" [disabled]="invalidSelection">{{t('common.confirm')}}</button>
     </div>
   }
 
@@ -49,13 +59,13 @@
 <ng-template #defaultTemplate let-item>
   @let selectedItemsValue = selectedItems();
 
-  <li class="list-group-item clickable" tabindex="0" role="option" (click)="select(item)" *transloco="let t">
+  <li class="list-group-item clickable" tabindex="0" role="option" (click)="select(item)">
     <div class="p-2 group-item d-flex justify-content-between align-items-center">
 
       <div class="fw-bold">{{item.label | sentenceCase}}</div>
 
       @if (selectedItemsValue && selectedItemsValue.includes(item)) {
-        <span class="pill p-1 ms-1">{{t('common.selected')}}</span>
+        <span class="pill p-1 ms-1">{{ selectedText() }}</span>
       }
     </div>
   </li>

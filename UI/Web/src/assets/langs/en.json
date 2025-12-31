@@ -1638,7 +1638,8 @@
         "no-data": "No collections created yet",
         "loading": "{{common.loading}}",
         "create": "{{common.create}}",
-        "bound":  "Bound"
+        "bound":  "Bound",
+        "warning-duplicate": "Your selection contains overlapping devices, this is not allowed"
     },
 
     "entity-title": {

@@ -10,7 +10,9 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Builders;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Kavita.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
 #nullable enable
@@ -132,13 +134,20 @@ public interface IReadingProfileService
     Task ClearLibraryProfile(int userId, int libraryId);
 
     /// <summary>
-    /// Returns the bound Reading Profile to a Library
+    /// Returns the all bound Reading Profile to a Library
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="libraryId"></param>
-    /// <param name="activeDeviceId"></param>
     /// <returns></returns>
-    Task<UserReadingProfileDto?> GetReadingProfileDtoForLibrary(int userId, int libraryId, int? activeDeviceId);
+    Task<List<UserReadingProfileDto>> GetReadingProfileDtosForLibrary(int userId, int libraryId);
+
+    /// <summary>
+    /// Returns the all bound Reading Profile to a Series
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    Task<List<UserReadingProfileDto>> GetReadingProfileDtosForSeries(int userId, int seriesId);
 
     /// <summary>
     /// Set the assigned devices for the given reading profile. Then removes all duplicate links, ensuring each series
@@ -378,11 +387,22 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         }
     }
 
-    public async Task<UserReadingProfileDto?> GetReadingProfileDtoForLibrary(int userId, int libraryId, int? activeDeviceId)
+    public Task<List<UserReadingProfileDto>> GetReadingProfileDtosForLibrary(int userId, int libraryId)
     {
-        var libraryProfile =
-            await unitOfWork.AppUserReadingProfileRepository.GetProfileForLibrary(userId, libraryId, activeDeviceId);
-        return mapper.Map<UserReadingProfileDto>(libraryProfile);
+        return unitOfWork.DataContext.AppUserReadingProfiles
+            .Where(rp => rp.AppUserId == userId && rp.LibraryIds.Contains(libraryId))
+            .Where(rp => rp.Kind == ReadingProfileKind.User)
+            .ProjectTo<UserReadingProfileDto>(mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public Task<List<UserReadingProfileDto>> GetReadingProfileDtosForSeries(int userId, int seriesId)
+    {
+        return unitOfWork.DataContext.AppUserReadingProfiles
+            .Where(rp => rp.AppUserId == userId && rp.SeriesIds.Contains(seriesId))
+            .Where(rp => rp.Kind == ReadingProfileKind.User)
+            .ProjectTo<UserReadingProfileDto>(mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
     public async Task SetProfileDevices(int userId, int profileId, List<int> deviceIds)

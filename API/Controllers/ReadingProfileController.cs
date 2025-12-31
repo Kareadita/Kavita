@@ -45,17 +45,25 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     }
 
     /// <summary>
-    /// Returns the (potential) Reading Profile bound to the library
+    /// Returns all Reading Profiles bound to a series
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("series")]
+    public async Task<ActionResult<List<UserReadingProfileDto>>> GetProfilesForSeries(int seriesId)
+    {
+        return Ok(await readingProfileService.GetReadingProfileDtosForSeries(UserId, seriesId));
+    }
+
+    /// <summary>
+    /// Returns all the Reading rofiles bound to the library
     /// </summary>
     /// <param name="libraryId"></param>
-    /// <param name="deviceId">Defaults to currently active device</param>
     /// <returns></returns>
     [HttpGet("library")]
-    public async Task<ActionResult<UserReadingProfileDto?>> GetProfileForLibrary(int libraryId, [FromQuery] int? deviceId = null)
+    public async Task<ActionResult<List<UserReadingProfileDto>>> GetProfilesForLibrary(int libraryId)
     {
-        deviceId ??= clientInfoAccessor.CurrentDeviceId;
-
-        return Ok(await readingProfileService.GetReadingProfileDtoForLibrary(UserId, libraryId, deviceId));
+        return Ok(await readingProfileService.GetReadingProfileDtosForLibrary(UserId, libraryId));
     }
 
     /// <summary>

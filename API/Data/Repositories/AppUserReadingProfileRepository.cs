@@ -27,14 +27,7 @@ public interface IAppUserReadingProfileRepository
     /// <param name="skipImplicit"></param>
     /// <returns></returns>
     Task<AppUserReadingProfile> GetProfileForSeries(int userId, int libraryId, int seriesId, int? activeDeviceId = null, bool skipImplicit = false);
-    /// <summary>
-    /// Returns the reading profile for a given library, if it exists
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="libraryId"></param>
-    /// <param name="activeDeviceId"></param>
-    /// <returns></returns>
-    Task<AppUserReadingProfile?> GetProfileForLibrary(int userId, int libraryId, int? activeDeviceId = null);
+
     /// <summary>
     /// Get all profiles assigned to a library
     /// </summary>
@@ -96,15 +89,6 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
             .ThenByDescending(rp => rp.LibraryIds.Contains(libraryId))
             .ThenByDescending(rp => rp.Kind == ReadingProfileKind.Default)
             .FirstAsync();
-    }
-
-    public Task<AppUserReadingProfile?> GetProfileForLibrary(int userId, int libraryId, int? activeDeviceId = null)
-    {
-        return context.AppUserReadingProfiles
-            .Where(rp => rp.AppUserId == userId && rp.LibraryIds.Contains(libraryId))
-            .WhereIf(activeDeviceId != null,
-                rp => rp.DeviceIds.Count == 0 || rp.DeviceIds.Contains(activeDeviceId!.Value))
-            .FirstOrDefaultAsync();
     }
 
     public Task<List<AppUserReadingProfile>> GetProfilesForLibrary(int userId, int libraryId)

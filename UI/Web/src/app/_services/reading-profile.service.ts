@@ -15,8 +15,12 @@ export class ReadingProfileService {
     return this.httpClient.get<ReadingProfile>(this.baseUrl + `reading-profile/${libraryId}/${seriesId}?skipImplicit=${skipImplicit}`);
   }
 
+  getAllForSeries(seriesId: number) {
+    return this.httpClient.get<ReadingProfile[]>(this.baseUrl + `reading-profile/series?seriesId=${seriesId}`);
+  }
+
   getForLibrary(libraryId: number) {
-    return this.httpClient.get<ReadingProfile | null>(this.baseUrl + `reading-profile/library?libraryId=${libraryId}`);
+    return this.httpClient.get<ReadingProfile[]>(this.baseUrl + `reading-profile/library?libraryId=${libraryId}`);
   }
 
   updateProfile(profile: ReadingProfile) {

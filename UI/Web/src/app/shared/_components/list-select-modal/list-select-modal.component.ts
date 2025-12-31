@@ -2,19 +2,20 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  ContentChild,
+  ContentChild, effect,
   inject, input,
   model,
   OnInit,
   signal,
-  TemplateRef, viewChild
+  TemplateRef, untracked, viewChild
 } from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {NgTemplateOutlet} from "@angular/common";
+import {LoadingComponent} from "../../loading/loading.component";
 
 export type ListSelectionItem<T> = {
   label: string,
@@ -28,13 +29,14 @@ export type ListSelectionItem<T> = {
     TranslocoDirective,
     ReactiveFormsModule,
     SentenceCasePipe,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    LoadingComponent
   ],
   templateUrl: './list-select-modal.component.html',
   styleUrl: './list-select-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ListSelectModalComponent<T> implements OnInit {
+export class ListSelectModalComponent<T> {
 
   private readonly modal = inject(NgbActiveModal);
 
@@ -42,13 +44,29 @@ export class ListSelectModalComponent<T> implements OnInit {
 
   title = model.required<string>();
   description = model<string | null>(null);
+  selectedText = model(translate('common.selected'));
+  invalidSelectionWarning = model<string | null>(null);
+
   items = model.required<ListSelectionItem<T>[]>();
   preSelectedItems = model<T[]>([]);
+  isSelectionValidFunc = model<(selection:T[]) => boolean>(() => true);
+  interceptConfirm = model<((selection: T|T[]) => void) | null>(null);
+
   itemsBeforeFilter = model(8);
   requireConfirmation = model(false);
   showFooter = model(true);
   multiSelect = model(false);
+
   itemTemplate = input<TemplateRef<any> | null>(null);
+
+  loading = model(false);
+
+  protected validSelection = computed(() => {
+    const fn = this.isSelectionValidFunc();
+    const selection = this.selectedItems().map(item => item.value);
+
+    return fn(selection);
+  })
 
   protected finalItemTemplate = computed(() => {
     const defaultTemplate = this.defaultTemplate();
@@ -75,11 +93,19 @@ export class ListSelectModalComponent<T> implements OnInit {
   protected filterForm = new FormGroup({
     query: new FormControl('', {nonNullable: true}),
   });
-  protected filterQuery = toSignal(this.filterForm.get('query')!.valueChanges, {initialValue: ''})
+  protected filterQuery = toSignal(this.filterForm.get('query')!.valueChanges, {initialValue: ''});
 
-  ngOnInit() {
-    const items = this.items().filter(item => this.preSelectedItems().includes(item.value));
-    this.selectedItems.set(items);
+  constructor() {
+    effect(() => {
+      const items = this.items();
+      const preSelectedItems = this.preSelectedItems();
+      const selectedItems = untracked(this.selectedItems); // Don't trigger effect when selected items changes
+
+      // Never overwrite selected items
+      if (selectedItems.length > 0) return;
+
+      this.selectedItems.set(items.filter(item => preSelectedItems.includes(item.value)));
+    });
   }
 
   select(item: ListSelectionItem<T>) {
@@ -111,10 +137,14 @@ export class ListSelectModalComponent<T> implements OnInit {
   }
 
   confirm() {
+    const intercept = this.interceptConfirm();
+    const fn = intercept == null ? this.modal.close : intercept;
+
+
     if (this.multiSelect()) {
-      this.modal.close(this.selectedItems().map(i => i.value))
+      fn(this.selectedItems().map(i => i.value))
     } else {
-      this.modal.close(this.selectedItems()[0].value);
+      fn(this.selectedItems()[0].value);
     }
   }
 
