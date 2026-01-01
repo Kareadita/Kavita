@@ -91,7 +91,8 @@ public class KoreaderService : IKoreaderService
         _logger.LogDebug("Converting KOReader progress from {KavitaProgress} to {KOReaderProgress}", originalScrollId?.Sanitize() ?? string.Empty, progressDto?.BookScrollId?.Sanitize() ?? string.Empty);
 
 
-        return new KoreaderBookDtoBuilder(bookHash).WithProgress(koreaderProgress)
+        return new KoreaderBookDtoBuilder(bookHash)
+            .WithProgress(koreaderProgress)
             .WithPercentage(progressDto?.PageNum, file.Pages)
             .WithDeviceId(settingsDto.InstallId, userId)
             .WithTimestamp(progressDto?.LastModifiedUtc)

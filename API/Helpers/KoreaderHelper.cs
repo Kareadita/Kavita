@@ -120,12 +120,16 @@ public static class KoreaderHelper
         }
         else
         {
-            // What we Store: //html[1]/BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]/section/p[62]/text().0
+            // What we Store: //body/p[9]
             // What we Need to send back: section/p[62]/text().0
-            nonBodyTag = progressDto.BookScrollId.Replace("//html[1]/", "//", StringComparison.InvariantCultureIgnoreCase).Replace(BookService.BookReaderBodyScope + "/", string.Empty, StringComparison.InvariantCultureIgnoreCase);
+            nonBodyTag = progressDto.BookScrollId
+                .Replace("//body/", string.Empty, StringComparison.InvariantCultureIgnoreCase)
+                // These should never happen, but just in case
+                .Replace("//html[1]/", "//", StringComparison.InvariantCultureIgnoreCase)
+                .Replace(BookService.BookReaderBodyScope + "/", string.Empty, StringComparison.InvariantCultureIgnoreCase);
         }
 
         // The format that Koreader accepts as a progress string. It tells Koreader where Kavita last left off.
-        return $"/body/DocFragment[{koreaderPageNumber}]/body/{nonBodyTag}";
+        return $"/body/DocFragment[{koreaderPageNumber}]/body/{nonBodyTag}/text().0";
     }
 }
