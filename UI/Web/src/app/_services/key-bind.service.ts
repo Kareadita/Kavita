@@ -280,7 +280,7 @@ export class KeyBindService {
 
   private handleKeyEvent(event: KeyboardEvent) {
     if (this.disabled()) return;
-    if (!event.hasOwnProperty('key')) return;
+    if (event.key === undefined) return;
 
     const eventKey = event.key.toLowerCase() as KeyCode;
 
