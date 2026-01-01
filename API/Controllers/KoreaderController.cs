@@ -19,7 +19,6 @@ namespace API.Controllers;
 /// Koreader uses a different form of authentication. It stores the username and password in headers.
 /// https://github.com/koreader/koreader/blob/master/plugins/kosync.koplugin/KOSyncClient.lua
 /// </remarks>
-[AllowAnonymous]
 public class KoreaderController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -35,15 +34,6 @@ public class KoreaderController : BaseApiController
         _koreaderService = koreaderService;
         _logger = logger;
     }
-
-    // We won't allow users to be created from Koreader. Rather, they
-    // must already have an account.
-    /*
-    [HttpPost("/users/create")]
-    public IActionResult CreateUser(CreateUserRequest request)
-    {
-    }
-    */
 
     [HttpGet("{apiKey}/users/auth")]
     public async Task<IActionResult> Authenticate(string apiKey)
