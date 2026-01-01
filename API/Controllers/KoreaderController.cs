@@ -36,15 +36,9 @@ public class KoreaderController : BaseApiController
     }
 
     [HttpGet("{apiKey}/users/auth")]
-    public async Task<IActionResult> Authenticate(string apiKey)
+    public IActionResult Authenticate(string apiKey)
     {
-        var userId = await GetUserId(apiKey);
-        if (userId == 0) return Unauthorized();
-
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return Unauthorized();
-
-        return Ok(new { username = user.UserName });
+        return Ok(new { username = Username });
     }
 
     /// <summary>
@@ -58,10 +52,7 @@ public class KoreaderController : BaseApiController
     {
         try
         {
-            var userId = await GetUserId(apiKey);
-            if (userId == 0) return Unauthorized();
-
-            await _koreaderService.SaveProgress(request, userId);
+            await _koreaderService.SaveProgress(request, UserId);
 
             return Ok(new KoreaderProgressUpdateDto{ Document = request.document, Timestamp = DateTime.UtcNow });
         }
@@ -82,10 +73,8 @@ public class KoreaderController : BaseApiController
     {
         try
         {
-            var userId = await GetUserId(apiKey);
-            if (userId == 0) return Unauthorized();
-            var response = await _koreaderService.GetProgress(ebookHash, userId);
-            _logger.LogDebug("Koreader response progress for User ({UserId}): {Progress}", userId, response.progress.Sanitize());
+            var response = await _koreaderService.GetProgress(ebookHash, UserId);
+            _logger.LogDebug("Koreader response progress for User ({UserName}): {Progress}", Username, response.progress.Sanitize());
 
 
             // We must pack this manually for Koreader due to a bug in their code: https://github.com/koreader/koreader/issues/13629
@@ -101,18 +90,6 @@ public class KoreaderController : BaseApiController
         catch (KavitaException ex)
         {
             return BadRequest(ex.Message);
-        }
-    }
-
-    private async Task<int> GetUserId(string apiKey)
-    {
-        try
-        {
-            return await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        }
-        catch
-        {
-            throw new KavitaException(await _localizationService.Get("en", "user-doesnt-exist"));
         }
     }
 }
