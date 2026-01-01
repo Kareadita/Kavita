@@ -8,11 +8,8 @@ using API.DTOs.OPDS.Requests;
 using API.DTOs.Progress;
 using API.Entities.Enums;
 using API.Exceptions;
-using API.Extensions;
-using API.Middleware;
 using API.Services;
 using API.Services.Reading;
-using API.Services.Store;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +22,6 @@ namespace API.Controllers;
 public class OpdsController : BaseApiController
 {
     private readonly IOpdsService _opdsService;
-    private readonly IUserContext _userContext;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDownloadService _downloadService;
     private readonly IDirectoryService _directoryService;
@@ -38,7 +34,7 @@ public class OpdsController : BaseApiController
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
         IReaderService readerService, IAccountService accountService,
-        ILocalizationService localizationService, IOpdsService opdsService, IUserContext userContext)
+        ILocalizationService localizationService, IOpdsService opdsService)
     {
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
@@ -48,7 +44,6 @@ public class OpdsController : BaseApiController
         _accountService = accountService;
         _localizationService = localizationService;
         _opdsService = opdsService;
-        _userContext = userContext;
 
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
     }
@@ -751,7 +746,6 @@ public class OpdsController : BaseApiController
     [ResponseCache(Duration = 60 * 60, Location = ResponseCacheLocation.Client, NoStore = false)]
     public async Task<ActionResult> GetFavicon(string apiKey)
     {
-        var userId = UserId;
         var files = _directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
         if (files.Length == 0) return BadRequest(await _localizationService.Translate(UserId, "favicon-doesnt-exist"));
 
