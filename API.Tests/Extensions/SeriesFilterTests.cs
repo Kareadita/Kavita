@@ -891,7 +891,9 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
         var (unitOfWork, context, mapper) = await CreateDatabase();
         await SetupHasReleaseYear(context);
 
-        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.IsInLast, 5).ToListAsync();
+        var years = DateTime.UtcNow.Year - 2020;
+
+        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.IsInLast, years).ToListAsync();
         Assert.Equal(2, foundSeries.Count);
     }
 
@@ -901,7 +903,9 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
         var (unitOfWork, context, mapper) = await CreateDatabase();
         await SetupHasReleaseYear(context);
 
-        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.IsNotInLast, 5).ToListAsync();
+        var years = DateTime.UtcNow.Year - 2020;
+
+        var foundSeries = await context.Series.HasReleaseYear(true, FilterComparison.IsNotInLast, years).ToListAsync();
         Assert.Single(foundSeries);
         Assert.Contains(foundSeries, s => s.Name == "2000");
     }
