@@ -64,8 +64,10 @@ public class KoreaderService : IKoreaderService
         // Update the bookScrollId if possible
         var reportedProgress = koreaderBookDto.progress;
         KoreaderHelper.UpdateProgressDto(userProgressDto, koreaderBookDto.progress);
-        _logger.LogDebug("Converting KOReader progress from {ReportedProgress} to {ScopedProgress}", reportedProgress.Sanitize(), userProgressDto.BookScrollId?.Sanitize());
+        _logger.LogDebug("Converting KOReader progress from {ReportedProgress} to {ScopedProgress}",
+            reportedProgress.Sanitize(), userProgressDto.BookScrollId?.Sanitize());
 
+        // Normal saving from kavita will be //body/h2[1]
         await _readerService.SaveReadingProgress(userProgressDto, userId);
     }
 

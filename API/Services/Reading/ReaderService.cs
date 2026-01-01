@@ -273,7 +273,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             }
 
             logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum}", progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum);
-            userProgress?.MarkModified();
+            userProgress.MarkModified();
 
             if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync())
             {

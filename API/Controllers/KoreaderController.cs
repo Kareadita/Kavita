@@ -22,7 +22,6 @@ namespace API.Controllers;
 [AllowAnonymous]
 public class KoreaderController : BaseApiController
 {
-
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILocalizationService _localizationService;
     private readonly IKoreaderService _koreaderService;
@@ -50,6 +49,8 @@ public class KoreaderController : BaseApiController
     public async Task<IActionResult> Authenticate(string apiKey)
     {
         var userId = await GetUserId(apiKey);
+        if (userId == 0) return Unauthorized();
+
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
 
@@ -68,6 +69,8 @@ public class KoreaderController : BaseApiController
         try
         {
             var userId = await GetUserId(apiKey);
+            if (userId == 0) return Unauthorized();
+
             await _koreaderService.SaveProgress(request, userId);
 
             return Ok(new KoreaderProgressUpdateDto{ Document = request.document, Timestamp = DateTime.UtcNow });
@@ -90,6 +93,7 @@ public class KoreaderController : BaseApiController
         try
         {
             var userId = await GetUserId(apiKey);
+            if (userId == 0) return Unauthorized();
             var response = await _koreaderService.GetProgress(ebookHash, userId);
             _logger.LogDebug("Koreader response progress for User ({UserId}): {Progress}", userId, response.progress.Sanitize());
 

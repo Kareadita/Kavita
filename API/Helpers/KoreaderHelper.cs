@@ -92,6 +92,9 @@ public static class KoreaderHelper
         var lastPart = koreaderPosition.Split("/body/")[^1];
         var lastTag = path[5].ToUpper();
 
+        // If lastPart ends in a .Decimal, remove it as it's not a valid xpath
+        lastPart = lastPart.Split("/text()")[0];
+
         // TODO: Enhance this code: /body/DocFragment[27]/body/section/p[3]/text().229 -> p[3] but we probably can get more
 
         if (lastTag == "A")
@@ -101,7 +104,7 @@ public static class KoreaderHelper
         else
         {
             // The format that Kavita accepts as a progress string. It tells Kavita where Koreader last left off.
-            progress.BookScrollId = $"//html[1]/{BookService.BookReaderBodyScope[2..].ToLowerInvariant()}/{lastPart}";
+            progress.BookScrollId = $"//body/{lastPart}";
         }
     }
 

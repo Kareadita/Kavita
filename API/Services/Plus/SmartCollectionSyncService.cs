@@ -213,7 +213,6 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         }
 
         // At this point, all series in the info have been checked and added if necessary
-        // You may want to commit changes to the database if needed
         collection.LastSyncUtc = DateTime.UtcNow.Truncate(TimeSpan.TicksPerHour);
         collection.TotalSourceCount = info.TotalItems;
         collection.Summary = info.Summary;
