@@ -111,12 +111,10 @@
         "share-series-reviews-tooltip": "是否對其他用戶顯示您對系列的評論",
         "clients-opds-alert": "此伺服器上未啟用 OPDS。 這不會影響 Tachiyomi 用戶。",
         "clients-opds-description": "所有第三方客戶端都將使用 API 密鑰或下面的連接 URL。 這些就像密碼一樣，請保密。",
-        "clients-api-key-tooltip": "API 金鑰就像密碼一樣。重置它會使任何現有的客戶端失效。",
         "clients-opds-url-tooltip": "查看支持的 OPDS 客户端列表： ",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "clients-opds-url-label": "OPDS 網址",
-        "clients-api-key-label": "API 密鑰",
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-tooltip": "允許 Kavita 單向同步閱讀進度與評分至 AniList",
         "want-to-read-sync-label": "想讀清單同步",
@@ -176,8 +174,6 @@
     "manage-devices": {
         "title": "裝置管理員",
         "description": "本部分供您設置無法通過網路瀏覽器連接到 Kavita 且具有接受文件的電子信箱地址的裝置。",
-        "devices-title": "裝置",
-        "no-devices": "尚未設定任何裝置",
         "platform-label": "平台",
         "email-label": "電子郵件",
         "email-setup-alert": "想要將文件發送到您的裝置嗎？請先讓管理員設定電子郵件！",
@@ -190,7 +186,6 @@
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
-        "platform-label": "{{manage-devices.platform-label}}",
         "email-label": "{{common.email}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
@@ -207,8 +202,6 @@
         "new-password-label": "新密碼",
         "confirm-password-label": "確認密碼",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "passwords-must-match": "密碼必須一致",
@@ -226,31 +219,19 @@
         "invite-url-label": "邀請連結",
         "invite-url-tooltip": "複製此內容並貼到新分頁中",
         "has-invalid-email": "看起來您沒有設置有效的電子郵件。更改電子郵件將需要管理員向您發送一個連結，以完成此操作。",
-        "permission-error": "您無權更改您的電子郵件。 聯繫伺服器管理員。",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
     "change-age-restriction": {
         "age-restriction-label": "年齡限制",
         "unknowns": "未知數",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "複製",
-        "show": "展示",
-        "hide": "隱藏",
-        "regen-warning": "重新生成 API 密鑰將使現有使用端失效。",
-        "no-key": "錯誤 - 未設置密鑰",
-        "confirm-reset": "這將使您設置的任何 OPDS 配置無效。 你確定要繼續嗎？",
-        "key-reset": "API密鑰重置",
-        "reset": "重設"
+        "copy": "複製"
     },
     "scrobbling-providers": {
         "title": "Scrobbling供應商",
@@ -291,40 +272,6 @@
         "clear": "{{common.clear}}",
         "filter": "{{common.filter}}",
         "open-filtered-search": "對 {{item}} 進行篩選搜索"
-    },
-    "user-stats-info-cards": {
-        "total-pages-read-label": "總閱讀頁數",
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-label": "閱讀總字數",
-        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
-        "time-spent-reading-label": "閱讀時間",
-        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-label": "閱讀章節",
-        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "avg-reading-per-week-label": "平均閱讀量/週",
-        "last-active-label": "最後登錄",
-        "chapters": "{{value}}章",
-        "words-count": "{{num}} 字",
-        "pages-count": "{{num}} 頁",
-        "pages-read-by-year-title": "每年閱讀頁數",
-        "words-read-by-year-title": "每年閱讀字數"
-    },
-    "user-stats": {
-        "library-read-progress-title": "書庫閱讀進度",
-        "read-percentage": "% 讀"
-    },
-    "top-readers": {
-        "title": "熱門讀者",
-        "time-selection-label": "時間",
-        "comics-label": "美漫：{{value}}小時",
-        "manga-label": "漫畫：{{value}}小時",
-        "books-label": "書籍：{{value}}小時",
-        "this-week": "{{time-periods.this-week}}",
-        "last-7-days": "{{time-periods.last-7-days}}",
-        "last-30-days": "{{time-periods.last-30-days}}",
-        "last-90-days": "{{time-periods.last-90-days}}",
-        "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
         "title": "角色",
@@ -600,30 +547,16 @@
         "bookmark-label": "書籤名稱"
     },
     "book-reader": {
-        "bookmarks-header": "{{side-nav.bookmarks}}",
         "incognito-mode-label": "無痕模式",
         "incognito-mode-alt": "無痕模式已開啟。切換以關閉。",
         "page-label": "頁",
-        "go-to-last-page": "跳轉到最後一頁",
-        "pagination-header": "章節",
         "go-to-page": "跳轉頁面",
-        "title": "書籍設置",
         "go-back": "返回",
-        "prev-page": "上一頁",
-        "next-page": "下一頁",
-        "prev-chapter": "上一章／卷",
-        "next-chapter": "下一章／卷",
         "skip-header": "跳轉至主要內容",
-        "virtual-pages": "虛擬頁",
-        "settings-header": "設定",
-        "toc-header": "章節",
         "next": "下一個",
         "previous": "上一個",
         "go-to-page-prompt": "一共有 {{totalPages}} 頁，您想要跳轉到哪一頁？",
-        "table-of-contents-header": "目錄",
-        "close-reader": "關閉閱讀器",
-        "loading-book": "正在加載書籍…",
-        "go-to-first-page": "前往第一頁"
+        "loading-book": "正在加載書籍…"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -1263,7 +1196,6 @@
         "admin-users": "用戶",
         "admin-general": "通用",
         "account": "帳戶",
-        "user-stats": "統計",
         "scrobbling": "Scrobbling",
         "customize": "自訂",
         "cbl-import": "CBL 書單",
@@ -1278,7 +1210,6 @@
     "collection-detail": {
         "item-count": "{{common.item-count}}",
         "sync-progress": "系列收藏：{{title}}",
-        "series-header": "系列",
         "last-sync": "最後同步時間：{{date}}",
         "no-data": "目前沒有項目。請嘗試添加一個系列。",
         "no-data-filtered": "沒有項目符合您當前的篩選條件。",
@@ -1431,15 +1362,6 @@
         "description": "匯入您的 MAL Interest Stacks，並在 Kavita 中創建收藏",
         "nothing-found": "未找到任何內容",
         "restack-count": "{{num}} Restacks"
-    },
-    "edit-chapter-progress": {
-        "action-header": "{{common.edit}}",
-        "edit-alt": "{{common.edit}}",
-        "no-data": "{{user-scrobble-history.no-data}}",
-        "date-updated-header": "最後更新時間（UTC）",
-        "date-created-header": "創建時間（UTC）",
-        "user-header": "用戶",
-        "page-read-header": "已閱讀頁數"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
@@ -1598,7 +1520,6 @@
         "loose-leaf-volume": "散頁章節",
         "view-files": "查看檔案",
         "max-issue-tooltip": "從系列所有的ComicInfo中找到的最大期數/卷數",
-        "force-refresh-tooltip": "強制從 Kavita+ 刷新外部元數據",
         "web-link-description": "可以在這裡添加不同的外部服務連結。",
         "added-title": "加入時間",
         "last-modified-title": "上一次修改",
@@ -1620,11 +1541,9 @@
         "highest-count-tooltip": "在系列中的所有 ComicInfo 文件中找到的最大數量",
         "chapter-title": "章節",
         "total-items-title": "總項目數",
-        "force-refresh": "強制刷新",
         "folder-path-tooltip": "書庫根目錄下，包含系列所有檔案的最高路徑",
         "lowest-folder-path-title": "最低資料夾路徑",
-        "total-words-title": "總字數",
-        "words-title": "字"
+        "total-words-title": "總字數"
     },
     "edit-chapter-modal": {
         "close": "{{common.close}}",
@@ -1655,7 +1574,6 @@
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "tags-tab": "{{tabs.tags-tab}}",
@@ -1672,7 +1590,6 @@
         "files-label": "檔案",
         "sort-order-label": "排序",
         "release-date-label": "發行",
-        "sort-order-tooltip": "本章於卷內的閱讀順序",
         "isbn-label": "ISBN",
         "pages-label": "頁數",
         "words-label": "長度",
@@ -1682,7 +1599,6 @@
     "edit-volume-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1690,17 +1606,12 @@
         "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
-        "links-label": "{{series-metadata-detail.links-label}}",
-        "last-read-label": "{{edit-chapter-modal.last-read-label}}",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "title": "編輯",
-        "range-hours": "{{value}} {{hourWord}}"
+        "title": "編輯"
     },
     "file-breakdown-stats": {
         "not-classified": "未分類",
@@ -1770,7 +1681,6 @@
         "volume-count": "{{num}} 卷",
         "total-files-tooltip": "總檔案數：{{count}}",
         "reads": "次閱讀",
-        "release-years-title": "發行年份",
         "series-count": "{{num}} 個系列",
         "most-active-users-title": "最活躍的用戶",
         "popular-series-title": "熱門系列",
@@ -1782,7 +1692,6 @@
         "total-size-label": "總大小",
         "total-read-time-label": "總閱讀時長",
         "total-read-time-tooltip": "總閱讀時長：{{count}}",
-        "recently-read-title": "最近閱讀",
         "genre-count": "{{num}} 種類型",
         "tag-count": "{{num}} 個標籤",
         "total-people-tooltip": "人物總數：{{count}}",
@@ -1807,19 +1716,13 @@
     },
     "customize-dashboard-modal": {
         "title-smart-filters": "智慧篩選器",
-        "close": "{{common.close}}",
         "smart-filters": "智慧篩選器",
-        "help": "{{common.help}}",
         "external-sources": "外部來源",
-        "title-external-sources": "外部來源",
-        "title-dashboard": "自訂儀表板",
-        "title-sidenav": "自訂側邊導覽列",
         "sidenav": "側邊導覽列",
         "dashboard": "儀表板",
         "description": "您可以透過重新排序、切換可見性，以及將智慧篩選器／外部來源綁定到首頁或側邊導覽列，來自訂 Kavita 的各個方面。"
     },
     "customize-dashboard-streams": {
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -1827,7 +1730,6 @@
         "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -2038,7 +1940,6 @@
         "add": "新增",
         "select-all": "全選",
         "chapter-num": "章",
-        "author-count": "{{num}}位作者",
         "issue-count": "{{num}} 期",
         "chapter-count": "{{num}} 章",
         "no-data": "無資料"
@@ -2237,7 +2138,6 @@
     },
     "card-detail-layout": {
         "total-items": "共 {{count}} 項",
-        "jumpkey-count": "{{count}} 個系列",
         "no-data": "{{common.no-data}}"
     },
     "read-more": {
@@ -2375,9 +2275,6 @@
         "continuous-reading-prev-chapter": "上一章",
         "continuous-reading-next-chapter-alt": "向上滾動以進入到下一章"
     },
-    "browse-themes-modal": {
-        "title": "瀏覽主題"
-    },
     "filter-comparison-pipe": {
         "must-contains": "必須包含",
         "is-before": "早於",
@@ -2397,14 +2294,6 @@
         "is-empty": "為空",
         "does-not-contain": "不包含"
     },
-    "kavitaplus-metadata-breakdown-stats": {
-        "description": "Kavita會隨著時間逐步地為符合條件的系列抓取元數據（評分、評論、推薦等）。",
-        "errored-series-label": "發生錯誤的系列",
-        "title": "Kavita+ 元數據分析",
-        "completed-series-label": "已完成的系列",
-        "complete": "所有系列都有元數據",
-        "no-data": "{{common.no-data}}"
-    },
     "next-expected-card": {
         "title": "~{{date}}",
         "upcoming-title": "即將推出"
@@ -2419,9 +2308,7 @@
     },
     "day-breakdown": {
         "no-data": "尚未有進度，快來開始閱讀",
-        "title": "每日統計分析",
-        "x-axis-label": "本週",
-        "y-axis-label": "閱讀事件"
+        "title": "每日統計分析"
     },
     "metadata-builder": {
         "add-rule": "新增條件",
@@ -2456,14 +2343,12 @@
         "general-tab": "{{edit-series-modal.general-tab}}",
         "title": "{{personName}} 的詳細資料",
         "name-label": "{{edit-series-modal.name-label}}",
-        "role-label": "身分",
         "hardcover-id-label": "Hardcover Id",
         "mal-id-label": "MAL Id",
         "required-field": "{{validations.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "anilist-id-label": "AniList Id",
         "asin-label": "ASIN",
-        "loading": "{{common.loading}}",
         "close": "{{common.close}}",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
         "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
@@ -2609,7 +2494,6 @@
         "loading": "{{common.loading}}",
         "close": "{{common.close}}",
         "clear": "{{common.clear}}",
-        "create": "{{common.create}}",
         "filter-label": "{{common.filter}}",
         "no-data": "尚未建立收藏",
         "title": "閱讀設定",

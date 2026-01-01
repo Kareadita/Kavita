@@ -5,7 +5,8 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Password dimenticata?",
-        "submit": "Accedi"
+        "submit": "Accedi",
+        "oidc": "OpenID Connect"
     },
     "dashboard": {
         "no-libraries": "Non ci sono ancora librerie impostate. Creane alcune in",
@@ -108,12 +109,10 @@
         "share-series-reviews-tooltip": "Kavita dovrebbe includere le tue recensioni di serie per altri utenti",
         "clients-opds-alert": "OPDS non è abilitato su questo server. Ciò non influirà sugli utenti Tachiyomi.",
         "clients-opds-description": "Tutti i client di terze parti utilizzeranno la chiave API o l'URL di connessione di seguito. Sono come password, tienile private.",
-        "clients-api-key-tooltip": "La chiave API è come una password. Reimpostandolo, tutti i client esistenti verranno invalidati.",
         "clients-opds-url-tooltip": "Visualizza un elenco dei client OPDS supportati: ",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "clients-opds-url-label": "URL OPDS",
-        "clients-api-key-label": "Chiave API",
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-tooltip": "Permetti a Kavita di fare Scrobble (sincronizzazione unidirezionale) sul progresso della lettura e sulle valutazioni verso AniList",
         "anilist-scrobbling-label": "Scrobbling AniList",
@@ -173,8 +172,6 @@
     "manage-devices": {
         "title": "Gestore Dispositivi",
         "description": "Questa sezione consente di configurare i dispositivi che non possono connettersi a Kavita tramite un browser Web e dispongono invece di un indirizzo e-mail che accetta i file.",
-        "devices-title": "Dispositivi",
-        "no-devices": "Non ci sono ancora dispositivi configurati",
         "platform-label": "Piattaforma",
         "email-label": "Email",
         "email-setup-alert": "Vuoi inviare file ai tuoi dispositivi? Il tuo ammistratore deve prima configurare le impostazioni della posta elettronica!",
@@ -187,7 +184,6 @@
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
-        "platform-label": "{{manage-devices.platform-label}}",
         "email-label": "{{common.email}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
@@ -204,8 +200,6 @@
         "new-password-label": "Nuova Password",
         "confirm-password-label": "Conferma Password",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Le password devono essere identiche",
@@ -223,31 +217,19 @@
         "invite-url-label": "URL di invito",
         "invite-url-tooltip": "Copia questo e incollalo in una nuova scheda",
         "has-invalid-email": "Sembra che tu abbia configurato una email non valida. Cambiare l'email richiede che l'amministratore ti invii un collegamento per completare questa operazione.",
-        "permission-error": "Non sei autorizzato a modificare la tua email. Contatta l'amministratore del server.",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
     "change-age-restriction": {
         "age-restriction-label": "Restrizioni per Età",
         "unknowns": "Sconosciuti",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "Copia",
-        "show": "Mostra",
-        "hide": "Nascondi",
-        "regen-warning": "La rigenerazione della chiave API invaliderà tutti i client esistenti.",
-        "no-key": "ERRORE - CHIAVE NON IMPOSTATA",
-        "confirm-reset": "Ciò invaliderà tutte le configurazioni OPDS impostate. Sei sicuro di voler continuare?",
-        "key-reset": "Ripristino della chiave API",
-        "reset": "Ripristina"
+        "copy": "Copia"
     },
     "scrobbling-providers": {
         "title": "Fornitori di Scrobbling",
@@ -288,40 +270,6 @@
         "clear": "{{common.clear}}",
         "filter": "{{common.filter}}",
         "open-filtered-search": "Apri una ricerca filtrata per {{item}}"
-    },
-    "user-stats-info-cards": {
-        "total-pages-read-label": "Pagine totali lette",
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-label": "Totale Parole Lette",
-        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
-        "time-spent-reading-label": "Tempo passato leggendo",
-        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-label": "Capitoli Letti",
-        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "avg-reading-per-week-label": "Lettura media / settimana",
-        "last-active-label": "Ultimo attivo",
-        "chapters": "{{value}} capitoli",
-        "pages-read-by-year-title": "Pagine Lette per Anno",
-        "words-read-by-year-title": "Parole Lette per Anno",
-        "words-count": "{{num}} parole",
-        "pages-count": "{{num}} pagine"
-    },
-    "user-stats": {
-        "library-read-progress-title": "Progressi di lettura della biblioteca",
-        "read-percentage": "% Letto"
-    },
-    "top-readers": {
-        "title": "I migliori lettori",
-        "time-selection-label": "Arco Temporale",
-        "comics-label": "Fumetti: {{value}} ore",
-        "manga-label": "Manga: {{value}} ore",
-        "books-label": "Libri: {{value}} ore",
-        "this-week": "{{time-periods.this-week}}",
-        "last-7-days": "{{time-periods.last-7-days}}",
-        "last-30-days": "{{time-periods.last-30-days}}",
-        "last-90-days": "{{time-periods.last-90-days}}",
-        "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
         "title": "Regole",
@@ -606,24 +554,11 @@
         "save": "{{common.save}}"
     },
     "book-reader": {
-        "title": "Impostazioni del libro",
         "page-label": "Pagina",
-        "pagination-header": "Sezione",
         "go-to-page": "Vai alla pagina",
-        "go-to-last-page": "Vai all'ultima pagina",
-        "prev-page": "Pagina Prec",
-        "next-page": "Pagina Suc",
-        "prev-chapter": "Capitolo/Volume prec",
-        "next-chapter": "Capitolo/Volume Suc",
         "skip-header": "Passa al contenuto principale",
-        "virtual-pages": "pagine virtuali",
-        "settings-header": "Impostazioni",
-        "table-of-contents-header": "Tabella dei contenuti",
-        "bookmarks-header": "{{side-nav.bookmarks}}",
-        "toc-header": "ToC",
         "loading-book": "Caricamento libro…",
         "go-back": "Torna indietro",
-        "close-reader": "Chiudi Lettore",
         "incognito-mode-alt": "La modalità di navigazione in incognito è attiva. Attiva per disattivare.",
         "incognito-mode-label": "Modalità Incognito",
         "next": "Prossimo",
@@ -908,8 +843,7 @@
         "deselect-all": "{{common.deselect-all}}"
     },
     "card-detail-layout": {
-        "total-items": "{{count}} articoli totali",
-        "jumpkey-count": "{{count}} Serie"
+        "total-items": "{{count}} articoli totali"
     },
     "card-item": {
         "cannot-read": "Non posso leggere"
@@ -1303,7 +1237,6 @@
         "scrobble-holds": "Scrobble Tenuti",
         "account": "Account",
         "admin-media-issues": "Problemi dei Media",
-        "user-stats": "Statistiche",
         "account-section-title": "Account",
         "admin-logs": "Log",
         "admin-email": "Email",
@@ -1329,7 +1262,6 @@
         "no-data": "Non ci sono articoli. Prova ad aggiungere una serie.",
         "no-data-filtered": "Nessun articolo corrisponde al filtro attuale.",
         "title-alt": "Kavita - Collezione {{collectionName}}",
-        "series-header": "Serie",
         "item-count": "{{common.item-count}}",
         "last-sync": "Ultima Sincronizzazione: {{date}}",
         "sync-progress": "Serie Raccolte: {{title}}"
@@ -1479,15 +1411,6 @@
         "restack-count": "{{num}} Reimpilare",
         "track": "Traccia",
         "nothing-found": "Non ho trovato nulla"
-    },
-    "edit-chapter-progress": {
-        "user-header": "Utente",
-        "page-read-header": "Pagine Lette",
-        "date-created-header": "Creato (UTC)",
-        "date-updated-header": "Ultimo Aggiornamento (UTC)",
-        "action-header": "{{common.edit}}",
-        "edit-alt": "{{common.edit}}",
-        "no-data": "{{user-scrobble-history.no-data}}"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
@@ -1698,8 +1621,6 @@
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "Conteggio più alto trovato in tutte le ComicInfo della serie",
         "max-issue-tooltip": "Campo numero massimo o volume da tutti i ComicInfo della serie",
-        "force-refresh": "Forza Aggiornamento",
-        "force-refresh-tooltip": "Forza aggiornamento metadati esterni da Kavita+",
         "loose-leaf-volume": "Capitoli volanti",
         "specials-volume": "Speciali",
         "release-year-validation": "{{validation.year-validation}}",
@@ -1707,8 +1628,7 @@
         "folder-path-tooltip": "Percorso più alto dalla root della libreria che contiene tutti i file di serie",
         "lowest-folder-path-title": "Percoso più basso della Cartella",
         "total-words-title": "Parole Totali",
-        "lowest-folder-path-tooltip": "Percorso più basso dalla root della libreria che contiene tutti i file della serie",
-        "words-title": "Parole"
+        "lowest-folder-path-tooltip": "Percorso più basso dalla root della libreria che contiene tutti i file della serie"
     },
     "edit-chapter-modal": {
         "close": "{{common.close}}",
@@ -1739,7 +1659,6 @@
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "tags-tab": "{{tabs.tags-tab}}",
@@ -1758,7 +1677,6 @@
         "date-added-label": "Data Aggiunta",
         "words-label": "Lunghezza",
         "title-label": "Titolo",
-        "sort-order-tooltip": "L'ordine di lettura in cui questo capitolo è ordinato all'interno del volume",
         "isbn-label": "ISBN",
         "range-hours": "{{value}} {{hourWord}}",
         "id-label": "ID"
@@ -1766,7 +1684,6 @@
     "edit-volume-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1774,31 +1691,16 @@
         "words-label": "{{edit-chapter-modal.length-title}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
-        "links-label": "{{series-metadata-detail.links-label}}",
-        "last-read-label": "{{edit-chapter-modal.last-read-label}}",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "title": "Modifica",
-        "range-hours": "{{value}} {{hourWord}}"
+        "title": "Modifica"
     },
     "day-breakdown": {
         "title": "Ripartizione del giorno",
-        "no-data": "Nessun progresso, inizia a leggere",
-        "x-axis-label": "Giorno della settimana",
-        "y-axis-label": "Eventi di lettura"
-    },
-    "kavitaplus-metadata-breakdown-stats": {
-        "title": "Problema Metadati Kavita+",
-        "description": "Kavita recupera lentamente nel tempo i metadati (valutazioni, recensioni, consigli, ecc.) per le serie idonee.",
-        "no-data": "{{common.no-data}}",
-        "errored-series-label": "Errore Serie",
-        "completed-series-label": "Serie Completate",
-        "complete": "Metadati completi per tutte le serie"
+        "no-data": "Nessun progresso, inizia a leggere"
     },
     "file-breakdown-stats": {
         "format-title": "Formato",
@@ -1875,11 +1777,9 @@
         "total-read-time-tooltip": "Tempo di lettura totale: {{count}}",
         "series": "serie",
         "reads": "lettori",
-        "release-years-title": "Anni di Uscita",
         "most-active-users-title": "Utenti più attivi",
         "popular-libraries-title": "Biblioteche popolari",
         "popular-series-title": "Serie popolari",
-        "recently-read-title": "Letto di recente",
         "series-count": "{{num}} Serie",
         "volume-count": "{{num}} Volumi",
         "file-count": "{{num}} Files",
@@ -1914,21 +1814,15 @@
         "remove-rule": "Rimuovi Riga"
     },
     "customize-dashboard-modal": {
-        "title-dashboard": "Personalizza la Dashboard",
-        "title-sidenav": "Personalizza la navigazione laterale",
-        "title-external-sources": "Fonti esterne",
         "title-smart-filters": "Filtri Intelligenti",
-        "close": "{{common.close}}",
         "dashboard": "Dashboard",
         "sidenav": "Nav laterale",
         "external-sources": "Fonti esterne",
         "smart-filters": "Filtri Intelligenti",
-        "help": "{{common.help}}",
         "description": "Puoi personalizzare diversi aspetti di Kavita riordinandoli, modificandone la visibilità e associando filtri intelligenti/fonti esterne alla home page o alla navigazione laterale."
     },
     "customize-dashboard-streams": {
         "no-data": "Tutti i filtri Smart aggiunti a Dashboard o nessuno ancora creato.",
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}"
@@ -1936,7 +1830,6 @@
     "customize-sidenav-streams": {
         "no-data": "Tutti i filtri Smart aggiunti a Side Nav o nessuno ancora creato.",
         "no-data-external-source": "Tutte le fonti esterne aggiunte a Side Nav o nessuna ancora creata.",
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -2306,7 +2199,6 @@
         "volume-num": "Volume",
         "book-nums": "Libri",
         "issue-num-shorthand": "#{{num}}",
-        "author-count": "{{num}} Autori",
         "chapter-count": "{{num}} Capitoli",
         "volume-nums": "Volumi",
         "no-data": "Nessun Dato",
@@ -2451,7 +2343,6 @@
     "edit-person-modal": {
         "title": "{{personName}} Dettagli",
         "general-tab": "{{edit-series-modal.general-tab}}",
-        "loading": "{{common.loading}}",
         "description-label": "Descrizione",
         "download-coversdb": "Scarica da CoversDB",
         "cover-image-description-extra": "In alternativa, se disponibile, è possibile scaricare una copertina da CoversDB.",
@@ -2465,7 +2356,6 @@
         "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
         "asin-label": "ASIN",
         "name-label": "{{edit-series-modal.name-label}}",
-        "role-label": "Ruolo",
         "mal-id-label": "MAL Id",
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
@@ -2493,9 +2383,6 @@
         "less-than-hour": "<1 Ora",
         "hour": "Ora",
         "hours": "Ore"
-    },
-    "browse-themes-modal": {
-        "title": "Sfoglia Temi"
     },
     "email-history": {
         "sent-tooltip": "Inviato",
@@ -2533,7 +2420,8 @@
     "oidc": {
         "login": "Torna al login",
         "error-loading-info": "Errore durante il caricamento di OIDC info, contattare l'amministratore",
-        "timeout": "Risoluzione dell'OIDC è scaduta o si è verificato un errore"
+        "timeout": "Risoluzione dell'OIDC è scaduta o si è verificato un errore",
+        "title": "OIDC Callback"
     },
     "manage-oidc-connect": {
         "save-success": "Impostazioni OIDC aggiornate con successo",

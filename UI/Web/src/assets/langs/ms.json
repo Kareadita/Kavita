@@ -70,7 +70,6 @@
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
-        "platform-label": "{{manage-devices.platform-label}}",
         "email-label": "{{common.email}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
@@ -81,8 +80,6 @@
     "change-password": {
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}"
     },
@@ -90,14 +87,10 @@
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
     "change-age-restriction": {
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
     "scrobbling-providers": {
@@ -115,20 +108,6 @@
         "close": "{{common.close}}",
         "clear": "{{common.clear}}",
         "filter": "{{common.filter}}"
-    },
-    "user-stats-info-cards": {
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
-        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}"
-    },
-    "top-readers": {
-        "this-week": "{{time-periods.this-week}}",
-        "last-7-days": "{{time-periods.last-7-days}}",
-        "last-30-days": "{{time-periods.last-30-days}}",
-        "last-90-days": "{{time-periods.last-90-days}}",
-        "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
         "deselect-all": "{{common.deselect-all}}",
@@ -197,9 +176,6 @@
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "save": "{{common.save}}"
-    },
-    "book-reader": {
-        "bookmarks-header": "{{side-nav.bookmarks}}"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -476,11 +452,6 @@
         "close": "{{common.close}}",
         "series-count": "{{common.series-count}}"
     },
-    "edit-chapter-progress": {
-        "action-header": "{{common.edit}}",
-        "edit-alt": "{{common.edit}}",
-        "no-data": "{{user-scrobble-history.no-data}}"
-    },
     "import-cbl-modal": {
         "close": "{{common.close}}"
     },
@@ -568,7 +539,6 @@
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "tags-tab": "{{tabs.tags-tab}}",
@@ -579,7 +549,6 @@
     "edit-volume-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -587,13 +556,9 @@
         "words-label": "{{edit-chapter-modal.length-title}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
-        "links-label": "{{series-metadata-detail.links-label}}",
-        "last-read-label": "{{edit-chapter-modal.last-read-label}}",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
@@ -615,18 +580,12 @@
         "tags": "{{metadata-fields.tags-title}}",
         "genres": "{{metadata-fields.genres-title}}"
     },
-    "customize-dashboard-modal": {
-        "close": "{{common.close}}",
-        "help": "{{common.help}}"
-    },
     "customize-dashboard-streams": {
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}"
     },
     "customize-sidenav-streams": {
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",

@@ -112,7 +112,6 @@
         "share-series-reviews-tooltip": "Moet Kavita jouw beoordelingen van Series voor andere gebruikers gebruiken",
         "clients-opds-alert": "OPDS is niet ingeschakeld op deze server. Dit heeft geen invloed op Tachiyomi-gebruikers.",
         "clients-opds-description": "Alle externe clients gebruiken de API-sleutel of de onderstaande verbindings-URL. Dit zijn net wachtwoorden, houd het privé.",
-        "clients-api-key-tooltip": "De API-sleutel werkt als een wachtwoord. Een reset maakt alle huidige clients ongeldig.",
         "clients-opds-url-tooltip": "Bekijk een lijst met ondersteunde OPDS-clients: ",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
@@ -120,7 +119,6 @@
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList scrobbelen",
         "want-to-read-sync-label": "Willen Lezen Sync",
-        "clients-api-key-label": "API-sleutel",
         "clients-opds-url-label": "OPDS URL"
     },
     "user-holds": {
@@ -175,8 +173,6 @@
     "manage-devices": {
         "title": "Apparaat beheerder",
         "description": "Deze sectie is bedoeld voor het instellen van apparaten die geen verbinding kunnen maken met Kavita via een webbrowser en in plaats daarvan een e-mailadres hebben dat bestanden accepteert.",
-        "devices-title": "Apparaten",
-        "no-devices": "Er zijn nog geen apparaten ingesteld",
         "platform-label": "Platform",
         "email-label": "E-mail",
         "add": "{{common.add}}",
@@ -189,7 +185,6 @@
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
-        "platform-label": "{{manage-devices.platform-label}}",
         "email-label": "{{common.email}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
@@ -205,8 +200,6 @@
         "new-password-label": "Nieuw Wachtwoord",
         "confirm-password-label": "Bevestig wachtwoord",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Wachtwoorden moeten overeenkomen",
@@ -220,12 +213,9 @@
         "setup-user-account": "Gebruikersaccount instellen",
         "invite-url-label": "Uitnodigings-URL",
         "invite-url-tooltip": "Kopieer dit en plak in een nieuw tabblad",
-        "permission-error": "U heeft geen toestemming om uw e-mailadres te wijzigen. Neem contact op met de beheerder van de server.",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "email-title": "E-mail",
         "email-label": "Nieuwe e-mail",
@@ -235,19 +225,10 @@
         "age-restriction-label": "Leeftijdsbeperking",
         "unknowns": "Onbekenden",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "Kopie",
-        "show": "Tonen",
-        "hide": "Verbergen",
-        "regen-warning": "Door uw API-sleutel opnieuw te genereren, worden alle bestaande clients ongeldig.",
-        "no-key": "FOUT - SLEUTEL NIET INGESTELD",
-        "confirm-reset": "Hierdoor worden alle OPDS-configuraties die u hebt ingesteld, ongeldig. Weet je zeker dat je door wilt gaan?",
-        "key-reset": "API-sleutel reset",
-        "reset": "Resetten"
+        "copy": "Kopie"
     },
     "scrobbling-providers": {
         "title": "Scrobbling-aanbieders",
@@ -280,40 +261,6 @@
         "clear": "{{common.clear}}",
         "filter": "{{common.filter}}",
         "open-filtered-search": "Open een gefilterde zoekopdracht voor {{item}}"
-    },
-    "user-stats-info-cards": {
-        "total-pages-read-label": "Totaal pagina's gelezen",
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-label": "Totaal gelezen woorden",
-        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
-        "time-spent-reading-label": "Tijd besteed aan lezen",
-        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-label": "Hoofdstukken gelezen",
-        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "avg-reading-per-week-label": "Gemiddelde lezing / week",
-        "last-active-label": "Laatst actief",
-        "chapters": "{{value}} hoofdstukken",
-        "pages-read-by-year-title": "Gelezen pagina's per jaar",
-        "words-read-by-year-title": "Woorden gelezen per jaar",
-        "words-count": "{{num}} woorden",
-        "pages-count": "{{num}} pagina's"
-    },
-    "user-stats": {
-        "library-read-progress-title": "Leesvoortgang bibliotheek",
-        "read-percentage": "% gelezen"
-    },
-    "top-readers": {
-        "title": "Toplezers",
-        "time-selection-label": "Tijdsbestek",
-        "comics-label": "Strips: {{value}} uur",
-        "manga-label": "Manga: {{value}} uur",
-        "books-label": "Boeken: {{value}} uur",
-        "this-week": "{{time-periods.this-week}}",
-        "last-7-days": "{{time-periods.last-7-days}}",
-        "last-30-days": "{{time-periods.last-30-days}}",
-        "last-90-days": "{{time-periods.last-90-days}}",
-        "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
         "title": "Rollen",
@@ -577,29 +524,16 @@
         "save": "{{common.save}}"
     },
     "book-reader": {
-        "title": "Boek instellingen",
         "page-label": "Pagina",
-        "pagination-header": "Sectie",
         "go-to-page": "Ga naar pagina",
-        "go-to-last-page": "Ga naar de laatste pagina",
-        "prev-page": "Vorige pagina",
-        "next-page": "Volgende pagina",
-        "prev-chapter": "Vorig hoofdstuk/volume",
-        "next-chapter": "Volgend hoofdstuk/volume",
         "skip-header": "Ga naar de hoofdinhoud",
-        "virtual-pages": "virtuele pagina's",
-        "settings-header": "Instellingen",
-        "table-of-contents-header": "Inhoudsopgave",
-        "bookmarks-header": "{{side-nav.bookmarks}}",
-        "toc-header": "ToC",
         "loading-book": "Boek laden…",
         "go-back": "Ga terug",
         "incognito-mode-alt": "Incognitomodus staat aan. Schakel om uit te schakelen.",
         "incognito-mode-label": "Incognito mode",
         "next": "Volgende",
         "previous": "Vorig",
-        "go-to-page-prompt": "Er zijn {{totalPages}} pagina's. Naar welke pagina wil je gaan?",
-        "go-to-first-page": "Ga naar de eerste pagina"
+        "go-to-page-prompt": "Er zijn {{totalPages}} pagina's. Naar welke pagina wil je gaan?"
     },
     "personal-table-of-contents": {
         "no-data": "Nog niets gebookmarked",
@@ -858,7 +792,6 @@
     },
     "card-detail-layout": {
         "total-items": "{{count}} items in totaal",
-        "jumpkey-count": "{{count}} Series",
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
@@ -1305,11 +1238,6 @@
         "close": "{{common.close}}",
         "series-count": "{{common.series-count}}"
     },
-    "edit-chapter-progress": {
-        "action-header": "{{common.edit}}",
-        "edit-alt": "{{common.edit}}",
-        "no-data": "{{user-scrobble-history.no-data}}"
-    },
     "import-cbl-modal": {
         "close": "{{common.close}}",
         "title": "CBL-import",
@@ -1521,7 +1449,6 @@
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "tags-tab": "{{tabs.tags-tab}}",
@@ -1532,7 +1459,6 @@
     "edit-volume-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1540,13 +1466,9 @@
         "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
-        "links-label": "{{series-metadata-detail.links-label}}",
-        "last-read-label": "{{edit-chapter-modal.last-read-label}}",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
@@ -1566,11 +1488,9 @@
     },
     "server-stats": {
         "reads": "Leest",
-        "release-years-title": "Uitgavejaren",
         "most-active-users-title": "Meest actieve gebruikers",
         "popular-libraries-title": "Populaire bibliotheken",
         "popular-series-title": "Populaire serie",
-        "recently-read-title": "Onlangs gelezen",
         "genre-count": "{{num}} Genres",
         "tag-count": "{{num}} Labels",
         "people-count": "{{num}} Mensen",
@@ -1599,20 +1519,14 @@
         "remove-rule": "Rij verwijderen"
     },
     "customize-dashboard-modal": {
-        "title-dashboard": "Dashboard aanpassen",
-        "title-sidenav": "Pas zijnavigatie aan",
-        "title-external-sources": "Externe bronnen",
         "title-smart-filters": "Slimme filters",
-        "close": "{{common.close}}",
         "dashboard": "Dashboard",
         "sidenav": "Zijnavigatie",
         "external-sources": "Externe bronnen",
-        "smart-filters": "Slimme filters",
-        "help": "{{common.help}}"
+        "smart-filters": "Slimme filters"
     },
     "customize-dashboard-streams": {
         "no-data": "Alle slimme filters toegevoegd aan Dashboard of nog geen gemaakt.",
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}"
@@ -1620,7 +1534,6 @@
     "customize-sidenav-streams": {
         "no-data": "Alle slimme filters toegevoegd aan Side Nav of nog geen gemaakt.",
         "no-data-external-source": "Alle externe bronnen toegevoegd aan Zijnavigatie of nog geen enkele aangemaakt.",
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -1700,7 +1613,6 @@
         "book-num": "Boek",
         "no-data": "Geen data",
         "chapter-count": "{{num}} Hoofdstukken",
-        "author-count": "{{num}} Auteurs",
         "deselect-all": "Deselecteer alles",
         "select-all": "Selecteer alles",
         "password": "Wachtwoord",
@@ -1848,8 +1760,7 @@
         "close": "{{common.close}}",
         "filter-label": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "loading": "{{common.loading}}",
-        "create": "{{common.create}}"
+        "loading": "{{common.loading}}"
     },
     "email-history": {
         "no-data": "{{common.no-data}}"

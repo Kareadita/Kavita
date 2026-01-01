@@ -34,7 +34,8 @@
         "identity-provider": "Постачальник ідентифікаційних даних",
         "identity-provider-tooltip": "Користувачі Kavita ніколи не синхронізуються з обліковими записами OIDC.",
         "libraries-label": "{{common.libraries}}",
-        "roles-label": "{{common.roles}}"
+        "roles-label": "{{common.roles}}",
+        "warning-read-only": "Облікові записи \"Тільки для читання\" мають обмежені дозволи"
     },
     "user-scrobble-history": {
         "filter-label": "{{common.filter}}",
@@ -88,7 +89,7 @@
         "blur-unread-summaries-tooltip": "Розмиває текст описів непрочитаних томів чи глав, аби не натрапити на спойлери",
         "disable-animations-tooltip": "Вимкнути анімації на сайті. Доречно для електронних читалок.",
         "collapse-series-relationships-tooltip": "Чи має Kavita показувати серії, у яких немає взаємозвʼязків чи які є найпершими або приквелами",
-        "clients-opds-description": "Всі сторонні клієнти мають використовувати API-ключ або URL для звʼязку нижче. Це як паролі, зберігайте їх у таємниці.",
+        "clients-opds-description": "Усі сторонні клієнти використовуватимуть або ключ автентифікації OPDS, або URL-адресу підключення, наведену нижче. Це як паролі, тримайте їх у таємниці.",
         "title": "Панель користувача",
         "share-series-reviews-tooltip": "Дозвольте іншим користувачам цього сервера бачити ваші відгуки",
         "pref-description": "Це глобальні налаштування, пов’язані з вашим обліковим записом. Налаштування читача знаходяться в розділі «Профілі читання».",
@@ -103,10 +104,8 @@
         "collapse-series-relationships-label": "Згорнути взаємозвʼязки серій",
         "share-series-reviews-label": "Ділитися оглядами серій",
         "clients-opds-alert": "OPDS не ввімкнено на цьому сервері. Це не вплине на користувачів Mihon.",
-        "clients-api-key-tooltip": "API-ключ – як пароль. Його скидання унеможливить роботу усіх чинних клієнтів.",
         "locale-tooltip": "Мова інтерфейсу Kavita",
         "clients-opds-url-label": "OPDS-посилання",
-        "clients-api-key-label": "API-ключ",
         "clients-opds-url-tooltip": "Список підтримуваних OPDS-клієнтів: ",
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "Скроблінг AniList",
@@ -130,7 +129,16 @@
         "social-include-unknowns-label": "Включити невідомі",
         "social-include-unknowns-tooltip": "Увімкнути соціальні функції для серій та розділів з невідомим віковим рейтингом",
         "data-saver-label": "Економія трафіку",
-        "data-saver-tooltip": "Мінімізує використання даних, запобігаючи автоматичному попередньому завантаженню (наприклад, програма для читання PDF)"
+        "data-saver-tooltip": "Мінімізує використання даних, запобігаючи автоматичному попередньому завантаженню (наприклад, програма для читання PDF)",
+        "opds-settings-title": "Налаштування OPDS",
+        "embed-progress-indicator-label": "Індикатор виконання вбудовування",
+        "embed-progress-indicator-tooltip": "Вбудувати індикатор виконання в заголовок",
+        "include-continue-from-label": "Включити Продовжити з запису",
+        "include-continue-from-tooltip": "Вставте запис «Продовжити з X» у поля OPDS, щоб уникнути пошуку останньої точки читання (імітує кнопку «Продовжити» в Kavita)",
+        "prompt-for-rereads-after-label": "Запрошення до повторного читання",
+        "prompt-for-rereads-after-tooltip": "Показувати запит на повторне читання, якщо з X днів тому не було жодного прогресу. 0 повністю вимикає запит.",
+        "social-share-profile-label": "Поділитися профілем",
+        "social-share-profile-tooltip": "Увімкнути обмін інформацією про вашу читацьку активність з іншими учасниками сервера"
     },
     "user-holds": {
         "no-data": "{{typeahead.no-data}}",
@@ -184,32 +192,29 @@
         "actions-header": "{{manage-users.actions-header}}",
         "email-label": "Email",
         "title": "Менеджер пристроїв",
-        "devices-title": "Пристрої",
-        "no-devices": "Жодних пристроїв ще не було налаштовано",
-        "description": "Цей розділ допоможе вам налаштувати пристрої, які не можуть підʼєднатися до Kavita через веб-браузер, але підтримують прийняття файлів через електронну пошту.",
-        "email-setup-alert": "Хочете відправити файли на свої пристрої? Спершу налаштуйте Email адміністратора!",
+        "description": "У цьому розділі ви можете налаштувати пристрої електронної пошти, які не можуть підключитися до Kavita та натомість мають адресу електронної пошти, що приймає файли.",
+        "email-setup-alert": "Хочете надсилати файли на свою електронну пошту? Спочатку попросіть адміністратора налаштувати параметри електронної пошти!",
         "platform-label": "Платформа",
         "name-label": "Імʼя",
-        "warning": "Увага"
+        "warning": "Увага",
+        "client-devices-header": "Клієнтські пристрої",
+        "sendto-device-header": "Пристрої на основі електронної пошти"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
-        "platform-label": "{{manage-devices.platform-label}}",
         "email-label": "{{common.email}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
-        "device-platform-label": "Платформа пристрою",
-        "title": "Редагувати пристрій",
+        "device-platform-label": "{{manage-devices.platform-label}}",
+        "title": "Редагувати пристрій електронної пошти",
         "email-tooltip": "Ця скринька буде використовуватися для прийняття файлів через функцію \"Відправити\""
     },
     "change-password": {
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "confirm-password-label": "Підтвердити пароль",
@@ -223,8 +228,6 @@
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "email-title": "Електронна пошта",
         "email-not-confirmed": "Цей email ще не підтверджено",
@@ -235,13 +238,10 @@
         "email-updated-description": "Ви можете використовувати посилання нижче для свого облікового запису. Якщо email-налаштування завершені, буде відправлено листа з посиланням для підтвердження доступу до скриньки.",
         "invite-url-tooltip": "Скопіюйте це і вставте в новій вкладці",
         "email-confirmed": "Цей email підтверджено",
-        "has-invalid-email": "Схоже, у вас не вказано дійсну електронну адресу. Щоб змінити електронну адресу, адміністратор повинен надіслати вам посилання для завершення цієї дії.",
-        "permission-error": "У вас немає дозволу на зміну електронної пошти. Зверніться до адміністратора сервера."
+        "has-invalid-email": "Схоже, у вас не вказано дійсну електронну адресу. Щоб змінити електронну адресу, адміністратор повинен надіслати вам посилання для завершення цієї дії."
     },
     "change-age-restriction": {
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "age-restriction-label": "Вікове обмеження",
         "unknowns": "Невідомі"
@@ -285,36 +285,6 @@
         "clear": "{{common.clear}}",
         "filter": "{{common.filter}}",
         "open-filtered-search": "Відкрити відфільтрований пошук для {{item}}"
-    },
-    "user-stats-info-cards": {
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
-        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "total-pages-read-label": "Загальна кількість прочитаних сторінок",
-        "total-words-read-label": "Загальна кількість прочитаних слів",
-        "time-spent-reading-label": "Час, витрачений на читання",
-        "chapters-read-label": "Прочитані розділи",
-        "avg-reading-per-week-label": "Середнє читання / тиждень",
-        "last-active-label": "Остання активність",
-        "chapters": "розділів ({{value}})",
-        "pages-read-by-year-title": "Прочитані сторінки за роком",
-        "words-read-by-year-title": "Слова, прочитані за роками",
-        "words-count": "{{num}} слів",
-        "pages-count": "{{num}} сторінки"
-    },
-    "top-readers": {
-        "this-week": "{{time-periods.this-week}}",
-        "last-7-days": "{{time-periods.last-7-days}}'",
-        "last-30-days": "{{time-periods.last-30-days}}'",
-        "last-90-days": "{{time-periods.last-90-days}}'",
-        "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}",
-        "title": "Найкращі читачі",
-        "time-selection-label": "Часові рамки",
-        "comics-label": "Комікси: {{value}} год",
-        "manga-label": "Манґа: {{value}} год",
-        "books-label": "Книги: {{value}} год"
     },
     "role-selector": {
         "deselect-all": "{{common.deselect-all}}",
@@ -485,24 +455,10 @@
         "annotate": "Анотувати"
     },
     "book-reader": {
-        "bookmarks-header": "{{side-nav.bookmarks}}",
-        "title": "Налаштування книги",
         "page-label": "Сторінка",
-        "pagination-header": "Розділ",
-        "go-to-first-page": "Перейти на першу сторінку",
-        "go-to-last-page": "Перейти на останню сторінку",
-        "prev-page": "Попередня сторінка",
-        "next-page": "Наступна сторінка",
-        "prev-chapter": "Попередній розділ/том",
-        "next-chapter": "Наступний розділ/том",
         "skip-header": "Перейти до основного вмісту",
-        "virtual-pages": "віртуальні сторінки",
-        "settings-header": "Налаштування",
-        "table-of-contents-header": "Зміст або Контенти",
-        "toc-header": "ToC'",
         "loading-book": "Завантаження книги…",
         "go-back": "Іди Назад'",
-        "close-reader": "Закрити читача",
         "incognito-mode-alt": "Режим інкогніто ввімкнено. Перемкніть, щоб вимкнути його.",
         "incognito-mode-label": "Режим інкогніто",
         "next": "Далі",
@@ -512,7 +468,8 @@
         "page-num-label": "Сторінка {{page}}",
         "completion-label": "Виконано {{percent}}",
         "force-selected-one-column": "Режим макета перемикається на один стовпець через недостатньо місця для відображення двох стовпців",
-        "forced-vertical-switch": "Режим макета перемикається, оскільки двоколонковий макет не працює з вертикальним стилем письма"
+        "forced-vertical-switch": "Режим макета перемикається, оскільки двоколонковий макет не працює з вертикальним стилем письма",
+        "close-reader-alt": "Закрити читача"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -606,7 +563,8 @@
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
         "annotations-tab": "{{tabs.annotations-tab}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "read-count-tooltip": "Загальна кількість прочитань"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -723,7 +681,11 @@
         "file-type-group-tooltip": "Які типи файлів має сканувати Kavita. Наприклад, архів міститиме всі файли cb*, zip, rar тощо.",
         "exclude-patterns-label": "Виключити шаблони",
         "exclude-patterns-tooltip": "Налаштуйте набір шаблонів (синтаксис Glob), які Kavita відповідатиме під час сканування каталогів та виключатиме з результатів сканування.",
-        "files-at-root-warning": "Одна або декілька папок містять файли в кореневому каталозі. Kavita цього не підтримує."
+        "files-at-root-warning": "Одна або декілька папок містять файли в кореневому каталозі. Kavita цього не підтримує.",
+        "inherit-web-links-label": "Успадкувати веб-посилання з першого розділу",
+        "inherit-web-links-tooltip": "Чи повинні серіали успадковувати веб-посилання з першого розділу",
+        "default-language-label": "Мова за замовчуванням",
+        "default-language-tooltip": "Мова, яку потрібно призначити серії, якщо в метаданих жодного з розділів не встановлено мову"
     },
     "reader-settings": {
         "font-family-label": "{{manage-reading-profiles.font-family-label}}",
@@ -788,7 +750,6 @@
     },
     "card-detail-layout": {
         "total-items": "{{count}} всього елементів",
-        "jumpkey-count": "Серії {{count}}",
         "no-data": "{{common.no-data}}"
     },
     "details-tab": {
@@ -957,7 +918,9 @@
         "media-issue-title": "Проблеми ЗМІ",
         "scrobble-issue-title": "Проблеми зі Scrobble",
         "cover-image-size-label": "Розмір зображення обкладинки",
-        "cover-image-size-tooltip": "Якого розміру мають створюватися зображення обкладинки. Примітка: Будь-який розмір, більший за значення за замовчуванням, призведе до збільшення часу завантаження сторінки."
+        "cover-image-size-tooltip": "Якого розміру мають створюватися зображення обкладинки. Примітка: Будь-який розмір, більший за значення за замовчуванням, призведе до збільшення часу завантаження сторінки.",
+        "pdf-render-resolution-label": "Роздільна здатність візуалізації PDF",
+        "pdf-render-resolution-tooltip": "Роздільна здатність, з якою будуть відображатися PDF-файли. Вища роздільна здатність відтворюватиметься довше та споживатиме більше пам’яті. Якщо у вас виникли проблеми з відтворенням PDF-файлів, спробуйте зменшити це значення."
     },
     "manage-scrobble-errors": {
         "filter-label": "{{common.filter}}",
@@ -1170,23 +1133,25 @@
         "account": "Обліковий запис",
         "preferences": "Параметри",
         "reading-profiles": "Профілі читання",
-        "clients": "Ключ API / OPDS",
+        "clients": "Ключі автентифікації / OPDS",
         "devices": "Пристрої",
-        "user-stats": "Статис",
         "scrobbling": "Скроблінг",
         "theme": "Тема",
         "customize": "Налаштувати",
         "cbl-import": "Список для читання CBL",
         "mal-stack-import": "Стек MAL",
         "admin-public-metadata": "Керування метаданими",
-        "font": "Шрифти EPUB"
+        "font": "Шрифти EPUB",
+        "custom-key-binds": "Прив'язки клавіш",
+        "insights-section-title": "Статистика",
+        "admin-activity": "Активність",
+        "admin-device": "Пристрої"
     },
     "collection-detail": {
         "item-count": "{{common.item-count}}",
         "no-data": "Немає елементів. Спробуйте додати серію.",
         "no-data-filtered": "Немає елементів, що відповідають вашому поточному фільтру.",
         "title-alt": "Кавіта - колекція {{collectionName}}",
-        "series-header": "Серія",
         "sync-progress": "Зібрані серії: {{title}}",
         "last-sync": "Остання синхронізація: {{date}}"
     },
@@ -1240,7 +1205,8 @@
         "date-range-title": "Діапазон дат",
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "Змінити порядок товарів",
-        "dnd-warning": "Перетягування недоступне на мобільних пристроях або якщо список для читання містить понад 100 елементів."
+        "dnd-warning": "Перетягування недоступне на мобільних пристроях або якщо список для читання містить понад 100 елементів.",
+        "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
         "close": "{{common.close}}",
@@ -1252,7 +1218,7 @@
         "users-online-count": "{{num}} Користувачі онлайн",
         "active-events-title": "Активні події:",
         "no-data": "Тут небагато чого відбувається",
-        "left-to-process": "Залишилося для обробки: {{leftToProcess}}",
+        "left-to-process": "Залишилося обробити: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} завантажень у черзі"
     },
     "shortcuts-modal": {
@@ -1264,7 +1230,8 @@
         "bookmark": "Додати поточну сторінку до закладок",
         "double-click": "подвійне клацання",
         "close-reader": "Закрити читача'",
-        "toggle-menu": "Перемикання меню"
+        "toggle-menu": "Перемикання меню",
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
     "grouped-typeahead": {
         "genres": "{{metadata-fields.genres-title}}",
@@ -1298,7 +1265,8 @@
         "person-aka-status": "Збігається з псевдонімом",
         "browse-genres": "Переглянути жанри",
         "browse-tags": "Переглянути теги",
-        "all-annotations": "Переглянути анотації"
+        "all-annotations": "Переглянути анотації",
+        "my-profile": "Мій профіль"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1339,15 +1307,6 @@
         "restack-count": "{{num}} Переукладання",
         "nothing-found": "Нічого не знайдено",
         "track": "Трек"
-    },
-    "edit-chapter-progress": {
-        "action-header": "{{common.edit}}",
-        "edit-alt": "{{common.edit}}",
-        "no-data": "{{user-scrobble-history.no-data}}",
-        "user-header": "Користувач",
-        "page-read-header": "Прочитані сторінки",
-        "date-created-header": "Створено (UTC)",
-        "date-updated-header": "Останнє оновлення (UTC)"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
@@ -1412,7 +1371,8 @@
         "no-prev-chapter": "Немає попереднього розділу",
         "reading-profile-updated": "Профіль читання оновлено",
         "reading-profile-promoted": "Профіль читання підвищено",
-        "series-progress": "Прогрес у серії: {{percentage}}"
+        "series-progress": "Прогрес у серії: {{percentage}}",
+        "page-offset-label": "Зсув сторінки"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1528,14 +1488,12 @@
         "added-title": "Додано",
         "last-modified-title": "Остання зміна",
         "view-files": "Переглянути файли",
-        "words-title": "Слова",
         "chapter-title": "Розділ'",
         "highest-count-tooltip": "Найбільша кількість знайдена серед усіх ComicInfo в серії",
         "max-issue-tooltip": "Поле «Максимальний випуск» або «Том» з усіх ComicInfo серії",
-        "force-refresh": "Примусове оновлення",
-        "force-refresh-tooltip": "Примусове оновлення зовнішніх метаданих з Kavita+",
         "loose-leaf-volume": "Розділи з вільними аркушами",
-        "specials-volume": "Спеціальні пропозиції"
+        "specials-volume": "Спеціальні пропозиції",
+        "no-data": "{{common.no-data}}"
     },
     "edit-chapter-modal": {
         "close": "{{common.close}}",
@@ -1566,7 +1524,6 @@
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "tags-tab": "{{tabs.tags-tab}}",
@@ -1576,13 +1533,12 @@
         "title": "Редагувати",
         "title-label": "Назва",
         "sort-order-label": "Порядок сортування",
-        "sort-order-tooltip": "Порядок читання, в якому цей розділ упорядковано в томі",
         "isbn-label": "ISBN",
         "release-date-label": "Реліз",
         "pages-label": "Сторінки",
         "words-label": "Довжина",
-        "pages-count": "Сторінки ({{num}})",
-        "words-count": "{{num}} Слів",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
         "reading-time-label": "Час читання",
         "date-added-label": "Дата додавання",
         "id-label": "ID",
@@ -1593,7 +1549,6 @@
     "edit-volume-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1601,17 +1556,12 @@
         "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
-        "links-label": "{{series-metadata-detail.links-label}}",
-        "last-read-label": "{{edit-chapter-modal.last-read-label}}",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "title": "Редагувати",
-        "range-hours": "{{value}} {{hourWord}}"
+        "title": "Редагувати"
     },
     "reading-activity": {
         "this-week": "{{time-periods.this-week}}",
@@ -1626,7 +1576,8 @@
         "y-axis-label": "Години читання",
         "no-data": "Немає прогресу читання",
         "time-frame-label": "Часові Рамки",
-        "all-users": "Усі користувачі"
+        "all-users": "Усі користувачі",
+        "select-user-alt": "Виберіть користувача для фільтрації"
     },
     "series-preview-drawer": {
         "tags-label": "{{filter-field-pipe.tags}}",
@@ -1658,25 +1609,26 @@
         "total-read-time-tooltip": "Загальний час читання: {{count}}",
         "series": "серія",
         "reads": "читає",
-        "release-years-title": "Роки випуску",
         "most-active-users-title": "Найактивніші користувачі",
         "popular-libraries-title": "Популярні бібліотеки",
         "popular-series-title": "Популярні серії",
-        "recently-read-title": "Нещодавно прочитані",
         "series-count": "Серія {{num}}",
         "volume-count": "Томів {{num}}",
         "file-count": "Файли ({{num}})",
         "genre-count": "Жанри ({{num}})",
         "tag-count": "Теги: {{num}}",
         "people-count": "{{num}} Люди",
-        "people": "Люди"
+        "people": "Люди",
+        "stats-title": "Дослідити",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "management-tab": "{{tabs.management-tab}}",
+        "popular-decades-title": "Популярні десятиліття",
+        "popular-genres-title": "Популярні жанри",
+        "popular-tags-title": "Популярні теги",
+        "popular-artists-title": "Популярні виконавці",
+        "popular-authors-title": "Популярні автори"
     },
     "customize-dashboard-modal": {
-        "close": "{{common.close}}",
-        "help": "{{common.help}}",
-        "title-dashboard": "Налаштувати інформаційну панель",
-        "title-sidenav": "Налаштувати бічну навігацію",
-        "title-external-sources": "Зовнішні джерела",
         "title-smart-filters": "Розумні фільтри",
         "dashboard": "Інформаційна панель",
         "sidenav": "Центр сторінок",
@@ -1685,7 +1637,6 @@
         "description": "Ви можете налаштувати різні аспекти Kavita, змінюючи порядок, перемикаючи видимість та прив’язуючи смарт-фільтри/зовнішні джерела до головної сторінки або бічної панелі навігації."
     },
     "customize-dashboard-streams": {
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -1693,7 +1644,6 @@
         "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -1867,7 +1817,8 @@
         "merge": "Об'єднати",
         "export": "Експорт",
         "like": "Подобається",
-        "unlike": "Вилучити вподобання"
+        "unlike": "Вилучити вподобання",
+        "edit-device-name": "Редагувати ім'я"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Прогрес читання",
@@ -1944,7 +1895,13 @@
         "custom-scopes-tooltip": "Додаткові області видимості, які потрібно запитувати у вашого постачальника OIDC під час входу. Розділяйте кілька областей видимості комами. Неправильні значення можуть перешкодити входу.",
         "default-roles-label": "{{common.roles}}",
         "default-libraries-label": "{{common.libraries}}",
-        "tls-required": "Постачальник OIDC повинен використовувати TLS (https)"
+        "tls-required": "Постачальник OIDC повинен використовувати TLS (https)",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "reset-label": "Скинути ідентифікатори",
+        "reset-tooltip": "Скинути зовнішні ідентифікатори всіх користувачів, використовуйте це для скидання зв'язків між користувачами в Kavita та вашим постачальником ідентифікаційних даних",
+        "reset-confirm": "Ви впевнені, що хочете скинути зовнішні ідентифікатори всіх користувачів?",
+        "reset-success": "Зовнішні ідентифікатори скинуто для всіх користувачів, повторно автентифікуйтеся для підключення",
+        "auto-save-required": "Ви змінили критичні налаштування, автоматично збережіть їх, щоб вони не зникли"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -1964,18 +1921,7 @@
         "required": "{{validation.required-field}}"
     },
     "api-key": {
-        "copy": "Копіювати",
-        "show": "Показати",
-        "hide": "Приховати",
-        "regen-warning": "Повторне створення вашого ключа API призведе до анулювання всіх існуючих клієнтів.",
-        "no-key": "ПОМИЛКА – КЛЮЧ НЕ ВСТАНОВЛЕНО",
-        "confirm-reset": "Це призведе до анулювання будь-яких налаштованих вами конфігурацій OPDS. Ви впевнені, що хочете продовжити?",
-        "key-reset": "Скидання ключа API",
-        "reset": "Скинути"
-    },
-    "user-stats": {
-        "library-read-progress-title": "Прогрес читання в бібліотеці",
-        "read-percentage": "% Читати"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "time-periods": {
         "this-week": "Цього тижня",
@@ -2304,7 +2250,7 @@
     },
     "manage-reading-profiles": {
         "reset": "{{common.reset}}",
-        "description": "Не всі ваші серії можна читати однаково, тому налаштуйте окремі профілі читання для кожної бібліотеки чи серії, щоб повернення до них було якомога простіше.",
+        "description": "Не всі ваші серії можна читати однаково, тому налаштуйте окремі профілі читання для кожної бібліотеки/серії/пристрою, щоб повернення до серії було якомога простішим.",
         "extra-tip": "Призначайте профілі читання через меню дій для серій та бібліотек або масово. Під час зміни налаштувань у програмі для читання створюється прихований профіль, який запам’ятовує ваш вибір для цієї серії (не для PDF-файлів). Цей профіль видаляється, коли ви призначаєте серії один із власних профілів читання. Більше інформації можна знайти на",
         "wiki-title": "вікі",
         "profiles-title": "Ваші профілі читання",
@@ -2374,7 +2320,9 @@
         "reading-profile-library-settings-title": "Бібліотека",
         "delete": "{{common.delete}}",
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
-        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}"
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
+        "set-devices": "Налаштувати пристрої",
+        "select-devices-for": "Налаштувати пристрої для {{name}}"
     },
     "file-type-group-pipe": {
         "archive": "Архів",
@@ -2398,8 +2346,9 @@
         "clear": "{{common.clear}}",
         "no-data": "Ще не створено колекцій",
         "loading": "{{common.loading}}",
-        "create": "{{common.create}}",
-        "bound": "Зв'язаний"
+        "bound": "Зв'язаний",
+        "warning-duplicate": "Вибрані пристрої містять пристрої, що перетинаються, це заборонено",
+        "hidden": "Профілі ({{amount}}) приховано через недійсний стан"
     },
     "external-series-card": {
         "open-external": "Відкрити зовнішній"
@@ -2462,9 +2411,6 @@
     "collection-owner": {
         "collection-created-label": "Створено: {{owner}}",
         "collection-via-label": "через {{source}}"
-    },
-    "browse-themes-modal": {
-        "title": "Переглянути теми"
     },
     "import-mappings": {
         "import-step": "Імпорт",
@@ -2544,17 +2490,16 @@
         "person-chapter-count": "Кількість розділів",
         "annotation-owner": "Власник",
         "annotation-series": "Назва серії",
-        "annotation-color": "Колір"
+        "annotation-color": "Колір",
+        "user-rating": "Моя оцінка"
     },
     "edit-person-modal": {
         "title": "Деталі {{personName}}",
         "general-tab": "{{edit-series-modal.general-tab}}",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
         "aliases-tab": "Псевдоніми",
-        "loading": "{{common.loading}}",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
-        "role-label": "Роль",
         "mal-id-label": "MAL Id",
         "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
         "anilist-id-label": "Ідентифікатор AniList",
@@ -2563,7 +2508,6 @@
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "asin-label": "ASIN",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "invalid-asin": "ASIN має бути у дійсному форматі ISBN-10 або ISBN-13",
         "description-label": "Опис",
         "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
@@ -2572,7 +2516,10 @@
         "download-coversdb": "Завантажити з CoversDB",
         "aliases-label": "Редагувати псевдоніми",
         "alias-overlap": "Цей псевдонім вже вказує на іншу особу або є іменем цієї особи, розгляньте можливість їх об'єднання.",
-        "aliases-tooltip": "Коли серію позначено псевдонімом особи, ця особа призначається, а не створюється нова особа. Під час видалення псевдоніма вам доведеться повторно просканувати серію, щоб зміни відобразилися."
+        "aliases-tooltip": "Коли серію позначено псевдонімом особи, ця особа призначається, а не створюється нова особа. Під час видалення псевдоніма вам доведеться повторно просканувати серію, щоб зміни відобразилися.",
+        "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
+        "invalid-amazon-code": "ASIN має починатися з B0 або BT"
     },
     "merge-person-modal": {
         "title": "{{personName}}",
@@ -2585,17 +2532,7 @@
     },
     "day-breakdown": {
         "title": "Розбивка по днях",
-        "no-data": "Немає прогресу, переходжу до читання",
-        "x-axis-label": "День тижня",
-        "y-axis-label": "Події читання"
-    },
-    "kavitaplus-metadata-breakdown-stats": {
-        "title": "Розподіл метаданих Kavita+",
-        "description": "Kavita повільно та з часом отримує метадані (рейтинги, відгуки, рекомендації тощо) для відповідних серіалів.",
-        "no-data": "{{common.no-data}}",
-        "errored-series-label": "Помилкові серії",
-        "completed-series-label": "Завершена серія",
-        "complete": "Усі серії мають метадані"
+        "no-data": "Немає прогресу, переходжу до читання"
     },
     "file-breakdown-stats": {
         "format-title": "Формат",
@@ -2665,7 +2602,8 @@
         "delete-font-in-use": "Шрифт наразі використовується принаймні одним користувачем, видалити неможливо",
         "font-manual-upload": "Виникла проблема зі створенням шрифту після ручного завантаження",
         "font-already-in-use": "Шрифт з такою назвою вже існує",
-        "upload-too-large": "Файл завеликий для завантаження, виберіть менше зображення та спробуйте ще раз."
+        "upload-too-large": "Файл завеликий для завантаження, виберіть менше зображення та спробуйте ще раз.",
+        "invalid-form": "Форма, яку ви намагаєтеся надіслати, містить помилки"
     },
     "metadata-builder": {
         "or": "Зіставте будь-який із наведених нижче варіантів",
@@ -2742,7 +2680,9 @@
         "annotation-highlights": "Колір виділення",
         "annotation-comment": "Текст анотації",
         "annotation-selection": "Виділення тексту",
-        "series": "{{tabs.series-tab}}"
+        "series": "{{tabs.series-tab}}",
+        "annotation-likes": "Вподобання",
+        "annotation-liked-by": "Сподобалося користувачу"
     },
     "toasts": {
         "regen-cover": "Завдання для відновлення зображення обкладинки поставлено в чергу",
@@ -2865,8 +2805,8 @@
         "match-success": "Серії зіставлені правильно",
         "webtoon-override": "Перемикання в режим вебтуна через зображення, що представляють вебтун.",
         "scrobble-gen-init": "Поставив у чергу завдання для створення подій Scrobble з історії читання та оцінок минулого періоду, синхронізуючи їх із підключеними сервісами.",
-        "series-bound-to-reading-profile": "Серія, пов'язана з профілем читання {{name}}",
-        "library-bound-to-reading-profile": "Бібліотека, прив'язана до профілю читання {{name}}",
+        "series-bound-to-reading-profile": "Серія, пов'язана з {{amount}} Профілі читання",
+        "library-bound-to-reading-profile": "Бібліотека зобов'язана дотримуватися профілів читання ({{amount}})",
         "external-match-rate-error": "Кавіта вичерпала свій тариф під час пошуку {{seriesName}}. Спробуйте ще раз через 5 хвилин.",
         "confirm-delete-bookmark": "Ви впевнені, що хочете видалити цю закладку?",
         "confirm-delete-annotation": "Ви впевнені, що хочете видалити цю анотацію?",
@@ -2874,7 +2814,8 @@
         "confirm-force-delete-font": "Цей шрифт зараз використовується. Ви хочете примусово видалити його? Це змусить користувачів повернутися до шрифту за замовчуванням.",
         "font-in-use": "Неможливо видалити, оскільки шрифт використовується одним або кількома користувачами.",
         "k+-resend-welcome-email-success": "На вашу електронну адресу Kavita+ було надіслано електронного листа",
-        "k+-resend-welcome-email-error": "Сталася помилка під час надсилання вашої ліцензії Kavita+. Можливо, це пов’язано з тим, що у вас більше немає активного облікового запису. Зверніться до служби підтримки."
+        "k+-resend-welcome-email-error": "Сталася помилка під час надсилання вашої ліцензії Kavita+. Можливо, це пов’язано з тим, що у вас більше немає активного облікового запису. Зверніться до служби підтримки.",
+        "confirm-delete-auth-key": "Ви впевнені, що хочете видалити цей ключ авторизації?"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Година",
@@ -2945,7 +2886,8 @@
         "valid-email": "Це має бути дійсна електронна адреса",
         "password-validation": "Пароль має містити від 6 до 256 символів",
         "year-validation": "Це має бути дійсний рік, довжина якого перевищує 1000 символів та містить 4 символи",
-        "invalid-uri": "Наданий URI недійсний"
+        "invalid-uri": "Наданий URI недійсний",
+        "other-field-invalid": "Неможливо перевірити дійсність, {{other}} недійсний"
     },
     "entity-type": {
         "volume": "обсяг",
@@ -2982,7 +2924,9 @@
         "stats-tab": "Статуси",
         "scrobbling-tab": "Скроблінг",
         "smart-filters-tab": "Розумні фільтри",
-        "annotations-tab": "Анотації"
+        "annotations-tab": "Анотації",
+        "overview-tab": "Огляд",
+        "management-tab": "Управління"
     },
     "common": {
         "reset-to-default": "Скинути до заводських налаштувань",
@@ -3010,7 +2954,6 @@
         "select-all": "Вибрати Все",
         "deselect-all": "Зняти вибір усіх",
         "series-count": "Серія {{num}}",
-        "author-count": "Автори ({{num}})",
         "item-count": "{{num}} елементів",
         "chapter-count": "Розділів: {{num}}",
         "issue-count": "Проблеми ({{num}})",
@@ -3029,7 +2972,9 @@
         "chapter-nums": "Розділи",
         "volume-nums": "Обсяги",
         "roles": "Ролі",
-        "libraries": "Бібліотеки"
+        "libraries": "Бібліотеки",
+        "confirm": "Підтвердити",
+        "selected": "Вибрано"
     },
     "annotation-card": {
         "page-num": "{{book-reader.page-num-label}}",
@@ -3038,9 +2983,6 @@
         "location-tooltip": "{{library}} - {{series}}",
         "liked": "Сподобалося {{amount}} людям, включаючи вас",
         "not-liked": "Сподобалося {{amount}} людям, вам не сподобалося"
-    },
-    "annotations-tab": {
-        "title": "{{tabs.annotations-tab}}"
     },
     "view-annotations-drawer": {
         "title": "{{tabs.annotations-tab}}",
@@ -3115,21 +3057,381 @@
         "brown-fox": "Швидка бура лисиця перестрибує через лінивого собаку",
         "filter-system-fonts-label": "Шрифти системи фільтрів"
     },
-    "epub-page-calc-method-pipe": {
-        "default": "За замовчуванням",
-        "calc1": "Розрахунок 1"
-    },
     "all-annotations": {
         "title": "Усі анотації",
-        "filter": {
-            "true": "True",
-            "false": "False"
-        },
         "annotations-count": "{{num}} Анотації",
         "export": "Експорт"
     },
     "multi-check-box-form": {
         "select-all": "Вибрати все",
-        "deselect-all": "Зняти Вибір Усіх"
+        "deselect-all": "Зняти Вибір Усіх",
+        "no-data": "{{typeahead.no-data}}"
+    },
+    "manage-custom-key-binds": {
+        "description": "Іноді клацання і перетягування мишкою буває занадто повільним. Використовуйте улюблені комбінації клавіш, щоб пришвидшити роботу. Кожна опція дозволяє встановити до {{max}} різних комбінацій клавіш. <b> Натисніть і утримуйте комбінацію клавіш, щоб її видалити. </b>",
+        "key-bind-error-reserved-key-bind": "Ця комбінація клавіш зарезервована і не може бути використана",
+        "key-bind-error-need-at-least-one-key": "Ваша комбінація клавіш повинна містити принаймні одну клавішу",
+        "key-bind-error-overlap-in-target": "Одна або декілька комбінацій клавіш однакові",
+        "add": "Додати альтернативний ключ",
+        "reset": "Скинути {{target}}",
+        "errors-array": "Клавіатури для {{target}} містять помилки",
+        "errors-control": "Прив'язка клавіш {{index}} для {{target}} містить помилки",
+        "warning-duplicated-control": "Клавіатура {{index}} для {{target}} також використовувалася для іншої цілі",
+        "warning-duplicate-key-bind": "Ця комбінація клавіш також використовувалася в інших місцях",
+        "key-bind-tooltip": "Довго натискайте прив'язку клавіш, щоб її вилучити.",
+        "global-header": "Глобальний",
+        "readers-header": "Читачі"
+    },
+    "keybind-setting-description-pipe": {
+        "key-bind-title-navigate-to-settings": "Відкрити налаштування",
+        "key-bind-tooltip-navigate-to-settings": "Відкрийте налаштування, не використовуючи рідер",
+        "key-bind-title-open-search": "Відкрити пошук",
+        "key-bind-tooltip-open-search": "Відкрити верхній рядок пошуку",
+        "key-bind-title-navigate-to-scrobbling": "Відкритий скроблінг",
+        "key-bind-tooltip-navigate-to-scrobbling": "Відкрити сторінку налаштувань на вкладці «Скроблінг»",
+        "key-bind-title-escape": "Пробіл",
+        "key-bind-tooltip-escape": "Закрити поточний відкритий контекст",
+        "key-bind-title-toggle-fullscreen": "Перемикання повноекранного режиму",
+        "key-bind-tooltip-toggle-fullscreen": "Альтернатива F11",
+        "key-bind-title-bookmark-page": "Додати поточну сторінку до закладок",
+        "key-bind-tooltip-bookmark-page": "Зберігає поточне зображення як закладку",
+        "key-bind-title-open-help": "Відкрити меню довідки",
+        "key-bind-tooltip-open-help": "Відкриває модальне вікно довідки з усіма відповідними комбінаціями клавіш",
+        "key-bind-title-go-to": "Перейти на Сторінку",
+        "key-bind-tooltip-go-to": "Відкрити запит для перемикання сторінок",
+        "key-bind-title-toggle-menu": "Перемикання Меню",
+        "key-bind-tooltip-toggle-menu": "Перемикає в меню читача",
+        "key-bind-title-page-left": "Сторінка ліворуч",
+        "key-bind-tooltip-page-left": "Перемістити на одну сторінку ліворуч",
+        "key-bind-title-page-right": "Сторінка праворуч",
+        "key-bind-tooltip-page-right": "Перемістити на одну сторінку праворуч",
+        "key-bind-title-page-up": "Сторінка вгору",
+        "key-bind-tooltip-page-up": "Перейти на одну сторінку вгору",
+        "key-bind-title-page-down": "Сторінка вниз",
+        "key-bind-tooltip-page-down": "Перемістити на одну сторінку вниз",
+        "key-bind-title-offset-double-page": "Зсувна подвійна сторінка",
+        "key-bind-tooltip-offset-double-page": "Зсув сторінок для вирівнювання розвороту на дві сторінки"
+    },
+    "manage-auth-keys": {
+        "auth-keys-title": "Керування ключами авторизації",
+        "name-label": "Ім'я",
+        "key-label": "Ключ",
+        "expires-label": "Термін дії",
+        "last-accessed-label": "Останній доступ",
+        "actions-label": "Дії",
+        "rotate": "Повернути",
+        "delete": "{{common.delete}}",
+        "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
+        "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
+        "clients-opds-description": "{{user-preferences.clients-opds-description}}",
+        "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
+        "opds": "OPDS",
+        "image-only": "Зображень",
+        "add-auth-key": "Новий",
+        "description": "Ключ автентифікації схожий на пароль. Його зміна призведе до недійсності будь-яких існуючих клієнтів.",
+        "copy-key": "{{common.copy}}"
+    },
+    "create-auth-key": {
+        "create-title": "Створити ключ авторизації",
+        "rotate-title": "Повернути ключ авторизації",
+        "name-label": "Ім'я",
+        "key-length-label": "Довжина ключа",
+        "expiration-label": "Термін дії",
+        "required-field": "{{validations.required-field}}",
+        "total-key-length": "Загальна довжина ключа: {{length}}",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "never": "Ніколи"
+    },
+    "review-list-item": {
+        "by-label": "Від",
+        "created-alt": "Створено"
+    },
+    "reread-modal": {
+        "title": "Перечитати",
+        "description-full-read": "Ви вже закінчили {{name}}! Бажаєте почати спочатку?",
+        "description-time-passed": "Минуло {{days}} днів з того часу, як ви востаннє читали {{name}}, потребуєте освіження знань?",
+        "continue": "Продовжуйте з того місця, де зупинилися",
+        "reread": "Почати спочатку",
+        "cancel": "{{common.cancel}}",
+        "read-incognito": "Читати інкогніто"
+    },
+    "server-devices": {
+        "client-devices-header": "{{manage-devices.client-devices-header}}",
+        "client-devices-this-month-header": "Клієнтські пристрої цього місяця",
+        "client-devices-mobile-vs-pc-header": "Мобільні пристрої проти ПК цього місяця",
+        "no-data": "{{common.no-data}}"
+    },
+    "client-device-card": {
+        "auth-type-label": "Тип автентифікації",
+        "browser-label": "Браузер",
+        "platform-label": "{{manage-devices.platform-label}}",
+        "screen-label": "Екран",
+        "version-label": "Версія програми",
+        "first-seen-label": "Вперше побачено",
+        "last-seen-label": "Востаннє бачили",
+        "active": "Активний",
+        "save": "{{common.save}}",
+        "local": "Локальний"
+    },
+    "duration-pipe": {
+        "seconds": "{{num}} секунд",
+        "minutes": "{{num}} хвилин",
+        "hours": "{{num}} години",
+        "combo": "{{hour}}год {{min}}м"
+    },
+    "reading-progress-status-pipe": {
+        "no-progress": "Читати",
+        "no-progress-incognito": "Читати інкогніто",
+        "progress": "Продовжити",
+        "progress-incognito": "Продовжити анонімний режим",
+        "full-read": "Перечитати",
+        "full-read-incognito": "Перечитати інкогніто"
+    },
+    "client-device-auth-type-pipe": {
+        "unknown": "Невідомо",
+        "oidc": "OIDC",
+        "jwt": "JWT",
+        "auth-key": "Ключ авторизації"
+    },
+    "client-device-platform-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}"
+    },
+    "client-device-client-type-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}",
+        "web-browser": "Веб-браузер",
+        "web-app": "Веб-додаток",
+        "koreader": "KOReader",
+        "panels": "Панелі",
+        "librera": "Лібрера",
+        "opds-client": "Клієнт OPDS"
+    },
+    "server-activity": {
+        "no-data": "Тут нічого дивитися"
+    },
+    "activity-card": {
+        "started-label": "Розпочато",
+        "view-label": "Переглянути",
+        "total-pages-label": "Загальна кількість сторінок",
+        "total-words-label": "Загальна кількість слів",
+        "total-chapters-label": "Розділи"
+    },
+    "profile": {
+        "title": "Профіль користувача {{username}}",
+        "joined-label": "Приєднався:",
+        "stats-title": "Погляд на подорож користувача {{username}} крізь {{libraryName}}",
+        "overview-tab": "{{tabs.overview-tab}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "reviews-tab": "{{tabs.reviews-tab}}",
+        "no-reviews": "Поки що немає відгуків",
+        "user-possessive": "{{name}}'s",
+        "total-reads-badge": "{{reads}} Читає",
+        "k+-badge": "K+ Абонент",
+        "last-read-label": "Останнє прочитання:",
+        "time-reading-label": "Загальний час читання:",
+        "avg-reading-per-week-label": "Середнє значення за тиждень:"
+    },
+    "profile-review-list": {
+        "no-data": "Немає відгуків або відгуки не поширюються",
+        "filter-label": "Фільтрувати за серією",
+        "rating-alt": "Фільтрувати за рейтингом",
+        "clear-rating-alt": "Очистити фільтр оцінок"
+    },
+    "profile-stat-bar": {
+        "books-read-label": "Прочитані книги",
+        "books-read-tooltip": "Прочитані книги: {{count}}",
+        "comics-read-label": "Читання коміксів",
+        "comics-read-tooltip": "Читання коміксів: {{count}}",
+        "pages-read-label": "Прочитані сторінки",
+        "pages-read-tooltip": "Прочитані сторінки: {{count}}",
+        "words-read-label": "Прочитані слова",
+        "words-read-tooltip": "Прочитані слова: {{count}}",
+        "authors-read-label": "Автори читають",
+        "authors-read-tooltip": "Автори читають: {{count}}",
+        "reviews-label": "Відгуки",
+        "reviews-tooltip": "Відгуки: {{count}}",
+        "ratings-label": "Рейтинги",
+        "ratings-tooltip": "Рейтинги: {{count}}"
+    },
+    "profile-image": {
+        "edit-image-alt": "Редагувати зображення",
+        "reset-image-alt": "Скинути зображення"
+    },
+    "preferred-format": {
+        "title": "Бажаний формат",
+        "sub-title": "{{name}} надає перевагу читанню {{format}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "favorite-authors": {
+        "title": "Найбільш читані автори",
+        "sub-title": "Найпопулярнішим автором {{name}} є {{author}}, загальна кількість прочитань — {{count}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "page-spread": {
+        "title": "Розділи за кількістю сторінок",
+        "sub-title": "{{username}} читає розділи між сторінками {{highestBucket}}",
+        "data-type": "розділи ({{data}})",
+        "data-of": "{{percentage}}% ваших розділів",
+        "range": "Діапазон сторінок: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "word-spread": {
+        "title": "Розділи за кількістю слів",
+        "sub-title": "{{username}} читає розділи між {{highestBucket}} словами",
+        "data-type": "розділи ({{data}})",
+        "data-of": "{{percentage}}% ваших розділів",
+        "range": "Діапазон слів: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "tag-breakdown": {
+        "title": "Найбільш читані теги",
+        "sub-title": "Найпопулярніший тег користувача {{name}} — {{mostUsed}}",
+        "missing": "Відсутні теги для серії {{amount}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "genre-breakdown": {
+        "title": "Найпопулярніші жанри",
+        "sub-title": "Найпопулярніший жанр автора {{name}} — {{mostUsed}}",
+        "missing": "Бракує жанрів для серій {{amount}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "reads-by-month": {
+        "title": "Загальна кількість прочитаних за місяць",
+        "sub-title": "{{username}} прочитав(ла) найбільше за {{month}} {{year}}, прочитавши {{reads}} розділів",
+        "no-data": "{{common.no-data}}"
+    },
+    "avg-time-reading-by-hour": {
+        "title": "Середній час, витрачений на читання, за годину",
+        "most-time-spend-reading": "{{name}} проводить більшу частину часу за читанням між {{startHour}} та {{endHour}}, в середньому {{amount}} хвилин",
+        "data-since": "Включає лише прочитання з {{date}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "profile-overview": {
+        "currently-reading": "Зараз читаю",
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "just-finished-reading": "Щойно закінчив читати"
+    },
+    "activity-graph": {
+        "title": "Читацька діяльність",
+        "day-of-week-alt": "День або тижня",
+        "less": "Менше",
+        "more": "Більше",
+        "reading-time": "Час Читання",
+        "pages": "Сторінки",
+        "words": "Слова",
+        "chapters": "Розділи",
+        "no-activity-tooltip": "Немає читацької активності {{date}}.",
+        "no-activity-alt": "Немає активності",
+        "all-time": "{{time-periods.all-time}}",
+        "low-activity-alt": "Низька активність",
+        "moderate-activity-alt": "Помірна активність",
+        "good-activity-alt": "Гарна активність",
+        "high-activity-alt": "Висока активність"
+    },
+    "reading-pace": {
+        "hours-read": "Години читання",
+        "pages-read": "Прочитані сторінки",
+        "words-read": "Прочитані слова",
+        "comics-read": "Читання коміксів",
+        "books-read": "Прочитані книги",
+        "per-year": "На рік",
+        "per-month": "На місяць",
+        "per-day": "За день",
+        "no-data": "{{common.no-data}}",
+        "title-books": "Темп читання: Книги",
+        "title-comics": "Темп читання: Комікси",
+        "sub-title-books": "{{username}} читає книгу кожні {{count}} днів",
+        "sub-title-comics": "{{username}} читає комікс кожні {{count}} днів",
+        "disclaimer-books": "Стосується Epub/Pdfs",
+        "disclaimer-comics": "Стосується зображень/архівів"
+    },
+    "smart-time-picker": {
+        "forever": "Назавжди",
+        "select-year": "Виберіть рік",
+        "custom-range": "Користувацький діапазон",
+        "during-year": "під час {{year}}",
+        "during-from-to": "з {{startYear}} до {{endYear}}",
+        "during-select": "Виберіть часовий діапазон",
+        "during-entire-life-profile": "протягом усього їхнього життя",
+        "during-entire-life-server": "з самого початку"
+    },
+    "client-device-type-pipe": {
+        "mobile": "Мобільний",
+        "tablet": "Планшет",
+        "desktop": "Комп'ютер",
+        "Unknown": "{{common.unknown}}"
+    },
+    "month-label-pipe": {
+        "january": "Січень",
+        "january-short": "Січ",
+        "february": "Лютий",
+        "february-short": "Лют",
+        "march": "Березень",
+        "march-short": "Бер",
+        "april": "Квітень",
+        "april-short": "Кві",
+        "may": "Травень",
+        "may-short": "Трав",
+        "june": "Червень",
+        "june-short": "Черв",
+        "july": "Липень",
+        "july-short": "Лип",
+        "august": "Серпень",
+        "august-short": "Сер",
+        "september": "Вересень",
+        "september-short": "Вер",
+        "october": "Жовтень",
+        "october-short": "Жов",
+        "november": "Листопад",
+        "november-short": "Лис",
+        "december": "Грудень",
+        "december-short": "Гру"
+    },
+    "day-label-pipe": {
+        "sunday": "Неділя",
+        "sunday-short": "Нд",
+        "monday": "Понеділок",
+        "monday-short": "Пон",
+        "tuesday": "Вівторок",
+        "tuesday-short": "Вт",
+        "wednesday": "Середа",
+        "wednesday-short": "Ср",
+        "thursday": "Четвер",
+        "thursday-short": "Чт",
+        "friday": "П'ятниця",
+        "friday-short": "Пт",
+        "saturday": "Субота",
+        "saturday-short": "Сб"
+    },
+    "ordinal-date-pipe": {
+        "ordinalFormat": "{{month}} {{day}}",
+        "ordinal": {
+            "st": "вул",
+            "nd": "й",
+            "rd": "рд",
+            "th": "го"
+        }
+    },
+    "most-active-users": {
+        "title": "Найактивніші читачі",
+        "no-data": "Відсутність читацької активності протягом певного періоду часу"
+    },
+    "active-user-card": {
+        "total-hours": "всього {{duration}}",
+        "comics-count": "комікси ({{count}})",
+        "books-count": "{{count}} книг"
+    },
+    "files-over-time": {
+        "title": "Файли, додані з часом",
+        "no-data": "{{common.no-data}}"
+    },
+    "pdf-render-resolution": {
+        "default": "За замовчуванням (1080x1920)",
+        "high": "Високий (1920x2560)",
+        "ultra": "Ультра (2160x3840)"
+    },
+    "list-select-modal": {
+        "hidden": "Кількість товарів ({{amount}}) приховано через недійсний стан"
     }
 }

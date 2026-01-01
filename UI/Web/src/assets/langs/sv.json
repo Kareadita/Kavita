@@ -5,7 +5,8 @@
         "password-validation": "{{validation.password-validation}}",
         "title": "Logga in på ditt konto",
         "forgot-password": "Glömt lösenord?",
-        "submit": "Logga in"
+        "submit": "Logga in",
+        "oidc": "OpenID Connect"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -89,11 +90,9 @@
         "collapse-series-relationships-tooltip": "Ska Kavita visa Serier som saknar relation eller är förälder/uppföljare",
         "share-series-reviews-label": "Dela Serierecensioner",
         "clients-opds-url-label": "OPDS-länk",
-        "clients-api-key-label": "API-nyckel",
         "clients-opds-url-tooltip": "Se en lista av kompatibla OPDS klienter. ",
         "clients-opds-description": "Alla tredje partens klienter kommer använda antingen API-nyckeln eller Anslutnings-länken nedan. Dessa är som lösenord, håll dem hemliga.",
-        "clients-opds-alert": "OPDS är inte aktiverat på denna server. Detta kommer inte påverka Tachiyomi användare.",
-        "clients-api-key-tooltip": "API-nyckeln är som ett lösenord. Återställs den tas alla anslutningar till klienter bort."
+        "clients-opds-alert": "OPDS är inte aktiverat på denna server. Detta kommer inte påverka Tachiyomi användare."
     },
     "user-holds": {
         "no-data": "{{typeahead.no-data}}",
@@ -150,13 +149,10 @@
         "email-setup-alert": "Vill du skicka filer till dina enheter? Be din administratör att först konfigurera e-postinställningarna!",
         "description": "Detta avsnitt är till för att du ska kunna konfigurera enheter som inte kan ansluta till Kavita via en webbläsare och istället har en e-postadress som tar emot filer.",
         "name-label": "Namn",
-        "devices-title": "Enheter",
-        "no-devices": "Det finns inga enheter konfigurerade ännu",
         "email-label": "Email"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
-        "platform-label": "{{manage-devices.platform-label}}",
         "email-label": "{{common.email}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
@@ -170,8 +166,6 @@
     "change-password": {
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "permission-error": "Du har inte behörighet att ändra ditt lösenord. Kontakta serveradministratören.",
@@ -184,8 +178,6 @@
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "has-invalid-email": "Det verkar som att du inte har en giltig e-postadress angiven. För att ändra e-post krävs det att administratören skickar en länk till dig för att slutföra denna åtgärd.",
         "invite-url-tooltip": "Kopiera detta och klistra in det i en ny flik",
@@ -197,13 +189,10 @@
         "email-not-confirmed": "Denna e-postadress är inte bekräftad",
         "email-updated-title": "E-postadress uppdaterad",
         "setup-user-account": "Konfigurera användarens konto",
-        "email-updated-description": "Du kan använda länken nedan för att bekräfta e-postadressen för ditt konto. Om e-postinställningarna har konfigurerats kommer ett e-postmeddelande att ha skickats, och länken kan användas för att bekräfta e-postadressen.",
-        "permission-error": "Du har inte behörighet att ändra din e-postadress. Kontakta serveradministratören."
+        "email-updated-description": "Du kan använda länken nedan för att bekräfta e-postadressen för ditt konto. Om e-postinställningarna har konfigurerats kommer ett e-postmeddelande att ha skickats, och länken kan användas för att bekräfta e-postadressen."
     },
     "change-age-restriction": {
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "unknowns": "Okända",
         "age-restriction-label": "Åldersbegränsning"
@@ -247,36 +236,6 @@
         "clear": "{{common.clear}}",
         "filter": "{{common.filter}}",
         "open-filtered-search": "Öppna en filtrerad sökning för {{item}}"
-    },
-    "user-stats-info-cards": {
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
-        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "last-active-label": "Senast aktiv",
-        "chapters": "{{value}} kapitel",
-        "chapters-read-label": "Lästa kapitel",
-        "words-count": "{{num}} ord",
-        "pages-count": "{{num}} sidor",
-        "total-pages-read-label": "Totalt antal lästa sidor",
-        "total-words-read-label": "Totalt antal lästa ord",
-        "time-spent-reading-label": "Tid spenderad på läsning",
-        "avg-reading-per-week-label": "Genomsnittlig läsning / vecka",
-        "pages-read-by-year-title": "Lästa sidor per år",
-        "words-read-by-year-title": "Lästa ord per år"
-    },
-    "top-readers": {
-        "this-week": "{{time-periods.this-week}}",
-        "last-7-days": "{{time-periods.last-7-days}}",
-        "last-30-days": "{{time-periods.last-30-days}}",
-        "last-90-days": "{{time-periods.last-90-days}}",
-        "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}",
-        "title": "Toppläsare",
-        "time-selection-label": "Tidsperiod",
-        "comics-label": "Serier: {{value}} tim",
-        "manga-label": "Manga: {{value}} tim",
-        "books-label": "Böcker: {{value}} tim"
     },
     "role-selector": {
         "deselect-all": "{{common.deselect-all}}",
@@ -438,29 +397,16 @@
         "bookmark": "Bokmärk"
     },
     "book-reader": {
-        "bookmarks-header": "{{side-nav.bookmarks}}",
         "go-back": "Gå tillbaka",
         "previous": "Förra",
         "incognito-mode-label": "Inkognitoläge",
         "next": "Nästa",
-        "next-chapter": "Nästa Kapitel/Volym",
-        "close-reader": "Stäng Läsare",
         "go-to-page": "Gå till sida",
-        "go-to-last-page": "Gå till sista sidan",
-        "prev-chapter": "Förra Kapitel/Volym",
         "page-label": "Sida",
-        "pagination-header": "Sektion",
-        "next-page": "Nästa sida",
-        "settings-header": "Inställningar",
         "go-to-page-prompt": "Det finns {{totalPages}} sidor. Vilken sida vill du gå till?",
-        "prev-page": "Förra sidan",
         "skip-header": "Skippa till huvudinnehållet",
-        "virtual-pages": "Virtuella sidor",
-        "toc-header": "Innehållsförteckning",
         "incognito-mode-alt": "Inkognitoläge är aktiverat. Växla för att stänga av det.",
-        "loading-book": "Laddar bok…",
-        "title": "Bokinställning",
-        "table-of-contents-header": "Innehållsförteckning"
+        "loading-book": "Laddar bok…"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -1077,7 +1023,6 @@
         "mal-stack-import": "MAL Stack",
         "preferences": "Preferenser",
         "clients": "API-Nyckel / OPDS",
-        "user-stats": "Stats",
         "scrobbling": "Scrobbling",
         "customize": "Anpassa",
         "theme": "Tema",
@@ -1105,8 +1050,7 @@
         "no-data": "Det finns inga filer. Prova lägga till en serie.",
         "no-data-filtered": "Inga filer matchar ditt nuvarande filter.",
         "sync-progress": "Serier Samlat: {{title}}",
-        "last-sync": "Senast Synkad: {{date}}",
-        "series-header": "Serier"
+        "last-sync": "Senast Synkad: {{date}}"
     },
     "all-collections": {
         "item-count": "{{common.item-count}}",
@@ -1252,15 +1196,6 @@
         "restack-count": "{{num}} Omstaplingar",
         "title": "Importera intressestapeln från MAL",
         "nothing-found": "Inget hittat"
-    },
-    "edit-chapter-progress": {
-        "action-header": "{{common.edit}}",
-        "edit-alt": "{{common.edit}}",
-        "no-data": "{{user-scrobble-history.no-data}}",
-        "page-read-header": "Sidor lästa",
-        "user-header": "Användare",
-        "date-created-header": "Skapad (UTC)",
-        "date-updated-header": "Senast Uppdaterad (UTC)"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
@@ -1415,13 +1350,11 @@
         "library-title": "Bibliotek",
         "created-title": "Skapad",
         "max-items-title": "Max Objekt",
-        "force-refresh": "Tvinga uppdatering",
         "publication-status-title": "Publikationsstatus",
         "chapter-title": "Kapitel",
         "field-locked-alt": "Fältet är låst",
         "publication-status-label": "Publikationsstatus",
         "web-link-description": "Här kan du lägga till många olika länkar till externa tjänster.",
-        "force-refresh-tooltip": "Tvinga uppdatering av extern metadata från Kavita+",
         "localized-name-label": "Lokaliserat Namn",
         "lowest-folder-path-title": "Lägsta Sökväg",
         "lowest-folder-path-tooltip": "Lägsta sökväg från bibliotekets rot som innehåller alla serie filer",
@@ -1433,7 +1366,6 @@
         "total-words-title": "Totalt antal Ord",
         "size-title": "Storlek",
         "specials-volume": "Specials",
-        "words-title": "Ord",
         "loose-leaf-volume": "Lösa Blad Kapitel",
         "last-scanned-title": "Senast Skannad",
         "format-title": "Format",
@@ -1470,14 +1402,12 @@
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "tags-tab": "{{tabs.tags-tab}}",
         "size-label": "{{edit-series-modal.size-title}}",
         "links-label": "{{metadata-fields.links-title}}",
         "last-read-label": "{{sort-field-pipe.read-progress}}",
-        "sort-order-tooltip": "Läsordningen i vilken detta kapitel är ordnat inom volymen",
         "pages-count": "{{num}} Sidor",
         "isbn-label": "ISBN",
         "title-label": "Titel",
@@ -1497,7 +1427,6 @@
     "edit-volume-modal": {
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1505,16 +1434,11 @@
         "words-label": "{{edit-chapter-modal.length-title}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
-        "links-label": "{{series-metadata-detail.links-label}}",
-        "last-read-label": "{{edit-chapter-modal.last-read-label}}",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "range-hours": "{{value}} {{hourWord}}",
         "title": "Ändra"
     },
     "reading-activity": {
@@ -1565,31 +1489,23 @@
         "tag-count": "{{num}} Taggar",
         "popular-libraries-title": "Populära Bibliotek",
         "total-people-label": "Totalt antal Personer",
-        "release-years-title": "Släppt År",
         "people-count": "{{num}} Personer",
         "genre-count": "{{num}} Genres",
         "total-series-tooltip": "Totalt antal Serier: {{count}}",
         "total-files-tooltip": "Totalt antal Filer: {{count}}",
         "popular-series-title": "Populära Serier",
-        "recently-read-title": "Nyligen Läst",
         "series": "serier",
         "total-read-time-tooltip": "Total Lästid: {{count}}"
     },
     "customize-dashboard-modal": {
-        "close": "{{common.close}}",
-        "help": "{{common.help}}",
-        "title-sidenav": "Anpassa Sido Nav",
         "sidenav": "Sido Nav",
         "smart-filters": "Smarta Filter",
-        "title-external-sources": "Externa Tjänster",
         "external-sources": "Externa Källor",
         "description": "Du kan anpassa olika aspekter av Kavita genom att ändra ordning, växla synlighet och binda smarta filter/externa källor till din startsida eller sidonavigering.",
-        "title-dashboard": "Anpassa instrumentpanelen",
         "dashboard": "Instrumentpanel",
         "title-smart-filters": "Smarta Filter"
     },
     "customize-dashboard-streams": {
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -1597,7 +1513,6 @@
         "no-data": "Alla smarta filter har lagts till på instrumentpanelen, eller så har inga skapats ännu."
     },
     "customize-sidenav-streams": {
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -1918,8 +1833,7 @@
     },
     "card-detail-layout": {
         "no-data": "{{common.no-data}}",
-        "total-items": "{{count}} antal objekt",
-        "jumpkey-count": "{{count}} Serier"
+        "total-items": "{{count}} antal objekt"
     },
     "email-history": {
         "template-header": "Mall",
@@ -2068,13 +1982,6 @@
         "default": "Standard (320x455)"
     },
     "api-key": {
-        "reset": "Återställ",
-        "show": "Visa",
-        "hide": "Göm",
-        "regen-warning": "Att regenerera din API-nyckel kommer att ogiltigförklara alla befintliga klienter.",
-        "no-key": "ERROR – NYCKEL HAR EJ ANGETTS",
-        "confirm-reset": "Detta kommer att ogiltigförklara alla OPDS-konfigurationer du har ställt in. Är du säker på att du vill fortsätta?",
-        "key-reset": "Återställ API-nyckel",
         "copy": "Kopiera"
     },
     "changelog": {
@@ -2095,10 +2002,6 @@
         "theme-black": "Svart",
         "theme-paper": "Papper",
         "theme-white": "Vit"
-    },
-    "user-stats": {
-        "library-read-progress-title": "Bibliotekets läsframsteg",
-        "read-percentage": "% Läst"
     },
     "day-of-week-pipe": {
         "tuesday": "Tisdag",
@@ -2217,7 +2120,6 @@
         "deselect-all": "Avmarkera Alla",
         "no-data": "Ingen Data",
         "submit": "Skicka",
-        "author-count": "{{num}} Författare",
         "item-count": "{{num}} Objekt",
         "filter": "Filter"
     },
@@ -2418,7 +2320,6 @@
     "edit-person-modal": {
         "general-tab": "{{edit-series-modal.general-tab}}",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
-        "loading": "{{common.loading}}",
         "close": "{{common.close}}",
         "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
         "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
@@ -2434,14 +2335,11 @@
         "cover-image-description-extra": "Alternativt kan du ladda ner omslag från CoversDB om tillgängligt.",
         "save": "{{common.save}}",
         "asin-label": "ASIN",
-        "role-label": "Roll",
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "title": "{{personName}} Detaljer"
     },
     "day-breakdown": {
         "title": "Dagsuppdelning",
-        "x-axis-label": "Veckodag",
-        "y-axis-label": "Läshändelser",
         "no-data": "Inget framsteg, börja läsa"
     },
     "preferences": {
@@ -2503,22 +2401,11 @@
         "off": "Inga Spridningar",
         "even": "Jämna Spridningar"
     },
-    "browse-themes-modal": {
-        "title": "Bläddra Teman"
-    },
     "infinite-scroller": {
         "continuous-reading-next-chapter": "Nästa Kapitel",
         "continuous-reading-prev-chapter-alt": "Skrolla upp för att hoppa till föregående kaptiel",
         "continuous-reading-prev-chapter": "Föregående Kapitel",
         "continuous-reading-next-chapter-alt": "Skrolla upp för att hoppa till nästa kapitel"
-    },
-    "kavitaplus-metadata-breakdown-stats": {
-        "description": "Kavita hämtar metadata (betyg, recensioner, rekommendationer, etc) långsamt över tid för kvalificerade serier.",
-        "completed-series-label": "Färdiga Serier",
-        "title": "Kavita+ Metadata Uppdelning",
-        "complete": "Alla Serier har metadata",
-        "errored-series-label": "Serier med Fel",
-        "no-data": "{{common.no-data}}"
     },
     "filter-comparison-pipe": {
         "is-before": "Är före",
@@ -2596,5 +2483,8 @@
         "chapter-title": "Titel (Kapitel)",
         "chapter-release-date": "Släppdatum (Kapitel)",
         "chapter-covers": "Omslag (Kapitel)"
+    },
+    "oidc": {
+        "login": "Tillbaka till inloggningsskärmen"
     }
 }

@@ -34,7 +34,8 @@
         "identity-provider": "身份提供者",
         "identity-provider-tooltip": "Kavita 用户从未与 OIDC 帐户同步。",
         "libraries-label": "{{common.libraries}}",
-        "roles-label": "{{common.roles}}"
+        "roles-label": "{{common.roles}}",
+        "warning-read-only": "只读帐户的权限有限"
     },
     "user-scrobble-history": {
         "title": "Scrobble 历史",
@@ -118,10 +119,8 @@
         "share-series-reviews-label": "分享系列评论",
         "share-series-reviews-tooltip": "允许此服务器上的其他用户看到您的评论",
         "clients-opds-alert": "此服务器未启用 OPDS。这不会影响 Mihon 用户。",
-        "clients-opds-description": "所有第三方客户端均使用下方的API密钥或链接。它们就像密码一样，请保密。",
-        "clients-api-key-tooltip": "API 密钥等同于密码。重置密钥将导致所有客户端失效。",
+        "clients-opds-description": "所有第三方客户端都将使用 OPDS 身份验证密钥或下方的连接 URL。这些信息如同密码，请务必妥善保管。",
         "clients-opds-url-label": "OPDS 网址",
-        "clients-api-key-label": "API 密钥",
         "clients-opds-url-tooltip": "查看受支持的 OPDS 客户端列表： ",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
@@ -147,7 +146,16 @@
         "social-include-unknowns-label": "包含未知内容",
         "social-include-unknowns-tooltip": "为年龄分级未知的系列和章节启用社交功能",
         "data-saver-label": "数据节约模式",
-        "data-saver-tooltip": "通过防止自动预读（例如 PDF 阅读器）最大限度减少数据使用"
+        "data-saver-tooltip": "通过防止自动预读（例如 PDF 阅读器）最大限度减少数据使用",
+        "opds-settings-title": "OPDS 设置",
+        "embed-progress-indicator-label": "嵌入式进度指示器",
+        "embed-progress-indicator-tooltip": "在标题中嵌入进度指示器",
+        "include-continue-from-label": "包括从条目继续",
+        "include-continue-from-tooltip": "在 OPDS 字段中插入“从 X 继续”条目，以避免查找上次阅读点（模拟 Kavita 的“继续”按钮）",
+        "prompt-for-rereads-after-label": "重新阅读提示",
+        "prompt-for-rereads-after-tooltip": "如果自 X 天前以来没有任何进展，则显示“重新阅读”提示。0 表示完全禁用此提示。",
+        "social-share-profile-label": "分享配置文件",
+        "social-share-profile-tooltip": "启用与其他服务器成员共享您的阅读活动信息的功能"
     },
     "user-holds": {
         "title": "刮削暂停",
@@ -201,27 +209,26 @@
     },
     "manage-devices": {
         "title": "设备管理",
-        "description": "对于无法通过浏览器访问Kavita的设备，您可以设置一个电子邮件地址用来接收文件。",
-        "devices-title": "设备",
-        "no-devices": "尚未设置任何设备",
+        "description": "本部分用于设置无法连接到 Kavita 的电子邮件设备，这些设备需要使用可以接收文件的电子邮件地址。",
         "platform-label": "平台",
         "email-label": "电子邮件",
         "name-label": "名称",
-        "email-setup-alert": "想要将文件发送到您的设备？请先联系管理员配置电子邮件设置！",
+        "email-setup-alert": "想通过电子邮件接收文件？请先让管理员设置电子邮件发送方式！",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
         "actions-header": "{{manage-users.actions-header}}",
-        "warning": "警告"
+        "warning": "警告",
+        "client-devices-header": "客户端设备",
+        "sendto-device-header": "基于电子邮件的设备"
     },
     "edit-device-modal": {
-        "title": "编辑设备",
+        "title": "编辑电子邮件设备",
         "device-name-label": "{{manage-devices.name-label}}",
-        "platform-label": "{{manage-devices.platform-label}}",
         "email-label": "{{common.email}}",
         "email-tooltip": "此电子邮件将用于通过“发送至”接受文件",
-        "device-platform-label": "设备平台",
+        "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -234,8 +241,6 @@
         "new-password-label": "新密码",
         "confirm-password-label": "确认密码",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "passwords-must-match": "密码必须一致",
@@ -253,31 +258,19 @@
         "invite-url-label": "邀请链接",
         "invite-url-tooltip": "将其复制并粘贴到一个新的标签页中",
         "has-invalid-email": "您似乎没有设置有效的电子邮件。更改电子邮件将要求管理员向您发送链接以完成此操作。",
-        "permission-error": "您无权更改电子邮件，请联系管理员。",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
     "change-age-restriction": {
         "age-restriction-label": "年龄限制",
         "unknowns": "未知",
         "reset": "{{common.reset}}",
-        "edit": "{{common.edit}}",
-        "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "复制",
-        "show": "显示",
-        "hide": "隐藏",
-        "regen-warning": "重新生成您的API密钥将使任何现有客户端失效。",
-        "no-key": "错误-未设置密钥",
-        "confirm-reset": "所有OPDS配置将会失效，您确定继续吗？",
-        "key-reset": "API密钥已重置",
-        "reset": "重置"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "scrobbling-providers": {
         "title": "Scrobbling服务提供商",
@@ -318,40 +311,6 @@
         "clear": "{{common.clear}}",
         "filter": "{{common.filter}}",
         "open-filtered-search": "为{{item}}打开一个带有筛选器的搜索"
-    },
-    "user-stats-info-cards": {
-        "total-pages-read-label": "总阅读页数",
-        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-label": "总阅读字数",
-        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
-        "time-spent-reading-label": "阅读时长",
-        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-label": "阅读章节",
-        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "avg-reading-per-week-label": "平均阅读时长/每周",
-        "last-active-label": "最后活跃时间",
-        "chapters": "{{value}} 章节",
-        "pages-read-by-year-title": "按年份阅读的页数",
-        "words-read-by-year-title": "按年份阅读的单词",
-        "words-count": "{{num}} 个单词",
-        "pages-count": "{{num}} 页"
-    },
-    "user-stats": {
-        "library-read-progress-title": "资料库阅读进度",
-        "read-percentage": "% 已阅读"
-    },
-    "top-readers": {
-        "title": "热门读者",
-        "time-selection-label": "时间范围",
-        "comics-label": "漫画：{{value}} 小时",
-        "manga-label": "漫画(日漫)：{{value}} 小时",
-        "books-label": "书籍：{{value}} 小时",
-        "this-week": "{{time-periods.this-week}}",
-        "last-7-days": "{{time-periods.last-7-days}}",
-        "last-30-days": "{{time-periods.last-30-days}}",
-        "last-90-days": "{{time-periods.last-90-days}}",
-        "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
         "title": "{{common.roles}}",
@@ -645,34 +604,21 @@
         "annotate": "注释"
     },
     "book-reader": {
-        "title": "书籍设置",
         "page-label": "页",
-        "pagination-header": "节",
         "go-to-page": "转到页面",
-        "go-to-last-page": "转到最后一页",
-        "prev-page": "上一页",
-        "next-page": "下一页",
-        "prev-chapter": "上一章/卷",
-        "next-chapter": "下一章/卷",
         "skip-header": "跳转至主要内容",
-        "virtual-pages": "虚拟页面",
-        "settings-header": "设置",
-        "table-of-contents-header": "目录",
-        "bookmarks-header": "{{side-nav.bookmarks}}",
-        "toc-header": "目录",
         "loading-book": "正在加载书籍…",
         "go-back": "返回",
-        "close-reader": "关闭阅读器",
         "incognito-mode-alt": "隐身模式已开启，点击关闭。",
         "incognito-mode-label": "隐身模式",
         "next": "下一个",
         "previous": "上一个",
         "go-to-page-prompt": "共有 {{totalPages}} 页。您想转到哪一页？页面从 1 开始。",
-        "go-to-first-page": "转到第一页",
         "page-num-label": "第 {{page}} 页",
         "completion-label": "{{percent}} 完成",
         "force-selected-one-column": "由于空间不足以呈现两列，布局模式切换为单列",
-        "forced-vertical-switch": "布局模式切换为双列布局，不支持垂直书写样式"
+        "forced-vertical-switch": "布局模式切换为双列布局，不支持垂直书写样式",
+        "close-reader-alt": "关闭阅读器"
     },
     "personal-table-of-contents": {
         "no-data": "尚未添加书签",
@@ -780,7 +726,8 @@
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
         "annotations-tab": "{{tabs.annotations-tab}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "read-count-tooltip": "总阅读量"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -908,7 +855,11 @@
         "enable-metadata-tooltip": "允许 Kavita 读取覆盖文件名解析的元数据文件。",
         "remove-prefix-for-sortname-label": "删除排序名称的常见前缀",
         "remove-prefix-for-sortname-tooltip": "Kavita 将从排序名称的标题中删除常见前缀，例如“The”、“A”、“An”。不会覆盖已设置的元数据。",
-        "files-at-root-warning": "一个或多个文件夹的根目录下包含文件。Kavita 不支持这种情况。"
+        "files-at-root-warning": "一个或多个文件夹的根目录下包含文件。Kavita 不支持这种情况。",
+        "inherit-web-links-label": "继承第一章的网络链接",
+        "inherit-web-links-tooltip": "系列是否应继承第一章的网络链接",
+        "default-language-label": "默认语言",
+        "default-language-tooltip": "如果所有章节的元数据中均未设置语言，则指定系列的语言"
     },
     "file-type-group-pipe": {
         "archive": "档案",
@@ -982,7 +933,6 @@
     },
     "card-detail-layout": {
         "total-items": "总共{{count}}个条目",
-        "jumpkey-count": "{{count}} 系列",
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
@@ -1160,7 +1110,9 @@
         "media-issue-title": "媒体问题",
         "scrobble-issue-title": "Scrobble 问题",
         "cover-image-size-label": "封面图片尺寸",
-        "cover-image-size-tooltip": "封面图片的生成尺寸。注意：任何大于默认尺寸的图片都将增加页面加载时间。"
+        "cover-image-size-tooltip": "封面图片的生成尺寸。注意：任何大于默认尺寸的图片都将增加页面加载时间。",
+        "pdf-render-resolution-label": "PDF 渲染分辨率",
+        "pdf-render-resolution-tooltip": "PDF 文件的渲染分辨率。分辨率越高，渲染所需的时间就越长，且占用的内存也越多。如果您在渲染 PDF 时遇到问题，请尝试调低此参数。"
     },
     "cover-image-size": {
         "default": "默认（320x455）",
@@ -1390,9 +1342,8 @@
         "admin-kavitaplus": "许可证",
         "account": "账户",
         "preferences": "首选项",
-        "clients": "API 密钥 / OPDS",
+        "clients": "身份验证密钥 / OPDS",
         "devices": "设备",
-        "user-stats": "状态",
         "scrobbling": "Scrobbling",
         "theme": "主题",
         "customize": "自定义",
@@ -1407,13 +1358,16 @@
         "admin-mappings-import": "元数据设置",
         "admin-public-metadata": "管理元数据",
         "admin-oidc": "OpenID 连接",
-        "font": "Epub 字体"
+        "font": "Epub 字体",
+        "custom-key-binds": "按键绑定",
+        "insights-section-title": "洞察",
+        "admin-activity": "活动",
+        "admin-device": "设备"
     },
     "collection-detail": {
         "no-data": "暂无项目。请尝试添加一个系列。",
         "no-data-filtered": "没有项目与当前筛选器匹配。",
         "title-alt": "Kavita - {{collectionName}} 收藏",
-        "series-header": "系列",
         "sync-progress": "系列收藏：{{title}}",
         "last-sync": "上次同步：{{date}}",
         "item-count": "{{common.item-count}}"
@@ -1478,7 +1432,8 @@
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "writers-title": "{{metadata-fields.writers-title}}",
         "storyline-tab": "{{series-detail.storyline-tab}}",
-        "dnd-warning": "在移动设备上或阅读列表超过 100 个项目时，无法进行拖放操作。"
+        "dnd-warning": "在移动设备上或阅读列表超过 100 个项目时，无法进行拖放操作。",
+        "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
         "title-alt": "活动",
@@ -1490,7 +1445,7 @@
         "users-online-count": "{{num}}用户在线",
         "active-events-title": "活动事件：",
         "no-data": "无运行",
-        "left-to-process": "待处理：{{leftToProcess}}",
+        "left-to-process": "待处理进度： {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} 队列中的下载"
     },
     "shortcuts-modal": {
@@ -1502,7 +1457,8 @@
         "bookmark": "为当前页面添加书签",
         "double-click": "双击",
         "close-reader": "关闭阅读器",
-        "toggle-menu": "切换菜单"
+        "toggle-menu": "切换菜单",
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
     "grouped-typeahead": {
         "files": "文件",
@@ -1536,7 +1492,8 @@
         "person-aka-status": "匹配别名",
         "browse-genres": "浏览类型",
         "browse-tags": "浏览标签",
-        "all-annotations": "浏览注释"
+        "all-annotations": "浏览注释",
+        "my-profile": "我的配置文件"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1573,9 +1530,6 @@
         "promote-label": "推广",
         "promote-tooltip": "推广意味着该收藏可以在整个服务器范围内看到，而不仅仅是您自己。此收藏中的所有系列仍将受到用户访问限制。"
     },
-    "browse-themes-modal": {
-        "title": "浏览主题"
-    },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
         "title": "MAL Interest Stack 导入",
@@ -1584,15 +1538,6 @@
         "restack-count": "{{num}} Restacks",
         "nothing-found": "没有任何结果",
         "track": "追踪"
-    },
-    "edit-chapter-progress": {
-        "user-header": "用户",
-        "page-read-header": "阅读页数",
-        "date-created-header": "创建 (UTC)",
-        "date-updated-header": "最后更新时间 (UTC)",
-        "action-header": "{{common.edit}}",
-        "edit-alt": "{{common.edit}}",
-        "no-data": "{{user-scrobble-history.no-data}}"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
@@ -1688,7 +1633,8 @@
         "loading": "{{reader-settings.loading}}",
         "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
         "reading-profile-updated": "阅读配置文件已更新",
-        "update-parent": "{{reader-settings.update-parent}}"
+        "update-parent": "{{reader-settings.update-parent}}",
+        "page-offset-label": "页面偏移"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1754,7 +1700,8 @@
         "person-name": "名称",
         "annotation-owner": "所有者",
         "annotation-series": "系列名称",
-        "annotation-color": "颜色"
+        "annotation-color": "颜色",
+        "user-rating": "我的评分"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 详细信息",
@@ -1818,17 +1765,15 @@
         "last-modified-title": "上次修改时间",
         "view-files": "查看文件",
         "pages-title": "{{edit-chapter-modal.pages-label}}",
-        "words-title": "字",
         "chapter-title": "章节",
         "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "系列内所有ComicInfo信息中的最高计数",
         "max-issue-tooltip": "从系列中的所有ComicInfo中获取最大话数或卷数字段",
-        "force-refresh": "强制刷新",
-        "force-refresh-tooltip": "从 Kavita+ 强制刷新外部元数据",
         "loose-leaf-volume": "活页章节",
         "specials-volume": "特刊",
         "release-year-validation": "{{validation.year-validation}}",
-        "volumes-title": "{{tab.volumes-tab}}"
+        "volumes-title": "{{tab.volumes-tab}}",
+        "no-data": "{{common.no-data}}"
     },
     "edit-chapter-modal": {
         "title": "编辑",
@@ -1836,7 +1781,6 @@
         "save": "{{common.save}}",
         "title-label": "标题",
         "sort-order-label": "排序",
-        "sort-order-tooltip": "本章在卷内的阅读顺序",
         "isbn-label": "ISBN",
         "release-date-label": "发行",
         "summary-label": "{{edit-series-modal.summary-label}}",
@@ -1865,14 +1809,13 @@
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "tags-tab": "{{tabs.tags-tab}}",
         "pages-label": "页数",
         "words-label": "长度",
-        "pages-count": "{{num}} 页",
-        "words-count": "{{num}} 字",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
         "reading-time-label": "阅读时间",
         "date-added-label": "添加日期",
         "size-label": "{{edit-series-modal.size-title}}",
@@ -1887,7 +1830,6 @@
         "title": "编辑",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "progress-tab": "{{tabs.progress-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1895,30 +1837,15 @@
         "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
-        "reading-time-label": "{{edit-chapter-modal.reading-time-label}}",
         "date-added-label": "{{edit-chapter-modal.date-added-label}}",
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
-        "links-label": "{{series-metadata-detail.links-label}}",
-        "last-read-label": "{{edit-chapter-modal.last-read-label}}",
-        "range-hours": "{{value}} {{hourWord}}",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}"
     },
     "day-breakdown": {
         "title": "每日统计分析",
-        "no-data": "没有进度，继续阅读",
-        "x-axis-label": "按天进行类型统计",
-        "y-axis-label": "阅读事件"
-    },
-    "kavitaplus-metadata-breakdown-stats": {
-        "title": "Kavita+ 元数据分析",
-        "description": "Kavita 会随着时间的推移，缓慢的获取符合条件的系列元数据（评分、评论、推荐等）。",
-        "no-data": "{{common.no-data}}",
-        "errored-series-label": "错误系列",
-        "completed-series-label": "已完成系列",
-        "complete": "所有系列都有元数据"
+        "no-data": "没有进度，继续阅读"
     },
     "file-breakdown-stats": {
         "format-title": "格式",
@@ -1947,7 +1874,8 @@
         "last-30-days": "{{time-periods.last-30-days}}",
         "last-90-days": "{{time-periods.last-90-days}}",
         "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
+        "all-time": "{{time-periods.all-time}}",
+        "select-user-alt": "选择要筛选的用户"
     },
     "manga-format-stats": {
         "title": "格式",
@@ -1995,11 +1923,9 @@
         "total-read-time-tooltip": "总阅读时长: {{count}}",
         "series": "系列",
         "reads": "次阅读",
-        "release-years-title": "发行年份计数",
         "most-active-users-title": "活跃用户排行榜",
         "popular-libraries-title": "热门资料库",
         "popular-series-title": "热门系列",
-        "recently-read-title": "最近阅读",
         "series-count": "{{num}} 系列",
         "volume-count": "{{num}} 卷",
         "file-count": "{{num}} 文件",
@@ -2008,7 +1934,15 @@
         "people-count": "{{num}} 人",
         "tags": "{{metadata-fields.tags-title}}",
         "people": "创作人员",
-        "genres": "{{metadata-fields.genres-title}}"
+        "genres": "{{metadata-fields.genres-title}}",
+        "stats-title": "探索",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "management-tab": "{{tabs.management-tab}}",
+        "popular-decades-title": "热门年代",
+        "popular-genres-title": "热门类型",
+        "popular-tags-title": "热门标签",
+        "popular-artists-title": "热门作者",
+        "popular-authors-title": "热门作者"
     },
     "errors": {
         "series-doesnt-exist": "该系列已不存在",
@@ -2046,7 +1980,8 @@
         "delete-font-in-use": "字体目前至少有一位用户正在使用，无法删除",
         "font-manual-upload": "手动上传创建字体时出现问题",
         "font-already-in-use": "该名称的字体已经存在",
-        "upload-too-large": "文件太大，无法上传，请选择较小的图像并重试。"
+        "upload-too-large": "文件太大，无法上传，请选择较小的图像并重试。",
+        "invalid-form": "您尝试提交的表单包含错误"
     },
     "metadata-builder": {
         "or": "匹配以下任意项",
@@ -2055,21 +1990,15 @@
         "remove-rule": "移除行"
     },
     "customize-dashboard-modal": {
-        "title-dashboard": "定制仪表盘",
-        "title-sidenav": "定制侧边栏",
-        "title-external-sources": "外部源",
         "title-smart-filters": "智筛选",
-        "close": "{{common.close}}",
         "dashboard": "仪表盘",
         "sidenav": "侧边栏",
         "external-sources": "外部源",
         "smart-filters": "智能筛选",
-        "help": "{{common.help}}",
         "description": "您可以通过重新排序、切换可见性以及将智能筛选器/外部源绑定到主页或侧边导航来定制 Kavita 的不同方面。"
     },
     "customize-dashboard-streams": {
         "no-data": "所有智能筛选已加入仪表板或尚未创建。",
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -2078,7 +2007,6 @@
     "customize-sidenav-streams": {
         "no-data": "所有智能筛选已加入侧边栏或尚未创建。",
         "no-data-external-source": "所有外部源已加入侧边栏或尚未创建。",
-        "save": "{{common.save}}",
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
@@ -2312,8 +2240,8 @@
         "scrobble-gen-init": "将一项任务加入队列，该任务将根据过去的阅读历史和评分生成 scrobble 事件，并将其与已连接的服务同步。",
         "confirm-delete-multiple-volumes": "您确定要删除这 {{count}} 个卷吗？这不会修改磁盘上的文件。",
         "series-added-want-to-read": "从“想读”列表中添加的系列",
-        "series-bound-to-reading-profile": "系列绑定到阅读配置文件 {{name}}",
-        "library-bound-to-reading-profile": "资料库绑定到阅读配置文件 {{name}}",
+        "series-bound-to-reading-profile": "该系列已绑定至 {{amount}} 个阅读配置文件",
+        "library-bound-to-reading-profile": "该资料库已绑定至 {{amount}} 个阅读档案",
         "external-match-rate-error": "Kavita 查找 {{seriesName}} 的速度已超出范围。请过 5 分钟再试。",
         "confirm-delete-bookmark": "您确定要删除此书签吗？",
         "confirm-delete-annotation": "您确定要删除此注释吗？",
@@ -2321,7 +2249,8 @@
         "confirm-force-delete-font": "此字体目前正在使用中。是否要强制删除它？这将强制用户恢复使用默认字体。",
         "font-in-use": "无法删除，因为该字体正在被一个或多个用户使用。",
         "k+-resend-welcome-email-success": "一封电子邮件已发送至您的 Kavita+ 电子邮箱",
-        "k+-resend-welcome-email-error": "发送您的 Kavita+ 许可证时出错。这可能是由于您的帐户已失效。请联系客服。"
+        "k+-resend-welcome-email-error": "发送您的 Kavita+ 许可证时出错。这可能是由于您的帐户已失效。请联系客服。",
+        "confirm-delete-auth-key": "您确定要删除此授权密钥吗？"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -2408,7 +2337,8 @@
         "clear-reading-profile-tooltip": "清除此资料库的阅读配置文件",
         "export": "导出",
         "like": "点赞",
-        "unlike": "移除点赞"
+        "unlike": "移除点赞",
+        "edit-device-name": "编辑名称"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -2450,7 +2380,8 @@
         "password-validation": "密码长度必须介于 6 到 256 个字符之间",
         "year-validation": "必须为大于 1000 且长度为 4 个字符的有效年份",
         "other-field-required": "设置 {{other}} 时，需要 {{name}}",
-        "invalid-uri": "提供的 uri 无效"
+        "invalid-uri": "提供的 uri 无效",
+        "other-field-invalid": "无法检查有效性，{{other}} 无效"
     },
     "entity-type": {
         "volume": "卷",
@@ -2487,7 +2418,9 @@
         "stats-tab": "状态",
         "scrobbling-tab": "Scrobbling",
         "smart-filters-tab": "智能筛选",
-        "annotations-tab": "注释"
+        "annotations-tab": "注释",
+        "overview-tab": "概述",
+        "management-tab": "管理"
     },
     "common": {
         "reset-to-default": "重置为默认值",
@@ -2528,13 +2461,14 @@
         "issue-nums": "期",
         "chapter-nums": "章节",
         "volume-nums": "卷",
-        "author-count": "{{num}} 作者",
         "chapter-count": "{{num}} 章",
         "no-data": "无数据",
         "issue-count": "{{num}} 期",
         "unknown": "未知",
         "roles": "角色",
-        "libraries": "资料库"
+        "libraries": "资料库",
+        "confirm": "确认",
+        "selected": "已选"
     },
     "confirm": {
         "confirm": "确认",
@@ -2552,9 +2486,7 @@
         "title": "{{personName}} 详细信息",
         "general-tab": "{{edit-series-modal.general-tab}}",
         "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
-        "loading": "{{common.loading}}",
         "name-label": "{{edit-series-modal.name-label}}",
-        "role-label": "角色",
         "hardcover-id-label": "Hardcover Id",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "asin-label": "ASIN",
@@ -2570,7 +2502,9 @@
         "aliases-tab": "别名",
         "aliases-label": "编辑别名",
         "alias-overlap": "此别名已经指向另一个人或为该人的名字，请考虑合并它们。",
-        "invalid-asin": "ASIN 必须是有效的 ISBN-10 或 ISBN-13 格式"
+        "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
+        "invalid-amazon-code": "ASIN 应以 B0 或 BT 开头"
     },
     "person-detail": {
         "all-roles": "{{common.roles}}",
@@ -2769,7 +2703,7 @@
         "critical": "严重"
     },
     "reviews": {
-        "user-reviews-plus": "外部评审",
+        "user-reviews-plus": "外部评论",
         "user-reviews-local": "本地评论"
     },
     "review-modal": {
@@ -2791,7 +2725,7 @@
         "save": "{{common.save}}"
     },
     "manage-reading-profiles": {
-        "description": "并非所有系列都以相同的方式阅读，请为每个资料库或系列设置不同的阅读配置文件，以尽可能无缝地回到您的系列中。",
+        "description": "并非所有系列都适合同一种阅读方式。您可以针对每个媒体库、系列或设备设置独立的阅读档案，让您随时随地都能无缝衔接阅读进度。",
         "tap-to-paginate-tooltip": "电子书阅读器屏幕的侧面是否允许点击以移动到上一页/下一页",
         "immersive-mode-tooltip": "这将隐藏阅读器文档上的菜单，并点击翻页",
         "add": "{{common.add}}",
@@ -2862,7 +2796,9 @@
         "disable-width-override-label": "禁用宽度覆盖",
         "disable-width-override-tooltip": "当屏幕尺寸至少等于或小于配置的断点时，防止宽度覆盖生效",
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
-        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}"
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
+        "set-devices": "设置设备",
+        "select-devices-for": "为 {{name}} 设置设备"
     },
     "bulk-set-reading-profile-modal": {
         "title": "设置阅读配置文件",
@@ -2870,9 +2806,10 @@
         "clear": "{{common.clear}}",
         "no-data": "尚未创建收藏",
         "loading": "{{common.loading}}",
-        "create": "{{common.create}}",
-        "bound": "边界",
-        "close": "{{common.close}}"
+        "bound": "绑定",
+        "close": "{{common.close}}",
+        "warning-duplicate": "所选设备存在重叠，请修改后再试",
+        "hidden": "{{amount}} 个配置文件状态异常，已隐藏"
     },
     "browse-people": {
         "issue-count": "{{common.issue-count}}",
@@ -2933,7 +2870,9 @@
         "annotation-highlights": "高亮颜色",
         "annotation-comment": "注释文本",
         "annotation-selection": "高亮文本",
-        "series": "{{tabs.series-tab}}"
+        "series": "{{tabs.series-tab}}",
+        "annotation-likes": "点赞",
+        "annotation-liked-by": "点赞"
     },
     "breakpoint-pipe": {
         "mobile": "手机",
@@ -3025,7 +2964,13 @@
         "custom-scopes-tooltip": "登录期间向 OIDC 提供商请求的附加范围。多个范围请用逗号分隔。值不正确可能会导致登录失败。",
         "default-roles-label": "{{common.roles}}",
         "default-libraries-label": "{{common.libraries}}",
-        "tls-required": "OIDC 提供商必须使用 tls (https)"
+        "tls-required": "OIDC 提供商必须使用 tls (https)",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "reset-label": "重置 ID",
+        "reset-tooltip": "重置所有用户的外部 ID,用于重置 Kavita 用户与身份提供商之间的关联链接",
+        "reset-confirm": "确定要重置所有用户的外部 ID 吗？",
+        "reset-success": "已重置所有用户的外部 ID，请重新认证以进行关联",
+        "auto-save-required": "关键设置已更改，系统将通过自动保存进行持久化"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -3038,9 +2983,6 @@
         "location-tooltip": "{{library}} - {{series}}",
         "liked": "包括您在内的 {{amount}} 人点赞",
         "not-liked": "有 {{amount}} 人点赞，但您没有点赞"
-    },
-    "annotations-tab": {
-        "title": "{{tabs.annotations-tab}}"
     },
     "view-annotations-drawer": {
         "title": "{{tabs.annotations-tab}}",
@@ -3115,21 +3057,381 @@
         "brown-fox": "The quick brown fox jumps over the lazy dog",
         "filter-system-fonts-label": "筛选系统字体"
     },
-    "epub-page-calc-method-pipe": {
-        "default": "默认",
-        "calc1": "计算 1"
-    },
     "all-annotations": {
         "title": "全部注释",
-        "filter": {
-            "true": "True",
-            "false": "False"
-        },
         "annotations-count": "{{num}} 注释",
         "export": "导出"
     },
     "multi-check-box-form": {
         "select-all": "全选",
-        "deselect-all": "取消全选"
+        "deselect-all": "取消全选",
+        "no-data": "{{typeahead.no-data}}"
+    },
+    "manage-custom-key-binds": {
+        "description": "有时候点击并拖动鼠标太慢了。使用您喜欢的快捷键可以加快速度。每个选项最多可设置 {{max}} 个不同的快捷键。<b>长按快捷键即可将其移除。</b>",
+        "key-bind-error-reserved-key-bind": "此快捷键已被保留，无法使用",
+        "key-bind-error-need-at-least-one-key": "您的快捷键绑定必须至少包含一个按键",
+        "key-bind-error-overlap-in-target": "一个或多个快捷键相同",
+        "add": "添加备用快捷键",
+        "reset": "重置 {{target}}",
+        "errors-array": "{{target}} 的快捷键绑定存在错误",
+        "errors-control": "快捷键 {{index}} 针对 {{target}} 存在错误",
+        "warning-duplicated-control": "{{target}} 快捷键 {{index}} 也被用于另一个目标",
+        "warning-duplicate-key-bind": "这个快捷键也曾在其他地方使用过",
+        "key-bind-tooltip": "长按快捷键即可移除该快捷键。",
+        "global-header": "全局",
+        "readers-header": "读者"
+    },
+    "keybind-setting-description-pipe": {
+        "key-bind-title-navigate-to-settings": "打开设置",
+        "key-bind-tooltip-navigate-to-settings": "在未打开阅读器的情况下打开设置",
+        "key-bind-title-open-search": "打开搜索",
+        "key-bind-tooltip-open-search": "打开顶部搜索栏",
+        "key-bind-title-navigate-to-scrobbling": "打开 Scrobbling",
+        "key-bind-tooltip-navigate-to-scrobbling": "打开 Scrobbling 选项卡上的设置页面",
+        "key-bind-tooltip-escape": "关闭当前打开的上下文",
+        "key-bind-title-escape": "退出",
+        "key-bind-title-toggle-fullscreen": "切换全屏",
+        "key-bind-tooltip-toggle-fullscreen": "F11 的替代方案",
+        "key-bind-title-bookmark-page": "将当前页面添加到书签",
+        "key-bind-tooltip-bookmark-page": "将当前图像保存为书签",
+        "key-bind-title-open-help": "打开帮助菜单",
+        "key-bind-tooltip-open-help": "打开一个包含所有相关快捷键的帮助对话框",
+        "key-bind-title-go-to": "转到页面",
+        "key-bind-tooltip-go-to": "打开切换页面的提示",
+        "key-bind-title-toggle-menu": "切换菜单",
+        "key-bind-tooltip-toggle-menu": "切换到读者菜单",
+        "key-bind-title-page-left": "左页",
+        "key-bind-tooltip-page-left": "向左翻一页",
+        "key-bind-title-page-right": "右页",
+        "key-bind-tooltip-page-right": "向右翻一页",
+        "key-bind-title-page-up": "上一页",
+        "key-bind-tooltip-page-up": "向上移一页",
+        "key-bind-title-page-down": "下一页",
+        "key-bind-tooltip-page-down": "向下移一页",
+        "key-bind-title-offset-double-page": "双页偏移",
+        "key-bind-tooltip-offset-double-page": "偏移页面以对齐双页跨页"
+    },
+    "manage-auth-keys": {
+        "auth-keys-title": "管理授权密钥",
+        "name-label": "名称",
+        "key-label": "密钥",
+        "expires-label": "到期",
+        "last-accessed-label": "最后访问时间",
+        "actions-label": "活动",
+        "rotate": "轮换",
+        "delete": "{{common.delete}}",
+        "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
+        "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
+        "clients-opds-description": "{{user-preferences.clients-opds-description}}",
+        "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
+        "opds": "OPDS",
+        "image-only": "图片",
+        "add-auth-key": "新的",
+        "description": "授权密钥就像密码一样。轮换密钥会使所有现有客户端失效。",
+        "copy-key": "{{common.copy}}"
+    },
+    "create-auth-key": {
+        "rotate-title": "轮换授权密钥",
+        "create-title": "创建授权密钥",
+        "name-label": "名称",
+        "key-length-label": "密钥长度",
+        "expiration-label": "到期",
+        "required-field": "{{validations.required-field}}",
+        "total-key-length": "总密钥长度：{{length}}",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "never": "从不"
+    },
+    "review-list-item": {
+        "by-label": "By",
+        "created-alt": "创建"
+    },
+    "profile-review-list": {
+        "no-data": "没有评论或评论未被分享",
+        "filter-label": "按系列筛选",
+        "rating-alt": "按评分筛选",
+        "clear-rating-alt": "清除评分筛选"
+    },
+    "reread-modal": {
+        "title": "重新阅读",
+        "description-full-read": "你已经完成了 {{name}}! 要重新开始吗？",
+        "description-time-passed": "距离您上次阅读 {{name}} 已经过去了 {{days}} 天，需要回顾一下吗？",
+        "continue": "继续你上次中断的地方",
+        "reread": "重新开始",
+        "cancel": "{{common.cancel}}",
+        "read-incognito": "隐身阅读"
+    },
+    "server-devices": {
+        "client-devices-header": "{{manage-devices.client-devices-header}}",
+        "client-devices-this-month-header": "本月客户端设备",
+        "client-devices-mobile-vs-pc-header": "本月移动端设备对比PC端设备",
+        "no-data": "{{common.no-data}}"
+    },
+    "client-device-card": {
+        "auth-type-label": "身份验证类型",
+        "browser-label": "浏览器",
+        "platform-label": "{{manage-devices.platform-label}}",
+        "screen-label": "屏幕",
+        "version-label": "应用版本",
+        "first-seen-label": "首次出现",
+        "last-seen-label": "最后出现",
+        "active": "活动",
+        "save": "{{common.save}}",
+        "local": "本地"
+    },
+    "duration-pipe": {
+        "seconds": "{{num}} 秒",
+        "minutes": "{{num}} 分钟",
+        "hours": "{{num}} 小时",
+        "combo": "{{hour}}h {{min}}m"
+    },
+    "reading-progress-status-pipe": {
+        "no-progress": "阅读",
+        "no-progress-incognito": "隐身阅读",
+        "progress": "继续",
+        "progress-incognito": "以隐身模式继续",
+        "full-read": "重新阅读",
+        "full-read-incognito": "以隐身模式重新阅读"
+    },
+    "client-device-auth-type-pipe": {
+        "unknown": "未知",
+        "oidc": "OIDC",
+        "jwt": "JWT",
+        "auth-key": "授权密钥"
+    },
+    "client-device-platform-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}"
+    },
+    "client-device-client-type-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}",
+        "web-browser": "网络浏览器",
+        "web-app": "网络应用程序",
+        "koreader": "KOReader",
+        "panels": "Panels",
+        "librera": "Librera",
+        "opds-client": "OPDS 客户端"
+    },
+    "server-activity": {
+        "no-data": "这里没什么好看的"
+    },
+    "activity-card": {
+        "started-label": "开始",
+        "view-label": "视图",
+        "total-pages-label": "总页数",
+        "total-words-label": "总字数",
+        "total-chapters-label": "章"
+    },
+    "profile": {
+        "title": "{{username}}'的配置文件",
+        "joined-label": "注册时间:",
+        "stats-title": "一起来看看 {{username}}'在 {{libraryName}} 的学习历程",
+        "overview-tab": "{{tabs.overview-tab}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "reviews-tab": "{{tabs.reviews-tab}}",
+        "no-reviews": "暂无评论",
+        "user-possessive": "{{name}}'s",
+        "total-reads-badge": "{{reads}} 阅读",
+        "k+-badge": "K+ Subscriber",
+        "last-read-label": "最近阅读:",
+        "time-reading-label": "累计阅读时长:",
+        "avg-reading-per-week-label": "周均时长:"
+    },
+    "profile-stat-bar": {
+        "books-read-label": "阅读书籍",
+        "books-read-tooltip": "阅读书籍：{{count}}",
+        "comics-read-label": "阅读漫画",
+        "comics-read-tooltip": "阅读漫画：{{count}}",
+        "pages-read-label": "阅读页数",
+        "pages-read-tooltip": "阅读页数：{{count}}",
+        "words-read-label": "阅读字数",
+        "words-read-tooltip": "阅读字数：{{count}}",
+        "authors-read-label": "阅读作者",
+        "authors-read-tooltip": "阅读作者：{{count}}",
+        "reviews-label": "评论",
+        "reviews-tooltip": "评论：{{count}}",
+        "ratings-label": "评分",
+        "ratings-tooltip": "评分：{{count}}"
+    },
+    "profile-image": {
+        "edit-image-alt": "编辑图片",
+        "reset-image-alt": "重置图片"
+    },
+    "preferred-format": {
+        "title": "首选格式",
+        "sub-title": "{{name}} 首选阅读 {{format}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "favorite-authors": {
+        "title": "最受欢迎的作者",
+        "sub-title": "{{name}} 中阅读量最高的作者是 {{author}}，总阅读量为 {{count}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "page-spread": {
+        "title": "按页数排列的章节",
+        "sub-title": "{{username}} 阅读最多的章节在 {{highestBucket}} 页之间",
+        "data-type": "{{data}} 章节",
+        "data-of": "你的章节占比 {{percentage}}%",
+        "range": "页码范围：{{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "word-spread": {
+        "title": "按字数统计的章节",
+        "sub-title": "{{username}} 阅读最多的章节字数在 {{highestBucket}} 字之间",
+        "data-type": "{{data}} 章节",
+        "data-of": "你的章节占比 {{percentage}}%",
+        "range": "字数范围: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "tag-breakdown": {
+        "title": "阅读最多的标签",
+        "sub-title": "{{name}} 最常阅读的标签是 {{mostUsed}}",
+        "missing": "{{amount}} 系列缺少标签",
+        "no-data": "{{common.no-data}}"
+    },
+    "genre-breakdown": {
+        "title": "最受欢迎的阅读类型",
+        "sub-title": "{{name}} 最常阅读的类型是 {{mostUsed}}",
+        "missing": "{{amount}} 系列缺少类型",
+        "no-data": "{{common.no-data}}"
+    },
+    "reads-by-month": {
+        "title": "按月阅读总量",
+        "sub-title": "{{username}} 在 {{month}} {{year}} 期间阅读量最多，共阅读了 {{reads}} 章",
+        "no-data": "{{common.no-data}}"
+    },
+    "avg-time-reading-by-hour": {
+        "title": "平均每小时阅读时间",
+        "most-time-spend-reading": "{{name}} 大部分时间都在 {{startHour}} 到 {{endHour}} 之间阅读，平均阅读时间为 {{amount}} 分钟",
+        "data-since": "仅包含自 {{date}} 以来的阅读量",
+        "no-data": "{{common.no-data}}"
+    },
+    "profile-overview": {
+        "currently-reading": "正在阅读",
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "just-finished-reading": "刚刚读完"
+    },
+    "activity-graph": {
+        "title": "阅读活动",
+        "day-of-week-alt": "星期几",
+        "less": "较少",
+        "more": "更多",
+        "reading-time": "阅读时间",
+        "pages": "页数",
+        "words": "字数",
+        "chapters": "章节",
+        "no-activity-tooltip": "{{date}} 当天没有阅读活动。",
+        "no-activity-alt": "无活动",
+        "all-time": "{{time-periods.all-time}}",
+        "low-activity-alt": "活跃度较低",
+        "moderate-activity-alt": "活跃度中等",
+        "good-activity-alt": "活跃度良好",
+        "high-activity-alt": "活跃度高"
+    },
+    "reading-pace": {
+        "hours-read": "阅读时长",
+        "pages-read": "阅读页数",
+        "words-read": "阅读字数",
+        "comics-read": "阅读漫画",
+        "books-read": "阅读书籍",
+        "per-year": "每年",
+        "per-month": "每月",
+        "per-day": "每日",
+        "no-data": "{{common.no-data}}",
+        "title-books": "阅读速度: 书籍",
+        "title-comics": "阅读速度: 漫画",
+        "sub-title-books": "{{username}} 平均每 {{count}} 天读完一本书",
+        "sub-title-comics": "{{username}} 平均每 {{count}} 天读完一本漫画",
+        "disclaimer-books": "适用于 Epub/Pdfs",
+        "disclaimer-comics": "适用于图像/存档文件"
+    },
+    "smart-time-picker": {
+        "forever": "永远",
+        "select-year": "选择年份",
+        "custom-range": "自定义范围",
+        "during-year": "期间 {{year}}",
+        "during-from-to": "从 {{startYear}} 到 {{endYear}}",
+        "during-select": "选择时间范围",
+        "during-entire-life-profile": "自注册以来",
+        "during-entire-life-server": "全部时间"
+    },
+    "client-device-type-pipe": {
+        "mobile": "手机",
+        "tablet": "平板",
+        "desktop": "桌面",
+        "Unknown": "{{common.unknown}}"
+    },
+    "month-label-pipe": {
+        "january": "一月",
+        "january-short": "一月",
+        "february": "二月",
+        "february-short": "二月",
+        "march": "三月",
+        "march-short": "三月",
+        "april": "四月",
+        "april-short": "四月",
+        "may": "五月",
+        "may-short": "五月",
+        "june": "六月",
+        "june-short": "六月",
+        "july": "七月",
+        "july-short": "七月",
+        "august": "八月",
+        "august-short": "八月",
+        "september": "九月",
+        "september-short": "九月",
+        "october": "十月",
+        "october-short": "十月",
+        "november": "十一月",
+        "november-short": "十一月",
+        "december": "十二月",
+        "december-short": "十二月"
+    },
+    "day-label-pipe": {
+        "sunday": "星期日",
+        "sunday-short": "星期日",
+        "monday": "星期一",
+        "monday-short": "星期一",
+        "tuesday": "星期二",
+        "tuesday-short": "星期二",
+        "wednesday": "星期三",
+        "wednesday-short": "星期三",
+        "thursday": "星期四",
+        "thursday-short": "星期四",
+        "friday": "星期五",
+        "friday-short": "星期五",
+        "saturday": "星期六",
+        "saturday-short": "星期六"
+    },
+    "ordinal-date-pipe": {
+        "ordinalFormat": "{{month}} {{day}}",
+        "ordinal": {
+            "st": "st",
+            "nd": "nd",
+            "rd": "rd",
+            "th": "th"
+        }
+    },
+    "most-active-users": {
+        "title": "最活跃读者",
+        "no-data": "暂无阅读数据"
+    },
+    "active-user-card": {
+        "total-hours": "{{duration}} 总计",
+        "comics-count": "{{count}} 漫画",
+        "books-count": "{{count}} 书籍"
+    },
+    "files-over-time": {
+        "title": "文件增长趋势",
+        "no-data": "{{common.no-data}}"
+    },
+    "pdf-render-resolution": {
+        "default": "默认值（1080x1920）",
+        "high": "高清 (1920x2560)",
+        "ultra": "超高清 (2160x3840)"
+    },
+    "list-select-modal": {
+        "hidden": "由于状态无效，已隐藏 {{amount}} 个项目"
     }
 }
