@@ -405,6 +405,7 @@ public class SettingsService : ISettingsService
                 setting.Value = ((int)updateSettingsDto.CoverImageSize).ToString();
                 _unitOfWork.SettingsRepository.Update(setting);
             }
+
             if (setting.Key == ServerSettingKey.PdfRenderResolution &&
                 ((int)updateSettingsDto.PdfRenderResolution).ToString() != setting.Value)
             {

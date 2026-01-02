@@ -205,6 +205,12 @@ public enum ServerSettingKey
     /// <summary>
     /// The resolution to render PDFs as when delivering them as images.
     /// </summary>
-    [Description("pdfRenderResolution")]
+    [Description("PdfRenderResolution")]
     PdfRenderResolution = 41,
+    /// <summary>
+    /// How many times Kavita has pinged the Stats API
+    /// </summary>
+    /// <remarks>After a set amount, the Stats API will stop recording some information, like Average I/O time</remarks>
+    [Description("StatsApiHits")]
+    StatsApiHits = 42
 }

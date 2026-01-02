@@ -422,6 +422,7 @@ public static class Seed
                 new() {Key = ServerSettingKey.EmailCustomizedTemplates, Value = "false"},
                 new() {Key = ServerSettingKey.FirstInstallVersion, Value = BuildInfo.Version.ToString()},
                 new() {Key = ServerSettingKey.FirstInstallDate, Value = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)},
+                new() {Key = ServerSettingKey.StatsApiHits, Value = "0"},
             }.ToArray()
         ];
 

@@ -133,6 +133,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.FirstInstallVersion:
                     destination.FirstInstallVersion = row.Value;
                     break;
+                case ServerSettingKey.StatsApiHits:
+                    destination.StatsApiHits = int.Parse(row.Value);
+                    break;
                 case ServerSettingKey.OidcConfiguration:
                     destination.OidcConfig = JsonSerializer.Deserialize<OidcConfigDto>(row.Value)!;
                     break;

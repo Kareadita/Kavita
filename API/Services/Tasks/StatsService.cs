@@ -111,6 +111,15 @@ public class StatsService : IStatsService
             {
                 _logger.LogError("KavitaStats did not respond successfully. {Content}", response);
             }
+
+            // Increment stats api hits
+            await _context.Database.ExecuteSqlAsync(
+                $"""
+                 UPDATE ServerSetting
+                 SET Value = CAST(CAST(Value AS INTEGER) + 1 AS TEXT)
+                 WHERE Key = {ServerSettingKey.StatsApiHits}
+                 """);
+
         }
         catch (HttpRequestException e)
         {
@@ -402,6 +411,15 @@ public class StatsService : IStatsService
 
     private async Task OpenRandomFile(ServerInfoV3Dto dto)
     {
+        // Skip this if we've sent enough
+        var samplesTaken = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).StatsApiHits;
+        if (samplesTaken > 2)
+        {
+            dto.TimeToOpeCbzMs = null;
+            dto.TimeToOpenCbzPages = null;
+            return;
+        }
+
         var random = new Random();
         List<string> extensions = [".cbz", ".zip"];
 

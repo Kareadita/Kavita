@@ -108,6 +108,10 @@ public sealed record ServerSettingDto
     /// The Version of Kavita on the first run
     /// </summary>
     public string? FirstInstallVersion { get; set; }
+    /// <summary>
+    /// How many times Kavita has hit the Stats API
+    /// </summary>
+    public int StatsApiHits { get; set; }
 
     /// <summary>
     /// Are at least some basics filled in
