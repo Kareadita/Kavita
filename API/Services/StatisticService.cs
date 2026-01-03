@@ -52,7 +52,7 @@ public interface IStatisticService
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
     Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year, int requestingUserId);
-    Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly, int requestingUserID);
+    Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly, int requestingUserId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId, int requestingUserId);
@@ -885,7 +885,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         filter.EndDate = filter.EndDate < DateTime.UtcNow ? filter.EndDate : DateTime.UtcNow;
 
         var activities = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true, onlyCompleted: false)
             .Select(a => new
             {
                 a.PagesRead,
@@ -894,7 +894,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 a.SeriesId,
                 SeriesFormat = a.Series.Format,
                 SessionStart = a.ReadingSession.StartTimeUtc,
-                SessionEnd = a.ReadingSession.EndTimeUtc
+                SessionEnd = a.ReadingSession.EndTimeUtc,
+                Finished = a.EndPage >= a.Chapter.Pages,
             })
             .WhereIf(booksOnly, d => d.SeriesFormat == MangaFormat.Pdf || d.SeriesFormat == MangaFormat.Epub)
             .WhereIf(!booksOnly, d => d.SeriesFormat != MangaFormat.Pdf && d.SeriesFormat != MangaFormat.Epub)
@@ -914,6 +915,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         {
             pagesRead += activity.PagesRead;
             wordsRead += activity.WordsRead;
+
+            if (!activity.Finished) continue;
 
             if (activity.SeriesFormat is MangaFormat.Epub or MangaFormat.Pdf)
                 booksRead.Add(activity.ChapterId);
@@ -1285,13 +1288,14 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
         var chapterData = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true, onlyCompleted: false)
             .Select(d => new
             {
                 d.ChapterId,
                 FormatType = d.Chapter.Files.First().Format,
                 d.PagesRead,
                 d.WordsRead,
+                Finished = d.EndPage >= d.Chapter.Pages
             })
             .ToListAsync();
 
@@ -1314,9 +1318,9 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             {
                 ChapterId = g.Key,
                 g.First().FormatType,
-                // Take max to handle potential duplicates with different values
-                PagesRead = g.Max(x => x.PagesRead),
-                WordsRead = g.Max(x => x.WordsRead)
+                PagesRead = g.Sum(x => x.PagesRead),
+                WordsRead = g.Sum(x => x.WordsRead),
+                Finished = g.Any(x => x.Finished)
             })
             .ToList();
 
@@ -1333,6 +1337,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         {
             pagesRead += ch.PagesRead;
             wordsRead += ch.WordsRead;
+
+            if (!ch.Finished) continue;
 
             switch (ch.FormatType)
             {

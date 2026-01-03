@@ -460,7 +460,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
     private async Task OnMidnightRolloverAsync()
     {
         var endOfYesterday = DateTime.Now.Date.AddTicks(-1); // 23:59:59.9999999
-        var endOfYesterdayUtc = DateTime.UtcNow.Date.AddTicks(-1); // 23:59:59.9999999
+        var endOfYesterdayUtc = TimeZoneInfo.ConvertTimeToUtc(endOfYesterday);
         var sessionsToClose = _activeSessions.ToArray();
 
         if (sessionsToClose.Length > 0)
