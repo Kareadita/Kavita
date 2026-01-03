@@ -23,7 +23,7 @@ import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {FilterField} from "../_models/metadata/v2/filter-field";
 import {ModalService} from "./modal.service";
-import {map, Observable, of, switchMap, tap} from "rxjs";
+import {catchError, map, Observable, of, switchMap, tap} from "rxjs";
 import {ListSelectModalComponent} from "../shared/_components/list-select-modal/list-select-modal.component";
 import {take, takeUntil} from "rxjs/operators";
 import {SeriesService} from "./series.service";
@@ -709,6 +709,7 @@ export class ReaderService {
       takeUntil(modal.dismissed),
       take(1),
       map(res => ({prompt: prompt, result: res as RereadPromptResult})),
+      catchError(() => of({prompt: prompt, result: RereadPromptResult.Cancel}))
     );
   }
 
