@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'manage-library'">
-  <div class="position-relative">
+  <div class="position-relative mb-3">
     <div class="d-flex gap-2 position-absolute custom-position">
       <app-card-actionables [actions]="bulkActions" btnClass="btn-outline-primary" [label]="t('bulk-action-label')"
                             [disabled]="bulkMode" (actionHandler)="handleBulkAction($event, null!)">
@@ -11,94 +11,163 @@
   </div>
 
   @if (bulkMode && bulkAction === Action.CopySettings && sourceCopyToLibrary) {
-   <div class="alert alert-warning">
-     {{t('bulk-copy-to', {libraryName: sourceCopyToLibrary.name})}}
-     <form [formGroup]="bulkForm">
-       <div class="form-check form-switch">
-         <input id="bulk-action-type" type="checkbox" class="form-check-input" formControlName="includeType" aria-describedby="include-type-help" switch>
-         <label class="form-check-label" for="bulk-action-type">{{t('include-type-label')}}</label>
-         <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="left" [ngbTooltip]="includeTypeTooltip" role="button" tabindex="0"></i>
-         <ng-template #includeTypeTooltip>{{t('include-type-tooltip')}}</ng-template>
-         <span class="visually-hidden" id="include-type-help"><ng-container [ngTemplateOutlet]="includeTypeTooltip" /></span>
-       </div>
-     </form>
-
-     <div class="mt-2">
-       <button class="btn btn-secondary" (click)="resetBulkMode()">{{t('cancel')}}</button>
-       <button class="btn btn-primary ms-1" (click)="applyBulkAction()" [disabled]="!hasSomeSelected">{{t('apply')}}</button>
-     </div>
-   </div>
+    <div class="alert alert-warning">
+      {{t('bulk-copy-to', {libraryName: sourceCopyToLibrary.name})}}
+      <form [formGroup]="bulkForm">
+        <div class="form-check form-switch">
+          <input id="bulk-action-type" type="checkbox" class="form-check-input" formControlName="includeType" aria-describedby="include-type-help" switch>
+          <label class="form-check-label" for="bulk-action-type">{{t('include-type-label')}}</label>
+          <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="left" [ngbTooltip]="includeTypeTooltip" role="button" tabindex="0"></i>
+          <ng-template #includeTypeTooltip>{{t('include-type-tooltip')}}</ng-template>
+          <span class="visually-hidden" id="include-type-help"><ng-container [ngTemplateOutlet]="includeTypeTooltip" /></span>
+        </div>
+      </form>
+      <div class="mt-2">
+        <button class="btn btn-secondary" (click)="resetBulkMode()">{{t('cancel')}}</button>
+        <button class="btn btn-primary ms-1" (click)="applyBulkAction()" [disabled]="!hasSomeSelected">{{t('apply')}}</button>
+      </div>
+    </div>
   }
 
-  <table class="table table-striped">
-    <thead>
-    <tr>
-      <th scope="col">
-        <div class="form-check">
-          <input id="select-all" type="checkbox" class="form-check-input"
-                 [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
-          <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-all')}}</label>
-        </div>
-      </th>
-      <th scope="col">{{t('name-header')}}</th>
-      <th scope="col">{{t('type-title')}}</th>
-      <th scope="col">{{t('shared-folders-title')}}</th>
-      <th scope="col">{{t('last-scanned-title')}}</th>
-      <th scope="col">{{t('actions-header')}}</th>
-    </tr>
-    </thead>
-    <tbody>
-      @for(library of libraries; track library.name + library.type + library.folders.length + library.lastScanned; let idx = $index) {
-        <tr>
-          <td>
+  <app-responsive-table [rows]="libraries" [trackByFn]="trackByLibrary">
+    <ng-template #tableTemplate>
+      <ngx-datatable
+        class="bootstrap"
+        [rows]="libraries"
+        [columnMode]="'force'"
+        rowHeight="auto"
+        [headerHeight]="50"
+        [footerHeight]="0"
+      >
+        <ngx-datatable-column [width]="60" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>
             <div class="form-check">
-              <input id="select-library-{{idx}}" type="checkbox" class="form-check-input"
-                     [ngModel]="selections.isSelected(library)" (change)="handleSelection(library, idx)">
-              <label for="select-library-{{idx}}" class="form-check-label visually-hidden">{{library.name}}</label>
+              <input id="select-all" type="checkbox" class="form-check-input"
+                     [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+              <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-all')}}</label>
             </div>
-          </td>
-          <td id="library--{{idx}}">
-            <a [routerLink]="'/library/' + library.id">{{library.name}}</a>
-          </td>
-          <td>
+          </ng-template>
+          <ng-template let-library="row" let-idx="rowIndex" ngx-datatable-cell-template>
+            <div class="form-check">
+              <input [id]="'select-library-' + idx" type="checkbox" class="form-check-input"
+                     [ngModel]="selections.isSelected(library)" (change)="handleSelection(library, idx)">
+              <label [for]="'select-library-' + idx" class="form-check-label visually-hidden">{{library.name}}</label>
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="name" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('name-header')}}</ng-template>
+          <ng-template let-library="row" let-idx="rowIndex" ngx-datatable-cell-template>
+            <a [routerLink]="'/library/' + library.id" [id]="'library--' + idx">{{library.name}}</a>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="type" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('type-title')}}</ng-template>
+          <ng-template let-library="row" ngx-datatable-cell-template>
             {{library.type | libraryType}}
-          </td>
-          <td>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('shared-folders-title')}}</ng-template>
+          <ng-template let-library="row" ngx-datatable-cell-template>
             {{library.folders.length}}
-          </td>
-          <td>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="lastScanned" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('last-scanned-title')}}</ng-template>
+          <ng-template let-library="row" ngx-datatable-cell-template>
             {{library.lastScanned | timeAgo | defaultDate}}
-          </td>
-          <td>
-            <!-- On Mobile we want to use ... for each row -->
-            @if (useActionables$ | async) {
-              <app-card-actionables [entity]="library" [actions]="actions" />
-            } @else {
-              <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" [ngbTooltip]="t('scan-library')"
-                      [attr.aria-label]="t('scan-library')">
-                <i class="fa fa-sync-alt" aria-hidden="true"></i>
-              </button>
+          </ng-template>
+        </ngx-datatable-column>
 
-              <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)">
-                <i class="fa fa-trash" placement="top" [ngbTooltip]="t('delete-library')"
-                   [attr.aria-label]="t('delete-library-by-name', {name: library.name | sentenceCase})"></i>
-              </button>
+        <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('actions-header')}}</ng-template>
+          <ng-template let-library="row" ngx-datatable-cell-template>
+            <ng-container *ngTemplateOutlet="actionsTemplate; context: {$implicit: library}"></ng-container>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </ng-template>
 
-              <button class="btn btn-primary btn-sm" (click)="editLibrary(library)">
-                <i class="fa fa-pen" placement="top" [ngbTooltip]="t('edit-library')"
-                   [attr.aria-label]="t('edit-library-by-name', {name: library.name | sentenceCase})"></i>
-              </button>
-            }
-          </td>
-        </tr>
+    <div cardHeader class="card mb-3">
+      <div class="card-body py-2">
+        <div class="form-check">
+          <input id="select-all-cards" type="checkbox" class="form-check-input"
+                 [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+          <label for="select-all-cards" class="form-check-label">{{t('select-all')}}</label>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #cardEmpty>
+      @if (loading) {
+        <app-loading [loading]="loading" />
+      } @else {
+        <div class="text-center text-muted py-4">{{t('no-data')}}</div>
       }
-      @empty {
-        @if (loading) {
-          <tr><td colspan="6" style="text-align: center;"><app-loading [loading]="loading" /></td></tr>
-        } @else {
-          <tr><td colspan="6" style="text-align: center;">{{t('no-data')}}</td></tr>
-        }
-      }
-    </tbody>
-  </table>
+    </ng-template>
+
+    <ng-template #cardTemplate let-library let-idx="index">
+      <div class="card mb-3">
+        <div class="card-body position-relative">
+          <!-- Actions top right -->
+          <div class="position-absolute top-0 end-0 mt-2 me-2">
+            <ng-container *ngTemplateOutlet="actionsTemplate; context: {$implicit: library}"></ng-container>
+          </div>
+
+          <div class="d-flex align-items-center mb-3">
+            <div class="form-check me-2">
+              <input [id]="'select-library-card-' + idx" type="checkbox" class="form-check-input"
+                     [ngModel]="selections.isSelected(library)" (change)="handleSelection(library, idx)">
+              <label [for]="'select-library-card-' + idx" class="visually-hidden">{{library.name}}</label>
+            </div>
+            <h5 class="card-title mb-0">
+              <a [routerLink]="'/library/' + library.id">{{library.name}}</a>
+            </h5>
+          </div>
+
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="text-muted small">{{t('type-title')}}</div>
+              <div>{{library.type | libraryType}}</div>
+            </div>
+
+            <div class="col-6">
+              <div class="text-muted small">{{t('shared-folders-title')}}</div>
+              <div>{{library.folders.length}}</div>
+            </div>
+
+            <div class="col-12">
+              <div class="text-muted small">{{t('last-scanned-title')}}</div>
+              <div>{{library.lastScanned | timeAgo | defaultDate}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </app-responsive-table>
+
+  <!-- Shared Actions Template -->
+  <ng-template #actionsTemplate let-library>
+    @if (useActionables$ | async) {
+      <app-card-actionables [entity]="library" [actions]="actions" />
+    } @else {
+      <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)"
+              [ngbTooltip]="t('scan-library')" [attr.aria-label]="t('scan-library')">
+        <i class="fa fa-sync-alt" aria-hidden="true"></i>
+      </button>
+      <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"
+              [ngbTooltip]="t('delete-library')" [attr.aria-label]="t('delete-library-by-name', {name: library.name | sentenceCase})">
+        <i class="fa fa-trash" aria-hidden="true"></i>
+      </button>
+      <button class="btn btn-primary btn-sm" (click)="editLibrary(library)"
+              [ngbTooltip]="t('edit-library')" [attr.aria-label]="t('edit-library-by-name', {name: library.name | sentenceCase})">
+        <i class="fa fa-pen" aria-hidden="true"></i>
+      </button>
+    }
+  </ng-template>
 </ng-container>
