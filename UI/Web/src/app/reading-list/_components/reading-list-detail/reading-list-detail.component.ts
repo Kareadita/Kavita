@@ -1,11 +1,13 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, computed,
+  Component,
+  computed,
   DestroyRef,
   ElementRef,
-  inject, model,
+  inject,
   OnInit,
+  signal,
   ViewChild
 } from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -112,7 +114,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   items: Array<ReadingListItem> = [];
   listId!: number;
-  readingList = model<ReadingList | undefined>(undefined);
+  readingList = signal<ReadingList | undefined>(undefined);
   actions: Array<ActionItem<any>> = [];
   isAdmin: boolean = false;
   isLoading: boolean = false;

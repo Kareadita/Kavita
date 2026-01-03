@@ -1,6 +1,23 @@
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AsyncPipe, DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, DestroyRef, ElementRef, EventEmitter, HostListener, inject, Input, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ContentChild,
+  DestroyRef,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  Input,
+  OnInit,
+  Output,
+  Renderer2,
+  RendererStyleFlags2,
+  TemplateRef,
+  ViewChild
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Observable, ReplaySubject} from 'rxjs';
 import {auditTime, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';

@@ -12,7 +12,8 @@ import {
   Input,
   OnInit,
   Output,
-  Signal, TemplateRef
+  Signal,
+  TemplateRef
 } from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';

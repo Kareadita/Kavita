@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, effect, inject, input, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {StatisticsService} from "../../../_services/statistics.service";
 import {StatsFilter} from "../../../statistics/_models/stats-filter";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -39,7 +39,6 @@ export class ProfileStatBarComponent {
   year = input.required<number>();
   filter = input.required<StatsFilter>();
 
-  data = model<ProfileStatBar>();
   dataResource = this.statsService.getUserOverallStats(() => this.filter(), () => this.userId());
 
   openPageByYearList() {
@@ -65,6 +64,4 @@ export class ProfileStatBarComponent {
       ref.componentInstance.title = translate('user-stats-info-cards.words-read-by-year-title');
     });
   }
-
-
 }

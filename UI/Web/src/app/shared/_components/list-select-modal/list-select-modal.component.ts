@@ -2,12 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  ContentChild, effect,
-  inject, input,
+  effect,
+  inject,
+  input,
   model,
-  OnInit,
   signal,
-  TemplateRef, untracked, viewChild
+  TemplateRef,
+  untracked,
+  viewChild
 } from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";

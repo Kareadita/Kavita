@@ -9,7 +9,6 @@ import {
   EventEmitter,
   HostListener,
   inject,
-  model,
   OnDestroy,
   OnInit,
   signal,
@@ -184,7 +183,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   seriesId!: number;
   volumeId!: number;
   chapterId!: number;
-  chapterInfo = model<ChapterInfo | null>();
+  chapterInfo = signal<ChapterInfo | null>(null);
   /**
    * Reading List id. Defaults to -1.
    */
@@ -197,7 +196,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * If this is true, we are reading a bookmark. ChapterId will be 0. There is no continuous reading. Progress is not saved. Bookmark control is removed.
    */
-  bookmarkMode = model<boolean>(false);
+  bookmarkMode = signal<boolean>(false);
 
   /**
    * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order.

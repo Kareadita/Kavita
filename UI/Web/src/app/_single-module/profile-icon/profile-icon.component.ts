@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal} from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {ImageComponent} from "../../shared/image/image.component";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
@@ -29,8 +29,8 @@ export class ProfileIconComponent {
    */
   processEvents = input<boolean>(true);
 
-  currentImageUrl = model<string>('');
-  noImage = model<boolean>(false);
+  currentImageUrl = signal<string>('');
+  noImage = signal<boolean>(false);
 
   constructor() {
 

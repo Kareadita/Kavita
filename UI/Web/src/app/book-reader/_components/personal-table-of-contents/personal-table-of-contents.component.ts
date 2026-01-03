@@ -5,9 +5,9 @@ import {
   EventEmitter,
   inject,
   Input,
-  model,
   OnInit,
-  Output
+  Output,
+  signal
 } from '@angular/core';
 import {ReaderService} from "../../../_services/reader.service";
 import {PersonalToC} from "../../../_models/readers/personal-toc";
@@ -44,7 +44,7 @@ export class PersonalTableOfContentsComponent implements OnInit {
   @Output() loadChapter: EventEmitter<PersonalToCEvent> = new EventEmitter();
 
 
-  ptocBookmarks = model<PersonalToC[]>([]);
+  ptocBookmarks = signal<PersonalToC[]>([]);
   formGroup = new FormGroup({
     filter: new FormControl('', [])
   });

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, model, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {Device} from 'src/app/_models/device/device';
 import {DeviceService} from 'src/app/_services/device.service';
 import {DevicePlatformPipe} from '../../_pipes/device-platform.pipe';
@@ -37,11 +37,11 @@ export class ManageDevicesComponent implements OnInit {
   private readonly accountService = inject(AccountService);
 
   //devices: Array<Device> = [];
-  devices = model<Device[]>([]);
-  hasEmailSetup = model<boolean>(false);
+  devices = signal<Device[]>([]);
+  hasEmailSetup = signal<boolean>(false);
   trackBy = (idx: number, item: Device) => `${item.name}_${item.emailAddress}_${item.platform}_${item.lastUsed}`;
 
-  clientDevices = model<ClientDevice[]>([]);
+  clientDevices = signal<ClientDevice[]>([]);
 
 
   isReadOnly$ = this.accountService.currentUser$.pipe(

@@ -5,8 +5,8 @@ import {
   DestroyRef,
   effect,
   inject,
-  model,
   OnInit,
+  signal,
   Signal,
   ViewChild,
   ViewContainerRef
@@ -89,9 +89,9 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
 
   @ViewChild('renderTarget', {read: ViewContainerRef}) renderTarget!: ViewContainerRef;
 
-  annotation = model<Annotation | null>(null);
-  mode = model<AnnotationMode>(AnnotationMode.View);
-  user = model<User | null>(null);
+  annotation = signal<Annotation | null>(null);
+  mode = signal<AnnotationMode>(AnnotationMode.View);
+  user = signal<User | null>(null);
   isEditMode: Signal<boolean>
   isEditOrCreateMode: Signal<boolean>
   titleColor: Signal<string>;

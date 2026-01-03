@@ -9,12 +9,12 @@ import {
   ElementRef,
   EventEmitter,
   inject,
-  model,
   OnDestroy,
   OnInit,
   Renderer2,
   RendererStyleFlags2,
   resource,
+  signal,
   Signal,
   ViewChild,
   ViewContainerRef
@@ -176,7 +176,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    /**
     * If this is true, no progress will be saved.
     */
-  incognitoMode = model<boolean>(false);
+  incognitoMode = signal<boolean>(false);
 
    /**
     * If this is true, chapters will be fetched in the order of a reading list,
@@ -192,11 +192,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Current Page
    */
-  pageNum = model<number>(0);
+  pageNum = signal<number>(0);
   /**
    * Max Pages
    */
-  maxPages = model<number>(1);
+  maxPages = signal<number>(1);
   /**
    * This allows for exploration into different chapters
    */
@@ -214,23 +214,23 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * If the word/line overlay is open
    */
-  isLineOverlayOpen = model<boolean>(false);
+  isLineOverlayOpen = signal<boolean>(false);
   /**
    * If the action bar (menu bars) is visible
    */
-  actionBarVisible = model<boolean>(true);
+  actionBarVisible = signal<boolean>(true);
   /**
    * If we are loading from backend
    */
-  isLoading = model<boolean>(true);
+  isLoading = signal<boolean>(true);
   /**
    * Title of the book. Rendered in action bar
    */
-  bookTitle = model<string>('');
+  bookTitle = signal<string>('');
   /**
    * Authors of the book. Rendered in action bar
    */
-  authorText = model<string>('');
+  authorText = signal<string>('');
   /**
    * The boolean that decides if the clickToPaginate overlay is visible or not.
    */
@@ -241,7 +241,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * This is the html we get from the server
    */
-  page = model<SafeHtml | undefined>(undefined);
+  page = signal<SafeHtml | undefined>(undefined);
   /**
    * Next Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
@@ -284,12 +284,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Will hide if all content in book is absolute positioned
    */
   horizontalScrollbarNeeded = false;
-  scrollbarNeeded = model<boolean>(false);
+  scrollbarNeeded = signal<boolean>(false);
 
   /**
    * Used solely for fullscreen to apply a hack
    */
-  darkMode = model<boolean>(true);
+  darkMode = signal<boolean>(true);
   readingTimeLeftResource =  resource({
     params: () => ({
       chapterId: this.chapterId,
@@ -301,8 +301,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   });
 
-  imageBookmarks = model<PageBookmark[]>([]);
-  annotationToLoad = model<number>(-1);
+  imageBookmarks = signal<PageBookmark[]>([]);
+  annotationToLoad = signal<number>(-1);
 
   /**
    * Anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
@@ -326,8 +326,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Width of the document (in non-column layout), used for column layout virtual paging
    */
-  windowWidth = model<number>(0);
-  windowHeight = model<number>(0);
+  windowWidth = signal<number>(0);
+  windowHeight = signal<number>(0);
 
   /**
    * used to track if a click is a drag or not, for opening menu
@@ -345,7 +345,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * When the user is highlighting something, then we remove pagination
    */
-  hidePagination = model<boolean>(false);
+  hidePagination = signal<boolean>(false);
 
   /**
    * Used to refresh the Personal PoC
@@ -359,7 +359,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Injects information to help debug issues
    */
-  debugMode = model<boolean>(!environment.production && true);
+  debugMode = signal<boolean>(!environment.production && true);
 
   /**
    * Will be set to true if this.scroll(...) is called but the actual scroll is still delayed

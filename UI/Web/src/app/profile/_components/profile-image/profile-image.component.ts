@@ -44,7 +44,7 @@ export class ProfileImageComponent {
   userId = input.required<number>();
   showEditButton = input<boolean>(true);
 
-  uploadInProgress = model<boolean>(false);
+  uploadInProgress = signal<boolean>(false);
 
   selectedFile = signal<File | null>(null);
   previewUrl = signal<string | null>(null);

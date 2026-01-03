@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, effect, EventEmitter, inject, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, EventEmitter, inject, input, model, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {
   NgbActiveOffcanvas,
@@ -52,8 +52,8 @@ export class ViewBookmarkDrawerComponent {
   protected readonly imageService = inject(ImageService);
 
 
-  chapterId = model<number>();
-  bookmarks = model<PageBookmark[]>();
+  chapterId = input.required<number>();
+  bookmarks = signal<PageBookmark[]>([]);
   /**
    * Current Page
    */

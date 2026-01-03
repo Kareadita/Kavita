@@ -8,6 +8,7 @@ import {
   input,
   model,
   Output,
+  signal,
   Signal
 } from '@angular/core';
 import {Annotation} from "../../../_models/annotations/annotation";
@@ -103,7 +104,7 @@ export class AnnotationCardComponent {
   @Output() selection = new EventEmitter<boolean>();
 
   titleColor: Signal<string>;
-  hasClicked = model<boolean>(false);
+  hasClicked = signal<boolean>(false);
 
   constructor() {
 

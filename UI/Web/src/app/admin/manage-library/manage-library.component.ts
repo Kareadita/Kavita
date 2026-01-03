@@ -33,11 +33,11 @@ import {Action, ActionFactoryService, ActionItem} from "../../_services/action-f
 import {ActionService} from "../../_services/action.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {BehaviorSubject, catchError, Observable} from "rxjs";
-import {SelectionModel} from "../../typeahead/_models/selection-model";
 import {
   CopySettingsFromLibraryModalComponent
 } from "../_modals/copy-settings-from-library-modal/copy-settings-from-library-modal.component";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {SelectionModel} from "../../typeahead/_models/selection-model";
 
 @Component({
   selector: 'app-manage-library',

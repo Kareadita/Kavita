@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, model, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, OnInit, signal} from '@angular/core';
 import {DeviceService} from "../../_services/device.service";
 import {ClientDevice} from "../../_models/client-device";
 import {ClientDeviceCardComponent} from "../../_single-module/client-device-card/client-device-card.component";
@@ -30,9 +30,9 @@ export class ServerDevicesComponent implements OnInit {
   private readonly clientDeviceClientTypePipe = new ClientDeviceClientTypePipe();
   private readonly clientDeviceTypePipe = new ClientDeviceTypePipe();
 
-  clientDevices = model<ClientDevice[]>([]);
-  clientDeviceTypeBreakdown = model<StatCount<number>[]>([]);
-  mobileVsDesktop = model<StatCount<string>[]>([]);
+  clientDevices = signal<ClientDevice[]>([]);
+  clientDeviceTypeBreakdown = signal<StatCount<number>[]>([]);
+  mobileVsDesktop = signal<StatCount<string>[]>([]);
 
   ngOnInit() {
     this.loadDevices();

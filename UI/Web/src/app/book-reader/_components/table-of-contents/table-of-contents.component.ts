@@ -1,12 +1,13 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
-  computed, effect,
+  computed,
+  effect,
   EventEmitter,
   inject,
-  model, OnInit,
-  Output
+  model,
+  Output,
+  signal
 } from '@angular/core';
 import {BookChapterItem} from '../../_models/book-chapter-item';
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -26,7 +27,7 @@ export class TableOfContentsComponent {
 
   chapterId = model.required<number>();
   pageNum = model.required<number>();
-  currentPageAnchor = model<string>();
+  currentPageAnchor = signal<string>('');
   chapters = model.required<Array<BookChapterItem>>();
   loading = model.required<boolean>();
 

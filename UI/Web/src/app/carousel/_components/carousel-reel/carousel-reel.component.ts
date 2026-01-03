@@ -61,7 +61,7 @@ export class CarouselReelComponent {
   @Output() sectionClick = new EventEmitter<string>();
   @Output() handleAction = new EventEmitter<ActionItem<any>>();
 
-  currentPage = model<number>(1);
+  currentPage = signal<number>(1);
   pageSize = input(20);
   nextPageLoader = input<NextPageLoader | null>(null);
 
