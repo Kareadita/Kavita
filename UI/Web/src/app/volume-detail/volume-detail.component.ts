@@ -6,8 +6,8 @@ import {
   DestroyRef,
   ElementRef,
   inject,
-  model,
-  OnInit, signal,
+  OnInit,
+  signal,
   ViewChild
 } from '@angular/core';
 import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
@@ -89,6 +89,7 @@ import {AnnotationsTabComponent} from "../_single-module/annotations-tab/annotat
 import {UtcToLocalDatePipe} from "../_pipes/utc-to-locale-date.pipe";
 import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
+import {ReadingProgressIconPipePipe} from "../_pipes/reading-progress-icon-pipe.pipe";
 
 enum TabID {
 
@@ -164,7 +165,8 @@ interface VolumeCast extends IHasCast {
     ExternalRatingComponent,
     AnnotationsTabComponent,
     UtcToLocalDatePipe,
-    ReadingProgressStatusPipePipe
+    ReadingProgressStatusPipePipe,
+    ReadingProgressIconPipePipe
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',

@@ -115,6 +115,7 @@ import {Annotation} from "../../../book-reader/_models/annotations/annotation";
 import {AnnotationService} from "../../../_services/annotation.service";
 import {ReadingProgressStatus} from "../../../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../../../_pipes/reading-progress-status-pipe.pipe";
+import {ReadingProgressIconPipePipe} from "../../../_pipes/reading-progress-icon-pipe.pipe";
 
 
 enum TabID {
@@ -147,7 +148,7 @@ interface StoryLineItem {
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, DetailsTabComponent, ChapterCardComponent,
     VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
-    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent, ReadingProgressStatusPipePipe]
+    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent, ReadingProgressStatusPipePipe, ReadingProgressIconPipePipe]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 

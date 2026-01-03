@@ -69,8 +69,8 @@
                 <div class="btn-group">
                   <button type="button" class="btn btn-outline-primary" (click)="read()">
                     <span>
-                      <i class="fa {{readingProgressStatusValue === ReadingProgressStatus.Progress ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
-                      <span class="read-btn--text">&nbsp;{{readingProgressStatusValue | readingProgressStatusPipe}}</span>
+                      <i class="{{readingProgressStatusValue | readingProgressIconPipe}}" aria-hidden="true"></i>
+                      <span class="read-btn--text ms-1">{{readingProgressStatusValue | readingProgressStatusPipe}}</span>
                     </span>
                   </button>
                   <div class="btn-group" ngbDropdown role="group" display="dynamic" [attr.aria-label]="t('read-options-alt')">
@@ -79,7 +79,7 @@
                       <button ngbDropdownItem (click)="read(true)">
                         <span>
                           <i class="fa fa-glasses" aria-hidden="true"></i>
-                          <span class="read-btn--text">&nbsp;{{readingProgressStatusValue | readingProgressStatusPipe:true}}</span>
+                          <span class="read-btn--text ms-1">{{readingProgressStatusValue | readingProgressStatusPipe:true}}</span>
                         </span>
                       </button>
                     </div>

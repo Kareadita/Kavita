@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {translate} from "@jsverse/transloco";
 
@@ -12,12 +12,11 @@ export class ReadingProgressStatusPipePipe implements PipeTransform {
 
     switch (value) {
       case ReadingProgressStatus.NoProgress:
-        return translate('reading-progress-status-pipe.no-progress' + suffix)
+        return translate('reading-progress-status-pipe.no-progress' + suffix);
       case ReadingProgressStatus.Progress:
-        return translate('reading-progress-status-pipe.progress' + suffix)
+        return translate('reading-progress-status-pipe.progress' + suffix);
       case ReadingProgressStatus.FullyRead:
-        return translate('reading-progress-status-pipe.full-read' + suffix)
-
+        return translate('reading-progress-status-pipe.full-read' + suffix);
     }
   }
 

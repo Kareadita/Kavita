@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   inject,
@@ -39,9 +40,8 @@ import {LibraryType} from "../_models/library/library";
 import {LibraryService} from "../_services/library.service";
 import {ThemeService} from "../_services/theme.service";
 import {DownloadEvent, DownloadService} from "../shared/_services/download.service";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
-import {ToastrService} from "ngx-toastr";
 import {ReaderService} from "../_services/reader.service";
 import {AccountService} from "../_services/account.service";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
@@ -83,6 +83,7 @@ import {UtcToLocalTimePipe} from "../_pipes/utc-to-local-time.pipe";
 import {UtcToLocalDatePipe} from "../_pipes/utc-to-locale-date.pipe";
 import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
+import {ReadingProgressIconPipePipe} from "../_pipes/reading-progress-icon-pipe.pipe";
 
 enum TabID {
   Related = 'related-tab',
@@ -126,7 +127,8 @@ enum TabID {
     AnnotationsTabComponent,
     UtcToLocalTimePipe,
     UtcToLocalDatePipe,
-    ReadingProgressStatusPipePipe
+    ReadingProgressStatusPipePipe,
+    ReadingProgressIconPipePipe
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -145,7 +147,6 @@ export class ChapterDetailComponent implements OnInit {
   private readonly themeService = inject(ThemeService);
   private readonly downloadService = inject(DownloadService);
   private readonly bulkSelectionService = inject(BulkSelectionService);
-  private readonly toastr = inject(ToastrService);
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
   private readonly modalService = inject(NgbModal);
@@ -169,23 +170,24 @@ export class ChapterDetailComponent implements OnInit {
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
-  isLoading: boolean = true;
+  isLoading = model<boolean>(true);
   coverImage: string = '';
   chapterId: number = 0;
   seriesId: number = 0;
   libraryId: number = 0;
-  chapter: Chapter | null = null;
-  series: Series | null = null;
+  chapter = model<Chapter | null>(null);
+  series = model<Series | null>(null);
   libraryType: LibraryType | null = null;
-  hasReadingProgress = false;
   userReviews: Array<UserReview> = [];
   plusReviews: Array<UserReview> = [];
   rating: number = 0;
   ratings: Array<Rating> = [];
   hasBeenRated: boolean = false;
-  size: number = 0;
+  size = computed(() => {
+    return (this.chapter()?.files || []).reduce((sum, f) => sum + f.bytes, 0);
+  })
   annotations = model<Annotation[]>([]);
-  readingProgressStatus = ReadingProgressStatus.NoProgress;
+  readingProgressStatus = model<ReadingProgressStatus>(ReadingProgressStatus.NoProgress);
 
   weblinks: Array<string> = [];
   activeTabId = TabID.Details;
@@ -195,7 +197,12 @@ export class ChapterDetailComponent implements OnInit {
   download$: Observable<DownloadEvent | null> | null = null;
   downloadInProgress: boolean = false;
   readingLists: ReadingList[] = [];
-  showDetailsTab: boolean = true;
+  showDetailsTab = computed(() => {
+    const chp = this.chapter();
+
+    return hasAnyCast(chp) || (chp?.genres || []).length > 0 ||
+        (chp?.tags || []).length > 0 || (chp?.webLinks || []).length > 0;
+  })
   mobileSeriesImgBackground: string | undefined;
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
@@ -269,27 +276,27 @@ export class ChapterDetailComponent implements OnInit {
         return;
       }
 
-      this.series = results.series;
-      this.chapter = results.chapter;
-      this.size = this.chapter.files.reduce((sum, f) => sum + f.bytes, 0);
-      this.weblinks = this.chapter.webLinks.length > 0 ? this.chapter.webLinks.split(',') : [];
+      this.series.set(results.series);
+      this.chapter.set(results.chapter);
+      this.weblinks = this.chapter()!.webLinks.length > 0 ? this.chapter()!.webLinks.split(',') : [];
       this.libraryType = results.libraryType;
       this.userReviews = results.chapterDetail.reviews.filter(r => !r.isExternal);
       this.plusReviews = results.chapterDetail.reviews.filter(r => r.isExternal);
       this.rating = results.chapterDetail.rating;
       this.hasBeenRated = results.chapterDetail.hasBeenRated;
       this.ratings = results.chapterDetail.ratings;
-      if (this.chapter.pagesRead > 0 && this.chapter.pagesRead < this.chapter.pages) {
-        this.readingProgressStatus = ReadingProgressStatus.Progress;
-      } else if (this.chapter.pagesRead >= this.chapter.pages) {
-        this.readingProgressStatus = ReadingProgressStatus.FullyRead;
+
+      if (this.chapter()!.pagesRead > 0 && this.chapter()!.pagesRead < this.chapter()!.pages) {
+        this.readingProgressStatus.set(ReadingProgressStatus.Progress);
+      } else if (this.chapter()!.pagesRead >= this.chapter()!.pages) {
+        this.readingProgressStatus.set(ReadingProgressStatus.FullyRead);
       }
 
-      this.themeService.setColorScape(this.chapter.primaryColor, this.chapter.secondaryColor);
+      this.themeService.setColorScape(this.chapter()!.primaryColor, this.chapter()!.secondaryColor);
 
       // Set up the download in progress
       this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
-        return this.downloadService.mapToEntityType(events, this.chapter!);
+        return this.downloadService.mapToEntityType(events, this.chapter()!);
       }));
 
       this.readingListService.getReadingListsForChapter(this.chapterId).subscribe(lists => {
@@ -305,14 +312,12 @@ export class ChapterDetailComponent implements OnInit {
         }
       }), takeUntilDestroyed(this.destroyRef)).subscribe();
 
-      this.showDetailsTab = hasAnyCast(this.chapter) || (this.chapter.genres || []).length > 0 ||
-        (this.chapter.tags || []).length > 0 || this.chapter.webLinks.length > 0;
 
-      if (!this.showDetailsTab && this.activeTabId === TabID.Details) {
+      if (!this.showDetailsTab() && this.activeTabId === TabID.Details) {
         this.activeTabId = TabID.Reviews;
       }
 
-      this.isLoading = false;
+      this.isLoading.set(false);
       this.cdRef.markForCheck();
     });
 
@@ -326,24 +331,23 @@ export class ChapterDetailComponent implements OnInit {
         return;
       }
 
-      this.chapter = d;
-      this.cdRef.markForCheck();
+      this.chapter.set(d);
     })
   }
 
   read(incognitoMode: boolean = false) {
     if (this.bulkSelectionService.hasSelections()) return;
-    if (this.chapter === null) return;
+    if (this.chapter()! === null) return;
 
-    this.readerService.readChapter(this.libraryId, this.seriesId, this.chapter, incognitoMode);
+    this.readerService.readChapter(this.libraryId, this.seriesId, this.chapter()!, incognitoMode);
   }
 
   openEditModal() {
     const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);
-    ref.componentInstance.chapter = this.chapter;
+    ref.componentInstance.chapter = this.chapter();
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.libraryId = this.libraryId;
-    ref.componentInstance.seriesId = this.series!.id;
+    ref.componentInstance.seriesId = this.seriesId;
 
     ref.closed.subscribe(res => {
       this.loadData();
@@ -364,7 +368,7 @@ export class ChapterDetailComponent implements OnInit {
 
   downloadChapter() {
     if (this.downloadInProgress) return;
-    this.downloadService.download('chapter', this.chapter!, (d) => {
+    this.downloadService.download('chapter', this.chapter()!, (d) => {
       this.downloadInProgress = !!d;
       this.cdRef.markForCheck();
     });
