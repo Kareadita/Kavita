@@ -44,7 +44,7 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
         var isSpecial = Parser.IsSpecial(fileName, type);
         // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
         // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
-        if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && isSpecial)
+        if (Parser.IsDefaultChapter(ret.Chapters) && Parser.IsLooseLeafVolume(ret.Volumes) && isSpecial)
         {
             ret.IsSpecial = true;
             // NOTE: This can cause some complications, we should try to be a bit less aggressive to fallback to folder
@@ -80,7 +80,7 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
         }
 
 
-        if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.LooseLeafVolume && type == LibraryType.Book)
+        if (Parser.IsDefaultChapter(ret.Chapters) && Parser.IsLooseLeafVolume(ret.Volumes) && type == LibraryType.Book)
         {
             ret.IsSpecial = true;
             ret.Chapters = Parser.DefaultChapter;

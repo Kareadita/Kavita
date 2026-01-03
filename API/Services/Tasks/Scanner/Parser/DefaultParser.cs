@@ -67,18 +67,18 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
             var parsedVolume = Parser.ParseVolume(folder, type);
             var parsedChapter = Parser.ParseChapter(folder, type);
 
-            if (!parsedVolume.Equals(Parser.LooseLeafVolume) || !parsedChapter.Equals(Parser.DefaultChapter))
+            var isLooseLeafVolume = Parser.IsLooseLeafVolume(parsedVolume);
+            var isDefaultChapter = Parser.IsDefaultChapter(parsedChapter);
+
+            if ((string.IsNullOrEmpty(ret.Volumes) || Parser.IsLooseLeafVolume(ret.Volumes))
+                && !string.IsNullOrEmpty(parsedVolume) && !isLooseLeafVolume)
             {
-                if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Parser.LooseLeafVolume))
-                    && !string.IsNullOrEmpty(parsedVolume) && !parsedVolume.Equals(Parser.LooseLeafVolume))
-                {
-                    ret.Volumes = parsedVolume;
-                }
-                if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Parser.DefaultChapter))
-                    && !string.IsNullOrEmpty(parsedChapter) && !parsedChapter.Equals(Parser.DefaultChapter))
-                {
-                    ret.Chapters = parsedChapter;
-                }
+                ret.Volumes = parsedVolume;
+            }
+            if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Parser.DefaultChapter))
+                && !string.IsNullOrEmpty(parsedChapter) && !isDefaultChapter)
+            {
+                ret.Chapters = parsedChapter;
             }
 
             // Generally users group in series folders. Let's try to parse series from the top folder
@@ -141,7 +141,7 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
 
     protected static bool IsEmptyOrDefault(string volumes, string chapters)
     {
-        return (string.IsNullOrEmpty(chapters) || chapters == Parser.DefaultChapter) &&
-               (string.IsNullOrEmpty(volumes) || volumes == Parser.LooseLeafVolume);
+        return (string.IsNullOrEmpty(chapters) || Parser.IsDefaultChapter(chapters)) &&
+               (string.IsNullOrEmpty(volumes) || Parser.IsLooseLeafVolume(volumes));
     }
 }

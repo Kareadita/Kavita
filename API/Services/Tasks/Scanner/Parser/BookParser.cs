@@ -38,26 +38,27 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
         }
 
         // This catches when original library type is Manga/Comic and when parsing with non
-        if (Parser.ParseVolume(info.Series, type) != Parser.LooseLeafVolume)
+        if (!Parser.IsLooseLeafVolume(Parser.ParseVolume(info.Series, type)))
         {
-            var hasVolumeInTitle = !Parser.ParseVolume(info.Title, type)
-                .Equals(Parser.LooseLeafVolume);
-            var hasVolumeInSeries = !Parser.ParseVolume(info.Series, type)
-                .Equals(Parser.LooseLeafVolume);
+            var parsedVolumeFromTitle = Parser.ParseVolume(info.Title, type);
+            var parsedVolumeFromSeries = Parser.ParseVolume(info.Series, type);
+
+            var hasVolumeInTitle = !Parser.IsLooseLeafVolume(parsedVolumeFromTitle);
+            var hasVolumeInSeries = !Parser.IsLooseLeafVolume(parsedVolumeFromSeries);
 
             if (string.IsNullOrEmpty(info.ComicInfo?.Volume) && hasVolumeInTitle && (hasVolumeInSeries || string.IsNullOrEmpty(info.Series)))
             {
                 // NOTE: I'm not sure the comment is true. I've never seen this triggered
                 // This is likely a light novel for which we can set series from parsed title
                 info.Series = Parser.ParseSeries(info.Title, type);
-                info.Volumes = Parser.ParseVolume(info.Title, type);
+                info.Volumes = parsedVolumeFromTitle;
             }
             else
             {
                 var info2 = basicParser.Parse(filePath, rootPath, libraryRoot, LibraryType.Book, enableMetadata, comicInfo);
                 info.Merge(info2);
-                if (hasVolumeInSeries && info2 != null && Parser.ParseVolume(info2.Series, type)
-                        .Equals(Parser.LooseLeafVolume))
+
+                if (hasVolumeInSeries && info2 != null && Parser.IsLooseLeafVolume(Parser.ParseVolume(info2.Series, type)))
                 {
                     // Override the Series name so it groups appropriately
                     info.Series = info2.Series;

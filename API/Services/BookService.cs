@@ -661,7 +661,7 @@ public partial class BookService : IBookService
 
             // If this is a single book and not a collection, set publication status to Completed
             if (string.IsNullOrEmpty(info.Volume) &&
-                Parser.ParseVolume(filePath, LibraryType.Manga).Equals(Parser.LooseLeafVolume))
+                Parser.IsLooseLeafVolume(Parser.ParseVolume(filePath, LibraryType.Manga)))
             {
                 info.Count = 1;
             }
@@ -670,8 +670,7 @@ public partial class BookService : IBookService
             info.Writer = string.Join(",",
                 epubBook?.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)) ?? []);
 
-            var hasVolumeInSeries = !Parser.ParseVolume(info.Title, LibraryType.Manga)
-                .Equals(Parser.LooseLeafVolume);
+            var hasVolumeInSeries = !Parser.IsLooseLeafVolume(Parser.ParseVolume(info.Title, LibraryType.Manga));
 
             if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries &&
                 (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))

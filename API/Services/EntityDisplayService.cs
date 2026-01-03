@@ -66,8 +66,8 @@ public class EntityDisplayService(ILocalizationService localizationService, IUni
                 return (firstChapter.TitleName, neededRename);
             }
 
-            // Fallback: extract from Range if it's not a loose leaf marker
-            if (!firstChapter.Range.Equals(Parser.LooseLeafVolume))
+            // Fallback: extract from Range if it's not a loose-leaf marker
+            if (!Parser.IsLooseLeafVolume(firstChapter.Range))
             {
                 var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
                 if (!string.IsNullOrEmpty(title))
@@ -123,7 +123,7 @@ public class EntityDisplayService(ILocalizationService localizationService, IUni
 
     /// <summary>
     /// Smart method that generates display name for a chapter, automatically detecting if it needs
-    /// to fetch the volume name instead (for loose leaf volumes in book libraries).
+    /// to fetch the volume name instead (for loose-leaf volumes in book libraries).
     /// This is the recommended method for most scenarios as it handles internal encodings.
     /// </summary>
     /// <param name="chapter">The chapter to generate a name for</param>
@@ -132,8 +132,8 @@ public class EntityDisplayService(ILocalizationService localizationService, IUni
     /// <returns>User-friendly display name</returns>
     public async Task<string> GetEntityDisplayName( ChapterDto chapter, int userId, EntityDisplayOptions options)
     {
-        // Detect if this is a loose leaf volume that should be displayed as a volume name
-        if (chapter.Title == Parser.LooseLeafVolume)
+        // Detect if this is a loose-leaf volume that should be displayed as a volume name
+        if (Parser.IsLooseLeafVolume(chapter.Title))
         {
             var volume = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId);
             if (volume != null)

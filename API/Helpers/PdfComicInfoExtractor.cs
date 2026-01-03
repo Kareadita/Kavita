@@ -116,7 +116,7 @@ public class PdfComicInfoExtractor : IPdfComicInfoExtractor
         info.Volume     = MaybeGetMetadata(metadata, "Volume") ?? string.Empty;
 
         // If this is a single book and not a collection, set publication status to Completed
-        if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath, LibraryType.Manga).Equals(Parser.LooseLeafVolume))
+        if (string.IsNullOrEmpty(info.Volume) && Parser.IsLooseLeafVolume(Parser.ParseVolume(filePath, LibraryType.Manga)))
         {
             info.Count = 1;
         }

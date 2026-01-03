@@ -88,13 +88,13 @@ public class ReadingListService : IReadingListService
     public static string FormatTitle(ReadingListItemDto item)
     {
         var title = string.Empty;
-        if (item.ChapterNumber == Parser.DefaultChapter && item.VolumeNumber != Parser.LooseLeafVolume) {
+        if (Parser.IsDefaultChapter(item.ChapterNumber) && !Parser.IsLooseLeafVolume(item.VolumeNumber)) {
             title = $"Volume {item.VolumeNumber}";
         }
 
         if (item.SeriesFormat == MangaFormat.Epub) {
             var specialTitle = Parser.CleanSpecialTitle(item.ChapterNumber);
-            if (specialTitle == Parser.DefaultChapter)
+            if (Parser.IsDefaultChapter(specialTitle))
             {
                 if (!string.IsNullOrEmpty(item.ChapterTitleName))
                 {
@@ -123,7 +123,7 @@ public class ReadingListService : IReadingListService
         if (title != string.Empty) return title;
 
         // item.ChapterNumber is Range
-        if (item.ChapterNumber == Parser.DefaultChapter &&
+        if (Parser.IsDefaultChapter(item.ChapterNumber) &&
             !string.IsNullOrEmpty(item.ChapterTitleName))
         {
             title = item.ChapterTitleName;
