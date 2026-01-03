@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import {Breakpoint, UtilityService} from "../../_services/utility.service";
 import {NgTemplateOutlet} from "@angular/common";
+import {TranslocoDirective} from "@jsverse/transloco";
 
 export interface PageEvent {
   pageIndex: number;
@@ -24,7 +25,8 @@ export interface PageEvent {
 @Component({
   selector: 'app-responsive-table',
   imports: [
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    TranslocoDirective
   ],
   templateUrl: './responsive-table.component.html',
   styleUrl: './responsive-table.component.scss',
