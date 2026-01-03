@@ -11,6 +11,31 @@
           </ng-container>
         }
       </div>
+
+      @if (!isEmpty() && totalItems() > pageSize()) {
+        <nav aria-label="Pagination">
+          <ul class="pagination justify-content-center mt-3">
+            <li class="page-item" [class.disabled]="pageIndex() === 0">
+              <button class="page-link" (click)="onPageChange(pageIndex() - 1)"
+                      [disabled]="pageIndex() === 0">
+                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                <span class="visually-hidden">Previous</span>
+              </button>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">{{pageIndex() + 1}} / {{totalPages()}}</span>
+            </li>
+            <li class="page-item" [class.disabled]="pageIndex() >= totalPages() - 1">
+              <button class="page-link" (click)="onPageChange(pageIndex() + 1)"
+                      [disabled]="pageIndex() >= totalPages() - 1">
+                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                <span class="visually-hidden">Next</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      }
+
       <ng-content select="[cardFooter]"></ng-content>
     }
   </div>

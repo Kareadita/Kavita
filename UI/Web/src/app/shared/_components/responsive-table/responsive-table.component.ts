@@ -5,11 +5,17 @@ import {
   contentChild,
   inject,
   input,
+  output,
   TemplateRef,
   TrackByFunction
 } from '@angular/core';
 import {Breakpoint, UtilityService} from "../../_services/utility.service";
 import {NgTemplateOutlet} from "@angular/common";
+
+export interface PageEvent {
+  pageIndex: number;
+  pageSize: number;
+}
 
 
 /**
@@ -31,6 +37,12 @@ export class ResponsiveTableComponent<T> {
   breakpoint = input<Breakpoint>(Breakpoint.Mobile);
   trackByFn = input<TrackByFunction<T>>((index, item: any) => item?.id ?? index);
 
+  totalItems = input<number>(0);
+  pageSize = input<number>(10);
+  pageIndex = input<number>(0);
+
+  pageChange = output<PageEvent>();
+
   private cardTemplateSignal = contentChild<TemplateRef<{$implicit: T, index: number}>>('cardTemplate');
   protected readonly cardTemplateRef = computed(() => this.cardTemplateSignal());
 
@@ -44,4 +56,12 @@ export class ResponsiveTableComponent<T> {
   });
 
   protected readonly isEmpty = computed(() => this.rows().length === 0);
+
+  protected readonly totalPages = computed(() =>
+    Math.ceil(this.totalItems() / this.pageSize())
+  );
+
+  protected onPageChange(newIndex: number) {
+    this.pageChange.emit({ pageIndex: newIndex, pageSize: this.pageSize() });
+  }
 }
