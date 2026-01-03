@@ -21,16 +21,11 @@ namespace API.Controllers;
 /// </remarks>
 public class KoreaderController : BaseApiController
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILocalizationService _localizationService;
     private readonly IKoreaderService _koreaderService;
     private readonly ILogger<KoreaderController> _logger;
 
-    public KoreaderController(IUnitOfWork unitOfWork, ILocalizationService localizationService,
-            IKoreaderService koreaderService, ILogger<KoreaderController> logger)
+    public KoreaderController(IKoreaderService koreaderService, ILogger<KoreaderController> logger)
     {
-        _unitOfWork = unitOfWork;
-        _localizationService = localizationService;
         _koreaderService = koreaderService;
         _logger = logger;
     }

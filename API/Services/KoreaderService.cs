@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Koreader;
@@ -59,6 +60,7 @@ public class KoreaderService : IKoreaderService
                 ChapterId = file.ChapterId,
                 VolumeId = chapterDto.VolumeId,
                 SeriesId = volumeDto.SeriesId,
+                PageNum = int.Parse(koreaderBookDto.progress)
             };
         }
         // Update the bookScrollId if possible
@@ -82,14 +84,17 @@ public class KoreaderService : IKoreaderService
         var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
         var file = await _unitOfWork.MangaFileRepository.GetByKoreaderHash(bookHash);
-
         if (file == null) throw new KavitaException(await _localizationService.Translate(userId, "file-missing"));
 
         var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
         var originalScrollId = progressDto?.BookScrollId;
-        var koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
-        _logger.LogDebug("Converting KOReader progress from {KavitaProgress} to {KOReaderProgress}", originalScrollId?.Sanitize() ?? string.Empty, progressDto?.BookScrollId?.Sanitize() ?? string.Empty);
 
+        var koreaderProgress = $"{progressDto?.PageNum ?? 0}"; // Non-epubs will just encode as a simple number
+        if (!string.IsNullOrEmpty(originalScrollId))
+        {
+            koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
+            _logger.LogDebug("Converting KOReader progress from {KavitaProgress} to {KOReaderProgress}", originalScrollId?.Sanitize() ?? string.Empty, progressDto?.BookScrollId?.Sanitize() ?? string.Empty);
+        }
 
         return new KoreaderBookDtoBuilder(bookHash)
             .WithProgress(koreaderProgress)

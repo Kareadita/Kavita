@@ -24,7 +24,7 @@ public static class KoreaderHelper
     /// <param name="filePath">The path to the file to hash</param>
     public static string HashContents(string filePath)
     {
-        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath) || !Parser.IsEpub(filePath))
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
         {
             return null;
         }
