@@ -1535,7 +1535,8 @@
         "format-title": "{{metadata-filter.format-label}}",
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
-        "file-path-title": "Folder path"
+        "folder-path-title": "Folder path",
+        "file-path-title": "Files"
     },
 
     "related-tab": {

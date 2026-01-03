@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, Input} from '@angular/core';
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -12,17 +12,10 @@ import {Tag} from "../../_models/tag";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ImageService} from "../../_services/image.service";
 import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
-import {IHasReadingTime} from "../../_models/common/i-has-reading-time";
-import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {MangaFormat} from "../../_models/manga-format";
-import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
-import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
-import {LanguageNamePipe} from "../../_pipes/language-name.pipe";
-import {AsyncPipe} from "@angular/common";
 import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
-import {AgeRating} from "../../_models/metadata/age-rating";
-import {AgeRatingImageComponent} from "../age-rating-image/age-rating-image.component";
 import {AccountService} from "../../_services/account.service";
+import {MangaFile} from "../../_models/manga-file";
 
 @Component({
   selector: 'app-details-tab',
@@ -49,13 +42,17 @@ export class DetailsTabComponent {
   protected readonly MangaFormat = MangaFormat;
 
   @Input({required: true}) metadata!: IHasCast;
-  @Input() genres: Array<Genre> = [];
-  @Input() tags: Array<Tag> = [];
-  @Input() webLinks: Array<string> = [];
+  genres = input<Genre[]>([]);
+  tags = input<Tag[]>([]);
+  webLinks = input<string[]>([]);
   @Input() suppressEmptyGenres: boolean = false;
   @Input() suppressEmptyTags: boolean = false;
-  @Input() filePaths: string[] | undefined;
+  filePaths = input<string[]>([]);
+  files = input<MangaFile[]>([]);
 
+  hasUpperMetadata = computed(() => {
+    return this.genres().length > 0 || this.tags().length > 0 || this.webLinks().length > 0;
+  });
 
   openGeneric(queryParamName: FilterField, filter: string | number) {
     if (queryParamName === FilterField.None) return;

@@ -92,7 +92,6 @@ import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-p
 import {ReadingProgressIconPipePipe} from "../_pipes/reading-progress-icon-pipe.pipe";
 
 enum TabID {
-
   Chapters = 'chapters-tab',
   Related = 'related-tab',
   Reviews = 'reviews-tab', // Only applicable for books
@@ -231,6 +230,11 @@ export class VolumeDetailComponent implements OnInit {
     if (chapters.length === 0) return 0;
 
     return chapters.reduce((min, curr) => Math.min(min, curr.totalReads), Infinity);
+  });
+  files = computed(() => {
+    const chapters = this.volume?.chapters || [];
+    console.log('files: ', chapters.flatMap(c => c.files))
+    return chapters.flatMap(c => c.files);
   });
   readingProgressStatus: ReadingProgressStatus = ReadingProgressStatus.NoProgress;
 

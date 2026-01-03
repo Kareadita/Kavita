@@ -4,10 +4,11 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
-  model,
   OnInit,
+  signal,
   ViewChild
 } from '@angular/core';
 import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
@@ -170,13 +171,13 @@ export class ChapterDetailComponent implements OnInit {
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
-  isLoading = model<boolean>(true);
+  isLoading = signal<boolean>(true);
   coverImage: string = '';
   chapterId: number = 0;
   seriesId: number = 0;
   libraryId: number = 0;
-  chapter = model<Chapter | null>(null);
-  series = model<Series | null>(null);
+  chapter = signal<Chapter | null>(null);
+  series = signal<Series | null>(null);
   libraryType: LibraryType | null = null;
   userReviews: Array<UserReview> = [];
   plusReviews: Array<UserReview> = [];
@@ -186,8 +187,8 @@ export class ChapterDetailComponent implements OnInit {
   size = computed(() => {
     return (this.chapter()?.files || []).reduce((sum, f) => sum + f.bytes, 0);
   })
-  annotations = model<Annotation[]>([]);
-  readingProgressStatus = model<ReadingProgressStatus>(ReadingProgressStatus.NoProgress);
+  annotations = signal<Annotation[]>([]);
+  readingProgressStatus = signal<ReadingProgressStatus>(ReadingProgressStatus.NoProgress);
 
   weblinks: Array<string> = [];
   activeTabId = TabID.Details;
@@ -199,9 +200,10 @@ export class ChapterDetailComponent implements OnInit {
   readingLists: ReadingList[] = [];
   showDetailsTab = computed(() => {
     const chp = this.chapter();
+    const user = this.accountService.currentUserSignal();
 
     return hasAnyCast(chp) || (chp?.genres || []).length > 0 ||
-        (chp?.tags || []).length > 0 || (chp?.webLinks || []).length > 0;
+        (chp?.tags || []).length > 0 || (chp?.webLinks || []).length > 0 || this.accountService.hasAdminRole(user!);
   })
   mobileSeriesImgBackground: string | undefined;
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
@@ -217,6 +219,12 @@ export class ChapterDetailComponent implements OnInit {
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
+  }
+
+  constructor() {
+    effect(() => {
+      console.log('reading progress: ', this.readingProgressStatus())
+    })
   }
 
 
@@ -278,7 +286,7 @@ export class ChapterDetailComponent implements OnInit {
 
       this.series.set(results.series);
       this.chapter.set(results.chapter);
-      this.weblinks = this.chapter()!.webLinks.length > 0 ? this.chapter()!.webLinks.split(',') : [];
+      this.weblinks = results.chapter.webLinks.length > 0 ? results.chapter.webLinks.split(',') : [];
       this.libraryType = results.libraryType;
       this.userReviews = results.chapterDetail.reviews.filter(r => !r.isExternal);
       this.plusReviews = results.chapterDetail.reviews.filter(r => r.isExternal);
@@ -286,13 +294,13 @@ export class ChapterDetailComponent implements OnInit {
       this.hasBeenRated = results.chapterDetail.hasBeenRated;
       this.ratings = results.chapterDetail.ratings;
 
-      if (this.chapter()!.pagesRead > 0 && this.chapter()!.pagesRead < this.chapter()!.pages) {
+      if (results.chapter.pagesRead > 0 && results.chapter.pagesRead < results.chapter.pages) {
         this.readingProgressStatus.set(ReadingProgressStatus.Progress);
-      } else if (this.chapter()!.pagesRead >= this.chapter()!.pages) {
+      } else if (results.chapter.pagesRead >= results.chapter.pages) {
         this.readingProgressStatus.set(ReadingProgressStatus.FullyRead);
       }
 
-      this.themeService.setColorScape(this.chapter()!.primaryColor, this.chapter()!.secondaryColor);
+      this.themeService.setColorScape(results.chapter.primaryColor, results.chapter.secondaryColor);
 
       // Set up the download in progress
       this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {

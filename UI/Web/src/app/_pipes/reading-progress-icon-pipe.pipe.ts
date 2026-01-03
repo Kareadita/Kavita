@@ -6,7 +6,9 @@ import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 })
 export class ReadingProgressIconPipePipe implements PipeTransform {
 
-  transform(value: ReadingProgressStatus): string {
+  transform(value: ReadingProgressStatus | undefined): string {
+    if (value === undefined) return 'fa fa-book';
+
     switch (value) {
       case ReadingProgressStatus.NoProgress:
         return 'fa fa-book';
