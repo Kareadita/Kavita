@@ -446,18 +446,18 @@ public class SeriesRepository : ISeriesRepository
             .Where(b => EF.Functions.Like(b.Series.Name, $"%{searchQuery}%") ||
                         (b.Series.OriginalName != null && EF.Functions.Like(b.Series.OriginalName, $"%{searchQuery}%")) ||
                         (b.Series.LocalizedName != null && EF.Functions.Like(b.Series.LocalizedName, $"%{searchQuery}%")))
-            .OrderBy(b => b.Series.NormalizedName.Length)
-            .ThenBy(b => b.Series.NormalizedName)
-            .Select(b => new BookmarkSearchResultDto
+            .GroupBy(b => new { b.SeriesId, b.Series.LibraryId, b.Series.Name, b.Series.LocalizedName, b.Series.NormalizedName })
+            .OrderBy(g => g.Key.NormalizedName.Length)
+            .ThenBy(g => g.Key.NormalizedName)
+            .Select(g => new BookmarkSearchResultDto
             {
-                SeriesName = b.Series.Name,
-                LocalizedSeriesName = b.Series.LocalizedName,
-                LibraryId = b.Series.LibraryId,
-                SeriesId = b.SeriesId,
-                ChapterId = b.ChapterId,
-                VolumeId = b.VolumeId
+                SeriesName = g.Key.Name,
+                LocalizedSeriesName = g.Key.LocalizedName,
+                LibraryId = g.Key.LibraryId,
+                SeriesId = g.Key.SeriesId,
+                ChapterId = g.First().ChapterId,
+                VolumeId = g.First().VolumeId
             })
-            .Distinct()
             .Take(maxRecords)
             .ToListAsync();
 
