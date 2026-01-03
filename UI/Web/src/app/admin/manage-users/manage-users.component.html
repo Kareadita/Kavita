@@ -1,123 +1,201 @@
 <ng-container *transloco="let t; prefix: 'manage-users'">
-  <div class="position-relative">
-    <button class="btn btn-outline-primary position-absolute custom-position" (click)="inviteUser()">
-      <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{t('invite')}}</span>
+  <div class="position-relative mb-3">
+    <button class="btn btn-outline-primary" (click)="inviteUser()">
+      <i class="fa fa-plus" aria-hidden="true"></i>
+      <span class="phone-hidden">&nbsp;{{t('invite')}}</span>
     </button>
   </div>
 
-
-
-  <table class="table table-striped">
-    <thead>
-    <tr>
-      <th scope="col"></th>
-      <th scope="col">{{t('name-header')}}</th>
-      <th scope="col">{{t('last-active-header')}}</th>
-      <th scope="col">{{t('sharing-header')}}</th>
-      <th scope="col">{{t('roles-header')}}</th>
-      <th scope="col">{{t('actions-header')}}</th>
-    </tr>
-    </thead>
-    <tbody>
-      @for(member of members; track member.username + member.lastActiveUtc + member.roles.length; let idx = $index) {
-        <tr>
-          <td>
-            <div class="d-flex flex-row justify-content-center align-items-center">
-              @switch (member.identityProvider) {
-                @case (IdentityProvider.OpenIdConnect) {
-                  <app-image [ngbTooltip]="t('identity-provider-oidc-tooltip')" imageUrl="assets/icons/open-id-connect-logo.svg" height="16px" width="16px" />
-                }
-                @case (IdentityProvider.Kavita) {
-                  <app-image [ngbTooltip]="t('identity-provider-native-tooltip')" imageUrl="assets/icons/favicon-16x16.png" height="16px" width="16px" />
-                }
+  <app-responsive-table [rows]="members" [trackByFn]="trackByMember">
+    <ng-template #tableTemplate>
+      <ngx-datatable
+        class="bootstrap"
+        [rows]="members"
+        [columnMode]="'force'"
+        rowHeight="auto"
+        [footerHeight]="50"
+      >
+        <ngx-datatable-column [width]="40" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template let-member="row" ngx-datatable-cell-template>
+            @switch (member.identityProvider) {
+              @case (IdentityProvider.OpenIdConnect) {
+                <app-image [ngbTooltip]="t('identity-provider-oidc-tooltip')" imageUrl="assets/icons/open-id-connect-logo.svg" height="16px" width="16px" />
               }
-            </div>
-          </td>
-          <td id="username--{{idx}}">
-            <span class="member-name" id="member-name--{{idx}}" [ngClass]="{'highlight': member.username === loggedInUsername}">{{member.username | titlecase}}</span>
+              @case (IdentityProvider.Kavita) {
+                <app-image [ngbTooltip]="t('identity-provider-native-tooltip')" imageUrl="assets/icons/favicon-16x16.png" height="16px" width="16px" />
+              }
+            }
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="username" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('name-header')}}</ng-template>
+          <ng-template let-member="row" let-idx="rowIndex" ngx-datatable-cell-template>
+            <span class="member-name" [id]="'member-name--' + idx" [ngClass]="{'highlight': member.username === loggedInUsername}">
+              {{member.username | titlecase}}
+            </span>
             @if (member.isPending) {
               <span class="badge bg-secondary text-dark ms-1 pending-badge" [ngbTooltip]="t('pending-tooltip')">{{t('pending-title')}}</span>
             }
-          </td>
-          <td>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="lastActiveUtc" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('last-active-header')}}</ng-template>
+          <ng-template let-member="row" ngx-datatable-cell-template>
             <span [ngbTooltip]="member.lastActiveUtc | utcToLocalTime | defaultDate">
+              @if ((messageHub.onlineUsers$ | async)?.includes(member.username)) {
+                {{t('online-now-tooltip')}}
+              } @else {
+                {{member.lastActiveUtc | utcToLocalDate | timeAgo | sentenceCase | defaultDate}}
+              }
+            </span>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('sharing-header')}}</ng-template>
+          <ng-template let-member="row" ngx-datatable-cell-template>
+            <ng-container *ngTemplateOutlet="librariesTemplate; context: {$implicit: member}"></ng-container>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('roles-header')}}</ng-template>
+          <ng-template let-member="row" ngx-datatable-cell-template>
+            <ng-container *ngTemplateOutlet="rolesTemplate; context: {$implicit: member}"></ng-container>
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('actions-header')}}</ng-template>
+          <ng-template let-member="row" ngx-datatable-cell-template>
+            <ng-container *ngTemplateOutlet="actionsTemplate; context: {$implicit: member}"></ng-container>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </ng-template>
+
+    <ng-template #cardEmpty>
+      @if (loadingMembers) {
+        <app-loading [loading]="loadingMembers" />
+      } @else {
+        <div class="text-center text-muted py-4">{{t('no-data')}}</div>
+      }
+    </ng-template>
+
+    <ng-template #cardTemplate let-member let-idx="index">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            @switch (member.identityProvider) {
+              @case (IdentityProvider.OpenIdConnect) {
+                <app-image class="me-2" [ngbTooltip]="t('identity-provider-oidc-tooltip')" imageUrl="assets/icons/open-id-connect-logo.svg" height="16px" width="16px" />
+              }
+              @case (IdentityProvider.Kavita) {
+                <app-image class="me-2" [ngbTooltip]="t('identity-provider-native-tooltip')" imageUrl="assets/icons/favicon-16x16.png" height="16px" width="16px" />
+              }
+            }
+            <h5 class="card-title mb-0" [ngClass]="{'highlight': member.username === loggedInUsername}">
+              {{member.username | titlecase}}
+            </h5>
+            @if (member.isPending) {
+              <span class="badge bg-secondary text-dark ms-2 pending-badge" [ngbTooltip]="t('pending-tooltip')">{{t('pending-title')}}</span>
+            }
+          </div>
+
+          <div class="row g-2">
+            <div class="col-12">
+              <div class="text-muted small">{{t('last-active-header')}}</div>
+              <div [ngbTooltip]="member.lastActiveUtc | utcToLocalTime | defaultDate">
                 @if ((messageHub.onlineUsers$ | async)?.includes(member.username)) {
                   {{t('online-now-tooltip')}}
                 } @else {
                   {{member.lastActiveUtc | utcToLocalDate | timeAgo | sentenceCase | defaultDate}}
                 }
-              </span>
-          </td>
-          <td>
-            @if (member.libraries.length > 0) {
-              @if (hasAdminRole(member) || member.libraries.length === libraryCount) {
-                {{t('all-libraries')}}
-              } @else {
-                @if (member.libraries.length > 5) {
-                  {{t('too-many-libraries')}}
-                }
-                @else {
-                  @for(lib of member.libraries; track lib.name) {
-                    <app-tag-badge class="col-auto">{{lib.name}}</app-tag-badge>
-                  }
-                }
-              }
-            } @else {
-              {{null | defaultValue}}
-            }
-          </td>
-          <td>
-            @if (getRoles(member); as roles) {
-              <div>
-                @if (roles.length === 0) {
-                  <span>{{null | defaultValue}}</span>
-                } @else {
-                  @if (hasAdminRole(member)) {
-                    <app-tag-badge class="col-auto">{{Role.Admin | roleLocalized}}</app-tag-badge>
-                  } @else {
-                    @for (role of roles; track role) {
-                      <app-tag-badge class="col-auto">{{role | roleLocalized}}</app-tag-badge>
-                    }
-                  }
-                }
               </div>
-            } @else {
-              {{null | defaultValue}}
-            }
-          </td>
-          <td>
-            <div class="btn-container">
-              @if (canEditMember(member)) {
-                <button class="btn btn-danger btn-sm me-2 mb-2" (click)="deleteUser(member)"
-                        placement="top" [ngbTooltip]="t('delete-user-tooltip')" [attr.aria-label]="t('delete-user-alt', {user: member.username | titlecase})">
-                  <i class="fa fa-trash" aria-hidden="true"></i>
-                </button>
-                <button class="btn btn-primary btn-sm me-2 mb-2" (click)="openEditUser(member)"
-                        placement="top" [ngbTooltip]="t('edit-user-tooltip')" [attr.aria-label]="t('edit-user-alt', {user: member.username | titlecase})">
-                  <i class="fa fa-pen" aria-hidden="true"></i>
-                </button>
-
-                @if (member.isPending) {
-                  <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="resendEmail(member)"
-                          placement="top" [ngbTooltip]="t('resend-invite-tooltip')" [attr.aria-label]="t('resend-invite-alt', {user: member.username | titlecase})"><i class="fa-solid fa-share-from-square" aria-hidden="true"></i></button>
-                  <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="setup(member)"
-                          placement="top" [ngbTooltip]="t('setup-user-tooltip')" [attr.aria-label]="t('setup-user-alt', {user: member.username | titlecase})"><i class="fa-solid fa-sliders" aria-hidden="true"></i></button>
-                } @else {
-                  <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="updatePassword(member)" [disabled]="member.identityProvider === IdentityProvider.OpenIdConnect && oidcSyncEnabled"
-                          placement="top" [ngbTooltip]="t('change-password-tooltip')" [attr.aria-label]="t('change-password-alt', {user: member.username | titlecase})"><i class="fa fa-key" aria-hidden="true"></i></button>
-                }
-              }
             </div>
-          </td>
-        </tr>
-      }
-      @empty {
-        @if (loadingMembers) {
-          <tr><td colspan="4" style="text-align: center;"><app-loading [loading]="loadingMembers" /></td></tr>
-        } @else {
-          <tr><td colspan="4" style="text-align: center;">{{t('no-data')}}</td></tr>
+
+            <div class="col-12">
+              <div class="text-muted small">{{t('sharing-header')}}</div>
+              <div><ng-container *ngTemplateOutlet="librariesTemplate; context: {$implicit: member}"></ng-container></div>
+            </div>
+
+            <div class="col-12">
+              <div class="text-muted small">{{t('roles-header')}}</div>
+              <div><ng-container *ngTemplateOutlet="rolesTemplate; context: {$implicit: member}"></ng-container></div>
+            </div>
+
+            <div class="col-12 mt-3">
+              <ng-container *ngTemplateOutlet="actionsTemplate; context: {$implicit: member}"></ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </app-responsive-table>
+
+  <!-- Shared Templates -->
+  <ng-template #librariesTemplate let-member>
+    @if (member.libraries.length > 0) {
+      @if (hasAdminRole(member) || member.libraries.length === libraryCount) {
+        {{t('all-libraries')}}
+      } @else if (member.libraries.length > 5) {
+        {{t('too-many-libraries')}}
+      } @else {
+        @for(lib of member.libraries; track lib.name) {
+          <app-tag-badge class="col-auto">{{lib.name}}</app-tag-badge>
         }
       }
-    </tbody>
-  </table>
+    } @else {
+      {{null | defaultValue}}
+    }
+  </ng-template>
+
+  <ng-template #rolesTemplate let-member>
+    @if (getRoles(member); as roles) {
+      @if (roles.length === 0) {
+        <span>{{null | defaultValue}}</span>
+      } @else if (hasAdminRole(member)) {
+        <app-tag-badge class="col-auto">{{Role.Admin | roleLocalized}}</app-tag-badge>
+      } @else {
+        @for (role of roles; track role) {
+          <app-tag-badge class="col-auto">{{role | roleLocalized}}</app-tag-badge>
+        }
+      }
+    } @else {
+      {{null | defaultValue}}
+    }
+  </ng-template>
+
+  <ng-template #actionsTemplate let-member>
+    @if (canEditMember(member)) {
+      <div class="btn-container">
+        <button class="btn btn-danger btn-sm me-2 mb-2" (click)="deleteUser(member)"
+                [ngbTooltip]="t('delete-user-tooltip')" [attr.aria-label]="t('delete-user-alt', {user: member.username | titlecase})">
+          <i class="fa fa-trash" aria-hidden="true"></i>
+        </button>
+        <button class="btn btn-primary btn-sm me-2 mb-2" (click)="openEditUser(member)"
+                [ngbTooltip]="t('edit-user-tooltip')" [attr.aria-label]="t('edit-user-alt', {user: member.username | titlecase})">
+          <i class="fa fa-pen" aria-hidden="true"></i>
+        </button>
+        @if (member.isPending) {
+          <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="resendEmail(member)"
+                  [ngbTooltip]="t('resend-invite-tooltip')" [attr.aria-label]="t('resend-invite-alt', {user: member.username | titlecase})">
+            <i class="fa-solid fa-share-from-square" aria-hidden="true"></i>
+          </button>
+          <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="setup(member)"
+                  [ngbTooltip]="t('setup-user-tooltip')" [attr.aria-label]="t('setup-user-alt', {user: member.username | titlecase})">
+            <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+          </button>
+        } @else {
+          <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="updatePassword(member)"
+                  [disabled]="member.identityProvider === IdentityProvider.OpenIdConnect && oidcSyncEnabled"
+                  [ngbTooltip]="t('change-password-tooltip')" [attr.aria-label]="t('change-password-alt', {user: member.username | titlecase})">
+            <i class="fa fa-key" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+    }
+  </ng-template>
 </ng-container>
