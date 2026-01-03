@@ -10,7 +10,10 @@
       <div class="ms-3 d-flex flex-column">
         @if (filesValue.length > 0) {
           @for (fp of filesValue; track $index) {
-            {{fp.filePath}} ({{fp.koreaderHash}})
+            {{fp.filePath}}
+            @if (fp.koreaderHash) {
+              ({{fp.koreaderHash}})
+            }
           }
         } @else {
           @for (fp of filePathsValue; track $index) {
