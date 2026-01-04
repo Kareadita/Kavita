@@ -4,13 +4,11 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {CoverUpdateEvent} from "../../_models/events/cover-update-event";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgStyle} from "@angular/common";
 
 @Component({
   selector: 'app-profile-icon',
   imports: [
-    ImageComponent,
-    NgStyle
+    ImageComponent
   ],
   templateUrl: './profile-icon.component.html',
   styleUrl: './profile-icon.component.scss',
@@ -33,7 +31,6 @@ export class ProfileIconComponent {
   noImage = signal<boolean>(false);
 
   constructor() {
-
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (!this.processEvents()) return;
       const imageUrl = this.currentImageUrl();

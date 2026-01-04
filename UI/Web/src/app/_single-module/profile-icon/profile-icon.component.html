@@ -1,14 +1,15 @@
-  @let image = currentImageUrl();
-  @if (image && !noImage()) {
-    <app-image objectFit="cover"
-               [styles]="{'object-position': 'top', 'border-radius': '50%'}"
-               height="{{size()}}px"
-               width="{{size()}}px"
-               [imageUrl]="image"
-               [errorImage]="imageService.noPersonImage"
-               (errorLoad)="handleErrorLoad()"
-               [hideOnError]="true"
-    />
-  } @else {
-    <i class="fa-solid fa-user-circle align-self-center" [ngStyle]="{'font-size': size() + 'px'}" aria-hidden="true"></i>
-  }
+@let image = currentImageUrl();
+@let sizeValue = size();
+@if (image && !noImage()) {
+  <app-image objectFit="cover"
+             [styles]="{'object-position': 'top', 'border-radius': '50%'}"
+             height="{{sizeValue}}px"
+             width="{{sizeValue}}px"
+             [imageUrl]="image"
+             [errorImage]="imageService.noPersonImage"
+             (errorLoad)="handleErrorLoad()"
+             [hideOnError]="true"
+  />
+} @else {
+  <i class="fa-solid fa-user-circle align-self-center" [style.font-size.px]="sizeValue" aria-hidden="true"></i>
+}
