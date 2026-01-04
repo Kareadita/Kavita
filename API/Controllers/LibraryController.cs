@@ -444,10 +444,17 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
+    [AllowAnonymous]
     [HttpPost("scan-folder")]
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> ScanFolder(ScanFolderDto dto)
     {
+        var user = await _unitOfWork.UserRepository.GetUserByAuthKey(dto.ApiKey);
+        if (user == null) return Unauthorized();
+
+        // Validate user has Admin privileges
+        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+        if (!isAdmin) return BadRequest("API key must belong to an admin");
+
         if (dto.FolderPath.Contains(".."))
         {
             return BadRequest(await _localizationService.Translate(UserId, "invalid-path"));

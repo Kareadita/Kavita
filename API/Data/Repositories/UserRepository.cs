@@ -88,6 +88,7 @@ public interface IUserRepository
     Task<UserDto?> GetUserDtoById(int userId);
     Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
+    Task<AppUser?> GetUserByAuthKey(string authKey, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<int> GetUserIdByUsernameAsync(string username);
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
     Task<AppUser?> GetUserByEmailAsync(string email, AppUserIncludes includes = AppUserIncludes.None);
@@ -255,6 +256,18 @@ public class UserRepository : IUserRepository
     {
         return await _context.Users
             .Where(x => x.Id == userId)
+            .Includes(includeFlags)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<AppUser?> GetUserByAuthKey(string authKey, AppUserIncludes includeFlags = AppUserIncludes.None)
+    {
+        if (string.IsNullOrEmpty(authKey)) return null;
+
+        return await _context.AppUserAuthKey
+            .Where(ak => ak.Key == authKey)
+            .HasNotExpired()
+            .Select(ak => ak.AppUser)
             .Includes(includeFlags)
             .FirstOrDefaultAsync();
     }
