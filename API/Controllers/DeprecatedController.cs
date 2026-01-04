@@ -266,7 +266,91 @@ public class DeprecatedController : BaseApiController
     {
         var userId = User.IsInRole(PolicyConstants.AdminRole) ? 0 : UserId;
         return Ok(await _unitOfWork.AppUserProgressRepository.GetUserProgressForChapter(chapterId, userId));
+    }
 
+    /// <summary>
+    /// Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams">Pagination</param>
+    /// <returns></returns>
+    [HttpGet("recommended/quick-reads")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickReads(int libraryId, [FromQuery] UserParams? userParams)
+    {
+        userParams ??= UserParams.Default;
+        var series = await _unitOfWork.SeriesRepository.GetQuickReads(UserId, libraryId, userParams);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Quick Catchup Reads are series that should be readable in less than 10 in total and are Ongoing in release.
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
+    [HttpGet("recommended/quick-catchup-reads")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickCatchupReads(int libraryId, [FromQuery] UserParams? userParams)
+    {
+        userParams ??= UserParams.Default;
+        var series = await _unitOfWork.SeriesRepository.GetQuickCatchupReads(UserId, libraryId, userParams);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Highly Rated based on other users ratings. Will pull series with ratings > 4.0, weighted by count of other users.
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams">Pagination</param>
+    /// <returns></returns>
+    [HttpGet("recommended/highly-rated")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams? userParams)
+    {
+        var userId = UserId;
+        userParams ??= UserParams.Default;
+        var series = await _unitOfWork.SeriesRepository.GetHighlyRated(userId, libraryId, userParams);
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Chooses a random genre and shows series that are in that without reading progress
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="genreId">Genre Id</param>
+    /// <param name="userParams">Pagination</param>
+    /// <returns></returns>
+    [HttpGet("recommended/more-in")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetMoreIn(int libraryId, int genreId, [FromQuery] UserParams? userParams)
+    {
+        var userId = UserId;
+
+        userParams ??= UserParams.Default;
+        var series = await _unitOfWork.SeriesRepository.GetMoreIn(userId, libraryId, genreId, userParams);
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Series that are fully read by the user in no particular order
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams">Pagination</param>
+    /// <returns></returns>
+    [HttpGet("recommended/rediscover")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetRediscover(int libraryId, [FromQuery] UserParams? userParams)
+    {
+        userParams ??= UserParams.Default;
+        var series = await _unitOfWork.SeriesRepository.GetRediscover(UserId, libraryId, userParams);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        return Ok(series);
     }
 
 }
