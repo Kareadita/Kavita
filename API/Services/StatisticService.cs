@@ -1587,14 +1587,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
-        // It makes no sense to filter this in by month etc. Trim to year
-        filter.StartDate = filter.StartDate.HasValue
-            ? new DateTime(filter.StartDate.Value.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-            : null;
-        filter.EndDate = filter.EndDate.HasValue
-            ? new DateTime(filter.EndDate.Value.Year, 12, 31, 23, 59, 59, 0, 0, DateTimeKind.Utc)
-            : null;
-
         return await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .GroupBy(s => new {s.ReadingSession.CreatedUtc.Year, s.ReadingSession.CreatedUtc.Month})
