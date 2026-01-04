@@ -534,6 +534,13 @@
         "books-count": "{{count}} books"
     },
 
+    "time-frame-label": {
+        "overall": "Overall",
+        "week": "This week",
+        "month": "This month",
+        "year": "This year"
+    },
+
     "role-selector": {
         "title": "{{common.roles}}",
         "deselect-all": "{{common.deselect-all}}",

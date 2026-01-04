@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {MostActiveUser} from "../../_models/top-reads";
 import {ImageService} from "../../../_services/image.service";
 import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile-icon.component";
@@ -27,7 +27,7 @@ export class ActiveUserCardComponent {
 
   user = input.required<MostActiveUser>();
   filter = input.required<StatsFilter>();
-  timeFrameLabel = input<string>('all time');
+  timeFrameLabel = input<string>(translate('time-frame-label.overall'));
 
 
   formatNumber(num: number): string {
