@@ -15,6 +15,7 @@ import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SortField} from "../../../_models/metadata/series-filter";
+import {QueryContext} from "../../../_models/metadata/v2/query-context";
 
 type OverviewStream = {
   title: string;
@@ -81,10 +82,10 @@ export class ProfileOverviewComponent {
       {
         title: translate('profile-overview.just-finished-reading'),
         api: this.seriesService
-          .getAllSeriesV2(0, 20, JustFinishedReadingFilter, memberId)
+          .getAllSeriesV2(0, 20, JustFinishedReadingFilter, QueryContext.None, memberId)
           .pipe(map(pr => pr.result)),
         nextPageLoader: (pageNum, pageSize) => this.seriesService
-          .getAllSeriesV2(pageNum, pageSize, JustFinishedReadingFilter, memberId),
+          .getAllSeriesV2(pageNum, pageSize, JustFinishedReadingFilter, QueryContext.None, memberId),
       }
     ];
   });
