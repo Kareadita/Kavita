@@ -305,6 +305,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
             WordsRead = 0,
             ClientInfo = null,
             DeviceIds = [],
+            Format = format,
         };
     }
 
