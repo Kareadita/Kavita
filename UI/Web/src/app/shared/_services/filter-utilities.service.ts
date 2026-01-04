@@ -21,7 +21,6 @@ import {
 } from "../../metadata-filter/filter-settings";
 import {SortFieldPipe} from "../../_pipes/sort-field.pipe";
 import {GenericFilterFieldPipe} from "../../_pipes/generic-filter-field.pipe";
-import {TranslocoService} from "@jsverse/transloco";
 import {
   allAnnotationsFilterFields,
   allAnnotationsSortFields,
@@ -41,7 +40,6 @@ export class FilterUtilitiesService {
   private readonly router = inject(Router);
   private readonly metadataService = inject(MetadataService);
   private readonly http = inject(HttpClient);
-  private readonly translocoService = inject(TranslocoService);
 
   private readonly sortFieldPipe = new SortFieldPipe();
   private readonly genericFilterFieldPipe = new GenericFilterFieldPipe();

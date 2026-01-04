@@ -21,7 +21,7 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
 import {map} from "rxjs/operators";
-import {forkJoin} from "rxjs";
+import {forkJoin, tap} from "rxjs";
 
 @Component({
   selector: 'app-server-stats-stats-tab',
@@ -46,6 +46,9 @@ export class ServerStatsStatsTabComponent {
   private readonly imageService = inject(ImageService);
   private readonly filterUtilities = inject(FilterUtilitiesService);
   protected readonly accountService = inject(AccountService);
+
+  // Encode() is fast but very predictable. We cache so we aren't calling the server over and over
+  private readonly cachePrefix = 'kavita-cache--encode-decade-';
 
 
   userId = computed(() => this.accountService.currentUserSignal()?.id);
@@ -149,8 +152,26 @@ export class ServerStatsStatsTabComponent {
         }
       }
 
-      // Encode each unique decade once
-      const encodeRequests = Array.from(decadeMap.entries()).map(([key, decade]) =>
+      const cached = new Map<string, string>();
+      const toFetch: [string, StatBucket][] = [];
+
+      for (const [key, decade] of decadeMap) {
+        const stored = localStorage.getItem(this.cachePrefix + decade.rangeStart);
+        if (stored) {
+          cached.set(key, stored);
+        } else {
+          toFetch.push([key, decade]);
+        }
+      }
+
+      // If everything is cached, resolve immediately
+      if (toFetch.length === 0) {
+        this.releaseYearsWithUrls.set(this.buildResolved(items, cached));
+        return;
+      }
+
+      // Fetch only uncached decades
+      const encodeRequests = toFetch.map(([key, decade]) =>
         this.filterUtilities.encodeFilter({
           statements: [
             { comparison: FilterComparison.GreaterThanEqual, field: FilterField.ReleaseYear, value: decade.rangeStart + '' },
@@ -160,26 +181,27 @@ export class ServerStatsStatsTabComponent {
           limitTo: 0,
           name: `${decade.rangeStart}s`
         }).pipe(
+          tap(encoded => localStorage.setItem(this.cachePrefix + decade.rangeStart, encoded)),
           map(encoded => [key, encoded] as const)
         )
       );
 
       forkJoin(encodeRequests).subscribe(encodedPairs => {
-        // Build lookup from decade key to encoded URL
-        const urlLookup = new Map(encodedPairs);
-
-        // Map original items using the lookup
-        const resolved = items.map(item => {
-          const decade = item.data as StatBucket;
-          const key = `${decade.rangeStart}-${decade.rangeEnd}`;
-          return {
-            ...item,
-            data: { ...decade, url: '/all-series?' + urlLookup.get(key) }
-          };
-        });
-
-        this.releaseYearsWithUrls.set(resolved);
+        // Merge cached + freshly fetched
+        const urlLookup = new Map([...cached, ...encodedPairs]);
+        this.releaseYearsWithUrls.set(this.buildResolved(items, urlLookup));
       });
+    });
+  }
+
+  private buildResolved(items: StatListItem[], urlLookup: Map<string, string>) {
+    return items.map(item => {
+      const decade = item.data as StatBucket;
+      const key = `${decade.rangeStart}-${decade.rangeEnd}`;
+      return {
+        ...item,
+        data: { ...decade, url: '/all-series?' + urlLookup.get(key) }
+      };
     });
   }
 }
