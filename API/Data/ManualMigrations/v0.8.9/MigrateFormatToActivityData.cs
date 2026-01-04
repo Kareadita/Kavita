@@ -10,13 +10,13 @@ namespace API.Data.ManualMigrations;
 /// <summary>
 /// v0.8.8.16 - Needed to add Format to the ActivityData to optimize a query
 /// </summary>
-public class MigrateFormatToActivityData : ManualMigration
+public class MigrateFormatToActivityDataV2 : ManualMigration
 {
-    protected override string MigrationName => nameof(MigrateFormatToActivityData);
+    protected override string MigrationName => nameof(MigrateFormatToActivityDataV2);
     protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
     {
         var activitiesWithoutFormat = await context.AppUserReadingSessionActivityData
-            .Where(d => d.Format == MangaFormat.Unknown)
+            .Where(d => d.Format == MangaFormat.Unknown || d.Format == 0)
             .Select(d => d.ChapterId)
             .Distinct()
             .ToListAsync();
@@ -47,7 +47,7 @@ public class MigrateFormatToActivityData : ManualMigration
         foreach (var chapterIdBatch in activitiesWithoutFormat.Chunk(batchSize))
         {
             var activities = await context.AppUserReadingSessionActivityData
-                .Where(d => d.Format == MangaFormat.Unknown && chapterIdBatch.Contains(d.ChapterId))
+                .Where(d => (d.Format == MangaFormat.Unknown || d.Format == 0) && chapterIdBatch.Contains(d.ChapterId))
                 .ToListAsync();
 
             foreach (var activity in activities)
