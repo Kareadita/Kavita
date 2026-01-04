@@ -241,6 +241,7 @@ export class PreferenceNavComponent implements AfterViewInit {
         children: [
           new SideNavItem(SettingsTabId.Activity, [Role.Admin]),
           new SideNavItem(SettingsTabId.AdminDevices, [Role.Admin]),
+          new SideNavItem(SettingsTabId.Statistics, [Role.Admin]),
         ]
       },
       {
@@ -268,7 +269,6 @@ export class PreferenceNavComponent implements AfterViewInit {
         title: SettingSectionId.InfoSection,
         children: [
           new SideNavItem(SettingsTabId.System, [Role.Admin]),
-          new SideNavItem(SettingsTabId.Statistics, [Role.Admin]),
           new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin], this.mediaIssuesBadgeCount$),
           new SideNavItem(SettingsTabId.EmailHistory, [Role.Admin]),
         ]

@@ -532,7 +532,7 @@ export class AccountService {
 
     this.stopRefreshTokenTimer();
 
-    this.refreshTokenTimeout = setInterval(() => this.refreshToken().subscribe(() => {}), (60 * 1_000));
+    this.refreshTokenTimeout = setInterval(() => this.refreshToken().subscribe(() => {}), (60 * 10_000));
   }
 
   private stopRefreshTokenTimer() {
