@@ -8,14 +8,19 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, DecimalPipe} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ResponsiveTableComponent} from "../../../shared/_components/responsive-table/responsive-table.component";
-import {DataTableColumnDirective, DatatableComponent} from "@siemens/ngx-datatable";
+import {
+  DataTableColumnCellDirective,
+  DataTableColumnDirective,
+  DataTableColumnHeaderDirective,
+  DatatableComponent
+} from "@siemens/ngx-datatable";
 
 @Component({
     selector: 'app-publication-status-stats',
     templateUrl: './publication-status-stats.component.html',
     styleUrls: ['./publication-status-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, AsyncPipe, DecimalPipe, TranslocoDirective, ResponsiveTableComponent, DatatableComponent, DataTableColumnDirective]
+  imports: [ReactiveFormsModule, AsyncPipe, DecimalPipe, TranslocoDirective, ResponsiveTableComponent, DatatableComponent, DataTableColumnDirective, DataTableColumnHeaderDirective, DataTableColumnCellDirective]
 })
 export class PublicationStatusStatsComponent {
   private readonly statService = inject(StatisticsService);
