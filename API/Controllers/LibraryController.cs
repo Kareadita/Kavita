@@ -444,30 +444,25 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [AllowAnonymous]
     [HttpPost("scan-folder")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> ScanFolder(ScanFolderDto dto)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(dto.ApiKey);
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return Unauthorized();
+        if (dto.FolderPath.Contains(".."))
+        {
+            return BadRequest(await _localizationService.Translate(UserId, "invalid-path"));
+        }
 
-        // Validate user has Admin privileges
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-        if (!isAdmin) return BadRequest("API key must belong to an admin");
-
-        if (dto.FolderPath.Contains("..")) return BadRequest(await _localizationService.Translate(user.Id, "invalid-path"));
-
-        dto.FolderPath = Services.Tasks.Scanner.Parser.Parser.NormalizePath(dto.FolderPath);
+        dto.FolderPath = Parser.NormalizePath(dto.FolderPath);
 
         var libraryFolder = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
             .SelectMany(l => l.Folders)
             .Distinct()
-            .Select(Services.Tasks.Scanner.Parser.Parser.NormalizePath);
+            .Select(Parser.NormalizePath);
 
         var seriesFolder = _directoryService.FindHighestDirectoriesFromFiles(libraryFolder, [dto.FolderPath]);
 
-        _taskScheduler.ScanFolder(seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath);
+        _taskScheduler.ScanFolder(seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath, dto.AbortOnNoSeriesMatch);
 
         return Ok();
     }

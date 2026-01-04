@@ -49,7 +49,7 @@ public interface IScannerService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true);
 
-    Task ScanFolder(string folder, string originalPath);
+    Task ScanFolder(string folder, string originalPath, bool abortOnNoSeriesMatch = false);
     Task AnalyzeFiles();
 
 }
@@ -142,7 +142,8 @@ public class ScannerService : IScannerService
     /// <remarks>This will Schedule the job to run 1 minute in the future to allow for any close-by duplicate requests to be dropped</remarks>
     /// <param name="folder">Normalized folder</param>
     /// <param name="originalPath">If invoked from LibraryWatcher, this maybe a nested folder and can allow for optimization</param>
-    public async Task ScanFolder(string folder, string originalPath)
+    /// <param name="abortOnNoSeriesMatch"></param>
+    public async Task ScanFolder(string folder, string originalPath, bool abortOnNoSeriesMatch = false)
     {
         Series? series = null;
         try
@@ -172,6 +173,8 @@ public class ScannerService : IScannerService
             BackgroundJob.Schedule(() => ScanSeries(series.Id, true), TimeSpan.FromMinutes(1));
             return;
         }
+
+        if (abortOnNoSeriesMatch) return;
 
 
         // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
