@@ -31,7 +31,9 @@ export class ExternalSourceService {
   }
 
   sourceExists(name: string, host: string, apiKey: string) {
-    return this.httpClient.get<string>(this.baseUrl + `stream/external-source-exists?host=${encodeURIComponent(host)}&name=${name}&apiKey=${apiKey}`, TextResonse)
+    const dto = {id: 0, name, host, apiKey};
+
+    return this.httpClient.post<string>(this.baseUrl + `stream/external-source-exists`, dto, TextResonse)
       .pipe(map(s => s == 'true'));
   }
 }
