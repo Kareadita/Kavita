@@ -129,31 +129,54 @@ export class ServerStatsStatsTabComponent {
   constructor() {
     effect(() => {
       const items = this.releaseYears();
-      if (!items.length) {
-        this.releaseYearsWithUrls.set([]);
+      if (!items.length || this.releaseYearsResource.isLoading()) {
+        if (!items.length) {
+          this.releaseYearsWithUrls.set([]);
+        }
         return;
       }
 
-      // Build all filter encode requests
-      const urlRequests = items.map(item => {
+      // Build a map of unique decade ranges to encode
+      const decadeMap = new Map<string, StatBucket>();
+      for (const item of items) {
         const decade = item.data as StatBucket;
-        return this.filterUtilities.encodeFilter({
+        if (decade.rangeStart) {
+          const key = `${decade.rangeStart}-${decade.rangeEnd}`;
+          if (!decadeMap.has(key)) {
+            decadeMap.set(key, decade);
+          }
+        }
+      }
+
+      // Encode each unique decade once
+      const encodeRequests = Array.from(decadeMap.entries()).map(([key, decade]) =>
+        this.filterUtilities.encodeFilter({
           statements: [
-            {comparison: FilterComparison.GreaterThanEqual, field: FilterField.ReleaseYear, value: decade.rangeStart + ''},
-            {comparison: FilterComparison.LessThanEqual, field: FilterField.ReleaseYear, value: decade.rangeEnd + ''},
+            { comparison: FilterComparison.GreaterThanEqual, field: FilterField.ReleaseYear, value: decade.rangeStart + '' },
+            { comparison: FilterComparison.LessThanEqual, field: FilterField.ReleaseYear, value: decade.rangeEnd + '' },
           ],
           combination: FilterCombination.And,
           limitTo: 0,
           name: `${decade.rangeStart}s`
         }).pipe(
-          map(encoded => ({
-            ...item,
-            data: { ...decade, url: '/all-series?' + encoded }
-          }))
-        );
-      });
+          map(encoded => [key, encoded] as const)
+        )
+      );
 
-      forkJoin(urlRequests).subscribe(resolved => {
+      forkJoin(encodeRequests).subscribe(encodedPairs => {
+        // Build lookup from decade key to encoded URL
+        const urlLookup = new Map(encodedPairs);
+
+        // Map original items using the lookup
+        const resolved = items.map(item => {
+          const decade = item.data as StatBucket;
+          const key = `${decade.rangeStart}-${decade.rangeEnd}`;
+          return {
+            ...item,
+            data: { ...decade, url: '/all-series?' + urlLookup.get(key) }
+          };
+        });
+
         this.releaseYearsWithUrls.set(resolved);
       });
     });
