@@ -724,7 +724,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     public async Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc)
     {
         var devices = await context.ClientDevice
-            .Where(d => d.IsActive && d.FirstSeenUtc >= fromDateUtc)
+            .Where(d => d.IsActive && d.LastSeenUtc >= fromDateUtc)
             .Select(d => d.CurrentClientInfo.ClientType)
             .ToListAsync();
 
@@ -749,7 +749,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     public async Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc)
     {
         var devices = await context.ClientDevice
-            .Where(d => d.IsActive && d.FirstSeenUtc >= fromDateUtc)
+            .Where(d => d.IsActive && d.LastSeenUtc >= fromDateUtc)
             .Select(d => d.CurrentClientInfo.DeviceType)
             .ToListAsync();
 
