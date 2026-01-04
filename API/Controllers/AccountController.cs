@@ -244,11 +244,7 @@ public class AccountController : BaseApiController
         AppUser? user;
         if (!string.IsNullOrEmpty(loginDto.ApiKey))
         {
-            user = await _userManager.Users
-                .Include(u => u.UserPreferences)
-                .Include(u => u.AuthKeys)
-                .AsSplitQuery()
-                .SingleOrDefaultAsync(x => x.GetOpdsAuthKey() == loginDto.ApiKey);
+            user = await _unitOfWork.UserRepository.GetUserByAuthKey(loginDto.ApiKey);
         }
         else
         {
