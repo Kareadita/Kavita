@@ -2764,8 +2764,7 @@
         "popular-reading-lists-title": "Most Read Reading Lists",
         "popular-genres-title": "Popular Genres",
         "popular-tags-title": "Popular Tags",
-        "popular-artists-title": "Popular Artists",
-        "popular-authors-title": "Popular Authors",
+        "popular-person-title": "Popular {{role}}",
 
 
         "series-count": "{{num}} Series",

@@ -24,10 +24,10 @@ export interface StatListConfig {
 }
 
 @Component({
-    selector: 'app-stat-list',
-    templateUrl: './stat-list.component.html',
-    styleUrls: ['./stat-list.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-stat-list',
+  templateUrl: './stat-list.component.html',
+  styleUrls: ['./stat-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, NgClass, ImageComponent, CompactNumberPipe]
 })
 export class StatListComponent {

@@ -4,8 +4,9 @@
   border-radius: 8px;
   overflow: hidden;
   min-width: 280px;
-  max-width: 400px;
-  min-height: 232px;
+  //max-width: 400px;
+  max-height: 305px;
+  height: 305px;
 
   &.has-featured {
     min-width: 400px;
@@ -14,7 +15,7 @@
 
 .featured-image {
   position: relative;
-  flex: 0 0 140px;
+  flex: 0 0 230px;
   background-color: var(--elevation-layer2-dark-solid);
 
   app-image {

@@ -23,6 +23,7 @@ import {FilterCombination} from "../../../_models/metadata/v2/filter-combination
 import {map} from "rxjs/operators";
 import {forkJoin, tap} from "rxjs";
 import {ReadingList} from "../../../_models/reading-list";
+import {PersonRolePipe} from "../../../_pipes/person-role.pipe";
 
 @Component({
   selector: 'app-server-stats-stats-tab',
@@ -36,7 +37,8 @@ import {ReadingList} from "../../../_models/reading-list";
     MostActiveUsersComponent,
     ReadingActivityComponent,
     StatListComponent,
-    TimeDurationPipe
+    TimeDurationPipe,
+    PersonRolePipe
   ],
   templateUrl: './server-stats-stats-tab.component.html',
   styleUrl: './server-stats-stats-tab.component.scss',
@@ -144,6 +146,20 @@ export class ServerStatsStatsTabComponent {
     }) as StatListItem[];
   });
 
+  readonly characterResource = this.statService.getPopularPersonResource(PersonRole.Character);
+  readonly popularCharacters = computed(() => {
+    return (this.characterResource.value() ?? []).map(r => {
+      return {name: r.value.name, value: r.count, data: r.value};
+    }) as StatListItem[];
+  });
+
+  readonly publisherResource = this.statService.getPopularPersonResource(PersonRole.Publisher);
+  readonly popularPublishers = computed(() => {
+    return (this.publisherResource.value() ?? []).map(r => {
+      return {name: r.value.name, value: r.count, data: r.value};
+    }) as StatListItem[];
+  });
+
   readonly getPersonUrl = (item: StatListItem) => {
     const person = item.data as Person;
     return `/person/${person.name}`;
@@ -224,4 +240,6 @@ export class ServerStatsStatsTabComponent {
       };
     });
   }
+
+  protected readonly PersonRole = PersonRole;
 }
