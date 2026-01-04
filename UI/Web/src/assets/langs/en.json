@@ -2705,7 +2705,8 @@
 
     "files-over-time": {
         "title": "Files added over time",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "most-files": "On {{date}}, {{count}} files were added"
     },
 
     "publication-status-stats": {
