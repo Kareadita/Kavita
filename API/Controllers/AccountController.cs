@@ -514,7 +514,8 @@ public class AccountController : BaseApiController
         }
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-        if (!await _accountService.CanChangeAgeRestriction(user)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
+        var hasRole = await _accountService.CanChangeAgeRestriction(user);
+        if (!hasRole) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         user.AgeRestriction = isAdmin ? AgeRating.NotApplicable : dto.AgeRating;
         user.AgeRestrictionIncludeUnknowns = isAdmin || dto.IncludeUnknowns;
