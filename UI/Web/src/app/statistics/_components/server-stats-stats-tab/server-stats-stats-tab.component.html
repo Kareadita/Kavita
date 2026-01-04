@@ -73,25 +73,8 @@
                                    (filterChange)="filter.set($event)" (yearChange)="year.set($event)" [locale]="'server'" />
   </div>
 
-  <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around align-items-stretch">
-    <div class="col-auto d-flex">
-      <app-stat-list
-        [title]="t('popular-decades-title')"
-        [items]="releaseYearsWithUrls()"
-        [valueLabel]="t('series')"
-        [itemUrl]="getDecadeUrl"
-        [config]="{ showRanking: true, showAccentBars: true }"
-      />
-    </div>
-    <div class="col-auto d-flex">
-      <app-stat-list
-        [title]="t('popular-libraries-title')"
-        [items]="popularLibraries()"
-        [valueLabel]="t('reads')"
-        [config]="{ showRanking: true, showAccentBars: true }"
-      />
-    </div>
-    <div class="col-auto d-flex">
+  <div class="container-fluid grid row g-0 pt-2 pb-2 d-flex justify-content-around align-items-stretch">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
         [title]="t('popular-series-title')"
         [items]="popularSeries()"
@@ -103,7 +86,25 @@
       />
     </div>
 
-    <div class="col-auto d-flex">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+      <app-stat-list
+        [title]="t('popular-decades-title')"
+        [items]="releaseYearsWithUrls()"
+        [valueLabel]="t('series')"
+        [itemUrl]="getDecadeUrl"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+      <app-stat-list
+        [title]="t('popular-libraries-title')"
+        [items]="popularLibraries()"
+        [valueLabel]="t('reads')"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
         [title]="t('popular-genres-title')"
         [items]="popularGenres()"
@@ -112,7 +113,7 @@
       />
     </div>
 
-    <div class="col-auto d-flex">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
         [title]="t('popular-tags-title')"
         [items]="popularTags()"
@@ -121,7 +122,7 @@
       />
     </div>
 
-    <div class="col-auto d-flex">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
         [title]="t('popular-authors-title')"
         [items]="popularAuthors()"
@@ -131,7 +132,7 @@
       />
     </div>
 
-    <div class="col-auto d-flex">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
         [title]="t('popular-artists-title')"
         [items]="popularArtists()"

@@ -16,7 +16,7 @@ import {AccountService} from "../../../_services/account.service";
 import {StatsFilter} from "../../_models/stats-filter";
 import {StatBucket} from "../../_models/stats/stat-bucket";
 import {Series} from "../../../_models/series";
-import {Person} from "../../../_models/metadata/person";
+import {Person, PersonRole} from "../../../_models/metadata/person";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
@@ -107,14 +107,14 @@ export class ServerStatsStatsTabComponent {
     }) as StatListItem[];
   });
 
-  readonly artistResource = this.statService.getPopularArtistsResource();
+  readonly artistResource = this.statService.getPopularPersonResource(PersonRole.CoverArtist);
   readonly popularArtists = computed(() => {
     return (this.artistResource.value() ?? []).map(r => {
       return {name: r.value.name, value: r.count, data: r.value};
     }) as StatListItem[];
   });
 
-  readonly authorsResource = this.statService.getPopularAuthorsResource();
+  readonly authorsResource = this.statService.getPopularPersonResource(PersonRole.Writer);
   readonly popularAuthors = computed(() => {
     return (this.authorsResource.value() ?? []).map(r => {
       return {name: r.value.name, value: r.count, data: r.value};
@@ -136,6 +136,7 @@ export class ServerStatsStatsTabComponent {
         return;
       }
 
+      console.log('ran release year encode code')
       // Build a map of unique decade ranges to encode
       const decadeMap = new Map<string, StatBucket>();
       for (const item of items) {

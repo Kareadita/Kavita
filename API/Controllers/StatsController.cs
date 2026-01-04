@@ -106,22 +106,12 @@ public class StatsController(
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("popular-authors")]
+    [HttpGet("popular-people")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularAuthors()
+    public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularPeople(PersonRole role)
     {
-        return Ok(await statService.GetPopularPerson(PersonRole.Writer));
+        return Ok(await statService.GetPopularPerson(role));
     }
-
-    [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("popular-artists")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularArtists()
-    {
-        return Ok(await statService.GetPopularPerson(PersonRole.CoverArtist));
-    }
-
-
 
     /// <summary>
     /// Top 5 most active readers for the given timeframe

@@ -234,13 +234,10 @@ public class LibraryController : BaseApiController
     [HttpGet("user-libraries")]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(int userId)
     {
-        var ownUserName = Username!;
-        if (string.IsNullOrEmpty(ownUserName)) return Unauthorized();
-
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null || string.IsNullOrEmpty(user.UserName)) return BadRequest();
 
-        var ownLibraries = await GetLibrariesForUser(ownUserName);
+        var ownLibraries = await GetLibrariesForUser(Username!);
         var otherLibraries = await GetLibrariesForUser(user.UserName);
 
         var sharedLibraries = otherLibraries.IntersectBy(ownLibraries.Select(l => l.Id), l => l.Id).ToList();
