@@ -269,7 +269,7 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
             ret.Recommendations.ExternalSeries = [];
         }
 
-        if (ret.Recommendations != null && user != null)
+        if (ret?.Recommendations != null && user != null)
         {
             ret.Recommendations.OwnedSeries ??= [];
             await unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, ret.Recommendations.OwnedSeries);
