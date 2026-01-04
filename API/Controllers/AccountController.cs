@@ -1285,7 +1285,7 @@ public class AccountController : BaseApiController
         _unitOfWork.UserRepository.Delete(authKey);
         await _unitOfWork.CommitAsync();
 
-        await _eventHub.SendMessageToAsync(MessageFactory.AuthKeyUpdate, MessageFactory.AuthKeyDeletedEvent(authKeyId), UserId);
+        await _eventHub.SendMessageToAsync(MessageFactory.AuthKeyDeleted, MessageFactory.AuthKeyDeletedEvent(authKeyId), UserId);
 
         return Ok();
     }
