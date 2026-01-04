@@ -8,7 +8,7 @@
     @if (highestBucketValue) {
       <h6 class="stats-subtitle">{{t('sub-title', {username: userName(), highestBucket: highestBucket()})}}</h6>
     } @else if (!bucketSpreadResource().isLoading())  {
-      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+      <app-stats-no-data [message]="t('no-data')" />
     }
 
     <app-loading [loading]="bucketSpreadResource().isLoading()" />

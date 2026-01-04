@@ -12,6 +12,7 @@ import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {MangaFormat} from "../../../_models/manga-format";
 import {StatsFilter} from "../../_models/stats-filter";
 import {AccountService} from "../../../_services/account.service";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 
@@ -33,7 +34,7 @@ interface PagesReadOnADayCount {
   templateUrl: './reading-activity.component.html',
   styleUrls: ['./reading-activity.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, AsyncPipe, TranslocoDirective, LineChartComponent]
+  imports: [ReactiveFormsModule, AsyncPipe, TranslocoDirective, LineChartComponent, StatsNoDataComponent]
 })
 export class ReadingActivityComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);

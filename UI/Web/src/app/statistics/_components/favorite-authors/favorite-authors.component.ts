@@ -9,6 +9,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {StatsFilter} from "../../_models/stats-filter";
 import {RouterLink} from "@angular/router";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 @Component({
   selector: 'app-favorite-authors',
@@ -20,7 +21,8 @@ import {RouterLink} from "@angular/router";
     FormsModule,
     ReactiveFormsModule,
     NgbTooltip,
-    RouterLink
+    RouterLink,
+    StatsNoDataComponent
   ],
   templateUrl: './favorite-authors.component.html',
   styleUrl: './favorite-authors.component.scss',

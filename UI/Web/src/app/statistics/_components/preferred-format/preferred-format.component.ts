@@ -6,12 +6,14 @@ import {MangaFormat} from "../../../_models/manga-format";
 import {StatsFilter} from "../../_models/stats-filter";
 import {PieChartComponent} from "../../../shared/_charts/pie-chart/pie-chart.component";
 import {StatCount} from "../../_models/stat-count";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 @Component({
   selector: 'app-preferred-format',
   imports: [
     TranslocoDirective,
-    PieChartComponent
+    PieChartComponent,
+    StatsNoDataComponent
   ],
   templateUrl: './preferred-format.component.html',
   styleUrl: './preferred-format.component.scss',

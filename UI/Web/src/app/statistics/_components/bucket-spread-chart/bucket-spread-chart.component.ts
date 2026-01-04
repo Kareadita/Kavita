@@ -5,13 +5,15 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {BarChartComponent, ToolTipFormatterContext} from "../../../shared/_charts/bar-chart/bar-chart.component";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 @Component({
   selector: 'app-bucket-spread-chart',
   imports: [
     TranslocoDirective,
     BarChartComponent,
-    LoadingComponent
+    LoadingComponent,
+    StatsNoDataComponent
   ],
   templateUrl: './bucket-spread-chart.component.html',
   styleUrl: './bucket-spread-chart.component.scss',

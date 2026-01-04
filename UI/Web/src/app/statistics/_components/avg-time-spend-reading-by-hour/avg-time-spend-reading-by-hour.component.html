@@ -13,7 +13,7 @@
         amount: mostTimeSpendReadingValue.count
       })}}</h6>
     } @else if (!timeByHourResource().isLoading())  {
-      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+      <app-stats-no-data [message]="t('no-data')" />
     }
 
     @if (timeByHourResource().isLoading()) {

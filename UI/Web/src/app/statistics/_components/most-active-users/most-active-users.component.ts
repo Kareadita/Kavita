@@ -4,6 +4,7 @@ import {StatisticsService} from "../../../_services/statistics.service";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {ActiveUserCardComponent} from "../active-user-card/active-user-card.component";
 import {StatsFilter} from "../../_models/stats-filter";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 export type TimeFrame = 'week' | 'month' | 'year' | 'allTime';
 
@@ -12,7 +13,8 @@ export type TimeFrame = 'week' | 'month' | 'year' | 'allTime';
   imports: [
     TranslocoDirective,
     LoadingComponent,
-    ActiveUserCardComponent
+    ActiveUserCardComponent,
+    StatsNoDataComponent
   ],
   templateUrl: './most-active-users.component.html',
   styleUrl: './most-active-users.component.scss',

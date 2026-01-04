@@ -14,13 +14,14 @@ import {
   DataTableColumnHeaderDirective,
   DatatableComponent
 } from "@siemens/ngx-datatable";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 @Component({
     selector: 'app-publication-status-stats',
     templateUrl: './publication-status-stats.component.html',
     styleUrls: ['./publication-status-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, AsyncPipe, DecimalPipe, TranslocoDirective, ResponsiveTableComponent, DatatableComponent, DataTableColumnDirective, DataTableColumnHeaderDirective, DataTableColumnCellDirective]
+  imports: [ReactiveFormsModule, AsyncPipe, DecimalPipe, TranslocoDirective, ResponsiveTableComponent, DatatableComponent, DataTableColumnDirective, DataTableColumnHeaderDirective, DataTableColumnCellDirective, StatsNoDataComponent]
 })
 export class PublicationStatusStatsComponent {
   private readonly statService = inject(StatisticsService);

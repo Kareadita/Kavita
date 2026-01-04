@@ -16,7 +16,7 @@
       />
 
     } @else if (!readsByMonthResource().isLoading())  {
-      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+      <app-stats-no-data [message]="t('no-data')" />
     }
   </div>
 

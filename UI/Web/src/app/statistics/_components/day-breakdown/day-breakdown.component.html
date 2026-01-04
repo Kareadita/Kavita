@@ -13,7 +13,7 @@
         height="250px"
       />
     } @else {
-      <p class="text-muted">{{t('no-data')}}</p>
+      <app-stats-no-data [message]="t('no-data')" />
     }
   </div>
 </ng-container>

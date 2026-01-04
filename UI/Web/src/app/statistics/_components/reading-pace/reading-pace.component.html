@@ -8,7 +8,7 @@
     @if (paceStats) {
       <h6 class="stats-subtitle">{{t('sub-title-' + localePrefix(), {username: userName(), count: paceInDays()})}}</h6>
     } @else if (!readingPace.isLoading()) {
-      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+      <app-stats-no-data [message]="t('no-data')" />
     }
 
     @if (paceStats) {

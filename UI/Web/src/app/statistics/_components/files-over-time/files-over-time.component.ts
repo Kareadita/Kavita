@@ -6,6 +6,7 @@ import {StatCountWithFormat} from "../../_models/stat-count";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {MangaFormat} from "../../../_models/manga-format";
 import {DecimalPipe} from "@angular/common";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 // TODO: Make this derived from localeService
 const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
@@ -15,7 +16,8 @@ const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric'
   imports: [
     TranslocoDirective,
     LineChartComponent,
-    DecimalPipe
+    DecimalPipe,
+    StatsNoDataComponent
   ],
   templateUrl: './files-over-time.component.html',
   styleUrl: './files-over-time.component.scss',
