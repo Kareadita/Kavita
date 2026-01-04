@@ -117,7 +117,8 @@ export class ReadingActivityComponent implements OnInit {
       const formatIdx = formatIndexMap.get(entry.format);
 
       if (dateIdx !== undefined && formatIdx !== undefined) {
-        chartData[formatIdx][dateIdx] = entry.count;
+        // Backend returns minutes, convert to hours on 2 decimal points
+        chartData[formatIdx][dateIdx] = Math.round(entry.count / 60 * 100) / 100;
       }
     }
 

@@ -563,7 +563,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 Value = g.Key.Day,
                 Format = g.Key.Format,
                 Count = (long)g.Sum(a =>
-                    (double)(a.EndTimeUtc!.Value.Ticks - a.StartTimeUtc.Ticks) / TimeSpan.TicksPerHour)
+                    (double)(a.EndTimeUtc!.Value.Ticks - a.StartTimeUtc.Ticks) / TimeSpan.TicksPerMinute)
             })
             .OrderBy(d => d.Value)
             .ToListAsync();

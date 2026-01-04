@@ -107,7 +107,7 @@ export class LineChartComponent {
       },
       ...this.getMarkPointConfig(dataSet as number[], clampedMax, index)
     }))
-  })
+  });
 
   private getMarkPointConfig(seriesData: number[], clampedMax: number | null, seriesIndex: number): Partial<LineSeriesOption> {
     if (clampedMax === null) return {};
@@ -161,9 +161,11 @@ export class LineChartComponent {
       legend: {
         show: this.showLegend(),
         data: this.legendLabels(),
+        orient: 'horizontal',
+        top: '-2%',
         textStyle: {
           color: this.themeService.getCssVariable('--body-text-color'),
-        }
+        },
       },
       tooltip: {
         show: true,
