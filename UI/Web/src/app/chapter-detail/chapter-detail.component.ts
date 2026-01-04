@@ -4,7 +4,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   ElementRef,
   inject,
   OnInit,
@@ -219,12 +218,6 @@ export class ChapterDetailComponent implements OnInit {
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
-  }
-
-  constructor() {
-    effect(() => {
-      console.log('reading progress: ', this.readingProgressStatus())
-    })
   }
 
 

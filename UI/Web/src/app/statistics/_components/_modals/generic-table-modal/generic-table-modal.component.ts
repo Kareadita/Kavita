@@ -20,8 +20,4 @@ export class GenericTableModalComponent {
   @Input({required: true}) title: string = '';
   @Input() bodyTemplate!: TemplateRef<any>;
 
-  ngOnInit() {
-    console.log('bodyTemplate: ', this.bodyTemplate)
-  }
-
 }

@@ -218,7 +218,6 @@ export class SideNavComponent implements OnInit {
 
   performAction(action: ActionItem<Library>, library: Library) {
     if (typeof action.callback === 'function') {
-      console.log('library: ', library)
       action.callback(action, library);
     }
   }

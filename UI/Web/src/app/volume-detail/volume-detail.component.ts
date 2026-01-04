@@ -233,7 +233,6 @@ export class VolumeDetailComponent implements OnInit {
   });
   files = computed(() => {
     const chapters = this.volume?.chapters || [];
-    console.log('files: ', chapters.flatMap(c => c.files))
     return chapters.flatMap(c => c.files);
   });
   readingProgressStatus: ReadingProgressStatus = ReadingProgressStatus.NoProgress;
