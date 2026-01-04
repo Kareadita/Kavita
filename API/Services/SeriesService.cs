@@ -42,7 +42,7 @@ public interface ISeriesService
     Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
     Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId);
     Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams);
-
+    Task<List<FilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId);
 }
 
 public class SeriesService : ISeriesService
@@ -962,9 +962,6 @@ public class SeriesService : ISeriesService
     {
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
-        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
-        var requestingUser = (await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId))!;
-
         var filter = new FilterV2Dto
         {
             Combination = FilterCombination.And,
@@ -995,28 +992,46 @@ public class SeriesService : ISeriesService
             ],
         };
 
-        if (userId == requestingUserId)
-            return await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter);
+        filter.Statements.AddRange(await GetProfilePrivacyStatements(userId, requestingUserId));
+
+        return await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter);
+    }
+
+    public async Task<List<FilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId)
+    {
+        if (userId == requestingUserId) return [];
+
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = (await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId))!;
 
         var librariesUser = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
         var librariesRequestingUser = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(requestingUserId);
 
-        var libIds = librariesRequestingUser.Intersect(librariesUser).Except(socialPreferences.SocialLibraries);
+        var libIds = librariesRequestingUser.Intersect(librariesUser);
+        if (socialPreferences.SocialLibraries.Count > 0)
+        {
+            libIds = libIds.Intersect(socialPreferences.SocialLibraries);
+        }
+
         var libraries = libIds.Select(id => id.ToString());
 
         var ageRating = socialPreferences.SocialMaxAgeRating < requestingUser.AgeRestriction ? socialPreferences.SocialMaxAgeRating : requestingUser.AgeRestriction;
         var includeUnknowns = socialPreferences.SocialIncludeUnknowns && requestingUser.AgeRestrictionIncludeUnknowns;
 
-        filter.Statements.Add(new FilterStatementDto
-        {
-            Comparison = FilterComparison.Contains,
-            Field = FilterField.Libraries,
-            Value = string.Join(",", libraries),
-        });
+        List<FilterStatementDto> filters =
+        [
+            new()
+            {
+                Comparison = FilterComparison.Contains,
+                Field = FilterField.Libraries,
+                Value = string.Join(",", libraries),
+            }
+
+        ];
 
         if (!includeUnknowns)
         {
-            filter.Statements.Add(new FilterStatementDto
+            filters.Add(new FilterStatementDto
             {
                 Comparison = FilterComparison.NotEqual,
                 Field = FilterField.AgeRating,
@@ -1026,7 +1041,7 @@ public class SeriesService : ISeriesService
 
         if (ageRating != AgeRating.NotApplicable)
         {
-            filter.Statements.Add(new FilterStatementDto
+            filters.Add(new FilterStatementDto
             {
                 Comparison = FilterComparison.LessThanEqual,
                 Field = FilterField.AgeRating,
@@ -1034,7 +1049,7 @@ public class SeriesService : ISeriesService
             });
         }
 
-        return await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter);
+        return filters;
     }
 
     private static double ExponentialSmoothing(IList<double> data, double alpha)

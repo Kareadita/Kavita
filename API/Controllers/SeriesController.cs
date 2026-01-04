@@ -258,18 +258,24 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="filterDto"></param>
     /// <param name="userParams"></param>
+    /// <param name="userId">Optional user id to request the OnDeck for someone else. They must have profile sharing enabled when doing so</param>
     /// <param name="libraryId">This is not in use</param>
+    /// <param name="context"></param>
     /// <returns></returns>
     [HttpPost("all-v2")]
+    [ProfilePrivacy(allowMissingUserId: true)]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams,
-        [FromQuery] int libraryId = 0, [FromQuery] QueryContext context = QueryContext.None)
+        [FromQuery] int? userId = null, [FromQuery] int libraryId = 0, [FromQuery] QueryContext context = QueryContext.None)
     {
-        var userId = UserId;
+        var seriesForUser = userId ?? UserId;
+
+        filterDto.Statements.AddRange(await _seriesService.GetProfilePrivacyStatements(seriesForUser, UserId));
+
         var series =
-            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto, context);
+            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(seriesForUser, userParams, filterDto, context);
 
         // Apply progress/rating information (I can't work out how to do this in initial query)
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(seriesForUser, series);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 

@@ -29,13 +29,15 @@ public class WantToReadController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
+    private readonly ISeriesService _seriesService;
 
     public WantToReadController(IUnitOfWork unitOfWork, IScrobblingService scrobblingService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService, ISeriesService seriesService)
     {
         _unitOfWork = unitOfWork;
         _scrobblingService = scrobblingService;
         _localizationService = localizationService;
+        _seriesService = seriesService;
     }
 
     /// <summary>
@@ -51,6 +53,9 @@ public class WantToReadController : BaseApiController
     {
         var wantToReadForUser = userId ?? UserId;
         userParams ??= new UserParams();
+
+        // Add profile privacy filter
+        filterDto.Statements.AddRange(await _seriesService.GetProfilePrivacyStatements(wantToReadForUser, UserId));
 
         var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(wantToReadForUser, userParams, filterDto);
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
