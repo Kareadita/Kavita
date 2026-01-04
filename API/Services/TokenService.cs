@@ -6,7 +6,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs.Account;
 using API.DTOs.Internal;
 using API.Entities;
@@ -35,17 +34,16 @@ public class TokenService : ITokenService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<TokenService> _logger;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly SymmetricSecurityKey _key;
     private const string RefreshTokenName = "RefreshToken";
     private static readonly SemaphoreSlim RefreshTokenLock = new(1, 1);
 
-    public TokenService(IOptions<AppSettingsDto> config, UserManager<AppUser> userManager, ILogger<TokenService> logger, IUnitOfWork unitOfWork)
+    public TokenService(IOptions<AppSettingsDto> config, UserManager<AppUser> userManager, ILogger<TokenService> logger)
     {
         _userManager = userManager;
         _logger = logger;
-        _unitOfWork = unitOfWork;
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Value.TokenKey ?? string.Empty));
+
+        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Value.TokenKey));
     }
 
     public async Task<string> CreateToken(AppUser user)

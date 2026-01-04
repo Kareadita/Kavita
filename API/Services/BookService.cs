@@ -64,7 +64,6 @@ public interface IBookService
     Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, int startPage, string endXpath, int endPage);
     Task<string> CopyImageToTempFromBook(int chapterId, BookmarkDto bookmarkDto, string cachedBookPath);
     Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey);
-
 }
 
 public partial class BookService : IBookService

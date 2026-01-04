@@ -16,7 +16,6 @@ public interface IEntityDisplayService
     Task<string> GetChapterDisplayName(ChapterDto chapter, int userId, EntityDisplayOptions options);
     Task<string> GetChapterDisplayName(Chapter chapter, int userId, EntityDisplayOptions options);
     Task<string> GetEntityDisplayName(ChapterDto chapter, int userId, EntityDisplayOptions options);
-
 }
 
 

@@ -28,7 +28,7 @@ public interface IMediaConversionService
 public class MediaConversionService : IMediaConversionService
 {
     public const string Name = "MediaConversionService";
-    public static readonly string[] ConversionMethods = {"ConvertAllBookmarkToEncoding", "ConvertAllCoversToEncoding", "ConvertAllManagedMediaToEncodingFormat"};
+    public static readonly string[] ConversionMethods = ["ConvertAllBookmarkToEncoding", "ConvertAllCoversToEncoding", "ConvertAllManagedMediaToEncodingFormat"];
     private readonly IUnitOfWork _unitOfWork;
     private readonly IImageService _imageService;
     private readonly IEventHub _eventHub;

@@ -26,7 +26,7 @@ using Microsoft.Extensions.Logging;
 namespace API.Services;
 #nullable enable
 
-internal sealed record UserReadCount(int ReadingListId, int AppUserId, int ChaptersRead);
+internal sealed record UserReadCount(int ReadingListId, int ChaptersRead);
 
 public interface IStatisticService
 {
@@ -273,7 +273,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .GroupBy(x => new { x.ReadingListId, x.AppUserId })
             .Select(g => new UserReadCount(
                 g.Key.ReadingListId,
-                g.Key.AppUserId,
                 g.Select(x => x.ChapterId).Distinct().Count()))
             .ToListAsync();
 
@@ -317,7 +316,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 .Take(take)
                 .ToList();
 
-            if (counts.Count >= take || threshold == 0.0)
+            if (counts.Count >= take || threshold.Is(0.0))
             {
                 return counts;
             }

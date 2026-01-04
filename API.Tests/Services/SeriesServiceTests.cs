@@ -58,8 +58,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
             Substitute.For<IMemoryCache>(), Substitute.For<IUnitOfWork>());
 
         return new SeriesService(unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
-            Substitute.For<IScrobblingService>(), locService, Substitute.For<IReadingListService>());
+            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(), locService, Substitute.For<IReadingListService>());
     }
 
     private static UpdateRelatedSeriesDto CreateRelationsDto(Series series)

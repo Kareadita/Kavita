@@ -36,7 +36,6 @@ using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -79,13 +78,11 @@ public enum QueryContext
 public interface ISeriesRepository
 {
     void Add(Series series);
-    void Attach(Series series);
     void Attach(SeriesRelation relation);
     void Update(Series series);
     void Update(SeriesMetadata seriesMetadata);
     void Remove(Series series);
     void Remove(IEnumerable<Series> series);
-    void Detach(Series series);
     Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format);
     /// <summary>
     /// Adds user information like progress, ratings, etc
@@ -133,7 +130,6 @@ public interface ISeriesRepository
     Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams);
     Task<Series?> GetFullSeriesForSeriesIdAsync(int seriesId);
     Task<Chunk> GetChunkInfo(int libraryId = 0);
-    Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
     Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams? userParams);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind);
@@ -153,7 +149,6 @@ public interface ISeriesRepository
     Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
         int userId, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
-
     Task<Series?> GetSeriesByAnyName(IList<string> names, IList<MangaFormat> formats,
         int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series?> GetSeriesByAnyName(string seriesName, string localizedName, IList<MangaFormat> formats, int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None);
@@ -162,11 +157,6 @@ public interface ISeriesRepository
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
     Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
-    /// <summary>
-    /// This is only used for <see cref="MigrateUserProgressLibraryId"/>
-    /// </summary>
-    /// <returns></returns>
-    Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
     Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIds(IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl);
@@ -175,7 +165,6 @@ public interface ISeriesRepository
     Task ClearOnDeckRemoval(int seriesId, int userId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None);
     Task<PlusSeriesRequestDto?> GetPlusSeriesDto(int seriesId);
-    Task<int> GetCountAsync();
     Task<Series?> MatchSeries(ExternalSeriesDetailDto externalSeries);
 }
 
@@ -183,26 +172,19 @@ public class SeriesRepository : ISeriesRepository
 {
     private readonly DataContext _context;
     private readonly IMapper _mapper;
-    private readonly UserManager<AppUser> _userManager;
 
-    private readonly Regex _yearRegex = new Regex(@"\d{4}", RegexOptions.Compiled,
+    private readonly Regex _yearRegex = new(@"\d{4}", RegexOptions.Compiled,
         Services.Tasks.Scanner.Parser.Parser.RegexTimeout);
 
-    public SeriesRepository(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
+    public SeriesRepository(DataContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
-        _userManager = userManager;
     }
 
     public void Add(Series series)
     {
         _context.Series.Add(series);
-    }
-
-    public void Attach(Series series)
-    {
-        _context.Series.Attach(series);
     }
 
     public void Attach(SeriesRelation relation)
@@ -233,11 +215,6 @@ public class SeriesRepository : ISeriesRepository
     public void Remove(IEnumerable<Series> series)
     {
         _context.Series.RemoveRange(series);
-    }
-
-    public void Detach(Series series)
-    {
-        _context.Entry(series).State = EntityState.Detached;
     }
 
     /// <summary>
@@ -690,21 +667,6 @@ public class SeriesRepository : ISeriesRepository
         return seriesChapters;
     }
 
-    public async Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync()
-    {
-        var seriesChapters = new Dictionary<int, int>();
-        var series = await _context.Series.Select(s => new
-        {
-            Id = s.Id, LibraryId = s.LibraryId
-        }).ToListAsync();
-        foreach (var s in series)
-        {
-            seriesChapters.Add(s.Id, s.LibraryId);
-        }
-
-        return seriesChapters;
-    }
-
     public async Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds)
     {
         return await _context.SeriesMetadata
@@ -718,7 +680,6 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery()
             .ToListAsync();
     }
-
 
     /// <summary>
     /// Returns custom images only
@@ -750,8 +711,7 @@ public class SeriesRepository : ISeriesRepository
         var query = await CreateFilteredSearchQueryableV2(userId, filterDto, queryContext);
 
         var retSeries = query
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            .AsNoTracking();
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
 
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
     }
@@ -788,11 +748,6 @@ public class SeriesRepository : ISeriesRepository
             .FirstOrDefaultAsync();
 
         return result;
-    }
-
-    public async Task<int> GetCountAsync()
-    {
-        return await _context.Series.CountAsync();
     }
 
     public async Task AddSeriesModifiers(int userId, IList<SeriesDto> series)
@@ -1052,7 +1007,7 @@ public class SeriesRepository : ISeriesRepository
             .HasTags(hasTagsFilter, FilterComparison.Contains, filter.Tags)
             .HasCollectionTags(hasCollectionTagFilter, FilterComparison.Contains, filter.Tags, collectionSeries)
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
-            .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
+            .HasFormat(filter.Formats is {Count: > 0}, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
             .HasPeopleLegacy(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
 
@@ -1487,18 +1442,6 @@ public class SeriesRepository : ISeriesRepository
             TotalChunks = totalChunks
         };
     }
-
-    public async Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds)
-    {
-        return await _context.SeriesMetadata
-            .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .Include(sm => sm.CollectionTags)
-            .AsSplitQuery()
-            .ToListAsync();
-    }
-
-
-
 
     /// <summary>
     /// Return recently updated series, regardless of read progress, and group the number of volume or chapters added.

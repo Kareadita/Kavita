@@ -126,7 +126,6 @@ public interface IUserRepository
     /// <param name="includes"></param>
     /// <returns></returns>
     Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None);
-
     Task<AnnotationDto?> GetAnnotationDtoById(int userId, int annotationId);
     Task<List<AnnotationDto>> GetAnnotationDtosBySeries(int userId, int seriesId);
     Task UpdateUserAsActive(int userId);

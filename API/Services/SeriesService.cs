@@ -51,7 +51,6 @@ public class SeriesService : ISeriesService
     private readonly IEventHub _eventHub;
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<SeriesService> _logger;
-    private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
     private readonly IReadingListService _readingListService;
 
@@ -63,14 +62,12 @@ public class SeriesService : ISeriesService
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService,
-        IReadingListService readingListService)
+        ILogger<SeriesService> logger, ILocalizationService localizationService, IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _taskScheduler = taskScheduler;
         _logger = logger;
-        _scrobblingService = scrobblingService;
         _localizationService = localizationService;
         _readingListService = readingListService;
     }
