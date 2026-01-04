@@ -7,7 +7,6 @@ import {
 } from "../../../carousel/_components/carousel-reel/carousel-reel.component";
 import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
 import {map, Observable} from "rxjs";
-import {AccountService} from "../../../_services/account.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SeriesService} from "../../../_services/series.service";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
@@ -37,7 +36,7 @@ const JustFinishedReadingFilter = {
   name: translate('profile-overview.just-finished-reading'),
   sortOptions: {
     sortField: SortField.ReadProgress,
-    isAscending: true
+    isAscending: false
   }
 } as FilterV2;
 
@@ -55,13 +54,11 @@ const JustFinishedReadingFilter = {
 })
 export class ProfileOverviewComponent {
 
-  private readonly accountService = inject(AccountService);
   private readonly seriesService = inject(SeriesService);
 
   memberInfo = input.required<MemberInfo>();
 
   streams = computed<OverviewStream[]>(() => {
-    const userId = this.accountService.currentUserSignal()!.id;
     const memberId = this.memberInfo().id;
 
     return [

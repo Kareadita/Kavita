@@ -15,6 +15,9 @@ export enum SortField {
   LastChapterAdded = 4,
   TimeToRead = 5,
   ReleaseYear = 6,
+  /**
+   * This sorts on the DATE of last progress
+   */
   ReadProgress = 7,
   /**
    * Kavita+ only
