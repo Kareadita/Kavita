@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, inject, input, OnDestr
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {AccountService} from 'src/app/_services/account.service';
 import {ActionableEntity, ActionItem} from 'src/app/_services/action-factory.service';
-import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
+import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
@@ -14,7 +14,7 @@ import {User} from "../../_models/user/user";
   selector: 'app-card-actionables',
   imports: [
     NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    DynamicListPipe, TranslocoDirective, AsyncPipe, NgTemplateOutlet
+    DynamicListPipe, TranslocoDirective, AsyncPipe, NgTemplateOutlet, NgClass
   ],
   templateUrl: './card-actionables.component.html',
   styleUrls: ['./card-actionables.component.scss'],
@@ -37,6 +37,10 @@ export class CardActionablesComponent implements OnDestroy {
    */
   label = input<string>('');
   disabled = input<boolean>(false);
+  /**
+   * Hide label when on mobile
+   */
+  hideLabelOnMobile = input<boolean>(false);
 
   entity = input<ActionableEntity>(null);
   /**

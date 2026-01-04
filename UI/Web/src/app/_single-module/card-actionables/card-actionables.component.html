@@ -4,14 +4,14 @@
       @if ((utilityService.activeBreakpoint$ | async)! <= Breakpoint.Tablet) {
         <button [disabled]="disabled()" class="btn {{btnClass()}}" id="{{labelId}}"
                 (click)="openMobileActionableMenu($event)">
-          {{label()}}
+          <span [ngClass]="{'phone-hidden': hideLabelOnMobile()}">{{label()}}</span>
           <i class="fa {{iconClass()}}" aria-hidden="true"></i>
         </button>
       } @else {
         <div ngbDropdown container="body" class="d-inline-block">
           <button [disabled]="disabled()" class="btn {{btnClass()}}" id="{{labelId}}" ngbDropdownToggle
                   (click)="preventEvent($event)">
-            {{label()}}
+            <span [ngClass]="{'phone-hidden': hideLabelOnMobile()}">{{label()}}</span>
             <i class="fa {{iconClass()}}" aria-hidden="true"></i>
           </button>
           <div ngbDropdownMenu attr.aria-labelledby="{{labelId}}">
