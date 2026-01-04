@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace API.Helpers;
 
 public class RateLimiter(int maxRequests, TimeSpan duration, bool refillBetween = true)
 {
     private readonly Dictionary<string, (int Tokens, DateTime LastRefill)> _tokenBuckets = new();
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     public bool TryAcquire(string key)
     {
@@ -22,7 +23,6 @@ public class RateLimiter(int maxRequests, TimeSpan duration, bool refillBetween 
 
             lock (_lock)
             {
-
                 if (_tokenBuckets[key].Tokens > 0)
                 {
                     _tokenBuckets[key] = (Tokens: _tokenBuckets[key].Tokens - 1, LastRefill: _tokenBuckets[key].LastRefill);

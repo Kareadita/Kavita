@@ -9,7 +9,7 @@ public static class BookChapterItemHelper
 {
     /// <summary>
     /// For a given page, finds all toc items that match the page number.
-    /// Returns flattened list to allow for best decision making.
+    /// Returns flattened list to allow for best decision-making.
     /// </summary>
     /// <param name="toc">The table of contents collection</param>
     /// <param name="pageNum">Page number to search for</param>
