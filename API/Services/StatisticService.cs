@@ -7,6 +7,7 @@ using API.Data.ManualMigrations;
 using API.DTOs;
 using API.DTOs.Metadata;
 using API.DTOs.Person;
+using API.DTOs.ReadingLists;
 using API.DTOs.Statistics;
 using API.DTOs.Stats;
 using API.DTOs.Stats.V3.ClientDevice;
@@ -25,6 +26,8 @@ using Microsoft.Extensions.Logging;
 namespace API.Services;
 #nullable enable
 
+internal sealed record UserReadCount(int ReadingListId, int AppUserId, int ChaptersRead);
+
 public interface IStatisticService
 {
     Task<ServerStatisticsDto> GetServerStatistics();
@@ -34,6 +37,7 @@ public interface IStatisticService
     Task<IList<StatBucketDto>> GetPopularDecades();
     Task<IList<StatCount<LibraryDto>>> GetPopularLibraries();
     Task<IList<StatCount<SeriesDto>>> GetPopularSeries();
+    Task<IList<StatCount<ReadingListDto>>> GetPopularReadingList(int take = 5);
     Task<IList<StatCount<GenreTagDto>>> GetPopularGenres();
     Task<IList<StatCount<TagDto>>> GetPopularTags();
     Task<IList<StatCount<PersonDto>>> GetPopularPerson(PersonRole role);
@@ -239,6 +243,87 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 Count = sc.Count
             })
             .ToList();
+    }
+
+    public async Task<IList<StatCount<ReadingListDto>>> GetPopularReadingList(int take = 5)
+    {
+        var readingListChapterCounts = await context.ReadingList
+            .Where(rl => rl.Promoted)
+            .Select(rl => new
+            {
+                ReadingListId = rl.Id,
+                TotalChapters = rl.Items.Count
+            })
+            .Where(x => x.TotalChapters > 0)
+            .ToDictionaryAsync(x => x.ReadingListId, x => x.TotalChapters);
+
+        if (readingListChapterCounts.Count == 0) return [];
+
+        var userReadCounts = await context.ReadingListItem
+            .Where(rli => readingListChapterCounts.Keys.Contains(rli.ReadingListId))
+            .Join(context.AppUserProgresses,
+                rli => rli.ChapterId,
+                p => p.ChapterId,
+                (rli, p) => new { rli.ReadingListId, p.AppUserId, p.ChapterId, p.PagesRead })
+            .Join(context.Chapter,
+                x => x.ChapterId,
+                c => c.Id,
+                (x, c) => new { x.ReadingListId, x.AppUserId, x.ChapterId, x.PagesRead, c.Pages })
+            .Where(x => x.PagesRead >= x.Pages)
+            .GroupBy(x => new { x.ReadingListId, x.AppUserId })
+            .Select(g => new UserReadCount(
+                g.Key.ReadingListId,
+                g.Key.AppUserId,
+                g.Select(x => x.ChapterId).Distinct().Count()))
+            .ToListAsync();
+
+        if (userReadCounts.Count == 0) return [];
+
+        var counts = RankReadingLists(userReadCounts, readingListChapterCounts, take);
+
+        if (counts.Count == 0) return [];
+
+        var readingListIds = counts.Select(c => c.ReadingListId).ToList();
+        var readingLists = await context.ReadingList
+            .Where(rl => readingListIds.Contains(rl.Id))
+            .ProjectTo<ReadingListDto>(mapper.ConfigurationProvider)
+            .ToDictionaryAsync(rl => rl.Id);
+
+        return counts
+            .Where(c => readingLists.ContainsKey(c.ReadingListId))
+            .Select(c => new StatCount<ReadingListDto>
+            {
+                Value = readingLists[c.ReadingListId],
+                Count = c.Count
+            })
+            .ToList();
+    }
+
+    private static List<(int ReadingListId, int Count)> RankReadingLists(
+        IReadOnlyList<UserReadCount> userReadCounts,
+        Dictionary<int, int> readingListChapterCounts,
+        int take)
+    {
+        double[] thresholds = [0.5, 0.25, 0.0];
+
+        foreach (var threshold in thresholds)
+        {
+            var counts = userReadCounts
+                .Where(x => readingListChapterCounts.TryGetValue(x.ReadingListId, out var total)
+                            && x.ChaptersRead >= Math.Ceiling(total * threshold))
+                .GroupBy(x => x.ReadingListId)
+                .Select(g => (ReadingListId: g.Key, Count: g.Count()))
+                .OrderByDescending(x => x.Count)
+                .Take(take)
+                .ToList();
+
+            if (counts.Count >= take || threshold == 0.0)
+            {
+                return counts;
+            }
+        }
+
+        return [];
     }
 
     /// <summary>

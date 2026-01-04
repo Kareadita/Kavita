@@ -78,10 +78,22 @@
       <app-stat-list
         [title]="t('popular-series-title')"
         [items]="popularSeries()"
-        [valueLabel]="t('series')"
+        [valueLabel]="t('reads')"
         [featuredImage]="mostPopularSeriesCover()"
         [itemImage]="getSeriesImage"
         [itemUrl]="getSeriesUrl"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+      <app-stat-list
+        [title]="t('popular-reading-lists-title')"
+        [items]="popularReadingList()"
+        [valueLabel]="t('readers')"
+        [featuredImage]="mostPopularReadingListCover()"
+        [itemImage]="getReadingListImage"
+        [itemUrl]="getReadingListUrl"
         [config]="{ showRanking: true, showAccentBars: true }"
       />
     </div>

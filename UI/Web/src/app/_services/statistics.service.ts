@@ -32,6 +32,7 @@ import {Library} from "../_models/library/library";
 import {Series} from "../_models/series";
 import {Tag} from "../_models/tag";
 import {Person, PersonRole} from "../_models/metadata/person";
+import {ReadingList} from "../_models/reading-list";
 
 export enum DayOfWeek
 {
@@ -71,6 +72,10 @@ export class StatisticsService {
 
   getPopularSeries() {
     return httpResource<StatCount<Series>[]>(() => this.baseUrl + 'stats/popular-series').asReadonly();
+  }
+
+  getPopularReadingList() {
+    return httpResource<StatCount<ReadingList>[]>(() => this.baseUrl + 'stats/popular-reading-list').asReadonly();
   }
 
   getPopularGenresResource() {

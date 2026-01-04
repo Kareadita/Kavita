@@ -89,6 +89,18 @@ public class StatsController(
         return Ok(await statService.GetPopularSeries());
     }
 
+    /// <summary>
+    /// Gets the top 5 most popular reading lists. Counts a reading list as active if a user has read at least some
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-reading-list")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<SeriesDto>>>> GetPopularReadingList()
+    {
+        return Ok(await statService.GetPopularReadingList());
+    }
+
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("popular-genres")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]

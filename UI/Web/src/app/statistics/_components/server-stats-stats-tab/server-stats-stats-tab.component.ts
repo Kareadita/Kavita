@@ -22,6 +22,7 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
 import {map} from "rxjs/operators";
 import {forkJoin, tap} from "rxjs";
+import {ReadingList} from "../../../_models/reading-list";
 
 @Component({
   selector: 'app-server-stats-stats-tab',
@@ -93,6 +94,25 @@ export class ServerStatsStatsTabComponent {
   readonly getSeriesUrl = (item: StatListItem) => {
     const series = item.data as Series;
     return `/library/${series.libraryId}/series/${series.id}`;
+  };
+
+  readonly popularReadingListResource = this.statService.getPopularReadingList();
+  readonly popularReadingList = computed(() => {
+    return (this.popularReadingListResource.value() ?? []).map(r => {
+      return {name: r.value.title, value: r.count, data: r.value};
+    }) as StatListItem[];
+  });
+  readonly mostPopularReadingListCover = computed(() => {
+    const popular = this.popularReadingList();
+    if (!popular || popular.length === 0) {
+      return '';
+    }
+    return this.imageService.getReadingListCoverImage((popular[0].data as ReadingList).id)
+  });
+  readonly getReadingListImage = (item: StatListItem) => this.imageService.getReadingListCoverImage((item.data as Series).id);
+  readonly getReadingListUrl = (item: StatListItem) => {
+    const rList = item.data as ReadingList;
+    return `/reading-list/${rList.id}`;
   };
 
 
