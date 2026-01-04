@@ -224,7 +224,7 @@
                   <span class="d-none d-xs-none d-sm-none d-md-inline-block fw-bold">{{user.username | sentenceCase}}</span>
                 </button>
                 <div ngbDropdownMenu>
-                  <a ngbDropdownItem [routerLink]="profileLink()">{{t('my-profile')}}</a>
+                  <a ngbDropdownItem [routerLink]="profileLink()" [fragment]="'stats-tab'">{{t('my-profile')}}</a>
                   @for (navItem of navService.navItems; track $index) {
                     @if (navItem.routerLink) {
                       <a ngbDropdownItem [routerLink]="navItem.routerLink" [fragment]="navItem.fragment">{{t(navItem.transLocoKey)}}</a>

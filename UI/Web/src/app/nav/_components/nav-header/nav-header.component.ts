@@ -83,7 +83,7 @@ export class NavHeaderComponent implements OnInit {
   @ViewChild('search') searchViewRef!: any;
 
   profileLink = computed(() => {
-    return `/profile/${this.accountService.currentUserSignal()?.id ?? ''}`
+    return ['/profile', this.accountService.currentUserSignal()?.id ?? ''];
   });
 
   currentUser = computed(() => {

@@ -22,7 +22,7 @@
         <div>
           @if (!reviewValue.isExternal) {
             <span (click)="$event.stopPropagation()">
-              <a routerLink="/profile/{{reviewValue.userId}}">
+              <a [routerLink]="['/profile', reviewValue.userId]" [fragment]="'stats-tab'">
                 <app-profile-icon [userId]="reviewValue.userId" [size]="16" />
                 <span class="ms-2">{{reviewValue.username}}</span>
               </a>

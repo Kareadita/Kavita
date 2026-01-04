@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input
+} from '@angular/core';
 import {Location, TitleCasePipe} from '@angular/common';
 import {MemberInfo} from "../../../_models/user/member-info";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -72,6 +80,7 @@ export class ProfileComponent {
   protected readonly licenseService = inject(LicenseService);
   private readonly titleService = inject(Title);
   private readonly accountService = inject(AccountService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
 
   // Set by angular from the resolver
@@ -106,12 +115,19 @@ export class ProfileComponent {
   });
 
   constructor() {
+    const initialFragment = this.route.snapshot.fragment;
+    if (initialFragment) {
+      this.activeTabId = initialFragment as TabID;
+      this.cdRef.markForCheck();
+    }
+
     // TODO: If ngBootstrap ever supports signal-based activeTabId, we can move this into syncUrlFragment directive
     this.route.fragment.pipe(tap(frag => {
       const fragId = frag as TabID;
       if (frag !== null && this.activeTabId !== fragId) {
         this.updateUrl(fragId);
         this.activeTabId = fragId;
+        this.cdRef.markForCheck();
       }
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
 
