@@ -314,6 +314,7 @@ $action-bar-height: 38px;
   pointer-events: none;
   z-index: 2;
   animation: fadeIn 0.2s ease-in, fadeOut 0.3s ease-out 1.7s forwards;
+  user-select: none;
 }
 
 .pagination-indicator {
@@ -321,18 +322,19 @@ $action-bar-height: 38px;
   top: $action-bar-height;
   width: 20vw;
   height: calc(100vh - $action-bar-height * 2);
-  border: 3px solid $primary-color;
-  background: rgba(0, 98, 204, 0.15);
   pointer-events: none;
   box-sizing: border-box;
   animation: fadeIn 0.2s ease-in, fadeOut 0.3s ease-out 1.7s forwards;
+  user-select: none;
   
   &.left-indicator {
     left: 0;
+    background: rgba(255, 165, 0, 0.5);
   }
   
   &.right-indicator {
     right: 0;
+    background: rgba(65, 225, 100, 0.5);
   }
   
   &.immersive {

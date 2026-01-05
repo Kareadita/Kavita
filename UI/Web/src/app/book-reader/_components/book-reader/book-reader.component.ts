@@ -814,7 +814,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.clearTimeout(this.paginationIndicatorsTimeout);
+    this.clearTimeoutId(this.paginationIndicatorsTimeout);
+    this.paginationIndicatorsTimeout = undefined;
     this.readerService.disableWakeLock();
 
     // Remove any debug viewport things
@@ -2195,7 +2196,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   applyLayoutMode(mode: BookPageLayoutMode, isChange: boolean = false) {
-    this.clearTimeout(this.updateImageSizeTimeout);
+    this.clearTimeoutId(this.updateImageSizeTimeout);
     this.updateImageSizeTimeout = setTimeout( () => {
       this.updateImageSizes();
       this.injectImageBookmarkIndicators(true);
@@ -2280,9 +2281,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   showPaginationOverlay(clickToPaginate: boolean) {
     this.readerSettingsService.updateClickToPaginate(clickToPaginate);
     this.cdRef.markForCheck();
-    
+
     if (clickToPaginate) {
-      this.clearTimeout(this.paginationIndicatorsTimeout);
+      this.clearTimeoutId(this.paginationIndicatorsTimeout);
+      this.paginationIndicatorsTimeout = undefined;
       this.showPaginationIndicators.set(true);
       this.cdRef.detectChanges();
       this.paginationIndicatorsTimeout = setTimeout(() => {
@@ -2291,36 +2293,25 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }, 2000);
     } else {
       this.showPaginationIndicators.set(false);
-      this.clearTimeout(this.paginationIndicatorsTimeout);
+      this.clearTimeoutId(this.paginationIndicatorsTimeout);
+      this.paginationIndicatorsTimeout = undefined;
       this.cdRef.detectChanges();
     }
   }
 
-  clearTimeout(timeoutId: number | undefined) {
+  clearTimeoutId(timeoutId: number | undefined) {
     if (timeoutId !== undefined) {
       clearTimeout(timeoutId);
-      timeoutId = undefined;
     }
   }
 
   handleReadingSectionMouseDown(event: MouseEvent) {
-    if (this.clickToPaginate() && !this.hidePagination()) {
-      const readingSection = this.readingSectionElemRef?.nativeElement;
-      if (readingSection) {
-        const rect = readingSection.getBoundingClientRect();
-        const clickX = event.clientX - rect.left;
-        const sectionWidth = rect.width;
-        const leftZoneThreshold = sectionWidth * 0.2;
-        const rightZoneThreshold = sectionWidth * 0.8;
-        
-        if (clickX < leftZoneThreshold || clickX > rightZoneThreshold) {
-          event.preventDefault();
-          const selection = window.getSelection();
-          if (selection) {
-            selection.removeAllRanges();
-          }
-        }
-      }
+    const bookContent = this.bookContentElemRef?.nativeElement;
+    const target = event.target as HTMLElement;
+    const isInBottomBar = target.closest('.bottom-bar') !== null;
+    
+    if (bookContent && !bookContent.contains(target) && !isInBottomBar) {
+      event.preventDefault();
     }
   }
 
@@ -2329,11 +2320,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     
     if (this.clickToPaginate() && !this.hidePagination()) {
       if (isHighlighting) {
-        event.preventDefault();
-        event.stopPropagation();
         return;
       }
-      
+
       const readingSection = this.readingSectionElemRef?.nativeElement;
       if (readingSection) {
         const rect = readingSection.getBoundingClientRect();
@@ -2346,21 +2335,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         
         if (clickX < leftZoneThreshold) {
           this.movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
-          event.preventDefault();
-          event.stopPropagation();
-          const selection = window.getSelection();
-          if (selection) {
-            selection.removeAllRanges();
-          }
           return;
         } else if (clickX > rightZoneThreshold) {
           this.movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
-          event.preventDefault();
-          event.stopPropagation();
-          const selection = window.getSelection();
-          if (selection) {
-            selection.removeAllRanges();
-          }
           return;
         }
       }
