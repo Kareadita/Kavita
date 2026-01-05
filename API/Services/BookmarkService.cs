@@ -178,7 +178,7 @@ public class BookmarkService : IBookmarkService
     /// <returns></returns>
     public async Task<bool> RemoveBookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto)
     {
-        var bookmarkToDelete = userWithBookmarks.Bookmarks.SingleOrDefault(x =>
+        var bookmarkToDelete = userWithBookmarks.Bookmarks.FirstOrDefault(x =>
             x.ChapterId == bookmarkDto.ChapterId && x.Page == bookmarkDto.Page && x.ImageOffset == bookmarkDto.ImageOffset);
         try
         {
