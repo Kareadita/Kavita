@@ -37,8 +37,6 @@ public class ThemeController : BaseApiController
         _mapper = mapper;
     }
 
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
-    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SiteThemeDto>>> GetThemes()
     {
@@ -84,8 +82,8 @@ public class ThemeController : BaseApiController
     /// Browse themes that can be used on this server
     /// </summary>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     [HttpGet("browse")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> BrowseThemes()
     {
         var themes = await _themeService.GetDownloadableThemes();
