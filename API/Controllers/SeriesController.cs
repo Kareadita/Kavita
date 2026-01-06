@@ -243,7 +243,7 @@ public class SeriesController : BaseApiController
     /// <returns></returns>
     [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-updated-series")]
-    public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
+    public async Task<ActionResult<IList<RecentlyAddedItemDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
         return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(UserId, userParams));

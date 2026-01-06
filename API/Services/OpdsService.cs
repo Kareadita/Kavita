@@ -432,7 +432,8 @@ public class OpdsService : IOpdsService
             var metadata = seriesMetadatas.First(s => s.SeriesId == seriesDto.Id);
             feed.Entries.Add(CreateSeries(seriesDto, metadata, apiKey, prefix, baseUrl));
         }
-        AddPagination(feed, request.PageNumber, 0, PageSize, $"{apiKey}/recently-updated");
+        // Recently updated is hardcoded to 30 items
+        AddPagination(feed, request.PageNumber, 30, PageSize, $"{apiKey}/recently-updated");
 
         return feed;
     }
