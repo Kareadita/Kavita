@@ -10,6 +10,7 @@ import {OrdinalDatePipe} from "../../../_pipes/ordinal-date.pipe";
 import {DurationPipe} from "../../../_pipes/duration.pipe";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {StatsFilter} from "../../_models/stats-filter";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 
 
 export interface ActivityGraphData {
@@ -45,7 +46,8 @@ interface WeekRow {
     OrdinalDatePipe,
     DatePipe,
     DurationPipe,
-    LoadingComponent
+    LoadingComponent,
+    CompactNumberPipe
   ],
   templateUrl: './activity-graph.component.html',
   styleUrl: './activity-graph.component.scss',
@@ -72,6 +74,12 @@ export class ActivityGraphComponent {
 
     return {};
   });
+
+  protected aggregatedCount = computed(() => Object.values(this.data())
+    .filter(entry => new Date(entry.date).getFullYear() == this.year())
+    .reduce((prev, cur) =>
+      ({totalWords: prev.totalWords + cur.totalWords, totalPages: prev.totalPages + cur.totalPages}),
+      {totalWords: 0, totalPages: 0}));
 
   // Computed values for the grid
   weeks = computed(() => this.generateWeeks());

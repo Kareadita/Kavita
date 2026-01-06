@@ -2910,7 +2910,8 @@
         "low-activity-alt": "Low Activity",
         "moderate-activity-alt": "Moderate Activity",
         "good-activity-alt": "Good Activity",
-        "high-activity-alt": "High Activity"
+        "high-activity-alt": "High Activity",
+        "aggregated-count": "You read {{totalPages}} pages and {{totalWords}} words in {{year}}"
     },
 
     "reading-pace": {
