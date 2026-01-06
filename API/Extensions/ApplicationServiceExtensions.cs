@@ -2,7 +2,6 @@
 using API.Constants;
 using API.Data;
 using API.Helpers;
-using API.Middleware;
 using API.Services;
 using API.Services.Caching;
 using API.Services.Plus;
