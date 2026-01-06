@@ -53,7 +53,7 @@ public interface IChapterRepository
     Task<IList<Chapter>> GetAllChaptersWithCoversInDifferentEncoding(EncodeFormat format);
     Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync();
     Task AddChapterModifiers(int userId, ChapterDto chapter);
-    IEnumerable<Chapter> GetChaptersForSeries(int seriesId);
+    IQueryable<Chapter> GetChaptersForSeries(int seriesId);
     Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId);
     Task<int> GetAverageUserRating(int chapterId, int userId);
     Task<IList<UserReviewDto>> GetExternalChapterReviewDtos(int chapterId);
@@ -350,13 +350,12 @@ public class ChapterRepository : IChapterRepository
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    public IEnumerable<Chapter> GetChaptersForSeries(int seriesId)
+    public IQueryable<Chapter> GetChaptersForSeries(int seriesId)
     {
         return _context.Chapter
             .Where(c => c.Volume.SeriesId == seriesId)
             .OrderBy(c => c.SortOrder)
-            .Include(c => c.Volume)
-            .AsEnumerable();
+            .Include(c => c.Volume);
     }
 
     public async Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId)
@@ -457,18 +456,7 @@ public class ChapterRepository : IChapterRepository
             .Include(c => c.Volume)
             .Include(c => c.Files)
             .Where(c => c.Volume.SeriesId == seriesId)
-            .OrderBy(c =>
-                // Priority 1: Regular volumes (not loose leaf, not special)
-                c.Volume.Number == Parser.LooseLeafVolumeNumber ||
-                c.Volume.Number == Parser.SpecialVolumeNumber ? 1 : 0)
-            .ThenBy(c =>
-                // Priority 2: Loose leaf over specials
-                c.Volume.Number == Parser.SpecialVolumeNumber ? 1 : 0)
-            .ThenBy(c =>
-                // Priority 3: Non-special chapters
-                c.IsSpecial ? 1 : 0)
-            .ThenBy(c => c.Volume.Number)
-            .ThenBy(c => c.SortOrder)
+            .ApplyDefaultChapterOrdering()
             .AsNoTracking()
             .FirstOrDefaultAsync();
 
@@ -488,18 +476,7 @@ public class ChapterRepository : IChapterRepository
             .Include(c => c.Volume)
             .Include(c => c.Files)
             .Where(c => c.Volume.Id == volumeId)
-            .OrderBy(c =>
-                // Priority 1: Regular volumes (not loose leaf, not special)
-                c.Volume.Number == Parser.LooseLeafVolumeNumber ||
-                c.Volume.Number == Parser.SpecialVolumeNumber ? 1 : 0)
-            .ThenBy(c =>
-                // Priority 2: Loose leaf over specials
-                c.Volume.Number == Parser.SpecialVolumeNumber ? 1 : 0)
-            .ThenBy(c =>
-                // Priority 3: Non-special chapters
-                c.IsSpecial ? 1 : 0)
-            .ThenBy(c => c.Volume.Number)
-            .ThenBy(c => c.SortOrder)
+            .ApplyDefaultChapterOrdering()
             .AsNoTracking()
             .FirstOrDefaultAsync();
 
