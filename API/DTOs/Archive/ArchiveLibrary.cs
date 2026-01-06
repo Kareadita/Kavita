@@ -1,4 +1,4 @@
-﻿namespace API.Archive;
+﻿namespace API.DTOs.Archive;
 
 /// <summary>
 /// Represents which library should handle opening this library
