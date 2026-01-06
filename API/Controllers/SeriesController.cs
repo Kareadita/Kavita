@@ -81,11 +81,7 @@ public class SeriesController : BaseApiController
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
 
-        //TODO: We might want something like libraryId as source so that I don't have to muck with the groups
-
         // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest("Could not get series for library");
-
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -264,7 +260,7 @@ public class SeriesController : BaseApiController
     /// <returns></returns>
     [HttpPost("all-v2")]
     [ProfilePrivacy(allowMissingUserId: true)]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams,
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetAllSeriesV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams,
         [FromQuery] int? userId = null, [FromQuery] int libraryId = 0, [FromQuery] QueryContext context = QueryContext.None)
     {
         var seriesForUser = userId ?? UserId;

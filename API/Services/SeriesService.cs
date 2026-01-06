@@ -1021,7 +1021,7 @@ public class SeriesService : ISeriesService
             {
                 Comparison = FilterComparison.Contains,
                 Field = FilterField.Libraries,
-                Value = string.Join(",", libraries),
+                Value = string.Join(',', libraries),
             }
 
         ];
