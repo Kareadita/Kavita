@@ -414,7 +414,9 @@ export class ChapterDetailComponent implements OnInit {
         this.downloadChapter();
         break;
       case Action.Delete:
-        this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+        this.chapterService.deleteChapter(this.chapterId).subscribe(() => {
+          this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
+        });
         break;
     }
   }
