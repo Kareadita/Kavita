@@ -495,7 +495,7 @@ public class Startup
                     await new MigrateToAuthKeys().RunAsync(dataContext, logger);
                     await new MigrateMissingAppUserRatingDateColumns().RunAsync(dataContext, logger);
                     await new MigrateFormatToActivityDataV2().RunAsync(dataContext, logger);
-                    await new MigrateIncorrectUtcMidnightRollovers().RunAsync(dataContext, logger);
+                    await new MigrateIncorrectUtcTimes().RunAsync(dataContext, logger);
                     #endregion
 
                     #endregion

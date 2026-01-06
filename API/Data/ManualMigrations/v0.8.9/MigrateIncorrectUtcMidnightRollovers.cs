@@ -7,10 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Data.ManualMigrations;
 
-public class MigrateIncorrectUtcMidnightRollovers: ManualMigration
+public class MigrateIncorrectUtcTimes: ManualMigration
 {
     private const int BatchSize = 1000;
-    protected override string MigrationName { get; } = nameof(MigrateIncorrectUtcMidnightRollovers);
+    protected override string MigrationName { get; } = nameof(MigrateIncorrectUtcTimes);
 
     protected override async Task ExecuteAsync(DataContext context, ILogger<Program> logger)
     {
@@ -36,14 +36,28 @@ public class MigrateIncorrectUtcMidnightRollovers: ManualMigration
                     continue;
                 }
 
+                var corrected = false;
+
                 var wantedUtc = TimeZoneInfo.ConvertTimeToUtc(session.EndTime.Value);
                 if (session.EndTimeUtc != wantedUtc)
                 {
                     session.EndTimeUtc = wantedUtc;
                     context.Entry(session).State = EntityState.Modified;
 
-                    correctedEntries++;
+                    corrected = true;
                 }
+
+                var wantedStartUtc = TimeZoneInfo.ConvertTimeToUtc(session.StartTime);
+                if (session.StartTimeUtc != wantedStartUtc)
+                {
+                    session.StartTimeUtc = wantedStartUtc;
+                    context.Entry(session).State = EntityState.Modified;
+
+                    corrected = true;
+                }
+
+                if (corrected)
+                    correctedEntries++;
             }
 
             await context.SaveChangesAsync();
