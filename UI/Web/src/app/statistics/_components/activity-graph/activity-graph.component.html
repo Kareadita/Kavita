@@ -80,6 +80,15 @@
           </div>
           <span class="legend-label">{{ t('more') }}</span>
         </div>
+
+        @let aggregatedCountValue = aggregatedCount();
+        @if (aggregatedCountValue.totalPages > 0 || aggregatedCountValue.totalWords > 0) {
+          <span class="legend-label mt-2">{{ t('aggregated-count', {
+            year: year(),
+            totalPages: aggregatedCountValue.totalPages | compactNumber,
+            totalWords: aggregatedCountValue.totalWords | compactNumber
+          }) }}</span>
+        }
       </div>
 
       <ng-template #noActivityTooltip let-item="item">

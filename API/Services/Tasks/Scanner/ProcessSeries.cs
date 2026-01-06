@@ -229,6 +229,9 @@ public class ProcessSeries(
             await externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type);
         }
 
+        await eventHub.SendMessageAsync(MessageFactory.ScanSeries,
+            MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name));
+
         return series.Id;
     }
 

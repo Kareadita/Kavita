@@ -23,7 +23,16 @@ public static class FlurlExtensions
     /// <returns></returns>
     public static async Task<string?> GetFileFormatAsync(this string url)
     {
-        var headResponse = await url.AllowHttpStatus("2xx").HeadAsync();
+        IFlurlResponse? headResponse;
+        try
+        {
+            headResponse = await url.AllowHttpStatus("2xx").HeadAsync();
+        }
+        catch
+        {
+            /* Ignore exceptions */
+            return null;
+        }
 
         // TODO: Move to new Headers class after merge with progress branch
         var contentTypeHeader = headResponse.Headers.FirstOrDefault("Content-Type");

@@ -555,7 +555,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
 
     public static void UpdateReaderProfileFields(AppUserReadingProfile existingProfile, UserReadingProfileDto dto, bool updateName = true)
     {
-        if (updateName && !string.IsNullOrEmpty(dto.Name) && existingProfile.NormalizedName != dto.Name.ToNormalized())
+        if (updateName && !string.IsNullOrEmpty(dto.Name) && existingProfile.Name != dto.Name)
         {
             existingProfile.Name = dto.Name;
             existingProfile.NormalizedName = dto.Name.ToNormalized();
