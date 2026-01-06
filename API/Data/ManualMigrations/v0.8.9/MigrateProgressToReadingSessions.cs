@@ -127,7 +127,7 @@ public class MigrateProgressToReadingSessions : ManualMigration
                         if (firstItem == null) continue;
 
                         var sessionDate = firstItem.Progress.LastModified.Date;
-                        var sessionDateUtc = sessionDate.ToUniversalTime();
+                        var sessionDateUtc = sessionDate.ToUniversalTime().Date;
 
                         var activityData = group.Select(item =>
                             CreateSessionActivityDataFromProgress(item.Progress, item.Chapter, item.Format))
