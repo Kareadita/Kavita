@@ -41,13 +41,13 @@ public class BaseApiController : ControllerBase
     /// Automatically handles conditional requests (If-None-Match) returning 304 Not Modified when appropriate.
     /// </summary>
     /// <param name="path">The absolute path to the file on disk.</param>
-    /// <param name="maxAge">Cache duration in seconds. Default is 86400 (1 day).</param>
+    /// <param name="maxAge">Cache duration in seconds. Default is 300 (5 minutes).</param>
     /// <returns>
     /// <see cref="NotFoundResult"/> if path is null/empty or file doesn't exist.
     /// <see cref="StatusCodeResult"/> with 304 if client's cached version is current.
     /// <see cref="PhysicalFileResult"/> with the file content and caching headers otherwise.
     /// </returns>
-    protected ActionResult CachedFile(string? path, int maxAge = 86400)
+    protected ActionResult CachedFile(string? path, int maxAge = 300)
     {
         if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
             return NotFound();
@@ -55,7 +55,7 @@ public class BaseApiController : ControllerBase
         var lastWrite = System.IO.File.GetLastWriteTimeUtc(path);
         var etag = $"\"{lastWrite.Ticks:x}-{path.GetHashCode():x}\"";
 
-        if (Request.Headers.IfNoneMatch.ToString() == etag)
+        if (Request.Headers.IfNoneMatch.Any(t => t == etag))
             return StatusCode(304);
 
         Response.Headers.ETag = etag;
