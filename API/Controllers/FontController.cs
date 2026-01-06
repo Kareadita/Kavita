@@ -44,7 +44,6 @@ public class FontController : BaseApiController
     /// List out the fonts
     /// </summary>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<EpubFontDto>>> GetFonts()
     {
