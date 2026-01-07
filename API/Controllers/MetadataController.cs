@@ -216,19 +216,6 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
     }
 
     /// <summary>
-    /// If this Series is on Kavita+ Blacklist, removes it. If already cached, invalidates it.
-    /// This then attempts to refresh data from Kavita+ for this series.
-    /// </summary>
-    /// <param name="seriesId"></param>
-    /// <returns></returns>
-    // [HttpPost("force-refresh")]
-    // public async Task<ActionResult> ForceRefresh(int seriesId)
-    // {
-    //     await metadataService.ForceKavitaPlusRefresh(seriesId);
-    //     return Ok();
-    // }
-
-    /// <summary>
     /// Fetches the details needed from Kavita+ for Series Detail page
     /// </summary>
     /// <remarks>This will hit upstream K+ if the data in local db is 2 weeks old</remarks>

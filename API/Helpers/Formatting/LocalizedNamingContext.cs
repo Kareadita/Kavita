@@ -87,28 +87,4 @@ public sealed class LocalizedNamingContext
             IssueLabel,
             BookLabel);
     }
-
-    /// <summary>
-    /// Formats a reading list item title from raw values using the pre-fetched localized labels.
-    /// Note: Uses this context's LibraryType, not a passed-in value.
-    /// </summary>
-    public string FormatReadingListItemTitle(
-        MangaFormat format,
-        string? chapterNumber,
-        string? volumeNumber,
-        string? chapterTitleName,
-        bool isSpecial)
-    {
-        return _namingService.FormatReadingListItemTitle(
-            LibraryType,
-            format,
-            chapterNumber,
-            volumeNumber,
-            chapterTitleName,
-            isSpecial,
-            VolumeLabel,
-            ChapterLabel,
-            IssueLabel,
-            BookLabel);
-    }
 }

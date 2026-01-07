@@ -19,6 +19,7 @@ using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Helpers.Formatting;
 using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
@@ -36,10 +37,14 @@ public interface ISeriesService
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
+    [Obsolete("Use LocalizedNamingContext")]
     Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true);
+    [Obsolete("Use LocalizedNamingContext")]
     Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true);
+    [Obsolete("Use LocalizedNamingContext")]
     Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string chapterRange, string? chapterTitle,
         bool withHash);
+    [Obsolete("Use LocalizedNamingContext")]
     Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
     Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId);
     Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams);
@@ -54,6 +59,7 @@ public class SeriesService : ISeriesService
     private readonly ILogger<SeriesService> _logger;
     private readonly ILocalizationService _localizationService;
     private readonly IReadingListService _readingListService;
+    private readonly IEntityNamingService _namingService;
 
     private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto
     {
@@ -63,7 +69,8 @@ public class SeriesService : ISeriesService
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, ILocalizationService localizationService, IReadingListService readingListService)
+        ILogger<SeriesService> logger, ILocalizationService localizationService, IReadingListService readingListService,
+        IEntityNamingService namingService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -71,6 +78,7 @@ public class SeriesService : ISeriesService
         _logger = logger;
         _localizationService = localizationService;
         _readingListService = readingListService;
+        _namingService = namingService;
     }
 
     /// <summary>
@@ -514,6 +522,7 @@ public class SeriesService : ISeriesService
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+
         var libraryIds = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
         if (!libraryIds.Contains(series.LibraryId))
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
@@ -528,9 +537,9 @@ public class SeriesService : ISeriesService
 
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var bookTreatment = libraryType is LibraryType.Book or LibraryType.LightNovel;
-        var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
+        var namingContext = await LocalizedNamingContext.CreateAsync( _namingService, _localizationService, userId, libraryType);
+        var bookTreatment = libraryType is LibraryType.Book or LibraryType.LightNovel;
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
@@ -541,8 +550,15 @@ public class SeriesService : ISeriesService
                 continue;
             }
 
-            if (RenameVolumeName(volume, libraryType, volumeLabel) || (bookTreatment && !volume.IsSpecial()))
+            var formattedName = namingContext.FormatVolumeName(volume);
+            if (formattedName != null)
             {
+                volume.Name = formattedName;
+                processedVolumes.Add(volume);
+            }
+            else if (bookTreatment && !volume.IsSpecial())
+            {
+                // Edge case: FormatVolumeName returned null but book treatment wants it
                 processedVolumes.Add(volume);
             }
         }
@@ -562,7 +578,7 @@ public class SeriesService : ISeriesService
 
         foreach (var chapter in chapters)
         {
-            chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
+            chapter.Title = namingContext.FormatChapterTitle(chapter);
 
             if (!chapter.IsSpecial) continue;
             specials.Add(chapter);
@@ -602,45 +618,6 @@ public class SeriesService : ISeriesService
     private static bool ShouldIncludeChapter(ChapterDto chapter)
     {
         return !chapter.IsSpecial && chapter.MinNumber.IsNot(Parser.DefaultChapterNumber);
-    }
-
-    /// <summary>
-    /// Should the volume be included and if so, this renames
-    /// </summary>
-    /// <param name="volume"></param>
-    /// <param name="libraryType"></param>
-    /// <param name="volumeLabel"></param>
-    /// <returns></returns>
-    public static bool RenameVolumeName(VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
-    {
-        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
-        {
-            var firstChapter = volume.Chapters.First();
-            // On Books, skip volumes that are specials, since these will be shown
-            // if (firstChapter.IsSpecial)
-            // {
-            //     // Some books can be SP marker and also position of 0, this will trick Kavita into rendering it as part of a non-special volume
-            //     // We need to rename the entity so that it renders out correctly
-            //     return false;
-            // }
-            if (string.IsNullOrEmpty(firstChapter.TitleName))
-            {
-                if (Parser.IsLooseLeafVolume(firstChapter.Range)) return false;
-                var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
-                if (string.IsNullOrEmpty(title)) return false;
-                volume.Name += $" - {title}"; // OPDS smart list 7 (just pdfs) triggered this
-            }
-            else if (!volume.IsLooseLeaf())
-            {
-                // If the titleName has Volume inside it, let's just send that back?
-                volume.Name = firstChapter.TitleName;
-            }
-
-            return !firstChapter.IsSpecial;
-        }
-
-        volume.Name = $"{volumeLabel.Trim()} {volume.Name}".Trim();
-        return true;
     }
 
 

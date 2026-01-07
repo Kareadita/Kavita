@@ -357,6 +357,7 @@ public class ReaderServiceRereadTests
         _chapterRepo.GetChapterDtoAsync(4, userId).Returns(prevChapter);
         _entityDisplayService.GetEntityDisplayName(continuePoint, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 5");
         _seriesService.FormatChapterTitle(userId, prevChapter, LibraryType.Manga).Returns("Chapter 4");
+        //_entityNamingService.FormatChapterTitle(userId, prevChapter, LibraryType.Manga).Returns("Chapter 4");
 
         // Mock GetPrevChapterIdAsync to return chapter 4
         var volumes = new List<VolumeDto>
