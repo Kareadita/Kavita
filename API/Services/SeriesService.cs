@@ -23,6 +23,7 @@ using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Kavita.Common;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -855,74 +856,123 @@ public class SeriesService : ISeriesService
         {
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
         }
+
+        // Estimation only makes sense for ongoing/ended manga/comics - books and light novels
+        // don't follow predictable release patterns based on chapter creation dates
         if (series.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) ||
             (series.Library.Type is LibraryType.Book or LibraryType.LightNovel))
         {
             return _emptyExpectedChapter;
         }
 
+        // We need at least 3 chapters to establish a meaningful pattern for prediction.
+        // With fewer data points, exponential smoothing produces unreliable forecasts.
+        const int minimumChaptersRequired = 3;
         const int minimumTimeDeltas = 3;
-        var chapters = _unitOfWork.ChapterRepository.GetChaptersForSeries(seriesId)
+
+        // Only fetch the fields we need for calculation - avoids loading entire Chapter entities
+        // with all their navigation properties, significantly reducing memory and query time
+        var chapterData = await _unitOfWork.ChapterRepository.GetChaptersForSeries(seriesId)
             .Where(c => !c.IsSpecial)
+            .Select(c => new
+            {
+                c.CreatedUtc,
+                c.MaxNumber,
+                VolumeMinNumber = c.Volume.MinNumber
+            })
             .OrderBy(c => c.CreatedUtc)
-            .ToList();
+            .ToListAsync();
 
-        if (chapters.Count < 3) return _emptyExpectedChapter;
+        if (chapterData.Count < minimumChaptersRequired) return _emptyExpectedChapter;
 
-        // Calculate the time differences between consecutive chapters
-        var timeDifferences = new List<TimeSpan>();
+        // Pre-allocate with maximum possible capacity to avoid list resizing during iteration.
+        // We store as days (double) directly to avoid a second conversion pass later.
+        var timeDifferencesInDays = new List<double>(chapterData.Count - 1);
+
+        // These track the values we need for building the result DTO.
+        // Previously we iterated the list 4 separate times with LINQ - now we gather everything in one pass.
+        var lastChapterDate = DateTime.MinValue;
+        var highestChapterNumber = float.MinValue;
+        var highestChapterIndex = 0;
+        var highestVolumeNumber = float.MinValue;
+
         DateTime? previousChapterTime = null;
-        foreach (var chapterCreatedUtc in chapters.Select(c => c.CreatedUtc))
+
+        for (var i = 0; i < chapterData.Count; i++)
         {
-            if (previousChapterTime.HasValue && (chapterCreatedUtc - previousChapterTime.Value) <= TimeSpan.FromHours(1))
+            var chapter = chapterData[i];
+
+            // Find the most recently created chapter - used as the baseline for our prediction.
+            // "When was the last chapter added?" + forecasted interval = expected next chapter date
+            if (chapter.CreatedUtc > lastChapterDate)
             {
-                continue; // Skip this chapter if it's within an hour of the previous one
+                lastChapterDate = chapter.CreatedUtc;
             }
 
-            if ((chapterCreatedUtc - previousChapterTime ?? TimeSpan.Zero) != TimeSpan.Zero)
+            // Find the chapter with the highest number - this determines what number comes next.
+            // Note: This is different from "most recent" - a user might add Chapter 50 before Chapter 49
+            if (chapter.MaxNumber > highestChapterNumber)
             {
-                timeDifferences.Add(chapterCreatedUtc - previousChapterTime ?? TimeSpan.Zero);
+                highestChapterNumber = chapter.MaxNumber;
+                highestChapterIndex = i;
             }
 
-            previousChapterTime = chapterCreatedUtc;
+            // Track the highest volume number for series that use volume-based numbering
+            // (e.g., "Volume 5" instead of "Chapter 47")
+            if (chapter.VolumeMinNumber > highestVolumeNumber)
+            {
+                highestVolumeNumber = chapter.VolumeMinNumber;
+            }
+
+            // Build the time differences array for exponential smoothing.
+            // We skip chapters added within 1 hour of each other - these are typically bulk imports
+            // or batch uploads that don't represent the actual release cadence.
+            if (previousChapterTime.HasValue)
+            {
+                var daysBetweenChapters = (chapter.CreatedUtc - previousChapterTime.Value).TotalDays;
+                var hoursBetweenChapters = daysBetweenChapters * 24;
+
+                if (hoursBetweenChapters > 1)
+                {
+                    timeDifferencesInDays.Add(daysBetweenChapters);
+                    previousChapterTime = chapter.CreatedUtc;
+                }
+                // If within an hour, we intentionally don't update previousChapterTime
+                // so the next valid chapter measures from the last "real" release
+            }
+            else
+            {
+                previousChapterTime = chapter.CreatedUtc;
+            }
         }
 
-        if (timeDifferences.Count < minimumTimeDeltas)
+        // After filtering out bulk imports, we may not have enough data points for a reliable forecast
+        if (timeDifferencesInDays.Count < minimumTimeDeltas)
         {
             return _emptyExpectedChapter;
         }
 
-        var historicalTimeDifferences = timeDifferences.Select(td => td.TotalDays).ToList();
+        // Exponential smoothing weights recent releases more heavily than older ones.
+        // Alpha of 0.2 means ~80% weight on historical average, ~20% on recent data.
+        // This smooths out anomalies like holiday delays or double-releases.
+        const double alpha = 0.2;
+        var forecastedDaysBetweenChapters = ExponentialSmoothing(timeDifferencesInDays, alpha);
 
-        if (historicalTimeDifferences.Count < minimumTimeDeltas)
+        if (forecastedDaysBetweenChapters <= 0)
         {
             return _emptyExpectedChapter;
         }
 
-        const double alpha = 0.2; // A smaller alpha will give more weight to recent data, while a larger alpha will smooth the data more.
-        var forecastedTimeDifference = ExponentialSmoothing(historicalTimeDifferences, alpha);
+        // Calculate expected date by adding the forecasted interval to the last chapter's creation date
+        var estimatedDate = lastChapterDate.AddDays(forecastedDaysBetweenChapters);
 
-        if (forecastedTimeDifference <= 0)
-        {
-            return _emptyExpectedChapter;
-        }
-
-        // Calculate the forecast for when the next chapter is expected
-        // var nextChapterExpected = chapters.Count > 0
-        //     ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(forecastedTimeDifference)
-        //     : (DateTime?)null;
-        var lastChapterDate = chapters.Max(c => c.CreatedUtc);
-        var estimatedDate = lastChapterDate.AddDays(forecastedTimeDifference);
+        // Clamp to valid calendar date - AddDays can produce invalid dates like "February 30th"
+        // when the forecasted date would land past the end of a short month
         var nextChapterExpected = estimatedDate.Day > DateTime.DaysInMonth(estimatedDate.Year, estimatedDate.Month)
             ? new DateTime(estimatedDate.Year, estimatedDate.Month, DateTime.DaysInMonth(estimatedDate.Year, estimatedDate.Month))
             : estimatedDate;
 
-        // For number and volume number, we need the highest chapter, not the latest created
-        var lastChapter = chapters.MaxBy(c => c.MaxNumber)!;
-        var lastChapterNumber = lastChapter.MaxNumber;
-
-        var lastVolumeNum = chapters.Select(c => c.Volume.MinNumber).Max();
-
+        // Build the result with the next expected chapter/volume number
         var result = new NextExpectedChapterDto
         {
             ChapterNumber = 0,
@@ -931,10 +981,15 @@ public class SeriesService : ISeriesService
             Title = string.Empty
         };
 
-        if (lastChapterNumber > 0)
+        // Series can be numbered by chapter (most manga/comics) or by volume (some collected editions).
+        // If we have chapter numbers, increment from the highest; otherwise, increment the volume number.
+        if (highestChapterNumber > 0)
         {
-            result.ChapterNumber = (int) Math.Truncate(lastChapterNumber) + 1;
-            result.VolumeNumber = lastChapter.Volume.MinNumber;
+            result.ChapterNumber = (int)Math.Truncate(highestChapterNumber) + 1;
+            result.VolumeNumber = chapterData[highestChapterIndex].VolumeMinNumber;
+
+            // Format the title based on library type conventions
+            // Manga uses "Chapter X", Comics use "Issue #X", Books use "Book X"
             result.Title = series.Library.Type switch
             {
                 LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber),
@@ -947,10 +1002,10 @@ public class SeriesService : ISeriesService
         }
         else
         {
-            result.VolumeNumber = lastVolumeNum + 1;
+            // Volume-only numbering - common for omnibus editions or series without chapter breaks
+            result.VolumeNumber = (int)highestVolumeNumber + 1;
             result.Title = await _localizationService.Translate(userId, "volume-num", result.VolumeNumber);
         }
-
 
         return result;
     }
