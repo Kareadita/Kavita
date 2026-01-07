@@ -61,6 +61,7 @@ public class OpdsService : IOpdsService
     private readonly IDirectoryService _directoryService;
     private readonly IReaderService _readerService;
     private readonly IEntityNamingService _namingService;
+    private readonly IReadingListService _readingListService;
 
     private readonly XmlSerializer _xmlSerializer;
 
@@ -102,7 +103,7 @@ public class OpdsService : IOpdsService
 
     public OpdsService(IUnitOfWork unitOfWork, ILocalizationService localizationService, ISeriesService seriesService,
         IDownloadService downloadService, IDirectoryService directoryService, IReaderService readerService,
-        IEntityNamingService namingService)
+        IEntityNamingService namingService, IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
@@ -111,6 +112,7 @@ public class OpdsService : IOpdsService
         _directoryService = directoryService;
         _readerService = readerService;
         _namingService = namingService;
+        _readingListService = readingListService;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
     }
@@ -595,12 +597,11 @@ public class OpdsService : IOpdsService
         var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
-        var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId, GetUserParams(request.PageNumber))).ToList();
+        var items = await _readingListService.GetReadingListItems(readingListId, userId, GetUserParams(request.PageNumber));
         var totalItems = await _unitOfWork.ReadingListRepository .GetReadingListItemCountAsync(readingListId, userId);
 
         var chapterIds = items.Select(i => i.ChapterId).Distinct().ToList();
-        var chapters = (await _unitOfWork.ChapterRepository
-                .GetChapterDtosAsync(chapterIds, userId))
+        var chapters = (await _unitOfWork.ChapterRepository .GetChapterDtosAsync(chapterIds, userId))
             .ToDictionary(c => c.Id);
 
         // Build naming contexts per library type (usually just 1-2)
@@ -616,9 +617,15 @@ public class OpdsService : IOpdsService
             if (anyProgress)
             {
                 var continuePoint = await _unitOfWork.ReadingListRepository.GetContinueReadingPoint(readingListId, userId);
-                if (continuePoint != null && chapters.TryGetValue(continuePoint.ChapterId, out var continueChapter) && continueChapter.Files.Count == 1)
+
+                if (continuePoint != null)
                 {
-                    feed.Entries.Add(await CreateContinueReadingEntryAsync(continuePoint, continueChapter, request));
+                    var continueChapter =
+                        await _unitOfWork.ChapterRepository.GetChapterDtoAsync(continuePoint.ChapterId, request.UserId);
+                    if (continueChapter is {Files.Count: 1})
+                    {
+                        feed.Entries.Add(await CreateContinueReadingEntryAsync(continuePoint, continueChapter, request));
+                    }
                 }
             }
         }
@@ -1390,12 +1397,8 @@ public class OpdsService : IOpdsService
     {
         var entry = CreateChapterWithFile(series, volume, chapter, namingContext, request);
 
-        var titleWithoutIcon = request.Preferences.EmbedProgressIndicator && entry.Title.Length > 2
-            ? entry.Title[2..]
-            : entry.Title;
-
         entry.Title = await _localizationService.Translate(
-            request.UserId, "opds-continue-reading-title", titleWithoutIcon);
+            request.UserId, "opds-continue-reading-title", entry.Title);
 
         return entry;
     }

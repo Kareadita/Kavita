@@ -49,13 +49,19 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var localizationService =
             new LocalizationService(ds, new MockHostingEnvironment(), Substitute.For<IMemoryCache>(), unitOfWork);
 
+        var namingService = new EntityNamingService();
+
+        var readingListService = new ReadingListService(unitOfWork, Substitute.For<ILogger<ReadingListService>>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(), Substitute.For<IDirectoryService>(),
+            namingService);
+
         var seriesService = new SeriesService(unitOfWork, Substitute.For<IEventHub>(), Substitute.For<ITaskScheduler>(),
             Substitute.For<ILogger<SeriesService>>(),
             localizationService, Substitute.For<IReadingListService>());
 
         var opdsService = new OpdsService(unitOfWork, localizationService,
             seriesService, Substitute.For<DownloadService>(),
-            ds, readerService, new EntityNamingService());
+            ds, readerService, namingService, readingListService);
 
         return new Tuple<IOpdsService, IReaderService>(opdsService, readerService);
     }
@@ -268,7 +274,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
-            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
+            Preferences = user2.UserPreferences.OpdsPreferences,
             EntityId = 1,
             PageNumber = 0
         });
@@ -330,13 +336,16 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             }, user.Id);
         }
 
+        var pref = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id);
+        pref.EmbedProgressIndicator = true;
+
         var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
         {
             ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
-            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
+            Preferences = pref,
             EntityId = 1,
             PageNumber = 0
         });

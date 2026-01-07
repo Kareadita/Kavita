@@ -58,6 +58,9 @@ public interface IReadingListService
     /// <returns></returns>
     /// <remarks>This method does not commit changes</remarks>
     Task UpdateReadingListAgeRatingForSeries(int seriesId, AgeRating ageRating);
+
+    Task<IList<ReadingListItemDto>> GetReadingListItems(int readingListId, int userId, UserParams? userParams = null);
+    Task<ReadingListItemDto?> GetContinueReadingPoint(int readingListId, int userId);
 }
 
 /// <summary>
@@ -71,18 +74,21 @@ public class ReadingListService : IReadingListService
     private readonly IEventHub _eventHub;
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
+    private readonly IEntityNamingService _namingService;
 
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Parser.RegexTimeout);
 
     public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger,
-        IEventHub eventHub, IImageService imageService, IDirectoryService directoryService)
+        IEventHub eventHub, IImageService imageService, IDirectoryService directoryService,
+        IEntityNamingService namingService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventHub = eventHub;
         _imageService = imageService;
         _directoryService = directoryService;
+        _namingService = namingService;
     }
 
     public static string FormatTitle(ReadingListItemDto item)
@@ -871,5 +877,26 @@ public class ReadingListService : IReadingListService
 
             readingList.AgeRating = maxAgeRating;
         }
+    }
+
+    public async Task<IList<ReadingListItemDto>> GetReadingListItems(int readingListId, int userId, UserParams? userParams = null)
+    {
+        var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId, userParams);
+
+        // Add the title
+        foreach (var item in items)
+        {
+            item.Title = _namingService.FormatReadingListItemTitle(item);
+        }
+
+        return items;
+    }
+
+    public async Task<ReadingListItemDto?> GetContinueReadingPoint(int readingListId, int userId)
+    {
+        var item = await _unitOfWork.ReadingListRepository.GetContinueReadingPoint(readingListId, userId);
+        item?.Title = _namingService.FormatReadingListItemTitle(item);
+
+        return item;
     }
 }

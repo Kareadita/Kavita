@@ -518,6 +518,100 @@ public class EntityNamingServiceTests
 
     #region FormatReadingListItemTitle Tests
 
+
+    // Manga Library & Archive
+    [Theory]
+    [InlineData(Parser.DefaultChapter, "1", null, false, "Volume 1")]
+    [InlineData("1", "1", null, false, "Chapter 1")]
+    [InlineData("1", "1", "The Title", false, "Chapter 1")]
+    [InlineData(Parser.DefaultChapter, "1", "The Title", false, "Volume 1")]
+    [InlineData(Parser.DefaultChapter, Parser.LooseLeafVolume, "The Title", false, "The Title")]
+    public void FormatReadingListItemTitle_MangaArchive_ReturnsExpected(
+        string chapterNumber, string volumeNumber, string? chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga, MangaFormat.Archive, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
+    // Comic Library & Archive
+    [Theory]
+    [InlineData(Parser.DefaultChapter, "1", null, false, "Volume 1")]
+    [InlineData("1", "1", null, false, "Issue #1")]
+    [InlineData("1", "1", "The Title", false, "Issue #1")]
+    [InlineData(Parser.DefaultChapter, "1", "The Title", false, "Volume 1")]
+    [InlineData(Parser.DefaultChapter, Parser.LooseLeafVolume, "The Title", false, "The Title")]
+    public void FormatReadingListItemTitle_ComicArchive_ReturnsExpected(
+        string chapterNumber, string volumeNumber, string? chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Comic, MangaFormat.Archive, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_ComicArchive_Special_ReturnsChapterNumber()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Comic, MangaFormat.Archive,
+            chapterNumber: "The Special Title",
+            volumeNumber: Parser.LooseLeafVolume,
+            chapterTitleName: null,
+            isSpecial: true);
+
+        Assert.Equal("The Special Title", result);
+    }
+
+    // Book Library & Archive
+    [Theory]
+    [InlineData(Parser.DefaultChapter, "1", null, false, "Volume 1")]
+    [InlineData("1", "1", null, false, "Book 1")]
+    [InlineData("1", "1", "The Title", false, "Book 1")]
+    [InlineData(Parser.DefaultChapter, "1", "The Title", false, "Volume 1")]
+    [InlineData(Parser.DefaultChapter, Parser.LooseLeafVolume, "The Title", false, "The Title")]
+    public void FormatReadingListItemTitle_BookArchive_ReturnsExpected(
+        string chapterNumber, string volumeNumber, string? chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Book, MangaFormat.Archive, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
+    // Manga Library & EPUB
+    [Theory]
+    [InlineData(Parser.DefaultChapter, "1", null, false, "Volume 1")]
+    [InlineData("1", "1", null, false, "Volume 1")]
+    [InlineData("1", "1", "The Title", false, "Volume 1")]
+    [InlineData(Parser.DefaultChapter, "1", "The Title", false, "The Title")]
+    [InlineData(Parser.DefaultChapter, Parser.LooseLeafVolume, "The Title", false, "The Title")]
+    public void FormatReadingListItemTitle_MangaEpub_ReturnsExpected(
+        string chapterNumber, string volumeNumber, string? chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga, MangaFormat.Epub, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
+    // Book Library & EPUB
+    [Theory]
+    [InlineData(Parser.DefaultChapter, "1", null, false, "Volume 1")]
+    [InlineData("1", "1", null, false, "Volume 1")]
+    [InlineData("1", "1", "The Title", false, "Volume 1")]
+    [InlineData(Parser.DefaultChapter, "1", "The Title", false, "The Title")]
+    [InlineData(Parser.DefaultChapter, Parser.LooseLeafVolume, "The Title", false, "The Title")]
+    public void FormatReadingListItemTitle_BookEpub_ReturnsExpected(
+        string chapterNumber, string volumeNumber, string? chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Book, MangaFormat.Epub, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
     [Theory]
     [InlineData(LibraryType.Manga, "5", "1", null, false, "Chapter 5")]
     [InlineData(LibraryType.Manga, "10.5", "1", null, false, "Chapter 10.5")]
