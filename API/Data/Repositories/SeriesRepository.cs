@@ -110,13 +110,6 @@ public interface ISeriesRepository
     Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds, bool fullSeries = true);
     Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
     Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
-    /// <summary>
-    /// Used to add Progress/Rating information to series list.
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="series"></param>
-    /// <returns></returns>
-    Task AddSeriesModifiers(int userId, IList<SeriesDto> series);
     Task<string?> GetSeriesCoverImageAsync(int seriesId);
     Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto? filter);
     Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);
@@ -342,7 +335,7 @@ public class SeriesRepository : ISeriesRepository
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter, QueryContext.None);
 
         var retSeries = query
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(_mapper, userId)
             .AsSplitQuery()
             .AsNoTracking();
 
@@ -537,15 +530,10 @@ public class SeriesRepository : ISeriesRepository
     public async Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId)
     {
         var series = await _context.Series.Where(x => x.Id == seriesId)
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(_mapper, userId)
             .SingleOrDefaultAsync();
 
-        if (series == null) return null;
-
-        var seriesList = new List<SeriesDto>() {series};
-        await AddSeriesModifiers(userId, seriesList);
-
-        return seriesList[0];
+        return series ?? null;
     }
 
     /// <summary>
@@ -613,7 +601,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => seriesIds.Contains(s.Id) && allowedLibraries.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(restriction)
             .AsSplitQuery()
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(_mapper, user.Id)
             .ToListAsync();
     }
 
@@ -710,8 +698,7 @@ public class SeriesRepository : ISeriesRepository
     {
         var query = await CreateFilteredSearchQueryableV2(userId, filterDto, queryContext);
 
-        var retSeries = query
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
+        var retSeries = query.ProjectToWithProgress<Series, SeriesDto>(_mapper, userId);
 
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
     }
@@ -720,7 +707,7 @@ public class SeriesRepository : ISeriesRepository
     {
 
         // I need to check Weblinks when AniListId/MalId is already set in ExternalSeries
-        // Updating stale data should prioritize ExernalSeriesMetada before Weblinks, to priorize prior matches
+        // Updating stale data should prioritize ExternalSeriesMetadata before Weblinks, to prioritize prior matches
         var result = await _context.Series
             .Where(s => s.Id == seriesId)
             .Include(s => s.ExternalSeriesMetadata)
@@ -750,37 +737,6 @@ public class SeriesRepository : ISeriesRepository
         return result;
     }
 
-    public async Task AddSeriesModifiers(int userId, IList<SeriesDto> series)
-    {
-        var userProgress = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))
-            .AsSplitQuery()
-            .ToListAsync();
-
-        var userRatings = await _context.AppUserRating
-            .Where(r => r.AppUserId == userId && series.Select(s => s.Id).Contains(r.SeriesId))
-            .AsSplitQuery()
-            .ToListAsync();
-
-        foreach (var s in series)
-        {
-            var seriesProgress = userProgress.Where(p => p.SeriesId == s.Id).ToList();
-            s.PagesRead = seriesProgress.Sum(p => p.PagesRead);
-            var rating = userRatings.SingleOrDefault(r => r.SeriesId == s.Id);
-            if (rating != null)
-            {
-                s.UserRating = rating.Rating;
-                s.HasUserRated = rating.HasBeenRated;
-            }
-
-            if (userProgress.Count > 0)
-            {
-                s.LatestReadDate = seriesProgress.MaxOrDefault(p => p.LastModified, DateTime.MinValue);
-                s.TotalReads = seriesProgress.MinOrDefault(p => p.TotalReads, 0);
-            }
-        }
-    }
-
     public async Task<string?> GetSeriesCoverImageAsync(int seriesId)
     {
         return await _context.Series
@@ -805,7 +761,7 @@ public class SeriesRepository : ISeriesRepository
 
         var retSeries = query
             .OrderByDescending(s => s.Created)
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(_mapper, userId)
             .AsSplitQuery()
             .AsNoTracking();
 
@@ -818,7 +774,7 @@ public class SeriesRepository : ISeriesRepository
 
         var retSeries = query
             .OrderByDescending(s => s.Created)
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(_mapper, userId)
             .AsSplitQuery()
             .AsNoTracking();
 
@@ -958,7 +914,7 @@ public class SeriesRepository : ISeriesRepository
                 .OrderByDescending(s => s.LatestReadDate)
             .ThenByDescending(s => s.LastChapterAdded)
             .Select(s => s.Series)
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(_mapper, userId)
             .AsSplitQuery()
             .AsNoTracking();
 
@@ -1066,6 +1022,7 @@ public class SeriesRepository : ISeriesRepository
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryableV2(int userId, FilterV2Dto filter, QueryContext queryContext, IQueryable<Series>? query = null)
     {
         var userLibraries = await GetUserLibrariesForFilteredQuery(0, userId, queryContext);
+        var allLibraryCount = await _context.Library.CountAsync();
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         var onlyParentSeries = await _context.AppUserPreferences.Where(u => u.AppUserId == userId)
             .Select(u => u.CollapseSeriesRelationships)
@@ -1093,7 +1050,7 @@ public class SeriesRepository : ISeriesRepository
         query = BuildFilterQuery(userId, filter, query);
 
         query = query
-            .WhereIf(userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
+            .WhereIf(allLibraryCount != userLibraries.Count && userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
             .WhereIf(onlyParentSeries, s =>
                 s.RelationOf.Count == 0 ||
                 s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
@@ -1342,7 +1299,7 @@ public class SeriesRepository : ISeriesRepository
             .SelectMany(c => c.Items.Where(s => userLibraries.Contains(s.LibraryId)))
             .OrderBy(s => s.LibraryId)
             .ThenBy(s => s.SortName.ToLower())
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(_mapper, userId)
             .AsSplitQuery();
 
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
@@ -1546,7 +1503,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => usersSeriesIds.Contains(s.Id))
             .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
+            .ProjectToWithProgress<Series, SeriesDto>(_mapper, userId);
 
 
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
@@ -1888,7 +1845,7 @@ public class SeriesRepository : ISeriesRepository
             .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .OrderByDescending(s => _context.AppUserRating.Where(r => r.SeriesId == s.Id).Select(r => r.Rating).Average())
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
+            .ProjectToWithProgress<Series, SeriesDto>(_mapper, userId);
 
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
@@ -2057,7 +2014,7 @@ public class SeriesRepository : ISeriesRepository
 
         var filteredQuery = await CreateFilteredSearchQueryable(userId, 0, filter, query);
 
-        return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+        return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectToWithProgress<Series, SeriesDto>(_mapper, userId), userParams.PageNumber, userParams.PageSize);
     }
 
     public async Task<PagedList<SeriesDto>> GetWantToReadForUserV2Async(int userId, UserParams userParams, FilterV2Dto filter)
@@ -2077,7 +2034,7 @@ public class SeriesRepository : ISeriesRepository
         query = query.Where(s => seriesIds.Contains(s.Id));
 
         var retSeries = query
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(_mapper, userId)
             .AsSplitQuery()
             .AsNoTracking();
 

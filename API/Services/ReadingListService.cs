@@ -239,7 +239,6 @@ public class ReadingListService : IReadingListService
     public async Task<bool> RemoveFullyReadItems(int readingListId, AppUser user)
     {
         var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, user.Id);
-        items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
 
         // Collect all Ids to remove
         var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id).ToList();

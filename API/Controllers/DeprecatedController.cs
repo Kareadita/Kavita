@@ -60,8 +60,6 @@ public class DeprecatedController : BaseApiController
         var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(UserId, userParams, filterDto);
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(UserId, pagedList);
-
         return Ok(pagedList);
     }
 
@@ -93,11 +91,6 @@ public class DeprecatedController : BaseApiController
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
 
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
-
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
         return Ok(series);
@@ -119,11 +112,6 @@ public class DeprecatedController : BaseApiController
         var series =
             await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, userId, userParams, filterDto);
 
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
-
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
         return Ok(series);
@@ -143,11 +131,6 @@ public class DeprecatedController : BaseApiController
         var userId = UserId;
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
-
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -311,9 +294,11 @@ public class DeprecatedController : BaseApiController
     {
         var userId = UserId;
         userParams ??= UserParams.Default;
+
         var series = await _unitOfWork.SeriesRepository.GetHighlyRated(userId, libraryId, userParams);
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
         return Ok(series);
     }
 
@@ -331,7 +316,6 @@ public class DeprecatedController : BaseApiController
 
         userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetMoreIn(userId, libraryId, genreId, userParams);
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
         return Ok(series);

@@ -52,7 +52,6 @@ public interface IChapterRepository
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IList<Chapter>> GetAllChaptersWithCoversInDifferentEncoding(EncodeFormat format);
     Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync();
-    Task AddChapterModifiers(int userId, ChapterDto chapter);
     IQueryable<Chapter> GetChaptersForSeries(int seriesId);
     Task<IList<Chapter>> GetAllChaptersForSeries(int seriesId);
     Task<int> GetAverageUserRating(int chapterId, int userId);
@@ -163,14 +162,9 @@ public class ChapterRepository : IChapterRepository
     {
         var chapter = await _context.Chapter
             .Includes(ChapterIncludes.Files | ChapterIncludes.People)
-            .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Chapter, ChapterDto>(_mapper, userId)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == chapterId);
-
-        if (userId > 0 && chapter != null)
-        {
-            await AddChapterModifiers(userId, chapter);
-        }
 
         return chapter;
     }
@@ -180,14 +174,9 @@ public class ChapterRepository : IChapterRepository
         var chapters = await _context.Chapter
                 .Where(c => chapterIds.Contains(c.Id))
                 .Includes(ChapterIncludes.Files | ChapterIncludes.People)
-                .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
+                .ProjectToWithProgress<Chapter, ChapterDto>(_mapper, userId)
                 .AsSplitQuery()
                 .ToListAsync() ;
-
-        foreach (var chapter in chapters)
-        {
-            await AddChapterModifiers(userId, chapter);
-        }
 
         return chapters;
     }
@@ -252,19 +241,12 @@ public class ChapterRepository : IChapterRepository
     /// <returns></returns>
     public async Task<IList<ChapterDto>> GetChapterDtosAsync(int volumeId, int userId)
     {
-        var chapts =  await _context.Chapter
+        return await _context.Chapter
             .Where(c => c.VolumeId == volumeId)
             .Includes(ChapterIncludes.Files | ChapterIncludes.People)
             .OrderBy(c => c.SortOrder)
-            .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Chapter, ChapterDto>(_mapper, userId)
             .ToListAsync();
-
-        foreach (var chapter in chapts)
-        {
-            await AddChapterModifiers(userId, chapter);
-        }
-
-        return chapts;
     }
 
     /// <summary>
@@ -320,29 +302,6 @@ public class ChapterRepository : IChapterRepository
             .Where(c => chapterIds.Contains(c.ChapterId))
             .AsNoTracking()
             .ToListAsync();
-    }
-
-    public async Task AddChapterModifiers(int userId, ChapterDto? chapter)
-    {
-        if (chapter == null) return;
-
-        var progress = await _context.AppUserProgresses.Where(x =>
-                x.AppUserId == userId && x.ChapterId == chapter.Id)
-            .AsNoTracking()
-            .FirstOrDefaultAsync();
-        if (progress != null)
-        {
-            chapter.PagesRead = progress.PagesRead ;
-            chapter.LastReadingProgressUtc = progress.LastModifiedUtc;
-            chapter.LastReadingProgress = progress.LastModified;
-            chapter.TotalReads = progress.TotalReads;
-        }
-        else
-        {
-            chapter.PagesRead = 0;
-            chapter.LastReadingProgressUtc = DateTime.MinValue;
-            chapter.LastReadingProgress = DateTime.MinValue;
-        }
     }
 
     /// <summary>
@@ -452,40 +411,26 @@ public class ChapterRepository : IChapterRepository
     public async Task<ChapterDto?> GetFirstChapterForSeriesAsync(int seriesId, int userId)
     {
         // Get the chapter entity with proper ordering
-        var firstChapter = await _context.Chapter
+        return await _context.Chapter
             .Include(c => c.Volume)
             .Include(c => c.Files)
             .Where(c => c.Volume.SeriesId == seriesId)
             .ApplyDefaultChapterOrdering()
             .AsNoTracking()
+            .ProjectToWithProgress<Chapter, ChapterDto>(_mapper, userId)
             .FirstOrDefaultAsync();
-
-        if (firstChapter == null) return null;
-
-        var dto = _mapper.Map<ChapterDto>(firstChapter);
-
-        await AddChapterModifiers(userId, dto);
-
-        return dto;
     }
 
     public async Task<ChapterDto?> GetFirstChapterForVolumeAsync(int volumeId, int userId)
     {
         // Get the chapter entity with proper ordering
-        var firstChapter = await _context.Chapter
+        return await _context.Chapter
             .Include(c => c.Volume)
             .Include(c => c.Files)
             .Where(c => c.Volume.Id == volumeId)
             .ApplyDefaultChapterOrdering()
             .AsNoTracking()
+            .ProjectToWithProgress<Chapter, ChapterDto>(_mapper, userId)
             .FirstOrDefaultAsync();
-
-        if (firstChapter == null) return null;
-
-        var dto = _mapper.Map<ChapterDto>(firstChapter);
-
-        await AddChapterModifiers(userId, dto);
-
-        return dto;
     }
 }

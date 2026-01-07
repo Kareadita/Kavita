@@ -842,7 +842,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
             if (firstChapter != null)
             {
-                // We will be rereading the volume, use it's name as label
+                // We will be rereading the volume, use its name as label
                 var (displayName, _) = await entityDisplayService.GetVolumeDisplayName(volume, userId, options);
 
                 return new RereadDto

@@ -263,16 +263,15 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
         if (!isAdmin && ret?.Recommendations != null && user != null)
         {
             // Re-obtain owned series and take into account age restriction
+            var seriesIds = ret.Recommendations.OwnedSeries.Select(s => s.Id);
             ret.Recommendations.OwnedSeries =
-                await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(
-                    ret.Recommendations.OwnedSeries.Select(s => s.Id), user);
+                await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(seriesIds, user);
             ret.Recommendations.ExternalSeries = [];
         }
 
         if (ret?.Recommendations != null && user != null)
         {
             ret.Recommendations.OwnedSeries ??= [];
-            await unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, ret.Recommendations.OwnedSeries);
         }
     }
 }

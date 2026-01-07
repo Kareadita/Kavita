@@ -81,8 +81,6 @@ public class SeriesController : BaseApiController
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
 
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
         return Ok(series);
@@ -153,7 +151,6 @@ public class SeriesController : BaseApiController
     {
         var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId);
         if (chapter == null) return NoContent();
-        await _unitOfWork.ChapterRepository.AddChapterModifiers(UserId, chapter);
 
         return Ok(chapter);
     }
@@ -226,11 +223,6 @@ public class SeriesController : BaseApiController
         var series =
             await _unitOfWork.SeriesRepository.GetRecentlyAddedV2(userId, userParams, filterDto);
 
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
-
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
         return Ok(series);
@@ -270,9 +262,6 @@ public class SeriesController : BaseApiController
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(seriesForUser, userParams, filterDto, context);
 
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(seriesForUser, series);
-
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
         return Ok(series);
@@ -290,8 +279,6 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult<PagedList<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
         var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(UserId, libraryId, userParams, null);
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(UserId, pagedList);
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
@@ -322,8 +309,6 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult<PagedList<SeriesDto>>> GetCurrentlyReadingForUser([FromQuery] UserParams userParams, [FromQuery] int userId)
     {
         var pagedList = await _seriesService.GetCurrentlyReading(userId, UserId, userParams);
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, pagedList);
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
@@ -408,11 +393,6 @@ public class SeriesController : BaseApiController
         var userId = UserId;
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, userParams);
-
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series-collection"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 

@@ -887,9 +887,6 @@ public class ReaderController : BaseApiController
         var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
         if (series == null || chapter == null) return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
 
-        // Patch in the reading progress
-        await _unitOfWork.ChapterRepository.AddChapterModifiers(UserId, chapter);
-
         if (series.Format == MangaFormat.Epub)
         {
             // Get the word counts for all the pages
