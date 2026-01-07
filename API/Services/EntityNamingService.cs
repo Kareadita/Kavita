@@ -239,7 +239,7 @@ public class EntityNamingService : IEntityNamingService
     private static bool ShouldAppendTitle(string? title, string range, string baseTitle, LibraryType libraryType)
     {
         // No title to append
-        if (string.IsNullOrEmpty(title))
+        if (string.IsNullOrWhiteSpace(title))
         {
             return false;
         }
