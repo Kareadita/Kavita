@@ -1,6 +1,7 @@
 ﻿using System.IO.Abstractions;
 using API.Constants;
 using API.Data;
+using API.Data.AutoMapper;
 using API.Helpers;
 using API.Services;
 using API.Services.Caching;
@@ -29,7 +30,7 @@ public static class ApplicationServiceExtensions
 {
     public static void AddApplicationServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
     {
-        services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
+        services.AddAutoMapper(typeof(Program).Assembly);
 
         services.AddScoped<UserContext>();
         services.AddScoped<IUserContext>(sp => sp.GetRequiredService<UserContext>());

@@ -5,9 +5,7 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Annotations;
 using API.DTOs.Collection;
-using API.DTOs.CollectionTags;
 using API.DTOs.Dashboard;
-using API.DTOs.Device;
 using API.DTOs.Device.EmailDevice;
 using API.DTOs.Email;
 using API.DTOs.Font;
@@ -36,15 +34,15 @@ using API.Entities.Progress;
 using API.Entities.Scrobble;
 using API.Entities.User;
 using API.Extensions.QueryExtensions.Filtering;
+using API.Helpers;
 using API.Helpers.Converters;
 using AutoMapper;
-using CollectionTag = API.Entities.CollectionTag;
 using EmailHistory = API.Entities.EmailHistory;
 using MediaError = API.Entities.MediaError;
 using PublicationStatus = API.Entities.Enums.PublicationStatus;
 using SiteTheme = API.Entities.SiteTheme;
 
-namespace API.Helpers;
+namespace API.Data.AutoMapper;
 #nullable enable
 
 public class AutoMapperProfiles : Profile

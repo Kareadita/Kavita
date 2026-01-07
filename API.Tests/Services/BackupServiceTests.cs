@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.AutoMapper;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Helpers.Builders;

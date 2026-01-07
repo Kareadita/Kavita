@@ -17,7 +17,6 @@ using API.DTOs.ReadingLists;
 using API.DTOs.Search;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Enums.UserPreferences;
 using API.Exceptions;
 using API.Helpers;
 using API.Helpers.Formatting;

@@ -236,6 +236,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = 1,
             PageNumber = 0
         });
@@ -267,6 +268,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = 1,
             PageNumber = 0
         });
@@ -287,6 +289,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             UserId = user.Id,
             EntityId = 1,
             PageNumber = 0
@@ -333,6 +336,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = 1,
             PageNumber = 0
         });
@@ -376,6 +380,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = user2.UserPreferences.OpdsPreferences,
             EntityId = 1,
             PageNumber = 0
         });
@@ -404,6 +409,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
                 Prefix = OpdsService.DefaultApiPrefix,
                 BaseUrl = string.Empty,
                 UserId = user.Id,
+                Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
                 Query = string.Empty
             });
         });
@@ -481,6 +487,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             PageNumber = OpdsService.FirstPageNumber
         });
 
@@ -502,6 +509,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             PageNumber = OpdsService.FirstPageNumber
         });
 
@@ -538,6 +546,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             PageNumber = OpdsService.FirstPageNumber
         });
 
@@ -570,6 +579,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             PageNumber = OpdsService.FirstPageNumber
         });
 
@@ -605,6 +615,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             PageNumber = OpdsService.FirstPageNumber
         });
 
@@ -626,6 +637,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             PageNumber = OpdsService.FirstPageNumber
         });
 
@@ -658,6 +670,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             PageNumber = OpdsService.FirstPageNumber
         });
 
@@ -689,6 +702,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             PageNumber = OpdsService.FirstPageNumber
         });
 
@@ -715,6 +729,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = libs.First().Id,
             PageNumber = OpdsService.FirstPageNumber
         });
@@ -730,6 +745,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = libs.First().Id,
             PageNumber = OpdsService.FirstPageNumber + 1
         });
@@ -773,6 +789,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = genre.Id,
             PageNumber = OpdsService.FirstPageNumber
         });
@@ -802,6 +819,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = smartFilter.Id,
             PageNumber = OpdsService.FirstPageNumber
         });
@@ -828,6 +846,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = collection.Id,
             PageNumber = OpdsService.FirstPageNumber
         });
@@ -866,6 +885,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = library.Id,
             PageNumber = OpdsService.FirstPageNumber
         });
@@ -896,6 +916,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = readingList.Id,
             PageNumber = OpdsService.FirstPageNumber
         });
@@ -951,6 +972,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = readingList.Id,
             PageNumber = OpdsService.FirstPageNumber
         });
@@ -979,6 +1001,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = 1,
             PageNumber = OpdsService.FirstPageNumber
         });
@@ -1000,6 +1023,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             SeriesId = 1,
             VolumeId = 1,
             PageNumber = OpdsService.FirstPageNumber
@@ -1023,6 +1047,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             SeriesId = 1,
             VolumeId = 1,
             ChapterId = 1,
@@ -1050,6 +1075,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Prefix = OpdsService.DefaultApiPrefix,
             BaseUrl = string.Empty,
             UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
             EntityId = 1,
             PageNumber = OpdsService.FirstPageNumber
         });
