@@ -431,7 +431,7 @@ public class Startup
                     #region v0.7.14
                     await MigrateEmailTemplates.Migrate(directoryService, logger);
                     await MigrateVolumeNumber.Migrate(dataContext, logger);
-                    await MigrateWantToReadImport.Migrate(unitOfWork, dataContext, directoryService, logger);
+                    await new MigrateWantToReadImport(unitOfWork, directoryService).RunAsync(dataContext, logger);
                     await MigrateManualHistory.Migrate(dataContext, logger);
                     await MigrateClearNightlyExternalSeriesRecords.Migrate(dataContext, logger);
                     #endregion
