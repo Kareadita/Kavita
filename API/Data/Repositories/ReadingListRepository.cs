@@ -57,6 +57,7 @@ public interface IReadingListRepository
     Task<ReadingListInfoDto?> GetReadingListInfoAsync(int readingListId);
     Task<bool> AnyUserReadingProgressAsync(int readingListId, int userId);
     Task<ReadingListItemDto?> GetContinueReadingPoint(int readingListId, int userId);
+    Task<int> GetReadingListItemCountAsync(int readingListId, int userId);
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -468,9 +469,14 @@ public class ReadingListRepository : IReadingListRepository
             LastReadingProgressUtc = item.Progress?.LastModifiedUtc
         };
 
-        dto.Title = ReadingListService.FormatTitle(dto);
+        dto.Title = ReadingListService.FormatTitle(dto); // TODO: Refactor to EntityNamingService/NamingContext
 
         return dto;
+    }
+
+    public Task<int> GetReadingListItemCountAsync(int readingListId, int userId)
+    {
+        return _context.ReadingListItem.Where(rli => rli.ReadingListId == readingListId).CountAsync();
     }
 
 

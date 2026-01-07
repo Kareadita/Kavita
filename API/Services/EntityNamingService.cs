@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using API.DTOs;
+using API.DTOs.ReadingLists;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
 
@@ -34,15 +36,28 @@ public interface IEntityNamingService
     /// Used for OPDS feeds, reading lists, etc.
     /// </summary>
     string BuildFullTitle(LibraryType libraryType, SeriesDto series, VolumeDto? volume, ChapterDto chapter, string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null);
+    /// <summary>
+    /// Formats a reading list item title based on the item's metadata.
+    /// Handles the unique naming conventions for reading list display.
+    /// </summary>
+    string FormatReadingListItemTitle(ReadingListItemDto item, string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null);
+
+    /// <summary>
+    /// Formats a reading list item title from raw values.
+    /// </summary>
+    string FormatReadingListItemTitle( LibraryType libraryType, MangaFormat format, string? chapterNumber, string? volumeNumber, string? chapterTitleName, bool isSpecial, string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null);
 }
 
-public class EntityNamingService : IEntityNamingService
+public partial class EntityNamingService : IEntityNamingService
 {
     private const string DefaultVolumeLabel = "Volume";
     private const string DefaultChapterLabel = "Chapter";
     private const string DefaultIssueLabel = "Issue";
     private const string DefaultBookLabel = "Book";
     private const string DefaultHashMark = "#";
+
+    [GeneratedRegex(@"^\d+(\.\d+)?$", RegexOptions.Compiled)]
+    private static partial Regex JustNumbersRegex();
 
     public string FormatChapterTitle(LibraryType libraryType, ChapterDto chapter,
         string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)
@@ -147,6 +162,152 @@ public class EntityNamingService : IEntityNamingService
         return $"{seriesName} - {volName} - {chapTitle}";
     }
 
+    public string FormatReadingListItemTitle(ReadingListItemDto item,
+        string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)
+    {
+        return FormatReadingListItemTitle(
+            item.LibraryType,
+            item.SeriesFormat,
+            item.ChapterNumber,
+            item.VolumeNumber,
+            item.ChapterTitleName,
+            item.IsSpecial,
+            volumeLabel,
+            chapterLabel,
+            issueLabel,
+            bookLabel);
+    }
+
+    public string FormatReadingListItemTitle(
+        LibraryType libraryType,
+        MangaFormat format,
+        string? chapterNumber,
+        string? volumeNumber,
+        string? chapterTitleName,
+        bool isSpecial,
+        string? volumeLabel = null,
+        string? chapterLabel = null,
+        string? issueLabel = null,
+        string? bookLabel = null)
+    {
+        volumeLabel ??= DefaultVolumeLabel;
+        chapterLabel ??= DefaultChapterLabel;
+        issueLabel ??= DefaultIssueLabel;
+        bookLabel ??= DefaultBookLabel;
+
+        // Handle epub format with special logic
+        if (format == MangaFormat.Epub)
+        {
+            return FormatEpubReadingListTitle(chapterNumber, volumeNumber, chapterTitleName, volumeLabel);
+        }
+
+        // Try volume-only title first (when chapter is default but volume is real)
+        if (Parser.IsDefaultChapter(chapterNumber) && !Parser.IsLooseLeafVolume(volumeNumber))
+        {
+            return $"{volumeLabel} {volumeNumber}";
+        }
+
+        // Clean chapter number for display
+        var displayChapterNumber = GetDisplayChapterNumber(chapterNumber);
+
+        // Default chapter with title name
+        if (Parser.IsDefaultChapter(chapterNumber) && !string.IsNullOrEmpty(chapterTitleName))
+        {
+            return chapterTitleName;
+        }
+
+        // Special chapter
+        if (isSpecial)
+        {
+            return !string.IsNullOrEmpty(chapterTitleName)
+                ? chapterTitleName
+                : displayChapterNumber ?? string.Empty;
+        }
+
+        // Standard chapter formatting based on library type
+        var chapterPrefix = GetChapterPrefix(libraryType, chapterLabel, issueLabel, bookLabel);
+        return $"{chapterPrefix}{displayChapterNumber}";
+    }
+
+    #region Reading List Helpers
+
+    /// <summary>
+    /// Handles the special epub formatting logic for reading list items.
+    /// </summary>
+    private static string FormatEpubReadingListTitle(
+        string? chapterNumber,
+        string? volumeNumber,
+        string? chapterTitleName,
+        string volumeLabel)
+    {
+        var cleanedChapterNumber = Parser.CleanSpecialTitle(chapterNumber);
+
+        // Default/empty chapter number
+        if (Parser.IsDefaultChapter(cleanedChapterNumber))
+        {
+            // Prefer title name if available
+            if (!string.IsNullOrEmpty(chapterTitleName))
+            {
+                return chapterTitleName;
+            }
+
+            // Fall back to volume
+            var cleanedVolume = Parser.CleanSpecialTitle(volumeNumber);
+            return $"{volumeLabel} {cleanedVolume}";
+        }
+
+        // Special volume marker - just use cleaned chapter
+        if (volumeNumber == Parser.SpecialVolume)
+        {
+            return cleanedChapterNumber;
+        }
+
+        // Regular epub with chapter number
+        return $"{volumeLabel} {cleanedChapterNumber}";
+    }
+
+    /// <summary>
+    /// Gets the display-ready chapter number, cleaning special characters if needed.
+    /// </summary>
+    private static string? GetDisplayChapterNumber(string? chapterNumber)
+    {
+        if (string.IsNullOrEmpty(chapterNumber))
+        {
+            return null;
+        }
+
+        // If it's just numbers (including decimals like "1.5"), return as-is
+        if (JustNumbersRegex().IsMatch(chapterNumber))
+        {
+            return chapterNumber;
+        }
+
+        // Otherwise clean special title formatting
+        return Parser.CleanSpecialTitle(chapterNumber);
+    }
+
+    /// <summary>
+    /// Gets the chapter prefix string based on library type.
+    /// Maps to ReaderService.FormatChapterName logic.
+    /// </summary>
+    private static string GetChapterPrefix(
+        LibraryType libraryType,
+        string chapterLabel,
+        string issueLabel,
+        string bookLabel)
+    {
+        return libraryType switch
+        {
+            LibraryType.Comic or LibraryType.ComicVine => $"{issueLabel} #",
+            LibraryType.Book or LibraryType.LightNovel => $"{bookLabel} ",
+            _ => $"{chapterLabel} "
+        };
+    }
+
+    #endregion
+
+    #region Volume Helpers
+
     /// <summary>
     /// Formats volume name for book/light novel libraries.
     /// </summary>
@@ -232,6 +393,10 @@ public class EntityNamingService : IEntityNamingService
         return false;
     }
 
+    #endregion
+
+    #region Chapter Helpers
+
     /// <summary>
     /// Determines if the title should be appended to the base chapter title.
     /// Prevents duplication like "Chapter 1448 - Chapter 1448".
@@ -307,4 +472,6 @@ public class EntityNamingService : IEntityNamingService
 
         return false;
     }
+
+    #endregion
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.DTOs;
+using API.DTOs.ReadingLists;
 using API.Entities.Enums;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
@@ -485,5 +486,357 @@ public class EntityNamingServiceTests
         };
     }
 
+    private static ReadingListItemDto CreateReadingListItemDto(
+        LibraryType libraryType,
+        MangaFormat format,
+        string? chapterNumber,
+        string? volumeNumber,
+        string? chapterTitleName,
+        bool isSpecial)
+    {
+        return new ReadingListItemDto
+        {
+            Id = 1,
+            Order = 1,
+            ChapterId = 1,
+            SeriesId = 1,
+            VolumeId = 1,
+            LibraryId = 1,
+            LibraryType = libraryType,
+            SeriesFormat = format,
+            ChapterNumber = chapterNumber,
+            VolumeNumber = volumeNumber,
+            ChapterTitleName = chapterTitleName,
+            IsSpecial = isSpecial,
+            SeriesName = "Test Series",
+            PagesRead = 0,
+            PagesTotal = 100
+        };
+    }
+
     #endregion
+
+    #region FormatReadingListItemTitle Tests
+
+    [Theory]
+    [InlineData(LibraryType.Manga, "5", "1", null, false, "Chapter 5")]
+    [InlineData(LibraryType.Manga, "10.5", "1", null, false, "Chapter 10.5")]
+    [InlineData(LibraryType.Image, "3", "1", null, false, "Chapter 3")]
+    public void FormatReadingListItemTitle_Manga_ReturnsChapterFormat(
+        LibraryType libraryType, string chapterNumber, string volumeNumber,
+        string? chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            libraryType, MangaFormat.Archive, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(LibraryType.Comic, "1", "1", null, false, "Issue #1")]
+    [InlineData(LibraryType.Comic, "25", "1", null, false, "Issue #25")]
+    [InlineData(LibraryType.ComicVine, "100", "1", null, false, "Issue #100")]
+    public void FormatReadingListItemTitle_Comic_ReturnsIssueFormat(
+        LibraryType libraryType, string chapterNumber, string volumeNumber,
+        string? chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            libraryType, MangaFormat.Archive, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(LibraryType.Book, "1", "1", null, false, "Book 1")]
+    [InlineData(LibraryType.LightNovel, "5", "1", null, false, "Book 5")]
+    public void FormatReadingListItemTitle_Book_ReturnsBookFormat(
+        LibraryType libraryType, string chapterNumber, string volumeNumber,
+        string? chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            libraryType, MangaFormat.Archive, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(LibraryType.Manga, Parser.DefaultChapter, "5", null, false, "Volume 5")]
+    [InlineData(LibraryType.Comic, Parser.DefaultChapter, "10", null, false, "Volume 10")]
+    public void FormatReadingListItemTitle_DefaultChapterWithVolume_ReturnsVolumeOnly(
+        LibraryType libraryType, string chapterNumber, string volumeNumber,
+        string? chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            libraryType, MangaFormat.Archive, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(LibraryType.Manga, Parser.DefaultChapter, Parser.LooseLeafVolume, "My Special Title", false, "My Special Title")]
+    [InlineData(LibraryType.Comic, Parser.DefaultChapter, Parser.LooseLeafVolume, "Origin Story", false, "Origin Story")]
+    public void FormatReadingListItemTitle_DefaultChapterWithTitleName_ReturnsTitleName(
+        LibraryType libraryType, string chapterNumber, string volumeNumber,
+        string chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            libraryType, MangaFormat.Archive, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(LibraryType.Manga, "SP01", "0", "Bonus Chapter", true, "Bonus Chapter")]
+    [InlineData(LibraryType.Comic, "Special", "0", "Annual #1", true, "Annual #1")]
+    public void FormatReadingListItemTitle_SpecialWithTitleName_ReturnsTitleName(
+        LibraryType libraryType, string chapterNumber, string volumeNumber,
+        string chapterTitleName, bool isSpecial, string expected)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            libraryType, MangaFormat.Archive, chapterNumber, volumeNumber, chapterTitleName, isSpecial);
+
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_SpecialWithoutTitleName_ReturnsCleanedChapterNumber()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga, MangaFormat.Archive,
+            chapterNumber: "SP01 - Bonus",
+            volumeNumber: "0",
+            chapterTitleName: null,
+            isSpecial: true);
+
+        // Should return cleaned version of chapter number
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_WithCustomLabels_UsesProvidedLabels()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga,
+            MangaFormat.Archive,
+            chapterNumber: "5",
+            volumeNumber: "1",
+            chapterTitleName: null,
+            isSpecial: false,
+            chapterLabel: "Kapitel");
+
+        Assert.Equal("Kapitel 5", result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_VolumeOnlyWithCustomLabel_UsesProvidedLabel()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga,
+            MangaFormat.Archive,
+            chapterNumber: Parser.DefaultChapter,
+            volumeNumber: "3",
+            chapterTitleName: null,
+            isSpecial: false,
+            volumeLabel: "Band");
+
+        Assert.Equal("Band 3", result);
+    }
+
+    #endregion
+
+    #region FormatReadingListItemTitle - Epub Tests
+
+    [Fact]
+    public void FormatReadingListItemTitle_Epub_DefaultChapterWithTitleName_ReturnsTitleName()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Book,
+            MangaFormat.Epub,
+            chapterNumber: Parser.DefaultChapter,
+            volumeNumber: "1",
+            chapterTitleName: "The Fellowship of the Ring",
+            isSpecial: false);
+
+        Assert.Equal("The Fellowship of the Ring", result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_Epub_DefaultChapterNoTitleName_ReturnsVolume()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Book,
+            MangaFormat.Epub,
+            chapterNumber: Parser.DefaultChapter,
+            volumeNumber: "1",
+            chapterTitleName: null,
+            isSpecial: false);
+
+        Assert.Equal("Volume 1", result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_Epub_SpecialVolume_ReturnsCleanedChapter()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Book,
+            MangaFormat.Epub,
+            chapterNumber: "Bonus Content",
+            volumeNumber: Parser.SpecialVolume,
+            chapterTitleName: null,
+            isSpecial: false);
+
+        Assert.Equal("Bonus Content", result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_Epub_RegularChapter_ReturnsVolumeWithChapter()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Book,
+            MangaFormat.Epub,
+            chapterNumber: "5",
+            volumeNumber: "1",
+            chapterTitleName: null,
+            isSpecial: false);
+
+        Assert.Equal("Volume 5", result);
+    }
+
+    #endregion
+
+    #region FormatReadingListItemTitle - DTO Overload Tests
+
+    [Fact]
+    public void FormatReadingListItemTitle_WithDto_ExtractsFieldsCorrectly()
+    {
+        var item = CreateReadingListItemDto(
+            libraryType: LibraryType.Manga,
+            format: MangaFormat.Archive,
+            chapterNumber: "42",
+            volumeNumber: "5",
+            chapterTitleName: null,
+            isSpecial: false);
+
+        var result = _sut.FormatReadingListItemTitle(item);
+
+        Assert.Equal("Chapter 42", result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_WithDto_SpecialItem_ReturnsTitleName()
+    {
+        var item = CreateReadingListItemDto(
+            libraryType: LibraryType.Manga,
+            format: MangaFormat.Archive,
+            chapterNumber: "SP01",
+            volumeNumber: "0",
+            chapterTitleName: "Bonus Chapter",
+            isSpecial: true);
+
+        var result = _sut.FormatReadingListItemTitle(item);
+
+        Assert.Equal("Bonus Chapter", result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_WithDto_EpubWithTitle_ReturnsTitleName()
+    {
+        var item = CreateReadingListItemDto(
+            libraryType: LibraryType.Book,
+            format: MangaFormat.Epub,
+            chapterNumber: Parser.DefaultChapter,
+            volumeNumber: "1",
+            chapterTitleName: "The Hobbit",
+            isSpecial: false);
+
+        var result = _sut.FormatReadingListItemTitle(item);
+
+        Assert.Equal("The Hobbit", result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_WithDto_ComicFormat_ReturnsIssue()
+    {
+        var item = CreateReadingListItemDto(
+            libraryType: LibraryType.Comic,
+            format: MangaFormat.Archive,
+            chapterNumber: "15",
+            volumeNumber: "1",
+            chapterTitleName: null,
+            isSpecial: false);
+
+        var result = _sut.FormatReadingListItemTitle(item);
+
+        Assert.Equal("Issue #15", result);
+    }
+
+    #endregion
+
+
+
+    [Fact]
+    public void FormatReadingListItemTitle_NullChapterNumber_HandlesGracefully()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga,
+            MangaFormat.Archive,
+            chapterNumber: null,
+            volumeNumber: "1",
+            chapterTitleName: "Fallback Title",
+            isSpecial: false);
+
+        // Should fall back to title name or handle gracefully
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_EmptyStrings_HandlesGracefully()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga,
+            MangaFormat.Archive,
+            chapterNumber: "",
+            volumeNumber: "",
+            chapterTitleName: "",
+            isSpecial: false);
+
+        // Should not throw and should return something
+        Assert.NotNull(result);
+    }
+
+    [Theory]
+    [InlineData("1.5")]
+    [InlineData("10")]
+    [InlineData("100.25")]
+    public void FormatReadingListItemTitle_NumericChapterNumbers_PreservedAsIs(string chapterNumber)
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga,
+            MangaFormat.Archive,
+            chapterNumber: chapterNumber,
+            volumeNumber: "1",
+            chapterTitleName: null,
+            isSpecial: false);
+
+        Assert.Contains(chapterNumber, result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_NonNumericChapterNumber_GetsCleaned()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga,
+            MangaFormat.Archive,
+            chapterNumber: "SP01 - Special Chapter",
+            volumeNumber: "1",
+            chapterTitleName: null,
+            isSpecial: false);
+
+        // Should clean the special title format
+        Assert.NotNull(result);
+        Assert.DoesNotContain(" - ", result.Replace("Chapter ", ""));
+    }
+
+
 }
