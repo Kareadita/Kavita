@@ -138,6 +138,7 @@ public interface IUserRepository
     Task<DateTime?> GetAuthKeyExpiration(string authKey, int userId);
     Task<AppUserSocialPreferences> GetSocialPreferencesForUser(int userId);
     Task<AppUserPreferences> GetPreferencesForUser(int userId);
+    Task<AppUserOpdsPreferences> GetOpdsPreferences(int userId);
 }
 
 public class UserRepository : IUserRepository
@@ -1124,6 +1125,20 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserPreferences
             .Where(p => p.AppUserId == userId)
+            .FirstAsync();
+    }
+
+    /// <summary>
+    /// No Tracking
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<AppUserOpdsPreferences> GetOpdsPreferences(int userId)
+    {
+        return await _context.AppUserPreferences
+            .Where(p => p.AppUserId == userId)
+            .Select(p => p.OpdsPreferences)
+            .AsNoTracking()
             .FirstAsync();
     }
 }

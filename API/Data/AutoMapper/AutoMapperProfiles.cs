@@ -223,7 +223,6 @@ public class AutoMapperProfiles : Profile
         CreateMap<ReadingList, ReadingListDto>()
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count))
             .ForMember(dest => dest.OwnerUserName, opt => opt.MapFrom(src => src.AppUser.UserName));
-        CreateMap<ReadingListItem, ReadingListItemDto>();
         CreateMap<ScrobbleError, ScrobbleErrorDto>();
         CreateMap<ChapterDto, TachiyomiChapterDto>();
         CreateMap<Chapter, TachiyomiChapterDto>();

@@ -99,6 +99,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IOidcService, OidcService>();
         services.AddScoped<IEntityDisplayService, EntityDisplayService>();
 
+
         services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
         services.AddScoped<IClientDeviceService, ClientDeviceService>();
         services.AddScoped<IDeviceTrackingService, DeviceTrackingService>();
@@ -106,6 +107,7 @@ public static class ApplicationServiceExtensions
 
         services.AddSingleton<IReadingSessionService, ReadingSessionService>();
         services.AddSingleton<IClientInfoAccessor, ClientInfoAccessor>();
+        services.AddSingleton<IEntityNamingService, EntityNamingService>();
 
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);

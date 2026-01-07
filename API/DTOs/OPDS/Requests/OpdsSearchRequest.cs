@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.OPDS.Requests;
+﻿using API.Entities.Enums.UserPreferences;
+
+namespace API.DTOs.OPDS.Requests;
 
 public sealed record OpdsSearchRequest : IOpdsRequest
 {
@@ -6,5 +8,6 @@ public sealed record OpdsSearchRequest : IOpdsRequest
     public string Prefix { get; init; }
     public string BaseUrl { get; init; }
     public int UserId { get; init; }
+    public AppUserOpdsPreferences Preferences { get; init; }
     public string Query { get; init; }
 }
