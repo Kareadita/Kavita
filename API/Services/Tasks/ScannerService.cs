@@ -170,7 +170,7 @@ public class ScannerService : IScannerService
             }
 
             _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder}, Series matched to folder and ScanSeries enqueued for 1 minute", folder);
-            BackgroundJob.Schedule(() => ScanSeries(series.Id, true), TimeSpan.FromMinutes(1));
+            BackgroundJob.Schedule(() => ScanSeries(series.Id, false), TimeSpan.FromMinutes(1));
             return;
         }
 
