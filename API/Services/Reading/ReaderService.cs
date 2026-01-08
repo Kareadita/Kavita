@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
-using API.Data.Migrations;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Progress;
@@ -15,6 +14,7 @@ using API.Entities.Enums;
 using API.Entities.Progress;
 using API.Entities.User;
 using API.Extensions;
+using API.Helpers.Formatting;
 using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
@@ -47,7 +47,8 @@ public interface IReaderService
 
 public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
     IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService,
-    IClientInfoAccessor clientInfoAccessor, ISeriesService seriesService, IEntityDisplayService entityDisplayService)
+    IClientInfoAccessor clientInfoAccessor, ISeriesService seriesService, IEntityNamingService namingService,
+    ILocalizationService localizationService)
     : IReaderService
 {
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
@@ -754,11 +755,12 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         if (series == null) return RereadDto.Dont();
 
-        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId);
-        var options = EntityDisplayOptions.Default(libraryType);
+        var namingContext = await CreateNamingContext(userId, libraryId);
+
         var continuePoint = await GetContinuePoint(seriesId, userId);
+        var continuePointLabel = await FormatReReadLabel(userId, namingContext, continuePoint);
+
         var lastProgress = await unitOfWork.AppUserProgressRepository.GetLatestProgressForSeries(seriesId, userId);
-        var continuePointLabel = await entityDisplayService.GetEntityDisplayName(continuePoint, userId, options);
 
         if (lastProgress == null || !await unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
         {
@@ -792,11 +794,11 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         var userPreferences = await unitOfWork.UserRepository.GetPreferencesForUser(userId);
 
         return await BuildRereadDto(
+            namingContext,
             userId,
             userPreferences,
             series.LibraryId,
             seriesId,
-            libraryType,
             continuePoint,
             continuePointLabel,
             lastProgress.Value,
@@ -818,10 +820,10 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         var volume = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId);
         if (volume == null) return RereadDto.Dont();
 
-        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId);
+        var namingContext = await CreateNamingContext(userId, libraryId);
+
         var continuePoint = FindNextReadingChapter([.. volume.Chapters]);
-        var options = EntityDisplayOptions.Default(libraryType);
-        var continuePointLabel = await entityDisplayService.GetEntityDisplayName(continuePoint, userId, options);
+        var continuePointLabel = await FormatReReadLabel(userId, namingContext, continuePoint);
 
         var lastProgress = await unitOfWork.AppUserProgressRepository.GetLatestProgressForVolume(volumeId, userId);
 
@@ -843,7 +845,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             if (firstChapter != null)
             {
                 // We will be rereading the volume, use its name as label
-                var (displayName, _) = await entityDisplayService.GetVolumeDisplayName(volume, userId, options);
+                var displayName = namingContext.FormatVolumeName(volume);
 
                 return new RereadDto
                 {
@@ -857,11 +859,11 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         }
 
         return await BuildRereadDto(
+            namingContext,
             userId,
             userPreferences,
             libraryId,
             seriesId,
-            libraryType,
             continuePoint,
             continuePointLabel,
             lastProgress.Value,
@@ -877,11 +879,11 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     }
 
     private async Task<RereadDto> BuildRereadDto(
+        LocalizedNamingContext namingContext,
         int userId,
         AppUserPreferences userPreferences,
         int libraryId,
         int seriesId,
-        LibraryType libraryType,
         ChapterDto continuePoint,
         string continuePointLabel,
         DateTime lastProgress,
@@ -924,7 +926,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         }
 
         // Prompt if it's been a while and might need a refresher (start with the prev chapter)
-        var prevChapterLabel = await seriesService.FormatChapterTitle(userId, prevChapter!, libraryType);
+        var prevChapterLabel = await FormatReReadLabel(userId, namingContext, prevChapter);
 
         return new RereadDto
         {
@@ -945,9 +947,9 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
         var lastProgress = await unitOfWork.AppUserProgressRepository.GetLatestProgressForChapter(chapterId, userId);
 
-        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId);
-        var options = EntityDisplayOptions.Default(libraryType);
-        var chapterLabel = await entityDisplayService.GetEntityDisplayName(chapter, userId, options);
+        var namingContext = await CreateNamingContext(userId, libraryId);
+
+        var chapterLabel = await FormatReReadLabel(userId, namingContext, chapter);
         var reReadChapter = new RereadChapterDto(libraryId, seriesId, chapter.VolumeId, chapterId, chapterLabel, chapter.Format);
 
         // No progress, read it
@@ -972,6 +974,30 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             ChapterOnContinue = reReadChapter,
             ChapterOnReread = reReadChapter,
         };
+    }
+
+    private async Task<LocalizedNamingContext> CreateNamingContext(int userId, int libraryId)
+    {
+        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId);
+        return await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType);
+    }
+
+    private async Task<string> FormatReReadLabel(int userId, LocalizedNamingContext namingContext, ChapterDto chapter)
+    {
+        if (Parser.IsLooseLeafVolume(chapter.Title))
+        {
+            var volume = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(chapter.VolumeId, userId);
+            if (volume != null)
+            {
+                var volumeLabel = namingContext.FormatVolumeName(volume);
+                if (!string.IsNullOrEmpty(volumeLabel))
+                {
+                    return volumeLabel;
+                }
+            }
+        }
+
+        return namingContext.FormatChapterTitle(chapter);
     }
 
     /// <summary>
