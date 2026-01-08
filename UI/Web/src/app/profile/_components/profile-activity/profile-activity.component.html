@@ -1,0 +1,73 @@
+<ng-container *transloco="let t; prefix: 'profile-activity'">
+  <div class="visually-hidden">
+    <!--Hidden to allow it to setup the filter for us -->
+    <app-library-and-time-selector [userId]="memberInfo().id" [label]="''" [locale]="'server'" (filterChange)="updateFilter($event)" />
+  </div>
+  <virtual-scroller
+    #scroll
+    [items]="items()"
+    [parentScroll]="scroll.window"
+    (vsEnd)="loadMore()">
+
+    <div class="activity-list" #container>
+      @for (item of scroll.viewPortItems; track item.id) {
+        @if (item.type === 'header') {
+          <div class="date-header">
+            <span class="date-text">{{ item.date | date:'fullDate' }}</span>
+          </div>
+        } @else if (item.entry; as entry) {
+          <div class="activity-entry" [class.completed]="entry.completed">
+            <div class="entry-series">
+              <a [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId]"
+                 class="series-link">
+                {{ entry.seriesName }}
+              </a>
+              <span class="format-badge" [class]="'format-' + entry.seriesFormat">
+                {{ entry.seriesFormat | titlecase }}
+              </span>
+            </div>
+
+            <div class="entry-chapter">
+              <a [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId, 'chapter', entry.chapterId]">
+                {{ entry.chapterTitle }}
+              </a>
+            </div>
+
+            <div class="entry-stats">
+              <span class="stat duration" [attr.aria-label]="t('duration')">
+                <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                {{ formatDuration(entry.durationSeconds) }}
+              </span>
+
+              <span class="stat pages" [attr.aria-label]="t('pages-read')">
+                <i class="fa-regular fa-file" aria-hidden="true"></i>
+                {{ entry.pagesRead }} {{ t('pages') }}
+              </span>
+
+              <span class="stat progress" [attr.aria-label]="t('progress')">
+                @if (entry.completed) {
+                  <i class="fa-solid fa-check" aria-hidden="true"></i>
+                }
+                {{ formatProgress(entry) }}
+              </span>
+
+              <span class="stat time" [attr.aria-label]="t('time')">
+                {{ entry.startTimeUtc | date:'shortTime' }}
+              </span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    @if (historyResource.isLoading()) {
+      <div class="loading-indicator">
+        <app-loading [loading]="true"></app-loading>
+      </div>
+    }
+
+    @if (!historyResource.isLoading() && items().length === 0) {
+      <app-stats-no-data [message]="t('no-data')" />
+    }
+  </virtual-scroller>
+</ng-container>

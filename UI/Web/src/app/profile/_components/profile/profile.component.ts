@@ -33,11 +33,13 @@ import {TimeDurationPipe} from "../../../_pipes/time-duration.pipe";
 import {NavTabUrlDirective} from "../../../_directives/nav-tab-url.directive";
 import {Title} from "@angular/platform-browser";
 import {AccountService} from "../../../_services/account.service";
+import {ProfileActivityComponent} from "../profile-activity/profile-activity.component";
 
 enum TabID {
   Overview = 'overview-tab',
   Stats = 'stats-tab',
   Reviews = 'reviews-tab',
+  Activity = 'activity-tab'
 }
 
 @Component({
@@ -65,6 +67,7 @@ enum TabID {
     SentenceCasePipe,
     TimeDurationPipe,
     NavTabUrlDirective,
+    ProfileActivityComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',

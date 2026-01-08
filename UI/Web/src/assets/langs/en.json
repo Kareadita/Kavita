@@ -2800,6 +2800,7 @@
         "overview-tab": "{{tabs.overview-tab}}",
         "stats-tab": "{{tabs.stats-tab}}",
         "reviews-tab": "{{tabs.reviews-tab}}",
+        "activity-tab": "{{tabs.activity-tab}}",
         "no-reviews": "No Reviews yet",
         "total-reads-badge": "{{reads}} Reads",
         "k+-badge": "K+ Subscriber"
@@ -3656,7 +3657,8 @@
         "smart-filters-tab": "Smart Filters",
         "annotations-tab": "Annotations",
         "overview-tab": "Overview",
-        "management-tab": "Management"
+        "management-tab": "Management",
+        "activity-tab": "Activity"
     },
 
     "common": {

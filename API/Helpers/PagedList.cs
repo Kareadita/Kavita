@@ -38,4 +38,9 @@ public class PagedList<T> : List<T>
 
         return new PagedList<T>(itemsTask.Result, countTask.Result, pageNumber, pageSize);
     }
+
+    public static PagedList<T> Create(IEnumerable<T> items, int totalCount, int pageNumber, int pageSize)
+    {
+        return new PagedList<T>(items, totalCount, pageNumber, pageSize);
+    }
 }

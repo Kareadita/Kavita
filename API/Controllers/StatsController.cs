@@ -17,6 +17,7 @@ using API.DTOs.Stats.V3.ClientDevice;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.Middleware;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
@@ -441,6 +442,25 @@ public class StatsController(
     public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
     {
         return Ok(await statService.GetUserReadStatistics(userId, []));
+    }
+
+
+    /// <summary>
+    /// Return a user's reading session history
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="filter"></param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
+    [HttpGet("reading-history")]
+    [ProfilePrivacy]
+    public async Task<ActionResult<PagedList<ReadingHistoryItemDto>>> GetReadingHistoryItems([FromQuery] int userId, [FromQuery] StatsFilterDto filter, [FromQuery] UserParams userParams)
+    {
+        var result = await statService.GetReadingHistoryItems(filter, userParams, userId, UserId);
+
+        Response.AddPaginationHeader(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
+
+        return Ok(result);
     }
 
     // TODO: Can we cache this? Can we make an attribute to cache methods based on keys?

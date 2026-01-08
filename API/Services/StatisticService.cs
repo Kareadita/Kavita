@@ -17,6 +17,7 @@ using API.Entities.Enums.UserPreferences;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
+using API.Helpers;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -68,6 +69,7 @@ public interface IStatisticService
     Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId);
     Task<IList<MostActiveUserDto>> GetMostActiveUsers(StatsFilterDto filter);
     Task<IList<StatCountWithFormat<DateTime>>> GetFilesAddedOverTime();
+    Task<PagedList<ReadingHistoryItemDto>> GetReadingHistoryItems(StatsFilterDto filter, UserParams userParams, int userId, int requestingUserId);
 }
 
 /// <summary>
@@ -1652,6 +1654,88 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .ToListAsync();
 
         return results;
+    }
+
+    public async Task<PagedList<ReadingHistoryItemDto>> GetReadingHistoryItems(StatsFilterDto filter, UserParams userParams, int userId, int requestingUserId)
+    {
+        var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+        var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
+
+        var query = context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: false, onlyCompleted: false)
+            .WhereIf(filter.Libraries.Count > 0, a => filter.Libraries.Contains(a.LibraryId))
+            .Select(a => new
+            {
+                a.AppUserReadingSessionId,
+                a.ReadingSession.StartTimeUtc,
+                EndTimeUtc = a.ReadingSession.EndTimeUtc!.Value,
+
+                a.SeriesId,
+                SeriesName = a.Series.Name,
+                SeriesFormat = a.Series.Format,
+
+                a.ChapterId,
+                ChapterTitle = a.Chapter.TitleName,
+                ChapterNumber = a.Chapter.Number,
+
+                a.LibraryId,
+                LibraryName = a.Library.Name,
+
+                a.PagesRead,
+                a.WordsRead,
+                a.StartPage,
+                a.EndPage,
+                TotalPages = a.Chapter.Pages,
+            })
+            .Where(a => a.EndTimeUtc != null)
+            .OrderByDescending(a => a.StartTimeUtc);
+
+        // Get total count before pagination
+        var totalCount = await query.CountAsync();
+
+        // Paginate and materialize
+        var items = await query
+            .Skip((userParams.PageNumber - 1) * userParams.PageSize)
+            .Take(userParams.PageSize)
+            .ToListAsync();
+
+        // Convert to DTOs with local time
+        var dtos = items.Select(a =>
+        {
+            var localStart = TimeZoneInfo.ConvertTimeFromUtc(a.StartTimeUtc, userTimeZone);
+            return new ReadingHistoryItemDto
+            {
+                SessionId = a.AppUserReadingSessionId,
+                StartTimeUtc = a.StartTimeUtc,
+                EndTimeUtc = a.EndTimeUtc,
+                LocalDate = localStart.Date,
+
+                SeriesId = a.SeriesId,
+                SeriesName = a.SeriesName,
+                SeriesFormat = a.SeriesFormat,
+
+                ChapterId = a.ChapterId,
+                ChapterTitle = !string.IsNullOrEmpty(a.ChapterTitle)
+                    ? a.ChapterTitle
+                    : $"Chapter {a.ChapterNumber}",
+                ChapterNumber = a.ChapterNumber,
+
+                LibraryId = a.LibraryId,
+                LibraryName = a.LibraryName,
+
+                PagesRead = a.PagesRead,
+                WordsRead = a.WordsRead,
+                DurationSeconds = (int)(a.EndTimeUtc - a.StartTimeUtc).TotalSeconds,
+
+                StartPage = a.StartPage,
+                EndPage = a.EndPage,
+                TotalPages = a.TotalPages,
+                Completed = a.EndPage >= a.TotalPages
+            };
+        }).ToList();
+
+        return PagedList<ReadingHistoryItemDto>.Create(dtos, totalCount, userParams.PageNumber, userParams.PageSize);
     }
 
     private async Task<int> GetAuthorsCount(HashSet<int> chapterIds)
