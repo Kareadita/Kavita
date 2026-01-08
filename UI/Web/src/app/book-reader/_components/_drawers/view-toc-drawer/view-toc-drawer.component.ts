@@ -32,7 +32,7 @@ export class ViewTocDrawerComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly bookService = inject(BookService);
 
-  chapterId = input.required<number>();
+  chapterId = model.required<number>();
   /**
    * Current Page
    */

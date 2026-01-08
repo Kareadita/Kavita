@@ -52,7 +52,7 @@ export class ViewBookmarkDrawerComponent {
   protected readonly imageService = inject(ImageService);
 
 
-  chapterId = input.required<number>();
+  chapterId = model.required<number>();
   bookmarks = signal<PageBookmark[]>([]);
   /**
    * Current Page
