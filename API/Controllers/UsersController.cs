@@ -76,13 +76,6 @@ public class UsersController : BaseApiController
         return Ok(await _unitOfWork.UserRepository.GetEmailConfirmedMemberDtosAsync(!includePending));
     }
 
-    [HttpGet("myself")]
-    public async Task<ActionResult<IEnumerable<MemberDto>>> GetMyself()
-    {
-        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
-        return Ok(users.Where(u => u.UserName == Username!).DefaultIfEmpty().Select(u => _mapper.Map<MemberDto>(u)).SingleOrDefault());
-    }
-
     /// <summary>
     /// Get Information about a given user
     /// </summary>
@@ -97,7 +90,6 @@ public class UsersController : BaseApiController
         if (user == null) return BadRequest();
 
         return Ok(_mapper.Map<MemberInfoDto>(user));
-
     }
 
 

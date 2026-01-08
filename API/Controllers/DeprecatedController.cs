@@ -5,18 +5,16 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs;
+using API.DTOs.Account;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
 using API.DTOs.Progress;
 using API.DTOs.Statistics;
 using API.DTOs.Uploads;
-using API.Entities;
-using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
-using API.Middleware;
 using API.Services;
-using API.Services.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -34,15 +32,17 @@ public class DeprecatedController : BaseApiController
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<DeprecatedController> _logger;
     private readonly IStatisticService _statService;
+    private readonly IMapper _mapper;
 
     public DeprecatedController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ITaskScheduler taskScheduler,
-        ILogger<DeprecatedController> logger, IStatisticService statService)
+        ILogger<DeprecatedController> logger, IStatisticService statService, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
         _taskScheduler = taskScheduler;
         _logger = logger;
         _statService = statService;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -184,6 +184,7 @@ public class DeprecatedController : BaseApiController
 
     [HttpGet("stats/user/reading-history")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
@@ -196,6 +197,7 @@ public class DeprecatedController : BaseApiController
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("stats/server/top/years")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetTopYears()
     {
         return Ok(await _statService.GetTopYears());
@@ -209,6 +211,7 @@ public class DeprecatedController : BaseApiController
     /// <returns></returns>
     [HttpGet("stats/reading-count-by-day")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<StatCountWithFormat<DateTime>>>> ReadCountByDay(int userId = 0, int days = 0)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
@@ -221,6 +224,7 @@ public class DeprecatedController : BaseApiController
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/count/year")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetYearStatistics()
     {
         return Ok(await _statService.GetYearCount());
@@ -234,6 +238,7 @@ public class DeprecatedController : BaseApiController
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("stats/server/top/users")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<TopReadDto>>> GetTopReads(int days = 0)
     {
         return Ok(await _statService.GetTopUsers(days));
@@ -245,6 +250,7 @@ public class DeprecatedController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("reader/all-chapter-progress")]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<FullProgressDto>>> GetProgressForChapter(int chapterId)
     {
         var userId = User.IsInRole(PolicyConstants.AdminRole) ? 0 : UserId;
@@ -258,6 +264,7 @@ public class DeprecatedController : BaseApiController
     /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("recommended/quick-reads")]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickReads(int libraryId, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
@@ -274,6 +281,7 @@ public class DeprecatedController : BaseApiController
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpGet("recommended/quick-catchup-reads")]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickCatchupReads(int libraryId, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
@@ -290,6 +298,7 @@ public class DeprecatedController : BaseApiController
     /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("recommended/highly-rated")]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams? userParams)
     {
         var userId = UserId;
@@ -310,6 +319,7 @@ public class DeprecatedController : BaseApiController
     /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("recommended/more-in")]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetMoreIn(int libraryId, int genreId, [FromQuery] UserParams? userParams)
     {
         var userId = UserId;
@@ -328,6 +338,7 @@ public class DeprecatedController : BaseApiController
     /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("recommended/rediscover")]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetRediscover(int libraryId, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
@@ -335,6 +346,14 @@ public class DeprecatedController : BaseApiController
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
         return Ok(series);
+    }
+
+    [Obsolete("Will be removed in v0.9.0")]
+    [HttpGet("users/myself")]
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetMyself()
+    {
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
+        return Ok(users.Where(u => u.UserName == Username!).DefaultIfEmpty().Select(u => _mapper.Map<MemberDto>(u)).SingleOrDefault());
     }
 
 }
