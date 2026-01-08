@@ -19,6 +19,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/
 import {DOCUMENT} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
 import {User} from "../../_models/user/user";
+import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-client-device-card',
@@ -46,6 +47,7 @@ export class ClientDeviceCardComponent {
   private readonly deviceService = inject(DeviceService);
   private readonly document = inject(DOCUMENT);
   private readonly accountService = inject(AccountService);
+  private readonly utilityService = inject(UtilityService);
   protected readonly clientInfoService = inject(ClientInfoService);
 
   clientDevice = input.required<ClientDevice>();
@@ -171,7 +173,12 @@ export class ClientDeviceCardComponent {
         this.deleteDevice();
         break;
       case Action.Edit:
-        this.toggleEdit();
+        // The actionable modal needs some time to clean up
+        if (this.utilityService.activeBreakpointSignal()! < Breakpoint.Tablet ) {
+          setTimeout(() => this.toggleEdit(), 100);
+        } else {
+          this.toggleEdit();
+        }
         break;
     }
   }
