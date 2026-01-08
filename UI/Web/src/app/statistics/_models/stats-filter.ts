@@ -5,4 +5,5 @@ export type StatsFilter = {
     endDate: Date | null,
   },
   libraries: number[],
+  timezone: string | null,
 }

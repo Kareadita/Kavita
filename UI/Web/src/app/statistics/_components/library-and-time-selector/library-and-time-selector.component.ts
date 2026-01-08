@@ -123,6 +123,8 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
       takeUntilDestroyed(),
     ).subscribe(value => {
       const filter = value as StatsFilter;
+      filter.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      
       this.filterChange.emit(filter);
       this.yearChange.emit(filter.timeFilter?.endDate?.getFullYear() ?? new Date().getFullYear());
     });

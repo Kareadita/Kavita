@@ -219,6 +219,10 @@ export class StatisticsService {
       params = params.set('endDate', filter.timeFilter.endDate.toISOString());
     }
 
+    if (filter.timezone) {
+      params = params.set('timezone', filter.timezone);
+    }
+
     for (let library of filter.libraries) {
       params = params.append('libraries', library)
     }

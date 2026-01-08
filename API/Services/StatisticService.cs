@@ -864,6 +864,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
+        var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
         var startDate = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
         var endDate = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
 
@@ -894,7 +895,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         if (sessionActivityData.Count == 0) return result;
 
         var dailyStats = sessionActivityData
-            .GroupBy(x => x.SessionDate)
+            .GroupBy(x => TimeZoneInfo.ConvertTimeFromUtc(x.SessionStartUtc, userTimeZone).Date)
             .Select(dayGroup => new
             {
                 Date = dayGroup.Key,
@@ -950,6 +951,21 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         }
 
         return result;
+    }
+
+    private static TimeZoneInfo GetTimeZoneOrUtc(string? timeZoneId)
+    {
+        if (string.IsNullOrEmpty(timeZoneId))
+            return TimeZoneInfo.Utc;
+
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return TimeZoneInfo.Utc;
+        }
     }
 
     public async Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly, int requestingUserId)
