@@ -85,7 +85,10 @@
     outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-focus-outline-color);
     outline-offset: 1px;
   }
+}
 
+.out-of-year-cell {
+  outline: none;
 }
 
 .empty-cell {
