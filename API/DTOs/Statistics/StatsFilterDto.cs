@@ -10,7 +10,8 @@ public sealed record StatsFilterDto
     /// <summary>
     /// Timezone of the user, will zone to this TimeZone
     /// </summary>
-    public string? TimeZoneId { get; set; } // e.g., "America/Los_Angeles"
+    /// <example>America/Los_Angeles</example>
+    public string? TimeZoneId { get; set; }
 
     public DateTime? EndDate
     {

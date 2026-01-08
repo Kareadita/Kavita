@@ -633,42 +633,69 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
 
     public async Task<IEnumerable<StatCountWithFormat<DateTime>>> ReadCounts(StatsFilterDto filter, int userId = 0)
     {
+        var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
         var startDate = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
         var endDate = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
 
-        var results = await context.AppUserReadingSessionActivityData
+        var rawData = await context.AppUserReadingSessionActivityData
             .AsNoTracking()
             .Where(a => a.StartTimeUtc >= startDate && a.StartTimeUtc <= endDate)
+            .Where(a => a.EndTimeUtc != null)
             .WhereIf(userId > 0, a => a.ReadingSession.AppUserId == userId)
             .WhereIf(filter.Libraries is { Count: > 0 }, a => filter.Libraries.Contains(a.LibraryId))
-            .GroupBy(a => new { Day = a.StartTimeUtc.Date, a.Format })
+            .Select(a => new
+            {
+                a.StartTimeUtc,
+                EndTimeUtc = a.EndTimeUtc!.Value,
+                a.Format
+            })
+            .ToListAsync();
+
+        var results = rawData
+            .GroupBy(a => new
+            {
+                Day = TimeZoneInfo.ConvertTimeFromUtc(a.StartTimeUtc, userTimeZone).Date,
+                a.Format
+            })
             .Select(g => new StatCountWithFormat<DateTime>
             {
                 Value = g.Key.Day,
                 Format = g.Key.Format,
-                Count = (long)g.Sum(a =>
-                    (double)(a.EndTimeUtc!.Value.Ticks - a.StartTimeUtc.Ticks) / TimeSpan.TicksPerMinute)
+                Count = (long)g.Sum(a => (a.EndTimeUtc - a.StartTimeUtc).TotalMinutes)
             })
             .OrderBy(d => d.Value)
-            .ToListAsync();
+            .ToList();
 
-        FillMissingDaysAndFormats(results, startDate, endDate);
+        // Convert boundaries to local for filling
+        var localStartDate = TimeZoneInfo.ConvertTimeFromUtc(
+            startDate == DateTime.MinValue ? DateTime.UtcNow.AddYears(-1) : startDate,
+            userTimeZone);
+        var localEndDate = TimeZoneInfo.ConvertTimeFromUtc(endDate, userTimeZone);
+
+        FillMissingDaysAndFormats(results, localStartDate, localEndDate);
 
         return results.OrderBy(r => r.Value);
     }
 
     private static void FillMissingDaysAndFormats(List<StatCountWithFormat<DateTime>> results, DateTime startDate, DateTime endDate)
     {
-        if (results.Count == 0)
-            return;
-
         var validFormats = Enum.GetValues<MangaFormat>()
             .Where(f => f != MangaFormat.Unknown)
             .ToArray();
 
-        var minDay = results.Min(d => d.Value);
-        var effectiveStart = minDay > startDate.Date ? minDay : startDate.Date;
-        var effectiveEnd = endDate.Date < DateTime.UtcNow.Date ? endDate.Date : DateTime.UtcNow.Date;
+        DateTime effectiveStart;
+
+        if (results.Count == 0)
+        {
+            effectiveStart = startDate.Date;
+        }
+        else
+        {
+            var minDay = results.Min(d => d.Value);
+            effectiveStart = minDay > startDate.Date ? minDay : startDate.Date;
+        }
+
+        var effectiveEnd = endDate.Date;
 
         var existingEntries = results
             .Select(r => (r.Value, r.Format))
@@ -678,8 +705,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         {
             foreach (var format in validFormats)
             {
-                if (existingEntries.Contains((date, format)))
-                    continue;
+                if (existingEntries.Contains((date, format))) continue;
 
                 results.Add(new StatCountWithFormat<DateTime>
                 {
@@ -863,8 +889,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
-
         var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
+
         var startDate = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
         var endDate = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
 
@@ -1316,13 +1342,14 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+        var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
 
         var sessionRecordedSince = await unitOfWork.DataContext.ManualMigrationHistory
-            .FirstOrDefaultAsync(mm => mm.Name == MigrateProgressToReadingSessions.Name);
+        .FirstOrDefaultAsync(mm => mm.Name == MigrateProgressToReadingSessions.Name);
 
         if (sessionRecordedSince == null)
         {
-            logger.LogWarning("{Migration} never happened? Cannot compute time by hour", MigrateProgressToReadingSessions.Name);
+            logger.LogWarning("{Migration} never happened! Cannot compute time by hour", MigrateProgressToReadingSessions.Name);
             return null;
         }
 
@@ -1332,24 +1359,37 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var sessions = await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .Where(session => session.ReadingSession.CreatedUtc > sessionRecordedSince.RanAt)
+            .Select(s => new
+            {
+                s.StartTimeUtc,
+                s.EndTimeUtc
+            })
             .ToListAsync();
 
         var hourStats = sessions
+            .Where(s => s.EndTimeUtc.HasValue)
             .SelectMany(session =>
             {
                 var hours = new List<(DateOnly day, int hour, TimeSpan timeSpent)>();
-                var current = session.StartTime;
+                var currentUtc = session.StartTimeUtc;
+                var endUtc = session.EndTimeUtc!.Value;
 
-                while (current < session.EndTime)
+                while (currentUtc < endUtc)
                 {
-                    var hourEnd = current.AddHours(1);
-                    var sessionEnd = session.EndTime ?? current;
-                    var endOfPeriod = new[] { hourEnd, sessionEnd }.Min();
+                    var currentLocal = TimeZoneInfo.ConvertTimeFromUtc(currentUtc, userTimeZone);
 
-                    var timeSpent = endOfPeriod - current;
-                    hours.Add((DateOnly.FromDateTime(current), current.Hour, timeSpent));
+                    // Calculate end of current hour in local time, then convert back to UTC
+                    var localHourEnd = new DateTime(
+                        currentLocal.Year, currentLocal.Month, currentLocal.Day,
+                        currentLocal.Hour, 0, 0, DateTimeKind.Unspecified).AddHours(1);
+                    var hourEndUtc = TimeZoneInfo.ConvertTimeToUtc(localHourEnd, userTimeZone);
 
-                    current = endOfPeriod;
+                    var endOfPeriod = hourEndUtc < endUtc ? hourEndUtc : endUtc;
+                    var timeSpent = endOfPeriod - currentUtc;
+
+                    hours.Add((DateOnly.FromDateTime(currentLocal), currentLocal.Hour, timeSpent));
+
+                    currentUtc = endOfPeriod;
                 }
 
                 return hours;
@@ -1371,7 +1411,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .Select(hour => new StatCount<int>
             {
                 Value = hour,
-                Count = (long) Math.Ceiling(hourStats.TryGetValue(hour, out var value) ? value : 0),
+                Count = (long)Math.Ceiling(hourStats.TryGetValue(hour, out var value) ? value : 0),
             })
             .ToList();
 
@@ -1686,19 +1726,28 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+        var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
 
-        return await context.AppUserReadingSessionActivityData
+        var rawData = await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
-            .GroupBy(s => new {s.ReadingSession.CreatedUtc.Year, s.ReadingSession.CreatedUtc.Month})
-            .Select(g => new StatCount<YearMonthGroupingDto>()
+            .Select(s => s.ReadingSession.CreatedUtc)
+            .ToListAsync();
+
+        return rawData
+            .Select(utc => TimeZoneInfo.ConvertTimeFromUtc(utc, userTimeZone))
+            .GroupBy(local => new { local.Year, local.Month })
+            .Select(g => new StatCount<YearMonthGroupingDto>
             {
-                Value = new YearMonthGroupingDto()
+                Value = new YearMonthGroupingDto
                 {
                     Year = g.Key.Year,
                     Month = g.Key.Month,
                 },
                 Count = g.Count(),
-            }).ToListAsync();
+            })
+            .OrderBy(s => s.Value.Year)
+            .ThenBy(s => s.Value.Month)
+            .ToList();
     }
 
     public async Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId, int requestingUserId)
