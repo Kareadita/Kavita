@@ -1,13 +1,22 @@
 <ng-container *transloco="let t; prefix: 'activity-graph'">
 
   <div class="activity-graph-container stats-card">
-    <h3 class="graph-title d-flex">
+    <h4 class="graph-title d-flex">
       <span class="stats-title me-2">{{ t('title') }} {{ timeFrameLabel() }}</span>
-    </h3>
+    </h4>
 
     <app-loading [loading]="readingActivityResource.isLoading()" />
 
     @if (readingActivityResource.hasValue()) {
+      @let aggregatedCountValue = aggregatedCount();
+      @if (aggregatedCountValue.totalPages > 0 || aggregatedCountValue.totalWords > 0) {
+        <h6 class="stats-subtitle">{{ t('aggregated-count', {
+          year: year(),
+          totalPages: aggregatedCountValue.totalPages | compactNumber,
+          totalWords: aggregatedCountValue.totalWords | compactNumber
+        }) }}</h6>
+      }
+
       <div class="graph-wrapper" role="region">
         <table class="activity-graph-table" role="grid" aria-readonly="true">
           <thead>
@@ -80,15 +89,6 @@
           </div>
           <span class="legend-label">{{ t('more') }}</span>
         </div>
-
-        @let aggregatedCountValue = aggregatedCount();
-        @if (aggregatedCountValue.totalPages > 0 || aggregatedCountValue.totalWords > 0) {
-          <span class="legend-label mt-2">{{ t('aggregated-count', {
-            year: year(),
-            totalPages: aggregatedCountValue.totalPages | compactNumber,
-            totalWords: aggregatedCountValue.totalWords | compactNumber
-          }) }}</span>
-        }
       </div>
 
       <ng-template #noActivityTooltip let-item="item">
