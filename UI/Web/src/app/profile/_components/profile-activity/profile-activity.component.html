@@ -95,7 +95,7 @@
   @let chapter = item.value;
 
   <div class="col-auto d-none d-sm-block chapter-cover me-2">
-    <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block"
+    <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block" [ngbTooltip]="chapter.title"
                style="width: 40px; height: auto;"/>
   </div>
 
@@ -109,7 +109,7 @@
 
     @if (label) {
       <span class="d-flex align-items-center flex-grow-1 ms-5" id="label-{{entry.id}}">
-        {{ label }}
+        {{label}}
       </span>
     }
 
@@ -128,7 +128,7 @@
     @if (entry.wordsRead > 0) {
       <span [attr.aria-label]="t('words-read')" class="d-flex align-items-center gap-1">
          <i aria-hidden="true" class="fa fa-book"></i>
-        {{ t('words-count', {num: entry.wordsRead | compactNumber}) }}
+        {{t('words-count', {num: entry.wordsRead | compactNumber})}}
       </span>
     }
 

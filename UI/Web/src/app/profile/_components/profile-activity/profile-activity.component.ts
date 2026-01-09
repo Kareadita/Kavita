@@ -32,7 +32,7 @@ import {ListSelectModalComponent} from '../../../shared/_components/list-select-
 import {CompactNumberPipe} from '../../../_pipes/compact-number.pipe';
 import {DurationPipe} from '../../../_pipes/duration.pipe';
 import {Pagination} from '../../../_models/pagination';
-import {NgbPagination} from '@ng-bootstrap/ng-bootstrap';
+import {NgbPagination, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 
 
 @Component({
@@ -52,6 +52,7 @@ import {NgbPagination} from '@ng-bootstrap/ng-bootstrap';
     NgTemplateOutlet,
     DurationPipe,
     NgbPagination,
+    NgbTooltip,
   ],
   templateUrl: './profile-activity.component.html',
   styleUrl: './profile-activity.component.scss',

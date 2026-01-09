@@ -1666,8 +1666,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
 
         var query = context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: false,
-                onlyCompleted: false)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: false, onlyCompleted: false)
             .WhereIf(filter.Libraries.Count > 0, a => filter.Libraries.Contains(a.LibraryId))
             .Select(a => new
             {
@@ -1681,7 +1680,11 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 SeriesFormat = a.Series.Format,
 
                 a.ChapterId,
+                ChapterNumber = a.Chapter.Number,
+                ChapterRange = a.Chapter.Range,
                 ChapterTitle = a.Chapter.Title,
+                ChapterIsSpecial = a.Chapter.IsSpecial,
+                VolumeNumber = a.Chapter.Volume.Number,
 
                 a.LibraryId,
                 LibraryName = a.Library.Name,
@@ -1705,6 +1708,15 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .Take(userParams.PageSize)
             .ToListAsync();
 
+        var libraryTypes = items.Select(i => i.LibraryType).Distinct().ToList();
+        var namingContexts = new Dictionary<LibraryType, LocalizedNamingContext>();
+
+        foreach (var libType in libraryTypes)
+        {
+            namingContexts[libType] = await LocalizedNamingContext.CreateAsync(
+                namingService, localizationService, userId, libType);
+        }
+
         // Convert to DTOs with local time
         var dtos = items
             .GroupBy(a => new { a.AppUserReadingSessionId, a.SeriesId })
@@ -1713,6 +1725,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 var first = x.First();
                 var startTime = x.Min(s => s.StartTimeUtc);
                 var endTime = x.Max(s => s.EndTimeUtc);
+                var namingContext = namingContexts[first.LibraryType];
 
                 var totalPages = x.Sum(s => s.TotalPages);
 
@@ -1732,7 +1745,13 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                     Chapters = x.Select(s => new ReadingHistoryChapterItemDto
                     {
                         ChapterId = s.ChapterId,
-                        Label = s.ChapterTitle, // TODO: Needs to be better
+                        Label = namingContext.FormatChapterTitle(new ChapterDto
+                        {
+                            Number = s.ChapterNumber,
+                            Range = s.ChapterRange,
+                            Title = s.ChapterTitle,
+                            IsSpecial = s.ChapterIsSpecial,
+                        }),
 
                         StartTimeUtc = s.StartTimeUtc,
                         EndTimeUtc = s.EndTimeUtc,
