@@ -516,6 +516,155 @@ public class EntityNamingServiceTests
 
     #endregion
 
+    #region BuildChapterTitle Tests
+
+    [Fact]
+    public void BuildChapterTitle_SingleChapterVolume_ReturnsVolumeOnly()
+    {
+        var chapter = CreateChapterDto(range: "1");
+        var volume = CreateVolumeDto(name: "5", minNumber: 5, chapters: [chapter]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Manga, volume, chapter);
+
+        Assert.Equal("Volume 5", result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_MultipleChapterVolume_ReturnsVolumeAndChapter()
+    {
+        var chapter1 = CreateChapterDto(range: "1", title: "The Beginning");
+        var chapter2 = CreateChapterDto(range: "2");
+        var volume = CreateVolumeDto(name: "1", minNumber: 1, chapters: [chapter1, chapter2]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Manga, volume, chapter1);
+
+        Assert.Equal("Volume 1 - Chapter 1 - The Beginning", result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_SpecialVolume_ReturnsChapterOnly()
+    {
+        var chapter = CreateChapterDto(range: "SP01", title: "Bonus", isSpecial: true);
+        var volume = CreateVolumeDto(name: "Specials", minNumber: Parser.SpecialVolumeNumber, chapters: [chapter]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Manga, volume, chapter);
+
+        Assert.NotEmpty(result);
+        Assert.DoesNotContain("Volume", result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_LooseLeafVolume_SingleChapter_ReturnsEmpty()
+    {
+        var chapter = CreateChapterDto(range: "1");
+        var volume = CreateVolumeDto(name: "0", minNumber: Parser.LooseLeafVolumeNumber, chapters: [chapter]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Manga, volume, chapter);
+
+        Assert.Equal(string.Empty, result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_LooseLeafVolume_MultipleChapters_ReturnsChapterOnly()
+    {
+        var chapter1 = CreateChapterDto(range: "1");
+        var chapter2 = CreateChapterDto(range: "2");
+        var volume = CreateVolumeDto(name: "0", minNumber: Parser.LooseLeafVolumeNumber, chapters: [chapter1, chapter2]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Manga, volume, chapter1);
+
+        Assert.Equal("Chapter 1", result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_Comic_SingleChapterVolume_ReturnsVolumeOnly()
+    {
+        var chapter = CreateChapterDto(range: "1");
+        var volume = CreateVolumeDto(name: "1", minNumber: 1, chapters: [chapter]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Comic, volume, chapter);
+
+        Assert.Equal("Volume 1", result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_Comic_MultipleChapterVolume_UsesIssueFormat()
+    {
+        var chapter1 = CreateChapterDto(range: "1");
+        var chapter2 = CreateChapterDto(range: "2");
+        var volume = CreateVolumeDto(name: "1", minNumber: 1, chapters: [chapter1, chapter2]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Comic, volume, chapter1);
+
+        Assert.Equal("Volume 1 - Issue #1", result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_Book_SingleChapterVolume_WithTitleName_ReturnsTitleName()
+    {
+        var chapter = CreateChapterDto(titleName: "The Fellowship of the Ring");
+        var volume = CreateVolumeDto(name: "1", minNumber: 1, chapters: [chapter]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Book, volume, chapter);
+
+        Assert.Equal("The Fellowship of the Ring", result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_Book_MultipleChapterVolume_ReturnsVolumeAndBook()
+    {
+        var chapter1 = CreateChapterDto(range: "1", title: "Part One");
+        var chapter2 = CreateChapterDto(range: "2", title: "Part Two");
+        var volume = CreateVolumeDto(name: "1", minNumber: 1, chapters: [chapter1, chapter2]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Book, volume, chapter1);
+
+        Assert.Contains("Book Part One", result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_WithCustomLabels_UsesProvidedLabels()
+    {
+        var chapter1 = CreateChapterDto(range: "5");
+        var chapter2 = CreateChapterDto(range: "6");
+        var volume = CreateVolumeDto(name: "2", minNumber: 2, chapters: [chapter1, chapter2]);
+
+        var result = _sut.BuildChapterTitle(
+            LibraryType.Manga, volume, chapter1,
+            volumeLabel: "Band",
+            chapterLabel: "Kapitel");
+
+        Assert.Equal("Band 2 - Kapitel 5", result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_VolumeAlreadyHasPrefix_DoesNotDuplicate()
+    {
+        var chapter1 = CreateChapterDto(range: "1");
+        var chapter2 = CreateChapterDto(range: "2");
+        var volume = CreateVolumeDto(name: "Volume 1", minNumber: 1, chapters: [chapter1, chapter2]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Manga, volume, chapter1);
+
+        Assert.Equal("Volume 1 - Chapter 1", result);
+        Assert.DoesNotContain("Volume Volume", result);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_RedundantChapterTitle_DoesNotDuplicate()
+    {
+        var chapter1 = CreateChapterDto(range: "1448", title: "Chapter 1448");
+        var chapter2 = CreateChapterDto(range: "1449");
+        var volume = CreateVolumeDto(name: "100", minNumber: 100, chapters: [chapter1, chapter2]);
+
+        var result = _sut.BuildChapterTitle(LibraryType.Manga, volume, chapter1);
+
+        Assert.Equal("Volume 100 - Chapter 1448", result);
+    }
+
+    #endregion
+
+
     #region FormatReadingListItemTitle Tests
 
 
