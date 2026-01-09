@@ -9,7 +9,7 @@ export const routes: Routes = [
     path: ':userId',
     component: ProfileComponent,
     pathMatch: 'full',
-    //canActivate: [profileGuard],
+    canActivate: [profileGuard],
     resolve: {
       memberInfo: memberInfoResolver
     }

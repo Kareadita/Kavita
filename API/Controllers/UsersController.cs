@@ -56,9 +56,6 @@ public class UsersController : BaseApiController
 
         _unitOfWork.UserRepository.Delete(user);
 
-        //(TODO: After updating a role or removing a user, delete their token)
-        // await _userManager.RemoveAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName);
-
         if (await _unitOfWork.CommitAsync()) return Ok();
 
         return BadRequest(await _localizationService.Translate(UserId, "generic-user-delete"));
@@ -92,6 +89,18 @@ public class UsersController : BaseApiController
         return Ok(_mapper.Map<MemberInfoDto>(user));
     }
 
+    /// <summary>
+    /// Does the requested user have their profile sharing on
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [HttpGet("has-profile-shared")]
+    [Authorize]
+    public async Task<ActionResult<bool>> HasProfileShared(int userId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        return Ok(user?.UserPreferences.SocialPreferences.ShareProfile);
+    }
 
     [HttpGet("has-reading-progress")]
     public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)

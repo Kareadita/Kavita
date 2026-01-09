@@ -3387,7 +3387,8 @@
         "confirm-delete-font": "Removing this font will delete it from the disk. You can grab it from temp directory before removal.",
         "confirm-force-delete-font": "This font is currently in use. Do you want to force delete it? This will force users back to the Default font.",
         "font-in-use": "Cannot delete as the font is in use by one or more users.",
-        "k+-resend-welcome-email-success": "An email was sent to your Kavita+ email"
+        "k+-resend-welcome-email-success": "An email was sent to your Kavita+ email",
+        "profile-unauthorized": "This user is not sharing their profile"
     },
 
     "read-time-pipe": {
