@@ -331,6 +331,17 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion([])
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<ClientInfoData>());
+
+        builder.Entity<AppUserReadingSession>(entity =>
+        {
+            // Covers: active session lookup, all sessions by user, and cleanup query
+            entity.HasIndex(s => new { s.AppUserId, s.IsActive })
+                .HasDatabaseName("IX_AppUserReadingSession_AppUserId_IsActive");
+
+            // Cleanup query: finding expired active sessions
+            entity.HasIndex(s => new { s.IsActive, s.LastModifiedUtc })
+                .HasDatabaseName("IX_AppUserReadingSession_IsActive_LastModifiedUtc");
+        });
         #endregion
 
         #region Client Device
