@@ -2837,9 +2837,11 @@
     "profile-activity": {
         "time-filter-title": "{{username}}'s activity through",
         "pages": "page(s)",
+        "words": "words",
         "no-data": "{{common.no-data}}",
         "duration": "Duration",
         "pages-read": "Pages read",
+        "words-read": "Words read",
         "progress": "Progress",
         "time": "Time",
         "chapter-detail-modal-title": "{{seriesName}}"

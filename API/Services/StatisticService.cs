@@ -1714,9 +1714,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 var startTime = x.Min(s => s.StartTimeUtc);
                 var endTime = x.Max(s => s.EndTimeUtc);
 
-                var startPage = x.Min(s => s.StartPage);
-                var endPage = x.Max(s => s.EndPage);
-                var totalPages = x.Max(s => s.TotalPages);
+                var totalPages = x.Sum(s => s.TotalPages);
 
                 var localStart = TimeZoneInfo.ConvertTimeFromUtc(startTime, userTimeZone);
                 return new ReadingHistoryItemDto
@@ -1756,8 +1754,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                     WordsRead = x.Sum(s => s.WordsRead),
                     DurationSeconds = (int)(endTime - startTime).TotalSeconds,
 
-                    StartPage = startPage,
-                    EndPage = endPage,
                     TotalPages = totalPages,
                 };
         }).ToList();

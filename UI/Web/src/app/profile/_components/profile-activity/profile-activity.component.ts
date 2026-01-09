@@ -15,7 +15,7 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {ReadingHistoryChapterItem, ReadingHistoryItem} from "../../../_models/stats/reading-history-item";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
-import {DatePipe, TitleCasePipe} from "@angular/common";
+import {DatePipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {StatsFilter} from "../../../statistics/_models/stats-filter";
 import {RouterLink} from "@angular/router";
 import {
@@ -28,6 +28,7 @@ import {ImageComponent} from "../../../shared/image/image.component";
 import {ImageService} from "../../../_services/image.service";
 import {ModalService} from "../../../_services/modal.service";
 import {ListSelectModalComponent} from "../../../shared/_components/list-select-modal/list-select-modal.component";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 
 interface HistoryDisplayItem {
   id: string;
@@ -50,6 +51,8 @@ interface HistoryDisplayItem {
     TagBadgeComponent,
     ImageComponent,
     TitleCasePipe,
+    CompactNumberPipe,
+    NgTemplateOutlet,
   ],
   templateUrl: './profile-activity.component.html',
   styleUrl: './profile-activity.component.scss',
@@ -65,6 +68,8 @@ export class ProfileActivityComponent {
   filter = signal<StatsFilter | undefined>(undefined);
 
   chapterInfoRow = viewChild.required<TemplateRef<any>>('chapterInfoRow');
+  readStatsTemplate = viewChild.required<TemplateRef<any>>('readStats');
+
   protected currentPage = signal(1);
   private readonly pageSize = 30;
   protected allEntries = signal<ReadingHistoryItem[]>([]);
@@ -119,7 +124,7 @@ export class ProfileActivityComponent {
       result.push({ id: `header-${dateKey}`, type: 'header', date: localDate });
       for (const entry of grouped.get(dateKey)!) {
         const chapterIds = entry.chapters.map(c => c.chapterId).join(",")
-        result.push({ id: `entry-${entry.sessionId}-${chapterIds}`, type: 'entry', entry });
+        result.push({ id: `entry-${entry.sessionId}-${entry.seriesId}-${chapterIds}`, type: 'entry', entry });
       }
     }
 
@@ -141,12 +146,13 @@ export class ProfileActivityComponent {
   }
 
   protected formatProgress(entry: ReadingHistoryItem): string {
-    if (entry.completed) return 'Completed';
-    return `${entry.endPage}/${entry.totalPages}`;
+    return `${entry.pagesRead}/${entry.totalPages}`;
   }
 
   protected displayInfo(item: ReadingHistoryItem) {
-    const [_, component] = this.modalService.open(ListSelectModalComponent<ReadingHistoryChapterItem>);
+    const [_, component] = this.modalService.open(ListSelectModalComponent<ReadingHistoryChapterItem>, {
+      size: "lg", centered: true
+    });
 
     component.title.set(translate('profile-activity.chapter-detail-modal-title', {seriesName: item.seriesName}));
     component.showConfirm.set(false);

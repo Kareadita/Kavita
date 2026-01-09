@@ -29,9 +29,6 @@ public sealed record ReadingHistoryItemDto
     public int WordsRead { get; set; }
     public int DurationSeconds { get; set; }
 
-    // Progress context
-    public int StartPage { get; set; }
-    public int EndPage { get; set; }
     public int TotalPages { get; set; }
 }
 

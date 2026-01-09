@@ -15,7 +15,7 @@
         @if (item.type === 'header') {
           <span>{{ item.date | date:'fullDate' }}</span>
         } @else if (item.entry; as entry) {
-          <div [class.completed]="entry.completed" class="activity-entry p-3 mb-2">
+          <div class="activity-entry p-3 mb-2">
             <div class="row g-3">
               <div class="col-auto d-sm-block">
                 <app-image [imageUrl]="imageService.getSeriesCoverImage(entry.seriesId)" class="d-block"
@@ -31,33 +31,10 @@
                   <app-tag-badge> {{ entry.seriesFormat | mangaFormat }}</app-tag-badge>
                 </div>
 
-                <div class="d-flex flex-wrap gap-3 small text-muted">
-                  <span [attr.aria-label]="t('duration')" class="d-flex align-items-center gap-1">
-                    <i aria-hidden="true" class="fa-regular fa-clock"></i>
-                    {{ formatDuration(entry.durationSeconds) }}
-                  </span>
+                <ng-container [ngTemplateOutlet]="readStatsTemplate()"
+                              [ngTemplateOutletContext]="{ $implicit: entry, showInfo: true }">
+                </ng-container>
 
-                  <span [attr.aria-label]="t('pages-read')" class="d-flex align-items-center gap-1">
-                    <i aria-hidden="true" class="fa-regular fa-file"></i>
-                    {{ entry.pagesRead }} {{ t('pages') }}
-                  </span>
-
-                  <span [attr.aria-label]="t('progress')" class="d-flex align-items-center gap-1">
-                    @if (entry.completed) {
-                      <i aria-hidden="true" class="fa-solid fa-check"></i>
-                    }
-                    {{ formatProgress(entry) }}
-                  </span>
-
-                  <span [attr.aria-label]="t('time')" class="d-flex align-items-center gap-1">
-                    {{ entry.startTimeUtc | date:'shortTime' }}
-                  </span>
-
-                  <span (click)="displayInfo(entry)">
-                    <i class="fa fa-info"></i>
-                  </span>
-
-                </div>
                 <div class="row mt-2">
                   @for (chapter of entry.chapters.slice(0, 5); track chapter.chapterId) {
                     <div class="col-auto d-none d-sm-block chapter-cover"
@@ -99,37 +76,60 @@
 <ng-template #chapterInfoRow let-item>
   @let chapter = item.value;
 
-  <div class="col-auto d-none d-sm-block chapter-cover">
+  <div class="col-auto d-none d-sm-block chapter-cover me-2">
     <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block"
                style="width: 40px; height: auto;"/>
   </div>
 
-  <div class="d-flex flex-wrap gap-3 small text-muted" *transloco="let t; prefix: 'profile-activity'">
+  <ng-container [ngTemplateOutlet]="readStatsTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: chapter, label: chapter.label }">
+  </ng-container>
+</ng-template>
 
-    <!-- TODO: Chapter label -->
-    <span class="d-flex align-items-center gap-1">
-      {{ chapter.label }}
+<ng-template #readStats let-entry let-label="label" let-showInfo="showInfo">
+  <div class="d-flex flex-wrap gap-3 small text-muted me-2 flex-grow-1" *transloco="let t; prefix: 'profile-activity'">
+
+    @if (label) {
+      <span class="d-flex align-items-center flex-grow-1 ms-5">
+      {{ label }}
     </span>
+    }
 
     <span [attr.aria-label]="t('duration')" class="d-flex align-items-center gap-1">
       <i aria-hidden="true" class="fa-regular fa-clock"></i>
-      {{ formatDuration(chapter.durationSeconds) }}
+      {{ formatDuration(entry.durationSeconds) }}
     </span>
 
-    <span [attr.aria-label]="t('pages-read')" class="d-flex align-items-center gap-1">
-      <i aria-hidden="true" class="fa-regular fa-file"></i>
-      {{ chapter.pagesRead }} {{ t('pages') }}
-    </span>
+    @if (entry.pagesRead > 0) {
+      <span [attr.aria-label]="t('pages-read')" class="d-flex align-items-center gap-1">
+                    <i aria-hidden="true" class="fa-regular fa-file"></i>
+        {{ entry.pagesRead | compactNumber }} {{ t('pages') }}
+                  </span>
+    }
+
+    @if (entry.wordsRead > 0) {
+      <span [attr.aria-label]="t('words-read')" class="d-flex align-items-center gap-1">
+                    <i aria-hidden="true" class="fa fa-book"></i>
+        {{ entry.wordsRead | compactNumber }} {{ t('words') }}
+                  </span>
+
+    }
 
     <span [attr.aria-label]="t('progress')" class="d-flex align-items-center gap-1">
-      @if (chapter.completed) {
+      @if (entry.completed) {
         <i aria-hidden="true" class="fa-solid fa-check"></i>
       }
-      {{ formatProgress(chapter) }}
+      {{ formatProgress(entry) }}
     </span>
 
     <span [attr.aria-label]="t('time')" class="d-flex align-items-center gap-1">
-      {{ chapter.startTimeUtc | date:'shortTime' }}
+      {{ entry.startTimeUtc | date:'shortTime' }}
     </span>
+
+    @if (showInfo) {
+      <span (click)="displayInfo(entry)">
+      <i class="fa fa-info clickable"></i>
+    </span>
+    }
   </div>
 </ng-template>

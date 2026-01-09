@@ -21,10 +21,7 @@ export interface ReadingHistoryItem {
   wordsRead: number;
   durationSeconds: number;
 
-  startPage: number;
-  endPage: number;
   totalPages: number;
-  completed: boolean;
 }
 
 export interface ReadingHistoryChapterItem {
