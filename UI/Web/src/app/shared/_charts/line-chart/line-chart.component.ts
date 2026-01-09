@@ -94,7 +94,7 @@ export class LineChartComponent {
         smooth: true,
         data: data as any[],
         ...this.getMarkPointConfig(data as number[], clampedMax, 0)
-      }
+      } as LineSeriesOption
     }
 
     return data.map((dataSet, index) => ({
