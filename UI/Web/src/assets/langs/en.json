@@ -2846,7 +2846,10 @@
         "time": "Time",
         "info-alt": "More Info",
         "chapter-detail-modal-title": "{{seriesName}}",
-        "showing-count": "Showing {{shown}} of {{total}} entries"
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "pagination-label": "Activity pagination",
+        "page-info": "Page {{current}} of {{total}} ({{items}} total records)"
     },
 
     "preferred-format": {

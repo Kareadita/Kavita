@@ -5,99 +5,90 @@
                                    [locale]="'profile'" [userId]="memberInfo().id"/>
   </div>
 
-  @if (debugMode()) {
-    <div class="debug-panel p-2 mb-2 border rounded small font-monospace">
-      <div><strong>Debug Info</strong></div>
-      <div>Total items: {{ items().length }}</div>
-      <div>Current page: {{ currentPage() }}</div>
-      <div>Has more: {{ hasMore() }}</div>
-      <div>Loading: {{ isLoading() }}</div>
-      @if (lastScrollInfo(); as info) {
-        <div>Viewport: {{ info.startIndex }} - {{ info.endIndex }}</div>
-        <div>Scroll %: {{ ((info.endIndex + 1) / items().length * 100).toFixed(1) }}%</div>
-      }
-      @if (pagination(); as pag) {
-        <div>Server: page {{ pag.currentPage }}/{{ pag.totalPages }} ({{ pag.totalItems }} total)</div>
-      }
-      <div class="d-flex gap-2 mt-1 flex-wrap">
-        @for (i of [1,2,3,4,5,6,7,8]; track i) {
-          <span class="px-2 py-1" [style.background]="getPageColor(i)">Page {{ i }}</span>
-        }
-      </div>
+  @if (isLoading()) {
+    <div class="loading-container py-5">
+      <app-loading [loading]="true"></app-loading>
     </div>
-  }
+  } @else if (pagination()?.totalItems === 0) {
+    <app-stats-no-data [message]="t('no-data')"/>
+  } @else {
+    @if (totalPages() > 1) {
+      <nav [attr.aria-label]="t('pagination-label')" class="d-flex justify-content-center my-3">
+        <ngb-pagination
+          [collectionSize]="totalItems()"
+          [page]="currentPage()"
+          [pageSize]="pageSize"
+          [maxSize]="5"
+          [rotate]="true"
+          [ellipses]="true"
+          [boundaryLinks]="true"
+          (pageChange)="onPageChange($event)"
+          size="sm"
+        />
+      </nav>
+    }
 
-  <virtual-scroller #scroll [items]="items()" [parentScroll]="scroll.window" (vsChange)="onScroll($event)" [bufferAmount]="10">
+    <div class="activity-list">
+      @for (entry of currentEntries(); track entry.sessionId) {
+        <div class="activity-entry p-3">
+          <div class="row g-3">
+            <div class="col-auto d-sm-block">
+              <app-image [imageUrl]="imageService.getSeriesCoverImage(entry.seriesId)" class="d-block"
+                         style="width: 80px; height: auto;"/>
+            </div>
 
-    <div #container class="activity-list">
-      @for (item of scroll.viewPortItems; track item.id) {
-        @if (item.type === 'header') {
-          <div class="date-header py-2" [style.background]="getPageColor(item.page)">
-            <span>{{ item.date | date:'fullDate' }}</span>
-            @if (debugMode()) {
-              <span class="ms-2 badge bg-secondary">Page {{ item.page }}</span>
-            }
-          </div>
-        } @else if (item.entry; as entry) {
-          <div class="activity-entry p-3 mb-2" [style.background]="getPageColor(item.page)">
-            <div class="row g-3">
-              <div class="col-auto d-sm-block">
-                <app-image [imageUrl]="imageService.getSeriesCoverImage(entry.seriesId)" class="d-block"
-                           style="width: 80px; height: auto;"/>
-              </div>
-
-              <div class="col">
-                <div class="d-flex align-items-center gap-2 mb-1">
+            <div class="col">
+              <div class="d-flex align-items-start gap-2 mb-1">
+                <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1">
                   <a [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId]"
                      class="text-decoration-none fw-medium">
                     {{ entry.seriesName }}
                   </a>
                   <app-tag-badge>{{ entry.seriesFormat | mangaFormat }}</app-tag-badge>
-                  @if (debugMode()) {
-                    <span class="badge bg-secondary">Page {{ item.page }}</span>
-                  }
                 </div>
+                <span class="entry-date text-muted small text-nowrap">
+                  {{ formatEntryDate(entry) }}
+                </span>
+              </div>
 
-                <ng-container [ngTemplateOutlet]="readStatsTemplate()"
-                              [ngTemplateOutletContext]="{ $implicit: entry, showInfo: true }">
-                </ng-container>
+              <ng-container [ngTemplateOutlet]="readStatsTemplate()"
+                            [ngTemplateOutletContext]="{ $implicit: entry, showInfo: true }">
+              </ng-container>
 
-                <div class="row mt-2">
-                  @for (chapter of entry.chapters.slice(0, 5); track chapter.chapterId) {
-                    <div class="col-auto d-none d-sm-block chapter-cover"
-                         [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId, 'chapter', chapter.chapterId]">
-                      <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block"
-                                 style="width: 40px; height: auto;"/>
-                    </div>
-                  }
-                </div>
+              <div class="row mt-2">
+                @for (chapter of entry.chapters.slice(0, 5); track chapter.chapterId) {
+                  <div class="col-auto d-none d-sm-block chapter-cover"
+                       [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId, 'chapter', chapter.chapterId]">
+                    <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block"
+                               style="width: 40px; height: auto;"/>
+                  </div>
+                }
               </div>
             </div>
           </div>
-
-          <div class="setting-section-break"></div>
-        }
+        </div>
       }
     </div>
 
-    @if (isLoading()) {
-      <div class="loading-indicator">
-        <app-loading [loading]="true"></app-loading>
-      </div>
+    <!-- Bottom pagination -->
+    @if (totalPages() > 1) {
+      <nav [attr.aria-label]="t('pagination-label')" class="d-flex flex-column align-items-center my-3 gap-2">
+        <ngb-pagination
+          [collectionSize]="totalItems()"
+          [page]="currentPage()"
+          [pageSize]="pageSize"
+          [maxSize]="5"
+          [rotate]="true"
+          [ellipses]="true"
+          [boundaryLinks]="true"
+          (pageChange)="onPageChange($event)"
+        />
+        <span class="text-muted small">
+          {{ t('page-info', { current: currentPage(), total: totalPages(), items: totalItems() }) }}
+        </span>
+      </nav>
     }
-
-    @if (!isLoading() && items().length === 0) {
-      <app-stats-no-data [message]="t('no-data')"/>
-    }
-
-    @if (pagination(); as pag) {
-      <div class="text-muted small mt-2 mb-3">
-        {{ t('showing-count', { shown: allEntriesWithPage().length, total: pag.totalItems }) }}
-      </div>
-    }
-  </virtual-scroller>
-
-
+  }
 </ng-container>
 
 <ng-template #chapterInfoRow let-item>
@@ -118,8 +109,8 @@
 
     @if (label) {
       <span class="d-flex align-items-center flex-grow-1 ms-5" id="label-{{entry.id}}">
-      {{ label }}
-    </span>
+        {{ label }}
+      </span>
     }
 
     <span [attr.aria-label]="t('duration')" class="d-flex align-items-center gap-1">
