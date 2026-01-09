@@ -317,6 +317,23 @@ export class StatisticsService {
     return httpResource<number>(() => this.baseUrl + `stats/total-reads?userId=${userId()}`).asReadonly();
   }
 
+  getReadingHistory(
+    filter: StatsFilter,
+    userId: number,
+    pageNum: number = 1,
+    itemsPerPage: number = 30
+  ) {
+    let params = this.filterHttpParams(filter, userId);
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.get<ReadingHistoryItem[]>(
+      `${this.baseUrl}stats/reading-history`,
+      { observe: 'response', params }
+    ).pipe(
+      map(response => this.utilityService.createPaginatedResult<ReadingHistoryItem>(response))
+    );
+  }
+
   getReadingHistoryResource(
     statsFilter: () => StatsFilter | undefined,
     userId: () => number,

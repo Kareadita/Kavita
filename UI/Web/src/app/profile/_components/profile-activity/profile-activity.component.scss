@@ -5,10 +5,20 @@
   padding: 1rem;
 }
 
-.virtual-scroller, virtual-scroller {
-  width: 100%;
-  height: calc(100vh - 85px);
-  max-height: calc(var(--vh) * 100 - 170px);
+.activity-item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+  overflow: hidden;
+
+  &.header-item {
+    background: var(--bs-tertiary-bg);
+  }
+
+  &.entry-item {
+    padding: 0.5rem 1rem;
+  }
 }
 
 .activity-entry {
