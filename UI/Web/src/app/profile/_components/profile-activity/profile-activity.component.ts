@@ -33,6 +33,7 @@ import {CompactNumberPipe} from '../../../_pipes/compact-number.pipe';
 import {DurationPipe} from '../../../_pipes/duration.pipe';
 import {Pagination} from '../../../_models/pagination';
 import {NgbPagination, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 
 @Component({
@@ -53,6 +54,7 @@ import {NgbPagination, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
     DurationPipe,
     NgbPagination,
     NgbTooltip,
+    UtcToLocalTimePipe,
   ],
   templateUrl: './profile-activity.component.html',
   styleUrl: './profile-activity.component.scss',

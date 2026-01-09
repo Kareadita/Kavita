@@ -139,7 +139,7 @@
     </span>
 
     <span [attr.aria-label]="t('time')" class="d-flex align-items-center gap-1">
-      {{ entry.startTimeUtc | date:'shortTime' }}
+      {{ entry.startTimeUtc | utcToLocalTime:'shortTime' }}
     </span>
 
     @if (showInfo) {
