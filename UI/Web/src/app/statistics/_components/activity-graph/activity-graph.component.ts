@@ -90,7 +90,6 @@ export class ActivityGraphComponent {
     const year = this.year();
     if (!filter) return year;
 
-    if (filter.timeFilter.startDate == filter.timeFilter.endDate) return translate('activity-graph.all-time');
     return year;
   })
 
