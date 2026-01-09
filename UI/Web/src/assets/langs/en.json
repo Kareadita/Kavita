@@ -2683,7 +2683,8 @@
         "not-classified": "Not Classified",
         "total-file-size-title": "Total File Size:",
         "download-file-for-extension-header": "Download Report",
-        "download-file-for-extension-alt": "Download files Report for {{extension}}"
+        "download-file-for-extension-alt": "Download files Report for {{extension}}",
+        "no-data": "{{common.no-data}}"
     },
 
     "reading-activity": {
@@ -2714,7 +2715,8 @@
         "visualisation-label": "Visualisation",
         "data-table-label": "Data Table",
         "year-header": "Year",
-        "count-header": "Count"
+        "count-header": "Count",
+        "no-data": "{{common.no-data}}"
     },
 
     "series-preview-drawer": {
