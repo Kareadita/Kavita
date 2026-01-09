@@ -2834,6 +2834,17 @@
         "reset-image-alt": "Reset Image"
     },
 
+    "profile-activity": {
+        "time-filter-title": "{{username}}'s activity through",
+        "pages": "page(s)",
+        "no-data": "{{common.no-data}}",
+        "duration": "Duration",
+        "pages-read": "Pages read",
+        "progress": "Progress",
+        "time": "Time",
+        "chapter-detail-modal-title": "{{seriesName}}"
+    },
+
     "preferred-format": {
         "title": "Preferred format",
         "sub-title": "{{name}} prefers to read {{format}}",

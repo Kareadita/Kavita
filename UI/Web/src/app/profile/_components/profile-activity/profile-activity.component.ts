@@ -1,9 +1,19 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  TemplateRef,
+  viewChild
+} from '@angular/core';
 import {MemberInfo} from "../../../_models/user/member-info";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {StatisticsService} from "../../../_services/statistics.service";
-import {ReadingHistoryItem} from "../../../_models/stats/reading-history-item";
+import {ReadingHistoryChapterItem, ReadingHistoryItem} from "../../../_models/stats/reading-history-item";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {DatePipe, TitleCasePipe} from "@angular/common";
 import {StatsFilter} from "../../../statistics/_models/stats-filter";
@@ -12,6 +22,12 @@ import {
   LibraryAndTimeSelectorComponent
 } from "../../../statistics/_components/library-and-time-selector/library-and-time-selector.component";
 import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
+import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
+import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
+import {ImageComponent} from "../../../shared/image/image.component";
+import {ImageService} from "../../../_services/image.service";
+import {ModalService} from "../../../_services/modal.service";
+import {ListSelectModalComponent} from "../../../shared/_components/list-select-modal/list-select-modal.component";
 
 interface HistoryDisplayItem {
   id: string;
@@ -28,20 +44,27 @@ interface HistoryDisplayItem {
     LoadingComponent,
     DatePipe,
     RouterLink,
-    TitleCasePipe,
     LibraryAndTimeSelectorComponent,
-    StatsNoDataComponent
+    StatsNoDataComponent,
+    MangaFormatPipe,
+    TagBadgeComponent,
+    ImageComponent,
+    TitleCasePipe,
   ],
   templateUrl: './profile-activity.component.html',
   styleUrl: './profile-activity.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileActivityComponent {
+
   private readonly statsService = inject(StatisticsService);
+  protected readonly imageService = inject(ImageService);
+  private readonly modalService = inject(ModalService);
 
   memberInfo = input.required<MemberInfo>();
   filter = signal<StatsFilter | undefined>(undefined);
 
+  chapterInfoRow = viewChild.required<TemplateRef<any>>('chapterInfoRow');
   protected currentPage = signal(1);
   private readonly pageSize = 30;
   protected allEntries = signal<ReadingHistoryItem[]>([]);
@@ -54,12 +77,6 @@ export class ProfileActivityComponent {
   );
 
   constructor() {
-    effect(() => {
-      const value = this.historyResource.value();
-      console.log('Raw resource value:', value);
-      console.log('Type:', typeof value, Array.isArray(value));
-    });
-
     effect(() => {
       const result = this.historyResource.value();
       if (result && result.length > 0) {
@@ -75,7 +92,8 @@ export class ProfileActivityComponent {
   protected hasMore = computed(() => {
     const result = this.historyResource.value();
     if (!result) return true; // Assume more until proven otherwise
-    return result.length >= this.pageSize;
+
+    return result.flatMap(item => item.sessionDataIds).length >= this.pageSize;
   });
 
   protected items = computed<HistoryDisplayItem[]>(() => {
@@ -100,10 +118,11 @@ export class ProfileActivityComponent {
 
       result.push({ id: `header-${dateKey}`, type: 'header', date: localDate });
       for (const entry of grouped.get(dateKey)!) {
-        result.push({ id: `entry-${entry.sessionId}`, type: 'entry', entry });
+        const chapterIds = entry.chapters.map(c => c.chapterId).join(",")
+        result.push({ id: `entry-${entry.sessionId}-${chapterIds}`, type: 'entry', entry });
       }
     }
-    console.log(result)
+
     return result;
   });
 
@@ -124,6 +143,17 @@ export class ProfileActivityComponent {
   protected formatProgress(entry: ReadingHistoryItem): string {
     if (entry.completed) return 'Completed';
     return `${entry.endPage}/${entry.totalPages}`;
+  }
+
+  protected displayInfo(item: ReadingHistoryItem) {
+    const [_, component] = this.modalService.open(ListSelectModalComponent<ReadingHistoryChapterItem>);
+
+    component.title.set(translate('profile-activity.chapter-detail-modal-title', {seriesName: item.seriesName}));
+    component.showConfirm.set(false);
+    component.inputItems.set(item.chapters.map(c => ({value: c, label: `${c.label}`})));
+    component.itemTemplate.set(this.chapterInfoRow());
+    component.itemsBeforeVirtual.set(5);
+
   }
 
   updateFilter(event: StatsFilter) {

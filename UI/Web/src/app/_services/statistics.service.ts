@@ -239,7 +239,7 @@ export class StatisticsService {
     }
 
     if (filter.timezone) {
-      params = params.set('timezone', filter.timezone);
+      params = params.set('timeZoneId', filter.timezone);
     }
 
     for (let library of filter.libraries) {
@@ -330,7 +330,6 @@ export class StatisticsService {
 
       let params = this.filterHttpParams(filter, id);
       params = this.utilityService.addPaginationIfExists(params, pageNum(), itemsPerPage());
-      params = params.set('timeZoneId', Intl.DateTimeFormat().resolvedOptions().timeZone);
 
       return {
         url: `${this.baseUrl}stats/reading-history`,

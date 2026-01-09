@@ -18,6 +18,7 @@ import {toSignal} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {NgTemplateOutlet} from "@angular/common";
 import {LoadingComponent} from "../../loading/loading.component";
+import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 
 export type ListSelectionItem<T> = {
   label: string,
@@ -32,7 +33,8 @@ export type ListSelectionItem<T> = {
     ReactiveFormsModule,
     SentenceCasePipe,
     NgTemplateOutlet,
-    LoadingComponent
+    LoadingComponent,
+    VirtualScrollerModule
   ],
   templateUrl: './list-select-modal.component.html',
   styleUrl: './list-select-modal.component.scss',
@@ -57,12 +59,14 @@ export class ListSelectModalComponent<T> {
   interceptConfirm = model<((selection: T|T[]) => void) | null>(null);
 
   itemsBeforeFilter = model(8);
+  itemsBeforeVirtual = model<number | null>(null);
   requireConfirmation = model(false);
   showFooter = model(true);
+  showConfirm = model(true);
   multiSelect = model(false);
   hideItemsWhenInvalid = model(false);
 
-  itemTemplate = input<TemplateRef<any> | null>(null);
+  itemTemplate = model<TemplateRef<any> | null>(null);
 
   loading = model(false);
 
@@ -104,7 +108,7 @@ export class ListSelectModalComponent<T> {
 
   protected filteredItems = computed(() => {
     const items = this.items();
-    const filter = this.filterQuery().toLowerCase();
+    const filter = (this.filterQuery() ?? '').toLowerCase();
 
     if (!filter) return items;
 

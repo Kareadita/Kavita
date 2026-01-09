@@ -1,6 +1,8 @@
 import {MangaFormat} from "../manga-format";
 
 export interface ReadingHistoryItem {
+  sessionDataIds: number[];
+  id: number;
   sessionId: number;
   startTimeUtc: string;
   endTimeUtc: string;
@@ -10,12 +12,27 @@ export interface ReadingHistoryItem {
   seriesName: string;
   seriesFormat: MangaFormat;
 
-  chapterId: number;
-  chapterTitle: string;
-  chapterNumber: string;
+  chapters: ReadingHistoryChapterItem[];
 
   libraryId: number;
   libraryName: string;
+
+  pagesRead: number;
+  wordsRead: number;
+  durationSeconds: number;
+
+  startPage: number;
+  endPage: number;
+  totalPages: number;
+  completed: boolean;
+}
+
+export interface ReadingHistoryChapterItem {
+  chapterId: number;
+  label: string;
+
+  startTimeUtc: string;
+  endTimeUtc: string;
 
   pagesRead: number;
   wordsRead: number;

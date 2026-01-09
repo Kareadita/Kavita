@@ -18,6 +18,7 @@ using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers;
+using API.Helpers.Formatting;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -76,7 +77,9 @@ public interface IStatisticService
 /// Responsible for computing statistics for the server
 /// </summary>
 /// <remarks>This performs raw queries and does not use a repository</remarks>
-public class StatisticService(ILogger<StatisticService> logger, DataContext context, IMapper mapper, IUnitOfWork unitOfWork): IStatisticService
+public class StatisticService(ILogger<StatisticService> logger, DataContext context,
+    IMapper mapper, IUnitOfWork unitOfWork, IEntityNamingService namingService, ILocalizationService localizationService
+    ): IStatisticService
 {
 
     public async Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds)
@@ -1663,24 +1666,26 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
 
         var query = context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: false, onlyCompleted: false)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: false,
+                onlyCompleted: false)
             .WhereIf(filter.Libraries.Count > 0, a => filter.Libraries.Contains(a.LibraryId))
             .Select(a => new
             {
+                a.Id,
                 a.AppUserReadingSessionId,
-                a.ReadingSession.StartTimeUtc,
-                EndTimeUtc = a.ReadingSession.EndTimeUtc!.Value,
+                a.StartTimeUtc,
+                EndTimeUtc = a.EndTimeUtc!.Value,
 
                 a.SeriesId,
                 SeriesName = a.Series.Name,
                 SeriesFormat = a.Series.Format,
 
                 a.ChapterId,
-                ChapterTitle = a.Chapter.TitleName,
-                ChapterNumber = a.Chapter.Number,
+                ChapterTitle = a.Chapter.Title,
 
                 a.LibraryId,
                 LibraryName = a.Library.Name,
+                LibraryType = a.Library.Type,
 
                 a.PagesRead,
                 a.WordsRead,
@@ -1701,38 +1706,60 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .ToListAsync();
 
         // Convert to DTOs with local time
-        var dtos = items.Select(a =>
-        {
-            var localStart = TimeZoneInfo.ConvertTimeFromUtc(a.StartTimeUtc, userTimeZone);
-            return new ReadingHistoryItemDto
+        var dtos = items
+            .GroupBy(a => new { a.AppUserReadingSessionId, a.SeriesId })
+            .Select(x =>
             {
-                SessionId = a.AppUserReadingSessionId,
-                StartTimeUtc = a.StartTimeUtc,
-                EndTimeUtc = a.EndTimeUtc,
-                LocalDate = localStart.Date,
+                var first = x.First();
+                var startTime = x.Min(s => s.StartTimeUtc);
+                var endTime = x.Max(s => s.EndTimeUtc);
 
-                SeriesId = a.SeriesId,
-                SeriesName = a.SeriesName,
-                SeriesFormat = a.SeriesFormat,
+                var startPage = x.Min(s => s.StartPage);
+                var endPage = x.Max(s => s.EndPage);
+                var totalPages = x.Max(s => s.TotalPages);
 
-                ChapterId = a.ChapterId,
-                ChapterTitle = !string.IsNullOrEmpty(a.ChapterTitle)
-                    ? a.ChapterTitle
-                    : $"Chapter {a.ChapterNumber}",
-                ChapterNumber = a.ChapterNumber,
+                var localStart = TimeZoneInfo.ConvertTimeFromUtc(startTime, userTimeZone);
+                return new ReadingHistoryItemDto
+                {
+                    SessionDataIds =  x.Select(s => s.Id).ToList(),
+                    SessionId = first.AppUserReadingSessionId,
+                    StartTimeUtc = startTime,
+                    EndTimeUtc = endTime,
+                    LocalDate = localStart.Date,
 
-                LibraryId = a.LibraryId,
-                LibraryName = a.LibraryName,
+                    SeriesId = first.SeriesId,
+                    SeriesName = first.SeriesName,
+                    SeriesFormat = first.SeriesFormat,
 
-                PagesRead = a.PagesRead,
-                WordsRead = a.WordsRead,
-                DurationSeconds = (int)(a.EndTimeUtc - a.StartTimeUtc).TotalSeconds,
+                    Chapters = x.Select(s => new ReadingHistoryChapterItemDto
+                    {
+                        ChapterId = s.ChapterId,
+                        Label = s.ChapterTitle, // TODO: Needs to be better
 
-                StartPage = a.StartPage,
-                EndPage = a.EndPage,
-                TotalPages = a.TotalPages,
-                Completed = a.EndPage >= a.TotalPages
-            };
+                        StartTimeUtc = s.StartTimeUtc,
+                        EndTimeUtc = s.EndTimeUtc,
+                        DurationSeconds = (int) (s.EndTimeUtc - s.StartTimeUtc).TotalSeconds,
+
+                        PagesRead = s.PagesRead,
+                        WordsRead = s.WordsRead,
+
+                        StartPage = s.StartPage,
+                        EndPage = s.EndPage,
+                        TotalPages = s.TotalPages,
+                        Completed = s.EndPage >= s.TotalPages,
+                    }).ToList(),
+
+                    LibraryId = first.LibraryId,
+                    LibraryName = first.LibraryName,
+
+                    PagesRead = x.Sum(s => s.PagesRead),
+                    WordsRead = x.Sum(s => s.WordsRead),
+                    DurationSeconds = (int)(endTime - startTime).TotalSeconds,
+
+                    StartPage = startPage,
+                    EndPage = endPage,
+                    TotalPages = totalPages,
+                };
         }).ToList();
 
         return PagedList<ReadingHistoryItemDto>.Create(dtos, totalCount, userParams.PageNumber, userParams.PageSize);

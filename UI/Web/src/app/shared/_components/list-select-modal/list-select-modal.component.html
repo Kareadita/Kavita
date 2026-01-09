@@ -15,6 +15,7 @@
     @let itemsValue = items();
     @let filteredItemsValue = filteredItems();
     @let descriptionValue = description();
+    @let itemsBeforeVirtualValue = itemsBeforeVirtual();
 
     @if (descriptionValue) {
       <span class="text-muted"> {{descriptionValue}} </span>
@@ -30,7 +31,7 @@
 
       @if (itemsValue.length > itemsBeforeFilter()) {
         <div class="mb-3">
-          <label for="filter" class="form-label">{{t('filter-label')}}</label>
+          <label for="filter" class="form-label">{{t('common.filter')}}</label>
           <div class="input-group">
             <input id="filter" autocomplete="off" class="form-control" formControlName="query" type="text" aria-describedby="reset-input">
             <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="clear()">{{t('common.clear')}}</button>
@@ -41,16 +42,42 @@
 
     <ul class="list-group mt-4">
       @if (!loading()) {
-        @for(item of filteredItemsValue; track $index) {
-          <li class="list-group-item clickable" tabindex="0" role="option" (click)="select(item)" [class.disabled]="!isItemValid(item)">
-            <div class="p-2 group-item d-flex justify-content-between align-items-center">
 
-              <ng-container [ngTemplateOutlet]="finalItemTemplate()"
-                            [ngTemplateOutletContext]="{ $implicit: item, index: $index, first: $first, last: $last, selectedItems: selectedItemsValue }" >
-              </ng-container>
+        @if (itemsBeforeVirtualValue && itemsValue.length > itemsBeforeVirtualValue) {
 
+          <virtual-scroller
+            #scroll
+            [items]="filteredItemsValue"
+          >
+
+            <div #container>
+              @for (item of scroll.viewPortItems; track $index) {
+                <li class="list-group-item clickable" tabindex="0" role="option" (click)="select(item)" [class.disabled]="!isItemValid(item)">
+                  <div class="p-2 group-item d-flex justify-content-between align-items-center">
+
+                    <ng-container [ngTemplateOutlet]="finalItemTemplate()"
+                                  [ngTemplateOutletContext]="{ $implicit: item, index: $index, first: $first, last: $last, selectedItems: selectedItemsValue }" >
+                    </ng-container>
+
+                  </div>
+                </li>
+              }
             </div>
-          </li>
+
+          </virtual-scroller>
+
+        } @else {
+          @for(item of filteredItemsValue; track $index) {
+            <li class="list-group-item clickable" tabindex="0" role="option" (click)="select(item)" [class.disabled]="!isItemValid(item)">
+              <div class="p-2 group-item d-flex justify-content-between align-items-center">
+
+                <ng-container [ngTemplateOutlet]="finalItemTemplate()"
+                              [ngTemplateOutletContext]="{ $implicit: item, index: $index, first: $first, last: $last, selectedItems: selectedItemsValue }" >
+                </ng-container>
+
+              </div>
+            </li>
+          }
         }
       }
     </ul>
@@ -59,8 +86,12 @@
 
   @if (showFooter()) {
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.cancel')}}</button>
-      <button type="button" class="btn btn-primary" (click)="confirm()" [disabled]="invalidSelection">{{t('common.confirm')}}</button>
+      <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.close')}}</button>
+
+      @if (showConfirm()) {
+        <button type="button" class="btn btn-primary" (click)="confirm()" [disabled]="invalidSelection">{{t('common.confirm')}}</button>
+      }
+
     </div>
   }
 
