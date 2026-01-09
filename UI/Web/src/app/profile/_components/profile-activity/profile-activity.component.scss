@@ -16,9 +16,8 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.75rem;
-  background: var(--bs-card-bg);
+  background: var(--bs-body-bg);
   border-radius: var(--bs-border-radius);
-  border: 1px solid var(--bs-border-color);
 
   &.completed {
     border-left: 3px solid var(--bs-success);

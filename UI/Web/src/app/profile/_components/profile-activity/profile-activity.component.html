@@ -5,10 +5,7 @@
                                    [locale]="'profile'" [userId]="memberInfo().id"/>
   </div>
 
-  <virtual-scroller
-    #scroll
-    [items]="items()"
-  >
+  <virtual-scroller #scroll [items]="items()">
 
     <div #container class="activity-list">
       @for (item of scroll.viewPortItems; track item.id) {
@@ -47,6 +44,8 @@
               </div>
             </div>
           </div>
+
+          <div class="setting-section-break"></div>
         }
       }
 
@@ -90,29 +89,28 @@
   <div class="d-flex flex-wrap gap-3 small text-muted me-2 flex-grow-1" *transloco="let t; prefix: 'profile-activity'">
 
     @if (label) {
-      <span class="d-flex align-items-center flex-grow-1 ms-5">
+      <span class="d-flex align-items-center flex-grow-1 ms-5" id="label-{{entry.id}}">
       {{ label }}
     </span>
     }
 
     <span [attr.aria-label]="t('duration')" class="d-flex align-items-center gap-1">
       <i aria-hidden="true" class="fa-regular fa-clock"></i>
-      {{ formatDuration(entry.durationSeconds) }}
+      {{ entry.durationSeconds | duration }}
     </span>
 
     @if (entry.pagesRead > 0) {
       <span [attr.aria-label]="t('pages-read')" class="d-flex align-items-center gap-1">
-                    <i aria-hidden="true" class="fa-regular fa-file"></i>
-        {{ entry.pagesRead | compactNumber }} {{ t('pages') }}
-                  </span>
+        <i aria-hidden="true" class="fa-regular fa-file"></i>
+        {{t('pages-count', {num: entry.pagesRead | compactNumber})}}
+      </span>
     }
 
     @if (entry.wordsRead > 0) {
       <span [attr.aria-label]="t('words-read')" class="d-flex align-items-center gap-1">
-                    <i aria-hidden="true" class="fa fa-book"></i>
-        {{ entry.wordsRead | compactNumber }} {{ t('words') }}
-                  </span>
-
+         <i aria-hidden="true" class="fa fa-book"></i>
+        {{ t('words-count', {num: entry.wordsRead | compactNumber}) }}
+      </span>
     }
 
     <span [attr.aria-label]="t('progress')" class="d-flex align-items-center gap-1">
@@ -127,9 +125,10 @@
     </span>
 
     @if (showInfo) {
-      <span (click)="displayInfo(entry)">
-      <i class="fa fa-info clickable"></i>
-    </span>
+      <button class="btn btn-icon" (click)="displayInfo(entry)" aria-labelledby="label-{{entry.id}}">
+        <i class="fa fa-info" aria-hidden="true"></i>
+        <span class="visually-hidden">{{t('info-alt')}}</span>
+      </button>
     }
   </div>
 </ng-template>

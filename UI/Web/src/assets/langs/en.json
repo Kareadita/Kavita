@@ -2836,14 +2836,15 @@
 
     "profile-activity": {
         "time-filter-title": "{{username}}'s activity through",
-        "pages": "page(s)",
-        "words": "words",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
         "no-data": "{{common.no-data}}",
         "duration": "Duration",
-        "pages-read": "Pages read",
-        "words-read": "Words read",
+        "pages-read": "{{reading-pace.pages-read}}",
+        "words-read": "{{reading-pace.words-read}}",
         "progress": "Progress",
         "time": "Time",
+        "info-alt": "More Info",
         "chapter-detail-modal-title": "{{seriesName}}"
     },
 

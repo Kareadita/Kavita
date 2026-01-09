@@ -29,6 +29,7 @@ import {ImageService} from "../../../_services/image.service";
 import {ModalService} from "../../../_services/modal.service";
 import {ListSelectModalComponent} from "../../../shared/_components/list-select-modal/list-select-modal.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {DurationPipe} from "../../../_pipes/duration.pipe";
 
 interface HistoryDisplayItem {
   id: string;
@@ -53,6 +54,7 @@ interface HistoryDisplayItem {
     TitleCasePipe,
     CompactNumberPipe,
     NgTemplateOutlet,
+    DurationPipe,
   ],
   templateUrl: './profile-activity.component.html',
   styleUrl: './profile-activity.component.scss',
