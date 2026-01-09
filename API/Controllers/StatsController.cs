@@ -453,10 +453,9 @@ public class StatsController(
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpGet("reading-history")]
-    [ProfilePrivacy]
-    public async Task<ActionResult<PagedList<ReadingHistoryItemDto>>> GetReadingHistoryItems([FromQuery] int userId, [FromQuery] StatsFilterDto filter, [FromQuery] UserParams userParams)
+    public async Task<ActionResult<PagedList<ReadingHistoryItemDto>>> GetReadingHistoryItems([FromQuery] StatsFilterDto filter, [FromQuery] UserParams userParams)
     {
-        var result = await statService.GetReadingHistoryItems(filter, userParams, userId, UserId);
+        var result = await statService.GetReadingHistoryItems(filter, userParams, UserId, UserId);
 
         Response.AddPaginationHeader(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
 

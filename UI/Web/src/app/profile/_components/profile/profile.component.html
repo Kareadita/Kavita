@@ -83,14 +83,16 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="TabID.Activity">
-          <a ngbNavLink>{{t(TabID.Activity)}}</a>
-          <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Activity; prefetch on idle) {
-              <app-profile-activity [memberInfo]="user" />
-            }
-          </ng-template>
-        </li>
+        @if (accountService.userId() === memberInfo().id) {
+          <li [ngbNavItem]="TabID.Activity">
+            <a ngbNavLink>{{t(TabID.Activity)}}</a>
+            <ng-template ngbNavContent>
+              @defer (when activeTabId === TabID.Activity; prefetch on idle) {
+                <app-profile-activity [memberInfo]="user" />
+              }
+            </ng-template>
+          </li>
+        }
       </ul>
     </div>
 

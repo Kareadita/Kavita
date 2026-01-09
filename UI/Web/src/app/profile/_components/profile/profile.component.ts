@@ -82,7 +82,7 @@ export class ProfileComponent {
   private readonly statsService = inject(StatisticsService);
   protected readonly licenseService = inject(LicenseService);
   private readonly titleService = inject(Title);
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
 
