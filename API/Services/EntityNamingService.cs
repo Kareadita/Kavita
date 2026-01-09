@@ -30,12 +30,16 @@ public interface IEntityNamingService
     /// Formats a volume name based on library type and volume metadata.
     /// </summary>
     string? FormatVolumeName(LibraryType libraryType, VolumeDto volume, string? volumeLabel = null);
-
     /// <summary>
     /// Builds a full display title for a chapter within a series/volume context.
     /// Used for OPDS feeds, reading lists, etc.
     /// </summary>
     string BuildFullTitle(LibraryType libraryType, SeriesDto series, VolumeDto? volume, ChapterDto chapter, string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null);
+    /// <summary>
+    /// Builds a display title for a chapter within its volume context.
+    /// Used when series context is not needed (e.g., reading history within a series grouping).
+    /// </summary>
+    string BuildChapterTitle(LibraryType libraryType, VolumeDto volume, ChapterDto chapter, string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null);
     /// <summary>
     /// Formats a reading list item title based on the item's metadata.
     /// Handles the unique naming conventions for reading list display.
@@ -127,31 +131,36 @@ public partial class EntityNamingService : IEntityNamingService
             return $"{seriesName} - {chapterTitle}";
         }
 
+        var title = BuildChapterTitle(libraryType, volume, chapter, volumeLabel, chapterLabel, issueLabel, bookLabel);
+
+        return string.IsNullOrEmpty(title)
+            ? seriesName
+            : $"{seriesName} - {title}";
+    }
+
+    public string BuildChapterTitle(LibraryType libraryType, VolumeDto volume, ChapterDto chapter, string? volumeLabel = null,
+        string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)
+    {
+        volumeLabel ??= DefaultVolumeLabel;
+
         // Special volume - just use chapter title
         if (volume.IsSpecial())
         {
-            var chapterTitle = FormatChapterTitle(libraryType, chapter, chapterLabel, issueLabel, bookLabel);
-            return $"{seriesName} - {chapterTitle}";
+            return FormatChapterTitle(libraryType, chapter, chapterLabel, issueLabel, bookLabel);
         }
 
-        // Loose-leaf volume - series name only or with chapter
+        // Loose-leaf volume
         if (volume.IsLooseLeaf())
         {
-            if (volume.Chapters.Count == 1)
-            {
-                return seriesName;
-            }
-            var chapterTitle = FormatChapterTitle(libraryType, chapter, chapterLabel, issueLabel, bookLabel);
-            return $"{seriesName} - {chapterTitle}";
+            return volume.Chapters.Count == 1
+                ? string.Empty  // Caller may want to handle this (e.g., use series name only)
+                : FormatChapterTitle(libraryType, chapter, chapterLabel, issueLabel, bookLabel);
         }
 
         // Single chapter in volume - use volume name only
         if (volume.Chapters.Count == 1)
         {
-            var volumeName = FormatVolumeName(libraryType, volume, volumeLabel);
-            return volumeName != null
-                ? $"{seriesName} - {volumeName}"
-                : seriesName;
+            return FormatVolumeName(libraryType, volume, volumeLabel) ?? string.Empty;
         }
 
         // Multiple chapters in volume - include both volume and chapter
@@ -159,7 +168,7 @@ public partial class EntityNamingService : IEntityNamingService
                       ?? FormatStandardVolumeName(volume.Name, volumeLabel);
         var chapTitle = FormatChapterTitle(libraryType, chapter, chapterLabel, issueLabel, bookLabel);
 
-        return $"{seriesName} - {volName} - {chapTitle}";
+        return $"{volName} - {chapTitle}";
     }
 
     public string FormatReadingListItemTitle(ReadingListItemDto item,

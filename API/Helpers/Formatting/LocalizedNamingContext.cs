@@ -75,6 +75,12 @@ public sealed class LocalizedNamingContext
             VolumeLabel, ChapterLabel, IssueLabel, BookLabel);
     }
 
+    public string BuildChapterTitle(VolumeDto volume, ChapterDto chapter)
+    {
+        return _namingService.BuildChapterTitle(LibraryType, volume, chapter,
+            VolumeLabel, ChapterLabel, IssueLabel, BookLabel);
+    }
+
     /// <summary>
     /// Formats a reading list item title using the pre-fetched localized labels.
     /// </summary>

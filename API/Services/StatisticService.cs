@@ -1679,12 +1679,19 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 SeriesName = a.Series.Name,
                 SeriesFormat = a.Series.Format,
 
+                // Chapter fields for ChapterDto
                 a.ChapterId,
                 ChapterNumber = a.Chapter.Number,
                 ChapterRange = a.Chapter.Range,
                 ChapterTitle = a.Chapter.Title,
+                ChapterTitleName = a.Chapter.TitleName,
                 ChapterIsSpecial = a.Chapter.IsSpecial,
+
+                // Volume fields for VolumeDto
+                VolumeId = a.Chapter.VolumeId,
                 VolumeNumber = a.Chapter.Volume.Number,
+                VolumeName = a.Chapter.Volume.Name,
+                VolumeChapters = a.Chapter.Volume.Chapters.Select(c => c.Id).ToList(), // Just need count, but need list for IsLooseLeaf/IsSpecial checks
 
                 a.LibraryId,
                 LibraryName = a.Library.Name,
@@ -1742,29 +1749,44 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                     SeriesName = first.SeriesName,
                     SeriesFormat = first.SeriesFormat,
 
-                    Chapters = x.Select(s => new ReadingHistoryChapterItemDto
+                    Chapters = x.Select(s =>
                     {
-                        ChapterId = s.ChapterId,
-                        Label = namingContext.FormatChapterTitle(new ChapterDto
+                        // Build minimal DTOs for naming
+                        var chapterDto = new ChapterDto
                         {
+                            Id = s.ChapterId,
                             Number = s.ChapterNumber,
                             Range = s.ChapterRange,
                             Title = s.ChapterTitle,
+                            TitleName = s.ChapterTitleName,
                             IsSpecial = s.ChapterIsSpecial,
-                        }),
+                        };
 
-                        StartTimeUtc = s.StartTimeUtc,
-                        EndTimeUtc = s.EndTimeUtc,
-                        DurationSeconds = (int) (s.EndTimeUtc - s.StartTimeUtc).TotalSeconds,
+                        var volumeDto = new VolumeDto
+                        {
+                            Id = s.VolumeId,
+                            Number = s.VolumeNumber,
+                            Name = s.VolumeName,
+                            Chapters = s.VolumeChapters.Select(id => new ChapterDto { Id = id }).ToList(),
+                        };
 
-                        PagesRead = s.PagesRead,
-                        WordsRead = s.WordsRead,
+                        return new ReadingHistoryChapterItemDto
+                        {
+                            ChapterId = s.ChapterId,
+                            Label = namingContext.BuildChapterTitle(volumeDto, chapterDto),
+                            StartTimeUtc = s.StartTimeUtc,
+                            EndTimeUtc = s.EndTimeUtc,
+                            DurationSeconds = (int) (s.EndTimeUtc - s.StartTimeUtc).TotalSeconds,
 
-                        StartPage = s.StartPage,
-                        EndPage = s.EndPage,
-                        TotalPages = s.TotalPages,
-                        Completed = s.EndPage >= s.TotalPages,
-                    }).ToList(),
+                            PagesRead = s.PagesRead,
+                            WordsRead = s.WordsRead,
+
+                            StartPage = s.StartPage,
+                            EndPage = s.EndPage,
+                            TotalPages = s.TotalPages,
+                            Completed = s.EndPage >= s.TotalPages,
+                        };
+                    }).OrderBy(c => c.StartTimeUtc).ToList(),
 
                     LibraryId = first.LibraryId,
                     LibraryName = first.LibraryName,
