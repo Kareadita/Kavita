@@ -153,7 +153,7 @@ public partial class EntityNamingService : IEntityNamingService
         if (volume.IsLooseLeaf())
         {
             return volume.Chapters.Count == 1
-                ? string.Empty  // Caller may want to handle this (e.g., use series name only)
+                ? string.Empty
                 : FormatChapterTitle(libraryType, chapter, chapterLabel, issueLabel, bookLabel);
         }
 

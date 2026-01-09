@@ -125,11 +125,13 @@ export class ProfileActivityComponent {
       });
   }
 
-  protected onPageChange(page: number): void {
+  protected onPageChange(page: number, scroll: boolean): void {
     if (page === this.currentPage() || this.isLoading()) return;
 
     this.loadPage(page);
-    this.document.querySelector('.activity-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (scroll) {
+      this.document.querySelector('.activity-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   protected formatProgress(entry: ReadingHistoryItem): string {

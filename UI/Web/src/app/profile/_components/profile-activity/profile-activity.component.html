@@ -22,8 +22,7 @@
           [rotate]="true"
           [ellipses]="true"
           [boundaryLinks]="true"
-          (pageChange)="onPageChange($event)"
-          size="sm"
+          (pageChange)="onPageChange($event, false)"
         />
       </nav>
     }
@@ -80,7 +79,7 @@
           [rotate]="true"
           [ellipses]="true"
           [boundaryLinks]="true"
-          (pageChange)="onPageChange($event)"
+          (pageChange)="onPageChange($event, true)"
         />
         <span class="text-muted small">
           {{ t('page-info', { current: currentPage(), total: totalPages(), items: totalItems() }) }}
@@ -89,6 +88,7 @@
     }
   }
 </ng-container>
+
 
 <ng-template #chapterInfoRow let-item>
   @let chapter = item.value;
