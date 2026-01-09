@@ -171,7 +171,7 @@ export class ProfileActivityComponent {
       centered: true
     });
 
-    component.title.set(translate('profile-activity.chapter-detail-modal-title', { seriesName: item.seriesName }));
+    component.title.set(item.seriesName);
     component.showConfirm.set(false);
     component.inputItems.set(item.chapters.map(c => ({ value: c, label: `${c.label}` })));
     component.itemTemplate.set(this.chapterInfoRow());

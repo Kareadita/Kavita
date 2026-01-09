@@ -1688,10 +1688,10 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 ChapterIsSpecial = a.Chapter.IsSpecial,
 
                 // Volume fields for VolumeDto
-                VolumeId = a.Chapter.VolumeId,
+                a.Chapter.VolumeId,
                 VolumeNumber = a.Chapter.Volume.Number,
                 VolumeName = a.Chapter.Volume.Name,
-                VolumeChapters = a.Chapter.Volume.Chapters.Select(c => c.Id).ToList(), // Just need count, but need list for IsLooseLeaf/IsSpecial checks
+                VolumeChapters = a.Chapter.Volume.Chapters.Select(c => c.Id).ToList(),
 
                 a.LibraryId,
                 LibraryName = a.Library.Name,
@@ -1751,7 +1751,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
 
                     Chapters = x.Select(s =>
                     {
-                        // Build minimal DTOs for naming
                         var chapterDto = new ChapterDto
                         {
                             Id = s.ChapterId,
@@ -1806,7 +1805,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     {
         if (chapterIds.Count == 0) return 0;
 
-        // For large sets, batch to avoid SQLite parameter limits (max ~999)
         if (chapterIds.Count <= 500)
         {
             return await context.ChapterPeople
@@ -1816,7 +1814,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 .CountAsync();
         }
 
-        // Batch approach for large chapter sets
         var authorIds = new HashSet<int>();
         foreach (var batch in chapterIds.Chunk(500))
         {
@@ -1837,7 +1834,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     {
         var baseQuery = BuildRatingQuery(filter, userId, socialPreferences);
 
-        // Single query with conditional counting
         var counts = await baseQuery
             .GroupBy(r => 1)
             .Select(g => new
