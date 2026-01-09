@@ -1,5 +1,10 @@
 @use '../../../theme/variables' as theme;
 
+.custom-position {
+  right: 15px;
+  top: -42px;
+}
+
 .presence {
     font-size: 12px;
     color: var(--primary-color);
@@ -17,10 +22,7 @@
   font-size: 12px;
 }
 
-.custom-position {
-  right: 15px;
-  top: -42px;
-}
+
 
 .member-name {
   word-break: keep-all;
