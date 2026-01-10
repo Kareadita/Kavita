@@ -108,6 +108,7 @@
     <PackageReference Include="System.Drawing.Common" Version="10.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
     <PackageReference Include="System.IO.Abstractions" Version="22.1.0" />
+    <PackageReference Include="TimeZoneConverter" Version="7.2.0" />
     <PackageReference Include="VersOne.Epub" Version="3.3.4" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>

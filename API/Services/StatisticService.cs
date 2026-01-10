@@ -24,6 +24,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using TimeZoneConverter;
 
 namespace API.Services;
 #nullable enable
@@ -889,19 +890,23 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         return result;
     }
 
-    public async Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year,
-        int requestingUserId)
+    public async Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year, int requestingUserId)
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
         var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
 
-        var startDate = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
-        var endDate = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
+        // Define year boundaries as local dates in user's timezone
+        var localYearStart = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Unspecified);
+        var localYearEnd = new DateTime(year, 12, 31, 23, 59, 59, 999, DateTimeKind.Unspecified);
+
+        // Convert to UTC for database filtering - explicitly treating these as user's local time
+        var filterStartUtc = TimeZoneInfo.ConvertTimeToUtc(localYearStart, userTimeZone);
+        var filterEndUtc = TimeZoneInfo.ConvertTimeToUtc(localYearEnd, userTimeZone);
 
         var sessionActivityData = await context.AppUserReadingSession
             .Where(s => s.AppUserId == userId)
-            .Where(s => s.StartTimeUtc >= startDate && s.EndTimeUtc <= endDate)
+            .Where(s => s.StartTimeUtc >= filterStartUtc && s.StartTimeUtc <= filterEndUtc)
             .Where(s => s.EndTimeUtc != null)
             .Join(
                 context.AppUserReadingSessionActivityData
@@ -910,7 +915,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 activity => activity.AppUserReadingSessionId,
                 (session, activity) => new
                 {
-                    SessionDate = session.StartTimeUtc.Date,
                     SessionId = session.Id,
                     SessionStartUtc = session.StartTimeUtc,
                     SessionEndUtc = session.EndTimeUtc!.Value,
@@ -924,62 +928,56 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
 
         var result = new ReadingActivityGraphDto();
 
-        if (sessionActivityData.Count == 0) return result;
-
-        var dailyStats = sessionActivityData
-            .GroupBy(x => TimeZoneInfo.ConvertTimeFromUtc(x.SessionStartUtc, userTimeZone).Date)
-            .Select(dayGroup => new
-            {
-                Date = dayGroup.Key,
-                DateKey = dayGroup.Key.ToString("yyyy-MM-dd"),
-                // Sum durations across all sessions for this day
-                TotalTimeReadingSeconds = dayGroup
-                    .GroupBy(x => x.SessionId)
-                    .Sum(sessionGroup =>
-                        (int) (sessionGroup.First().SessionEndUtc - sessionGroup.First().SessionStartUtc).TotalSeconds),
-                // Sum pages/words across all activities
-                TotalPages = dayGroup.Sum(x => x.PagesRead),
-                TotalWords = dayGroup.Sum(x => x.WordsRead),
-                // Count distinct chapters that were fully read per day
-                TotalChaptersFullyRead = dayGroup
-                    .Where(x => x.PagesRead > 0 && x.TotalPages > 0 && x.EndPage >= x.TotalPages)
-                    .Select(x => x.ChapterId)
-                    .Distinct()
-                    .Count()
-            })
-            .ToList();
-
-        foreach (var stat in dailyStats)
+        if (sessionActivityData.Count > 0)
         {
-            result[stat.DateKey] = new ReadingActivityGraphEntryDto
-            {
-                Date = stat.Date,
-                TotalTimeReadingSeconds = stat.TotalTimeReadingSeconds,
-                TotalPages = stat.TotalPages,
-                TotalWords = stat.TotalWords,
-                TotalChaptersFullyRead = stat.TotalChaptersFullyRead
-            };
-
-            if (result.Count <= 0) return result;
-
-            var currentDate = startDate;
-            while (currentDate.Year == year)
-            {
-                var dateKey = currentDate.ToString("yyyy-MM-dd");
-                if (!result.ContainsKey(dateKey))
+            var dailyStats = sessionActivityData
+                .GroupBy(x => TimeZoneInfo.ConvertTimeFromUtc(x.SessionStartUtc, userTimeZone).Date)
+                .Select(dayGroup => new
                 {
-                    result[dateKey] = new ReadingActivityGraphEntryDto
-                    {
-                        Date = currentDate,
-                        TotalTimeReadingSeconds = 0,
-                        TotalPages = 0,
-                        TotalWords = 0,
-                        TotalChaptersFullyRead = 0
-                    };
-                }
+                    Date = dayGroup.Key,
+                    DateKey = dayGroup.Key.ToString("yyyy-MM-dd"),
+                    TotalTimeReadingSeconds = dayGroup
+                        .GroupBy(x => x.SessionId)
+                        .Sum(sessionGroup =>
+                            (int)(sessionGroup.First().SessionEndUtc - sessionGroup.First().SessionStartUtc).TotalSeconds),
+                    TotalPages = dayGroup.Sum(x => x.PagesRead),
+                    TotalWords = dayGroup.Sum(x => x.WordsRead),
+                    TotalChaptersFullyRead = dayGroup
+                        .Where(x => x.PagesRead > 0 && x.TotalPages > 0 && x.EndPage >= x.TotalPages)
+                        .Select(x => x.ChapterId)
+                        .Distinct()
+                        .Count()
+                })
+                .ToList();
 
-                currentDate = currentDate.AddDays(1);
+            foreach (var stat in dailyStats)
+            {
+                result[stat.DateKey] = new ReadingActivityGraphEntryDto
+                {
+                    Date = stat.Date,
+                    TotalTimeReadingSeconds = stat.TotalTimeReadingSeconds,
+                    TotalPages = stat.TotalPages,
+                    TotalWords = stat.TotalWords,
+                    TotalChaptersFullyRead = stat.TotalChaptersFullyRead
+                };
             }
+        }
+
+        // Fill missing dates using LOCAL year boundaries
+        var currentDate = localYearStart.Date;
+        var endDate = localYearEnd.Date;
+        while (currentDate <= endDate)
+        {
+            var dateKey = currentDate.ToString("yyyy-MM-dd");
+            result.TryAdd(dateKey, new ReadingActivityGraphEntryDto
+            {
+                Date = currentDate,
+                TotalTimeReadingSeconds = 0,
+                TotalPages = 0,
+                TotalWords = 0,
+                TotalChaptersFullyRead = 0
+            });
+            currentDate = currentDate.AddDays(1);
         }
 
         return result;
@@ -992,7 +990,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
 
         try
         {
-            return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+            // TZConvert handles both IANA and Windows timezone IDs on any platform
+            return TZConvert.GetTimeZoneInfo(timeZoneId);
         }
         catch (TimeZoneNotFoundException)
         {
