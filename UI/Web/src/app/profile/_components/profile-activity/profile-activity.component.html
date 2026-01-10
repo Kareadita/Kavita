@@ -91,16 +91,20 @@
 
 
 <ng-template #chapterInfoRow let-item>
-  @let chapter = item.value;
+  @let chapter = item.value.chapter;
+  @let entry = item.value.entry;
 
-  <div class="col-auto d-none d-sm-block chapter-cover me-2">
-    <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block"
-               style="width: 40px; height: auto;"/>
+  <div class="d-flex flex-grow-1 justify-content-between align-items-center"
+    [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId, 'chapter', chapter.chapterId]">
+    <div class="col-auto d-none d-sm-block chapter-cover me-2">
+      <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block"
+                 style="width: 40px; height: auto;"/>
+    </div>
+
+    <ng-container [ngTemplateOutlet]="readStatsTemplate()"
+                  [ngTemplateOutletContext]="{ $implicit: chapter, label: chapter.label }">
+    </ng-container>
   </div>
-
-  <ng-container [ngTemplateOutlet]="readStatsTemplate()"
-                [ngTemplateOutletContext]="{ $implicit: chapter, label: chapter.label }">
-  </ng-container>
 </ng-template>
 
 <ng-template #readStats let-entry let-label="label" let-showInfo="showInfo">
