@@ -735,7 +735,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         tap((e) => {
           const selection = window.getSelection();
           this.hidePagination.set(selection !== null && selection.toString().trim() !== '');
-          this.cdRef.markForCheck();
         })
       )
       .subscribe();
@@ -2286,7 +2285,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.paginationIndicatorsTimeout = undefined;
 
     this.showPaginationIndicators.set(clickToPaginate);
-    
+
     if (clickToPaginate) {
       this.paginationIndicatorsTimeout = setTimeout(() => {
         this.showPaginationIndicators.set(false);
