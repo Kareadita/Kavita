@@ -1774,7 +1774,9 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                             Name = s.VolumeName,
                             MinNumber = s.VolumeMinNumber,
                             MaxNumber = s.VolumeMaxNumber,
-                            Chapters = s.VolumeChapters.Select(id => new ChapterDto { Id = id }).ToList(),
+                            Chapters = s.VolumeChapters
+                                .Select(id => id == chapterDto.Id ? chapterDto : new ChapterDto { Id = id })
+                                .ToList(),
                         };
 
                         return new ReadingHistoryChapterItemDto
