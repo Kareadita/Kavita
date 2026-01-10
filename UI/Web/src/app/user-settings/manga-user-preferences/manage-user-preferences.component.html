@@ -132,6 +132,18 @@
 
       <h4>{{t('social-settings-title')}}</h4>
       <ng-container formGroupName="socialPreferences">
+
+        <div class="row g-0 mt-4">
+          <app-setting-switch [title]="t('social-share-profile-label')" [subtitle]="t('social-share-profile-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input type="checkbox" role="switch" id="social-share-profile"
+                       formControlName="shareProfile" class="form-check-input">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        </div>
+
         <div class="row g-0 mt-4">
           <app-setting-switch [title]="t('share-series-reviews-label')" [subtitle]="t('share-series-reviews-tooltip')">
             <ng-template #switch>
@@ -210,17 +222,6 @@
               <div class="form-check form-switch float-end">
                 <input type="checkbox" role="switch" id="social-include-unknowns"
                        formControlName="socialIncludeUnknowns" class="form-check-input">
-              </div>
-            </ng-template>
-          </app-setting-switch>
-        </div>
-
-        <div class="row g-0 mt-4">
-          <app-setting-switch [title]="t('social-share-profile-label')" [subtitle]="t('social-share-profile-tooltip')">
-            <ng-template #switch>
-              <div class="form-check form-switch float-end">
-                <input type="checkbox" role="switch" id="social-share-profile"
-                       formControlName="shareProfile" class="form-check-input">
               </div>
             </ng-template>
           </app-setting-switch>

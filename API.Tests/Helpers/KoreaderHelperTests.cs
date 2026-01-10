@@ -56,7 +56,7 @@ public class KoreaderHelperTests
 
     [Theory]
     [InlineData("//body/p[20]", 5, "/body/DocFragment[5]/body/p[20]")]
-    [InlineData(null, 10, "/body/DocFragment[10]/body/p[1]")] // I've not seen a null/just an a from Koreader in testing
+    [InlineData(null, 10, "/body/DocFragment[10]/body/p[1]")] // I've not seen a null/just an "A" from Koreader in testing
     public void GetKoreaderPosition(string? scrollId, int page, string koreaderPosition)
     {
         var given = EmptyProgressDto();
