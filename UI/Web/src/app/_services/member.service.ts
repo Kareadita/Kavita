@@ -29,7 +29,7 @@ export class MemberService {
   }
 
   hasProfileShared(userId: number) {
-    return this.httpClient.get<boolean>(this.baseUrl + 'users/has-profile-shared', TextResonse).pipe(map(d => (d + '') == 'true'));
+    return this.httpClient.get<boolean>(this.baseUrl + `users/has-profile-shared?userId=${userId}`, TextResonse).pipe(map(d => (d + '') == 'true'));
   }
 
   getUserTokenInfo() {
