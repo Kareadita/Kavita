@@ -326,17 +326,24 @@ $action-bar-height: 38px;
   box-sizing: border-box;
   animation: fadeIn 0.2s ease-in, fadeOut 0.3s ease-out 1.7s forwards;
   user-select: none;
-  
+
   &.left-indicator {
     left: 0;
-    background: rgba(255, 165, 0, 0.5);
   }
-  
+
   &.right-indicator {
     right: 0;
+
+  }
+
+  &.forward {
     background: rgba(65, 225, 100, 0.5);
   }
-  
+
+  &.backward {
+    background: rgba(255, 165, 0, 0.5);
+  }
+
   &.immersive {
     top: 0;
     height: 100vh;

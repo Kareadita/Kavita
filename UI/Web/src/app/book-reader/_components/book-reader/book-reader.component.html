@@ -20,8 +20,8 @@
 
     @if (clickToPaginate() && !hidePagination() && showPaginationIndicators()) {
       <div class="pagination-indicators" [ngClass]="{'immersive' : immersiveMode()}">
-        <div class="pagination-indicator left-indicator" [ngClass]="{'immersive' : immersiveMode()}"></div>
-        <div class="pagination-indicator right-indicator" [ngClass]="{'immersive' : immersiveMode()}"></div>
+        <div class="pagination-indicator left-indicator" [ngClass]="{'immersive' : immersiveMode(), 'forward': !isLeftToRight, 'backward': isLeftToRight}"></div>
+        <div class="pagination-indicator right-indicator" [ngClass]="{'immersive' : immersiveMode(), 'forward': isLeftToRight, 'backward': !isLeftToRight}"></div>
       </div>
     }
 

@@ -234,7 +234,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * The boolean that decides if the pagination zone indicators should be visible
    */
-  showPaginationIndicators = model<boolean>(false);
+  showPaginationIndicators = signal<boolean>(false);
   paginationIndicatorsTimeout: any = undefined;
   updateImageSizeTimeout: any = undefined;
   /**
@@ -2309,7 +2309,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const bookContent = this.bookContentElemRef?.nativeElement;
     const target = event.target as HTMLElement;
     const isInBottomBar = target.closest('.bottom-bar') !== null;
-    
+
     if (bookContent && !bookContent.contains(target) && !isInBottomBar) {
       event.preventDefault();
     }
@@ -2317,7 +2317,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleReaderClick(event: MouseEvent) {
     const isHighlighting = window.getSelection()?.toString() != '';
-    
+
     if (this.clickToPaginate() && !this.hidePagination()) {
       if (isHighlighting) {
         return;
@@ -2332,7 +2332,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         const rightZoneThreshold = sectionWidth * 0.8;
 
         const isLeftToRight = this.readingDirection() === ReadingDirection.LeftToRight;
-        
+
         if (clickX < leftZoneThreshold) {
           this.movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
           return;
