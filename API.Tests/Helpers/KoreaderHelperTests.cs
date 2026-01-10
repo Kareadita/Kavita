@@ -3,7 +3,7 @@ using API.Helpers;
 using Xunit;
 
 namespace API.Tests.Helpers;
-
+#nullable enable
 
 public class KoreaderHelperTests
 {
@@ -37,12 +37,27 @@ public class KoreaderHelperTests
         Assert.Equal(expected.PageNum, actual.PageNum);
     }
 
+    [Theory]
+    [InlineData("/body/DocFragment[3]/body/h1/text().0", 2, "h1")]
+    [InlineData("/body/DocFragment[10].0", 9, null)]
+    public void GetEpubPositionDto2(string koreaderPosition, int page, string? endingTag)
+    {
+        var expected = EmptyProgressDto();
+        expected.PageNum = page;
+        var actual = EmptyProgressDto();
 
+        KoreaderHelper.UpdateProgressDto(actual, koreaderPosition);
+        if (!string.IsNullOrEmpty(endingTag))
+        {
+            Assert.EndsWith(endingTag, actual.BookScrollId);
+        }
+        Assert.Equal(expected.PageNum, actual.PageNum);
+    }
 
     [Theory]
     [InlineData("//body/p[20]", 5, "/body/DocFragment[5]/body/p[20]")]
     [InlineData(null, 10, "/body/DocFragment[10]/body/p[1]")] // I've not seen a null/just an a from Koreader in testing
-    public void GetKoreaderPosition(string scrollId, int page, string koreaderPosition)
+    public void GetKoreaderPosition(string? scrollId, int page, string koreaderPosition)
     {
         var given = EmptyProgressDto();
         given.BookScrollId = scrollId;

@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 
@@ -12,8 +13,11 @@ namespace API.Helpers;
 /// All things related to Koreader
 /// </summary>
 /// <remarks>Original developer: https://github.com/MFDeAngelo</remarks>
-public static class KoreaderHelper
+public static partial class KoreaderHelper
 {
+    [GeneratedRegex(@"DocFragment\[(\d+)\]")]
+    private static partial Regex DocFragmentRegex();
+
     /// <summary>
     /// Hashes the document according to a custom Koreader hashing algorithm.
     /// Look at the util.partialMD5 method in the attached link.
@@ -83,11 +87,15 @@ public static class KoreaderHelper
         var path = koreaderPosition.Split('/');
         if (path.Length < 6)
         {
+            // Handle cases like: /body/DocFragment[10].0
+            if (path.Length == 3)
+            {
+                progress.PageNum = GetPageNumber(path);
+            }
             return;
         }
 
-        docNumber = path[2].Replace("DocFragment[", string.Empty).Replace("]", string.Empty);
-        progress.PageNum = int.Parse(docNumber) - 1;
+        progress.PageNum = GetPageNumber(path);
 
         var lastPart = koreaderPosition.Split("/body/")[^1];
         var lastTag = path[5].ToUpper();
@@ -104,6 +112,12 @@ public static class KoreaderHelper
             // The format that Kavita accepts as a progress string. It tells Kavita where Koreader last left off.
             progress.BookScrollId = $"//body/{lastPart}";
         }
+    }
+
+    private static int GetPageNumber(string[] path, int offset = 2)
+    {
+        var match = DocFragmentRegex().Match(path[offset]);
+        return int.Parse(match.Groups[1].Value) - 1;
     }
 
     /// <summary>

@@ -93,7 +93,7 @@ public class KoreaderService : IKoreaderService
         if (!string.IsNullOrEmpty(originalScrollId))
         {
             koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
-            _logger.LogDebug("Converting KOReader progress from {KavitaProgress} to {KOReaderProgress}", originalScrollId?.Sanitize() ?? string.Empty, progressDto?.BookScrollId?.Sanitize() ?? string.Empty);
+            _logger.LogDebug("Converting KOReader progress from {KavitaProgress} to {KOReaderProgress}", originalScrollId.Sanitize() ?? string.Empty, progressDto?.BookScrollId?.Sanitize() ?? string.Empty);
         }
 
         return new KoreaderBookDtoBuilder(bookHash)
