@@ -2966,7 +2966,8 @@
         "during-entire-life-server": "since the beginning",
         "during-year": "during {{year}}",
         "during-from-to": "from {{startYear}} to {{endYear}}",
-        "during-select": "Select a time range"
+        "during-select": "Select a time range",
+        "close": "{{common.close}}"
     },
 
     "client-device-type-pipe": {
