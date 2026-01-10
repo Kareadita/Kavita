@@ -1,10 +1,13 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs;
 using API.DTOs.KavitaPlus.Manage;
+using API.Extensions;
+using API.Helpers;
 using API.Services.Plus;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,10 +35,15 @@ public class ManageController : BaseApiController
     /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("series-metadata")]
-    public async Task<ActionResult<IList<ManageMatchSeriesDto>>> SeriesMetadata(ManageMatchFilterDto filter)
+    public async Task<ActionResult<PagedList<ManageMatchSeriesDto>>> SeriesMetadata(ManageMatchFilterDto filter, [FromQuery] UserParams? userParams)
     {
-        if (!await _licenseService.HasActiveLicense()) return Ok(Array.Empty<SeriesDto>());
+        //if (!await _licenseService.HasActiveLicense()) return Ok(Array.Empty<SeriesDto>());
 
-        return Ok(await _unitOfWork.ExternalSeriesMetadataRepository.GetAllSeries(filter));
+        userParams ??= UserParams.Default;
+
+        var res = await _unitOfWork.ExternalSeriesMetadataRepository.GetAllSeries(filter, userParams);
+
+        Response.AddPaginationHeader(res);
+        return Ok(res);
     }
 }

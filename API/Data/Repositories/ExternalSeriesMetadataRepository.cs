@@ -10,6 +10,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions.QueryExtensions;
+using API.Helpers;
 using API.Services.Plus;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -33,7 +34,7 @@ public interface IExternalSeriesMetadataRepository
     Task LinkRecommendationsToSeries(Series series);
     Task<bool> IsBlacklistedSeries(int seriesId);
     Task<IList<int>> GetSeriesThatNeedExternalMetadata(int limit, bool includeStaleData = false);
-    Task<IList<ManageMatchSeriesDto>> GetAllSeries(ManageMatchFilterDto filter);
+    Task<PagedList<ManageMatchSeriesDto>> GetAllSeries(ManageMatchFilterDto filter, UserParams userParams);
 }
 
 public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepository
@@ -223,9 +224,9 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .ToListAsync();
     }
 
-    public async Task<IList<ManageMatchSeriesDto>> GetAllSeries(ManageMatchFilterDto filter)
+    public Task<PagedList<ManageMatchSeriesDto>> GetAllSeries(ManageMatchFilterDto filter, UserParams userParams)
     {
-        return await _context.Series
+        var source =  _context.Series
             .Include(s => s.Library)
             .Include(s => s.ExternalSeriesMetadata)
             .Where(s => !ExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
@@ -233,7 +234,8 @@ public class ExternalSeriesMetadataRepository : IExternalSeriesMetadataRepositor
             .WhereIf(filter.LibraryType >= 0, s => s.Library.Type == (LibraryType) filter.LibraryType)
             .FilterMatchState(filter.MatchStateOption)
             .OrderBy(s => s.NormalizedName)
-            .ProjectTo<ManageMatchSeriesDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .ProjectTo<ManageMatchSeriesDto>(_mapper.ConfigurationProvider);
+
+        return PagedList<ManageMatchSeriesDto>.CreateAsync(source, userParams);
     }
 }

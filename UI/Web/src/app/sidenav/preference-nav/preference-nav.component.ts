@@ -174,7 +174,7 @@ export class PreferenceNavComponent implements AfterViewInit {
           searchTerm: ''
         }).pipe(
           takeUntilDestroyed(this.destroyRef),
-          map(d => d.length),
+          map(d => d.pagination.totalItems),
           shareReplay({bufferSize: 1, refCount: true})
         );
       }

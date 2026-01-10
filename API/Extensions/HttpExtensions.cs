@@ -28,4 +28,9 @@ public static class HttpExtensions
         response.Headers.Append("Pagination", JsonSerializer.Serialize(paginationHeader, Options));
         response.Headers.Append("Access-Control-Expose-Headers", "Pagination");
     }
+
+    public static void AddPaginationHeader<T>(this HttpResponse response, PagedList<T> pagedList)
+    {
+        response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+    }
 }

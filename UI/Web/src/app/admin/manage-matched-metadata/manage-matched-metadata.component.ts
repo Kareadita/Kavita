@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal} from '@angular/core';
 import {LicenseService} from "../../_services/license.service";
 import {Router} from "@angular/router";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -26,6 +26,7 @@ import {allKavitaPlusMetadataApplicableTypes} from "../../_models/library/librar
 import {ExternalMatchRateLimitErrorEvent} from "../../_models/events/external-match-rate-limit-error-event";
 import {ToastrService} from "ngx-toastr";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {Pagination} from "../../_models/pagination";
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -58,14 +59,19 @@ export class ManageMatchedMetadataComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly manageService = inject(ManageService);
   private readonly messageHub = inject(MessageHubService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
   protected readonly imageService = inject(ImageService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
 
+  isLoading = signal(true);
+  data = signal<ManageMatchSeries[]>([]);
+  pagination = signal<Pagination>({
+    currentPage: 1,
+    totalItems: 0,
+    totalPages: 0,
+    itemsPerPage: 15,
+  });
 
-  isLoading: boolean = true;
-  data: Array<ManageMatchSeries> = [];
   filterGroup = new FormGroup({
     'matchState': new FormControl(MatchStateOption.Error, []),
     'libraryType': new FormControl(-1, []), // Denotes all
@@ -83,7 +89,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
       this.messageHub.messages$.subscribe(message => {
         if (message.event == EVENTS.ScanSeries) {
           const evt = message.payload as ScanSeriesEvent;
-          if (this.data.filter(d => d.series.id === evt.seriesId).length > 0) {
+          if (this.data().filter(d => d.series.id === evt.seriesId).length > 0) {
             this.loadData();
           }
         }
@@ -92,21 +98,17 @@ export class ManageMatchedMetadataComponent implements OnInit {
           const evt = message.payload as ExternalMatchRateLimitErrorEvent;
           this.toastr.error(translate('toasts.external-match-rate-error', {seriesName: evt.seriesName}))
         }
-
-
       });
 
       this.filterGroup.valueChanges.pipe(
         debounceTime(300),
         distinctUntilChanged(),
         tap(_ => {
-          this.isLoading = true;
-          this.cdRef.markForCheck();
+          this.isLoading.set(true);
         }),
         switchMap(_ => this.loadData()),
         tap(_ => {
-          this.isLoading = false;
-          this.cdRef.markForCheck();
+          this.isLoading.set(false);
         }),
       ).subscribe();
 
@@ -114,31 +116,36 @@ export class ManageMatchedMetadataComponent implements OnInit {
     });
   }
 
+  onPageChange(page: number) {
+    this.loadData(page + 1).subscribe();
+  }
 
-  loadData() {
+  loadData(pageNumber: number = 1) {
     const filter: ManageMatchFilter = {
       matchStateOption: parseInt(this.filterGroup.get('matchState')!.value + '', 10),
       libraryType: parseInt(this.filterGroup.get('libraryType')!.value + '', 10),
       searchTerm: ''
     };
 
-    this.isLoading = true;
-    this.data = [];
-    this.cdRef.markForCheck();
+    this.isLoading.set(true);
 
-    return this.manageService.getAllKavitaPlusSeries(filter).pipe(tap(data => {
-      this.data = [...data];
-      this.isLoading = false;
-      this.cdRef.markForCheck();
+    return this.manageService.getAllKavitaPlusSeries(filter, pageNumber, this.pagination().itemsPerPage).pipe(tap(data => {
+      this.data.set(data.result);
+      this.pagination.set({
+        itemsPerPage: data.pagination.itemsPerPage,
+        totalItems: data.pagination.totalItems,
+        totalPages: data.pagination.totalPages,
+        currentPage: data.pagination.currentPage - 1, // ngx-datatable is 0 based, Kavita is 1 based
+      });
+      this.isLoading.set(false);
     }));
   }
-
 
   fixMatch(series: Series) {
     this.actionService.matchSeries(series, result => {
       if (!result) return;
-      this.data = [...this.data.filter(s => s.series.id !== series.id)];
-      this.cdRef.markForCheck();
+
+      this.data.update(x => x.filter(s => s.series.id !== series.id));
     });
   }
 }
