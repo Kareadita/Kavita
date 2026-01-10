@@ -1683,6 +1683,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 a.ChapterId,
                 ChapterNumber = a.Chapter.Number,
                 ChapterRange = a.Chapter.Range,
+                ChapterMinNumber = a.Chapter.MinNumber,
+                ChapterMaxNumber = a.Chapter.MaxNumber,
                 ChapterTitle = a.Chapter.Title,
                 ChapterTitleName = a.Chapter.TitleName,
                 ChapterIsSpecial = a.Chapter.IsSpecial,
@@ -1691,6 +1693,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 a.Chapter.VolumeId,
                 VolumeNumber = a.Chapter.Volume.Number,
                 VolumeName = a.Chapter.Volume.Name,
+                VolumeMinNumber = a.Chapter.Volume.MinNumber,
+                VolumeMaxNumber = a.Chapter.Volume.MaxNumber,
                 VolumeChapters = a.Chapter.Volume.Chapters.Select(c => c.Id).ToList(),
 
                 a.LibraryId,
@@ -1757,6 +1761,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                             Number = s.ChapterNumber,
                             Range = s.ChapterRange,
                             Title = s.ChapterTitle,
+                            MinNumber = s.ChapterMinNumber,
+                            MaxNumber = s.ChapterMaxNumber,
                             TitleName = s.ChapterTitleName,
                             IsSpecial = s.ChapterIsSpecial,
                         };
@@ -1766,6 +1772,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                             Id = s.VolumeId,
                             Number = s.VolumeNumber,
                             Name = s.VolumeName,
+                            MinNumber = s.VolumeMinNumber,
+                            MaxNumber = s.VolumeMaxNumber,
                             Chapters = s.VolumeChapters.Select(id => new ChapterDto { Id = id }).ToList(),
                         };
 

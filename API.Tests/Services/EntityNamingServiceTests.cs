@@ -1088,20 +1088,31 @@ public class EntityNamingServiceTests
     {
         var chapterDto = new ChapterDto
         {
+            Id = 2002,
             Number = Parser.LooseLeafVolume,
             Range = Parser.LooseLeafVolume,
-            Title = Parser.LooseLeafVolume,
             MinNumber = Parser.LooseLeafVolumeNumber,
-            TitleName = "The Vexations of a Shut-In Vampire Princess, Vol. 4",
+            MaxNumber = Parser.LooseLeafVolumeNumber,
+            SortOrder = Parser.LooseLeafVolumeNumber,
             IsSpecial = false,
+            Title = Parser.LooseLeafVolume,
+            TitleName = "The Vexations of a Shut-In Vampire Princess, Vol. 4",
+            Pages = 40,
+            PagesRead = 20,
+            CoverImageLocked = false,
+            VolumeId = 1446,
         };
 
         var volumeDto = new VolumeDto
         {
+            Id = 1446,
             Number = 4,
             Name = "4",
             MinNumber = 4,
             MaxNumber = 4,
+            Pages = 40,
+            PagesRead = 20,
+            SeriesId = 256,
             Chapters = [chapterDto],
         };
 
