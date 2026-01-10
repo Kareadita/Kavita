@@ -2853,6 +2853,13 @@
         "page-info": "Page {{current}} of {{total}} ({{items}} total records)"
     },
 
+    "user-stats-info-cards": {
+        "pages-read-by-year-title": "Pages read by year",
+        "pages-count": "{{num}} pages",
+        "words-read-by-year-title": "Words read by year",
+        "words-count": "{{num}} words"
+    },
+
     "preferred-format": {
         "title": "Preferred format",
         "sub-title": "{{name}} prefers to read {{format}}",

@@ -50,7 +50,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
         _cache = cache;
-        _sessionTimeout = sessionTimeout ?? TimeSpan.FromMinutes(30);
+        _sessionTimeout = sessionTimeout ?? TimeSpan.FromMinutes(10);
         _pollInterval = pollInterval ?? TimeSpan.FromMinutes(5);
 
         _cleanupTimer = new Timer(
@@ -78,10 +78,14 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         await context.SaveChangesAsync();
     }
 
-    private async Task<AppUserReadingSession> GetOrCreateSessionAsync( int userId, ProgressDto dto, DataContext context)
+    private async Task<AppUserReadingSession> GetOrCreateSessionAsync(int userId, ProgressDto dto, DataContext context)
     {
+        var cutoffUtc = DateTime.UtcNow - _sessionTimeout;
+        var midnightToday = DateTime.Today;
+
         var existingSession = await context.AppUserReadingSession
             .Where(s => s.IsActive && s.AppUserId == userId)
+            .Where(s => s.LastModifiedUtc >= cutoffUtc && s.StartTime >= midnightToday)
             .Include(s => s.ActivityData)
             .FirstOrDefaultAsync();
 

@@ -100,14 +100,14 @@ export class StatisticsService {
     return httpResource<StatCountWithFormat<string>[]>(() => this.baseUrl + 'stats/files-added-over-time').asReadonly();
   }
 
-  getPagesPerYear(userId = 0) {
+  getPagesPerYear(userId: number) {
     return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/pages-per-year?userId=' + userId).pipe(
       map(spreads => spreads.map(spread => {
         return {name: spread.value + '', value: spread.count};
       })));
   }
 
-  getWordsPerYear(userId = 0) {
+  getWordsPerYear(userId: number) {
     return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/words-per-year?userId=' + userId).pipe(
       map(spreads => spreads.map(spread => {
         return {name: spread.value + '', value: spread.count};

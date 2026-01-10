@@ -215,29 +215,31 @@ public class StatsController(
     /// <summary>
     /// Returns a count of pages read per year for a given userId.
     /// </summary>
-    /// <param name="userId">If userId is 0 and user is not an admin, API will default to userId</param>
+    /// <param name="userId"></param>
     /// <returns></returns>
+    [ProfilePrivacy]
     [HttpGet("pages-per-year")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<int>>>> GetPagesReadPerYear(int userId = 0)
+    public async Task<ActionResult<IList<StatCount<int>>>> GetPagesReadPerYear(int? userId)
     {
-        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin) userId = await unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
-        return Ok(await statService.GetPagesReadCountByYear(userId));
+        userId ??= UserId;
+
+        return Ok(await statService.GetPagesReadCountByYear(userId.Value));
     }
 
     /// <summary>
     /// Returns a count of words read per year for a given userId.
     /// </summary>
-    /// <param name="userId">If userId is 0 and user is not an admin, API will default to userId</param>
+    /// <param name="userId"></param>
     /// <returns></returns>
+    [ProfilePrivacy]
     [HttpGet("words-per-year")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetWordsReadPerYear(int userId = 0)
+    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetWordsReadPerYear(int? userId)
     {
-        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin) userId = await unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
-        return Ok(statService.GetWordsReadCountByYear(userId));
+        userId ??= UserId;
+
+        return Ok(await statService.GetWordsReadCountByYear(userId.Value));
     }
 
     [HttpGet("files-added-over-time")]
@@ -453,10 +455,9 @@ public class StatsController(
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpGet("reading-history")]
-    [ProfilePrivacy]
-    public async Task<ActionResult<PagedList<ReadingHistoryItemDto>>> GetReadingHistoryItems([FromQuery] int userId, [FromQuery] StatsFilterDto filter, [FromQuery] UserParams userParams)
+    public async Task<ActionResult<PagedList<ReadingHistoryItemDto>>> GetReadingHistoryItems([FromQuery] StatsFilterDto filter, [FromQuery] UserParams userParams)
     {
-        var result = await statService.GetReadingHistoryItems(filter, userParams, userId, UserId);
+        var result = await statService.GetReadingHistoryItems(filter, userParams, UserId, UserId);
 
         Response.AddPaginationHeader(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
 
