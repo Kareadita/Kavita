@@ -50,7 +50,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
         _cache = cache;
-        _sessionTimeout = sessionTimeout ?? TimeSpan.FromMinutes(30);
+        _sessionTimeout = sessionTimeout ?? TimeSpan.FromMinutes(10);
         _pollInterval = pollInterval ?? TimeSpan.FromMinutes(5);
 
         _cleanupTimer = new Timer(
