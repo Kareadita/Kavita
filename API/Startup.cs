@@ -106,21 +106,21 @@ public class Startup
             options.CacheProfiles.Add(ResponseCacheProfiles.Month,
                 new CacheProfile()
                 {
-                    Duration = TimeSpan.FromDays(30).Seconds,
+                    Duration = (int) TimeSpan.FromDays(30).TotalSeconds,
                     Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.LicenseCache,
                 new CacheProfile()
                 {
-                    Duration = TimeSpan.FromHours(4).Seconds,
+                    Duration = (int) TimeSpan.FromHours(4).TotalSeconds,
                     Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.KavitaPlus,
                 new CacheProfile()
                 {
-                    Duration = TimeSpan.FromDays(30).Seconds,
+                    Duration = (int) TimeSpan.FromDays(30).TotalSeconds,
                     Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });

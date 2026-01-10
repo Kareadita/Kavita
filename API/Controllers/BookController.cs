@@ -108,7 +108,7 @@ public class BookController : BaseApiController
     [AllowAnonymous]
     [SkipDeviceTracking]
     [HttpGet("{chapterId}/book-resources")]
-    [ResponseCache(Duration = 60 * 1, Location = ResponseCacheLocation.Client, NoStore = false)]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = ["chapterId", "file"])]
     public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
     {
         if (chapterId <= 0) return BadRequest(await _localizationService.Get("en", "chapter-doesnt-exist"));

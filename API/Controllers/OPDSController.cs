@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using API.Constants;
 using API.Data;
 using API.DTOs.OPDS;
 using API.DTOs.OPDS.Requests;
@@ -761,7 +762,7 @@ public class OpdsController : BaseApiController
     }
 
     [HttpGet("{apiKey}/favicon")]
-    [ResponseCache(Duration = 60 * 60, Location = ResponseCacheLocation.Client, NoStore = false)]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month)]
     public async Task<ActionResult> GetFavicon(string apiKey)
     {
         var files = _directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");

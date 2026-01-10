@@ -215,7 +215,6 @@ public class SeriesController : BaseApiController
     /// <param name="filterDto"></param>
     /// <param name="userParams"></param>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-added-v2")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAddedV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams)
     {
@@ -233,7 +232,6 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="userParams">Page size and offset</param>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-updated-series")]
     public async Task<ActionResult<IList<RecentlyAddedItemDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
     {
@@ -275,7 +273,6 @@ public class SeriesController : BaseApiController
     /// <param name="libraryId">Default of 0 meaning all libraries</param>
     /// <returns></returns>
     [HttpPost("on-deck")]
-    [ResponseCache(CacheProfileName = "Instant")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
         var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(UserId, libraryId, userParams, null);
@@ -416,8 +413,7 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="ageRating"></param>
     /// <returns></returns>
-    /// <remarks>This is cached for an hour</remarks>
-    [ResponseCache(CacheProfileName = "Month", VaryByQueryKeys = ["ageRating"])]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = ["ageRating"])]
     [HttpGet("age-rating")]
     public async Task<ActionResult<string>> GetAgeRating(int ageRating)
     {
@@ -434,7 +430,6 @@ public class SeriesController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     /// <remarks>Do not rely on this API externally. May change without hesitation. </remarks>
-    //[ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = ["seriesId"])]
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {
