@@ -349,7 +349,11 @@ public partial class EntityNamingService : IEntityNamingService
         // Loose-leaf without title
         if (Parser.IsLooseLeafVolume(firstChapter.Range))
         {
-            return null;
+            // Volume is real (not loose-leaf) - it has a meaningful name, use it
+            if (!volume.IsLooseLeaf())
+            {
+                return volume.Name;
+            }
         }
 
         // Extract title from filename

@@ -1081,5 +1081,114 @@ public class EntityNamingServiceTests
         Assert.DoesNotContain(" - ", result.Replace("Chapter ", ""));
     }
 
+    #region Extra Tests
+
+    [Fact]
+    public void BuildChapterTitle_ManualTest1()
+    {
+        var chapterDto = new ChapterDto
+        {
+            Number = Parser.LooseLeafVolume,
+            Range = Parser.LooseLeafVolume,
+            Title = Parser.LooseLeafVolume,
+            MinNumber = Parser.LooseLeafVolumeNumber,
+            TitleName = "The Vexations of a Shut-In Vampire Princess, Vol. 4",
+            IsSpecial = false,
+        };
+
+        var volumeDto = new VolumeDto
+        {
+            Number = 4,
+            Name = "4",
+            MinNumber = 4,
+            MaxNumber = 4,
+            Chapters = [chapterDto],
+        };
+
+        var chapterTitle = _sut.BuildChapterTitle(LibraryType.LightNovel, volumeDto, chapterDto);
+        Assert.Equal("The Vexations of a Shut-In Vampire Princess, Vol. 4", chapterTitle);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_ManualTest2()
+    {
+        var chapterDto = new ChapterDto
+        {
+            Number = Parser.LooseLeafVolume,
+            Range = Parser.LooseLeafVolume,
+            Title = Parser.LooseLeafVolume,
+            TitleName = "Accel World, Vol. 5: The Floating Starlight Bridge",
+            MinNumber = Parser.LooseLeafVolumeNumber,
+            MaxNumber = Parser.LooseLeafVolumeNumber,
+            IsSpecial = false,
+        };
+
+        var volumeDto = new VolumeDto
+        {
+            Number = 5,
+            Name = "5",
+            MinNumber = 5,
+            MaxNumber = 5,
+            Chapters = [chapterDto],
+        };
+
+        var chapterTitle = _sut.BuildChapterTitle(LibraryType.LightNovel, volumeDto, chapterDto);
+        Assert.Equal("Accel World, Vol. 5: The Floating Starlight Bridge", chapterTitle);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_ManualTest3()
+    {
+        var chapterDto = new ChapterDto
+        {
+            Number = Parser.LooseLeafVolume,
+            Range = "After Sundown",
+            Title = "After Sundown",
+            MinNumber = Parser.LooseLeafVolumeNumber,
+            MaxNumber = Parser.LooseLeafVolumeNumber,
+            IsSpecial = true,
+        };
+
+        var volumeDto = new VolumeDto
+        {
+            Number = Parser.SpecialVolumeNumber,
+            Name = Parser.SpecialVolumeNumber.ToString(),
+            MinNumber = Parser.SpecialVolumeNumber,
+            MaxNumber = Parser.SpecialVolumeNumber,
+            Chapters = [chapterDto],
+        };
+
+        var chapterTitle = _sut.BuildChapterTitle(LibraryType.Book, volumeDto, chapterDto);
+        Assert.Equal("After Sundown", chapterTitle);
+    }
+
+    [Fact]
+    public void BuildChapterTitle_ManualTest4()
+    {
+        var chapterDto = new ChapterDto
+        {
+            Number = Parser.LooseLeafVolume,
+            Range = "A Girl on the Shore (Umibe no Onnanoko)",
+            Title = "A Girl on the Shore (Umibe no Onnanoko)",
+            MinNumber = Parser.LooseLeafVolumeNumber,
+            MaxNumber = Parser.LooseLeafVolumeNumber,
+            IsSpecial = true,
+        };
+
+        var volumeDto = new VolumeDto
+        {
+            Number = Parser.SpecialVolumeNumber,
+            Name = Parser.SpecialVolumeNumber.ToString(),
+            MinNumber = Parser.SpecialVolumeNumber,
+            MaxNumber = Parser.SpecialVolumeNumber,
+            Chapters = [chapterDto],
+        };
+
+        var chapterTitle = _sut.BuildChapterTitle(LibraryType.Manga, volumeDto, chapterDto);
+        Assert.Equal("A Girl on the Shore (Umibe no Onnanoko)", chapterTitle);
+    }
+
+    #endregion
+
 
 }
