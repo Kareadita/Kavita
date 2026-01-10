@@ -78,10 +78,14 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         await context.SaveChangesAsync();
     }
 
-    private async Task<AppUserReadingSession> GetOrCreateSessionAsync( int userId, ProgressDto dto, DataContext context)
+    private async Task<AppUserReadingSession> GetOrCreateSessionAsync(int userId, ProgressDto dto, DataContext context)
     {
+        var cutoffUtc = DateTime.UtcNow - _sessionTimeout;
+        var midnightToday = DateTime.Today;
+
         var existingSession = await context.AppUserReadingSession
             .Where(s => s.IsActive && s.AppUserId == userId)
+            .Where(s => s.LastModifiedUtc >= cutoffUtc && s.StartTime >= midnightToday)
             .Include(s => s.ActivityData)
             .FirstOrDefaultAsync();
 
