@@ -917,7 +917,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                     activity.ChapterId,
                     activity.PagesRead,
                     activity.WordsRead,
-                    activity.TotalPages
+                    activity.TotalPages,
+                    activity.EndPage,
                 })
             .ToListAsync();
 
@@ -941,7 +942,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 TotalWords = dayGroup.Sum(x => x.WordsRead),
                 // Count distinct chapters that were fully read per day
                 TotalChaptersFullyRead = dayGroup
-                    .Where(x => x.PagesRead > 0 && x.TotalPages > 0 && x.PagesRead >= x.TotalPages)
+                    .Where(x => x.PagesRead > 0 && x.TotalPages > 0 && x.EndPage >= x.TotalPages)
                     .Select(x => x.ChapterId)
                     .Distinct()
                     .Count()

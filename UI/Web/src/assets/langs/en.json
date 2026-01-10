@@ -2929,7 +2929,7 @@
         "reading-time": "Reading Time",
         "pages": "Pages",
         "words": "Words",
-        "chapters": "Chapters",
+        "chapters": "Completed Chapters",
         "no-activity-alt": "No Activity",
         "no-activity-tooltip": "No reading activity on {{date}}.",
         "all-time": "{{time-periods.all-time}}",
