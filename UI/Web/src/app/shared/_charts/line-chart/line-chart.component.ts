@@ -79,7 +79,7 @@ export class LineChartComponent {
 
     // Round up to a nice number
     const magnitude = Math.pow(10, Math.floor(Math.log10(p95Value)));
-    return Math.ceil(p95Value / magnitude) * magnitude * 1.2;
+    return Math.ceil(Math.ceil(p95Value / magnitude) * magnitude * 1.2);
   });
 
   private seriesOption = computed<ArrayAble<LineSeriesOption>>(() => {
