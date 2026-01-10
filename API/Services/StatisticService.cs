@@ -1075,7 +1075,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
         var readsPerGenre = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, onlyCompleted: false)
             .GroupBy(d => d.SeriesId)
             .Select(d => new
             {
@@ -1150,7 +1150,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
         var readsPerTagTask =  context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, onlyCompleted: false)
             .GroupBy(d => d.SeriesId)
             .Select(d => new
             {
