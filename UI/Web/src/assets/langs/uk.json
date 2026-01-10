@@ -156,12 +156,9 @@
         "upload": "{{cover-image-chooser.upload}}",
         "add": "{{common.add}}",
         "description": "Kavita доступна в багатьох кольорах, знайдіть кольорову схему, яка відповідає вашим потребам, або створіть свою самостійно та поділіться нею. Теми можна застосовувати для вашого облікового запису або до всіх облікових записів.",
-        "title": "Менеджер тем",
-        "site-themes": "Теми сайту",
         "set-default": "Зробити за замовчуванням",
         "applied": "Застосовано",
         "updated-toastr": "Стандартні налаштування були оновлені для {{name}}",
-        "scan-queued": "Сканування тем сайту поставлене в чергу",
         "default-theme": "За замовчуванням",
         "active-theme": "Активне",
         "downloaded": "Завантажене",
@@ -319,7 +316,6 @@
         "artist": "Художник",
         "character": "Персонаж",
         "colorist": "Колорист",
-        "cover-artist": "{{artist}}",
         "editor": "Редактор",
         "inker": "Інкер",
         "letterer": "Листи",
@@ -505,7 +501,6 @@
     },
     "series-detail": {
         "close": "{{common.close}}",
-        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "read": "{{common.read}}",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
@@ -521,17 +516,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
-        "characters-title": "{{metadata-fields.characters-title}}",
-        "colorists-title": "{{metadata-fields.colorists-title}}",
-        "editors-title": "{{metadata-fields.editors-title}}",
-        "inkers-title": "{{metadata-fields.inkers-title}}",
-        "letterers-title": "{{metadata-fields.letterers-title}}",
-        "translators-title": "{{metadata-fields.translators-title}}",
-        "pencillers-title": "{{metadata-fields.pencillers-title}}",
-        "publishers-title": "{{metadata-fields.publishers-title}}",
-        "imprints-title": "{{metadata-fields.imprints-title}}",
-        "teams-title": "{{metadata-fields.teams-title}}",
-        "locations-title": "{{metadata-fields.locations-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
         "ongoing": "{{publication-status-pipe.ongoing}}",
@@ -540,14 +524,8 @@
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
         "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "page-settings-title": "Налаштування сторінки",
-        "layout-mode-option-card": "Картка",
-        "layout-mode-option-list": "Список",
         "continue-from": "Продовжити {{title}}",
-        "continue": "Продовжити",
-        "read-incognito": "Читати інкогніто",
-        "continue-incognito": "Продовжити анонімний режим",
         "read-options-alt": "Параметри читання",
-        "incognito": "Інкогніто",
         "edit-series-alt": "Редагувати інформацію",
         "send-to": "Файл надіслано електронною поштою на адресу {{deviceName}}",
         "no-chapters": "У цьому томі немає розділів. Неможливо читати.",
@@ -775,7 +753,8 @@
         "format-title": "{{metadata-filter.format-label}}",
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
-        "file-path-title": "Шлях до Папки"
+        "file-path-title": "Файли",
+        "folder-path-title": "Шлях до папки"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1040,29 +1019,21 @@
         "check-for-updates-task-desc": "Перевірте, чи є якісь стабільні релізи перед вашою версією."
     },
     "manage-users": {
-        "loading": "{{common.loading}}",
-        "title": "Активні користувачі",
         "invite": "Запросити",
-        "you-alt": "(Ви)",
         "pending-title": "Очікує на розгляд",
         "delete-user-tooltip": "Видалити користувача",
         "delete-user-alt": "Видалити користувача {{user}}",
         "edit-user-tooltip": "Редагувати",
         "edit-user-alt": "Редагувати користувача {{user}}",
-        "username-pattern": "Ім'я користувача може містити лише такі символи та пробіли: {{characters}}",
         "resend-invite-tooltip": "Надіслати запрошення повторно",
         "resend-invite-alt": "Надіслати запрошення повторно {{user}}",
         "setup-user-tooltip": "Налаштування користувача",
         "setup-user-alt": "Налаштування користувача {{user}}",
         "change-password-tooltip": "Змінити пароль",
         "change-password-alt": "Змінити пароль {{user}}",
-        "resend": "Надіслати повторно",
-        "setup": "Налаштування'",
         "last-active-header": "Остання активність",
         "roles-header": "{{common.roles}}",
         "name-header": "Ім'я",
-        "none": "Жоден",
-        "never": "Ніколи",
         "online-now-tooltip": "Зараз онлайн",
         "all-libraries": "Усі бібліотеки",
         "too-many-libraries": "Багато",
@@ -1360,7 +1331,6 @@
         "off": "{{reader-settings.off}}",
         "original": "Оригінал",
         "swipe-enabled-label": "Проведення пальцем увімкнено",
-        "enable-comic-book-label": "Емуляція коміксів",
         "brightness-label": "Яскравість",
         "bookmark-page-tooltip": "Додати сторінку до закладок",
         "unbookmark-page-tooltip": "Видалити сторінку з закладок",
@@ -1625,8 +1595,10 @@
         "popular-decades-title": "Популярні десятиліття",
         "popular-genres-title": "Популярні жанри",
         "popular-tags-title": "Популярні теги",
-        "popular-artists-title": "Популярні виконавці",
-        "popular-authors-title": "Популярні автори"
+        "users": "користувачі",
+        "readers": "читачі",
+        "popular-reading-lists-title": "Найпопулярніші списки для читання",
+        "popular-person-title": "Популярна {{role}}"
     },
     "customize-dashboard-modal": {
         "title-smart-filters": "Розумні фільтри",
@@ -2245,7 +2217,6 @@
         "browse-person-title": "Усі роботи {{name}}",
         "browse-person-by-role-title": "Усі роботи {{name}} у ролі {{role}}",
         "all-roles": "{{common.roles}}",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
         "no-info": "Немає інформації про цю особу"
     },
     "manage-reading-profiles": {
@@ -2548,13 +2519,6 @@
         "download-file-for-extension-header": "Завантажити звіт",
         "download-file-for-extension-alt": "Завантажити файли Звіт для {{extension}}"
     },
-    "manga-format-stats": {
-        "title": "Формат",
-        "visualisation-label": "Візуалізація",
-        "data-table-label": "Таблиця даних",
-        "format-header": "Формат",
-        "count-header": "Кількість"
-    },
     "publication-status-stats": {
         "title": "Статус публікації",
         "visualisation-label": "Візуалізація",
@@ -2685,15 +2649,12 @@
         "annotation-liked-by": "Сподобалося користувачу"
     },
     "toasts": {
-        "regen-cover": "Завдання для відновлення зображення обкладинки поставлено в чергу",
         "no-pages": "Немає сторінок. Kavita не змогла прочитати цей архів.",
-        "download-in-progress": "Завантаження вже триває. Зачекайте.",
         "scan-queued": "Сканування поставлено в чергу для {{name}}",
         "server-settings-updated": "Налаштування сервера оновлено",
         "reset-ip-address": "Скидання IP-адрес",
         "reset-base-url": "Скидання базової URL-адреси",
         "unauthorized-1": "Ви не маєте права переглядати цю сторінку.",
-        "unauthorized-2": "Неавторизовано",
         "no-updates": "Немає доступних оновлень",
         "confirm-delete-user": "Ви впевнені, що хочете видалити цього користувача?",
         "user-deleted": "Користувача {{user}} вже видалено",
@@ -2705,7 +2666,6 @@
         "reading-lists-deleted": "Списки для читання видалено",
         "reading-list-updated": "Список для читання оновлено",
         "confirm-delete-reading-list": "Ви впевнені, що хочете видалити список для читання? Цю дію неможливо скасувати.",
-        "confirm-delete-reading-lists": "Ви впевнені, що хочете видалити списки для читання? Цю дію неможливо скасувати.",
         "item-removed": "Елемент вилучено",
         "nothing-to-remove": "Нічого не вилучати",
         "series-added-to-reading-list": "Серію додано до списку для читання",
@@ -2715,12 +2675,8 @@
         "select-files-warning": "Вам потрібно вибрати файли, щоб рухатися далі",
         "reading-list-imported": "Список для читання імпортовано",
         "incognito-off": "Режим інкогніто вимкнено. Тепер почнеться відстеження прогресу.",
-        "email-service-reset": "Скидання служби електронної пошти",
-        "email-service-reachable": "Підключення до електронної пошти Kavita успішне",
-        "email-service-unresponsive": "URL-адреса служби електронної пошти не відповіла.",
         "refresh-covers-queued": "Оновлення обкладинок у черзі для {{name}}",
         "generate-colorscape-queued": "Згенерувати кольоровий ландшафт у черзі для {{name}}",
-        "library-file-analysis-queued": "Аналіз файлів бібліотеки поставлено в чергу для {{name}}",
         "entity-read": "{{name}} тепер прочитано",
         "entity-unread": "{{name}} зараз непрочитаний",
         "mark-read": "Позначено як прочитане",
@@ -2741,7 +2697,6 @@
         "k+-reset-key-success": "Реєстрацію вашої ліцензії скасовано. Натисніть кнопку «Редагувати», щоб повторно зареєструвати свій екземпляр та повторно активувати Kavita+",
         "library-deleted": "Бібліотеку {{name}} вже вилучено",
         "copied-to-clipboard": "Скопійовано в буфер обміну",
-        "book-settings-info": "Ви можете змінювати налаштування книги, зберігати ці налаштування для всіх книг та переглядати зміст з шухляди.",
         "no-next-chapter": "Не вдалося знайти наступний {{entity}}",
         "no-prev-chapter": "Не вдалося знайти попередній {{entity}}",
         "load-next-chapter": "Наступний {{entity}} завантажено",
@@ -2761,7 +2716,6 @@
         "device-created": "Пристрій створено",
         "delete-device": "Ви впевнені, що хочете видалити цей пристрій?",
         "confirm-regen-covers": "Оновлення обкладинок призведе до перерахунку всіх зображень обкладинок. Це складна операція. Ви впевнені, що не хочете виконати сканування?",
-        "alert-long-running": "Це тривалий процес. Будь ласка, дайте йому час на завершення, перш ніж запускати його знову.",
         "confirm-delete-multiple-series": "Ви впевнені, що хочете видалити {{count}} серію? Це не змінить файли на диску.",
         "confirm-delete-multiple-chapters": "Ви впевнені, що хочете видалити {{count}} розділів/томів? Це не змінить файли на диску.",
         "confirm-delete-multiple-volumes": "Ви впевнені, що хочете видалити {{count}} томів? Це не змінить файли на диску.",
@@ -2784,8 +2738,6 @@
         "collection-not-owned": "Ви не володієте цією колекцією",
         "collections-promoted": "Просовані колекції",
         "collections-unpromoted": "Нерекламовані колекції",
-        "reading-lists-promoted": "Реклама списків читання",
-        "reading-lists-unpromoted": "Списки для читання без реклами",
         "reading-list-promoted": "Список читання просунуто",
         "reading-list-unpromoted": "Список для читання не підвищується",
         "confirm-delete-collections": "Ви впевнені, що хочете видалити кілька колекцій?",
@@ -2814,7 +2766,6 @@
         "confirm-force-delete-font": "Цей шрифт зараз використовується. Ви хочете примусово видалити його? Це змусить користувачів повернутися до шрифту за замовчуванням.",
         "font-in-use": "Неможливо видалити, оскільки шрифт використовується одним або кількома користувачами.",
         "k+-resend-welcome-email-success": "На вашу електронну адресу Kavita+ було надіслано електронного листа",
-        "k+-resend-welcome-email-error": "Сталася помилка під час надсилання вашої ліцензії Kavita+. Можливо, це пов’язано з тим, що у вас більше немає активного облікового запису. Зверніться до служби підтримки.",
         "confirm-delete-auth-key": "Ви впевнені, що хочете видалити цей ключ авторизації?"
     },
     "read-time-pipe": {
@@ -2911,7 +2862,6 @@
         "tasks-tab": "Завдання",
         "recommendations-tab": "Рекомендації",
         "info-tab": "Інформація",
-        "progress-tab": "Прогрес",
         "tags-tab": "Теги",
         "weblink-tab": "Веб-посилання",
         "people-tab": "Люди",
@@ -2926,7 +2876,8 @@
         "smart-filters-tab": "Розумні фільтри",
         "annotations-tab": "Анотації",
         "overview-tab": "Огляд",
-        "management-tab": "Управління"
+        "management-tab": "Управління",
+        "activity-tab": "Активність"
     },
     "common": {
         "reset-to-default": "Скинути до заводських налаштувань",
@@ -2995,7 +2946,6 @@
         "edit-title": "Редагувати анотацію",
         "create-title": "Створити анотацію",
         "create": "Створити",
-        "close": "{{common.close}}",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
         "edit": "Редагувати",
         "delete": "Видалити"
@@ -3225,17 +3175,16 @@
         "stats-tab": "{{tabs.stats-tab}}",
         "reviews-tab": "{{tabs.reviews-tab}}",
         "no-reviews": "Поки що немає відгуків",
-        "user-possessive": "{{name}}'s",
         "total-reads-badge": "{{reads}} Читає",
         "k+-badge": "K+ Абонент",
         "last-read-label": "Останнє прочитання:",
         "time-reading-label": "Загальний час читання:",
-        "avg-reading-per-week-label": "Середнє значення за тиждень:"
+        "avg-reading-per-week-label": "Середнє значення за тиждень:",
+        "activity-tab": "{{tabs.activity-tab}}"
     },
     "profile-review-list": {
         "no-data": "Немає відгуків або відгуки не поширюються",
         "filter-label": "Фільтрувати за серією",
-        "rating-alt": "Фільтрувати за рейтингом",
         "clear-rating-alt": "Очистити фільтр оцінок"
     },
     "profile-stat-bar": {
@@ -3327,7 +3276,8 @@
         "low-activity-alt": "Низька активність",
         "moderate-activity-alt": "Помірна активність",
         "good-activity-alt": "Гарна активність",
-        "high-activity-alt": "Висока активність"
+        "high-activity-alt": "Висока активність",
+        "aggregated-count": "Ви прочитали {{totalPages}} сторінок та {{totalWords}} слів за {{year}}"
     },
     "reading-pace": {
         "hours-read": "Години читання",
@@ -3424,7 +3374,8 @@
     },
     "files-over-time": {
         "title": "Файли, додані з часом",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "most-files": "{{date}} було додано {{count}} файлів"
     },
     "pdf-render-resolution": {
         "default": "За замовчуванням (1080x1920)",
@@ -3433,5 +3384,26 @@
     },
     "list-select-modal": {
         "hidden": "Кількість товарів ({{amount}}) приховано через недійсний стан"
+    },
+    "time-frame-label": {
+        "overall": "Загалом",
+        "week": "Цього тижня",
+        "month": "Цього місяця",
+        "year": "Цього року"
+    },
+    "profile-activity": {
+        "time-filter-title": "Активність користувача {{username}} через",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "no-data": "{{common.no-data}}",
+        "duration": "Тривалість",
+        "pages-read": "{{reading-pace.pages-read}}",
+        "words-read": "{{reading-pace.words-read}}",
+        "time": "Час",
+        "info-alt": "Більше інформації",
+        "today": "Сьогодні",
+        "yesterday": "Вчора",
+        "pagination-label": "Пагінація активності",
+        "page-info": "Сторінка {{current}} з {{total}} (всього записів: {{items}})"
     }
 }

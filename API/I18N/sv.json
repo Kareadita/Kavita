@@ -207,5 +207,6 @@
     "dashboard-stream-only-delete-smart-filter": "Bara smarta-filter-strömmar kan tas bort från panelen",
     "smart-filter-name-required": "Smart Filter namn krävs",
     "sidenav-stream-only-delete-smart-filter": "Bara smarta-filter-strömmar kan tas bort från sidomenyn",
-    "smart-filter-system-name": "Du kan inte använda namnet från en ström som systemet tillhandahåller"
+    "smart-filter-system-name": "Du kan inte använda namnet från en ström som systemet tillhandahåller",
+    "password-authentication-disabled": "Lösenords autentisering har stängts av, logga in via OpenID Connect"
 }

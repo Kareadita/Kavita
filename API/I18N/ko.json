@@ -220,5 +220,8 @@
     "genre-doesnt-exist": "장르가 존재하지 않습니다",
     "font-url-not-allowed": "URL을 통한 글꼴 업로드는 Google 글꼴만 가능합니다",
     "annotation-export-failed": "주석 내보내기를 사용할 수 없습니다. 로그를 확인하십시오",
-    "download-not-allowed": "사용자에게 다운로드 권한이 없습니다"
+    "download-not-allowed": "사용자에게 다운로드 권한이 없습니다",
+    "client-device-doesnt-exist": "클라이언트 장치가 존재하지 않습니다",
+    "auth-key-unique": "인증 키 이름은 계정 내에서 고유해야 합니다",
+    "role-restricted": "접근 금지: 귀하의 역할은 이 작업을 허용하지 않습니다"
 }
