@@ -16,7 +16,7 @@ import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {StatisticsService} from '../../../_services/statistics.service';
 import {ReadingHistoryChapterItem, ReadingHistoryItem} from '../../../_models/stats/reading-history-item';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
-import {DatePipe, DOCUMENT, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {DOCUMENT, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {StatsFilter} from '../../../statistics/_models/stats-filter';
 import {RouterLink} from '@angular/router';
 import {
@@ -41,7 +41,6 @@ import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
   imports: [
     TranslocoDirective,
     LoadingComponent,
-    DatePipe,
     RouterLink,
     LibraryAndTimeSelectorComponent,
     StatsNoDataComponent,
@@ -134,10 +133,6 @@ export class ProfileActivityComponent {
     if (scroll) {
       this.document.querySelector('.activity-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }
-
-  protected formatProgress(entry: ReadingHistoryItem): string {
-    return `${entry.pagesRead}/${entry.totalPages}`;
   }
 
   /**

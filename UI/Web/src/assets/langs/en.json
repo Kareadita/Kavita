@@ -2844,7 +2844,6 @@
         "duration": "Duration",
         "pages-read": "{{reading-pace.pages-read}}",
         "words-read": "{{reading-pace.words-read}}",
-        "progress": "Progress",
         "time": "Time",
         "info-alt": "More Info",
         "today": "Today",

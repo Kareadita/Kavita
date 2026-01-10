@@ -131,15 +131,9 @@
       </span>
     }
 
-    <span [attr.aria-label]="t('progress')" class="d-flex align-items-center gap-1">
-      @if (entry.completed) {
-        <i aria-hidden="true" class="fa-solid fa-check"></i>
-      }
-      {{ formatProgress(entry) }}
-    </span>
 
     <span [attr.aria-label]="t('time')" class="d-flex align-items-center gap-1">
-      {{ entry.startTimeUtc | utcToLocalTime:'shortTime' }}
+      {{ entry.startTimeUtc | utcToLocalTime:'shortTime' }} - {{ entry.endTimeUtc | utcToLocalTime:'shortTime' }}
     </span>
 
     @if (showInfo) {
