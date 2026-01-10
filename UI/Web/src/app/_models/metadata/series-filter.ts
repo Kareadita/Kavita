@@ -15,12 +15,16 @@ export enum SortField {
   LastChapterAdded = 4,
   TimeToRead = 5,
   ReleaseYear = 6,
+  /**
+   * This sorts on the DATE of last progress
+   */
   ReadProgress = 7,
   /**
    * Kavita+ only
    */
   AverageRating = 8,
-  Random = 9
+  Random = 9,
+  UserRating = 10,
 }
 
 export const allSeriesSortFields = Object.keys(SortField)

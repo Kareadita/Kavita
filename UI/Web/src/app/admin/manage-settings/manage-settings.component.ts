@@ -140,20 +140,10 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   packData() {
-    const modelSettings: ServerSettings = this.settingsForm.value;
-    modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
-    modelSettings.smtpConfig = this.serverSettings.smtpConfig;
-    modelSettings.installId = this.serverSettings.installId;
-    modelSettings.installVersion = this.serverSettings.installVersion;
-    modelSettings.oidcConfig = this.serverSettings.oidcConfig;
-
-    // Disabled FormControls are not added to the value
-    if (this.isDocker) {
-      modelSettings.ipAddresses = this.serverSettings.ipAddresses;
-      modelSettings.port = this.serverSettings.port;
-    }
-
-    return modelSettings;
+    return {
+      ...this.serverSettings,
+      ...this.settingsForm.value,
+    };
   }
 
   async resetToDefaults() {

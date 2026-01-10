@@ -19,6 +19,7 @@ using API.Entities.Scrobble;
 using API.Entities.User;
 using API.Extensions;
 using Hangfire.Storage.SQLite.Entities;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,7 @@ namespace API.Data;
 
 public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     IdentityUserClaim<int>, AppUserRole, IdentityUserLogin<int>,
-    IdentityRoleClaim<int>, IdentityUserToken<int>>
+    IdentityRoleClaim<int>, IdentityUserToken<int>>, IDataProtectionKeyContext
 {
     public DataContext(DbContextOptions options) : base(options)
     {
@@ -96,6 +97,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ClientDevice> ClientDevice { get; set; } = null!;
     public DbSet<ClientDeviceHistory> ClientDeviceHistory { get; set; } = null!;
     public DbSet<AppUserAuthKey> AppUserAuthKey { get; set; } = null!;
+
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -267,13 +270,14 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(true);
 
         builder.Entity<AppUserReadingProfile>()
-            .Property(rp => rp.LibraryIds)
-            .HasJsonConversion([])
-            .HasColumnType("TEXT");
+            .PrimitiveCollection(p => p.LibraryIds)
+            .HasDefaultValue(new List<int>());
         builder.Entity<AppUserReadingProfile>()
-            .Property(rp => rp.SeriesIds)
-            .HasJsonConversion([])
-            .HasColumnType("TEXT");
+            .PrimitiveCollection(p => p.SeriesIds)
+            .HasDefaultValue(new List<int>());
+        builder.Entity<AppUserReadingProfile>()
+            .PrimitiveCollection(p => p.DeviceIds)
+            .HasDefaultValue(new List<int>());
         #endregion
 
         #region AppUser Streams
@@ -327,6 +331,17 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion([])
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<ClientInfoData>());
+
+        builder.Entity<AppUserReadingSession>(entity =>
+        {
+            // Covers: active session lookup, all sessions by user, and cleanup query
+            entity.HasIndex(s => new { s.AppUserId, s.IsActive })
+                .HasDatabaseName("IX_AppUserReadingSession_AppUserId_IsActive");
+
+            // Cleanup query: finding expired active sessions
+            entity.HasIndex(s => new { s.IsActive, s.LastModifiedUtc })
+                .HasDatabaseName("IX_AppUserReadingSession_IsActive_LastModifiedUtc");
+        });
         #endregion
 
         #region Client Device

@@ -460,6 +460,7 @@
   --setting-tablet-breakpoint: 1280;
   --setting-desktop-breakpoint: 1440;
 
+  /** Charts **/
   --charts-palette1: #5470c6;
   --charts-palette2: #91cc75;
   --charts-palette3: #fac858;
@@ -477,5 +478,8 @@
   /** Misc **/
   --offwhite-text-color: #8b95a5;
 
+  /** Activity Card **/
+  --activity-card-client-platform-badge-bg-color: #8b5cf6;
+  --activity-card-client-device-badge-bg-color: #3b82f6;
 
 }

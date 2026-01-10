@@ -34,9 +34,14 @@ export class SeriesService {
   paginatedResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
   paginatedSeriesForTagsResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
 
-  getAllSeriesV2(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>, context: QueryContext = QueryContext.None) {
+  getAllSeriesV2(pageNum?: number, itemsPerPage?: number, filter?: FilterV2<FilterField>, context: QueryContext = QueryContext.None, userId?: number) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    if (userId) {
+      params = params.set('userId', userId);
+    }
+
     const data = filter || {};
 
     return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/all-v2?context=' + context, data, {observe: 'response', params}).pipe(

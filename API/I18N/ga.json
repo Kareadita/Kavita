@@ -220,5 +220,8 @@
     "genre-doesnt-exist": "Níl an seánra ann",
     "font-url-not-allowed": "Ní cheadaítear Cló a uaslódáil trí url ach amháin ó Google Fonts",
     "annotation-export-failed": "Ní féidir nótaí a easpórtáil, seiceáil na logaí",
-    "download-not-allowed": "Níl ceadanna íoslódála ag an úsáideoir"
+    "download-not-allowed": "Níl ceadanna íoslódála ag an úsáideoir",
+    "client-device-doesnt-exist": "Níl an Gléas Cliant ann",
+    "auth-key-unique": "Ní mór ainm na hEochrach Údaraithe a bheith uathúil do do chuntas",
+    "role-restricted": "Rochtain toirmiscthe: Ní cheadaíonn do ról an gníomh seo"
 }

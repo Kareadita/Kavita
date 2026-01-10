@@ -4,6 +4,8 @@ import {environment} from 'src/environments/environment';
 import {Member} from '../_models/auth/member';
 import {UserTokenInfo} from "../_models/kavitaplus/user-token-info";
 import {MemberInfo} from "../_models/user/member-info";
+import {map} from "rxjs/operators";
+import {TextResonse} from "../_types/text-response";
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +26,10 @@ export class MemberService {
 
   getMemberNames() {
     return this.httpClient.get<string[]>(this.baseUrl + 'users/names');
+  }
+
+  hasProfileShared(userId: number) {
+    return this.httpClient.get<boolean>(this.baseUrl + 'users/has-profile-shared', TextResonse).pipe(map(d => (d + '') == 'true'));
   }
 
   getUserTokenInfo() {
@@ -53,9 +59,4 @@ export class MemberService {
   removeSeriesToWantToRead(seriesIds: Array<number>) {
     return this.httpClient.post(this.baseUrl + 'want-to-read/remove-series', {seriesIds});
   }
-
-  getMember() {
-    return this.httpClient.get<Member>(this.baseUrl + 'users/myself');
-  }
-
 }

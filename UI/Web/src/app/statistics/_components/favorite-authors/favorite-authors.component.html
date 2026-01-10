@@ -15,7 +15,6 @@
 
 
     @for (fAuthor of favAuthors; track fAuthor.authorName + $index) {
-
       <div class="row mb-4 align-items-start">
 
         <div class="col-12 col-md-4 d-flex flex-row align-items-center text-center">
@@ -62,6 +61,8 @@
       </div>
 
       <div class="setting-section-break"></div>
+    } @empty {
+      <app-stats-no-data [message]="t('no-data')" />
     }
   }
 </div>

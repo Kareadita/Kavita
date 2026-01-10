@@ -11,9 +11,6 @@ using Microsoft.Extensions.Hosting;
 namespace API.Services;
 #nullable enable
 
-
-
-
 public interface ILocalizationService
 {
     Task<string> Get(string locale, string key, params object[] args);

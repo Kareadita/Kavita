@@ -220,5 +220,8 @@
     "genre-doesnt-exist": "Gatunek nie istnieje",
     "font-url-not-allowed": "Przesyłanie czcionki przez adres URL jest dozwolone wyłącznie z serwisu Google Fonts",
     "annotation-export-failed": "Nie można wyeksportować adnotacji, sprawdź logi",
-    "download-not-allowed": "Użytkownik nie ma uprawnień do pobierania plików"
+    "download-not-allowed": "Użytkownik nie ma uprawnień do pobierania plików",
+    "client-device-doesnt-exist": "Urządzenie klienckie nie istnieje",
+    "auth-key-unique": "Nazwa klucza uwierzytelniającego musi być unikalna dla Twojego konta",
+    "role-restricted": "Dostęp zabroniony: Twoja rola nie pozwala na wykonanie tej czynności"
 }

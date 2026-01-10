@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using API.DTOs.Filtering;
 using API.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +36,8 @@ public static class SeriesSort
                 .Max(), sortOptions),
             SortField.AverageRating => query.DoOrderBy(s => s.ExternalSeriesMetadata.ExternalRatings
                 .Where(p => p.SeriesId == s.Id).Average(p => p.AverageScore), sortOptions),
+            SortField.UserRating => query.DoOrderBy(s => s.Ratings.Where(r => r.SeriesId == s.Id && r.AppUserId == userId).Max(r => r.Rating), sortOptions)
+                .ThenBy(s => s.SortName.ToLower()),
             SortField.Random => query.DoOrderBy(s => EF.Functions.Random(), sortOptions),
             _ => query
         };

@@ -574,6 +574,11 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValue("Dark");
 
+                    b.PrimitiveCollection<string>("DeviceIds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("[]");
+
                     b.Property<int>("DisableWidthOverride")
                         .HasColumnType("INTEGER");
 
@@ -586,8 +591,10 @@ namespace API.Data.Migrations
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("LibraryIds")
-                        .HasColumnType("TEXT");
+                    b.PrimitiveCollection<string>("LibraryIds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("[]");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -616,8 +623,10 @@ namespace API.Data.Migrations
                     b.Property<int>("ScalingOption")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("SeriesIds")
-                        .HasColumnType("TEXT");
+                    b.PrimitiveCollection<string>("SeriesIds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("[]");
 
                     b.Property<bool>("ShowScreenHints")
                         .HasColumnType("INTEGER");
@@ -2177,9 +2186,13 @@ namespace API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId");
-
                     b.HasIndex("IsActive");
+
+                    b.HasIndex("AppUserId", "IsActive")
+                        .HasDatabaseName("IX_AppUserReadingSession_AppUserId_IsActive");
+
+                    b.HasIndex("IsActive", "LastModifiedUtc")
+                        .HasDatabaseName("IX_AppUserReadingSession_IsActive_LastModifiedUtc");
 
                     b.ToTable("AppUserReadingSession");
                 });
@@ -2816,7 +2829,7 @@ namespace API.Data.Migrations
                     b.Property<string>("Key")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("LastAccessedAt")
+                    b.Property<DateTime?>("LastAccessedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -3287,6 +3300,23 @@ namespace API.Data.Migrations
                     b.HasIndex("ExternalSeriesMetadatasId");
 
                     b.ToTable("ExternalReviewExternalSeriesMetadata");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FriendlyName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Xml")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataProtectionKeys");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

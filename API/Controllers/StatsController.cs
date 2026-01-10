@@ -17,6 +17,7 @@ using API.DTOs.Stats.V3.ClientDevice;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.Middleware;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
@@ -89,6 +90,18 @@ public class StatsController(
         return Ok(await statService.GetPopularSeries());
     }
 
+    /// <summary>
+    /// Gets the top 5 most popular reading lists. Counts a reading list as active if a user has read at least some
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("popular-reading-list")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    public async Task<ActionResult<IList<StatCount<SeriesDto>>>> GetPopularReadingList()
+    {
+        return Ok(await statService.GetPopularReadingList());
+    }
+
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("popular-genres")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
@@ -106,22 +119,12 @@ public class StatsController(
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("popular-authors")]
+    [HttpGet("popular-people")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularAuthors()
+    public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularPeople(PersonRole role)
     {
-        return Ok(await statService.GetPopularPerson(PersonRole.Writer));
+        return Ok(await statService.GetPopularPerson(role));
     }
-
-    [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("popular-artists")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<PersonDto>>>> GetPopularArtists()
-    {
-        return Ok(await statService.GetPopularPerson(PersonRole.CoverArtist));
-    }
-
-
 
     /// <summary>
     /// Top 5 most active readers for the given timeframe
@@ -212,29 +215,31 @@ public class StatsController(
     /// <summary>
     /// Returns a count of pages read per year for a given userId.
     /// </summary>
-    /// <param name="userId">If userId is 0 and user is not an admin, API will default to userId</param>
+    /// <param name="userId"></param>
     /// <returns></returns>
+    [ProfilePrivacy]
     [HttpGet("pages-per-year")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IList<StatCount<int>>>> GetPagesReadPerYear(int userId = 0)
+    public async Task<ActionResult<IList<StatCount<int>>>> GetPagesReadPerYear(int? userId)
     {
-        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin) userId = await unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
-        return Ok(await statService.GetPagesReadCountByYear(userId));
+        userId ??= UserId;
+
+        return Ok(await statService.GetPagesReadCountByYear(userId.Value));
     }
 
     /// <summary>
     /// Returns a count of words read per year for a given userId.
     /// </summary>
-    /// <param name="userId">If userId is 0 and user is not an admin, API will default to userId</param>
+    /// <param name="userId"></param>
     /// <returns></returns>
+    [ProfilePrivacy]
     [HttpGet("words-per-year")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
-    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetWordsReadPerYear(int userId = 0)
+    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetWordsReadPerYear(int? userId)
     {
-        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin) userId = await unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!);
-        return Ok(statService.GetWordsReadCountByYear(userId));
+        userId ??= UserId;
+
+        return Ok(await statService.GetWordsReadCountByYear(userId.Value));
     }
 
     [HttpGet("files-added-over-time")]
@@ -439,6 +444,24 @@ public class StatsController(
     public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
     {
         return Ok(await statService.GetUserReadStatistics(userId, []));
+    }
+
+
+    /// <summary>
+    /// Return a user's reading session history
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="filter"></param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
+    [HttpGet("reading-history")]
+    public async Task<ActionResult<PagedList<ReadingHistoryItemDto>>> GetReadingHistoryItems([FromQuery] StatsFilterDto filter, [FromQuery] UserParams userParams)
+    {
+        var result = await statService.GetReadingHistoryItems(filter, userParams, UserId, UserId);
+
+        Response.AddPaginationHeader(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
+
+        return Ok(result);
     }
 
     // TODO: Can we cache this? Can we make an attribute to cache methods based on keys?

@@ -57,6 +57,9 @@
 
                 @if (selectedProfile.id !== 0) {
                   <div class="d-flex justify-content-between">
+                    <button class="btn btn-secondary me-2" (click)="setDevices()" [disabled]="selectedProfile.kind === ReadingProfileKind.Default">
+                      {{t('set-devices')}}
+                    </button>
                     <button type="button" class="btn btn-danger" (click)="delete(selectedProfile!)" [disabled]="selectedProfile.kind === ReadingProfileKind.Default">
                       <i class="fa fa-trash" aria-hidden="true"></i>
                       <span class="visually-hidden">{{t('delete')}}</span>

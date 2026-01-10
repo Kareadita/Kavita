@@ -45,11 +45,11 @@ public sealed record ServerInfoV3Dto
     /// <summary>
     /// Milliseconds to open a random archive (zip/cbz) for reading
     /// </summary>
-    public long TimeToOpeCbzMs { get; set; }
+    public long? TimeToOpeCbzMs { get; set; }
     /// <summary>
     /// Number of pages for said archive (zip/cbz)
     /// </summary>
-    public long TimeToOpenCbzPages { get; set; }
+    public long? TimeToOpenCbzPages { get; set; }
     /// <summary>
     /// Milliseconds to get a response from KavitaStats API
     /// </summary>

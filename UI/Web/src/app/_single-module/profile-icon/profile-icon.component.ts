@@ -1,16 +1,14 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal} from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {ImageComponent} from "../../shared/image/image.component";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {CoverUpdateEvent} from "../../_models/events/cover-update-event";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgStyle} from "@angular/common";
 
 @Component({
   selector: 'app-profile-icon',
   imports: [
-    ImageComponent,
-    NgStyle
+    ImageComponent
   ],
   templateUrl: './profile-icon.component.html',
   styleUrl: './profile-icon.component.scss',
@@ -29,11 +27,10 @@ export class ProfileIconComponent {
    */
   processEvents = input<boolean>(true);
 
-  currentImageUrl = model<string>('');
-  noImage = model<boolean>(false);
+  currentImageUrl = signal<string>('');
+  noImage = signal<boolean>(false);
 
   constructor() {
-
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (!this.processEvents()) return;
       const imageUrl = this.currentImageUrl();

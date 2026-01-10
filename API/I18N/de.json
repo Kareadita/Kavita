@@ -16,7 +16,7 @@
     "not-accessible-password": "Es kann nicht auf Ihren Server zugegriffen werden. Der Link zum Zurücksetzen Ihres Passworts finden Sie in den Protokollen",
     "disabled-account": "Ihr Konto ist deaktiviert. Kontaktieren Sie den Server-Administrator.",
     "confirm-email": "Bitte bestätigen Sie zunächst Ihre E-Mail-Adresse",
-    "locked-out": "Sie wurden wegen zu vieler Autorisierungsversuche ausgesperrt. Bitte warten Sie 10 Minuten.",
+    "locked-out": "Sie wurden aufgrund zu vieler Autorisierungsversuche gesperrt. Bitte warten Sie 10 Minuten.",
     "confirm-token-gen": "Es gab ein Problem bei der Generierung eines Bestätigungs-Tokens",
     "invalid-password": "Ungültiges Passwort",
     "password-required": "Sie müssen Ihr bestehendes Passwort eingeben, um Ihr Konto zu ändern, es sei denn, Sie sind ein Administrator",
@@ -220,5 +220,8 @@
     "font-url-not-allowed": "Das Hochladen einer Schriftart per URL geht nur mit Google Fonts",
     "download-not-allowed": "Der Benutzer verfügt nicht über die erforderlichen Download-Berechtigungen",
     "opds-continue-reading-title": "Weiterlesen ab: {0}",
-    "annotation-export-failed": "Anmerkungen können nicht exportiert werden, überprüfen Sie die Protokolle"
+    "annotation-export-failed": "Anmerkungen können nicht exportiert werden, überprüfen Sie die Protokolle",
+    "client-device-doesnt-exist": "Client-Gerät existiert nicht",
+    "auth-key-unique": "Der Name des Authentifizierungsschlüssels muss für Ihr Konto eindeutig sein",
+    "role-restricted": "Zugriff verboten: Ihre Rolle erlaubt diese Aktion nicht"
 }

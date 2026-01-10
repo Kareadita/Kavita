@@ -1,28 +1,19 @@
 <ng-container *transloco="let t; prefix:'server-stats'">
 
-  <p class="alert alert-warning" role="alert">
-    This page is being redesigned!
-  </p>
-
-
   <div class="carousel-tabs-container mb-2 ms-md-2 me-md-2 w-auto">
     <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="true">
 
       <li [ngbNavItem]="TabID.Stats">
         <a ngbNavLink>{{t(TabID.Stats)}}</a>
         <ng-template ngbNavContent>
-          @defer (when activeTabId === TabID.Stats; prefetch on idle) {
-            <app-server-stats-stats-tab />
-          }
+          <app-server-stats-stats-tab />
         </ng-template>
       </li>
 
       <li [ngbNavItem]="TabID.Management">
         <a ngbNavLink>{{t(TabID.Management)}}</a>
         <ng-template ngbNavContent>
-          @defer (when activeTabId === TabID.Management; prefetch on idle) {
-            <app-server-stats-mgmt-tab />
-          }
+          <app-server-stats-mgmt-tab />
         </ng-template>
       </li>
     </ul>

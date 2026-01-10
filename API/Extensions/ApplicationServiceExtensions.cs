@@ -1,8 +1,8 @@
 ﻿using System.IO.Abstractions;
 using API.Constants;
 using API.Data;
+using API.Data.AutoMapper;
 using API.Helpers;
-using API.Middleware;
 using API.Services;
 using API.Services.Caching;
 using API.Services.Plus;
@@ -30,7 +30,7 @@ public static class ApplicationServiceExtensions
 {
     public static void AddApplicationServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
     {
-        services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
+        services.AddAutoMapper(typeof(Program).Assembly);
 
         services.AddScoped<UserContext>();
         services.AddScoped<IUserContext>(sp => sp.GetRequiredService<UserContext>());
@@ -88,6 +88,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ILocalizationService, LocalizationService>();
         services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<IAuthKeyCacheInvalidator, AuthKeyCacheInvalidator>();
+        services.AddScoped<IAuthKeyService, AuthKeyService>();
 
 
         services.AddScoped<IKavitaPlusApiService, KavitaPlusApiService>();
@@ -98,7 +99,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
 
         services.AddScoped<IOidcService, OidcService>();
-        services.AddScoped<IEntityDisplayService, EntityDisplayService>();
+
 
         services.AddScoped<IReadingHistoryService, ReadingHistoryService>();
         services.AddScoped<IClientDeviceService, ClientDeviceService>();
@@ -107,6 +108,7 @@ public static class ApplicationServiceExtensions
 
         services.AddSingleton<IReadingSessionService, ReadingSessionService>();
         services.AddSingleton<IClientInfoAccessor, ClientInfoAccessor>();
+        services.AddSingleton<IEntityNamingService, EntityNamingService>();
 
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);

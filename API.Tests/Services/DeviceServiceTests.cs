@@ -19,7 +19,8 @@ public class DeviceServiceDbTests(ITestOutputHelper outputHelper): AbstractDbTes
 
     private Task<IDeviceService> Setup(IUnitOfWork unitOfWork)
     {
-        return Task.FromResult<IDeviceService>(new DeviceService(unitOfWork, _logger, Substitute.For<IEmailService>()));
+        return Task.FromResult<IDeviceService>(new DeviceService(unitOfWork, _logger,
+            Substitute.For<IEmailService>(), Substitute.For<IReadingProfileService>()));
     }
 
     [Fact]

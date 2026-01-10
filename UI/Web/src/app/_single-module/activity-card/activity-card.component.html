@@ -16,14 +16,8 @@
       <div class="activity-details">
         <div class="activity-header">
           <div class="media-info">
-            <span class="badge bg-secondary product-badge">{{ activeData.clientInfo?.platform | clientDevicePlatform }}</span>
-            <span class="badge bg-primary player-badge">{{activeData.clientInfo?.clientType | clientDeviceClientType}}</span>
-            <span class="quality-badge">
-            {{t('pages-count', {num: activeData.pagesRead})}}
-            @if (activeData.wordsRead > 0) {
-              <span> ({{t('words-count', {num: activeData.wordsRead})}})</span>
-            }
-          </span>
+            <span class="badge bg-secondary platform-badge">{{ activeData.clientInfo?.platform | clientDevicePlatform }}</span>
+            <span class="badge bg-primary device-badge">{{activeData.clientInfo?.clientType | clientDeviceClientType}}</span>
           </div>
         </div>
 
@@ -31,6 +25,24 @@
           <div class="metadata-row">
             <span class="label text-uppercase">{{t('started-label')}}</span>
             <span class="value">{{activeData.startTimeUtc | utcToLocalDate | timeAgo}}</span>
+          </div>
+
+          <div class="metadata-row">
+            <span class="label text-uppercase">{{t('total-pages-label')}}</span>
+            <span class="value">{{totalPages() | defaultValue}}</span>
+          </div>
+
+
+          @if (totalWords() > 0) {
+            <div class="metadata-row">
+              <span class="label text-uppercase">{{t('total-words-label')}}</span>
+              <span class="value">{{totalWords() | defaultValue}}</span>
+            </div>
+          }
+
+          <div class="metadata-row">
+            <span class="label text-uppercase">{{t('total-chapters-label')}}</span>
+            <span class="value">{{distinctChapters() | defaultValue}}</span>
           </div>
         </div>
 

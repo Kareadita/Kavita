@@ -28,6 +28,23 @@
         </div>
 
         <div class="row g-0 mt-2">
+          @if(settingsForm.get('pdfRenderResolution'); as formControl) {
+            <app-setting-item [title]="t('pdf-render-resolution-label')" [subtitle]="t('pdf-render-resolution-tooltip')">
+              <ng-template #view>
+                {{formControl!.value | pdfRenderResolution}}
+              </ng-template>
+              <ng-template #edit>
+                <select class="form-select" formControlName="pdfRenderResolution">
+                  @for (opt of allPdfRenderResolutions; track opt) {
+                    <option [ngValue]="opt">{{opt | pdfRenderResolution}}</option>
+                  }
+                </select>
+              </ng-template>
+            </app-setting-item>
+          }
+        </div>
+
+        <div class="row g-0 mt-2">
           @if(settingsForm.get('coverImageSize'); as formControl) {
             <app-setting-item [title]="t('cover-image-size-label')" [subtitle]="t('cover-image-size-tooltip')">
               <ng-template #view>

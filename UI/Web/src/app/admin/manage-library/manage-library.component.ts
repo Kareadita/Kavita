@@ -5,7 +5,8 @@ import {
   DestroyRef,
   HostListener,
   inject,
-  OnInit
+  OnInit,
+  TrackByFunction
 } from '@angular/core';
 import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
@@ -33,11 +34,18 @@ import {Action, ActionFactoryService, ActionItem} from "../../_services/action-f
 import {ActionService} from "../../_services/action.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {BehaviorSubject, catchError, Observable} from "rxjs";
-import {SelectionModel} from "../../typeahead/_models/selection-model";
 import {
   CopySettingsFromLibraryModalComponent
 } from "../_modals/copy-settings-from-library-modal/copy-settings-from-library-modal.component";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {SelectionModel} from "../../typeahead/_models/selection-model";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {
+  DataTableColumnCellDirective,
+  DataTableColumnDirective,
+  DataTableColumnHeaderDirective,
+  DatatableComponent
+} from "@siemens/ngx-datatable";
 
 @Component({
   selector: 'app-manage-library',
@@ -45,7 +53,7 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular
   styleUrls: ['./manage-library.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
-    AsyncPipe, LoadingComponent, CardActionablesComponent, NgTemplateOutlet, ReactiveFormsModule, FormsModule]
+    AsyncPipe, LoadingComponent, CardActionablesComponent, NgTemplateOutlet, ReactiveFormsModule, FormsModule, ResponsiveTableComponent, DatatableComponent, DataTableColumnHeaderDirective, DataTableColumnDirective, DataTableColumnCellDirective]
 })
 export class ManageLibraryComponent implements OnInit {
 
@@ -81,6 +89,9 @@ export class ManageLibraryComponent implements OnInit {
   bulkForm = new FormGroup({'includeType': new FormControl(false)});
   isShiftDown: boolean = false;
   lastSelectedIndex: number | null = null;
+
+  trackByLibrary: TrackByFunction<Library> = (_, lib) =>
+    `${lib.name}_${lib.type}_${lib.folders.length}_${lib.lastScanned}`;
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(_: Event) {

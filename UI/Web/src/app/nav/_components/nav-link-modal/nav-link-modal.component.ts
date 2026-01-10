@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject} from '@angular/core';
 import {WikiLink} from "../../../_models/wiki";
-import {NgbActiveModal, NgbDropdownItem} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {Router, RouterLink} from "@angular/router";
 import {ReactiveFormsModule} from "@angular/forms";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -13,8 +13,7 @@ import {AccountService} from "../../../_services/account.service";
   imports: [
     RouterLink,
     ReactiveFormsModule,
-    TranslocoDirective,
-    NgbDropdownItem
+    TranslocoDirective
   ],
   templateUrl: './nav-link-modal.component.html',
   styleUrl: './nav-link-modal.component.scss',
@@ -32,8 +31,8 @@ export class NavLinkModalComponent {
   private readonly accountService = inject(AccountService);
 
   profileLink = computed(() => {
-    return `/profile/${this.accountService.currentUserSignal()?.id ?? ''}`
-  })
+    return ['/profile', this.accountService.currentUserSignal()?.id ?? ''];
+  });
 
   close() {
     this.modal.close();

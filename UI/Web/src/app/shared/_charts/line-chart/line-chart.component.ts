@@ -79,7 +79,7 @@ export class LineChartComponent {
 
     // Round up to a nice number
     const magnitude = Math.pow(10, Math.floor(Math.log10(p95Value)));
-    return Math.ceil(p95Value / magnitude) * magnitude * 1.2;
+    return Math.ceil(Math.ceil(p95Value / magnitude) * magnitude * 1.2);
   });
 
   private seriesOption = computed<ArrayAble<LineSeriesOption>>(() => {
@@ -94,7 +94,7 @@ export class LineChartComponent {
         smooth: true,
         data: data as any[],
         ...this.getMarkPointConfig(data as number[], clampedMax, 0)
-      }
+      } as LineSeriesOption
     }
 
     return data.map((dataSet, index) => ({
@@ -107,7 +107,7 @@ export class LineChartComponent {
       },
       ...this.getMarkPointConfig(dataSet as number[], clampedMax, index)
     }))
-  })
+  });
 
   private getMarkPointConfig(seriesData: number[], clampedMax: number | null, seriesIndex: number): Partial<LineSeriesOption> {
     if (clampedMax === null) return {};
@@ -161,9 +161,11 @@ export class LineChartComponent {
       legend: {
         show: this.showLegend(),
         data: this.legendLabels(),
+        orient: 'horizontal',
+        top: '-2%',
         textStyle: {
           color: this.themeService.getCssVariable('--body-text-color'),
-        }
+        },
       },
       tooltip: {
         show: true,

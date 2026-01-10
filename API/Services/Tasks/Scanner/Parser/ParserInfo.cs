@@ -83,7 +83,7 @@ public class ParserInfo
     /// <returns></returns>
     public bool IsSpecialInfo()
     {
-        return (IsSpecial || (Volumes == Parser.LooseLeafVolume && Chapters == Parser.DefaultChapter));
+        return IsSpecial || (Parser.IsLooseLeafVolume(Volumes) && Parser.IsDefaultChapter(Chapters));
     }
 
     /// <summary>
@@ -93,15 +93,15 @@ public class ParserInfo
     public ComicInfo? ComicInfo { get; set; }
 
     /// <summary>
-    /// Merges non empty/null properties from info2 into this entity.
+    /// Merges non-empty/null properties from info2 into this entity.
     /// </summary>
     /// <remarks>This does not merge ComicInfo as they should always be the same</remarks>
     /// <param name="info2"></param>
     public void Merge(ParserInfo? info2)
     {
         if (info2 == null) return;
-        Chapters = string.IsNullOrEmpty(Chapters) || Chapters == Parser.DefaultChapter ? info2.Chapters: Chapters;
-        Volumes = string.IsNullOrEmpty(Volumes) || Volumes == Parser.LooseLeafVolume ? info2.Volumes : Volumes;
+        Chapters = Parser.IsDefaultChapter(Chapters) ? info2.Chapters: Chapters;
+        Volumes = Parser.IsLooseLeafVolume(Volumes) ? info2.Volumes : Volumes;
         Edition = string.IsNullOrEmpty(Edition) ? info2.Edition : Edition;
         Title = string.IsNullOrEmpty(Title) ? info2.Title : Title;
         Series = string.IsNullOrEmpty(Series) ? info2.Series : Series;

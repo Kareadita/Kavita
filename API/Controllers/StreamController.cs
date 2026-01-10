@@ -84,13 +84,13 @@ public class StreamController : BaseApiController
     /// <summary>
     /// Validates the external source by host is unique (for this user)
     /// </summary>
-    /// <param name="host"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
-    [HttpGet("external-source-exists")]
+    [HttpPost("external-source-exists")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult<bool>> ExternalSourceExists(string host, string name, string apiKey)
+    public async Task<ActionResult<bool>> ExternalSourceExists(ExternalSourceDto dto)
     {
-        return Ok(await _unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(UserId, name, host, apiKey));
+        return Ok(await _unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(UserId, dto.Name, dto.Host, dto.ApiKey));
     }
 
     /// <summary>

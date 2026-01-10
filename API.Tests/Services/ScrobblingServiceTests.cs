@@ -59,7 +59,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             Substitute.For<IImageService>(),
             Substitute.For<IDirectoryService>(),
             Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
-            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityDisplayService>()); // Do not use the actual one
+            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityNamingService>(),
+            Substitute.For<ILocalizationService>()); // Do not use the actual one
 
         var hookedUpReaderService = new ReaderService(unitOfWork,
             Substitute.For<ILogger<ReaderService>>(),
@@ -67,7 +68,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             Substitute.For<IImageService>(),
             Substitute.For<IDirectoryService>(),
             service, Substitute.For<IReadingSessionService>(),
-            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityDisplayService>());
+            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityNamingService>(),
+            Substitute.For<ILocalizationService>());
 
         await SeedData(unitOfWork, context);
 

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, TrackByFunction} from '@angular/core';
 import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {take} from 'rxjs/operators';
 import {MemberService} from 'src/app/_services/member.service';
@@ -12,7 +12,7 @@ import {InviteUserComponent} from '../invite-user/invite-user.component';
 import {EditUserComponent} from '../edit-user/edit-user.component';
 import {Router} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
-import {AsyncPipe, NgClass, TitleCasePipe} from '@angular/common';
+import {AsyncPipe, NgClass, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -27,6 +27,13 @@ import {SettingsService} from "../settings.service";
 import {ServerSettings} from "../_models/server-settings";
 import {IdentityProvider} from "../../_models/user/user";
 import {ImageComponent} from "../../shared/image/image.component";
+import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {
+  DataTableColumnCellDirective,
+  DataTableColumnDirective,
+  DataTableColumnHeaderDirective,
+  DatatableComponent
+} from "@siemens/ngx-datatable";
 
 @Component({
   selector: 'app-manage-users',
@@ -35,7 +42,7 @@ import {ImageComponent} from "../../shared/image/image.component";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, TranslocoModule, DefaultDatePipe, NgClass,
     DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, TimeAgoPipe, SentenceCasePipe, UtcToLocalDatePipe,
-    RoleLocalizedPipe, ImageComponent]
+    RoleLocalizedPipe, ImageComponent, ResponsiveTableComponent, NgTemplateOutlet, DatatableComponent, DataTableColumnDirective, DataTableColumnCellDirective, DataTableColumnHeaderDirective]
 })
 export class ManageUsersComponent implements OnInit {
 
@@ -58,6 +65,9 @@ export class ManageUsersComponent implements OnInit {
   loggedInUsername = '';
   loadingMembers = false;
   libraryCount: number = 0;
+
+  trackByMember: TrackByFunction<Member> = (_, m) =>
+    `${m.username}_${m.lastActiveUtc}_${m.roles.length}`;
 
 
   constructor() {

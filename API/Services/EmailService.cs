@@ -392,10 +392,10 @@ public class EmailService : IEmailService
 
         var emailOptions = new EmailOptionsDto()
         {
-            Subject = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Server", placeholders),
+            Subject = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Kavita Server", placeholders),
             Template = EmailConfirmTemplate,
             Body = UpdatePlaceHolders(await GetEmailBody(EmailConfirmTemplate), placeholders),
-            Preheader = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Server", placeholders),
+            Preheader = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Kavita Server", placeholders),
             ToEmails = new List<string>()
             {
                 data.EmailAddress

@@ -1,7 +1,15 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input
+} from '@angular/core';
 import {Location, TitleCasePipe} from '@angular/common';
 import {MemberInfo} from "../../../_models/user/member-info";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../../_services/image.service";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
@@ -23,11 +31,15 @@ import {ProfileStatsComponent} from "../profile-stats/profile-stats.component";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {TimeDurationPipe} from "../../../_pipes/time-duration.pipe";
 import {NavTabUrlDirective} from "../../../_directives/nav-tab-url.directive";
+import {Title} from "@angular/platform-browser";
+import {AccountService} from "../../../_services/account.service";
+import {ProfileActivityComponent} from "../profile-activity/profile-activity.component";
 
 enum TabID {
   Overview = 'overview-tab',
   Stats = 'stats-tab',
   Reviews = 'reviews-tab',
+  Activity = 'activity-tab'
 }
 
 @Component({
@@ -55,6 +67,7 @@ enum TabID {
     SentenceCasePipe,
     TimeDurationPipe,
     NavTabUrlDirective,
+    ProfileActivityComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -68,6 +81,9 @@ export class ProfileComponent {
   protected readonly imageService = inject(ImageService);
   private readonly statsService = inject(StatisticsService);
   protected readonly licenseService = inject(LicenseService);
+  private readonly titleService = inject(Title);
+  protected readonly accountService = inject(AccountService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
 
   // Set by angular from the resolver
@@ -102,14 +118,23 @@ export class ProfileComponent {
   });
 
   constructor() {
+    const initialFragment = this.route.snapshot.fragment;
+    if (initialFragment) {
+      this.activeTabId = initialFragment as TabID;
+      this.cdRef.markForCheck();
+    }
+
     // TODO: If ngBootstrap ever supports signal-based activeTabId, we can move this into syncUrlFragment directive
     this.route.fragment.pipe(tap(frag => {
       const fragId = frag as TabID;
       if (frag !== null && this.activeTabId !== fragId) {
         this.updateUrl(fragId);
         this.activeTabId = fragId;
+        this.cdRef.markForCheck();
       }
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
+
+    this.titleService.setTitle(translate('profile.title', {username: this.accountService.currentUserSignal()!.username}));
   }
 
 

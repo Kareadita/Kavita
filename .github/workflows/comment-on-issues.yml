@@ -1,0 +1,173 @@
+﻿name: Comment on Linked Issues
+
+on:
+  workflow_run:
+    workflows: ["Nightly Workflow"]
+    types: [completed]
+    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to process'
+        required: true
+        type: number
+      stable_version:
+        description: 'Override stable version (e.g., 0.8.5)'
+        required: false
+        type: string
+
+jobs:
+  comment-issues:
+    name: Comment on Linked Issues
+    runs-on: ubuntu-24.04
+    if: >
+      (github.event_name == 'workflow_dispatch') ||
+      (github.event.workflow_run.conclusion == 'success')
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Get csproj Version
+        uses: kzrnm/get-net-sdk-project-versions-action@v2
+        id: get-version
+        with:
+          proj-path: Kavita.Common/Kavita.Common.csproj
+
+      - name: Calculate Versions
+        id: versions
+        run: |
+          nightly='${{ steps.get-version.outputs.assembly-version }}'
+          IFS='.' read -r major minor patch build <<< "$nightly"
+          default_stable="$major.$minor.$((patch + 1))"
+
+          stable_override='${{ inputs.stable_version }}'
+          if [ -n "$stable_override" ]; then
+            stable_version="$stable_override"
+          else
+            stable_version="$default_stable"
+          fi
+
+          echo "NIGHTLY_VERSION=$nightly" >> $GITHUB_OUTPUT
+          echo "STABLE_VERSION=$stable_version" >> $GITHUB_OUTPUT
+
+      - name: Find PR from Commit
+        id: pr-number
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            if ('${{ github.event_name }}' === 'workflow_dispatch') {
+              core.setOutput('pr', '${{ inputs.pr_number }}');
+              return;
+            }
+
+            const sha = '${{ github.event.workflow_run.head_sha }}';
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: sha
+            });
+
+            const merged = prs.find(pr => pr.merged_at !== null);
+            if (merged) {
+              console.log(`Found merged PR #${merged.number}`);
+              core.setOutput('pr', merged.number);
+            } else {
+              console.log('No merged PR found for commit');
+              core.setOutput('pr', '');
+            }
+
+      - name: Comment on Linked Issues
+        if: steps.pr-number.outputs.pr != ''
+        uses: actions/github-script@v7
+        env:
+          NIGHTLY_VERSION: ${{ steps.versions.outputs.NIGHTLY_VERSION }}
+          STABLE_VERSION: ${{ steps.versions.outputs.STABLE_VERSION }}
+          PR_NUMBER: ${{ steps.pr-number.outputs.pr }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = parseInt(process.env.PR_NUMBER);
+            const nightlyVersion = process.env.NIGHTLY_VERSION;
+            const stableVersion = process.env.STABLE_VERSION;
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            const textToSearch = `${pr.title || ''}\n${pr.body || ''}`;
+            const linkedIssues = new Map();
+
+            // Match: Fixes #123, Closes #123, Resolves #123 (and variants)
+            const pattern = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
+            let match;
+            while ((match = pattern.exec(textToSearch)) !== null) {
+              const num = parseInt(match[1]);
+              linkedIssues.set(num, { owner: context.repo.owner, repo: context.repo.repo, number: num });
+            }
+
+            if (linkedIssues.size === 0) {
+              console.log('No linked issues found');
+              return;
+            }
+
+            console.log(`Found ${linkedIssues.size} linked issues: ${[...linkedIssues.keys()].join(', ')}`);
+
+            const commentBody = `This was closed as of PR #${prNumber}, it is available in v${nightlyVersion} (nightly) and will be available in v${stableVersion} (stable).`;
+
+            let posted = 0, skipped = 0, failed = 0;
+
+            for (const [num, issue] of linkedIssues) {
+              try {
+                const { data: issueData } = await github.rest.issues.get({
+                  owner: issue.owner,
+                  repo: issue.repo,
+                  issue_number: issue.number
+                });
+
+                if (issueData.pull_request) {
+                  console.log(`#${num}: skipped (pull request)`);
+                  skipped++;
+                  continue;
+                }
+
+                const { data: comments } = await github.rest.issues.listComments({
+                  owner: issue.owner,
+                  repo: issue.repo,
+                  issue_number: issue.number,
+                  per_page: 100
+                });
+
+                const alreadyCommented = comments.some(c =>
+                  c.user?.login === 'github-actions[bot]' &&
+                  c.body?.includes(`PR #${prNumber}`)
+                );
+
+                if (alreadyCommented) {
+                  console.log(`#${num}: skipped (already commented)`);
+                  skipped++;
+                  continue;
+                }
+
+                await github.rest.issues.createComment({
+                  owner: issue.owner,
+                  repo: issue.repo,
+                  issue_number: issue.number,
+                  body: commentBody
+                });
+
+                console.log(`#${num}: commented`);
+                posted++;
+
+              } catch (error) {
+                console.log(`#${num}: failed (${error.message})`);
+                failed++;
+              }
+            }
+
+            console.log(`Summary: ${posted} posted, ${skipped} skipped, ${failed} failed`);

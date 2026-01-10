@@ -53,6 +53,7 @@
 
   <!-- Override vulnerable transitive dependencies -->
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.1" />
     <PackageReference Include="NeoSmart.Caching.Sqlite.AspNetCore" Version="9.0.1" />
   </ItemGroup>
 

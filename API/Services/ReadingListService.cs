@@ -58,6 +58,9 @@ public interface IReadingListService
     /// <returns></returns>
     /// <remarks>This method does not commit changes</remarks>
     Task UpdateReadingListAgeRatingForSeries(int seriesId, AgeRating ageRating);
+
+    Task<IList<ReadingListItemDto>> GetReadingListItems(int readingListId, int userId, UserParams? userParams = null);
+    Task<ReadingListItemDto?> GetContinueReadingPoint(int readingListId, int userId);
 }
 
 /// <summary>
@@ -71,30 +74,33 @@ public class ReadingListService : IReadingListService
     private readonly IEventHub _eventHub;
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
+    private readonly IEntityNamingService _namingService;
 
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Parser.RegexTimeout);
 
     public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger,
-        IEventHub eventHub, IImageService imageService, IDirectoryService directoryService)
+        IEventHub eventHub, IImageService imageService, IDirectoryService directoryService,
+        IEntityNamingService namingService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventHub = eventHub;
         _imageService = imageService;
         _directoryService = directoryService;
+        _namingService = namingService;
     }
 
     public static string FormatTitle(ReadingListItemDto item)
     {
         var title = string.Empty;
-        if (item.ChapterNumber == Parser.DefaultChapter && item.VolumeNumber != Parser.LooseLeafVolume) {
+        if (Parser.IsDefaultChapter(item.ChapterNumber) && !Parser.IsLooseLeafVolume(item.VolumeNumber)) {
             title = $"Volume {item.VolumeNumber}";
         }
 
         if (item.SeriesFormat == MangaFormat.Epub) {
             var specialTitle = Parser.CleanSpecialTitle(item.ChapterNumber);
-            if (specialTitle == Parser.DefaultChapter)
+            if (Parser.IsDefaultChapter(specialTitle))
             {
                 if (!string.IsNullOrEmpty(item.ChapterTitleName))
                 {
@@ -123,7 +129,7 @@ public class ReadingListService : IReadingListService
         if (title != string.Empty) return title;
 
         // item.ChapterNumber is Range
-        if (item.ChapterNumber == Parser.DefaultChapter &&
+        if (Parser.IsDefaultChapter(item.ChapterNumber) &&
             !string.IsNullOrEmpty(item.ChapterTitleName))
         {
             title = item.ChapterTitleName;
@@ -239,7 +245,6 @@ public class ReadingListService : IReadingListService
     public async Task<bool> RemoveFullyReadItems(int readingListId, AppUser user)
     {
         var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, user.Id);
-        items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
 
         // Collect all Ids to remove
         var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id).ToList();
@@ -872,5 +877,26 @@ public class ReadingListService : IReadingListService
 
             readingList.AgeRating = maxAgeRating;
         }
+    }
+
+    public async Task<IList<ReadingListItemDto>> GetReadingListItems(int readingListId, int userId, UserParams? userParams = null)
+    {
+        var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId, userParams);
+
+        // Add the title
+        foreach (var item in items)
+        {
+            item.Title = _namingService.FormatReadingListItemTitle(item);
+        }
+
+        return items;
+    }
+
+    public async Task<ReadingListItemDto?> GetContinueReadingPoint(int readingListId, int userId)
+    {
+        var item = await _unitOfWork.ReadingListRepository.GetContinueReadingPoint(readingListId, userId);
+        item?.Title = _namingService.FormatReadingListItemTitle(item);
+
+        return item;
     }
 }

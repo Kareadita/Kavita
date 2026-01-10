@@ -10,6 +10,7 @@ import {OrdinalDatePipe} from "../../../_pipes/ordinal-date.pipe";
 import {DurationPipe} from "../../../_pipes/duration.pipe";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {StatsFilter} from "../../_models/stats-filter";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 
 
 export interface ActivityGraphData {
@@ -45,7 +46,8 @@ interface WeekRow {
     OrdinalDatePipe,
     DatePipe,
     DurationPipe,
-    LoadingComponent
+    LoadingComponent,
+    CompactNumberPipe
   ],
   templateUrl: './activity-graph.component.html',
   styleUrl: './activity-graph.component.scss',
@@ -73,6 +75,12 @@ export class ActivityGraphComponent {
     return {};
   });
 
+  protected aggregatedCount = computed(() => Object.values(this.data())
+    .filter(entry => new Date(entry.date).getFullYear() == this.year())
+    .reduce((prev, cur) =>
+      ({totalWords: prev.totalWords + cur.totalWords, totalPages: prev.totalPages + cur.totalPages}),
+      {totalWords: 0, totalPages: 0}));
+
   // Computed values for the grid
   weeks = computed(() => this.generateWeeks());
   months = computed(() => this.generateMonthLabels());
@@ -82,7 +90,6 @@ export class ActivityGraphComponent {
     const year = this.year();
     if (!filter) return year;
 
-    if (filter.timeFilter.startDate == filter.timeFilter.endDate) return translate('activity-graph.all-time');
     return year;
   })
 
@@ -201,14 +208,14 @@ export class ActivityGraphComponent {
 
   getLevelDescription(level: number): string {
     const descriptions = [
-      'activity-graph.no-activity',
-      'activity-graph.low-activity',
-      'activity-graph.moderate-activity',
-      'activity-graph.good-activity',
-      'activity-graph.high-activity'
+      'activity-graph.no-activity-alt',
+      'activity-graph.low-activity-alt',
+      'activity-graph.moderate-activity-alt',
+      'activity-graph.good-activity-alt',
+      'activity-graph.high-activity-alt'
     ];
 
-    return translate(descriptions[level]) || 'activity-graph.no-activity';
+    return translate(descriptions[level]) || 'activity-graph.no-activity-alt';
   }
 
 }

@@ -7,9 +7,9 @@ import {
   EventEmitter,
   inject,
   Input,
-  model,
   OnInit,
   Output,
+  signal,
 } from '@angular/core';
 import {fromEvent, merge, of} from "rxjs";
 import {catchError, debounceTime, tap} from "rxjs/operators";
@@ -55,7 +55,7 @@ export class BookLineOverlayComponent implements OnInit {
   bookmarkForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
   });
-  hasSelectedAnnotation = model<boolean>(false);
+  hasSelectedAnnotation = signal<boolean>(false);
 
 
   private readonly destroyRef = inject(DestroyRef);

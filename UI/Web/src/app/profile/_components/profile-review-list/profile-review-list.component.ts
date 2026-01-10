@@ -46,7 +46,7 @@ export class ProfileReviewListComponent implements OnInit {
   memberInfo = input.required<MemberInfo>();
 
   reviews = signal<UserReviewExtended[]>([]);
-  isLoading = model<boolean>(true);
+  isLoading = signal<boolean>(true);
 
   starColor = this.themeService.getCssVariable('--rating-star-color');
   formGroup = new FormGroup({

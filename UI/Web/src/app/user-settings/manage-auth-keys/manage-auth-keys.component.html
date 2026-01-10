@@ -35,7 +35,7 @@
         <ngx-datatable
           class="bootstrap"
           [rows]="authKeysValue"
-          [columnMode]="ColumnMode.flex"
+          [columnMode]="'flex'"
           rowHeight="auto"
           [footerHeight]="50"
           [limit]="15"
@@ -135,7 +135,7 @@
             </div>
 
             <!-- Actions -->
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 float-end">
               <button class="btn btn-primary" (click)="rotate(item)" [disabled]="isReadOnly()">
                 <i class="fa-solid fa-rotate" aria-hidden="true"></i>
                 <span class="ms-2">{{t('rotate')}}</span>

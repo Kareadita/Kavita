@@ -216,19 +216,6 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
     }
 
     /// <summary>
-    /// If this Series is on Kavita+ Blacklist, removes it. If already cached, invalidates it.
-    /// This then attempts to refresh data from Kavita+ for this series.
-    /// </summary>
-    /// <param name="seriesId"></param>
-    /// <returns></returns>
-    // [HttpPost("force-refresh")]
-    // public async Task<ActionResult> ForceRefresh(int seriesId)
-    // {
-    //     await metadataService.ForceKavitaPlusRefresh(seriesId);
-    //     return Ok();
-    // }
-
-    /// <summary>
     /// Fetches the details needed from Kavita+ for Series Detail page
     /// </summary>
     /// <remarks>This will hit upstream K+ if the data in local db is 2 weeks old</remarks>
@@ -263,16 +250,15 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
         if (!isAdmin && ret?.Recommendations != null && user != null)
         {
             // Re-obtain owned series and take into account age restriction
+            var seriesIds = ret.Recommendations.OwnedSeries.Select(s => s.Id);
             ret.Recommendations.OwnedSeries =
-                await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(
-                    ret.Recommendations.OwnedSeries.Select(s => s.Id), user);
+                await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(seriesIds, user);
             ret.Recommendations.ExternalSeries = [];
         }
 
-        if (ret.Recommendations != null && user != null)
+        if (ret?.Recommendations != null && user != null)
         {
             ret.Recommendations.OwnedSeries ??= [];
-            await unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, ret.Recommendations.OwnedSeries);
         }
     }
 }

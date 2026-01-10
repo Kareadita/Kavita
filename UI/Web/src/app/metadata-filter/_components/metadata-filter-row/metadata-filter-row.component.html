@@ -42,7 +42,9 @@
                           ngbDatepicker
                           #d="ngbDatepicker"
                         />
-                        <button class="btn btn-outline-secondary fa-solid fa-calendar-days" (click)="d.toggle()" type="button"></button>
+                        <button class="btn btn-outline-secondary" (click)="d.toggle()" type="button">
+                          <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+                        </button>
                       </div>
                     }
                     @case (PredicateType.Dropdown) {

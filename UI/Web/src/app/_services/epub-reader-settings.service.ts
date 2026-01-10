@@ -18,6 +18,7 @@ import {UserBreakpoint, UtilityService} from "../shared/_services/utility.servic
 import {environment} from "../../environments/environment";
 import {EpubFont} from "../_models/preferences/epub-font";
 import {FontService} from "./font.service";
+import {Library} from "../_models/library/library";
 
 export interface ReaderSettingUpdate {
   setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme' | 'pageCalcMethod';
@@ -52,6 +53,7 @@ export class EpubReaderSettingsService {
   private readonly _currentReadingProfile = signal<ReadingProfile | null>(null);
   private readonly _parentReadingProfile = signal<ReadingProfile | null>(null);
   private readonly _currentSeriesId = signal<number | null>(null);
+  private readonly _currentLibraryId = signal<number | null>(null);
   private readonly _isInitialized = signal<boolean>(false);
   private readonly _epubFonts = signal<EpubFont[]>([]);
 
@@ -211,17 +213,18 @@ export class EpubReaderSettingsService {
   /**
    * Initialize the service with a reading profile and series ID
    */
-  async initialize(seriesId: number, readingProfile: ReadingProfile): Promise<void> {
+  async initialize(libraryId: number, seriesId: number, readingProfile: ReadingProfile): Promise<void> {
     const fonts = await firstValueFrom(this.fontService.getFonts());
     this._epubFonts.set(fonts);
 
     this._currentSeriesId.set(seriesId);
+    this._currentLibraryId.set(libraryId);
     this._currentReadingProfile.set(readingProfile);
 
     // Load parent profile if needed, otherwise profile is its own parent
     if (readingProfile.kind === ReadingProfileKind.Implicit) {
       try {
-        const parent = await firstValueFrom(this.readingProfileService.getForSeries(seriesId, true));
+        const parent = await firstValueFrom(this.readingProfileService.getForSeries(libraryId, seriesId, true));
         this._parentReadingProfile.set(parent || null);
       } catch (error) {
         console.error('Failed to load parent reading profile:', error);
@@ -401,11 +404,12 @@ export class EpubReaderSettingsService {
   updateParentProfile(): void {
     const currentRp = this._currentReadingProfile();
     const seriesId = this._currentSeriesId();
-    if (!currentRp || currentRp.kind !== ReadingProfileKind.Implicit || !seriesId) {
+    const libraryId = this._currentLibraryId();
+    if (!currentRp || currentRp.kind !== ReadingProfileKind.Implicit || !seriesId || !libraryId) {
       return;
     }
 
-    this.readingProfileService.updateParentProfile(seriesId, this.packReadingProfile())
+    this.readingProfileService.updateParentProfile(libraryId, seriesId, this.packReadingProfile())
       .subscribe(newProfile => {
         this._currentReadingProfile.set(newProfile);
         this.toastr.success(translate('manga-reader.reading-profile-updated'));
@@ -616,7 +620,7 @@ export class EpubReaderSettingsService {
   private updateImplicitProfile(): void {
     if (!this._currentReadingProfile() || !this._currentSeriesId()) return;
 
-    this.readingProfileService.updateImplicit(this.packReadingProfile(), this._currentSeriesId()!)
+    this.readingProfileService.updateImplicit(this._currentLibraryId()!, this._currentSeriesId()!, this.packReadingProfile())
       .subscribe({
         next: newProfile => {
           this._currentReadingProfile.set(newProfile);

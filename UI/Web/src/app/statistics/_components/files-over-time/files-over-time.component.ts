@@ -5,6 +5,8 @@ import {StatisticsService} from "../../../_services/statistics.service";
 import {StatCountWithFormat} from "../../_models/stat-count";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {MangaFormat} from "../../../_models/manga-format";
+import {DecimalPipe} from "@angular/common";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 // TODO: Make this derived from localeService
 const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
@@ -13,7 +15,9 @@ const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric'
   selector: 'app-files-over-time',
   imports: [
     TranslocoDirective,
-    LineChartComponent
+    LineChartComponent,
+    DecimalPipe,
+    StatsNoDataComponent
   ],
   templateUrl: './files-over-time.component.html',
   styleUrl: './files-over-time.component.scss',
@@ -32,6 +36,23 @@ export class FilesOverTimeComponent {
   });
 
   isLoading = computed(() => this.filesOverTimeResource.isLoading());
+
+  mostFilesInADay = computed(() => {
+    const { data, axisLabels, hasData } = this.chartData();
+
+    if (!hasData || axisLabels.length === 0) {
+      return { date: '', count: 0 };
+    }
+
+    const totals = axisLabels.map((_, dateIdx) =>
+      data.reduce((sum, formatRow) => sum + formatRow[dateIdx], 0)
+    );
+
+    const maxCount = Math.max(...totals);
+    const maxIndex = totals.indexOf(maxCount);
+
+    return { date: axisLabels[maxIndex], count: maxCount };
+  })
 
   private transformData(data: StatCountWithFormat<any>[]) {
     if (!data || data.length === 0) {

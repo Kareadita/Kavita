@@ -6,118 +6,122 @@
 
     @let files = (files$ | async) || [];
 
-    <app-responsive-table [rows]="files" [trackByFn]="trackByExtension">
-      <ng-template #tableTemplate>
-        <ngx-datatable
-          class="bootstrap"
-          [rows]="files"
-          [columnMode]="'force'"
-          rowHeight="auto"
-          [headerHeight]="40"
-          [footerHeight]="40"
-          [sorts]="[{prop: 'totalFiles', dir: 'desc'}]"
-        >
-          <ngx-datatable-column prop="extension" [sortable]="true" [draggable]="false" [resizeable]="false">
-            <ng-template ngx-datatable-header-template>
-              {{t('extension-header')}}
-            </ng-template>
-            <ng-template let-value="value" ngx-datatable-cell-template>
-              {{value || t('not-classified')}}
-            </ng-template>
-          </ngx-datatable-column>
+    @if (files.length > 0) {
+      <app-responsive-table [rows]="files" [trackByFn]="trackByExtension">
+        <ng-template #tableTemplate>
+          <ngx-datatable
+            class="bootstrap"
+            [rows]="files"
+            [columnMode]="'force'"
+            rowHeight="auto"
+            [footerHeight]="50"
+            [sorts]="[{prop: 'totalFiles', dir: 'desc'}]"
+          >
+            <ngx-datatable-column prop="extension" [sortable]="true" [draggable]="false" [resizeable]="false">
+              <ng-template ngx-datatable-header-template>
+                {{t('extension-header')}}
+              </ng-template>
+              <ng-template let-value="value" ngx-datatable-cell-template>
+                {{value || t('not-classified')}}
+              </ng-template>
+            </ngx-datatable-column>
 
-          <ngx-datatable-column prop="format" [sortable]="true" [draggable]="false" [resizeable]="false">
-            <ng-template ngx-datatable-header-template>
-              {{t('format-header')}}
-            </ng-template>
-            <ng-template let-value="value" ngx-datatable-cell-template>
-              {{value | mangaFormat}}
-            </ng-template>
-          </ngx-datatable-column>
+            <ngx-datatable-column prop="format" [sortable]="true" [draggable]="false" [resizeable]="false">
+              <ng-template ngx-datatable-header-template>
+                {{t('format-header')}}
+              </ng-template>
+              <ng-template let-value="value" ngx-datatable-cell-template>
+                {{value | mangaFormat}}
+              </ng-template>
+            </ngx-datatable-column>
 
-          <ngx-datatable-column prop="totalSize" [sortable]="true" [draggable]="false" [resizeable]="false">
-            <ng-template ngx-datatable-header-template>
-              {{t('total-size-header')}}
-            </ng-template>
-            <ng-template let-value="value" ngx-datatable-cell-template>
-              {{value | bytes}}
-            </ng-template>
-          </ngx-datatable-column>
+            <ngx-datatable-column prop="totalSize" [sortable]="true" [draggable]="false" [resizeable]="false">
+              <ng-template ngx-datatable-header-template>
+                {{t('total-size-header')}}
+              </ng-template>
+              <ng-template let-value="value" ngx-datatable-cell-template>
+                {{value | bytes}}
+              </ng-template>
+            </ngx-datatable-column>
 
-          <ngx-datatable-column prop="totalFiles" [sortable]="true" [draggable]="false" [resizeable]="false">
-            <ng-template ngx-datatable-header-template>
-              {{t('total-files-header')}}
-            </ng-template>
-            <ng-template let-value="value" ngx-datatable-cell-template>
-              {{value | compactNumber}}
-            </ng-template>
-          </ngx-datatable-column>
+            <ngx-datatable-column prop="totalFiles" [sortable]="true" [draggable]="false" [resizeable]="false">
+              <ng-template ngx-datatable-header-template>
+                {{t('total-files-header')}}
+              </ng-template>
+              <ng-template let-value="value" ngx-datatable-cell-template>
+                {{value | compactNumber}}
+              </ng-template>
+            </ngx-datatable-column>
 
-          <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
-            <ng-template ngx-datatable-header-template>
-              {{t('download-file-for-extension-header')}}
-            </ng-template>
-            <ng-template let-item="row" ngx-datatable-cell-template>
-              <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress[item.extension]">
-                @if (downloadInProgress[item.extension]) {
-                  <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
-                } @else {
-                  <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
-                }
-                <span class="visually-hidden">{{t('download-file-for-extension-alt', {extension: item.extension})}}</span>
-              </button>
-            </ng-template>
-          </ngx-datatable-column>
+            <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
+              <ng-template ngx-datatable-header-template>
+                {{t('download-file-for-extension-header')}}
+              </ng-template>
+              <ng-template let-item="row" ngx-datatable-cell-template>
+                <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress[item.extension]">
+                  @if (downloadInProgress[item.extension]) {
+                    <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+                  } @else {
+                    <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
+                  }
+                  <span class="visually-hidden">{{t('download-file-for-extension-alt', {extension: item.extension})}}</span>
+                </button>
+              </ng-template>
+            </ngx-datatable-column>
 
-          <ng-template ngx-datatable-footer-template>
-            <div class="d-flex align-items-center px-3 py-2">
-              <span>{{t('total-file-size-title')}}: {{((rawData$ | async)?.totalFileSize || 0) | bytes}}</span>
-            </div>
-          </ng-template>
-        </ngx-datatable>
-      </ng-template>
-
-      <ng-template #cardTemplate let-item let-idx="index">
-        <div class="card mb-3">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-              <h5 class="card-title mb-0" id="adhoctask--{{idx}}">
-                {{item.extension || t('not-classified')}}
-              </h5>
-              <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress[item.extension]">
-                @if (downloadInProgress[item.extension]) {
-                  <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
-                } @else {
-                  <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
-                }
-                <span class="visually-hidden">{{t('download-file-for-extension-alt', {extension: item.extension})}}</span>
-              </button>
-            </div>
-
-            <div class="row g-2">
-              <div class="col-6">
-                <div class="text-muted small">{{t('format-header')}}</div>
-                <div>{{item.format | mangaFormat}}</div>
+            <ng-template ngx-datatable-footer-template>
+              <div class="d-flex align-items-center px-3 py-2">
+                <span>{{t('total-file-size-title')}}: {{((rawData$ | async)?.totalFileSize || 0) | bytes}}</span>
               </div>
-              <div class="col-6">
-                <div class="text-muted small">{{t('total-size-header')}}</div>
-                <div>{{item.totalSize | bytes}}</div>
+            </ng-template>
+          </ngx-datatable>
+        </ng-template>
+
+        <ng-template #cardTemplate let-item let-idx="index">
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5 class="card-title mb-0" id="adhoctask--{{idx}}">
+                  {{item.extension || t('not-classified')}}
+                </h5>
+                <button class="btn btn-icon" style="color: var(--primary-color)" (click)="export(item.extension)" [disabled]="downloadInProgress[item.extension]">
+                  @if (downloadInProgress[item.extension]) {
+                    <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+                  } @else {
+                    <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
+                  }
+                  <span class="visually-hidden">{{t('download-file-for-extension-alt', {extension: item.extension})}}</span>
+                </button>
               </div>
-              <div class="col-6">
-                <div class="text-muted small">{{t('total-files-header')}}</div>
-                <div>{{item.totalFiles | compactNumber}}</div>
+
+              <div class="row g-2">
+                <div class="col-6">
+                  <div class="text-muted small">{{t('format-header')}}</div>
+                  <div>{{item.format | mangaFormat}}</div>
+                </div>
+                <div class="col-6">
+                  <div class="text-muted small">{{t('total-size-header')}}</div>
+                  <div>{{item.totalSize | bytes}}</div>
+                </div>
+                <div class="col-6">
+                  <div class="text-muted small">{{t('total-files-header')}}</div>
+                  <div>{{item.totalFiles | compactNumber}}</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </ng-template>
+        </ng-template>
 
-      <div cardFooter class="card mb-3">
-        <div class="card-body py-2">
-          <strong>{{t('total-file-size-title')}}:</strong> {{((rawData$ | async)?.totalFileSize || 0) | bytes}}
+        <div cardFooter class="card mb-3">
+          <div class="card-body py-2">
+            <strong>{{t('total-file-size-title')}}:</strong> {{((rawData$ | async)?.totalFileSize || 0) | bytes}}
+          </div>
         </div>
-      </div>
-    </app-responsive-table>
+      </app-responsive-table>
+    } @else {
+      <app-stats-no-data [message]="t('no-data')" [icon]="'fa-solid fa-file'" />
+    }
+
 
   </div>
 </ng-container>

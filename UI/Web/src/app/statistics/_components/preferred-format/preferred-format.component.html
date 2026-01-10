@@ -10,7 +10,7 @@
 
       <app-pie-chart [data]="data()" [valueTransformer]="valueTransformer.bind(this)" />
     }  @else if (!formatsResource.isLoading())  {
-      <h6 class="stats-subtitle">{{t('no-data')}}</h6>
+      <app-stats-no-data [message]="t('no-data')" />
     }
 
 

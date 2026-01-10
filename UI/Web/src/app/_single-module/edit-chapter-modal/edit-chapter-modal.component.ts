@@ -45,7 +45,8 @@ enum TabID {
   Info = 'info-tab',
   People = 'people-tab',
   Tasks = 'tasks-tab',
-  Tags = 'tags-tab'
+  Tags = 'tags-tab',
+  Weblinks = 'weblinks-tab', // TODO: Weblinks are not implemented
 }
 
 export interface EditChapterModalCloseResult {

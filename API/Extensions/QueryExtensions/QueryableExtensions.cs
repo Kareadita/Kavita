@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -350,7 +350,7 @@ public static class QueryableExtensions
     /// <param name="keySelector"></param>
     /// <param name="sortOptions"></param>
     /// <returns></returns>
-    public static IQueryable<T> DoOrderBy<T, TKey>(this IQueryable<T> query, Expression<Func<T, TKey>> keySelector, SortOptions sortOptions)
+    public static IOrderedQueryable<T> DoOrderBy<T, TKey>(this IQueryable<T> query, Expression<Func<T, TKey>> keySelector, SortOptions sortOptions)
     {
         return sortOptions.IsAscending ? query.OrderBy(keySelector) : query.OrderByDescending(keySelector);
     }

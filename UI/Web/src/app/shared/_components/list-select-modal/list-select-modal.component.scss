@@ -1,5 +1,9 @@
-.clickable:hover, .clickable:focus {
+.clickable:hover:not(.disabled) {
   background-color: var(--list-group-hover-bg-color, var(--primary-color));
+}
+
+.disabled:hover {
+  cursor: not-allowed;
 }
 
 .pill {
@@ -11,4 +15,9 @@
   &.active {
     background-color : var(--primary-color);
   }
+}
+
+.virtual-scroller, virtual-scroller {
+  width: 100%;
+  height: 400px;
 }

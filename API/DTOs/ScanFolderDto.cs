@@ -14,4 +14,9 @@ public sealed record ScanFolderDto
     /// </summary>
     /// <remarks>JSON cannot accept /, so you may need to use // escaping on paths</remarks>
     public string FolderPath { get; set; } = default!;
+
+    /// <summary>
+    /// If true, only runs the scan if a matches series is found. I.e. prevent library scans
+    /// </summary>
+    public bool AbortOnNoSeriesMatch { get; set; } = false;
 }

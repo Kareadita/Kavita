@@ -2,54 +2,58 @@
   <div class="card stats-card p-4">
     <h6 class="stats-title">{{t('title')}}</h6>
 
-    @let statuses = publicationStatues$ | async;
+    @let statuses = (publicationStatues$ | async) || [];
+    @if (statuses.length > 0) {
+      <app-responsive-table [rows]="statuses" [trackByFn]="trackByIdentity">
+        <ng-template #tableTemplate>
+          <ngx-datatable
+            class="bootstrap"
+            [rows]="statuses"
+            [columnMode]="'force'"
+            rowHeight="auto"
+            [footerHeight]="50"
+          >
+            <ngx-datatable-column prop="name" [sortable]="true" [draggable]="false" [resizeable]="false">
+              <ng-template ngx-datatable-header-template>
+                {{t('year-header')}}
+              </ng-template>
+              <ng-template let-value="value" ngx-datatable-cell-template>
+                {{value}}
+              </ng-template>
+            </ngx-datatable-column>
 
-    <app-responsive-table [rows]="statuses || []" [trackByFn]="trackByIdentity">
-      <ng-template #tableTemplate>
-        <ngx-datatable
-          class="bootstrap"
-          [rows]="statuses"
-          [columnMode]="'force'"
-          rowHeight="auto"
-          [headerHeight]="40"
-        >
-          <ngx-datatable-column prop="name" [sortable]="true" [draggable]="false" [resizeable]="false">
-            <ng-template ngx-datatable-header-template>
-              {{t('year-header')}}
-            </ng-template>
-            <ng-template let-value="value" ngx-datatable-cell-template>
-              {{value}}
-            </ng-template>
-          </ngx-datatable-column>
+            <ngx-datatable-column prop="value" [sortable]="true" [draggable]="false" [resizeable]="false">
+              <ng-template ngx-datatable-header-template>
+                {{t('count-header')}}
+              </ng-template>
+              <ng-template let-value="value" ngx-datatable-cell-template>
+                {{value | number:'1.0-0'}}
+              </ng-template>
+            </ngx-datatable-column>
+          </ngx-datatable>
+        </ng-template>
 
-          <ngx-datatable-column prop="value" [sortable]="true" [draggable]="false" [resizeable]="false">
-            <ng-template ngx-datatable-header-template>
-              {{t('count-header')}}
-            </ng-template>
-            <ng-template let-value="value" ngx-datatable-cell-template>
-              {{value | number:'1.0-0'}}
-            </ng-template>
-          </ngx-datatable-column>
-        </ngx-datatable>
-      </ng-template>
-
-      <ng-template #cardTemplate let-item let-idx="index">
-        <div class="card mb-3">
-          <div class="card-body">
-            <div class="row g-2">
-              <div class="col-6">
-                <div class="text-muted small">{{t('year-header')}}</div>
-                <div>{{item.name}}</div>
-              </div>
-              <div class="col-6">
-                <div class="text-muted small">{{t('count-header')}}</div>
-                <div>{{item.value | number:'1.0-0'}}</div>
+        <ng-template #cardTemplate let-item let-idx="index">
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="row g-2">
+                <div class="col-6">
+                  <div class="text-muted small">{{t('year-header')}}</div>
+                  <div>{{item.name}}</div>
+                </div>
+                <div class="col-6">
+                  <div class="text-muted small">{{t('count-header')}}</div>
+                  <div>{{item.value | number:'1.0-0'}}</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </ng-template>
-    </app-responsive-table>
+        </ng-template>
+      </app-responsive-table>
+    } @else {
+      <app-stats-no-data [message]="t('no-data')" />
+    }
+
 </div>
 
 

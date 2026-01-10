@@ -64,7 +64,7 @@ import {ServerDevicesComponent} from "../../../admin/server-devices/server-devic
 import {ManageCustomKeyBindsComponent} from "../../../user-settings/custom-key-binds/manage-custom-key-binds.component";
 
 @Component({
-    selector: 'app-settings',
+  selector: 'app-settings',
   imports: [
     ChangeAgeRestrictionComponent,
     ChangeEmailComponent,
@@ -105,9 +105,9 @@ import {ManageCustomKeyBindsComponent} from "../../../user-settings/custom-key-b
     ManageCustomKeyBindsComponent,
     ManageAuthKeysComponent
   ],
-    templateUrl: './settings.component.html',
-    styleUrl: './settings.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './settings.component.html',
+  styleUrl: './settings.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingsComponent {
 
@@ -131,8 +131,6 @@ export class SettingsComponent {
         return;
       }
       this.fragment = frag as SettingsTabId;
-
-      //this.titleService.setTitle('Kavita - ' + translate('admin-dashboard.title'));
 
       this.cdRef.markForCheck();
     }), takeUntilDestroyed(this.destroyRef)).subscribe();

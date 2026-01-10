@@ -28,7 +28,12 @@
     </form>
   </div>
 
-  <app-responsive-table [rows]="events" [trackByFn]="trackByEvents">
+  <app-responsive-table [rows]="events"
+                        [trackByFn]="trackByEvents"
+                        [totalItems]="pageInfo.totalElements"
+                        [pageSize]="pageInfo.size"
+                        [pageIndex]="pageInfo.pageNumber"
+                        (pageChange)="onPageChange({offset: $event.pageIndex})">
     <ng-template #tableTemplate>
       <ngx-datatable
         class="bootstrap"

@@ -9,7 +9,7 @@
         } @else { <!-- Displaying both looks really bad -->
           <app-profile-icon [userId]="annotation().ownerUserId" />
         }
-        <a class="ms-2" routerLink="/profile/{{annotation().ownerUserId}}" (click)="$event.stopPropagation()">
+        <a class="ms-2" [routerLink]="['/profile', annotation().ownerUserId]" [fragment]="'stats-tab'" (click)="$event.stopPropagation()">
           <strong [style.color]="colorscapeService.getContrastingTextColor(username)">{{ annotation().ownerUsername }}</strong>
         </a>
       </div>

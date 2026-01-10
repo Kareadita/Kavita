@@ -16,10 +16,7 @@
               [timeFrameLabel]="timeFrameLabel()" />
           </div>
         } @empty {
-          <div class="empty-state text-center py-4">
-            <i class="fa-solid fa-users-slash fa-2x mb-2" aria-hidden="true"></i>
-            <p class="mb-0">{{t('no-data')}}</p>
-          </div>
+          <app-stats-no-data [message]="t('no-data')" />
         }
       }
     </div>

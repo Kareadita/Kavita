@@ -4,7 +4,7 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Linq;
-using API.Archive;
+using API.DTOs.Archive;
 using API.Entities.Enums;
 using API.Services;
 using Microsoft.Extensions.Logging;

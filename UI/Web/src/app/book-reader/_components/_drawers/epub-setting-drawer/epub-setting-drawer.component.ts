@@ -21,6 +21,7 @@ export class EpubSettingDrawerComponent {
 
   chapterId = model<number>();
   seriesId = model<number>();
+  libraryId = model<number>();
   readingProfile = model<ReadingProfile>();
   readerSettingsService = model.required<EpubReaderSettingsService>();
 

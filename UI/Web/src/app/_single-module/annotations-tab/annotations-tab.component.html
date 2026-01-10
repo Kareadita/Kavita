@@ -1,4 +1,4 @@
-<div class="mb-3" *transloco="let t;prefix:'annotations-tab'">
+<div class="mb-3">
   <virtual-scroller #scroll [items]="annotations()"  [parentScroll]="scrollingBlock()" [childHeight]="1">
     <div class="card-container row g-0" #container>
       @for(item of scroll.viewPortItems; let idx = $index; track item.id) {

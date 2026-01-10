@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.AutoMapper;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
@@ -47,7 +48,10 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
         await SeedDb(_context);
 
 
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.AddMaps(typeof(AutoMapperProfiles).Assembly);
+        });
         var mapper = config.CreateMapper();
 
         GlobalConfiguration.Configuration.UseInMemoryStorage();

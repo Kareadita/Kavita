@@ -73,8 +73,34 @@
                                    (filterChange)="filter.set($event)" (yearChange)="year.set($event)" [locale]="'server'" />
   </div>
 
-  <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around align-items-stretch">
-    <div class="col-auto d-flex">
+  <div class="row g-3 mt-2 mb-3">
+    <div class="col-12 col-md-6">
+      <app-stat-list
+        [title]="t('popular-series-title')"
+        [items]="popularSeries()"
+        [valueLabel]="t('reads')"
+        [featuredImage]="mostPopularSeriesCover()"
+        [itemImage]="getSeriesImage"
+        [itemUrl]="getSeriesUrl"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+
+    <div class="col-12 col-md-6">
+      <app-stat-list
+        [title]="t('popular-reading-lists-title')"
+        [items]="popularReadingList()"
+        [valueLabel]="t('readers')"
+        [featuredImage]="mostPopularReadingListCover()"
+        [itemImage]="getReadingListImage"
+        [itemUrl]="getReadingListUrl"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
         [title]="t('popular-decades-title')"
         [items]="releaseYearsWithUrls()"
@@ -83,7 +109,7 @@
         [config]="{ showRanking: true, showAccentBars: true }"
       />
     </div>
-    <div class="col-auto d-flex">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
         [title]="t('popular-libraries-title')"
         [items]="popularLibraries()"
@@ -91,19 +117,8 @@
         [config]="{ showRanking: true, showAccentBars: true }"
       />
     </div>
-    <div class="col-auto d-flex">
-      <app-stat-list
-        [title]="t('popular-series-title')"
-        [items]="popularSeries()"
-        [valueLabel]="t('series')"
-        [featuredImage]="mostPopularSeriesCover()"
-        [itemImage]="getSeriesImage"
-        [itemUrl]="getSeriesUrl"
-        [config]="{ showRanking: true, showAccentBars: true }"
-      />
-    </div>
 
-    <div class="col-auto d-flex">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
         [title]="t('popular-genres-title')"
         [items]="popularGenres()"
@@ -112,7 +127,7 @@
       />
     </div>
 
-    <div class="col-auto d-flex">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
         [title]="t('popular-tags-title')"
         [items]="popularTags()"
@@ -121,9 +136,9 @@
       />
     </div>
 
-    <div class="col-auto d-flex">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
-        [title]="t('popular-authors-title')"
+        [title]="t('popular-person-title', {role: PersonRole.Writer | personRole})"
         [items]="popularAuthors()"
         [valueLabel]="t('series')"
         [itemUrl]="getPersonUrl"
@@ -131,10 +146,30 @@
       />
     </div>
 
-    <div class="col-auto d-flex">
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
       <app-stat-list
-        [title]="t('popular-artists-title')"
+        [title]="t('popular-person-title', {role: PersonRole.CoverArtist | personRole})"
         [items]="popularArtists()"
+        [valueLabel]="t('series')"
+        [itemUrl]="getPersonUrl"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+      <app-stat-list
+        [title]="t('popular-person-title', {role: PersonRole.Character | personRole})"
+        [items]="popularCharacters()"
+        [valueLabel]="t('series')"
+        [itemUrl]="getPersonUrl"
+        [config]="{ showRanking: true, showAccentBars: true }"
+      />
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+      <app-stat-list
+        [title]="t('popular-person-title', {role: PersonRole.Publisher | personRole})"
+        [items]="popularPublishers()"
         [valueLabel]="t('series')"
         [itemUrl]="getPersonUrl"
         [config]="{ showRanking: true, showAccentBars: true }"

@@ -5,8 +5,8 @@ import {
   DestroyRef,
   inject,
   Input,
-  model,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
@@ -57,7 +57,6 @@ import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pip
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {setupLanguageSettings, TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
 import {Language} from "../../../_models/metadata/language";
-import {map} from "rxjs/operators";
 import {MetadataService} from "../../../_services/metadata.service";
 
 enum TabID {
@@ -146,7 +145,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   setupStep = StepID.General;
   fileTypeGroups = allFileTypeGroup;
   excludePatterns: Array<string> = [''];
-  filesAtRoot = model<Array<string>>([]);
+  filesAtRoot = signal<Array<string>>([]);
 
   tasks: ActionItem<Library>[] = this.getTasks();
 

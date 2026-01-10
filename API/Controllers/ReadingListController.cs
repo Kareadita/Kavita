@@ -103,10 +103,9 @@ public class ReadingListController : BaseApiController
     /// <param name="readingListId"></param>
     /// <returns></returns>
     [HttpGet("items")]
-    public async Task<ActionResult<IEnumerable<ReadingListItemDto>>> GetListForUser(int readingListId)
+    public async Task<ActionResult<IList<ReadingListItemDto>>> GetListForUser(int readingListId)
     {
-        var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, UserId);
-        return Ok(items);
+        return Ok(await _readingListService.GetReadingListItems(readingListId, UserId));
     }
 
 

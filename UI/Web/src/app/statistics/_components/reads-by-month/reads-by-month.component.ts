@@ -4,13 +4,15 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
 import {DecimalPipe} from "@angular/common";
 import {LineChartComponent} from "../../../shared/_charts/line-chart/line-chart.component";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 @Component({
   selector: 'app-reads-by-month',
   imports: [
     TranslocoDirective,
     LineChartComponent,
-    DecimalPipe
+    DecimalPipe,
+    StatsNoDataComponent
   ],
   templateUrl: './reads-by-month.component.html',
   styleUrl: './reads-by-month.component.scss',

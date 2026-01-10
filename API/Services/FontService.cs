@@ -8,7 +8,6 @@ using API.Entities;
 using API.Entities.Enums.Font;
 using API.Extensions;
 using API.Services.Tasks.Scanner.Parser;
-using API.SignalR;
 using Flurl.Http;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -96,18 +95,16 @@ public class FontService: IFontService
     private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<FontService> _logger;
-    private readonly IEventHub _eventHub;
 
     private const string SupportedFontUrlPrefix = "https://fonts.google.com/";
     private const string DownloadFontUrlPrefix = "https://fonts.google.com/download/list?family=";
     private const string GoogleFontsInvalidJsonPrefix = ")]}'";
 
-    public FontService(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<FontService> logger, IEventHub eventHub)
+    public FontService(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<FontService> logger)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
         _logger = logger;
-        _eventHub = eventHub;
     }
 
     public async Task<EpubFont> CreateFontFromFileAsync(string path)

@@ -121,7 +121,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
         if (!string.IsNullOrEmpty(info.ComicInfo.Number))
         {
             info.Chapters = info.ComicInfo.Number;
-            if (info.IsSpecial && Parser.DefaultChapter != info.Chapters)
+            if (info.IsSpecial && !Parser.IsDefaultChapter(info.Chapters))
             {
                 info.IsSpecial = false;
                 info.Volumes = $"{Parser.SpecialVolumeNumber}";

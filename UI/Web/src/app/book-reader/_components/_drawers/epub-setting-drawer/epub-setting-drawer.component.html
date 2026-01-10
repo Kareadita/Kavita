@@ -9,10 +9,11 @@
   </div>
 
   <div class="offcanvas-body">
+    @let lId = libraryId();
     @let sId = seriesId();
     @let rp = readingProfile();
-    @if (sId && rp) {
-      <app-reader-settings [seriesId]="sId"
+    @if (sId && rp && lId) {
+      <app-reader-settings [libraryId]="lId" [seriesId]="sId"
         [readingProfile]="rp"
         [readerSettingsService]="readerSettingsService()"
        />

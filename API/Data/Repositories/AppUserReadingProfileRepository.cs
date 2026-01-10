@@ -18,22 +18,44 @@ public interface IAppUserReadingProfileRepository
 {
 
     /// <summary>
-    /// Return the given profile if it belongs the user
+    /// Returns the reading profile to use for the given series
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="libraryId"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="activeDeviceId"></param>
+    /// <param name="skipImplicit"></param>
+    /// <returns></returns>
+    Task<AppUserReadingProfile> GetProfileForSeries(int userId, int libraryId, int seriesId, int? activeDeviceId = null, bool skipImplicit = false);
+
+    /// <summary>
+    /// Get all profiles assigned to a library
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
+    Task<List<AppUserReadingProfile>> GetProfilesForLibrary(int userId, int libraryId);
+    /// <summary>
+    /// Return the profile if it belongs the user
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="profileId"></param>
     /// <returns></returns>
     Task<AppUserReadingProfile?> GetUserProfile(int userId, int profileId);
+
     /// <summary>
     /// Returns all reading profiles for the user
     /// </summary>
     /// <param name="userId"></param>
+    /// <param name="skipImplicit"></param>
     /// <returns></returns>
     Task<IList<AppUserReadingProfile>> GetProfilesForUser(int userId, bool skipImplicit = false);
+
     /// <summary>
     /// Returns all reading profiles for the user
     /// </summary>
     /// <param name="userId"></param>
+    /// <param name="skipImplicit"></param>
     /// <returns></returns>
     Task<IList<UserReadingProfileDto>> GetProfilesDtoForUser(int userId, bool skipImplicit = false);
     /// <summary>
@@ -52,6 +74,30 @@ public interface IAppUserReadingProfileRepository
 
 public class AppUserReadingProfileRepository(DataContext context, IMapper mapper): IAppUserReadingProfileRepository
 {
+
+    public Task<AppUserReadingProfile> GetProfileForSeries(int userId, int libraryId, int seriesId, int? activeDeviceId = null, bool skipImplicit = false)
+    {
+        return context.AppUserReadingProfiles
+            .Where(rp => rp.AppUserId == userId)
+            .WhereIf(skipImplicit, rp => rp.Kind != ReadingProfileKind.Implicit)
+            .Where(rp => rp.DeviceIds.Count == 0 || activeDeviceId == null || rp.DeviceIds.Contains(activeDeviceId.Value))
+            .OrderByDescending(rp => rp.Kind == ReadingProfileKind.Implicit && rp.SeriesIds.Contains(seriesId) && (rp.DeviceIds.Count == 0 || (activeDeviceId != null && rp.DeviceIds.Contains(activeDeviceId.Value))))
+            .ThenByDescending(rp => rp.Kind == ReadingProfileKind.Implicit && rp.SeriesIds.Contains(seriesId))
+            .ThenByDescending(rp => rp.SeriesIds.Contains(seriesId) && (rp.DeviceIds.Count == 0 || (activeDeviceId != null && rp.DeviceIds.Contains(activeDeviceId.Value))))
+            .ThenByDescending(rp => rp.SeriesIds.Contains(seriesId))
+            .ThenByDescending(rp => rp.LibraryIds.Contains(libraryId) && (rp.DeviceIds.Count == 0 || (activeDeviceId != null && rp.DeviceIds.Contains(activeDeviceId.Value))))
+            .ThenByDescending(rp => rp.LibraryIds.Contains(libraryId))
+            .ThenByDescending(rp => rp.Kind == ReadingProfileKind.Default)
+            .FirstAsync();
+    }
+
+    public Task<List<AppUserReadingProfile>> GetProfilesForLibrary(int userId, int libraryId)
+    {
+        return context.AppUserReadingProfiles
+            .Where(rp => rp.AppUserId == userId && rp.LibraryIds.Contains(libraryId))
+            .ToListAsync();
+    }
+
     public async Task<AppUserReadingProfile?> GetUserProfile(int userId, int profileId)
     {
         return await context.AppUserReadingProfiles

@@ -26,7 +26,6 @@ public class ReaderServiceRereadTests
     private readonly IAppUserProgressRepository _progressRepo;
     private readonly IUserRepository _userRepo;
     private readonly ILibraryRepository _libraryRepo;
-    private readonly IEntityDisplayService _entityDisplayService;
     private readonly ISeriesService _seriesService;
     private readonly ReaderService _readerService;
 
@@ -39,7 +38,6 @@ public class ReaderServiceRereadTests
         _progressRepo = Substitute.For<IAppUserProgressRepository>();
         _userRepo = Substitute.For<IUserRepository>();
         _libraryRepo = Substitute.For<ILibraryRepository>();
-        _entityDisplayService = Substitute.For<IEntityDisplayService>();
         _seriesService = Substitute.For<ISeriesService>();
 
         unitOfWork.SeriesRepository.Returns(_seriesRepo);
@@ -59,7 +57,8 @@ public class ReaderServiceRereadTests
             Substitute.For<IReadingSessionService>(),
             Substitute.For<IClientInfoAccessor>(),
             _seriesService,
-            _entityDisplayService
+            Substitute.For<IEntityNamingService>(),
+            Substitute.For<ILocalizationService>()
         );
     }
 
@@ -95,7 +94,6 @@ public class ReaderServiceRereadTests
         _chapterRepo.GetFirstChapterForSeriesAsync(seriesId, userId).Returns(continuePoint);
         _progressRepo.AnyUserProgressForSeriesAsync(seriesId, userId).Returns(false);
         _progressRepo.GetLatestProgressForSeries(seriesId, userId).Returns((DateTime?)null);
-        _entityDisplayService.GetEntityDisplayName(continuePoint, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 1");
 
         // Act
         var result = await _readerService.CheckSeriesForReRead(userId, seriesId, libraryId);
@@ -144,7 +142,6 @@ public class ReaderServiceRereadTests
         _chapterRepo.GetFirstChapterForSeriesAsync(seriesId, userId).Returns(firstChapter);
         _progressRepo.AnyUserProgressForSeriesAsync(seriesId, userId).Returns(true);
         _progressRepo.GetLatestProgressForSeries(seriesId, userId).Returns(DateTime.UtcNow.AddDays(-1));
-        _entityDisplayService.GetEntityDisplayName(continuePoint, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 10");
 
         // Mock GetContinuePoint internals
         _progressRepo.AnyUserProgressForSeriesAsync(seriesId, userId).Returns(true);
@@ -198,7 +195,6 @@ public class ReaderServiceRereadTests
         _progressRepo.AnyUserProgressForSeriesAsync(seriesId, userId).Returns(true);
         _progressRepo.GetLatestProgressForSeries(seriesId, userId).Returns(DateTime.UtcNow.AddDays(-1));
         _chapterRepo.GetCurrentlyReadingChapterAsync(seriesId, userId).Returns(continuePoint);
-        _entityDisplayService.GetEntityDisplayName(continuePoint, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 5");
 
         // Act
         var result = await _readerService.CheckSeriesForReRead(userId, seriesId, libraryId);
@@ -245,7 +241,6 @@ public class ReaderServiceRereadTests
         _progressRepo.AnyUserProgressForSeriesAsync(seriesId, userId).Returns(true);
         _progressRepo.GetLatestProgressForSeries(seriesId, userId).Returns(DateTime.UtcNow.AddDays(-1));
         _chapterRepo.GetCurrentlyReadingChapterAsync(seriesId, userId).Returns(continuePoint);
-        _entityDisplayService.GetEntityDisplayName(continuePoint, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 5");
 
         // Act
         var result = await _readerService.CheckSeriesForReRead(userId, seriesId, libraryId);
@@ -294,7 +289,6 @@ public class ReaderServiceRereadTests
         _progressRepo.AnyUserProgressForSeriesAsync(seriesId, userId).Returns(true);
         _progressRepo.GetLatestProgressForSeries(seriesId, userId).Returns(DateTime.UtcNow.AddDays(-daysSinceRead));
         _chapterRepo.GetCurrentlyReadingChapterAsync(seriesId, userId).Returns(continuePoint);
-        _entityDisplayService.GetEntityDisplayName(continuePoint, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 5");
 
         // Act
         var result = await _readerService.CheckSeriesForReRead(userId, seriesId, libraryId);
@@ -355,8 +349,6 @@ public class ReaderServiceRereadTests
         _progressRepo.GetLatestProgressForSeries(seriesId, userId).Returns(DateTime.UtcNow.AddDays(-daysSinceRead));
         _chapterRepo.GetCurrentlyReadingChapterAsync(seriesId, userId).Returns(continuePoint);
         _chapterRepo.GetChapterDtoAsync(4, userId).Returns(prevChapter);
-        _entityDisplayService.GetEntityDisplayName(continuePoint, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 5");
-        _seriesService.FormatChapterTitle(userId, prevChapter, LibraryType.Manga).Returns("Chapter 4");
 
         // Mock GetPrevChapterIdAsync to return chapter 4
         var volumes = new List<VolumeDto>
@@ -442,7 +434,6 @@ public class ReaderServiceRereadTests
         _volumeRepo.GetVolumeDtoAsync(volumeId, userId).Returns(volumeDto);
         _libraryRepo.GetLibraryTypeAsync(libraryId).Returns(LibraryType.Manga);
         _progressRepo.GetLatestProgressForVolume(volumeId, userId).Returns((DateTime?)null);
-        _entityDisplayService.GetEntityDisplayName(volumeDto.Chapters.First(), userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 1");
 
         // Act
         var result = await _readerService.CheckVolumeForReRead(userId, volumeId, seriesId, libraryId);
@@ -499,9 +490,6 @@ public class ReaderServiceRereadTests
         _libraryRepo.GetLibraryTypeAsync(libraryId).Returns(LibraryType.Manga);
         _progressRepo.GetLatestProgressForVolume(volumeId, userId).Returns(DateTime.UtcNow.AddDays(-1));
         _chapterRepo.GetFirstChapterForVolumeAsync(volumeId, userId).Returns(firstChapter);
-        _entityDisplayService.GetEntityDisplayName(Arg.Any<ChapterDto>(), userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 1");
-        _entityDisplayService.GetVolumeDisplayName(volumeDto, userId, Arg.Any<EntityDisplayOptions>()).Returns(("Volume 1", false));
-
         // Act
         var result = await _readerService.CheckVolumeForReRead(userId, volumeId, seriesId, libraryId);
 
@@ -511,7 +499,6 @@ public class ReaderServiceRereadTests
         Assert.False(result.TimePrompt);
         Assert.NotNull(result.ChapterOnReread);
         Assert.Equal(firstChapter.Id, result.ChapterOnReread.ChapterId);
-        Assert.Equal("Volume 1", result.ChapterOnReread.Label);
     }
 
     [Fact]
@@ -562,7 +549,6 @@ public class ReaderServiceRereadTests
         _volumeRepo.GetVolumesDtoAsync(seriesId, userId).Returns([volumeDto]);
         _libraryRepo.GetLibraryTypeAsync(libraryId).Returns(LibraryType.Manga);
         _progressRepo.GetLatestProgressForVolume(volumeId, userId).Returns(DateTime.UtcNow.AddDays(-daysSinceRead));
-        _entityDisplayService.GetEntityDisplayName(Arg.Any<ChapterDto>(), userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 2");
 
         // Act
         var result = await _readerService.CheckVolumeForReRead(userId, volumeId, seriesId, libraryId);
@@ -627,7 +613,6 @@ public class ReaderServiceRereadTests
         _chapterRepo.GetChapterDtoAsync(chapterId, userId).Returns(chapterDto);
         _libraryRepo.GetLibraryTypeAsync(libraryId).Returns(LibraryType.Manga);
         _progressRepo.GetLatestProgressForChapter(chapterId, userId).Returns((DateTime?)null);
-        _entityDisplayService.GetEntityDisplayName(chapterDto, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 1");
 
         // Act
         var result = await _readerService.CheckChapterForReRead(userId, chapterId, seriesId, libraryId);
@@ -664,7 +649,6 @@ public class ReaderServiceRereadTests
         _chapterRepo.GetChapterDtoAsync(chapterId, userId).Returns(chapterDto);
         _libraryRepo.GetLibraryTypeAsync(libraryId).Returns(LibraryType.Manga);
         _progressRepo.GetLatestProgressForChapter(chapterId, userId).Returns(DateTime.UtcNow.AddDays(-1));
-        _entityDisplayService.GetEntityDisplayName(chapterDto, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 1");
 
         // Act
         var result = await _readerService.CheckChapterForReRead(userId, chapterId, seriesId, libraryId);
@@ -704,7 +688,6 @@ public class ReaderServiceRereadTests
         _chapterRepo.GetChapterDtoAsync(chapterId, userId).Returns(chapterDto);
         _libraryRepo.GetLibraryTypeAsync(libraryId).Returns(LibraryType.Manga);
         _progressRepo.GetLatestProgressForChapter(chapterId, userId).Returns(DateTime.UtcNow.AddDays(-daysSinceRead));
-        _entityDisplayService.GetEntityDisplayName(chapterDto, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 1");
 
         // Act
         var result = await _readerService.CheckChapterForReRead(userId, chapterId, seriesId, libraryId);
@@ -742,7 +725,6 @@ public class ReaderServiceRereadTests
         _chapterRepo.GetChapterDtoAsync(chapterId, userId).Returns(chapterDto);
         _libraryRepo.GetLibraryTypeAsync(libraryId).Returns(LibraryType.Manga);
         _progressRepo.GetLatestProgressForChapter(chapterId, userId).Returns(DateTime.UtcNow.AddDays(-daysSinceRead));
-        _entityDisplayService.GetEntityDisplayName(chapterDto, userId, Arg.Any<EntityDisplayOptions>()).Returns("Chapter 1");
 
         // Act
         var result = await _readerService.CheckChapterForReRead(userId, chapterId, seriesId, libraryId);

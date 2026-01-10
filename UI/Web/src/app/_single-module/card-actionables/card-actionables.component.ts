@@ -1,20 +1,8 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  effect,
-  EventEmitter,
-  inject,
-  input,
-  model,
-  OnChanges,
-  OnDestroy,
-  Output
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, inject, input, OnDestroy, Output} from '@angular/core';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {AccountService} from 'src/app/_services/account.service';
 import {ActionableEntity, ActionItem} from 'src/app/_services/action-factory.service';
-import {AsyncPipe, NgTemplateOutlet} from "@angular/common";
+import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
@@ -26,15 +14,14 @@ import {User} from "../../_models/user/user";
   selector: 'app-card-actionables',
   imports: [
     NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    DynamicListPipe, TranslocoDirective, AsyncPipe, NgTemplateOutlet
+    DynamicListPipe, TranslocoDirective, AsyncPipe, NgTemplateOutlet, NgClass
   ],
   templateUrl: './card-actionables.component.html',
   styleUrls: ['./card-actionables.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardActionablesComponent implements OnChanges, OnDestroy {
+export class CardActionablesComponent implements OnDestroy {
 
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly modalService = inject(NgbModal);
@@ -43,13 +30,17 @@ export class CardActionablesComponent implements OnChanges, OnDestroy {
 
   iconClass = input<string>('fa-ellipsis-v');
   btnClass = input<string>('');
-  inputActions = input<ActionItem<any>[]>([]);
+  actions = input<ActionItem<any>[]>([]);
   labelBy = input<string>('card');
   /**
    * Text to display as if actionable was a button
    */
   label = input<string>('');
   disabled = input<boolean>(false);
+  /**
+   * Hide label when on mobile
+   */
+  hideLabelOnMobile = input<boolean>(false);
 
   entity = input<ActionableEntity>(null);
   /**
@@ -57,29 +48,9 @@ export class CardActionablesComponent implements OnChanges, OnDestroy {
    */
   @Output() actionHandler = new EventEmitter<ActionItem<any>>();
 
-
-  actions = model<ActionItem<ActionableEntity>[]>([]);
-  currentUser: User | undefined = undefined;
+  currentUser = this.accountService.currentUserSignal;
   submenu: {[key: string]: NgbDropdown} = {};
   private closeTimeout: any = null;
-
-  constructor() {
-    effect(() => {
-      const user = this.accountService.currentUserSignal();
-      if (!user) return;
-
-      this.currentUser = user;
-      this.actions.set(this.inputActions().filter(a => this.willRenderAction(a, user)));
-      this.cdRef.markForCheck();
-    });
-  }
-
-  ngOnChanges() {
-    if (!this.currentUser) return; // We can safely return as actionables will never be visible if there is no user
-
-    this.actions.set(this.inputActions().filter(a => this.willRenderAction(a, this.currentUser!)));
-    this.cdRef.markForCheck();
-  }
 
   ngOnDestroy() {
     this.cancelCloseSubmenus();

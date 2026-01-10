@@ -82,6 +82,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.CoverImageSize:
                     destination.CoverImageSize = Enum.Parse<CoverImageSize>(row.Value);
                     break;
+                case ServerSettingKey.PdfRenderResolution:
+                    destination.PdfRenderResolution = Enum.Parse<PdfRenderResolution>(row.Value);
+                    break;
                 case ServerSettingKey.EncodeMediaAs:
                     destination.EncodeMediaAs = Enum.Parse<EncodeFormat>(row.Value);
                     break;
@@ -129,6 +132,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     break;
                 case ServerSettingKey.FirstInstallVersion:
                     destination.FirstInstallVersion = row.Value;
+                    break;
+                case ServerSettingKey.StatsApiHits:
+                    destination.StatsApiHits = int.Parse(row.Value);
                     break;
                 case ServerSettingKey.OidcConfiguration:
                     destination.OidcConfig = JsonSerializer.Deserialize<OidcConfigDto>(row.Value)!;

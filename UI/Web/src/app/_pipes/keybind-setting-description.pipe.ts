@@ -35,7 +35,9 @@ export class KeybindSettingDescriptionPipe implements PipeTransform {
       case KeyBindTarget.PageUp:
         return this.create('key-bind-title-page-up', 'key-bind-tooltip-page-up');
       case KeyBindTarget.PageDown:
-        return this.create('key-bind-title-page-down', 'key-bind-tooltip-page-up');
+        return this.create('key-bind-title-page-down', 'key-bind-tooltip-page-down');
+      case KeyBindTarget.OffsetDoublePage:
+        return this.create('key-bind-title-offset-double-page', 'key-bind-tooltip-offset-double-page');
     }
   }
 

@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.OPDS.Requests;
+﻿using API.Entities.Enums.UserPreferences;
+
+namespace API.DTOs.OPDS.Requests;
 
 /// <summary>
 /// A special case for dealing with lower level entities (volume/chapter) which need higher level entity ids
@@ -10,6 +12,7 @@ public sealed record OpdsItemsFromCompoundEntityIdsRequest : IOpdsRequest, IOpds
     public string Prefix { get; init; }
     public string BaseUrl { get; init; }
     public int UserId { get; init; }
+    public AppUserOpdsPreferences Preferences { get; init; }
     public int PageNumber { get; init; }
 
     public int SeriesId { get; init; }

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, model, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
@@ -41,12 +41,12 @@ export class LicenseComponent implements OnInit {
     'email': new FormControl('', [Validators.required]),
     'discordId': new FormControl('', [Validators.pattern(/\d+/)])
   });
-  isViewMode = model<boolean>(true);
-  isChecking = model<boolean>(true);
-  isSaving = model<boolean>(false);
-  hasLicense = model<boolean>(false);
-  licenseInfo = model<LicenseInfo | null>(null);
-  showEmail = model<boolean>(false);
+  isViewMode = signal<boolean>(true);
+  isChecking = signal<boolean>(true);
+  isSaving = signal<boolean>(false);
+  hasLicense = signal<boolean>(false);
+  licenseInfo = signal<LicenseInfo | null>(null);
+  showEmail = signal<boolean>(false);
 
   /**
    * Either the normal manageLink or with a prefilled email to ease the user

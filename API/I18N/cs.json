@@ -220,5 +220,8 @@
     "genre-doesnt-exist": "Žánr neexistuje",
     "font-url-not-allowed": "Nahrávání písma pomocí URL je povoleno pouze z Google Fonts",
     "annotation-export-failed": "Nelze exportovat poznámky, zkontrolujte protokoly",
-    "download-not-allowed": "Uživatel nemá oprávnění ke stažení"
+    "download-not-allowed": "Uživatel nemá oprávnění ke stažení",
+    "client-device-doesnt-exist": "Klientské zařízení neexistuje",
+    "auth-key-unique": "Název autentizačního klíče musí být pro váš účet jedinečný",
+    "role-restricted": "Přístup zakázán: Vaše role tuto akci neumožňuje"
 }

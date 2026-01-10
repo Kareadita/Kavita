@@ -9,6 +9,7 @@
         </div>
       } @else if (chartData(); as chart) {
         @if (chart.hasData) {
+
           <app-line-chart
             [axisLabels]="chart.axisLabels"
             [data]="chart.data"
@@ -17,9 +18,17 @@
             [clampOutliers]="true"
           />
         } @else {
-          <p>{{t('no-data')}}</p>
+          <app-stats-no-data [message]="t('no-data')" />
         }
       }
     </div>
+
+    @let mostFiles = mostFilesInADay();
+    @if (mostFiles.count > 0) {
+      <div class="stats-note text-muted">
+        {{t('most-files', {date: mostFiles.date, count: mostFiles.count | number})}}
+      </div>
+    }
+
   </div>
 </ng-container>

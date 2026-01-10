@@ -10,6 +10,8 @@ public sealed record ClientDeviceDto
     /// </summary>
     public string FriendlyName { get; set; } = string.Empty;
 
+    public string? UiFingerprint { get; set; }
+
     /// <summary>
     /// Most recent stable ClientInfoData (excluding IP/timestamp changes)
     /// </summary>

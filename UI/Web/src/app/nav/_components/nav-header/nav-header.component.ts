@@ -9,6 +9,7 @@ import {
   HostListener,
   inject,
   OnInit,
+  signal,
   ViewChild
 } from '@angular/core';
 import {NavigationEnd, Router, RouterLink, RouterLinkActive} from '@angular/router';
@@ -51,7 +52,6 @@ import {MetadataService} from "../../../_services/metadata.service";
 import {Annotation} from "../../../book-reader/_models/annotations/annotation";
 import {QuillViewComponent} from "ngx-quill";
 import {AnnotationService} from "../../../_services/annotation.service";
-import {ProfileImageComponent} from "../../../profile/_components/profile-image/profile-image.component";
 import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile-icon.component";
 
 @Component({
@@ -61,7 +61,7 @@ import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, GroupedTypeaheadComponent, ImageComponent,
     SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    AsyncPipe, SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileImageComponent, ProfileIconComponent]
+    AsyncPipe, SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileIconComponent]
 })
 export class NavHeaderComponent implements OnInit {
 
@@ -80,27 +80,23 @@ export class NavHeaderComponent implements OnInit {
   private readonly annotationService = inject(AnnotationService);
   private readonly document = inject(DOCUMENT);
 
-
-  protected readonly FilterField = FilterField;
-  protected readonly WikiLink = WikiLink;
-  protected readonly ScrobbleProvider = ScrobbleProvider;
-  protected readonly SettingsTabId = SettingsTabId;
-  protected readonly Breakpoint = Breakpoint;
-
   @ViewChild('search') searchViewRef!: any;
 
   profileLink = computed(() => {
-    return `/profile/${this.accountService.currentUserSignal()?.id ?? ''}`
-  })
+    return ['/profile', this.accountService.currentUserSignal()?.id ?? ''];
+  });
+
+  currentUser = computed(() => {
+    return this.accountService.currentUserSignal();
+  });
 
 
-  isLoading = false;
+  isLoading = signal<boolean>(false);
   debounceTime = 300;
   searchResults: SearchResultGroup = new SearchResultGroup();
   searchTerm = '';
 
   backToTopNeeded = false;
-  searchFocused: boolean = false;
   scrollElem: HTMLElement;
 
   breakpointSource = new BehaviorSubject<Breakpoint>(this.utilityService.getActiveBreakpoint());
@@ -150,17 +146,17 @@ export class NavHeaderComponent implements OnInit {
   }
 
   onChangeSearch(evt: SearchEvent) {
-      this.isLoading = true;
+      this.isLoading.set(true);
       this.searchTerm = evt.value.trim();
       this.cdRef.markForCheck();
 
       this.searchService.search(this.searchTerm, evt.includeFiles).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(results => {
         this.searchResults = results;
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.cdRef.markForCheck();
       }, () => {
         this.searchResults.reset();
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.searchTerm = '';
         this.cdRef.markForCheck();
       });
@@ -250,18 +246,19 @@ export class NavHeaderComponent implements OnInit {
     this.scrollService.scrollTo(0, this.scrollElem);
   }
 
-  focusUpdate(searchFocused: boolean) {
-    this.searchFocused = searchFocused;
-    this.cdRef.markForCheck();
-  }
-
   toggleSideNav(event: any) {
     event.stopPropagation();
     this.navService.toggleSideNav();
   }
 
   openLinkSelectionMenu() {
-    const ref = this.modalService.open(NavLinkModalComponent, {fullscreen: 'sm'});
+    this.modalService.open(NavLinkModalComponent, {fullscreen: 'sm'});
   }
+
+  protected readonly FilterField = FilterField;
+  protected readonly WikiLink = WikiLink;
+  protected readonly ScrobbleProvider = ScrobbleProvider;
+  protected readonly SettingsTabId = SettingsTabId;
+  protected readonly Breakpoint = Breakpoint;
 
 }

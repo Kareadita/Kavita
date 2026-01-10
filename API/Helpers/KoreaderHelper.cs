@@ -24,7 +24,7 @@ public static class KoreaderHelper
     /// <param name="filePath">The path to the file to hash</param>
     public static string HashContents(string filePath)
     {
-        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath) || !Parser.IsEpub(filePath))
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
         {
             return null;
         }
@@ -92,7 +92,8 @@ public static class KoreaderHelper
         var lastPart = koreaderPosition.Split("/body/")[^1];
         var lastTag = path[5].ToUpper();
 
-        // TODO: Enhance this code: /body/DocFragment[27]/body/section/p[3]/text().229 -> p[3] but we probably can get more
+        // If lastPart ends in a .Decimal, remove it as it's not a valid xpath
+        lastPart = lastPart.Split("/text()")[0];
 
         if (lastTag == "A")
         {
@@ -101,28 +102,27 @@ public static class KoreaderHelper
         else
         {
             // The format that Kavita accepts as a progress string. It tells Kavita where Koreader last left off.
-            progress.BookScrollId = $"//html[1]/{BookService.BookReaderBodyScope[2..].ToLowerInvariant()}/{lastPart}";
+            progress.BookScrollId = $"//body/{lastPart}";
         }
     }
 
-
+    /// <summary>
+    /// The format that Koreader accepts as a progress string. It tells Koreader where Kavita last left off.
+    /// </summary>
+    /// <remarks>
+    /// Koreader stores the format as:
+    /// /body/DocFragment[fragment_index]/body/[xpath_to_element]
+    /// fragment_index is the page number for the xhtml files
+    /// </remarks>
+    /// <param name="progressDto"></param>
+    /// <returns></returns>
     public static string GetKoreaderPosition(ProgressDto progressDto)
     {
-        string nonBodyTag;
-        var koreaderPageNumber = progressDto.PageNum + 1;
 
-        if (string.IsNullOrEmpty(progressDto.BookScrollId))
-        {
-            nonBodyTag = "a";
-        }
-        else
-        {
-            // What we Store: //html[1]/BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]/section/p[62]/text().0
-            // What we Need to send back: section/p[62]/text().0
-            nonBodyTag = progressDto.BookScrollId.Replace("//html[1]/", "//", StringComparison.InvariantCultureIgnoreCase).Replace(BookService.BookReaderBodyScope + "/", string.Empty, StringComparison.InvariantCultureIgnoreCase);
-        }
+        var targetPath = !string.IsNullOrEmpty(progressDto.BookScrollId)
+            ? progressDto.BookScrollId.Replace("//body/", string.Empty, StringComparison.InvariantCultureIgnoreCase)
+            : "p[1]"; // Default to first paragraph if unknown
 
-        // The format that Koreader accepts as a progress string. It tells Koreader where Kavita last left off.
-        return $"/body/DocFragment[{koreaderPageNumber}]/body/{nonBodyTag}";
+        return $"/body/DocFragment[{progressDto.PageNum}]/body/{targetPath}";
     }
 }

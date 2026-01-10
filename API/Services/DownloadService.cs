@@ -17,8 +17,6 @@ public class DownloadService : IDownloadService
 {
     private readonly FileExtensionContentTypeProvider _fileTypeProvider = new FileExtensionContentTypeProvider();
 
-    public DownloadService() { }
-
     /// <summary>
     /// Downloads the first file in the file enumerable for download
     /// </summary>

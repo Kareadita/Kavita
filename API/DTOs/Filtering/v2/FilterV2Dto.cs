@@ -16,7 +16,7 @@ public sealed record FilterV2Dto
     /// The name of the filter
     /// </summary>
     public string? Name { get; set; }
-    public ICollection<FilterStatementDto> Statements { get; set; } = [];
+    public List<FilterStatementDto> Statements { get; set; } = [];
     public FilterCombination Combination { get; set; } = FilterCombination.And;
     public SortOptions? SortOptions { get; set; }
 

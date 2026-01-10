@@ -234,13 +234,10 @@ public class LibraryController : BaseApiController
     [HttpGet("user-libraries")]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(int userId)
     {
-        var ownUserName = Username!;
-        if (string.IsNullOrEmpty(ownUserName)) return Unauthorized();
-
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null || string.IsNullOrEmpty(user.UserName)) return BadRequest();
 
-        var ownLibraries = await GetLibrariesForUser(ownUserName);
+        var ownLibraries = await GetLibrariesForUser(Username!);
         var otherLibraries = await GetLibrariesForUser(user.UserName);
 
         var sharedLibraries = otherLibraries.IntersectBy(ownLibraries.Select(l => l.Id), l => l.Id).ToList();
@@ -448,26 +445,28 @@ public class LibraryController : BaseApiController
     [HttpPost("scan-folder")]
     public async Task<ActionResult> ScanFolder(ScanFolderDto dto)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(dto.ApiKey);
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var user = await _unitOfWork.UserRepository.GetUserByAuthKey(dto.ApiKey);
         if (user == null) return Unauthorized();
 
         // Validate user has Admin privileges
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (!isAdmin) return BadRequest("API key must belong to an admin");
 
-        if (dto.FolderPath.Contains("..")) return BadRequest(await _localizationService.Translate(user.Id, "invalid-path"));
+        if (dto.FolderPath.Contains(".."))
+        {
+            return BadRequest(await _localizationService.Translate(UserId, "invalid-path"));
+        }
 
-        dto.FolderPath = Services.Tasks.Scanner.Parser.Parser.NormalizePath(dto.FolderPath);
+        dto.FolderPath = Parser.NormalizePath(dto.FolderPath);
 
         var libraryFolder = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
             .SelectMany(l => l.Folders)
             .Distinct()
-            .Select(Services.Tasks.Scanner.Parser.Parser.NormalizePath);
+            .Select(Parser.NormalizePath);
 
         var seriesFolder = _directoryService.FindHighestDirectoriesFromFiles(libraryFolder, [dto.FolderPath]);
 
-        _taskScheduler.ScanFolder(seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath);
+        _taskScheduler.ScanFolder(seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath, dto.AbortOnNoSeriesMatch);
 
         return Ok();
     }

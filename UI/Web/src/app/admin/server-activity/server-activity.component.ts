@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, model, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ActivityCardComponent} from "../../_single-module/activity-card/activity-card.component";
 import {ActivityService} from "../../_services/activity.service";
@@ -23,7 +23,7 @@ export class ServerActivityComponent implements OnInit {
   protected readonly messageHub = inject(MessageHubService);
   protected readonly destroyRef = inject(DestroyRef);
 
-  activeSessions = model<ReadingSession[]>([]);
+  activeSessions = signal<ReadingSession[]>([]);
 
   constructor() {
     this.messageHub.messages$.pipe(

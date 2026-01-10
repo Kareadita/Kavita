@@ -98,7 +98,7 @@ public class Program
                             try
                             {
                                 // v0.7.14
-                                await MigrateWantToReadExport.Migrate(context, directoryService, logger);
+                                await new MigrateWantToReadExport(directoryService).RunAsync(context, logger);
 
                                 // v0.8.2
                                 await ManualMigrateSwitchToWal.Migrate(context, logger);

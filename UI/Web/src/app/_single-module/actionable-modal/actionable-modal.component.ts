@@ -47,23 +47,27 @@ export class ActionableModalComponent implements OnInit {
   user!: User | undefined;
 
   ngOnInit() {
-    this.currentItems = this.translateOptions(this.actions);
+    // Copy as the list may be shared between entities
+    const actionItems = this.actions.map(action => this.utilityService.copyActionItem(action));
 
     // On Mobile, surface download
-    const otherActionIndex = this.currentItems.findIndex(i => i.action === Action.Submenu && i.title === 'actionable.other')
+    const otherActionIndex = actionItems.findIndex(i => i.action === Action.Submenu && i.title === 'others')
     if (otherActionIndex >= 0) {
-      const downloadActionIndex = this.currentItems[otherActionIndex].children.findIndex(a => a.action === Action.Download);
+      const downloadActionIndex = actionItems[otherActionIndex].children.findIndex(a => a.action === Action.Download);
 
       if (downloadActionIndex >= 0) {
-        const downloadAction = this.currentItems[otherActionIndex].children.splice(downloadActionIndex, 1)[0];
-        this.currentItems.push(downloadAction);
+        const downloadAction = actionItems[otherActionIndex].children.splice(downloadActionIndex, 1)[0];
+        actionItems.push(downloadAction);
 
         // Check if Other has any other children, else remove
-        if (this.currentItems[otherActionIndex].children.length === 0) {
-          this.currentItems.splice(otherActionIndex, 1);
+        if (actionItems[otherActionIndex].children.length === 0) {
+          actionItems.splice(otherActionIndex, 1);
         }
       }
     }
+
+    this.actions = actionItems;
+    this.currentItems = this.translateOptions(this.actions)
 
     this.accountService.currentUser$.pipe(tap(user => {
       this.user = user;

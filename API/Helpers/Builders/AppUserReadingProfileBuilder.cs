@@ -21,7 +21,8 @@ public class AppUserReadingProfileBuilder
             AppUserId = userId,
             Kind = ReadingProfileKind.User,
             SeriesIds = [],
-            LibraryIds = []
+            LibraryIds = [],
+            DeviceIds = [],
         };
     }
 
@@ -47,6 +48,14 @@ public class AppUserReadingProfileBuilder
     {
         _profile.Name = name;
         _profile.NormalizedName = name.ToNormalized();
+        return this;
+    }
+
+    public AppUserReadingProfileBuilder WithDeviceId(int deviceId)
+    {
+        if (_profile.DeviceIds.Contains(deviceId)) return this;
+        _profile.DeviceIds.Add(deviceId);
+
         return this;
     }
 

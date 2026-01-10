@@ -31,8 +31,16 @@ public class PagedList<T> : List<T>
     public static async Task<PagedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize)
     {
         // NOTE: OrderBy warning being thrown here even if query has the orderby statement
-        var count = await source.CountAsync();
-        var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-        return new PagedList<T>(items, count, pageNumber, pageSize);
+        var countTask = source.CountAsync();
+        var itemsTask = source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+        await Task.WhenAll(countTask, itemsTask);
+
+        return new PagedList<T>(itemsTask.Result, countTask.Result, pageNumber, pageSize);
+    }
+
+    public static PagedList<T> Create(IEnumerable<T> items, int totalCount, int pageNumber, int pageSize)
+    {
+        return new PagedList<T>(items, totalCount, pageNumber, pageSize);
     }
 }

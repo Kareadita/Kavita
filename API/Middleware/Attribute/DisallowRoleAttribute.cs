@@ -39,8 +39,6 @@ public class DisallowRoleAttribute(params string[] roles) : Attribute, IAsyncAut
                 Content = message,
                 ContentType = "text/plain"
             };
-
-
         }
     }
 }

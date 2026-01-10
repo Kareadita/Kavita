@@ -1,5 +1,7 @@
 <ng-container *transloco="let t; prefix: 'nav-header'">
   @if (navService.navbarVisible$ | async) {
+    @let user = currentUser();
+
     <nav class="navbar navbar-expand-md navbar-dark fixed-top">
       <div class="container-fluid">
         <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-alt')}}</a>
@@ -15,7 +17,7 @@
           </div>
         </a>
         <ul class="navbar-nav col me-auto">
-          @if (accountService.currentUser$ | async; as user) {
+          @if (user) {
             <div class="nav-item search">
               <label for="nav-search" class="form-label visually-hidden">{{t('search-series-alt')}}</label>
               <div class="ng-autocomplete">
@@ -23,13 +25,12 @@
                   #search
                   id="nav-search"
                   [minQueryLength]="2"
-                  [isLoading]="isLoading"
+                  [isLoading]="isLoading()"
                   initialValue=""
                   [placeholder]="t('search-alt')"
                   [groupedData]="searchResults"
                   (inputChanged)="onChangeSearch($event)"
                   (clearField)="clearSearch()"
-                  (focusChanged)="focusUpdate($event)"
                 >
 
                   <ng-template #libraryTemplate let-item>
@@ -198,14 +199,14 @@
             }
           }
 
-          @if (accountService.currentUser$ | async; as user) {
+          @if (user) {
             <div class="nav-item me-2">
               <app-nav-events-toggle [user]="user" />
             </div>
 
             @if((breakpoint$ | async)! <= Breakpoint.Mobile) {
               <button class="btn btn-outline-secondary primary-text" (click)="openLinkSelectionMenu()">
-                <app-profile-icon [userId]="user.id" />
+                <app-profile-icon [userId]="user.id" [size]="20" />
               </button>
             } @else {
               <div class="nav-item not-xs-only">
@@ -218,12 +219,12 @@
               <div ngbDropdown class="nav-item dropdown d-sm-none d-md-block" display="dynamic" placement="bottom-right">
                 <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
                   <span class="phone-hidden d-xs-inline-block d-sm-inline-block me-2">
-                    <app-profile-icon [userId]="user.id" />
+                    <app-profile-icon [userId]="user.id" [size]="20" />
                   </span>
                   <span class="d-none d-xs-none d-sm-none d-md-inline-block fw-bold">{{user.username | sentenceCase}}</span>
                 </button>
                 <div ngbDropdownMenu>
-                  <a ngbDropdownItem [routerLink]="profileLink()">{{t('my-profile')}}</a>
+                  <a ngbDropdownItem [routerLink]="profileLink()" [fragment]="'stats-tab'">{{t('my-profile')}}</a>
                   @for (navItem of navService.navItems; track $index) {
                     @if (navItem.routerLink) {
                       <a ngbDropdownItem [routerLink]="navItem.routerLink" [fragment]="navItem.fragment">{{t(navItem.transLocoKey)}}</a>

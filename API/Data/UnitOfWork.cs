@@ -55,7 +55,7 @@ public class UnitOfWork : IUnitOfWork
         _mapper = mapper;
         _userManager = userManager;
 
-        SeriesRepository = new SeriesRepository(_context, _mapper, _userManager);
+        SeriesRepository = new SeriesRepository(_context, _mapper);
         UserRepository = new UserRepository(_context, _userManager, _mapper);
         LibraryRepository = new LibraryRepository(_context, _mapper);
         VolumeRepository = new VolumeRepository(_context, _mapper);

@@ -19,7 +19,6 @@ public interface IAppUserSmartFilterRepository
     IEnumerable<SmartFilterDto> GetAllDtosByUserId(int userId);
     Task<PagedList<SmartFilterDto>> GetPagedDtosByUserIdAsync(int userId, UserParams userParams);
     Task<AppUserSmartFilter?> GetById(int smartFilterId);
-
 }
 
 public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository

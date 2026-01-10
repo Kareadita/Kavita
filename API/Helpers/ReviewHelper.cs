@@ -58,7 +58,7 @@ public static class ReviewHelper
             .Select(node => node.InnerText)
             .Where(s => !s.Equals("\n")));
 
-        // Clean any leftover markdown out
+        // Clean any leftover Markdown out
         plainText = Regex.Replace(plainText, @"\*\*(.*?)\*\*", "$1"); // Bold with **
         plainText = Regex.Replace(plainText, @"_(.*?)_", "$1"); // Italic with _
         plainText = Regex.Replace(plainText, @"\[(.*?)\]\((.*?)\)", "$1"); // Links [text](url)

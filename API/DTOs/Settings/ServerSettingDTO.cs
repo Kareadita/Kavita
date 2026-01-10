@@ -88,6 +88,10 @@ public sealed record ServerSettingDto
     /// </summary>
     public CoverImageSize CoverImageSize { get; set; }
     /// <summary>
+    /// How large rendered PDF images should be
+    /// </summary>
+    public PdfRenderResolution PdfRenderResolution { get; set; }
+    /// <summary>
     /// SMTP Configuration
     /// </summary>
     public SmtpConfigDto SmtpConfig { get; set; }
@@ -104,6 +108,10 @@ public sealed record ServerSettingDto
     /// The Version of Kavita on the first run
     /// </summary>
     public string? FirstInstallVersion { get; set; }
+    /// <summary>
+    /// How many times Kavita has hit the Stats API
+    /// </summary>
+    public int StatsApiHits { get; set; }
 
     /// <summary>
     /// Are at least some basics filled in

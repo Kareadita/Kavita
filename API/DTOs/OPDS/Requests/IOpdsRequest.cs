@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.OPDS.Requests;
+﻿using API.Entities.Enums.UserPreferences;
+
+namespace API.DTOs.OPDS.Requests;
 
 public interface IOpdsRequest
 {
@@ -6,4 +8,5 @@ public interface IOpdsRequest
     public string Prefix { get; init; }
     public string BaseUrl { get; init; }
     public int UserId { get; init; }
+    public AppUserOpdsPreferences Preferences { get; init; }
 }

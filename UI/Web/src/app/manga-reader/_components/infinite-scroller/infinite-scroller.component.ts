@@ -1,5 +1,26 @@
 import {AsyncPipe, DOCUMENT} from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, effect, ElementRef, EventEmitter, inject, Injector, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, signal, Signal, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  EventEmitter,
+  inject,
+  Injector,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  Renderer2,
+  Signal,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
 import {ScrollService} from 'src/app/_services/scroll.service';
@@ -224,6 +245,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    */
   initScrollHandler() {
     const element = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
+
+    // Reset any modal-induced overflow lock (this can happen when Starting Over and ngBootstrap modal hasn't completed teardown)
+    if (element === this.document.body) {
+      this.document.body.style.overflow = 'auto';
+      this.document.body.classList.remove('modal-open'); // ngBootstrap adds this
+    }
 
     fromEvent(element, 'scroll')
       .pipe(

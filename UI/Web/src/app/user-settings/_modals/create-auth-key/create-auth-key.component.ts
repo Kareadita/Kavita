@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
@@ -24,7 +24,7 @@ export class CreateAuthKeyComponent implements OnInit {
   private readonly modalRef = inject(NgbActiveModal);
   private readonly accountService = inject(AccountService);
 
-  authKey = model<AuthKey | null>(null);
+  authKey = signal<AuthKey | null>(null);
   isRotateFlow = computed(() => this.authKey() != null);
 
   settingsForm: FormGroup = new FormGroup({

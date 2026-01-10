@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix:'manage-devices'">
 
-  <!-- "Send to" Devices -->
+  <!-- Email Devices -->
   <ng-container>
     <div class="position-relative">
       <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="isReadOnly$ | async" (click)="addDevice()">
@@ -12,18 +12,18 @@
 
     <p>{{t('description')}}</p>
 
-    @if (!hasEmailSetup) {
+    @if (!hasEmailSetup()) {
       <div class="alert alert-warning" role="alert">
         <strong>{{t('warning')}}</strong> {{t('email-setup-alert')}}
       </div>
     }
 
-    <app-responsive-table [rows]="devices" [trackByFn]="trackBy">
+    <app-responsive-table [rows]="devices()" [trackByFn]="trackBy">
       <ng-template #tableTemplate>
         <ngx-datatable
           class="bootstrap"
-          [rows]="devices"
-          [columnMode]="ColumnMode.flex"
+          [rows]="devices()"
+          [columnMode]="'flex'"
           rowHeight="auto"
           [footerHeight]="50"
           [limit]="15"
@@ -60,15 +60,17 @@
           <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
             <ng-template let-column="column" ngx-datatable-header-template />
             <ng-template let-item="row" ngx-datatable-cell-template>
-              <button class="btn btn-danger  me-2" (click)="deleteDevice(item)">
-                <i class="fa fa-trash" aria-hidden="true"></i>
-                <span class="visually-hidden">{{t('delete')}}</span>
-              </button>
+              <div class="float-end">
+                <button class="btn btn-danger  me-2" (click)="deleteDevice(item)">
+                  <i class="fa fa-trash" aria-hidden="true"></i>
+                  <span class="visually-hidden">{{t('delete')}}</span>
+                </button>
 
-              <button class="btn btn-primary" (click)="editDevice(item)">
-                <i class="fa fa-pen" aria-hidden="true"></i>
-                <span class="visually-hidden">{{t('edit')}}</span>
-              </button>
+                <button class="btn btn-primary" (click)="editDevice(item)">
+                  <i class="fa fa-pen" aria-hidden="true"></i>
+                  <span class="visually-hidden">{{t('edit')}}</span>
+                </button>
+              </div>
             </ng-template>
           </ngx-datatable-column>
         </ngx-datatable>
@@ -79,12 +81,13 @@
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-start mb-3">
               <h5 class="card-title mb-0">{{item.name}}</h5>
-              <div class="btn-group btn-group-sm" role="group">
-                <button class="btn btn-outline-primary" (click)="editDevice(item)">
+
+              <div>
+                <button class="btn btn-primary btn-sm me-2" (click)="editDevice(item)">
                   <i class="fa fa-pen" aria-hidden="true"></i>
                   <span class="visually-hidden">{{t('edit')}}</span>
                 </button>
-                <button class="btn btn-outline-danger" (click)="deleteDevice(item)">
+                <button class="btn btn-danger btn-sm" (click)="deleteDevice(item)">
                   <i class="fa fa-trash" aria-hidden="true"></i>
                   <span class="visually-hidden">{{t('delete')}}</span>
                 </button>

@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.8.17",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.8.24",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.8.17"
+    "version": "0.8.8.24"
   },
   "servers": [
     {
@@ -3195,7 +3195,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/stats/server/top/years": {
@@ -3233,7 +3234,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/stats/reading-count-by-day": {
@@ -3294,7 +3296,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/server/count/year": {
@@ -3332,7 +3335,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/stats/server/top/users": {
@@ -3383,7 +3387,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/reader/all-chapter-progress": {
@@ -3433,7 +3438,396 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/recommended/quick-reads": {
+      "get": {
+        "tags": [
+          "Deprecated"
+        ],
+        "summary": "Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "query",
+            "description": "Library to restrict series to",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/recommended/quick-catchup-reads": {
+      "get": {
+        "tags": [
+          "Deprecated"
+        ],
+        "summary": "Quick Catchup Reads are series that should be readable in less than 10 in total and are Ongoing in release.",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "query",
+            "description": "Library to restrict series to",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/recommended/highly-rated": {
+      "get": {
+        "tags": [
+          "Deprecated"
+        ],
+        "summary": "Highly Rated based on other users ratings. Will pull series with ratings > 4.0, weighted by count of other users.",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "query",
+            "description": "Library to restrict series to",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/recommended/more-in": {
+      "get": {
+        "tags": [
+          "Deprecated"
+        ],
+        "summary": "Chooses a random genre and shows series that are in that without reading progress",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "query",
+            "description": "Library to restrict series to",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "genreId",
+            "in": "query",
+            "description": "Genre Id",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/recommended/rediscover": {
+      "get": {
+        "tags": [
+          "Deprecated"
+        ],
+        "summary": "Series that are fully read by the user in no particular order",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "query",
+            "description": "Library to restrict series to",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/users/myself": {
+      "get": {
+        "tags": [
+          "Deprecated"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/api/Device/create": {
@@ -6193,6 +6587,25 @@
           "Manage"
         ],
         "summary": "Returns a list of all Series that is Kavita+ applicable to metadata match and the status of it",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -11453,13 +11866,23 @@
         }
       }
     },
-    "/api/reading-profile/{seriesId}": {
+    "/api/reading-profile/{libraryId}/{seriesId}": {
       "get": {
         "tags": [
           "ReadingProfile"
         ],
         "summary": "Returns the ReadingProfile that should be applied to the given series, walks up the tree.\nSeries -> Library -> Default",
         "parameters": [
+          {
+            "name": "libraryId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
           {
             "name": "seriesId",
             "in": "path",
@@ -11477,8 +11900,145 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Defaults to currently active device",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reading-profile/series": {
+      "get": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Returns all Reading Profiles bound to a series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadingProfileDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadingProfileDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadingProfileDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Update the implicit reading profile for a series, creates one if none exists",
+        "description": "Any modification to the reader settings during reading will create an implicit profile. Use \"update-parent\" to save to the bound series profile.",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Defaults to currently active device",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserReadingProfileDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -11508,7 +12068,7 @@
         "tags": [
           "ReadingProfile"
         ],
-        "summary": "Returns the (potential) Reading Profile bound to the library",
+        "summary": "Returns all the Reading rofiles bound to the library",
         "parameters": [
           {
             "name": "libraryId",
@@ -11526,17 +12086,26 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadingProfileDto"
+                  }
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadingProfileDto"
+                  }
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserReadingProfileDto"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReadingProfileDto"
+                  }
                 }
               }
             }
@@ -11609,70 +12178,17 @@
               "type": "integer",
               "format": "int32"
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserReadingProfileDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserReadingProfileDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserReadingProfileDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/reading-profile/series": {
-      "post": {
-        "tags": [
-          "ReadingProfile"
-        ],
-        "summary": "Update the implicit reading profile for a series, creates one if none exists",
-        "description": "Any modification to the reader settings during reading will create an implicit profile. Use \"update-parent\" to save to the bound series profile.",
-        "parameters": [
+          },
           {
-            "name": "seriesId",
+            "name": "deviceId",
             "in": "query",
-            "description": "",
+            "description": "Defaults to currently active device",
             "schema": {
               "type": "integer",
               "format": "int32"
             }
           }
         ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserReadingProfileDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserReadingProfileDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserReadingProfileDto"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "OK",
@@ -11705,9 +12221,27 @@
         "summary": "Updates the non-implicit reading profile for the given series, and removes implicit profiles",
         "parameters": [
           {
+            "name": "libraryId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
             "name": "seriesId",
             "in": "query",
             "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "Defaults to currently active device",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -11847,17 +12381,40 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "profileId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
           }
         ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -11904,17 +12461,40 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "profileId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
           }
         ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -11951,6 +12531,39 @@
           "ReadingProfile"
         ],
         "summary": "Assigns the reading profile to all passes series, and deletes their implicit profiles",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkSetSeriesProfiles"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkSetSeriesProfiles"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkSetSeriesProfiles"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/reading-profile/set-devices": {
+      "post": {
+        "tags": [
+          "ReadingProfile"
+        ],
+        "summary": "Set the assigned devices for a reading profile",
         "parameters": [
           {
             "name": "profileId",
@@ -11997,350 +12610,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Recommended/quick-reads": {
-      "get": {
-        "tags": [
-          "Recommended"
-        ],
-        "summary": "Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "description": "If set to 0, will set as MaxInt",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Recommended/quick-catchup-reads": {
-      "get": {
-        "tags": [
-          "Recommended"
-        ],
-        "summary": "Quick Catchup Reads are series that should be readable in less than 10 in total and are Ongoing in release.",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "description": "If set to 0, will set as MaxInt",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Recommended/highly-rated": {
-      "get": {
-        "tags": [
-          "Recommended"
-        ],
-        "summary": "Highly Rated based on other users ratings. Will pull series with ratings > 4.0, weighted by count of other users.",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "description": "If set to 0, will set as MaxInt",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Recommended/more-in": {
-      "get": {
-        "tags": [
-          "Recommended"
-        ],
-        "summary": "Chooses a random genre and shows series that are in that without reading progress",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "genreId",
-            "in": "query",
-            "description": "Genre Id",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "description": "If set to 0, will set as MaxInt",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Recommended/rediscover": {
-      "get": {
-        "tags": [
-          "Recommended"
-        ],
-        "summary": "Series that are fully read by the user in no particular order",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "description": "If set to 0, will set as MaxInt",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -13795,6 +14064,15 @@
             }
           },
           {
+            "name": "userId",
+            "in": "query",
+            "description": "Optional user id to request the OnDeck for someone else. They must have profile sharing enabled when doing so",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
             "name": "libraryId",
             "in": "query",
             "description": "This is not in use",
@@ -13807,7 +14085,7 @@
           {
             "name": "context",
             "in": "query",
-            "description": "For complex queries, Library has certain restrictions where the library should not be included in results.\nThis enum dictates which field to use for the lookup.",
+            "description": "",
             "schema": {
               "enum": [
                 1,
@@ -15814,6 +16092,18 @@
         }
       }
     },
+    "/api/Settings/reset-external-ids": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Settings/is-valid-authority": {
       "post": {
         "tags": [
@@ -16083,6 +16373,45 @@
         }
       }
     },
+    "/api/Stats/popular-reading-list": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Gets the top 5 most popular reading lists. Counts a reading list as active if a user has read at least some",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDtoStatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDtoStatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDtoStatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stats/popular-genres": {
       "get": {
         "tags": [
@@ -16159,48 +16488,36 @@
         }
       }
     },
-    "/api/Stats/popular-authors": {
+    "/api/Stats/popular-people": {
       "get": {
         "tags": [
           "Stats"
         ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PersonDtoStatCount"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PersonDtoStatCount"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PersonDtoStatCount"
-                  }
-                }
-              }
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "enum": [
+                1,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "type": "integer",
+              "format": "int32"
             }
           }
-        }
-      }
-    },
-    "/api/Stats/popular-artists": {
-      "get": {
-        "tags": [
-          "Stats"
         ],
         "responses": {
           "200": {
@@ -16249,6 +16566,16 @@
               "type": "string",
               "format": "date-time"
             }
+          },
+          {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
           },
           {
             "name": "EndDate",
@@ -16380,6 +16707,16 @@
             }
           },
           {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
+          },
+          {
             "name": "EndDate",
             "in": "query",
             "schema": {
@@ -16500,11 +16837,10 @@
           {
             "name": "userId",
             "in": "query",
-            "description": "If userId is 0 and user is not an admin, API will default to userId",
+            "description": "",
             "schema": {
               "type": "integer",
-              "format": "int32",
-              "default": 0
+              "format": "int32"
             }
           }
         ],
@@ -16551,11 +16887,10 @@
           {
             "name": "userId",
             "in": "query",
-            "description": "If userId is 0 and user is not an admin, API will default to userId",
+            "description": "",
             "schema": {
               "type": "integer",
-              "format": "int32",
-              "default": 0
+              "format": "int32"
             }
           }
         ],
@@ -16705,6 +17040,16 @@
             }
           },
           {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
+          },
+          {
             "name": "EndDate",
             "in": "query",
             "schema": {
@@ -16787,6 +17132,16 @@
               "type": "string",
               "format": "date-time"
             }
+          },
+          {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
           },
           {
             "name": "EndDate",
@@ -16874,6 +17229,16 @@
             }
           },
           {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
+          },
+          {
             "name": "EndDate",
             "in": "query",
             "schema": {
@@ -16940,6 +17305,16 @@
               "type": "string",
               "format": "date-time"
             }
+          },
+          {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
           },
           {
             "name": "EndDate",
@@ -17009,6 +17384,16 @@
             }
           },
           {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
+          },
+          {
             "name": "EndDate",
             "in": "query",
             "schema": {
@@ -17075,6 +17460,16 @@
             }
           },
           {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
+          },
+          {
             "name": "EndDate",
             "in": "query",
             "schema": {
@@ -17139,6 +17534,16 @@
               "type": "string",
               "format": "date-time"
             }
+          },
+          {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
           },
           {
             "name": "EndDate",
@@ -17208,6 +17613,16 @@
             }
           },
           {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
+          },
+          {
             "name": "EndDate",
             "in": "query",
             "schema": {
@@ -17273,6 +17688,16 @@
               "type": "string",
               "format": "date-time"
             }
+          },
+          {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
           },
           {
             "name": "EndDate",
@@ -17394,6 +17819,16 @@
             }
           },
           {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
+          },
+          {
             "name": "EndDate",
             "in": "query",
             "schema": {
@@ -17477,6 +17912,101 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserReadStatistics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/reading-history": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Return a user's reading session history",
+        "parameters": [
+          {
+            "name": "StartDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "TimeZoneId",
+            "in": "query",
+            "description": "Timezone of the user, will zone to this TimeZone",
+            "schema": {
+              "type": "string",
+              "example": "America/Los_Angeles"
+            },
+            "example": "America/Los_Angeles"
+          },
+          {
+            "name": "EndDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "Libraries",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
+            }
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingHistoryItemDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingHistoryItemDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingHistoryItemDto"
+                  }
                 }
               }
             }
@@ -17722,35 +18252,31 @@
       }
     },
     "/api/Stream/external-source-exists": {
-      "get": {
+      "post": {
         "tags": [
           "Stream"
         ],
         "summary": "Validates the external source by host is unique (for this user)",
-        "parameters": [
-          {
-            "name": "host",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "name",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "schema": {
-              "type": "string"
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalSourceDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalSourceDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalSourceDto"
+              }
             }
           }
-        ],
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -18908,44 +19434,6 @@
         }
       }
     },
-    "/api/Users/myself": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Users/profile-info": {
       "get": {
         "tags": [
@@ -18979,6 +19467,47 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MemberInfoDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Users/has-profile-shared": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Does the requested user have their profile sharing on",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
                 }
               }
             }
@@ -20041,7 +20570,7 @@
             "format": "date-time",
             "nullable": true
           },
-          "lastAccessedAt": {
+          "lastAccessedAtUtc": {
             "type": "string",
             "format": "date-time",
             "nullable": true
@@ -20578,6 +21107,28 @@
       "BulkRemoveBookmarkForSeriesDto": {
         "type": "object",
         "properties": {
+          "seriesIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BulkSetSeriesProfiles": {
+        "type": "object",
+        "properties": {
+          "profileIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
           "seriesIds": {
             "type": "array",
             "items": {
@@ -21340,6 +21891,10 @@
           "friendlyName": {
             "type": "string",
             "description": "User-friendly name, defaults to generated name like \"Chrome on Windows\"",
+            "nullable": true
+          },
+          "uiFingerprint": {
+            "type": "string",
             "nullable": true
           },
           "currentClientInfo": {
@@ -23670,6 +24225,11 @@
             "type": "string",
             "description": "File extension",
             "nullable": true
+          },
+          "koreaderHash": {
+            "type": "string",
+            "description": "A hash of the document using Koreader's unique hashing algorithm",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -24949,6 +25509,136 @@
         },
         "additionalProperties": false
       },
+      "ReadingHistoryChapterItemDto": {
+        "type": "object",
+        "properties": {
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTimeUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTimeUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pagesRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wordsRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "completed": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReadingHistoryItemDto": {
+        "type": "object",
+        "properties": {
+          "sessionDataIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "sessionId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startTimeUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTimeUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "localDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesFormat": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingHistoryChapterItemDto"
+            },
+            "nullable": true
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryName": {
+            "type": "string",
+            "nullable": true
+          },
+          "pagesRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "wordsRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "ReadingListDto": {
         "required": [
           "ageRating"
@@ -25671,6 +26361,10 @@
             "type": "string",
             "description": "Folder Path to Scan",
             "nullable": true
+          },
+          "abortOnNoSeriesMatch": {
+            "type": "boolean",
+            "description": "If true, only runs the scan if a matches series is found. I.e. prevent library scans"
           }
         },
         "additionalProperties": false,
@@ -26776,6 +27470,16 @@
             "description": "How large the cover images should be",
             "format": "int32"
           },
+          "pdfRenderResolution": {
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "How large rendered PDF images should be",
+            "format": "int32"
+          },
           "smtpConfig": {
             "$ref": "#/components/schemas/SmtpConfigDto"
           },
@@ -26792,6 +27496,11 @@
             "type": "string",
             "description": "The Version of Kavita on the first run",
             "nullable": true
+          },
+          "statsApiHits": {
+            "type": "integer",
+            "description": "How many times Kavita has hit the Stats API",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -27058,7 +27767,8 @@
               6,
               7,
               8,
-              9
+              9,
+              10
             ],
             "type": "integer",
             "format": "int32"
@@ -29039,6 +29749,12 @@
                 "items": {
                   "$ref": "#/components/schemas/KeyBind"
                 }
+              },
+              "OffsetDoublePage": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/KeyBind"
+                }
               }
             },
             "additionalProperties": false
@@ -29144,6 +29860,30 @@
             ],
             "type": "integer",
             "format": "int32"
+          },
+          "deviceIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "seriesIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "libraryIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
           },
           "readingDirection": {
             "enum": [
@@ -29726,9 +30466,6 @@
     },
     {
       "name": "ReadingProfile"
-    },
-    {
-      "name": "Recommended"
     },
     {
       "name": "Review"

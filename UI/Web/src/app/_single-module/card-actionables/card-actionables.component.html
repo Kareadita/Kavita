@@ -4,14 +4,14 @@
       @if ((utilityService.activeBreakpoint$ | async)! <= Breakpoint.Tablet) {
         <button [disabled]="disabled()" class="btn {{btnClass()}}" id="{{labelId}}"
                 (click)="openMobileActionableMenu($event)">
-          {{label()}}
+          <span [ngClass]="{'phone-hidden': hideLabelOnMobile()}">{{label()}}</span>
           <i class="fa {{iconClass()}}" aria-hidden="true"></i>
         </button>
       } @else {
         <div ngbDropdown container="body" class="d-inline-block">
           <button [disabled]="disabled()" class="btn {{btnClass()}}" id="{{labelId}}" ngbDropdownToggle
                   (click)="preventEvent($event)">
-            {{label()}}
+            <span [ngClass]="{'phone-hidden': hideLabelOnMobile()}">{{label()}}</span>
             <i class="fa {{iconClass()}}" aria-hidden="true"></i>
           </button>
           <div ngbDropdownMenu attr.aria-labelledby="{{labelId}}">
@@ -26,11 +26,11 @@
                 @for(dynamicItem of dList; track dynamicItem.title) {
                   <button ngbDropdownItem (click)="performDynamicClick($event, action, dynamicItem)">{{dynamicItem.title}}</button>
                 }
-              } @else if (willRenderAction(action, this.currentUser!)) {
+              } @else if (willRenderAction(action, this.currentUser()!)) {
                 <button ngbDropdownItem (click)="performAction($event, action)">{{t(action.title)}}</button>
               }
             } @else {
-              @if (shouldRenderSubMenu(action, action.children?.[0].dynamicList | async) && hasRenderableChildren(action, this.currentUser!)) {
+              @if (shouldRenderSubMenu(action, action.children?.[0].dynamicList | async) && hasRenderableChildren(action, this.currentUser()!)) {
                 <!-- Submenu items -->
                 <div ngbDropdown #subMenuHover="ngbDropdown" placement="right left"
                      (click)="openSubmenu(action.title, subMenuHover)"
@@ -39,7 +39,7 @@
                      class="submenu-wrapper">
 
                   <!-- Check to ensure the submenu has items -->
-                  @if (willRenderAction(action, this.currentUser!)) {
+                  @if (willRenderAction(action, this.currentUser()!)) {
                     <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>
                       {{t(action.title)}} <i class="fa-solid fa-angle-right submenu-icon"></i>
                     </button>

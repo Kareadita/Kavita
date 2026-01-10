@@ -1,23 +1,35 @@
 <ng-container *transloco="let t; prefix: 'details-tab'">
 <div class="details pb-3">
 
-  @if (accountService.isAdmin() && filePaths && filePaths.length > 0) {
+  @let filePathsValue = filePaths();
+  @let filesValue = files();
+
+  @if (accountService.isAdmin() && (filePathsValue.length > 0 || filesValue.length > 0)) {
     <div class="mb-3 ms-1">
-      <h4 class="header">{{t('file-path-title')}}</h4>
+      <h4 class="header">{{t(filesValue.length > 0 ? 'file-path-title' : 'folder-path-title')}}</h4>
       <div class="ms-3 d-flex flex-column">
-        @for (fp of filePaths; track $index) {
-          {{fp}}
+        @if (filesValue.length > 0) {
+          @for (fp of filesValue; track $index) {
+            {{fp.filePath}}
+            @if (fp.koreaderHash) {
+              ({{fp.koreaderHash}})
+            }
+          }
+        } @else {
+          @for (fp of filePathsValue; track $index) {
+            {{fp}}
+          }
         }
       </div>
     </div>
   }
 
-  @if (!suppressEmptyGenres || genres.length > 0) {
+  @if (!suppressEmptyGenres || genres().length > 0) {
 
     <div class="mb-3 ms-1">
       <h4 class="header">{{t('genres-title')}}</h4>
       <div class="ms-3">
-        <app-badge-expander [includeComma]="true" [items]="genres" [itemsTillExpander]="3" [defaultExpanded]="true">
+        <app-badge-expander [includeComma]="true" [items]="genres()" [itemsTillExpander]="3" [defaultExpanded]="true">
           <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
             <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Genres, item.id)">{{item.title}}</a>
           </ng-template>
@@ -26,11 +38,11 @@
     </div>
   }
 
-  @if (!suppressEmptyTags || tags.length > 0) {
+  @if (!suppressEmptyTags || tags().length > 0) {
     <div class="mb-3 ms-1">
       <h4 class="header">{{t('tags-title')}}</h4>
       <div class="ms-3">
-        <app-badge-expander [includeComma]="true" [items]="tags" [itemsTillExpander]="3" [defaultExpanded]="true">
+        <app-badge-expander [includeComma]="true" [items]="tags()" [itemsTillExpander]="3" [defaultExpanded]="true">
           <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
             <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Tags, item.id)">{{item.title}}</a>
           </ng-template>
@@ -40,7 +52,7 @@
   }
 
   <div class="mb-3">
-    <app-carousel-reel [items]="webLinks" [title]="t('weblinks-title')">
+    <app-carousel-reel [items]="webLinks()" [title]="t('weblinks-title')">
       <ng-template #carouselItem let-item>
         <a class="me-1" [href]="item | safeUrl"  target="_blank" rel="noopener noreferrer" [title]="item">
           <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(item)"
@@ -50,7 +62,7 @@
     </app-carousel-reel>
   </div>
 
-  @if (genres.length > 0 || tags.length > 0 || webLinks.length > 0) {
+  @if (hasUpperMetadata()) {
     <div class="setting-section-break" aria-hidden="true"></div>
   }
 

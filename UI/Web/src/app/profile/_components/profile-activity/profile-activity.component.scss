@@ -1,0 +1,68 @@
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.activity-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--bs-body-bg);
+  border-radius: var(--bs-border-radius);
+  border: 1px solid var(--bs-border-color-translucent);
+
+  &.completed {
+    border-left: 3px solid var(--bs-success);
+  }
+}
+
+.entry-date {
+  flex-shrink: 0;
+}
+
+.chapter-cover {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+// Mobile optimizations
+@media (max-width: 575.98px) {
+  .activity-list {
+    padding: 0.5rem;
+  }
+
+  .activity-entry {
+    padding: 0.5rem;
+  }
+
+  // Make pagination buttons larger for touch
+  ::ng-deep .pagination {
+    .page-link {
+      padding: 0.5rem 0.75rem;
+      min-width: 44px; // Minimum touch target
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}

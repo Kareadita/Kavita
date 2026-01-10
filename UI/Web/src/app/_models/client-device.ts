@@ -6,6 +6,7 @@ import {ClientInfo} from "../_services/client-info.service";
 export interface ClientDevice {
   id: number;
   friendlyName: string;
+  uiFingerprint?: string;
   currentClientInfo: ClientInfo;
   firstSeenUtc: string;
   lastSeenUtc: string;

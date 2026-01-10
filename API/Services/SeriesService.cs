@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -19,10 +18,12 @@ using API.Entities.Person;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Helpers.Formatting;
 using API.Services.Plus;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Kavita.Common;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -35,14 +36,9 @@ public interface ISeriesService
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
-    Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true);
-    Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true);
-    Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string chapterRange, string? chapterTitle,
-        bool withHash);
-    Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
     Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId);
     Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams);
-
+    Task<List<FilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId);
 }
 
 public class SeriesService : ISeriesService
@@ -51,9 +47,9 @@ public class SeriesService : ISeriesService
     private readonly IEventHub _eventHub;
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<SeriesService> _logger;
-    private readonly IScrobblingService _scrobblingService;
     private readonly ILocalizationService _localizationService;
     private readonly IReadingListService _readingListService;
+    private readonly IEntityNamingService _namingService;
 
     private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto
     {
@@ -63,16 +59,16 @@ public class SeriesService : ISeriesService
     };
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService,
-        IReadingListService readingListService)
+        ILogger<SeriesService> logger, ILocalizationService localizationService, IReadingListService readingListService,
+        IEntityNamingService namingService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _taskScheduler = taskScheduler;
         _logger = logger;
-        _scrobblingService = scrobblingService;
         _localizationService = localizationService;
         _readingListService = readingListService;
+        _namingService = namingService;
     }
 
     /// <summary>
@@ -516,6 +512,7 @@ public class SeriesService : ISeriesService
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+
         var libraryIds = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
         if (!libraryIds.Contains(series.LibraryId))
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
@@ -530,9 +527,9 @@ public class SeriesService : ISeriesService
 
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var bookTreatment = libraryType is LibraryType.Book or LibraryType.LightNovel;
-        var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
+        var namingContext = await LocalizedNamingContext.CreateAsync(_namingService, _localizationService, userId, libraryType);
+        var bookTreatment = libraryType is LibraryType.Book or LibraryType.LightNovel;
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
@@ -543,8 +540,15 @@ public class SeriesService : ISeriesService
                 continue;
             }
 
-            if (RenameVolumeName(volume, libraryType, volumeLabel) || (bookTreatment && !volume.IsSpecial()))
+            var formattedName = namingContext.FormatVolumeName(volume);
+            if (formattedName != null)
             {
+                volume.Name = formattedName;
+                processedVolumes.Add(volume);
+            }
+            else if (bookTreatment && !volume.IsSpecial())
+            {
+                // Edge case: FormatVolumeName returned null but book treatment wants it
                 processedVolumes.Add(volume);
             }
         }
@@ -564,7 +568,7 @@ public class SeriesService : ISeriesService
 
         foreach (var chapter in chapters)
         {
-            chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
+            chapter.Title = namingContext.FormatChapterTitle(chapter);
 
             if (!chapter.IsSpecial) continue;
             specials.Add(chapter);
@@ -604,101 +608,6 @@ public class SeriesService : ISeriesService
     private static bool ShouldIncludeChapter(ChapterDto chapter)
     {
         return !chapter.IsSpecial && chapter.MinNumber.IsNot(Parser.DefaultChapterNumber);
-    }
-
-    /// <summary>
-    /// Should the volume be included and if so, this renames
-    /// </summary>
-    /// <param name="volume"></param>
-    /// <param name="libraryType"></param>
-    /// <param name="volumeLabel"></param>
-    /// <returns></returns>
-    public static bool RenameVolumeName(VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
-    {
-        if (libraryType is LibraryType.Book or LibraryType.LightNovel)
-        {
-            var firstChapter = volume.Chapters.First();
-            // On Books, skip volumes that are specials, since these will be shown
-            // if (firstChapter.IsSpecial)
-            // {
-            //     // Some books can be SP marker and also position of 0, this will trick Kavita into rendering it as part of a non-special volume
-            //     // We need to rename the entity so that it renders out correctly
-            //     return false;
-            // }
-            if (string.IsNullOrEmpty(firstChapter.TitleName))
-            {
-                if (firstChapter.Range.Equals(Parser.LooseLeafVolume)) return false;
-                var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
-                if (string.IsNullOrEmpty(title)) return false;
-                volume.Name += $" - {title}"; // OPDS smart list 7 (just pdfs) triggered this
-            }
-            else if (!volume.IsLooseLeaf())
-            {
-                // If the titleName has Volume inside it, let's just send that back?
-                volume.Name = firstChapter.TitleName;
-            }
-
-            return !firstChapter.IsSpecial;
-        }
-
-        volume.Name = $"{volumeLabel.Trim()} {volume.Name}".Trim();
-        return true;
-    }
-
-
-    public async Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string chapterRange, string? chapterTitle, bool withHash)
-    {
-        if (string.IsNullOrEmpty(chapterTitle) && (isSpecial || libraryType == LibraryType.Book)) throw new ArgumentException("Chapter Title cannot be null");
-
-        if (isSpecial)
-        {
-            return Parser.CleanSpecialTitle(chapterTitle!);
-        }
-
-        var hashSpot = withHash ? "#" : string.Empty;
-        var baseChapter = libraryType switch
-        {
-            LibraryType.Book => await _localizationService.Translate(userId, "book-num", chapterTitle!),
-            LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", chapterRange),
-            LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterRange),
-            LibraryType.ComicVine => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterRange),
-            LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", chapterRange),
-            LibraryType.Image => await _localizationService.Translate(userId, "chapter-num", chapterRange),
-            _ => await _localizationService.Translate(userId, "chapter-num", ' ')
-        };
-
-        if (!string.IsNullOrEmpty(chapterTitle) && libraryType != LibraryType.Book && chapterTitle != chapterRange)
-        {
-            baseChapter += " - " + chapterTitle;
-        }
-
-
-        return baseChapter;
-    }
-
-    public async Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true)
-    {
-        return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Range, chapter.Title, withHash);
-    }
-
-    public async Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true)
-    {
-        return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Range, chapter.Title, withHash);
-    }
-
-    // TODO: Refactor this out and use FormatChapterTitle instead across library
-    public async Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false)
-    {
-        var hashSpot = withHash ? "#" : string.Empty;
-        return (libraryType switch
-        {
-            LibraryType.Book => await _localizationService.Translate(userId, "book-num", string.Empty),
-            LibraryType.LightNovel => await _localizationService.Translate(userId, "book-num", string.Empty),
-            LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
-            LibraryType.ComicVine => await _localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
-            LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", string.Empty),
-            _ => await _localizationService.Translate(userId, "chapter-num", ' ')
-        }).Trim();
     }
 
     /// <summary>
@@ -858,74 +767,123 @@ public class SeriesService : ISeriesService
         {
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
         }
+
+        // Estimation only makes sense for ongoing/ended manga/comics - books and light novels
+        // don't follow predictable release patterns based on chapter creation dates
         if (series.Metadata.PublicationStatus is not (PublicationStatus.OnGoing or PublicationStatus.Ended) ||
             (series.Library.Type is LibraryType.Book or LibraryType.LightNovel))
         {
             return _emptyExpectedChapter;
         }
 
+        // We need at least 3 chapters to establish a meaningful pattern for prediction.
+        // With fewer data points, exponential smoothing produces unreliable forecasts.
+        const int minimumChaptersRequired = 3;
         const int minimumTimeDeltas = 3;
-        var chapters = _unitOfWork.ChapterRepository.GetChaptersForSeries(seriesId)
+
+        // Only fetch the fields we need for calculation - avoids loading entire Chapter entities
+        // with all their navigation properties, significantly reducing memory and query time
+        var chapterData = await _unitOfWork.ChapterRepository.GetChaptersForSeries(seriesId)
             .Where(c => !c.IsSpecial)
+            .Select(c => new
+            {
+                c.CreatedUtc,
+                c.MaxNumber,
+                VolumeMinNumber = c.Volume.MinNumber
+            })
             .OrderBy(c => c.CreatedUtc)
-            .ToList();
+            .ToListAsync();
 
-        if (chapters.Count < 3) return _emptyExpectedChapter;
+        if (chapterData.Count < minimumChaptersRequired) return _emptyExpectedChapter;
 
-        // Calculate the time differences between consecutive chapters
-        var timeDifferences = new List<TimeSpan>();
+        // Pre-allocate with maximum possible capacity to avoid list resizing during iteration.
+        // We store as days (double) directly to avoid a second conversion pass later.
+        var timeDifferencesInDays = new List<double>(chapterData.Count - 1);
+
+        // These track the values we need for building the result DTO.
+        // Previously we iterated the list 4 separate times with LINQ - now we gather everything in one pass.
+        var lastChapterDate = DateTime.MinValue;
+        var highestChapterNumber = float.MinValue;
+        var highestChapterIndex = 0;
+        var highestVolumeNumber = float.MinValue;
+
         DateTime? previousChapterTime = null;
-        foreach (var chapterCreatedUtc in chapters.Select(c => c.CreatedUtc))
+
+        for (var i = 0; i < chapterData.Count; i++)
         {
-            if (previousChapterTime.HasValue && (chapterCreatedUtc - previousChapterTime.Value) <= TimeSpan.FromHours(1))
+            var chapter = chapterData[i];
+
+            // Find the most recently created chapter - used as the baseline for our prediction.
+            // "When was the last chapter added?" + forecasted interval = expected next chapter date
+            if (chapter.CreatedUtc > lastChapterDate)
             {
-                continue; // Skip this chapter if it's within an hour of the previous one
+                lastChapterDate = chapter.CreatedUtc;
             }
 
-            if ((chapterCreatedUtc - previousChapterTime ?? TimeSpan.Zero) != TimeSpan.Zero)
+            // Find the chapter with the highest number - this determines what number comes next.
+            // Note: This is different from "most recent" - a user might add Chapter 50 before Chapter 49
+            if (chapter.MaxNumber > highestChapterNumber)
             {
-                timeDifferences.Add(chapterCreatedUtc - previousChapterTime ?? TimeSpan.Zero);
+                highestChapterNumber = chapter.MaxNumber;
+                highestChapterIndex = i;
             }
 
-            previousChapterTime = chapterCreatedUtc;
+            // Track the highest volume number for series that use volume-based numbering
+            // (e.g., "Volume 5" instead of "Chapter 47")
+            if (chapter.VolumeMinNumber > highestVolumeNumber)
+            {
+                highestVolumeNumber = chapter.VolumeMinNumber;
+            }
+
+            // Build the time differences array for exponential smoothing.
+            // We skip chapters added within 1 hour of each other - these are typically bulk imports
+            // or batch uploads that don't represent the actual release cadence.
+            if (previousChapterTime.HasValue)
+            {
+                var daysBetweenChapters = (chapter.CreatedUtc - previousChapterTime.Value).TotalDays;
+                var hoursBetweenChapters = daysBetweenChapters * 24;
+
+                if (hoursBetweenChapters > 1)
+                {
+                    timeDifferencesInDays.Add(daysBetweenChapters);
+                    previousChapterTime = chapter.CreatedUtc;
+                }
+                // If within an hour, we intentionally don't update previousChapterTime
+                // so the next valid chapter measures from the last "real" release
+            }
+            else
+            {
+                previousChapterTime = chapter.CreatedUtc;
+            }
         }
 
-        if (timeDifferences.Count < minimumTimeDeltas)
+        // After filtering out bulk imports, we may not have enough data points for a reliable forecast
+        if (timeDifferencesInDays.Count < minimumTimeDeltas)
         {
             return _emptyExpectedChapter;
         }
 
-        var historicalTimeDifferences = timeDifferences.Select(td => td.TotalDays).ToList();
+        // Exponential smoothing weights recent releases more heavily than older ones.
+        // Alpha of 0.2 means ~80% weight on historical average, ~20% on recent data.
+        // This smooths out anomalies like holiday delays or double-releases.
+        const double alpha = 0.2;
+        var forecastedDaysBetweenChapters = ExponentialSmoothing(timeDifferencesInDays, alpha);
 
-        if (historicalTimeDifferences.Count < minimumTimeDeltas)
+        if (forecastedDaysBetweenChapters <= 0)
         {
             return _emptyExpectedChapter;
         }
 
-        const double alpha = 0.2; // A smaller alpha will give more weight to recent data, while a larger alpha will smooth the data more.
-        var forecastedTimeDifference = ExponentialSmoothing(historicalTimeDifferences, alpha);
+        // Calculate expected date by adding the forecasted interval to the last chapter's creation date
+        var estimatedDate = lastChapterDate.AddDays(forecastedDaysBetweenChapters);
 
-        if (forecastedTimeDifference <= 0)
-        {
-            return _emptyExpectedChapter;
-        }
-
-        // Calculate the forecast for when the next chapter is expected
-        // var nextChapterExpected = chapters.Count > 0
-        //     ? chapters.Max(c => c.CreatedUtc) + TimeSpan.FromDays(forecastedTimeDifference)
-        //     : (DateTime?)null;
-        var lastChapterDate = chapters.Max(c => c.CreatedUtc);
-        var estimatedDate = lastChapterDate.AddDays(forecastedTimeDifference);
+        // Clamp to valid calendar date - AddDays can produce invalid dates like "February 30th"
+        // when the forecasted date would land past the end of a short month
         var nextChapterExpected = estimatedDate.Day > DateTime.DaysInMonth(estimatedDate.Year, estimatedDate.Month)
             ? new DateTime(estimatedDate.Year, estimatedDate.Month, DateTime.DaysInMonth(estimatedDate.Year, estimatedDate.Month))
             : estimatedDate;
 
-        // For number and volume number, we need the highest chapter, not the latest created
-        var lastChapter = chapters.MaxBy(c => c.MaxNumber)!;
-        var lastChapterNumber = lastChapter.MaxNumber;
-
-        var lastVolumeNum = chapters.Select(c => c.Volume.MinNumber).Max();
-
+        // Build the result with the next expected chapter/volume number
         var result = new NextExpectedChapterDto
         {
             ChapterNumber = 0,
@@ -934,10 +892,15 @@ public class SeriesService : ISeriesService
             Title = string.Empty
         };
 
-        if (lastChapterNumber > 0)
+        // Series can be numbered by chapter (most manga/comics) or by volume (some collected editions).
+        // If we have chapter numbers, increment from the highest; otherwise, increment the volume number.
+        if (highestChapterNumber > 0)
         {
-            result.ChapterNumber = (int) Math.Truncate(lastChapterNumber) + 1;
-            result.VolumeNumber = lastChapter.Volume.MinNumber;
+            result.ChapterNumber = (int)Math.Truncate(highestChapterNumber) + 1;
+            result.VolumeNumber = chapterData[highestChapterIndex].VolumeMinNumber;
+
+            // Format the title based on library type conventions
+            // Manga uses "Chapter X", Comics use "Issue #X", Books use "Book X"
             result.Title = series.Library.Type switch
             {
                 LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", result.ChapterNumber),
@@ -950,10 +913,10 @@ public class SeriesService : ISeriesService
         }
         else
         {
-            result.VolumeNumber = lastVolumeNum + 1;
+            // Volume-only numbering - common for omnibus editions or series without chapter breaks
+            result.VolumeNumber = (int)highestVolumeNumber + 1;
             result.Title = await _localizationService.Translate(userId, "volume-num", result.VolumeNumber);
         }
-
 
         return result;
     }
@@ -961,9 +924,6 @@ public class SeriesService : ISeriesService
     public async Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams)
     {
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-
-        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
-        var requestingUser = (await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId))!;
 
         var filter = new FilterV2Dto
         {
@@ -995,28 +955,46 @@ public class SeriesService : ISeriesService
             ],
         };
 
-        if (userId == requestingUserId)
-            return await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter);
+        filter.Statements.AddRange(await GetProfilePrivacyStatements(userId, requestingUserId));
+
+        return await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter);
+    }
+
+    public async Task<List<FilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId)
+    {
+        if (userId == requestingUserId) return [];
+
+        var socialPreferences = await _unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = (await _unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId))!;
 
         var librariesUser = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
         var librariesRequestingUser = await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(requestingUserId);
 
-        var libIds = librariesRequestingUser.Intersect(librariesUser).Except(socialPreferences.SocialLibraries);
+        var libIds = librariesRequestingUser.Intersect(librariesUser);
+        if (socialPreferences.SocialLibraries.Count > 0)
+        {
+            libIds = libIds.Intersect(socialPreferences.SocialLibraries);
+        }
+
         var libraries = libIds.Select(id => id.ToString());
 
         var ageRating = socialPreferences.SocialMaxAgeRating < requestingUser.AgeRestriction ? socialPreferences.SocialMaxAgeRating : requestingUser.AgeRestriction;
         var includeUnknowns = socialPreferences.SocialIncludeUnknowns && requestingUser.AgeRestrictionIncludeUnknowns;
 
-        filter.Statements.Add(new FilterStatementDto
-        {
-            Comparison = FilterComparison.Contains,
-            Field = FilterField.Libraries,
-            Value = string.Join(",", libraries),
-        });
+        List<FilterStatementDto> filters =
+        [
+            new()
+            {
+                Comparison = FilterComparison.Contains,
+                Field = FilterField.Libraries,
+                Value = string.Join(',', libraries),
+            }
+
+        ];
 
         if (!includeUnknowns)
         {
-            filter.Statements.Add(new FilterStatementDto
+            filters.Add(new FilterStatementDto
             {
                 Comparison = FilterComparison.NotEqual,
                 Field = FilterField.AgeRating,
@@ -1026,7 +1004,7 @@ public class SeriesService : ISeriesService
 
         if (ageRating != AgeRating.NotApplicable)
         {
-            filter.Statements.Add(new FilterStatementDto
+            filters.Add(new FilterStatementDto
             {
                 Comparison = FilterComparison.LessThanEqual,
                 Field = FilterField.AgeRating,
@@ -1034,7 +1012,7 @@ public class SeriesService : ISeriesService
             });
         }
 
-        return await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter);
+        return filters;
     }
 
     private static double ExponentialSmoothing(IList<double> data, double alpha)

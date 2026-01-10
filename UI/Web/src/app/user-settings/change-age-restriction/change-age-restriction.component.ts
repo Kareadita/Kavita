@@ -2,13 +2,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   EventEmitter,
   inject,
   OnInit
 } from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
-import {map, Observable, of, shareReplay, take} from 'rxjs';
+import {shareReplay, take} from 'rxjs';
 import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
 import {AgeRating} from 'src/app/_models/metadata/age-rating';
 import {User} from 'src/app/_models/user/user';
@@ -36,14 +37,15 @@ export class ChangeAgeRestrictionComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly AgeRating = AgeRating;
 
   user: User | undefined = undefined;
-  hasChangeAgeRestrictionAbility: Observable<boolean> = of(false);
-  isViewMode: boolean = true;
   selectedRestriction!: AgeRestriction;
   originalRestriction!: AgeRestriction;
   reset: EventEmitter<AgeRestriction> = new EventEmitter();
+
+  canEdit = computed(() => {
+    return this.accountService.hasChangeAgeRestrictionRole(this.accountService.currentUserSignal()!);
+  });
 
 
   ngOnInit(): void {
@@ -54,16 +56,11 @@ export class ChangeAgeRestrictionComponent implements OnInit {
       this.cdRef.markForCheck();
     });
 
-    this.hasChangeAgeRestrictionAbility = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), map(user => {
-      return user !== undefined && !this.accountService.hasReadOnlyRole(user) && (!this.accountService.hasAdminRole(user) && this.accountService.hasChangeAgeRestrictionRole(user));
-    }));
     this.cdRef.markForCheck();
   }
 
   updateRestrictionSelection(restriction: AgeRestriction) {
     this.selectedRestriction = restriction;
-
-    this.saveForm();
   }
 
   resetForm() {
@@ -83,17 +80,11 @@ export class ChangeAgeRestrictionComponent implements OnInit {
         this.user.ageRestriction.includeUnknowns = this.selectedRestriction.includeUnknowns;
       }
       this.resetForm();
-      this.isViewMode = true;
-      this.cdRef.markForCheck();
-    }, err => {
 
+      this.cdRef.markForCheck();
     });
   }
 
-  updateEditMode(mode: boolean) {
-    this.isViewMode = !mode;
-    this.resetForm();
-    this.cdRef.markForCheck();
-  }
+  protected readonly AgeRating = AgeRating;
 
 }

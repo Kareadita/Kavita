@@ -29,9 +29,8 @@ public interface IReadingListRepository
 {
     Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true);
     Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None);
-    Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null);
+    Task<IList<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null);
     Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId);
-    Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
     Task<ReadingListDto?> GetReadingListDtoByTitleAsync(int userId, string title);
     Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId);
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
@@ -58,6 +57,7 @@ public interface IReadingListRepository
     Task<ReadingListInfoDto?> GetReadingListInfoAsync(int readingListId);
     Task<bool> AnyUserReadingProgressAsync(int readingListId, int userId);
     Task<ReadingListItemDto?> GetContinueReadingPoint(int readingListId, int userId);
+    Task<int> GetReadingListItemCountAsync(int readingListId, int userId);
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -469,104 +469,25 @@ public class ReadingListRepository : IReadingListRepository
             LastReadingProgressUtc = item.Progress?.LastModifiedUtc
         };
 
-        dto.Title = ReadingListService.FormatTitle(dto);
-
         return dto;
     }
 
+    public Task<int> GetReadingListItemCountAsync(int readingListId, int userId)
+    {
+        return _context.ReadingListItem.Where(rli => rli.ReadingListId == readingListId).CountAsync();
+    }
 
-    public async Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null)
+
+    public async Task<IList<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null)
     {
         var userLibraries = _context.Library.GetUserLibraries(userId);
 
         var query = _context.ReadingListItem
-        .Where(s => s.ReadingListId == readingListId)
-        .Join(_context.Chapter,
-            s => s.ChapterId,
-            chapter => chapter.Id,
-            (data, chapter) => new
-            {
-                TotalPages = chapter.Pages,
-                ChapterNumber = chapter.Range,
-                chapter.ReleaseDate,
-                ReadingListItem = data,
-                ChapterTitleName = chapter.TitleName,
-                FileSize = chapter.Files.Sum(f => f.Bytes),
-                chapter.Summary,
-                chapter.IsSpecial
-            })
-        .Join(_context.Volume,
-            s => s.ReadingListItem.VolumeId,
-            volume => volume.Id,
-            (data, volume) => new
-            {
-                data.ReadingListItem,
-                data.TotalPages,
-                data.ChapterNumber,
-                data.ReleaseDate,
-                data.ChapterTitleName,
-                data.FileSize,
-                data.Summary,
-                data.IsSpecial,
-                VolumeId = volume.Id,
-                VolumeNumber = volume.Name,
-            })
-        .Join(_context.Series,
-            s => s.ReadingListItem.SeriesId,
-            series => series.Id,
-            (data, s) => new
-            {
-                SeriesName = s.Name,
-                SortName = s.SortName,
-                SeriesFormat = s.Format,
-                s.LibraryId,
-                data.ReadingListItem,
-                data.TotalPages,
-                data.ChapterNumber,
-                data.VolumeNumber,
-                data.VolumeId,
-                data.ReleaseDate,
-                data.ChapterTitleName,
-                data.FileSize,
-                data.Summary,
-                data.IsSpecial,
-                LibraryName = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Name).Single(),
-                LibraryType = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Type).Single()
-            })
-        .GroupJoin(_context.AppUserProgresses.Where(p => p.AppUserId == userId),
-            data => data.ReadingListItem.ChapterId,
-            progress => progress.ChapterId,
-            (data, progressGroup) => new { Data = data, ProgressGroup = progressGroup })
-        .SelectMany(
-            x => x.ProgressGroup.DefaultIfEmpty(),
-            (x, progress) => new ReadingListItemDto()
-            {
-                Id = x.Data.ReadingListItem.Id,
-                ChapterId = x.Data.ReadingListItem.ChapterId,
-                Order = x.Data.ReadingListItem.Order,
-                SeriesId = x.Data.ReadingListItem.SeriesId,
-                SeriesName = x.Data.SeriesName,
-                SeriesSortName = x.Data.SortName,
-                SeriesFormat = x.Data.SeriesFormat,
-                PagesTotal = x.Data.TotalPages,
-                ChapterNumber = x.Data.ChapterNumber,
-                VolumeNumber = x.Data.VolumeNumber,
-                LibraryId = x.Data.LibraryId,
-                VolumeId = x.Data.VolumeId,
-                ReadingListId = x.Data.ReadingListItem.ReadingListId,
-                ReleaseDate = x.Data.ReleaseDate,
-                LibraryType = x.Data.LibraryType,
-                ChapterTitleName = x.Data.ChapterTitleName,
-                LibraryName = x.Data.LibraryName,
-                FileSize = x.Data.FileSize,
-                Summary = x.Data.Summary,
-                IsSpecial = x.Data.IsSpecial,
-                PagesRead = progress != null ? progress.PagesRead : 0,
-                LastReadingProgressUtc = progress != null ? progress.LastModifiedUtc : null
-            })
-        .Where(o => userLibraries.Contains(o.LibraryId))
-        .OrderBy(rli => rli.Order)
-        .AsSplitQuery();
+            .Where(rli => rli.ReadingListId == readingListId)
+            .Where(rli => userLibraries.Contains(rli.Series.LibraryId))
+            .OrderBy(rli => rli.Order)
+            .ProjectToWithProgress<ReadingListItem, ReadingListItemDto>(_mapper, userId)
+            .AsSplitQuery();
 
         if (userParams != null)
         {
@@ -575,14 +496,7 @@ public class ReadingListRepository : IReadingListRepository
                 .Take(userParams.PageSize);
         }
 
-        var items = await query.ToListAsync();
-
-        foreach (var item in items)
-        {
-            item.Title = ReadingListService.FormatTitle(item);
-        }
-
-        return items;
+        return await query.ToListAsync();
     }
 
     public async Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId)
@@ -595,24 +509,6 @@ public class ReadingListRepository : IReadingListRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items)
-    {
-        var chapterIds = items.Select(i => i.ChapterId).Distinct();
-        var userProgress = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId && chapterIds.Contains(p.ChapterId))
-            .AsNoTracking()
-            .ToListAsync();
-
-        foreach (var item in items)
-        {
-            var progress = userProgress.Where(p => p.ChapterId == item.ChapterId).ToList();
-            if (progress.Count == 0) continue;
-            item.PagesRead = progress.Sum(p => p.PagesRead);
-            item.LastReadingProgressUtc = progress.Max(p => p.LastModifiedUtc);
-        }
-
-        return items;
-    }
 
     public async Task<ReadingListDto?> GetReadingListDtoByTitleAsync(int userId, string title)
     {

@@ -91,6 +91,7 @@ export class ReaderSettingsComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
+  @Input({required:true}) libraryId!: number;
   @Input({required:true}) seriesId!: number;
   @Input({required:true}) readingProfile!: ReadingProfile;
   @Input({required:true}) readerSettingsService!: EpubReaderSettingsService;
@@ -136,7 +137,7 @@ export class ReaderSettingsComponent implements OnInit {
 
     // Initialize the service if not already done
     if (!this.readerSettingsService.getCurrentReadingProfile()) {
-      await this.readerSettingsService.initialize(this.seriesId, this.readingProfile);
+      await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.readingProfile);
     }
 
     this.settingsForm = this.readerSettingsService.getSettingsForm();

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using API.Entities;
 using API.Entities.Enums;
@@ -13,6 +14,9 @@ public sealed record UserReadingProfileDto
 
     public string Name { get; init; }
     public ReadingProfileKind Kind { get; init; }
+    public List<int> DeviceIds { get; init; }
+    public List<int> SeriesIds { get; init; }
+    public List<int> LibraryIds { get; init; }
 
     #region MangaReader
 

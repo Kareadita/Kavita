@@ -1,4 +1,4 @@
-import {HttpClient, httpResource} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {computed, DestroyRef, inject, Injectable} from '@angular/core';
 import {Observable, of, ReplaySubject, shareReplay} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
@@ -91,7 +91,12 @@ export class AccountService {
         filter(evt => evt.event === EVENTS.AuthKeyUpdate),
         map(evt => evt.payload as {authKey: AuthKey}),
         tap(({authKey}) => {
-          const authKeys = this.currentUser!.authKeys.map(k => k.id === authKey.id ? authKey : k);
+          const existingKeys = this.currentUser!.authKeys;
+          const index = existingKeys.findIndex(k => k.id === authKey.id);
+
+          const authKeys = index >= 0
+            ? existingKeys.map(k => k.id === authKey.id ? authKey : k)
+            : [...existingKeys, authKey];
 
           this.setCurrentUser({
             ...this.currentUser!,

@@ -405,6 +405,7 @@ public static class Seed
                 new() {Key = ServerSettingKey.OnDeckProgressDays, Value = "30"},
                 new() {Key = ServerSettingKey.OnDeckUpdateDays, Value = "7"},
                 new() {Key = ServerSettingKey.CoverImageSize, Value = nameof(CoverImageSize.Default)},
+                new() {Key = ServerSettingKey.PdfRenderResolution, Value = nameof(PdfRenderResolution.Default)},
                 new() {
                     Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
                 }, // Not used from DB, but DB is sync with appSettings.json
@@ -421,6 +422,7 @@ public static class Seed
                 new() {Key = ServerSettingKey.EmailCustomizedTemplates, Value = "false"},
                 new() {Key = ServerSettingKey.FirstInstallVersion, Value = BuildInfo.Version.ToString()},
                 new() {Key = ServerSettingKey.FirstInstallDate, Value = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)},
+                new() {Key = ServerSettingKey.StatsApiHits, Value = "0"},
             }.ToArray()
         ];
 

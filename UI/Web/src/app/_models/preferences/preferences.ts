@@ -69,6 +69,7 @@ export enum KeyBindTarget {
   Escape = 'Escape',
   PageUp = 'PageUp',
   PageDown = 'PageDown',
+  OffsetDoublePage = 'OffsetDoublePage',
 }
 
 export interface OpdsPreferences {

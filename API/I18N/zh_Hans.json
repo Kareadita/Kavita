@@ -220,5 +220,8 @@
     "genre-doesnt-exist": "类型不存在",
     "font-url-not-allowed": "仅允许通过 Google 字体网址上传字体",
     "annotation-export-failed": "无法导出注释，请检查日志",
-    "download-not-allowed": "用户没有下载权限"
+    "download-not-allowed": "用户没有下载权限",
+    "client-device-doesnt-exist": "客户端设备不存在",
+    "auth-key-unique": "授权密钥名称在您的帐户中必须是唯一的",
+    "role-restricted": "访问受限：您的角色不允许执行此操作"
 }

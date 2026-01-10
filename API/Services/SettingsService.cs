@@ -406,6 +406,13 @@ public class SettingsService : ISettingsService
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.PdfRenderResolution &&
+                ((int)updateSettingsDto.PdfRenderResolution).ToString() != setting.Value)
+            {
+                setting.Value = ((int)updateSettingsDto.PdfRenderResolution).ToString();
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
             if (setting.Key == ServerSettingKey.HostName && updateSettingsDto.HostName + string.Empty != setting.Value)
             {
                 setting.Value = (updateSettingsDto.HostName + string.Empty).Trim();

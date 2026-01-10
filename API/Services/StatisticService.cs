@@ -7,6 +7,7 @@ using API.Data.ManualMigrations;
 using API.DTOs;
 using API.DTOs.Metadata;
 using API.DTOs.Person;
+using API.DTOs.ReadingLists;
 using API.DTOs.Statistics;
 using API.DTOs.Stats;
 using API.DTOs.Stats.V3.ClientDevice;
@@ -16,6 +17,8 @@ using API.Entities.Enums.UserPreferences;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
+using API.Helpers;
+using API.Helpers.Formatting;
 using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -24,6 +27,8 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 #nullable enable
+
+internal sealed record UserReadCount(int ReadingListId, int ChaptersRead);
 
 public interface IStatisticService
 {
@@ -34,6 +39,7 @@ public interface IStatisticService
     Task<IList<StatBucketDto>> GetPopularDecades();
     Task<IList<StatCount<LibraryDto>>> GetPopularLibraries();
     Task<IList<StatCount<SeriesDto>>> GetPopularSeries();
+    Task<IList<StatCount<ReadingListDto>>> GetPopularReadingList(int take = 5);
     Task<IList<StatCount<GenreTagDto>>> GetPopularGenres();
     Task<IList<StatCount<TagDto>>> GetPopularTags();
     Task<IList<StatCount<PersonDto>>> GetPopularPerson(PersonRole role);
@@ -52,7 +58,7 @@ public interface IStatisticService
     Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc);
     Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc);
     Task<ReadingActivityGraphDto> GetReadingActivityGraphData(StatsFilterDto filter, int userId, int year, int requestingUserId);
-    Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly, int requestingUserID);
+    Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly, int requestingUserId);
     Task<BreakDownDto<string>> GetGenreBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<BreakDownDto<string>> GetTagBreakdownForUser(StatsFilterDto filter, int userId, int requestingUserId);
     Task<SpreadStatsDto> GetPageSpreadForUser(StatsFilterDto filter, int userId, int requestingUserId);
@@ -64,13 +70,16 @@ public interface IStatisticService
     Task<ProfileStatBarDto> GetUserStatBar(StatsFilterDto filter, int userId, int requestingUserId);
     Task<IList<MostActiveUserDto>> GetMostActiveUsers(StatsFilterDto filter);
     Task<IList<StatCountWithFormat<DateTime>>> GetFilesAddedOverTime();
+    Task<PagedList<ReadingHistoryItemDto>> GetReadingHistoryItems(StatsFilterDto filter, UserParams userParams, int userId, int requestingUserId);
 }
 
 /// <summary>
 /// Responsible for computing statistics for the server
 /// </summary>
 /// <remarks>This performs raw queries and does not use a repository</remarks>
-public class StatisticService(ILogger<StatisticService> logger, DataContext context, IMapper mapper, IUnitOfWork unitOfWork): IStatisticService
+public class StatisticService(ILogger<StatisticService> logger, DataContext context,
+    IMapper mapper, IUnitOfWork unitOfWork, IEntityNamingService namingService, ILocalizationService localizationService
+    ): IStatisticService
 {
 
     public async Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds)
@@ -241,6 +250,86 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .ToList();
     }
 
+    public async Task<IList<StatCount<ReadingListDto>>> GetPopularReadingList(int take = 5)
+    {
+        var readingListChapterCounts = await context.ReadingList
+            .Where(rl => rl.Promoted)
+            .Select(rl => new
+            {
+                ReadingListId = rl.Id,
+                TotalChapters = rl.Items.Count
+            })
+            .Where(x => x.TotalChapters > 0)
+            .ToDictionaryAsync(x => x.ReadingListId, x => x.TotalChapters);
+
+        if (readingListChapterCounts.Count == 0) return [];
+
+        var userReadCounts = await context.ReadingListItem
+            .Where(rli => readingListChapterCounts.Keys.Contains(rli.ReadingListId))
+            .Join(context.AppUserProgresses,
+                rli => rli.ChapterId,
+                p => p.ChapterId,
+                (rli, p) => new { rli.ReadingListId, p.AppUserId, p.ChapterId, p.PagesRead })
+            .Join(context.Chapter,
+                x => x.ChapterId,
+                c => c.Id,
+                (x, c) => new { x.ReadingListId, x.AppUserId, x.ChapterId, x.PagesRead, c.Pages })
+            .Where(x => x.PagesRead >= x.Pages)
+            .GroupBy(x => new { x.ReadingListId, x.AppUserId })
+            .Select(g => new UserReadCount(
+                g.Key.ReadingListId,
+                g.Select(x => x.ChapterId).Distinct().Count()))
+            .ToListAsync();
+
+        if (userReadCounts.Count == 0) return [];
+
+        var counts = RankReadingLists(userReadCounts, readingListChapterCounts, take);
+
+        if (counts.Count == 0) return [];
+
+        var readingListIds = counts.Select(c => c.ReadingListId).ToList();
+        var readingLists = await context.ReadingList
+            .Where(rl => readingListIds.Contains(rl.Id))
+            .ProjectTo<ReadingListDto>(mapper.ConfigurationProvider)
+            .ToDictionaryAsync(rl => rl.Id);
+
+        return counts
+            .Where(c => readingLists.ContainsKey(c.ReadingListId))
+            .Select(c => new StatCount<ReadingListDto>
+            {
+                Value = readingLists[c.ReadingListId],
+                Count = c.Count
+            })
+            .ToList();
+    }
+
+    private static List<(int ReadingListId, int Count)> RankReadingLists(
+        IReadOnlyList<UserReadCount> userReadCounts,
+        Dictionary<int, int> readingListChapterCounts,
+        int take)
+    {
+        double[] thresholds = [0.5, 0.25, 0.0];
+
+        foreach (var threshold in thresholds)
+        {
+            var counts = userReadCounts
+                .Where(x => readingListChapterCounts.TryGetValue(x.ReadingListId, out var total)
+                            && x.ChaptersRead >= Math.Ceiling(total * threshold))
+                .GroupBy(x => x.ReadingListId)
+                .Select(g => (ReadingListId: g.Key, Count: g.Count()))
+                .OrderByDescending(x => x.Count)
+                .Take(take)
+                .ToList();
+
+            if (counts.Count >= take || threshold.Is(0.0))
+            {
+                return counts;
+            }
+        }
+
+        return [];
+    }
+
     /// <summary>
     /// Top 5 genres where there is some reading activity
     /// </summary>
@@ -396,7 +485,9 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 Volumes = context.Volume.Count(v => Math.Abs(v.MinNumber - Parser.LooseLeafVolumeNumber) > 0.001f),
                 TotalBytes = context.MangaFile.Sum(m => m.Bytes)
             })
-            .FirstAsync();
+            .FirstOrDefaultAsync();
+
+        if (counts == null) return new ServerStatisticsDto();
 
         var totalReadingHours = await context.AppUserReadingSessionActivityData
             .Where(a => a.EndTimeUtc != null)
@@ -547,42 +638,69 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
 
     public async Task<IEnumerable<StatCountWithFormat<DateTime>>> ReadCounts(StatsFilterDto filter, int userId = 0)
     {
+        var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
         var startDate = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
         var endDate = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
 
-        var results = await context.AppUserReadingSessionActivityData
+        var rawData = await context.AppUserReadingSessionActivityData
             .AsNoTracking()
             .Where(a => a.StartTimeUtc >= startDate && a.StartTimeUtc <= endDate)
+            .Where(a => a.EndTimeUtc != null)
             .WhereIf(userId > 0, a => a.ReadingSession.AppUserId == userId)
             .WhereIf(filter.Libraries is { Count: > 0 }, a => filter.Libraries.Contains(a.LibraryId))
-            .GroupBy(a => new { Day = a.StartTimeUtc.Date, a.Format })
+            .Select(a => new
+            {
+                a.StartTimeUtc,
+                EndTimeUtc = a.EndTimeUtc!.Value,
+                a.Format
+            })
+            .ToListAsync();
+
+        var results = rawData
+            .GroupBy(a => new
+            {
+                Day = TimeZoneInfo.ConvertTimeFromUtc(a.StartTimeUtc, userTimeZone).Date,
+                a.Format
+            })
             .Select(g => new StatCountWithFormat<DateTime>
             {
                 Value = g.Key.Day,
                 Format = g.Key.Format,
-                Count = (long)g.Sum(a =>
-                    (double)(a.EndTimeUtc!.Value.Ticks - a.StartTimeUtc.Ticks) / TimeSpan.TicksPerHour)
+                Count = (long)g.Sum(a => (a.EndTimeUtc - a.StartTimeUtc).TotalMinutes)
             })
             .OrderBy(d => d.Value)
-            .ToListAsync();
+            .ToList();
 
-        FillMissingDaysAndFormats(results, startDate, endDate);
+        // Convert boundaries to local for filling
+        var localStartDate = TimeZoneInfo.ConvertTimeFromUtc(
+            startDate == DateTime.MinValue ? DateTime.UtcNow.AddYears(-1) : startDate,
+            userTimeZone);
+        var localEndDate = TimeZoneInfo.ConvertTimeFromUtc(endDate, userTimeZone);
+
+        FillMissingDaysAndFormats(results, localStartDate, localEndDate);
 
         return results.OrderBy(r => r.Value);
     }
 
     private static void FillMissingDaysAndFormats(List<StatCountWithFormat<DateTime>> results, DateTime startDate, DateTime endDate)
     {
-        if (results.Count == 0)
-            return;
-
         var validFormats = Enum.GetValues<MangaFormat>()
             .Where(f => f != MangaFormat.Unknown)
             .ToArray();
 
-        var minDay = results.Min(d => d.Value);
-        var effectiveStart = minDay > startDate.Date ? minDay : startDate.Date;
-        var effectiveEnd = endDate.Date < DateTime.UtcNow.Date ? endDate.Date : DateTime.UtcNow.Date;
+        DateTime effectiveStart;
+
+        if (results.Count == 0)
+        {
+            effectiveStart = startDate.Date;
+        }
+        else
+        {
+            var minDay = results.Min(d => d.Value);
+            effectiveStart = minDay > startDate.Date ? minDay : startDate.Date;
+        }
+
+        var effectiveEnd = endDate.Date;
 
         var existingEntries = results
             .Select(r => (r.Value, r.Format))
@@ -592,8 +710,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         {
             foreach (var format in validFormats)
             {
-                if (existingEntries.Contains((date, format)))
-                    continue;
+                if (existingEntries.Contains((date, format))) continue;
 
                 results.Add(new StatCountWithFormat<DateTime>
                 {
@@ -722,7 +839,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     public async Task<DeviceClientBreakdownDto> GetClientTypeBreakdown(DateTime fromDateUtc)
     {
         var devices = await context.ClientDevice
-            .Where(d => d.IsActive && d.FirstSeenUtc >= fromDateUtc)
+            .Where(d => d.IsActive && d.LastSeenUtc >= fromDateUtc)
             .Select(d => d.CurrentClientInfo.ClientType)
             .ToListAsync();
 
@@ -747,7 +864,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     public async Task<IList<StatCount<string>>> GetDeviceTypeCounts(DateTime fromDateUtc)
     {
         var devices = await context.ClientDevice
-            .Where(d => d.IsActive && d.FirstSeenUtc >= fromDateUtc)
+            .Where(d => d.IsActive && d.LastSeenUtc >= fromDateUtc)
             .Select(d => d.CurrentClientInfo.DeviceType)
             .ToListAsync();
 
@@ -777,6 +894,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+        var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
 
         var startDate = filter.StartDate?.ToUniversalTime() ?? DateTime.MinValue;
         var endDate = filter.EndDate?.ToUniversalTime() ?? DateTime.UtcNow;
@@ -799,7 +917,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                     activity.ChapterId,
                     activity.PagesRead,
                     activity.WordsRead,
-                    activity.TotalPages
+                    activity.TotalPages,
+                    activity.EndPage,
                 })
             .ToListAsync();
 
@@ -808,7 +927,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         if (sessionActivityData.Count == 0) return result;
 
         var dailyStats = sessionActivityData
-            .GroupBy(x => x.SessionDate)
+            .GroupBy(x => TimeZoneInfo.ConvertTimeFromUtc(x.SessionStartUtc, userTimeZone).Date)
             .Select(dayGroup => new
             {
                 Date = dayGroup.Key,
@@ -823,7 +942,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 TotalWords = dayGroup.Sum(x => x.WordsRead),
                 // Count distinct chapters that were fully read per day
                 TotalChaptersFullyRead = dayGroup
-                    .Where(x => x.PagesRead > 0 && x.TotalPages > 0 && x.PagesRead >= x.TotalPages)
+                    .Where(x => x.PagesRead > 0 && x.TotalPages > 0 && x.EndPage >= x.TotalPages)
                     .Select(x => x.ChapterId)
                     .Distinct()
                     .Count()
@@ -866,6 +985,21 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         return result;
     }
 
+    private static TimeZoneInfo GetTimeZoneOrUtc(string? timeZoneId)
+    {
+        if (string.IsNullOrEmpty(timeZoneId))
+            return TimeZoneInfo.Utc;
+
+        try
+        {
+            return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return TimeZoneInfo.Utc;
+        }
+    }
+
     public async Task<ReadingPaceDto> GetReadingPaceForUser(StatsFilterDto filter, int userId, int year, bool booksOnly, int requestingUserId)
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
@@ -883,7 +1017,7 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         filter.EndDate = filter.EndDate < DateTime.UtcNow ? filter.EndDate : DateTime.UtcNow;
 
         var activities = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true, onlyCompleted: false)
             .Select(a => new
             {
                 a.PagesRead,
@@ -892,7 +1026,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 a.SeriesId,
                 SeriesFormat = a.Series.Format,
                 SessionStart = a.ReadingSession.StartTimeUtc,
-                SessionEnd = a.ReadingSession.EndTimeUtc
+                SessionEnd = a.ReadingSession.EndTimeUtc,
+                Finished = a.EndPage >= a.Chapter.Pages,
             })
             .WhereIf(booksOnly, d => d.SeriesFormat == MangaFormat.Pdf || d.SeriesFormat == MangaFormat.Epub)
             .WhereIf(!booksOnly, d => d.SeriesFormat != MangaFormat.Pdf && d.SeriesFormat != MangaFormat.Epub)
@@ -912,6 +1047,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         {
             pagesRead += activity.PagesRead;
             wordsRead += activity.WordsRead;
+
+            if (!activity.Finished) continue;
 
             if (activity.SeriesFormat is MangaFormat.Epub or MangaFormat.Pdf)
                 booksRead.Add(activity.ChapterId);
@@ -1211,39 +1348,54 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+        var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
 
         var sessionRecordedSince = await unitOfWork.DataContext.ManualMigrationHistory
-            .FirstOrDefaultAsync(mm => mm.Name == MigrateProgressToReadingSessions.Name);
+        .FirstOrDefaultAsync(mm => mm.Name == MigrateProgressToReadingSessions.Name);
 
         if (sessionRecordedSince == null)
         {
-            logger.LogWarning("{Migration} never happened? Cannot compute time by hour", MigrateProgressToReadingSessions.Name);
+            logger.LogWarning("{Migration} never happened! Cannot compute time by hour", MigrateProgressToReadingSessions.Name);
             return null;
         }
 
-        var daysSinceCounting = (DateTime.UtcNow - sessionRecordedSince.RanAt).Days;
+        filter.StartDate ??= sessionRecordedSince.RanAt;
+        filter.StartDate = filter.StartDate < sessionRecordedSince.RanAt ? sessionRecordedSince.RanAt : filter.StartDate;
 
         var sessions = await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
             .Where(session => session.ReadingSession.CreatedUtc > sessionRecordedSince.RanAt)
+            .Select(s => new
+            {
+                s.StartTimeUtc,
+                s.EndTimeUtc
+            })
             .ToListAsync();
 
         var hourStats = sessions
+            .Where(s => s.EndTimeUtc.HasValue)
             .SelectMany(session =>
             {
                 var hours = new List<(DateOnly day, int hour, TimeSpan timeSpent)>();
-                var current = session.StartTime;
+                var currentUtc = session.StartTimeUtc;
+                var endUtc = session.EndTimeUtc!.Value;
 
-                while (current < session.EndTime)
+                while (currentUtc < endUtc)
                 {
-                    var hourEnd = current.AddHours(1);
-                    var sessionEnd = session.EndTime ?? current;
-                    var endOfPeriod = new[] { hourEnd, sessionEnd }.Min();
+                    var currentLocal = TimeZoneInfo.ConvertTimeFromUtc(currentUtc, userTimeZone);
 
-                    var timeSpent = endOfPeriod - current;
-                    hours.Add((DateOnly.FromDateTime(current), current.Hour, timeSpent));
+                    // Calculate end of current hour in local time, then convert back to UTC
+                    var localHourEnd = new DateTime(
+                        currentLocal.Year, currentLocal.Month, currentLocal.Day,
+                        currentLocal.Hour, 0, 0, DateTimeKind.Unspecified).AddHours(1);
+                    var hourEndUtc = TimeZoneInfo.ConvertTimeToUtc(localHourEnd, userTimeZone);
 
-                    current = endOfPeriod;
+                    var endOfPeriod = hourEndUtc < endUtc ? hourEndUtc : endUtc;
+                    var timeSpent = endOfPeriod - currentUtc;
+
+                    hours.Add((DateOnly.FromDateTime(currentLocal), currentLocal.Hour, timeSpent));
+
+                    currentUtc = endOfPeriod;
                 }
 
                 return hours;
@@ -1258,14 +1410,14 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             .GroupBy(x => x.hour)
             .ToDictionary(
                 g => g.Key,
-                g => g.Sum(x => x.totalTimeSpent) / daysSinceCounting
+                g => g.Sum(x => x.totalTimeSpent) / g.Count()
             );
 
         var data = Enumerable.Range(0, 24)
             .Select(hour => new StatCount<int>
             {
                 Value = hour,
-                Count = (long) Math.Ceiling(hourStats.TryGetValue(hour, out var value) ? value : 0),
+                Count = (long)Math.Ceiling(hourStats.TryGetValue(hour, out var value) ? value : 0),
             })
             .ToList();
 
@@ -1282,13 +1434,14 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
 
         var chapterData = await context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true, onlyCompleted: false)
             .Select(d => new
             {
                 d.ChapterId,
                 FormatType = d.Chapter.Files.First().Format,
                 d.PagesRead,
                 d.WordsRead,
+                Finished = d.EndPage >= d.Chapter.Pages
             })
             .ToListAsync();
 
@@ -1311,9 +1464,9 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
             {
                 ChapterId = g.Key,
                 g.First().FormatType,
-                // Take max to handle potential duplicates with different values
-                PagesRead = g.Max(x => x.PagesRead),
-                WordsRead = g.Max(x => x.WordsRead)
+                PagesRead = g.Sum(x => x.PagesRead),
+                WordsRead = g.Sum(x => x.WordsRead),
+                Finished = g.Any(x => x.Finished)
             })
             .ToList();
 
@@ -1330,6 +1483,8 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         {
             pagesRead += ch.PagesRead;
             wordsRead += ch.WordsRead;
+
+            if (!ch.Finished) continue;
 
             switch (ch.FormatType)
             {
@@ -1505,11 +1660,162 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
         return results;
     }
 
+    public async Task<PagedList<ReadingHistoryItemDto>> GetReadingHistoryItems(StatsFilterDto filter, UserParams userParams, int userId, int requestingUserId)
+    {
+        var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
+        var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+        var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
+
+        var query = context.AppUserReadingSessionActivityData
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: false, onlyCompleted: false)
+            .WhereIf(filter.Libraries.Count > 0, a => filter.Libraries.Contains(a.LibraryId))
+            .Select(a => new
+            {
+                a.Id,
+                a.AppUserReadingSessionId,
+                a.StartTimeUtc,
+                EndTimeUtc = a.EndTimeUtc!.Value,
+
+                a.SeriesId,
+                SeriesName = a.Series.Name,
+                SeriesFormat = a.Series.Format,
+
+                // Chapter fields for ChapterDto
+                a.ChapterId,
+                ChapterNumber = a.Chapter.Number,
+                ChapterRange = a.Chapter.Range,
+                ChapterMinNumber = a.Chapter.MinNumber,
+                ChapterMaxNumber = a.Chapter.MaxNumber,
+                ChapterTitle = a.Chapter.Title,
+                ChapterTitleName = a.Chapter.TitleName,
+                ChapterIsSpecial = a.Chapter.IsSpecial,
+
+                // Volume fields for VolumeDto
+                a.Chapter.VolumeId,
+                VolumeNumber = a.Chapter.Volume.Number,
+                VolumeName = a.Chapter.Volume.Name,
+                VolumeMinNumber = a.Chapter.Volume.MinNumber,
+                VolumeMaxNumber = a.Chapter.Volume.MaxNumber,
+                VolumeChapters = a.Chapter.Volume.Chapters.Select(c => c.Id).ToList(),
+
+                a.LibraryId,
+                LibraryName = a.Library.Name,
+                LibraryType = a.Library.Type,
+
+                a.PagesRead,
+                a.WordsRead,
+                a.StartPage,
+                a.EndPage,
+                TotalPages = a.Chapter.Pages,
+            })
+            .Where(a => a.EndTimeUtc != null)
+            .OrderByDescending(a => a.StartTimeUtc);
+
+        // Get total count before pagination
+        var totalCount = await query.CountAsync();
+
+        // Paginate and materialize
+        var items = await query
+            .Skip((userParams.PageNumber - 1) * userParams.PageSize)
+            .Take(userParams.PageSize)
+            .ToListAsync();
+
+        var libraryTypes = items.Select(i => i.LibraryType).Distinct().ToList();
+        var namingContexts = new Dictionary<LibraryType, LocalizedNamingContext>();
+
+        foreach (var libType in libraryTypes)
+        {
+            namingContexts[libType] = await LocalizedNamingContext.CreateAsync(
+                namingService, localizationService, userId, libType);
+        }
+
+        // Convert to DTOs with local time
+        var dtos = items
+            .GroupBy(a => new { a.AppUserReadingSessionId, a.SeriesId })
+            .Select(x =>
+            {
+                var first = x.First();
+                var startTime = x.Min(s => s.StartTimeUtc);
+                var endTime = x.Max(s => s.EndTimeUtc);
+                var namingContext = namingContexts[first.LibraryType];
+
+                var totalPages = x.Sum(s => s.TotalPages);
+
+                var localStart = TimeZoneInfo.ConvertTimeFromUtc(startTime, userTimeZone);
+                return new ReadingHistoryItemDto
+                {
+                    SessionDataIds =  x.Select(s => s.Id).ToList(),
+                    SessionId = first.AppUserReadingSessionId,
+                    StartTimeUtc = startTime,
+                    EndTimeUtc = endTime,
+                    LocalDate = localStart.Date,
+
+                    SeriesId = first.SeriesId,
+                    SeriesName = first.SeriesName,
+                    SeriesFormat = first.SeriesFormat,
+
+                    Chapters = x.Select(s =>
+                    {
+                        var chapterDto = new ChapterDto
+                        {
+                            Id = s.ChapterId,
+                            Number = s.ChapterNumber,
+                            Range = s.ChapterRange,
+                            Title = s.ChapterTitle,
+                            MinNumber = s.ChapterMinNumber,
+                            MaxNumber = s.ChapterMaxNumber,
+                            TitleName = s.ChapterTitleName,
+                            IsSpecial = s.ChapterIsSpecial,
+                        };
+
+                        var volumeDto = new VolumeDto
+                        {
+                            Id = s.VolumeId,
+                            Number = s.VolumeNumber,
+                            Name = s.VolumeName,
+                            MinNumber = s.VolumeMinNumber,
+                            MaxNumber = s.VolumeMaxNumber,
+                            Chapters = s.VolumeChapters
+                                .Select(id => id == chapterDto.Id ? chapterDto : new ChapterDto { Id = id })
+                                .ToList(),
+                        };
+
+                        return new ReadingHistoryChapterItemDto
+                        {
+                            ChapterId = s.ChapterId,
+                            Label = namingContext.BuildChapterTitle(volumeDto, chapterDto),
+                            StartTimeUtc = s.StartTimeUtc,
+                            EndTimeUtc = s.EndTimeUtc,
+                            DurationSeconds = (int) (s.EndTimeUtc - s.StartTimeUtc).TotalSeconds,
+
+                            PagesRead = s.PagesRead,
+                            WordsRead = s.WordsRead,
+
+                            StartPage = s.StartPage,
+                            EndPage = s.EndPage,
+                            TotalPages = s.TotalPages,
+                            Completed = s.EndPage >= s.TotalPages,
+                        };
+                    }).OrderBy(c => c.StartTimeUtc).ToList(),
+
+                    LibraryId = first.LibraryId,
+                    LibraryName = first.LibraryName,
+
+                    PagesRead = x.Sum(s => s.PagesRead),
+                    WordsRead = x.Sum(s => s.WordsRead),
+                    DurationSeconds = (int)(endTime - startTime).TotalSeconds,
+
+                    TotalPages = totalPages,
+                };
+        }).ToList();
+
+        return PagedList<ReadingHistoryItemDto>.Create(dtos, totalCount, userParams.PageNumber, userParams.PageSize);
+    }
+
     private async Task<int> GetAuthorsCount(HashSet<int> chapterIds)
     {
         if (chapterIds.Count == 0) return 0;
 
-        // For large sets, batch to avoid SQLite parameter limits (max ~999)
         if (chapterIds.Count <= 500)
         {
             return await context.ChapterPeople
@@ -1519,7 +1825,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 .CountAsync();
         }
 
-        // Batch approach for large chapter sets
         var authorIds = new HashSet<int>();
         foreach (var batch in chapterIds.Chunk(500))
         {
@@ -1540,7 +1845,6 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     {
         var baseQuery = BuildRatingQuery(filter, userId, socialPreferences);
 
-        // Single query with conditional counting
         var counts = await baseQuery
             .GroupBy(r => 1)
             .Select(g => new
@@ -1577,27 +1881,28 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId);
+        var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
 
-        // It makes no sense to filter this in by month etc. Trim to year
-        filter.StartDate = filter.StartDate.HasValue
-            ? new DateTime(filter.StartDate.Value.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-            : null;
-        filter.EndDate = filter.EndDate.HasValue
-            ? new DateTime(filter.EndDate.Value.Year, 12, 31, 23, 59, 59, 0, 0, DateTimeKind.Utc)
-            : null;
-
-        return await context.AppUserReadingSessionActivityData
+        var rawData = await context.AppUserReadingSessionActivityData
             .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: true)
-            .GroupBy(s => new {s.ReadingSession.CreatedUtc.Year, s.ReadingSession.CreatedUtc.Month})
-            .Select(g => new StatCount<YearMonthGroupingDto>()
+            .Select(s => s.ReadingSession.CreatedUtc)
+            .ToListAsync();
+
+        return rawData
+            .Select(utc => TimeZoneInfo.ConvertTimeFromUtc(utc, userTimeZone))
+            .GroupBy(local => new { local.Year, local.Month })
+            .Select(g => new StatCount<YearMonthGroupingDto>
             {
-                Value = new YearMonthGroupingDto()
+                Value = new YearMonthGroupingDto
                 {
                     Year = g.Key.Year,
                     Month = g.Key.Month,
                 },
                 Count = g.Count(),
-            }).ToListAsync();
+            })
+            .OrderBy(s => s.Value.Year)
+            .ThenBy(s => s.Value.Month)
+            .ToList();
     }
 
     public async Task<IList<MostReadAuthorsDto>> GetMostReadAuthors(StatsFilterDto filter, int userId, int requestingUserId)

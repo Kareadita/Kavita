@@ -24,13 +24,14 @@ import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {ResponsiveTableComponent} from "../../../shared/_components/responsive-table/responsive-table.component";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 @Component({
   selector: 'app-file-breakdown-stats',
   templateUrl: './file-breakdown-stats.component.html',
   styleUrls: ['./file-breakdown-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, ReactiveFormsModule, AsyncPipe, TranslocoDirective, NgxDatatableModule, MangaFormatPipe, BytesPipe, CompactNumberPipe, ResponsiveTableComponent]
+  imports: [NgbTooltip, ReactiveFormsModule, AsyncPipe, TranslocoDirective, NgxDatatableModule, MangaFormatPipe, BytesPipe, CompactNumberPipe, ResponsiveTableComponent, StatsNoDataComponent]
 })
 export class FileBreakdownStatsComponent {
 

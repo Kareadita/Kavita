@@ -1,21 +1,48 @@
-@if (showCards()) {
-  <div class="mt-2">
-    <ng-content select="[cardHeader]"></ng-content>
-    @if (isEmpty()) {
-      <ng-content select="[cardEmpty]"></ng-content>
-    } @else {
-      <div class="card-list">
-        @for (item of rows(); track trackByFn()(idx, item); let idx = $index) {
-          <ng-container
-            *ngTemplateOutlet="cardTemplateRef(); context: {$implicit: item, index: idx}">
-          </ng-container>
+<ng-container *transloco="let t;">
+  @if (showCards()) {
+    <div class="mt-2">
+      <ng-content select="[cardHeader]"></ng-content>
+      @if (isEmpty()) {
+        <ng-content select="[cardEmpty]"></ng-content>
+      } @else {
+        <div class="card-list">
+          @for (item of rows(); track trackByFn()(idx, item); let idx = $index) {
+            <ng-container
+              *ngTemplateOutlet="cardTemplateRef(); context: {$implicit: item, index: idx}">
+            </ng-container>
+          }
+        </div>
+
+        @if (!isEmpty() && totalItems() > pageSize()) {
+          <nav>
+            <ul class="pagination justify-content-center mt-3">
+              <li class="page-item" [class.disabled]="pageIndex() === 0">
+                <button class="page-link" (click)="onPageChange(pageIndex() - 1)"
+                        [disabled]="pageIndex() === 0">
+                  <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                  <span class="visually-hidden">{{t('manga-reader.prev-page-tooltip')}}</span>
+                </button>
+              </li>
+              <li class="page-item disabled">
+                <span class="page-link">{{pageIndex() + 1}} / {{totalPages()}}</span>
+              </li>
+              <li class="page-item" [class.disabled]="pageIndex() >= totalPages() - 1">
+                <button class="page-link" (click)="onPageChange(pageIndex() + 1)"
+                        [disabled]="pageIndex() >= totalPages() - 1">
+                  <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                  <span class="visually-hidden">{{t('manga-reader.next-page-tooltip')}}</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
         }
-      </div>
-      <ng-content select="[cardFooter]"></ng-content>
+
+        <ng-content select="[cardFooter]"></ng-content>
+      }
+    </div>
+  } @else {
+    @if (tableTemplateRef(); as tableTemplate) {
+      <ng-container *ngTemplateOutlet="tableTemplate"></ng-container>
     }
-  </div>
-} @else {
-  @if (tableTemplateRef(); as tableTemplate) {
-    <ng-container *ngTemplateOutlet="tableTemplate"></ng-container>
   }
-}
+</ng-container>

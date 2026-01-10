@@ -1,56 +1,53 @@
 <ng-container *transloco="let t; prefix: 'bulk-set-reading-profile-modal'">
 
-  <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
-    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
-  </div>
-  <form [formGroup]="profileForm">
-    <div class="modal-body">
-      @if (profiles.length >= MaxItems) {
-        <div class="mb-3">
-          <label for="filter" class="form-label">{{t('filter-label')}}</label>
-          <div class="input-group">
-            <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="clear()">Clear</button>
-          </div>
-        </div>
-      }
+  <app-list-select-modal
+    [title]="t('title')"
+    [inputItems]="listItems()"
+    [preSelectedItems]="preSelectedListItems()"
+    [loading]="loading()"
+    [selectedText]="t('bound')"
+    hiddenTranslationKey="bulk-set-reading-profile-modal.hidden"
+    [multiSelect]="true"
+    [hideItemsWhenInvalid]="true"
+    [interceptConfirm]="addToProfile.bind(this)"
+    [isSelectionValidFunc]="validSelection.bind(this)"
+    [isValidItemFunc]="validItem.bind(this)"
+    [invalidSelectionWarning]="t('warning-duplicate')"
+    [itemTemplate]="itemTemplate()"
+  >
 
-      <ul class="list-group">
-        @for(profile of profiles | filter: filterList; let i = $index; track profile.name) {
-          <li class="list-group-item clickable" tabindex="0" role="option" (click)="addToProfile(profile)">
-            <div class="p-2 group-item d-flex justify-content-between align-items-center">
-
-              <div class="fw-bold">{{profile.name | sentenceCase}}</div>
-
-              @if (currentProfile && currentProfile.name === profile.name) {
-                <span class="pill p-1 ms-1">{{t('bound')}}</span>
-              }
-            </div>
-          </li>
-        }
-
-        @if (profiles.length === 0 && !isLoading) {
-          <li class="list-group-item">{{t('no-data')}}</li>
-        }
-
-        @if (isLoading) {
-          <li class="list-group-item">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">{{t('loading')}}</span>
-            </div>
-          </li>
-        }
-      </ul>
-    </div>
-
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
-    </div>
-  </form>
-
-
-
-
+  </app-list-select-modal>
 
 </ng-container>
+
+<ng-template #listItemTemplate let-item let-selectedItems="selectedItems">
+
+  <div class="d-flex flex-column flex-grow-1">
+    <div class="d-flex flex-row justify-content-between" *transloco="let t; prefix: 'bulk-set-reading-profile-modal'">
+      <div class="fw-bold">{{ item.label | sentenceCase }}</div>
+
+      @if (selectedItems && selectedItems.includes(item)) {
+        <span class="pill p-1 ms-1">{{ t('bound') }}</span>
+      }
+    </div>
+
+    @let devices = profileDevice(item.value);
+
+    <div class="mt-1 text-muted small">
+      @if (devices.length <= 3) {
+        @for (device of devices; track device.id) {
+          <span>{{ device.friendlyName }}</span>
+          @if (!$last) {<span>, </span>}
+        }
+      } @else {
+        @for (device of devices.slice(0, 3); track device.id) {
+          <span>{{ device.friendlyName }}</span>
+          @if (!$last) {<span>, </span>}
+        }
+        <span>, …</span>
+      }
+    </div>
+  </div>
+
+</ng-template>
+

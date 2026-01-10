@@ -31,7 +31,7 @@ public interface ITaskScheduler
     void ScheduleUpdaterTasks();
     Task ScheduleKavitaPlusTasks();
     void ScanFolder(string folderPath, string originalPath, TimeSpan delay);
-    void ScanFolder(string folderPath);
+    void ScanFolder(string folderPath, bool abortOnNoSeriesMatch = false);
     Task ScanLibrary(int libraryId, bool force = false);
     Task ScanLibraries(bool force = false);
     void CleanupChapters(int[] chapterIds);
@@ -391,7 +391,7 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Schedule(() => _scannerService.ScanFolder(normalizedFolder, normalizedOriginal), delay);
     }
 
-    public void ScanFolder(string folderPath)
+    public void ScanFolder(string folderPath, bool abortOnNoSeriesMatch = false)
     {
         var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
         if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", [normalizedFolder, string.Empty]))
@@ -402,7 +402,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalizedFolder);
-        _scannerService.ScanFolder(normalizedFolder, string.Empty);
+        _scannerService.ScanFolder(normalizedFolder, string.Empty, abortOnNoSeriesMatch);
     }
 
     #endregion

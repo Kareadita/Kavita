@@ -42,7 +42,8 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
             Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
-            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityDisplayService>());
+            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(),
+            Substitute.For<IEntityNamingService>(), Substitute.For<ILocalizationService>());
 
         return Task.FromResult<(ILogger<CleanupService>, IEventHub, IReaderService)>((logger, messageHub, readerService));
     }
@@ -638,7 +639,6 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         await unitOfWork.CommitAsync();
 
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(c.Id, 1);
-        await unitOfWork.ChapterRepository.AddChapterModifiers(user.Id, chapter);
 
         Assert.NotNull(chapter);
         Assert.Equal(2, chapter.PagesRead);
@@ -649,7 +649,6 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         await unitOfWork.CommitAsync();
 
         chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(c.Id, 1);
-        await unitOfWork.ChapterRepository.AddChapterModifiers(user.Id, chapter);
         Assert.NotNull(chapter);
         Assert.Equal(2, chapter.PagesRead);
         Assert.Equal(1, chapter.Pages);
@@ -660,7 +659,6 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         await cleanupService.EnsureChapterProgressIsCapped();
         chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(c.Id, 1);
-        await unitOfWork.ChapterRepository.AddChapterModifiers(user.Id, chapter);
 
         Assert.NotNull(chapter);
         Assert.Equal(1, chapter.PagesRead);

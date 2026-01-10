@@ -94,7 +94,7 @@
 
         <span class="card-actions">
         @if (actions && actions.length > 0) {
-            <app-card-actionables [entity]="actionEntity" (actionHandler)="performAction($event)" [inputActions]="actions" [labelBy]="title" />
+            <app-card-actionables [entity]="actionEntity" (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title" />
         }
         </span>
       </div>

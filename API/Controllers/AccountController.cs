@@ -104,7 +104,6 @@ public class AccountController : BaseApiController
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
     /// <remarks>Does not return tokens for the user</remarks>
-    /// <remarks>Updates the last active date for the user</remarks>
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
     {
@@ -113,15 +112,6 @@ public class AccountController : BaseApiController
 
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole) && !roles.Contains(PolicyConstants.AdminRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
-
-        try
-        {
-            await _unitOfWork.UserRepository.UpdateUserAsActive(user.Id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to update last active for {UserName}", user.UserName);
-        }
 
         return Ok(await ConstructUserDto(user, roles, false));
     }
@@ -254,11 +244,7 @@ public class AccountController : BaseApiController
         AppUser? user;
         if (!string.IsNullOrEmpty(loginDto.ApiKey))
         {
-            user = await _userManager.Users
-                .Include(u => u.UserPreferences)
-                .Include(u => u.AuthKeys)
-                .AsSplitQuery()
-                .SingleOrDefaultAsync(x => x.GetOpdsAuthKey() == loginDto.ApiKey);
+            user = await _unitOfWork.UserRepository.GetUserByAuthKey(loginDto.ApiKey);
         }
         else
         {
@@ -361,6 +347,7 @@ public class AccountController : BaseApiController
     /// <param name="tokenRequestDto"></param>
     /// <returns></returns>
     [AllowAnonymous]
+    [SkipDeviceTracking]
     [HttpPost("refresh-token")]
     public async Task<ActionResult<TokenRequestDto>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
     {
@@ -527,7 +514,8 @@ public class AccountController : BaseApiController
         }
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-        if (!await _accountService.CanChangeAgeRestriction(user)) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
+        var hasRole = await _accountService.CanChangeAgeRestriction(user);
+        if (!hasRole) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
         user.AgeRestriction = isAdmin ? AgeRating.NotApplicable : dto.AgeRating;
         user.AgeRestrictionIncludeUnknowns = isAdmin || dto.IncludeUnknowns;
@@ -1294,7 +1282,7 @@ public class AccountController : BaseApiController
         _unitOfWork.UserRepository.Delete(authKey);
         await _unitOfWork.CommitAsync();
 
-        await _eventHub.SendMessageToAsync(MessageFactory.AuthKeyUpdate, MessageFactory.AuthKeyDeletedEvent(authKeyId), UserId);
+        await _eventHub.SendMessageToAsync(MessageFactory.AuthKeyDeleted, MessageFactory.AuthKeyDeletedEvent(authKeyId), UserId);
 
         return Ok();
     }

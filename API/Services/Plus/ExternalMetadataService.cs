@@ -191,14 +191,7 @@ public class ExternalMetadataService : IExternalMetadataService
             _logger.LogDebug("Fetching Kavita+ for MAL Stacks for user {UserName}", user.MalUserName);
 
             var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-            var result = await _kavitaPlusApiService.GetMalStacks(user.MalUserName, license);
-
-            if (result == null)
-            {
-                return ArraySegment<MalStackDto>.Empty;
-            }
-
-            return result;
+            return await _kavitaPlusApiService.GetMalStacks(user.MalUserName, license);
         }
         catch (Exception ex)
         {

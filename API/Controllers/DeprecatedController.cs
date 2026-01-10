@@ -5,18 +5,16 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs;
+using API.DTOs.Account;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
 using API.DTOs.Progress;
 using API.DTOs.Statistics;
 using API.DTOs.Uploads;
-using API.Entities;
-using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
-using API.Middleware;
 using API.Services;
-using API.Services.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -34,15 +32,17 @@ public class DeprecatedController : BaseApiController
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<DeprecatedController> _logger;
     private readonly IStatisticService _statService;
+    private readonly IMapper _mapper;
 
     public DeprecatedController(IUnitOfWork unitOfWork, ILocalizationService localizationService, ITaskScheduler taskScheduler,
-        ILogger<DeprecatedController> logger, IStatisticService statService)
+        ILogger<DeprecatedController> logger, IStatisticService statService, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _localizationService = localizationService;
         _taskScheduler = taskScheduler;
         _logger = logger;
         _statService = statService;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -59,8 +59,6 @@ public class DeprecatedController : BaseApiController
         userParams ??= new UserParams();
         var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(UserId, userParams, filterDto);
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(UserId, pagedList);
 
         return Ok(pagedList);
     }
@@ -93,11 +91,6 @@ public class DeprecatedController : BaseApiController
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
 
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
-
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
         return Ok(series);
@@ -119,11 +112,6 @@ public class DeprecatedController : BaseApiController
         var series =
             await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, userId, userParams, filterDto);
 
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
-
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
         return Ok(series);
@@ -143,11 +131,6 @@ public class DeprecatedController : BaseApiController
         var userId = UserId;
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
-
-        // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "no-series"));
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -201,6 +184,7 @@ public class DeprecatedController : BaseApiController
 
     [HttpGet("stats/user/reading-history")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
@@ -213,6 +197,7 @@ public class DeprecatedController : BaseApiController
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("stats/server/top/years")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetTopYears()
     {
         return Ok(await _statService.GetTopYears());
@@ -226,6 +211,7 @@ public class DeprecatedController : BaseApiController
     /// <returns></returns>
     [HttpGet("stats/reading-count-by-day")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<StatCountWithFormat<DateTime>>>> ReadCountByDay(int userId = 0, int days = 0)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
@@ -238,6 +224,7 @@ public class DeprecatedController : BaseApiController
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("server/count/year")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetYearStatistics()
     {
         return Ok(await _statService.GetYearCount());
@@ -251,6 +238,7 @@ public class DeprecatedController : BaseApiController
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("stats/server/top/users")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<TopReadDto>>> GetTopReads(int days = 0)
     {
         return Ok(await _statService.GetTopUsers(days));
@@ -262,11 +250,110 @@ public class DeprecatedController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("reader/all-chapter-progress")]
+    [Obsolete("Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<FullProgressDto>>> GetProgressForChapter(int chapterId)
     {
         var userId = User.IsInRole(PolicyConstants.AdminRole) ? 0 : UserId;
         return Ok(await _unitOfWork.AppUserProgressRepository.GetUserProgressForChapter(chapterId, userId));
+    }
 
+    /// <summary>
+    /// Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams">Pagination</param>
+    /// <returns></returns>
+    [HttpGet("recommended/quick-reads")]
+    [Obsolete("Will be removed in v0.9.0")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickReads(int libraryId, [FromQuery] UserParams? userParams)
+    {
+        userParams ??= UserParams.Default;
+        var series = await _unitOfWork.SeriesRepository.GetQuickReads(UserId, libraryId, userParams);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Quick Catchup Reads are series that should be readable in less than 10 in total and are Ongoing in release.
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
+    [HttpGet("recommended/quick-catchup-reads")]
+    [Obsolete("Will be removed in v0.9.0")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickCatchupReads(int libraryId, [FromQuery] UserParams? userParams)
+    {
+        userParams ??= UserParams.Default;
+        var series = await _unitOfWork.SeriesRepository.GetQuickCatchupReads(UserId, libraryId, userParams);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Highly Rated based on other users ratings. Will pull series with ratings > 4.0, weighted by count of other users.
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams">Pagination</param>
+    /// <returns></returns>
+    [HttpGet("recommended/highly-rated")]
+    [Obsolete("Will be removed in v0.9.0")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams? userParams)
+    {
+        var userId = UserId;
+        userParams ??= UserParams.Default;
+
+        var series = await _unitOfWork.SeriesRepository.GetHighlyRated(userId, libraryId, userParams);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Chooses a random genre and shows series that are in that without reading progress
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="genreId">Genre Id</param>
+    /// <param name="userParams">Pagination</param>
+    /// <returns></returns>
+    [HttpGet("recommended/more-in")]
+    [Obsolete("Will be removed in v0.9.0")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetMoreIn(int libraryId, int genreId, [FromQuery] UserParams? userParams)
+    {
+        var userId = UserId;
+
+        userParams ??= UserParams.Default;
+        var series = await _unitOfWork.SeriesRepository.GetMoreIn(userId, libraryId, genreId, userParams);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Series that are fully read by the user in no particular order
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams">Pagination</param>
+    /// <returns></returns>
+    [HttpGet("recommended/rediscover")]
+    [Obsolete("Will be removed in v0.9.0")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetRediscover(int libraryId, [FromQuery] UserParams? userParams)
+    {
+        userParams ??= UserParams.Default;
+        var series = await _unitOfWork.SeriesRepository.GetRediscover(UserId, libraryId, userParams);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        return Ok(series);
+    }
+
+    [Obsolete("Will be removed in v0.9.0")]
+    [HttpGet("users/myself")]
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetMyself()
+    {
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
+        return Ok(users.Where(u => u.UserName == Username!).DefaultIfEmpty().Select(u => _mapper.Map<MemberDto>(u)).SingleOrDefault());
     }
 
 }

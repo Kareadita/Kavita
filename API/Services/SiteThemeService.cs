@@ -21,7 +21,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 
-namespace API.Services.Tasks;
+namespace API.Services;
 #nullable enable
 
 internal class GitHubContent

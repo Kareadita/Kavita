@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Linq;
+using API.Services.Tasks.Scanner.Parser;
 using Xunit;
 using static API.Services.Tasks.Scanner.Parser.Parser;
 
@@ -17,6 +18,36 @@ public class ParsingTests
         s = 6.5f + "";
         a = float.Parse(s, CultureInfo.CurrentCulture);
         Assert.Equal(6.5f, a);
+    }
+
+    [Theory]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    [InlineData(DefaultChapter, true)]
+    public void IsDefaultChapterTest(string input, bool expected)
+    {
+        Assert.Equal(expected, IsDefaultChapter(input));
+    }
+
+    [Fact]
+    public void IsDefaultChapterTest_FloatString()
+    {
+        Assert.True(IsDefaultChapter($"{DefaultChapterNumber}"));
+    }
+
+    [Theory]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    [InlineData(LooseLeafVolume, true)]
+    public void IsLooseLeafTest(string input, bool expected)
+    {
+        Assert.Equal(expected, IsLooseLeafVolume(input));
+    }
+
+    [Fact]
+    public void IsLooseLeafTest_FloatString()
+    {
+        Assert.True(IsLooseLeafVolume($"{LooseLeafVolumeNumber}"));
     }
 
     // [Theory]

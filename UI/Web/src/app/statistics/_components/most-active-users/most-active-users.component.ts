@@ -1,9 +1,10 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {ActiveUserCardComponent} from "../active-user-card/active-user-card.component";
 import {StatsFilter} from "../../_models/stats-filter";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 export type TimeFrame = 'week' | 'month' | 'year' | 'allTime';
 
@@ -12,7 +13,8 @@ export type TimeFrame = 'week' | 'month' | 'year' | 'allTime';
   imports: [
     TranslocoDirective,
     LoadingComponent,
-    ActiveUserCardComponent
+    ActiveUserCardComponent,
+    StatsNoDataComponent
   ],
   templateUrl: './most-active-users.component.html',
   styleUrl: './most-active-users.component.scss',
@@ -28,18 +30,18 @@ export class MostActiveUsersComponent {
 
   timeFrameLabel = computed(() => {
     const filter = this.statsFilter();
-    if (!filter) return 'overall';
+    if (!filter) return translate('time-frame-label.overall');
 
     const { startDate, endDate } = filter.timeFilter;
-    if (!startDate || !endDate) return 'overall';
+    if (!startDate || !endDate) return translate('time-frame-label.overall');
 
     const timeFrame = this.detectTimeFrame(startDate, endDate);
 
     const labels: Record<TimeFrame, string> = {
-      week: 'this week',
-      month: 'this month',
-      year: 'this year',
-      allTime: 'overall'
+      week: translate('time-frame-label.week'),
+      month: translate('time-frame-label.month'),
+      year: translate('time-frame-label.year'),
+      allTime: translate('time-frame-label.overall')
     };
 
     return labels[timeFrame];

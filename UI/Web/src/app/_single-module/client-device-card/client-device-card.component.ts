@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, HostListener, inject, inpu
 import {ClientDevice} from "../../_models/client-device";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
-import {ClientDeviceType} from "../../_services/client-info.service";
+import {ClientDeviceType, ClientInfoService} from "../../_services/client-info.service";
 import {ClientDeviceAuthTypePipe} from "../../_pipes/client-device-authtype.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {ClientDevicePlatformPipe} from "../../_pipes/client-device-platform.pipe";
@@ -19,6 +19,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/
 import {DOCUMENT} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
 import {User} from "../../_models/user/user";
+import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-client-device-card',
@@ -46,6 +47,8 @@ export class ClientDeviceCardComponent {
   private readonly deviceService = inject(DeviceService);
   private readonly document = inject(DOCUMENT);
   private readonly accountService = inject(AccountService);
+  private readonly utilityService = inject(UtilityService);
+  protected readonly clientInfoService = inject(ClientInfoService);
 
   clientDevice = input.required<ClientDevice>();
 
@@ -63,6 +66,10 @@ export class ClientDeviceCardComponent {
 
   deviceForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
+  });
+
+  currentUserId = computed(() => {
+    return this.accountService.currentUserSignal()?.id;
   });
 
   ipAddress = computed(() => {
@@ -166,7 +173,12 @@ export class ClientDeviceCardComponent {
         this.deleteDevice();
         break;
       case Action.Edit:
-        this.toggleEdit();
+        // The actionable modal needs some time to clean up
+        if (this.utilityService.activeBreakpointSignal()! < Breakpoint.Tablet ) {
+          setTimeout(() => this.toggleEdit(), 100);
+        } else {
+          this.toggleEdit();
+        }
         break;
     }
   }

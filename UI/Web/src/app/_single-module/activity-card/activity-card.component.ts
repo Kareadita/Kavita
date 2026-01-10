@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingSession} from "../../_models/progress/reading-session";
 import {ImageService} from "../../_services/image.service";
@@ -31,5 +31,19 @@ export class ActivityCardComponent {
   protected readonly imageService = inject(ImageService);
 
   session = input.required<ReadingSession>();
+
+  totalPages = computed(() => {
+    return this.session().activityData.reduce((sum, curr) => sum + curr.pagesRead, 0);
+  });
+
+  totalWords = computed(() => {
+    return this.session().activityData.reduce((sum, curr) => sum + curr.wordsRead, 0);
+  });
+
+  distinctChapters = computed(() => {
+    return new Set(this.session().activityData.map(d => d.chapterId)).size;
+  });
+
+
 
 }

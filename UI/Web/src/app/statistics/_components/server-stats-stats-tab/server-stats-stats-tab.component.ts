@@ -16,12 +16,14 @@ import {AccountService} from "../../../_services/account.service";
 import {StatsFilter} from "../../_models/stats-filter";
 import {StatBucket} from "../../_models/stats/stat-bucket";
 import {Series} from "../../../_models/series";
-import {Person} from "../../../_models/metadata/person";
+import {Person, PersonRole} from "../../../_models/metadata/person";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
 import {map} from "rxjs/operators";
-import {forkJoin} from "rxjs";
+import {forkJoin, tap} from "rxjs";
+import {ReadingList} from "../../../_models/reading-list";
+import {PersonRolePipe} from "../../../_pipes/person-role.pipe";
 
 @Component({
   selector: 'app-server-stats-stats-tab',
@@ -35,7 +37,8 @@ import {forkJoin} from "rxjs";
     MostActiveUsersComponent,
     ReadingActivityComponent,
     StatListComponent,
-    TimeDurationPipe
+    TimeDurationPipe,
+    PersonRolePipe
   ],
   templateUrl: './server-stats-stats-tab.component.html',
   styleUrl: './server-stats-stats-tab.component.scss',
@@ -46,6 +49,9 @@ export class ServerStatsStatsTabComponent {
   private readonly imageService = inject(ImageService);
   private readonly filterUtilities = inject(FilterUtilitiesService);
   protected readonly accountService = inject(AccountService);
+
+  // Encode() is fast but very predictable. We cache so we aren't calling the server over and over
+  private readonly cachePrefix = 'kavita-cache--encode-decade-';
 
 
   userId = computed(() => this.accountService.currentUserSignal()?.id);
@@ -92,6 +98,25 @@ export class ServerStatsStatsTabComponent {
     return `/library/${series.libraryId}/series/${series.id}`;
   };
 
+  readonly popularReadingListResource = this.statService.getPopularReadingList();
+  readonly popularReadingList = computed(() => {
+    return (this.popularReadingListResource.value() ?? []).map(r => {
+      return {name: r.value.title, value: r.count, data: r.value};
+    }) as StatListItem[];
+  });
+  readonly mostPopularReadingListCover = computed(() => {
+    const popular = this.popularReadingList();
+    if (!popular || popular.length === 0) {
+      return '';
+    }
+    return this.imageService.getReadingListCoverImage((popular[0].data as ReadingList).id)
+  });
+  readonly getReadingListImage = (item: StatListItem) => this.imageService.getReadingListCoverImage((item.data as Series).id);
+  readonly getReadingListUrl = (item: StatListItem) => {
+    const rList = item.data as ReadingList;
+    return `/reading-list/${rList.id}`;
+  };
+
 
   readonly genresResource = this.statService.getPopularGenresResource();
   readonly popularGenres = computed(() => {
@@ -107,16 +132,30 @@ export class ServerStatsStatsTabComponent {
     }) as StatListItem[];
   });
 
-  readonly artistResource = this.statService.getPopularArtistsResource();
+  readonly artistResource = this.statService.getPopularPersonResource(PersonRole.CoverArtist);
   readonly popularArtists = computed(() => {
     return (this.artistResource.value() ?? []).map(r => {
       return {name: r.value.name, value: r.count, data: r.value};
     }) as StatListItem[];
   });
 
-  readonly authorsResource = this.statService.getPopularAuthorsResource();
+  readonly authorsResource = this.statService.getPopularPersonResource(PersonRole.Writer);
   readonly popularAuthors = computed(() => {
     return (this.authorsResource.value() ?? []).map(r => {
+      return {name: r.value.name, value: r.count, data: r.value};
+    }) as StatListItem[];
+  });
+
+  readonly characterResource = this.statService.getPopularPersonResource(PersonRole.Character);
+  readonly popularCharacters = computed(() => {
+    return (this.characterResource.value() ?? []).map(r => {
+      return {name: r.value.name, value: r.count, data: r.value};
+    }) as StatListItem[];
+  });
+
+  readonly publisherResource = this.statService.getPopularPersonResource(PersonRole.Publisher);
+  readonly popularPublishers = computed(() => {
+    return (this.publisherResource.value() ?? []).map(r => {
       return {name: r.value.name, value: r.count, data: r.value};
     }) as StatListItem[];
   });
@@ -129,33 +168,78 @@ export class ServerStatsStatsTabComponent {
   constructor() {
     effect(() => {
       const items = this.releaseYears();
-      if (!items.length) {
-        this.releaseYearsWithUrls.set([]);
+      if (!items.length || this.releaseYearsResource.isLoading()) {
+        if (!items.length) {
+          this.releaseYearsWithUrls.set([]);
+        }
         return;
       }
 
-      // Build all filter encode requests
-      const urlRequests = items.map(item => {
+      console.log('ran release year encode code')
+      // Build a map of unique decade ranges to encode
+      const decadeMap = new Map<string, StatBucket>();
+      for (const item of items) {
         const decade = item.data as StatBucket;
-        return this.filterUtilities.encodeFilter({
+        if (decade.rangeStart) {
+          const key = `${decade.rangeStart}-${decade.rangeEnd}`;
+          if (!decadeMap.has(key)) {
+            decadeMap.set(key, decade);
+          }
+        }
+      }
+
+      const cached = new Map<string, string>();
+      const toFetch: [string, StatBucket][] = [];
+
+      for (const [key, decade] of decadeMap) {
+        const stored = localStorage.getItem(this.cachePrefix + decade.rangeStart);
+        if (stored) {
+          cached.set(key, stored);
+        } else {
+          toFetch.push([key, decade]);
+        }
+      }
+
+      // If everything is cached, resolve immediately
+      if (toFetch.length === 0) {
+        this.releaseYearsWithUrls.set(this.buildResolved(items, cached));
+        return;
+      }
+
+      // Fetch only uncached decades
+      const encodeRequests = toFetch.map(([key, decade]) =>
+        this.filterUtilities.encodeFilter({
           statements: [
-            {comparison: FilterComparison.GreaterThanEqual, field: FilterField.ReleaseYear, value: decade.rangeStart + ''},
-            {comparison: FilterComparison.LessThanEqual, field: FilterField.ReleaseYear, value: decade.rangeEnd + ''},
+            { comparison: FilterComparison.GreaterThanEqual, field: FilterField.ReleaseYear, value: decade.rangeStart + '' },
+            { comparison: FilterComparison.LessThanEqual, field: FilterField.ReleaseYear, value: decade.rangeEnd + '' },
           ],
           combination: FilterCombination.And,
           limitTo: 0,
           name: `${decade.rangeStart}s`
         }).pipe(
-          map(encoded => ({
-            ...item,
-            data: { ...decade, url: '/all-series?' + encoded }
-          }))
-        );
-      });
+          tap(encoded => localStorage.setItem(this.cachePrefix + decade.rangeStart, encoded)),
+          map(encoded => [key, encoded] as const)
+        )
+      );
 
-      forkJoin(urlRequests).subscribe(resolved => {
-        this.releaseYearsWithUrls.set(resolved);
+      forkJoin(encodeRequests).subscribe(encodedPairs => {
+        // Merge cached + freshly fetched
+        const urlLookup = new Map([...cached, ...encodedPairs]);
+        this.releaseYearsWithUrls.set(this.buildResolved(items, urlLookup));
       });
     });
   }
+
+  private buildResolved(items: StatListItem[], urlLookup: Map<string, string>) {
+    return items.map(item => {
+      const decade = item.data as StatBucket;
+      const key = `${decade.rangeStart}-${decade.rangeEnd}`;
+      return {
+        ...item,
+        data: { ...decade, url: '/all-series?' + urlLookup.get(key) }
+      };
+    });
+  }
+
+  protected readonly PersonRole = PersonRole;
 }

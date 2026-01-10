@@ -11,7 +11,7 @@
           <label for="filter" class="form-label">{{t('filter-label')}}</label>
           <div class="input-group">
             <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">Clear</button>
+            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">{{t('clear')}}</button>
           </div>
         </div>
       }

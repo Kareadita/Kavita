@@ -23,16 +23,26 @@
     </div>
   </form>
 
-  <app-responsive-table [rows]="data" [trackByFn]="trackBy">
+  <app-responsive-table [rows]="data()"
+                        [trackByFn]="trackBy"
+                        [totalItems]="pagination().totalItems"
+                        [pageSize]="pagination().itemsPerPage"
+                        [pageIndex]="pagination().currentPage"
+                        (pageChange)="onPageChange($event.pageIndex)"
+  >
     <ng-template #tableTemplate>
       <ngx-datatable
         class="bootstrap"
-        [rows]="data"
-        [loadingIndicator]="isLoading"
+        [rows]="data()"
+        [loadingIndicator]="isLoading()"
         [columnMode]="ColumnMode.flex"
         rowHeight="auto"
-        [limit]="15"
         [footerHeight]="50"
+        [externalPaging]="true"
+        [limit]="pagination().itemsPerPage"
+        [count]="pagination().totalItems"
+        [offset]="pagination().currentPage"
+        (page)="onPageChange($event.offset)"
       >
 
         <ngx-datatable-column prop="series.name" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">

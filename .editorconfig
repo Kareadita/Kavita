@@ -27,3 +27,5 @@ indent_size = 2
 [*.cs]
 # Disable SonarLint warning S1075 (Don't use hardcoded url)
 dotnet_diagnostic.S1075.severity = none
+# Logging is never disabled in this project
+dotnet_diagnostic.CA1873.severity = none

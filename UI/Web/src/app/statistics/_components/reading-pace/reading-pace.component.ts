@@ -3,6 +3,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
 import {StatsFilter} from "../../_models/stats-filter";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 export interface ReadingPace {
   hoursRead: number;
@@ -22,7 +23,8 @@ export enum ReadingPaceType {
   selector: 'app-reading-pace',
   imports: [
     TranslocoDirective,
-    CompactNumberPipe
+    CompactNumberPipe,
+    StatsNoDataComponent
   ],
   templateUrl: './reading-pace.component.html',
   styleUrl: './reading-pace.component.scss',

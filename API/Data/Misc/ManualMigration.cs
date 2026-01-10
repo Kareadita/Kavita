@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using API.Entities.History;
+using API.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -13,6 +14,7 @@ public abstract class ManualMigration
     /// Execute the migration logic. Handle your own exceptions.
     /// </summary>
     protected abstract Task ExecuteAsync(DataContext context, ILogger<Program> logger);
+
 
     public async Task RunAsync(DataContext context, ILogger<Program> logger)
     {

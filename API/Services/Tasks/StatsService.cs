@@ -111,6 +111,15 @@ public class StatsService : IStatsService
             {
                 _logger.LogError("KavitaStats did not respond successfully. {Content}", response);
             }
+
+            // Increment stats api hits
+            await _context.Database.ExecuteSqlAsync(
+                $"""
+                 UPDATE ServerSetting
+                 SET Value = CAST(CAST(Value AS INTEGER) + 1 AS TEXT)
+                 WHERE Key = {ServerSettingKey.StatsApiHits}
+                 """);
+
         }
         catch (HttpRequestException e)
         {
@@ -356,8 +365,32 @@ public class StatsService : IStatsService
             userDto.SeriesBookmarksCreatedCount = user.Bookmarks.Count;
             userDto.SmartFilterCreatedCount = user.SmartFilters.Count;
             userDto.IsSharingReviews = user.UserPreferences.SocialPreferences.ShareReviews;
+            userDto.IsSharingProfile = user.UserPreferences.SocialPreferences.ShareProfile;
+            userDto.IsSharingAnnotations = user.UserPreferences.SocialPreferences.ShareAnnotations;
             userDto.WantToReadSeriesCount = user.WantToRead.Count;
             userDto.IdentityProvider = user.IdentityProvider;
+
+            // Social Profile
+            var activityData = await _context.AppUserReadingSession
+                .Where(s => s.AppUserId == user.Id)
+                .SelectMany(s => s.ActivityData)
+                .Select(ad => new
+                {
+                    ad.PagesRead,
+                    ad.WordsRead,
+                    ad.StartTime,
+                    ad.EndTime
+                })
+                .ToListAsync();
+
+            userDto.TotalPagesRead = activityData.Sum(ad => ad.PagesRead);
+            userDto.TotalWordsRead = activityData.Sum(ad => ad.WordsRead);
+            userDto.TotalSecondsRead = activityData
+                .Where(ad => ad.EndTime.HasValue)
+                .Sum(ad => (long)(ad.EndTime!.Value - ad.StartTime).TotalSeconds);
+
+            // Since social profiles require some sort of way to identify the user, let's use userId + installId. These can be disassociated, but should be stable enough
+            userDto.UserId = $"{serverSettings.InstallId}_{user.Id}";
 
             if (allLibraries.Count > 0 && userLibraryAccess.TryGetValue(user.Id, out var accessibleLibraries))
             {
@@ -378,6 +411,15 @@ public class StatsService : IStatsService
 
     private async Task OpenRandomFile(ServerInfoV3Dto dto)
     {
+        // Skip this if we've sent enough
+        var samplesTaken = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).StatsApiHits;
+        if (samplesTaken > 2)
+        {
+            dto.TimeToOpeCbzMs = null;
+            dto.TimeToOpenCbzPages = null;
+            return;
+        }
+
         var random = new Random();
         List<string> extensions = [".cbz", ".zip"];
 

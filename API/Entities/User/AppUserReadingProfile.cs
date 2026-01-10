@@ -31,6 +31,7 @@ public class AppUserReadingProfile
     public ReadingProfileKind Kind { get; set; }
     public List<int> LibraryIds { get; set; }
     public List<int> SeriesIds { get; set; }
+    public List<int> DeviceIds { get; set; }
 
     #region MangaReader
 

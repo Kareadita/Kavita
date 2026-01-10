@@ -42,4 +42,7 @@ public enum KeyBindTarget
 
     [Description(nameof(PageDown))]
     PageDown = 12,
+
+    [Description(nameof(OffsetDoublePage))]
+    OffsetDoublePage = 13,
 }

@@ -8,7 +8,6 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -152,20 +151,13 @@ public class VolumeRepository : IVolumeRepository
     /// <returns></returns>
     public async Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId)
     {
-        var volume = await _context.Volume
+        return await _context.Volume
             .Where(vol => vol.Id == volumeId)
             .Includes(VolumeIncludes.Chapters | VolumeIncludes.Files)
             .AsSplitQuery()
             .OrderBy(v => v.MinNumber)
-            .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Volume, VolumeDto>(_mapper, userId)
             .FirstOrDefaultAsync(vol => vol.Id == volumeId);
-
-        if (volume == null) return null;
-
-        var volumeList = new List<VolumeDto>() {volume};
-        await AddVolumeModifiers(userId, volumeList);
-
-        return volumeList[0];
     }
 
     /// <summary>
@@ -214,17 +206,13 @@ public class VolumeRepository : IVolumeRepository
     /// <returns></returns>
     public async Task<IList<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId, VolumeIncludes includes = VolumeIncludes.Chapters)
     {
-        var volumes =  await _context.Volume
+        return await _context.Volume
             .Where(vol => vol.SeriesId == seriesId)
             .Includes(includes)
             .OrderBy(volume => volume.MinNumber)
-            .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Volume, VolumeDto>(_mapper, userId)
             .AsSplitQuery()
             .ToListAsync();
-
-        await AddVolumeModifiers(userId, volumes);
-
-        return volumes;
     }
 
     public async Task<IList<Volume>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat)
@@ -237,32 +225,6 @@ public class VolumeRepository : IVolumeRepository
             .ToListAsync();
     }
 
-
-    private async Task AddVolumeModifiers(int userId, IReadOnlyCollection<VolumeDto> volumes)
-    {
-        var volIds = volumes.Select(s => s.Id);
-        var userProgress = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId && volIds.Contains(p.VolumeId))
-            .AsNoTracking()
-            .ToListAsync();
-
-        foreach (var v in volumes)
-        {
-            foreach (var c in v.Chapters)
-            {
-                var progresses = userProgress.Where(p => p.ChapterId == c.Id).ToList();
-                if (progresses.Count == 0) continue;
-                c.PagesRead = progresses.Sum(p => p.PagesRead);
-                c.TotalReads = progresses.Min(p => p.TotalReads);
-                c.LastReadingProgressUtc = progresses.Max(p => p.LastModifiedUtc);
-                c.LastReadingProgress = progresses.Max(p => p.LastModified);
-            }
-
-            v.PagesRead = userProgress
-                .Where(p => p.VolumeId == v.Id)
-                .Sum(p => p.PagesRead);
-        }
-    }
 
     /// <summary>
     /// Returns cover images for locked chapters

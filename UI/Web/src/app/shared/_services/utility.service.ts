@@ -11,6 +11,7 @@ import {debounceTime, ReplaySubject, shareReplay} from "rxjs";
 import {DOCUMENT} from "@angular/common";
 import getComputedStyle from "@popperjs/core/lib/dom-utils/getComputedStyle";
 import {toSignal} from "@angular/core/rxjs-interop";
+import {ActionItem} from "../../_services/action-factory.service";
 
 export enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -273,5 +274,12 @@ export class UtilityService {
                   || document.documentElement.clientHeight
                   || document.body.clientHeight;
     return [windowWidth, windowHeight];
+  }
+
+  copyActionItem(item: ActionItem<any>): ActionItem<any> {
+    return {
+      ...item,
+      children: item.children.map(child => this.copyActionItem(child))
+    }
   }
 }

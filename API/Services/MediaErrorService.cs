@@ -15,10 +15,10 @@ public enum MediaErrorProducer
 
 public interface IMediaErrorService
 {
-    Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, string details);
     void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, string details);
-    Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, Exception ex);
     void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, Exception ex);
+    Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, string details);
+    Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, Exception ex);
 }
 
 public class MediaErrorService : IMediaErrorService
@@ -30,10 +30,7 @@ public class MediaErrorService : IMediaErrorService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, Exception ex)
-    {
-        await ReportMediaIssueAsync(filename, producer, errorMessage, ex.Message);
-    }
+
 
     public void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, Exception ex)
     {
@@ -46,6 +43,11 @@ public class MediaErrorService : IMediaErrorService
     {
         // To avoid overhead on commits, do async. We don't need to wait.
         BackgroundJob.Enqueue(() => ReportMediaIssueAsync(filename, producer, errorMessage, details));
+    }
+
+    public async Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, Exception ex)
+    {
+        await ReportMediaIssueAsync(filename, producer, errorMessage, ex.Message);
     }
 
     public async Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, string details)

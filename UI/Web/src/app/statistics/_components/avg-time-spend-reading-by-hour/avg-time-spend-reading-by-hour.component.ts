@@ -4,6 +4,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {BarChartComponent} from "../../../shared/_charts/bar-chart/bar-chart.component";
+import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
 
 export type ReadTimeByHour = {
   dataSince: string,
@@ -15,7 +16,8 @@ export type ReadTimeByHour = {
     TranslocoDirective,
     BarChartComponent,
     UtcToLocalTimePipe,
-    LoadingComponent
+    LoadingComponent,
+    StatsNoDataComponent
   ],
   templateUrl: './avg-time-spend-reading-by-hour.component.html',
   styleUrl: './avg-time-spend-reading-by-hour.component.scss',

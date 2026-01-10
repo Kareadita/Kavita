@@ -17,6 +17,9 @@
               }
             </h5>
             <div class="text-muted small">
+              @if (clientDevice().uiFingerprint === clientInfoService.getDeviceId()) {
+                <span class="badge bg-primary me-2">{{t('active')}}</span>
+              }
               <span class="badge" [class]="clientTypeBadgeClass()">
                 {{clientDevice().currentClientInfo.clientType | clientDeviceClientType}}
               </span>
@@ -24,15 +27,10 @@
                 {{clientDevice().currentClientInfo.authType | clientDeviceAuthType}}
               </span>
               <span class="ms-2">{{clientDevice().ownerUsername}}</span>
-              <!--TODO: I'm not happy with how ip address renders out-->
-<!--              <span class="ms-1">-->
-<!--                <i class="fa-solid fa-network-wired" aria-hidden="true"></i>-->
-<!--                {{ ipAddress() | defaultValue }}-->
-<!--              </span>-->
             </div>
           </div>
           <div class="text-end">
-            <app-card-actionables [inputActions]="actions()" [entity]="clientDevice()" />
+            <app-card-actionables [actions]="actions()" [entity]="clientDevice()" [disabled]="clientDevice().ownerUserId != currentUserId()" />
           </div>
         </div>
 

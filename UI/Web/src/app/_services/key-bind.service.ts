@@ -127,6 +127,7 @@ export const DefaultKeyBinds: Readonly<Record<KeyBindTarget, KeyBind[]>> = {
   [KeyBindTarget.Escape]: [{key: KeyCode.Escape}],
   [KeyBindTarget.PageUp]: [{key: KeyCode.ArrowUp}],
   [KeyBindTarget.PageDown]: [{key: KeyCode.ArrowDown}],
+  [KeyBindTarget.OffsetDoublePage]: [{key: KeyCode.KeyO}],
 } as const;
 
 type KeyBindGroup = {
@@ -161,6 +162,7 @@ export const KeyBindGroups: KeyBindGroup[] = [
       {target: KeyBindTarget.PageLeft},
       {target: KeyBindTarget.PageUp},
       {target: KeyBindTarget.PageDown},
+      {target: KeyBindTarget.OffsetDoublePage},
     ],
   }
 ];
@@ -278,6 +280,7 @@ export class KeyBindService {
 
   private handleKeyEvent(event: KeyboardEvent) {
     if (this.disabled()) return;
+    if (event.key === undefined) return;
 
     const eventKey = event.key.toLowerCase() as KeyCode;
 

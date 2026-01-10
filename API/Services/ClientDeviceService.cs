@@ -399,6 +399,7 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
     private async Task UpdateDeviceActivityAsync(ClientDevice device, ClientInfoData? newClientInfo)
     {
         device.LastSeenUtc = DateTime.UtcNow;
+        context.Entry(device).State = EntityState.Modified;
 
         if (HasMeaningfulChanges(device.CurrentClientInfo, newClientInfo))
         {
@@ -420,8 +421,8 @@ public class ClientDeviceService(DataContext context, IMapper mapper, ILogger<Cl
             // Their LastSeenUtc is equally valid
             logger.LogDebug(ex, "Concurrency conflict updating device {DeviceId}, ignoring", device.Id);
 
-            // Detach to prevent tracking issues
-            context.Entry(device).State = EntityState.Detached;
+            // Reload the entity from database to get current state
+            await context.Entry(device).ReloadAsync();
         }
     }
 

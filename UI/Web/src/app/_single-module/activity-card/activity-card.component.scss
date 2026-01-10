@@ -1,7 +1,8 @@
 
 
+
 .activity-card {
-  background: #1a1a1a;
+  background: var(--elevation-layer1-dark-solid);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 20px;
@@ -9,7 +10,7 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px var(--elevation-layer10-dark);
   }
 
   .activity-content {
@@ -37,9 +38,9 @@
       width: 60px;
       height: 85px;
       object-fit: cover;
-      border: 2px solid #1a1a1a;
+      border: 2px solid var(--elevation-layer1-dark-solid);
       border-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 2px 8px var(--elevation-layer11-dark);
     }
   }
 
@@ -48,7 +49,7 @@
     padding: 16px;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.8), #1a1a1a);
+    background: linear-gradient(to right, var(--elevation-layer11-dark), var(--elevation-layer1-dark-solid));
     min-width: 0; // Allow text truncation
   }
 
@@ -68,34 +69,19 @@
     align-items: center;
   }
 
-  .product-badge {
-    background: #8b5cf6 !important;
+  .platform-badge {
+    background: var(--activity-card-client-platform-badge-bg-color) !important;
     font-size: 11px;
     padding: 4px 8px;
     font-weight: 600;
   }
 
-  .player-badge {
-    background: #3b82f6 !important;
+  .device-badge {
+    background: var(--activity-card-client-device-badge-bg-color);
     font-size: 11px;
     padding: 4px 8px;
   }
 
-  .quality-badge {
-    color: #cbd5e1;
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .badge-stream {
-    background: #22c55e;
-    color: white;
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    font-weight: 600;
-  }
 
   .session-metadata {
     margin-bottom: 12px;
@@ -107,14 +93,10 @@
       font-size: 12px;
 
       .label {
-        color: #94a3b8;
+        color: var(--offwhite-text-color);
         text-transform: uppercase;
         font-weight: 600;
         min-width: 80px;
-      }
-
-      .value {
-        color: #e2e8f0;
       }
     }
   }
@@ -123,7 +105,7 @@
     margin-bottom: 12px;
 
     .progress {
-      background: #334155;
+      background: var(--progress-bg-color);
       border-radius: 2px;
     }
 
@@ -132,7 +114,7 @@
       justify-content: flex-end;
       margin-top: 4px;
       font-size: 11px;
-      color: #94a3b8;
+      color: var(--offwhite-text-color);
     }
   }
 
@@ -145,7 +127,7 @@
 
     .play-icon {
       font-size: 24px;
-      color: #f59e0b;
+      color: var(--primary-color);
       flex-shrink: 0;
     }
 
@@ -155,7 +137,7 @@
     }
 
     .series-title {
-      color: #f1f5f9;
+      color: var(--primary-color);
       font-size: 16px;
       font-weight: 600;
       white-space: nowrap;
@@ -164,7 +146,7 @@
     }
 
     .chapter-info {
-      color: #94a3b8;
+      color: var(--offwhite-text-color);
       font-size: 13px;
       white-space: nowrap;
       overflow: hidden;
@@ -177,10 +159,10 @@
     justify-content: flex-end;
     align-items: center;
     padding-top: 8px;
-    border-top: 1px solid #334155;
+    border-top: 1px solid var(--offwhite-text-color);
 
     .username {
-      color: #cbd5e1;
+      color: var(--offwhite-text-color);
       font-size: 13px;
       font-weight: 500;
     }

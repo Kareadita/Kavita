@@ -25,6 +25,7 @@ using HtmlAgilityPack;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -63,6 +64,11 @@ public class Startup
         services.Configure<AppSettingsDto>(_config);
         services.AddApplicationServices(_config, _env);
 
+        // Store keys inside database, such that cookies can be decrypted between container restarts
+        services.AddDataProtection()
+            .PersistKeysToDbContext<DataContext>()
+            .SetApplicationName(BuildInfo.AppName);
+
         services.AddControllers(options =>
         {
             options.CacheProfiles.Add(ResponseCacheProfiles.Instant,
@@ -96,13 +102,6 @@ public class Startup
                 {
                     Duration = _env.IsDevelopment() ? 0 : 60 * 60 * 6,
                     Location = ResponseCacheLocation.Client,
-                });
-            options.CacheProfiles.Add(ResponseCacheProfiles.Images,
-                new CacheProfile()
-                {
-                    Duration = 60,
-                    Location = ResponseCacheLocation.Client,
-                    NoStore = false
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.Month,
                 new CacheProfile()
@@ -239,7 +238,6 @@ public class Startup
         });
     }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
         IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider,
         IDirectoryService directoryService, IUnitOfWork unitOfWork, IVersionUpdaterService versionService)
@@ -433,7 +431,7 @@ public class Startup
                     #region v0.7.14
                     await MigrateEmailTemplates.Migrate(directoryService, logger);
                     await MigrateVolumeNumber.Migrate(dataContext, logger);
-                    await MigrateWantToReadImport.Migrate(unitOfWork, dataContext, directoryService, logger);
+                    await new MigrateWantToReadImport(unitOfWork, directoryService).RunAsync(dataContext, logger);
                     await MigrateManualHistory.Migrate(dataContext, logger);
                     await MigrateClearNightlyExternalSeriesRecords.Migrate(dataContext, logger);
                     #endregion
@@ -495,7 +493,8 @@ public class Startup
                     await new MigrateTotalReads().RunAsync(dataContext, logger);
                     await new MigrateToAuthKeys().RunAsync(dataContext, logger);
                     await new MigrateMissingAppUserRatingDateColumns().RunAsync(dataContext, logger);
-                    await new MigrateFormatToActivityData().RunAsync(dataContext, logger);
+                    await new MigrateFormatToActivityDataV2().RunAsync(dataContext, logger);
+                    await new MigrateIncorrectUtcTimes().RunAsync(dataContext, logger);
                     #endregion
 
                     #endregion

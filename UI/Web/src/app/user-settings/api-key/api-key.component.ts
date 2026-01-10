@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   ElementRef,
@@ -11,20 +10,21 @@ import {
   ViewChild
 } from '@angular/core';
 import {Clipboard} from '@angular/cdk/clipboard';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
-    selector: 'app-api-key',
-    templateUrl: './api-key.component.html',
-    styleUrls: ['./api-key.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-api-key',
+  templateUrl: './api-key.component.html',
+  styleUrls: ['./api-key.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslocoDirective, SettingItemComponent]
 })
 export class ApiKeyComponent {
 
   private readonly clipboard = inject(Clipboard);
-  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly toastr = inject(ToastrService);
 
   title = input.required<string>();
   key = input.required<string>();
@@ -44,16 +44,13 @@ export class ApiKeyComponent {
   @ViewChild('apiKey') inputElem!: ElementRef;
 
   async copy() {
-    this.inputElem.nativeElement.select();
-    this.clipboard.copy(this.inputElem.nativeElement.value);
-    this.inputElem.nativeElement.setSelectionRange(0, 0);
-    this.cdRef.markForCheck();
+    this.clipboard.copy(this.key());
+    this.toastr.success(translate('toasts.copied-to-clipboard'));
   }
 
   selectAll() {
     if (this.inputElem) {
       this.inputElem.nativeElement.setSelectionRange(0, this.key().length);
-      this.cdRef.markForCheck();
     }
   }
 
