@@ -21,7 +21,7 @@ public sealed record AuthKeyDto
     /// An Optional time which the Key expires
     /// </summary>
     public DateTime? ExpiresAtUtc { get; set; }
-    public DateTime? LastAccessedAt { get; set; }
+    public DateTime? LastAccessedAtUtc { get; set; }
 
     /// <summary>
     /// Kavita will have a short-lived key

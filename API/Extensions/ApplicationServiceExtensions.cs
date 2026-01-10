@@ -88,6 +88,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ILocalizationService, LocalizationService>();
         services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<IAuthKeyCacheInvalidator, AuthKeyCacheInvalidator>();
+        services.AddScoped<IAuthKeyService, AuthKeyService>();
 
 
         services.AddScoped<IKavitaPlusApiService, KavitaPlusApiService>();

@@ -8,9 +8,12 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Entities.Progress;
+using API.Services;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -26,6 +29,7 @@ public class AuthKeyAuthenticationHandler : AuthenticationHandler<AuthKeyAuthent
 {
 private readonly IUnitOfWork _unitOfWork;
     private readonly HybridCache _cache;
+    private readonly IMemoryCache _memoryCache;
 
     private static readonly HybridCacheEntryOptions CacheOptions = new()
     {
@@ -33,16 +37,24 @@ private readonly IUnitOfWork _unitOfWork;
         LocalCacheExpiration = TimeSpan.FromMinutes(15)
     };
 
+    private static readonly MemoryCacheEntryOptions AuthKeyCacheOptions = new MemoryCacheEntryOptions()
+    {
+        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+        Size = 1
+    };
+
     public AuthKeyAuthenticationHandler(
         IOptionsMonitor<AuthKeyAuthenticationOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
         IUnitOfWork unitOfWork,
-        HybridCache cache)
+        HybridCache cache,
+        IMemoryCache memoryCache)
         : base(options, logger, encoder)
     {
         _unitOfWork = unitOfWork;
         _cache = cache;
+        _memoryCache = memoryCache;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -86,6 +98,9 @@ private readonly IUnitOfWork _unitOfWork;
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
+            // Mark the auth key as last accessed
+            EnqueueAccessUpdateIfNeeded(apiKey);
+
             return AuthenticateResult.Success(ticket);
         }
         catch (Exception ex)
@@ -121,5 +136,20 @@ private readonly IUnitOfWork _unitOfWork;
     public static string CreateCacheKey(string keyValue)
     {
         return $"authKey_{keyValue}";
+    }
+
+    private void EnqueueAccessUpdateIfNeeded(string apiKey)
+    {
+        var throttleKey = $"authkey_access_{apiKey}";
+
+        if (_memoryCache.TryGetValue(throttleKey, out _))
+        {
+            return;
+        }
+
+        // Mark as recently queued
+        _memoryCache.Set(throttleKey, true, AuthKeyCacheOptions);
+
+        BackgroundJob.Enqueue<IAuthKeyService>(s => s.UpdateLastAccessedAsync(apiKey));
     }
 }
