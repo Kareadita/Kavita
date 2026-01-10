@@ -27,7 +27,7 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
         var endpoint = context.GetEndpoint();
         var skipTracking = endpoint?.Metadata.GetMetadata<SkipDeviceTrackingAttribute>() != null;
 
-        if (skipTracking)
+        if (skipTracking || context.Request.Path.Equals("/"))
         {
             await next(context);
             return;
