@@ -116,14 +116,11 @@
         "no-data": "{{typeahead.no-data}}"
     },
     "theme-manager": {
-        "title": "ตัวจัดการธีม",
-        "site-themes": "ธีมไซต์",
         "set-default": "ตั้งค่าเริ่มต้น",
         "download": "{{changelog.download}}",
         "apply": "{{common.apply}}",
         "applied": "บันทึกแล้ว",
         "updated-toastr": "ค่าเริ่มต้นของไซต์ได้รับการอัปเดตเป็น {{name}}",
-        "scan-queued": "การสแกนธีมไซต์อยู่ในคิวแล้ว",
         "delete": "{{common.delete}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
@@ -341,7 +338,6 @@
         "artist": "ศิลปิน",
         "character": "ตัวละคร",
         "colorist": "ช่างสี",
-        "cover-artist": "ผู้วาดหน้าปก",
         "editor": "อิดิเตอร์",
         "inker": "ผู้ลงหมึก",
         "letterer": "เลทเทอเรอ",
@@ -444,7 +440,6 @@
     },
     "series-detail": {
         "close": "{{common.close}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
         "read": "{{common.read}}",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
@@ -460,17 +455,6 @@
         "no-pages": "{{toasts.no-pages}}",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
-        "characters-title": "{{metadata-fields.characters-title}}",
-        "colorists-title": "{{metadata-fields.colorists-title}}",
-        "editors-title": "{{metadata-fields.editors-title}}",
-        "inkers-title": "{{metadata-fields.inkers-title}}",
-        "letterers-title": "{{metadata-fields.letterers-title}}",
-        "translators-title": "{{metadata-fields.translators-title}}",
-        "pencillers-title": "{{metadata-fields.pencillers-title}}",
-        "publishers-title": "{{metadata-fields.publishers-title}}",
-        "imprints-title": "{{metadata-fields.imprints-title}}",
-        "teams-title": "{{metadata-fields.teams-title}}",
-        "locations-title": "{{metadata-fields.locations-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
         "ongoing": "{{publication-status-pipe.ongoing}}",
@@ -617,9 +601,6 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "required": "{{validation.required-field}}"
-    },
-    "manage-users": {
-        "loading": "{{common.loading}}"
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",
@@ -881,7 +862,6 @@
     "toasts": {
         "reset-ip-address": "รีเซ็ต IP Addresses",
         "reset-base-url": "รีเซ็ต Base Url",
-        "email-service-reset": "รีเซ็ต Email Service",
         "k+-delete-key": "การดำเนินการนี้จะลบ License ของ Kavita และอนุญาตให้แสดงลิงก์ซื้อ การดำเนินการนี้จะไม่ยกเลิกการสมัครรับข้อมูลของคุณ ใช้ฟังก์ชันนี้เฉพาะเมื่อได้รับคำแนะนำจากฝ่ายสนับสนุนเท่านั้น!",
         "password-reset": "รีเซ็ตรหัสผ่าน"
     },

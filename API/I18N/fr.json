@@ -220,5 +220,8 @@
     "genre-doesnt-exist": "Le genre n'existe pas",
     "font-url-not-allowed": "Le téléchargement d'une police à partir d'une URL n'est autorisée que depuis Google Fonts",
     "annotation-export-failed": "Impossible d'exporter les annotations, vérifiez les logs",
-    "download-not-allowed": "L'utilisateur ne dispose pas des autorisations de téléchargement"
+    "download-not-allowed": "L'utilisateur ne dispose pas des autorisations de téléchargement",
+    "client-device-doesnt-exist": "L'appareil client n'existe plus",
+    "auth-key-unique": "Le nom de la clé d'authentification doit unique à votre compte",
+    "role-restricted": "Accès interdit : Votre rôle ne vous autorise pas à effectuer cette action"
 }

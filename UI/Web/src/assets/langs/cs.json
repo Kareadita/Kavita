@@ -166,14 +166,11 @@
         "delete-label": "{{common.remove}}"
     },
     "theme-manager": {
-        "title": "Správce motivů",
-        "site-themes": "Témata stránek",
         "set-default": "Nastavit výchozí",
         "download": "{{changelog.download}}",
         "apply": "{{common.apply}}",
         "applied": "Aplikovaný",
         "updated-toastr": "Výchozí nastavení webu bylo aktualizováno na {{name}}",
-        "scan-queued": "Kontrola motivu webu byla zařazena do fronty",
         "delete": "{{common.delete}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
@@ -233,7 +230,7 @@
         "valid-email": "{{validation.valid-email}}",
         "title": "Upravit e-mailové zařízení",
         "email-tooltip": "Tento e-mail bude použit pro přijetí souboru prostřednictvím Odeslat do",
-        "device-platform-label": "Platforma zařízení"
+        "device-platform-label": "{{manage-devices.platform-label}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -270,7 +267,7 @@
         "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "Kopírovat"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "scrobbling-providers": {
         "title": "Poskytovatelé scroblingu",
@@ -424,7 +421,6 @@
         "artist": "Umělec",
         "character": "Postava",
         "colorist": "Kolorista",
-        "cover-artist": "{{artist}}",
         "editor": "Editor",
         "inker": "Inkoust",
         "letterer": "Letterer",
@@ -617,7 +613,8 @@
         "page-num-label": "Strana {{page}}",
         "completion-label": "{{percent}} dokončeno",
         "force-selected-one-column": "Režim rozvržení přepnut na jeden sloupec z důvodu nedostatečného prostoru pro vykreslení dvou sloupců",
-        "forced-vertical-switch": "Režim rozvržení přepnutý, protože rozvržení do dvou sloupců nefunguje s vertikálním stylem psaní"
+        "forced-vertical-switch": "Režim rozvržení přepnutý, protože rozvržení do dvou sloupců nefunguje s vertikálním stylem psaní",
+        "close-reader-alt": "Zavřít čtečku"
     },
     "personal-table-of-contents": {
         "no-data": "V záložkách zatím nic není",
@@ -668,16 +665,9 @@
     "series-detail": {
         "page-settings-title": "Nastavení stránky",
         "close": "{{common.close}}",
-        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
-        "layout-mode-option-card": "Karta",
-        "layout-mode-option-list": "Seznam",
         "continue-from": "Pokračovat {{title}}",
         "read": "{{common.read}}",
-        "continue": "Pokračovat",
-        "read-incognito": "Přečíst si knihu Incognito",
-        "continue-incognito": "Pokračovat inkognito",
         "read-options-alt": "Možnosti čtení",
-        "incognito": "Inkognito",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Upravit informace",
@@ -696,17 +686,6 @@
         "cover-change": "Obnovení obrázku v prohlížeči může trvat až minutu. Do té doby se na některých stránkách může zobrazovat starý obrázek.",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
-        "characters-title": "{{metadata-fields.characters-title}}",
-        "colorists-title": "{{metadata-fields.colorists-title}}",
-        "editors-title": "{{metadata-fields.editors-title}}",
-        "inkers-title": "{{metadata-fields.inkers-title}}",
-        "letterers-title": "{{metadata-fields.letterers-title}}",
-        "translators-title": "{{metadata-fields.translators-title}}",
-        "pencillers-title": "{{metadata-fields.pencillers-title}}",
-        "publishers-title": "{{metadata-fields.publishers-title}}",
-        "imprints-title": "{{metadata-fields.imprints-title}}",
-        "teams-title": "{{metadata-fields.teams-title}}",
-        "locations-title": "{{metadata-fields.locations-title}}",
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
         "ongoing": "{{publication-status-pipe.ongoing}}",
@@ -940,7 +919,8 @@
         "language-title": "{{edit-chapter-modal.language-label}}",
         "release-title": "{{sort-field-pipe.release-year}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
-        "file-path-title": "Cesta ke složce"
+        "file-path-title": "Soubory",
+        "folder-path-title": "Cesta ke složce"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1083,7 +1063,9 @@
         "bookmark-dir-label": "Adresář záložek",
         "bookmark-dir-tooltip": "Umístění, kde budou záložky uloženy. Záložky jsou zdrojové soubory a mohou být velké. Zvolte umístění s dostatečným úložným prostorem. Adresář je spravován; ostatní soubory v adresáři budou odstraněny. Pokud používáte Docker, připojte další svazek a použijte jej.",
         "media-issue-title": "Problémy s médii",
-        "scrobble-issue-title": "Problémy se scrobble"
+        "scrobble-issue-title": "Problémy se scrobble",
+        "pdf-render-resolution-label": "Rozlišení vykreslování PDF",
+        "pdf-render-resolution-tooltip": "Rozlišení, ve kterém budou PDF soubory vykreslovány. Vyšší rozlišení bude trvat déle a spotřebuje více paměti. Pokud máte problémy s vykreslováním PDF, zkuste toto rozlišení snížit."
     },
     "manage-scrobble-errors": {
         "filter-label": "{{common.filter}}",
@@ -1203,31 +1185,23 @@
         "sync-themes-task": "Synchronizovat motivy"
     },
     "manage-users": {
-        "loading": "{{common.loading}}",
-        "never": "Nikdy",
         "change-password-alt": "Změna hesla {{user}}",
-        "title": "Aktivní uživatelé",
         "invite": "Pozvat",
         "change-password-tooltip": "Změnit heslo",
-        "resend": "Znovu zaslat",
-        "setup": "Nastavení",
         "no-data": "Žádní další uživatelé nejsou k dispozici.",
         "pending-tooltip": "Tento uživatel neověřil svůj e-mail",
         "edit-user-tooltip": "Upravit",
         "edit-user-alt": "Upravit uživatele {{user}}",
         "last-active-header": "Naposledy aktivní",
         "roles-header": "{{common.roles}}",
-        "you-alt": "(Ty)",
         "pending-title": "Čeká na vyřízení",
         "delete-user-tooltip": "Odstranit uživatele",
         "delete-user-alt": "Odstranit uživatele {{user}}",
-        "username-pattern": "Uživatelské jméno může obsahovat pouze následující znaky a mezery: {{characters}}",
         "resend-invite-tooltip": "Znovu poslat pozvánku",
         "resend-invite-alt": "Znovu poslat pozvánku {{user}}",
         "setup-user-tooltip": "Nastavení uživatele",
         "setup-user-alt": "Nastavení uživatele {{user}}",
         "name-header": "Jméno",
-        "none": "Žádný",
         "online-now-tooltip": "Nyní aktivní",
         "too-many-libraries": "Hodně",
         "sharing-header": "Sdílení",
@@ -1393,7 +1367,8 @@
         "bookmark": "Záložka aktuální stránky",
         "double-click": "dvojklik",
         "title": "Klávesové zkratky",
-        "toggle-menu": "Přepnout nabídku"
+        "toggle-menu": "Přepnout nabídku",
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
     "grouped-typeahead": {
         "genres": "{{metadata-fields.genres-title}}",
@@ -1522,7 +1497,6 @@
         "image-splitting-label": "Rozdělení obrazu",
         "width-override-label": "Přepsání šířky",
         "off": "{{reader-settings.off}}",
-        "enable-comic-book-label": "Napodobit komiks",
         "brightness-label": "Jas",
         "bookmark-page-tooltip": "Založit stránku",
         "unbookmark-page-tooltip": "Zrušení záložky stránky",
@@ -1533,7 +1507,8 @@
         "loading": "{{reader-settings.loading}}",
         "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
         "reading-profile-updated": "Profil čtení aktualizován",
-        "reading-profile-promoted": "Profil čtení propagován"
+        "reading-profile-promoted": "Profil čtení propagován",
+        "page-offset-label": "Odsazení stránky"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1693,7 +1668,7 @@
         "last-read-label": "{{sort-field-pipe.read-progress}}",
         "words-label": "Délka",
         "pages-label": "Stránky",
-        "pages-count": "{{num}} stránek",
+        "pages-count": "{{series-detail.pages-count}}",
         "range-hours": "{{value}} {{hourWord}}",
         "read-time-label": "Čas čtení",
         "title": "Upravit",
@@ -1701,7 +1676,7 @@
         "sort-order-label": "Pořadí řazení",
         "isbn-label": "ISBN",
         "reading-time-label": "Čas čtení",
-        "words-count": "{{num}} slov",
+        "words-count": "{{series-detail.words-count}}",
         "id-label": "ID",
         "release-date-label": "Vydání",
         "date-added-label": "Datum přidání",
@@ -1786,8 +1761,10 @@
         "popular-decades-title": "Populární dekády",
         "popular-genres-title": "Populární žánry",
         "popular-tags-title": "Populární tagy",
-        "popular-artists-title": "Populární umělci",
-        "popular-authors-title": "Populární autoři"
+        "users": "uživatelé",
+        "readers": "čtenáři",
+        "popular-reading-lists-title": "Nejčtenější seznamy knih",
+        "popular-person-title": "Populární {{role}}"
     },
     "customize-dashboard-modal": {
         "title-smart-filters": "Chytré filtry",
@@ -2015,7 +1992,6 @@
         "known-for-title": "Známý díky",
         "individual-role-title": "Jako {{role}}",
         "browse-person-title": "Všechny práce {{name}}",
-        "anilist-url": "{{edit-person-modal.anilist-tooltip}}",
         "no-info": "Žádné informace o této osobě",
         "aka-title": "Známé také jako "
     },
@@ -2132,7 +2108,8 @@
         "person-chapter-count": "Počet kapitol",
         "annotation-owner": "Vlastník",
         "annotation-series": "Název série",
-        "annotation-color": "Barva"
+        "annotation-color": "Barva",
+        "user-rating": "Moje hodnocení"
     },
     "edit-person-modal": {
         "name-label": "{{edit-series-modal.name-label}}",
@@ -2260,13 +2237,6 @@
         "no-data": "Žádný pokrok, pusťte se do čtení",
         "title": "Rozdělení dne"
     },
-    "manga-format-stats": {
-        "format-header": "Formát",
-        "count-header": "Počet",
-        "visualisation-label": "Vizualizace",
-        "data-table-label": "Tabulka dat",
-        "title": "Formát"
-    },
     "table-of-contents": {
         "no-data": "Tato kniha nemá v metadatech nastavený obsah ani soubor toc"
     },
@@ -2283,7 +2253,6 @@
         "folder-tab": "Složka",
         "advanced-tab": "Pokročilé",
         "details-tab": "Podrobnosti",
-        "progress-tab": "Pokrok",
         "tags-tab": "Štítky",
         "tasks-tab": "Úkoly",
         "account-tab": "Účet",
@@ -2303,7 +2272,8 @@
         "cover-tab": "Obrázek na obalu",
         "annotations-tab": "Anotace",
         "overview-tab": "Přehled",
-        "management-tab": "Správa"
+        "management-tab": "Správa",
+        "activity-tab": "Aktivita"
     },
     "card-item": {
         "cannot-read": "Nelze přečíst"
@@ -2336,17 +2306,14 @@
         "file-send-to": "Soubor(y) zaslaný(é) e-mailem na adresu {{name}}",
         "account-migration-complete": "Migrace účtu dokončena",
         "reset-ip-address": "Reset IP adres",
-        "email-service-reachable": "Kavita E-mailové připojení úspěšné",
         "password-reset": "Heslo obnoveno",
         "forced-scan-queued": "Bylo zahájeno nucené skenování pro {{name}}",
         "series-added-to-reading-list": "Série přidána do seznamu četby",
-        "confirm-delete-reading-lists": "Určitě chcete odstranit seznamy čtení? Toto nelze vrátit zpět.",
         "pdf-book-mode-screen-size": "Příliš malá obrazovka pro režim Kniha",
         "k+-delete-key": "Tím se pouze odstraní licenční klíč Kavity a zobrazí se odkaz na nákup.<b>Tím se vaše předplatné nezruší!</b>Ke zrušení předplatného nejprve použijte nástroj Spravovat.",
         "device-created": "Zařízení vytvořeno",
         "bulk-covers": "Obnovování obálek ve více knihovnách je náročné a může trvat dlouho. Jste si jisti, že chcete pokračovat?",
         "k+-reset-key-success": "Vaše licence byla odhlášena. Pomocí tlačítka Upravit znovu zaregistrujte svou instanci a znovu aktivujte Kavita+",
-        "book-settings-info": "V zásuvce můžete upravit nastavení knihy, uložit je pro všechny knihy a zobrazit obsah.",
         "entity-unread": "{{jméno}} je nyní nepřečteno",
         "smart-filter-deleted": "Chytrý filtr odstraněn",
         "confirm-download-size": "{{entityType}} je {{size}}. Jste si jisti, že chcete pokračovat?",
@@ -2361,10 +2328,7 @@
         "delete-review": "Opravdu chcete svou recenzi smazat?",
         "review-deleted": "Recenze smazána",
         "age-restriction-updated": "Věkové omezení bylo aktualizováno",
-        "reading-lists-unpromoted": "Seznamy čtení nepropagovány",
-        "regen-cover": "Byla zadána úloha na znovu vytvoření obálky",
         "collection-updated": "Aktualizovaná sbírka",
-        "email-service-unresponsive": "E-mailová služba Url neodpověděla.",
         "refresh-covers-queued": "Obnovit obálky ve frontě pro {{name}}",
         "email-not-sent": "E-mail v souboru není platný a nelze jej odeslat. Odkaz byl uložen v záznamech. Správce může tento odkaz poskytnout pro dokončení toku.",
         "k+-license-saved": "Licenční klíč je uložen, ale není platný. Kliknutím na tlačítko zkontrolovat obnovte platnost předplatného. Při první registraci může propagace trvat minutu.",
@@ -2386,16 +2350,12 @@
         "theme-missing": "Aktivní motiv již neexistuje. Obnovte prosím stránku.",
         "email-sent": "E-mail odeslaný na adresu {{email}}",
         "list-doesnt-exist": "Tento seznam neexistuje",
-        "email-service-reset": "Resetování e-mailové služby",
-        "unauthorized-2": "Neautorizovaný",
         "server-settings-updated": "Aktualizováno nastavení serveru",
         "reset-base-url": "Obnovení základní adresy URL",
         "no-updates": "Nejsou k dispozici žádné aktualizace",
-        "download-in-progress": "Stahování již probíhá. Počkejte prosím.",
         "no-series-collection-warning": "Pozor! Nejsou vybrány žádné série, uložením se sbírka odstraní. Určitě chcete pokračovat?",
         "confirm-download-size-ios": "Systém iOS má problémy se stahováním souborů větších než 200 MB, toto stahování se nemusí dokončit.",
         "copied-to-clipboard": "Zkopírováno do schránky",
-        "alert-long-running": "Jedná se o dlouhodobý proces. Než jej znovu vyvoláte, dejte mu prosím čas na dokončení.",
         "confirm-library-type-change": "Změna typu knihovny vyvolá nové skenování s odlišnými pravidly analýzy a může vést k opětovnému vytvoření sérií, a tedy ke ztrátě postupu a záložek. Před tímto úkonem byste měli provést zálohu. Jste si jisti, že chcete pokračovat?",
         "external-source-already-exists": "Externí zdroj se stejným názvem/hostitelem/klíčem API již existuje",
         "no-pages": "Nejsou zde žádné stránky. Kavita nebyla schopna přečíst tento archiv.",
@@ -2404,7 +2364,6 @@
         "reading-list-updated": "Aktualizovaný seznam četby",
         "nothing-to-remove": "Nic k odstranění",
         "volumes-added-to-reading-list": "Svazek přidán do seznamu četby",
-        "library-file-analysis-queued": "Analýza souboru v knihovně ve frontě pro {{name}}",
         "entity-read": "{{name}} je nyní čteno",
         "k+-reset-key": "Tím se zruší platnost předchozí registrace pomocí vaší licence a umožní se opětovná registrace instance systému Kavita.",
         "confirm-delete-multiple-series": "Jste si jisti, že chcete odstranit {{count}} sérií? Soubory na disku se tím nezmění.",
@@ -2444,7 +2403,6 @@
         "smart-filter-updated": "Vytvořený/aktualizovaný chytrý filtr",
         "force-kavita+-refresh-success": "Externí metadata Kavita+ byla zneplatněna",
         "collection-not-owned": "Tuto sbírku nevlastníte",
-        "reading-lists-promoted": "Seznamy čtení propagovány",
         "reading-list-promoted": "Seznam čtení propagován",
         "mal-token-required": "Je vyžadován MAL Token, nastavený v Nastavení uživatele",
         "match-success": "Správně sladěné série",
@@ -2452,8 +2410,8 @@
         "scrobble-gen-init": "Vytvořena úloha pro generování událostí scrobble z historie čtení, hodnocení v minulosti a jejich synchronizaci s připojenými službami.",
         "confirm-delete-multiple-volumes": "Jste si jisti, že chcete odstranit {{count}} svazků? Soubory na disku se tím nezmění.",
         "series-added-want-to-read": "Série přidána ze seznamu Chci číst",
-        "series-bound-to-reading-profile": "Série vázaná na čtenářský profil {{name}}",
-        "library-bound-to-reading-profile": "Knihovna vázaná na čtenářský profil {{name}}",
+        "series-bound-to-reading-profile": "Série vázaná na {{amount}} čtenářských profilů",
+        "library-bound-to-reading-profile": "Knihovna vázaná na {{amount}} čtenářských profilů",
         "external-match-rate-error": "Kavita vyčerpala limit pro vyhledávání {{seriesName}}. Zkuste to znovu za 5 minut.",
         "confirm-delete-bookmark": "Opravdu chcete odstranit tuto záložku?",
         "confirm-delete-annotation": "Opravdu chcete tuto poznámku smazat?",
@@ -2461,7 +2419,6 @@
         "confirm-force-delete-font": "Toto písmo je momentálně používáno. Chcete jej vynutit smazat? Tím se uživatelé vrátí k výchozímu písmu.",
         "font-in-use": "Nelze smazat, protože písmo je používáno jedním nebo více uživateli.",
         "k+-resend-welcome-email-success": "Na vaši e-mailovou adresu Kavita+ byl odeslán e-mail",
-        "k+-resend-welcome-email-error": "Při odesílání licence Kavita+ došlo k chybě. Může to být způsobeno tím, že již nemáte aktivní účet. Obraťte se na podporu.",
         "confirm-delete-auth-key": "Opravdu chcete tento autentizační klíč smazat?"
     },
     "preferences": {
@@ -2549,7 +2506,9 @@
         "issue-count": "{{num}} Vydání",
         "unknown": "Neznámý",
         "roles": "Role",
-        "libraries": "Knihovny"
+        "libraries": "Knihovny",
+        "confirm": "Potvrdit",
+        "selected": "Vybrané"
     },
     "entity-type": {
         "logs": "záznamy",
@@ -2720,7 +2679,7 @@
         "extra-tip": "Přiřaďte profily čtení pomocí akčního menu v sériích a knihovnách nebo hromadně. Při změně nastavení v čtečce se vytvoří skrytý profil, který si pamatuje vaše volby pro danou sérii (ne pro soubory PDF). Tento profil se odstraní, když přiřadíte k sérii jeden ze svých vlastních profilů čtení. Více informací naleznete na stránce",
         "reading-direction-tooltip": "Směr kliknutí pro přechod na další stránku. Zprava doleva znamená, že kliknete na levou stranu obrazovky, abyste přejeli na další stránku.",
         "layout-mode-book-tooltip": "Jak by měl být obsah rozložen. Posouvání je stejné jako u knihy. 1 nebo 2 sloupce se přizpůsobí výšce zařízení a na každou stránku se vejde 1 nebo 2 sloupce textu",
-        "description": "Ne všechny vaše série lze číst stejným způsobem, proto nastavte pro každou knihovnu nebo sérii samostatné profily čtení, aby se vám co nejlépe dařilo navázat na předchozí díly série.",
+        "description": "Ne všechny vaše série lze číst stejným způsobem, nastavte si různé profily čtení pro jednotlivé knihovny/série/zařízení, aby se vám co nejlépe dařilo navazovat na čtení vašich sérií.",
         "reading-direction-book-tooltip": "Směr kliknutí pro přechod na další stránku. Zprava doleva znamená, že kliknete na levou stranu obrazovky, abyste přejeli na další stránku.",
         "font-family-tooltip": "Rodina písem, která se má načíst. Výchozí nastavení načte výchozí písmo knihy",
         "pdf-theme-tooltip": "Barevné motivy čtečky",
@@ -2788,7 +2747,9 @@
         "disable-width-override-label": "Zakázat přepsání šířky",
         "disable-width-override-tooltip": "Zabraňte tomu, aby se přepsání šířky projevilo, pokud je vaše obrazovka alespoň v konfigurovaném bodě zlomu nebo menší",
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
-        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}"
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
+        "set-devices": "Nastavit zařízení",
+        "select-devices-for": "Nastavit zařízení pro {{name}}"
     },
     "bulk-set-reading-profile-modal": {
         "title": "Nastavit profil čtení",
@@ -2797,7 +2758,9 @@
         "clear": "{{common.clear}}",
         "no-data": "Zatím nebyly vytvořeny žádné sbírky",
         "loading": "{{common.loading}}",
-        "bound": "Vázaný"
+        "bound": "Vázaný",
+        "warning-duplicate": "Váš výběr obsahuje překrývající se zařízení, což není povoleno",
+        "hidden": "{{amount}} profilů skryto z důvodu neplatného stavu"
     },
     "browse-people": {
         "title": "Procházet Osoby",
@@ -2921,7 +2884,12 @@
         "default-roles-label": "{{common.roles}}",
         "default-libraries-label": "{{common.libraries}}",
         "tls-required": "Poskytovatel OIDC musí používat tls (https)",
-        "other-field-invalid": "{{validation.other-field-invalid}}"
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "reset-label": "Resetovat ID",
+        "reset-tooltip": "Obnovte externí identifikátory všech uživatelů. Tuto funkci použijte k obnovení propojení mezi uživateli v Kavita a vaším poskytovatelem identit",
+        "reset-confirm": "Opravdu chcete resetovat externí ID všech uživatelů?",
+        "reset-success": "Externí ID všech uživatelů byla resetována, proveďte opětovné ověření pro propojení",
+        "auto-save-required": "Změnili jste důležité nastavení, automaticky uložte, aby se zachovalo"
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -2978,7 +2946,6 @@
         "edit-title": "Upravit poznámku",
         "create-title": "Vytvořit poznámku",
         "create": "Vytvořit",
-        "close": "{{common.close}}",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
         "edit": "Upravit",
         "delete": "Odstranit"
@@ -3091,7 +3058,9 @@
         "key-bind-title-page-up": "Stránka nahoru",
         "key-bind-tooltip-page-up": "Přesunout o jednu stránku nahoru",
         "key-bind-title-page-down": "Stránka dolů",
-        "key-bind-tooltip-page-down": "Přesunout o jednu stránku dolů"
+        "key-bind-tooltip-page-down": "Přesunout o jednu stránku dolů",
+        "key-bind-title-offset-double-page": "Dvojstránka s odsazením",
+        "key-bind-tooltip-offset-double-page": "Odsazení stránek pro zarovnání dvojstránky"
     },
     "manage-auth-keys": {
         "auth-keys-title": "Správa autorizačních klíčů",
@@ -3147,7 +3116,7 @@
     "client-device-card": {
         "auth-type-label": "Typ ověření",
         "browser-label": "Prohlížeč",
-        "platform-label": "Platforma",
+        "platform-label": "{{manage-devices.platform-label}}",
         "screen-label": "Obrazovka",
         "version-label": "Verze aplikace",
         "first-seen-label": "Poprvé viděno",
@@ -3193,7 +3162,10 @@
     },
     "activity-card": {
         "started-label": "Spuštěno",
-        "view-label": "Zobrazit"
+        "view-label": "Zobrazit",
+        "total-pages-label": "Celkový počet stránek",
+        "total-words-label": "Celkový počet slov",
+        "total-chapters-label": "Kapitoly"
     },
     "profile": {
         "title": "Profil uživatele {{username}}",
@@ -3203,17 +3175,16 @@
         "stats-tab": "{{tabs.stats-tab}}",
         "reviews-tab": "{{tabs.reviews-tab}}",
         "no-reviews": "Zatím žádné recenze",
-        "user-possessive": "{{name}}",
         "total-reads-badge": "{{reads}} čte",
         "k+-badge": "K+ předplatitel",
         "last-read-label": "Naposledy čteno:",
         "time-reading-label": "Celková doba čtení:",
-        "avg-reading-per-week-label": "Průměr za týden:"
+        "avg-reading-per-week-label": "Průměr za týden:",
+        "activity-tab": "{{tabs.activity-tab}}"
     },
     "profile-review-list": {
         "no-data": "Žádné recenze nebo recenze nejsou sdíleny",
         "filter-label": "Filtrovat podle série",
-        "rating-alt": "Filtrovat podle hodnocení",
         "clear-rating-alt": "Vymazat filtr hodnocení"
     },
     "profile-stat-bar": {
@@ -3287,7 +3258,8 @@
     },
     "profile-overview": {
         "currently-reading": "Právě čtu",
-        "want-to-read": "{{side-nav.want-to-read}}"
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "just-finished-reading": "Právě přečteno"
     },
     "activity-graph": {
         "title": "Čtenářská aktivita",
@@ -3298,7 +3270,14 @@
         "pages": "Stránky",
         "words": "Slova",
         "chapters": "Kapitoly",
-        "no-activity-tooltip": "Žádná čtenářská aktivita dne {{date}}."
+        "no-activity-tooltip": "Žádná čtenářská aktivita dne {{date}}.",
+        "no-activity-alt": "Žádná aktivita",
+        "all-time": "{{time-periods.all-time}}",
+        "low-activity-alt": "Nízká aktivita",
+        "moderate-activity-alt": "Střední aktivita",
+        "good-activity-alt": "Dobrá aktivita",
+        "high-activity-alt": "Vysoká aktivita",
+        "aggregated-count": "V roce {{year}} jste přečetli {{totalPages}} stránek a {{totalWords}} slov"
     },
     "reading-pace": {
         "hours-read": "Odečtených hodiny",
@@ -3395,6 +3374,36 @@
     },
     "files-over-time": {
         "title": "Soubory přidané v průběhu času",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "most-files": "Dne {{date}} bylo přidáno {{count}} souborů"
+    },
+    "pdf-render-resolution": {
+        "default": "Výchozí (1080x1920)",
+        "high": "Vysoké (1920x2560)",
+        "ultra": "Ultra (2160x3840)"
+    },
+    "list-select-modal": {
+        "hidden": "{{amount}} položek skryto z důvodu neplatného stavu"
+    },
+    "time-frame-label": {
+        "overall": "Celkem",
+        "week": "Tento týden",
+        "month": "Tento měsíc",
+        "year": "Tento rok"
+    },
+    "profile-activity": {
+        "time-filter-title": "Aktivita uživatele {{username}} prostřednictvím",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "no-data": "{{common.no-data}}",
+        "duration": "Doba trvání",
+        "pages-read": "{{reading-pace.pages-read}}",
+        "words-read": "{{reading-pace.words-read}}",
+        "time": "Čas",
+        "info-alt": "Více informací",
+        "today": "Dnes",
+        "yesterday": "Včera",
+        "pagination-label": "Stránkování aktivit",
+        "page-info": "Strana {{current}} z {{total}} (celkem {{items}} záznamů)"
     }
 }

@@ -36,8 +36,6 @@
         "disable-animations-label": "Desactiva les animacions"
     },
     "theme-manager": {
-        "title": "Gestor de temes",
-        "site-themes": "Temes del lloc",
         "default-theme": "Per defecte",
         "upload-continued": "un fitxer CSS",
         "active-theme": "Actiu",
@@ -171,15 +169,9 @@
     },
     "series-detail": {
         "page-settings-title": "Paràmetres de pàgina",
-        "layout-mode-option-card": "Targeta",
-        "incognito": "Incògnit",
-        "continue-incognito": "Continua en incògnit",
         "send-to": "S'ha enviat el fitxer a {{deviceName}}",
         "no-chapters": "No hi ha capítols en aquest volum. No es pot llegir.",
         "edit-series-alt": "Edita la informació",
-        "continue": "Continua",
-        "read-incognito": "Llegeix en incògnit",
-        "layout-mode-option-list": "Llista",
         "weblinks-title": "Enllaços",
         "more-alt": "Més",
         "pages-count": "{{num}} pàgines",
@@ -264,13 +256,6 @@
         "format-header": "Format",
         "total-files-header": "Fitxers totals"
     },
-    "manga-format-stats": {
-        "data-table-label": "Taula de dades",
-        "count-header": "Recompte",
-        "title": "Format",
-        "visualisation-label": "Visualització",
-        "format-header": "Format"
-    },
     "publication-status-stats": {
         "visualisation-label": "Visualització",
         "data-table-label": "Taula de dades",
@@ -354,7 +339,6 @@
         "related-tab": "Relacionats",
         "specials-tab": "Especials",
         "details-tab": "Detalls",
-        "progress-tab": "Progrés",
         "info-tab": "Informació",
         "recommendations-tab": "Recomanacions",
         "tasks-tab": "Tasques",
