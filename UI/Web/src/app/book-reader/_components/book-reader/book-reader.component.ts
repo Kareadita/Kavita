@@ -2282,20 +2282,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.readerSettingsService.updateClickToPaginate(clickToPaginate);
     this.cdRef.markForCheck();
 
+    this.clearTimeoutId(this.paginationIndicatorsTimeout);
+    this.paginationIndicatorsTimeout = undefined;
+
+    this.showPaginationIndicators.set(clickToPaginate);
+    
     if (clickToPaginate) {
-      this.clearTimeoutId(this.paginationIndicatorsTimeout);
-      this.paginationIndicatorsTimeout = undefined;
-      this.showPaginationIndicators.set(true);
-      this.cdRef.detectChanges();
       this.paginationIndicatorsTimeout = setTimeout(() => {
         this.showPaginationIndicators.set(false);
-        this.cdRef.detectChanges();
       }, 2000);
-    } else {
-      this.showPaginationIndicators.set(false);
-      this.clearTimeoutId(this.paginationIndicatorsTimeout);
-      this.paginationIndicatorsTimeout = undefined;
-      this.cdRef.detectChanges();
     }
   }
 
