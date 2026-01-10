@@ -285,7 +285,6 @@ public class StatsController(
     #region Reading History
 
     [HttpGet("reading-activity")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<ReadingActivityGraphDto>> GetReadingActivity([FromQuery] StatsFilterDto filter, int userId, int year)
     {
         await CleanStatsFilter(filter, UserId);
@@ -431,7 +430,6 @@ public class StatsController(
 
     [ProfilePrivacy]
     [HttpGet("user-stats")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Statistics)]
     public async Task<ActionResult<ProfileStatBarDto>> GetStatsForUserBar([FromQuery] StatsFilterDto filter, int userId)
     {
         await CleanStatsFilter(filter, userId);
