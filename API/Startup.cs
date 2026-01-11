@@ -488,6 +488,7 @@ public class Startup
                     await new MigrateMissingAppUserRatingDateColumns().RunAsync(dataContext, logger);
                     await new MigrateFormatToActivityDataV2().RunAsync(dataContext, logger);
                     await new MigrateIncorrectUtcTimes().RunAsync(dataContext, logger);
+                    await new MigrateBadKoreaderProgress().RunAsync(dataContext, logger);
                     #endregion
 
                     #endregion
