@@ -301,6 +301,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         var completedChapterIds = session.ActivityData
             .Where(d => d.TotalPages > 0 && d.EndPage >= d.TotalPages)
             .Select(d => d.ChapterId)
+            .Distinct()
             .ToList();
 
         // Clear format caches
