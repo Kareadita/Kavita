@@ -71,10 +71,10 @@ public class Startup
 
         services.AddControllers(options =>
         {
-            options.CacheProfiles.Add(ResponseCacheProfiles.Instant,
+            options.CacheProfiles.Add(ResponseCacheProfiles.Minute,
                 new CacheProfile()
                 {
-                    Duration = 30,
+                    Duration = 60 * 1,
                     Location = ResponseCacheLocation.Client,
                 });
             options.CacheProfiles.Add(ResponseCacheProfiles.FiveMinute,
@@ -114,13 +114,6 @@ public class Startup
                 new CacheProfile()
                 {
                     Duration = (int) TimeSpan.FromHours(4).TotalSeconds,
-                    Location = ResponseCacheLocation.Client,
-                    NoStore = false
-                });
-            options.CacheProfiles.Add(ResponseCacheProfiles.KavitaPlus,
-                new CacheProfile()
-                {
-                    Duration = (int) TimeSpan.FromDays(30).TotalSeconds,
                     Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });

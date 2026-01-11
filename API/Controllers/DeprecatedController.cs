@@ -103,7 +103,7 @@ public class DeprecatedController : BaseApiController
     /// <param name="userParams"></param>
     /// <param name="libraryId"></param>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = "Instant")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Minute)]
     [HttpPost("series/recently-added")]
     [Obsolete("use recently-added-v2. Will be removed in v0.9.0")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)

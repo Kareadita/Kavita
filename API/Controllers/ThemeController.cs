@@ -83,7 +83,7 @@ public class ThemeController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("browse")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> BrowseThemes()
     {
         var themes = await _themeService.GetDownloadableThemes();
