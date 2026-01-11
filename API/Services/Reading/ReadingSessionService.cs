@@ -112,10 +112,13 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         return newSession;
     }
 
-    private async Task UpdateActivityDataAsync( AppUserReadingSession session, ProgressDto progressDto, ClientInfoData? clientInfo,
+    private async Task UpdateActivityDataAsync(AppUserReadingSession session, ProgressDto progressDto, ClientInfoData? clientInfo,
         int? deviceId, IServiceScope scope, DataContext context)
     {
+        var cutoffUtc = DateTime.UtcNow - _sessionTimeout;
+
         var existingActivity = session.ActivityData
+            .Where(d => d.EndTimeUtc == null || d.EndTimeUtc >= cutoffUtc) // End time works as a LastModified
             .FirstOrDefault(d => d.ChapterId == progressDto.ChapterId);
 
         var chapterFormat = await GetChapterFormatAsync(progressDto.ChapterId, context);
