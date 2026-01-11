@@ -1741,6 +1741,51 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                 var totalPages = x.Sum(s => s.TotalPages);
 
                 var localStart = TimeZoneInfo.ConvertTimeFromUtc(startTime, userTimeZone);
+
+                var chapters = x.Select(s =>
+                {
+                    var chapterDto = new ChapterDto
+                    {
+                        Id = s.ChapterId,
+                        Number = s.ChapterNumber,
+                        Range = s.ChapterRange,
+                        Title = s.ChapterTitle,
+                        MinNumber = s.ChapterMinNumber,
+                        MaxNumber = s.ChapterMaxNumber,
+                        TitleName = s.ChapterTitleName,
+                        IsSpecial = s.ChapterIsSpecial,
+                    };
+
+                    var volumeDto = new VolumeDto
+                    {
+                        Id = s.VolumeId,
+                        Number = s.VolumeNumber,
+                        Name = s.VolumeName,
+                        MinNumber = s.VolumeMinNumber,
+                        MaxNumber = s.VolumeMaxNumber,
+                        Chapters = s.VolumeChapters
+                            .Select(id => id == chapterDto.Id ? chapterDto : new ChapterDto { Id = id })
+                            .ToList(),
+                    };
+
+                    return new ReadingHistoryChapterItemDto
+                    {
+                        ChapterId = s.ChapterId,
+                        Label = namingContext.BuildChapterTitle(volumeDto, chapterDto),
+                        StartTimeUtc = s.StartTimeUtc,
+                        EndTimeUtc = s.EndTimeUtc,
+                        DurationSeconds = (int)(s.EndTimeUtc - s.StartTimeUtc).TotalSeconds,
+
+                        PagesRead = s.PagesRead,
+                        WordsRead = s.WordsRead,
+
+                        StartPage = s.StartPage,
+                        EndPage = s.EndPage,
+                        TotalPages = s.TotalPages,
+                        Completed = s.EndPage >= s.TotalPages,
+                    };
+                }).OrderBy(c => c.StartTimeUtc).ToList();
+
                 return new ReadingHistoryItemDto
                 {
                     SessionDataIds =  x.Select(s => s.Id).ToList(),
@@ -1753,56 +1798,14 @@ public class StatisticService(ILogger<StatisticService> logger, DataContext cont
                     SeriesName = first.SeriesName,
                     SeriesFormat = first.SeriesFormat,
 
-                    Chapters = x.Select(s =>
-                    {
-                        var chapterDto = new ChapterDto
-                        {
-                            Id = s.ChapterId,
-                            Number = s.ChapterNumber,
-                            Range = s.ChapterRange,
-                            Title = s.ChapterTitle,
-                            MinNumber = s.ChapterMinNumber,
-                            MaxNumber = s.ChapterMaxNumber,
-                            TitleName = s.ChapterTitleName,
-                            IsSpecial = s.ChapterIsSpecial,
-                        };
-
-                        var volumeDto = new VolumeDto
-                        {
-                            Id = s.VolumeId,
-                            Number = s.VolumeNumber,
-                            Name = s.VolumeName,
-                            MinNumber = s.VolumeMinNumber,
-                            MaxNumber = s.VolumeMaxNumber,
-                            Chapters = s.VolumeChapters
-                                .Select(id => id == chapterDto.Id ? chapterDto : new ChapterDto { Id = id })
-                                .ToList(),
-                        };
-
-                        return new ReadingHistoryChapterItemDto
-                        {
-                            ChapterId = s.ChapterId,
-                            Label = namingContext.BuildChapterTitle(volumeDto, chapterDto),
-                            StartTimeUtc = s.StartTimeUtc,
-                            EndTimeUtc = s.EndTimeUtc,
-                            DurationSeconds = (int) (s.EndTimeUtc - s.StartTimeUtc).TotalSeconds,
-
-                            PagesRead = s.PagesRead,
-                            WordsRead = s.WordsRead,
-
-                            StartPage = s.StartPage,
-                            EndPage = s.EndPage,
-                            TotalPages = s.TotalPages,
-                            Completed = s.EndPage >= s.TotalPages,
-                        };
-                    }).OrderBy(c => c.StartTimeUtc).ToList(),
+                    Chapters = chapters,
 
                     LibraryId = first.LibraryId,
                     LibraryName = first.LibraryName,
 
                     PagesRead = x.Sum(s => s.PagesRead),
                     WordsRead = x.Sum(s => s.WordsRead),
-                    DurationSeconds = (int)(endTime - startTime).TotalSeconds,
+                    DurationSeconds = chapters.Sum(s => s.DurationSeconds),
 
                     TotalPages = totalPages,
                 };
