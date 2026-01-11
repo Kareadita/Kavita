@@ -125,8 +125,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
         if (existingActivity != null)
         {
-            await UpdateExistingActivityAsync(
-                existingActivity, progressDto, clientInfo, deviceId, chapterFormat, scope);
+            await UpdateExistingActivityAsync(existingActivity, progressDto, clientInfo, deviceId, chapterFormat, scope);
         }
         else
         {
@@ -143,7 +142,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         }
     }
 
-    private async Task UpdateExistingActivityAsync( AppUserReadingSessionActivityData activity, ProgressDto progressDto, ClientInfoData? clientInfo,
+    private async Task UpdateExistingActivityAsync(AppUserReadingSessionActivityData activity, ProgressDto progressDto, ClientInfoData? clientInfo,
         int? deviceId, MangaFormat chapterFormat, IServiceScope scope)
     {
         activity.PagesRead = progressDto.PageNum - activity.StartPage;
@@ -173,7 +172,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         }
     }
 
-    private async Task UpdateEpubActivityAsync( AppUserReadingSessionActivityData activity, ProgressDto progressDto, Chapter chapter,
+    private async Task UpdateEpubActivityAsync(AppUserReadingSessionActivityData activity, ProgressDto progressDto, Chapter chapter,
         ICacheService cacheService, IServiceScope scope)
     {
         var bookService = scope.ServiceProvider.GetRequiredService<IBookService>();
