@@ -7,15 +7,15 @@ namespace API.DTOs.Progress;
 public sealed record ProgressDto
 {
     [Required]
-    public int VolumeId { get; set; }
+    public required int VolumeId { get; set; }
     [Required]
-    public int ChapterId { get; set; }
+    public required int ChapterId { get; set; }
     [Required]
-    public int PageNum { get; set; }
+    public required int PageNum { get; set; }
     [Required]
-    public int SeriesId { get; set; }
+    public required int SeriesId { get; set; }
     [Required]
-    public int LibraryId { get; set; }
+    public required int LibraryId { get; set; }
     /// <summary>
     /// For EPUB reader, this can be an optional string of the id of a part marker, to help resume reading position
     /// on pages that combine multiple "chapters".

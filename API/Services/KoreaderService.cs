@@ -55,11 +55,16 @@ public class KoreaderService : IKoreaderService
             var volumeDto = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapterDto.VolumeId);
             if (volumeDto == null) throw new KavitaException(await _localizationService.Translate(userId, "volume-doesnt-exist"));
 
+            var seriesDto = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(volumeDto.SeriesId, userId);
+            if (seriesDto == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+
             userProgressDto = new ProgressDto()
             {
+                PageNum = 0, // This is updated in KoreaderHelper.UpdateProgressDto
                 ChapterId = file.ChapterId,
                 VolumeId = chapterDto.VolumeId,
-                SeriesId = volumeDto.SeriesId,
+                SeriesId = seriesDto.Id,
+                LibraryId = seriesDto.LibraryId
             };
         }
         // Update the bookScrollId if possible
