@@ -1417,7 +1417,8 @@
         "active-events-title": "Aktive Ereignisse:",
         "no-data": "Hier ist nicht viel los",
         "left-to-process": "Noch zu bearbeiten: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} Downloads in der Warteschlange"
+        "download-in-queue": "{{num}} Downloads in der Warteschlange",
+        "reading-now": "{{num}} wird gerade gelesen"
     },
     "shortcuts-modal": {
         "title": "Tastaturkurzbefehle",
@@ -1829,7 +1830,8 @@
         "not-classified": "Nicht klassifiziert",
         "total-file-size-title": "Gesamtgröße der Datei:",
         "download-file-for-extension-header": "Bericht herunterladen",
-        "download-file-for-extension-alt": "Dateien herunterladen Bericht für {{extension}}"
+        "download-file-for-extension-alt": "Dateien herunterladen Bericht für {{extension}}",
+        "no-data": "{{common.no-data}}"
     },
     "reading-activity": {
         "title": "Lese Aktivität",
@@ -1852,7 +1854,8 @@
         "visualisation-label": "Visualisierung",
         "data-table-label": "Daten-Tabelle",
         "year-header": "Jahr",
-        "count-header": "Zähler"
+        "count-header": "Zähler",
+        "no-data": "{{common.no-data}}"
     },
     "series-preview-drawer": {
         "staff-label": "Team",
@@ -2202,7 +2205,8 @@
         "confirm-force-delete-font": "Diese Schriftart wird derzeit verwendet. Möchten Sie sie zwangsweise löschen? Dadurch werden Benutzer zur Standardschriftart zurückgesetzt.",
         "font-in-use": "Kann nicht gelöscht werden, da die Schriftart von einem oder mehreren Benutzern verwendet wird.",
         "k+-resend-welcome-email-success": "Eine E-Mail wurde an Ihre Kavita+-E-Mail-Adresse gesendet",
-        "confirm-delete-auth-key": "Sind Sie sicher, dass Sie diesen Authentifizierungsschlüssel löschen möchten?"
+        "confirm-delete-auth-key": "Sind Sie sicher, dass Sie diesen Authentifizierungsschlüssel löschen möchten?",
+        "profile-unauthorized": "Dieser Benutzer teilt sein Profil nicht"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
@@ -2740,7 +2744,8 @@
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "Geräte einrichten",
-        "select-devices-for": "Geräte für {{name}} einrichten"
+        "select-devices-for": "Geräte für {{name}} einrichten",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
     "bulk-set-reading-profile-modal": {
         "no-data": "Es wurden noch keine Sammlungen erstellt",
@@ -3281,7 +3286,7 @@
         "day-of-week-alt": "Tag der Woche",
         "pages": "Seiten",
         "words": "Wörter",
-        "chapters": "Kapitel",
+        "chapters": "Abgeschlossene Kapitel",
         "no-activity-alt": "Keine Aktivität",
         "all-time": "{{time-periods.all-time}}",
         "low-activity-alt": "Geringe Aktivität",
@@ -3315,7 +3320,8 @@
         "during-entire-life-server": "seit Beginn",
         "during-year": "während {{year}}",
         "during-from-to": "von {{startYear}} bis {{endYear}}",
-        "during-select": "Wählen Sie einen Zeitraum aus"
+        "during-select": "Wählen Sie einen Zeitraum aus",
+        "close": "{{common.close}}"
     },
     "time-frame-label": {
         "overall": "Insgesamt",
@@ -3405,5 +3411,11 @@
     },
     "list-select-modal": {
         "hidden": "{{amount}} Artikel aufgrund eines ungültigen Status ausgeblendet"
+    },
+    "user-stats-info-cards": {
+        "pages-read-by-year-title": "Gelesene Seiten nach Jahr",
+        "pages-count": "{{num}} Seiten",
+        "words-read-by-year-title": "Wörter nach Jahr gelesen",
+        "words-count": "{{num}} Wörter"
     }
 }

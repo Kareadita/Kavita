@@ -2,7 +2,11 @@
     "login": {
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}"
+        "password-validation": "{{validation.password-validation}}",
+        "title": "Log ind på din konto",
+        "forgot-password": "Glemt adgangskode?",
+        "submit": "Log ind",
+        "oidc": "OpenID Connect"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -10,17 +14,57 @@
         "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "invalid-email-warning": "En ugyldig e-mailadresse vil blokere nogle af Kavitas funktioner",
+        "warning-read-only": "Read Only-konti har begrænsede tilladelser",
+        "saving": "Gemmer…",
+        "update": "Opdatering",
+        "account-detail-title": "Kontooplysninger",
+        "notice": "Advarsel!",
+        "out-of-sync": "Denne bruger blev oprettet via OIDC. Hvis indstillingen SyncUsers er aktiveret, kan alle ændringer, der foretages på denne konto, blive overskrevet.",
+        "oidc-managed": "Denne bruger administreres via OIDC. Kontakt din OIDC-administrator for at anmode om ændringer.",
+        "identity-provider": "Identitetsudbyder",
+        "identity-provider-tooltip": "Kavita-brugere synkroniseres aldrig med OIDC-konti.",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "user-scrobble-history": {
         "filter-label": "{{common.filter}}",
-        "special": "{{entity-title.special}}"
+        "special": "{{entity-title.special}}",
+        "title": "Scrobble-historik",
+        "description": "Her finder du alle scrobble-begivenheder, der er knyttet til din konto. For at begivenhederne kan eksistere, skal du have konfigureret en aktiv scrobble-udbyder. Alle begivenheder, der er blevet behandlet, slettes efter en måned. Hvis der er ubehandlede begivenheder, er det sandsynligt, at disse ikke kan danne match opstrøms. Kontakt din administrator for at få dem rettet.",
+        "not-read-warning": "Upstream-udbydere vil altid beholde det højeste antal",
+        "created-header": "Oprettet",
+        "last-modified-header": "Sidst ændret",
+        "type-header": "Type",
+        "series-header": "Serie",
+        "data-header": "Data",
+        "is-processed-header": "Er forarbejdet",
+        "select-all-label": "Vælg alt",
+        "delete-selected-label": "Slet valgt",
+        "no-data": "{{common.no-data}}",
+        "volume-and-chapter-num": "Bind {{v}} Kapitel {{n}}",
+        "volume-num": "Bind {{num}}",
+        "chapter-num": "Kapitel {{num}}",
+        "rating": "Bedømmelse {{r}}",
+        "not-applicable": "Ikke relevant",
+        "processed": "Forarbejdet",
+        "not-processed": "Ikke behandlet",
+        "generate-scrobble-events": "Backfill-begivenheder",
+        "token-expired": "Dit AniList-token er udløbet! Scrobbling-begivenheder vil ikke blive behandlet, før du fornyer det på siden Konti.",
+        "scrobbling-disabled": "Scrobbling er deaktiveret i dine kontoindstillinger."
     },
     "review-card-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "user-review": "{{username}}s anmeldelse",
+        "external-mod": "(ekstern)",
+        "go-to-review": "Gå til anmeldelse"
     },
     "want-to-read": {
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "title": "Vil du læse",
+        "no-items": "Der er ingen varer. Prøv at tilføje en serie.",
+        "no-items-filtered": "Ingen varer matcher dit nuværende filter."
     },
     "user-preferences": {
         "account-tab": "{{tabs.account-tab}}",
@@ -31,10 +75,69 @@
         "scrobbling-tab": "{{tabs.scrobbling-tab}}",
         "smart-filters-tab": "{{tabs.smart-filters-tab}}",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "title": "Brugerdashboard",
+        "pref-description": "Dette er globale indstillinger, der er knyttet til din konto. Læserindstillinger findes i læsningsprofiler.",
+        "font-tab": "Skrifttype",
+        "success-toast": "Brugerindstillinger opdateret",
+        "global-settings-title": "Globale indstillinger",
+        "social-settings-title": "Sociale indstillinger",
+        "opds-settings-title": "OPDS-indstillinger",
+        "page-layout-mode-label": "Sidelayouttilstand",
+        "page-layout-mode-tooltip": "Vis emner som kort eller listevisning på siden Serieoplysninger.",
+        "locale-label": "Lokale",
+        "locale-tooltip": "Det sprog, Kavita bør bruge",
+        "blur-unread-summaries-label": "Slør ulæste oversigter",
+        "blur-unread-summaries-tooltip": "Slører resuméteksten på bind eller kapitler, hvor der ikke er læst noget (for at undgå spoilere)",
+        "prompt-on-download-label": "Spørg ved download",
+        "prompt-on-download-tooltip": "Spørg, når en download overstiger {{size}} MB i størrelse",
+        "disable-animations-label": "Deaktiver animationer",
+        "disable-animations-tooltip": "Deaktiverer animationer på webstedet. Nyttigt for e-ink-læsere.",
+        "collapse-series-relationships-label": "Sammenbrudsserieforhold",
+        "collapse-series-relationships-tooltip": "Skal Kavita vise serier, der ikke har noget forhold til hinanden, eller er det forælder/forløber",
+        "highlight-bar-label": "Annotationer fremhæver farver",
+        "highlight-bar-tooltip": "Disse farver er fælles for alle bøger",
+        "colorscape-label": "Brug ColorScape",
+        "colorscape-tooltip": "Global omskifter til aktivering/deaktivering af den dynamiske gradientfunktion. Tilpasning af temaindstillinger",
+        "data-saver-label": "Data-besparelse",
+        "data-saver-tooltip": "Minimerer dataforbruget ved at forhindre automatisk forhåndsindlæsning (f.eks. PDF-læser)",
+        "prompt-for-rereads-after-label": "Opfordring til genlæsning",
+        "prompt-for-rereads-after-tooltip": "Vis prompten »Læs igen«, hvis der ikke er sket fremskridt siden for X dage siden. 0 deaktiverer prompten fuldstændigt.",
+        "kavitaplus-settings-title": "Kavita+",
+        "anilist-scrobbling-label": "AniList Scrobbling",
+        "anilist-scrobbling-tooltip": "Tillad Kavita at scrobble (envejs synkronisering) læseprogression og vurderinger til AniList",
+        "want-to-read-sync-label": "Vil du læse Sync?",
+        "want-to-read-sync-tooltip": "Tillad Kavita at tilføje emner til din liste over ting, du vil læse, baseret på AniList og MAL-serier i listen over ventende læsning",
+        "share-series-reviews-label": "Del serieanmeldelser",
+        "share-series-reviews-tooltip": "Tillad, at dine anmeldelser er synlige for andre brugere på denne server",
+        "share-annotations-label": "Del kommentarer",
+        "share-annotations-tooltip": "Tillad, at dine kommentarer er synlige for andre brugere på denne server",
+        "view-other-annotations-label": "Se delte kommentarer",
+        "view-other-annotations-tooltip": "Se andre brugeres kommentarer, mens du læser",
+        "social-libraries-label": "Sociale biblioteker",
+        "social-libraries-tooltip": "Biblioteker, hvor sociale funktioner skal være aktiveret. Intet valg aktiverer sociale funktioner overalt. Deaktiver specifikke funktioner, hvis du ikke ønsker at bruge dem nogen steder.",
+        "social-max-age-rating-label": "Maksimal aldersgrænse",
+        "social-max-age-rating-tooltip": "Maksimal aldersgrænse for, hvilke sociale funktioner der fungerer",
+        "social-include-unknowns-label": "Inkluder ukendte faktorer",
+        "social-include-unknowns-tooltip": "Aktivér sociale funktioner for serier og kapitler med ukendt aldersgrænse",
+        "social-share-profile-label": "Del profil",
+        "social-share-profile-tooltip": "Aktivér deling af oplysninger om din læseaktivitet med andre servermedlemmer",
+        "embed-progress-indicator-label": "Indsæt fremskridtsindikator",
+        "embed-progress-indicator-tooltip": "Indsæt fremskridtsindikator i titel",
+        "include-continue-from-label": "Inkluder Fortsæt fra indgang",
+        "include-continue-from-tooltip": "Indsæt en »Fortsæt fra X«-indtastning i OPDS-felterne for at undgå at finde dit sidste læsningspunkt (emulerer Kavitas Fortsæt-knap)",
+        "clients-opds-alert": "OPDS er ikke aktiveret på denne server. Dette påvirker ikke Mihon-brugere.",
+        "clients-opds-description": "Alle tredjepartsklienter skal enten bruge OPDS-autentificeringsnøglen eller forbindelses-URL'en nedenfor. Disse fungerer som adgangskoder og skal holdes hemmelige.",
+        "clients-opds-url-label": "OPDS-URL",
+        "clients-opds-url-tooltip": "Se en liste over understøttede OPDS-klienter: "
     },
     "user-holds": {
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "title": "Scrobble-beholdninger",
+        "description": "Dette er en brugerstyret liste over serier, der ikke vil blive scrobbet til upstream-udbydere. Du kan fjerne en serie når som helst, og den næste scrobble-bare begivenhed (læseforløb, vurdering, status for ønsker at læse) vil udløse scrobbling.",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "delete-label": "{{common.remove}}"
     },
     "theme-manager": {
         "download": "{{changelog.download}}",
@@ -42,20 +145,48 @@
         "delete": "{{common.delete}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "description": "Kavita findes i mange farver. Find et farveskema, der passer til dine behov, eller lav dit eget og del det. Temaer kan anvendes på din konto eller på alle konti.",
+        "set-default": "Indstil standard",
+        "default-theme": "Standard",
+        "downloaded": "Downloadet",
+        "downloadable": "Kan downloades",
+        "applied": "Anvendt",
+        "active-theme": "Aktiv",
+        "updated-toastr": "Webstedets standardindstilling er blevet opdateret til {{name}}",
+        "upload-continued": "en css-fil",
+        "preview-default": "Vælg først et tema",
+        "preview-default-admin": "Vælg først et tema, eller upload et manuelt",
+        "preview-title": "Forhåndsvisning"
     },
     "restriction-selector": {
-        "age-rating-label": "{{metadata-fields.age-rating-title}}"
+        "age-rating-label": "{{metadata-fields.age-rating-title}}",
+        "title": "Aldersbegrænsning",
+        "description": "Når denne indstilling er valgt, fjernes alle serier og læselister, der indeholder mindst ét element, der overskrider den valgte begrænsning, fra resultaterne.",
+        "not-applicable-for-admins": "Dette gælder ikke for administratorer.",
+        "no-restriction": "Ingen begrænsninger",
+        "include-unknowns-label": "Inkluder ukendte faktorer",
+        "include-unknowns-tooltip": "Hvis dette er sandt, vil ukendte medier blive tilladt med aldersbegrænsning. Dette kan føre til, at medier uden mærkning lækkes til brugere med aldersbegrænsninger."
     },
     "site-theme-provider-pipe": {
-        "custom": "{{device-platform-pipe.custom}}"
+        "custom": "{{device-platform-pipe.custom}}",
+        "system": "System"
     },
     "manage-devices": {
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
-        "actions-header": "{{manage-users.actions-header}}"
+        "actions-header": "{{manage-users.actions-header}}",
+        "title": "Enhedshåndtering",
+        "description": "Dette afsnit er til dig, der skal konfigurere e-mail-enheder, der ikke kan oprette forbindelse til Kavita, men i stedet har en e-mail-adresse, der accepterer filer.",
+        "platform-label": "Platform",
+        "email-label": "E-mail",
+        "name-label": "Navn",
+        "email-setup-alert": "Vil du sende filer til din e-mail? Få din administrator til at konfigurere e-mailindstillingerne først!",
+        "warning": "Advarsel",
+        "client-devices-header": "Klient-enheder",
+        "sendto-device-header": "E-mail-baserede enheder"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -64,48 +195,101 @@
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
         "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "valid-email": "{{validation.valid-email}}",
+        "title": "Rediger e-mail-enhed",
+        "device-platform-label": "{{manage-devices.platform-label}}",
+        "email-tooltip": "Denne e-mail vil blive brugt til at acceptere filen via Send til"
     },
     "change-password": {
         "password-label": "{{common.password}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "required-field": "{{validation.required-field}}",
+        "current-password-label": "Nuværende adgangskode",
+        "new-password-label": "Nyt kodeord",
+        "confirm-password-label": "Bekræft adgangskode",
+        "passwords-must-match": "Adgangskoder skal stemme overens",
+        "permission-error": "Du har ikke tilladelse til at ændre din adgangskode. Kontakt serveradministratoren."
     },
     "change-email": {
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "email-title": "E-mail",
+        "email-label": "Ny e-mail",
+        "current-password-label": "Nuværende adgangskode",
+        "email-not-confirmed": "Denne e-mail er ikke bekræftet",
+        "email-confirmed": "Denne e-mail er bekræftet",
+        "email-updated-title": "E-mail opdateret",
+        "email-updated-description": "Du kan bruge nedenstående link til at bekræfte e-mailadressen til din konto. Hvis e-mailindstillingerne er konfigureret, er der sendt en e-mail, og linket kan bruges til at bekræfte e-mailadressen.",
+        "setup-user-account": "Opret brugerkonto",
+        "invite-url-label": "Inviter URL",
+        "invite-url-tooltip": "Kopier dette og indsæt det i en ny fane",
+        "has-invalid-email": "Det ser ud til, at du ikke har angivet en gyldig e-mailadresse. For at ændre e-mailadressen skal administratoren sende dig et link for at gennemføre denne handling."
     },
     "change-age-restriction": {
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "age-restriction-label": "Aldersbegrænsning",
+        "unknowns": "Ukendte faktorer"
     },
     "scrobbling-providers": {
         "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}. Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "title": "Scrobbling-udbydere",
+        "requires": "Denne funktion kræver en aktiv {{product}}-licens",
+        "token-valid": "Token gyldig",
+        "token-expired": "Token udløbet",
+        "no-token-set": "Intet tokensæt",
+        "token-set": "Token-sæt",
+        "generate": "Generer",
+        "generic-instructions": "Udfyld oplysninger om forskellige eksterne tjenester, du har, for at give Kavita+ mulighed for at interagere med dem.",
+        "mal-instructions": "Kavita bruger et MAL-klient-id til godkendelse. Opret en ny klient til Kavita, og når den er godkendt, skal du angive klient-id'et og dit brugernavn.",
+        "scrobbling-applicable-label": "Scrobbling Gældende",
+        "token-input-label": "{{service}} Token kommer her",
+        "mal-token-input-label": "MAL-kunde-id",
+        "mal-username-input-label": "MAL-brugernavn",
+        "anilist-used-for": "AniList bruges til scrobbling (synkronisering af data) og ønsker at læse synkronisering.",
+        "mal-used-for": "MyAnimeList bruges til Smart Collections og ønsker at læse synkronisering.",
+        "anilist-first-header": "AniList-token gemt",
+        "anilist-first-description": "Din AniList-token er nu konfigureret. Denne token er gyldig i et år, og Kavita vil informere dig, inden den udløber, så du kan opdatere den her. Med denne token vil Kavita generere scrobble-begivenheder (synkronisering) fra din læsehistorik, din ønskeliste og dine vurderinger. Du kan starte dette nu eller senere. Hvis du har serier, som du ikke ønsker skal scrobblet, skal du vælge senere og placere en Scrobble Hold på dem. Du behøver kun at køre denne opgave én gang. Derefter vil Kavita håndtere synkroniseringen for dig. Hvis du vælger ›Senere‹, kan du finde knappen på Scrobbling-siden.",
+        "anilist-first-later": "Senere",
+        "anilist-first-now": "Nu"
     },
     "typeahead": {
         "close": "{{common.close}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "locked-field": "Feltet er låst",
+        "add-item": "Tilføj {{item}}…",
+        "no-data": "{{common.no-data}}",
+        "add-custom-item": ", skriv for at tilføje et brugerdefineret element"
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
         "clear": "{{common.clear}}",
-        "filter": "{{common.filter}}"
+        "filter": "{{common.filter}}",
+        "open-filtered-search": "Åbn en filtreret søgning efter {{item}}"
     },
     "role-selector": {
         "deselect-all": "{{common.deselect-all}}",
-        "select-all": "{{common.select-all}}"
+        "select-all": "{{common.select-all}}",
+        "title": "{{common.roles}}"
     },
     "directory-picker": {
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "title": "Vælg en mappe",
+        "path-label": "Sti",
+        "path-placeholder": "Begynd at skrive eller vælg sti",
+        "instructions": "Vælg en mappe for at åbne den. Kan du ikke se din mappe? Prøv at tjekke / først.",
+        "type-header": "Type",
+        "name-header": "Navn",
+        "share": "Del"
     },
     "library-access-modal": {
         "select-all": "{{common.select-all}}",
@@ -113,29 +297,50 @@
         "close": "{{common.close}}",
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "title": "Adgang til biblioteket",
+        "no-data": "Der er endnu ikke oprettet nogen biblioteker."
     },
     "person-role-pipe": {
         "team": "{{filter-field-pipe.team}}",
-        "location": "{{filter-field-pipe.location}}"
+        "location": "{{filter-field-pipe.location}}",
+        "artist": "Kunstner",
+        "character": "Karakter",
+        "colorist": "Farvelægger",
+        "editor": "Redaktør",
+        "inker": "Blækpen",
+        "letterer": "Brev",
+        "penciller": "Penciller",
+        "publisher": "Udgiver",
+        "writer": "Forfatter",
+        "other": "Andet",
+        "imprint": "Aftryk",
+        "translator": "Oversætter"
     },
     "reset-password": {
         "email-label": "{{common.email}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
-        "submit": "{{common.submit}}"
+        "submit": "{{common.submit}}",
+        "title": "Nulstilling af adgangskode",
+        "description": "Indtast e-mailadressen til din konto. Kavita sender dig en e-mail, hvis der er registreret en gyldig e-mailadresse. Ellers skal du bede administratoren om at nulstille din adgangskode."
     },
     "reset-password-modal": {
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "title": "Nulstil {{username}}s adgangskode",
+        "new-password-label": "Nyt kodeord",
+        "error-label": "fejl: "
     },
     "all-series": {
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "title": "Alle serier"
     },
     "all-filters": {
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}"
+        "create": "{{common.create}}",
+        "title": "Alle smarte filtre"
     },
     "out-of-date-modal": {
         "close": "{{common.close}}"
@@ -605,5 +810,348 @@
     },
     "actionable": {
         "clear": "{{common.clear}}"
+    },
+    "oidc": {
+        "title": "OIDC-tilbagekaldelse",
+        "login": "Tilbage til login-skærmen",
+        "error-loading-info": "Der opstod en fejl under indlæsning af OIDC-oplysninger. Kontakt din administrator",
+        "timeout": "OIDC-opløsningen er udløbet, eller der er opstået en fejl"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "reset-label": "Nulstil id'er",
+        "reset-tooltip": "Nulstil eksterne id'er fra alle brugere. Brug dette til at nulstille links mellem brugere i Kavita og din identitetsudbyder",
+        "reset-confirm": "Er du sikker på, at du vil nulstille eksterne id'er fra alle brugere?",
+        "reset-success": "Eksterne id'er nulstillet for alle brugere, genautentificer for at oprette forbindelse",
+        "save-success": "OIDC-indstillingerne er opdateret",
+        "notice": "Bemærk",
+        "restart-required": "Ændring af udbyder eller avancerede indstillinger kræver en manuel genstart af Kavita for at træde i kraft.",
+        "auto-save-required": "Du har ændret vigtige indstillinger. Gem dem automatisk for at bevare dem",
+        "provider-title": "Udbyder",
+        "provider-tooltip": "Udbyderindstillinger kræver, at du manuelt klikker på Gem. Kavita skal konfigureres som en fortrolig klient og har brug for en omdirigerings-URL. Se <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> for flere detaljer.",
+        "behavior-title": "Adfærd",
+        "other-field-required": "{{validation.other-field-required}}",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "tls-required": "OIDC-udbyderen skal bruge tls (https)",
+        "manual-save-label": "Ændring af udbyderindstillinger kræver manuel gemning",
+        "authority-label": "Myndighed",
+        "authority-tooltip": "URL'en til din OIDC-udbyder, inkluder ikke stien .well-known/openid-configuration",
+        "client-id-label": "Kunde-ID",
+        "client-id-tooltip": "Klient-ID'et, der er angivet i din OIDC-udbyder, kan være hvad som helst",
+        "secret-label": "Kundesekret",
+        "secret-tooltip": "Den hemmelige kode, der genereres af din OIDC-udbyder, vises ikke, når den er indstillet",
+        "provision-accounts-label": "Provisionskonti",
+        "provision-accounts-tooltip": "Opret automatisk en ny konto, når du logger ind via OIDC, hvis den ikke kan matches med en eksisterende konto",
+        "require-verified-email-label": "Kræv verificerede e-mails",
+        "require-verified-email-tooltip": "Kræver e-mail-bekræftelse, når der oprettes en ny konto eller matches med en eksisterende konto. Hvis en nyoprettet konto har en bekræftet e-mail, bliver den automatisk bekræftet på Kavitas side.",
+        "sync-user-settings-label": "Synkroniser brugerindstillinger med OIDC-roller",
+        "sync-user-settings-tooltip": "Brugere oprettet via OIDC administreres fuldt ud af identitetsudbyderen, herunder roller, biblioteksadgang og aldersklassificering. Hvis denne indstilling er deaktiveret, har brugerne ikke adgang til noget indhold efter oprettelse af kontoen. Se dokumentationen for flere detaljer.",
+        "auto-login-label": "Automatisk login",
+        "auto-login-tooltip": "Automatisk omdirigering til OIDC-udbyder, når login-skærmen åbnes",
+        "disable-password-authentication-label": "Deaktiver adgangskodegodkendelse",
+        "disable-password-authentication-tooltip": "Brugere med administratorrolle kan omgå denne begrænsning",
+        "provider-name-label": "Udbyderens navn",
+        "provider-name-tooltip": "Navn vist på login-skærmen",
+        "defaults-title": "Standardindstillinger",
+        "defaults-requirement": "Følgende indstillinger bruges, når en bruger registreres via OIDC, mens Synkroniser brugerindstillinger er slået fra",
+        "default-include-unknowns-label": "Inkluder ukendte faktorer",
+        "default-include-unknowns-tooltip": "Inkluder ukendte aldersklassificeringer",
+        "default-age-restriction-label": "Aldersgrænse",
+        "default-age-restriction-tooltip": "Maksimal aldersgrænse vist for nye brugere",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "default-roles-label": "{{common.roles}}",
+        "default-libraries-label": "{{common.libraries}}",
+        "advanced-title": "Avancerede indstillinger",
+        "advanced-tooltip": "Du bør kun ændre disse indstillinger, hvis du forstår deres betydning.",
+        "roles-prefix-label": "Roller præfiks",
+        "roles-prefix-tooltip": "Kavita vil kun overveje roller, der starter med dette præfiks.",
+        "roles-claim-label": "Roller hævder",
+        "roles-claim-tooltip": "Den påstand, Kavita vil bruge til at udtrække roller. Lad feltet være tomt for at bruge standardindstillingen.",
+        "custom-scopes-label": "Brugerdefinerede omfang",
+        "custom-scopes-tooltip": "Yderligere omfang, der skal anmodes om fra din OIDC-udbyder under login. Adskil flere omfang med kommaer. Forkerte værdier kan forhindre login."
+    },
+    "manage-auth-keys": {
+        "auth-keys-title": "Administrer autorisationsnøgler",
+        "name-label": "Navn",
+        "key-label": "Nøgle",
+        "expires-label": "Udløb",
+        "last-accessed-label": "Sidst besøgt",
+        "actions-label": "Handlinger",
+        "rotate": "Rotér",
+        "delete": "{{common.delete}}",
+        "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
+        "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
+        "clients-opds-description": "{{user-preferences.clients-opds-description}}",
+        "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
+        "opds": "OPDS",
+        "image-only": "Billeder",
+        "add-auth-key": "Ny",
+        "description": "En Auth Key er som en adgangskode. Hvis du ændrer den, bliver alle eksisterende klienter ugyldige.",
+        "copy-key": "{{common.copy}}"
+    },
+    "create-auth-key": {
+        "create-title": "Opret autorisationsnøgle",
+        "rotate-title": "Rotér autentificeringsnøgle",
+        "name-label": "Navn",
+        "key-length-label": "Nøglelængde",
+        "expiration-label": "Udløb",
+        "required-field": "{{validations.required-field}}",
+        "total-key-length": "Samlet nøglelængde: {{length}}",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "never": "Aldrig"
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "OpenID Connect"
+    },
+    "dashboard": {
+        "no-libraries": "Der er endnu ikke oprettet nogen biblioteker. Opret nogle i",
+        "server-settings-link": "Serverindstillinger",
+        "not-granted": "Du har ikke fået adgang til nogen biblioteker.",
+        "on-deck-title": "På dækket",
+        "recently-updated-title": "Nyligt opdaterede serier",
+        "recently-added-title": "Nyligt tilføjede serier",
+        "more-in-genre-title": "Mere i {{genre}}"
+    },
+    "scrobble-event-type-pipe": {
+        "chapter-read": "Læseforløb",
+        "score-updated": "Vurderingsopdatering",
+        "want-to-read-add": "Vil du læse: Tilføj",
+        "want-to-read-remove": "Vil du læse: Fjern",
+        "review": "Gennemgang af opdatering"
+    },
+    "spoiler": {
+        "click-to-show": "Spoiler, klik for at vise"
+    },
+    "reviews": {
+        "user-reviews-local": "Lokale anmeldelser",
+        "user-reviews-plus": "Eksterne anmeldelser"
+    },
+    "review-modal": {
+        "title": "Rediger anmeldelse",
+        "review-label": "Anmeldelse",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
+        "min-length": "Anmeldelsen skal være på mindst {{count}} tegn",
+        "required": "{{validation.required-field}}"
+    },
+    "review-card": {
+        "your-review": "Dette er din anmeldelse",
+        "external-review": "Ekstern gennemgang",
+        "local-review": "Lokal anmeldelse",
+        "rating-percentage": "Bedømmelse {{r}}%",
+        "critic": "kritiker"
+    },
+    "review-list-item": {
+        "by-label": "Af",
+        "created-alt": "Oprettet"
+    },
+    "reread-modal": {
+        "title": "Genlæs",
+        "description-full-read": "Du har allerede gennemført {{name}}! Vil du starte forfra?",
+        "description-time-passed": "Det er {{days}} dage siden, du sidst læste {{name}}. Har du brug for en opfriskning?",
+        "continue": "Fortsæt hvor du slap",
+        "reread": "Start forfra",
+        "cancel": "{{common.cancel}}",
+        "read-incognito": "Læs inkognito"
+    },
+    "multi-check-box-form": {
+        "select-all": "Vælg alt",
+        "deselect-all": "Fravælg alle",
+        "no-data": "{{typeahead.no-data}}"
+    },
+    "font-manager": {
+        "description": "Kavitas epub-læser leveres med et par indbyggede skrifttyper. Tilføj dine egne skrifttyper her. Upload en fil, eller brug en Google Fonts-URL. Se <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'> wiki</a>for mere information.",
+        "enter-an-url-pre-title": "Indtast en {{url}}",
+        "url": "url",
+        "add": "{{common.add}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "en fontfil",
+        "preview-default": "Upload din egen skrifttype via fil eller Google Font-url",
+        "delete": "{{common.delete}}",
+        "url-label": "Url",
+        "back": "Tilbage",
+        "load": "Belastning",
+        "no-preview": "IndlæsDenne skrifttype kan ikke forhåndsvises. Den vil bruge standardstilen fra bogen.",
+        "brown-fox": "Den hurtige brune ræv springer over den dovne hund",
+        "filter-system-fonts-label": "Filtersystemskrifttyper"
+    },
+    "theme": {
+        "theme-dark": "Mørk",
+        "theme-black": "Sort",
+        "theme-paper": "Papir",
+        "theme-white": "Hvid"
+    },
+    "server-devices": {
+        "client-devices-header": "{{manage-devices.client-devices-header}}",
+        "client-devices-this-month-header": "Klient-enheder denne måned",
+        "client-devices-mobile-vs-pc-header": "Mobil vs. pc denne måned",
+        "no-data": "{{common.no-data}}"
+    },
+    "client-device-card": {
+        "auth-type-label": "Autentificeringstype",
+        "browser-label": "Browser",
+        "platform-label": "{{manage-devices.platform-label}}",
+        "screen-label": "Skærm",
+        "version-label": "App-version",
+        "first-seen-label": "Første gang set",
+        "last-seen-label": "Sidst set",
+        "active": "Aktiv",
+        "save": "{{common.save}}",
+        "local": "Lokalt"
+    },
+    "api-key": {
+        "copy": "{{book-line-overlay.copy}}"
+    },
+    "most-active-users": {
+        "title": "Mest aktive læsere",
+        "no-data": "Ingen læseaktivitet i tidsperioden"
+    },
+    "active-user-card": {
+        "total-hours": "{{varighed}} i alt",
+        "comics-count": "{{count}} tegneserier",
+        "books-count": "{{count}} bøger"
+    },
+    "time-frame-label": {
+        "overall": "Samlet",
+        "week": "Denne uge",
+        "month": "Denne måned",
+        "year": "I år"
+    },
+    "time-periods": {
+        "this-week": "Denne uge",
+        "last-7-days": "De sidste 7 dage",
+        "last-30-days": "Sidste 30 dage",
+        "last-90-days": "Sidste 90 dage",
+        "last-year": "Sidste år",
+        "all-time": "Alle tid"
+    },
+    "device-platform-pipe": {
+        "custom": "Brugerdefineret"
+    },
+    "day-of-week-pipe": {
+        "monday": "mandag",
+        "tuesday": "Tirsdag",
+        "wednesday": "Onsdag",
+        "thursday": "Torsdag",
+        "friday": "fredag",
+        "saturday": "Lørdag",
+        "sunday": "Søndag"
+    },
+    "cbl-import-result-pipe": {
+        "success": "Succes",
+        "partial": "Delvis",
+        "failure": "Fejl"
+    },
+    "cbl-conflict-reason-pipe": {
+        "all-series-missing": "Din konto har ikke adgang til alle serier på listen, eller Kavita har ikke noget på listen.",
+        "chapter-missing": "{{series}}: Kapitel {{chapter}} mangler i Kavita. Dette element vil blive sprunget over.",
+        "empty-file": "CBL-filen er tom, der er intet at gøre.",
+        "name-conflict": "Der findes allerede en læseliste ({{readingListName}}) på din konto, der matcher cbl-filen.",
+        "series-collision": "Serien {{seriesLink}} kolliderer med en anden serie med samme navn i et andet bibliotek.",
+        "series-missing": "Serien {{series}} mangler i Kavita, eller din konto har ikke tilladelse. Alle emner med denne serie springes over ved import.",
+        "volume-missing": "{{serie}}: Bind {{bind}} mangler i Kavita, eller din konto har ikke tilladelse. Alle emner med dette bindnummer springes over.",
+        "all-chapter-missing": "Alle kapitler kan ikke matches med kapitler i Kavita.",
+        "invalid-file": "Filen er beskadiget eller stemmer ikke overens med de forventede tags/specifikationer.",
+        "success": "{{series}} bind {{volume}} kapitel {{chapter}} kortlagt med succes."
+    },
+    "time-duration-pipe": {
+        "hours": "{{value}} timer",
+        "minutes": "{{value}} minutter",
+        "days": "{{value}} dage",
+        "months": "{{value}} måneder",
+        "years": "{{value}} år"
+    },
+    "time-ago-pipe": {
+        "never": "Aldrig",
+        "just-now": "lige nu",
+        "min-ago": "for et minut siden",
+        "mins-ago": "{{value}} minutter siden",
+        "hour-ago": "for en time siden",
+        "hours-ago": "{{value}} timer siden",
+        "day-ago": "for en dag siden",
+        "days-ago": "{{value}} dage siden",
+        "month-ago": "for en måned siden",
+        "months-ago": "{{value}} måneder siden",
+        "year-ago": "for et år siden",
+        "years-ago": "{{value}} år siden"
+    },
+    "duration-pipe": {
+        "seconds": "{{num}} sekunder",
+        "minutes": "{{num}} minutter",
+        "hours": "{{num}} timer",
+        "combo": "{{hour}}h {{min}}m"
+    },
+    "relationship-pipe": {
+        "adaptation": "Tilpasning",
+        "alternative-setting": "Alternativ indstilling",
+        "alternative-version": "Alternativ version",
+        "character": "Karakter",
+        "contains": "Indeholder",
+        "doujinshi": "Fan-lavede tegneserier",
+        "other": "Andet",
+        "prequel": "Forløber",
+        "sequel": "Fortsættelse",
+        "side-story": "Sidehistorie",
+        "spin-off": "Spin Off",
+        "parent": "Forælder",
+        "edition": "Udgave",
+        "annual": "Årlig"
+    },
+    "publication-status-pipe": {
+        "ongoing": "Igangværende",
+        "hiatus": "Pause",
+        "completed": "Afsluttet",
+        "cancelled": "Aflyst",
+        "ended": "Afsluttet"
+    },
+    "manga-format-pipe": {
+        "epub": "EPUB",
+        "archive": "Arkiv",
+        "image": "Billede",
+        "pdf": "PDF",
+        "unknown": "Ukendt"
+    },
+    "library-type-pipe": {
+        "book": "Bog",
+        "comic": "Tegneserie (fleksibel)",
+        "manga": "Manga",
+        "comicVine": "Comic",
+        "image": "Billede",
+        "lightNovel": "Let roman"
+    },
+    "library-type-subtitle-pipe": {
+        "book": "Bibliotek med bøger til almindeligt brug.",
+        "comic": "Tegneseriebibliotek med understøttelse af volumengruppering og paperbacks inden for en enkelt serie. Understøtter ikke flere udgivelser i samme serie.",
+        "manga": "Japanske tegneserier med understøttelse af volumengruppering. Håndterer også nogle løse billedkonfigurationer.",
+        "comicVine": "Streng implementering af tegneserier baseret på Comic Vine-metadata med integration til specialiserede værktøjer.",
+        "image": "Løse billedfiler med begrænset support. Skal i vid udstrækning følge wiki-dokumentationen.",
+        "lightNovel": "Bogbibliotek med særlig håndtering optimeret til lette romaner"
+    },
+    "age-rating-pipe": {
+        "unknown": "Ukendt",
+        "early-childhood": "Tidlig barndom",
+        "adults-only": "Kun for voksne over 18 år",
+        "everyone": "Alle",
+        "everyone-10-plus": "Alle over 10 år",
+        "g": "G",
+        "kids-to-adults": "Børn til voksne",
+        "mature": "Modent",
+        "ma15-plus": "MA15+",
+        "mature-17-plus": "Voksen 17+",
+        "rating-pending": "Bedømmelse afventer",
+        "teen": "Teenager",
+        "x18-plus": "X18+",
+        "not-applicable": "Ikke relevant",
+        "pg": "PG",
+        "r18-plus": "R18+"
+    },
+    "announcements": {
+        "title": "Meddelelser"
     }
 }

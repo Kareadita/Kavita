@@ -220,5 +220,8 @@
     "genre-doesnt-exist": "O género não existe",
     "font-url-not-allowed": "Subir uma font através de um url só é permitido com fonts Google",
     "annotation-export-failed": "Não foi possível exportar Anotações, verifique os logs",
-    "download-not-allowed": "O utilizador não tem permissões para descarregar permissões"
+    "download-not-allowed": "O utilizador não tem permissões para descarregar permissões",
+    "client-device-doesnt-exist": "Não existe este dispositivo cliente",
+    "auth-key-unique": "O nome da Chave de Autenticação tem de ser único na sua conta",
+    "role-restricted": "Acesso proibido: A sua função não permite esta acção"
 }
