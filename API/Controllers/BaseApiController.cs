@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -40,6 +41,7 @@ public class BaseApiController : ControllerBase
     /// Returns a physical file with proper HTTP caching headers and ETag support.
     /// Automatically handles conditional requests (If-None-Match) returning 304 Not Modified when appropriate.
     /// </summary>
+    /// <remarks>This will create a waterfall of cache validation checks if used in virtual scroller</remarks>
     /// <param name="path">The absolute path to the file on disk.</param>
     /// <param name="maxAge">Cache duration in seconds. Default is 300 (5 minutes).</param>
     /// <returns>
@@ -49,17 +51,28 @@ public class BaseApiController : ControllerBase
     /// </returns>
     protected ActionResult CachedFile(string? path, int maxAge = 300)
     {
-        if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
-            return NotFound();
+        if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return NotFound();
 
         var lastWrite = System.IO.File.GetLastWriteTimeUtc(path);
         var etag = $"\"{lastWrite.Ticks:x}-{path.GetHashCode():x}\"";
 
-        if (Request.Headers.IfNoneMatch.Any(t => t == etag))
-            return StatusCode(304);
+        if (Request.Headers.IfNoneMatch.Any(t => t == etag)) return StatusCode(304);
 
         Response.Headers.ETag = etag;
-        Response.Headers.CacheControl = $"private, max-age={maxAge}";
+        Response.Headers.CacheControl = $"private, max-age={maxAge}, stale-while-revalidate={maxAge}";
+
+        var contentType = MimeTypeMap.GetMimeType(Path.GetExtension(path));
+        return PhysicalFile(path, contentType, Path.GetFileName(path), enableRangeProcessing: true);
+    }
+
+    /// <summary>
+    /// Returns a physical file
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    protected ActionResult PhysicalFile(string? path)
+    {
+        if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return NotFound();
 
         var contentType = MimeTypeMap.GetMimeType(Path.GetExtension(path));
         return PhysicalFile(path, contentType, Path.GetFileName(path), enableRangeProcessing: true);

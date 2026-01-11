@@ -11,6 +11,7 @@ using API.Services;
 using API.Services.Tasks.Metadata;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MimeTypes;
 
 namespace API.Controllers;
 
@@ -51,7 +52,7 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetChapterCoverImage(int chapterId, string apiKey)
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
-        return CachedFile(path);
+        return PhysicalFile(path);
     }
 
     /// <summary>
@@ -64,7 +65,7 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetLibraryCoverImage(int libraryId, string apiKey)
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId));
-        return CachedFile(path);
+        return PhysicalFile(path);
     }
 
     /// <summary>
@@ -77,7 +78,7 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetVolumeCoverImage(int volumeId, string apiKey)
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
-        return CachedFile(path);
+        return PhysicalFile(path);
     }
 
     /// <summary>
@@ -90,7 +91,7 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetSeriesCoverImage(int seriesId, string apiKey)
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
-        return CachedFile(path);
+        return PhysicalFile(path);
     }
 
     /// <summary>
@@ -109,7 +110,7 @@ public class ImageController : BaseApiController
             path = await GenerateCollectionCoverImage(collectionTagId);
         }
 
-        return CachedFile(path);
+        return PhysicalFile(path);
     }
 
     /// <summary>
@@ -127,7 +128,7 @@ public class ImageController : BaseApiController
             path = await _readingListService.GenerateReadingListCoverImage(readingListId);
         }
 
-        return CachedFile(path);
+        return PhysicalFile(path);
     }
 
     private async Task<string> GenerateCollectionCoverImage(int collectionId)
@@ -166,7 +167,7 @@ public class ImageController : BaseApiController
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
         var path = Path.Join(bookmarkDirectory, bookmark.FileName);
 
-        return CachedFile(path);
+        return PhysicalFile(path);
     }
 
     /// <summary>
@@ -198,7 +199,7 @@ public class ImageController : BaseApiController
             }
         }
 
-        return CachedFile(domainFilePath);
+        return PhysicalFile(domainFilePath);
     }
 
 
@@ -245,7 +246,7 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetPersonCoverImage(int personId, string apiKey)
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.UserRepository.GetPersonCoverImageAsync(personId));
-        return CachedFile(path);
+        return PhysicalFile(path);
     }
 
     /// <summary>
@@ -282,6 +283,6 @@ public class ImageController : BaseApiController
         }
 
         var path = Path.Join(_directoryService.TempDirectory, filename);
-        return CachedFile(path);
+        return PhysicalFile(path);
     }
 }
