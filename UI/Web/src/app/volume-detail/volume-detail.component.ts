@@ -54,7 +54,7 @@ import {IHasCast} from "../_models/common/i-has-cast";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
-import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
+import {UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
@@ -90,6 +90,7 @@ import {UtcToLocalDatePipe} from "../_pipes/utc-to-locale-date.pipe";
 import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 import {ReadingProgressIconPipePipe} from "../_pipes/reading-progress-icon-pipe.pipe";
+import {Breakpoint, BreakpointService} from "../_services/breakpoint.service";
 
 enum TabID {
   Chapters = 'chapters-tab',
@@ -196,12 +197,11 @@ export class VolumeDetailComponent implements OnInit {
   private readonly location = inject(Location);
   private readonly chapterService = inject(ChapterService);
   private readonly annotationService = inject(AnnotationService);
-
+  protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly AgeRating = AgeRating;
   protected readonly TabID = TabID;
   protected readonly FilterField = FilterField;
-  protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly encodeURIComponent = encodeURIComponent;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
@@ -731,4 +731,6 @@ export class VolumeDetailComponent implements OnInit {
       this.currentlyReadingChapter = undefined;
     }
   }
+
+  protected readonly Breakpoint = Breakpoint;
 }

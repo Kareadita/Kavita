@@ -1,5 +1,5 @@
 import {HttpParams} from '@angular/common/http';
-import {inject, Injectable, signal} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Chapter} from 'src/app/_models/chapter';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
@@ -7,10 +7,7 @@ import {PaginatedResult} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {Volume} from 'src/app/_models/volume';
 import {translate} from "@jsverse/transloco";
-import {debounceTime, ReplaySubject, shareReplay} from "rxjs";
 import {DOCUMENT} from "@angular/common";
-import getComputedStyle from "@popperjs/core/lib/dom-utils/getComputedStyle";
-import {toSignal} from "@angular/core/rxjs-interop";
 import {ActionItem} from "../../_services/action-factory.service";
 
 export enum KEY_CODES {
@@ -34,57 +31,12 @@ export enum KEY_CODES {
   ALT = 'Alt',
 }
 
-/**
- * Use {@link UserBreakpoint} and {@link UtilityService.activeUserBreakpoint} for breakpoint that should depend on user settings
- */
-export enum Breakpoint {
-  Mobile = 768,
-  Tablet = 1280,
-  Desktop = 1440
-}
-
-/*
-Breakpoints, but they're derived from css vars in the theme
- */
-export enum UserBreakpoint {
-  /**
-   * This is to be used in the UI/as value to disable the functionality with breakpoint, will not actually be set as a breakpoint
-   */
-  Never = 0,
-  /**
-   * --mobile-breakpoint
-   */
-  Mobile = 1,
-  /**
-   * --tablet-breakpoint
-   */
-  Tablet = 2,
-  /**
-   * --desktop-breakpoint, does not actually matter as everything that's not mobile or tablet will be desktop
-   */
-  Desktop = 3,
-}
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class UtilityService {
   private document = inject<Document>(DOCUMENT);
-
-
-  public readonly activeBreakpointSource = new ReplaySubject<Breakpoint>(1);
-  public readonly activeBreakpoint$ = this.activeBreakpointSource.asObservable().pipe(debounceTime(60), shareReplay({bufferSize: 1, refCount: true}));
-  public readonly activeBreakpointSignal = toSignal(this.activeBreakpointSource);
-
-
-  /**
-   * The currently active breakpoint, is {@link UserBreakpoint.Never} until the app has loaded
-   */
-  public readonly activeUserBreakpoint = signal<UserBreakpoint>(UserBreakpoint.Never);
-
-  // TODO: I need an isPhone/Tablet so that I can easily trigger different views
-
 
   mangaFormatKeys: string[] = [];
 
@@ -163,42 +115,6 @@ export class UtilityService {
 
   asSeries(d: any) {
     return <Series>d;
-  }
-
-  getActiveBreakpoint(): Breakpoint {
-    if (window.innerWidth <= Breakpoint.Mobile) return Breakpoint.Mobile;
-    else if (window.innerWidth > Breakpoint.Mobile && window.innerWidth <= Breakpoint.Tablet) return Breakpoint.Tablet;
-    else if (window.innerWidth > Breakpoint.Tablet) return Breakpoint.Desktop
-
-    return Breakpoint.Desktop;
-  }
-
-  updateActiveBreakpoint(): void {
-     this.activeUserBreakpoint.set(this.getActiveUserBreakpoint());
-  }
-
-  private getActiveUserBreakpoint(): UserBreakpoint {
-     const style = getComputedStyle(this.document.body)
-     const mobileBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--setting-mobile-breakpoint'), Breakpoint.Mobile);
-     const tabletBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--setting-tablet-breakpoint'), Breakpoint.Tablet);
-     //const desktopBreakPoint = this.parseOrDefault<number>(style.getPropertyValue('--setting-desktop-breakpoint'), Breakpoint.Desktop);
-
-     if (window.innerWidth <= mobileBreakPoint) {
-       return UserBreakpoint.Mobile;
-     } else if (window.innerWidth <= tabletBreakPoint) {
-       return UserBreakpoint.Tablet;
-     }
-
-     // Fallback to desktop
-     return UserBreakpoint.Desktop;
-  }
-
-  private parseOrDefault<T>(s: string, def: T): T {
-     const ret = parseInt(s, 10);
-     if (isNaN(ret)) {
-       return def;
-     }
-     return ret as T;
   }
 
   isInViewport(element: Element, additionalTopOffset: number = 0) {

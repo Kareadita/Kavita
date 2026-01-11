@@ -4,12 +4,12 @@
       <h4 class="modal-title">{{t('title')}} <app-entity-title [libraryType]="libraryType" [entity]="chapter" [prioritizeTitleName]="false" /></h4>
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
-    <div class="modal-body scrollable-modal" [ngClass]="{'d-flex': utilityService.getActiveBreakpoint() !== Breakpoint.Mobile}">
+    <div class="modal-body scrollable-modal" [ngClass]="{'d-flex': breakpointService.isAboveMobile()}">
 
       <form [formGroup]="editForm">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills"
             [destroyOnHide]="false"
-            orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+            orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
 
           <!-- General Tab -->
           @if (user && accountService.hasAdminRole(user))
@@ -660,7 +660,7 @@
         </ul>
       </form>
 
-      <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+      <div [ngbNavOutlet]="nav" class="tab-content {{breakpointService.isMobile() ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>

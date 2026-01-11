@@ -1,4 +1,4 @@
-import {DatePipe, DOCUMENT} from '@angular/common';
+import {DatePipe} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -15,11 +15,11 @@ import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgbModal, NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {debounceTime, take} from 'rxjs/operators';
+import {debounceTime} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-to-collection-event';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
@@ -63,6 +63,7 @@ import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {MetadataService} from "../../../_services/metadata.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
   selector: 'app-collection-detail',
@@ -74,9 +75,6 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
     DatePipe, DefaultDatePipe, ProviderImagePipe, ScrobbleProviderNamePipe, PromotedIconComponent]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
-  private document = inject<Document>(DOCUMENT);
-
-
   public readonly imageService = inject(ImageService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly destroyRef = inject(DestroyRef);
@@ -96,12 +94,12 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   private readonly messageHub = inject(MessageHubService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   protected readonly utilityService = inject(UtilityService);
+  protected readonly breakpointService = inject(BreakpointService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
   private readonly metadataService = inject(MetadataService);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
-  protected readonly UserBreakpoint = UserBreakpoint;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -344,5 +342,5 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     ref.componentInstance.series = this.series;
   }
 
-
+  protected readonly Breakpoint = Breakpoint;
 }

@@ -90,7 +90,7 @@
             </div>
 
             <div class="mt-2 mb-3">
-              <app-read-more [text]="readingListSummary()" [maxLength]="utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop ? 170 : 200" />
+              <app-read-more [text]="readingListSummary()" [useResponsiveLength]="true" />
             </div>
 
             <div class="mt-2 upper-details">
@@ -213,7 +213,7 @@
                         <app-loading [loading]="isLoading" />
                       }
 
-                      @if(formGroup.get('edit')?.value && (items.length > 100 || utilityService.getActiveBreakpoint() < Breakpoint.Tablet)) {
+                      @if(formGroup.get('edit')?.value && (items.length > 100 || breakpointService.isMobile())) {
                         <div class="alert alert-secondary mt-2" role="alert">
                           {{t('dnd-warning')}}
                         </div>

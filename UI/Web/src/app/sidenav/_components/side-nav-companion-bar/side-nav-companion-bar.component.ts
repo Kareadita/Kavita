@@ -10,12 +10,13 @@ import {
   TemplateRef
 } from '@angular/core';
 import {NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { NavService } from 'src/app/_services/nav.service';
-import { ToggleService } from 'src/app/_services/toggle.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
+import {NavService} from 'src/app/_services/nav.service';
+import {ToggleService} from 'src/app/_services/toggle.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {tap} from "rxjs";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 /**
  * This should go on all pages which have the side nav present and is not Settings related.
@@ -28,12 +29,11 @@ import {tap} from "rxjs";
     styleUrls: ['./side-nav-companion-bar.component.scss']
 })
 export class SideNavCompanionBarComponent implements OnInit {
-  private navService = inject(NavService);
-  private utilityService = inject(UtilityService);
-  toggleService = inject(ToggleService);
-  private offcanvasService = inject(NgbOffcanvas);
-
-
+  private readonly navService = inject(NavService);
+  private readonly utilityService = inject(UtilityService);
+  protected readonly toggleService = inject(ToggleService);
+  private readonly offcanvasService = inject(NgbOffcanvas);
+  protected readonly breakpointService = inject(BreakpointService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
   /**
@@ -63,7 +63,7 @@ export class SideNavCompanionBarComponent implements OnInit {
   ngOnInit(): void {
     // If user opens side nav while filter is open on mobile, then collapse filter (as it doesn't render well) TODO: Change this when we have new drawer
     this.navService.sideNavCollapsed$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(sideNavCollapsed => {
-      if (this.isFilterOpen && sideNavCollapsed && this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
+      if (this.isFilterOpen && sideNavCollapsed && this.breakpointService.isMobile()) {
         this.isFilterOpen = false;
         this.filterOpen.emit(this.isFilterOpen);
       }

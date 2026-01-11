@@ -1,23 +1,21 @@
 <ng-container *transloco="let t; prefix: 'metadata-filter'">
   @if (toggleService.toggleState$ | async; as isOpen) {
-    @if (utilityService.getActiveBreakpoint(); as activeBreakpoint) {
-      @if (activeBreakpoint >= Breakpoint.Tablet) {
-        <div [@inOutAnimation]>
-          <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}" />
-        </div>
-      } @else {
-        <div>
-          <app-drawer #commentDrawer="drawer" [isOpen]="isOpen" [options]="{topOffset: 75}" (drawerClosed)="toggleService.set(false)" [width]="600">
-            <h5 header>
-              {{t('filter-title')}}
-            </h5>
-            <div body class="drawer-body">
-              <!-- TODO: BUG: Filter section is instantiated twice if this isn't ngIf'd (also this isn't animating like my custom version)-->
-              <ng-container [ngTemplateOutlet]="filterSection" />
-            </div>
-          </app-drawer>
-        </div>
-      }
+    @if (breakpointService.isTabletOrAbove()) {
+      <div [@inOutAnimation]>
+        <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}" />
+      </div>
+    } @else {
+      <div>
+        <app-drawer #commentDrawer="drawer" [isOpen]="isOpen" [options]="{topOffset: 75}" (drawerClosed)="toggleService.set(false)" [width]="600">
+          <h5 header>
+            {{t('filter-title')}}
+          </h5>
+          <div body class="drawer-body">
+            <!-- TODO: BUG: Filter section is instantiated twice if this isn't ngIf'd (also this isn't animating like my custom version)-->
+            <ng-container [ngTemplateOutlet]="filterSection" />
+          </div>
+        </app-drawer>
+      </div>
     }
   }
 
@@ -49,19 +47,19 @@
             </div>
 
             @if (filterSettings().supportsSmartFilter) {
-              <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': utilityService.getActiveBreakpoint() <= Breakpoint.Mobile}">
+              <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': breakpointService.isMobileOrBelow()}">
                 <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
                 <input id="filter-name" type="text" class="form-control" formControlName="name">
               </div>
             }
 
 
-            @if (utilityService.getActiveBreakpoint() > Breakpoint.Tablet) {
+            @if (breakpointService.activeBreakpoint() > Breakpoint.Tablet) {
               <ng-container [ngTemplateOutlet]="buttons" />
             }
           </div>
 
-          @if (utilityService.getActiveBreakpoint() <= Breakpoint.Tablet) {
+          @if (breakpointService.isTabletOrBelow()) {
             <div class="row mb-3">
               <ng-container [ngTemplateOutlet]="buttons" />
             </div>

@@ -30,7 +30,7 @@ import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from 'sr
 import {SeriesService} from 'src/app/_services/series.service';
 import {DomSanitizer, SafeHtml, Title} from '@angular/platform-browser';
 import {BookService} from '../../_services/book.service';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {BookChapterItem} from '../../_models/book-chapter-item';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {Stack} from 'src/app/shared/data-structures/stack';
@@ -70,6 +70,7 @@ import {FontService} from "../../../_services/font.service";
 import afterFrame from "afterframe";
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 
 interface HistoryPoint {
@@ -160,6 +161,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly colorscapeService = inject(ColorscapeService);
   private readonly fontService = inject(FontService);
   private readonly keyBindService = inject(KeyBindService);
+  protected readonly breakpointService = inject(BreakpointService);
 
   libraryId!: number;
   seriesId!: number;
@@ -2592,7 +2594,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  protected readonly Breakpoint = Breakpoint;
   protected readonly environment = environment;
   protected readonly ReadingDirection = ReadingDirection;
   protected readonly PAGING_DIRECTION = PAGING_DIRECTION;

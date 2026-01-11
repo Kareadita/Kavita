@@ -61,7 +61,6 @@ import {
 } from "../series-detail/_components/metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../series-detail/_components/download-button/download-button.component";
 import {hasAnyCast} from "../_models/common/i-has-cast";
-import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {CoverUpdateEvent} from "../_models/events/cover-update-event";
 import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
@@ -84,6 +83,7 @@ import {UtcToLocalDatePipe} from "../_pipes/utc-to-locale-date.pipe";
 import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 import {ReadingProgressIconPipePipe} from "../_pipes/reading-progress-icon-pipe.pipe";
+import {BreakpointService} from "../_services/breakpoint.service";
 
 enum TabID {
   Related = 'related-tab',
@@ -153,19 +153,12 @@ export class ChapterDetailComponent implements OnInit {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly readingListService = inject(ReadingListService);
-  protected readonly utilityService = inject(UtilityService);
+  protected readonly breakpointService = inject(BreakpointService);
   private readonly messageHub = inject(MessageHubService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
   private readonly location = inject(Location);
   private readonly annotationService = inject(AnnotationService);
-
-  protected readonly AgeRating = AgeRating;
-  protected readonly TabID = TabID;
-  protected readonly FilterField = FilterField;
-  protected readonly UserBreakpoint = UserBreakpoint;
-  protected readonly LibraryType = LibraryType;
-  protected readonly encodeURIComponent = encodeURIComponent;
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -420,4 +413,10 @@ export class ChapterDetailComponent implements OnInit {
         break;
     }
   }
+
+  protected readonly AgeRating = AgeRating;
+  protected readonly TabID = TabID;
+  protected readonly FilterField = FilterField;
+  protected readonly LibraryType = LibraryType;
+  protected readonly encodeURIComponent = encodeURIComponent;
 }

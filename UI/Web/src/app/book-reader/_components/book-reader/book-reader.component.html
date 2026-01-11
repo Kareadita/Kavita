@@ -76,7 +76,7 @@
                   }
                   <span class="ms-1 book-title-text" [ngbTooltip]="bookTitle() + ' - ' + authorText()">
                   {{ bookTitle() }}
-                    @if (utilityService.getActiveBreakpoint() >= Breakpoint.Desktop) {
+                    @if (breakpointService.isDesktopOrAbove()) {
                       - {{ authorText() }}
                     }
                 </span>

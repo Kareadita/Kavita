@@ -1,7 +1,7 @@
   <ng-container *transloco="let t; prefix: 'actionable'">
     @let labelId = 'actions-' + labelBy();
     @if (actions().length > 0) {
-      @if ((utilityService.activeBreakpoint$ | async)! <= Breakpoint.Tablet) {
+      @if (breakpointService.isTabletOrBelow()) {
         <button [disabled]="disabled()" class="btn {{btnClass()}}" id="{{labelId}}"
                 (click)="openMobileActionableMenu($event)">
           <span [ngClass]="{'phone-hidden': hideLabelOnMobile()}">{{label()}}</span>

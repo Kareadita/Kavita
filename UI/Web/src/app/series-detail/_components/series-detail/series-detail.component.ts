@@ -38,7 +38,7 @@ import {
   EditSeriesModalComponent
 } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
-import {UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Device} from 'src/app/_models/device/device';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
@@ -116,6 +116,7 @@ import {AnnotationService} from "../../../_services/annotation.service";
 import {ReadingProgressStatus} from "../../../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../../../_pipes/reading-progress-status-pipe.pipe";
 import {ReadingProgressIconPipePipe} from "../../../_pipes/reading-progress-icon-pipe.pipe";
+import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
 
 
 enum TabID {
@@ -183,7 +184,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly location = inject(Location);
   private readonly document = inject(DOCUMENT);
-
+  protected readonly breakpointService = inject(BreakpointService);
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -1176,7 +1177,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly SettingsTabId = SettingsTabId;
   protected readonly FilterField = FilterField;
   protected readonly AgeRating = AgeRating;
-  protected readonly UserBreakpoint = UserBreakpoint;
   protected readonly encodeURIComponent = encodeURIComponent;
-  protected readonly ReadingProgressStatus = ReadingProgressStatus;
+  protected readonly Breakpoint = Breakpoint;
 }

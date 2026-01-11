@@ -22,7 +22,7 @@
       </div>
 
       <div class="flex-grow-1">
-        @if (utilityService.activeUserBreakpoint() >= UserBreakpoint.Desktop) {
+        @if (breakpointService.isDesktopOrAbove()) {
           @if (isEditOrCreateMode() && this.annotation()) {
             <div class="ms-2 d-flex w-100">
               <app-highlight-bar
@@ -83,7 +83,7 @@
       </div>
     </div>
 
-    @if (utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop) {
+    @if (breakpointService.isTabletOrBelow()) {
       @if (isEditOrCreateMode() && this.annotation()) {
         <div class="d-flex align-content-center justify-content-center w-100">
           <app-highlight-bar

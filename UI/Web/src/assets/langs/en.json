@@ -3630,7 +3630,8 @@
 
         "reading-profile-series-settings-title": "Series",
         "reading-profile-library-settings-title": "Library",
-        "delete": "{{common.delete}}"
+        "delete": "{{common.delete}}",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
 
     "list-select-modal": {

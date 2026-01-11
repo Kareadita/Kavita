@@ -268,6 +268,7 @@
                               <ng-template #edit>
                                 <select class="form-select" aria-describedby="image-reader-heading"
                                         formControlName="disableWidthOverride">
+                                  <option [ngValue]="0">{{t('breakpoint-pipe-never')}}</option>
                                   @for (opt of breakPoints; track opt) {
                                     <option [ngValue]="opt">{{opt | breakpoint}}</option>
                                   }

@@ -13,11 +13,12 @@ import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.compon
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ServerService} from "./_services/server.service";
 import {PreferenceNavComponent} from "./sidenav/preference-nav/preference-nav.component";
-import {Breakpoint, UtilityService} from "./shared/_services/utility.service";
+import {UtilityService} from "./shared/_services/utility.service";
 import {TranslocoService} from "@jsverse/transloco";
 import {VersionService} from "./_services/version.service";
 import {LicenseService} from "./_services/license.service";
 import {LocalizationService} from "./_services/localization.service";
+import {BreakpointService} from "./_services/breakpoint.service";
 
 @Component({
     selector: 'app-root',
@@ -27,10 +28,6 @@ import {LocalizationService} from "./_services/localization.service";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
-  protected readonly Breakpoint = Breakpoint;
-
-
-
   private readonly destroyRef = inject(DestroyRef);
   private readonly offcanvas = inject(NgbOffcanvas);
   protected readonly navService = inject(NavService);
@@ -44,6 +41,7 @@ export class AppComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
   private readonly translocoService = inject(TranslocoService);
   private readonly versionService = inject(VersionService); // Needs to be injected to run background job
+  private readonly breakpointService = inject(BreakpointService); // Needs to be injected to run background job
   private readonly licenseService = inject(LicenseService);
   private readonly localizationService = inject(LocalizationService);
 
@@ -101,8 +99,6 @@ export class AppComponent implements OnInit {
     // Sets a CSS variable for the actual device viewport height. Needed for mobile dev.
     const vh = window.innerHeight * 0.01;
     this.document.documentElement.style.setProperty('--vh', `${vh}px`);
-    this.utilityService.activeBreakpointSource.next(this.utilityService.getActiveBreakpoint());
-    this.utilityService.updateActiveBreakpoint();
   }
 
   ngOnInit(): void {

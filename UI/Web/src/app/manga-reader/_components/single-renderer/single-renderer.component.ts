@@ -1,17 +1,31 @@
-import { DOCUMENT, AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, effect, EventEmitter, inject, Injector, Input, OnInit, Output, signal, Signal, WritableSignal } from '@angular/core';
-import {combineLatest, combineLatestWith, filter, map, Observable, of, shareReplay, switchMap, tap} from 'rxjs';
-import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
-import { LayoutMode } from '../../_models/layout-mode';
-import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
-import { ReaderSetting } from '../../_models/reader-setting';
-import { ImageRenderer } from '../../_models/renderer';
-import { MangaReaderService } from '../../_service/manga-reader.service';
-import {takeUntilDestroyed, toObservable, toSignal} from "@angular/core/rxjs-interop";
-import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
+import {AsyncPipe, DOCUMENT} from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  Injector,
+  Input,
+  OnInit,
+  Output,
+  Signal
+} from '@angular/core';
+import {combineLatest, filter, map, Observable, of, shareReplay, switchMap, tap} from 'rxjs';
+import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
+import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
+import {LayoutMode} from '../../_models/layout-mode';
+import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
+import {ReaderSetting} from '../../_models/reader-setting';
+import {ImageRenderer} from '../../_models/renderer';
+import {MangaReaderService} from '../../_service/manga-reader.service';
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
     selector: 'app-single-renderer',
@@ -22,9 +36,9 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 })
 export class SingleRendererComponent implements OnInit, ImageRenderer {
   private readonly cdRef = inject(ChangeDetectorRef);
-  mangaReaderService = inject(MangaReaderService);
+  protected readonly mangaReaderService = inject(MangaReaderService);
   private document = inject<Document>(DOCUMENT);
-
+  protected readonly breakpointService = inject(BreakpointService);
 
   private readonly utilityService = inject(UtilityService);
   private readonly injector = inject(Injector);
@@ -68,7 +82,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
 
     this.readerSettings = toSignal(this.readerSettings$, {injector: this.injector, requireSync: true});
     this.widthOverride = computed(() => {
-      const breakpoint = this.utilityService.activeUserBreakpoint();
+      const breakpoint = this.breakpointService.activeBreakpoint();
       const value = this.readerSettings().widthSlider;
 
       if (breakpoint <= this.readingProfile.disableWidthOverride) {

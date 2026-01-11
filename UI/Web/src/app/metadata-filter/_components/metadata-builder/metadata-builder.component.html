@@ -2,7 +2,7 @@
   @if (filter) {
     <form [formGroup]="formGroup">
 
-      @if (utilityService.getActiveBreakpoint() === Breakpoint.Desktop) {
+      @if (breakpointService.isDesktop()) {
         <div class="container-fluid">
           <div class="row mb-2">
             <div class="col-auto">

@@ -5,9 +5,9 @@ import {ActionableEntity, ActionItem} from 'src/app/_services/action-factory.ser
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
-import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
 import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
 import {User} from "../../_models/user/user";
+import {BreakpointService} from "../../_services/breakpoint.service";
 
 
 @Component({
@@ -23,10 +23,8 @@ import {User} from "../../_models/user/user";
 export class CardActionablesComponent implements OnDestroy {
 
   private readonly accountService = inject(AccountService);
-  protected readonly utilityService = inject(UtilityService);
   protected readonly modalService = inject(NgbModal);
-
-  protected readonly Breakpoint = Breakpoint;
+  protected readonly breakpointService = inject(BreakpointService);
 
   iconClass = input<string>('fa-ellipsis-v');
   btnClass = input<string>('');

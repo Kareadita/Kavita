@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
-import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
+import {UtilityService} from "../../shared/_services/utility.service";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {AsyncPipe, NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
@@ -38,6 +38,7 @@ import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {ChapterService} from "../../_services/chapter.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {User} from "../../_models/user/user";
+import {BreakpointService} from "../../_services/breakpoint.service";
 
 enum TabID {
   General = 'general-tab',
@@ -60,7 +61,7 @@ export interface EditChapterModalCloseResult {
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
 @Component({
-    selector: 'app-edit-chapter-modal',
+  selector: 'app-edit-chapter-modal',
   imports: [
     FormsModule,
     NgbNav,
@@ -87,9 +88,9 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     SafeHtmlPipe,
     ReadTimePipe,
   ],
-    templateUrl: './edit-chapter-modal.component.html',
-    styleUrl: './edit-chapter-modal.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './edit-chapter-modal.component.html',
+  styleUrl: './edit-chapter-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditChapterModalComponent implements OnInit {
 
@@ -105,12 +106,7 @@ export class EditChapterModalComponent implements OnInit {
   private readonly actionService = inject(ActionService);
   private readonly downloadService = inject(DownloadService);
   private readonly chapterService = inject(ChapterService);
-
-  protected readonly Breakpoint = Breakpoint;
-  protected readonly TabID = TabID;
-  protected readonly Action = Action;
-  protected readonly PersonRole = PersonRole;
-  protected readonly MangaFormat = MangaFormat;
+  protected readonly breakpointService = inject(BreakpointService);
 
   @Input({required: true}) chapter!: Chapter;
   @Input({required: true}) libraryType!: LibraryType;
@@ -509,4 +505,9 @@ export class EditChapterModalComponent implements OnInit {
   getPersonsSettings(role: PersonRole) {
     return this.peopleSettings[role];
   }
+
+  protected readonly TabID = TabID;
+  protected readonly Action = Action;
+  protected readonly PersonRole = PersonRole;
+  protected readonly MangaFormat = MangaFormat;
 }

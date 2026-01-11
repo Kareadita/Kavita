@@ -1,13 +1,13 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, model} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {HighlightSlot, RgbaColor} from "../../../_models/annotations/highlight-slot";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
-import {ColorscapeService} from "../../../../_services/colorscape.service";
-import {Breakpoint, UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
+import {UtilityService} from "../../../../shared/_services/utility.service";
 import {
   SettingColorPickerComponent
 } from "../../../../settings/_components/setting-colour-picker/setting-color-picker.component";
+import {BreakpointService} from "../../../../_services/breakpoint.service";
 
 @Component({
   selector: 'app-highlight-bar',
@@ -23,9 +23,8 @@ import {
 export class HighlightBarComponent {
 
   private readonly annotationService = inject(AnnotationService);
-  private readonly colorscapeService = inject(ColorscapeService);
   protected readonly utilityService = inject(UtilityService);
-  private readonly destroyRef = inject(DestroyRef);
+  protected readonly breakpointService = inject(BreakpointService);
 
   selectedSlotIndex = model.required<number>();
   isCollapsed = model<boolean>(true);
@@ -42,7 +41,7 @@ export class HighlightBarComponent {
     return slots[index];
   });
 
-  desktopLayout = computed(() => this.utilityService.activeUserBreakpoint() >= UserBreakpoint.Desktop);
+  desktopLayout = computed(() => this.breakpointService.isDesktopOrAbove());
 
 
   selectSlot(index: number, slot: HighlightSlot) {
@@ -63,6 +62,4 @@ export class HighlightBarComponent {
   handleSlotColourChange(index: number, color: RgbaColor) {
     this.annotationService.updateSlotColor(index, color).subscribe();
   }
-
-  protected readonly Breakpoint = Breakpoint;
 }

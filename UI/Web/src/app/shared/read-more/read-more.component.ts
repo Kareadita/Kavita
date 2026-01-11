@@ -1,7 +1,8 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnChanges} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, signal} from '@angular/core';
 import {NgClass} from "@angular/common";
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {BreakpointService} from "../../_services/breakpoint.service";
 
 @Component({
     selector: 'app-read-more',
@@ -10,70 +11,81 @@ import {TranslocoDirective} from "@jsverse/transloco";
     styleUrls: ['./read-more.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReadMoreComponent implements OnChanges {
-  private readonly cdRef = inject(ChangeDetectorRef);
+export class ReadMoreComponent {
+  private readonly breakpointService = inject(BreakpointService);
 
   /**
    * String to apply read more on
    */
-  @Input({required: true}) text!: string;
+  readonly text = input.required<string>();
   /**
    * Max length before apply read more. Defaults to 250 characters.
    */
-  @Input() maxLength: number = 250;
+  readonly maxLength = input<number>(250);
   /**
    * If the field is collapsed and blur true, text will not be readable
    */
-  @Input() blur: boolean = false;
+  readonly blur = input(false);
   /**
    * If the read more toggle is visible
    */
-  @Input() showToggle: boolean = true;
+  readonly showToggle = input(true);
+  /**
+   * When true, maxLength is ignored and uses 170 (desktop or below) / 200 (above desktop).
+   */
+  readonly useResponsiveLength = input(false);
 
-  currentText!: string;
-  hideToggle: boolean = true;
-  isCollapsed: boolean = true;
+  readonly isCollapsed = signal(true);
 
+  private readonly effectiveMaxLength = computed(() => {
+    if (this.useResponsiveLength()) {
+      return this.breakpointService.isDesktopOrBelow() ? 170 : 200;
+    }
+    return this.maxLength();
+  });
 
-  toggleView() {
-    this.isCollapsed = !this.isCollapsed;
-    this.determineView();
-  }
+  private readonly normalizedText = computed(() =>
+    this.text()?.replace(/\n/g, '<br>') ?? ''
+  );
 
-  determineView() {
-    const text = this.text ? this.text.replace(/\n/g, '<br>') : '';
+  private readonly exceedsMaxLength = computed(() =>
+    this.text()?.length > this.effectiveMaxLength()
+  );
 
-    if (!this.text || this.text.length <= this.maxLength) {
-        this.currentText = text;
-        this.isCollapsed = true;
-        this.hideToggle = true;
-        this.cdRef.markForCheck();
-        return;
+  readonly hideToggle = computed(() => !this.exceedsMaxLength());
+
+  readonly currentText = computed(() => {
+    const text = this.normalizedText();
+    const maxLen = this.effectiveMaxLength();
+
+    if (!text || text.length <= maxLen) {
+      return text;
     }
 
-    this.hideToggle = false;
-    if (this.isCollapsed) {
-      this.currentText = text.substring(0, this.maxLength);
-
-      // Find last natural breaking point: space for English, or a CJK character boundary
-      const match = this.currentText.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]+$/u);
-      const lastSpace = this.currentText.lastIndexOf(' ');
-
-      if (lastSpace > 0) {
-        this.currentText = this.currentText.substring(0, lastSpace); // Prefer space for English
-      } else if (match) {
-        this.currentText = this.currentText.substring(0, this.currentText.length - match[0].length); // Trim CJK
-      }
-
-      this.currentText = this.currentText + '…';
-    } else if (!this.isCollapsed)  {
-      this.currentText = text;
+    if (!this.isCollapsed()) {
+      return text;
     }
 
-    this.cdRef.markForCheck();
+    return this.truncateText(text, maxLen);
+  });
+
+  toggleView(): void {
+    this.isCollapsed.update(v => !v);
   }
 
-  ngOnChanges() {
-      this.determineView();
+  private truncateText(text: string, maxLen: number): string {
+    let truncated = text.substring(0, maxLen);
+
+    // Find last natural breaking point: space for English, or a CJK character boundary
+    const cjkMatch = truncated.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]+$/u);
+    const lastSpace = truncated.lastIndexOf(' ');
+
+    if (lastSpace > 0) {
+      truncated = truncated.substring(0, lastSpace);
+    } else if (cjkMatch) {
+      truncated = truncated.substring(0, truncated.length - cjkMatch[0].length);
+    }
+
+    return truncated + '…';
   }
 }

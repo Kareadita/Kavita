@@ -152,7 +152,7 @@
 
   <!-- Shared Actions Template -->
   <ng-template #actionsTemplate let-library>
-    @if (useActionables$ | async) {
+    @if (useActionables()) {
       <app-card-actionables [entity]="library" [actions]="actions" />
     } @else {
       <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)"

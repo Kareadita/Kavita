@@ -17,10 +17,10 @@ import {SlotColorPipe} from "../../../_pipes/slot-color.pipe";
 import {RgbaColor} from "../../../book-reader/_models/annotations/highlight-slot";
 import {LongClickDirective} from "../../../_directives/long-click.directive";
 import {ChromePickerComponent, Color, ColorPickerControl} from "@iplab/ngx-color-picker";
-import {UserBreakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged} from "rxjs/operators";
 import {tap} from "rxjs";
+import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
   selector: 'app-setting-colour-picker',
@@ -34,7 +34,7 @@ export class SettingColorPickerComponent implements OnInit {
   private readonly elementRef = inject(ElementRef);
   private readonly slotColorPipe = inject(SlotColorPipe);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly utilityService: UtilityService = inject(UtilityService);
+  protected readonly breakpointService = inject(BreakpointService);
 
   @ViewChild('colorPopup') colorPopup?: ElementRef;
 
@@ -89,7 +89,7 @@ export class SettingColorPickerComponent implements OnInit {
 
     this.editMode.update(b => !b);
 
-    if (this.utilityService.activeUserBreakpoint() < UserBreakpoint.Desktop) {
+    if (this.breakpointService.activeBreakpoint() < Breakpoint.Desktop) {
       this.showPicker.update(b => !b);
     }
   }

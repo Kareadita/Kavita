@@ -20,7 +20,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {concat, forkJoin, Observable, of, tap} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {setupLanguageSettings, TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {Genre} from 'src/app/_models/metadata/genre';
@@ -61,6 +61,7 @@ import {DownloadService} from "../../../shared/_services/download.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {LicenseService} from "../../../_services/license.service";
 import {AsyncPipe, DecimalPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 enum TabID {
   General = 0,
@@ -121,26 +122,26 @@ const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, 
 })
 export class EditSeriesModalComponent implements OnInit {
 
-  public readonly modal = inject(NgbActiveModal);
+  protected readonly modal = inject(NgbActiveModal);
   private readonly seriesService = inject(SeriesService);
-  public readonly utilityService = inject(UtilityService);
+  protected readonly utilityService = inject(UtilityService);
   private readonly fb = inject(FormBuilder);
-  public readonly imageService = inject(ImageService);
+  protected readonly imageService = inject(ImageService);
   private readonly libraryService = inject(LibraryService);
   private readonly uploadService = inject(UploadService);
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  public readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
   private readonly downloadService = inject(DownloadService);
+  protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly TabID = TabID;
   protected readonly PersonRole = PersonRole;
-  protected readonly Breakpoint = Breakpoint;
   protected readonly Action = Action;
 
   @Input({required: true}) series!: Series;

@@ -39,7 +39,7 @@ import {NgbModal, NgbModalRef, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import {Stack} from 'src/app/shared/data-structures/stack';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
@@ -171,12 +171,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly mangaReaderService = inject(MangaReaderService);
   private readonly keyBindService = inject(KeyBindService);
 
-
   protected readonly KeyDirection = KeyDirection;
   protected readonly ReaderMode = ReaderMode;
   protected readonly LayoutMode = LayoutMode;
   protected readonly ReadingDirection = ReadingDirection;
-  protected readonly Breakpoint = Breakpoint;
   protected readonly Math = Math;
 
   libraryId!: number;

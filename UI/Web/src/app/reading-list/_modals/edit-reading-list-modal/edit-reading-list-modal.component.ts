@@ -1,26 +1,27 @@
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  OnInit
-} from '@angular/core';
-import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { NgbActiveModal, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbTooltip, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import {concat, debounceTime, distinctUntilChanged, forkJoin, switchMap, tap} from 'rxjs';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { ReadingList } from 'src/app/_models/reading-list';
-import { AccountService } from 'src/app/_services/account.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { UploadService } from 'src/app/_services/upload.service';
+  NgbActiveModal,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavItemRole,
+  NgbNavLink,
+  NgbNavOutlet,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {concat, debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
+import {ReadingList} from 'src/app/_models/reading-list';
+import {AccountService} from 'src/app/_services/account.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {ReadingListService} from 'src/app/_services/reading-list.service';
+import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { CoverImageChooserComponent } from '../../../cards/cover-image-chooser/cover-image-chooser.component';
-import { NgTemplateOutlet, AsyncPipe } from '@angular/common';
+import {CoverImageChooserComponent} from '../../../cards/cover-image-chooser/cover-image-chooser.component';
+import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 enum TabID {
   General = 'general-tab',
@@ -35,20 +36,20 @@ enum TabID {
     imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, AsyncPipe, TranslocoDirective]
 })
 export class EditReadingListModalComponent implements OnInit {
-  private ngModal = inject(NgbActiveModal);
-  private readingListService = inject(ReadingListService);
-  utilityService = inject(UtilityService);
-  private uploadService = inject(UploadService);
-  private toastr = inject(ToastrService);
-  private imageService = inject(ImageService);
+  private readonly ngModal = inject(NgbActiveModal);
+  private readonly readingListService = inject(ReadingListService);
+  protected readonly breakpointService = inject(BreakpointService);
+  private readonly uploadService = inject(UploadService);
+  private readonly toastr = inject(ToastrService);
+  private readonly imageService = inject(ImageService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
+  private readonly destroyRef = inject(DestroyRef);
 
 
   @Input({required: true}) readingList!: ReadingList;
-  private readonly destroyRef = inject(DestroyRef);
-  reviewGroup!: FormGroup;
 
+  reviewGroup!: FormGroup;
   coverImageIndex: number = 0;
    /**
     * Url of the selected cover
@@ -58,8 +59,7 @@ export class EditReadingListModalComponent implements OnInit {
   imageUrls: Array<string> = [];
   active = TabID.General;
 
-  get Breakpoint() { return Breakpoint; }
-  get TabID() { return TabID; }
+  protected readonly TabID = TabID;
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({

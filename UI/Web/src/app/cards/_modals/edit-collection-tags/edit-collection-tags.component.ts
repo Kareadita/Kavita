@@ -13,7 +13,7 @@ import {
 import {ToastrService} from 'ngx-toastr';
 import {concat, debounceTime, distinctUntilChanged, forkJoin, switchMap, tap} from 'rxjs';
 import {ConfirmService} from 'src/app/shared/confirm.service';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
@@ -34,6 +34,7 @@ import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {SelectionModel} from "../../../typeahead/_models/selection-model";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 
 enum TabID {
@@ -66,8 +67,8 @@ export class EditCollectionTagsComponent implements OnInit {
   private readonly uploadService = inject(UploadService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
+  protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
   protected readonly ScrobbleProvider = ScrobbleProvider;
 

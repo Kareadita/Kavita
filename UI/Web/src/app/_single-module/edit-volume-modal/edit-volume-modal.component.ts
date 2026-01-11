@@ -14,7 +14,7 @@ import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {Volume} from "../../_models/volume";
-import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
+import {UtilityService} from "../../shared/_services/utility.service";
 import {ImageService} from "../../_services/image.service";
 import {UploadService} from "../../_services/upload.service";
 import {AccountService} from "../../_services/account.service";
@@ -25,8 +25,8 @@ import {PersonRole} from "../../_models/metadata/person";
 import {forkJoin} from "rxjs";
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
-import {VolumeService} from "../../_services/volume.service";
 import {User} from "../../_models/user/user";
+import {BreakpointService} from "../../_services/breakpoint.service";
 
 enum TabID {
   General = 'general-tab',
@@ -82,9 +82,8 @@ export class EditVolumeModalComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
   private readonly downloadService = inject(DownloadService);
-  private readonly volumeService = inject(VolumeService);
+  protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly Breakpoint = Breakpoint;
   protected readonly TabID = TabID;
   protected readonly Action = Action;
   protected readonly PersonRole = PersonRole;

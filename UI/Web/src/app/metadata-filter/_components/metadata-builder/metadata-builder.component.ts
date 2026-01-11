@@ -11,7 +11,7 @@ import {
   Output
 } from '@angular/core';
 import {MetadataService} from 'src/app/_services/metadata.service';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {FilterV2} from 'src/app/_models/metadata/v2/filter-v2';
 import {MetadataFilterRowComponent} from "../metadata-filter-row/metadata-filter-row.component";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
@@ -23,6 +23,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {distinctUntilChanged, tap} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../../filter-settings";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
   selector: 'app-metadata-builder',
@@ -52,7 +53,8 @@ export class MetadataBuilderComponent<TFilter extends number = number, TSort ext
   private readonly metadataService = inject(MetadataService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly filterUtilityService = inject(FilterUtilitiesService);
-  private readonly  destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly breakpointService = inject(BreakpointService);
 
   formGroup: FormGroup = new FormGroup({});
 
@@ -86,7 +88,5 @@ export class MetadataBuilderComponent<TFilter extends number = number, TSort ext
     this.metadataService.updateFilter(this.filter.statements, index, filterStmt);
     this.update.emit(this.filter);
   }
-
-  protected readonly Breakpoint = Breakpoint;
 
 }

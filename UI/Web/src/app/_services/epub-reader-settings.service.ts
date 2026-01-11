@@ -14,11 +14,11 @@ import {DOCUMENT} from "@angular/common";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
+import {UtilityService} from "../shared/_services/utility.service";
 import {environment} from "../../environments/environment";
 import {EpubFont} from "../_models/preferences/epub-font";
 import {FontService} from "./font.service";
-import {Library} from "../_models/library/library";
+import {BreakpointService} from "./breakpoint.service";
 
 export interface ReaderSettingUpdate {
   setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme' | 'pageCalcMethod';
@@ -48,6 +48,7 @@ export class EpubReaderSettingsService {
   private readonly toastr = inject(ToastrService);
   private readonly document = inject(DOCUMENT);
   private readonly fb = inject(NonNullableFormBuilder);
+  protected readonly breakpointService = inject(BreakpointService);
 
   // Core signals - these will be the single source of truth
   private readonly _currentReadingProfile = signal<ReadingProfile | null>(null);
@@ -92,7 +93,7 @@ export class EpubReaderSettingsService {
   // Computed signals for derived state
   public readonly layoutMode = computed(() => {
     const layout = this._layoutMode();
-    const mobileDevice = this.utilityService.activeUserBreakpoint() < UserBreakpoint.Tablet;
+    const mobileDevice = this.breakpointService.isMobile();
 
     if (layout !== BookPageLayoutMode.Column2 || !mobileDevice) return layout;
 

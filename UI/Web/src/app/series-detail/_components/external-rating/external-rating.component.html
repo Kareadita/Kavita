@@ -2,18 +2,16 @@
   <div class="row g-0">
 
 
-      @if (utilityService.activeBreakpoint$ | async; as activeBreakpoint) {
-        @if (activeBreakpoint <= Breakpoint.Tablet) {
-          <div class="col-auto custom-col clickable" tabindex="0" role="button" (click)="openRatingModal()">
-            <ng-container [ngTemplateOutlet]="kavitaRating" />
-          </div>
-        } @else {
-          <div class="col-auto custom-col clickable" [ngbPopover]="popContent"
-               [popoverTitle]="t('kavita-tooltip')" popoverClass="md-popover">
-            <ng-container [ngTemplateOutlet]="kavitaRating" />
-          </div>
-        }
-      }
+    @if (breakpointService.isTabletOrBelow()) {
+      <div class="col-auto custom-col clickable" tabindex="0" role="button" (click)="openRatingModal()">
+        <ng-container [ngTemplateOutlet]="kavitaRating" />
+      </div>
+    } @else {
+      <div class="col-auto custom-col clickable" [ngbPopover]="popContent"
+           [popoverTitle]="t('kavita-tooltip')" popoverClass="md-popover">
+        <ng-container [ngTemplateOutlet]="kavitaRating" />
+      </div>
+    }
 
     @for (rating of ratings; track rating.provider + rating.averageScore) {
       <div class="col-auto custom-col clickable" [ngbPopover]="externalPopContent" [popoverContext]="{rating: rating}"

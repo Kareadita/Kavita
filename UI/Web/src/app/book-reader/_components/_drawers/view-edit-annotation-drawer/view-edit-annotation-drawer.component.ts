@@ -27,7 +27,7 @@ import {DatePipe, DOCUMENT, NgStyle} from "@angular/common";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 import {PageChapterLabelPipe} from "../../../../_pipes/page-chapter-label.pipe";
-import {UserBreakpoint, UtilityService} from "../../../../shared/_services/utility.service";
+import {UtilityService} from "../../../../shared/_services/utility.service";
 import {QuillTheme, QuillWrapperComponent} from "../../quill-wrapper/quill-wrapper.component";
 import {ContentChange, QuillViewComponent} from "ngx-quill";
 import {UtcToLocalDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
@@ -40,6 +40,7 @@ import {ConfirmService} from "../../../../shared/confirm.service";
 import {AnnotationLikesComponent} from "../../_annotations/annotation-likes/annotation-likes.component";
 import {ProfileIconComponent} from "../../../../_single-module/profile-icon/profile-icon.component";
 import {RouterLink} from "@angular/router";
+import {BreakpointService} from "../../../../_services/breakpoint.service";
 
 export enum AnnotationMode {
   View = 0,
@@ -86,6 +87,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   private readonly offcanvasService = inject(NgbOffcanvas);
+  protected readonly breakpointService = inject(BreakpointService);
 
   @ViewChild('renderTarget', {read: ViewContainerRef}) renderTarget!: ViewContainerRef;
 
@@ -352,12 +354,6 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     return Math.floor(availableWidth / avgCharWidth);
   }
 
-  protected readonly AnnotationMode = AnnotationMode;
-  protected readonly UserBreakpoint = UserBreakpoint;
-  protected readonly QuillTheme = QuillTheme;
-  protected readonly ResizeMode = ResizeMode;
-  protected readonly window = window;
-
   async delete() {
     const annotation = this.annotation();
     if (!annotation) return;
@@ -368,4 +364,9 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
       this.offcanvasService.dismiss();
     });
   }
+
+  protected readonly AnnotationMode = AnnotationMode;
+  protected readonly QuillTheme = QuillTheme;
+  protected readonly ResizeMode = ResizeMode;
+  protected readonly window = window;
 }

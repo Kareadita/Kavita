@@ -10,7 +10,7 @@ import {
   Output
 } from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
+import {UtilityService} from "../../shared/_services/utility.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {Action, ActionableEntity, ActionItem} from "../../_services/action-factory.service";
 import {AccountService} from "../../_services/account.service";
@@ -34,7 +34,6 @@ export class ActionableModalComponent implements OnInit {
   protected readonly accountService = inject(AccountService);
   protected readonly cdRef = inject(ChangeDetectorRef);
   protected readonly destroyRef = inject(DestroyRef);
-  protected readonly Breakpoint = Breakpoint;
 
   @Input() entity: ActionableEntity = null;
   @Input() actions: ActionItem<any>[] = [];

@@ -17,7 +17,6 @@ import {Clipboard} from "@angular/cdk/clipboard";
 import {DatePipe} from "@angular/common";
 import {ToastrService} from "ngx-toastr";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
-import {Breakpoint} from "../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-manage-auth-keys',
@@ -43,7 +42,6 @@ export class ManageAuthKeysComponent implements OnInit {
   private readonly modalService = inject(NgbModal);
   private readonly clipboard = inject(Clipboard);
   private readonly toastr = inject(ToastrService);
-
 
   protected readonly opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
 
@@ -104,5 +102,4 @@ export class ManageAuthKeysComponent implements OnInit {
   }
 
   protected readonly AuthKeyProvider = AuthKeyProvider;
-  protected readonly Breakpoint = Breakpoint;
 }

@@ -22,7 +22,7 @@
 
         </div>
       </div>
-      @if (utilityService.activeUserBreakpoint() < Breakpoint.Desktop) {
+      @if (breakpointService.isTabletOrBelow()) {
         <div class="side-nav-overlay" (click)="collapse()" [ngClass]="{'closed' : navService.sideNavCollapsedSignal()}"></div>
       }
     }

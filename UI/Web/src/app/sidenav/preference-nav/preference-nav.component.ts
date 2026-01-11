@@ -13,19 +13,20 @@ import {NavService} from "../../_services/nav.service";
 import {AccountService, Role} from "../../_services/account.service";
 import {SideNavItemComponent} from "../_components/side-nav-item/side-nav-item.component";
 import {ActivatedRoute, NavigationEnd, Router} from "@angular/router";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
-import {map, Observable, of, shareReplay, switchMap, take, tap} from "rxjs";
+import {map, Observable, of, shareReplay, switchMap, take} from "rxjs";
 import {ServerService} from "../../_services/server.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {User} from "../../_models/user/user";
 import {filter} from "rxjs/operators";
-import {Breakpoint, UtilityService} from "../../shared/_services/utility.service";
+import {UtilityService} from "../../shared/_services/utility.service";
 import {LicenseService} from "../../_services/license.service";
 import {ManageService} from "../../_services/manage.service";
 import {MatchStateOption} from "../../_models/kavitaplus/match-state-option";
 import {KeyBindService} from "../../_services/key-bind.service";
 import {KeyBindTarget} from "../../_models/preferences/preferences";
+import {BreakpointService} from "../../_services/breakpoint.service";
 
 export enum SettingsTabId {
 
@@ -141,25 +142,19 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly manageService = inject(ManageService);
   private readonly document = inject(DOCUMENT);
   private readonly keyBindService = inject(KeyBindService);
+  protected readonly breakpointService = inject(BreakpointService);
+
+  private readonly navEnd = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    )
+  );
 
   /**
    * This links to settings.component.html which has triggers on what underlying component to render out.
    */
   sections: Array<PrefSection> = [];
 
-  collapseSideNavOnMobileNav$ = this.router.events.pipe(
-    filter(event => event instanceof NavigationEnd),
-    takeUntilDestroyed(this.destroyRef),
-    map(evt => evt as NavigationEnd),
-    switchMap(_ => this.utilityService.activeBreakpoint$),
-    filter((b) => b < Breakpoint.Tablet),
-    switchMap(() => this.navService.sideNavCollapsed$),
-    take(1),
-    filter(collapsed => !collapsed),
-    tap(_ => {
-      this.navService.collapseSideNav(true);
-    }),
-  );
 
   private readonly matchedMetadataBadgeCount$ = this.accountService.currentUser$.pipe(
     take(1),
@@ -214,10 +209,18 @@ export class PreferenceNavComponent implements AfterViewInit {
   );
 
   constructor() {
-    this.collapseSideNavOnMobileNav$.subscribe();
+    effect(() => {
+      const navEvent = this.navEnd();
+      if (!navEvent) return;
+
+      if (this.breakpointService.isAboveMobile()) return;
+      if (this.navService.sideNavCollapsedSignal()) return;
+
+      this.navService.collapseSideNav(true);
+    });
 
     // Ensure that on mobile, we are collapsed by default
-    if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
+    if (this.breakpointService.isMobileOrBelow()) {
       this.navService.collapseSideNav(true);
     }
 
@@ -329,6 +332,4 @@ export class PreferenceNavComponent implements AfterViewInit {
   collapse() {
     this.navService.toggleSideNav();
   }
-
-  protected readonly Breakpoint = Breakpoint;
 }

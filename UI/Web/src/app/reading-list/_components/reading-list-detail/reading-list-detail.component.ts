@@ -15,7 +15,7 @@ import {DatePipe, DecimalPipe, DOCUMENT, Location, NgClass, NgStyle} from '@angu
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs/operators';
 import {ConfirmService} from 'src/app/shared/confirm.service';
-import {Breakpoint, UserBreakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {ReadingList, ReadingListInfo, ReadingListItem} from 'src/app/_models/reading-list';
@@ -61,6 +61,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
 import {IHasCast} from "../../../_models/common/i-has-cast";
 import {User} from "../../../_models/user/user";
+import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
 
 enum TabID {
   Storyline = 'storyline-tab',
@@ -82,14 +83,6 @@ enum TabID {
 })
 export class ReadingListDetailComponent implements OnInit {
   private document = inject<Document>(DOCUMENT);
-
-
-  protected readonly MangaFormat = MangaFormat;
-  protected readonly Breakpoint = Breakpoint;
-  protected readonly UserBreakpoint = UserBreakpoint;
-  protected readonly TabID = TabID;
-  protected readonly encodeURIComponent = encodeURIComponent;
-
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private readingListService = inject(ReadingListService);
@@ -106,7 +99,11 @@ export class ReadingListDetailComponent implements OnInit {
   private titleService = inject(Title);
   private location = inject(Location);
   private destroyRef = inject(DestroyRef);
+  protected readonly breakpointService = inject(BreakpointService);
 
+  protected readonly MangaFormat = MangaFormat;
+  protected readonly TabID = TabID;
+  protected readonly encodeURIComponent = encodeURIComponent;
 
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
@@ -212,18 +209,18 @@ export class ReadingListDetailComponent implements OnInit {
 
     this.formGroup.get('accessibilityMode')!.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
-      startWith(this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet),
+      startWith(this.breakpointService.isMobile()),
       tap(mode => {
-        this.accessibilityMode = (mode || this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet);
+        this.accessibilityMode = (mode || this.breakpointService.isMobile());
         this.cdRef.markForCheck();
       })
     ).subscribe();
 
-    if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
+    if (this.breakpointService.isMobile()) {
       this.formGroup.get('accessibilityMode')?.disable();
     }
 
-    this.accessibilityMode = this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet;
+    this.accessibilityMode = this.breakpointService.isMobile();
     this.editMode = false;
     this.cdRef.markForCheck();
 
@@ -427,4 +424,6 @@ export class ReadingListDetailComponent implements OnInit {
       }
     }, 10);
   }
+
+  protected readonly Breakpoint = Breakpoint;
 }

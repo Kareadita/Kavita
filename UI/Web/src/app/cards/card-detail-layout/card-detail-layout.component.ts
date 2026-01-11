@@ -26,7 +26,6 @@ import {
 } from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Library} from 'src/app/_models/library/library';
 import {Pagination} from 'src/app/_models/pagination';
@@ -68,15 +67,11 @@ const ANIMATION_TIME_MS = 0;
   standalone: true
 })
 export class CardDetailLayoutComponent<TFilter extends number, TSort extends number> implements OnInit, OnChanges, AfterViewInit {
-  private document = inject<Document>(DOCUMENT);
-
-
-  protected readonly utilityService = inject(UtilityService);
+  private readonly document = inject<Document>(DOCUMENT);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly jumpbarService = inject(JumpbarService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-
 
 
   header: Signal<string> = input('');
@@ -279,6 +274,4 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     this.jumpbarService.saveResumeKey(this.router.url, name.charAt(0));
     this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.scrollStartPosition);
   }
-
-  protected readonly Breakpoint = Breakpoint;
 }

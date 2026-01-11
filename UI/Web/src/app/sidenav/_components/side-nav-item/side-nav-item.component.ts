@@ -5,7 +5,8 @@ import {NavService} from 'src/app/_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {ImageComponent} from "../../../shared/image/image.component";
-import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 
 @Component({
@@ -21,6 +22,7 @@ export class SideNavItemComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly navService = inject(NavService);
   protected readonly utilityService = inject(UtilityService);
+  protected readonly breakpointService = inject(BreakpointService);
 
   /**
    * Id for automatic scrolling to.
@@ -159,7 +161,7 @@ export class SideNavItemComponent implements OnInit {
 
   // If on mobile, automatically collapse the side nav after making a selection
   collapseNavIfApplicable() {
-    if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
+    if (this.breakpointService.isMobile()) {
       this.navService.collapseSideNav(true);
     }
   }

@@ -60,7 +60,7 @@
             <pdf-find-button [textLayer]='true' />
             <pdf-paging-area />
 
-            @if (utilityService.getActiveBreakpoint() > Breakpoint.Mobile) {
+            @if (breakpointService.isTabletOrAbove()) {
               <button class="btn-icon mt-0 mb-0 pt-1 pb-0 toolbarButton" [ngbTooltip]="bookTitle">
                 <i class="toolbar-icon fa-solid fa-info" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
                 <span class="visually-hidden">{{bookTitle}}</span>

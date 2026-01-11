@@ -10,9 +10,9 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
   <form [formGroup]="libraryForm">
-    <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
+    <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
       <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
-          orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+          orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
 
         <li [ngbNavItem]="TabID.General">
           <a ngbNavLink>{{t(TabID.General)}}</a>
@@ -295,7 +295,7 @@
 
       </ul>
 
-      <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+      <div [ngbNavOutlet]="nav" class="tab-content {{breakpointService.isMobile() ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
   </form>
   <div class="modal-footer">

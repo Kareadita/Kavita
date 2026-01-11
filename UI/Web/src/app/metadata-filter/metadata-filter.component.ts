@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
-import {Breakpoint, UtilityService} from '../shared/_services/utility.service';
+import {UtilityService} from '../shared/_services/utility.service';
 import {Library} from '../_models/library/library';
 import {FilterEvent, FilterItem} from '../_models/metadata/series-filter';
 import {ToggleService} from '../_services/toggle.service';
@@ -33,6 +33,7 @@ import {animate, style, transition, trigger} from "@angular/animations";
 import {SortButtonComponent} from "../_single-module/sort-button/sort-button.component";
 import {FilterSettingsBase} from "./filter-settings";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
+import {Breakpoint, BreakpointService} from "../_services/breakpoint.service";
 
 
 @Component({
@@ -67,6 +68,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   protected readonly toggleService = inject(ToggleService);
   protected readonly translocoService = inject(TranslocoService);
   protected readonly filterUtilitiesService = inject(FilterUtilitiesService);
+  protected readonly breakpointService = inject(BreakpointService);
 
   /**
    * This toggles the opening/collapsing of the metadata filter code
@@ -235,7 +237,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   apply() {
     this.applyFilter.emit({isFirst: this.updateApplied === 0, filterV2: this.filterV2!} as FilterEvent<TFilter, TSort>);
 
-    if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {
+    if (this.breakpointService.isMobile() && this.updateApplied !== 0) {
       this.toggleSelected();
     }
 
@@ -256,7 +258,6 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
     this.toggleService.toggle();
     this.cdRef.markForCheck();
   }
-
 
   protected readonly Breakpoint = Breakpoint;
 }

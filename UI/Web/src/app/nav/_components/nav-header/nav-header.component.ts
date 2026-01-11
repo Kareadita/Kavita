@@ -5,13 +5,11 @@ import {
   Component,
   computed,
   DestroyRef,
-  HostListener,
   inject,
   signal,
   ViewChild
 } from '@angular/core';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
-import {BehaviorSubject, Observable} from 'rxjs';
 import {Chapter} from 'src/app/_models/chapter';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {Library} from 'src/app/_models/library/library';
@@ -41,7 +39,6 @@ import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {CollectionOwnerComponent} from "../../../collections/_components/collection-owner/collection-owner.component";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
-import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {WikiLink} from "../../../_models/wiki";
 import {NavLinkModalComponent} from "../nav-link-modal/nav-link-modal.component";
 import {MetadataService} from "../../../_services/metadata.service";
@@ -49,6 +46,7 @@ import {Annotation} from "../../../book-reader/_models/annotations/annotation";
 import {QuillViewComponent} from "ngx-quill";
 import {AnnotationService} from "../../../_services/annotation.service";
 import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile-icon.component";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
   selector: 'app-nav-header',
@@ -69,7 +67,7 @@ export class NavHeaderComponent {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly navService = inject(NavService);
   protected readonly imageService = inject(ImageService);
-  protected readonly utilityService = inject(UtilityService);
+  protected readonly breakpointService = inject(BreakpointService);
   protected readonly modalService = inject(NgbModal);
   protected readonly metadataService = inject(MetadataService);
   private readonly annotationService = inject(AnnotationService);
@@ -77,9 +75,6 @@ export class NavHeaderComponent {
 
   @ViewChild('search') searchViewRef!: any;
 
-  showMobileView = computed(() => {
-    return this.utilityService.activeBreakpointSignal()! <= Breakpoint.Mobile;
-  });
 
   profileLink = computed(() => {
     return ['/profile', this.accountService.currentUserSignal()?.id ?? ''];
@@ -89,21 +84,10 @@ export class NavHeaderComponent {
     return this.accountService.currentUserSignal();
   });
 
-
   isLoading = signal<boolean>(false);
   debounceTime = 300;
   searchResults: SearchResultGroup = new SearchResultGroup();
   searchTerm = '';
-
-
-  breakpointSource = new BehaviorSubject<Breakpoint>(this.utilityService.getActiveBreakpoint());
-  breakpoint$: Observable<Breakpoint> = this.breakpointSource.asObservable();
-
-  @HostListener('window:resize', ['$event'])
-  @HostListener('window:orientationchange', ['$event'])
-  onResize(event: Event){
-    this.breakpointSource.next(this.utilityService.getActiveBreakpoint());
-  }
 
   moveFocus() {
     this.document.getElementById('content')?.focus();
@@ -218,6 +202,4 @@ export class NavHeaderComponent {
   protected readonly WikiLink = WikiLink;
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly SettingsTabId = SettingsTabId;
-  protected readonly Breakpoint = Breakpoint;
-
 }

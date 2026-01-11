@@ -20,7 +20,8 @@ import {Action, ActionItem} from "../../../_services/action-factory.service";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
@@ -39,6 +40,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly utilityService = inject(UtilityService);
+  protected readonly breakpointService = inject(BreakpointService);
 
   items: SideNavStream[] = [];
   allSmartFilters: SmartFilter[] = [];
@@ -145,7 +147,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
       this.items = results[0];
 
       // After X items, drag and drop is disabled to use virtualization
-      if (this.items.length > this.virtualizeAfter || this.utilityService.getActiveBreakpoint() <= Breakpoint.Tablet) {
+      if (this.items.length > this.virtualizeAfter || this.breakpointService.isTabletOrBelow()) {
         this.pageOperationsForm.get('accessibilityMode')?.setValue(true);
       }
 

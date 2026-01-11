@@ -23,7 +23,7 @@ import {
 import {ToastrService} from 'ngx-toastr';
 import {take} from 'rxjs';
 import {BookService} from 'src/app/book-reader/_services/book.service';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter} from 'src/app/_models/chapter';
 import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
@@ -45,6 +45,7 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
+import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
   selector: 'app-pdf-reader',
@@ -70,9 +71,9 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   public readonly destroyRef = inject(DestroyRef);
   public readonly document = inject(DOCUMENT);
   private readonly keyBindService = inject(KeyBindService);
+  protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly ScrollModeType = ScrollModeType;
-  protected readonly Breakpoint = Breakpoint;
 
   @ViewChild('container') container!: ElementRef;
 
@@ -370,7 +371,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     if (this.pageLayoutMode === 'book') {
       this.pageLayoutMode = 'multiple';
     } else {
-      if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
+      if (this.breakpointService.activeBreakpoint() < Breakpoint.Tablet) {
         this.toastr.info(translate('toasts.pdf-book-mode-screen-size'));
         return;
       }
@@ -421,4 +422,5 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   }
 
 
+  protected readonly Breakpoint = Breakpoint;
 }

@@ -1,5 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
-import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {CustomizeDashboardStreamsComponent} from "../customize-dashboard-streams/customize-dashboard-streams.component";
 import {CustomizeSidenavStreamsComponent} from "../customize-sidenav-streams/customize-sidenav-streams.component";
 import {ManageExternalSourcesComponent} from "../manage-external-sources/manage-external-sources.component";
@@ -34,12 +33,9 @@ enum TabID {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageCustomizationComponent {
-  private readonly cdRef = inject(ChangeDetectorRef);
-  public readonly utilityService = inject(UtilityService);
-
-  protected readonly TabID = TabID;
-  protected readonly Breakpoint = Breakpoint;
-  protected readonly WikiLink = WikiLink;
 
   activeTab = TabID.Dashboard;
+
+  protected readonly TabID = TabID;
+  protected readonly WikiLink = WikiLink;
 }

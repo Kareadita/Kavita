@@ -100,22 +100,20 @@
         }
       </div>
     </div>
-    }
+  }
 
-    @if (utilityService.activeBreakpoint$ | async; as breakpoint) {
-      @if (breakpoint < Breakpoint.Desktop) {
-        <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async)}"></div>
-      }
-    }
+  @if (breakpointService.isTabletOrBelow()) {
+    <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async)}"></div>
+  }
 
-    <div class="sidenav-bottom" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
-        'hidden': (navService.sideNavVisibility$ | async) === false || (licenseService.hasValidLicense$ | async) === true}">
-      @if ((licenseService.hasValidLicense$ | async) === false) {
-        <app-side-nav-item [ngClass]="'donate'" icon="fa-heart"
-                          [ngbTooltip]="t('donate-tooltip')"
-                          [link]="WikiLink.Donation"
-                          [external]="true" />
-      }
-    </div>
+  <div class="sidenav-bottom" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
+      'hidden': (navService.sideNavVisibility$ | async) === false || (licenseService.hasValidLicense$ | async) === true}">
+    @if ((licenseService.hasValidLicense$ | async) === false) {
+      <app-side-nav-item [ngClass]="'donate'" icon="fa-heart"
+                        [ngbTooltip]="t('donate-tooltip')"
+                        [link]="WikiLink.Donation"
+                        [external]="true" />
+    }
+  </div>
 
 </ng-container>

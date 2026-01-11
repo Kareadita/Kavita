@@ -35,6 +35,7 @@ import {ReaderSetting} from "../../_models/reader-setting";
 import {SafeStylePipe} from "../../../_pipes/safe-style.pipe";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -95,6 +96,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   private readonly injector = inject(Injector);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly breakpointService = inject(BreakpointService);
 
   /**
    * Current page number aka what's recorded on screen
@@ -293,7 +295,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
     // Automatically updates when the breakpoint changes, or when reader settings changes
     this.widthOverride = computed(() => {
-      const breakpoint = this.utilityService.activeUserBreakpoint();
+      const breakpoint = this.breakpointService.activeBreakpoint();
       const value = this.readerSettings().widthSlider;
 
       if (breakpoint <= this.readingProfile.disableWidthOverride) {

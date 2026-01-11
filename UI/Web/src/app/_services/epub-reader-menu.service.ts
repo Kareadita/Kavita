@@ -5,7 +5,6 @@ import {
   ViewBookmarkDrawerComponent
 } from "../book-reader/_components/_drawers/view-bookmarks-drawer/view-bookmark-drawer.component";
 import {ViewTocDrawerComponent} from "../book-reader/_components/_drawers/view-toc-drawer/view-toc-drawer.component";
-import {UserBreakpoint, UtilityService} from "../shared/_services/utility.service";
 import {
   EpubSettingDrawerComponent,
 } from "../book-reader/_components/_drawers/epub-setting-drawer/epub-setting-drawer.component";
@@ -16,8 +15,8 @@ import {
   AnnotationMode,
   ViewEditAnnotationDrawerComponent
 } from "../book-reader/_components/_drawers/view-edit-annotation-drawer/view-edit-annotation-drawer.component";
-import {AccountService} from "./account.service";
 import {EpubReaderSettingsService} from './epub-reader-settings.service';
+import {BreakpointService} from "./breakpoint.service";
 
 /**
  * Responsible for opening the different readers and providing any context needed. Handles closing or keeping a stack of menus open.
@@ -28,8 +27,7 @@ import {EpubReaderSettingsService} from './epub-reader-settings.service';
 export class EpubReaderMenuService {
 
   private readonly offcanvasService = inject(NgbOffcanvas);
-  private readonly utilityService = inject(UtilityService);
-  private readonly accountService = inject(AccountService);
+  private readonly breakpointService = inject(BreakpointService);
 
   /**
    * The currently active breakpoint, is {@link UserBreakpoint.Never} until the app has loaded
@@ -94,7 +92,7 @@ export class EpubReaderMenuService {
     ref.componentInstance.pageNum.set(pageNum);
     ref.componentInstance.loadPage.subscribe((res: LoadPageEvent | null) => {
       // Check if we are on mobile to collapse the menu
-      if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
+      if (this.breakpointService.isMobileOrBelow()) {
         this.closeAll();
       }
       callbackFn(res);
@@ -117,14 +115,14 @@ export class EpubReaderMenuService {
     ref.componentInstance.pageNum.set(pageNum);
     ref.componentInstance.loadPage.subscribe((res: PageBookmark | null) => {
       // Check if we are on mobile to collapse the menu
-      if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
+      if (this.breakpointService.isMobileOrBelow()) {
         this.closeAll();
       }
       callbackFn(res, 'loadPage');
     });
     ref.componentInstance.loadPtoc.subscribe((res: LoadPageEvent) => {
       // Check if we are on mobile to collapse the menu
-      if (this.utilityService.activeUserBreakpoint() <= UserBreakpoint.Mobile) {
+      if (this.breakpointService.isMobileOrBelow()) {
         this.closeAll();
       }
       loadPtocCallbackFn(res);

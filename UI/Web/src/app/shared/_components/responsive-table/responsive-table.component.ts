@@ -9,9 +9,9 @@ import {
   TemplateRef,
   TrackByFunction
 } from '@angular/core';
-import {Breakpoint, UtilityService} from "../../_services/utility.service";
 import {NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
 
 export interface PageEvent {
   pageIndex: number;
@@ -33,7 +33,7 @@ export interface PageEvent {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResponsiveTableComponent<T> {
-  private readonly utilityService = inject(UtilityService);
+  protected readonly breakpointService = inject(BreakpointService);
 
   rows = input.required<T[]>();
   breakpoint = input<Breakpoint>(Breakpoint.Mobile);
@@ -52,7 +52,7 @@ export class ResponsiveTableComponent<T> {
   protected readonly tableTemplateRef = computed(() => this.tableTemplateSignal());
 
   protected readonly showCards = computed(() => {
-    const activeBreakpoint = this.utilityService.activeBreakpointSignal();
+    const activeBreakpoint = this.breakpointService.activeBreakpoint();
     const setting = this.breakpoint();
     return activeBreakpoint && activeBreakpoint <= setting;
   });
