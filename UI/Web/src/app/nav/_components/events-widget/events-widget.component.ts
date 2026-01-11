@@ -1,15 +1,5 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  OnDestroy,
-  OnInit
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
 import {NgbModal, NgbModalRef, NgbPopover} from '@ng-bootstrap/ng-bootstrap';
-import {BehaviorSubject, debounceTime, startWith} from 'rxjs';
 import {ConfirmConfig} from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {
@@ -23,7 +13,7 @@ import {UpdateVersionEvent} from 'src/app/_models/events/update-version-event';
 import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {AsyncPipe, NgClass, NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -36,107 +26,69 @@ import {DefaultModalOptions} from "../../../_models/default-modal-options";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgClass, NgbPopover, NgStyle, AsyncPipe, SentenceCasePipe, TranslocoDirective]
 })
-export class EventsWidgetComponent implements OnInit, OnDestroy {
+export class EventsWidgetComponent implements OnInit {
   public readonly downloadService = inject(DownloadService);
   public readonly messageHub = inject(MessageHubService);
   private readonly modalService = inject(NgbModal);
   protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
-  @Input({required: true}) user!: User;
+  readonly user = input.required<User>();
 
-
-  /**
-   * Progress events (Event Type: 'started', 'ended', 'updated' that have progress property)
-   */
-  progressEventsSource = new BehaviorSubject<NotificationProgressEvent[]>([]);
-  progressEvents$ = this.progressEventsSource.asObservable();
-
-  singleUpdateSource = new BehaviorSubject<NotificationProgressEvent[]>([]);
-  singleUpdates$ = this.singleUpdateSource.asObservable();
-
-  errorSource = new BehaviorSubject<ErrorEvent[]>([]);
-  errors$ = this.errorSource.asObservable();
-
-  infoSource = new BehaviorSubject<InfoEvent[]>([]);
-  infos$ = this.infoSource.asObservable();
+  /** Progress events (Event Type: 'started', 'ended', 'updated' that have progress property) */
+  readonly progressEvents = signal<NotificationProgressEvent[]>([]);
+  readonly singleUpdates = signal<NotificationProgressEvent[]>([]);
+  readonly errors = signal<ErrorEvent[]>([]);
+  readonly infos = signal<InfoEvent[]>([]);
 
   private updateNotificationModalRef: NgbModalRef | null = null;
 
-  activeEventsSource = new BehaviorSubject<number>(0);
-  activeEvents$ = this.activeEventsSource.asObservable().pipe(startWith(0), takeUntilDestroyed(this.destroyRef), debounceTime(100));
-  activeEvents: number = 0;
-  /**
-   * Intercepts from Single Updates to show an extra indicator to the user
-   */
-  updateAvailable: boolean = false;
+  readonly activeEvents = computed(() => {
+    return this.progressEvents().length
+      + this.singleUpdates().length
+      + this.errors().length
+      + this.infos().length;
+  });
 
-  protected readonly EVENTS = EVENTS;
+  /** Intercepts from Single Updates to show an extra indicator to the user */
+  readonly updateAvailable = signal(false);
 
+  readonly activeDownloads = toSignal(this.downloadService.activeDownloads$, { initialValue: [] });
+  readonly onlineUsers = toSignal(this.messageHub.onlineUsers$, { initialValue: [] });
 
-  ngOnDestroy(): void {
-    this.progressEventsSource.complete();
-    this.singleUpdateSource.complete();
-    this.errorSource.complete();
-  }
 
   ngOnInit(): void {
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<NotificationProgressEvent>) => {
       if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
       } else if (event.event === EVENTS.Error) {
-        const values = this.errorSource.getValue();
-        values.push(event.payload as ErrorEvent);
-        this.errorSource.next(values);
-        this.activeEvents += 1;
-        this.activeEventsSource.next(this.activeEvents);
-        this.cdRef.markForCheck();
+        this.errors.update(values => [...values, event.payload as ErrorEvent]);
       } else if (event.event === EVENTS.Info) {
-        const values = this.infoSource.getValue();
-        values.push(event.payload as InfoEvent);
-        this.infoSource.next(values);
-        this.activeEvents += 1;
-        this.activeEventsSource.next(this.activeEvents);
-        this.cdRef.markForCheck();
+        this.infos.update(values => [...values, event.payload as InfoEvent]);
       } else if (event.event === EVENTS.UpdateAvailable) {
         this.handleUpdateAvailableClick(event.payload);
+      } else if (event.event === EVENTS.ReadingSessionUpdate) {
+        // Handle reading session update
       }
     });
   }
 
   processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {
     const message = event.payload as NotificationProgressEvent;
-    let data;
     switch (event.payload.eventType) {
       case 'single':
-        const values = this.singleUpdateSource.getValue();
-        values.push(message);
-        this.singleUpdateSource.next(values);
-        this.activeEvents += 1;
-        this.activeEventsSource.next(this.activeEvents);
+        this.singleUpdates.update(values => [...values, message]);
         if (event.payload.name === EVENTS.UpdateAvailable) {
-          this.updateAvailable = true;
+          this.updateAvailable.set(true);
         }
-        this.cdRef.markForCheck();
         break;
       case 'started':
-        // Sometimes we can receive 2 started on long-running scans, so better to just treat as a merge then.
-        data = this.mergeOrUpdate(this.progressEventsSource.getValue(), message);
-        this.progressEventsSource.next(data);
-        break;
       case 'updated':
-        data = this.mergeOrUpdate(this.progressEventsSource.getValue(), message);
-        this.progressEventsSource.next(data);
+        this.progressEvents.update(data => this.mergeOrUpdate(data, message));
         break;
       case 'ended':
-        data = this.progressEventsSource.getValue();
-        data = data.filter(m => m.name !== message.name);
-        this.progressEventsSource.next(data);
-        this.activeEvents = Math.max(this.activeEvents - 1, 0);
-        this.activeEventsSource.next(this.activeEvents);
-        this.cdRef.markForCheck();
+        this.progressEvents.update(data => data.filter(m => m.name !== message.name));
         break;
       default:
         break;
@@ -144,17 +96,15 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   }
 
   private mergeOrUpdate(data: NotificationProgressEvent[], message: NotificationProgressEvent) {
+    // Sometimes we can receive 2 started on long-running scans, so better to just treat as a merge then.
     const index = data.findIndex(m => m.name === message.name);
-    // Sometimes we can receive 2 started on long running scans, so better to just treat as a merge then.
     if (index < 0) {
-      data.push(message);
-      this.activeEvents += 1;
-      this.activeEventsSource.next(this.activeEvents);
-      this.cdRef.markForCheck();
-    } else {
-      data[index] = message;
+      return [...data, message];
     }
-    return data;
+    // Replace existing item immutably
+    const newData = [...data];
+    newData[index] = message;
+    return newData;
   }
 
 
@@ -196,13 +146,8 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   }
 
   clearAllErrorOrInfos() {
-    const infoCount = this.infoSource.getValue().length;
-    const errorCount = this.errorSource.getValue().length;
-    this.infoSource.next([]);
-    this.errorSource.next([]);
-    this.activeEvents -= Math.max(infoCount + errorCount, 0);
-    this.activeEventsSource.next(this.activeEvents);
-    this.cdRef.markForCheck();
+    this.infos.set([]);
+    this.errors.set([]);
   }
 
   removeErrorOrInfo(messageEvent: ErrorEvent | InfoEvent, event?: MouseEvent) {
@@ -210,22 +155,16 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-    let data = [];
     if (messageEvent.name === EVENTS.Info) {
-      data = this.infoSource.getValue();
-      data = data.filter(m => m !== messageEvent);
-      this.infoSource.next(data);
+      this.infos.update(data => data.filter(m => m !== messageEvent));
     } else {
-      data = this.errorSource.getValue();
-      data = data.filter(m => m !== messageEvent);
-      this.errorSource.next(data);
+      this.errors.update(data => data.filter(m => m !== messageEvent));
     }
-    this.activeEvents = Math.max(this.activeEvents - 1, 0);
-    this.activeEventsSource.next(this.activeEvents);
-    this.cdRef.markForCheck();
   }
 
   prettyPrintProgress(progress: number) {
     return Math.trunc(progress * 100);
   }
+
+  protected readonly EVENTS = EVENTS;
 }

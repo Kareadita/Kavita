@@ -17,7 +17,6 @@ public class ReadingSessionRepository(DataContext context, IMapper mapper) : IRe
 {
     public async Task<IList<ReadingSessionDto>> GetAllReadingSessionAsync(bool isActiveOnly = true)
     {
-        // TODO: We need more restrictions based on date range
         var query = context.AppUserReadingSession
             .Where(s => !isActiveOnly || s.IsActive);
 

@@ -12,34 +12,28 @@ public interface IPresenceTracker
     Task UserDisconnected(int userId, string connectionId);
     Task<int[]> GetOnlineAdminIds();
     Task<List<string>> GetConnectionsForUser(int userId);
-
 }
 
-internal class ConnectionDetail
+internal sealed record ConnectionDetail
 {
-    public string UserName { get; set; }
-    public List<string> ConnectionIds { get; set; } = [];
-    public bool IsAdmin { get; set; }
+    public required string UserName { get; init; }
+    public List<string> ConnectionIds { get; init; } = [];
+    public bool IsAdmin { get; init; }
 }
 
 /// <summary>
 /// This is a singleton service for tracking what users have a SignalR connection and their difference connectionIds
 /// </summary>
-public class PresenceTracker : IPresenceTracker
+public class PresenceTracker(IUnitOfWork unitOfWork) : IPresenceTracker
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private static readonly Dictionary<int, ConnectionDetail> OnlineUsers = new();
-
-    public PresenceTracker(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
+    private static readonly Dictionary<int, ConnectionDetail> OnlineUsers = [];
 
     public async Task UserConnected(int userId, string connectionId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return;
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+
+        var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user);
         lock (OnlineUsers)
         {
             if (OnlineUsers.TryGetValue(userId, out var detail))
@@ -50,8 +44,8 @@ public class PresenceTracker : IPresenceTracker
             {
                 OnlineUsers.Add(userId, new ConnectionDetail()
                 {
-                    UserName = user.UserName,
-                    ConnectionIds = new List<string>() {connectionId},
+                    UserName = user.UserName!,
+                    ConnectionIds = [connectionId],
                     IsAdmin = isAdmin
                 });
             }
@@ -111,6 +105,6 @@ public class PresenceTracker : IPresenceTracker
             connectionIds = OnlineUsers.GetValueOrDefault(userId)?.ConnectionIds;
         }
 
-        return Task.FromResult(connectionIds ?? new List<string>());
+        return Task.FromResult(connectionIds ?? []);
     }
 }

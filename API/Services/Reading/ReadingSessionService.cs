@@ -67,6 +67,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
         using var scope = _serviceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+        var eventHub = scope.ServiceProvider.GetRequiredService<IEventHub>();
 
         var session = await GetOrCreateSessionAsync(userId, progressDto, context);
 
@@ -76,6 +77,8 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         session.LastModifiedUtc = DateTime.UtcNow;
 
         await context.SaveChangesAsync();
+
+        await eventHub.SendMessageAsync(MessageFactory.ReadingSessionUpdate, MessageFactory.ReadingSessionUpdateEvent(userId, session.Id));
     }
 
     private async Task<AppUserReadingSession> GetOrCreateSessionAsync(int userId, ProgressDto dto, DataContext context)
@@ -271,9 +274,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         }
     }
 
-    private async Task<List<int>> CloseSessionAsync(
-        AppUserReadingSession session,
-        IEventHub eventHub)
+    private async Task<List<int>> CloseSessionAsync(AppUserReadingSession session, IEventHub eventHub)
     {
         var lastActivity = session.ActivityData
             .Where(ad => ad.EndTime.HasValue)
@@ -310,9 +311,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         }
 
         // Notify clients
-        await eventHub.SendMessageAsync(
-            MessageFactory.SessionClose,
-            MessageFactory.SessionCloseEvent(session.Id));
+        await eventHub.SendMessageAsync(MessageFactory.ReadingSessionClose, MessageFactory.ReadingSessionCloseEvent(session.AppUserId, session.Id));
 
         _logger.LogDebug(
             "Closed session {SessionId} for user {UserId}, {ActivityCount} activities, {CompletedCount} completed chapters",

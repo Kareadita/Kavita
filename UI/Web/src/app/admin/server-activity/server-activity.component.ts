@@ -27,7 +27,7 @@ export class ServerActivityComponent implements OnInit {
 
   constructor() {
     this.messageHub.messages$.pipe(
-      filter(event => event.event === EVENTS.UserProgressUpdate || event.event === EVENTS.SessionClose),
+      filter(event => event.event === EVENTS.UserProgressUpdate || event.event === EVENTS.ReadingSessionClose || event.event === EVENTS.ReadingSessionUpdate),
       debounceTime(100),
       takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
         this.loadData();

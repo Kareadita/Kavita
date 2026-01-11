@@ -200,9 +200,11 @@
           }
 
           @if (user) {
-            <div class="nav-item me-2">
-              <app-nav-events-toggle [user]="user" />
-            </div>
+            @if (accountService.isAdmin()) {
+              <div class="nav-item me-2">
+                <app-nav-events-toggle [user]="user" />
+              </div>
+            }
 
             @if((breakpoint$ | async)! <= Breakpoint.Mobile) {
               <button class="btn btn-outline-secondary primary-text" (click)="openLinkSelectionMenu()">

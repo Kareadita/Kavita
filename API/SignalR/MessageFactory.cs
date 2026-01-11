@@ -164,9 +164,13 @@ public static class MessageFactory
     /// </summary>
     public const string AnnotationUpdate = "AnnotationUpdate";
     /// <summary>
-    /// A Session is closing
+    /// A Reading Session is starting or updating
     /// </summary>
-    public const string SessionClose = "SessionClose";
+    public const string ReadingSessionUpdate = "ReadingSessionUpdate";
+    /// <summary>
+    /// A Reading Session is closing
+    /// </summary>
+    public const string ReadingSessionClose = "ReadingSessionClose";
     /// <summary>
     /// Auth key has been rotated, created
     /// </summary>
@@ -736,14 +740,28 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage SessionCloseEvent(int sessionId)
+    public static SignalRMessage ReadingSessionUpdateEvent(int userId, int sessionId)
     {
         return new SignalRMessage()
         {
-            Name = SessionClose,
+            Name = ReadingSessionUpdate,
             Body = new
             {
-                SessionId = sessionId
+                SessionId = sessionId,
+                UserId = userId,
+            }
+        };
+    }
+
+    public static SignalRMessage ReadingSessionCloseEvent(int userId, int sessionId)
+    {
+        return new SignalRMessage()
+        {
+            Name = ReadingSessionClose,
+            Body = new
+            {
+                SessionId = sessionId,
+                UserId = userId,
             }
         };
     }
