@@ -18,6 +18,9 @@ public static partial class KoreaderHelper
     [GeneratedRegex(@"DocFragment\[(\d+)\]")]
     private static partial Regex DocFragmentRegex();
 
+    [GeneratedRegex(@"\d+")]
+    private static partial Regex JustNumber();
+
     /// <summary>
     /// Hashes the document according to a custom Koreader hashing algorithm.
     /// Look at the util.partialMD5 method in the attached link.
@@ -76,11 +79,17 @@ public static partial class KoreaderHelper
     public static void UpdateProgressDto(ProgressDto progress, string koreaderPosition)
     {
         // #_doc_fragment26
-        string docNumber;
         if (koreaderPosition.StartsWith("#_doc_fragment"))
         {
-            docNumber = koreaderPosition.Replace("#_doc_fragment", string.Empty);
+            var docNumber = koreaderPosition.Replace("#_doc_fragment", string.Empty);
             progress.PageNum = int.Parse(docNumber) - 1;
+            return;
+        }
+
+        // Check if koreaderPosition is just a number, this indicates an Archive
+        if (JustNumber().IsMatch(koreaderPosition))
+        {
+            progress.PageNum = int.Parse(koreaderPosition) - 1;
             return;
         }
 
@@ -116,7 +125,11 @@ public static partial class KoreaderHelper
 
     private static int GetPageNumber(string[] path, int offset = 2)
     {
+        if (offset >= path.Length) return 0;
+
         var match = DocFragmentRegex().Match(path[offset]);
+        if (!match.Success) return 0;
+
         return int.Parse(match.Groups[1].Value) - 1;
     }
 
@@ -132,11 +145,11 @@ public static partial class KoreaderHelper
     /// <returns></returns>
     public static string GetKoreaderPosition(ProgressDto progressDto)
     {
-
         var targetPath = !string.IsNullOrEmpty(progressDto.BookScrollId)
             ? progressDto.BookScrollId.Replace("//body/", string.Empty, StringComparison.InvariantCultureIgnoreCase)
             : "p[1]"; // Default to first paragraph if unknown
 
-        return $"/body/DocFragment[{progressDto.PageNum}]/body/{targetPath}";
+        // Add 1 back to match KOReader's 1-based indexing
+        return $"/body/DocFragment[{progressDto.PageNum + 1}]/body/{targetPath}";
     }
 }

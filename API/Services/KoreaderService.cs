@@ -60,14 +60,14 @@ public class KoreaderService : IKoreaderService
                 ChapterId = file.ChapterId,
                 VolumeId = chapterDto.VolumeId,
                 SeriesId = volumeDto.SeriesId,
-                PageNum = int.Parse(koreaderBookDto.progress)
             };
         }
         // Update the bookScrollId if possible
         var reportedProgress = koreaderBookDto.progress;
         KoreaderHelper.UpdateProgressDto(userProgressDto, koreaderBookDto.progress);
-        _logger.LogDebug("Converting KOReader progress from {ReportedProgress} to {ScopedProgress}",
-            reportedProgress.Sanitize(), userProgressDto.BookScrollId?.Sanitize());
+
+        _logger.LogDebug("Converted KOReader progress from {ProgressEncoding} to Page {PageNum} with ScrollId: {ScrollId}", reportedProgress.Sanitize(),
+            userProgressDto.PageNum, userProgressDto.BookScrollId?.Sanitize() ?? string.Empty);
 
         // Normal saving from kavita will be //body/h2[1]
         await _readerService.SaveReadingProgress(userProgressDto, userId);
@@ -93,15 +93,19 @@ public class KoreaderService : IKoreaderService
         if (!string.IsNullOrEmpty(originalScrollId))
         {
             koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
-            _logger.LogDebug("Converting KOReader progress from {KavitaProgress} to {KOReaderProgress}", originalScrollId.Sanitize(),
-                progressDto?.BookScrollId?.Sanitize() ?? string.Empty);
         }
 
-        return new KoreaderBookDtoBuilder(bookHash)
+        var response = new KoreaderBookDtoBuilder(bookHash)
             .WithProgress(koreaderProgress)
             .WithPercentage(progressDto?.PageNum, file.Pages)
             .WithDeviceId(settingsDto.InstallId, userId)
             .WithTimestamp(progressDto?.LastModifiedUtc)
             .Build();
+
+        _logger.LogDebug("Responding to KOReader with Page {PageNum}, Scroll Id: {ScrollId}, and Progress: {Progress}",
+            progressDto?.PageNum, response.progress.Sanitize(), response.percentage);
+
+
+        return response;
     }
 }

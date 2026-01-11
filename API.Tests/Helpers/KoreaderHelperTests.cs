@@ -38,18 +38,19 @@ public class KoreaderHelperTests
     }
 
     [Theory]
-    [InlineData("/body/DocFragment[3]/body/h1/text().0", 2, "h1")]
+    [InlineData("/body/DocFragment[3]/body/h1/text().0", 2, "//body/h1")]
     [InlineData("/body/DocFragment[10].0", 9, null)]
-    public void GetEpubPositionDto2(string koreaderPosition, int page, string? endingTag)
+    [InlineData("/body/DocFragment[9]/body/p[52]/text().248", 8, "//body/p[52]")]
+    public void GetEpubPositionDto_UserSubmitted(string koreaderPosition, int page, string? convertedXpath)
     {
         var expected = EmptyProgressDto();
         expected.PageNum = page;
         var actual = EmptyProgressDto();
 
         KoreaderHelper.UpdateProgressDto(actual, koreaderPosition);
-        if (!string.IsNullOrEmpty(endingTag))
+        if (!string.IsNullOrEmpty(convertedXpath))
         {
-            Assert.EndsWith(endingTag, actual.BookScrollId);
+            Assert.Equal(convertedXpath, actual.BookScrollId);
         }
         Assert.Equal(expected.PageNum, actual.PageNum);
     }
