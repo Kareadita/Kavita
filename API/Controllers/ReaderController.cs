@@ -542,7 +542,8 @@ public class ReaderController : BaseApiController
             PageNum = 0,
             ChapterId = chapterId,
             VolumeId = 0,
-            SeriesId = 0
+            SeriesId = 0,
+            LibraryId = 0
         });
         return Ok(progress);
     }
