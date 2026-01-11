@@ -98,10 +98,15 @@ public class UsersController : BaseApiController
     [Authorize]
     public async Task<ActionResult<bool>> HasProfileShared(int userId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
         return Ok(user?.UserPreferences?.SocialPreferences?.ShareProfile ?? false);
     }
 
+    /// <summary>
+    /// Is there any reading progress on this library
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [HttpGet("has-reading-progress")]
     public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
     {
@@ -110,6 +115,11 @@ public class UsersController : BaseApiController
         return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, UserId));
     }
 
+    /// <summary>
+    /// Does the user have access to this library
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [HttpGet("has-library-access")]
     public async Task< ActionResult<bool>> HasLibraryAccess(int libraryId)
     {
