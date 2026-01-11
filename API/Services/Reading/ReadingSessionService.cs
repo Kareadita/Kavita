@@ -248,15 +248,35 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
             _logger.LogInformation("Closing {Count} expired reading sessions", expiredSessions.Count);
 
+            // Collect all chapter IDs to remove from cache
+            var chapterIdsToInvalidate = expiredSessions
+                .SelectMany(s => s.ActivityData.Select(a => a.ChapterId))
+                .Distinct()
+                .ToList();
+
             var allCompletedChapterIds = new List<int>();
 
             foreach (var session in expiredSessions)
             {
-                var completedIds = await CloseSessionAsync(session, eventHub);
+                var completedIds = CloseSession(session);
                 allCompletedChapterIds.AddRange(completedIds);
             }
 
             await context.SaveChangesAsync();
+
+            // Batch cache invalidation after all sync work
+            foreach (var chapterId in chapterIdsToInvalidate)
+            {
+                await _cache.RemoveAsync(GetChapterFormatCacheKey(chapterId));
+            }
+
+            // Batch notify after save
+            foreach (var session in expiredSessions)
+            {
+                await eventHub.SendMessageAsync(
+                    MessageFactory.ReadingSessionClose,
+                    MessageFactory.ReadingSessionCloseEvent(session.AppUserId, session.Id));
+            }
 
             // Batch update total reads
             if (allCompletedChapterIds.Count > 0)
@@ -274,7 +294,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         }
     }
 
-    private async Task<List<int>> CloseSessionAsync(AppUserReadingSession session, IEventHub eventHub)
+    private List<int> CloseSession(AppUserReadingSession session)
     {
         var lastActivity = session.ActivityData
             .Where(ad => ad.EndTime.HasValue)
@@ -283,7 +303,6 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         var endTime = lastActivity?.EndTime ?? session.LastModified;
         var endTimeUtc = lastActivity?.EndTimeUtc ?? session.LastModifiedUtc;
 
-        // Handle midnight rollover
         if (session.StartTime.Date < DateTime.Today)
         {
             var endOfStartDay = session.StartTime.Date.AddDays(1).AddTicks(-1);
@@ -297,21 +316,11 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         session.LastModified = DateTime.Now;
         session.LastModifiedUtc = DateTime.UtcNow;
 
-        // Collect completed chapters
         var completedChapterIds = session.ActivityData
             .Where(d => d.TotalPages > 0 && d.EndPage >= d.TotalPages)
             .Select(d => d.ChapterId)
             .Distinct()
             .ToList();
-
-        // Clear format caches
-        foreach (var activity in session.ActivityData)
-        {
-            await _cache.RemoveAsync(GetChapterFormatCacheKey(activity.ChapterId));
-        }
-
-        // Notify clients
-        await eventHub.SendMessageAsync(MessageFactory.ReadingSessionClose, MessageFactory.ReadingSessionCloseEvent(session.AppUserId, session.Id));
 
         _logger.LogDebug(
             "Closed session {SessionId} for user {UserId}, {ActivityCount} activities, {CompletedCount} completed chapters",
