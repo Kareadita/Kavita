@@ -18,7 +18,7 @@ public static partial class KoreaderHelper
     [GeneratedRegex(@"DocFragment\[(\d+)\]")]
     private static partial Regex DocFragmentRegex();
 
-    [GeneratedRegex(@"\d+")]
+    [GeneratedRegex(@"^\d+$")]
     private static partial Regex JustNumber();
 
     /// <summary>
