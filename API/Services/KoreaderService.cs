@@ -89,7 +89,8 @@ public class KoreaderService : IKoreaderService
         var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
         var originalScrollId = progressDto?.BookScrollId;
 
-        var koreaderProgress = $"{progressDto?.PageNum ?? 0}"; // Non-epubs will just encode as a simple number
+        // Non-epubs use the pageNum as the progress. KOReader is 1-index based
+        var koreaderProgress = $"{progressDto?.PageNum + 1 ?? 0}";
         if (!string.IsNullOrEmpty(originalScrollId))
         {
             koreaderProgress = KoreaderHelper.GetKoreaderPosition(progressDto);
