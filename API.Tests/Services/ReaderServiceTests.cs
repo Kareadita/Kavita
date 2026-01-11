@@ -126,6 +126,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             SeriesId = 1,
             VolumeId = 1,
+            LibraryId = 1,
             BookScrollId = null
         }, 1);
 
@@ -169,6 +170,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             SeriesId = 1,
             VolumeId = 1,
+            LibraryId = 1,
             BookScrollId = null
         }, 1);
 
@@ -181,6 +183,7 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             SeriesId = 1,
             VolumeId = 1,
+            LibraryId = 1,
             BookScrollId = "/h1/"
         }, 1));
 
@@ -1644,7 +1647,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 2,
             ChapterId = 1,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         var nextChapter = await readerService.GetContinuePoint(1, 1);
 
@@ -1690,7 +1694,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 2,
             ChapterId = 1,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         var nextChapter = await readerService.GetContinuePoint(1, 1);
 
@@ -1743,21 +1748,24 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
             SeriesId = 1,
-            VolumeId = 2
+            VolumeId = 2,
+            LibraryId = 1,
         }, 1);
 
         await context.SaveChangesAsync();
@@ -1827,7 +1835,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 6, // Chapter 0 volume 1 id
             SeriesId = 1,
-            VolumeId = 2 // Volume 1 id
+            VolumeId = 2, // Volume 1 id
+            LibraryId = 1,
         }, 1);
 
 
@@ -1836,7 +1845,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 7, // Chapter 21 volume 2 id
             SeriesId = 1,
-            VolumeId = 3 // Volume 2 id
+            VolumeId = 3, // Volume 2 id
+            LibraryId = 1,
         }, 1);
 
         await context.SaveChangesAsync();
@@ -1929,21 +1939,24 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
             SeriesId = 1,
-            VolumeId = 2
+            VolumeId = 2,
+            LibraryId = 1,
         }, 1);
 
         await context.SaveChangesAsync();
@@ -2047,7 +2060,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
                 PageNum = 0,
                 ChapterId = chapt.Id,
                 SeriesId = 1,
-                VolumeId = 1
+                VolumeId = 1,
+                LibraryId = 1,
             }, 1);
         }
         await context.SaveChangesAsync();
@@ -2106,14 +2120,16 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 0,
             ChapterId = vol.Chapters.ElementAt(1).Id,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 0,
             ChapterId = vol.Chapters.ElementAt(2).Id,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await context.SaveChangesAsync();
 
@@ -2162,21 +2178,24 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
             SeriesId = 1,
-            VolumeId = 2
+            VolumeId = 2,
+            LibraryId = 1,
         }, 1);
 
         await context.SaveChangesAsync();
@@ -2274,21 +2293,24 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
 
         await context.SaveChangesAsync();
@@ -2474,21 +2496,24 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
             SeriesId = 1,
-            VolumeId = 2
+            VolumeId = 2,
+            LibraryId = 1,
         }, 1);
 
         await readerService.SaveReadingProgress(new ProgressDto()
@@ -2496,7 +2521,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 4,
             SeriesId = 1,
-            VolumeId = 2
+            VolumeId = 2,
+            LibraryId = 1,
         }, 1);
 
         await readerService.SaveReadingProgress(new ProgressDto()
@@ -2504,7 +2530,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 5,
             SeriesId = 1,
-            VolumeId = 2
+            VolumeId = 2,
+            LibraryId = 1,
         }, 1);
 
         // Chapter 91 has partial progress, hence it should resume there
@@ -2513,7 +2540,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 6,
             SeriesId = 1,
-            VolumeId = 2
+            VolumeId = 2,
+            LibraryId = 1,
         }, 1);
 
         // Special is fully read
@@ -2522,7 +2550,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 7,
             SeriesId = 1,
-            VolumeId = 2
+            VolumeId = 2,
+            LibraryId = 1,
         }, 1);
 
         await context.SaveChangesAsync();
@@ -2575,7 +2604,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
 
         await context.SaveChangesAsync();
@@ -2591,7 +2621,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await context.SaveChangesAsync();
 
@@ -2606,7 +2637,8 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
             PageNum = 1,
             ChapterId = 3,
             SeriesId = 1,
-            VolumeId = 1
+            VolumeId = 1,
+            LibraryId = 1,
         }, 1);
         await context.SaveChangesAsync();
 
