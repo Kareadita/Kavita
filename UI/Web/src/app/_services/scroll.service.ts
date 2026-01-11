@@ -1,4 +1,4 @@
-import {ElementRef, inject, Injectable, signal} from '@angular/core';
+import {ElementRef, inject, Injectable} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
 import {filter, ReplaySubject} from 'rxjs';
 
@@ -42,9 +42,6 @@ export class ScrollService {
 
   private activeScrollHandlers = new Map<HTMLElement, ScrollHandler>();
 
-  private readonly _lock = signal(false);
-  public readonly isScrollingLock = this._lock.asReadonly();
-
   constructor() {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -70,21 +67,6 @@ export class ScrollService {
       || document.body.scrollLeft || 0);
   }
 
-  /**
-   * Returns true if the log is active
-   * @private
-   */
-  private checkLock(): boolean {
-
-    return false; // NOTE: We don't need locking anymore - it bugs out
-
-    if (!this._lock()) return false;
-
-    console.warn("[ScrollService] tried to scroll while locked, timings should be checked")
-
-    return true;
-  }
-
   private intersectionObserver(element: HTMLElement, callback?: () => void) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -99,9 +81,6 @@ export class ScrollService {
   }
 
   scrollIntoView(element: HTMLElement, options?: ScrollToOptions, callback?: () => void) {
-    if (this.checkLock()) return;
-    this._lock.set(true);
-
     const timeoutId = window.setTimeout(() => {
       console.warn('Intersection observer timed out - forcing callback execution');
       this.executeCallback(element, callback)
@@ -130,9 +109,6 @@ export class ScrollService {
 
   scrollTo(position: number, element: HTMLElement, behavior: 'auto' | 'smooth' = 'smooth',
            onComplete?: () => void, options?: ScrollEndOptions) {
-    if (this.checkLock()) return;
-    this._lock.set(true);
-
     element.scrollTo({
       top: position,
       behavior: behavior
@@ -145,9 +121,6 @@ export class ScrollService {
 
   scrollToX(position: number, element: HTMLElement, behavior: 'auto' | 'smooth' = 'auto',
             onComplete?: () => void, options?: ScrollEndOptions) {
-    if (this.checkLock()) return;
-    this._lock.set(true);
-
     element.scrollTo({
       left: position,
       behavior: behavior
@@ -265,8 +238,6 @@ export class ScrollService {
   }
 
   private executeCallback(element: HTMLElement, callback?: () => void): void {
-    this._lock.set(false);
-
     this.clearScrollHandler(element);
 
     if (!callback) return;
@@ -292,7 +263,7 @@ export class ScrollService {
    * Clean up all handlers
    */
   cleanup(): void {
-    this.activeScrollHandlers.forEach((handler, element) => {
+    this.activeScrollHandlers.forEach((_, element) => {
       this.clearScrollHandler(element);
     });
   }
@@ -301,7 +272,6 @@ export class ScrollService {
    * Force unlocking of scroll lock
    */
   unlock() {
-    this._lock.set(false);
     this.cleanup();
   }
 

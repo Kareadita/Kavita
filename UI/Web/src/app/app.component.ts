@@ -102,7 +102,7 @@ export class AppComponent implements OnInit {
     const vh = window.innerHeight * 0.01;
     this.document.documentElement.style.setProperty('--vh', `${vh}px`);
     this.utilityService.activeBreakpointSource.next(this.utilityService.getActiveBreakpoint());
-    this.utilityService.updateUserBreakpoint();
+    this.utilityService.updateActiveBreakpoint();
   }
 
   ngOnInit(): void {

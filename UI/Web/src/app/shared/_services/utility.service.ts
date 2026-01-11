@@ -77,6 +77,7 @@ export class UtilityService {
   public readonly activeBreakpoint$ = this.activeBreakpointSource.asObservable().pipe(debounceTime(60), shareReplay({bufferSize: 1, refCount: true}));
   public readonly activeBreakpointSignal = toSignal(this.activeBreakpointSource);
 
+
   /**
    * The currently active breakpoint, is {@link UserBreakpoint.Never} until the app has loaded
    */
@@ -172,7 +173,7 @@ export class UtilityService {
     return Breakpoint.Desktop;
   }
 
-  updateUserBreakpoint(): void {
+  updateActiveBreakpoint(): void {
      this.activeUserBreakpoint.set(this.getActiveUserBreakpoint());
   }
 

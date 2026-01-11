@@ -188,60 +188,47 @@
           }
         </ul>
 
-          @if((breakpoint$ | async)! > Breakpoint.Tablet) {
-            @if (backToTopNeeded) {
-              <div class="back-to-top">
-                <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()">
-                  <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
-                  <span class="visually-hidden">{{t('scroll-to-top-alt')}}</span>
-                </button>
-              </div>
-            }
+        @if (user) {
+          @if (accountService.isAdmin()) {
+            <div class="nav-item me-2">
+              <app-nav-events-toggle [user]="user" />
+            </div>
           }
 
-          @if (user) {
-            @if (accountService.isAdmin()) {
-              <div class="nav-item me-2">
-                <app-nav-events-toggle [user]="user" />
-              </div>
-            }
+          @if(showMobileView()) {
+            <button class="btn btn-outline-secondary primary-text" (click)="openLinkSelectionMenu()">
+              <app-profile-icon [userId]="user.id" [size]="20" />
+            </button>
+          } @else {
+            <div class="nav-item not-xs-only">
+              <a routerLink="/settings" [fragment]="SettingsTabId.Preferences" class="dark-exempt btn btn-icon" [title]="t('settings')">
+                <i class="fa fa-cogs nav" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('settings')}}</span>
+              </a>
+            </div>
 
-            @if((breakpoint$ | async)! <= Breakpoint.Mobile) {
-              <button class="btn btn-outline-secondary primary-text" (click)="openLinkSelectionMenu()">
-                <app-profile-icon [userId]="user.id" [size]="20" />
+            <div ngbDropdown class="nav-item dropdown d-sm-none d-md-block" display="dynamic" placement="bottom-right">
+              <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
+                <span class="phone-hidden d-xs-inline-block d-sm-inline-block me-2">
+                  <app-profile-icon [userId]="user.id" [size]="20" />
+                </span>
+                <span class="d-none d-xs-none d-sm-none d-md-inline-block fw-bold">{{user.username | sentenceCase}}</span>
               </button>
-            } @else {
-              <div class="nav-item not-xs-only">
-                <a routerLink="/settings" [fragment]="SettingsTabId.Preferences" class="dark-exempt btn btn-icon" [title]="t('settings')">
-                  <i class="fa fa-cogs nav" aria-hidden="true"></i>
-                  <span class="visually-hidden">{{t('settings')}}</span>
-                </a>
-              </div>
-
-              <div ngbDropdown class="nav-item dropdown d-sm-none d-md-block" display="dynamic" placement="bottom-right">
-                <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
-                  <span class="phone-hidden d-xs-inline-block d-sm-inline-block me-2">
-                    <app-profile-icon [userId]="user.id" [size]="20" />
-                  </span>
-                  <span class="d-none d-xs-none d-sm-none d-md-inline-block fw-bold">{{user.username | sentenceCase}}</span>
-                </button>
-                <div ngbDropdownMenu>
-                  <a ngbDropdownItem [routerLink]="profileLink()" [fragment]="'stats-tab'">{{t('my-profile')}}</a>
-                  @for (navItem of navService.navItems; track $index) {
-                    @if (navItem.routerLink) {
-                      <a ngbDropdownItem [routerLink]="navItem.routerLink" [fragment]="navItem.fragment">{{t(navItem.transLocoKey)}}</a>
-                    } @else if (navItem.href) {
-                      <a ngbDropdownItem [href]="navItem.href" rel="noopener noreferrer" target="_blank">{{t(navItem.transLocoKey)}}</a>
-                    } @else if (navItem.click) {
-                      <a ngbDropdownItem (click)="navItem.click()">{{t(navItem.transLocoKey)}}</a>
-                    }
+              <div ngbDropdownMenu>
+                <a ngbDropdownItem [routerLink]="profileLink()" [fragment]="'stats-tab'">{{t('my-profile')}}</a>
+                @for (navItem of navService.navItems; track $index) {
+                  @if (navItem.routerLink) {
+                    <a ngbDropdownItem [routerLink]="navItem.routerLink" [fragment]="navItem.fragment">{{t(navItem.transLocoKey)}}</a>
+                  } @else if (navItem.href) {
+                    <a ngbDropdownItem [href]="navItem.href" rel="noopener noreferrer" target="_blank">{{t(navItem.transLocoKey)}}</a>
+                  } @else if (navItem.click) {
+                    <a ngbDropdownItem (click)="navItem.click()">{{t(navItem.transLocoKey)}}</a>
                   }
-                </div>
+                }
               </div>
-            }
+            </div>
           }
-
-
+        }
       </div>
     </nav>
   }
