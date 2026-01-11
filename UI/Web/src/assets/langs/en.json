@@ -1907,7 +1907,8 @@
         "actions-header": "Actions",
         "pending-tooltip": "This user has not validated their email",
         "identity-provider-oidc-tooltip": "OIDC",
-        "identity-provider-native-tooltip": "Native"
+        "identity-provider-native-tooltip": "Native",
+        "profile-link-alt": "Profile"
     },
 
     "role-localized-pipe": {

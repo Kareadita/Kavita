@@ -99,7 +99,7 @@ public class UsersController : BaseApiController
     public async Task<ActionResult<bool>> HasProfileShared(int userId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        return Ok(user?.UserPreferences.SocialPreferences.ShareProfile);
+        return Ok(user?.UserPreferences?.SocialPreferences?.ShareProfile ?? false);
     }
 
     [HttpGet("has-reading-progress")]

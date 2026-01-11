@@ -31,12 +31,19 @@
         <ngx-datatable-column prop="username" [sortable]="false" [draggable]="false" [resizeable]="false">
           <ng-template ngx-datatable-header-template>{{t('name-header')}}</ng-template>
           <ng-template let-member="row" let-idx="rowIndex" ngx-datatable-cell-template>
+            @if (!member.isPending) {
+              <a class="btn btn-icon me-1" target="_blank" [routerLink]="['/profile', member.id]" [fragment]="'stats-tab'">
+                <i class="fa-solid fa-user" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('profile-link-alt')}}</span>
+              </a>
+            }
             <span class="member-name" [id]="'member-name--' + idx" [ngClass]="{'highlight': member.username === loggedInUsername}">
               {{member.username | titlecase}}
             </span>
             @if (member.isPending) {
               <span class="badge bg-secondary text-dark ms-1 pending-badge" [ngbTooltip]="t('pending-tooltip')">{{t('pending-title')}}</span>
             }
+
           </ng-template>
         </ngx-datatable-column>
 

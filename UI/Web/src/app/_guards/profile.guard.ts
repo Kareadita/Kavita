@@ -21,6 +21,7 @@ export const profileGuard: CanActivateFn = (route, state) => {
   // Otherwise check if that user has their account shared
   return memberService.hasProfileShared(userId).pipe(
     tap(hasAccess => {
+      console.log('hasAccess', hasAccess);
       if (!hasAccess) {
         toastr.info(translate('toasts.profile-unauthorized'));
       }

@@ -10,7 +10,7 @@ import {ConfirmService} from 'src/app/shared/confirm.service';
 import {MessageHubService} from 'src/app/_services/message-hub.service';
 import {InviteUserComponent} from '../invite-user/invite-user.component';
 import {EditUserComponent} from '../edit-user/edit-user.component';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
 import {AsyncPipe, NgClass, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {TranslocoModule, TranslocoService} from "@jsverse/transloco";
@@ -42,7 +42,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, TranslocoModule, DefaultDatePipe, NgClass,
     DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, TimeAgoPipe, SentenceCasePipe, UtcToLocalDatePipe,
-    RoleLocalizedPipe, ImageComponent, ResponsiveTableComponent, NgTemplateOutlet, DatatableComponent, DataTableColumnDirective, DataTableColumnCellDirective, DataTableColumnHeaderDirective]
+    RoleLocalizedPipe, ImageComponent, ResponsiveTableComponent, NgTemplateOutlet, DatatableComponent, DataTableColumnDirective, DataTableColumnCellDirective, DataTableColumnHeaderDirective, RouterLink]
 })
 export class ManageUsersComponent implements OnInit {
 
