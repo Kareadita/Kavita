@@ -93,7 +93,7 @@
 
       <ng-template #noActivityTooltip let-item="item">
         <div class="activity-tooltip">
-          {{t('no-activity-tooltip', {date: item.date | ordinalDate})}}
+          {{t('no-activity-tooltip', {date: item.date | date:'MMMM d, yyyy'})}}
         </div>
       </ng-template>
 
