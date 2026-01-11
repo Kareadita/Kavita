@@ -242,6 +242,7 @@ public class ArchiveService : IArchiveService
                     var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
 
                     var entryName = FindCoverImageFilename(archivePath, entryNames);
+                    if (entryName == null) return string.Empty;
                     var entry = archive.Entries.Single(e => e.Key == entryName);
 
                     using var stream = entry.OpenEntryStream();
