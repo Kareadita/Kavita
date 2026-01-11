@@ -67,6 +67,7 @@ public class KoreaderService : IKoreaderService
                 LibraryId = seriesDto.LibraryId
             };
         }
+
         // Update the bookScrollId if possible
         var reportedProgress = koreaderBookDto.progress;
         KoreaderHelper.UpdateProgressDto(userProgressDto, koreaderBookDto.progress);

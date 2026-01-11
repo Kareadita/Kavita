@@ -529,7 +529,8 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId)
     {
-        var series = await _context.Series.Where(x => x.Id == seriesId)
+        var series = await _context.Series
+            .Where(x => x.Id == seriesId)
             .ProjectToWithProgress<Series, SeriesDto>(_mapper, userId)
             .SingleOrDefaultAsync();
 

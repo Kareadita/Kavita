@@ -1,20 +1,14 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace API.DTOs.Progress;
 #nullable enable
 
 public sealed record ProgressDto
 {
-    [Required]
     public required int VolumeId { get; set; }
-    [Required]
     public required int ChapterId { get; set; }
-    [Required]
     public required int PageNum { get; set; }
-    [Required]
     public required int SeriesId { get; set; }
-    [Required]
     public required int LibraryId { get; set; }
     /// <summary>
     /// For EPUB reader, this can be an optional string of the id of a part marker, to help resume reading position
