@@ -10,7 +10,7 @@
   // Remove featured image on mobile, show on md+
   &.has-featured {
     // Mobile: stack vertically or hide image
-    @media (max-width: 767.98px) {
+    @media (max-width: 800px) {
       .featured-image {
         display: none;
       }
