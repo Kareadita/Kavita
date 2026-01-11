@@ -15,16 +15,18 @@ import {AccountService} from 'src/app/_services/account.service';
 import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
-import {AsyncPipe, NgClass, NgStyle} from '@angular/common';
+import {NgClass, NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
+import {RouterLink} from "@angular/router";
+import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
 
 @Component({
   selector: 'app-nav-events-toggle',
   templateUrl: './events-widget.component.html',
   styleUrls: ['./events-widget.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, NgbPopover, NgStyle, AsyncPipe, SentenceCasePipe, TranslocoDirective]
+  imports: [NgClass, NgbPopover, NgStyle, SentenceCasePipe, TranslocoDirective, RouterLink]
 })
 export class EventsWidgetComponent implements OnInit {
   public readonly downloadService = inject(DownloadService);
@@ -41,9 +43,13 @@ export class EventsWidgetComponent implements OnInit {
   readonly singleUpdates = signal<NotificationProgressEvent[]>([]);
   readonly errors = signal<ErrorEvent[]>([]);
   readonly infos = signal<InfoEvent[]>([]);
+  readonly activeReadingSessions = signal<Set<number>>(new Set());
 
   private updateNotificationModalRef: NgbModalRef | null = null;
 
+  /**
+   * Does not include active reading sessions
+   */
   readonly activeEvents = computed(() => {
     return this.progressEvents().length
       + this.singleUpdates().length
@@ -59,7 +65,7 @@ export class EventsWidgetComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<NotificationProgressEvent>) => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<any>) => {
       if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
       } else if (event.event === EVENTS.Error) {
@@ -69,7 +75,14 @@ export class EventsWidgetComponent implements OnInit {
       } else if (event.event === EVENTS.UpdateAvailable) {
         this.handleUpdateAvailableClick(event.payload);
       } else if (event.event === EVENTS.ReadingSessionUpdate) {
-        // Handle reading session update
+        const data = event.payload as ReadingSessionUpdateEvent;
+        this.activeReadingSessions.update(set => new Set([...set, data.sessionId]));
+      } else if (event.event === EVENTS.ReadingSessionClose) {
+        this.activeReadingSessions.update(set => {
+          const newSet = new Set(set);
+          newSet.delete(event.payload.sessionId);
+          return newSet;
+        });
       }
     });
   }

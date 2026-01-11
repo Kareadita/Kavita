@@ -1,13 +1,15 @@
 <ng-container *transloco="let t; prefix: 'events-widget'">
 
+  @let readingSessionCount = activeReadingSessions().size;
+
   <button type="button" class="btn btn-icon"
           [ngbPopover]="popContent" [title]="t('title-alt')"
           placement="bottom" [popoverClass]="'nav-events'"
           [autoClose]="'outside'">
 
-    @if (onlineUsers().length > 1) {
-      <span class="me-2" [ngClass]="{'colored': activeEvents() > 0 || activeDownloads().length > 0 || updateAvailable()}">
-        {{onlineUsers().length}}
+    @if (readingSessionCount > 1) {
+      <span class="me-2" [ngClass]="{'colored': activeEvents() > 0 || activeDownloads().length > 0 || updateAvailable() || readingSessionCount > 0}">
+        {{readingSessionCount}}
       </span>
     }
 
@@ -137,7 +139,13 @@
         </li>
       }
 
-      @if (activeDownloads().length === 0 && activeEvents() === 0) {
+      @if (readingSessionCount > 0) {
+        <li class="list-group-item dark-menu-item">
+          <a [routerLink]="['settings']" [fragment]="'admin-activity'">{{t('reading-now', {num: readingSessionCount})}}</a>
+        </li>
+      }
+
+      @if (activeDownloads().length === 0 && activeEvents() === 0 && readingSessionCount === 0) {
         <li class="list-group-item dark-menu-item">{{t('no-data')}</li>
       }
     </ul>
