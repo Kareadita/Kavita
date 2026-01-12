@@ -18,6 +18,7 @@ public class AppUserReadingHistory
     /// JSON Column
     /// </summary>
     public DailyReadingDataDto Data { get; set; }
+
     /// <summary>
     /// JSON Column
     /// </summary>
