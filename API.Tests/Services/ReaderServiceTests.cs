@@ -21,6 +21,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
+using YamlDotNet.Core;
 
 namespace API.Tests.Services;
 
@@ -1894,6 +1895,57 @@ public class ReaderServiceTests(ITestOutputHelper testOutputHelper) : AbstractDb
         var nextChapter = await readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1", nextChapter.Range);
+    }
+
+    [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstVolume_WhenHasSpecial_LightNovel()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var readerService = Setup(unitOfWork);
+
+        var library = new LibraryBuilder("Test Lib", LibraryType.LightNovel).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
+        var series = new SeriesBuilder("Test")
+            // Loose chapters
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapterNumber).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapterNumber).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("12")
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapterNumber).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("99.9")
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                    .WithSortOrder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapterNumber).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.SpecialVolume)
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter, "Short Stories").WithIsSpecial(true)
+                    .WithSortOrder(0).WithPages(1).Build())
+                .Build())
+            .WithLibraryId(library.Id)
+            .Build();
+
+
+        context.Series.Add(series);
+
+        context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await context.SaveChangesAsync();
+
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var volume = await context.Volume.FirstOrDefaultAsync(v => v.Id == nextChapter.VolumeId);
+
+        Assert.Equal(1f, volume.MinNumber);
     }
 
     [Fact]

@@ -537,19 +537,12 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     /// <returns></returns>
     public async Task<ChapterDto> GetContinuePoint(int seriesId, int userId)
     {
-        var hasProgress = await unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId);
-        if (!hasProgress)
-        {
-            // Get first chapter only
-            return await unitOfWork.ChapterRepository.GetFirstChapterForSeriesAsync(seriesId, userId);
-        }
+        // Since the first chapter has progress already on it, we can check if there is any progress and if not, return that chapter
+        var firstChapter = await unitOfWork.ChapterRepository.GetFirstChapterForSeriesAsync(seriesId, userId);
+        if (firstChapter is { PagesRead: 0 }) return firstChapter;
 
         var currentlyReading = await unitOfWork.ChapterRepository.GetCurrentlyReadingChapterAsync(seriesId, userId);
-
-        if (currentlyReading != null)
-        {
-            return currentlyReading;
-        }
+        if (currentlyReading != null) return currentlyReading;
 
         var volumes = (await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId, VolumeIncludes.Files)).ToList();
 

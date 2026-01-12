@@ -12,7 +12,7 @@ namespace API.Services.Tasks.Scanner.Parser;
 public static partial class Parser
 {
     // NOTE: If you change this, don't forget to change in the UI (see Series Detail)
-    public const string DefaultChapter = "-100000"; // -2147483648
+    public const string DefaultChapter = "-100000";
     public const string LooseLeafVolume = "-100000";
     public const int DefaultChapterNumber = -100_000;
     public const int LooseLeafVolumeNumber = -100_000;
