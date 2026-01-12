@@ -49,19 +49,19 @@ public class ReadingHistoryService : IReadingHistoryService
 
     private async Task<List<int>> GetUsersPendingAggregation(DateTime start, DateTime end, DateTime reportDate)
     {
-        var activeUserIds = await _context.AppUserReadingSession
+        var needAggregationUserIds = await _context.AppUserReadingSession
             .Where(s => s.StartTime >= start && s.StartTime <= end)
             .Where(s => !s.IsActive && s.EndTime != null)
             .Select(s => s.AppUserId)
             .Distinct()
             .ToListAsync();
 
-        var existingHistoryUserIds = await _context.AppUserReadingHistory
+        var alreadyHasHistoryUserIds = await _context.AppUserReadingHistory
             .Where(h => h.DateUtc == reportDate)
             .Select(h => h.AppUserId)
             .ToListAsync();
 
-        return activeUserIds.Except(existingHistoryUserIds).ToList();
+        return needAggregationUserIds.Except(alreadyHasHistoryUserIds).ToList();
     }
 
     private async Task AggregateUserActivity(int userId, DateTime start, DateTime end, DateTime reportDate)
