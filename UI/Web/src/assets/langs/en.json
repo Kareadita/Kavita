@@ -3024,17 +3024,6 @@
         "saturday-short": "Sat"
     },
 
-    "ordinal-date-pipe": {
-        "ordinalFormat": "{{month}} {{day}}",
-        "ordinal": {
-            "st": "st",
-            "nd": "nd",
-            "rd": "rd",
-            "th": "th"
-        }
-    },
-
-
     "errors": {
         "series-doesnt-exist": "This series no longer exists",
         "collection-invalid-access": "You don't have access to any libraries this tag belongs to or this collection is invalid",
