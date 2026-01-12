@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.DTOs.Progress;
 using API.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,4 +55,29 @@ public class AppUserReadingSessionActivityData
     /// </summary>
     /// <remarks>JSON Column</remarks>
     public List<int> DeviceIds { get; set; } = [];
+
+    public AppUserReadingSessionActivityData()
+    {
+    }
+
+    public AppUserReadingSessionActivityData(ProgressDto dto, int startPage, MangaFormat format)
+    {
+        ChapterId = dto.ChapterId;
+        VolumeId = dto.VolumeId;
+        SeriesId = dto.SeriesId;
+        LibraryId = dto.LibraryId;
+        StartPage = startPage;
+        StartBookScrollId = dto.BookScrollId;
+        EndPage = dto.PageNum;
+        StartTime = DateTime.Now;
+        StartTimeUtc = DateTime.UtcNow;
+        EndTime = null;
+        EndTimeUtc = null;
+        PagesRead = 0;
+        WordsRead = 0;
+        ClientInfo = null;
+        DeviceIds = [];
+        Format = format;
+
+    }
 }

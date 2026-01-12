@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -32,6 +33,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
     private readonly TimeSpan _pollInterval;
     private readonly Timer _cleanupTimer;
     private readonly SemaphoreSlim _cleanupLock = new(1, 1);
+    private static readonly ConcurrentDictionary<int, SemaphoreSlim> UserLocks = new();
     private bool _disposed;
 
     private static readonly HybridCacheEntryOptions ChapterFormatCacheOptions = new()
@@ -63,22 +65,35 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
     public async Task UpdateProgress(int userId, ProgressDto progressDto, ClientInfoData? clientInfo, int? deviceId)
     {
-        _logger.LogDebug("Updating Reading Session for {UserId} on {ChapterId}", userId, progressDto.ChapterId);
+        // We need to lock per-user as progress events can come fast and duplicate, as we are using new DataContext per Background Task
+        var userLock = UserLocks.GetOrAdd(userId, _ => new SemaphoreSlim(1, 1));
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<DataContext>();
-        var eventHub = scope.ServiceProvider.GetRequiredService<IEventHub>();
+        await userLock.WaitAsync();
 
-        var session = await GetOrCreateSessionAsync(userId, progressDto, context);
+        try
+        {
+            _logger.LogDebug("Updating Reading Session for {UserId} on {ChapterId}", userId, progressDto.ChapterId);
 
-        await UpdateActivityDataAsync(session, progressDto, clientInfo, deviceId, scope, context);
+            using var scope = _serviceScopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+            var eventHub = scope.ServiceProvider.GetRequiredService<IEventHub>();
 
-        session.LastModified = DateTime.Now;
-        session.LastModifiedUtc = DateTime.UtcNow;
+            var session = await GetOrCreateSessionAsync(userId, progressDto, context);
 
-        await context.SaveChangesAsync();
+            await UpdateActivityDataAsync(session, progressDto, clientInfo, deviceId, scope, context);
 
-        await eventHub.SendMessageAsync(MessageFactory.ReadingSessionUpdate, MessageFactory.ReadingSessionUpdateEvent(userId, session.Id));
+            session.LastModified = DateTime.Now;
+            session.LastModifiedUtc = DateTime.UtcNow;
+
+            await context.SaveChangesAsync();
+
+            await eventHub.SendMessageAsync(MessageFactory.ReadingSessionUpdate,
+                MessageFactory.ReadingSessionUpdateEvent(userId, session.Id));
+        }
+        finally
+        {
+            userLock.Release();
+        }
     }
 
     private async Task<AppUserReadingSession> GetOrCreateSessionAsync(int userId, ProgressDto dto, DataContext context)
@@ -94,8 +109,10 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
         if (existingSession != null)
         {
+            _logger.LogDebug("Found existing session {SessionId} for user {UserId} for Chapter {ChapterId}", existingSession.Id, userId, dto.ChapterId);
             return existingSession;
         }
+
 
         var chapterFormat = await GetChapterFormatAsync(dto.ChapterId, context);
         var newSession = new AppUserReadingSession
@@ -112,6 +129,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         context.AppUserReadingSession.Add(newSession);
         await context.SaveChangesAsync();
 
+        _logger.LogDebug("Created new session {SessionId} for user {UserId} for Chapter {ChapterId}", newSession.Id, userId, dto.ChapterId);
         return newSession;
     }
 
@@ -128,10 +146,12 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
         if (existingActivity != null)
         {
+            _logger.LogDebug("Updating Session {SessionId} with an existing Activity {ActivityId}", session.Id,  existingActivity.Id);
             await UpdateExistingActivityAsync(existingActivity, progressDto, clientInfo, deviceId, chapterFormat, scope);
         }
         else
         {
+            _logger.LogDebug("Updating Session {SessionId} with a new Activity", session.Id);
             var newActivity = NewActivityData(progressDto, chapterFormat);
             if (clientInfo != null)
             {
@@ -258,6 +278,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
             foreach (var session in expiredSessions)
             {
+                _logger.LogDebug("Closing session {SessionId} for user {UserId}", session.Id, session.AppUserId);
                 var completedIds = CloseSession(session);
                 allCompletedChapterIds.AddRange(completedIds);
             }
@@ -351,25 +372,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
     {
         var startPage = format == MangaFormat.Epub ? dto.PageNum : Math.Max(dto.PageNum - 1, 0);
 
-        return new AppUserReadingSessionActivityData
-        {
-            ChapterId = dto.ChapterId,
-            VolumeId = dto.VolumeId,
-            SeriesId = dto.SeriesId,
-            LibraryId = dto.LibraryId,
-            StartPage = startPage,
-            StartBookScrollId = dto.BookScrollId,
-            EndPage = dto.PageNum,
-            StartTime = DateTime.Now,
-            StartTimeUtc = DateTime.UtcNow,
-            EndTime = null,
-            EndTimeUtc = null,
-            PagesRead = 0,
-            WordsRead = 0,
-            ClientInfo = null,
-            DeviceIds = [],
-            Format = format,
-        };
+        return new AppUserReadingSessionActivityData(dto, startPage, format);
     }
 
     public void Dispose()
@@ -378,6 +381,13 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
         _cleanupTimer.Dispose();
         _cleanupLock.Dispose();
+
+        foreach (var kvp in UserLocks)
+        {
+            kvp.Value.Dispose();
+        }
+        UserLocks.Clear();
+
         _disposed = true;
     }
 
@@ -387,6 +397,13 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
         await _cleanupTimer.DisposeAsync();
         _cleanupLock.Dispose();
+
+        foreach (var kvp in UserLocks)
+        {
+            kvp.Value.Dispose();
+        }
+        UserLocks.Clear();
+
         _disposed = true;
     }
 }
