@@ -55,9 +55,15 @@ public class KoreaderHelperTests
         Assert.Equal(expected.PageNum, actual.PageNum);
     }
 
+    /// <summary>
+    /// KOReader is 1-indexed
+    /// </summary>
+    /// <param name="scrollId"></param>
+    /// <param name="page"></param>
+    /// <param name="koreaderPosition"></param>
     [Theory]
-    [InlineData("//body/p[20]", 5, "/body/DocFragment[5]/body/p[20]")]
-    [InlineData(null, 10, "/body/DocFragment[10]/body/p[1]")] // I've not seen a null/just an "A" from Koreader in testing
+    [InlineData("//body/p[20]", 4, "/body/DocFragment[5]/body/p[20]")]
+    [InlineData(null, 9, "/body/DocFragment[10]/body/p[1]")] // I've not seen a null/just an "A" from Koreader in testing
     public void GetKoreaderPosition(string? scrollId, int page, string koreaderPosition)
     {
         var given = EmptyProgressDto();
