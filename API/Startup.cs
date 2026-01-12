@@ -481,6 +481,7 @@ public class Startup
                     #endregion
 
                     #region v0.8.9
+                    await new MigrateBadKoreaderProgress().RunAsync(dataContext, logger);
                     await new MigrateProgressToReadingSessions().RunAsync(dataContext, logger);
                     await new MigrateMissingCreatedUtcDate().RunAsync(dataContext, logger);
                     await new MigrateTotalReads().RunAsync(dataContext, logger);
@@ -488,7 +489,6 @@ public class Startup
                     await new MigrateMissingAppUserRatingDateColumns().RunAsync(dataContext, logger);
                     await new MigrateFormatToActivityDataV2().RunAsync(dataContext, logger);
                     await new MigrateIncorrectUtcTimes().RunAsync(dataContext, logger);
-                    await new MigrateBadKoreaderProgress().RunAsync(dataContext, logger);
                     #endregion
 
                     #endregion

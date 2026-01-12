@@ -26,8 +26,7 @@ public class MigrateBadKoreaderProgress : ManualMigration
 
         if (badProgressWithLibrary.Count == 0) return;
 
-        logger.LogInformation("[MigrateBadKoreaderProgress] Found {Count} progress records with LibraryId = 0, fixing...",
-            badProgressWithLibrary.Count);
+        logger.LogInformation("Found {Count} progress records with LibraryId = 0", badProgressWithLibrary.Count);
 
         foreach (var item in badProgressWithLibrary)
         {
@@ -36,7 +35,6 @@ public class MigrateBadKoreaderProgress : ManualMigration
 
         await context.SaveChangesAsync();
 
-        logger.LogInformation("[MigrateBadKoreaderProgress] Successfully fixed {Count} progress records",
-            badProgressWithLibrary.Count);
+        logger.LogInformation("Successfully fixed {Count} progress records", badProgressWithLibrary.Count);
     }
 }
