@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.Entities;
 using API.Entities.Enums;
 using API.Services;
 
@@ -13,9 +14,12 @@ public class DailyReadingDataDto
     public int TotalWordsRead { get; set; }
     public int LongestSessionMinutes { get; set; }
 
+    /// <summary>
+    /// Detailed breakdown by series/chapter read that day
+    /// </summary>
     public List<ReadingActivitySnapshotDto> Activities { get; set; } = [];
 
-    // Data may be deleted
+    // Data may be deleted, these are legacy identifiers
     public IList<int?> SeriesIds { get; set; }
     public IList<int?> ChapterIds { get; set; }
 }
@@ -29,20 +33,25 @@ public class ReadingActivitySnapshotDto
     public int? LibraryId { get; set; }
 
     // Denormalized metadata captured at read time
-    public string SeriesName { get; set; } = string.Empty;
+    public string SeriesName { get; set; }
+    public string? LocalizedSeriesName { get; set; }
+    public string LibraryName { get; set; }
     /// <summary>
-    /// This will be the transformed name from <see cref="EntityNamingService"/>
+    /// Maps to <see cref="Chapter.Range"/>
     /// </summary>
-    public string? ChapterTitle { get; set; }
-    public string? LibraryName { get; set; }
+    public string ChapterRange { get; set; }
+    /// <summary>
+    /// Maps to <see cref="Volume.MinNumber"/>
+    /// </summary>
+    public float VolumeNumber { get; set; }
+
     public MangaFormat Format { get; set; }
+    public LibraryType LibraryType { get; set; }
 
     // Reading metrics for this specific activity
     public int PagesRead { get; set; }
     public int WordsRead { get; set; }
     public int MinutesRead { get; set; }
-    public int TotalPages { get; set; }
-    public long TotalWords { get; set; }
 
     public DateTime StartTimeUtc { get; set; }
     public DateTime EndTimeUtc { get; set; }

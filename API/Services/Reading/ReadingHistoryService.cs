@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Progress;
+using API.Entities.Enums;
 using API.Entities.Progress;
-using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -22,6 +22,9 @@ public class ReadingHistoryService : IReadingHistoryService
     private readonly DataContext _context;
     private readonly ILogger<ReadingHistoryService> _logger;
 
+    private sealed record ChapterMetadata(int Id, string? Range, float VolumeNumber, string SeriesName, string? LocalizedSeriesName, string LibraryName, LibraryType LibraryType);
+    private sealed record SeriesMetadata(int Id, string Name, string? LocalizedName, string LibraryName, LibraryType LibraryType);
+
     public ReadingHistoryService(DataContext context, ILogger<ReadingHistoryService> logger)
     {
         _context = context;
@@ -30,117 +33,183 @@ public class ReadingHistoryService : IReadingHistoryService
 
     public async Task AggregateYesterdaysActivity()
     {
-        var yesterday = DateTime.Today.AddDays(-1);
         var yesterdayUtc = DateTime.UtcNow.Date.AddDays(-1);
+        var startUtc = yesterdayUtc;
+        var endUtc = yesterdayUtc.AddDays(1).AddTicks(-1);
 
-        // Define precise boundaries for yesterday
-        var yesterdayStart = yesterday; // 2025-10-22 00:00:00.000
-        var yesterdayEnd = yesterday.AddDays(1).AddTicks(-1); // 2025-10-22 23:59:59.9999999
+        var usersToProcess = await GetUsersPendingAggregation(startUtc, endUtc, yesterdayUtc);
 
-        // First - Validate that all sessions are closed, if not, reschedule ourselves for 10 mins in future
-        if (await _context.AppUserReadingSession.AnyAsync(s => s.IsActive || s.EndTime == null))
+        foreach (var userId in usersToProcess)
         {
-            _logger.LogWarning("Not all reading sessions are closed, rescheduling for 10 minutes");
-            BackgroundJob.Schedule(() => AggregateYesterdaysActivity(), TimeSpan.FromMinutes(10));
-        }
-
-        // Second - Validate we haven't already created a ReadingHistory for yesterday
-        var existingHistoryUserIds = await _context.AppUserReadingHistory
-            .Where(h => h.DateUtc == yesterdayUtc)
-            .Select(h => h.AppUserId)
-            .ToListAsync();
-
-        if (existingHistoryUserIds.Count != 0)
-        {
-            _logger.LogInformation("Reading history already exists for {Count} users on {Date}",
-                existingHistoryUserIds.Count, yesterday);
-            return;
-        }
-
-        // Third - Get all closed sessions from yesterday using precise boundaries
-        var yesterdaySessions = await _context.AppUserReadingSession
-            .Where(s => !s.IsActive && s.EndTime.HasValue)
-            .Where(s => s.StartTime >= yesterdayStart && s.StartTime <= yesterdayEnd)
-            .Include(s => s.ActivityData)
-            .ToListAsync();
-
-        if (yesterdaySessions.Count == 0)
-        {
-            _logger.LogInformation("No reading sessions found for {Date}", yesterday);
-            return;
-        }
-
-        // Fourth - Group by user and aggregate
-        var userGroups = yesterdaySessions.GroupBy(s => s.AppUserId);
-        var userCount = 0;
-
-        foreach (var userGroup in userGroups)
-        {
-            var userId = userGroup.Key;
-            var sessions = userGroup.ToList();
-
-            // Calculate aggregates
-            var totalMinutes = 0;
-            var totalPages = 0;
-            var totalWords = 0;
-            var longestSessionMinutes = 0;
-            var seriesIds = new List<int>();
-            var chapterIds = new List<int>();
-
-            var devicesUsed = sessions
-                .SelectMany(s => s.ActivityData)
-                .Select(a => a.ClientInfo)
-                .Where(c => c != null)
-                .DistinctBy(c => new { c.UserAgent, c.IpAddress, c.ClientType, c.Platform, c.DeviceType })
-                .ToList();
-
-            foreach (var session in sessions)
-            {
-                if (session.EndTime.HasValue)
-                {
-                    var sessionMinutes = (int)(session.EndTime.Value - session.StartTime).TotalMinutes;
-                    totalMinutes += sessionMinutes;
-                    longestSessionMinutes = Math.Max(longestSessionMinutes, sessionMinutes);
-                }
-
-                // Parse ActivityData JSON
-                foreach (var activity in session.ActivityData)
-                {
-                    totalPages += activity.PagesRead;
-                    totalWords += activity.WordsRead;
-                    seriesIds.Add(activity.SeriesId);
-                    chapterIds.Add(activity.ChapterId);
-                }
-            }
-
-            var dailyData = new DailyReadingDataDto
-            {
-                TotalMinutesRead = totalMinutes,
-                TotalPagesRead = totalPages,
-                TotalWordsRead = totalWords,
-                LongestSessionMinutes = longestSessionMinutes,
-                SeriesIds = seriesIds.Distinct().ToList(),
-                ChapterIds = chapterIds.Distinct().ToList()
-            };
-
-            // Create ReadingHistory record
-            var history = new AppUserReadingHistory
-            {
-                AppUserId = userId,
-                DateUtc = yesterdayUtc,
-                Data = dailyData,
-                CreatedUtc = DateTime.UtcNow,
-                ClientInfoUsed = devicesUsed
-            };
-
-            _context.AppUserReadingHistory.Add(history);
-            userCount++;
+            await AggregateUserActivity(userId, startUtc, endUtc, yesterdayUtc);
         }
 
         await _context.SaveChangesAsync();
+    }
 
-        _logger.LogInformation("Aggregated reading history for {UserCount} users on {Date}",
-            userCount, yesterday);
+    private async Task<List<int>> GetUsersPendingAggregation(DateTime start, DateTime end, DateTime reportDate)
+    {
+        var activeUserIds = await _context.AppUserReadingSession
+            .Where(s => s.StartTime >= start && s.StartTime <= end)
+            .Where(s => !s.IsActive && s.EndTime != null)
+            .Select(s => s.AppUserId)
+            .Distinct()
+            .ToListAsync();
 
+        var existingHistoryUserIds = await _context.AppUserReadingHistory
+            .Where(h => h.DateUtc == reportDate)
+            .Select(h => h.AppUserId)
+            .ToListAsync();
+
+        return activeUserIds.Except(existingHistoryUserIds).ToList();
+    }
+
+    private async Task AggregateUserActivity(int userId, DateTime start, DateTime end, DateTime reportDate)
+    {
+        var sessions = await _context.AppUserReadingSession
+            .Include(s => s.ActivityData)
+            .Where(s => s.AppUserId == userId &&
+                        s.StartTime >= start && s.StartTime <= end &&
+                        !s.IsActive && s.EndTime != null)
+            .ToListAsync();
+
+        if (sessions.Count == 0) return;
+
+        var chapterMeta = await GetChapterMetadata(sessions);
+        var seriesMeta = await GetSeriesMetadata(sessions);
+
+        var dailyData = CalculateDailyData(sessions, chapterMeta, seriesMeta);
+
+        _context.AppUserReadingHistory.Add(new AppUserReadingHistory
+        {
+            AppUserId = userId,
+            DateUtc = reportDate,
+            ClientInfoUsed = ExtractClientInfo(sessions),
+            Data = dailyData
+        });
+    }
+
+    private async Task<Dictionary<int, ChapterMetadata>> GetChapterMetadata(List<AppUserReadingSession> sessions)
+    {
+        var ids = sessions.SelectMany(s => s.ActivityData.Select(ad => ad.ChapterId)).Distinct().ToList();
+        return await _context.Chapter
+            .Where(c => ids.Contains(c.Id))
+            .Select(c => new ChapterMetadata(
+                c.Id, c.Range, c.Volume.MinNumber, c.Volume.Series.Name,
+                c.Volume.Series.LocalizedName, c.Volume.Series.Library.Name,
+                c.Volume.Series.Library.Type))
+            .ToDictionaryAsync(c => c.Id);
+    }
+
+    private async Task<Dictionary<int, SeriesMetadata>> GetSeriesMetadata(List<AppUserReadingSession> sessions)
+    {
+        var ids = sessions.SelectMany(s => s.ActivityData.Select(ad => ad.SeriesId)).Distinct().ToList();
+        return await _context.Series
+            .Where(s => ids.Contains(s.Id))
+            .Select(s => new SeriesMetadata(s.Id, s.Name, s.LocalizedName, s.Library.Name, s.Library.Type))
+            .ToDictionaryAsync(s => s.Id);
+    }
+
+    private static DailyReadingDataDto CalculateDailyData(List<AppUserReadingSession> sessions,
+        Dictionary<int, ChapterMetadata> chapterMeta, Dictionary<int, SeriesMetadata> seriesMeta)
+    {
+        var totalMinutes = 0;
+        var totalPages = 0;
+        var totalWords = 0;
+        var longestSession = 0;
+        var seriesIds = new HashSet<int>();
+        var chapterIds = new HashSet<int>();
+        var activities = new List<ReadingActivitySnapshotDto>();
+
+        foreach (var session in sessions)
+        {
+            var duration = (int)(session.EndTime!.Value - session.StartTime).TotalMinutes;
+            totalMinutes += duration;
+            longestSession = Math.Max(longestSession, duration);
+
+            foreach (var activity in session.ActivityData)
+            {
+                totalPages += activity.PagesRead;
+                totalWords += activity.WordsRead;
+                chapterIds.Add(activity.ChapterId);
+                seriesIds.Add(activity.SeriesId);
+
+                activities.Add(MapToSnapshot(activity, chapterMeta, seriesMeta));
+            }
+        }
+
+        return new DailyReadingDataDto
+        {
+            TotalMinutesRead = totalMinutes,
+            TotalPagesRead = totalPages,
+            TotalWordsRead = totalWords,
+            LongestSessionMinutes = longestSession,
+            SeriesIds = seriesIds.Cast<int?>().ToList(),
+            ChapterIds = chapterIds.Cast<int?>().ToList(),
+            Activities = activities
+        };
+    }
+
+    private static ReadingActivitySnapshotDto MapToSnapshot( AppUserReadingSessionActivityData activity,
+        Dictionary<int, ChapterMetadata> chapterLookup, Dictionary<int, SeriesMetadata> seriesLookup)
+    {
+        var minutesRead = activity.EndTimeUtc.HasValue
+            ? (int)(activity.EndTimeUtc.Value - activity.StartTimeUtc).TotalMinutes
+            : 0;
+
+        var snapshot = new ReadingActivitySnapshotDto
+        {
+            ChapterId = activity.ChapterId,
+            VolumeId = activity.VolumeId,
+            SeriesId = activity.SeriesId,
+            LibraryId = activity.LibraryId,
+            Format = activity.Format,
+            PagesRead = activity.PagesRead,
+            WordsRead = activity.WordsRead,
+            MinutesRead = minutesRead,
+            StartTimeUtc = activity.StartTimeUtc,
+            EndTimeUtc = activity.EndTimeUtc ?? activity.StartTimeUtc,
+
+            // Set defaults for required strings
+            SeriesName = string.Empty,
+            LibraryName = string.Empty,
+            ChapterRange = string.Empty
+        };
+
+        if (chapterLookup.TryGetValue(activity.ChapterId, out var c))
+        {
+            snapshot.SeriesName = c.SeriesName;
+            snapshot.LocalizedSeriesName = c.LocalizedSeriesName;
+            snapshot.ChapterRange = c.Range ?? string.Empty;
+            snapshot.VolumeNumber = c.VolumeNumber;
+            snapshot.LibraryName = c.LibraryName;
+            snapshot.LibraryType = c.LibraryType;
+        }
+        else if (seriesLookup.TryGetValue(activity.SeriesId, out var s))
+        {
+            snapshot.SeriesName = s.Name;
+            snapshot.LocalizedSeriesName = s.LocalizedName;
+            snapshot.LibraryName = s.LibraryName;
+            snapshot.LibraryType = s.LibraryType;
+            snapshot.ChapterRange = "[Deleted]";
+        }
+        else
+        {
+            snapshot.SeriesName = "[Deleted Data]";
+            snapshot.ChapterRange = "[Deleted]";
+        }
+
+        return snapshot;
+    }
+
+    private static List<ClientInfoData> ExtractClientInfo(List<AppUserReadingSession> sessions)
+    {
+        return sessions
+            .SelectMany(s => s.ActivityData)
+            .Select(a => a.ClientInfo)
+            .Where(c => c != null)
+            .Select(c => c!)
+            .DistinctBy(c => new { c.UserAgent, c.IpAddress, c.Platform })
+            .ToList();
     }
 }
