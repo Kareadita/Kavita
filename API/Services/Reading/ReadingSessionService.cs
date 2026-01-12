@@ -382,12 +382,6 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         _cleanupTimer.Dispose();
         _cleanupLock.Dispose();
 
-        foreach (var kvp in UserLocks)
-        {
-            kvp.Value.Dispose();
-        }
-        UserLocks.Clear();
-
         _disposed = true;
     }
 
@@ -397,12 +391,6 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
         await _cleanupTimer.DisposeAsync();
         _cleanupLock.Dispose();
-
-        foreach (var kvp in UserLocks)
-        {
-            kvp.Value.Dispose();
-        }
-        UserLocks.Clear();
 
         _disposed = true;
     }
