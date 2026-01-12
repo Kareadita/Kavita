@@ -103,6 +103,10 @@ private readonly IUnitOfWork _unitOfWork;
 
             return AuthenticateResult.Success(ticket);
         }
+        catch (OperationCanceledException)
+        {
+            return AuthenticateResult.Fail("Auth Key authentication failed");
+        }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Auth Key authentication failed");

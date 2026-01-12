@@ -51,6 +51,10 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
                 logger.LogTrace("Device {DeviceId} tracked for user {UserId}", deviceId, userId);
             }
         }
+        catch (OperationCanceledException)
+        {
+            /* Ignore */
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to track device activity");
