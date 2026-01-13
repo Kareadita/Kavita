@@ -141,6 +141,8 @@ public class LibraryController : BaseApiController
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(UserId, "generic-library"));
 
+        await _unitOfWork.CommitAsync();
+
         await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
 
         if (library.FolderWatching)
