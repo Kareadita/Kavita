@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using API.Entities.Enums;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 
@@ -164,6 +165,7 @@ public static partial class KoreaderHelper
     /// fragment_index is the page number for the xhtml files
     /// </remarks>
     /// <param name="progressDto"></param>
+    /// <param name="format">Helps dictate the encoding scheme to use</param>
     /// <returns></returns>
     public static string GetKoreaderPosition(ProgressDto progressDto)
     {
