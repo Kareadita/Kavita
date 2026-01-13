@@ -563,25 +563,24 @@ public class TaskScheduler : ITaskScheduler
     /// <remarks>2 users reported this issue, I cannot reproduce, this is a precaution</remarks>
     public async Task EnsureSideNav()
     {
-        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams);
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams | AppUserIncludes.Libraries);
         var libraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
         var libraryLookup = libraries.ToDictionary(l => l.Id);
-        var allLibIds = libraryLookup.Keys.ToHashSet();
 
         var hasChanges = false;
 
         foreach (var user in users)
         {
-            // Ensure the user is an admin
-            if (!await _unitOfWork.UserRepository.IsUserAdminAsync(user)) continue;
+            var accessibleLibraryIds = user.Libraries?
+                .Select(l => l.Id)
+                .ToHashSet() ?? [];
 
-            // Get library IDs that the user already has in their SideNav
-            var existingLibraryIds = user.SideNavStreams
+            var existingLibraryIds = user.SideNavStreams?
                 .Where(s => s.LibraryId.HasValue)
                 .Select(s => s.LibraryId!.Value)
                 .ToHashSet() ?? [];
 
-            var missingLibIds = allLibIds.Except(existingLibraryIds).ToList();
+            var missingLibIds = accessibleLibraryIds.Except(existingLibraryIds).ToList();
 
             if (missingLibIds.Count == 0) continue;
 
