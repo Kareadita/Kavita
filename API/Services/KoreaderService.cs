@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Koreader;
@@ -94,7 +93,6 @@ public class KoreaderService : IKoreaderService
         if (file == null) throw new KavitaException(await _localizationService.Translate(userId, "file-missing"));
 
         var progressDto = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
-        var originalScrollId = progressDto?.BookScrollId;
 
         // Non-epubs use the pageNum as the progress. KOReader is 1-index based
         var koreaderProgress = $"{progressDto?.PageNum + 1 ?? 0}";
