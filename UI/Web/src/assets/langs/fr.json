@@ -3353,15 +3353,6 @@
         "saturday": "Samedi",
         "saturday-short": "SAM"
     },
-    "ordinal-date-pipe": {
-        "ordinalFormat": "{{month}} {{day}}",
-        "ordinal": {
-            "st": "er",
-            "nd": "d",
-            "rd": "ème",
-            "th": "ème"
-        }
-    },
     "client-device-auth-type-pipe": {
         "unknown": "Inconnu",
         "oidc": "OIDC",

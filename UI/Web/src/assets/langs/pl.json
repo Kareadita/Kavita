@@ -3078,8 +3078,5 @@
     },
     "client-device-type-pipe": {
         "Unknown": "{{common.unknown}}"
-    },
-    "ordinal-date-pipe": {
-        "ordinalFormat": "{{month}} {{day}}"
     }
 }

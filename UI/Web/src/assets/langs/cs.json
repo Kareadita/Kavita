@@ -1208,7 +1208,8 @@
         "actions-header": "Akce",
         "all-libraries": "Všechny knihovny",
         "identity-provider-oidc-tooltip": "OIDC",
-        "identity-provider-native-tooltip": "Nativní"
+        "identity-provider-native-tooltip": "Nativní",
+        "profile-link-alt": "Profil"
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",
@@ -1356,7 +1357,8 @@
         "no-data": "Tady se toho moc neděje",
         "left-to-process": "Zbývá zpracovat: {{leftToProcess}} / {{totalToProcess}}",
         "active-events-title": "Aktivní události:",
-        "download-in-queue": "{{num}} stahování ve frontě"
+        "download-in-queue": "{{num}} stahování ve frontě",
+        "reading-now": "{{num}} právě čte"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",
@@ -1508,7 +1510,8 @@
         "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
         "reading-profile-updated": "Profil čtení aktualizován",
         "reading-profile-promoted": "Profil čtení propagován",
-        "page-offset-label": "Odsazení stránky"
+        "page-offset-label": "Odsazení stránky",
+        "offset-only-double": "Posun stránky lze použít pouze u dvojitého rozvržení"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -2196,14 +2199,16 @@
         "not-classified": "Nezařazeno",
         "download-file-for-extension-header": "Stáhnout zprávu",
         "download-file-for-extension-alt": "Stáhnout soubory Zpráva pro {{extension}}",
-        "total-file-size-title": "Celková velikost souboru:"
+        "total-file-size-title": "Celková velikost souboru:",
+        "no-data": "{{common.no-data}}"
     },
     "publication-status-stats": {
         "visualisation-label": "Vizualizace",
         "title": "Stav publikace",
         "data-table-label": "Datová tabulka",
         "count-header": "Počet",
-        "year-header": "Rok"
+        "year-header": "Rok",
+        "no-data": "{{common.no-data}}"
     },
     "email-history": {
         "template-header": "Šablona",
@@ -2419,7 +2424,8 @@
         "confirm-force-delete-font": "Toto písmo je momentálně používáno. Chcete jej vynutit smazat? Tím se uživatelé vrátí k výchozímu písmu.",
         "font-in-use": "Nelze smazat, protože písmo je používáno jedním nebo více uživateli.",
         "k+-resend-welcome-email-success": "Na vaši e-mailovou adresu Kavita+ byl odeslán e-mail",
-        "confirm-delete-auth-key": "Opravdu chcete tento autentizační klíč smazat?"
+        "confirm-delete-auth-key": "Opravdu chcete tento autentizační klíč smazat?",
+        "profile-unauthorized": "Tento uživatel nesdílí svůj profil"
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
@@ -2749,7 +2755,8 @@
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "Nastavit zařízení",
-        "select-devices-for": "Nastavit zařízení pro {{name}}"
+        "select-devices-for": "Nastavit zařízení pro {{name}}",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
     "bulk-set-reading-profile-modal": {
         "title": "Nastavit profil čtení",
@@ -3269,7 +3276,7 @@
         "reading-time": "Čas čtení",
         "pages": "Stránky",
         "words": "Slova",
-        "chapters": "Kapitoly",
+        "chapters": "Dokončených kapitol",
         "no-activity-tooltip": "Žádná čtenářská aktivita dne {{date}}.",
         "no-activity-alt": "Žádná aktivita",
         "all-time": "{{time-periods.all-time}}",
@@ -3304,7 +3311,8 @@
         "during-from-to": "od {{startYear}} do {{endYear}}",
         "during-select": "Vybrat časové rozmezí",
         "during-entire-life-profile": "po celý svůj život",
-        "during-entire-life-server": "od začátku"
+        "during-entire-life-server": "od začátku",
+        "close": "{{common.close}}"
     },
     "client-device-type-pipe": {
         "mobile": "Mobil",
@@ -3354,15 +3362,6 @@
         "saturday": "Sobota",
         "saturday-short": "Sob"
     },
-    "ordinal-date-pipe": {
-        "ordinalFormat": "{{month}} {{day}}",
-        "ordinal": {
-            "st": ".",
-            "nd": ".",
-            "rd": ".",
-            "th": "."
-        }
-    },
     "most-active-users": {
         "title": "Nejaktivnější čtenáři",
         "no-data": "Žádná čtenářská aktivita za dané období"
@@ -3405,5 +3404,11 @@
         "yesterday": "Včera",
         "pagination-label": "Stránkování aktivit",
         "page-info": "Strana {{current}} z {{total}} (celkem {{items}} záznamů)"
+    },
+    "user-stats-info-cards": {
+        "pages-read-by-year-title": "Počet přečtených stránek za rok",
+        "pages-count": "{{num}} stran",
+        "words-read-by-year-title": "Slova přečtená za rok",
+        "words-count": "{{num}} slov"
     }
 }

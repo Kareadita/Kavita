@@ -1042,7 +1042,8 @@
         "actions-header": "Дії",
         "pending-tooltip": "Цей користувач не підтвердив свою електронну адресу",
         "identity-provider-oidc-tooltip": "OIDC",
-        "identity-provider-native-tooltip": "Рідний"
+        "identity-provider-native-tooltip": "Рідний",
+        "profile-link-alt": "Профіль"
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",
@@ -1190,7 +1191,8 @@
         "active-events-title": "Активні події:",
         "no-data": "Тут небагато чого відбувається",
         "left-to-process": "Залишилося обробити: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} завантажень у черзі"
+        "download-in-queue": "{{num}} завантажень у черзі",
+        "reading-now": "{{num}} читає зараз"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",
@@ -1342,7 +1344,8 @@
         "reading-profile-updated": "Профіль читання оновлено",
         "reading-profile-promoted": "Профіль читання підвищено",
         "series-progress": "Прогрес у серії: {{percentage}}",
-        "page-offset-label": "Зсув сторінки"
+        "page-offset-label": "Зсув сторінки",
+        "offset-only-double": "Зсув сторінки можна використовувати лише з подвійним макетом"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -2293,7 +2296,8 @@
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "Налаштувати пристрої",
-        "select-devices-for": "Налаштувати пристрої для {{name}}"
+        "select-devices-for": "Налаштувати пристрої для {{name}}",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
     "file-type-group-pipe": {
         "archive": "Архів",
@@ -3357,15 +3361,6 @@
         "friday-short": "Пт",
         "saturday": "Субота",
         "saturday-short": "Сб"
-    },
-    "ordinal-date-pipe": {
-        "ordinalFormat": "{{month}} {{day}}",
-        "ordinal": {
-            "st": "вул",
-            "nd": "й",
-            "rd": "рд",
-            "th": "го"
-        }
     },
     "most-active-users": {
         "title": "Найактивніші читачі",

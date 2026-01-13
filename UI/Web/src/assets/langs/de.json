@@ -1259,7 +1259,8 @@
         "pending-tooltip": "Dieser Benutzer hat seine E-Mail nicht bestätigt",
         "all-libraries": "Alle Bibliotheken",
         "identity-provider-native-tooltip": "Muttersprachler",
-        "identity-provider-oidc-tooltip": "OIDC"
+        "identity-provider-oidc-tooltip": "OIDC",
+        "profile-link-alt": "Profil"
     },
     "edit-collection-tags": {
         "title": "Sammlung {{collectionName}} bearbeiten",
@@ -1605,7 +1606,8 @@
         "loading": "{{reader-settings.loading}}",
         "create-new": "{{reader-settings.create-new}}",
         "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
-        "page-offset-label": "Seitenversatz"
+        "page-offset-label": "Seitenversatz",
+        "offset-only-double": "Der Seitenversatz kann nur mit dem doppelten Layout verwendet werden"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -3399,15 +3401,6 @@
         "friday-short": "Fre",
         "saturday": "Samstag",
         "saturday-short": "Sam"
-    },
-    "ordinal-date-pipe": {
-        "ordinalFormat": "{{month}} {{day}}",
-        "ordinal": {
-            "st": "st",
-            "nd": "nd",
-            "rd": "rd",
-            "th": "th"
-        }
     },
     "list-select-modal": {
         "hidden": "{{amount}} Artikel aufgrund eines ungültigen Status ausgeblendet"

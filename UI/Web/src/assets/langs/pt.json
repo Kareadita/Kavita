@@ -119,7 +119,7 @@
         "share-series-reviews-label": "Partilhar Críticas de Séries",
         "share-series-reviews-tooltip": "Permitir que as suas críticas sejam visíveis para outros utilizadores deste servidor",
         "clients-opds-alert": "O OPDS não está habilitado neste servidor. Isto não irá afectar os utilizadores do Mihon.",
-        "clients-opds-description": "Todos os clientes de terceiros utilizarão a chave de API ou URL abaixo. Estes elementos são semelhantes a palavras passe, mantenha-os privados.",
+        "clients-opds-description": "Todos os clientes de terceiros utilizarão a chave de autenticação OPDS ou o URL abaixo. Estes elementos são semelhantes a palavras passe, mantenha-os privados.",
         "clients-opds-url-label": "URL OPDS",
         "clients-opds-url-tooltip": "Veja uma lista de clientes OPDS suportados: ",
         "reset": "{{common.reset}}",
@@ -206,11 +206,11 @@
     },
     "manage-devices": {
         "title": "Gestor de Dispositivos",
-        "description": "Esta secção serve para configurar dispositivos que não se conseguem ligar ao Kavita através do browser e, em vez disso, têm um endereço de email que aceita ficheiros.",
+        "description": "Esta secção serve para configurar dispositivos por email que não se conseguem ligar ao Kavita e, em vez disso, têm um endereço de email que aceita ficheiros.",
         "platform-label": "Plataforma",
         "email-label": "Email",
         "name-label": "Nome",
-        "email-setup-alert": "Deseja enviar ficheiros para os seus dispositivos? Peça ao administrador para primeiro configurar o Email!",
+        "email-setup-alert": "Deseja enviar ficheiros para o seu email? Peça ao administrador para primeiro configurar as definições do Email!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
@@ -221,11 +221,11 @@
         "sendto-device-header": "Dispositivos baseados em Email"
     },
     "edit-device-modal": {
-        "title": "Editar Dispositivo",
+        "title": "Editar Dispositivo de Email",
         "device-name-label": "{{manage-devices.name-label}}",
         "email-label": "{{common.email}}",
         "email-tooltip": "Este email será usado para aceitar o ficheiro através da funcionalidade Enviar Para",
-        "device-platform-label": "Plataforma do Dispositivo",
+        "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -267,7 +267,7 @@
         "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "Copiar"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "scrobbling-providers": {
         "title": "Fornecedores de Scrobbling",
@@ -939,7 +939,7 @@
         "format-title": "{{metadata-filter.format-label}}",
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
-        "file-path-title": "Localização da pasta",
+        "file-path-title": "Ficheiros",
         "folder-path-title": "Caminho da pasta"
     },
     "related-tab": {
@@ -1089,7 +1089,9 @@
         "media-issue-title": "Problemas com Ficheiros",
         "scrobble-issue-title": "Problemas de Scrobble",
         "cover-image-size-label": "Tamanho da Imagem de Capa",
-        "cover-image-size-tooltip": "Com que tamanho devem ser geradas as imagens de capa. Nota: Tudo o que for maior que o valor por defeito provocará maiores tempos de load das páginas."
+        "cover-image-size-tooltip": "Com que tamanho devem ser geradas as imagens de capa. Nota: Tudo o que for maior que o valor por defeito provocará maiores tempos de load das páginas.",
+        "pdf-render-resolution-label": "Resolução de renderização de PDF",
+        "pdf-render-resolution-tooltip": "A resolução em que os PDFs serão renderizados. As resoluções mais altas demorarão mais tempo a renderizar e irão consumir mais memória. Se encontrar problemas com a renderização dos PDFs, tente diminuir a resolução."
     },
     "cover-image-size": {
         "default": "Padrão (320x455)",
@@ -1257,7 +1259,8 @@
         "pending-tooltip": "Este utilizador não validou o seu email",
         "all-libraries": "Todas as Bibliotecas",
         "identity-provider-oidc-tooltip": "OIDC",
-        "identity-provider-native-tooltip": "Nativo"
+        "identity-provider-native-tooltip": "Nativo",
+        "profile-link-alt": "Perfil"
     },
     "edit-collection-tags": {
         "title": "Editar Coleção {{collectionName}}",
@@ -1311,7 +1314,7 @@
         "admin-kavitaplus": "Licença",
         "account": "Conta",
         "preferences": "Preferências",
-        "clients": "Chave API / OPDS",
+        "clients": "Chaves Autenticação / OPDS",
         "devices": "Dispositivos",
         "scrobbling": "Scrobbling",
         "theme": "Tema",
@@ -1327,7 +1330,10 @@
         "admin-oidc": "OpenID Connect",
         "admin-mappings-import": "Configurações de Metadados",
         "admin-public-metadata": "Gerir Metadados",
-        "font": "Fonts Epub"
+        "font": "Fonts Epub",
+        "admin-activity": "Atividade",
+        "admin-device": "Dispositivos",
+        "custom-key-binds": "Atalhos de Teclado"
     },
     "collection-detail": {
         "no-data": "Não existem itens. Tente adicionar uma série.",
@@ -2737,7 +2743,8 @@
         "no-data": "Ainda não foram criadas coleções",
         "loading": "{{common.loading}}",
         "bound": "Vinculado",
-        "warning-duplicate": "A sua seleção contém dispositivos que se sobrepõem, isto não é permitido"
+        "warning-duplicate": "A sua seleção contém dispositivos que se sobrepõem, isto não é permitido",
+        "hidden": "{{amount}} perfis escondidos devido a estado inválido"
     },
     "merge-person-modal": {
         "title": "{{personName}}",
@@ -3068,5 +3075,97 @@
         "progress-incognito": "Continuar anónimo",
         "full-read": "Voltar a Ler",
         "full-read-incognito": "Voltar a ler anónimo"
+    },
+    "pdf-render-resolution": {
+        "default": "Por Defeito (1080x1920)",
+        "high": "Alta (1920x2560)",
+        "ultra": "Ultra (2160x3840)"
+    },
+    "manage-custom-key-binds": {
+        "description": "Por vezes usar o rato é muito lento. Use os seus atalhos de teclado preferidos para ser mais rápido. Cada opção permite até {{max}} atalhos.<b> Faça uma pressão longa num atalho para o remover.</b>",
+        "key-bind-error-reserved-key-bind": "Este atalho é reservado e não pode ser usado",
+        "key-bind-error-need-at-least-one-key": "O atalho tem de ter no mínimo uma tecla",
+        "key-bind-error-overlap-in-target": "Um ou mais atalhos são iguais",
+        "add": "Adicione uma tecla alternativa",
+        "reset": "Repor {{target}}",
+        "errors-array": "Os atalhos para {{target}} têm erros",
+        "errors-control": "O atalho {{index}} para {{target}} tem erros",
+        "warning-duplicated-control": "O atalho {{index}} para {{target}} foi usado noutro controlo",
+        "warning-duplicate-key-bind": "Este atalho já está a ser usado noutro sítio",
+        "key-bind-tooltip": "Pressione o atalho para o remover.",
+        "global-header": "Global",
+        "readers-header": "Leitores"
+    },
+    "keybind-setting-description-pipe": {
+        "key-bind-title-navigate-to-settings": "Abrir definições",
+        "key-bind-tooltip-navigate-to-settings": "Abrir definições enquanto não estiver no leitor",
+        "key-bind-title-open-search": "Abrir pesquisa",
+        "key-bind-tooltip-open-search": "Abrir a barra de pesquisa",
+        "key-bind-title-navigate-to-scrobbling": "Abrir Scrobbling",
+        "key-bind-tooltip-navigate-to-scrobbling": "Abrir a página de definições no separador de Scrobbling",
+        "key-bind-title-escape": "Escape",
+        "key-bind-tooltip-escape": "Fechar o contexto que está aberto no momento",
+        "key-bind-title-toggle-fullscreen": "Ativar/desativar ecrã completo",
+        "key-bind-tooltip-toggle-fullscreen": "Alternativa ao F11",
+        "key-bind-title-bookmark-page": "Marcar página atual",
+        "key-bind-tooltip-bookmark-page": "Guarda a imagem atual como um marcador",
+        "key-bind-title-open-help": "Abrir o menu de ajuda",
+        "key-bind-tooltip-open-help": "Abre uma janela com todos os atalhos relevantes",
+        "key-bind-title-go-to": "Ir para página",
+        "key-bind-tooltip-go-to": "Abre um menu para mudar de página",
+        "key-bind-tooltip-toggle-menu": "Mostra/esconde o menu do leitor",
+        "key-bind-title-page-left": "Página para a esquerda",
+        "key-bind-tooltip-page-left": "Mover uma página para a esquerda",
+        "key-bind-title-page-right": "Página para a direita",
+        "key-bind-tooltip-page-right": "Mover uma página para a direita",
+        "key-bind-title-page-up": "Página para cima",
+        "key-bind-tooltip-page-up": "Mover uma página para cima",
+        "key-bind-title-page-down": "Página para baixo",
+        "key-bind-tooltip-page-down": "Mover uma página para baixo",
+        "key-bind-title-offset-double-page": "Deslocar paginação dupla"
+    },
+    "profile": {
+        "reviews-tab": "{{tabs.reviews-tab}}",
+        "activity-tab": "{{tabs.activity-tab}}",
+        "no-reviews": "Sem Nenhuma Crítica",
+        "total-reads-badge": "{{reads}} Leituras",
+        "k+-badge": "Subscritor K+"
+    },
+    "profile-review-list": {
+        "filter-label": "Filtrar por Séries",
+        "clear-rating-alt": "Limpar Filtro de Classificação"
+    },
+    "profile-stat-bar": {
+        "books-read-label": "Livros Lidos",
+        "books-read-tooltip": "Livros Lidos: {{count}}",
+        "comics-read-label": "BDs Lidas",
+        "comics-read-tooltip": "BDs Lidas: {{count}}",
+        "pages-read-label": "Páginas Lidas",
+        "pages-read-tooltip": "Páginas Lidas: {{count}}",
+        "words-read-label": "Palavras Lidas",
+        "words-read-tooltip": "Palavras Lidas: {{count}}",
+        "authors-read-label": "Autores Lidos",
+        "authors-read-tooltip": "Autores Lidos: {{count}}",
+        "reviews-label": "Críticas",
+        "reviews-tooltip": "Críticas: {{count}}",
+        "ratings-label": "Classificações",
+        "ratings-tooltip": "Classificações: {{count}}"
+    },
+    "profile-image": {
+        "edit-image-alt": "Editar Imagem",
+        "reset-image-alt": "Repor Imagem"
+    },
+    "profile-activity": {
+        "time-filter-title": "Atividade de {{username}} até",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "no-data": "{{common.no-data}}",
+        "duration": "Duração",
+        "pages-read": "{{reading-pace.pages-read}}",
+        "words-read": "{{reading-pace.words-read}}",
+        "time": "Tempo",
+        "info-alt": "Mais informação",
+        "today": "Hoje",
+        "yesterday": "Ontem"
     }
 }

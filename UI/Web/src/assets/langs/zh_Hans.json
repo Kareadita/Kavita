@@ -1259,7 +1259,8 @@
         "pending-tooltip": "此用户尚未验证其电子邮件",
         "all-libraries": "所有资料库",
         "identity-provider-oidc-tooltip": "OIDC",
-        "identity-provider-native-tooltip": "本地"
+        "identity-provider-native-tooltip": "本地",
+        "profile-link-alt": "配置文件"
     },
     "edit-collection-tags": {
         "title": "编辑 {{collectionName}} 收藏",
@@ -1417,7 +1418,8 @@
         "active-events-title": "活动事件：",
         "no-data": "无运行",
         "left-to-process": "待处理进度： {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} 队列中的下载"
+        "download-in-queue": "{{num}} 队列中的下载",
+        "reading-now": "{{num}} 正在阅读"
     },
     "shortcuts-modal": {
         "title": "热键",
@@ -1604,7 +1606,8 @@
         "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
         "reading-profile-updated": "阅读配置文件已更新",
         "update-parent": "{{reader-settings.update-parent}}",
-        "page-offset-label": "页面偏移"
+        "page-offset-label": "页面偏移",
+        "offset-only-double": "页面偏移只能与双页布局一起使用"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -2752,7 +2755,8 @@
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "设置设备",
-        "select-devices-for": "为 {{name}} 设置设备"
+        "select-devices-for": "为 {{name}} 设置设备",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
     "bulk-set-reading-profile-modal": {
         "title": "设置阅读配置文件",
@@ -3357,15 +3361,6 @@
         "friday-short": "星期五",
         "saturday": "星期六",
         "saturday-short": "星期六"
-    },
-    "ordinal-date-pipe": {
-        "ordinalFormat": "{{month}} {{day}}",
-        "ordinal": {
-            "st": "st",
-            "nd": "nd",
-            "rd": "rd",
-            "th": "th"
-        }
     },
     "most-active-users": {
         "title": "最活跃读者",

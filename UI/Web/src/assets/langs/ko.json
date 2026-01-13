@@ -3351,15 +3351,6 @@
         "saturday": "토요일",
         "saturday-short": "토요일"
     },
-    "ordinal-date-pipe": {
-        "ordinalFormat": "{{month}} {{day}}",
-        "ordinal": {
-            "th": "일",
-            "rd": "일",
-            "nd": "일",
-            "st": "일"
-        }
-    },
     "most-active-users": {
         "title": "가장 활발한 독자",
         "no-data": "해당 기간 동안의 독서 활동 없음"

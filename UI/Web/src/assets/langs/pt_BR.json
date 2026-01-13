@@ -1259,7 +1259,8 @@
         "pending-tooltip": "Este usuário não validou seu e-mail",
         "all-libraries": "Todas as Bibliotecas",
         "identity-provider-oidc-tooltip": "OIDC",
-        "identity-provider-native-tooltip": "Nativo"
+        "identity-provider-native-tooltip": "Nativo",
+        "profile-link-alt": "Perfil"
     },
     "edit-collection-tags": {
         "title": "Editar {{collectionName}} Coleção",
@@ -1417,7 +1418,8 @@
         "active-events-title": "Eventos Ativos:",
         "no-data": "Não há muita coisa acontecendo aqui",
         "left-to-process": "Restante para Processar: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} downloads na Fila"
+        "download-in-queue": "{{num}} downloads na Fila",
+        "reading-now": "{{num}} lendo agora"
     },
     "shortcuts-modal": {
         "title": "Atalhos de Teclado",
@@ -1604,7 +1606,8 @@
         "update-parent": "{{reader-settings.update-parent}}",
         "reading-profile-updated": "Perfil de leitura atualizado",
         "create-new": "{{reader-settings.create-new}}",
-        "page-offset-label": "Deslocamento de Página"
+        "page-offset-label": "Deslocamento de Página",
+        "offset-only-double": "O Deslocamento de Página só pode ser usado com Layout Duplo"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -2752,7 +2755,8 @@
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "Definir Dispositivos",
-        "select-devices-for": "Definir dispositivos para {{name}}"
+        "select-devices-for": "Definir dispositivos para {{name}}",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
     "bulk-set-reading-profile-modal": {
         "title": "Definir perfil de leitura",
@@ -3260,15 +3264,6 @@
         "friday-short": "Sex",
         "saturday": "Sábado",
         "saturday-short": "Sab"
-    },
-    "ordinal-date-pipe": {
-        "ordinalFormat": "{{month}} {{day}}",
-        "ordinal": {
-            "st": "º",
-            "nd": "º",
-            "rd": "º",
-            "th": "th"
-        }
     },
     "profile-review-list": {
         "no-data": "Não há Análises ou as Análises não estão sendo compartilhadas",

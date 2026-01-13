@@ -1259,7 +1259,8 @@
         "pending-tooltip": "Níor bhailíochtaigh an t-úsáideoir seo a ríomhphost",
         "all-libraries": "Gach Leabharlann",
         "identity-provider-oidc-tooltip": "OIDC",
-        "identity-provider-native-tooltip": "Dúchasach"
+        "identity-provider-native-tooltip": "Dúchasach",
+        "profile-link-alt": "Próifíl"
     },
     "edit-collection-tags": {
         "title": "Cuir {{collectionName}} Collection in eagar",
@@ -1417,7 +1418,8 @@
         "active-events-title": "Imeachtaí Gníomhacha:",
         "no-data": "Níl mórán ar siúl anseo",
         "left-to-process": "Fágtha le Próiseáil: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} íoslódálacha sa Scuaine"
+        "download-in-queue": "{{num}} íoslódálacha sa Scuaine",
+        "reading-now": "{{num}} ag léamh anois"
     },
     "shortcuts-modal": {
         "title": "Aicearraí Méarchláir",
@@ -1604,7 +1606,8 @@
         "reading-profile-updated": "Próifíl léitheoireachta nuashonraithe",
         "reading-profile-promoted": "Próifíl léitheoireachta curtha chun cinn",
         "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
-        "page-offset-label": "Fritháireamh Leathanaigh"
+        "page-offset-label": "Fritháireamh Leathanaigh",
+        "offset-only-double": "Ní féidir Fritháireamh Leathanaigh a úsáid ach amháin le Leagan Amach Dúbailte"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -2752,7 +2755,8 @@
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "Socraigh Gléasanna",
-        "select-devices-for": "Socraigh gléasanna do {{name}}"
+        "select-devices-for": "Socraigh gléasanna do {{name}}",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
     "bulk-set-reading-profile-modal": {
         "filter-label": "{{common.filter}}",
@@ -3357,15 +3361,6 @@
         "friday-short": "Aoi",
         "saturday": "Dé Sathairn",
         "saturday-short": "Sat"
-    },
-    "ordinal-date-pipe": {
-        "ordinalFormat": "{{month}} {{day}}",
-        "ordinal": {
-            "st": "ú",
-            "nd": "ú",
-            "rd": "ú",
-            "th": "ú"
-        }
     },
     "most-active-users": {
         "title": "Léitheoirí is Gníomhaí",
