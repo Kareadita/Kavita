@@ -563,18 +563,36 @@ public class TaskScheduler : ITaskScheduler
     /// <remarks>2 users reported this issue, I cannot reproduce, this is a precaution</remarks>
     public async Task EnsureSideNav()
     {
-        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams | AppUserIncludes.Libraries);
-        var libraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams);
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.AppUser)).ToList();
         var libraryLookup = libraries.ToDictionary(l => l.Id);
+
+        // Build a lookup: userId -> set of library IDs they have access to
+        var userLibraryAccess = new Dictionary<int, HashSet<int>>();
+        foreach (var library in libraries)
+        {
+            foreach (var appUser in library.AppUsers)
+            {
+                if (!userLibraryAccess.TryGetValue(appUser.Id, out var libIds))
+                {
+                    libIds = [];
+                    userLibraryAccess[appUser.Id] = libIds;
+                }
+                libIds.Add(library.Id);
+            }
+        }
 
         var hasChanges = false;
 
         foreach (var user in users)
         {
-            var accessibleLibraryIds = user.Libraries?
-                .Select(l => l.Id)
-                .ToHashSet() ?? [];
+            // Get library IDs this user has access to
+            if (!userLibraryAccess.TryGetValue(user.Id, out var accessibleLibraryIds))
+            {
+                continue; // User has no library access
+            }
 
+            // Get library IDs already in their SideNav
             var existingLibraryIds = user.SideNavStreams?
                 .Where(s => s.LibraryId.HasValue)
                 .Select(s => s.LibraryId!.Value)
