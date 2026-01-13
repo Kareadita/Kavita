@@ -7,6 +7,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.Entities.Enums;
 using API.Entities.Enums.User;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Converters;
 using API.Services.Caching;
@@ -92,6 +93,7 @@ public class TaskScheduler : ITaskScheduler
     public const string KavitaPlusWantToReadSyncId = "kavita+-want-to-read-sync";
     public const string ReadingHistoryAggregationId = "reading-history-aggregation";
     public const string AuthKeyExpirationId = "auth-key-expiration";
+    public const string EnsureSideNavId = "ensure-sidenav";
 
     private const int BaseRetryDelay = 60; // 1-minute
 
@@ -227,6 +229,8 @@ public class TaskScheduler : ITaskScheduler
 
         RecurringJob.AddOrUpdate(AuthKeyExpirationId, () => CheckExpiredOrExpiringAuthKeys(),
             Cron.Daily, RecurringJobOptions);
+
+        RecurringJob.AddOrUpdate(EnsureSideNavId, () => EnsureSideNav(), Cron.Daily(1), RecurringJobOptions);
 
 
         RecurringJob.AddOrUpdate<IReadingHistoryService>(ReadingHistoryAggregationId, service => service.AggregateYesterdaysActivity(),
@@ -551,6 +555,55 @@ public class TaskScheduler : ITaskScheduler
     public async Task SyncThemes()
     {
         await _themeService.SyncThemes();
+    }
+
+    /// <summary>
+    /// Checks for any user that does not have a Library Side nav, when they should
+    /// </summary>
+    /// <remarks>2 users reported this issue, I cannot reproduce, this is a precaution</remarks>
+    public async Task EnsureSideNav()
+    {
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams);
+        var libraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
+        var libraryLookup = libraries.ToDictionary(l => l.Id);
+        var allLibIds = libraryLookup.Keys.ToHashSet();
+
+        var hasChanges = false;
+
+        foreach (var user in users)
+        {
+            // Ensure the user is an admin
+            if (!await _unitOfWork.UserRepository.IsUserAdminAsync(user)) continue;
+
+            // Get library IDs that the user already has in their SideNav
+            var existingLibraryIds = user.SideNavStreams
+                .Where(s => s.LibraryId.HasValue)
+                .Select(s => s.LibraryId!.Value)
+                .ToHashSet() ?? [];
+
+            var missingLibIds = allLibIds.Except(existingLibraryIds).ToList();
+
+            if (missingLibIds.Count == 0) continue;
+
+            _logger.LogInformation(
+                "Found {Count} libraries missing from User {UserId} sidenav: [{LibraryIds}]",
+                missingLibIds.Count,
+                user.Id,
+                string.Join(", ", missingLibIds));
+
+            foreach (var libId in missingLibIds)
+            {
+                user.CreateSideNavFromLibrary(libraryLookup[libId]);
+            }
+
+            _unitOfWork.UserRepository.Update(user);
+            hasChanges = true;
+        }
+
+        if (hasChanges)
+        {
+            await _unitOfWork.CommitAsync();
+        }
     }
 
     /// <summary>

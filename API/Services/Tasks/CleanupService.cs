@@ -81,6 +81,7 @@ public class CleanupService : ICleanupService
 
         _logger.LogInformation("Starting Cleanup");
 
+        // TODO: Why do I have clear temp directory then immediately do it again?
         var cleanupSteps = new List<(Func<Task>, string)>
         {
             (() => Task.Run(() => _directoryService.ClearDirectory(_directoryService.TempDirectory)), "Cleaning temp directory"),

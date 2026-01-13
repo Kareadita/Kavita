@@ -56,7 +56,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   pageOperationsForm: FormGroup = new FormGroup({
     'accessibilityMode': new FormControl(false, []),
     'bulkMode': new FormControl(false, [])
-  })
+  });
 
   filterSideNavStreams = (listItem: SideNavStream) => {
     const filterVal = (this.listForm.value.filterSideNavStream || '').toLowerCase();
