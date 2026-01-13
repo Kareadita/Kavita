@@ -1333,7 +1333,8 @@
         "font": "Fonts Epub",
         "admin-activity": "Atividade",
         "admin-device": "Dispositivos",
-        "custom-key-binds": "Atalhos de Teclado"
+        "custom-key-binds": "Atalhos de Teclado",
+        "insights-section-title": "Analise"
     },
     "collection-detail": {
         "no-data": "Não existem itens. Tente adicionar uma série.",
@@ -1403,7 +1404,8 @@
         "date-range-title": "Intervalo de Datas",
         "edit-alt": "{{common.edit}}",
         "reorder-alt": "Reordenar Itens",
-        "more-alt": "{{series-detail.more-alt}}"
+        "more-alt": "{{series-detail.more-alt}}",
+        "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
         "title-alt": "Atividade",
@@ -1415,8 +1417,9 @@
         "users-online-count": "{{num}} Utilizadores ligados",
         "active-events-title": "Eventos Ativos:",
         "no-data": "Nada para ver aqui",
-        "left-to-process": "Por Processar: {{leftToProcess}}",
-        "download-in-queue": "{{num}} downloads em espera"
+        "left-to-process": "Por Processar: {{leftToProcess}} / {{totalToProcess}}",
+        "download-in-queue": "{{num}} downloads em espera",
+        "reading-now": "{{num}} a ler agora"
     },
     "shortcuts-modal": {
         "title": "Atalhos de Teclado",
@@ -1427,7 +1430,8 @@
         "bookmark": "Adicionar marcador a página atual",
         "double-click": "duplo clique",
         "close-reader": "Fechar leitor",
-        "toggle-menu": "Abrir/Fechar Menu"
+        "toggle-menu": "Abrir/Fechar Menu",
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
     "grouped-typeahead": {
         "files": "Ficheiros",
@@ -1461,7 +1465,8 @@
         "person-aka-status": "Corresponde um pseudónimo",
         "browse-genres": "Explorar Géneros",
         "browse-tags": "Explorar Etiquetas",
-        "all-annotations": "Explorar Anotações"
+        "all-annotations": "Explorar Anotações",
+        "my-profile": "O Meu Perfil"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1600,7 +1605,9 @@
         "create-new": "{{reader-settings.create-new}}",
         "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
         "reading-profile-updated": "Perfil de leitura atualizado",
-        "reading-profile-promoted": "Perfil de leitura promovido"
+        "reading-profile-promoted": "Perfil de leitura promovido",
+        "page-offset-label": "Ajuste de Páginas",
+        "offset-only-double": "O Ajuste de Páginas só pode ser usado no Layout Duplo"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1666,7 +1673,8 @@
         "person-chapter-count": "Número de Capítulos",
         "annotation-owner": "Proprietário",
         "annotation-series": "Nome da Série",
-        "annotation-color": "Cor"
+        "annotation-color": "Cor",
+        "user-rating": "A minha classificação"
     },
     "edit-series-modal": {
         "title": "Detalhes de {{seriesName}}",
@@ -1737,7 +1745,8 @@
         "loose-leaf-volume": "Capítulos de Folhas Soltas",
         "specials-volume": "Especiais",
         "release-year-validation": "{{validation.year-validation}}",
-        "volumes-title": "{{tab.volumes-tab}}"
+        "volumes-title": "{{tab.volumes-tab}}",
+        "no-data": "{{common.no-data}}"
     },
     "edit-chapter-modal": {
         "title": "Editar",
@@ -1778,8 +1787,8 @@
         "tags-tab": "{{tabs.tags-tab}}",
         "pages-label": "Páginas",
         "words-label": "Tamanho",
-        "pages-count": "{{num}} Páginas",
-        "words-count": "{{num}} Palavras",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
         "reading-time-label": "Tempo de Leitura",
         "date-added-label": "Data de Adição",
         "size-label": "{{edit-series-modal.size-title}}",
@@ -1823,7 +1832,8 @@
         "not-classified": "Não Classificado",
         "total-file-size-title": "Tamanho Total dos Ficheiros:",
         "download-file-for-extension-header": "Descarregar Relatório",
-        "download-file-for-extension-alt": "Descarregar o relatório para {{extension}}"
+        "download-file-for-extension-alt": "Descarregar o relatório para {{extension}}",
+        "no-data": "{{common.no-data}}"
     },
     "reading-activity": {
         "title": "Atividade de Leitura",
@@ -1838,14 +1848,16 @@
         "last-30-days": "{{time-periods.last-30-days}}",
         "last-90-days": "{{time-periods.last-90-days}}",
         "last-year": "{{time-periods.last-year}}",
-        "all-time": "{{time-periods.all-time}}"
+        "all-time": "{{time-periods.all-time}}",
+        "select-user-alt": "Selecione o utilizador para filtrar"
     },
     "publication-status-stats": {
         "title": "Estado de Publicação",
         "visualisation-label": "Visualização",
         "data-table-label": "Tabela de Dados",
         "year-header": "Ano",
-        "count-header": "Contador"
+        "count-header": "Contador",
+        "no-data": "{{common.no-data}}"
     },
     "series-preview-drawer": {
         "staff-label": "Pessoal",
@@ -1890,7 +1902,17 @@
         "people-count": "{{num}} Pessoas",
         "tags": "{{metadata-fields.tags-title}}",
         "people": "Pessoas",
-        "genres": "{{metadata-fields.genres-title}}"
+        "genres": "{{metadata-fields.genres-title}}",
+        "stats-title": "Explorar",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "management-tab": "{{tabs.management-tab}}",
+        "users": "utilizadores",
+        "readers": "leitores",
+        "popular-decades-title": "Décadas Populares",
+        "popular-reading-lists-title": "Listas de Leitura Mais Lidas",
+        "popular-genres-title": "Géneros Populares",
+        "popular-tags-title": "Etiquetas Populares",
+        "popular-person-title": "{{role}} Popular"
     },
     "errors": {
         "series-doesnt-exist": "Esta série já não existe",
@@ -1928,7 +1950,8 @@
         "delete-font-in-use": "A font está a ser usada por pelo menos um utilizador, por isso não pode ser eliminada",
         "font-manual-upload": "Ocorreu um erro ao criar a Font a partir do upload manual",
         "font-already-in-use": "Já existe uma font com este nome",
-        "upload-too-large": "O arquivo é muito grande para upload, selecione uma imagem menor e tente novamente."
+        "upload-too-large": "O arquivo é muito grande para upload, selecione uma imagem menor e tente novamente.",
+        "invalid-form": "O formulário que está a tentar submeter tem erros"
     },
     "metadata-builder": {
         "or": "Iguale qualquer um dos seguintes",
@@ -2175,15 +2198,17 @@
         "scrobble-gen-init": "Foi colocada uma tarefa em fila para gerar eventos de scrobble a partir do historial de leitura e classificações existentes, sincronizando-as com os serviços que estão configurados.",
         "series-added-want-to-read": "Série adicionada da lista Leituras Futuras",
         "confirm-delete-multiple-volumes": "Tem a certeza que deseja apagar {{count}} volumes? Os ficheiros em disco não serão alterados.",
-        "series-bound-to-reading-profile": "Série vinculada ao Perfil de Leitura {{name}}",
-        "library-bound-to-reading-profile": "Biblioteca vinculada ao Perfil de Leitura {{name}}",
+        "series-bound-to-reading-profile": "Série vinculada a {{amount}} Perfis de Leitura",
+        "library-bound-to-reading-profile": "Biblioteca vinculada a {{amount}} Perfis de Leitura",
         "external-match-rate-error": "O Kavita ficou sem taxa à procura de {{seriesName}}. Tente novamente em 5 minutos.",
         "confirm-delete-bookmark": "Tem a certeza que deseja eliminar este Marcador?",
         "confirm-delete-annotation": "Tem a certeza que deseja eliminar esta Anotação?",
         "confirm-delete-font": "Se remover esta font esta será apagada do disco. Pode obtê-la da diretoria temporária antes de ser removida.",
         "confirm-force-delete-font": "Esta font está a ser usada. Mesmo assim deseja apagá-la? Isto irá forçar que os utilizadores usem a font por defeito.",
         "font-in-use": "Não é possível apagar porque a font está a ser usada por um ou mais utilizadores.",
-        "k+-resend-welcome-email-success": "Foi enviado um email para o seu endereço de email do Kavita+"
+        "k+-resend-welcome-email-success": "Foi enviado um email para o seu endereço de email do Kavita+",
+        "confirm-delete-auth-key": "Tem a certeza que quer apagar esta Chave de Autenticação?",
+        "profile-unauthorized": "Este utilizador não tem o perfil partilhado"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",
@@ -2270,7 +2295,8 @@
         "merge": "Juntar",
         "export": "Exportar",
         "like": "Gostar",
-        "unlike": "Remover gostos"
+        "unlike": "Remover gostos",
+        "edit-device-name": "Editar Nome"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -2312,7 +2338,8 @@
         "password-validation": "A palavra passe tem de ter entre 6 a 256 caracteres",
         "year-validation": "O ano tem de ser um valor válido maior que 1000 e com 4 caracteres",
         "other-field-required": "{{name}} é necessário quando {{other}} é definido",
-        "invalid-uri": "A uri fornecido é inválido"
+        "invalid-uri": "A uri fornecido é inválido",
+        "other-field-invalid": "Não foi possível verificar a validade, {{other}} é inválido"
     },
     "entity-type": {
         "volume": "volume",
@@ -2348,7 +2375,10 @@
         "stats-tab": "Estatísticas",
         "scrobbling-tab": "Scrobbling",
         "smart-filters-tab": "Filtros Inteligentes",
-        "annotations-tab": "Anotações"
+        "annotations-tab": "Anotações",
+        "overview-tab": "Visão Geral",
+        "management-tab": "Gestão",
+        "activity-tab": "Atividade"
     },
     "common": {
         "reset-to-default": "Repôr Valor por Defeito",
@@ -2394,7 +2424,9 @@
         "issue-count": "{{num}} Edições",
         "unknown": "Desconhecido",
         "roles": "Funções",
-        "libraries": "Bibliotecas"
+        "libraries": "Bibliotecas",
+        "confirm": "Confirmar",
+        "selected": "Selecionado"
     },
     "confirm": {
         "alert": "Alerta",
@@ -2436,7 +2468,10 @@
         "aliases-tab": "Pseudónimos",
         "aliases-label": "Editar pseudónimos",
         "alias-overlap": "Este pseudónimo refere-se a outra pessoa ou é o nome desta pessoa, considere juntar as duas pessoas.",
-        "aliases-tooltip": "Quando uma série é etiquetada com o pseudónimo de uma pessoa, essa pessoa é associada à serie em vez de ser criada uma pessoa nova. Quando um pseudónimo for apagado, será necessário voltar a analisar a série para que essa alteração tenha efeito."
+        "aliases-tooltip": "Quando uma série é etiquetada com o pseudónimo de uma pessoa, essa pessoa é associada à serie em vez de ser criada uma pessoa nova. Quando um pseudónimo for apagado, será necessário voltar a analisar a série para que essa alteração tenha efeito.",
+        "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
+        "invalid-amazon-code": "O ASIN deve começar com B0 ou BT"
     },
     "changelog-update-item": {
         "fixed": "Corrigido",
@@ -2626,7 +2661,7 @@
     },
     "manage-reading-profiles": {
         "reset": "{{common.reset}}",
-        "description": "Nem todas as séries podem ser lidas da mesma maneira, defina perfis de leitura distintos por biblioteca ou séries para que o regresso às suas séries seja o mais simples possível.",
+        "description": "Nem todas as séries podem ser lidas da mesma maneira, defina perfis de leitura distintos por biblioteca/séries/dispositivo para que o regresso às suas séries seja o mais simples possível.",
         "extra-tip": "Atribua perfis de leitura a partir do menu de ações nas séries ou bibliotecas, ou em massa. Quando alterar definições num leitor, é criado um perfil escondido que memoriza as suas escolhas para essa série (não se aplica a pdfs). Este perfil é removido quando atribui o seu próprio perfil de leitura à série. Pode encontrar mais informação no",
         "wiki-title": "wiki",
         "profiles-title": "Os seus perfis de leitura",
@@ -2696,7 +2731,10 @@
         "reading-profile-library-settings-title": "Biblioteca",
         "delete": "{{common.delete}}",
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
-        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}"
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
+        "select-devices-for": "Definir dispositivos para {{name}}",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}",
+        "set-devices": "Definir Dispositivos"
     },
     "reviews": {
         "user-reviews-local": "Criticas Locais",
@@ -2790,7 +2828,9 @@
         "annotation-highlights": "Color de destaque",
         "annotation-comment": "Texto da Anotação",
         "annotation-selection": "Text da Anotação",
-        "series": "{{tabs.series-tab}}"
+        "series": "{{tabs.series-tab}}",
+        "annotation-likes": "Gostos",
+        "annotation-liked-by": "Apreciado por"
     },
     "breakpoint-pipe": {
         "never": "Nunca",
@@ -3122,18 +3162,29 @@
         "key-bind-tooltip-page-up": "Mover uma página para cima",
         "key-bind-title-page-down": "Página para baixo",
         "key-bind-tooltip-page-down": "Mover uma página para baixo",
-        "key-bind-title-offset-double-page": "Deslocar paginação dupla"
+        "key-bind-title-offset-double-page": "Deslocar paginação dupla",
+        "key-bind-title-toggle-menu": "Ativar/desativar menu",
+        "key-bind-tooltip-offset-double-page": "Deslocar páginas para o alinhamento de página dupla"
     },
     "profile": {
         "reviews-tab": "{{tabs.reviews-tab}}",
         "activity-tab": "{{tabs.activity-tab}}",
         "no-reviews": "Sem Nenhuma Crítica",
         "total-reads-badge": "{{reads}} Leituras",
-        "k+-badge": "Subscritor K+"
+        "k+-badge": "Subscritor K+",
+        "title": "Perfil de {{username}}",
+        "joined-label": "Registado:",
+        "last-read-label": "Último Leitura:",
+        "time-reading-label": "Tempo de Leitura Total:",
+        "avg-reading-per-week-label": "Média por Semana:",
+        "overview-tab": "{{tabs.overview-tab}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "stats-title": "Ver o histórico de {{username}} em {{libraryName}}"
     },
     "profile-review-list": {
         "filter-label": "Filtrar por Séries",
-        "clear-rating-alt": "Limpar Filtro de Classificação"
+        "clear-rating-alt": "Limpar Filtro de Classificação",
+        "no-data": "Não há Criticas ou as Críticas não estão a ser partilhadas"
     },
     "profile-stat-bar": {
         "books-read-label": "Livros Lidos",
@@ -3166,6 +3217,198 @@
         "time": "Tempo",
         "info-alt": "Mais informação",
         "today": "Hoje",
-        "yesterday": "Ontem"
+        "yesterday": "Ontem",
+        "page-info": "Página {{current}} de {{total}} ({{items}} items no total)",
+        "pagination-label": "Paginação da Atividade"
+    },
+    "client-device-auth-type-pipe": {
+        "unknown": "Desconhecido",
+        "oidc": "OIDC",
+        "jwt": "JWT",
+        "auth-key": "Chave de Autenticação"
+    },
+    "client-device-platform-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}"
+    },
+    "client-device-client-type-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}",
+        "web-browser": "Navegador Web",
+        "web-app": "Aplicação Web",
+        "koreader": "KOReader",
+        "panels": "Panels",
+        "librera": "Librera",
+        "opds-client": "Cliente OPDS"
+    },
+    "files-over-time": {
+        "title": "Ficheiros adicionados ao longo do tempo",
+        "no-data": "{{common.no-data}}",
+        "most-files": "Em {{date}}, foram adicionados {{count}} ficheiros"
+    },
+    "server-activity": {
+        "no-data": "Nada para ver"
+    },
+    "activity-card": {
+        "total-pages-label": "Total de Páginas",
+        "total-words-label": "Total de Palavras",
+        "total-chapters-label": "Capítulos",
+        "started-label": "Iniciado",
+        "view-label": "Ver"
+    },
+    "user-stats-info-cards": {
+        "pages-read-by-year-title": "Páginas lidas por ano",
+        "pages-count": "{{num}} páginas",
+        "words-read-by-year-title": "Palavras lidas por ano",
+        "words-count": "{{num}} palavras"
+    },
+    "preferred-format": {
+        "title": "Formato preferido",
+        "sub-title": "{{name}} prefere ler {{format}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "favorite-authors": {
+        "title": "Autores Mais Lidos",
+        "sub-title": "O autor mais lido de {{name}} é {{author}}, com {{count}} leituras no total",
+        "no-data": "{{common.no-data}}"
+    },
+    "page-spread": {
+        "title": "Capítulos por Número de Páginas",
+        "sub-title": "{{username}} lê capítulos que tenham entre {{highestBucket}} páginas",
+        "data-type": "{{data}} capítulos",
+        "data-of": "{{percentage}}% dos seus capítulos",
+        "range": "Gama de páginas: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "word-spread": {
+        "title": "Capítulos por Número de Palavras",
+        "sub-title": "{{username}} lê capítulos com palavras entre {{highestBucket}}",
+        "data-type": "{{data}} capítulos",
+        "data-of": "{{percentage}}% dos seus capítulos",
+        "range": "Gama de palavras: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "tag-breakdown": {
+        "title": "Etiquetas mais lidas",
+        "sub-title": "A etiqueta mais lida de {{name}} é {{mostUsed}}",
+        "missing": "Etiquetas em falta para {{amount]] séries",
+        "no-data": "{{common.no-data}}"
+    },
+    "genre-breakdown": {
+        "title": "Géneros mais lidos",
+        "sub-title": "O género mais lido de {{name}} é {{mostUsed}}",
+        "missing": "Géneros em falta para {{amount}} séries",
+        "no-data": "{{common.no-data}}"
+    },
+    "reads-by-month": {
+        "title": "Leituras totais por mês",
+        "sub-title": "{{username}} leu mais em {{month}} {{year}} com {{reads}} capítulos lidos",
+        "no-data": "{{common.no-data}}"
+    },
+    "avg-time-reading-by-hour": {
+        "title": "Tempo médio a ler por hora",
+        "most-time-spend-reading": "{{name}} lê a maior parte do tempo entre {{startHour}} e {{endHour}} com uma média de {{amount}} minutos",
+        "data-since": "Incluir apenas leituras a partir de {{date}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "profile-overview": {
+        "currently-reading": "Leitura Atual",
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "just-finished-reading": "Leitura Terminada mais Recente"
+    },
+    "activity-graph": {
+        "all-time": "{{time-periods.all-time}}",
+        "no-activity-tooltip": "Sem leituras em {{date}}.",
+        "aggregated-count": "Leu {{totalPages}} páginas e {{totalWords}} palavras em {{year}}",
+        "title": "Atividade das Leituras",
+        "day-of-week-alt": "Dia da Semana",
+        "less": "Menos",
+        "more": "Mais",
+        "reading-time": "Tempo de Leitura",
+        "pages": "Páginas",
+        "words": "Palavras",
+        "chapters": "Capítulos Terminados",
+        "no-activity-alt": "Sem Atividade",
+        "low-activity-alt": "Pouca Atividade",
+        "moderate-activity-alt": "Atividade Moderada",
+        "good-activity-alt": "Boa Atividade",
+        "high-activity-alt": "Alta Atividade"
+    },
+    "reading-pace": {
+        "no-data": "{{common.no-data}}",
+        "sub-title-books": "{{username}} lê um livro a cada {{count}} dias",
+        "sub-title-comics": "{{username}} lê uma BD a cada {{count}} dias",
+        "title-books": "Velocidade de Leitura: Livros",
+        "title-comics": "Velocidade de Leitura: BDs",
+        "hours-read": "Horas Lidas",
+        "pages-read": "Páginas Lidas",
+        "words-read": "Palavras Lidas",
+        "comics-read": "BDs Lidas",
+        "books-read": "Livros Lidos",
+        "per-year": "Por Ano",
+        "per-month": "Por Mês",
+        "per-day": "Por Dia",
+        "disclaimer-books": "Aplica-se a Epub/Pdfs",
+        "disclaimer-comics": "Aplica-se a Imagens/Arquivos"
+    },
+    "smart-time-picker": {
+        "during-year": "durante {{year}}",
+        "during-from-to": "de {{startYear}} até {{endYear}}",
+        "close": "{{common.close}}",
+        "forever": "Para Sempre",
+        "select-year": "Selecionar Ano",
+        "custom-range": "Intervalo personalizado",
+        "during-entire-life-profile": "durante o tempo de vida",
+        "during-entire-life-server": "desde o início",
+        "during-select": "Selecionar um intervalo de tempo"
+    },
+    "client-device-type-pipe": {
+        "Unknown": "{{common.unknown}}",
+        "mobile": "Mobile",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
+    },
+    "list-select-modal": {
+        "hidden": "{{amount}} items escondidos por terem um estado inválido"
+    },
+    "month-label-pipe": {
+        "january": "Janeiro",
+        "january-short": "Jan",
+        "february": "Fevereiro",
+        "february-short": "Feb",
+        "march": "Março",
+        "march-short": "Mar",
+        "april": "Abril",
+        "april-short": "Abr",
+        "may": "Maio",
+        "may-short": "Mai",
+        "june": "Junho",
+        "june-short": "Jun",
+        "july": "Julho",
+        "july-short": "Jul",
+        "august": "Agosto",
+        "august-short": "Ago",
+        "september": "Setembro",
+        "september-short": "Set",
+        "october": "Outubro",
+        "october-short": "Out",
+        "november": "Novembro",
+        "november-short": "Nov",
+        "december": "Dezembro",
+        "december-short": "Dez"
+    },
+    "day-label-pipe": {
+        "sunday": "Domingo",
+        "sunday-short": "Dom",
+        "monday": "Segunda-feira",
+        "monday-short": "Seg",
+        "tuesday": "Terça-feira",
+        "tuesday-short": "Ter",
+        "wednesday": "Quarta-feira",
+        "wednesday-short": "Qua",
+        "thursday": "Quinta-feira",
+        "thursday-short": "Qui",
+        "friday": "Sexta-feira",
+        "friday-short": "Sex",
+        "saturday": "Sábado",
+        "saturday-short": "Sab"
     }
 }

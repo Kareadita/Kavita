@@ -210,7 +210,7 @@
         "platform-label": "Plattform",
         "email-label": "E-Mail",
         "name-label": "Name",
-        "email-setup-alert": "Möchten Sie Dateien an Ihre E-Mail-Adresse senden? Lassen Sie zunächst Ihren Administrator die E-Mail-Einstellungen vornehmen.",
+        "email-setup-alert": "Möchten Sie Dateien an Ihre E-Mail senden? Lassen Sie Ihren Administrator zunächst die E-Mail-Einstellungen konfigurieren!",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
@@ -405,7 +405,7 @@
         "prequel": "Prequel",
         "sequel": "Nachfolger",
         "side-story": "Nebengeschichte",
-        "spin-off": "Spin-off",
+        "spin-off": "Spin-Off",
         "parent": "Übergeordnet",
         "edition": "Ausgabe",
         "annual": "Jährlich"
@@ -2381,7 +2381,7 @@
         "activity-tab": "Aktivität"
     },
     "common": {
-        "reset-to-default": "Alles zurücksetzen",
+        "reset-to-default": "Auf Standard zurücksetzen",
         "close": "Schließen",
         "clear": "Klar",
         "filter": "Filter",

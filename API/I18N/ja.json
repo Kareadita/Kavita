@@ -219,5 +219,9 @@
     "annotation-export-failed": "注釈をエクスポートできません。ログを確認してください",
     "download-not-allowed": "ユーザーにダウンロード権限がありません",
     "auth-key-unique": "認証キー名はアカウントごとに一意である必要があります",
-    "role-restricted": "アクセス禁止: あなたの権限ではこの操作を実行できません"
+    "role-restricted": "アクセス禁止: あなたの権限ではこの操作を実行できません",
+    "process-scrobbling-events": "Scrobbling イベントの処理",
+    "process-processed-scrobbling-events": "処理済みの Scrobbling イベントを処理する",
+    "remove-from-want-to-read": "「後で読む」を削除",
+    "cleanup": "削除"
 }

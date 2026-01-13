@@ -213,7 +213,7 @@
         "device-name-label": "{{manage-devices.name-label}}",
         "email-label": "{{common.email}}",
         "email-tooltip": "Ten adres e-mail zostanie użyty do zaakceptowania pliku za pośrednictwem funkcji Wyślij do",
-        "device-platform-label": "Platforma urządzenia",
+        "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -255,7 +255,7 @@
         "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "Kopiuj"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "scrobbling-providers": {
         "title": "Dostawcy usług scrobblowania",
@@ -1403,7 +1403,8 @@
         "bookmark": "Dodaj aktualną stronę do zakładek",
         "double-click": "podwójne kliknięcie",
         "close-reader": "Zamknij czytnik",
-        "toggle-menu": "Przełącz menu"
+        "toggle-menu": "Przełącz menu",
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
     "grouped-typeahead": {
         "files": "Pliki",
@@ -1755,8 +1756,8 @@
         "tags-tab": "{{tabs.tags-tab}}",
         "pages-label": "Stron",
         "words-label": "Długość",
-        "pages-count": "{{num}} Stron",
-        "words-count": "{{num}} Słów",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
         "reading-time-label": "Czas czytania",
         "date-added-label": "Data dodania",
         "size-label": "{{edit-series-modal.size-title}}",
@@ -1800,7 +1801,8 @@
         "not-classified": "Nie sklasyfikowano",
         "total-file-size-title": "Całkowity rozmiar pliku:",
         "download-file-for-extension-header": "Pobierz raport",
-        "download-file-for-extension-alt": "Pobierz raport dla {{extension}}"
+        "download-file-for-extension-alt": "Pobierz raport dla {{extension}}",
+        "no-data": "{{common.no-data}}"
     },
     "reading-activity": {
         "title": "Aktywność czytelnicza",
@@ -1822,7 +1824,8 @@
         "visualisation-label": "Wizualizacja",
         "data-table-label": "Tabela danych",
         "year-header": "Rok",
-        "count-header": "Liczba"
+        "count-header": "Liczba",
+        "no-data": "{{common.no-data}}"
     },
     "series-preview-drawer": {
         "staff-label": "Personel",
@@ -1867,7 +1870,9 @@
         "people-count": "{{num}} Osób",
         "tags": "{{metadata-fields.tags-title}}",
         "people": "Osoby",
-        "genres": "{{metadata-fields.genres-title}}"
+        "genres": "{{metadata-fields.genres-title}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "management-tab": "{{tabs.management-tab}}"
     },
     "errors": {
         "series-doesnt-exist": "Ta seria już nie istnieje",
@@ -2771,7 +2776,8 @@
         "reading-profile-library-settings-title": "Biblioteka",
         "delete": "{{common.delete}}",
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
-        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}"
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
     "oidc": {
         "login": "Wróć do ekranu logowania",
@@ -2993,7 +2999,8 @@
         "no-data": "{{common.no-data}}"
     },
     "client-device-card": {
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "platform-label": "{{manage-devices.platform-label}}"
     },
     "duration-pipe": {
         "seconds": "{{num}} sekund",
@@ -3012,15 +3019,16 @@
     },
     "profile": {
         "title": "Profil użytkownika {{username}}",
-        "joined-label": "Dołączono: {{date}}",
-        "last-read-label": "Ostatnio czytano: {{date}}",
-        "time-reading-label": "Całkowity czas czytania: {{date}}",
-        "avg-reading-per-week-label": "Średnio tygodniowo: {{time}}",
+        "joined-label": "Dołączono:",
+        "last-read-label": "Ostatnio czytano:",
+        "time-reading-label": "Całkowity czas czytania:",
+        "avg-reading-per-week-label": "Średnio tygodniowo:",
         "stats-title": "Rzut oka na podróż {{username}} przez {{libraryName}}",
         "overview-tab": "{{tabs.overview-tab}}",
         "stats-tab": "{{tabs.stats-tab}}",
         "reviews-tab": "{{tabs.reviews-tab}}",
-        "total-reads-badge": "{{reads}} Czyta"
+        "total-reads-badge": "{{reads}} Czyta",
+        "activity-tab": "{{tabs.activity-tab}}"
     },
     "profile-stat-bar": {
         "books-read-tooltip": "Przeczytane książki: {{count}}",
@@ -3078,5 +3086,21 @@
     },
     "client-device-type-pipe": {
         "Unknown": "{{common.unknown}}"
+    },
+    "active-user-card": {
+        "books-count": "{{count}} książek"
+    },
+    "files-over-time": {
+        "no-data": "{{common.no-data}}"
+    },
+    "profile-activity": {
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "no-data": "{{common.no-data}}",
+        "pages-read": "{{reading-pace.pages-read}}",
+        "words-read": "{{reading-pace.words-read}}"
+    },
+    "activity-graph": {
+        "all-time": "{{time-periods.all-time}}"
     }
 }

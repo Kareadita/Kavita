@@ -99,5 +99,6 @@
     "series-restricted": "Brugeren har ikke adgang til denne serie",
     "generic-series-delete": "Der opstod en fejl i forbindelse med sletningen af serien",
     "generic-series-update": "Der opstod en fejl i forbindelse med opdateringen af serien",
-    "series-updated": "Succesfuldt opdateret"
+    "series-updated": "Succesfuldt opdateret",
+    "password-authentication-disabled": "Adgangskodegodkendelse er deaktiveret, log ind via OpenID Connect"
 }
