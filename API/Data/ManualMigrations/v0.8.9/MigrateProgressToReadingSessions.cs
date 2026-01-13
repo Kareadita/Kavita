@@ -87,7 +87,7 @@ public class MigrateProgressToReadingSessions : ManualMigration
             var totalProgressRecords = await context.AppUserProgresses.CountAsync();
             if (totalProgressRecords > 0)
             {
-                logger.LogInformation("Found {Count} progress records to migrate", totalProgressRecords);
+                logger.LogInformation("[{Scope}] Found {Count} progress records to migrate", MigrationName, totalProgressRecords);
 
                 var totalBatches = (int)Math.Ceiling(totalProgressRecords / (double)BatchSize);
                 var migratedCount = 0;
@@ -158,21 +158,21 @@ public class MigrateProgressToReadingSessions : ManualMigration
                         migratedCount += sessions.Count;
                     }
 
-                    logger.LogInformation("Migrated batch {Current}/{Total} ({Count} sessions)",
-                        batchNumber + 1, totalBatches, migratedCount);
+                    logger.LogInformation("[{Scope}] Migrated batch {Current}/{Total} ({Count} sessions)",
+                        MigrationName, batchNumber + 1, totalBatches, migratedCount);
                 }
 
-                logger.LogInformation("Migration complete: {Count} sessions created from {Total} progress records",
-                    migratedCount, totalProgressRecords);
+                logger.LogInformation("[{Scope}] Migration complete: {Count} sessions created from {Total} progress records",
+                    MigrationName, migratedCount, totalProgressRecords);
             }
             else
             {
-                logger.LogInformation("No progress records found to migrate");
+                logger.LogInformation("[{Scope}] No progress records found to migrate", MigrationName);
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error during MigrateProgressToReadingSessions migration");
+            logger.LogError(ex, "[{Scope}] Error during MigrateProgressToReadingSessions migration", MigrationName);
             throw;
         }
     }
