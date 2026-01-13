@@ -141,7 +141,12 @@ public class LibraryController : BaseApiController
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(UserId, "generic-library"));
 
-        await _unitOfWork.CommitAsync();
+        // I added this twice as some users were having issues where their new library wasn't added to the side nav.
+        // I wasn't able to reproduce but could validate it didn't happen with this extra commit. (https://github.com/Kareadita/Kavita/issues/4248)
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync();
+        }
 
         await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
 
@@ -487,7 +492,14 @@ public class LibraryController : BaseApiController
 
         try
         {
-            return Ok(await DeleteLibrary(libraryId, UserId));
+            var result = await DeleteLibrary(libraryId, UserId);
+            if (result)
+            {
+                // Inform the user's side nav to remove it if needed
+                await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
+                    MessageFactory.SideNavUpdateEvent(UserId), false);
+            }
+            return Ok(result);
         }
         catch (Exception ex)
         {
