@@ -80,7 +80,7 @@
               {{t('last-accessed-label')}}
             </ng-template>
             <ng-template let-item="row" ngx-datatable-cell-template>
-              {{ item.lastAccessedAtUtc | utcToLocalDate | defaultDate }}
+              {{ item.lastAccessedAtUtc | utcToLocalDate | date:'mediumDate' | defaultDate }}
             </ng-template>
           </ngx-datatable-column>
 
@@ -130,7 +130,7 @@
               </div>
               <div class="col-6">
                 <label class="form-label fw-bold d-block">{{t('last-accessed-label')}}</label>
-                <span>{{ item.lastAccessedAtUtc | utcToLocalDate | defaultDate }}</span>
+                <span>{{ item.lastAccessedAtUtc | utcToLocalDate | date:'mediumDate' | defaultDate }}</span>
               </div>
             </div>
 
