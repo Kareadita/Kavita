@@ -596,7 +596,7 @@ public class TaskScheduler : ITaskScheduler
             var existingLibraryIds = user.SideNavStreams?
                 .Where(s => s.LibraryId.HasValue)
                 .Select(s => s.LibraryId!.Value)
-                .ToHashSet() ?? [];
+                .ToHashSet();
 
             var missingLibIds = accessibleLibraryIds.Except(existingLibraryIds).ToList();
 
@@ -604,9 +604,7 @@ public class TaskScheduler : ITaskScheduler
 
             _logger.LogInformation(
                 "Found {Count} libraries missing from User {UserId} sidenav: [{LibraryIds}]",
-                missingLibIds.Count,
-                user.Id,
-                string.Join(", ", missingLibIds));
+                missingLibIds.Count, user.Id, string.Join(", ", missingLibIds));
 
             foreach (var libId in missingLibIds)
             {
