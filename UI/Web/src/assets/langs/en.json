@@ -2717,7 +2717,7 @@
         "title": "Publication Status",
         "visualisation-label": "Visualisation",
         "data-table-label": "Data Table",
-        "year-header": "Year",
+        "status-header": "{{manage-matched-metadata.status-header}}",
         "count-header": "Count",
         "no-data": "{{common.no-data}}"
     },
