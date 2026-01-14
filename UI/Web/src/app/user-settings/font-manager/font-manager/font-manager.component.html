@@ -54,21 +54,21 @@
                   @switch (uploadMode()) {
                     @case ('all') {
                       <div class="row g-0 mt-3 pb-3">
-                        <div class="mx-auto">
-                          <div class="row g-0 mb-3">
-                            <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
+                        <div class="mx-auto text-center">
+                          <div class="mb-3">
+                            <i class="fa fa-file-upload" style="font-size: 24px;" aria-hidden="true"></i>
                           </div>
 
-                          <div class="d-flex justify-content-center">
-                            <div class="d-flex justify-content-evenly">
-                              <a class="pe-0" href="javascript:void(0)" (click)="uploadMode.set('url')">
-                                <span class="phone-hidden">{{t('enter-an-url-pre-title', {url: ''})}}</span>{{t('url')}}
-                              </a>
-                              <span class="ps-1 pe-1">•</span>
-                              <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
-                              <span class="ps-1 pe-1">•</span>
-                              <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
-                            </div>
+                          <div class="d-flex justify-content-center align-items-center gap-2">
+                            <a href="javascript:void(0)" (click)="uploadMode.set('url')">
+                              <span class="d-none d-md-inline">{{t('enter-an-url-pre-title', {url: ''})}}</span>{{t('url')}}
+                            </a>
+                            <span class="text-muted">•</span>
+                            <span class="d-none d-md-inline">{{t('drag-n-drop')}}</span>
+                            <span class="d-none d-md-inline text-muted">•</span>
+                            <a href="javascript:void(0)" (click)="openFileSelector()">
+                              {{t('upload')}}<span class="d-none d-md-inline"> {{t('upload-continued')}}</span>
+                            </a>
                           </div>
                         </div>
                       </div>
