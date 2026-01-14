@@ -62,10 +62,14 @@ export class LicenseComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.loadLicenseInfo().subscribe();
+    this.loadLicenseInfo();
   }
 
   loadLicenseInfo(forceCheck = false) {
+    this.getLicenseInfoObservable(forceCheck).subscribe();
+  }
+
+  getLicenseInfoObservable(forceCheck = false) {
     this.isChecking.set(true);
 
     return this.licenseService.hasAnyLicense()
@@ -110,7 +114,7 @@ export class LicenseComponent implements OnInit {
           this.isViewMode.set(true);
           this.isSaving.set(false);
           this.cdRef.markForCheck();
-          this.loadLicenseInfo().subscribe(async (info) => {
+          this.getLicenseInfoObservable().subscribe(async (info) => {
             if (info?.isActive && !hadActiveLicenseBefore) {
               await this.confirmService.info(translate('license.k+-unlocked-description'), translate('license.k+-unlocked'));
             } else {
