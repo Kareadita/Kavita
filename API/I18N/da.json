@@ -100,5 +100,6 @@
     "generic-series-delete": "Der opstod en fejl i forbindelse med sletningen af serien",
     "generic-series-update": "Der opstod en fejl i forbindelse med opdateringen af serien",
     "series-updated": "Succesfuldt opdateret",
-    "password-authentication-disabled": "Adgangskodegodkendelse er deaktiveret, log ind via OpenID Connect"
+    "password-authentication-disabled": "Adgangskodegodkendelse er deaktiveret, log ind via OpenID Connect",
+    "email-taken": "E-mail allerede i brug"
 }
