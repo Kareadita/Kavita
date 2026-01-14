@@ -78,6 +78,7 @@ export class NavService {
    * If the top Nav bar is rendered or not
    */
   navbarVisible$ = this.navbarVisibleSource.asObservable();
+  navbarVisibleSignal = toSignal(this.navbarVisible$, {initialValue: false})
 
   private sideNavCollapseSource = new ReplaySubject<boolean>(1);
   /**
@@ -91,7 +92,7 @@ export class NavService {
    * If the side nav is rendered or not into the DOM.
    */
   sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
-  sideNavVisibilitySignal = toSignal(this.sideNavVisibility$, {initialValue: false})
+  sideNavVisibilitySignal = toSignal(this.sideNavVisibility$, {initialValue: false});
 
   usePreferenceSideNav$ = this.router.events.pipe(
     filter(event => event instanceof NavigationEnd),
