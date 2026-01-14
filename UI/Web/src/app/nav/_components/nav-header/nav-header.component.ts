@@ -1,4 +1,4 @@
-import {AsyncPipe, DOCUMENT} from '@angular/common';
+import {DOCUMENT} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -55,7 +55,7 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, GroupedTypeaheadComponent, ImageComponent,
     SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    AsyncPipe, SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileIconComponent]
+    SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileIconComponent]
 })
 export class NavHeaderComponent {
 
@@ -190,6 +190,7 @@ export class NavHeaderComponent {
   }
 
   toggleSideNav(event: any) {
+    console.log('nav-header: toggling side nav');
     event.stopPropagation();
     this.navService.toggleSideNav();
   }

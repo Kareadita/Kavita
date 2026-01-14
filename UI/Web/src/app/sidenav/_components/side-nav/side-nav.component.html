@@ -1,12 +1,11 @@
 <ng-container *transloco="let t; prefix: 'side-nav'">
 
-  @let isSideNavCollapsed = navService.sideNavCollapsedSignal();
-  @let isSideNavVisible = navService.sideNavVisibilitySignal();
-  {{debug(isSideNavCollapsed)}}
+  @let sideNavVisible = navService.sideNavVisibilitySignal();
+  @let sideNavCollapsed = navService.sideNavCollapsedSignal();
 
   @if (accountService.currentUser$ | async; as user) {
-    <div class="side-nav-container" [ngClass]="{'closed' : isSideNavCollapsed,
-    'hidden': isSideNavVisible === false,
+    <div class="side-nav-container" [ngClass]="{'closed' : sideNavCollapsed,
+    'hidden': sideNavVisible === false,
     'no-donate': (licenseService.hasValidLicense$ | async) === true}">
       <div class="side-nav" cdkDropList (cdkDropListDropped)="reorderDrop($event)">
 
@@ -26,7 +25,7 @@
                                  [title]="t('customize')" link="/settings"
                                  [fragment]="SettingsTabId.Customize" />
             }
-            @if (streams.length > ItemLimit && isSideNavCollapsed === false && !editMode) {
+            @if (streams.length > ItemLimit && sideNavCollapsed === false && !editMode) {
               <div cdkDrag cdkDragDisabled class="mb-2 mt-3 ms-2 me-2">
                 <label for="filter" class="form-label visually-hidden">{{t('filter-label')}}</label>
                 <div class="form-group position-relative">
@@ -108,11 +107,11 @@
   }
 
   @if (breakpointService.isTabletOrBelow()) {
-    <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : isSideNavCollapsed}"></div>
+    <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : sideNavCollapsed}"></div>
   }
 
-  <div class="sidenav-bottom" [ngClass]="{'closed' : isSideNavCollapsed,
-      'hidden': isSideNavVisible === false || (licenseService.hasValidLicense$ | async) === true}">
+  <div class="sidenav-bottom" [ngClass]="{'closed' : sideNavCollapsed,
+      'hidden': sideNavVisible === false || (licenseService.hasValidLicense$ | async) === true}">
     @if ((licenseService.hasValidLicense$ | async) === false) {
       <app-side-nav-item [ngClass]="'donate'" icon="fa-heart"
                         [ngbTooltip]="t('donate-tooltip')"

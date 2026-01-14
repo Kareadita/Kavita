@@ -5,7 +5,8 @@ import {
   Component,
   DestroyRef,
   effect,
-  inject
+  inject,
+  untracked
 } from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AsyncPipe, DOCUMENT, NgClass} from "@angular/common";
@@ -214,8 +215,10 @@ export class PreferenceNavComponent implements AfterViewInit {
       if (!navEvent) return;
 
       if (this.breakpointService.isAboveMobile()) return;
-      if (this.navService.sideNavCollapsedSignal()) return;
 
+      const isCollapsed = untracked(() => this.navService.sideNavCollapsedSignal());
+      if (isCollapsed) return;
+      
       this.navService.collapseSideNav(true);
     });
 

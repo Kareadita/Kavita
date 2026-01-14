@@ -3,7 +3,7 @@ import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import {filter, map, tap} from 'rxjs';
 import {NavService} from 'src/app/_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
+import {NgClass, NgTemplateOutlet} from "@angular/common";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
@@ -11,7 +11,7 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
   selector: 'app-side-nav-item',
-  imports: [RouterLink, ImageComponent, NgTemplateOutlet, NgClass, AsyncPipe],
+  imports: [RouterLink, ImageComponent, NgTemplateOutlet, NgClass],
   templateUrl: './side-nav-item.component.html',
   styleUrls: ['./side-nav-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -161,9 +161,8 @@ export class SideNavItemComponent implements OnInit {
 
   // If on mobile, automatically collapse the side nav after making a selection
   collapseNavIfApplicable() {
-    if (this.breakpointService.isMobile()) {
-      this.navService.collapseSideNav(true);
-    }
+    if (!this.breakpointService.isMobile()) return;
+    this.navService.collapseSideNav(true);
   }
 
 }

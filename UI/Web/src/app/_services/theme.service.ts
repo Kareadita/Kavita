@@ -88,9 +88,9 @@ export class ThemeService {
         const evt = (message.payload as SiteThemeUpdatedEvent);
         this.currentTheme$.pipe(take(1)).subscribe(currentTheme => {
           if (currentTheme && currentTheme.name !== EVENTS.SiteThemeProgress) return;
+
           console.log('Active theme has been updated, refreshing theme');
           this.setTheme(currentTheme.name);
-
         });
       }
     });

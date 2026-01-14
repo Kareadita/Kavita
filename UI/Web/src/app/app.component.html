@@ -10,8 +10,8 @@
     }
     <app-nav-header />
 
-    @let sideNavVisible = navService.sideNavVisibility$ | async;
-    @let sideNavCollapsed = navService.sideNavCollapsed$ | async;
+    @let sideNavVisible = navService.sideNavVisibilitySignal();
+    @let sideNavCollapsed = navService.sideNavCollapsedSignal();
     @let usePreferenceSideNav = navService.usePreferenceSideNav$ | async;
 
     <div [ngClass]="{'closed' : sideNavCollapsed, 'content-wrapper': sideNavVisible}">
@@ -23,11 +23,11 @@
         }
       }
 
-      <div [ngClass]="{'g-0': sideNavVisible === false}">
+      <div [ngClass]="{'g-0': !sideNavVisible}">
         <a id="content"></a>
         @if (sideNavVisible) {
           <div>
-            <div class="companion-bar" [ngClass]="{'companion-bar-content': sideNavCollapsed === false || usePreferenceSideNav,
+            <div class="companion-bar" [ngClass]="{'companion-bar-content': !sideNavCollapsed || usePreferenceSideNav,
                   'companion-bar-collapsed': (sideNavCollapsed && usePreferenceSideNav)}">
               <router-outlet />
             </div>

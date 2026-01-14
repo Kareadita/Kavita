@@ -175,7 +175,6 @@ export class ServerStatsStatsTabComponent {
         return;
       }
 
-      console.log('ran release year encode code')
       // Build a map of unique decade ranges to encode
       const decadeMap = new Map<string, StatBucket>();
       for (const item of items) {
