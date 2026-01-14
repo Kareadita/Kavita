@@ -61,7 +61,7 @@ public class LicenseController(
     /// <summary>
     /// Asks Kavita+ for the latest license info
     /// </summary>
-    /// <param name="forceCheck">Force checking the API and skip the 8 hour cache</param>
+    /// <param name="forceCheck">Force checking the API and skip the 8-hour cache</param>
     /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("info")]
