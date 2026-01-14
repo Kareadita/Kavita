@@ -286,4 +286,8 @@ export class SideNavComponent implements OnInit {
       }
     });
   }
+
+  debug(message: any) {
+    console.log(message);
+  }
 }

@@ -1,10 +1,12 @@
 <ng-container *transloco="let t; prefix: 'side-nav'">
 
   @let isSideNavCollapsed = navService.sideNavCollapsedSignal();
+  @let isSideNavVisible = navService.sideNavVisibilitySignal();
+  {{debug(isSideNavCollapsed)}}
 
   @if (accountService.currentUser$ | async; as user) {
     <div class="side-nav-container" [ngClass]="{'closed' : isSideNavCollapsed,
-    'hidden': (navService.sideNavVisibility$ | async) === false,
+    'hidden': isSideNavVisible === false,
     'no-donate': (licenseService.hasValidLicense$ | async) === true}">
       <div class="side-nav" cdkDropList (cdkDropListDropped)="reorderDrop($event)">
 
@@ -110,7 +112,7 @@
   }
 
   <div class="sidenav-bottom" [ngClass]="{'closed' : isSideNavCollapsed,
-      'hidden': (navService.sideNavVisibility$ | async) === false || (licenseService.hasValidLicense$ | async) === true}">
+      'hidden': isSideNavVisible === false || (licenseService.hasValidLicense$ | async) === true}">
     @if ((licenseService.hasValidLicense$ | async) === false) {
       <app-side-nav-item [ngClass]="'donate'" icon="fa-heart"
                         [ngbTooltip]="t('donate-tooltip')"
