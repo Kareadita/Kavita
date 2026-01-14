@@ -1,6 +1,6 @@
 import {DOCUMENT} from '@angular/common';
-import {DestroyRef, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2} from '@angular/core';
-import {filter, ReplaySubject, take} from 'rxjs';
+import {DestroyRef, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2, signal} from '@angular/core';
+import {filter, take} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
@@ -8,7 +8,7 @@ import {TextResonse} from "../_types/text-response";
 import {AccountService} from "./account.service";
 import {map} from "rxjs/operators";
 import {NavigationEnd, Router} from "@angular/router";
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {WikiLink} from "../_models/wiki";
 import {AuthGuard} from "../_guards/auth.guard";
 
@@ -32,14 +32,14 @@ interface NavItem {
   providedIn: 'root'
 })
 export class NavService {
-  private document = inject<Document>(DOCUMENT);
-  private httpClient = inject(HttpClient);
-
-
+  private readonly document = inject<Document>(DOCUMENT);
+  private readonly httpClient = inject(HttpClient);
   private readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
+  private readonly renderer: Renderer2;
+  private readonly baseUrl = environment.apiUrl;
   public localStorageSideNavKey = 'kavita--sidenav--expanded';
 
   public navItems: NavItem[] = [
@@ -73,25 +73,36 @@ export class NavService {
     }
   ]
 
-  private navbarVisibleSource = new ReplaySubject<boolean>(1);
+  private navBarVisible = signal(false);
   /**
    * If the top Nav bar is rendered or not
    */
-  navbarVisible$ = this.navbarVisibleSource.asObservable();
+  navbarVisibleSignal = this.navBarVisible.asReadonly();
+  /**
+   * If the top Nav bar is rendered or not
+   */
+  navbarVisible$ = toObservable(this.navBarVisible);
 
-  private sideNavCollapseSource = new ReplaySubject<boolean>(1);
+
+  private sideNavCollapsed = signal(false);
   /**
    * If the Side Nav is in a collapsed state or not.
    */
-  sideNavCollapsed$ = this.sideNavCollapseSource.asObservable();
-  sideNavCollapsedSignal = toSignal(this.sideNavCollapsed$, {initialValue: false});
+  sideNavCollapsedSignal = this.sideNavCollapsed.asReadonly();
+  /**
+   * If the Side Nav is in a collapsed state or not.
+   */
+  sideNavCollapsed$ = toObservable(this.sideNavCollapsed);
 
-  private sideNavVisibilitySource = new ReplaySubject<boolean>(1);
+  private sideNavVisibility = signal(false);
   /**
    * If the side nav is rendered or not into the DOM.
    */
-  sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
-  sideNavVisibilitySignal = toSignal(this.sideNavVisibility$, {initialValue: false})
+  sideNavVisibilitySignal = this.sideNavVisibility.asReadonly();
+  /**
+   * If the side nav is rendered or not into the DOM.
+   */
+  sideNavVisibility$ = toObservable(this.sideNavVisibility);
 
   usePreferenceSideNav$ = this.router.events.pipe(
     filter(event => event instanceof NavigationEnd),
@@ -105,8 +116,7 @@ export class NavService {
     takeUntilDestroyed(this.destroyRef),
   );
 
-  private renderer: Renderer2;
-  baseUrl = environment.apiUrl;
+
 
   constructor() {
     const rendererFactory = inject(RendererFactory2);
@@ -121,7 +131,7 @@ export class NavService {
     });
 
     const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
-    this.sideNavCollapseSource.next(sideNavState);
+    this.sideNavCollapsed.set(sideNavState);
     this.showSideNav();
   }
 
@@ -164,7 +174,7 @@ export class NavService {
       this.renderer.setStyle(bodyElem, 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
       this.renderer.setStyle(bodyElem, 'overflow', 'hidden');
       this.renderer.setStyle(this.document.querySelector('html'), 'height', 'calc(var(--vh)*100 - var(--nav-offset))');
-      this.navbarVisibleSource.next(true);
+      this.navBarVisible.set(true);
     }, 10);
   }
 
@@ -179,7 +189,7 @@ export class NavService {
       this.renderer.setStyle(bodyElem, 'scrollbar-gutter', 'initial', RendererStyleFlags2.Important);
       this.renderer.removeStyle(this.document.querySelector('html'), 'height');
       this.renderer.setStyle(bodyElem, 'overflow', 'auto');
-      this.navbarVisibleSource.next(false);
+      this.navBarVisible.set(false);
     }, 10);
   }
 
@@ -208,27 +218,24 @@ export class NavService {
    * Shows the side nav. When being visible, the side nav will automatically return to previous collapsed state.
    */
   showSideNav() {
-    this.sideNavVisibilitySource.next(true);
+    this.sideNavVisibility.set(true);
   }
 
   /**
    * Hides the side nav. This is useful for the readers and login page.
    */
   hideSideNav() {
-    this.sideNavVisibilitySource.next(false);
+    this.sideNavVisibility.set(false);
   }
 
   toggleSideNav() {
-    this.sideNavCollapseSource.pipe(take(1)).subscribe(val => {
-      if (val === undefined) val = false;
-      const newVal = !(val || false);
-      this.sideNavCollapseSource.next(newVal);
-      localStorage.setItem(this.localStorageSideNavKey, newVal + '');
-    });
+    const newValue = !this.sideNavCollapsed();
+    this.sideNavCollapsed.set(newValue);
+    localStorage.setItem(this.localStorageSideNavKey, newValue + '');
   }
 
   collapseSideNav(isCollapsed: boolean) {
-    this.sideNavCollapseSource.next(isCollapsed);
+    this.sideNavCollapsed.set(isCollapsed);
     localStorage.setItem(this.localStorageSideNavKey, isCollapsed + '');
   }
 }

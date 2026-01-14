@@ -1,15 +1,14 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject,} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, inject,} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
-import {distinctUntilChanged, map, take, tap} from 'rxjs';
+import {distinctUntilChanged, tap} from 'rxjs';
 import {ThemeService} from 'src/app/_services/theme.service';
 import {SiteTheme, ThemeProvider} from 'src/app/_models/preferences/site-theme';
 import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
-import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {shareReplay} from "rxjs/operators";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {ImageComponent} from "../../shared/image/image.component";
 import {DownloadableSiteTheme} from "../../_models/theme/downloadable-site-theme";
@@ -35,14 +34,14 @@ interface ThemeContainer {
     templateUrl: './theme-manager.component.html',
     styleUrls: ['./theme-manager.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [AsyncPipe, SentenceCasePipe, TranslocoDirective, CarouselReelComponent,
-        ImageComponent, DefaultValuePipe, NgTemplateOutlet, NgxFileDropModule,
-        ReactiveFormsModule, LoadingComponent]
+  imports: [SentenceCasePipe, TranslocoDirective, CarouselReelComponent,
+    ImageComponent, DefaultValuePipe, NgTemplateOutlet, NgxFileDropModule,
+    ReactiveFormsModule, LoadingComponent]
 })
 export class ThemeManagerComponent {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly themeService = inject(ThemeService);
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
@@ -56,23 +55,16 @@ export class ThemeManagerComponent {
   selectedTheme: ThemeContainer | undefined;
   downloadableThemes: Array<DownloadableSiteTheme> = [];
   downloadedThemes: Array<SiteTheme> = [];
-  hasAdmin$ = this.accountService.currentUser$.pipe(
-    takeUntilDestroyed(this.destroyRef),
-    map(c => c && this.accountService.hasAdminRole(c)),
-    shareReplay({refCount: true, bufferSize: 1}),
-  );
 
-  canUseThemes$ = this.accountService.currentUser$.pipe(
-    takeUntilDestroyed(this.destroyRef),
-    map(c => c && !this.accountService.hasReadOnlyRole(c)),
-    shareReplay({refCount: true, bufferSize: 1}),
-  );
+  canUseThemes = computed(() => {
+    const user = this.accountService.currentUserSignal();
+    if (!user) return false;
+    return !this.accountService.hasReadOnlyRole(user);
+  });
 
   files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.css'].join(',');
   isUploadingTheme: boolean = false;
-
-
 
   constructor() {
 
@@ -115,17 +107,18 @@ export class ThemeManagerComponent {
   }
 
   applyTheme(theme: SiteTheme) {
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (!user) return;
-      const pref = Object.assign({}, user.preferences);
-      pref.theme = theme;
-      this.accountService.updatePreferences(pref).subscribe();
-      // Updating theme emits the new theme to load on the themes$
-    });
+    const user = this.accountService.currentUserSignal();
+    if (!user) return;
+
+    // Updating theme emits the new theme to load on the themes$
+    const pref = Object.assign({}, user.preferences);
+    pref.theme = theme;
+    this.accountService.updatePreferences(pref).subscribe();
   }
 
   updateDefault(theme: SiteTheme) {
     this.themeService.setDefault(theme.id).subscribe(() => {
+      // TODO: Refactor this key to be in toasts
       this.toastr.success(translate('theme-manager.updated-toastr', {name: theme.name}));
     });
   }

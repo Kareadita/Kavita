@@ -1,12 +1,12 @@
 <ng-container *transloco="let t; prefix: 'nav-header'">
-  @if (navService.navbarVisible$ | async) {
+  @if (navService.navbarVisibleSignal()) {
     @let user = currentUser();
 
     <nav class="navbar navbar-expand-md navbar-dark fixed-top">
       <div class="container-fluid">
         <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-alt')}}</a>
 
-        @if (navService.sideNavVisibility$ | async) {
+        @if (navService.sideNavVisibilitySignal()) {
           <a class="side-nav-toggle" (click)="toggleSideNav($event)"><i class="fas fa-bars" aria-hidden="true"></i></a>
         }
 

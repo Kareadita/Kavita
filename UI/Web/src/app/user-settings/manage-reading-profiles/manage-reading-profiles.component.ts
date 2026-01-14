@@ -266,7 +266,7 @@ export class ManageReadingProfilesComponent implements OnInit {
           this.cdRef.markForCheck();
         }),
         catchError(err => {
-          console.log(err);
+          console.error(err);
           this.toastr.error(err.message);
 
           return of(null);
@@ -285,7 +285,7 @@ export class ManageReadingProfilesComponent implements OnInit {
         this.cdRef.markForCheck();
       }),
       catchError(err => {
-        console.log(err);
+        console.error(err);
         this.toastr.error(err.message);
 
         return of(null);

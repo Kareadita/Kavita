@@ -15,7 +15,7 @@
     "forgot-password-generic": "Es wird eine E-Mail an die E-Mail-Adresse gesendet, wenn sie in der Datenbank vorhanden ist",
     "not-accessible-password": "Es kann nicht auf Ihren Server zugegriffen werden. Der Link zum Zurücksetzen Ihres Passworts finden Sie in den Protokollen",
     "disabled-account": "Ihr Konto ist deaktiviert. Kontaktieren Sie den Server-Administrator.",
-    "confirm-email": "Bitte bestätigen Sie zunächst Ihre E-Mail-Adresse",
+    "confirm-email": "Sie müssen zuerst Ihre E-Mail-Adresse bestätigen",
     "locked-out": "Sie wurden aufgrund zu vieler Autorisierungsversuche gesperrt. Bitte warten Sie 10 Minuten.",
     "confirm-token-gen": "Es gab ein Problem bei der Generierung eines Bestätigungs-Tokens",
     "invalid-password": "Ungültiges Passwort",

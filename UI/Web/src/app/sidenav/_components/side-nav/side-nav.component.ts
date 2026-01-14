@@ -124,19 +124,17 @@ export class SideNavComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     )
   ).pipe(
-      startWith(null),
-      filter(data => data !== null),
-      takeUntilDestroyed(this.destroyRef),
+    startWith(null),
+    filter(data => data !== null),
+    takeUntilDestroyed(this.destroyRef),
   );
 
   collapseSideNavOnMobileNav$ = this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd),
-      takeUntilDestroyed(this.destroyRef),
-      map(evt => evt as NavigationEnd),
-      filter(() => this.breakpointService.isMobile()),
-      switchMap(() => this.navService.sideNavCollapsed$),
-      take(1),
-      filter(collapsed => !collapsed)
+    filter(event => event instanceof NavigationEnd),
+    takeUntilDestroyed(this.destroyRef),
+    map(evt => evt as NavigationEnd),
+    filter(() => this.breakpointService.isMobile() && this.navService.sideNavCollapsedSignal()),
+    filter(collapsed => !collapsed)
   );
 
 
@@ -147,8 +145,7 @@ export class SideNavComponent implements OnInit {
     }
 
     this.collapseSideNavOnMobileNav$.subscribe(() => {
-        this.navService.collapseSideNav(false);
-        this.cdRef.markForCheck();
+      this.navService.collapseSideNav(false);
     });
 
     this.keyBindService.registerListener(

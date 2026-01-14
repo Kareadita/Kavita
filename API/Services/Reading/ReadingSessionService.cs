@@ -30,7 +30,6 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
     private readonly ILogger<ReadingSessionService> _logger;
     private readonly HybridCache _cache;
     private readonly TimeSpan _sessionTimeout;
-    private readonly TimeSpan _pollInterval;
     private readonly Timer _cleanupTimer;
     private readonly SemaphoreSlim _cleanupLock = new(1, 1);
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> UserLocks = new();
@@ -53,13 +52,13 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         _logger = logger;
         _cache = cache;
         _sessionTimeout = sessionTimeout ?? TimeSpan.FromMinutes(10);
-        _pollInterval = pollInterval ?? TimeSpan.FromMinutes(5);
+        var pollInterval1 = pollInterval ?? TimeSpan.FromMinutes(5);
 
         _cleanupTimer = new Timer(
             callback: _ => _ = RunCleanupAsync(),
             state: null,
-            dueTime: _pollInterval,
-            period: _pollInterval
+            dueTime: pollInterval1,
+            period: pollInterval1
         );
     }
 

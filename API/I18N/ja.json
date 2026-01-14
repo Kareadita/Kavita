@@ -111,7 +111,7 @@
     "file-doesnt-exist": "ファイルが存在しません",
     "update-metadata-fail": "メタデータを更新できませんでした",
     "age-restriction-not-applicable": "無制限",
-    "no-cover-image": "カバー画像がありません",
+    "no-cover-image": "表紙画像がありません",
     "no-library-access": "ユーザーにはこのライブラリへのアクセス権がありません",
     "library-doesnt-exist": "ライブラリが存在しません",
     "bookmark-save": "ブックマークを保存できませんでした",

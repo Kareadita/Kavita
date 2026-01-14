@@ -88,9 +88,9 @@ export class ThemeService {
         const evt = (message.payload as SiteThemeUpdatedEvent);
         this.currentTheme$.pipe(take(1)).subscribe(currentTheme => {
           if (currentTheme && currentTheme.name !== EVENTS.SiteThemeProgress) return;
+
           console.log('Active theme has been updated, refreshing theme');
           this.setTheme(currentTheme.name);
-
         });
       }
     });
@@ -234,10 +234,7 @@ export class ThemeService {
             this.setTheme('dark');
             return;
           }
-          const styleElem = this.document.createElement('style');
-          styleElem.id = 'theme-' + theme.name;
-          styleElem.appendChild(this.document.createTextNode(content));
-          this.renderer.appendChild(this.document.head, styleElem);
+          this.injectStyleNode(theme, content);
 
           // Check if the theme has --theme-color and apply it to meta tag
           const themeColor = this.getThemeColor();
@@ -283,7 +280,23 @@ export class ThemeService {
   }
 
   private unsetThemes() {
-    this.themeCache.forEach(theme => this.document.body.classList.remove(theme.selector));
+    this.themeCache.forEach(theme => {
+      this.document.body.classList.remove(theme.selector);
+
+      if (theme.provider === ThemeProvider.System) return;
+      // Remove the injected style (unless it's Dark)
+      const styleElem = this.document.querySelector('style#theme-' + theme.name);
+      if (styleElem) {
+        this.renderer.removeChild(this.document.head, styleElem);
+      }
+    });
+  }
+
+  private injectStyleNode(theme: SiteTheme, content: string) {
+    const styleElem = this.document.createElement('style');
+    styleElem.id = 'theme-' + theme.name;
+    styleElem.appendChild(this.document.createTextNode(content));
+    this.renderer.appendChild(this.document.head, styleElem);
   }
 
   private unsetBookThemes() {

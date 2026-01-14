@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'theme-manager'">
 
   <div class="position-relative">
-    @if ((hasAdmin$ | async)) {
+    @if (accountService.isAdmin()) {
       <button class="btn btn-outline-primary position-absolute custom-position" (click)="selectTheme(undefined)" [title]="t('add')">
         <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
       </button>
@@ -43,7 +43,7 @@
             <div class="mx-auto">
               <div class="d-flex justify-content-center">
                 <div class="d-flex justify-content-evenly">
-                  @if (hasAdmin$ | async) {
+                  @if (accountService.isAdmin()) {
                     {{t('preview-default-admin')}}
                   } @else {
                     {{t('preview-default')}}
@@ -56,7 +56,7 @@
 
           @if (files && files.length > 0) {
             <app-loading [loading]="isUploadingTheme" />
-          } @else if (hasAdmin$ | async) {
+          } @else if (accountService.isAdmin()) {
             <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
                           dropZoneClassName="file-upload" contentClassName="file-upload-zone">
 
@@ -87,14 +87,14 @@
             {{selectedTheme.name | sentenceCase}}
             <div class="float-end">
               @if (selectedTheme.isSiteTheme) {
-                @if (selectedTheme.name !== 'Dark' && (canUseThemes$ | async)) {
+                @if (selectedTheme.name !== 'Dark' && canUseThemes()) {
                   <button class="btn btn-danger me-1" (click)="deleteTheme(selectedTheme.site!)">{{t('delete')}}</button>
                 }
-                @if (hasAdmin$ | async) {
+                @if (accountService.isAdmin()) {
                   <button class="btn btn-secondary me-1" [disabled]="selectedTheme.site?.isDefault" (click)="updateDefault(selectedTheme.site!)">{{t('set-default')}}</button>
                 }
                 <button class="btn btn-primary me-1" [disabled]="currentTheme && selectedTheme.name === currentTheme.name" (click)="applyTheme(selectedTheme.site!)">{{t('apply')}}</button>
-              } @else if (canUseThemes$ | async) {
+              } @else if (canUseThemes()) {
                 <button class="btn btn-primary" [disabled]="selectedTheme.downloadable?.alreadyDownloaded" (click)="downloadTheme(selectedTheme.downloadable!)">{{t('download')}}</button>
               }
             </div>
