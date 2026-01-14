@@ -118,6 +118,7 @@ export class ThemeManagerComponent {
 
   updateDefault(theme: SiteTheme) {
     this.themeService.setDefault(theme.id).subscribe(() => {
+      // TODO: Refactor this key to be in toasts
       this.toastr.success(translate('theme-manager.updated-toastr', {name: theme.name}));
     });
   }
