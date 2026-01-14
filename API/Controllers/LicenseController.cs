@@ -30,7 +30,6 @@ public class LicenseController(
     /// </summary>
     /// <returns></returns>
     [HttpGet("valid-license")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache, VaryByQueryKeys = ["forceCheck"])]
     public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
 
@@ -53,7 +52,6 @@ public class LicenseController(
     /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("has-license")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasLicense()
     {
         return Ok(!string.IsNullOrEmpty(
@@ -67,7 +65,6 @@ public class LicenseController(
     /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("info")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache, VaryByQueryKeys = ["forceCheck"])]
     public async Task<ActionResult<LicenseInfoDto?>> GetLicenseInfo(bool forceCheck = false)
     {
         try
