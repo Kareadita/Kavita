@@ -284,11 +284,14 @@ export class ThemeService {
       this.document.body.classList.remove(theme.selector);
 
       if (theme.provider === ThemeProvider.System) return;
+
+      // TODO: BUG: We aren't removing the old style tags, thus some style conflict can occur (switch theme, delete button might be green).
+      // We need to remove the old style tags, however this brought instability in v0.8.9. I removed this for hotfix, let's revist it later. 
       // Remove the injected style (unless it's Dark)
-      const styleElem = this.document.querySelector('style#theme-' + theme.name);
-      if (styleElem) {
-        this.renderer.removeChild(this.document.head, styleElem);
-      }
+      // const styleElem = this.document.querySelector('style#theme-' + theme.name);
+      // if (styleElem) {
+      //   this.renderer.removeChild(this.document.head, styleElem);
+      // }
     });
   }
 
