@@ -1,25 +1,11 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject, OnInit,
-  QueryList, signal,
-  TemplateRef,
-  ViewChild,
-  ViewChildren
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, signal,} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
-import {BehaviorSubject, combineLatest, map, Observable, shareReplay, tap} from 'rxjs';
+import {tap} from 'rxjs';
 import {StatisticsService} from 'src/app/_services/statistics.service';
-import {compare, SortableHeader, SortEvent} from 'src/app/_single-module/table/_directives/sortable-header.directive';
-import {FileExtension, FileExtensionBreakdown} from '../../_models/file-breakdown';
-import {PieDataItem} from '../../_models/pie-data-item';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AsyncPipe} from '@angular/common';
-import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {FileExtension} from '../../_models/file-breakdown';
+import {TranslocoDirective} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {NgxDatatableModule, SortDirection} from "@siemens/ngx-datatable";
+import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
@@ -45,7 +31,6 @@ export class FileBreakdownStatsComponent implements OnInit {
   downloadInProgress: {[key: string]: boolean}  = {};
 
   private readonly statService = inject(StatisticsService);
-  private readonly translocoService = inject(TranslocoService);
 
   trackByExtension = (_: number, item: FileExtension) => item.extension + '_' + item.totalFiles;
 

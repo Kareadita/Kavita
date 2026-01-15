@@ -88,7 +88,7 @@ public class AccountController : BaseApiController
     /// Returns true if OIDC authentication cookies are present and the <see cref="IdentityServiceExtensions.OpenIdConnect"/>
     /// scheme has been registered
     /// </summary>
-    /// <remarks>Makes not guarantee about their validity</remarks>
+    /// <remarks>Makes no guarantee about their validity</remarks>
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("oidc-authenticated")]
