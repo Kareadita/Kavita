@@ -2,7 +2,7 @@
   <div class="card stats-card p-4">
     <h6 class="stats-title">{{t('title')}}</h6>
 
-    @let statuses = (publicationStatues$ | async) || [];
+    @let statuses = publicationStatues();
     @if (statuses.length > 0) {
       <app-responsive-table [rows]="statuses" [trackByFn]="trackByIdentity">
         <ng-template #tableTemplate>
