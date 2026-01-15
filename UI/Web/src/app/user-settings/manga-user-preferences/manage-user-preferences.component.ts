@@ -5,7 +5,14 @@ import {AccountService} from "../../_services/account.service";
 import {Title} from "@angular/platform-browser";
 import {Router} from "@angular/router";
 import {LocalizationService} from "../../_services/localization.service";
-import {FormArray, FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
+import {
+  FormArray,
+  FormControl,
+  FormGroup,
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators
+} from "@angular/forms";
 import {User} from "../../_models/user/user";
 import {KavitaLocale} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -162,7 +169,7 @@ export class ManageUserPreferencesComponent implements OnInit {
         bookReaderHighlightSlots: this.fb.array(pref.bookReaderHighlightSlots.map(s => this.fb.control(s))),
         colorScapeEnabled: this.fb.control<boolean>(pref.colorScapeEnabled),
         dataSaver: this.fb.control<boolean>(pref.dataSaver),
-        promptForRereadsAfter: this.fb.control<number>(pref.promptForRereadsAfter),
+        promptForRereadsAfter: this.fb.control<number>(pref.promptForRereadsAfter, [Validators.required]), // Required allows 0, but not null
 
         aniListScrobblingEnabled: this.fb.control<boolean>(pref.aniListScrobblingEnabled),
         wantToReadSync: this.fb.control<boolean>(pref.wantToReadSync),
