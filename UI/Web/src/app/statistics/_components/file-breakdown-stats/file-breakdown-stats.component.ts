@@ -37,7 +37,8 @@ export class FileBreakdownStatsComponent implements OnInit {
   ngOnInit() {
     this.statService.getFileBreakdown().pipe(
       tap(res => {
-        this.files.set(res.fileBreakdown);
+        // Using sort props breaks the table for some users; https://github.com/Kareadita/Kavita/issues/4365
+        this.files.set(res.fileBreakdown.sort((a, b) => b.totalFiles - a.totalFiles));
         this.totalSize.set(res.totalFileSize);
       })
     ).subscribe();
