@@ -3,14 +3,14 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  inject,
-  QueryList,
+  inject, OnInit,
+  QueryList, signal,
   TemplateRef,
   ViewChild,
   ViewChildren
 } from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
-import {BehaviorSubject, combineLatest, map, Observable, shareReplay} from 'rxjs';
+import {BehaviorSubject, combineLatest, map, Observable, shareReplay, tap} from 'rxjs';
 import {StatisticsService} from 'src/app/_services/statistics.service';
 import {compare, SortableHeader, SortEvent} from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import {FileExtension, FileExtensionBreakdown} from '../../_models/file-breakdown';
@@ -19,7 +19,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe} from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {NgxDatatableModule} from "@siemens/ngx-datatable";
+import {NgxDatatableModule, SortDirection} from "@siemens/ngx-datatable";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
@@ -31,22 +31,14 @@ import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.
   templateUrl: './file-breakdown-stats.component.html',
   styleUrls: ['./file-breakdown-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, ReactiveFormsModule, AsyncPipe, TranslocoDirective, NgxDatatableModule, MangaFormatPipe, BytesPipe, CompactNumberPipe, ResponsiveTableComponent, StatsNoDataComponent]
+  imports: [NgbTooltip, ReactiveFormsModule, TranslocoDirective, NgxDatatableModule, MangaFormatPipe, BytesPipe, CompactNumberPipe, ResponsiveTableComponent, StatsNoDataComponent]
 })
-export class FileBreakdownStatsComponent {
+export class FileBreakdownStatsComponent implements OnInit {
 
-  private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
 
-  @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
-  @ViewChild('modalTable') modalTable!: TemplateRef<any>;
-
-  rawData$!: Observable<FileExtensionBreakdown>;
-  files$!: Observable<Array<FileExtension>>;
-  vizData2$!: Observable<Array<PieDataItem>>;
-
-  currentSort = new BehaviorSubject<SortEvent<FileExtension>>({column: 'extension', direction: 'asc'});
-  currentSort$: Observable<SortEvent<FileExtension>> = this.currentSort.asObservable();
+  files = signal<FileExtension[]>([]);
+  totalSize = signal<number>(0);
 
   view: [number, number] = [700, 400];
 
@@ -57,27 +49,13 @@ export class FileBreakdownStatsComponent {
 
   trackByExtension = (_: number, item: FileExtension) => item.extension + '_' + item.totalFiles;
 
-  constructor() {
-    this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntilDestroyed(this.destroyRef), shareReplay());
-
-    this.files$ = combineLatest([this.currentSort$, this.rawData$]).pipe(
-      map(([sortConfig, data]) => {
-        return {sortConfig, fileBreakdown: data.fileBreakdown};
-      }),
-      map(({ sortConfig, fileBreakdown }) => {
-        return (sortConfig.column) ? fileBreakdown.sort((a: FileExtension, b: FileExtension) => {
-          if (sortConfig.column === '') return 0;
-          const res = compare(a[sortConfig.column], b[sortConfig.column]);
-          return sortConfig.direction === 'asc' ? res : -res;
-        }) : fileBreakdown;
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    );
-
-
-    this.vizData2$ = this.files$.pipe(takeUntilDestroyed(this.destroyRef), map(data => data.map(d => {
-      return {name: d.extension || this.translocoService.translate('file-breakdown-stats.not-classified'), value: d.totalFiles, extra: d.totalSize};
-    })));
+  ngOnInit() {
+    this.statService.getFileBreakdown().pipe(
+      tap(res => {
+        this.files.set(res.fileBreakdown);
+        this.totalSize.set(res.totalFileSize);
+      })
+    ).subscribe();
   }
 
 
