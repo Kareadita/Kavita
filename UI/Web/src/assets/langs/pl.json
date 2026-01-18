@@ -1823,7 +1823,6 @@
         "title": "Status publikacji",
         "visualisation-label": "Wizualizacja",
         "data-table-label": "Tabela danych",
-        "year-header": "Rok",
         "count-header": "Liczba",
         "no-data": "{{common.no-data}}"
     },

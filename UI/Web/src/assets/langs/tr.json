@@ -1236,9 +1236,6 @@
         "fields-to-import": "Ayarlar",
         "merge": "Birleştir"
     },
-    "publication-status-stats": {
-        "year-header": "Yıl"
-    },
     "browse-genres": {
         "genre-count": "{{num}} Tür"
     },

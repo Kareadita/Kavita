@@ -2333,7 +2333,6 @@
     },
     "publication-status-stats": {
         "data-table-label": "Datatabell",
-        "year-header": "År",
         "visualisation-label": "Visualisering",
         "count-header": "Antal",
         "title": "Publikationsstatus"

@@ -1787,7 +1787,6 @@
         "title": "Stav publikácie",
         "visualisation-label": "Vizualizácia",
         "data-table-label": "Tabuľka údajov",
-        "year-header": "Rok",
         "count-header": "Počet"
     },
     "series-preview-drawer": {

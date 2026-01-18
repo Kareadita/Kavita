@@ -1855,9 +1855,9 @@
         "title": "Stádas Foilseacháin",
         "visualisation-label": "Amharcléiriú",
         "data-table-label": "Tábla Sonraí",
-        "year-header": "Bliain",
         "count-header": "Comhaireamh",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "status-header": "{{manage-matched-metadata.status-header}}"
     },
     "series-preview-drawer": {
         "staff-label": "Foireann",
