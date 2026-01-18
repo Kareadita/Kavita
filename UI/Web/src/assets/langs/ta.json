@@ -1326,8 +1326,7 @@
         "count-header": "எண்ணுங்கள்",
         "title": "வெளியீட்டு நிலை",
         "visualisation-label": "காட்சிப்படுத்தல்",
-        "data-table-label": "தரவு அட்டவணை",
-        "year-header": "ஆண்டு"
+        "data-table-label": "தரவு அட்டவணை"
     },
     "settings": {
         "admin-users": "பயனர்கள்",

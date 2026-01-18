@@ -224,7 +224,7 @@
         "valid-email": "{{validation.valid-email}}",
         "title": "E-mail eszköz szerkesztése",
         "email-tooltip": "Ezt az e-mail címet fogjuk használni a fájl Küldés funkcióval történő fogadásához",
-        "device-platform-label": "Eszközplatform"
+        "device-platform-label": "{{manage-devices.platform-label}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -468,7 +468,9 @@
         "email-label": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "valid-email": "{{common.valid-email}}",
-        "password-validation": "{{validation.password-validation}}"
+        "password-validation": "{{validation.password-validation}}",
+        "title": "Nyilvántartás",
+        "description": "Töltsd ki az űrlapot a regisztráció befejezéséhez"
     },
     "confirm-reset-password": {
         "password-label": "{{common.password}}",
@@ -1364,7 +1366,12 @@
         "roles-claim-tooltip": "Az az igény, amelyet Kavita a szerepkörök kinyerésére fog használni. Hagyja üresen az alapértelmezett érték használatához.",
         "custom-scopes-label": "Egyéni hatókörök",
         "custom-scopes-tooltip": "További hatókörök, amelyeket bejelentkezéskor az OIDC-szolgáltatótól kell kérni. Több hatókör esetén vesszővel válassza el őket. A helytelen értékek megakadályozhatják a bejelentkezést.",
-        "provision-accounts-label": "Céltartalék számlák"
+        "provision-accounts-label": "Céltartalék számlák",
+        "reset-label": "Azonosítók visszaállítása",
+        "reset-tooltip": "Külső azonosító visszaállítása az összes felhasználóról, ezzel visszaállíthatja a Kavita felhasználói és az identitásszolgáltatója közötti kapcsolatokat",
+        "reset-confirm": "Biztosan vissza szeretné állítani az összes felhasználó külső azonosítóját?",
+        "reset-success": "Külső azonosítók visszaállítása minden felhasználó számára, újbóli hitelesítés a linkeléshez",
+        "auto-save-required": "Fontos beállításokat módosítottál, automatikus mentés a megőrzésük érdekében"
     },
     "manage-auth-keys": {
         "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
@@ -1446,7 +1453,7 @@
     "client-device-card": {
         "auth-type-label": "Hitelesítési típus",
         "browser-label": "Böngésző",
-        "platform-label": "Platform",
+        "platform-label": "{{manage-devices.platform-label}}",
         "screen-label": "Képernyő",
         "version-label": "Alkalmazás verziója",
         "first-seen-label": "Első megtekintés",
@@ -1582,7 +1589,8 @@
         "series-header": "Sorozatmezők",
         "tags-header": "Címkék",
         "source-genre-tags-placeholder": "Forrás műfaja/címke",
-        "dest-genre-tags-placeholder": "Cél műfaj/címke"
+        "dest-genre-tags-placeholder": "Cél műfaj/címke",
+        "people-header": "Emberek"
     },
     "reading-progress-status-pipe": {
         "progress-incognito": "Folytatás inkognitómódban",
@@ -1617,7 +1625,7 @@
         "downloading-status": "Letöltés…"
     },
     "api-key": {
-        "copy": "Másolat"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "most-active-users": {
         "title": "Legaktívabb olvasók",
@@ -1704,7 +1712,9 @@
         "side-story": "Melléktörténet",
         "parent": "Szülő",
         "edition": "Kiadás",
-        "annual": "Évi"
+        "annual": "Évi",
+        "doujinshi": "Doujinshi",
+        "spin-off": "Szétválasztás"
     },
     "publication-status-pipe": {
         "ongoing": "Folyamatban lévő",
@@ -1745,7 +1755,9 @@
         "mature": "Érett",
         "rating-pending": "Értékelés függőben",
         "teen": "Tini",
-        "not-applicable": "Nem alkalmazható"
+        "not-applicable": "Nem alkalmazható",
+        "mature-17-plus": "17+ éves kortól",
+        "x18-plus": "18+ éves kortól"
     },
     "cover-image-size": {
         "default": "Alapértelmezett (320x455)",
@@ -1851,7 +1863,9 @@
         "close": "{{common.close}}",
         "no-data": "{{common.no-data}}",
         "page-num-label": "{{book-reader.page-num-label}}",
-        "load-bookmark": "Töltés"
+        "load-bookmark": "Töltés",
+        "image-header": "Kép",
+        "text-header": "Szöveg"
     },
     "badge-expander": {
         "more-items": "és még {{count}}"
@@ -1903,5 +1917,56 @@
         "epub": "Epub",
         "pdf": "Pdf",
         "image": "Kép"
+    },
+    "time-frame-label": {
+        "overall": "Átfogó",
+        "week": "Ezen a héten",
+        "month": "Ebben a hónapban",
+        "year": "Idén"
+    },
+    "page-chapter-label-pipe": {
+        "page-only": "— {{pageNumber}}. oldal",
+        "full": "— {{pageNumber}}. oldal, \"{{chapterTitle}}\" fejezet"
+    },
+    "view-toc-drawer": {
+        "title": "Tartalomjegyzék",
+        "close": "{{common.close}}",
+        "toc-header": "Könyv",
+        "personal-header": "Személyes"
+    },
+    "epub-setting-drawer": {
+        "title": "Könyvbeállítások",
+        "close": "{{common.close}}"
+    },
+    "highlight-bar": {
+        "add-new-color-alt": "Egyéni szín hozzáadása",
+        "slot-label": "Kiemelt hely {{slot}}",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}"
+    },
+    "book-reader": {
+        "page-label": "Oldal",
+        "skip-header": "Ugrás a fő tartalomra",
+        "loading-book": "Könyv betöltése…",
+        "go-back": "Vissza",
+        "close-reader-alt": "Olvasó bezárása",
+        "incognito-mode-alt": "Az inkognitómód be van kapcsolva. Kapcsolja be a kikapcsoláshoz.",
+        "incognito-mode-label": "Inkognitó mód",
+        "next": "Következő",
+        "previous": "Előző",
+        "go-to-page": "Ugrás az oldalra",
+        "go-to-page-prompt": "{{totalPages}} oldal van. Melyik oldalra szeretne ugrani? Az oldal az 1-gyel kezdődik.",
+        "page-num-label": "Oldal {{page}}",
+        "completion-label": "{{percent}} kész",
+        "force-selected-one-column": "Az elrendezési mód egy oszlopra váltott, mert nincs elég hely a két oszlop megjelenítéséhez",
+        "forced-vertical-switch": "Az elrendezési mód átváltott, mivel a két oszlopos elrendezés nem működik függőleges írásstílussal"
+    },
+    "personal-table-of-contents": {
+        "no-data": "Még semmi sincs könyvjelzőzve",
+        "page-title": "Oldal {{page}}",
+        "chapter-and-page-title": "{{chapterTitle}}. fejezet, {{page}}. oldal",
+        "delete": "Törölje a(z) {{bookmarkName}} könyvjelzőt",
+        "no-match": "Nincsenek könyvjelzők, amelyek megfelelnek a szűrőnek",
+        "filter-label": "{{common.filter}}"
     }
 }

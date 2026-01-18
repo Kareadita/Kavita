@@ -1855,9 +1855,9 @@
         "title": "Status der Veröffentlichung",
         "visualisation-label": "Visualisierung",
         "data-table-label": "Daten-Tabelle",
-        "year-header": "Jahr",
         "count-header": "Zähler",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "status-header": "{{manage-matched-metadata.status-header}}"
     },
     "series-preview-drawer": {
         "staff-label": "Team",
@@ -2421,7 +2421,7 @@
         "volume-nums": "Bände",
         "no-data": "Keine Daten",
         "chapter-count": "{{num}} Kapitel",
-        "issue-count": "{{num}} Probleme",
+        "issue-count": "{{num}} Ausgaben",
         "unknown": "Unbekannt",
         "roles": "Rollen",
         "libraries": "Bibliotheken",
@@ -3193,7 +3193,7 @@
         "avg-reading-per-week-label": "Durchschnitt pro Woche:",
         "stats-title": "Ein Blick auf {{username}}s Reise durch {{libraryName}}",
         "no-reviews": "Noch keine Bewertungen",
-        "total-reads-badge": "{{reads}} Liest",
+        "total-reads-badge": "{{reads}} Gelesen",
         "k+-badge": "K+ Abonnent",
         "overview-tab": "{{tabs.overview-tab}}",
         "stats-tab": "{{tabs.stats-tab}}",
@@ -3208,13 +3208,13 @@
     "profile-stat-bar": {
         "books-read-label": "Gelesene Bücher",
         "books-read-tooltip": "Gelesene Bücher: {{count}}",
-        "comics-read-label": "Comics lesen",
+        "comics-read-label": "Gelesene Comics",
         "comics-read-tooltip": "Gelesene Comics: {{count}}",
         "pages-read-label": "Gelesene Seiten",
         "pages-read-tooltip": "Gelesen Seiten: {{count}}",
         "words-read-label": "Gelesene Wörter",
         "words-read-tooltip": "Gelesene Wörter: {{count}}",
-        "authors-read-label": "Autoren Lesen",
+        "authors-read-label": "Gelesene Autoren",
         "authors-read-tooltip": "Autoren gelesen: {{count}}",
         "reviews-label": "Bewertungen",
         "reviews-tooltip": "Bewertungen: {{count}}",
@@ -3295,7 +3295,7 @@
         "moderate-activity-alt": "Moderate Aktivität",
         "good-activity-alt": "Gute Aktivität",
         "high-activity-alt": "Hohe Aktivität",
-        "aggregated-count": "Sie haben im {{year}} {{totalPages}} Seiten und {{totalWords}} Wörter gelesen"
+        "aggregated-count": "Sie haben {{totalPages}} Seiten und {{totalWords}} Wörter im Jahr {{year}} gelesen"
     },
     "reading-pace": {
         "title-books": "Lesetempo: Bücher",

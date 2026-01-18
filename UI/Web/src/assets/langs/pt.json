@@ -1855,7 +1855,6 @@
         "title": "Estado de Publicação",
         "visualisation-label": "Visualização",
         "data-table-label": "Tabela de Dados",
-        "year-header": "Ano",
         "count-header": "Contador",
         "no-data": "{{common.no-data}}"
     },

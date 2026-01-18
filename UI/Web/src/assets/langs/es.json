@@ -1707,7 +1707,6 @@
         "title": "Estado de publicación",
         "visualisation-label": "Visualización",
         "data-table-label": "Tabla de datos",
-        "year-header": "Año",
         "count-header": "Recuento"
     },
     "series-preview-drawer": {

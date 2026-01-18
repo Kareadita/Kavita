@@ -259,7 +259,6 @@
     "publication-status-stats": {
         "visualisation-label": "Visualització",
         "data-table-label": "Taula de dades",
-        "year-header": "Any",
         "count-header": "Recompte",
         "title": "Estat de publicació"
     },

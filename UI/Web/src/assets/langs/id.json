@@ -669,5 +669,37 @@
     },
     "actionable": {
         "clear": "{{common.clear}}"
+    },
+    "oidc": {
+        "error-loading-info": "Terjadi kesalahan saat memuat informasi OIDC, hubungi administrator Anda",
+        "timeout": "Waktu resolusi OIDC telah habis atau terjadi sebuah kesalahan"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "reset-label": "Setel ulang id",
+        "reset-tooltip": "Atur ulang id eksternal dari semua pengguna, gunakan ini untuk mengatur ulang tautan antara pengguna di Kavita dan penyedia identitas Anda",
+        "reset-confirm": "Apakah Anda yakin ingin mengatur ulang id eksternal dari semua pengguna?",
+        "reset-success": "id eksternal direset untuk semua pengguna, lakukan autentikasi ulang untuk menautkan",
+        "save-success": "Pengaturan OIDC Anda berhasil diperbarui",
+        "notice": "Pemberitahuan",
+        "restart-required": "Mengubah penyedia atau pengaturan lanjutan memerlukan mulai ulang Kavita secara manual agar perubahan berlaku.",
+        "auto-save-required": "Anda telah mengubah pengaturan penting, simpan otomatis agar perubahan tersebut tetap tersimpan",
+        "provider-title": "Penyedia",
+        "provider-tooltip": "Pengaturan penyedia mengharuskan Anda untuk mengklik Simpan secara manual. Kavita harus dikonfigurasi sebagai klien rahasia dan memerlukan URL pengalihan. Lihat <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> untuk detail lebih lanjut.",
+        "behavior-title": "Perilaku",
+        "other-field-required": "{{validation.other-field-required}}",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "tls-required": "Penyedia OIDC harus menggunakan TLS (https)",
+        "manual-save-label": "Mengubah pengaturan penyedia memerlukan penyimpanan manual",
+        "authority-label": "Otoritas",
+        "authority-tooltip": "URL ke penyedia OIDC Anda, jangan menyertakan jalur .well-known/openid-configuration",
+        "client-id-label": "Client ID",
+        "client-id-tooltip": "ClientID yang diatur di penyedia OIDC Anda, bisa berupa apa saja",
+        "secret-label": "Client secret",
+        "secret-tooltip": "Kode rahasia yang dihasilkan oleh penyedia OIDC Anda, tidak akan ditampilkan setelah diatur",
+        "provision-accounts-label": "Akun penyediaan",
+        "provision-accounts-tooltip": "Buat akun baru secara otomatis saat masuk melalui OIDC jika akun tersebut tidak dapat dicocokkan dengan akun yang sudah ada",
+        "require-verified-email-label": "Membutuhkan email terverifikasi"
     }
 }

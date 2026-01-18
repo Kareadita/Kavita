@@ -1259,7 +1259,8 @@
         "pending-tooltip": "Cet utilisateur n'a pas validé son e-mail",
         "all-libraries": "Toutes les Bibliothèques",
         "identity-provider-oidc-tooltip": "OIDC",
-        "identity-provider-native-tooltip": "Natif"
+        "identity-provider-native-tooltip": "Natif",
+        "profile-link-alt": "Profil"
     },
     "edit-collection-tags": {
         "title": "Modifier la collection {{collectionName}}",
@@ -1417,7 +1418,8 @@
         "active-events-title": "Événements actifs :",
         "no-data": "Il ne se passe pas grand-chose ici",
         "left-to-process": "Reste à traiter : {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "{{num}} téléchargements dans la file d'attente"
+        "download-in-queue": "{{num}} téléchargements dans la file d'attente",
+        "reading-now": "{{num}} en cours de lecture"
     },
     "shortcuts-modal": {
         "title": "Raccourcis clavier",
@@ -1604,7 +1606,8 @@
         "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
         "reading-profile-updated": "Profil de lecture mis à jour",
         "reading-profile-promoted": "Profil de lecture promu",
-        "page-offset-label": "Décalage de page"
+        "page-offset-label": "Décalage de page",
+        "offset-only-double": "Le décalage de page ne peut être utilisé qu'avec la mise en page double"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1829,7 +1832,8 @@
         "not-classified": "Non classé",
         "total-file-size-title": "Taille totale du fichier :",
         "download-file-for-extension-header": "Rapport de téléchargement",
-        "download-file-for-extension-alt": "Télécharger les fichiers Rapport pour {{extension}}"
+        "download-file-for-extension-alt": "Télécharger les fichiers Rapport pour {{extension}}",
+        "no-data": "{{common.no-data}}"
     },
     "reading-activity": {
         "title": "Activité de lecture",
@@ -1851,8 +1855,9 @@
         "title": "État de la publication",
         "visualisation-label": "Visualisation",
         "data-table-label": "Table de données",
-        "year-header": "Année",
-        "count-header": "Compter"
+        "count-header": "Compter",
+        "status-header": "{{manage-matched-metadata.status-header}}",
+        "no-data": "{{common.no-data}}"
     },
     "series-preview-drawer": {
         "staff-label": "Équipe",
@@ -2202,7 +2207,8 @@
         "confirm-force-delete-font": "Cette police est actuellement utilisée. Vous voulez forcer la suppression ? Cela obligera les utilisateurs à retourner à la police Par défaut.",
         "font-in-use": "Ne peut pas supprimer car la police est utilisée par un ou plusieurs utilisateurs.",
         "k+-resend-welcome-email-success": "Un email a été envoyé à votre email Kavita+",
-        "confirm-delete-auth-key": "Êtes-vous sûr de vouloir supprimer cette clé d'authentification ?"
+        "confirm-delete-auth-key": "Êtes-vous sûr de vouloir supprimer cette clé d'authentification ?",
+        "profile-unauthorized": "Cet utilisateur ne partage pas son profil"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Heure",
@@ -2371,7 +2377,8 @@
         "smart-filters-tab": "Filtres intelligents",
         "annotations-tab": "Annotations",
         "overview-tab": "Aperçu",
-        "management-tab": "Gestion"
+        "management-tab": "Gestion",
+        "activity-tab": "Activité"
     },
     "common": {
         "reset-to-default": "Réinitialiser aux valeurs par défaut",
@@ -2828,7 +2835,8 @@
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "Configurer les appareils",
-        "select-devices-for": "Configurer les appareils pour {{name}}"
+        "select-devices-for": "Configurer les appareils pour {{name}}",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
     "oidc": {
         "title": "OIDC Callback",
@@ -3074,7 +3082,8 @@
         "reviews-tab": "{{tabs.reviews-tab}}",
         "no-reviews": "Pas encore d'avis",
         "total-reads-badge": "{{reads}} Lectures",
-        "k+-badge": "K+ Abonné"
+        "k+-badge": "K+ Abonné",
+        "activity-tab": "{{tabs.activity-tab}}"
     },
     "reread-modal": {
         "title": "(Re)Lecture",
@@ -3269,14 +3278,15 @@
         "reading-time": "Temps de lecture",
         "pages": "Pages",
         "words": "Mots",
-        "chapters": "Chapitres",
+        "chapters": "Chapitres terminés",
         "no-activity-alt": "Aucune activité",
         "no-activity-tooltip": "Aucune activité de lecture le {{date}}.",
         "all-time": "{{time-periods.all-time}}",
         "low-activity-alt": "Peu d'activité",
         "moderate-activity-alt": "Activité moyenne",
         "good-activity-alt": "Bonne activité",
-        "high-activity-alt": "Forte activité"
+        "high-activity-alt": "Forte activité",
+        "aggregated-count": "Vous avez lu {{totalPages}} pages et {{totalWords}} mots en {{year}}"
     },
     "reading-pace": {
         "title-books": "Rythme de lecture : Livres",
@@ -3303,7 +3313,8 @@
         "during-entire-life-server": "depuis le début",
         "during-year": "durant {{year}}",
         "during-from-to": "de {{startYear}} à {{endYear}}",
-        "during-select": "Sélectionnez une plage horaire"
+        "during-select": "Sélectionnez une plage horaire",
+        "close": "{{common.close}}"
     },
     "client-device-type-pipe": {
         "mobile": "Mobile",
@@ -3378,5 +3389,26 @@
     },
     "list-select-modal": {
         "hidden": "{{amount}} éléments masqués en raison d'un état invalide"
+    },
+    "profile-activity": {
+        "time-filter-title": "Activité de {{username}} via",
+        "pages-count": "{{series-detail.pages-count}}",
+        "no-data": "{{common.no-data}}",
+        "duration": "Durée",
+        "words-count": "{{series-detail.words-count}}",
+        "pages-read": "{{reading-pace.pages-read}}",
+        "words-read": "{{reading-pace.words-read}}",
+        "time": "Temps",
+        "info-alt": "Plus d'info",
+        "today": "Aujourd'hui",
+        "yesterday": "Hier",
+        "pagination-label": "Pagination des activités",
+        "page-info": "Page {{current}} sur {{total}} ({{items}} enregistrements au total)"
+    },
+    "user-stats-info-cards": {
+        "pages-read-by-year-title": "Pages lues par an",
+        "pages-count": "{{num}} pages",
+        "words-read-by-year-title": "Mots lus par an",
+        "words-count": "{{num}} mots"
     }
 }
