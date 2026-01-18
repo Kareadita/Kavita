@@ -2,10 +2,12 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.Progress;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Progress;
+using API.Extensions.QueryExtensions;
 using API.Helpers.Builders;
 using API.Services.Reading;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +32,7 @@ public class ReadingHistoryServiceTests(ITestOutputHelper testOutputHelper) : Ab
         var service = Setup(dataContext);
 
         // Setup data
-        var lib = await dataContext.Library.FirstAsync();
+        var lib = await dataContext.Library.Includes(LibraryIncludes.Series).FirstAsync();
         lib.Series.Add(new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1").WithChapter(new ChapterBuilder("1").WithPages(2).Build()).Build())
             .Build());
@@ -72,7 +74,7 @@ public class ReadingHistoryServiceTests(ITestOutputHelper testOutputHelper) : Ab
         var service = Setup(dataContext);
 
         // Setup data
-        var lib = await dataContext.Library.FirstAsync();
+        var lib = await dataContext.Library.Includes(LibraryIncludes.Series).FirstAsync();
         lib.Series.Add(new SeriesBuilder("Test")
             .WithVolume(new VolumeBuilder("1").WithChapter(new ChapterBuilder("1").WithPages(2).Build()).Build())
             .Build());

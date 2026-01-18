@@ -89,6 +89,6 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
 
         var exp = await unitOfWork.UserRepository.GetAuthKeyExpiration(authKey, UserId);
 
-        return Ok(new { expiresAt = exp?.ToUniversalTime() });
+        return Ok(new { ExpiresAt = exp?.ToUniversalTime() });
     }
 }
