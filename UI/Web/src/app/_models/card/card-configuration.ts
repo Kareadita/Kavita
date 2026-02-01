@@ -1,0 +1,103 @@
+import {DownloadEvent} from "../../shared/_services/download.service";
+import {Observable} from "rxjs";
+import {BulkSelectionEntityDataSource} from "../../cards/bulk-selection.service";
+import {CardEntity} from "./card-entity";
+import {MangaFormat} from "../manga-format";
+import {TemplateRef} from "@angular/core";
+import {ActionableEntity, ActionItem} from "../../_services/action-factory.service";
+
+/**
+ * Progress information for entities that track reading progress.
+ */
+export interface CardProgress {
+  pages: number;
+  pagesRead: number; // TODO: Refactor this to IHasProgress
+}
+
+/**
+ * Configuration object that defines how a card renders and behaves.
+ * Created by CardConfigFactory for each entity type with sensible defaults.
+ *
+ * @typeParam T - The underlying data type, must be ActionableEntity
+ */
+export interface CardConfiguration<T extends ActionableEntity> {
+
+  /** Whether bulk selection is enabled for this card */
+  allowSelection: boolean;
+
+  /** Entity type identifier for bulk selection tracking */
+  selectionType: BulkSelectionEntityDataSource;
+
+  /** Returns the cover image URL */
+  coverFunc: (entity: T) => string;
+
+  /** Returns the primary title displayed in the card footer */
+  titleFunc: (entity: T) => string;
+
+  /** Returns the router link for the title */
+  titleRouteFunc: (entity: T) => string;
+
+  /** Returns the meta title text (area above the main title). Required as fallback. */
+  metaTitleFunc: (entity: T, wrapper: CardEntity) => string;
+
+  /** Returns tooltip text for the title */
+  tooltipFunc: (entity: T) => string;
+
+  /** Returns reading progress. Return { pages: 0, pagesRead: 0 } if not applicable. */
+  progressFunc: (entity: T) => CardProgress;
+
+  /** Returns the MangaFormat for the format badge, or null to hide */
+  formatBadgeFunc?: (entity: T) => MangaFormat | null;
+
+  /** Returns count for the badge (e.g., volume count, file count). 0 or 1 hides the badge. */
+  countFunc?: (entity: T) => number;
+
+  /** Returns true to show the error banner ("cannot read"). Default: pages === 0 */
+  showErrorFunc?: (entity: T) => boolean;
+
+  /** Returns accessible label for the card */
+  ariaLabelFunc?: (entity: T) => string;
+
+  /**
+   * Optional template for meta title area. Takes precedence over metaTitleFunc.
+   * Context: { $implicit: CardEntity } - the full wrapper, not just data
+   */
+  metaTitleTemplate?: TemplateRef<{ $implicit: CardEntity }>;
+
+  /** Action items for the card's action menu */
+  actionables: ActionItem<T>[];
+
+  /** Callback when the read button is clicked */
+  readFunc: (entity: T) => void;
+
+  /** Callback when the card body is clicked (navigation or preview) */
+  clickFunc?: (entity: T, wrapper: CardEntity) => void;
+
+  /**
+   * Returns an observable of download events for this entity.
+   * Used to show download progress indicator.
+   */
+  downloadObservableFunc?: (entity: T) => Observable<DownloadEvent | null>;
+}
+
+/**
+ * Partial configuration for overrides. All properties optional.
+ */
+export type CardConfigurationOverrides<T extends ActionableEntity> = Partial<CardConfiguration<T>>;
+
+/**
+ * Minimal configuration - only the truly required fields.
+ * Used internally by factory to ensure all required fields are set.
+ */
+export type RequiredCardConfiguration<T extends ActionableEntity> = Pick<CardConfiguration<T>,
+  | 'allowSelection'
+  | 'selectionType'
+  | 'coverFunc'
+  | 'titleFunc'
+  | 'titleRouteFunc'
+  | 'metaTitleFunc'
+  | 'tooltipFunc'
+  | 'progressFunc'
+  | 'actionables'
+  | 'readFunc'
+>;
