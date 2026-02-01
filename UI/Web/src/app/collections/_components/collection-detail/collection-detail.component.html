@@ -70,8 +70,7 @@
 
             <ng-template #cardItem let-item let-position="idx">
               <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="loadPage()"
-                               (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
-                               [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
+                               [index]="position" [maxIndex]="series.length" [allowSelection]="true"
                />
             </ng-template>
 

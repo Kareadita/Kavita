@@ -2,15 +2,16 @@
   <div class="pb-2">
     @if (relations.length > 0) {
       <app-carousel-reel [items]="relations" [title]="t('relations-title')">
-        <ng-template #carouselItem let-item>
-          <app-series-card class="col-auto mt-2 mb-2" [series]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation" />
+        <ng-template #carouselItem let-item let-idx>
+          <app-series-card class="col-auto mt-2 mb-2" [series]="item.series" [libraryId]="item.series.libraryId"
+                           [relation]="item.relation" [index]="idx" [maxIndex]="relations.length" />
         </ng-template>
       </app-carousel-reel>
     }
 
     @if (collections.length > 0) {
       <app-carousel-reel [items]="collections" [title]="t('collections-title')">
-        <ng-template #carouselItem let-item>
+        <ng-template #carouselItem let-item let-idx>
           <app-card-item [title]="item.title" [entity]="item"
                          [count]="item.itemCount"
                          [suppressLibraryLink]="true" [imageUrl]="imageService.getCollectionCoverImage(item.id)"
@@ -22,7 +23,7 @@
 
     @if (readingLists.length > 0) {
       <app-carousel-reel [items]="readingLists" [title]="t('reading-lists-title')">
-        <ng-template #carouselItem let-item>
+        <ng-template #carouselItem let-item let-idx>
           <app-card-item [title]="item.title" [entity]="item"
                          [count]="item.itemCount"
                          [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
@@ -33,7 +34,7 @@
 
     @if (bookmarks.length > 0) {
       <app-carousel-reel [items]="bookmarks" [title]="t('bookmarks-title')">
-        <ng-template #carouselItem let-item>
+        <ng-template #carouselItem let-item let-idx>
           <app-card-item [entity]="item" [title]="t('bookmarks-title')" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
                          [suppressArchiveWarning]="true"
                          [linkUrl]="'/library/' + libraryId + '/series/' + item.seriesId + '/manga/0?bookmarkMode=true'"

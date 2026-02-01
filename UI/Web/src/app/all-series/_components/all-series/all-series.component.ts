@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {debounceTime, take} from 'rxjs/operators';
+import {debounceTime} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';

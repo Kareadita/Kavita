@@ -3,6 +3,7 @@ import {NavigationStart, Router} from '@angular/router';
 import {ReplaySubject} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
+import {toSignal} from "@angular/core/rxjs-interop";
 
 export type BulkSelectionEntityDataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'sideNavStream' | 'collection' | 'readingList' | 'annotations';
 
@@ -33,7 +34,8 @@ export class BulkSelectionService {
   /**
    * Number of active selections
    */
-  public selections$ = this.selectionsSource.asObservable();
+  public readonly selections$ = this.selectionsSource.asObservable();
+  public readonly selectionSignal = toSignal(this.selectionsSource);
 
   constructor() {
     const router = inject(Router);

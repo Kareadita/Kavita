@@ -5,14 +5,7 @@ import {CardEntity} from "./card-entity";
 import {MangaFormat} from "../manga-format";
 import {TemplateRef} from "@angular/core";
 import {ActionableEntity, ActionItem} from "../../_services/action-factory.service";
-
-/**
- * Progress information for entities that track reading progress.
- */
-export interface CardProgress {
-  pages: number;
-  pagesRead: number; // TODO: Refactor this to IHasProgress
-}
+import {IHasProgress} from "../common/i-has-progress";
 
 /**
  * Configuration object that defines how a card renders and behaves.
@@ -44,7 +37,7 @@ export interface CardConfiguration<T extends ActionableEntity> {
   tooltipFunc: (entity: T) => string;
 
   /** Returns reading progress. Return { pages: 0, pagesRead: 0 } if not applicable. */
-  progressFunc: (entity: T) => CardProgress;
+  progressFunc: (entity: T) => IHasProgress;
 
   /** Returns the MangaFormat for the format badge, or null to hide */
   formatBadgeFunc?: (entity: T) => MangaFormat | null;

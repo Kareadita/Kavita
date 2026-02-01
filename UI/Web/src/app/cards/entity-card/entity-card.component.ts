@@ -16,7 +16,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DownloadEvent} from "../../shared/_services/download.service";
 import {Observable} from "rxjs";
 import {MangaFormat} from "../../_models/manga-format";
-import {CardConfiguration, CardProgress} from "../../_models/card/card-configuration";
+import {CardConfiguration} from "../../_models/card/card-configuration";
 import {CardEntity} from "../../_models/card/card-entity";
 import {ScrollService} from "../../_services/scroll.service";
 import {ImageService} from "../../_services/image.service";
@@ -31,6 +31,8 @@ import {DecimalPipe, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {ActionableEntity} from "../../_services/action-factory.service";
+import {IHasProgress} from "../../_models/common/i-has-progress";
+import {ThemeService} from "../../_services/theme.service";
 
 @Component({
   selector: 'app-entity-card',
@@ -55,6 +57,7 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly scrollService = inject(ScrollService);
+  private readonly themeService = inject(ThemeService);
   protected readonly imageService = inject(ImageService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
 
@@ -87,9 +90,7 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   /** Emitted when underlying entity data changes */
   @Output() dataChanged = new EventEmitter<T>();
 
-  // ============================================================
-  // COMPUTED PROPERTIES
-  // ============================================================
+
 
   /** Underlying entity data extracted from wrapper */
   protected data: Signal<T> = computed(() => this.entity().data as T);
@@ -120,7 +121,7 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   );
 
   /** Reading progress */
-  protected progress: Signal<CardProgress> = computed(() =>
+  protected progress: Signal<IHasProgress> = computed(() =>
     this.config().progressFunc(this.data())
   );
 
@@ -140,10 +141,11 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   );
 
   /** Whether this card is selected */
-  protected isSelected: Signal<boolean> = computed(() =>
-    this.config().allowSelection &&
-    this.bulkSelectionService.isCardSelected(this.config().selectionType, this.index())
-  );
+  protected isSelected: Signal<boolean> = computed(() => {
+    this.bulkSelectionService.selectionSignal(); // Ensure we re-render when deselect occurs
+    return this.config().allowSelection &&
+      this.bulkSelectionService.isCardSelected(this.config().selectionType, this.index());
+  });
 
   /** Whether action menu should display */
   protected hasActionables: Signal<boolean> = computed(() =>
@@ -154,6 +156,14 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   protected ariaLabel: Signal<string> = computed(() =>
     this.config().ariaLabelFunc?.(this.data()) ?? this.title()
   );
+
+  protected cardWidth = computed(() => {
+    return this.themeService.getCssVariable('--card-image-width');
+  });
+
+  protected cardHeight = computed(() => {
+    return this.themeService.getCssVariable('--card-image-height');
+  });
 
   protected download$: Observable<DownloadEvent | null> | null = null;
 

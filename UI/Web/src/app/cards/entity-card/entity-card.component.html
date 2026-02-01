@@ -13,15 +13,15 @@
       <!-- Cover Image -->
       @if (!showError()) {
         <app-image
-          height="232.91px"
-          width="160px"
+          [height]="cardHeight()"
+          [width]="cardWidth()"
           [styles]="{'border-radius': '.25rem .25rem 0 0'}"
           [imageUrl]="coverUrl()"
         />
       } @else {
         <app-image
-          height="232.91px"
-          width="160px"
+          [height]="cardHeight()"
+          [width]="cardWidth()"
           [styles]="{'border-radius': '.25rem .25rem 0 0'}"
           [imageUrl]="imageService.errorImage"
         />
@@ -34,8 +34,7 @@
         entityProgress.pages > 0) {
           <p
             [ngbTooltip]="((entityProgress.pagesRead / entityProgress.pages) * 100 | number:'1.0-1') + '%'"
-            container="body"
-          >
+            container="body">
             <ngb-progressbar
               type="primary"
               height="5px"
@@ -50,7 +49,6 @@
         </span>
       </div>
 
-      <!-- Error Banner -->
       @if (showError()) {
         <div class="error-banner">
           {{ t('cannot-read') }}
@@ -64,13 +62,11 @@
         </div>
       }
 
-      <!-- Bulk Selection Checkbox -->
       @if (config().allowSelection) {
         <div
           class="bulk-mode"
           [class.always-show]="bulkSelectionService.hasSelections()"
-          (click)="handleSelection($event)"
-        >
+          (click)="handleSelection($event)">
           <input
             type="checkbox"
             class="form-check-input"
@@ -102,8 +98,7 @@
               tabindex="0"
               (click)="handleRead($event)"
               (keydown.enter)="handleRead($event)"
-              [attr.aria-label]="t('read') + ' ' + ariaLabel()"
-            >
+              [attr.aria-label]="t('read') + ' ' + ariaLabel()">
               <div>
                 <i class="fa-solid fa-book" aria-hidden="true"></i>
               </div>
@@ -116,8 +111,7 @@
     <!-- Meta Title Area (above main title) -->
     <div
       class="card-body meta-title"
-      [ngbTooltip]="metaTitle().length > 34 ? metaTitle() : null"
-    >
+      [ngbTooltip]="metaTitle().length > 34 ? metaTitle() : null">
       @if (hasMetaTitleTemplate) {
         <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
           <ng-container *ngTemplateOutlet="metaTitleTemplate!; context: { $implicit: entity() }" />
@@ -143,12 +137,10 @@
         class="card-title"
         [ngbTooltip]="tooltip()"
         placement="top"
-        [id]="'entity-' + entityId"
-      >
+        [id]="'entity-' + entityId">
         <a
           class="dark-exempt btn-icon"
-          [routerLink]="titleRoute()"
-        >
+          [routerLink]="titleRoute()">
           {{ title() }}
         </a>
       </span>
