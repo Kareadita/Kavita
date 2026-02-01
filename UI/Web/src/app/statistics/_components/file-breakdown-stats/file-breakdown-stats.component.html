@@ -4,18 +4,15 @@
 
     <ng-template #tooltip>{{t('format-tooltip')}}</ng-template>
 
-    @let files = (files$ | async) || [];
-
-    @if (files.length > 0) {
-      <app-responsive-table [rows]="files" [trackByFn]="trackByExtension">
+    @if (files().length > 0) {
+      <app-responsive-table [rows]="files()" [trackByFn]="trackByExtension">
         <ng-template #tableTemplate>
           <ngx-datatable
             class="bootstrap"
-            [rows]="files"
+            [rows]="files()"
             [columnMode]="'force'"
             rowHeight="auto"
             [footerHeight]="50"
-            [sorts]="[{prop: 'totalFiles', dir: 'desc'}]"
           >
             <ngx-datatable-column prop="extension" [sortable]="true" [draggable]="false" [resizeable]="false">
               <ng-template ngx-datatable-header-template>
@@ -71,7 +68,7 @@
 
             <ng-template ngx-datatable-footer-template>
               <div class="d-flex align-items-center px-3 py-2">
-                <span>{{t('total-file-size-title')}}: {{((rawData$ | async)?.totalFileSize || 0) | bytes}}</span>
+                <span>{{t('total-file-size-title')}}: {{ totalSize() | bytes}}</span>
               </div>
             </ng-template>
           </ngx-datatable>
@@ -114,7 +111,7 @@
 
         <div cardFooter class="card mb-3">
           <div class="card-body py-2">
-            <strong>{{t('total-file-size-title')}}:</strong> {{((rawData$ | async)?.totalFileSize || 0) | bytes}}
+            <strong>{{t('total-file-size-title')}}:</strong> {{ totalSize() | bytes}}
           </div>
         </div>
       </app-responsive-table>

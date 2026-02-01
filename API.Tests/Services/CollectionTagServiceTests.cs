@@ -8,11 +8,13 @@ using API.Data.Repositories;
 using API.DTOs.Collection;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions.QueryExtensions;
 using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
 using API.SignalR;
 using Kavita.Common;
+using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
@@ -516,7 +518,7 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
 
         // Add a third series with a different age rating
         var s3 = new SeriesBuilder("Series 3").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.PG).Build()).Build();
-        context.Library.First().Series.Add(s3);
+        context.Library.Includes(LibraryIncludes.Series).First().Series.Add(s3);
         await unitOfWork.CommitAsync();
 
         // Add series 3 to tag 2

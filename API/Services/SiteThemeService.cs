@@ -505,7 +505,13 @@ public class ThemeService : IThemeService
                 _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, theme.FileName);
             var newLocation =
                 _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, theme.FileName);
-            _directoryService.CopyFileToDirectory(existingLocation, newLocation);
+
+            if (!_directoryService.FileSystem.File.Exists(newLocation))
+            {
+                _logger.LogInformation("Copying Deleted theme file ({FileName}) to config/temp, it will be removed at midnight", theme.FileName);
+                _directoryService.CopyFileToDirectory(existingLocation, newLocation);
+            }
+
             _directoryService.DeleteFiles([existingLocation]);
         }
         catch (Exception) { /* Swallow */ }

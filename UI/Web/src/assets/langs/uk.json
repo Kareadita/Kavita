@@ -2528,9 +2528,9 @@
         "title": "Статус публікації",
         "visualisation-label": "Візуалізація",
         "data-table-label": "Таблиця даних",
-        "year-header": "Рік",
         "count-header": "Кількість",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "status-header": "{{manage-matched-metadata.status-header}}"
     },
     "next-expected-card": {
         "title": "~{{date}}",

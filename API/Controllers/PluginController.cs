@@ -81,8 +81,14 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
     /// <remarks>Will always return null if the Auth Key does not belong to this account</remarks>
     /// <returns></returns>
     [HttpGet("authkey-expires")]
-    public async Task<ActionResult<DateTime?>> GetAuthKeyExpiration([Required] string authKey)
+    public async Task<ActionResult<DateTime?>> GetAuthKeyExpiration()
     {
-        return Ok(await unitOfWork.UserRepository.GetAuthKeyExpiration(authKey, UserId));
+        var authKey = AuthKey;
+        if (string.IsNullOrEmpty(authKey))
+            return BadRequest();
+
+        var exp = await unitOfWork.UserRepository.GetAuthKeyExpiration(authKey, UserId);
+
+        return Ok(new { ExpiresAt = exp?.ToUniversalTime() });
     }
 }

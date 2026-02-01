@@ -86,7 +86,8 @@ private readonly IUnitOfWork _unitOfWork;
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(JwtRegisteredClaimNames.Name, user.Username),
-                new("AuthType", nameof(AuthenticationType.AuthKey))
+                new("AuthType", nameof(AuthenticationType.AuthKey)),
+                new("AuthKey", apiKey),
             };
 
             if (user.Roles != null && user.Roles.Any())

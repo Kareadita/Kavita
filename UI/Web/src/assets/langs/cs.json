@@ -2207,8 +2207,8 @@
         "title": "Stav publikace",
         "data-table-label": "Datová tabulka",
         "count-header": "Počet",
-        "year-header": "Rok",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "status-header": "{{manage-matched-metadata.status-header}}"
     },
     "email-history": {
         "template-header": "Šablona",

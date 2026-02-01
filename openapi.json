@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.0",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.1",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.0"
+    "version": "0.8.9.1"
   },
   "servers": [
     {
@@ -33,7 +33,7 @@
           "Account"
         ],
         "summary": "Returns true if OIDC authentication cookies are present and the API.Extensions.IdentityServiceExtensions.OpenIdConnect\nscheme has been registered",
-        "description": "Makes not guarantee about their validity",
+        "description": "Makes no guarantee about their validity",
         "responses": {
           "200": {
             "description": "OK",
@@ -8982,16 +8982,6 @@
         ],
         "summary": "Returns the expiration (UTC) of the authenticated Auth key (or null if none set)",
         "description": "Will always return null if the Auth Key does not belong to this account",
-        "parameters": [
-          {
-            "name": "authKey",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK",

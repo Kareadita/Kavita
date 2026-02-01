@@ -38,6 +38,11 @@ public class BaseApiController : ControllerBase
     protected string? Username => UserContext.GetUsername();
 
     /// <summary>
+    /// Returns the auth key used for authentication, null if a different authentication method was used
+    /// </summary>
+    protected string? AuthKey => User.Claims.FirstOrDefault(c => c.Type == "AuthKey")?.Value;
+
+    /// <summary>
     /// Returns a physical file with proper HTTP caching headers and ETag support.
     /// Automatically handles conditional requests (If-None-Match) returning 304 Not Modified when appropriate.
     /// </summary>

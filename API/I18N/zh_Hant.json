@@ -209,5 +209,8 @@
     "smart-filter-system-name": "您不能使用系統保留的串流名稱",
     "kavitaplus-restricted": "此功能僅限 Kavita+ 使用",
     "aliases-have-overlap": "一個或多個別名與其他人物重複，無法更新",
-    "generated-reading-profile-name": "由 {0} 生成"
+    "generated-reading-profile-name": "由 {0} 生成",
+    "oidc-managed": "無法編輯受 OIDC 管理的使用者資料。",
+    "cannot-change-identity-provider-original-user": "無法變更原始管理員帳號的身分驗證提供者",
+    "download-not-allowed": "使用者不具備下載權限"
 }

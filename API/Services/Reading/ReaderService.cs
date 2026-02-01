@@ -884,7 +884,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         Func<ChapterDto?, bool> isValidPrevChapter)
     {
         var daysSinceLastProgress = (DateTime.UtcNow - lastProgress).Days;
-        var reReadForTime = daysSinceLastProgress != 0 && daysSinceLastProgress > userPreferences.PromptForRereadsAfter;
+        var reReadForTime = userPreferences.PromptForRereadsAfter != 0 && daysSinceLastProgress > userPreferences.PromptForRereadsAfter;
 
         // Next up chapter has progress, re-read if it's fully read or long ago
         if (continuePoint.PagesRead > 0)
@@ -956,7 +956,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         }
 
         var daysSinceLastProgress = (DateTime.UtcNow - lastProgress.Value).Days;
-        var reReadForTime = daysSinceLastProgress != 0 && daysSinceLastProgress > userPreferences.PromptForRereadsAfter;
+        var reReadForTime = userPreferences.PromptForRereadsAfter != 0 && daysSinceLastProgress > userPreferences.PromptForRereadsAfter;
 
         // Prompt if fully read or long ago
         return new RereadDto

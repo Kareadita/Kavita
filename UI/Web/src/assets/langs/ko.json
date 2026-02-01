@@ -1851,7 +1851,6 @@
         "title": "출판현황",
         "visualisation-label": "시각화",
         "data-table-label": "데이터 테이블",
-        "year-header": "년",
         "count-header": "카운트"
     },
     "series-preview-drawer": {
@@ -3267,7 +3266,7 @@
         "reading-time": "읽은 시간",
         "pages": "페이지",
         "words": "단어",
-        "chapters": "챕터",
+        "chapters": "완결된 챕터",
         "no-activity-tooltip": "{{date}}에는 독서 활동이 없습니다.",
         "no-activity-alt": "활동 없음",
         "all-time": "{{time-periods.all-time}}",

@@ -57,6 +57,8 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
         GlobalConfiguration.Configuration.UseInMemoryStorage();
         var unitOfWork = new UnitOfWork(_context, mapper, null);
 
+        _context.ChangeTracker.Clear();
+
         return (unitOfWork, _context, mapper);
     }
 

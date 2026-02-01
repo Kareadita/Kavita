@@ -4,7 +4,7 @@ import {ReplaySubject} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
 
-type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'sideNavStream' | 'collection' | 'readingList' | 'annotations';
+export type BulkSelectionEntityDataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'sideNavStream' | 'collection' | 'readingList' | 'annotations';
 
 /**
  * Responsible for handling selections on cards. Can handle multiple card sources next to each other in different loops.
@@ -21,7 +21,7 @@ export class BulkSelectionService {
 
   private debug: boolean = false;
   private prevIndex: number = 0;
-  private prevDataSource!: DataSource;
+  private prevDataSource!: BulkSelectionEntityDataSource;
   private selectedCards: { [key: string]: {[key: number]: boolean} } = {};
   private dataSourceMax: { [key: string]: number} = {};
   public isShiftDown: boolean = false;
@@ -47,7 +47,7 @@ export class BulkSelectionService {
       });
   }
 
-  handleCardSelection(dataSource: DataSource, index: number, maxIndex: number, wasSelected: boolean) {
+  handleCardSelection(dataSource: BulkSelectionEntityDataSource, index: number, maxIndex: number, wasSelected: boolean) {
     if (this.isShiftDown) {
 
       if (dataSource === this.prevDataSource) {
@@ -79,14 +79,14 @@ export class BulkSelectionService {
     this.actionsSource.next(this.getActions(() => {}));
   }
 
-  isCardSelected(dataSource: DataSource, index: number) {
+  isCardSelected(dataSource: BulkSelectionEntityDataSource, index: number) {
     if (this.selectedCards.hasOwnProperty(dataSource) && this.selectedCards[dataSource].hasOwnProperty(index)) {
       return this.selectedCards[dataSource][index];
     }
     return false;
   }
 
-  selectCards(dataSource: DataSource, from: number, to: number, value: boolean) {
+  selectCards(dataSource: BulkSelectionEntityDataSource, from: number, to: number, value: boolean) {
     if (!this.selectedCards.hasOwnProperty(dataSource)) {
       this.selectedCards[dataSource] = {};
     }
@@ -130,7 +130,7 @@ export class BulkSelectionService {
     return sum;
   }
 
-  getSelectedCardsForSource(dataSource: DataSource) {
+  getSelectedCardsForSource(dataSource: BulkSelectionEntityDataSource) {
     if (!this.selectedCards.hasOwnProperty(dataSource)) return [];
 
     const ret = [];

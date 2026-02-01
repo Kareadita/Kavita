@@ -1855,9 +1855,9 @@
         "title": "出版状态",
         "visualisation-label": "可视化",
         "data-table-label": "数据表格",
-        "year-header": "年份",
         "count-header": "数量",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "status-header": "{{manage-matched-metadata.status-header}}"
     },
     "series-preview-drawer": {
         "staff-label": "工作人员",
