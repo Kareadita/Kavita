@@ -9012,6 +9012,113 @@
         }
       }
     },
+    "/api/Plugin/parse": {
+      "get": {
+        "tags": [
+          "Plugin"
+        ],
+        "summary": "Parse a string and return Parsed information from it. Does not support any directory fallback parsing",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "String to parse",
+            "schema": {
+              "maxLength": 1000,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          {
+            "name": "libraryType",
+            "in": "query",
+            "description": "Determines the set of pattern matching to use",
+            "schema": {
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Plugin/parse-bulk": {
+      "post": {
+        "tags": [
+          "Plugin"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseBulkRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseBulkRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParseBulkRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseBulkResponseDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseBulkResponseDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParseBulkResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Rating/series": {
       "post": {
         "tags": [
@@ -24889,6 +24996,90 @@
           },
           "enabled": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ParseBulkRequestDto": {
+        "type": "object",
+        "properties": {
+          "names": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "libraryType": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ParseBulkResponseDto": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ParseResultDto"
+            },
+            "description": "The requested name to the parsed result. Does not include errored items",
+            "nullable": true
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "nullable": true
+            },
+            "description": "The requested name to parse maps to the Error exception",
+            "nullable": true
+          },
+          "errorCounts": {
+            "type": "integer",
+            "description": "Count of errored items",
+            "format": "int32",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ParseResultDto": {
+        "type": "object",
+        "properties": {
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesYear": {
+            "type": "string",
+            "nullable": true
+          },
+          "minChapterNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxChapterNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "minVolumeNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxVolumeNumber": {
+            "type": "number",
+            "format": "float"
           }
         },
         "additionalProperties": false

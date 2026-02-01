@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
+using API.DTOs.Misc;
 using API.Entities.Enums;
 using API.Middleware;
 using API.Services;
+using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -90,5 +95,86 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
         var exp = await unitOfWork.UserRepository.GetAuthKeyExpiration(authKey, UserId);
 
         return Ok(new { ExpiresAt = exp?.ToUniversalTime() });
+    }
+
+
+    /// <summary>
+    /// Parse a string and return Parsed information from it. Does not support any directory fallback parsing
+    /// </summary>
+    /// <param name="name">String to parse</param>
+    /// <param name="libraryType">Determines the set of pattern matching to use</param>
+    /// <returns></returns>
+    [HttpGet("parse")]
+    public ActionResult<ParseResultDto> Parse([FromQuery] [StringLength(1000)] string name, [FromQuery] LibraryType libraryType)
+    {
+        try
+        {
+            var result = ParseText(name, libraryType);
+
+            return Ok(result);
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            return BadRequest("Input could not be parsed in allowed time");
+        }
+        catch (Exception)
+        {
+            return BadRequest("Failed to parse input");
+        }
+    }
+
+    private static ParseResultDto ParseText(string name, LibraryType libraryType)
+    {
+        var result = new ParseResultDto
+        {
+            SeriesName = Parser.ParseSeries(name, libraryType),
+            SeriesYear = Parser.ParseYear(name)
+        };
+        var chapterRange = Parser.ParseChapter(name, libraryType);
+        result.MinChapterNumber = Parser.MinNumberFromRange(chapterRange);
+        result.MaxChapterNumber = Parser.MaxNumberFromRange(chapterRange);
+        var volumeRange = Parser.ParseVolume(name, libraryType);
+        result.MinVolumeNumber = Parser.MinNumberFromRange(volumeRange);
+        result.MaxVolumeNumber = Parser.MaxNumberFromRange(volumeRange);
+        return result;
+    }
+
+    [HttpPost("parse-bulk")]
+    public ActionResult<ParseBulkResponseDto> ParseBulk(ParseBulkRequestDto dto, CancellationToken cancellationToken)
+    {
+        if (dto.Names.Count > 100)
+        {
+            return BadRequest("Only 100 items can be processed at once");
+        }
+
+        var result = new ParseBulkResponseDto();
+
+        var successfulParses = result.Results;
+        var errorParses = result.Errors;
+        foreach (var name in dto.Names)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (name.Length > 1000)
+            {
+                errorParses.Add(name, "Length > 1000 characters");
+                continue;
+            }
+
+            try
+            {
+                successfulParses.Add(name, ParseText(name, dto.LibraryType));
+            }
+            catch (RegexMatchTimeoutException)
+            {
+                errorParses.Add(name, "Input could not be parsed in allowed time");
+            }
+            catch (Exception)
+            {
+                errorParses.Add(name, "Failed to parse input");
+            }
+        }
+
+        return Ok(result);
     }
 }
