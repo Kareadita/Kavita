@@ -172,10 +172,10 @@ public class Program
     private static void HandleFirstRunConfiguration()
     {
         var firstRunConfigFilePath = Path.Join(Directory.GetCurrentDirectory(), "config/appsettings-init.json");
-        if (File.Exists(firstRunConfigFilePath) &&
-            !File.Exists(Path.Join(Directory.GetCurrentDirectory(), "config/appsettings.json")))
+        var actualRunConfigFilePath = Path.Join(Directory.GetCurrentDirectory(), "config/appsettings.json");
+        if (File.Exists(firstRunConfigFilePath) && !File.Exists(actualRunConfigFilePath))
         {
-            File.Move(firstRunConfigFilePath, Path.Join(Directory.GetCurrentDirectory(), "config/appsettings.json"));
+            File.Move(firstRunConfigFilePath, actualRunConfigFilePath);
         }
     }
 
