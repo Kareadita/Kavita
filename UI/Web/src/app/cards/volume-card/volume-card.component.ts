@@ -14,13 +14,9 @@ import {
 } from '@angular/core';
 import {Router} from "@angular/router";
 import {ImageService} from "../../_services/image.service";
-import {BulkSelectionService} from "../bulk-selection.service";
-import {DownloadService} from "../../shared/_services/download.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
-import {ScrollService} from "../../_services/scroll.service";
 import {ActionItem} from "../../_services/action-factory.service";
-import {ReaderService} from "../../_services/reader.service";
 import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, map} from "rxjs/operators";
@@ -28,7 +24,6 @@ import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update
 import {Volume} from "../../_models/volume";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {LibraryType} from "../../_models/library/library";
-import {ActionService} from "../../_services/action.service";
 import {FormsModule} from "@angular/forms";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
@@ -49,15 +44,10 @@ export class VolumeCardComponent implements OnInit, OnChanges {
 
   private readonly destroyRef = inject(DestroyRef);
   public readonly imageService = inject(ImageService);
-  public readonly bulkSelectionService = inject(BulkSelectionService);
-  private readonly downloadService = inject(DownloadService);
-  private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
   private readonly accountService = inject(AccountService);
-  private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
-  private readonly readerService = inject(ReaderService);
   protected readonly utilityService = inject(UtilityService);
   private readonly configFactory = inject(CardConfigFactory);
 
@@ -116,20 +106,21 @@ export class VolumeCardComponent implements OnInit, OnChanges {
       this.user = user;
     });
 
+    // TODO: Decide if I want to port this feature over or leave it off going forward
     this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
       map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed(this.destroyRef))
       .subscribe(updateEvent => {
       if (this.user === undefined || this.user.username !== updateEvent.username) return;
       if (updateEvent.volumeId !== this.volume.id) return;
 
-        let sum = 0;
-        const chapters = this.volume.chapters.filter(c => c.volumeId === updateEvent.volumeId);
-        chapters.forEach(chapter => {
-          chapter.pagesRead = updateEvent.pagesRead;
-          sum += chapter.pagesRead;
-        });
-        this.volume.pagesRead = sum;
-        this.cdRef.detectChanges();
+      let sum = 0;
+      const chapters = this.volume.chapters.filter(c => c.volumeId === updateEvent.volumeId);
+      chapters.forEach(chapter => {
+        chapter.pagesRead = updateEvent.pagesRead;
+        sum += chapter.pagesRead;
+      });
+      this.volume.pagesRead = sum;
+      this.cdRef.detectChanges();
     });
 
   }

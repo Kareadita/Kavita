@@ -19,7 +19,6 @@ import {ActionService} from 'src/app/_services/action.service';
 import {translate, TranslocoService} from "@jsverse/transloco";
 import {FormsModule} from "@angular/forms";
 import {DownloadService} from "../../shared/_services/download.service";
-import {ReaderService} from "../../_services/reader.service";
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
@@ -51,7 +50,6 @@ export class SeriesCardComponent implements OnChanges {
   private readonly configFactory = inject(CardConfigFactory);
   private readonly downloadService = inject(DownloadService);
   private readonly readingProfilesService = inject(ReadingProfileService);
-  private readonly readerService = inject(ReaderService);
 
   // ============================================================
   // EXISTING PUBLIC API (maintained for backwards compatibility)
@@ -77,7 +75,6 @@ export class SeriesCardComponent implements OnChanges {
   private relationSignal = signal<RelationKind | undefined>(undefined);
   private isOnDeckSignal = signal(false);
 
-  /** Wrapped entity for EntityCardComponent */
   cardEntity = computed<CardEntity>(() => {
     const series = this.seriesSignal();
     if (!series) {
@@ -90,7 +87,6 @@ export class SeriesCardComponent implements OnChanges {
     });
   });
 
-  /** Configuration for EntityCardComponent */
   config = computed<CardConfiguration<Series>>(() => {
     const baseConfig = this.configFactory.forSeries(
       this.handleSeriesActionCallback.bind(this),
@@ -108,10 +104,6 @@ export class SeriesCardComponent implements OnChanges {
     return baseConfig;
   });
 
-  // ============================================================
-  // LIFECYCLE
-  // ============================================================
-
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['series']) {
       this.seriesSignal.set(this.series);
@@ -128,7 +120,8 @@ export class SeriesCardComponent implements OnChanges {
   // ACTION HANDLING (preserved from original implementation)
   // ============================================================
 
-  private handleSeriesActionCallback(action: ActionItem<Series>, series: Series): void {
+  // TODO: See if we can further streamline action handling without needing to implement handling in each component
+  private async handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
     switch (action.action) {
       case Action.MarkAsRead:
         this.actionService.markSeriesAsRead(series, () => {
@@ -151,15 +144,15 @@ export class SeriesCardComponent implements OnChanges {
         break;
 
       case Action.RefreshMetadata:
-        this.actionService.refreshSeriesMetadata(series, undefined, true, true);
+        await this.actionService.refreshSeriesMetadata(series, undefined, true, true);
         break;
 
       case Action.GenerateColorScape:
-        this.actionService.refreshSeriesMetadata(series, undefined, false, false);
+        await this.actionService.refreshSeriesMetadata(series, undefined, false, false);
         break;
 
       case Action.Delete:
-        this.actionService.deleteSeries(series, (result) => {
+        await this.actionService.deleteSeries(series, (result) => {
           if (result) this.reload.emit(series.id);
         });
         break;
@@ -224,7 +217,7 @@ export class SeriesCardComponent implements OnChanges {
     }
   }
 
-  private handleClick(series: Series): void {
+  private async handleClick(series: Series) {
     if (this.previewOnClick) {
       const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {
         position: 'end',
@@ -238,10 +231,10 @@ export class SeriesCardComponent implements OnChanges {
     }
 
     this.clicked.emit(series);
-    this.router.navigate(['library', this.libraryId, 'series', series.id]);
+    await this.router.navigate(['library', this.libraryId, 'series', series.id]);
   }
 
-  private openEditModal(series: Series): void {
+  private openEditModal(series: Series) {
     const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
     modalRef.componentInstance.series = series;
     modalRef.closed.subscribe((closeResult: { success: boolean; series: Series; coverImageUpdate: boolean }) => {
@@ -255,7 +248,7 @@ export class SeriesCardComponent implements OnChanges {
     });
   }
 
-  private addOnDeckAction(config: CardConfiguration<Series>): CardConfiguration<Series> {
+  private addOnDeckAction(config: CardConfiguration<Series>) {
     const actions = [...config.actionables];
     const othersIndex = actions.findIndex(a => a.title === 'others');
 
