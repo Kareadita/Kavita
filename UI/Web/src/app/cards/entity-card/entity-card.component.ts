@@ -171,11 +171,11 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   private prevOffset = 0;
   private selectionInProgress = false;
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.setupDownloadTracking();
   }
 
-  private setupDownloadTracking(): void {
+  private setupDownloadTracking() {
     const downloadFunc = this.config().downloadObservableFunc;
     if (downloadFunc) {
       this.download$ = downloadFunc(this.data()).pipe(
@@ -185,14 +185,14 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   }
 
   @HostListener('touchmove')
-  onTouchMove(): void {
+  onTouchMove() {
     if (!this.config().allowSelection) return;
     this.selectionInProgress = false;
     this.cdRef.markForCheck();
   }
 
   @HostListener('touchstart', ['$event'])
-  onTouchStart(event: TouchEvent): void {
+  onTouchStart(event: TouchEvent) {
     if (!this.config().allowSelection) return;
     this.prevTouchTime = event.timeStamp;
     this.prevOffset = this.scrollService.scrollPosition;
@@ -200,7 +200,7 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   }
 
   @HostListener('touchend', ['$event'])
-  onTouchEnd(event: TouchEvent): void {
+  onTouchEnd(event: TouchEvent) {
     if (!this.config().allowSelection) return;
 
     const delta = event.timeStamp - this.prevTouchTime;
@@ -218,7 +218,7 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
     this.selectionInProgress = false;
   }
 
-  handleClick(event?: Event): void {
+  handleClick(event?: Event) {
     if (event) {
       event.stopPropagation();
     }
@@ -235,7 +235,7 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
     }
   }
 
-  handleSelection(event?: Event): void {
+  handleSelection(event?: Event) {
     if (event) {
       event.stopPropagation();
     }
@@ -251,7 +251,7 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
     this.cdRef.detectChanges();
   }
 
-  handleRead(event: Event): void {
+  handleRead(event: Event) {
     event.stopPropagation();
 
     // Don't trigger read if in bulk selection mode
@@ -261,17 +261,24 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   }
 
   /** Check if meta title template is provided */
-  get hasMetaTitleTemplate(): boolean {
+  get hasMetaTitleTemplate() {
     return !!this.config().metaTitleTemplate;
   }
 
-  /** Get the meta title template */
+  get hasTitleTemplate() {
+    return !!this.config().titleTemplate;
+  }
+
   get metaTitleTemplate() {
     return this.config().metaTitleTemplate;
   }
+  
+  get titleTemplate() {
+    return this.config().titleTemplate;
+  }
 
   /** Get entity ID for accessibility attributes */
-  get entityId(): number {
+  get entityId() {
     const data = this.data() as { id?: number };
     return data.id ?? 0;
   }

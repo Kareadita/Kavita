@@ -133,15 +133,19 @@
       }
 
       <!-- Title Link -->
+
+
       <span
         class="card-title"
         [ngbTooltip]="tooltip()"
         placement="top"
         [id]="'entity-' + entityId">
-        <a
-          class="dark-exempt btn-icon"
-          [routerLink]="titleRoute()">
-          {{ title() }}
+        <a class="dark-exempt btn-icon" [routerLink]="titleRoute()">
+          @if (hasTitleTemplate) {
+            <ng-container *ngTemplateOutlet="titleTemplate!; context: { $implicit: entity() }" />
+          } @else {
+            {{ title() }}
+          }
         </a>
       </span>
 

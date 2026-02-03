@@ -52,6 +52,12 @@ export interface CardConfiguration<T extends ActionableEntity> {
   ariaLabelFunc?: (entity: T) => string;
 
   /**
+   * Optional template for title area. Takes precedence over titleFunc.
+   * Context: { $implicit: CardEntity } - the full wrapper, not just data
+   */
+  titleTemplate?: TemplateRef<{ $implicit: CardEntity }>;
+
+  /**
    * Optional template for meta title area. Takes precedence over metaTitleFunc.
    * Context: { $implicit: CardEntity } - the full wrapper, not just data
    */

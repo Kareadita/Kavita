@@ -173,8 +173,9 @@
                                       [libraryId]="libraryId"
                                       [libraryType]="libraryType"
                                       [actions]="chapterActions"
-                                      (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, volume!.chapters.length, $event)"
-                                      [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"
+                                      [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
+                                      [maxIndex]="volume.chapters.length"
+                                      [allowSelection]="true"
                      />
                   }
                 </div>

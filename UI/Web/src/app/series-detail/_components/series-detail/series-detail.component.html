@@ -400,8 +400,8 @@
                       [libraryId]="libraryId"
                       [actions]="chapterActions"
                       [libraryType]="libraryTypeValue"
-                      (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                      [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
+                      [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
+                      [maxIndex]="totalLength" [allowSelection]="true" />
   </ng-template>
 
   <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
@@ -414,8 +414,10 @@
                       [libraryId]="libraryId"
                       [actions]="chapterActions"
                       [libraryType]="libraryTypeValue"
-                      (selection)="bulkSelectionService.handleCardSelection('special', scroll.viewPortInfo.startIndexWithBuffer + idx, totalLength, $event)"
-                      [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true" />
+                      [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
+                      [maxIndex]="totalLength"
+                      [dataSource]="'special'"
+                      [allowSelection]="true" />
   </ng-template>
 
 

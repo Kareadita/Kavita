@@ -14,6 +14,7 @@ import {Volume} from "../_models/volume";
 import {UserCollection} from "../_models/collection-tag";
 import {ReadingList} from "../_models/reading-list";
 import {LibraryType} from "../_models/library/library";
+import {MangaFormat} from "../_models/manga-format";
 
 /**
  * Factory service that creates CardConfiguration objects for each entity type.
@@ -82,11 +83,7 @@ export class CardConfigFactory {
    * Creates configuration for Chapter cards
    */
   forChapter(
-    seriesId: number,
-    libraryId: number,
-    actionCallback: (action: ActionItem<Chapter>, chapter: Chapter) => void,
-    overrides?: CardConfigurationOverrides<Chapter>
-  ): CardConfiguration<Chapter> {
+    seriesId: number, libraryId: number, libraryType: LibraryType, actionCallback: (action: ActionItem<Chapter>, chapter: Chapter) => void, overrides?: CardConfigurationOverrides<Chapter>  ): CardConfiguration<Chapter> {
     const defaults: CardConfiguration<Chapter> = {
       allowSelection: false,
       selectionType: 'chapter',
@@ -104,7 +101,7 @@ export class CardConfigFactory {
       progressFunc: (c) => ({ pages: c.pages, pagesRead: c.pagesRead }),
 
       formatBadgeFunc: () => null,
-      countFunc: (c) => c.files?.length > 1 ? c.files.length : 0,
+      countFunc: (c) => c.files?.length > 1 && c.files[0].format !== MangaFormat.IMAGE ? c.files.length : 0,
       showErrorFunc: (c) => {
         const wrapper = overrides as unknown as ChapterCardEntity;
         return c.pages === 0 && !wrapper?.suppressArchiveWarning;
