@@ -1,7 +1,7 @@
 import {inject, Injectable} from "@angular/core";
 import {ImageService} from "./image.service";
 import {ReaderService} from "./reader.service";
-import {ActionableEntity, ActionFactoryService} from "./action-factory.service";
+import {ActionableEntity, ActionFactoryService, ActionItem} from "./action-factory.service";
 import {DownloadService} from "../shared/_services/download.service";
 import {Router} from "@angular/router";
 import {RelationshipPipe} from "../_pipes/relationship.pipe";
@@ -13,6 +13,7 @@ import {map} from "rxjs/operators";
 import {Volume} from "../_models/volume";
 import {UserCollection} from "../_models/collection-tag";
 import {ReadingList} from "../_models/reading-list";
+import {LibraryType} from "../_models/library/library";
 
 /**
  * Factory service that creates CardConfiguration objects for each entity type.
@@ -40,7 +41,7 @@ export class CardConfigFactory {
    * Creates configuration for Series cards
    */
   forSeries(
-    actionCallback: (action: any, series: Series) => void,
+    actionCallback: (action: ActionItem<Series>, series: Series) => void,
     overrides?: CardConfigurationOverrides<Series>
   ): CardConfiguration<Series> {
     const defaults: CardConfiguration<Series> = {
@@ -83,7 +84,7 @@ export class CardConfigFactory {
   forChapter(
     seriesId: number,
     libraryId: number,
-    actionCallback: (action: any, chapter: Chapter) => void,
+    actionCallback: (action: ActionItem<Chapter>, chapter: Chapter) => void,
     overrides?: CardConfigurationOverrides<Chapter>
   ): CardConfiguration<Chapter> {
     const defaults: CardConfiguration<Chapter> = {
@@ -110,7 +111,7 @@ export class CardConfigFactory {
       },
       ariaLabelFunc: (c) => c.titleName || c.title || c.range,
 
-      actionables: [],
+      actionables: this.actionFactory.getChapterActions(actionCallback),
       readFunc: (c) => this.readerService.readChapter(libraryId, seriesId, c, false),
       clickFunc: (c) => this.router.navigate(['library', libraryId, 'series', seriesId, 'chapter', c.id]),
 
@@ -128,7 +129,8 @@ export class CardConfigFactory {
   forVolume(
     seriesId: number,
     libraryId: number,
-    actionCallback: (action: any, volume: Volume) => void,
+    libraryType: LibraryType,
+    actionCallback: (action: ActionItem<Volume>, volume: Volume) => void,
     overrides?: CardConfigurationOverrides<Volume>
   ): CardConfiguration<Volume> {
     const defaults: CardConfiguration<Volume> = {
@@ -137,8 +139,18 @@ export class CardConfigFactory {
 
       coverFunc: (v) => this.imageService.getVolumeCoverImage(v.id),
       titleFunc: (v) => v.name,
-      titleRouteFunc: (v) => `/library/${libraryId}/series/${seriesId}`,
-      metaTitleFunc: (v) => v.name,
+      titleRouteFunc: (v) => `/library/${libraryId}/series/${seriesId}/volume/${v.id}`,
+      metaTitleFunc: (v) => {
+        if (libraryType === LibraryType.Images) return '';
+        if ([LibraryType.LightNovel || LibraryType.Book].includes(libraryType)) {
+          return v.name;
+        }
+        if (v.hasOwnProperty('chapters') && v.chapters.length > 0 && v.chapters[0].titleName) {
+          v.chapters[0].titleName
+        }
+
+        return v.name;
+      },
       tooltipFunc: (v) => v.name,
       progressFunc: (v) => ({ pages: v.pages, pagesRead: v.pagesRead }),
 
@@ -147,11 +159,9 @@ export class CardConfigFactory {
       showErrorFunc: (v) => v.pages === 0,
       ariaLabelFunc: (v) => v.name,
 
-      actionables: [],
+      actionables: this.actionFactory.getVolumeActions(actionCallback),
       readFunc: (v) => {
-        if (v.chapters?.length > 0) {
-          this.readerService.readChapter(libraryId, seriesId, v.chapters[0], false);
-        }
+        this.readerService.readVolume(libraryId, seriesId, v, false);
       },
 
       downloadObservableFunc: (v) => this.downloadService.activeDownloads$.pipe(
@@ -166,7 +176,7 @@ export class CardConfigFactory {
    * Creates configuration for Collection cards
    */
   forCollection(
-    actionCallback: (action: any, collection: UserCollection) => void,
+    actionCallback: (action: ActionItem<UserCollection>, collection: UserCollection) => void,
     overrides?: CardConfigurationOverrides<UserCollection>
   ): CardConfiguration<UserCollection> {
     const defaults: CardConfiguration<UserCollection> = {
@@ -185,7 +195,7 @@ export class CardConfigFactory {
       showErrorFunc: () => false,
       ariaLabelFunc: (c) => c.title,
 
-      actionables: [],
+      actionables: this.actionFactory.getCollectionTagActions(actionCallback),
       readFunc: () => {},
 
       downloadObservableFunc: () => null!
@@ -198,7 +208,7 @@ export class CardConfigFactory {
    * Creates configuration for ReadingList cards
    */
   forReadingList(
-    actionCallback: (action: any, list: ReadingList) => void,
+    actionCallback: (action: ActionItem<ReadingList>, list: ReadingList) => void,
     overrides?: CardConfigurationOverrides<ReadingList>
   ): CardConfiguration<ReadingList> {
     const defaults: CardConfiguration<ReadingList> = {
@@ -217,7 +227,7 @@ export class CardConfigFactory {
       showErrorFunc: () => false,
       ariaLabelFunc: (r) => r.title,
 
-      actionables: [],
+      actionables: this.actionFactory.getReadingListActions(actionCallback),
       readFunc: () => {},
 
       downloadObservableFunc: () => null!

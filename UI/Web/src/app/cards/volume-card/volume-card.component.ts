@@ -2,21 +2,19 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   EventEmitter,
-  HostListener,
   inject,
+  input,
   Input,
+  OnChanges,
   OnInit,
-  Output
+  Output,
+  signal,
+  SimpleChanges
 } from '@angular/core';
-import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
-import {DecimalPipe} from "@angular/common";
-import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
-import {ImageComponent} from "../../shared/image/image.component";
-import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {Router, RouterLink} from "@angular/router";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {Router} from "@angular/router";
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
 import {DownloadEvent, DownloadService} from "../../shared/_services/download.service";
@@ -35,25 +33,22 @@ import {UtilityService} from "../../shared/_services/utility.service";
 import {LibraryType} from "../../_models/library/library";
 import {ActionService} from "../../_services/action.service";
 import {FormsModule} from "@angular/forms";
+import {EntityCardComponent} from "../entity-card/entity-card.component";
+import {CardConfigFactory} from "../../_services/card-config-factory.service";
+import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
+import {CardConfiguration} from "../../_models/card/card-configuration";
 
 @Component({
   selector: 'app-volume-card',
   imports: [
-    CardActionablesComponent,
-    DecimalPipe,
-    DownloadIndicatorComponent,
-    ImageComponent,
-    NgbProgressbar,
-    NgbTooltip,
-    RouterLink,
-    TranslocoDirective,
     FormsModule,
+    EntityCardComponent,
   ],
   templateUrl: './volume-card.component.html',
   styleUrl: './volume-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class VolumeCardComponent implements OnInit {
+export class VolumeCardComponent implements OnInit, OnChanges {
 
   private readonly destroyRef = inject(DestroyRef);
   public readonly imageService = inject(ImageService);
@@ -67,6 +62,14 @@ export class VolumeCardComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly readerService = inject(ReaderService);
   protected readonly utilityService = inject(UtilityService);
+  private readonly configFactory = inject(CardConfigFactory);
+
+  index = input.required<number>();
+  maxIndex = input.required<number>();
+
+  // ============================================================
+  // EXISTING PUBLIC API (maintained for backwards compatibility)
+  // ============================================================
 
   @Input({required: true}) libraryId: number = 0;
   @Input({required: true}) libraryType!: LibraryType;
@@ -109,37 +112,34 @@ export class VolumeCardComponent implements OnInit {
 
   private user: User | undefined;
 
-  @HostListener('touchmove', ['$event'])
-  onTouchMove(event: TouchEvent) {
-    if (!this.allowSelection) return;
+  private volumeSignal = signal<Volume | null>(null);
 
-    this.selectionInProgress = false;
-    this.cdRef.markForCheck();
-  }
-
-  @HostListener('touchstart', ['$event'])
-  onTouchStart(event: TouchEvent) {
-    if (!this.allowSelection) return;
-
-    this.prevTouchTime = event.timeStamp;
-    this.prevOffset = this.scrollService.scrollPosition;
-    this.selectionInProgress = true;
-  }
-
-  @HostListener('touchend', ['$event'])
-  onTouchEnd(event: TouchEvent) {
-    if (!this.allowSelection) return;
-    const delta = event.timeStamp - this.prevTouchTime;
-    const verticalOffset = this.scrollService.scrollPosition;
-
-    if (delta >= 300 && delta <= 1000 && (verticalOffset === this.prevOffset) && this.selectionInProgress) {
-      this.handleSelection();
-      event.stopPropagation();
-      event.preventDefault();
+  cardEntity = computed<CardEntity>(() => {
+    const volume = this.volumeSignal();
+    if (!volume) {
+      // Return a placeholder - shouldn't render in practice
+      return CardEntityFactory.volume({} as Volume, 0, 0);
     }
-    this.prevTouchTime = 0;
-    this.selectionInProgress = false;
-  }
+    return CardEntityFactory.volume(volume, this.seriesId, this.libraryId);
+  });
+
+  config = computed<CardConfiguration<Volume>>(() => {
+    const baseConfig = this.configFactory.forVolume(
+      this.seriesId,
+      this.libraryId,
+      this.libraryType,
+      this.handleAction.bind(this),
+      {
+        allowSelection: this.allowSelection,
+        clickFunc: this.handleClick.bind(this)
+      }
+    );
+
+    return baseConfig;
+  });
+
+
+
 
   ngOnInit() {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
@@ -169,12 +169,23 @@ export class VolumeCardComponent implements OnInit {
 
   }
 
-  handleSelection(event?: any) {
-    if (event) {
-      event.stopPropagation();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['entity']) {
+      this.volumeSignal.set(this.volume);
     }
-    this.selection.emit(this.selected);
-    this.cdRef.detectChanges();
+  }
+
+  handleAction(action: ActionItem<Volume>, volume: Volume) {
+
+  }
+
+
+  handleSelection(event?: any) {
+    // if (event) {
+    //   event.stopPropagation();
+    // }
+    // this.selection.emit(this.selected);
+    // this.cdRef.detectChanges();
   }
 
   handleClick(event: any) {
@@ -186,9 +197,9 @@ export class VolumeCardComponent implements OnInit {
   }
 
   read(event: any) {
-    event.stopPropagation();
-    event.preventDefault();
-    this.readerService.readVolume(this.libraryId, this.seriesId, this.volume, false);
+    // event.stopPropagation();
+    // event.preventDefault();
+    // this.readerService.readVolume(this.libraryId, this.seriesId, this.volume, false);
   }
 
   protected readonly LibraryType = LibraryType;

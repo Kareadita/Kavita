@@ -112,7 +112,7 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
 
   /** Meta title text (fallback when no template) */
   protected metaTitle: Signal<string> = computed(() =>
-    this.config().metaTitleFunc(this.data(), this.entity())
+    this.config().metaTitleFunc(this.data(), this.entity()) ?? ''
   );
 
   /** Tooltip text */
