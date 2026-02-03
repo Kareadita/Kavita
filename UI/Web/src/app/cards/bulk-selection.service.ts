@@ -35,7 +35,7 @@ export class BulkSelectionService {
    * Number of active selections
    */
   public readonly selections$ = this.selectionsSource.asObservable();
-  public readonly selectionSignal = toSignal(this.selectionsSource);
+  public readonly selectionSignal = toSignal(this.selections$);
 
   constructor() {
     const router = inject(Router);

@@ -4,26 +4,23 @@ import {
   Component,
   computed,
   DestroyRef,
-  EventEmitter,
   inject,
   input,
   Input,
   OnChanges,
   OnInit,
-  Output,
   signal,
   SimpleChanges
 } from '@angular/core';
 import {Router} from "@angular/router";
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
-import {DownloadEvent, DownloadService} from "../../shared/_services/download.service";
+import {DownloadService} from "../../shared/_services/download.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
 import {ScrollService} from "../../_services/scroll.service";
 import {ActionItem} from "../../_services/action-factory.service";
 import {ReaderService} from "../../_services/reader.service";
-import {Observable} from "rxjs";
 import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, map} from "rxjs/operators";
@@ -80,35 +77,9 @@ export class VolumeCardComponent implements OnInit, OnChanges {
    */
   @Input() actions: ActionItem<Volume>[] = [];
   /**
-   * If the entity is selected or not.
-   */
-  @Input() selected: boolean = false;
-  /**
    * If the entity should show selection code
    */
   @Input() allowSelection: boolean = false;
-  /**
-   * This will suppress the "cannot read archive warning" when total pages is 0
-   */
-  @Input() suppressArchiveWarning: boolean = false;
-  /**
-   * When the card is selected.
-   */
-  @Output() selection = new EventEmitter<boolean>();
-
-  /**
-   * This is the download we get from download service.
-   */
-  download$: Observable<DownloadEvent | null> | null = null;
-  /**
-   * Handles touch events for selection on mobile devices
-   */
-  prevTouchTime: number = 0;
-  /**
-   * Handles touch events for selection on mobile devices to ensure you aren't touch scrolling
-   */
-  prevOffset: number = 0;
-  selectionInProgress: boolean = false;
 
   private user: User | undefined;
 
@@ -128,10 +99,11 @@ export class VolumeCardComponent implements OnInit, OnChanges {
       this.seriesId,
       this.libraryId,
       this.libraryType,
-      this.handleAction.bind(this),
+      (action, v) => {},
       {
         allowSelection: this.allowSelection,
-        clickFunc: this.handleClick.bind(this)
+        clickFunc: this.handleClick.bind(this),
+        actionables: this.actions,
       }
     );
 
@@ -139,17 +111,10 @@ export class VolumeCardComponent implements OnInit, OnChanges {
   });
 
 
-
-
   ngOnInit() {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       this.user = user;
     });
-
-    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
-      return this.downloadService.mapToEntityType(events, this.volume);
-    }));
-
 
     this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
       map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed(this.destroyRef))
@@ -170,37 +135,13 @@ export class VolumeCardComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['entity']) {
+    if (changes['volume']) {
       this.volumeSignal.set(this.volume);
     }
   }
 
-  handleAction(action: ActionItem<Volume>, volume: Volume) {
-
-  }
-
-
-  handleSelection(event?: any) {
-    // if (event) {
-    //   event.stopPropagation();
-    // }
-    // this.selection.emit(this.selected);
-    // this.cdRef.detectChanges();
-  }
 
   handleClick(event: any) {
-    if (this.bulkSelectionService.hasSelections()) {
-      this.handleSelection(event);
-      return;
-    }
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'volume', this.volume.id]);
   }
-
-  read(event: any) {
-    // event.stopPropagation();
-    // event.preventDefault();
-    // this.readerService.readVolume(this.libraryId, this.seriesId, this.volume, false);
-  }
-
-  protected readonly LibraryType = LibraryType;
 }
