@@ -48,6 +48,7 @@ export class CardConfigFactory {
     const defaults: CardConfiguration<Series> = {
       allowSelection: false,
       selectionType: 'series',
+      suppressArchiveWarning: false,
 
       coverFunc: (s) => this.imageService.getSeriesCoverImage(s.id),
       titleFunc: (s) => s.name,
@@ -79,6 +80,40 @@ export class CardConfigFactory {
     return this.mergeConfig(defaults, overrides);
   }
 
+  forBookmark(
+    actionCallback: (action: ActionItem<Series>, series: Series) => void,
+    overrides?: CardConfigurationOverrides<Series>
+  ): CardConfiguration<Series> {
+    const defaults: CardConfiguration<Series> = {
+      allowSelection: true,
+      selectionType: 'bookmark',
+      suppressArchiveWarning: true,
+
+      coverFunc: (s) => this.imageService.getSeriesCoverImage(s.id),
+      titleFunc: (s) => s.name,
+      titleRouteFunc: (s) => `/library/${s.libraryId}/series/${s.id}`,
+      metaTitleFunc: (s, wrapper) => s.name,
+      tooltipFunc: (s) => s.name,
+      progressFunc: (s) => ({ pages: s.pages, pagesRead: s.pagesRead }),
+
+      formatBadgeFunc: (s) => s.format,
+      countFunc: () => 0,
+      showErrorFunc: (s) => false,
+      ariaLabelFunc: (s) => s.name,
+
+      actionables: this.actionFactory.getBookmarkActions(actionCallback),
+      readFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.id, 'manga', 0], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
+      clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.id, 'manga', 0], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
+
+      downloadObservableFunc: (s) => this.downloadService.activeDownloads$.pipe(
+        map(events => this.downloadService.mapToEntityType(events, s))
+      )
+    };
+
+    return this.mergeConfig(defaults, overrides);
+  }
+
+
   /**
    * Creates configuration for Chapter cards
    */
@@ -87,6 +122,7 @@ export class CardConfigFactory {
     const defaults: CardConfiguration<Chapter> = {
       allowSelection: false,
       selectionType: 'chapter',
+      suppressArchiveWarning: false,
 
       coverFunc: (c) => this.imageService.getChapterCoverImage(c.id),
       titleFunc: (c) => c.titleName || c.title || c.range,
@@ -133,6 +169,7 @@ export class CardConfigFactory {
     const defaults: CardConfiguration<Volume> = {
       allowSelection: false,
       selectionType: 'volume',
+      suppressArchiveWarning: false,
 
       coverFunc: (v) => this.imageService.getVolumeCoverImage(v.id),
       titleFunc: (v) => v.name,
@@ -183,6 +220,7 @@ export class CardConfigFactory {
     const defaults: CardConfiguration<UserCollection> = {
       allowSelection: false,
       selectionType: 'collection',
+      suppressArchiveWarning: true,
 
       coverFunc: (c) => this.imageService.getCollectionCoverImage(c.id),
       titleFunc: (c) => c.title,
@@ -215,6 +253,7 @@ export class CardConfigFactory {
     const defaults: CardConfiguration<ReadingList> = {
       allowSelection: false,
       selectionType: 'readingList',
+      suppressArchiveWarning: true,
 
       coverFunc: (r) => this.imageService.getReadingListCoverImage(r.id),
       titleFunc: (r) => r.title,

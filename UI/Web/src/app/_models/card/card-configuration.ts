@@ -21,6 +21,9 @@ export interface CardConfiguration<T extends ActionableEntity> {
   /** Entity type identifier for bulk selection tracking */
   selectionType: BulkSelectionEntityDataSource;
 
+  /** Suppress Archive Warning when page count is 0 **/
+  suppressArchiveWarning: boolean;
+
   /** Returns the cover image URL */
   coverFunc: (entity: T) => string;
 

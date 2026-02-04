@@ -4,12 +4,12 @@
       <h4 title>
         {{t('title')}}
       </h4>
-      <h5 subtitle>{{t('series-count', {num: series.length | number})}}</h5>
+      <h5 subtitle>{{t('series-count', {num: series().length | number})}}</h5>
     </app-side-nav-companion-bar>
     @if (filter) {
       <app-card-detail-layout
         [isLoading]="loadingBookmarks"
-        [items]="series"
+        [items]="seriesEntities()"
         [filterSettings]="filterSettings"
         [trackByIdentity]="trackByIdentity"
         [refresh]="refresh"
@@ -22,12 +22,9 @@
         </ng-template>
 
         <ng-template #cardItem let-item let-position="idx">
-          <app-card-item [entity]="item" [title]="item.name" [imageUrl]="imageService.getSeriesCoverImage(item.id)"
-                         [suppressArchiveWarning]="true" (clicked)="viewBookmarks(item)" [count]="seriesIds[item.id]" [allowSelection]="true"
-                         [actions]="actions"
-                         [selected]="bulkSelectionService.isCardSelected('bookmark', position)"
-                         (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)"
-           />
+          <app-entity-card [entity]="item" [config]="bookmarkConfig()"
+                           [index]="position" [maxIndex]="seriesEntities().length"
+          />
         </ng-template>
 
         <ng-template #noData>
