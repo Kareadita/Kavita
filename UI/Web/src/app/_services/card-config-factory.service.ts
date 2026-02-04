@@ -152,7 +152,7 @@ export class CardConfigFactory {
       progressFunc: (v) => ({ pages: v.pages, pagesRead: v.pagesRead }),
 
       formatBadgeFunc: () => null,
-      countFunc: (v) => v.chapters?.length || 0,
+      countFunc: (v) => 0,
       showErrorFunc: (v) => v.pages === 0,
       ariaLabelFunc: (v) => v.name,
 
