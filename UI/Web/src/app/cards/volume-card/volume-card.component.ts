@@ -28,7 +28,7 @@ import {FormsModule} from "@angular/forms";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
 import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
-import {CardConfiguration} from "../../_models/card/card-configuration";
+import {BaseCardConfiguration} from "../../_models/card/card-configuration";
 
 @Component({
   selector: 'app-volume-card',
@@ -84,7 +84,7 @@ export class VolumeCardComponent implements OnInit, OnChanges {
     return CardEntityFactory.volume(volume, this.seriesId, this.libraryId);
   });
 
-  config = computed<CardConfiguration<Volume>>(() => {
+  config = computed<BaseCardConfiguration<Volume>>(() => {
     const baseConfig = this.configFactory.forVolume(
       this.seriesId,
       this.libraryId,

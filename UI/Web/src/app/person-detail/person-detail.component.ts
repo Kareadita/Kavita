@@ -45,6 +45,7 @@ import {MergePersonModalComponent} from "./_modal/merge-person-modal/merge-perso
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {MetadataService} from "../_services/metadata.service";
+import {SeriesCardComponent} from "../cards/series-card/series-card.component";
 
 interface PersonMergeEvent {
   srcId: number,
@@ -67,7 +68,8 @@ interface PersonMergeEvent {
     TranslocoDirective,
     ChapterCardComponent,
     SafeUrlPipe,
-    BadgeExpanderComponent
+    BadgeExpanderComponent,
+    SeriesCardComponent
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',

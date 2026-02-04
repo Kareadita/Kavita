@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, Input} from '@angular/core';
 import {ReadingList} from "../../_models/reading-list";
 import {CardItemComponent} from "../../cards/card-item/card-item.component";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
@@ -10,6 +10,7 @@ import {SeriesCardComponent} from "../../cards/series-card/series-card.component
 import {Series} from "../../_models/series";
 import {RelationKind} from "../../_models/series-detail/relation-kind";
 import {PageBookmark} from "../../_models/readers/page-bookmark";
+import {CardConfigFactory} from "../../_services/card-config-factory.service";
 
 export interface RelatedSeriesPair {
   series: Series;
@@ -32,12 +33,15 @@ export class RelatedTabComponent {
 
   protected readonly imageService = inject(ImageService);
   protected readonly router = inject(Router);
+  private readonly cardConfigFactory = inject(CardConfigFactory);
 
   @Input() readingLists: Array<ReadingList> = [];
   @Input() collections: Array<UserCollection> = [];
   @Input() relations: Array<RelatedSeriesPair> = [];
-  @Input() bookmarks: Array<PageBookmark> = [];
+  bookmarks = input<PageBookmark[]>([]);
   @Input() libraryId!: number;
+
+  //bookmarkEntries = computed(() => this.bookmarks().map(c => CardEntityFactory.series(c)))
 
   openReadingList(readingList: ReadingList) {
     this.router.navigate(['lists', readingList.id]);

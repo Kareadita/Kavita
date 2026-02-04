@@ -69,7 +69,7 @@ export class AllCollectionsComponent implements OnInit {
   public readonly accountService = inject(AccountService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly actionService = inject(ActionService);
-  public readonly cardConfigFactory = inject(CardConfigFactory);
+  private readonly cardConfigFactory = inject(CardConfigFactory);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly WikiLink = WikiLink;

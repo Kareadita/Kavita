@@ -22,7 +22,7 @@ import {DownloadService} from "../../shared/_services/download.service";
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
-import {CardConfiguration} from "../../_models/card/card-configuration";
+import {ActionableCardConfiguration, BaseCardConfiguration} from "../../_models/card/card-configuration";
 import {Series} from "../../_models/series";
 import {EditSeriesModalComponent} from "../_modals/edit-series-modal/edit-series-modal.component";
 import {RelationKind} from "../../_models/series-detail/relation-kind";
@@ -87,7 +87,7 @@ export class SeriesCardComponent implements OnChanges {
     });
   });
 
-  config = computed<CardConfiguration<Series>>(() => {
+  config = computed<BaseCardConfiguration<Series>>(() => {
     const baseConfig = this.configFactory.forSeries(
       this.handleSeriesActionCallback.bind(this),
       {
@@ -248,7 +248,7 @@ export class SeriesCardComponent implements OnChanges {
     });
   }
 
-  private addOnDeckAction(config: CardConfiguration<Series>) {
+  private addOnDeckAction(config: ActionableCardConfiguration<Series>) {
     const actions = [...config.actionables];
     const othersIndex = actions.findIndex(a => a.title === 'others');
 

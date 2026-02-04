@@ -1,13 +1,17 @@
 import {inject, Injectable, TemplateRef} from "@angular/core";
 import {ImageService} from "./image.service";
 import {ReaderService} from "./reader.service";
-import {ActionableEntity, ActionFactoryService, ActionItem} from "./action-factory.service";
+import {ActionFactoryService, ActionItem} from "./action-factory.service";
 import {DownloadService} from "../shared/_services/download.service";
 import {Router} from "@angular/router";
 import {RelationshipPipe} from "../_pipes/relationship.pipe";
 import {Series} from "../_models/series";
 import {CardEntity, ChapterCardEntity, SeriesCardEntity} from "../_models/card/card-entity";
-import {CardConfiguration, CardConfigurationOverrides} from "../_models/card/card-configuration";
+import {
+  ActionableCardConfiguration,
+  BaseCardConfiguration,
+  CardConfigurationOverrides
+} from "../_models/card/card-configuration";
 import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
 import {map} from "rxjs/operators";
 import {Volume} from "../_models/volume";
@@ -44,8 +48,8 @@ export class CardConfigFactory {
   forSeries(
     actionCallback: (action: ActionItem<Series>, series: Series) => void,
     overrides?: CardConfigurationOverrides<Series>
-  ): CardConfiguration<Series> {
-    const defaults: CardConfiguration<Series> = {
+  ): ActionableCardConfiguration<Series> {
+    const defaults: ActionableCardConfiguration<Series> = {
       allowSelection: false,
       selectionType: 'series',
       suppressArchiveWarning: false,
@@ -83,8 +87,8 @@ export class CardConfigFactory {
   forBookmark(
     actionCallback: (action: ActionItem<Series>, series: Series) => void,
     overrides?: CardConfigurationOverrides<Series>
-  ): CardConfiguration<Series> {
-    const defaults: CardConfiguration<Series> = {
+  ): ActionableCardConfiguration<Series> {
+    const defaults: ActionableCardConfiguration<Series> = {
       allowSelection: true,
       selectionType: 'bookmark',
       suppressArchiveWarning: true,
@@ -118,8 +122,10 @@ export class CardConfigFactory {
    * Creates configuration for Chapter cards
    */
   forChapter(
-    seriesId: number, libraryId: number, libraryType: LibraryType, actionCallback: (action: ActionItem<Chapter>, chapter: Chapter) => void, overrides?: CardConfigurationOverrides<Chapter>  ): CardConfiguration<Chapter> {
-    const defaults: CardConfiguration<Chapter> = {
+    seriesId: number, libraryId: number, libraryType: LibraryType,
+    actionCallback: (action: ActionItem<Chapter>, chapter: Chapter) => void,
+    overrides?: CardConfigurationOverrides<Chapter>  ): ActionableCardConfiguration<Chapter> {
+    const defaults: ActionableCardConfiguration<Chapter> = {
       allowSelection: false,
       selectionType: 'chapter',
       suppressArchiveWarning: false,
@@ -165,8 +171,8 @@ export class CardConfigFactory {
     libraryType: LibraryType,
     actionCallback: (action: ActionItem<Volume>, volume: Volume) => void,
     overrides?: CardConfigurationOverrides<Volume>
-  ): CardConfiguration<Volume> {
-    const defaults: CardConfiguration<Volume> = {
+  ): ActionableCardConfiguration<Volume> {
+    const defaults: ActionableCardConfiguration<Volume> = {
       allowSelection: false,
       selectionType: 'volume',
       suppressArchiveWarning: false,
@@ -217,8 +223,8 @@ export class CardConfigFactory {
     actionables: ActionItem<UserCollection>[],
     templateRef: TemplateRef<{ $implicit: CardEntity }> | undefined,
     overrides?: CardConfigurationOverrides<UserCollection>
-  ): CardConfiguration<UserCollection> {
-    const defaults: CardConfiguration<UserCollection> = {
+  ): ActionableCardConfiguration<UserCollection> {
+    const defaults: ActionableCardConfiguration<UserCollection> = {
       allowSelection: false,
       selectionType: 'collection',
       suppressArchiveWarning: true,
@@ -250,8 +256,8 @@ export class CardConfigFactory {
   forReadingList(
     actionCallback: (action: ActionItem<ReadingList>, list: ReadingList) => void,
     overrides?: CardConfigurationOverrides<ReadingList>
-  ): CardConfiguration<ReadingList> {
-    const defaults: CardConfiguration<ReadingList> = {
+  ): ActionableCardConfiguration<ReadingList> {
+    const defaults: ActionableCardConfiguration<ReadingList> = {
       allowSelection: false,
       selectionType: 'readingList',
       suppressArchiveWarning: true,
@@ -281,11 +287,11 @@ export class CardConfigFactory {
    * Merges default configuration with overrides.
    * Overrides take precedence.
    */
-  private mergeConfig<T extends ActionableEntity>(
-    defaults: CardConfiguration<T>,
-    overrides?: CardConfigurationOverrides<T>
-  ): CardConfiguration<T> {
+  private mergeConfig<C extends BaseCardConfiguration<any>>(
+    defaults: C,
+    overrides?: Partial<C>
+  ): C {
     if (!overrides) return defaults;
-    return { ...defaults, ...overrides };
+    return { ...defaults, ...overrides } as C;
   }
 }

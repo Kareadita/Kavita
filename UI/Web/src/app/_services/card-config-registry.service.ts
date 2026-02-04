@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {CardConfigFactory} from "./card-config-factory.service";
 import {Chapter} from "../_models/chapter";
-import {CardConfiguration, CardConfigurationOverrides} from "../_models/card/card-configuration";
+import {BaseCardConfiguration, CardConfigurationOverrides} from "../_models/card/card-configuration";
 import {CardEntity, ChapterCardEntity, ReadingListItemCardEntity} from "../_models/card/card-entity";
 import {ReadingList} from "../_models/reading-list";
 import {ActionableEntity} from "./action-factory.service";
@@ -40,8 +40,8 @@ export class CardConfigRegistry {
     entity: CardEntity,
     actionCallback: (action: any, entity: any) => void,
     overrides?: CardConfigurationOverrides<any>
-  ): CardConfiguration<T> {
-    let config: CardConfiguration<any>;
+  ): BaseCardConfiguration<T> {
+    let config: BaseCardConfiguration<any>;
 
     switch (entity.entityType) {
       case 'series':
@@ -96,7 +96,7 @@ export class CardConfigRegistry {
         throw new Error(`Unknown entity type: ${(entity as CardEntity).entityType}`);
     }
 
-    return config as CardConfiguration<T>;
+    return config as BaseCardConfiguration<T>;
   }
 
   /**
@@ -105,8 +105,8 @@ export class CardConfigRegistry {
   resolveAll(
     entities: CardEntity[],
     actionCallback: (action: any, entity: any) => void
-  ): Map<CardEntity, CardConfiguration<any>> {
-    const configMap = new Map<CardEntity, CardConfiguration<any>>();
+  ): Map<CardEntity, BaseCardConfiguration<any>> {
+    const configMap = new Map<CardEntity, BaseCardConfiguration<any>>();
     for (const entity of entities) {
       configMap.set(entity, this.resolve(entity, actionCallback));
     }
@@ -120,7 +120,7 @@ export class CardConfigRegistry {
     entity: ReadingListItemCardEntity,
     actionCallback: (action: any, entity: ReadingList) => void,
     overrides?: CardConfigurationOverrides<ReadingList>
-  ): CardConfiguration<ReadingList> {
+  ): BaseCardConfiguration<ReadingList> {
     // ReadingListItem contains a reference to the actual entity
     return this.factory.forReadingList(
       actionCallback as (action: any, s: ReadingList) => void,

@@ -30,7 +30,7 @@ import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update
 import {LibraryType} from "../../_models/library/library";
 import {MangaFormat} from "../../_models/manga-format";
 import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
-import {CardConfiguration} from "../../_models/card/card-configuration";
+import {BaseCardConfiguration} from "../../_models/card/card-configuration";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {BulkSelectionEntityDataSource} from "../bulk-selection.service";
@@ -103,7 +103,7 @@ export class ChapterCardComponent implements OnInit, OnChanges {
     return CardEntityFactory.chapter(chapter, this.seriesId, this.libraryId);
   });
 
-  config = computed<CardConfiguration<Chapter>>(() => {
+  config = computed<BaseCardConfiguration<Chapter>>(() => {
     const baseConfig = this.configFactory.forChapter(
       this.seriesId,
       this.libraryId,

@@ -16,7 +16,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DownloadEvent} from "../../shared/_services/download.service";
 import {Observable} from "rxjs";
 import {MangaFormat} from "../../_models/manga-format";
-import {CardConfiguration} from "../../_models/card/card-configuration";
+import {BaseCardConfiguration, hasActionables} from "../../_models/card/card-configuration";
 import {CardEntity} from "../../_models/card/card-entity";
 import {ScrollService} from "../../_services/scroll.service";
 import {ImageService} from "../../_services/image.service";
@@ -30,7 +30,7 @@ import {RouterLink} from "@angular/router";
 import {DecimalPipe, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
-import {ActionableEntity} from "../../_services/action-factory.service";
+import {ActionableEntity, ActionItem} from "../../_services/action-factory.service";
 import {IHasProgress} from "../../_models/common/i-has-progress";
 import {ThemeService} from "../../_services/theme.service";
 
@@ -69,7 +69,7 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   entity = input.required<CardEntity>();
 
   /** Configuration defining how the card renders and behaves */
-  config = input.required<CardConfiguration<T>>();
+  config = input.required<BaseCardConfiguration<T>>();
 
   /** Index in the rendered list - drives bulk selection */
   index = input<number>(0);
@@ -149,8 +149,13 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
 
   /** Whether action menu should display */
   protected hasActionables: Signal<boolean> = computed(() =>
-    this.config().actionables.length > 0
+    hasActionables(this.config())
   );
+
+  protected actionables: Signal<ActionItem<any>[]> = computed(() => {
+    const config = this.config() as { actionables?: ActionItem<any>[] };
+    return config.actionables ?? [];
+  });
 
   /** Aria label for accessibility */
   protected ariaLabel: Signal<string> = computed(() =>
@@ -272,7 +277,7 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
   get metaTitleTemplate() {
     return this.config().metaTitleTemplate;
   }
-  
+
   get titleTemplate() {
     return this.config().titleTemplate;
   }

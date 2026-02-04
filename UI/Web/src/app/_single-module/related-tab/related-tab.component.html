@@ -32,14 +32,15 @@
       </app-carousel-reel>
     }
 
-    @if (bookmarks.length > 0) {
-      <app-carousel-reel [items]="bookmarks" [title]="t('bookmarks-title')">
+    @if (bookmarks().length > 0) {
+      <app-carousel-reel [items]="bookmarks()" [title]="t('bookmarks-title')">
         <ng-template #carouselItem let-item let-idx>
-          <app-card-item [entity]="item" [title]="t('bookmarks-title')" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
+          <app-card-item [entity]="item" [title]="t('bookmarks-title')"
+                         [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
                          [suppressArchiveWarning]="true"
                          [linkUrl]="'/library/' + libraryId + '/series/' + item.seriesId + '/manga/0?bookmarkMode=true'"
                          (clicked)="viewBookmark(item)"
-                         [count]="bookmarks.length"
+                         [count]="bookmarks().length"
                          [allowSelection]="false" />
         </ng-template>
       </app-carousel-reel>

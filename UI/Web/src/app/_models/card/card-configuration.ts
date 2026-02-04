@@ -11,9 +11,9 @@ import {IHasProgress} from "../common/i-has-progress";
  * Configuration object that defines how a card renders and behaves.
  * Created by CardConfigFactory for each entity type with sensible defaults.
  *
- * @typeParam T - The underlying data type, must be ActionableEntity
+ * @typeParam T - The underlying data type.
  */
-export interface CardConfiguration<T extends ActionableEntity> {
+export interface BaseCardConfiguration<T> {
 
   /** Whether bulk selection is enabled for this card */
   allowSelection: boolean;
@@ -66,9 +66,6 @@ export interface CardConfiguration<T extends ActionableEntity> {
    */
   metaTitleTemplate?: TemplateRef<{ $implicit: CardEntity }>;
 
-  /** Action items for the card's action menu */
-  actionables: ActionItem<T>[];
-
   /** Callback when the read button is clicked */
   readFunc: (entity: T) => void;
 
@@ -83,15 +80,40 @@ export interface CardConfiguration<T extends ActionableEntity> {
 }
 
 /**
+ * Configuration object that defines how a card renders and behaves.
+ * Created by CardConfigFactory for each entity type with sensible defaults.
+ *
+ * @typeParam T - The underlying data type, T must be ActionableEntity
+ */
+export interface ActionableCardConfiguration<T extends ActionableEntity>
+  extends BaseCardConfiguration<T> {
+  /** Action items for the card's action menu */
+  actionables: ActionItem<T>[];
+}
+
+export type CardConfiguration<T> = T extends ActionableEntity
+  ? ActionableCardConfiguration<T> | BaseCardConfiguration<T>
+  : BaseCardConfiguration<T>;
+
+export function hasActionables<T>(
+  config: BaseCardConfiguration<T>
+): config is BaseCardConfiguration<T> & { actionables: ActionItem<any>[] } {
+  return 'actionables' in config &&
+    Array.isArray((config as any).actionables) &&
+    (config as any).actionables.length > 0;
+}
+
+/**
  * Partial configuration for overrides. All properties optional.
  */
-export type CardConfigurationOverrides<T extends ActionableEntity> = Partial<CardConfiguration<T>>;
+export type CardConfigurationOverrides<T extends ActionableEntity> = Partial<ActionableCardConfiguration<T>>;
+export type BaseCardConfigurationOverrides<T> = Partial<BaseCardConfiguration<T>>;
 
 /**
  * Minimal configuration - only the truly required fields.
  * Used internally by factory to ensure all required fields are set.
  */
-export type RequiredCardConfiguration<T extends ActionableEntity> = Pick<CardConfiguration<T>,
+export type RequiredCardConfiguration<T extends ActionableEntity> = Pick<BaseCardConfiguration<T>,
   | 'allowSelection'
   | 'selectionType'
   | 'coverFunc'
@@ -100,6 +122,5 @@ export type RequiredCardConfiguration<T extends ActionableEntity> = Pick<CardCon
   | 'metaTitleFunc'
   | 'tooltipFunc'
   | 'progressFunc'
-  | 'actionables'
   | 'readFunc'
 >;
