@@ -12,7 +12,9 @@ import {
   OnInit,
   Output,
   signal,
-  SimpleChanges
+  SimpleChanges,
+  TemplateRef,
+  viewChild
 } from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
@@ -85,6 +87,8 @@ export class ChapterCardComponent implements OnInit, OnChanges {
    */
   @Output() selection = new EventEmitter<boolean>();
 
+  protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
+
 
   private user: User | undefined;
 
@@ -108,7 +112,8 @@ export class ChapterCardComponent implements OnInit, OnChanges {
       {
         allowSelection: this.allowSelection,
         actionables: this.actions,
-        selectionType: this.dataSource()
+        selectionType: this.dataSource(),
+        titleTemplate: this.titleTemplateRef()
       }
     );
 

@@ -2,12 +2,12 @@
   <ng-container *transloco="let t; prefix: 'all-collections'">
     <app-side-nav-companion-bar [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
       <h4 title>{{t('title')}}</h4>
-      <h5 subtitle>{{t('item-count', {num: collections.length | number})}}</h5>
+      <h5 subtitle>{{t('item-count', {num: collections().length | number})}}</h5>
     </app-side-nav-companion-bar>
 
     <app-card-detail-layout
       [isLoading]="isLoading"
-      [items]="collections"
+      [items]="collectionEntities()"
       [filterOpen]="filterOpen"
       [jumpBarKeys]="jumpbarKeys"
       [trackByIdentity]="trackByIdentity"
@@ -18,18 +18,12 @@
       </ng-template>
 
       <ng-template #cardItem let-item let-position="idx">
-        <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [actionEntity]="item"
-                       [imageUrl]="imageService.getCollectionCoverImage(item.id)"
-                       [linkUrl]="'/collections/' + item.id"
-                       [count]="item.itemCount"
-                       (clicked)="loadCollection(item)"
-                       (selection)="bulkSelectionService.handleCardSelection('collection', position, collections.length, $event)"
-                       [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true" [showFormat]="false">
-
+        <app-entity-card [entity]="item" [index]="position" [maxIndex]="collectionEntities().length"
+                         [config]="collectionConfig()">
           <ng-template #subtitle>
-            <app-collection-owner [collection]="item" />
+            <app-collection-owner [collection]="item.data" />
           </ng-template>
-        </app-card-item>
+        </app-entity-card>
       </ng-template>
 
       <ng-template #noData>

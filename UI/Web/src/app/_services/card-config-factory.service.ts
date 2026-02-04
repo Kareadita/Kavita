@@ -1,4 +1,4 @@
-import {inject, Injectable} from "@angular/core";
+import {inject, Injectable, TemplateRef} from "@angular/core";
 import {ImageService} from "./image.service";
 import {ReaderService} from "./reader.service";
 import {ActionableEntity, ActionFactoryService, ActionItem} from "./action-factory.service";
@@ -6,7 +6,7 @@ import {DownloadService} from "../shared/_services/download.service";
 import {Router} from "@angular/router";
 import {RelationshipPipe} from "../_pipes/relationship.pipe";
 import {Series} from "../_models/series";
-import {ChapterCardEntity, SeriesCardEntity} from "../_models/card/card-entity";
+import {CardEntity, ChapterCardEntity, SeriesCardEntity} from "../_models/card/card-entity";
 import {CardConfiguration, CardConfigurationOverrides} from "../_models/card/card-configuration";
 import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
 import {map} from "rxjs/operators";
@@ -214,7 +214,8 @@ export class CardConfigFactory {
    * Creates configuration for Collection cards
    */
   forCollection(
-    actionCallback: (action: ActionItem<UserCollection>, collection: UserCollection) => void,
+    actionables: ActionItem<UserCollection>[],
+    templateRef: TemplateRef<{ $implicit: CardEntity }> | undefined,
     overrides?: CardConfigurationOverrides<UserCollection>
   ): CardConfiguration<UserCollection> {
     const defaults: CardConfiguration<UserCollection> = {
@@ -225,19 +226,19 @@ export class CardConfigFactory {
       coverFunc: (c) => this.imageService.getCollectionCoverImage(c.id),
       titleFunc: (c) => c.title,
       titleRouteFunc: (c) => `/collections/${c.id}`,
-      metaTitleFunc: (c) => c.summary || '',
+      metaTitleFunc: (c) => '',
+      metaTitleTemplate: templateRef,
       tooltipFunc: (c) => c.title,
       progressFunc: () => ({ pages: 0, pagesRead: 0 }),
 
       formatBadgeFunc: () => null,
-      countFunc: () => 0,
+      countFunc: (c) => c.itemCount,
       showErrorFunc: () => false,
       ariaLabelFunc: (c) => c.title,
 
-      actionables: this.actionFactory.getCollectionTagActions(actionCallback),
+      actionables: actionables,
       readFunc: () => {},
-
-      downloadObservableFunc: () => null!
+      clickFunc: (c) => this.router.navigate(['collections', c.id]),
     };
 
     return this.mergeConfig(defaults, overrides);

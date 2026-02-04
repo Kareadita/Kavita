@@ -2,10 +2,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   EventEmitter,
   inject,
-  OnInit
+  OnInit,
+  signal,
+  TemplateRef,
+  viewChild
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router} from '@angular/router';
@@ -21,7 +25,6 @@ import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, DecimalPipe} from '@angular/common';
-import {CardItemComponent} from '../../../cards/card-item/card-item.component';
 import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
 import {
   SideNavCompanionBarComponent
@@ -36,6 +39,9 @@ import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {ActionService} from "../../../_services/action.service";
 import {WikiLink} from "../../../_models/wiki";
 import {DefaultModalOptions} from "../../../_models/default-modal-options";
+import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
+import {CardEntity, CardEntityFactory, CollectionCardEntity} from "../../../_models/card/card-entity";
+import {CardConfigFactory} from "../../../_services/card-config-factory.service";
 
 
 @Component({
@@ -44,8 +50,8 @@ import {DefaultModalOptions} from "../../../_models/default-modal-options";
   styleUrls: ['./all-collections.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, AsyncPipe, DecimalPipe,
-    TranslocoDirective, CollectionOwnerComponent, BulkOperationsComponent]
+  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, AsyncPipe, DecimalPipe,
+    TranslocoDirective, CollectionOwnerComponent, BulkOperationsComponent, EntityCardComponent]
 })
 export class AllCollectionsComponent implements OnInit {
 
@@ -63,16 +69,33 @@ export class AllCollectionsComponent implements OnInit {
   public readonly accountService = inject(AccountService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly actionService = inject(ActionService);
+  public readonly cardConfigFactory = inject(CardConfigFactory);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly WikiLink = WikiLink;
 
+  protected subtitleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('subtitle');
+
+
   isLoading: boolean = true;
-  collections: UserCollection[] = [];
+  collections = signal<UserCollection[]>([]);
+  collectionEntities = computed(() => this.collections().map(c => CardEntityFactory.collection(c)));
+
+  collectionConfig = computed(() => {
+    const user = this.accountService.currentUserSignal();
+
+    const actions = this.actionFactoryService.getCollectionTagActions(
+      this.handleCollectionActionCallback.bind(this), this.shouldRenderCollection.bind(this))
+      .filter(action => this.collectionService.actionListFilter(action, user!));
+
+
+    return this.cardConfigFactory.forCollection(actions, this.subtitleTemplateRef());
+  })
+
   collectionTagActions: ActionItem<UserCollection>[] = [];
   jumpbarKeys: Array<JumpKey> = [];
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-  trackByIdentity = (index: number, item: UserCollection) => `${item.id}_${item.title}_${item.owner}_${item.promoted}`;
+  trackByIdentity = (index: number, item: CollectionCardEntity) => `${item.data.id}_${item.data.title}_${item.data.owner}_${item.data.promoted}`;
   user!: User;
 
 
@@ -118,7 +141,7 @@ export class AllCollectionsComponent implements OnInit {
     this.isLoading = true;
     this.cdRef.markForCheck();
     this.collectionService.allCollections().subscribe(tags => {
-      this.collections = [...tags];
+      this.collections.set([...tags]);
       this.isLoading = false;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(tags, (t: Tag) => t.title);
       this.cdRef.markForCheck();
@@ -161,7 +184,7 @@ export class AllCollectionsComponent implements OnInit {
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedCollectionIndexies = this.bulkSelectionService.getSelectedCardsForSource('collection');
-    const selectedCollections = this.collections.filter((col, index: number) => selectedCollectionIndexies.includes(index + ''));
+    const selectedCollections = this.collections().filter((col, index: number) => selectedCollectionIndexies.includes(index + ''));
 
     switch (action.action) {
       case Action.Promote:

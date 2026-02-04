@@ -73,12 +73,11 @@ export class BookmarksComponent implements OnInit {
   protected readonly WikiLink = WikiLink;
 
   bookmarks: Array<PageBookmark> = [];
-  //series: Array<Series> = [];
 
   series = signal<Series[]>([]);
   seriesEntities = computed(() => {
     return this.series().map(s => CardEntityFactory.series(s));
-  })
+  });
 
   loadingBookmarks: boolean = false;
   seriesIds: {[id: number]: number} = {};
