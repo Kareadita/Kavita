@@ -104,7 +104,7 @@ export class ChapterCardComponent implements OnInit, OnChanges {
   });
 
   config = computed<BaseCardConfiguration<Chapter>>(() => {
-    const baseConfig = this.configFactory.forChapter(
+    return this.configFactory.forChapter(
       this.seriesId,
       this.libraryId,
       this.libraryType,
@@ -116,8 +116,6 @@ export class ChapterCardComponent implements OnInit, OnChanges {
         titleTemplate: this.titleTemplateRef()
       }
     );
-
-    return baseConfig;
   });
 
   ngOnInit() {
@@ -125,7 +123,7 @@ export class ChapterCardComponent implements OnInit, OnChanges {
       this.user = user;
     });
 
-
+    // TODO: I don't think we can port this easily. It might be worth just removing this functionality from the app
     this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
       map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed(this.destroyRef)).subscribe(updateEvent => {
       if (this.user === undefined || this.user.username !== updateEvent.username) return;
