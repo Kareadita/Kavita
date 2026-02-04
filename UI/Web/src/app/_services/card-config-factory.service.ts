@@ -19,6 +19,7 @@ import {UserCollection} from "../_models/collection-tag";
 import {ReadingList} from "../_models/reading-list";
 import {LibraryType} from "../_models/library/library";
 import {MangaFormat} from "../_models/manga-format";
+import {User} from "../_models/user/user";
 
 /**
  * Factory service that creates CardConfiguration objects for each entity type.
@@ -255,10 +256,11 @@ export class CardConfigFactory {
    */
   forReadingList(
     actionCallback: (action: ActionItem<ReadingList>, list: ReadingList) => void,
+    shouldRenderAction: (action: ActionItem<ReadingList>, entity: ReadingList, user: User) => boolean,
     overrides?: CardConfigurationOverrides<ReadingList>
   ): ActionableCardConfiguration<ReadingList> {
     const defaults: ActionableCardConfiguration<ReadingList> = {
-      allowSelection: false,
+      allowSelection: true,
       selectionType: 'readingList',
       suppressArchiveWarning: true,
 
@@ -270,11 +272,11 @@ export class CardConfigFactory {
       progressFunc: () => ({ pages: 0, pagesRead: 0 }),
 
       formatBadgeFunc: () => null,
-      countFunc: () => 0,
+      countFunc: (r) => r.itemCount,
       showErrorFunc: () => false,
       ariaLabelFunc: (r) => r.title,
 
-      actionables: this.actionFactory.getReadingListActions(actionCallback),
+      actionables: this.actionFactory.getReadingListActions(actionCallback, shouldRenderAction),
       readFunc: () => {},
 
       downloadObservableFunc: () => null!

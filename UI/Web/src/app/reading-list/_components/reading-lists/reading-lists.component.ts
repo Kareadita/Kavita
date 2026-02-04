@@ -1,17 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
-import {take} from 'rxjs/operators';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {PaginatedResult, Pagination} from 'src/app/_models/pagination';
 import {ReadingList} from 'src/app/_models/reading-list';
 import {AccountService} from 'src/app/_services/account.service';
-import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {Action, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
-import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
-import {CardItemComponent} from '../../../cards/card-item/card-item.component';
 import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
 import {DecimalPipe} from '@angular/common';
 import {
@@ -24,70 +20,58 @@ import {WikiLink} from "../../../_models/wiki";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {User} from "../../../_models/user/user";
+import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
+import {CardEntityFactory, ReadingListCardEntity} from "../../../_models/card/card-entity";
+import {CardConfigFactory} from "../../../_services/card-config-factory.service";
 
 @Component({
-    selector: 'app-reading-lists',
-    templateUrl: './reading-lists.component.html',
-    styleUrls: ['./reading-lists.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, CardDetailLayoutComponent, CardItemComponent,
-    DecimalPipe, TranslocoDirective, BulkOperationsComponent]
+  selector: 'app-reading-lists',
+  templateUrl: './reading-lists.component.html',
+  styleUrls: ['./reading-lists.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, CardDetailLayoutComponent, DecimalPipe,
+    TranslocoDirective, BulkOperationsComponent, EntityCardComponent]
 })
 export class ReadingListsComponent implements OnInit {
   private readingListService = inject(ReadingListService);
-  imageService = inject(ImageService);
-  private actionFactoryService = inject(ActionFactoryService);
-  private accountService = inject(AccountService);
-  private toastr = inject(ToastrService);
-  private router = inject(Router);
-  private jumpbarService = inject(JumpbarService);
+  private readonly accountService = inject(AccountService);
+  private readonly toastr = inject(ToastrService);
+  private readonly jumpbarService = inject(JumpbarService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private titleService = inject(Title);
-
-  protected readonly WikiLink = WikiLink;
-
+  private readonly titleService = inject(Title);
+  private readonly cardConfigFactory = inject(CardConfigFactory);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly actionService = inject(ActionService);
 
+  protected readonly WikiLink = WikiLink;
 
-  lists: ReadingList[] = [];
+
+
+
+  lists = signal<ReadingList[]>([]);
+  listEntities = computed(() => this.lists().map(l => CardEntityFactory.readingList(l)));
+  readingListConfig = computed(() => {
+    return this.cardConfigFactory.forReadingList(this.handleReadingListActionCallback.bind(this), this.shouldRenderReadingListAction.bind(this));
+  });
   loadingLists = false;
   pagination!: Pagination;
-  isAdmin: boolean = false;
-  hasPromote: boolean = false;
+  // isAdmin: boolean = false;
+  // hasPromote: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
   globalActions: Array<ActionItem<any>> = [];
-  trackByIdentity = (index: number, item: ReadingList) => `${item.id}_${item.title}_${item.promoted}`;
+  trackByIdentity = (index: number, item: ReadingListCardEntity) => `${item.data.id}_${item.data.title}_${item.data.promoted}`;
 
   ngOnInit(): void {
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.isAdmin = this.accountService.hasAdminRole(user);
-        this.hasPromote = this.accountService.hasPromoteRole(user);
-
-        this.cdRef.markForCheck();
-
-        this.loadPage();
-        this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));
-      }
-    });
+    this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));
+    this.loadPage();
   }
 
-  getActions(readingList: ReadingList) {
-    return this.actionFactoryService
-      .getReadingListActions(this.handleReadingListActionCallback.bind(this), this.shouldRenderReadingListAction.bind(this))
-      .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin || this.hasPromote));
-  }
 
   performGlobalAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
       action.callback(action, undefined);
     }
-  }
-
-  handleClick(list: ReadingList) {
-    this.router.navigateByUrl('lists/' + list.id);
   }
 
   handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
@@ -138,19 +122,17 @@ export class ReadingListsComponent implements OnInit {
     this.cdRef.markForCheck();
 
     this.readingListService.getReadingLists(true, false).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
-      this.lists = readingLists.result;
+      this.lists.set(readingLists.result);
       this.pagination = readingLists.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(readingLists.result, (rl: ReadingList) => rl.title);
       this.loadingLists = false;
-      this.actions = {};
-      this.lists.forEach(l => this.actions[l.id] = this.getActions(l));
       this.cdRef.markForCheck();
     });
   }
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedReadingListIndexies = this.bulkSelectionService.getSelectedCardsForSource('readingList');
-    const selectedReadingLists = this.lists.filter((col, index: number) => selectedReadingListIndexies.includes(index + ''));
+    const selectedReadingLists = this.lists().filter((col, index: number) => selectedReadingListIndexies.includes(index + ''));
 
     switch (action.action) {
       case Action.Promote:
@@ -178,6 +160,13 @@ export class ReadingListsComponent implements OnInit {
   }
 
   shouldRenderReadingListAction(action: ActionItem<ReadingList>, entity: ReadingList, user: User) {
+    const isPromoteAction = action.action === Action.Promote || action.action === Action.UnPromote;
+    const hasPromotionAbility = this.accountService.hasAdminRole(user) || this.accountService.hasPromoteRole(user);
+
+    if (isPromoteAction && !hasPromotionAbility) {
+      return false;
+    }
+
     switch (action.action) {
       case Action.Promote:
         return !entity.promoted;

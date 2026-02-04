@@ -1,5 +1,5 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {map} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
 import {UtilityService} from '../shared/_services/utility.service';
@@ -98,9 +98,6 @@ export class ReadingListService {
 
     if (isPromotionAction) return canPromote;
     return true;
-
-    // if (readingList?.promoted && !isAdmin) return false;
-    // return true;
   }
 
   nameExists(name: string) {
