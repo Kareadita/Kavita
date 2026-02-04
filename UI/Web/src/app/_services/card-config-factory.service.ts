@@ -8,7 +8,7 @@ import {RelationshipPipe} from "../_pipes/relationship.pipe";
 import {Series} from "../_models/series";
 import {ChapterCardEntity, SeriesCardEntity} from "../_models/card/card-entity";
 import {CardConfiguration, CardConfigurationOverrides} from "../_models/card/card-configuration";
-import {Chapter} from "../_models/chapter";
+import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
 import {map} from "rxjs/operators";
 import {Volume} from "../_models/volume";
 import {UserCollection} from "../_models/collection-tag";
@@ -152,7 +152,11 @@ export class CardConfigFactory {
       progressFunc: (v) => ({ pages: v.pages, pagesRead: v.pagesRead }),
 
       formatBadgeFunc: () => null,
-      countFunc: (v) => 0,
+      // Show file count if there are duplicate files for volume, not just chapter count
+      countFunc: (v) => (v?.chapters || [])
+        .filter(c => c.minNumber === LooseLeafOrDefaultNumber)
+        .flatMap(c => c.files)
+        .length,
       showErrorFunc: (v) => v.pages === 0,
       ariaLabelFunc: (v) => v.name,
 
