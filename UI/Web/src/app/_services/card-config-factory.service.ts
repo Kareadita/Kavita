@@ -139,7 +139,7 @@ export class CardConfigFactory {
         }
         return c.titleName || '';
       },
-      tooltipFunc: (c) => c.titleName || c.title || c.range,
+      tooltipFunc: (c) => c.titleName || c.title || (c.range === (LooseLeafOrDefaultNumber + '') ? '' : c.range),
       progressFunc: (c) => ({ pages: c.pages, pagesRead: c.pagesRead }),
 
       formatBadgeFunc: () => null,
@@ -148,7 +148,7 @@ export class CardConfigFactory {
         const wrapper = overrides as unknown as ChapterCardEntity;
         return c.pages === 0 && !wrapper?.suppressArchiveWarning;
       },
-      ariaLabelFunc: (c) => c.titleName || c.title || c.range,
+      ariaLabelFunc: (c) => c.titleName || c.title || (c.range === (LooseLeafOrDefaultNumber + '') ? '' : c.range),
 
       actionables: this.actionFactory.getChapterActions(actionCallback),
       readFunc: (c) => this.readerService.readChapter(libraryId, seriesId, c, false),

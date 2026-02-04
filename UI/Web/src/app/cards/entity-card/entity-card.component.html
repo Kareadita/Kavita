@@ -123,6 +123,8 @@
       }
     </div>
 
+    <!--BUG: When both format and actions aren't present, the title doesn't render correctly-->
+
     <!-- Footer: Format Badge, Title, Actions -->
     <div class="card-title-container">
       <!-- Format Badge (optional) -->
@@ -133,8 +135,6 @@
       }
 
       <!-- Title Link -->
-
-
       <span
         class="card-title"
         [ngbTooltip]="tooltip()"
@@ -158,6 +158,8 @@
             [labelBy]="ariaLabel()"
           />
         </span>
+      } @else {
+        <span class="card-actions"></span>
       }
     </div>
   </div>
