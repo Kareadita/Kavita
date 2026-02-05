@@ -53,7 +53,7 @@ import {ThemeService} from "../../_services/theme.service";
   styleUrl: './entity-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
+export class EntityCardComponent<T> implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly scrollService = inject(ScrollService);
@@ -162,6 +162,13 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
     return config.actionables ?? [];
   });
 
+  protected actionableEntity: Signal<ActionableEntity | null> = computed(() => {
+    if (hasActionables(this.config())) {
+      return this.data() as unknown as ActionableEntity;
+    }
+    return null;
+  });
+
   /** Aria label for accessibility */
   protected ariaLabel: Signal<string> = computed(() =>
     this.config().ariaLabelFunc?.(this.data()) ?? this.title()
@@ -268,6 +275,11 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
     if (this.bulkSelectionService.hasSelections()) return;
 
     this.config().readFunc(this.data());
+  }
+
+  /** Check if meta title is not empty/null **/
+  get shouldRenderMetaTitle() {
+    return !!this.metaTitle() || this.hasMetaTitleTemplate;
   }
 
   /** Check if meta title template is provided */

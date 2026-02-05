@@ -109,19 +109,21 @@
     </div>
 
     <!-- Meta Title Area (above main title) -->
-    <div
-      class="card-body meta-title"
-      [ngbTooltip]="metaTitle().length > 34 ? metaTitle() : null">
-      @if (hasMetaTitleTemplate) {
-        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
-          <ng-container *ngTemplateOutlet="metaTitleTemplate!; context: { $implicit: entity() }" />
-        </div>
-      } @else {
-        <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
-          {{ metaTitle() }}
-        </div>
-      }
-    </div>
+    @if (shouldRenderMetaTitle) {
+      <div
+        class="card-body meta-title"
+        [ngbTooltip]="metaTitle().length > 34 ? metaTitle() : null">
+        @if (hasMetaTitleTemplate) {
+          <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+            <ng-container *ngTemplateOutlet="metaTitleTemplate!; context: { $implicit: entity() }" />
+          </div>
+        } @else {
+          <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+            {{ metaTitle() }}
+          </div>
+        }
+      </div>
+    }
 
     <!--BUG: When both format and actions aren't present, the title doesn't render correctly-->
 
@@ -153,7 +155,7 @@
       @if (hasActionables()) {
         <span class="card-actions">
           <app-card-actionables
-            [entity]="data()"
+            [entity]="actionableEntity()"
             [actions]="actionables()"
             [labelBy]="ariaLabel()"
           />

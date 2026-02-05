@@ -6,10 +6,11 @@ import {DownloadService} from "../shared/_services/download.service";
 import {Router} from "@angular/router";
 import {RelationshipPipe} from "../_pipes/relationship.pipe";
 import {Series} from "../_models/series";
-import {CardEntity, ChapterCardEntity, SeriesCardEntity} from "../_models/card/card-entity";
+import {CardEntity, ChapterCardEntity, RelatedSeriesCardEntity, SeriesCardEntity} from "../_models/card/card-entity";
 import {
   ActionableCardConfiguration,
   BaseCardConfiguration,
+  BaseCardConfigurationOverrides,
   CardConfigurationOverrides
 } from "../_models/card/card-configuration";
 import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
@@ -21,6 +22,7 @@ import {LibraryType} from "../_models/library/library";
 import {MangaFormat} from "../_models/manga-format";
 import {User} from "../_models/user/user";
 import {PageBookmark} from "../_models/readers/page-bookmark";
+import {RelatedSeriesPair} from "../_single-module/related-tab/related-tab.component";
 
 /**
  * Factory service that creates CardConfiguration objects for each entity type.
@@ -48,7 +50,7 @@ export class CardConfigFactory {
    * Creates configuration for Series cards
    */
   forSeries(
-    actionCallback: (action: ActionItem<Series>, series: Series) => void,
+    actionCallback?: (action: ActionItem<Series>, series: Series) => void,
     overrides?: CardConfigurationOverrides<Series>
   ): ActionableCardConfiguration<Series> {
     const defaults: ActionableCardConfiguration<Series> = {
@@ -74,12 +76,51 @@ export class CardConfigFactory {
       showErrorFunc: (s) => s.pages === 0,
       ariaLabelFunc: (s) => s.name,
 
-      actionables: this.actionFactory.getSeriesActions(actionCallback),
+      actionables: actionCallback
+        ? this.actionFactory.getSeriesActions(actionCallback)
+        : [],
       readFunc: (s) => this.readerService.readSeries(s, false),
       clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.id]),
 
       downloadObservableFunc: (s) => this.downloadService.activeDownloads$.pipe(
         map(events => this.downloadService.mapToEntityType(events, s))
+      )
+    };
+
+    return this.mergeConfig(defaults, overrides);
+  }
+
+  forRelationship(
+    overrides?: BaseCardConfigurationOverrides<RelatedSeriesPair>
+  ): BaseCardConfiguration<RelatedSeriesPair> {
+    const defaults: BaseCardConfiguration<RelatedSeriesPair> = {
+      allowSelection: false,
+      selectionType: 'series',
+      suppressArchiveWarning: false,
+
+      coverFunc: (s) => this.imageService.getSeriesCoverImage(s.series.id),
+      titleFunc: (s) => s.series.name,
+      titleRouteFunc: (s) => `/library/${s.series.libraryId}/series/${s.series.id}`,
+      metaTitleFunc: (s, wrapper) => {
+        const seriesWrapper = wrapper as RelatedSeriesCardEntity;
+        if (seriesWrapper.data.relation) {
+          return this.relationshipPipe.transform(seriesWrapper.data.relation);
+        }
+        return s.series.localizedName || s.series.name;
+      },
+      tooltipFunc: (s) => s.series.name,
+      progressFunc: (s) => ({ pages: s.series.pages, pagesRead: s.series.pagesRead }),
+
+      formatBadgeFunc: (s) => s.series.format,
+      countFunc: () => 0,
+      showErrorFunc: (s) => s.series.pages === 0,
+      ariaLabelFunc: (s) => s.series.name,
+
+      readFunc: (s) => this.readerService.readSeries(s.series, false),
+      clickFunc: (s) => this.router.navigate(['library', s.series.libraryId, 'series', s.series.id]),
+
+      downloadObservableFunc: (s) => this.downloadService.activeDownloads$.pipe(
+        map(events => this.downloadService.mapToEntityType(events, s.series))
       )
     };
 
@@ -226,8 +267,8 @@ export class CardConfigFactory {
    * Creates configuration for Collection cards
    */
   forCollection(
-    actionables: ActionItem<UserCollection>[],
-    templateRef: TemplateRef<{ $implicit: CardEntity }> | undefined,
+    actionables?: ActionItem<UserCollection>[],
+    templateRef?: TemplateRef<{ $implicit: CardEntity }> | undefined,
     overrides?: CardConfigurationOverrides<UserCollection>
   ): ActionableCardConfiguration<UserCollection> {
     const defaults: ActionableCardConfiguration<UserCollection> = {
@@ -248,7 +289,9 @@ export class CardConfigFactory {
       showErrorFunc: () => false,
       ariaLabelFunc: (c) => c.title,
 
-      actionables: actionables,
+      actionables: actionables
+        ? actionables
+        : [],
       readFunc: () => {},
       clickFunc: (c) => this.router.navigate(['collections', c.id]),
     };

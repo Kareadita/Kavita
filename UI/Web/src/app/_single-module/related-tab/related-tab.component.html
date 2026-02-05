@@ -1,22 +1,17 @@
 <ng-container *transloco="let t; prefix: 'related-tab'">
   <div class="pb-2">
-    @if (relations.length > 0) {
-      <app-carousel-reel [items]="relations" [title]="t('relations-title')">
+    @if (relationEntities().length > 0) {
+      <app-carousel-reel [items]="relationEntities()" [title]="t('relations-title')">
         <ng-template #carouselItem let-item let-idx>
-          <app-series-card class="col-auto mt-2 mb-2" [series]="item.series" [libraryId]="item.series.libraryId"
-                           [relation]="item.relation" [index]="idx" [maxIndex]="relations.length" />
+          <app-entity-card [entity]="item" [config]="relatedConfig()" [index]="idx" [maxIndex]="relationEntities().length" />
         </ng-template>
       </app-carousel-reel>
     }
 
-    @if (collections.length > 0) {
-      <app-carousel-reel [items]="collections" [title]="t('collections-title')">
+    @if (collectionEntities().length > 0) {
+      <app-carousel-reel [items]="collectionEntities()" [title]="t('collections-title')">
         <ng-template #carouselItem let-item let-idx>
-          <app-card-item [title]="item.title" [entity]="item"
-                         [count]="item.itemCount"
-                         [suppressLibraryLink]="true" [imageUrl]="imageService.getCollectionCoverImage(item.id)"
-                         (clicked)="openCollection(item)" [linkUrl]="'/collections/' + item.id" [showFormat]="false" />
-
+        <app-entity-card [entity]="item" [config]="collectionConfig()" [index]="idx" [maxIndex]="collectionEntities().length" />
         </ng-template>
       </app-carousel-reel>
     }
@@ -34,14 +29,6 @@
       <app-carousel-reel [items]="bookmarkEntities()" [title]="t('bookmarks-title')">
         <ng-template #carouselItem let-item let-idx>
           <app-entity-card [entity]="item" [index]="idx" [maxIndex]="bookmarkEntities().length" [config]="bookmarkConfig()" />
-
-<!--          <app-card-item [entity]="item" [title]="t('bookmarks-title')"-->
-<!--                         [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"-->
-<!--                         [suppressArchiveWarning]="true"-->
-<!--                         [linkUrl]="'/library/' + libraryId + '/series/' + item.seriesId + '/manga/0?bookmarkMode=true'"-->
-<!--                         (clicked)="viewBookmark(item)"-->
-<!--                         [count]="bookmarks().length"-->
-<!--                         [allowSelection]="false" />-->
         </ng-template>
       </app-carousel-reel>
     }
