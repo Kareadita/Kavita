@@ -5,6 +5,7 @@ import {RelationKind} from "../series-detail/relation-kind";
 import {Volume} from "../volume";
 import {UserCollection} from "../collection-tag";
 import {LibraryType} from "../library/library";
+import {PageBookmark} from "../readers/page-bookmark";
 
 /**
  * Discriminated union representing any entity that can be displayed as a card.
@@ -22,7 +23,8 @@ export type CardEntity =
   | ReadingListCardEntity
   | VolumeCardEntity
   | ChapterCardEntity
-  | ReadingListItemCardEntity;
+  | ReadingListItemCardEntity
+  | BookmarkCardEntity;
 
 export interface SeriesCardEntity {
   entityType: 'series';
@@ -68,6 +70,11 @@ export interface ReadingListItemCardEntity {
   data: ReadingListItem;
 }
 
+export interface BookmarkCardEntity {
+  entityType: 'bookmark';
+  data: PageBookmark;
+}
+
 /**
  * Type guard utilities for working with CardEntity
  */
@@ -78,6 +85,7 @@ export const CardEntityGuards = {
   isVolume: (e: CardEntity): e is VolumeCardEntity => e.entityType === 'volume',
   isChapter: (e: CardEntity): e is ChapterCardEntity => e.entityType === 'chapter',
   isReadingListItem: (e: CardEntity): e is ReadingListItemCardEntity => e.entityType === 'readinglist-item',
+  isBookmark: (e: CardEntity): e is BookmarkCardEntity => e.entityType === 'bookmark',
 };
 
 /**
@@ -125,5 +133,10 @@ export const CardEntityFactory = {
   readingListItem: (data: ReadingListItem): ReadingListItemCardEntity => ({
     entityType: 'readinglist-item',
     data
-  })
+  }),
+
+  bookmark: (data: PageBookmark): BookmarkCardEntity => ({
+    entityType: 'bookmark',
+    data
+  }),
 };

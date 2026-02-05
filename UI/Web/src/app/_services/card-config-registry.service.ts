@@ -14,6 +14,7 @@ import {Volume} from "../_models/volume";
 import {UserCollection} from "../_models/collection-tag";
 import {LibraryType} from "../_models/library/library";
 import {User} from "../_models/user/user";
+import {PageBookmark} from "../_models/readers/page-bookmark";
 
 /**
  * Context required to resolve configurations for entities that need
@@ -84,6 +85,8 @@ export class CardConfigRegistry {
 
       case 'readinglist-item':
         return this.resolveReadingListItem(entity, actionCallback, context, overrides);
+      case 'bookmark':
+        return this.resolveBookmark(actionCallback, overrides);
 
       default:
         const _exhaustive: never = entity;
@@ -169,6 +172,18 @@ export class CardConfigRegistry {
       actionCallback as (action: ActionItem<ReadingList>, r: ReadingList) => void,
       shouldRender,
       overrides as CardConfigurationOverrides<ReadingList>
+    );
+  }
+
+
+  private resolveBookmark(
+    actionCallback?: (action: ActionItem<any>, entity: any) => void,
+    overrides?: CardConfigurationOverrides<any>
+  ): ActionableCardConfiguration<PageBookmark> {
+
+    return this.factory.forBookmark(
+      actionCallback,
+      overrides as CardConfigurationOverrides<PageBookmark>
     );
   }
 

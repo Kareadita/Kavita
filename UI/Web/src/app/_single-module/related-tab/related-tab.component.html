@@ -16,32 +16,32 @@
                          [count]="item.itemCount"
                          [suppressLibraryLink]="true" [imageUrl]="imageService.getCollectionCoverImage(item.id)"
                          (clicked)="openCollection(item)" [linkUrl]="'/collections/' + item.id" [showFormat]="false" />
+
         </ng-template>
       </app-carousel-reel>
     }
 
 
-    @if (readingLists.length > 0) {
-      <app-carousel-reel [items]="readingLists" [title]="t('reading-lists-title')">
+    @if (readingListEntities().length > 0) {
+      <app-carousel-reel [items]="readingListEntities()" [title]="t('reading-lists-title')">
         <ng-template #carouselItem let-item let-idx>
-          <app-card-item [title]="item.title" [entity]="item"
-                         [count]="item.itemCount"
-                         [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
-                         (clicked)="openReadingList(item)" [linkUrl]="'/lists/' + item.id" [showFormat]="false" />
+          <app-entity-card [entity]="item" [index]="idx" [maxIndex]="readingListEntities().length" [config]="readingListConfig()" />
         </ng-template>
       </app-carousel-reel>
     }
 
     @if (bookmarks().length > 0) {
-      <app-carousel-reel [items]="bookmarks()" [title]="t('bookmarks-title')">
+      <app-carousel-reel [items]="bookmarkEntities()" [title]="t('bookmarks-title')">
         <ng-template #carouselItem let-item let-idx>
-          <app-card-item [entity]="item" [title]="t('bookmarks-title')"
-                         [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
-                         [suppressArchiveWarning]="true"
-                         [linkUrl]="'/library/' + libraryId + '/series/' + item.seriesId + '/manga/0?bookmarkMode=true'"
-                         (clicked)="viewBookmark(item)"
-                         [count]="bookmarks().length"
-                         [allowSelection]="false" />
+          <app-entity-card [entity]="item" [index]="idx" [maxIndex]="bookmarkEntities().length" [config]="bookmarkConfig()" />
+
+<!--          <app-card-item [entity]="item" [title]="t('bookmarks-title')"-->
+<!--                         [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"-->
+<!--                         [suppressArchiveWarning]="true"-->
+<!--                         [linkUrl]="'/library/' + libraryId + '/series/' + item.seriesId + '/manga/0?bookmarkMode=true'"-->
+<!--                         (clicked)="viewBookmark(item)"-->
+<!--                         [count]="bookmarks().length"-->
+<!--                         [allowSelection]="false" />-->
         </ng-template>
       </app-carousel-reel>
     }

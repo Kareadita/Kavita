@@ -77,6 +77,10 @@ export interface BaseCardConfiguration<T> {
    * Used to show download progress indicator.
    */
   downloadObservableFunc?: (entity: T) => Observable<DownloadEvent | null>;
+  /**
+   * Returns key/values for route params (bookmark mode)
+   */
+  titleRouteParamsFunc?: (entity: T) => Record<string, any>;
 }
 
 /**

@@ -20,6 +20,7 @@ import {ReadingList} from "../_models/reading-list";
 import {LibraryType} from "../_models/library/library";
 import {MangaFormat} from "../_models/manga-format";
 import {User} from "../_models/user/user";
+import {PageBookmark} from "../_models/readers/page-bookmark";
 
 /**
  * Factory service that creates CardConfiguration objects for each entity type.
@@ -86,29 +87,33 @@ export class CardConfigFactory {
   }
 
   forBookmark(
-    actionCallback: (action: ActionItem<Series>, series: Series) => void,
-    overrides?: CardConfigurationOverrides<Series>
-  ): ActionableCardConfiguration<Series> {
-    const defaults: ActionableCardConfiguration<Series> = {
+    actionCallback?: (action: ActionItem<PageBookmark>, bookmark: PageBookmark) => void,
+    overrides?: CardConfigurationOverrides<PageBookmark>
+  ): ActionableCardConfiguration<PageBookmark> {
+    const defaults: ActionableCardConfiguration<PageBookmark> = {
       allowSelection: true,
       selectionType: 'bookmark',
       suppressArchiveWarning: true,
 
       coverFunc: (s) => this.imageService.getSeriesCoverImage(s.id),
-      titleFunc: (s) => s.name,
-      titleRouteFunc: (s) => `/library/${s.libraryId}/series/${s.id}`,
-      metaTitleFunc: (s, wrapper) => s.name,
-      tooltipFunc: (s) => s.name,
-      progressFunc: (s) => ({ pages: s.pages, pagesRead: s.pagesRead }),
+      titleFunc: (s) => s.series!.name,
+      titleRouteFunc: (s) => `/library/${s.series!.libraryId}/series/${s.seriesId}}`,
+      metaTitleFunc: (s, wrapper) => s.series!.name,
+      tooltipFunc: (s) => s.series!.name,
+      progressFunc: (s) => ({ pages: s.series!.pages, pagesRead: s.series!.pagesRead }),
 
-      formatBadgeFunc: (s) => s.format,
+      formatBadgeFunc: (s) => s.series!.format,
       countFunc: () => 0,
       showErrorFunc: (s) => false,
-      ariaLabelFunc: (s) => s.name,
+      ariaLabelFunc: (s) => s.series!.name,
+      titleRouteParamsFunc: (s) => {return { bookmarkMode: true }},
 
-      actionables: this.actionFactory.getBookmarkActions(actionCallback),
-      readFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.id, 'manga', 0], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
-      clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.id, 'manga', 0], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
+      actionables: actionCallback
+        ? this.actionFactory.getBookmarkActions(actionCallback)
+        : [],
+
+      readFunc: (s) => this.router.navigate(['library', s.series!.libraryId, 'series', s.seriesId, 'manga', s.chapterId], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
+      clickFunc: (s) => this.router.navigate(['library', s.series!.libraryId, 'series', s.seriesId, 'manga', s.chapterId], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
 
       downloadObservableFunc: (s) => this.downloadService.activeDownloads$.pipe(
         map(events => this.downloadService.mapToEntityType(events, s))
@@ -255,8 +260,8 @@ export class CardConfigFactory {
    * Creates configuration for ReadingList cards
    */
   forReadingList(
-    actionCallback: (action: ActionItem<ReadingList>, list: ReadingList) => void,
-    shouldRenderAction: (action: ActionItem<ReadingList>, entity: ReadingList, user: User) => boolean,
+    actionCallback?: (action: ActionItem<ReadingList>, list: ReadingList) => void,
+    shouldRenderAction?: (action: ActionItem<ReadingList>, entity: ReadingList, user: User) => boolean,
     overrides?: CardConfigurationOverrides<ReadingList>
   ): ActionableCardConfiguration<ReadingList> {
     const defaults: ActionableCardConfiguration<ReadingList> = {
@@ -276,10 +281,10 @@ export class CardConfigFactory {
       showErrorFunc: () => false,
       ariaLabelFunc: (r) => r.title,
 
-      actionables: this.actionFactory.getReadingListActions(actionCallback, shouldRenderAction),
+      actionables: actionCallback
+            ? this.actionFactory.getReadingListActions(actionCallback, shouldRenderAction)
+            : [],
       readFunc: () => {},
-
-      downloadObservableFunc: () => null!
     };
 
     return this.mergeConfig(defaults, overrides);

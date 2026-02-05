@@ -110,6 +110,11 @@ export class EntityCardComponent<T extends ActionableEntity> implements OnInit {
     this.config().titleRouteFunc(this.data())
   );
 
+  /** Router link for title */
+  protected titleRouteParams: Signal<Record<string, any>> = computed(() =>
+    this.config().titleRouteParamsFunc?.(this.data()) ?? {}
+  );
+
   /** Meta title text (fallback when no template) */
   protected metaTitle: Signal<string> = computed(() =>
     this.config().metaTitleFunc(this.data(), this.entity()) ?? ''

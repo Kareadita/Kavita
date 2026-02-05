@@ -6,7 +6,6 @@ import {
   DestroyRef,
   EventEmitter,
   inject,
-  OnInit,
   signal
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -20,7 +19,7 @@ import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {Action, ActionItem} from 'src/app/_services/action-factory.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {ReaderService} from 'src/app/_services/reader.service';
@@ -41,7 +40,7 @@ import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {MetadataService} from "../../../_services/metadata.service";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
-import {CardEntityFactory, SeriesCardEntity} from "../../../_models/card/card-entity";
+import {BookmarkCardEntity, CardEntityFactory} from "../../../_models/card/card-entity";
 
 @Component({
   selector: 'app-bookmarks',
@@ -50,14 +49,13 @@ import {CardEntityFactory, SeriesCardEntity} from "../../../_models/card/card-en
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, DecimalPipe, TranslocoDirective, EntityCardComponent]
 })
-export class BookmarksComponent implements OnInit {
+export class BookmarksComponent {
 
   private readonly translocoService = inject(TranslocoService);
   private readonly readerService = inject(ReaderService);
   private readonly downloadService = inject(DownloadService);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
-  private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
@@ -72,17 +70,19 @@ export class BookmarksComponent implements OnInit {
 
   protected readonly WikiLink = WikiLink;
 
-  bookmarks: Array<PageBookmark> = [];
-
-  series = signal<Series[]>([]);
-  seriesEntities = computed(() => {
-    return this.series().map(s => CardEntityFactory.series(s));
+  bookmarks = signal<PageBookmark[]>([]);
+  bookmarkEntities = computed(() => {
+    return this.bookmarks().map(s => CardEntityFactory.bookmark(s));
+  });
+  series = computed(() => this.bookmarks().map(b => b.series!));
+  bookmarkConfig = computed(() => {
+    return this.cardConfigFactory.forBookmark(this.handleAction.bind(this), {
+      countFunc: entity => this.seriesIds[entity.seriesId],
+    });
   });
 
   loadingBookmarks: boolean = false;
   seriesIds: {[id: number]: number} = {};
-  clearingSeries: {[id: number]: boolean} = {};
-  actions: ActionItem<Series>[] = [];
   jumpbarKeys: Array<JumpKey> = [];
 
   pagination: Pagination = new Pagination();
@@ -92,14 +92,10 @@ export class BookmarksComponent implements OnInit {
   filterActive: boolean = false;
   filterActiveCheck!: FilterV2<FilterField>;
 
-  trackByIdentity = (index: number, item: SeriesCardEntity) => `${item.data.name}_${item.data.localizedName}_${item.data.pagesRead}`;
+  trackByIdentity = (index: number, item: BookmarkCardEntity) => `${item.data.series!.name}_${item.data.seriesId}_${item.data.series!.pagesRead}`;
   refresh: EventEmitter<void> = new EventEmitter();
 
-  bookmarkConfig = computed(() => {
-    return this.cardConfigFactory.forBookmark(this.handleAction.bind(this), {
-      countFunc: entity => this.seriesIds[entity.id],
-    });
-  });
+
 
   constructor() {
 
@@ -123,12 +119,11 @@ export class BookmarksComponent implements OnInit {
       this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
     }
 
-  ngOnInit(): void {
-    this.actions = this.actionFactoryService.getBookmarkActions(this.handleAction.bind(this));
-  }
 
+  async handleAction(action: ActionItem<PageBookmark>, pageBookmark: PageBookmark) {
+    const series = pageBookmark.series;
+    if (series == null) return;
 
-  async handleAction(action: ActionItem<Series>, series: Series) {
     switch (action.action) {
       case(Action.Delete):
         await this.clearBookmarks(series);
@@ -151,7 +146,7 @@ export class BookmarksComponent implements OnInit {
 
     switch (action.action) {
       case Action.DownloadBookmark:
-        this.downloadService.download('bookmark', this.bookmarks.filter(bmk => seriesIds.includes(bmk.seriesId)),
+        this.downloadService.download('bookmark', this.bookmarks().filter(bmk => seriesIds.includes(bmk.seriesId)),
           (d) => {
           if (!d) {
             this.bulkSelectionService.deselectAll();
@@ -179,43 +174,47 @@ export class BookmarksComponent implements OnInit {
     this.cdRef.markForCheck();
 
     this.readerService.getAllBookmarks(this.filter).subscribe(bookmarks => {
-      this.bookmarks = bookmarks;
-      this.bookmarks.forEach(bmk => {
-        this.clearingSeries[bmk.seriesId] = false;
+
+      // Get the total number of bookmarks per series before deduplication
+      bookmarks.forEach(bmk => {
         if (!this.seriesIds.hasOwnProperty(bmk.seriesId)) {
           this.seriesIds[bmk.seriesId] = 0;
         }
         this.seriesIds[bmk.seriesId] += 1;
       });
 
-      const distinctSeriesMap = new Map();
-      this.bookmarks.forEach(b => {
-        distinctSeriesMap.set(b.series!.id, b.series!);
+      // Deduplicate: keep first bookmark per series
+      const uniqueBySeriesMap = new Map<number, PageBookmark>();
+      bookmarks.forEach(bmk => {
+        if (!uniqueBySeriesMap.has(bmk.seriesId)) {
+          uniqueBySeriesMap.set(bmk.seriesId, bmk);
+        }
       });
-      this.series.set(Array.from(distinctSeriesMap.values()));
+      const uniqueBookmarks = Array.from(uniqueBySeriesMap.values());
+
+      this.bookmarks.set(uniqueBookmarks);
+
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series(), (t: Series) => t.name);
       this.loadingBookmarks = false;
       this.cdRef.markForCheck();
     });
   }
 
-  viewBookmarks(series: Series) {
-    this.router.navigate(['library', series.libraryId, 'series', series.id, 'manga', 0], {queryParams: {incognitoMode: false, bookmarkMode: true}});
-  }
+  // viewBookmarks(series: Series) {
+  //   this.router.navigate(['library', series.libraryId, 'series', series.id, 'manga', 0], {queryParams: {incognitoMode: false, bookmarkMode: true}});
+  // }
 
   async clearBookmarks(series: Series) {
     if (!await this.confirmService.confirm(this.translocoService.translate('bookmarks.confirm-single-delete', {seriesName: series.name}))) {
       return;
     }
 
-    this.clearingSeries[series.id] = true;
-    this.cdRef.markForCheck();
     this.readerService.clearBookmarks(series.id).subscribe(() => {
-      const index = this.series().indexOf(series);
-      if (index > -1) {
-        this.series.set(this.series().splice(index, 1));
-      }
-      this.clearingSeries[series.id] = false;
+      // Filter out the bookmark for this series
+      this.bookmarks.update(bookmarks =>
+        bookmarks.filter(bmk => bmk.seriesId !== series.id)
+      );
+
       this.toastr.success(this.translocoService.translate('delete-single-success', {seriesName: series.name}));
       this.refresh.emit();
       this.cdRef.markForCheck();
@@ -223,7 +222,11 @@ export class BookmarksComponent implements OnInit {
   }
 
   downloadBookmarks(series: Series) {
-    this.downloadService.download('bookmark', this.bookmarks.filter(bmk => bmk.seriesId === series.id));
+    // Find the bookmark for this series
+    const bookmark = this.bookmarks().find(bmk => bmk.seriesId === series.id);
+    if (bookmark) {
+      this.downloadService.download('bookmark', [bookmark]);
+    }
   }
 
   updateFilter(data: FilterEvent<FilterField, SortField>) {

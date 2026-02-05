@@ -16,6 +16,7 @@ import {Person} from "../_models/metadata/person";
 import {User} from '../_models/user/user';
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {ClientDevice} from "../_models/client-device";
+import {PageBookmark} from "../_models/readers/page-bookmark";
 
 export enum Action {
   Submenu = -1,
@@ -179,7 +180,7 @@ export interface ActionItem<T> {
 /**
  * Entities that can be actioned upon
  */
-export type ActionableEntity = Volume | Series | Chapter | ReadingList | UserCollection | Person | Library | SideNavStream | SmartFilter | ClientDevice | null;
+export type ActionableEntity = Volume | Series | Chapter | ReadingList | UserCollection | Person | Library | SideNavStream | SmartFilter | ClientDevice | PageBookmark | null;
 
 @Injectable({
   providedIn: 'root',
@@ -194,7 +195,7 @@ export class ActionFactoryService {
   private chapterActions: Array<ActionItem<Chapter>> = [];
   private collectionTagActions: Array<ActionItem<UserCollection>> = [];
   private readingListActions: Array<ActionItem<ReadingList>> = [];
-  private bookmarkActions: Array<ActionItem<Series>> = [];
+  private bookmarkActions: Array<ActionItem<PageBookmark>> = [];
   private personActions: Array<ActionItem<Person>> = [];
   private sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
   private smartFilterActions: Array<ActionItem<SmartFilter>> = [];
@@ -240,7 +241,7 @@ export class ActionFactoryService {
     return this.applyCallbackToList(this.readingListActions, callback, shouldRenderFunc);
   }
 
-  getBookmarkActions(callback: ActionCallback<Series>, shouldRenderFunc: ActionShouldRenderFunc<Series> = this.dummyShouldRender) {
+  getBookmarkActions(callback: ActionCallback<PageBookmark>, shouldRenderFunc: ActionShouldRenderFunc<PageBookmark> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.bookmarkActions, callback, shouldRenderFunc);
   }
 

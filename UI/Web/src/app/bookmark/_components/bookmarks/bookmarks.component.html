@@ -9,7 +9,7 @@
     @if (filter) {
       <app-card-detail-layout
         [isLoading]="loadingBookmarks"
-        [items]="seriesEntities()"
+        [items]="bookmarkEntities()"
         [filterSettings]="filterSettings"
         [trackByIdentity]="trackByIdentity"
         [refresh]="refresh"
@@ -23,7 +23,7 @@
 
         <ng-template #cardItem let-item let-position="idx">
           <app-entity-card [entity]="item" [config]="bookmarkConfig()"
-                           [index]="position" [maxIndex]="seriesEntities().length"
+                           [index]="position" [maxIndex]="bookmarkEntities().length"
           />
         </ng-template>
 
