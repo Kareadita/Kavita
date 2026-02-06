@@ -9,6 +9,8 @@ import {ActionableModalComponent} from "../actionable-modal/actionable-modal.com
 import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionItem} from "../../_models/actionables/action-item";
+import {Observable} from "rxjs";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 
 @Component({
@@ -45,7 +47,7 @@ export class CardActionablesComponent implements OnDestroy {
   /**
    * This will only emit when the action is clicked and the entity is null. Otherwise, the entity callback handler will be invoked.
    */
-  @Output() actionHandler = new EventEmitter<ActionItem<any>>();
+  @Output() actionHandler = new EventEmitter<ActionItem<any> | ActionResult<any>>();
 
   currentUser = this.accountService.currentUserSignal;
   submenu: {[key: string]: NgbDropdown} = {};
@@ -63,12 +65,21 @@ export class CardActionablesComponent implements OnDestroy {
   performAction(event: any, action: ActionItem<ActionableEntity>) {
     this.preventEvent(event);
 
-    if (typeof action.callback === 'function') {
-      if (this.entity() === null) {
-        this.actionHandler.emit(action);
-      } else {
-        action.callback(action, this.entity());
+    if (this.entity() === null) {
+      this.actionHandler.emit(action);
+      return;
+    }
+
+    // Prefer callback2 (observable-returning) over callback
+    if (action.callback2) {
+      const result = action.callback2(action, this.entity());
+      if (result && typeof (result as any).subscribe === 'function') {
+        (result as Observable<ActionResult<any>>).subscribe(actionResult => {
+          this.actionHandler.emit(actionResult);
+        });
       }
+    } else if (typeof action.callback === 'function') {
+      action.callback(action, this.entity());
     }
   }
 
@@ -146,8 +157,19 @@ export class CardActionablesComponent implements OnDestroy {
     ref.componentInstance.actions = this.actions();
     ref.componentInstance.willRenderAction = this.willRenderAction.bind(this);
     ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);
-    ref.componentInstance.actionPerformed.subscribe((action: ActionItem<any>) => {
-      this.performAction(event, action);
+    // ref.componentInstance.actionPerformed.subscribe((action: ActionItem<any>) => {
+    //   this.performAction(event, action);
+    // });
+
+    ref.componentInstance.actionPerformed.subscribe((actionOrResult: any) => {
+      // If it's an ActionResult (from callback2), just forward it — action already executed
+      if ('effect' in actionOrResult) {
+        // ActionResult from callback2 — already executed
+        this.actionHandler.emit(actionOrResult);
+      } else {
+        // Legacy ActionItem — needs execution
+        this.performAction(event, actionOrResult);
+      }
     });
   }
 }

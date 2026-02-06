@@ -18,6 +18,7 @@ import {KEY_CODES} from "../../shared/_services/utility.service";
 import {ActionItem, ActionShouldRenderFunc} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {ActionFactoryService} from "../../_services/action-factory.service";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-bulk-operations',
@@ -86,9 +87,12 @@ export class BulkOperationsComponent<T> implements OnInit {
       this.cdRef.markForCheck();
     });
   }
+  
+  performAction(event: ActionItem<any> | ActionResult<any>) {
+    // Skip ActionResults — they've already been handled
+    if ('effect' in event) return;
 
-  performAction(action: ActionItem<any>) {
-    this.actionCallback(action, null);
+    this.actionCallback(event as ActionItem<any>, null);
   }
 
   executeAction(action: Action) {

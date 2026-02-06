@@ -47,6 +47,7 @@ import {ReadingProfileService} from "../_services/reading-profile.service";
 import {ToastrService} from "ngx-toastr";
 import {ActionItem} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";
+import {ActionResult} from "../_models/actionables/action-result";
 
 @Component({
     selector: 'app-library-detail',
@@ -323,9 +324,12 @@ export class LibraryDetailComponent implements OnInit {
     }
   }
 
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, undefined);
+  performAction(event: ActionItem<void> | ActionResult<void>) {
+    // Skip ActionResults — they've already been handled
+    if ('effect' in event) return;
+
+    if (typeof event.callback === 'function') {
+      event.callback(event, undefined)
     }
   }
 

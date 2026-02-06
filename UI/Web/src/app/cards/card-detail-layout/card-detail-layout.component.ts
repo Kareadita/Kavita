@@ -41,6 +41,7 @@ import {tap} from "rxjs";
 import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 import {FilterSettingsBase, ValidFilterEntity} from "../../metadata-filter/filter-settings";
 import {ActionItem} from "../../_models/actionables/action-item";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 
 const ANIMATION_TIME_MS = 0;
@@ -231,9 +232,12 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     }
   }
 
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, undefined);
+  performAction(event: ActionItem<void> | ActionResult<void>) {
+    // Skip ActionResults — they've already been handled
+    if ('effect' in event) return;
+
+    if (typeof event.callback === 'function') {
+      event.callback(event, undefined)
     }
   }
 

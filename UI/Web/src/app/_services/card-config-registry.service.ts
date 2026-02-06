@@ -9,13 +9,13 @@ import {
 } from "../_models/card/card-configuration";
 import {CardEntity, ChapterCardEntity, ReadingListItemCardEntity, VolumeCardEntity} from "../_models/card/card-entity";
 import {ReadingList} from "../_models/reading-list";
-import {ActionItem} from "./action-factory.service";
 import {Volume} from "../_models/volume";
 import {UserCollection} from "../_models/collection-tag";
 import {LibraryType} from "../_models/library/library";
 import {User} from "../_models/user/user";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedSeriesPair} from "../_single-module/related-tab/related-tab.component";
+import {ActionItem} from "../_models/actionables/action-item";
 
 /**
  * Context required to resolve configurations for entities that need

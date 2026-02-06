@@ -50,6 +50,7 @@ import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {ActionableEntity, ActionFactoryService} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter | BrowsePerson;
 
@@ -350,8 +351,11 @@ export class CardItemComponent implements OnInit {
   }
 
 
-  performAction(action: ActionItem<any>) {
-    if (action.action == Action.Download) {
+  performAction(event: ActionItem<void> | ActionResult<void>) {
+    // Skip ActionResults — they've already been handled
+    if ('effect' in event) return;
+
+    if (event.action == Action.Download) {
       if (this.utilityService.isVolume(this.entity)) {
         const volume = this.utilityService.asVolume(this.entity);
         this.downloadService.download('volume', volume);
@@ -365,8 +369,8 @@ export class CardItemComponent implements OnInit {
       return; // Don't propagate the download from a card
     }
 
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.entity);
+    if (typeof event.callback === 'function') {
+      event.callback(event, undefined)
     }
   }
 

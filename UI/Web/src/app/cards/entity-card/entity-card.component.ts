@@ -269,6 +269,21 @@ export class EntityCardComponent<T> implements OnInit {
     this.cdRef.detectChanges();
   }
 
+  // TODO: 2 things left to solve: 1) entity is an input, so not mutatable and 2) need to write a fromExisting method
+  // onActionResult(result: ActionResult<any>) {
+  //   switch (result.effect) {
+  //     case 'update':
+  //       // Rebuild the CardEntity with updated data
+  //       this.entity.set(CardEntityFactory.fromExisting(this.entity, result.entity));
+  //       this.dataChanged.emit(result.entity);
+  //       break;
+  //     case 'remove':
+  //     case 'reload':
+  //       this.reload.emit(result.entity.id);
+  //       break;
+  //   }
+  // }
+
   handleRead(event: Event) {
     event.stopPropagation();
 

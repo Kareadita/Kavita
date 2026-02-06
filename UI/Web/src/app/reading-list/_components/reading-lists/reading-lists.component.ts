@@ -24,6 +24,7 @@ import {CardEntityFactory, ReadingListCardEntity} from "../../../_models/card/ca
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-reading-lists',
@@ -68,10 +69,12 @@ export class ReadingListsComponent implements OnInit {
     this.loadPage();
   }
 
+  performGlobalAction(event: ActionItem<void> | ActionResult<void>) {
+    // Skip ActionResults — they've already been handled
+    if ('effect' in event) return;
 
-  performGlobalAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, undefined);
+    if (typeof event.callback === 'function') {
+      event.callback(event, undefined)
     }
   }
 

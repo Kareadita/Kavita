@@ -50,6 +50,7 @@ import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-manage-library',
@@ -271,7 +272,11 @@ export class ManageLibraryComponent implements OnInit {
     }
   }
 
-  async handleBulkAction(action: ActionItem<Library>, _: Library) {
+  async handleBulkAction(event: ActionItem<Library> | ActionResult<Library>) {
+    // Skip ActionResults — they've already been handled
+    if ('effect' in event) return;
+
+    const action = event as ActionItem<Library>;
     //Library is null for bulk actions
     this.bulkAction = action.action;
     this.cdRef.markForCheck();

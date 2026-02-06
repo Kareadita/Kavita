@@ -22,6 +22,7 @@ import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {map, Observable, tap} from "rxjs";
 import {PaginatedResult} from "../../../_models/pagination";
 import {ActionItem} from "../../../_models/actionables/action-item";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 register();
 
@@ -142,8 +143,12 @@ export class CarouselReelComponent {
     this.cdRef.markForCheck();
   }
 
+  performAction(event: ActionItem<void> | ActionResult<void>) {
+    // Skip ActionResults — they've already been handled
+    if ('effect' in event) return;
 
-  performAction(action: ActionItem<any>) {
-    this.handleAction.emit(action);
+    if (typeof event.callback === 'function') {
+      event.callback(event, undefined)
+    }
   }
 }

@@ -97,7 +97,7 @@ export class DashboardComponent implements OnInit {
   streamCount: number = 0;
   streamsLoaded: number = 0;
 
-  seriesConfig = computed(() => this.cardConfigFactory.forSeries(this.handleSeriesAction.bind(this)));
+  seriesConfig = computed(() => this.cardConfigFactory.forSeries());
 
   /**
    * We use this Replay subject to slow the amount of times we reload the UI
@@ -110,15 +110,11 @@ export class DashboardComponent implements OnInit {
     this.loadDashboard();
 
     this.refreshStreamsFromDashboardUpdate$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(1000),
-      tap(() => {
-        this.loadDashboard();
-      }))
+      tap(() => this.loadDashboard()))
       .subscribe();
 
     this.refreshStreams$.pipe(takeUntilDestroyed(this.destroyRef), throttleTime(10_000),
-        tap(() => {
-          this.loadDashboard()
-        }))
+        tap(() => this.loadDashboard()))
         .subscribe();
 
 

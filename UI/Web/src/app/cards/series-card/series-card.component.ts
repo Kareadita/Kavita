@@ -29,6 +29,7 @@ import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {Action} from "../../_models/actionables/action";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-series-card',
@@ -88,7 +89,6 @@ export class SeriesCardComponent implements OnChanges {
 
   config = computed(() => {
     const baseConfig = this.configFactory.forSeries(
-      this.handleSeriesActionCallback.bind(this),
       {
         allowSelection: this.allowSelection,
         clickFunc: this.handleClick.bind(this)
@@ -102,6 +102,10 @@ export class SeriesCardComponent implements OnChanges {
 
     return baseConfig;
   });
+
+  constructor() {
+    //this.config().actionHandler
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['series']) {
@@ -118,6 +122,20 @@ export class SeriesCardComponent implements OnChanges {
   // ============================================================
   // ACTION HANDLING (preserved from original implementation)
   // ============================================================
+
+  onActionResult(result: ActionResult<any>) {
+    switch (result.effect) {
+      case 'update':
+        this.seriesSignal.set(result.entity);
+        this.reload.emit(result.entity.id);
+        this.dataChanged.emit(result.entity);
+        break;
+      case 'remove':
+      case 'reload':
+        this.reload.emit(result.entity.id);
+        break;
+    }
+  }
 
   /** This handles any extra work that needs to be done after the actionable executes */
   private async handleSeriesActionCallback(action: Action, series: Series) {

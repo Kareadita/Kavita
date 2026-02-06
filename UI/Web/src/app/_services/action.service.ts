@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {take} from 'rxjs/operators';
+import {map, take} from 'rxjs/operators';
 import {BulkAddToCollectionComponent} from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
 import {ADD_FLOW, AddToListModalComponent} from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
 import {
@@ -40,6 +40,8 @@ import {Router} from "@angular/router";
 import {ReadingProfileService} from "./reading-profile.service";
 import {Action} from "../_models/actionables/action";
 import {ActionItem} from "../_models/actionables/action-item";
+import {filter, from, Observable, switchMap, tap} from "rxjs";
+import {ActionEffect, ActionResult} from "../_models/actionables/action-result";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -135,6 +137,28 @@ export class ActionService {
         // const _exhaustive: never = entityType;
         // throw new Error(`Unknown entity type: ${entityType}`);
     }
+  }
+
+  // This is the temp handler for Series Actionables (until full refactor)
+  handleSeriesAction2(action: ActionItem<Series>, series: Series): Observable<ActionResult<Series>> | void {
+    switch (action.action) {
+      case Action.MarkAsRead:
+        return this.seriesService.markRead(series.id).pipe(
+          tap(() => this.toastr.success(translate('toasts.entity-read', {name: series.name}))),
+          map(() => this.fromAction(action, { ...series, pagesRead: series.pages }, 'update'))
+        );
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-series'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.seriesService.delete(series.id)),
+          map(() => this.fromAction(action, series, 'remove'))
+        );
+      // TODO: Finish this
+    }
+  }
+
+  private fromAction<T>(action: ActionItem<T>, data: T, effect: ActionEffect) {
+    return { action: action.action, entity: data, effect: effect };
   }
 
   /**
