@@ -12,7 +12,6 @@ import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {CardActionablesComponent} from "../card-actionables/card-actionables.component";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {DeviceService} from "../../_services/device.service";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -20,6 +19,9 @@ import {DOCUMENT} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
 import {User} from "../../_models/user/user";
 import {Breakpoint, BreakpointService} from "../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
 
 @Component({
   selector: 'app-client-device-card',

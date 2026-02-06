@@ -26,7 +26,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {ImageService} from 'src/app/_services/image.service';
@@ -64,6 +63,9 @@ import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {MetadataService} from "../../../_services/metadata.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../../_services/action-factory.service";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
 
 @Component({
   selector: 'app-collection-detail',

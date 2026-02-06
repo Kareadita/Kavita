@@ -30,9 +30,10 @@ import {RouterLink} from "@angular/router";
 import {DecimalPipe, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
-import {ActionableEntity, ActionItem} from "../../_services/action-factory.service";
+import {ActionableEntity} from "../../_services/action-factory.service";
 import {IHasProgress} from "../../_models/common/i-has-progress";
 import {ThemeService} from "../../_services/theme.service";
+import {ActionItem} from "../../_models/actionables/action-item";
 
 @Component({
   selector: 'app-entity-card',

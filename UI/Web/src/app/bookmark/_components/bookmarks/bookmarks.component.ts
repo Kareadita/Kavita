@@ -19,7 +19,6 @@ import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {Action, ActionItem} from 'src/app/_services/action-factory.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {ReaderService} from 'src/app/_services/reader.service';
@@ -41,6 +40,8 @@ import {MetadataService} from "../../../_services/metadata.service";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
 import {BookmarkCardEntity, CardEntityFactory} from "../../../_models/card/card-entity";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
 
 @Component({
   selector: 'app-bookmarks',

@@ -19,7 +19,6 @@ import {UserCollection} from 'src/app/_models/collection-tag';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Tag} from 'src/app/_models/tag';
 import {AccountService} from 'src/app/_services/account.service';
-import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
@@ -42,6 +41,9 @@ import {DefaultModalOptions} from "../../../_models/default-modal-options";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {CardEntity, CardEntityFactory, CollectionCardEntity} from "../../../_models/card/card-entity";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
+import {ActionFactoryService} from "../../../_services/action-factory.service";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
 
 
 @Component({

@@ -4,9 +4,10 @@ import {environment} from 'src/environments/environment';
 import {UserCollection} from '../_models/collection-tag';
 import {TextResonse} from '../_types/text-response';
 import {MalStack} from "../_models/collection/mal-stack";
-import {Action, ActionItem} from "./action-factory.service";
 import {User} from "../_models/user/user";
 import {AccountService} from "./account.service";
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 @Injectable({
   providedIn: 'root'

@@ -30,7 +30,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Library} from 'src/app/_models/library/library';
 import {Pagination} from 'src/app/_models/pagination';
 import {FilterEvent, FilterItem, SortField} from 'src/app/_models/metadata/series-filter';
-import {ActionItem} from 'src/app/_services/action-factory.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
@@ -41,6 +40,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs";
 import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 import {FilterSettingsBase, ValidFilterEntity} from "../../metadata-filter/filter-settings";
+import {ActionItem} from "../../_models/actionables/action-item";
 
 
 const ANIMATION_TIME_MS = 0;

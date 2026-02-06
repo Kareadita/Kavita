@@ -16,7 +16,9 @@ import {SeriesService} from "../../../_services/series.service";
 import {QueryContext} from "../../../_models/metadata/v2/query-context";
 import {map, shareReplay} from "rxjs/operators";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
-import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
+import {ActionFactoryService} from "../../../_services/action-factory.service";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
 
 @Component({
   selector: 'app-manage-smart-filters',

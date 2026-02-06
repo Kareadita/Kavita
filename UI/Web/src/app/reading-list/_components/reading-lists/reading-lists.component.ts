@@ -4,7 +4,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {PaginatedResult, Pagination} from 'src/app/_models/pagination';
 import {ReadingList} from 'src/app/_models/reading-list';
 import {AccountService} from 'src/app/_services/account.service';
-import {Action, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
@@ -23,6 +22,8 @@ import {User} from "../../../_models/user/user";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {CardEntityFactory, ReadingListCardEntity} from "../../../_models/card/card-entity";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
 
 @Component({
   selector: 'app-reading-lists',

@@ -12,7 +12,6 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {Volume} from "../../_models/volume";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {ImageService} from "../../_services/image.service";
@@ -27,6 +26,9 @@ import {MangaFormat} from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
 import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
 
 enum TabID {
   General = 'general-tab',
@@ -44,7 +46,6 @@ export interface EditVolumeModalCloseResult {
   isDeleted: boolean;
 }
 
-const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
 @Component({
   selector: 'app-edit-volume-modal',
@@ -101,7 +102,7 @@ export class EditVolumeModalComponent implements OnInit {
   user!: User;
 
 
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.runTask.bind(this)), blackList);
+  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.runTask.bind(this)), this.blacklist);
   /**
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
    */
@@ -119,6 +120,10 @@ export class EditVolumeModalComponent implements OnInit {
       }
       this.cdRef.markForCheck();
     });
+  }
+
+  get blacklist() {
+    return [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
   }
 
 

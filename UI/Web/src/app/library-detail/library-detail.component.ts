@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {take} from 'rxjs/operators';
 import {BulkSelectionService} from '../cards/bulk-selection.service';
 import {KEY_CODES, UtilityService} from '../shared/_services/utility.service';
 import {SeriesAddedEvent} from '../_models/events/series-added-event';
@@ -18,7 +17,7 @@ import {Library} from '../_models/library/library';
 import {Pagination} from '../_models/pagination';
 import {Series} from '../_models/series';
 import {FilterEvent, SortField} from '../_models/metadata/series-filter';
-import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
+import {ActionFactoryService} from '../_services/action-factory.service';
 import {ActionService} from '../_services/action.service';
 import {LibraryService} from '../_services/library.service';
 import {EVENTS, MessageHubService} from '../_services/message-hub.service';
@@ -46,6 +45,8 @@ import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
 import {MetadataService} from "../_services/metadata.service";
 import {ReadingProfileService} from "../_services/reading-profile.service";
 import {ToastrService} from "ngx-toastr";
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 @Component({
     selector: 'app-library-detail',

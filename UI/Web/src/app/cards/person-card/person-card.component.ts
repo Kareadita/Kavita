@@ -11,7 +11,6 @@ import {
   Output,
   TemplateRef
 } from '@angular/core';
-import {ActionItem} from "../../_services/action-factory.service";
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
 import {MessageHubService} from "../../_services/message-hub.service";
@@ -24,6 +23,7 @@ import {Person} from "../../_models/metadata/person";
 import {FormsModule} from "@angular/forms";
 import {ImageComponent} from "../../shared/image/image.component";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {ActionItem} from "../../_models/actionables/action-item";
 
 
 @Component({

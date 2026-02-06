@@ -20,7 +20,7 @@ import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {ReadingList, ReadingListInfo, ReadingListItem} from 'src/app/_models/reading-list';
 import {AccountService} from 'src/app/_services/account.service';
-import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionFactoryService} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';
@@ -62,6 +62,8 @@ import {DetailsTabComponent} from "../../../_single-module/details-tab/details-t
 import {IHasCast} from "../../../_models/common/i-has-cast";
 import {User} from "../../../_models/user/user";
 import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
 
 enum TabID {
   Storyline = 'storyline-tab',

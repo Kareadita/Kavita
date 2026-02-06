@@ -7,7 +7,7 @@ import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
 import {UtilityService} from '../../../shared/_services/utility.service';
 import {Library, LibraryType} from '../../../_models/library/library';
 import {AccountService} from '../../../_services/account.service';
-import {Action, ActionFactoryService, ActionItem} from '../../../_services/action-factory.service';
+import {ActionFactoryService} from '../../../_services/action-factory.service';
 import {ActionService} from '../../../_services/action.service';
 import {NavService} from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -29,6 +29,8 @@ import {ReadingProfileService} from "../../../_services/reading-profile.service"
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
 
 @Component({
   selector: 'app-side-nav',

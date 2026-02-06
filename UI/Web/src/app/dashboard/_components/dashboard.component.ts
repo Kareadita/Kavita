@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
 import {filter, Observable, ReplaySubject, Subject, switchMap} from 'rxjs';
@@ -14,7 +23,6 @@ import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
 import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CardItemComponent} from '../../cards/card-item/card-item.component';
-import {SeriesCardComponent} from '../../cards/series-card/series-card.component';
 import {CarouselReelComponent} from '../../carousel/_components/carousel-reel/carousel-reel.component';
 import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {
@@ -36,6 +44,11 @@ import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.compone
 import {ReaderService} from "../../_services/reader.service";
 import {QueryContext} from "../../_models/metadata/v2/query-context";
 import {LicenseService} from "../../_services/license.service";
+import {EntityCardComponent} from "../../cards/entity-card/entity-card.component";
+import {CardConfigFactory} from "../../_services/card-config-factory.service";
+import {CardEntityFactory} from "../../_models/card/card-entity";
+import {Series} from "../../_models/series";
+import {Action} from "../../_models/actionables/action";
 
 enum StreamId {
   OnDeck,
@@ -50,8 +63,7 @@ enum StreamId {
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, SeriesCardComponent,
-        CardItemComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent]
+  imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, CardItemComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent, EntityCardComponent]
 })
 export class DashboardComponent implements OnInit {
 
@@ -72,9 +84,10 @@ export class DashboardComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly readerService = inject(ReaderService);
   private readonly licenseService = inject(LicenseService);
+  private readonly cardConfigFactory = inject(CardConfigFactory);
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
-  isLoadingDashboard = true;
+  isLoadingDashboard = signal<boolean>(true);
 
   streams: Array<DashboardStream> = [];
   genre: Genre | undefined;
@@ -83,6 +96,8 @@ export class DashboardComponent implements OnInit {
 
   streamCount: number = 0;
   streamsLoaded: number = 0;
+
+  seriesConfig = computed(() => this.cardConfigFactory.forSeries(this.handleSeriesAction.bind(this)));
 
   /**
    * We use this Replay subject to slow the amount of times we reload the UI
@@ -142,15 +157,33 @@ export class DashboardComponent implements OnInit {
     if (!stream.smartFilterDecoded) return null;
 
     return (pageNum: number, pageSize: number) => {
-      return this.seriesService.getAllSeriesV2(pageNum, pageSize, stream.smartFilterDecoded, QueryContext.Dashboard);
+      return this.seriesService.getAllSeriesV2(pageNum, pageSize, stream.smartFilterDecoded, QueryContext.Dashboard).pipe(map(d => d.result.map(series => CardEntityFactory.series(series))));
+    }
+  }
+
+  onDeckNextPage(stream: DashboardStream) {
+    return (pageNum: number, pageSize: number) => {
+      return this.seriesService.getOnDeck(pageNum, pageSize).pipe(map(d => d.result.map(series => CardEntityFactory.series(series))));
+    }
+  }
+  onRecentlyAddedNextPage(stream: DashboardStream) {
+    return (pageNum: number, pageSize: number) => {
+      return this.seriesService.getRecentlyAdded(pageNum, pageSize).pipe(map(d => d.result.map(series => CardEntityFactory.series(series))));
+    }
+  }
+
+  onRecentlyUpdatedNextPage(stream: DashboardStream) {
+    return (pageNum: number, pageSize: number) => {
+      return this.seriesService.getRecentlyUpdatedSeries(pageNum, pageSize);
     }
   }
 
   loadDashboard() {
-    this.isLoadingDashboard = true;
+    this.isLoadingDashboard.set(true);
     this.streamsLoaded = 0;
     this.streamCount = 0;
     this.cdRef.markForCheck();
+
     this.dashboardService.getDashboardStreams().subscribe(streams => {
       this.streams = streams;
       this.streamCount = streams.length;
@@ -158,15 +191,29 @@ export class DashboardComponent implements OnInit {
         switch (s.streamType) {
           case StreamType.OnDeck:
             s.api = this.seriesService.getOnDeck(1, 20)
-                .pipe(map(d => d.result), tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+                .pipe(
+                  map(d => d.result.map(series => CardEntityFactory.series(series, { isOnDeck: true }))),
+                  tap(() => this.increment()),
+                  takeUntilDestroyed(this.destroyRef),
+                  shareReplay({bufferSize: 1, refCount: true})
+                );
             break;
           case StreamType.NewlyAdded:
             s.api = this.seriesService.getRecentlyAdded(1, 20)
-                .pipe(map(d => d.result), tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+                .pipe(
+                  map(d => d.result.map(series => CardEntityFactory.series(series))),
+                  tap(() => this.increment()),
+                  takeUntilDestroyed(this.destroyRef),
+                  shareReplay({bufferSize: 1, refCount: true})
+                );
             break;
           case StreamType.RecentlyUpdated:
             s.api = this.seriesService.getRecentlyUpdatedSeries(1, 20)
-              .pipe(tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+              .pipe(
+                tap(() => this.increment()),
+                takeUntilDestroyed(this.destroyRef),
+                shareReplay({bufferSize: 1, refCount: true})
+              );
             break;
           case StreamType.SmartFilter:
             s.api = this.filterUtilityService.decodeFilter(s.smartFilterEncoded!).pipe(
@@ -174,7 +221,12 @@ export class DashboardComponent implements OnInit {
                 s.smartFilterDecoded = filter;
                 return this.seriesService.getAllSeriesV2(1, 20, filter, QueryContext.Dashboard);
               }))
-                .pipe(map(d => d.result),tap(() => this.increment()), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+              .pipe(
+                map(d => d.result.map(series => CardEntityFactory.series(series))),
+                tap(() => this.increment()),
+                takeUntilDestroyed(this.destroyRef),
+                shareReplay({bufferSize: 1, refCount: true})
+              );
             break;
           case StreamType.MoreInGenre:
             s.api = this.metadataService.getAllGenres([], QueryContext.Dashboard).pipe(
@@ -183,7 +235,7 @@ export class DashboardComponent implements OnInit {
                   return this.genre;
                 }),
                 switchMap(genre => this.recommendationService.getMoreIn(0, genre.id, 0, 30)),
-                map(p => p.result),
+                map(d => d.result.map(series => CardEntityFactory.series(series))),
                 tap(() => this.increment()),
                 takeUntilDestroyed(this.destroyRef),
                 shareReplay({bufferSize: 1, refCount: true})
@@ -191,7 +243,7 @@ export class DashboardComponent implements OnInit {
             break;
         }
       });
-      this.isLoadingDashboard = false;
+      this.isLoadingDashboard.set(false);
       this.cdRef.markForCheck();
     });
   }
@@ -229,6 +281,7 @@ export class DashboardComponent implements OnInit {
     await this.router.navigateByUrl('all-series?' + stream.smartFilterEncoded);
   }
 
+  // TODO: See if we can put this into the carousel and have a custom tokens (not in the original list) to forward to a callback handler
   handleSectionClick(streamId: StreamId) {
     if (streamId === StreamId.RecentlyUpdatedSeries) {
       const params: any = {};
@@ -271,6 +324,10 @@ export class DashboardComponent implements OnInit {
       filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     }
+  }
+
+  handleSeriesAction(action: Action, series: Series) {
+    // TODO:
   }
 
   protected readonly SettingsTabId = SettingsTabId;

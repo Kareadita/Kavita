@@ -8,7 +8,8 @@ import {PaginatedResult} from '../_models/pagination';
 import {ReadingList, ReadingListCast, ReadingListInfo, ReadingListItem} from '../_models/reading-list';
 import {CblImportSummary} from '../_models/reading-list/cbl/cbl-import-summary';
 import {TextResonse} from '../_types/text-response';
-import {Action, ActionItem} from './action-factory.service';
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 @Injectable({
   providedIn: 'root'

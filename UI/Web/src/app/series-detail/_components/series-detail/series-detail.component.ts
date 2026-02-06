@@ -51,7 +51,7 @@ import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
 import {Volume} from 'src/app/_models/volume';
 import {AccountService} from 'src/app/_services/account.service';
-import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionFactoryService} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
@@ -117,6 +117,8 @@ import {ReadingProgressStatus} from "../../../_models/series-detail/reading-prog
 import {ReadingProgressStatusPipePipe} from "../../../_pipes/reading-progress-status-pipe.pipe";
 import {ReadingProgressIconPipePipe} from "../../../_pipes/reading-progress-icon-pipe.pipe";
 import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
 
 
 enum TabID {
@@ -567,49 +569,54 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.location.replaceState(newUrl)
   }
 
-  async handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
+  async handleSeriesActionCallback(action: Action, series: Series) {
     const seriesValue = this.series();
-    switch(action.action) {
+    switch(action) {
       case(Action.MarkAsRead):
-        this.actionService.markSeriesAsRead(series, (series: Series) => {
-          this.loadPageSource.next(false);
-        });
+        // this.actionService.markSeriesAsRead(series, (series: Series) => {
+        //   this.loadPageSource.next(false);
+        // });
+        this.loadPageSource.next(false);
         break;
       case(Action.MarkAsUnread):
-        this.actionService.markSeriesAsUnread(series, (series: Series) => {
-          this.loadPageSource.next(false);
-        });
+        // this.actionService.markSeriesAsUnread(series, (series: Series) => {
+        //   this.loadPageSource.next(false);
+        // });
+        this.loadPageSource.next(false);
         break;
-      case(Action.Scan):
-        await this.actionService.scanSeries(series);
-        break;
-      case(Action.RefreshMetadata):
-        await this.actionService.refreshSeriesMetadata(series, undefined, true, false);
-        break;
-      case(Action.GenerateColorScape):
-        await this.actionService.refreshSeriesMetadata(series, undefined, false, true);
-        break;
+      // case(Action.Scan):
+      //   await this.actionService.scanSeries(series);
+      //   break;
+      // case(Action.RefreshMetadata):
+      //   await this.actionService.refreshSeriesMetadata(series, undefined, true, false);
+      //   break;
+      // case(Action.GenerateColorScape):
+      //   await this.actionService.refreshSeriesMetadata(series, undefined, false, true);
+      //   break;
       case(Action.Delete):
-        await this.deleteSeries(series);
+        //await this.deleteSeries(series);
+        this.router.navigate(['library', this.libraryId]);
         break;
-      case(Action.AddToReadingList):
-        this.actionService.addSeriesToReadingList(series);
-        break;
-      case(Action.AddToCollection):
-        this.actionService.addMultipleSeriesToCollectionTag([series]);
-        break;
-      case (Action.AnalyzeFiles):
-        this.actionService.analyzeFilesForSeries(series);
-        break;
-      case Action.AddToWantToReadList:
-        this.actionService.addMultipleSeriesToWantToReadList([series.id]);
-        break;
-      case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList([series.id]);
-        break;
+      // case(Action.AddToReadingList):
+      //   this.actionService.addSeriesToReadingList(series);
+      //   break;
+      // case(Action.AddToCollection):
+      //   this.actionService.addMultipleSeriesToCollectionTag([series]);
+      //   break;
+      // case (Action.AnalyzeFiles):
+      //   this.actionService.analyzeFilesForSeries(series);
+      //   break;
+      // case Action.AddToWantToReadList:
+      //   this.actionService.addMultipleSeriesToWantToReadList([series.id]);
+      //   break;
+      // case Action.RemoveFromWantToReadList:
+      //   this.actionService.removeMultipleSeriesFromWantToReadList([series.id]);
+      //   break;
       case Action.Download:
         if (this.downloadInProgress) return;
-        this.downloadSeries();
+        //this.downloadSeries();
+        this.downloadInProgress = true;
+        this.cdRef.markForCheck();
         break;
       case Action.Match:
         this.actionService.matchSeries(seriesValue!, (refreshNeeded) => {
@@ -620,19 +627,20 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         break;
       case Action.SendTo:
         {
-          const chapterIds = [...this.volumes.map(v => v.chapters.map(c => c.id)).flat(), ...this.specials.map(c => c.id)]
-          const device = (action._extra!.data as Device);
-          this.actionService.sendToDevice(chapterIds, device);
+          // TODO: validate if we can use SendSeries or not
+          // const chapterIds = [...this.volumes.map(v => v.chapters.map(c => c.id)).flat(), ...this.specials.map(c => c.id)]
+          // const device = (action._extra!.data as Device);
+          // this.actionService.sendToDevice(chapterIds, device);
           break;
         }
-      case Action.SetReadingProfile:
-        this.actionService.setReadingProfileForMultiple([seriesValue!]);
-        break;
-      case Action.ClearReadingProfile:
-        this.readingProfileService.clearSeriesProfiles(this.seriesId).subscribe(() => {
-          this.toastr.success(translate('actionable.cleared-profile'));
-        });
-        break;
+      // case Action.SetReadingProfile:
+      //   this.actionService.setReadingProfileForMultiple([seriesValue!]);
+      //   break;
+      // case Action.ClearReadingProfile:
+      //   this.readingProfileService.clearSeriesProfiles(this.seriesId).subscribe(() => {
+      //     this.toastr.success(translate('actionable.cleared-profile'));
+      //   });
+      //   break;
       default:
         break;
     }

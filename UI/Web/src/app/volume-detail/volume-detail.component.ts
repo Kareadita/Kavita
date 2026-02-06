@@ -53,7 +53,6 @@ import {Person} from "../_models/metadata/person";
 import {IHasCast} from "../_models/common/i-has-cast";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
-import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
 import {UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
@@ -91,6 +90,9 @@ import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 import {ReadingProgressIconPipePipe} from "../_pipes/reading-progress-icon-pipe.pipe";
 import {Breakpoint, BreakpointService} from "../_services/breakpoint.service";
+import {ActionFactoryService} from "../_services/action-factory.service";
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 enum TabID {
   Chapters = 'chapters-tab',

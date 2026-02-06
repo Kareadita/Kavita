@@ -50,7 +50,6 @@ import {WikiLink} from "../../../_models/wiki";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../../settings/_components/setting-switch/setting-switch.component";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
-import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
 import {ActionService} from "../../../_services/action.service";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
@@ -59,6 +58,9 @@ import {setupLanguageSettings, TypeaheadSettings} from "../../../typeahead/_mode
 import {Language} from "../../../_models/metadata/language";
 import {MetadataService} from "../../../_services/metadata.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../../_services/action-factory.service";
+import {Action} from "../../../_models/actionables/action";
+import {ActionItem} from "../../../_models/actionables/action-item";
 
 enum TabID {
   General = 'general-tab',

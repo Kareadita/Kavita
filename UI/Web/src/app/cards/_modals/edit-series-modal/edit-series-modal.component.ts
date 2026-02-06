@@ -54,14 +54,14 @@ import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
 import {Volume} from "../../../_models/volume";
-import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
-import {ActionService} from "../../../_services/action.service";
-import {DownloadService} from "../../../shared/_services/download.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {LicenseService} from "../../../_services/license.service";
 import {AsyncPipe, DecimalPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../../_services/action-factory.service";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
 
 enum TabID {
   General = 0,
@@ -81,9 +81,6 @@ export interface EditSeriesModalCloseResult {
   updateExternal: boolean
 }
 
-const blackList = [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, Action.SendTo,
-  Action.AddToWantToReadList, Action.AddToCollection, Action.AddToReadingList, Action.RemoveFromWantToReadList,
-  Action.RemoveFromWantToReadList];
 
 @Component({
   selector: 'app-edit-series-modal',
@@ -136,8 +133,6 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly actionService = inject(ActionService);
-  private readonly downloadService = inject(DownloadService);
   protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly TabID = TabID;
@@ -153,7 +148,8 @@ export class EditSeriesModalComponent implements OnInit {
    * A copy of the series from init. This is used to compare values for name fields to see if lock was modified
    */
   initSeries!: Series;
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getSeriesActions(this.runTask.bind(this)), blackList);
+  tasks = this.actionFactoryService.getActionablesForSettingsPage(
+    this.actionFactoryService.getSeriesActions(this.handleTaskCallback.bind(this)), this.blacklist);
   volumeCollapsed: any = {};
   tabs = ['general-tab', 'metadata-tab', 'people-tab', 'web-links-tab', 'cover-image-tab', 'related-tab', 'info-tab', 'tasks-tab'];
   active = this.tabs[0];
@@ -185,6 +181,12 @@ export class EditSeriesModalComponent implements OnInit {
   isAdmin: boolean = false;
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
+
+  get blacklist() {
+    return [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, Action.SendTo,
+      Action.AddToWantToReadList, Action.AddToCollection, Action.AddToReadingList, Action.RemoveFromWantToReadList,
+      Action.RemoveFromWantToReadList];
+  }
 
   get WebLinks() {
     return this.metadata?.webLinks.split(',') || [''];
@@ -610,35 +612,40 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   async runTask(action: ActionItem<Series>) {
-    switch (action.action) {
-      case Action.Scan:
-        await this.actionService.scanSeries(this.series);
-        break;
-      case Action.RefreshMetadata:
-        await this.actionService.refreshSeriesMetadata(this.series);
-        break;
-      case Action.GenerateColorScape:
-        await this.actionService.refreshSeriesMetadata(this.series, undefined, false, true);
-        break;
-      case Action.AnalyzeFiles:
-        this.actionService.analyzeFilesForSeries(this.series);
-        break;
-      case Action.MarkAsRead:
-        this.actionService.markSeriesAsRead(this.series);
-        break;
-      case Action.MarkAsUnread:
-        this.actionService.markSeriesAsUnread(this.series);
-        break;
-      case Action.Delete:
-        await this.actionService.deleteSeries(this.series);
-        break;
-      case Action.Download:
-        this.downloadService.download('series', this.series);
-        break;
+
+  }
+
+  async handleTaskCallback(action: Action, series: Series) {
+    switch (action) {
+      // case Action.Scan:
+      //   await this.actionService.scanSeries(this.series);
+      //   break;
+      // case Action.RefreshMetadata:
+      //   await this.actionService.refreshSeriesMetadata(this.series);
+      //   break;
+      // case Action.GenerateColorScape:
+      //   await this.actionService.refreshSeriesMetadata(this.series, undefined, false, true);
+      //   break;
+      // case Action.AnalyzeFiles:
+      //   this.actionService.analyzeFilesForSeries(this.series);
+      //   break;
+      // case Action.MarkAsRead:
+      //   this.actionService.markSeriesAsRead(this.series);
+      //   break;
+      // case Action.MarkAsUnread:
+      //   this.actionService.markSeriesAsUnread(this.series);
+      //   break;
+      // case Action.Delete:
+      //   await this.actionService.deleteSeries(this.series);
+      //   break;
+      // case Action.Download:
+      //   this.downloadService.download('series', this.series);
+      //   break;
       case Action.Match:
-        this.actionService.matchSeries(this.series, _ => {
-          this.modal.close({success: true, series: this.series, coverImageUpdate: false, updateExternal: true});
-        });
+        // this.actionService.matchSeries(this.series, _ => {
+        //   this.modal.close({success: true, series: this.series, coverImageUpdate: false, updateExternal: true});
+        // });
+        this.modal.close({success: true, series: this.series, coverImageUpdate: false, updateExternal: true});
         break;
     }
   }

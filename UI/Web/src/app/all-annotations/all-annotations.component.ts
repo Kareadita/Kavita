@@ -33,11 +33,13 @@ import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail
 import {
   AnnotationCardComponent
 } from "../book-reader/_components/_annotations/annotation-card/annotation-card.component";
-import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
 import {User} from "../_models/user/user";
 import {AccountService} from "../_services/account.service";
+import {ActionFactoryService} from "../_services/action-factory.service";
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 @Component({
   selector: 'app-all-annotations',

@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {map, Observable, shareReplay} from 'rxjs';
+import {map, shareReplay} from 'rxjs';
 import {Chapter} from '../_models/chapter';
 import {UserCollection} from '../_models/collection-tag';
 import {Device} from '../_models/device/device';
@@ -17,165 +17,10 @@ import {User} from '../_models/user/user';
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {ClientDevice} from "../_models/client-device";
 import {PageBookmark} from "../_models/readers/page-bookmark";
+import {ActionService, ExtraActionCallback} from "./action.service";
+import {ActionCallback, ActionItem, ActionShouldRenderFunc} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
-export enum Action {
-  Submenu = -1,
-  /**
-   * Mark entity as read
-   */
-  MarkAsRead = 0,
-  /**
-   * Mark entity as unread
-   */
-  MarkAsUnread = 1,
-  /**
-   * Invoke a Scan on Series/Library
-   */
-  Scan = 2,
-  /**
-   * Delete the entity
-   */
-  Delete = 3,
-  /**
-   * Open edit modal
-   */
-  Edit = 4,
-  /**
-   * Open details modal
-   */
-  Info = 5,
-  /**
-   * Invoke a refresh covers
-   */
-  RefreshMetadata = 6,
-  /**
-   * Download the entity
-   */
-  Download = 7,
-  /**
-   * Invoke an Analyze Files which calculates word count
-   */
-  AnalyzeFiles = 8,
-  /**
-   * Read in incognito mode aka no progress tracking
-   */
-  IncognitoRead = 9,
-  /**
-   * Add to reading list
-   */
-  AddToReadingList = 10,
-  /**
-   * Add to collection
-   */
-  AddToCollection = 11,
-  /**
-   * Essentially a download, but handled differently. Needed so card bubbles it up for handling
-   */
-  DownloadBookmark = 12,
-  /**
-   * Open Series detail page for said series
-   */
-  ViewSeries = 13,
-  /**
-   * Open the reader for entity
-   */
-  Read = 14,
-  /**
-   * Add to user's Want to Read List
-   */
-  AddToWantToReadList = 15,
-  /**
-   * Remove from user's Want to Read List
-   */
-  RemoveFromWantToReadList = 16,
-  /**
-   * Send to a device
-   */
-  SendTo = 17,
-  /**
-   * Import some data into Kavita
-   */
-  Import = 18,
-  /**
-   * Removes the Series from On Deck inclusion
-   */
-  RemoveFromOnDeck = 19,
-  AddRuleGroup = 20,
-  RemoveRuleGroup = 21,
-  MarkAsVisible = 22,
-  MarkAsInvisible = 23,
-  /**
-   * Promotes the underlying item (Reading List, Collection)
-   */
-  Promote = 24,
-  UnPromote = 25,
-  /**
-   * Invoke refresh covers as false to generate colorscapes
-   */
-  GenerateColorScape = 26,
-  /**
-   * Copy settings from one entity to another
-   */
-  CopySettings = 27,
-  /**
-   * Match an entity with an upstream system
-   */
-  Match = 28,
-  /**
-   * Merge two (or more?) entities
-   */
-  Merge = 29,
-  /**
-   * Add to a reading profile
-   */
-  SetReadingProfile = 30,
-  /**
-   * Remove the reading profile from the entity
-   */
-  ClearReadingProfile = 31,
-  Export = 32,
-  Like = 33,
-  UnLike = 34,
-}
-
-/**
- * Callback for an action
- */
-export type ActionCallback<T> = (action: ActionItem<T>, entity: T) => void;
-export type ActionShouldRenderFunc<T> = (action: ActionItem<T>, entity: T, user: User) => boolean;
-
-export interface ActionItem<T> {
-  title: string;
-  description: string;
-  action: Action;
-  callback: ActionCallback<T>;
-  /**
-   * Roles required to be present for ActionItem to show. If empty, assumes anyone can see. At least one needs to apply.
-   */
-  requiredRoles: Role[];
-  /**
-   * @deprecated Use required Roles instead
-   */
-  requiresAdmin?: boolean;
-  children: Array<ActionItem<T>>;
-  /**
-   * An optional class which applies to an item. ie) danger on a delete action
-   */
-  class?: string;
-  /**
-   * Indicates that there exists a separate list will be loaded from an API.
-   * Rule: If using this, only one child should exist in children with the Action for dynamicList.
-   */
-  dynamicList?: Observable<{title: string, data: any}[]> | undefined;
-  /**
-   * Extra data that needs to be sent back from the card item. Used mainly for dynamicList. This will be the item from dyanamicList return
-   */
-  _extra?: {title: string, data: any};
-  /**
-   * Will call on each action to determine if it should show for the appropriate entity based on state and user
-   */
-  shouldRender: ActionShouldRenderFunc<T>;
-}
 
 /**
  * Entities that can be actioned upon
@@ -188,6 +33,7 @@ export type ActionableEntity = Volume | Series | Chapter | ReadingList | UserCol
 export class ActionFactoryService {
   private accountService = inject(AccountService);
   private deviceService = inject(DeviceService);
+  private actionService = inject(ActionService);
 
   private libraryActions: Array<ActionItem<Library>> = [];
   private seriesActions: Array<ActionItem<Series>> = [];
@@ -213,8 +59,8 @@ export class ActionFactoryService {
     return this.applyCallbackToList(this.libraryActions, callback, shouldRenderFunc) as ActionItem<Library>[];
   }
 
-  getSeriesActions(callback: ActionCallback<Series>, shouldRenderFunc: ActionShouldRenderFunc<Series> = this.basicReadRender) {
-    return this.applyCallbackToList(this.seriesActions, callback, shouldRenderFunc);
+  getSeriesActions(callback?: ExtraActionCallback<Series>, shouldRenderFunc: ActionShouldRenderFunc<Series> = this.basicReadRender) {
+    return this.applyCallbackToList(this.seriesActions, this.actionService.getActionCallback('series', callback), shouldRenderFunc);
   }
 
   getSideNavStreamActions(callback: ActionCallback<SideNavStream>, shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.dummyShouldRender) {

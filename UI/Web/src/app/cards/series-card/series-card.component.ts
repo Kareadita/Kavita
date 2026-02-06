@@ -13,23 +13,22 @@ import {
 import {Router} from '@angular/router';
 import {NgbModal, NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {Action, ActionItem} from 'src/app/_services/action-factory.service';
 import {SeriesService} from 'src/app/_services/series.service';
 import {ActionService} from 'src/app/_services/action.service';
-import {translate, TranslocoService} from "@jsverse/transloco";
+import {TranslocoService} from "@jsverse/transloco";
 import {FormsModule} from "@angular/forms";
 import {DownloadService} from "../../shared/_services/download.service";
 import {ReadingProfileService} from "../../_services/reading-profile.service";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
-import {ActionableCardConfiguration, BaseCardConfiguration} from "../../_models/card/card-configuration";
+import {ActionableCardConfiguration} from "../../_models/card/card-configuration";
 import {Series} from "../../_models/series";
 import {EditSeriesModalComponent} from "../_modals/edit-series-modal/edit-series-modal.component";
 import {RelationKind} from "../../_models/series-detail/relation-kind";
 import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
-import {Device} from "../../_models/device/device";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {Action} from "../../_models/actionables/action";
 
 @Component({
   selector: 'app-series-card',
@@ -87,7 +86,7 @@ export class SeriesCardComponent implements OnChanges {
     });
   });
 
-  config = computed<BaseCardConfiguration<Series>>(() => {
+  config = computed(() => {
     const baseConfig = this.configFactory.forSeries(
       this.handleSeriesActionCallback.bind(this),
       {
@@ -120,104 +119,141 @@ export class SeriesCardComponent implements OnChanges {
   // ACTION HANDLING (preserved from original implementation)
   // ============================================================
 
-  // TODO: See if we can further streamline action handling without needing to implement handling in each component
-  private async handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
-    switch (action.action) {
+  /** This handles any extra work that needs to be done after the actionable executes */
+  private async handleSeriesActionCallback(action: Action, series: Series) {
+    switch (action) {
       case Action.MarkAsRead:
-        this.actionService.markSeriesAsRead(series, () => {
-          series.pagesRead = series.pages;
-          this.dataChanged.emit(series);
-        });
+        this.dataChanged.emit(series);
         break;
 
       case Action.MarkAsUnread:
-        this.actionService.markSeriesAsUnread(series, () => {
-          series.pagesRead = 0;
-          this.dataChanged.emit(series);
-        });
-        break;
-
-      case Action.Scan:
-        this.seriesService.scan(series.libraryId, series.id).subscribe(() => {
-          this.toastr.success(translate('toasts.scan-queued', { name: series.name }));
-        });
-        break;
-
-      case Action.RefreshMetadata:
-        await this.actionService.refreshSeriesMetadata(series, undefined, true, true);
-        break;
-
-      case Action.GenerateColorScape:
-        await this.actionService.refreshSeriesMetadata(series, undefined, false, false);
+        this.dataChanged.emit(series);
         break;
 
       case Action.Delete:
-        await this.actionService.deleteSeries(series, (result) => {
-          if (result) this.reload.emit(series.id);
-        });
+        this.reload.emit(series.id);
         break;
 
       case Action.Edit:
-        this.openEditModal(series);
+        this.seriesSignal.set(series);
+        this.reload.emit(series.id);
+        this.dataChanged.emit(series);
         break;
 
       case Action.Match:
-        this.actionService.matchSeries(series, (refreshNeeded) => {
-          if (refreshNeeded) this.reload.emit(series.id);
-        });
-        break;
-
-      case Action.AddToReadingList:
-        this.actionService.addSeriesToReadingList(series);
-        break;
-
-      case Action.AddToWantToReadList:
-        this.actionService.addMultipleSeriesToWantToReadList([series.id]);
+        this.reload.emit(series.id);
         break;
 
       case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList([series.id]);
-        if (this.router.url.startsWith('/want-to-read')) {
-          this.reload.emit(series.id);
-        }
+        this.reload.emit(series.id);
         break;
 
-      case Action.AddToCollection:
-        this.actionService.addMultipleSeriesToCollectionTag([series]);
-        break;
-
-      case Action.AnalyzeFiles:
-        this.actionService.analyzeFilesForSeries(series);
-        break;
-
-      case Action.SendTo:
-        const device = action._extra!.data as Device;
-        this.actionService.sendSeriesToDevice(series.id, device);
-        break;
 
       case Action.RemoveFromOnDeck:
-        this.seriesService.removeFromOnDeck(series.id).subscribe(() => {
-          this.reload.emit(series.id);
-        });
-        break;
-
-      case Action.Download:
-        this.downloadService.download('series', series);
-        break;
-
-      case Action.SetReadingProfile:
-        this.actionService.setReadingProfileForMultiple([series]);
-        break;
-
-      case Action.ClearReadingProfile:
-        this.readingProfilesService.clearSeriesProfiles(series.id).subscribe(() => {
-          this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
-        });
+        this.reload.emit(series.id);
         break;
     }
   }
 
+  // TODO: See if we can further streamline action handling without needing to implement handling in each component
+  // private async handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
+  //   switch (action.action) {
+  //     case Action.MarkAsRead:
+  //       this.actionService.markSeriesAsRead(series, () => {
+  //         series.pagesRead = series.pages;
+  //         this.dataChanged.emit(series);
+  //       });
+  //       break;
+  //
+  //     case Action.MarkAsUnread:
+  //       this.actionService.markSeriesAsUnread(series, () => {
+  //         series.pagesRead = 0;
+  //         this.dataChanged.emit(series);
+  //       });
+  //       break;
+  //
+  //     case Action.Scan:
+  //       this.seriesService.scan(series.libraryId, series.id).subscribe(() => {
+  //         this.toastr.success(translate('toasts.scan-queued', { name: series.name }));
+  //       });
+  //       break;
+  //
+  //     case Action.RefreshMetadata:
+  //       await this.actionService.refreshSeriesMetadata(series, undefined, true, true);
+  //       break;
+  //
+  //     case Action.GenerateColorScape:
+  //       await this.actionService.refreshSeriesMetadata(series, undefined, false, false);
+  //       break;
+  //
+  //     case Action.Delete:
+  //       await this.actionService.deleteSeries(series, (result) => {
+  //         if (result) this.reload.emit(series.id);
+  //       });
+  //       break;
+  //
+  //     case Action.Edit:
+  //       this.openEditModal(series);
+  //       break;
+  //
+  //     case Action.Match:
+  //       this.actionService.matchSeries(series, (refreshNeeded) => {
+  //         if (refreshNeeded) this.reload.emit(series.id);
+  //       });
+  //       break;
+  //
+  //     case Action.AddToReadingList:
+  //       this.actionService.addSeriesToReadingList(series);
+  //       break;
+  //
+  //     case Action.AddToWantToReadList:
+  //       this.actionService.addMultipleSeriesToWantToReadList([series.id]);
+  //       break;
+  //
+  //     case Action.RemoveFromWantToReadList:
+  //       this.actionService.removeMultipleSeriesFromWantToReadList([series.id]);
+  //       if (this.router.url.startsWith('/want-to-read')) {
+  //         this.reload.emit(series.id);
+  //       }
+  //       break;
+  //
+  //     case Action.AddToCollection:
+  //       this.actionService.addMultipleSeriesToCollectionTag([series]);
+  //       break;
+  //
+  //     case Action.AnalyzeFiles:
+  //       this.actionService.analyzeFilesForSeries(series);
+  //       break;
+  //
+  //     case Action.SendTo:
+  //       const device = action._extra!.data as Device;
+  //       this.actionService.sendSeriesToDevice(series.id, device);
+  //       break;
+  //
+  //     case Action.RemoveFromOnDeck:
+  //       this.seriesService.removeFromOnDeck(series.id).subscribe(() => {
+  //         this.reload.emit(series.id);
+  //       });
+  //       break;
+  //
+  //     case Action.Download:
+  //       this.downloadService.download('series', series);
+  //       break;
+  //
+  //     case Action.SetReadingProfile:
+  //       this.actionService.setReadingProfileForMultiple([series]);
+  //       break;
+  //
+  //     case Action.ClearReadingProfile:
+  //       this.readingProfilesService.clearSeriesProfiles(series.id).subscribe(() => {
+  //         this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
+  //       });
+  //       break;
+  //   }
+  // }
+
   private async handleClick(series: Series) {
+    // TODO: This needs to be driven via the main entity card
     if (this.previewOnClick) {
       const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {
         position: 'end',
@@ -248,33 +284,35 @@ export class SeriesCardComponent implements OnChanges {
     });
   }
 
+  // TODO: Tackle this after the actionable handling deduplication
   private addOnDeckAction(config: ActionableCardConfiguration<Series>) {
     const actions = [...config.actionables];
-    const othersIndex = actions.findIndex(a => a.title === 'others');
-
-    if (othersIndex >= 0) {
-      const othersAction = { ...actions[othersIndex] };
-      const hasRemoveAction = othersAction.children?.some(c => c.action === Action.RemoveFromOnDeck);
-
-      if (!hasRemoveAction && othersAction.children) {
-        othersAction.children = [
-          ...othersAction.children,
-          {
-            action: Action.RemoveFromOnDeck,
-            title: 'remove-from-on-deck',
-            description: '',
-            callback: this.handleSeriesActionCallback.bind(this),
-            class: 'danger',
-            requiresAdmin: false,
-            requiredRoles: [],
-            shouldRender: () => true,
-            children: []
-          }
-        ];
-        actions[othersIndex] = othersAction;
-      }
-    }
+    // const othersIndex = actions.findIndex(a => a.title === 'others');
+    //
+    // if (othersIndex >= 0) {
+    //   const othersAction = { ...actions[othersIndex] };
+    //   const hasRemoveAction = othersAction.children?.some(c => c.action === Action.RemoveFromOnDeck);
+    //
+    //   if (!hasRemoveAction && othersAction.children) {
+    //     othersAction.children = [
+    //       ...othersAction.children,
+    //       {
+    //         action: Action.RemoveFromOnDeck,
+    //         title: 'remove-from-on-deck',
+    //         description: '',
+    //         callback: this.handleSeriesActionCallback.bind(this),
+    //         class: 'danger',
+    //         requiresAdmin: false,
+    //         requiredRoles: [],
+    //         shouldRender: () => true,
+    //         children: []
+    //       }
+    //     ];
+    //     actions[othersIndex] = othersAction;
+    //   }
+    // }
 
     return { ...config, actionables: actions };
+    //return actions;
   }
 }

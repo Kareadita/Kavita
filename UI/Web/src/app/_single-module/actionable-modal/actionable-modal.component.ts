@@ -12,11 +12,13 @@ import {
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {Action, ActionableEntity, ActionItem} from "../../_services/action-factory.service";
 import {AccountService} from "../../_services/account.service";
 import {tap} from "rxjs";
 import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ActionableEntity} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
 
 @Component({
     selector: 'app-actionable-modal',

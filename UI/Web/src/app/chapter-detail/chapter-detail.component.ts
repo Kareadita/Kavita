@@ -64,7 +64,6 @@ import {hasAnyCast} from "../_models/common/i-has-cast";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {CoverUpdateEvent} from "../_models/events/cover-update-event";
 import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
-import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
 import {Device} from "../_models/device/device";
 import {ActionService} from "../_services/action.service";
 import {DefaultDatePipe} from "../_pipes/default-date.pipe";
@@ -84,6 +83,9 @@ import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 import {ReadingProgressIconPipePipe} from "../_pipes/reading-progress-icon-pipe.pipe";
 import {BreakpointService} from "../_services/breakpoint.service";
+import {ActionFactoryService} from "../_services/action-factory.service";
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 enum TabID {
   Related = 'related-tab',

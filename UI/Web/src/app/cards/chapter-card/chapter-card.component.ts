@@ -19,7 +19,6 @@ import {
 import {ImageService} from "../../_services/image.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
-import {ActionItem} from "../../_services/action-factory.service";
 import {Chapter} from "../../_models/chapter";
 import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -34,6 +33,7 @@ import {BaseCardConfiguration} from "../../_models/card/card-configuration";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {BulkSelectionEntityDataSource} from "../bulk-selection.service";
+import {ActionItem} from "../../_models/actionables/action-item";
 
 @Component({
     selector: 'app-chapter-card',

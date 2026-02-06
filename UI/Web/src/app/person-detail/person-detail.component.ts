@@ -29,9 +29,8 @@ import {Series} from "../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {AccountService} from "../_services/account.service";
-import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
-import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
+import {ActionFactoryService} from "../_services/action-factory.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {EditPersonModalComponent} from "./_modal/edit-person-modal/edit-person-modal.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -46,6 +45,8 @@ import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {MetadataService} from "../_services/metadata.service";
 import {SeriesCardComponent} from "../cards/series-card/series-card.component";
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 interface PersonMergeEvent {
   srcId: number,
@@ -63,7 +64,6 @@ interface PersonMergeEvent {
     ReadMoreComponent,
     PersonRolePipe,
     CarouselReelComponent,
-    CardItemComponent,
     CardActionablesComponent,
     TranslocoDirective,
     ChapterCardComponent,

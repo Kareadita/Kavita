@@ -2,8 +2,10 @@ import {inject, Injectable} from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {ReplaySubject} from 'rxjs';
 import {filter} from 'rxjs/operators';
-import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
+import {ActionFactoryService} from '../_services/action-factory.service';
 import {toSignal} from "@angular/core/rxjs-interop";
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 export type BulkSelectionEntityDataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'sideNavStream' | 'collection' | 'readingList' | 'annotations';
 
@@ -154,7 +156,7 @@ export class BulkSelectionService {
       Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList, Action.SetReadingProfile];
 
     if (Object.keys(this.selectedCards).filter(item => item === 'series').length > 0) {
-      return this.applyFilterToList(this.actionFactory.getSeriesActions(callback), allowedActions);
+      return this.applyFilterToList(this.actionFactory.getSeriesActions(), allowedActions);
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'bookmark').length > 0) {

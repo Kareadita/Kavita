@@ -4,8 +4,9 @@ import {BulkSelectionEntityDataSource} from "../../cards/bulk-selection.service"
 import {CardEntity} from "./card-entity";
 import {MangaFormat} from "../manga-format";
 import {TemplateRef} from "@angular/core";
-import {ActionableEntity, ActionItem} from "../../_services/action-factory.service";
+import {ActionableEntity} from "../../_services/action-factory.service";
 import {IHasProgress} from "../common/i-has-progress";
+import {ActionItem} from "../actionables/action-item";
 
 /**
  * Configuration object that defines how a card renders and behaves.

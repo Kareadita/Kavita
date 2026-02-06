@@ -17,7 +17,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {Action, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
@@ -40,6 +39,8 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {Select2Option} from "ng-select2-component";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
 
 
 @Component({

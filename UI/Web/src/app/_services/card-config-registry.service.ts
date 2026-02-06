@@ -4,17 +4,18 @@ import {Chapter} from "../_models/chapter";
 import {
   ActionableCardConfiguration,
   BaseCardConfiguration,
+  BaseCardConfigurationOverrides,
   CardConfigurationOverrides
 } from "../_models/card/card-configuration";
 import {CardEntity, ChapterCardEntity, ReadingListItemCardEntity, VolumeCardEntity} from "../_models/card/card-entity";
 import {ReadingList} from "../_models/reading-list";
 import {ActionItem} from "./action-factory.service";
-import {Series} from "../_models/series";
 import {Volume} from "../_models/volume";
 import {UserCollection} from "../_models/collection-tag";
 import {LibraryType} from "../_models/library/library";
 import {User} from "../_models/user/user";
 import {PageBookmark} from "../_models/readers/page-bookmark";
+import {RelatedSeriesPair} from "../_single-module/related-tab/related-tab.component";
 
 /**
  * Context required to resolve configurations for entities that need
@@ -66,10 +67,12 @@ export class CardConfigRegistry {
   ): BaseCardConfiguration<any> {
     switch (entity.entityType) {
       case 'series':
-        return this.factory.forSeries(
-          actionCallback as (action: ActionItem<Series>, s: Series) => void,
-          overrides as CardConfigurationOverrides<Series>
-        );
+        // TODO: Implement this too
+        return this.factory.forSeries();
+        // return this.factory.forSeries(
+        //   //actionCallback as ExtraActionCallback<Series>,
+        //   overrides as CardConfigurationOverrides<Series>
+        // );
 
       case 'chapter':
         return this.resolveChapter(entity, actionCallback, context, overrides);
@@ -87,7 +90,8 @@ export class CardConfigRegistry {
         return this.resolveReadingListItem(entity, actionCallback, context, overrides);
       case 'bookmark':
         return this.resolveBookmark(actionCallback, overrides);
-
+      case 'related':
+        return this.resolveRelatedSeries(overrides);
       default:
         const _exhaustive: never = entity;
         throw new Error(`Unknown entity type: ${(entity as CardEntity).entityType}`);
@@ -184,6 +188,15 @@ export class CardConfigRegistry {
     return this.factory.forBookmark(
       actionCallback,
       overrides as CardConfigurationOverrides<PageBookmark>
+    );
+  }
+
+  private resolveRelatedSeries(
+    overrides?: CardConfigurationOverrides<any>
+  ): BaseCardConfiguration<RelatedSeriesPair> {
+
+    return this.factory.forRelationship(
+      overrides as BaseCardConfigurationOverrides<RelatedSeriesPair>
     );
   }
 

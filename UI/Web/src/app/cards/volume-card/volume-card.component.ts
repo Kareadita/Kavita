@@ -16,7 +16,6 @@ import {Router} from "@angular/router";
 import {ImageService} from "../../_services/image.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
-import {ActionItem} from "../../_services/action-factory.service";
 import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, map} from "rxjs/operators";
@@ -29,6 +28,7 @@ import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
 import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
 import {BaseCardConfiguration} from "../../_models/card/card-configuration";
+import {ActionItem} from "../../_models/actionables/action-item";
 
 @Component({
   selector: 'app-volume-card',

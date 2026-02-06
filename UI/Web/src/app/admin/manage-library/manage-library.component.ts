@@ -31,7 +31,6 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {NgTemplateOutlet} from "@angular/common";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {UtilityService} from "../../shared/_services/utility.service";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ActionService} from "../../_services/action.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {catchError} from "rxjs";
@@ -48,6 +47,9 @@ import {
   DatatableComponent
 } from "@siemens/ngx-datatable";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
 
 @Component({
   selector: 'app-manage-library',

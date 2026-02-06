@@ -1,7 +1,7 @@
 import {inject, Injectable, TemplateRef} from "@angular/core";
 import {ImageService} from "./image.service";
 import {ReaderService} from "./reader.service";
-import {ActionFactoryService, ActionItem} from "./action-factory.service";
+import {ActionFactoryService} from "./action-factory.service";
 import {DownloadService} from "../shared/_services/download.service";
 import {Router} from "@angular/router";
 import {RelationshipPipe} from "../_pipes/relationship.pipe";
@@ -23,6 +23,8 @@ import {MangaFormat} from "../_models/manga-format";
 import {User} from "../_models/user/user";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedSeriesPair} from "../_single-module/related-tab/related-tab.component";
+import {ExtraActionCallback} from "./action.service";
+import {ActionItem} from "../_models/actionables/action-item";
 
 /**
  * Factory service that creates CardConfiguration objects for each entity type.
@@ -50,7 +52,7 @@ export class CardConfigFactory {
    * Creates configuration for Series cards
    */
   forSeries(
-    actionCallback?: (action: ActionItem<Series>, series: Series) => void,
+    extraActionCallback?: ExtraActionCallback<Series>,
     overrides?: CardConfigurationOverrides<Series>
   ): ActionableCardConfiguration<Series> {
     const defaults: ActionableCardConfiguration<Series> = {
@@ -76,9 +78,7 @@ export class CardConfigFactory {
       showErrorFunc: (s) => s.pages === 0,
       ariaLabelFunc: (s) => s.name,
 
-      actionables: actionCallback
-        ? this.actionFactory.getSeriesActions(actionCallback)
-        : [],
+      actionables: this.actionFactory.getSeriesActions(extraActionCallback),
       readFunc: (s) => this.readerService.readSeries(s, false),
       clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.id]),
 

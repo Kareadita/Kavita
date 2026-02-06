@@ -26,7 +26,6 @@ import {Series} from 'src/app/_models/series';
 import {User} from 'src/app/_models/user/user';
 import {Volume} from 'src/app/_models/volume';
 import {AccountService} from 'src/app/_services/account.service';
-import {Action, ActionableEntity, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
@@ -48,6 +47,9 @@ import {PromotedIconComponent} from "../../shared/_components/promoted-icon/prom
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
+import {ActionableEntity, ActionFactoryService} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
 
 export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter | BrowsePerson;
 

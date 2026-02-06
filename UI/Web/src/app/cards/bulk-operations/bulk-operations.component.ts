@@ -8,12 +8,6 @@ import {
   Input,
   OnInit
 } from '@angular/core';
-import {
-  Action,
-  ActionFactoryService,
-  ActionItem,
-  ActionShouldRenderFunc
-} from 'src/app/_services/action-factory.service';
 import {BulkSelectionService} from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, DecimalPipe, NgStyle} from "@angular/common";
@@ -21,6 +15,9 @@ import {TranslocoModule} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {KEY_CODES} from "../../shared/_services/utility.service";
+import {ActionItem, ActionShouldRenderFunc} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
+import {ActionFactoryService} from "../../_services/action-factory.service";
 
 @Component({
   selector: 'app-bulk-operations',

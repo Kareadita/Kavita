@@ -233,7 +233,7 @@ public class SeriesController : BaseApiController
     /// <param name="userParams">Page size and offset</param>
     /// <returns></returns>
     [HttpPost("recently-updated-series")]
-    public async Task<ActionResult<IList<RecentlyAddedItemDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
+    public async Task<ActionResult<IList<GroupedSeriesDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
         return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(UserId, userParams));
