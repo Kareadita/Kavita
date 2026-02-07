@@ -47,8 +47,6 @@ import {LicenseService} from "../../_services/license.service";
 import {EntityCardComponent} from "../../cards/entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
 import {CardEntityFactory} from "../../_models/card/card-entity";
-import {Series} from "../../_models/series";
-import {Action} from "../../_models/actionables/action";
 
 enum StreamId {
   OnDeck,
@@ -320,10 +318,6 @@ export class DashboardComponent implements OnInit {
       filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     }
-  }
-
-  handleSeriesAction(action: Action, series: Series) {
-    // TODO:
   }
 
   protected readonly SettingsTabId = SettingsTabId;

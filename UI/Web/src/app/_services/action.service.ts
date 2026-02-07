@@ -36,11 +36,10 @@ import {
 } from "../cards/_modals/bulk-set-reading-profile-modal/bulk-set-reading-profile-modal.component";
 import {EditSeriesModalComponent} from "../cards/_modals/edit-series-modal/edit-series-modal.component";
 import {DownloadService} from "../shared/_services/download.service";
-import {Router} from "@angular/router";
 import {ReadingProfileService} from "./reading-profile.service";
 import {Action} from "../_models/actionables/action";
 import {ActionItem} from "../_models/actionables/action-item";
-import {filter, from, Observable, switchMap, tap} from "rxjs";
+import {EMPTY, filter, from, Observable, of, switchMap, tap} from "rxjs";
 import {ActionEffect, ActionResult} from "../_models/actionables/action-result";
 
 
@@ -53,8 +52,6 @@ export type VoidActionCallback = () => void;
 export type BooleanActionCallback = (result: boolean) => void;
 
 export type ExtraActionCallback<T> = (action: Action, data: T) => void;
-
-type EntityType = 'series' | 'volume' | 'chapter' | 'library' | 'readingList' | 'collection';
 
 /**
  * Responsible for executing actions
@@ -78,7 +75,6 @@ export class ActionService {
   private readonly filterService = inject(FilterService);
   private readonly readingListService = inject(ReadingListService);
   private readonly downloadService = inject(DownloadService);
-  private readonly router = inject(Router);
   private readonly readingProfilesService = inject(ReadingProfileService);
 
 
@@ -93,149 +89,163 @@ export class ActionService {
 
 
   /**
-   * Creates an action callback for any entity type that executes the action
-   * and then calls the optional extra callback for post-action work.
+   * Centralized handler for all series actions.
+   * Returns Observable<ActionResult<Series>> so the caller can react to effects.
    */
-  getActionCallback<T>(
-    entityType: EntityType,
-    extraCallback?: ExtraActionCallback<T>
-  ): (action: ActionItem<T>, entity: T) => void {
-    return async (action: ActionItem<T>, entity: T) => {
-      await this.handleAction(entityType, action, entity, extraCallback);
-    };
-  }
-
-  /**
-   * Routes to the appropriate entity-specific handler.
-   */
-  private async handleAction(
-    entityType: EntityType,
-    action: ActionItem<any>,
-    entity: any,
-    callback?: ExtraActionCallback<any>
-  ): Promise<void> {
-    switch (entityType) {
-      case 'series':
-        await this.handleSeriesAction(action, entity, callback);
-        break;
-      // case 'volume':
-      //   await this.handleVolumeAction(action, entity, callback);
-      //   break;
-      // case 'chapter':
-      //   await this.handleChapterAction(action, entity, callback);
-      //   break;
-      // case 'library':
-      //   await this.handleLibraryAction(action, entity, callback);
-      //   break;
-      // case 'readingList':
-      //   await this.handleReadingListAction(action, entity, callback);
-      //   break;
-      // case 'collection':
-      //   await this.handleCollectionAction(action, entity, callback);
-      //   break;
-      default:
-        // const _exhaustive: never = entityType;
-        // throw new Error(`Unknown entity type: ${entityType}`);
-    }
-  }
-
-  // This is the temp handler for Series Actionables (until full refactor)
-  handleSeriesAction2(action: ActionItem<Series>, series: Series): Observable<ActionResult<Series>> | void {
+  handleSeriesAction(action: ActionItem<Series>, series: Series): Observable<ActionResult<Series>> {
     switch (action.action) {
       case Action.MarkAsRead:
         return this.seriesService.markRead(series.id).pipe(
           tap(() => this.toastr.success(translate('toasts.entity-read', {name: series.name}))),
           map(() => this.fromAction(action, { ...series, pagesRead: series.pages }, 'update'))
         );
+
+      case Action.MarkAsUnread:
+        return this.seriesService.markUnread(series.id).pipe(
+          tap(() => this.toastr.success(translate('toasts.entity-unread', {name: series.name}))),
+          map(() => this.fromAction(action, { ...series, pagesRead: 0 }, 'update'))
+        );
+
+      case Action.Scan:
+        return this.seriesService.scan(series.libraryId, series.id).pipe(
+          tap(() => this.toastr.info(translate('toasts.scan-queued', {name: series.name}))),
+          map(() => this.fromAction(action, series, 'none'))
+        );
+
+      case Action.RefreshMetadata:
+        return from(this.confirmService.confirm(translate('toasts.confirm-regen-covers'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.seriesService.refreshMetadata(series, true, false)),
+          tap(() => this.toastr.info(translate('toasts.refresh-covers-queued', {name: series.name}))),
+          map(() => this.fromAction(action, series, 'none'))
+        );
+
+      case Action.GenerateColorScape:
+        return this.seriesService.refreshMetadata(series, false, false).pipe(
+          tap(() => this.toastr.info(translate('toasts.generate-colorscape-queued', {name: series.name}))),
+          map(() => this.fromAction(action, series, 'none'))
+        );
+
+      case Action.AnalyzeFiles:
+        return this.seriesService.analyzeFiles(series.libraryId, series.id).pipe(
+          tap(() => this.toastr.info(translate('toasts.scan-queued', {name: series.name}))),
+          map(() => this.fromAction(action, series, 'none'))
+        );
+
       case Action.Delete:
         return from(this.confirmService.confirm(translate('toasts.confirm-delete-series'))).pipe(
           filter(confirmed => confirmed),
           switchMap(() => this.seriesService.delete(series.id)),
+          tap(() => this.toastr.success(translate('toasts.series-deleted'))),
           map(() => this.fromAction(action, series, 'remove'))
         );
-      // TODO: Finish this
-    }
-  }
 
-  private fromAction<T>(action: ActionItem<T>, data: T, effect: ActionEffect) {
-    return { action: action.action, entity: data, effect: effect };
-  }
+      case Action.Edit: {
+        const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
+        modalRef.componentInstance.series = series;
+        return from(modalRef.closed).pipe(
+          filter((closeResult: { success: boolean; series: Series; coverImageUpdate: boolean }) => closeResult.success),
+          switchMap(() => this.seriesService.getSeries(series.id)),
+          map(updated => this.fromAction(action, updated, 'update'))
+        );
+      }
 
-  /**
-   * Executes a series action and optionally calls back for local state updates.
-   * @param action The action item triggered
-   * @param series The series being acted upon
-   * @param callback Optional callback for post-action state updates (e.g., reload, dataChanged)
-   */
-  async handleSeriesAction(action: ActionItem<Series>, series: Series, callback?: (action: Action, series: Series) => void) {
-    switch (action.action) {
-      case Action.MarkAsRead:
-        await this.markSeriesAsRead2(series, callback);
-        break;
-      case Action.MarkAsUnread:
-        await this.markSeriesAsUnread2(series, callback);
-        break;
-      case Action.Scan:
-        await this.scanSeries2(series, callback);
-        break;
-      case Action.RefreshMetadata:
-        await this.refreshSeriesMetadata2(series, callback);
-        break;
-      case Action.Delete:
-        await this.deleteSeries2(series, callback);
-        break;
-      case Action.GenerateColorScape:
-        await this.refreshSeriesMetadata(series, undefined, false, false);
-        break;
-      case Action.Edit:
-        this.editSeries(series, callback);
-        break;
-      case Action.AddToReadingList:
-        this.addSeriesToReadingList2(series, callback);
-        break;
-      case Action.AddToCollection:
-        this.addMultipleSeriesToCollectionTag([series]);
-        break;
+      case Action.Match: {
+        const ref = this.modalService.open(MatchSeriesModalComponent, DefaultModalOptions);
+        ref.componentInstance.series = series;
+        return from(ref.closed).pipe(
+          filter((saved: boolean) => saved),
+          map(() => this.fromAction(action, series, 'reload'))
+        );
+      }
+
+      case Action.AddToReadingList: {
+        if (this.readingListModalRef != null) return EMPTY;
+        this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+        this.readingListModalRef.componentInstance.seriesId = series.id;
+        this.readingListModalRef.componentInstance.title = series.name;
+        this.readingListModalRef.componentInstance.type = ADD_FLOW.Series;
+
+        const ref = this.readingListModalRef;
+        return new Observable<ActionResult<Series>>(subscriber => {
+          ref.closed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.next(this.fromAction(action, series, 'none'));
+            subscriber.complete();
+          });
+          ref.dismissed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.complete();
+          });
+        });
+      }
+
+      case Action.AddToCollection: {
+        if (this.collectionModalRef != null) return EMPTY;
+        this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection', fullscreen: 'md' });
+        this.collectionModalRef.componentInstance.seriesIds = [series.id];
+        this.collectionModalRef.componentInstance.title = translate('actionable.new-collection');
+
+        const ref = this.collectionModalRef;
+        return new Observable<ActionResult<Series>>(subscriber => {
+          ref.closed.subscribe(() => {
+            this.collectionModalRef = null;
+            subscriber.next(this.fromAction(action, series, 'none'));
+            subscriber.complete();
+          });
+          ref.dismissed.subscribe(() => {
+            this.collectionModalRef = null;
+            subscriber.complete();
+          });
+        });
+      }
+
       case Action.Download:
         this.downloadService.download('series', series);
-        callback?.(action.action, series);
-        break;
+        return of(this.fromAction(action, series, 'none'));
+
       case Action.AddToWantToReadList:
-        this.addMultipleSeriesToWantToReadList([series.id]);
-        break;
+        return this.memberService.addSeriesToWantToRead([series.id]).pipe(
+          tap(() => this.toastr.success(translate('toasts.series-added-want-to-read'))),
+          map(() => this.fromAction(action, series, 'none'))
+        );
+
       case Action.RemoveFromWantToReadList:
-        this.removeMultipleSeriesFromWantToReadList([series.id]);
-        if (this.router.url.startsWith('/want-to-read')) {
-          callback?.(action.action, series);
-        }
-        break;
+        return this.memberService.removeSeriesToWantToRead([series.id]).pipe(
+          tap(() => this.toastr.success(translate('toasts.series-removed-want-to-read'))),
+          map(() => this.fromAction(action, series, 'reload'))
+        );
+
       case Action.RemoveFromOnDeck:
-        this.seriesService.removeFromOnDeck(series.id).subscribe(() => {
-          callback?.(action.action, series);
-        });
-        break;
-      case Action.SendTo:
+        return this.seriesService.removeFromOnDeck(series.id).pipe(
+          map(() => this.fromAction(action, series, 'reload'))
+        );
+
+      case Action.SendTo: {
         const device = action._extra!.data as Device;
-        this.sendSeriesToDevice(series.id, device);
-        break;
+        return this.deviceService.sendSeriesToEmailDevice(series.id, device.id).pipe(
+          tap(() => this.toastr.success(translate('toasts.file-send-to', {name: device.name}))),
+          map(() => this.fromAction(action, series, 'none'))
+        );
+      }
 
       case Action.SetReadingProfile:
         this.setReadingProfileForMultiple([series]);
-        break;
+        return of(this.fromAction(action, series, 'none'));
 
       case Action.ClearReadingProfile:
-        this.readingProfilesService.clearSeriesProfiles(series.id).subscribe(() => {
-          this.toastr.success(translate('actionable.cleared-profile'));
-        });
-        break;
-      case Action.Match:
-        this.matchSeries(series, (refreshNeeded) => {
-          if (refreshNeeded) callback?.(action.action, series);
-        });
-        break;
+        return this.readingProfilesService.clearSeriesProfiles(series.id).pipe(
+          tap(() => this.toastr.success(translate('actionable.cleared-profile'))),
+          map(() => this.fromAction(action, series, 'none'))
+        );
+
       default:
-        console.warn(`Unhandled series action: ${action.action}`);
+        return of(this.fromAction(action, series, 'none'));
     }
+  }
+
+  private fromAction<T>(action: ActionItem<T>, data: T, effect: ActionEffect): ActionResult<T> {
+    return { action: action.action, entity: data, effect: effect };
   }
 
 
@@ -345,19 +355,6 @@ export class ActionService {
   }
 
   /**
-   * Mark a series as read; updates the series pagesRead
-   * @param series Series, must have id and name populated
-   * @param callback Optional callback to perform actions after API completes
-   */
-  private markSeriesAsRead2(series: Series, callback?: ExtraActionCallback<Series>) {
-    this.seriesService.markRead(series.id).subscribe(() => {
-      series.pagesRead = series.pages;
-      this.toastr.success(translate('toasts.entity-read', {name: series.name}));
-      callback?.(Action.MarkAsRead, series)
-    });
-  }
-
-  /**
    * Mark a series as unread; updates the series pagesRead
    * @param series Series, must have id and name populated
    * @param callback Optional callback to perform actions after API completes
@@ -367,19 +364,6 @@ export class ActionService {
       series.pagesRead = 0;
       this.toastr.success(translate('toasts.entity-unread', {name: series.name}));
       callback?.(series);
-    });
-  }
-
-  /**
-   * Mark a series as unread; updates the series pagesRead
-   * @param series Series, must have id and name populated
-   * @param callback Optional callback to perform actions after API completes
-   */
-  markSeriesAsUnread2(series: Series, callback?: ExtraActionCallback<Series>) {
-    this.seriesService.markUnread(series.id).subscribe(() => {
-      series.pagesRead = 0;
-      this.toastr.success(translate('toasts.entity-unread', {name: series.name}));
-      callback?.(Action.MarkAsUnread, series);
     });
   }
 
@@ -398,18 +382,6 @@ export class ActionService {
   }
 
   /**
-   * Start a file scan for a Series
-   * @param series Series, must have libraryId and name populated
-   * @param callback Optional callback to perform actions after API completes
-   */
-  async scanSeries2(series: Series, callback?: ExtraActionCallback<Series>) {
-    this.seriesService.scan(series.libraryId, series.id).subscribe(() => {
-      this.toastr.info(translate('toasts.scan-queued', {name: series.name}));
-      callback?.(Action.Scan, series);
-    });
-  }
-
-  /**
    * Start a file scan for analyze files for a Series
    * @param series Series, must have libraryId and name populated
    * @param callback Optional callback to perform actions after API completes
@@ -420,18 +392,6 @@ export class ActionService {
       if (callback) {
         callback(series);
       }
-    });
-  }
-
-  /**
-   * Start a file scan for analyze files for a Series
-   * @param series Series, must have libraryId and name populated
-   * @param callback Optional callback to perform actions after API completes
-   */
-  analyzeFilesForSeries2(series: Series, callback?: ExtraActionCallback<Series>) {
-    this.seriesService.analyzeFiles(series.libraryId, series.id).subscribe(() => {
-      this.toastr.info(translate('toasts.scan-queued', {name: series.name}));
-      callback?.(Action.AnalyzeFiles, series);
     });
   }
 
@@ -458,49 +418,6 @@ export class ActionService {
       this.toastr.info(translate(message, {name: series.name}));
       if (callback) {
         callback(series);
-      }
-    });
-  }
-
-  /**
-   * Start a metadata refresh for a Series
-   * @param series Series, must have libraryId, id and name populated
-   * @param callback Optional callback to perform actions after API completes
-   * @param forceUpdate If cache should be checked or not
-   * @param forceColorscape If cache should be checked or not
-   */
-  async refreshSeriesMetadata2(series: Series, callback?: ExtraActionCallback<Series>, forceUpdate: boolean = true, forceColorscape: boolean = false) {
-
-    // Prompt the user if we are doing a forced call
-    if (forceUpdate) {
-      if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
-        callback?.(Action.RefreshMetadata, series);
-        return;
-      }
-    }
-
-    const message = forceUpdate ? 'toasts.refresh-covers-queued' : 'toasts.generate-colorscape-queued';
-
-    this.seriesService.refreshMetadata(series, forceUpdate, forceColorscape).subscribe(() => {
-      this.toastr.info(translate(message, {name: series.name}));
-      callback?.(Action.RefreshMetadata, series);
-    });
-  }
-
-  /**
-   * Returns the updated Series, does not call extra callback on cancelling modal
-   * @param series
-   * @param callback
-   */
-  editSeries(series: Series, callback?: ExtraActionCallback<Series>) {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
-    modalRef.componentInstance.series = series;
-
-    modalRef.closed.subscribe((closeResult: { success: boolean; series: Series; coverImageUpdate: boolean }) => {
-      if (closeResult.success) {
-        this.seriesService.getSeries(series.id).subscribe(updated => {
-          callback?.(Action.Edit, updated);
-        });
       }
     });
   }
@@ -919,26 +836,7 @@ export class ActionService {
       });
   }
 
-  addSeriesToReadingList2(series: Series, callback?: ExtraActionCallback<Series>) {
-    if (this.readingListModalRef != null) { return; }
-
-    this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
-    this.readingListModalRef.componentInstance.seriesId = series.id;
-    this.readingListModalRef.componentInstance.title = series.name;
-    this.readingListModalRef.componentInstance.type = ADD_FLOW.Series;
-
-
-    this.readingListModalRef.closed.subscribe(() => {
-      this.readingListModalRef = null;
-      callback?.(Action.AddToReadingList, series);
-    });
-    this.readingListModalRef.dismissed.subscribe(() => {
-      this.readingListModalRef = null;
-      callback?.(Action.AddToReadingList, series);
-    });
-  }
-
-  addVolumeToReadingList(volume: Volume, seriesId: number, callback?: VolumeActionCallback) {
+addVolumeToReadingList(volume: Volume, seriesId: number, callback?: VolumeActionCallback) {
     if (this.readingListModalRef != null) { return; }
       this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
       this.readingListModalRef.componentInstance.seriesId = seriesId;
@@ -1035,22 +933,7 @@ export class ActionService {
     });
   }
 
-  async deleteSeries2(series: Series, callback?: ExtraActionCallback<Series>) {
-    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-series'))) {
-      return;
-    }
-
-    this.seriesService.delete(series.id).subscribe((res: boolean) => {
-      if (res) {
-        this.toastr.success(translate('toasts.series-deleted'));
-        callback?.(Action.Delete, series);
-      } else {
-        this.toastr.error(translate('errors.generic'));
-      }
-    });
-  }
-
-  async deleteChapter(chapterId: number, callback?: BooleanActionCallback) {
+async deleteChapter(chapterId: number, callback?: BooleanActionCallback) {
     if (!await this.confirmService.confirm(translate('toasts.confirm-delete-chapter'))) {
       if (callback) {
         callback(false);

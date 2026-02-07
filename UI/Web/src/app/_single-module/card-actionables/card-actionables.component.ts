@@ -9,7 +9,6 @@ import {ActionableModalComponent} from "../actionable-modal/actionable-modal.com
 import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionItem} from "../../_models/actionables/action-item";
-import {Observable} from "rxjs";
 import {ActionResult} from "../../_models/actionables/action-result";
 
 
@@ -72,12 +71,9 @@ export class CardActionablesComponent implements OnDestroy {
 
     // Prefer callback2 (observable-returning) over callback
     if (action.callback2) {
-      const result = action.callback2(action, this.entity());
-      if (result && typeof (result as any).subscribe === 'function') {
-        (result as Observable<ActionResult<any>>).subscribe(actionResult => {
-          this.actionHandler.emit(actionResult);
-        });
-      }
+      action.callback2(action, this.entity()).subscribe(actionResult => {
+        this.actionHandler.emit(actionResult);
+      });
     } else if (typeof action.callback === 'function') {
       action.callback(action, this.entity());
     }

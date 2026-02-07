@@ -119,6 +119,7 @@ import {ReadingProgressIconPipePipe} from "../../../_pipes/reading-progress-icon
 import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 
 enum TabID {
@@ -569,79 +570,25 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.location.replaceState(newUrl)
   }
 
-  async handleSeriesActionCallback(action: Action, series: Series) {
-    const seriesValue = this.series();
-    switch(action) {
-      case(Action.MarkAsRead):
-        // this.actionService.markSeriesAsRead(series, (series: Series) => {
-        //   this.loadPageSource.next(false);
-        // });
+  onSeriesActionResult(event: any) {
+    if (!('effect' in event)) return; // Ignore legacy ActionItem events
+    const result = event as ActionResult<Series>;
+    switch (result.effect) {
+      case 'update':
         this.loadPageSource.next(false);
         break;
-      case(Action.MarkAsUnread):
-        // this.actionService.markSeriesAsUnread(series, (series: Series) => {
-        //   this.loadPageSource.next(false);
-        // });
-        this.loadPageSource.next(false);
-        break;
-      // case(Action.Scan):
-      //   await this.actionService.scanSeries(series);
-      //   break;
-      // case(Action.RefreshMetadata):
-      //   await this.actionService.refreshSeriesMetadata(series, undefined, true, false);
-      //   break;
-      // case(Action.GenerateColorScape):
-      //   await this.actionService.refreshSeriesMetadata(series, undefined, false, true);
-      //   break;
-      case(Action.Delete):
-        //await this.deleteSeries(series);
+      case 'remove':
         this.router.navigate(['library', this.libraryId]);
         break;
-      // case(Action.AddToReadingList):
-      //   this.actionService.addSeriesToReadingList(series);
-      //   break;
-      // case(Action.AddToCollection):
-      //   this.actionService.addMultipleSeriesToCollectionTag([series]);
-      //   break;
-      // case (Action.AnalyzeFiles):
-      //   this.actionService.analyzeFilesForSeries(series);
-      //   break;
-      // case Action.AddToWantToReadList:
-      //   this.actionService.addMultipleSeriesToWantToReadList([series.id]);
-      //   break;
-      // case Action.RemoveFromWantToReadList:
-      //   this.actionService.removeMultipleSeriesFromWantToReadList([series.id]);
-      //   break;
-      case Action.Download:
-        if (this.downloadInProgress) return;
-        //this.downloadSeries();
-        this.downloadInProgress = true;
-        this.cdRef.markForCheck();
+      case 'reload':
+        this.loadSeries(this.seriesId, true);
         break;
-      case Action.Match:
-        this.actionService.matchSeries(seriesValue!, (refreshNeeded) => {
-          if (refreshNeeded) {
-            this.loadSeries(seriesValue!.id, refreshNeeded);
-          }
-        });
-        break;
-      case Action.SendTo:
-        {
-          // TODO: validate if we can use SendSeries or not
-          // const chapterIds = [...this.volumes.map(v => v.chapters.map(c => c.id)).flat(), ...this.specials.map(c => c.id)]
-          // const device = (action._extra!.data as Device);
-          // this.actionService.sendToDevice(chapterIds, device);
-          break;
+      case 'none':
+        if (result.action === Action.Download) {
+          if (this.downloadInProgress) return;
+          this.downloadInProgress = true;
+          this.cdRef.markForCheck();
         }
-      // case Action.SetReadingProfile:
-      //   this.actionService.setReadingProfileForMultiple([seriesValue!]);
-      //   break;
-      // case Action.ClearReadingProfile:
-      //   this.readingProfileService.clearSeriesProfiles(this.seriesId).subscribe(() => {
-      //     this.toastr.success(translate('actionable.cleared-profile'));
-      //   });
-      //   break;
-      default:
         break;
     }
   }
@@ -820,7 +767,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
-      this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
+      this.seriesActions = this.actionFactoryService.getSeriesActions()
               .filter(action => action.action !== Action.Edit);
 
       this.licenseService.hasValidLicense$.subscribe(hasLic => {

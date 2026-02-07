@@ -34,6 +34,7 @@ import {ActionableEntity} from "../../_services/action-factory.service";
 import {IHasProgress} from "../../_models/common/i-has-progress";
 import {ThemeService} from "../../_services/theme.service";
 import {ActionItem} from "../../_models/actionables/action-item";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-entity-card',
@@ -269,20 +270,21 @@ export class EntityCardComponent<T> implements OnInit {
     this.cdRef.detectChanges();
   }
 
-  // TODO: 2 things left to solve: 1) entity is an input, so not mutatable and 2) need to write a fromExisting method
-  // onActionResult(result: ActionResult<any>) {
-  //   switch (result.effect) {
-  //     case 'update':
-  //       // Rebuild the CardEntity with updated data
-  //       this.entity.set(CardEntityFactory.fromExisting(this.entity, result.entity));
-  //       this.dataChanged.emit(result.entity);
-  //       break;
-  //     case 'remove':
-  //     case 'reload':
-  //       this.reload.emit(result.entity.id);
-  //       break;
-  //   }
-  // }
+  onActionResult(event: ActionItem<any> | ActionResult<any>) {
+    if (!('effect' in event)) return; // Ignore legacy ActionItem events
+    const result = event as ActionResult<any>;
+    switch (result.effect) {
+      case 'update':
+        this.dataChanged.emit(result.entity);
+        break;
+      case 'remove':
+      case 'reload':
+        this.reload.emit(result.entity?.id ?? 0);
+        break;
+      case 'none':
+        break;
+    }
+  }
 
   handleRead(event: Event) {
     event.stopPropagation();

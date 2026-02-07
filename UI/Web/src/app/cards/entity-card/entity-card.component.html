@@ -158,6 +158,7 @@
             [entity]="actionableEntity()"
             [actions]="actionables()"
             [labelBy]="ariaLabel()"
+            (actionHandler)="onActionResult($event)"
           />
         </span>
       } @else {

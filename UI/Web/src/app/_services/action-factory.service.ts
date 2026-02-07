@@ -17,9 +17,10 @@ import {User} from '../_models/user/user';
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {ClientDevice} from "../_models/client-device";
 import {PageBookmark} from "../_models/readers/page-bookmark";
-import {ActionService, ExtraActionCallback} from "./action.service";
+import {ActionService} from "./action.service";
 import {ActionCallback, ActionItem, ActionShouldRenderFunc} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";
+import {ActionResultCallback} from "../_models/actionables/action-result";
 
 
 /**
@@ -59,8 +60,16 @@ export class ActionFactoryService {
     return this.applyCallbackToList(this.libraryActions, callback, shouldRenderFunc) as ActionItem<Library>[];
   }
 
-  getSeriesActions(callback?: ExtraActionCallback<Series>, shouldRenderFunc: ActionShouldRenderFunc<Series> = this.basicReadRender) {
-    return this.applyCallbackToList(this.seriesActions, this.actionService.getActionCallback('series', callback), shouldRenderFunc);
+  getSeriesActions(shouldRenderFunc: ActionShouldRenderFunc<Series> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.seriesActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleSeriesAction(action, entity)
+    );
+    return actions;
   }
 
   getSideNavStreamActions(callback: ActionCallback<SideNavStream>, shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.dummyShouldRender) {
@@ -1051,6 +1060,22 @@ export class ActionFactoryService {
     actions.forEach((action) => this.applyCallback(action, callback, shouldRenderFunc));
 
     return actions;
+  }
+
+  private applyCallback2(action: ActionItem<any>, callback: ActionResultCallback<any>) {
+    action.callback2 = callback;
+
+    if (action.children === null || action.children?.length === 0) return;
+
+    action.children = action.children.map(d => { return {...d}; });
+
+    action.children.forEach((childAction) => {
+      this.applyCallback2(childAction, callback);
+    });
+  }
+
+  private applyCallbackToList2<T>(list: Array<ActionItem<T>>, callback: ActionResultCallback<T>) {
+    list.forEach((action) => this.applyCallback2(action, callback));
   }
 
   // Checks the whole tree for the action and returns true if it exists

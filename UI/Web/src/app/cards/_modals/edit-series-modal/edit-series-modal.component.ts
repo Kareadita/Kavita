@@ -149,7 +149,7 @@ export class EditSeriesModalComponent implements OnInit {
    */
   initSeries!: Series;
   tasks = this.actionFactoryService.getActionablesForSettingsPage(
-    this.actionFactoryService.getSeriesActions(this.handleTaskCallback.bind(this)), this.blacklist);
+    this.actionFactoryService.getSeriesActions(), this.blacklist);
   volumeCollapsed: any = {};
   tabs = ['general-tab', 'metadata-tab', 'people-tab', 'web-links-tab', 'cover-image-tab', 'related-tab', 'info-tab', 'tasks-tab'];
   active = this.tabs[0];
@@ -613,41 +613,6 @@ export class EditSeriesModalComponent implements OnInit {
 
   async runTask(action: ActionItem<Series>) {
 
-  }
-
-  async handleTaskCallback(action: Action, series: Series) {
-    switch (action) {
-      // case Action.Scan:
-      //   await this.actionService.scanSeries(this.series);
-      //   break;
-      // case Action.RefreshMetadata:
-      //   await this.actionService.refreshSeriesMetadata(this.series);
-      //   break;
-      // case Action.GenerateColorScape:
-      //   await this.actionService.refreshSeriesMetadata(this.series, undefined, false, true);
-      //   break;
-      // case Action.AnalyzeFiles:
-      //   this.actionService.analyzeFilesForSeries(this.series);
-      //   break;
-      // case Action.MarkAsRead:
-      //   this.actionService.markSeriesAsRead(this.series);
-      //   break;
-      // case Action.MarkAsUnread:
-      //   this.actionService.markSeriesAsUnread(this.series);
-      //   break;
-      // case Action.Delete:
-      //   await this.actionService.deleteSeries(this.series);
-      //   break;
-      // case Action.Download:
-      //   this.downloadService.download('series', this.series);
-      //   break;
-      case Action.Match:
-        // this.actionService.matchSeries(this.series, _ => {
-        //   this.modal.close({success: true, series: this.series, coverImageUpdate: false, updateExternal: true});
-        // });
-        this.modal.close({success: true, series: this.series, coverImageUpdate: false, updateExternal: true});
-        break;
-    }
   }
 
   protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;

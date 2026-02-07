@@ -24,8 +24,6 @@ import {User} from "../_models/user/user";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedSeriesPair} from "../_single-module/related-tab/related-tab.component";
 import {ActionItem} from "../_models/actionables/action-item";
-import {ActionFactory2Service} from "./action-factory2.service";
-import {ActionService} from "./action.service";
 
 /**
  * Factory service that creates CardConfiguration objects for each entity type.
@@ -45,8 +43,6 @@ export class CardConfigFactory {
   private readonly imageService = inject(ImageService);
   private readonly readerService = inject(ReaderService);
   private readonly actionFactory = inject(ActionFactoryService);
-  private readonly actionFactory2 = inject(ActionFactory2Service);
-  private readonly actionService = inject(ActionService);
   private readonly downloadService = inject(DownloadService);
   private readonly router = inject(Router);
   private readonly relationshipPipe = new RelationshipPipe();
@@ -80,7 +76,7 @@ export class CardConfigFactory {
       showErrorFunc: (s) => s.pages === 0,
       ariaLabelFunc: (s) => s.name,
 
-      actionables: this.actionFactory2.getSeriesActions(),
+      actionables: this.actionFactory.getSeriesActions(),
       readFunc: (s) => this.readerService.readSeries(s, false),
       clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.id]),
 

@@ -16,6 +16,7 @@ import {User} from "../_models/user/user";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedSeriesPair} from "../_single-module/related-tab/related-tab.component";
 import {ActionItem} from "../_models/actionables/action-item";
+import {Series} from "../_models/series";
 
 /**
  * Context required to resolve configurations for entities that need
@@ -67,12 +68,7 @@ export class CardConfigRegistry {
   ): BaseCardConfiguration<any> {
     switch (entity.entityType) {
       case 'series':
-        // TODO: Implement this too
-        return this.factory.forSeries();
-        // return this.factory.forSeries(
-        //   //actionCallback as ExtraActionCallback<Series>,
-        //   overrides as CardConfigurationOverrides<Series>
-        // );
+        return this.factory.forSeries(overrides as CardConfigurationOverrides<Series>);
 
       case 'chapter':
         return this.resolveChapter(entity, actionCallback, context, overrides);
