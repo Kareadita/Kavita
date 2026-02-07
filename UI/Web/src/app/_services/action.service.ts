@@ -52,6 +52,9 @@ import {EditCollectionTagsComponent} from "../cards/_modals/edit-collection-tags
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationService} from "./annotation.service";
 import {ClientDevice} from "../_models/client-device";
+import {Person} from "../_models/metadata/person";
+import {EditPersonModalComponent} from "../person-detail/_modal/edit-person-modal/edit-person-modal.component";
+import {MergePersonModalComponent} from "../person-detail/_modal/merge-person-modal/merge-person-modal.component";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -415,6 +418,7 @@ export class ActionService {
             this.fromAction(action, chapter, res.isDeleted ? 'remove' : 'update')
           )
         );
+
       case Action.AddToReadingList:
         if (this.readingListModalRef != null) return EMPTY;
         this.readingListModalRef = this.modalService.open(AddToListModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
@@ -592,6 +596,10 @@ export class ActionService {
     }
   }
 
+  /**
+   * Centralized handler for all client device actions.
+   * Returns Observable<ActionResult<ClientDevice>> so the caller can react to effects.
+   */
   handleClientDeviceAction(action: ActionItem<ClientDevice>, clientDevice: ClientDevice) {
     switch (action.action) {
       case Action.Delete:
@@ -607,6 +615,34 @@ export class ActionService {
 
       default:
         return of(this.fromAction(action, clientDevice, 'none'));
+    }
+  }
+
+  handlePersonAction(action: ActionItem<Person>, person: Person) {
+    switch (action.action) {
+      case Action.Edit:
+        const ref = this.modalService.open(EditPersonModalComponent, DefaultModalOptions);
+        ref.componentInstance.person = person;
+
+        return from(ref.closed).pipe(
+          filter((res: {success: false, coverImageUpdate: false, person: Person}) => res.success),
+          map((res: {success: false, coverImageUpdate: false}) =>
+            this.fromAction(action, person, res.success ? 'update' : 'none')
+          )
+        );
+
+      case Action.Merge:
+        const ref2 = this.modalService.open(MergePersonModalComponent, DefaultModalOptions);
+        ref2.componentInstance.person = person;
+
+        return from(ref2.closed).pipe(
+          filter((res: {success: false, coverImageUpdate: false, person: Person}) => res.success),
+          map((res: {success: false, coverImageUpdate: false}) =>
+            this.fromAction(action, person, res.success ? 'reload' : 'none')
+          )
+        );
+      default:
+        return of(this.fromAction(action, person, 'none'));
     }
   }
 
