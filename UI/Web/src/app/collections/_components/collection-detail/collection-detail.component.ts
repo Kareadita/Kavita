@@ -66,6 +66,7 @@ import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.servi
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-collection-detail',
@@ -219,8 +220,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (!user) return;
       this.user = user;
-      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(
-        this.handleCollectionActionCallback.bind(this), this.shouldRenderCollection.bind(this))
+      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.shouldRenderCollection.bind(this))
         .filter(action => this.collectionService.actionListFilter(action, user));
       this.cdRef.markForCheck();
     });
@@ -253,6 +253,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     this.scrollService.setScrollContainer(this.scrollingBlock);
   }
 
+  // TODO: This is a very weird implementation, let's clean it up
   updateTag(tagId: number) {
     this.collectionService.allCollections().subscribe(tags => {
       const matchingTags = tags.filter(t => t.id === tagId);
@@ -262,11 +263,15 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
         return;
       }
 
-      this.collectionTag = matchingTags[0];
-      this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
-      this.titleService.setTitle(this.translocoService.translate('collection-detail.title-alt', {collectionName: this.collectionTag.title}));
-      this.cdRef.markForCheck();
+      this.setTag(matchingTags[0]);
     });
+  }
+
+  private setTag(tag: UserCollection) {
+    this.collectionTag = {...tag};
+    this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
+    this.titleService.setTitle(this.translocoService.translate('collection-detail.title-alt', {collectionName: this.collectionTag.title}));
+    this.cdRef.markForCheck();
   }
 
   loadPage() {
@@ -282,6 +287,39 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       this.cdRef.markForCheck();
     });
   }
+
+  updateSeries(updatedEntity: Series) {
+    const originalEntity = this.series.find(s => s.id == updatedEntity.id);
+    if (originalEntity) {
+      Object.assign(originalEntity, updatedEntity);
+      this.series = [...this.series];
+      this.cdRef.markForCheck();
+    }
+  }
+
+  async handleActionCallback(event: ActionItem<UserCollection> | ActionResult<UserCollection>) {
+
+    // This can be removed once actionable refactor is complete
+    const isUpdatedActionSystem = 'effect' in event;
+    if (!isUpdatedActionSystem) return;
+
+    const result = event as unknown as ActionResult<UserCollection>;
+
+    switch (result.effect) {
+      case 'update':
+        this.updateTag(this.collectionTag.id);
+        break;
+      case 'remove':
+        this.router.navigateByUrl('/collections');
+        break;
+      case 'reload':
+        this.loadPage();
+        break;
+      case 'none':
+        break;
+    }
+  }
+
 
   updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;

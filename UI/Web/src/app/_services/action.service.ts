@@ -517,6 +517,10 @@ export class ActionService {
     }
   }
 
+  /**
+   * Centralized handler for all collection actions.
+   * Returns Observable<ActionResult<UserCollection>> so the caller can react to effects.
+   */
   handleCollectionAction(action: ActionItem<UserCollection>, collection: UserCollection) {
     switch (action.action) {
       case Action.Delete:
@@ -532,7 +536,7 @@ export class ActionService {
         ref.componentInstance.tag = collection;
         return from(ref.closed).pipe(
           map((res: {success: boolean, coverImageUpdated: boolean}) =>
-            this.fromAction(action, collection, 'reload')
+            this.fromAction(action, collection, 'update')
           )
         );
 

@@ -8,7 +8,8 @@
               <h4>
                 <app-promoted-icon [promoted]="collectionTag.promoted" />
                 <span class="ms-2">{{collectionTag.title}}</span>
-                <app-card-actionables [entity]="collectionTag" [disabled]="actionInProgress" [actions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v" />
+                <app-card-actionables [entity]="collectionTag" [disabled]="actionInProgress" [actions]="collectionTagActions"
+                                      [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v" (actionHandler)="handleActionCallback($event)" />
               </h4>
             }
             <h5 subtitle class="ms-2 subtitle-with-actionables">{{t('item-count', {num: series.length})}}</h5>
@@ -69,7 +70,7 @@
             </ng-template>
 
             <ng-template #cardItem let-item let-position="idx">
-              <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="loadPage()"
+              <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="loadPage()" (dataChanged)="updateSeries($event)"
                                [index]="position" [maxIndex]="series.length" [allowSelection]="true"
                />
             </ng-template>

@@ -120,16 +120,24 @@ export class ActionFactoryService {
     return actions;
   }
 
+  getCollectionTagActions(shouldRenderFunc: ActionShouldRenderFunc<UserCollection> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.collectionTagActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleCollectionAction(action, entity)
+    );
+    return actions;
+  }
+
   getSideNavStreamActions(callback: ActionCallback<SideNavStream>, shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.sideNavStreamActions, callback, shouldRenderFunc);
   }
 
   getSmartFilterActions(callback: ActionCallback<SmartFilter>, shouldRenderFunc: ActionShouldRenderFunc<SmartFilter> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.smartFilterActions, callback, shouldRenderFunc);
-  }
-
-  getCollectionTagActions(callback: ActionCallback<UserCollection>, shouldRenderFunc: ActionShouldRenderFunc<UserCollection> = this.dummyShouldRender) {
-    return  this.applyCallbackToList(this.collectionTagActions, callback, shouldRenderFunc);
   }
 
   getPersonActions(callback: ActionCallback<Person>, shouldRenderFunc: ActionShouldRenderFunc<Person> = this.dummyShouldRender) {

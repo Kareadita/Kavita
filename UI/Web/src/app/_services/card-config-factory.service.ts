@@ -25,6 +25,14 @@ import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedSeriesPair} from "../_single-module/related-tab/related-tab.component";
 import {ActionItem} from "../_models/actionables/action-item";
 
+
+export interface CollectionParameters {
+  shouldRenderAction?: (action: ActionItem<UserCollection>, entity: UserCollection, user: User) => boolean,
+  titleRef?: TemplateRef<{ $implicit: CardEntity }> | undefined,
+  metaTitleRef?: TemplateRef<{ $implicit: CardEntity }> | undefined,
+  overrides?: CardConfigurationOverrides<UserCollection>,
+}
+
 /**
  * Factory service that creates CardConfiguration objects for each entity type.
  * Provides sensible defaults that can be overridden at call sites.
@@ -259,11 +267,7 @@ export class CardConfigFactory {
   /**
    * Creates configuration for Collection cards
    */
-  forCollection(
-    actionables?: ActionItem<UserCollection>[],
-    templateRef?: TemplateRef<{ $implicit: CardEntity }> | undefined,
-    overrides?: CardConfigurationOverrides<UserCollection>
-  ): ActionableCardConfiguration<UserCollection> {
+  forCollection(params?: CollectionParameters): ActionableCardConfiguration<UserCollection> {
     const defaults: ActionableCardConfiguration<UserCollection> = {
       allowSelection: false,
       selectionType: 'collection',
@@ -272,8 +276,9 @@ export class CardConfigFactory {
       coverFunc: (c) => this.imageService.getCollectionCoverImage(c.id),
       titleFunc: (c) => c.title,
       titleRouteFunc: (c) => `/collections/${c.id}`,
+      titleTemplate: params?.titleRef,
       metaTitleFunc: (c) => '',
-      metaTitleTemplate: templateRef,
+      metaTitleTemplate: params?.metaTitleRef,
       tooltipFunc: (c) => c.title,
       progressFunc: () => ({ pages: 0, pagesRead: 0 }),
 
@@ -282,14 +287,12 @@ export class CardConfigFactory {
       showErrorFunc: () => false,
       ariaLabelFunc: (c) => c.title,
 
-      actionableFunc: (c) => actionables
-        ? actionables
-        : [],
+      actionableFunc: (c) => this.actionFactory.getCollectionTagActions(params?.shouldRenderAction),
       readFunc: () => {},
       clickFunc: (c) => this.router.navigate(['collections', c.id]),
     };
 
-    return this.mergeConfig(defaults, overrides);
+    return this.mergeConfig(defaults, params?.overrides);
   }
 
   /**

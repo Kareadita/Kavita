@@ -168,7 +168,7 @@ export class BulkSelectionService {
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'collection').length > 0) {
-      return this.applyFilterToList(this.actionFactory.getCollectionTagActions(callback), [Action.Promote, Action.UnPromote, Action.Delete]);
+      return this.applyFilterToList(this.actionFactory.getCollectionTagActions(), [Action.Promote, Action.UnPromote, Action.Delete]);
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'readingList').length > 0) {

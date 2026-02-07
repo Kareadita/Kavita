@@ -44,6 +44,7 @@ import {CardConfigFactory} from "../../../_services/card-config-factory.service"
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
+import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 
 
 @Component({
@@ -53,7 +54,7 @@ import {Action} from "../../../_models/actionables/action";
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, AsyncPipe, DecimalPipe,
-    TranslocoDirective, CollectionOwnerComponent, BulkOperationsComponent, EntityCardComponent]
+    TranslocoDirective, CollectionOwnerComponent, BulkOperationsComponent, EntityCardComponent, PromotedIconComponent]
 })
 export class AllCollectionsComponent implements OnInit {
 
@@ -76,7 +77,8 @@ export class AllCollectionsComponent implements OnInit {
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly WikiLink = WikiLink;
 
-  protected subtitleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('subtitle');
+  protected cardSubtitleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('subtitle');
+  protected cardTitleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
 
 
   isLoading: boolean = true;
@@ -86,12 +88,13 @@ export class AllCollectionsComponent implements OnInit {
   collectionConfig = computed(() => {
     const user = this.accountService.currentUserSignal();
 
-    const actions = this.actionFactoryService.getCollectionTagActions(
-      this.handleCollectionActionCallback.bind(this), this.shouldRenderCollection.bind(this))
-      .filter(action => this.collectionService.actionListFilter(action, user!));
+    // const actions = this.actionFactoryService.getCollectionTagActions(
+    //   this.handleCollectionActionCallback.bind(this), )
+    //   .filter(action => this.collectionService.actionListFilter(action, user!));
 
-
-    return this.cardConfigFactory.forCollection(actions, this.subtitleTemplateRef());
+  // TODO: Figure out how to do the Promote check for collections
+    return this.cardConfigFactory.forCollection({shouldRenderAction: this.shouldRenderCollection.bind(this),
+      titleRef: this.cardTitleTemplateRef(), metaTitleRef: this.cardSubtitleTemplateRef()});
   })
 
   collectionTagActions: ActionItem<UserCollection>[] = [];
@@ -117,14 +120,17 @@ export class AllCollectionsComponent implements OnInit {
 
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (!user) return;
-      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(
-        this.handleCollectionActionCallback.bind(this), this.shouldRenderCollection.bind(this))
+      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.shouldRenderCollection.bind(this))
         .filter(action => this.collectionService.actionListFilter(action, user));
       this.cdRef.markForCheck();
     });
   }
 
   shouldRenderCollection(action: ActionItem<UserCollection>, entity: UserCollection, user: User) {
+
+    // TODO: Add a check if user has promotion rights on this
+    //const hasPromotionRights = this.collectionService.hasPromotionRights()
+
     switch (action.action) {
       case Action.Promote:
         return !entity.promoted;
@@ -132,6 +138,14 @@ export class AllCollectionsComponent implements OnInit {
         return entity.promoted;
       default:
         return true;
+    }
+  }
+
+  updateCollection(updatedEntity: UserCollection) {
+    const originalEntity = this.collections().find(s => s.id == updatedEntity.id);
+    if (originalEntity) {
+      Object.assign(originalEntity, updatedEntity);
+      this.collections.set([...this.collections()]);
     }
   }
 
