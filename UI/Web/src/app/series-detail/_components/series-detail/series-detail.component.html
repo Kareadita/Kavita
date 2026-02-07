@@ -310,7 +310,9 @@
                   <app-related-tab [readingLists]="readingLists"
                                    [collections]="collections"
                                    [relations]="relations"
-                                   [bookmarks]="bookmarks" />
+                                   [bookmarks]="bookmarks"
+                                   (reload)="handleRelatedReload($event)"
+                                   (dataChanged)="handleRelatedReload($event)"/>
                 }
               </ng-template>
             </li>

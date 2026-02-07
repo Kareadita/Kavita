@@ -100,7 +100,11 @@ import {DownloadButtonComponent} from "../download-button/download-button.compon
 import {hasAnyCast} from "../../../_models/common/i-has-cast";
 import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {CoverUpdateEvent} from "../../../_models/events/cover-update-event";
-import {RelatedSeriesPair, RelatedTabComponent} from "../../../_single-module/related-tab/related-tab.component";
+import {
+  RelatedSeriesPair,
+  RelatedTabChangeEvent,
+  RelatedTabComponent
+} from "../../../_single-module/related-tab/related-tab.component";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {UserCollection} from "../../../_models/collection-tag";
 import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
@@ -704,32 +708,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.cdRef.markForCheck();
     });
 
-    this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
-      this.readingLists = lists;
-      this.cdRef.markForCheck();
-    });
-
-    this.collectionTagService.allCollectionsForSeries(seriesId, false).subscribe(tags => {
-      this.collections = tags;
-      this.cdRef.markForCheck();
-    });
-
-
-    this.readerService.getBookmarksForSeries(seriesId).subscribe(bookmarks => {
-      if (bookmarks.length > 0) {
-        this.bookmarks = Object.values(
-          bookmarks.reduce((acc, bookmark) => {
-            if (!acc[bookmark.seriesId]) {
-              acc[bookmark.seriesId] = bookmark; // Select the first one per seriesId
-            }
-            return acc;
-          }, {} as Record<number, PageBookmark>)
-        );
-      } else {
-        this.bookmarks = [];
-      }
-      this.cdRef.markForCheck();
-    });
+    this.loadReadingLists(seriesId);
+    this.loadCollections(seriesId);
+    this.loadBookmarks(seriesId);
+    this.loadRelatedSeries(seriesId);
 
     this.annotationService.getAnnotationsForSeries(seriesId).subscribe(annotationsForSeries => {
       this.annotations.set(annotationsForSeries);
@@ -755,7 +737,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (loadExternal) {
         this.loadPlusMetadata(this.seriesId, results.libType);
       }
-      
+
       this.titleService.setTitle('Kavita - ' + results.series.name + ' Details');
 
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType());
@@ -771,33 +753,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       });
 
 
-      this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
-        this.relationships = relations;
-        this.relations = [
-          ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),
-          ...relations.sequels.map(item => this.createRelatedSeries(item, RelationKind.Sequel)),
-          ...relations.sideStories.map(item => this.createRelatedSeries(item, RelationKind.SideStory)),
-          ...relations.spinOffs.map(item => this.createRelatedSeries(item, RelationKind.SpinOff)),
-          ...relations.adaptations.map(item => this.createRelatedSeries(item, RelationKind.Adaptation)),
-          ...relations.contains.map(item => this.createRelatedSeries(item, RelationKind.Contains)),
-          ...relations.characters.map(item => this.createRelatedSeries(item, RelationKind.Character)),
-          ...relations.others.map(item => this.createRelatedSeries(item, RelationKind.Other)),
-          ...relations.alternativeSettings.map(item => this.createRelatedSeries(item, RelationKind.AlternativeSetting)),
-          ...relations.alternativeVersions.map(item => this.createRelatedSeries(item, RelationKind.AlternativeVersion)),
-          ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi)),
-          ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
-          ...relations.editions.map(item => this.createRelatedSeries(item, RelationKind.Edition)),
-          ...relations.annuals.map(item => this.createRelatedSeries(item, RelationKind.Annual)),
-        ];
 
-        if (this.relations.length > 0) {
-          this.hasRelations = true;
-          this.cdRef.markForCheck();
-        } else {
-          this.hasRelations = false;
-          this.cdRef.markForCheck();
-        }
-      });
 
       this.seriesService.getSeriesDetail(this.seriesId).pipe(catchError(err => {
         this.router.navigateByUrl('/home');
@@ -871,6 +827,68 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       });
     }, err => {
       this.router.navigateByUrl('/home');
+    });
+  }
+
+  private loadRelatedSeries(seriesId: number) {
+    this.seriesService.getRelatedForSeries(seriesId).subscribe((relations: RelatedSeries) => {
+      this.relationships = relations;
+      this.relations = [
+        ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),
+        ...relations.sequels.map(item => this.createRelatedSeries(item, RelationKind.Sequel)),
+        ...relations.sideStories.map(item => this.createRelatedSeries(item, RelationKind.SideStory)),
+        ...relations.spinOffs.map(item => this.createRelatedSeries(item, RelationKind.SpinOff)),
+        ...relations.adaptations.map(item => this.createRelatedSeries(item, RelationKind.Adaptation)),
+        ...relations.contains.map(item => this.createRelatedSeries(item, RelationKind.Contains)),
+        ...relations.characters.map(item => this.createRelatedSeries(item, RelationKind.Character)),
+        ...relations.others.map(item => this.createRelatedSeries(item, RelationKind.Other)),
+        ...relations.alternativeSettings.map(item => this.createRelatedSeries(item, RelationKind.AlternativeSetting)),
+        ...relations.alternativeVersions.map(item => this.createRelatedSeries(item, RelationKind.AlternativeVersion)),
+        ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi)),
+        ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
+        ...relations.editions.map(item => this.createRelatedSeries(item, RelationKind.Edition)),
+        ...relations.annuals.map(item => this.createRelatedSeries(item, RelationKind.Annual)),
+      ];
+
+      if (this.relations.length > 0) {
+        this.hasRelations = true;
+        this.cdRef.markForCheck();
+      } else {
+        this.hasRelations = false;
+        this.cdRef.markForCheck();
+      }
+    });
+  }
+
+  private loadReadingLists(seriesId: number) {
+    this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
+      this.readingLists = lists;
+      this.cdRef.markForCheck();
+    });
+  }
+
+  private loadCollections(seriesId: number) {
+    this.collectionTagService.allCollectionsForSeries(seriesId, false).subscribe(tags => {
+      this.collections = tags;
+      this.cdRef.markForCheck();
+    });
+  }
+
+  private loadBookmarks(seriesId: number) {
+    this.readerService.getBookmarksForSeries(seriesId).subscribe(bookmarks => {
+      if (bookmarks.length > 0) {
+        this.bookmarks = Object.values(
+          bookmarks.reduce((acc, bookmark) => {
+            if (!acc[bookmark.seriesId]) {
+              acc[bookmark.seriesId] = bookmark; // Select the first one per seriesId
+            }
+            return acc;
+          }, {} as Record<number, PageBookmark>)
+        );
+      } else {
+        this.bookmarks = [];
+      }
+      this.cdRef.markForCheck();
     });
   }
 
@@ -1015,6 +1033,28 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     if (this.bulkSelectionService.hasSelections()) return;
 
     this.readerService.readSeries(this.series()!, incognitoMode);
+  }
+
+
+  handleRelatedReload(event: RelatedTabChangeEvent) {
+    switch (event.entity) {
+      case 'bookmark':
+        this.loadBookmarks(this.seriesId);
+        this.updateSelectedTab();
+        break;
+      case 'collection':
+        this.loadCollections(this.seriesId);
+        this.updateSelectedTab();
+        break;
+      case 'readingList':
+        this.loadReadingLists(this.seriesId);
+        this.updateSelectedTab();
+        break;
+      case 'relation':
+        this.loadRelatedSeries(this.seriesId);
+        this.updateSelectedTab();
+        break;
+    }
   }
 
   openChapter(chapter: Chapter, incognitoMode = false, promptForReread: boolean = true) {

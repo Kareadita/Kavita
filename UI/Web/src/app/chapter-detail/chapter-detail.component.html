@@ -214,7 +214,7 @@
             <a ngbNavLink>{{t('related-tab')}}</a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                <app-related-tab [readingLists]="readingLists" />
+                <app-related-tab [readingLists]="readingLists" (reload)="handleRelatedReload($event)" (dataChanged)="handleRelatedReload($event)" />
               }
             </ng-template>
           </li>

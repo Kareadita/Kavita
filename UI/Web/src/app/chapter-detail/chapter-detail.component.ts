@@ -54,7 +54,7 @@ import {FilterUtilitiesService} from "../shared/_services/filter-utilities.servi
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
-import {RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
+import {RelatedTabChangeEvent, RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {
   MetadataDetailRowComponent
@@ -295,10 +295,7 @@ export class ChapterDetailComponent implements OnInit {
         return this.downloadService.mapToEntityType(events, this.chapter()!);
       }));
 
-      this.readingListService.getReadingListsForChapter(this.chapterId).subscribe(lists => {
-        this.readingLists = lists;
-        this.cdRef.markForCheck();
-      });
+      this.loadReadingListsForChapter(this.chapterId);
 
       this.route.fragment.pipe(tap(frag => {
         if (frag !== null && this.activeTabId !== (frag as TabID)) {
@@ -318,6 +315,13 @@ export class ChapterDetailComponent implements OnInit {
     });
 
     this.cdRef.markForCheck();
+  }
+
+  loadReadingListsForChapter(chapterId: number) {
+    this.readingListService.getReadingListsForChapter(this.chapterId).subscribe(lists => {
+      this.readingLists = lists;
+      this.cdRef.markForCheck();
+    });
   }
 
   loadData() {
@@ -413,6 +417,12 @@ export class ChapterDetailComponent implements OnInit {
           this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
         });
         break;
+    }
+  }
+
+  handleRelatedReload(event: RelatedTabChangeEvent) {
+    if (event.entity === 'readingList') {
+      this.loadReadingListsForChapter(this.chapterId);
     }
   }
 

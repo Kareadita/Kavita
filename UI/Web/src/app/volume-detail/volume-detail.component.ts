@@ -58,7 +58,7 @@ import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
 import {Tag} from "../_models/tag";
-import {RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
+import {RelatedTabChangeEvent, RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
@@ -469,12 +469,8 @@ export class VolumeDetailComponent implements OnInit {
         }
       }), takeUntilDestroyed(this.destroyRef)).subscribe();
 
-      if (this.volume.chapters.length === 1) {
-        this.readingListService.getReadingListsForChapter(this.volume.chapters[0].id).subscribe(lists => {
-          this.readingLists = lists;
-          this.cdRef.markForCheck();
-        });
-      }
+
+      this.loadReadingLists();
 
       // Calculate all the writes/artists for all chapters
       this.volumeCast.writers = this.volume.chapters
@@ -570,6 +566,22 @@ export class VolumeDetailComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
+  private loadReadingLists(switchTabsIfNoList = false) {
+    // TODO: Why can't we have a bulk flow for this?
+    const volume = this.volume;
+    if (!volume) return;
+
+    if (volume.chapters.length === 1) {
+      this.readingListService.getReadingListsForChapter(volume.chapters[0].id).subscribe(lists => {
+        this.readingLists = lists;
+        if (switchTabsIfNoList && lists.length === 0) {
+          this.switchTabsToDetail();
+        }
+        this.cdRef.markForCheck();
+      });
+    }
+  }
+
   loadVolume() {
     this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
       this.volume = v;
@@ -615,6 +627,12 @@ export class VolumeDetailComponent implements OnInit {
     const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
     this.location.replaceState(newUrl)
+  }
+
+  handleRelatedReload(event: RelatedTabChangeEvent) {
+    if (event.entity === 'readingList') {
+      this.loadReadingLists(true);
+    }
   }
 
   async handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {

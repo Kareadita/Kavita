@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, EventEmitter, inject, input, Output} from '@angular/core';
 import {ReadingList} from "../../_models/reading-list";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {ImageService} from "../../_services/image.service";
@@ -14,6 +14,17 @@ import {CardEntityFactory} from "../../_models/card/card-entity";
 export interface RelatedSeriesPair {
   series: Series;
   relation: RelationKind;
+}
+
+/**
+ * Fires when a card on Related Tab is mutated or deleted
+ */
+export interface RelatedTabChangeEvent {
+  entity: 'bookmark' | 'collection' | 'readingList' | 'relation';
+  /**
+   * Entity Id - Relation's will have the underlying seriesId
+   */
+  id: number;
 }
 
 @Component({
@@ -55,4 +66,9 @@ export class RelatedTabComponent {
   relations = input<RelatedSeriesPair[]>([]);
   relationEntities = computed(() => this.relations().map(r => CardEntityFactory.related(r)));
   relatedConfig = computed(() => this.cardConfigFactory.forRelationship());
+
+  /** Emits when an entity type is deleted and a full refresh is needed **/
+  @Output() reload = new EventEmitter<RelatedTabChangeEvent>();
+  /** Emits when an entity's internal state is changed and it needs to be updated **/
+  @Output() dataChanged = new EventEmitter<RelatedTabChangeEvent>();
 }
