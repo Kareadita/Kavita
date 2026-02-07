@@ -741,7 +741,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.titleService.setTitle('Kavita - ' + results.series.name + ' Details');
 
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType());
-      this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
+      this.chapterActions = this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType());
       this.seriesActions = this.actionFactoryService.getSeriesActions()
               .filter(action => action.action !== Action.Edit);
 

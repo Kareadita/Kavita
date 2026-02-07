@@ -84,6 +84,18 @@ export class ActionFactoryService {
     return actions;
   }
 
+  getChapterActions(seriesId: number, libraryId: number, libraryType: LibraryType, shouldRenderFunc: ActionShouldRenderFunc<Chapter> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.chapterActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleChapterAction(action, entity, seriesId, libraryId, libraryType)
+    );
+    return actions;
+  }
+
   getBookmarkActions(seriesId: number, libraryId: number, seriesName: string, shouldRenderFunc: ActionShouldRenderFunc<PageBookmark> = this.basicReadRender) {
     const actions = this.applyCallbackToList(
       this.bookmarkActions,
@@ -102,10 +114,6 @@ export class ActionFactoryService {
 
   getSmartFilterActions(callback: ActionCallback<SmartFilter>, shouldRenderFunc: ActionShouldRenderFunc<SmartFilter> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.smartFilterActions, callback, shouldRenderFunc);
-  }
-
-  getChapterActions(callback: ActionCallback<Chapter>, shouldRenderFunc: ActionShouldRenderFunc<Chapter> = this.basicReadRender) {
-    return this.applyCallbackToList(this.chapterActions, callback, shouldRenderFunc);
   }
 
   getCollectionTagActions(callback: ActionCallback<UserCollection>, shouldRenderFunc: ActionShouldRenderFunc<UserCollection> = this.dummyShouldRender) {

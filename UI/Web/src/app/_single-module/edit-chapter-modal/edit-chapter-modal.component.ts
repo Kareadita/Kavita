@@ -129,7 +129,8 @@ export class EditChapterModalComponent implements OnInit {
   genres: Genre[] = [];
   ageRatings: Array<AgeRatingDto> = [];
 
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getChapterActions(this.runTask.bind(this)), blackList);
+  tasks = this.actionFactoryService.getActionablesForSettingsPage(
+    this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType), blackList);
   /**
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
    */

@@ -417,7 +417,7 @@ export class ActionService {
         return from(ref.closed).pipe(
           filter((res: EditVolumeModalCloseResult) => res.success),
           map((res: EditVolumeModalCloseResult) =>
-            this.fromAction(action, chapter, res.isDeleted ? 'remove' : 'reload')
+            this.fromAction(action, chapter, res.isDeleted ? 'remove' : 'update')
           )
         );
       case Action.AddToReadingList:

@@ -86,6 +86,14 @@ export class ChapterCardComponent implements OnInit, OnChanges {
    * When the card is selected.
    */
   @Output() selection = new EventEmitter<boolean>();
+  /**
+   * Emitted when the entity is deleted. Emits the entity id
+   */
+  @Output() reload: EventEmitter<number> = new EventEmitter();
+  /**
+   * Underlying data has mutated, mutated data is returned
+   */
+  @Output() dataChanged: EventEmitter<Chapter> = new EventEmitter();
 
   protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
 
@@ -108,7 +116,6 @@ export class ChapterCardComponent implements OnInit, OnChanges {
       this.seriesId,
       this.libraryId,
       this.libraryType,
-      (action, c) => {},
       {
         allowSelection: this.allowSelection,
         actionableFunc: () => this.actions,
@@ -125,7 +132,7 @@ export class ChapterCardComponent implements OnInit, OnChanges {
 
     // TODO: I don't think we can port this easily. It might be worth just removing this functionality from the app
     this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
-      map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed(this.destroyRef)).subscribe(updateEvent => {
+      map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed(this.destroyRef)).subscribe( updateEvent => {
       if (this.user === undefined || this.user.username !== updateEvent.username) return;
       if (updateEvent.chapterId !== this.chapter.id) return;
 
@@ -140,4 +147,9 @@ export class ChapterCardComponent implements OnInit, OnChanges {
     }
   }
 
+  onDataChanged(entity: Chapter) {
+    this.chapterSignal.set(entity);
+    this.dataChanged.emit(entity);
+    this.reload.emit(entity.id);
+  }
 }

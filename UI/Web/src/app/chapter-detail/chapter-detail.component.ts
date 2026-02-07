@@ -200,7 +200,7 @@ export class ChapterDetailComponent implements OnInit {
         (chp?.tags || []).length > 0 || (chp?.webLinks || []).length > 0 || this.accountService.hasAdminRole(user!);
   })
   mobileSeriesImgBackground: string | undefined;
-  chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
+  chapterActions: Array<ActionItem<Chapter>> = [];
 
   user: User | undefined;
 
@@ -281,6 +281,8 @@ export class ChapterDetailComponent implements OnInit {
       this.rating = results.chapterDetail.rating;
       this.hasBeenRated = results.chapterDetail.hasBeenRated;
       this.ratings = results.chapterDetail.ratings;
+
+      this.chapterActions = this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType);
 
       if (results.chapter.pagesRead > 0 && results.chapter.pagesRead < results.chapter.pages) {
         this.readingProgressStatus.set(ReadingProgressStatus.Progress);

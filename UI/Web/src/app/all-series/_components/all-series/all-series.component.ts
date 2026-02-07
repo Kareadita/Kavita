@@ -217,5 +217,14 @@ export class AllSeriesComponent implements OnInit {
     });
   }
 
+  updateSeries(updatedSeries: Series) {
+    const originalEntity = this.series.find(s => s.id == updatedSeries.id);
+
+    if (originalEntity) {
+      Object.assign(originalEntity, updatedSeries);
+      this.cdRef.markForCheck();
+    }
+  }
+
   trackByIdentity = (_: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 }

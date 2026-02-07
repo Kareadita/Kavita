@@ -165,7 +165,6 @@ export class CardConfigFactory {
    */
   forChapter(
     seriesId: number, libraryId: number, libraryType: LibraryType,
-    actionCallback: (action: ActionItem<Chapter>, chapter: Chapter) => void,
     overrides?: CardConfigurationOverrides<Chapter>  ): ActionableCardConfiguration<Chapter> {
     const defaults: ActionableCardConfiguration<Chapter> = {
       allowSelection: false,
@@ -192,7 +191,7 @@ export class CardConfigFactory {
       },
       ariaLabelFunc: (c) => c.titleName || c.title || (c.range === (LooseLeafOrDefaultNumber + '') ? '' : c.range),
 
-      actionableFunc: (c) => this.actionFactory.getChapterActions(actionCallback),
+      actionableFunc: (c) => this.actionFactory.getChapterActions(seriesId, libraryId, libraryType),
       readFunc: (c) => this.readerService.readChapter(libraryId, seriesId, c, false),
       clickFunc: (c) => this.router.navigate(['library', libraryId, 'series', seriesId, 'chapter', c.id]),
 

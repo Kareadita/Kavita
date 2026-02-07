@@ -243,7 +243,7 @@ export class VolumeDetailComponent implements OnInit {
   downloadInProgress: boolean = false;
 
   volumeActions: Array<ActionItem<Volume>> = [];
-  chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
+  chapterActions: Array<ActionItem<Chapter>> = [];
 
   bulkActionCallback = async (action: ActionItem<Chapter>, _: any) => {
     if (this.volume === null) {
@@ -433,6 +433,7 @@ export class VolumeDetailComponent implements OnInit {
       this.libraryType = results.libraryType;
 
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType, this.shouldRenderVolumeAction.bind(this));
+      this.chapterActions = this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType);
 
       if (this.volume.pagesRead > 0 && this.volume.pagesRead < this.volume.pages) {
         this.readingProgressStatus = ReadingProgressStatus.Progress;
