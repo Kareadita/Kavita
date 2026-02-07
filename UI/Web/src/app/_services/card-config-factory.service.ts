@@ -214,7 +214,6 @@ export class CardConfigFactory {
     seriesId: number,
     libraryId: number,
     libraryType: LibraryType,
-    actionCallback: (action: ActionItem<Volume>, volume: Volume) => void,
     overrides?: CardConfigurationOverrides<Volume>
   ): ActionableCardConfiguration<Volume> {
     const defaults: ActionableCardConfiguration<Volume> = {
@@ -248,7 +247,7 @@ export class CardConfigFactory {
       showErrorFunc: (v) => v.pages === 0,
       ariaLabelFunc: (v) => v.name,
 
-      actionables: this.actionFactory.getVolumeActions(actionCallback),
+      actionables: this.actionFactory.getVolumeActions(seriesId, libraryId, libraryType),
       readFunc: (v) => {
         this.readerService.readVolume(libraryId, seriesId, v, false);
       },

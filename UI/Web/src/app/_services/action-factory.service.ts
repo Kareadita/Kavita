@@ -3,7 +3,7 @@ import {map, shareReplay} from 'rxjs';
 import {Chapter} from '../_models/chapter';
 import {UserCollection} from '../_models/collection-tag';
 import {Device} from '../_models/device/device';
-import {Library} from '../_models/library/library';
+import {Library, LibraryType} from '../_models/library/library';
 import {ReadingList} from '../_models/reading-list';
 import {Series} from '../_models/series';
 import {Volume} from '../_models/volume';
@@ -72,16 +72,24 @@ export class ActionFactoryService {
     return actions;
   }
 
+  getVolumeActions(seriesId: number, libraryId: number, libraryType: LibraryType, shouldRenderFunc: ActionShouldRenderFunc<Volume> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.volumeActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleVolumeAction(action, entity, seriesId, libraryId, libraryType)
+    );
+    return actions;
+  }
+
   getSideNavStreamActions(callback: ActionCallback<SideNavStream>, shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.sideNavStreamActions, callback, shouldRenderFunc);
   }
 
   getSmartFilterActions(callback: ActionCallback<SmartFilter>, shouldRenderFunc: ActionShouldRenderFunc<SmartFilter> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.smartFilterActions, callback, shouldRenderFunc);
-  }
-
-  getVolumeActions(callback: ActionCallback<Volume>, shouldRenderFunc: ActionShouldRenderFunc<Volume> = this.basicReadRender) {
-    return this.applyCallbackToList(this.volumeActions, callback, shouldRenderFunc);
   }
 
   getChapterActions(callback: ActionCallback<Chapter>, shouldRenderFunc: ActionShouldRenderFunc<Chapter> = this.basicReadRender) {

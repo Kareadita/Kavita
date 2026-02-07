@@ -102,7 +102,7 @@ export class EditVolumeModalComponent implements OnInit {
   user!: User;
 
 
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.runTask.bind(this)), this.blacklist);
+  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType), this.blacklist);
   /**
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
    */

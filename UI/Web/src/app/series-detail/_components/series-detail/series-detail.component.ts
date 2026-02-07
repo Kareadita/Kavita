@@ -755,17 +755,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (loadExternal) {
         this.loadPlusMetadata(this.seriesId, results.libType);
       }
-
-      // if (results.libType === LibraryType.LightNovel) {
-      //   this.renderMode = PageLayoutMode.List;
-      //   this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
-      //   this.cdRef.markForCheck();
-      // }
-
-
+      
       this.titleService.setTitle('Kavita - ' + results.series.name + ' Details');
 
-      this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
+      this.volumeActions = this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType());
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
       this.seriesActions = this.actionFactoryService.getSeriesActions()
               .filter(action => action.action !== Action.Edit);

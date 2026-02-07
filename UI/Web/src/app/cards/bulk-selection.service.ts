@@ -179,8 +179,9 @@ export class BulkSelectionService {
       return this.actionFactory.getAnnotationActions(callback);
     }
 
+    // TODO: This is more complicated as we need some extra state
     // Chapter/Volume
-    return this.applyFilterToList(this.actionFactory.getVolumeActions(callback), [...allowedActions, Action.SendTo]);
+    return this.applyFilterToList(this.actionFactory.getVolumeActions(0, 0, 0), [...allowedActions, Action.SendTo]);
   }
 
   private debugLog(message: string, extraData?: any) {

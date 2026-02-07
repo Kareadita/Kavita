@@ -242,7 +242,7 @@ export class VolumeDetailComponent implements OnInit {
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
 
-  volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this), this.shouldRenderVolumeAction.bind(this));
+  volumeActions: Array<ActionItem<Volume>> = [];
   chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
   bulkActionCallback = async (action: ActionItem<Chapter>, _: any) => {
@@ -431,6 +431,8 @@ export class VolumeDetailComponent implements OnInit {
       this.size = this.volume.chapters.reduce((sum, c) =>
         sum + c.files.reduce((fileSum, f) => fileSum + f.bytes, 0), 0);
       this.libraryType = results.libraryType;
+
+      this.volumeActions = this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType, this.shouldRenderVolumeAction.bind(this));
 
       if (this.volume.pagesRead > 0 && this.volume.pagesRead < this.volume.pages) {
         this.readingProgressStatus = ReadingProgressStatus.Progress;

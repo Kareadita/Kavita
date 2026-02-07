@@ -13,7 +13,7 @@ import {
 } from '../sidenav/_modals/library-settings-modal/library-settings-modal.component';
 import {Chapter} from '../_models/chapter';
 import {Device} from '../_models/device/device';
-import {Library} from '../_models/library/library';
+import {Library, LibraryType} from '../_models/library/library';
 import {ReadingList} from '../_models/reading-list';
 import {Series} from '../_models/series';
 import {Volume} from '../_models/volume';
@@ -35,6 +35,10 @@ import {
   BulkSetReadingProfileModalComponent
 } from "../cards/_modals/bulk-set-reading-profile-modal/bulk-set-reading-profile-modal.component";
 import {EditSeriesModalComponent} from "../cards/_modals/edit-series-modal/edit-series-modal.component";
+import {
+  EditVolumeModalCloseResult,
+  EditVolumeModalComponent
+} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {DownloadService} from "../shared/_services/download.service";
 import {ReadingProfileService} from "./reading-profile.service";
 import {Action} from "../_models/actionables/action";
@@ -244,8 +248,111 @@ export class ActionService {
     }
   }
 
-  private fromAction<T>(action: ActionItem<T>, data: T, effect: ActionEffect): ActionResult<T> {
-    return { action: action.action, entity: data, effect: effect };
+  /**
+   * Centralized handler for all volume actions.
+   * Returns Observable<ActionResult<Volume>> so the caller can react to effects.
+   */
+  handleVolumeAction(
+    action: ActionItem<Volume>,
+    volume: Volume,
+    seriesId: number,
+    libraryId: number,
+    libraryType: LibraryType
+  ): Observable<ActionResult<Volume>> {
+    switch (action.action) {
+      case Action.MarkAsRead:
+        return this.readerService.markVolumeRead(seriesId, volume.id).pipe(
+          tap(() => this.toastr.success(translate('toasts.mark-read'))),
+          map(() => {
+            const updated = {
+              ...volume,
+              pagesRead: volume.pages,
+              chapters: volume.chapters?.map(c => ({...c, pagesRead: c.pages}))
+            };
+            return this.fromAction(action, updated, 'update');
+          })
+        );
+
+      case Action.MarkAsUnread:
+        return this.readerService.markVolumeUnread(seriesId, volume.id).pipe(
+          tap(() => this.toastr.success(translate('toasts.mark-unread'))),
+          map(() => {
+            const updated = {
+              ...volume,
+              pagesRead: 0,
+              chapters: volume.chapters?.map(c => ({...c, pagesRead: 0}))
+            };
+            return this.fromAction(action, updated, 'update');
+          })
+        );
+
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-volume'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.volumeService.deleteVolume(volume.id)),
+          filter(success => success),
+          tap(() => this.toastr.success(translate('toasts.volume-deleted'))),
+          map(() => this.fromAction(action, volume, 'remove'))
+        );
+
+      case Action.Edit: {
+        const ref = this.modalService.open(EditVolumeModalComponent, DefaultModalOptions);
+        ref.componentInstance.volume = volume;
+        ref.componentInstance.libraryType = libraryType;
+        ref.componentInstance.seriesId = seriesId;
+        ref.componentInstance.libraryId = libraryId;
+
+        return from(ref.closed).pipe(
+          filter((res: EditVolumeModalCloseResult) => res.success),
+          map((res: EditVolumeModalCloseResult) =>
+            this.fromAction(action, volume, res.isDeleted ? 'remove' : 'reload')
+          )
+        );
+      }
+
+      case Action.AddToReadingList: {
+        if (this.readingListModalRef != null) return EMPTY;
+        this.readingListModalRef = this.modalService.open(AddToListModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
+        this.readingListModalRef.componentInstance.seriesId = seriesId;
+        this.readingListModalRef.componentInstance.volumeId = volume.id;
+        this.readingListModalRef.componentInstance.type = ADD_FLOW.Volume;
+
+        const ref = this.readingListModalRef;
+        return new Observable<ActionResult<Volume>>(subscriber => {
+          ref.closed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.next(this.fromAction(action, volume, 'none'));
+            subscriber.complete();
+          });
+          ref.dismissed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.complete();
+          });
+        });
+      }
+
+      case Action.IncognitoRead:
+        if (volume.chapters != undefined && volume.chapters.length >= 1) {
+          const sorted = [...volume.chapters].sort((a, b) => a.minNumber - b.minNumber);
+          this.readerService.readChapter(libraryId, seriesId, sorted[0], true);
+        }
+        return of(this.fromAction(action, volume, 'none'));
+
+      case Action.SendTo: {
+        const device = action._extra!.data as Device;
+        return this.deviceService.sendToEmailDevice(volume.chapters.map(c => c.id), device.id).pipe(
+          tap(() => this.toastr.success(translate('toasts.file-send-to', {name: device.name}))),
+          map(() => this.fromAction(action, volume, 'none'))
+        );
+      }
+
+      case Action.Download:
+        this.downloadService.download('volume', volume);
+        return of(this.fromAction(action, volume, 'none'));
+
+      default:
+        return of(this.fromAction(action, volume, 'none'));
+    }
   }
 
 
@@ -1066,4 +1173,8 @@ async deleteChapter(chapterId: number, callback?: BooleanActionCallback) {
     });
   }
 
+
+  private fromAction<T>(action: ActionItem<T>, data: T, effect: ActionEffect): ActionResult<T> {
+    return { action: action.action, entity: data, effect: effect };
+  }
 }
