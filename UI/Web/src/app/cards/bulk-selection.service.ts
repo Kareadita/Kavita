@@ -172,7 +172,7 @@ export class BulkSelectionService {
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'readingList').length > 0) {
-      return this.applyFilterToList(this.actionFactory.getReadingListActions(callback), [Action.Promote, Action.UnPromote, Action.Delete]);
+      return this.applyFilterToList(this.actionFactory.getReadingListActions(), [Action.Promote, Action.UnPromote, Action.Delete]);
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'annotations').length > 0) {

@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  TemplateRef,
+  viewChild
+} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {PaginatedResult, Pagination} from 'src/app/_models/pagination';
@@ -20,11 +30,12 @@ import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {User} from "../../../_models/user/user";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
-import {CardEntityFactory, ReadingListCardEntity} from "../../../_models/card/card-entity";
+import {CardEntity, CardEntityFactory, ReadingListCardEntity} from "../../../_models/card/card-entity";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 
 @Component({
   selector: 'app-reading-lists',
@@ -32,7 +43,7 @@ import {ActionResult} from "../../../_models/actionables/action-result";
   styleUrls: ['./reading-lists.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, CardDetailLayoutComponent, DecimalPipe,
-    TranslocoDirective, BulkOperationsComponent, EntityCardComponent]
+    TranslocoDirective, BulkOperationsComponent, EntityCardComponent, PromotedIconComponent]
 })
 export class ReadingListsComponent implements OnInit {
   private readingListService = inject(ReadingListService);
@@ -48,17 +59,16 @@ export class ReadingListsComponent implements OnInit {
   protected readonly WikiLink = WikiLink;
 
 
+  protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
 
 
   lists = signal<ReadingList[]>([]);
   listEntities = computed(() => this.lists().map(l => CardEntityFactory.readingList(l)));
   readingListConfig = computed(() => {
-    return this.cardConfigFactory.forReadingList(this.handleReadingListActionCallback.bind(this), this.shouldRenderReadingListAction.bind(this));
+    return this.cardConfigFactory.forReadingList(this.titleTemplateRef(), this.shouldRenderReadingListAction.bind(this));
   });
   loadingLists = false;
   pagination!: Pagination;
-  // isAdmin: boolean = false;
-  // hasPromote: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
   globalActions: Array<ActionItem<any>> = [];
@@ -78,37 +88,11 @@ export class ReadingListsComponent implements OnInit {
     }
   }
 
-  handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
-    switch(action.action) {
-      case Action.Delete:
-        this.readingListService.delete(readingList.id).subscribe(() => {
-          this.toastr.success(translate('toasts.reading-list-deleted'));
-          this.loadPage();
-        });
-        break;
-      case Action.Edit:
-        this.actionService.editReadingList(readingList, (updatedList: ReadingList) => {
-          // Reload information around list
-          readingList = updatedList;
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.Promote:
-        this.actionService.promoteMultipleReadingLists([readingList], true, (res) => {
-          // Reload information around list
-          readingList.promoted = true;
-          this.loadPage();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.UnPromote:
-        this.actionService.promoteMultipleReadingLists([readingList], false, (res) => {
-          // Reload information around list
-          readingList.promoted = false;
-          this.loadPage();
-          this.cdRef.markForCheck();
-        });
-        break;
+  updateReadingList(updatedEntity: ReadingList) {
+    const originalEntity = this.lists().find(s => s.id == updatedEntity.id);
+    if (originalEntity) {
+      Object.assign(originalEntity, updatedEntity);
+      this.lists.set([...this.lists()]);
     }
   }
 

@@ -64,6 +64,7 @@ import {User} from "../../../_models/user/user";
 import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 enum TabID {
   Storyline = 'storyline-tab',
@@ -256,7 +257,7 @@ export class ReadingListDetailComponent implements OnInit {
           this.isAdmin = this.accountService.hasAdminRole(user);
 
           this.actions = this.actionFactoryService
-            .getReadingListActions(this.handleReadingListActionCallback.bind(this), this.shouldRenderReadingListAction.bind(this))
+            .getReadingListActions(this.shouldRenderReadingListAction.bind(this))
             .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
           this.isOwnedReadingList = this.actions.filter(a => a.action === Action.Edit).length > 0;
           this.cdRef.markForCheck();
@@ -286,29 +287,24 @@ export class ReadingListDetailComponent implements OnInit {
     this.router.navigate(this.readerService.getNavigationArray(item.libraryId, item.seriesId, item.chapterId, item.seriesFormat), {queryParams: params});
   }
 
-  async handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
-    const currentList = this.readingList();
 
-    switch(action.action) {
-      case Action.Delete:
-        await this.deleteList(readingList);
+  async handleReadingListActionCallback(event: ActionItem<ReadingList> | ActionResult<ReadingList>) {
+
+    // This can be removed once actionable refactor is complete
+    const isUpdatedActionSystem = 'effect' in event;
+    if (!isUpdatedActionSystem) return;
+
+    const result = event as unknown as ActionResult<ReadingList>;
+
+    switch (result.effect) {
+      case 'update':
+        this.readingList.set({...result.entity});
         break;
-      case Action.Edit:
-        this.editReadingList(readingList);
+      case 'remove':
+      case 'reload':
+        this.router.navigateByUrl('/lists');
         break;
-      case Action.Promote:
-        this.actionService.promoteMultipleReadingLists([currentList!], true, () => {
-          if (currentList) {
-            this.readingList.set({...currentList, promoted: true});
-          }
-        });
-        break;
-      case Action.UnPromote:
-        this.actionService.promoteMultipleReadingLists([currentList!], false, () => {
-          if (currentList) {
-            this.readingList.set({...currentList, promoted: false});
-          }
-        });
+      case 'none':
         break;
     }
   }

@@ -45,7 +45,7 @@ export class RelatedTabComponent {
 
   readingLists = input<ReadingList[]>([]);
   readingListEntities = computed(() => this.readingLists().map(r => CardEntityFactory.readingList(r)));
-  readingListConfig = computed(() => this.cardConfigFactory.forReadingList());
+  readingListConfig = computed(() => this.cardConfigFactory.forReadingList(undefined, undefined, {actionableFunc: () => []}));
 
   collections = input<UserCollection[]>([]);
   collectionEntities = computed(() => this.collections().map(c => CardEntityFactory.collection(c)));

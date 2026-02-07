@@ -260,13 +260,7 @@ export class ActionService {
    * Centralized handler for all volume actions.
    * Returns Observable<ActionResult<Volume>> so the caller can react to effects.
    */
-  handleVolumeAction(
-    action: ActionItem<Volume>,
-    volume: Volume,
-    seriesId: number,
-    libraryId: number,
-    libraryType: LibraryType
-  ): Observable<ActionResult<Volume>> {
+  handleVolumeAction(action: ActionItem<Volume>, volume: Volume, seriesId: number, libraryId: number, libraryType: LibraryType): Observable<ActionResult<Volume>> {
     switch (action.action) {
       case Action.MarkAsRead:
         return this.readerService.markVolumeRead(seriesId, volume.id).pipe(
@@ -510,13 +504,13 @@ export class ActionService {
       case Action.Promote:
         return this.readingListService.promoteMultipleReadingLists([readingList.id], true).pipe(
           tap(() => this.toastr.success(translate('toasts.reading-list-promoted'))),
-          map(() => this.fromAction(action, readingList, 'update'))
+          map(() => this.fromAction(action, {...readingList, promoted: true}, 'update'))
         );
 
       case Action.UnPromote:
         return this.readingListService.promoteMultipleReadingLists([readingList.id], false).pipe(
           tap(() => this.toastr.success(translate('toasts.reading-list-unpromoted'))),
-          map(() => this.fromAction(action, readingList, 'update'))
+          map(() => this.fromAction(action, {...readingList, promoted: false}, 'update'))
         );
       default:
         return of(this.fromAction(action, readingList, 'none'));
@@ -545,13 +539,13 @@ export class ActionService {
       case Action.Promote:
         return this.collectionService.promoteMultipleCollections([collection.id], true).pipe(
           tap(() => this.toastr.success(translate('toasts.collections-promoted'))),
-          map(() => this.fromAction(action, collection, 'update'))
+          map(() => this.fromAction(action, {...collection, promoted: true}, 'update'))
         );
 
       case Action.UnPromote:
         return this.collectionService.promoteMultipleCollections([collection.id], false).pipe(
           tap(() => this.toastr.success(translate('toasts.collections-unpromoted'))),
-          map(() => this.fromAction(action, collection, 'update'))
+          map(() => this.fromAction(action, {...collection, promoted: false}, 'update'))
         );
 
       default:

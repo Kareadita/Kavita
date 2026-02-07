@@ -296,7 +296,7 @@ export class CardConfigFactory {
    * Creates configuration for ReadingList cards
    */
   forReadingList(
-    actionCallback?: (action: ActionItem<ReadingList>, list: ReadingList) => void,
+    templateRef?: TemplateRef<{ $implicit: CardEntity }> | undefined,
     shouldRenderAction?: (action: ActionItem<ReadingList>, entity: ReadingList, user: User) => boolean,
     overrides?: CardConfigurationOverrides<ReadingList>
   ): ActionableCardConfiguration<ReadingList> {
@@ -307,6 +307,7 @@ export class CardConfigFactory {
 
       coverFunc: (r) => this.imageService.getReadingListCoverImage(r.id),
       titleFunc: (r) => r.title,
+      titleTemplate: templateRef,
       titleRouteFunc: (r) => `/lists/${r.id}`,
       metaTitleFunc: (r) => r.summary || '',
       tooltipFunc: (r) => r.title,
@@ -317,9 +318,7 @@ export class CardConfigFactory {
       showErrorFunc: () => false,
       ariaLabelFunc: (r) => r.title,
 
-      actionableFunc: (r) => actionCallback
-            ? this.actionFactory.getReadingListActions(actionCallback, shouldRenderAction)
-            : [],
+      actionableFunc: (r) => this.actionFactory.getReadingListActions(shouldRenderAction),
       readFunc: () => {},
     };
 
