@@ -16,7 +16,11 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DownloadEvent} from "../../shared/_services/download.service";
 import {Observable} from "rxjs";
 import {MangaFormat} from "../../_models/manga-format";
-import {BaseCardConfiguration, hasActionables} from "../../_models/card/card-configuration";
+import {
+  ActionableCardConfiguration,
+  BaseCardConfiguration,
+  hasActionables
+} from "../../_models/card/card-configuration";
 import {CardEntity} from "../../_models/card/card-entity";
 import {ScrollService} from "../../_services/scroll.service";
 import {ImageService} from "../../_services/image.service";
@@ -156,19 +160,26 @@ export class EntityCardComponent<T> implements OnInit {
 
   /** Whether action menu should display */
   protected hasActionables: Signal<boolean> = computed(() =>
-    hasActionables(this.config())
+    this.actionables().length > 0
   );
 
   protected actionables: Signal<ActionItem<any>[]> = computed(() => {
-    const config = this.config() as { actionables?: ActionItem<any>[] };
-    return config.actionables ?? [];
+    const config = this.config();
+    const data = this.data();
+
+    if (hasActionables(config) && data) {
+      // Cast to a generic ActionableCardConfiguration to bridge the T gap
+      const actionableCfg = config as unknown as ActionableCardConfiguration<ActionableEntity>;
+      return actionableCfg.actionableFunc(data as unknown as ActionableEntity);
+    }
+
+    return [];
   });
 
   protected actionableEntity: Signal<ActionableEntity | null> = computed(() => {
-    if (hasActionables(this.config())) {
-      return this.data() as unknown as ActionableEntity;
-    }
-    return null;
+    return this.hasActionables()
+      ? (this.data() as unknown as ActionableEntity)
+      : null;
   });
 
   /** Aria label for accessibility */

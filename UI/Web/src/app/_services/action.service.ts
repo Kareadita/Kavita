@@ -45,6 +45,12 @@ import {Action} from "../_models/actionables/action";
 import {ActionItem} from "../_models/actionables/action-item";
 import {EMPTY, filter, from, Observable, of, switchMap, tap} from "rxjs";
 import {ActionEffect, ActionResult} from "../_models/actionables/action-result";
+import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
+import {PageBookmark} from "../_models/readers/page-bookmark";
+import {Router} from "@angular/router";
+import {EditCollectionTagsComponent} from "../cards/_modals/edit-collection-tags/edit-collection-tags.component";
+import {Annotation} from "../book-reader/_models/annotations/annotation";
+import {AnnotationService} from "./annotation.service";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -78,9 +84,11 @@ export class ActionService {
   private readonly collectionTagService = inject(CollectionTagService);
   private readonly filterService = inject(FilterService);
   private readonly readingListService = inject(ReadingListService);
+  private readonly collectionService = inject(CollectionTagService);
   private readonly downloadService = inject(DownloadService);
   private readonly readingProfilesService = inject(ReadingProfileService);
-
+  private readonly router = inject(Router);
+  private readonly annotationsService = inject(AnnotationService);
 
   private readingListModalRef: NgbModalRef | null = null;
   private collectionModalRef: NgbModalRef | null = null;
@@ -355,6 +363,231 @@ export class ActionService {
     }
   }
 
+  /**
+   * Centralized handler for all chapter actions.
+   * Returns Observable<ActionResult<Chapter>> so the caller can react to effects.
+   */
+  handleChapterAction(action: ActionItem<Chapter>, chapter: Chapter, seriesId: number, libraryId: number, libraryType: LibraryType): Observable<ActionResult<Chapter>> {
+    switch (action.action) {
+
+      case Action.MarkAsRead:
+        return this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(
+          tap(() => this.toastr.success(translate('toasts.mark-read'))),
+          map(() => {
+            const updated = {
+              ...chapter,
+              pagesRead: chapter.pages,
+            };
+            return this.fromAction(action, updated, 'update');
+          })
+        );
+
+      case Action.MarkAsUnread:
+        return this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 9).pipe(
+          tap(() => this.toastr.success(translate('toasts.mark-unread'))),
+          map(() => {
+            const updated = {
+              ...chapter,
+              pagesRead: 9,
+            };
+            return this.fromAction(action, updated, 'update');
+          })
+        );
+
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-chapter'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.chapterService.deleteChapter(chapter.id)),
+          filter(success => success),
+          tap(() => this.toastr.success(translate('toasts.chapter-deleted'))),
+          map(() => this.fromAction(action, chapter, 'remove'))
+        );
+
+      case Action.Download:
+        this.downloadService.download('chapter', chapter);
+        return of(this.fromAction(action, chapter, 'none'));
+
+      case Action.Edit:
+        const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);
+        ref.componentInstance.chapter = chapter;
+        ref.componentInstance.libraryType = libraryType;
+        ref.componentInstance.seriesId = seriesId;
+        ref.componentInstance.libraryId = libraryId;
+
+        return from(ref.closed).pipe(
+          filter((res: EditVolumeModalCloseResult) => res.success),
+          map((res: EditVolumeModalCloseResult) =>
+            this.fromAction(action, chapter, res.isDeleted ? 'remove' : 'reload')
+          )
+        );
+      case Action.AddToReadingList:
+        if (this.readingListModalRef != null) return EMPTY;
+        this.readingListModalRef = this.modalService.open(AddToListModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
+        this.readingListModalRef.componentInstance.seriesId = seriesId;
+        this.readingListModalRef.componentInstance.volumeId = chapter.volumeId;
+        this.readingListModalRef.componentInstance.chapterId = chapter.id;
+        this.readingListModalRef.componentInstance.type = ADD_FLOW.Chapter;
+
+        const chapterRLRef = this.readingListModalRef;
+        return new Observable<ActionResult<Chapter>>(subscriber => {
+          chapterRLRef.closed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.next(this.fromAction(action, chapter, 'none'));
+            subscriber.complete();
+          });
+          chapterRLRef.dismissed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.complete();
+          });
+        });
+
+      case Action.IncognitoRead:
+        this.readerService.readChapter(libraryId, seriesId, chapter, true);
+        return of(this.fromAction(action, chapter, 'none'));
+
+      case Action.SendTo:
+        const device = action._extra!.data as Device;
+        return this.deviceService.sendToEmailDevice([chapter.id], device.id).pipe(
+          tap(() => this.toastr.success(translate('toasts.file-send-to', {name: device.name}))),
+          map(() => this.fromAction(action, chapter, 'none'))
+        );
+
+      default:
+        return of(this.fromAction(action, chapter, 'none'));
+    }
+  }
+
+  /**
+   * Centralized handler for all bookmark actions.
+   * Returns Observable<ActionResult<PageBookmark>> so the caller can react to effects.
+   */
+  handleBookmarkAction(action: ActionItem<PageBookmark>, bookmark: PageBookmark, seriesId: number, libraryId: number, seriesName: string) {
+    switch (action.action) {
+
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('bookmarks.confirm-single-delete', {seriesName}))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.readerService.clearBookmarks(seriesId)),
+          tap(() => this.toastr.success(translate('bookmarks.delete-single-success'))),
+          map(() => this.fromAction(action, bookmark, 'remove'))
+        );
+
+      case Action.DownloadBookmark:
+        this.downloadService.download('bookmark', [bookmark]);
+        return of(this.fromAction(action, bookmark, 'none'));
+
+      case Action.ViewSeries:
+        this.router.navigate(['library', libraryId, 'series', seriesId]);
+        return of(this.fromAction(action, bookmark, 'none'));
+
+      default:
+        return of(this.fromAction(action, bookmark, 'none'));
+    }
+  }
+
+  /**
+   * Centralized handler for all reading list actions.
+   * Returns Observable<ActionResult<ReadingList>> so the caller can react to effects.
+   */
+  handleReadingListAction(action: ActionItem<ReadingList>, readingList: ReadingList) {
+    switch (action.action) {
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-reading-list'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.readingListService.delete(readingList.id)),
+          tap(() => this.toastr.success(translate('toasts.reading-list-deleted'))),
+          map(() => this.fromAction(action, readingList, 'remove'))
+        );
+
+      case Action.Edit:
+        const ref = this.modalService.open(EditReadingListModalComponent, DefaultModalOptions);
+        ref.componentInstance.readingList = readingList;
+        return from(ref.closed).pipe(
+          map((res: ReadingList) =>
+            this.fromAction(action, res, 'reload')
+          )
+        );
+      case Action.Promote:
+        return this.readingListService.promoteMultipleReadingLists([readingList.id], true).pipe(
+          tap(() => this.toastr.success(translate('toasts.reading-list-promoted'))),
+          map(() => this.fromAction(action, readingList, 'update'))
+        );
+
+      case Action.UnPromote:
+        return this.readingListService.promoteMultipleReadingLists([readingList.id], false).pipe(
+          tap(() => this.toastr.success(translate('toasts.reading-list-unpromoted'))),
+          map(() => this.fromAction(action, readingList, 'update'))
+        );
+      default:
+        return of(this.fromAction(action, readingList, 'none'));
+    }
+  }
+
+  handleCollectionAction(action: ActionItem<UserCollection>, collection: UserCollection) {
+    switch (action.action) {
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-collection'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.collectionService.deleteTag(collection.id)),
+          tap(() => this.toastr.success(translate('toasts.collection-tag-deleted'))),
+          map(() => this.fromAction(action, collection, 'remove'))
+        );
+
+      case Action.Edit:
+        const ref = this.modalService.open(EditCollectionTagsComponent, DefaultModalOptions);
+        ref.componentInstance.tag = collection;
+        return from(ref.closed).pipe(
+          map((res: {success: boolean, coverImageUpdated: boolean}) =>
+            this.fromAction(action, collection, 'reload')
+          )
+        );
+
+      case Action.Promote:
+        return this.collectionService.promoteMultipleCollections([collection.id], true).pipe(
+          tap(() => this.toastr.success(translate('toasts.collections-promoted'))),
+          map(() => this.fromAction(action, collection, 'update'))
+        );
+
+      case Action.UnPromote:
+        return this.collectionService.promoteMultipleCollections([collection.id], false).pipe(
+          tap(() => this.toastr.success(translate('toasts.collections-unpromoted'))),
+          map(() => this.fromAction(action, collection, 'update'))
+        );
+
+      default:
+        return of(this.fromAction(action, collection, 'none'));
+    }
+  }
+
+  handleAnnotationAction(action: ActionItem<Annotation>, annotation: Annotation) {
+    switch (action.action) {
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-annotations'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.annotationsService.bulkDelete([annotation.id])),
+          tap(() => this.toastr.success(translate('toasts.annotations-deleted'))),
+          map(() => this.fromAction(action, annotation, 'remove'))
+        );
+
+      case Action.Export:
+        return this.annotationsService.exportAnnotations([annotation.id]).pipe(
+          map(() => this.fromAction(action, annotation, 'none'))
+        );
+
+      case Action.Like:
+        return this.annotationsService.likeAnnotations([annotation.id]).pipe(
+          map(() => this.fromAction(action, annotation, 'update'))
+        );
+
+      case Action.UnLike:
+        return this.annotationsService.unLikeAnnotations([annotation.id]).pipe(
+          map(() => this.fromAction(action, annotation, 'update'))
+        );
+
+      default:
+        return of(this.fromAction(action, annotation, 'none'));
+    }
+  }
 
   // -------------------------------------------
   //      INDIVIDUAL HANDLERS

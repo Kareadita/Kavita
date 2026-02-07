@@ -111,7 +111,7 @@ export class ChapterCardComponent implements OnInit, OnChanges {
       (action, c) => {},
       {
         allowSelection: this.allowSelection,
-        actionables: this.actions,
+        actionableFunc: () => this.actions,
         selectionType: this.dataSource(),
         titleTemplate: this.titleTemplateRef()
       }

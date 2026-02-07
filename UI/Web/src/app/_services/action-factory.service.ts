@@ -84,6 +84,18 @@ export class ActionFactoryService {
     return actions;
   }
 
+  getBookmarkActions(seriesId: number, libraryId: number, seriesName: string, shouldRenderFunc: ActionShouldRenderFunc<PageBookmark> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.bookmarkActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleBookmarkAction(action, entity, seriesId, libraryId, seriesName)
+    );
+    return actions;
+  }
+
   getSideNavStreamActions(callback: ActionCallback<SideNavStream>, shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.sideNavStreamActions, callback, shouldRenderFunc);
   }
@@ -102,10 +114,6 @@ export class ActionFactoryService {
 
   getReadingListActions(callback: ActionCallback<ReadingList>, shouldRenderFunc: ActionShouldRenderFunc<ReadingList> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.readingListActions, callback, shouldRenderFunc);
-  }
-
-  getBookmarkActions(callback: ActionCallback<PageBookmark>, shouldRenderFunc: ActionShouldRenderFunc<PageBookmark> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.bookmarkActions, callback, shouldRenderFunc);
   }
 
   getPersonActions(callback: ActionCallback<Person>, shouldRenderFunc: ActionShouldRenderFunc<Person> = this.dummyShouldRender) {

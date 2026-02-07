@@ -24,6 +24,8 @@
         <ng-template #cardItem let-item let-position="idx">
           <app-entity-card [entity]="item" [config]="bookmarkConfig()"
                            [index]="position" [maxIndex]="bookmarkEntities().length"
+                           (reload)="clearBookmarks(item.series)"
+
           />
         </ng-template>
 

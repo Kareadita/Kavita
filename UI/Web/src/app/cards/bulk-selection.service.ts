@@ -160,7 +160,7 @@ export class BulkSelectionService {
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'bookmark').length > 0) {
-      return this.applyFilterToList(this.actionFactory.getBookmarkActions(callback), [Action.DownloadBookmark, Action.Delete]);
+      return this.applyFilterToList(this.actionFactory.getBookmarkActions(0, 0, 'TODO'), [Action.DownloadBookmark, Action.Delete]);
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'sideNavStream').length > 0) {

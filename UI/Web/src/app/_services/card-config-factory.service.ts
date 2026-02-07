@@ -76,7 +76,7 @@ export class CardConfigFactory {
       showErrorFunc: (s) => s.pages === 0,
       ariaLabelFunc: (s) => s.name,
 
-      actionables: this.actionFactory.getSeriesActions(),
+      actionableFunc: (s) => this.actionFactory.getSeriesActions(),
       readFunc: (s) => this.readerService.readSeries(s, false),
       clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.id]),
 
@@ -126,7 +126,6 @@ export class CardConfigFactory {
   }
 
   forBookmark(
-    actionCallback?: (action: ActionItem<PageBookmark>, bookmark: PageBookmark) => void,
     overrides?: CardConfigurationOverrides<PageBookmark>
   ): ActionableCardConfiguration<PageBookmark> {
     const defaults: ActionableCardConfiguration<PageBookmark> = {
@@ -134,7 +133,7 @@ export class CardConfigFactory {
       selectionType: 'bookmark',
       suppressArchiveWarning: true,
 
-      coverFunc: (s) => this.imageService.getSeriesCoverImage(s.id),
+      coverFunc: (s) => this.imageService.getSeriesCoverImage(s.series!.id),
       titleFunc: (s) => s.series!.name,
       titleRouteFunc: (s) => `/library/${s.series!.libraryId}/series/${s.seriesId}}`,
       metaTitleFunc: (s, wrapper) => s.series!.name,
@@ -147,9 +146,7 @@ export class CardConfigFactory {
       ariaLabelFunc: (s) => s.series!.name,
       titleRouteParamsFunc: (s) => {return { bookmarkMode: true }},
 
-      actionables: actionCallback
-        ? this.actionFactory.getBookmarkActions(actionCallback)
-        : [],
+      actionableFunc: (s) => this.actionFactory.getBookmarkActions(s.series!.id, s.series!.libraryId, s.series!.name),
 
       readFunc: (s) => this.router.navigate(['library', s.series!.libraryId, 'series', s.seriesId, 'manga', s.chapterId], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
       clickFunc: (s) => this.router.navigate(['library', s.series!.libraryId, 'series', s.seriesId, 'manga', s.chapterId], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
@@ -195,7 +192,7 @@ export class CardConfigFactory {
       },
       ariaLabelFunc: (c) => c.titleName || c.title || (c.range === (LooseLeafOrDefaultNumber + '') ? '' : c.range),
 
-      actionables: this.actionFactory.getChapterActions(actionCallback),
+      actionableFunc: (c) => this.actionFactory.getChapterActions(actionCallback),
       readFunc: (c) => this.readerService.readChapter(libraryId, seriesId, c, false),
       clickFunc: (c) => this.router.navigate(['library', libraryId, 'series', seriesId, 'chapter', c.id]),
 
@@ -247,7 +244,7 @@ export class CardConfigFactory {
       showErrorFunc: (v) => v.pages === 0,
       ariaLabelFunc: (v) => v.name,
 
-      actionables: this.actionFactory.getVolumeActions(seriesId, libraryId, libraryType),
+      actionableFunc: (v) => this.actionFactory.getVolumeActions(seriesId, libraryId, libraryType),
       readFunc: (v) => {
         this.readerService.readVolume(libraryId, seriesId, v, false);
       },
@@ -286,7 +283,7 @@ export class CardConfigFactory {
       showErrorFunc: () => false,
       ariaLabelFunc: (c) => c.title,
 
-      actionables: actionables
+      actionableFunc: (c) => actionables
         ? actionables
         : [],
       readFunc: () => {},
@@ -321,7 +318,7 @@ export class CardConfigFactory {
       showErrorFunc: () => false,
       ariaLabelFunc: (r) => r.title,
 
-      actionables: actionCallback
+      actionableFunc: (r) => actionCallback
             ? this.actionFactory.getReadingListActions(actionCallback, shouldRenderAction)
             : [],
       readFunc: () => {},

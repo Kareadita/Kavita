@@ -93,20 +93,31 @@ export interface BaseCardConfiguration<T> {
 export interface ActionableCardConfiguration<T extends ActionableEntity>
   extends BaseCardConfiguration<T> {
   /** Action items for the card's action menu */
-  actionables: ActionItem<T>[];
+  actionableFunc: (entity: T) => ActionItem<T>[];
 }
 
 export type CardConfiguration<T> = T extends ActionableEntity
   ? ActionableCardConfiguration<T> | BaseCardConfiguration<T>
   : BaseCardConfiguration<T>;
 
+// export function hasActionables<T>(
+//   config: BaseCardConfiguration<T>
+// ): config is BaseCardConfiguration<T> & { actionables: ActionItem<any>[] } {
+//   return (
+//     'actionableFunc' in config &&
+//     typeof (config as any).actionables === 'function'
+//   );
+// }
+
 export function hasActionables<T>(
   config: BaseCardConfiguration<T>
-): config is BaseCardConfiguration<T> & { actionables: ActionItem<any>[] } {
-  return 'actionables' in config &&
-    Array.isArray((config as any).actionables) &&
-    (config as any).actionables.length > 0;
+): config is BaseCardConfiguration<T> & { actionableFunc: (entity: any) => ActionItem<any>[] } {
+  return (
+    'actionableFunc' in config &&
+    typeof (config as any).actionableFunc === 'function'
+  );
 }
+
 
 /**
  * Partial configuration for overrides. All properties optional.

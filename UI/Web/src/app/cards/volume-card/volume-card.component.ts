@@ -92,7 +92,7 @@ export class VolumeCardComponent implements OnInit, OnChanges {
       {
         allowSelection: this.allowSelection,
         clickFunc: this.handleClick.bind(this),
-        actionables: this.actions,
+        actionableFunc: (_) => this.actions,
       }
     );
 

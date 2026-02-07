@@ -77,7 +77,7 @@ export class BookmarksComponent {
   });
   series = computed(() => this.bookmarks().map(b => b.series!));
   bookmarkConfig = computed(() => {
-    return this.cardConfigFactory.forBookmark(this.handleAction.bind(this), {
+    return this.cardConfigFactory.forBookmark({
       countFunc: entity => this.seriesIds[entity.seriesId],
     });
   });
@@ -99,46 +99,26 @@ export class BookmarksComponent {
 
 
   constructor() {
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.filter = data['filter'] as FilterV2<FilterField, SortField>;
 
-      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-        this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+      if (this.filter == null) {
+        this.filter = this.metadataService.createDefaultFilterDto('series');
+        this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+      }
 
-        if (this.filter == null) {
-          this.filter = this.metadataService.createDefaultFilterDto('series');
-          this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
-        }
+      this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
+      this.filterActiveCheck.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+      this.filterSettings.presetsV2 =  this.filter;
+      this.filterSettings.statementLimit = 1;
 
-        this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
-        this.filterActiveCheck.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
-        this.filterSettings.presetsV2 =  this.filter;
-        this.filterSettings.statementLimit = 1;
-
-        this.cdRef.markForCheck();
-      });
-
-
-      this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
-    }
+      this.cdRef.markForCheck();
+    });
 
 
-  async handleAction(action: ActionItem<PageBookmark>, pageBookmark: PageBookmark) {
-    const series = pageBookmark.series;
-    if (series == null) return;
-
-    switch (action.action) {
-      case(Action.Delete):
-        await this.clearBookmarks(series);
-        break;
-      case(Action.DownloadBookmark):
-        this.downloadBookmarks(series);
-        break;
-      case(Action.ViewSeries):
-        await this.router.navigate(['library', series.libraryId, 'series', series.id]);
-        break;
-      default:
-        break;
-    }
+    this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
   }
+
 
   bulkActionCallback = async (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('bookmark');
@@ -201,33 +181,14 @@ export class BookmarksComponent {
     });
   }
 
-  // viewBookmarks(series: Series) {
-  //   this.router.navigate(['library', series.libraryId, 'series', series.id, 'manga', 0], {queryParams: {incognitoMode: false, bookmarkMode: true}});
-  // }
+  // The backend state is already handled by the action service. This just needs to handle the side-effect.
+  clearBookmarks(series: Series) {
+    // Filter out the bookmark for this series
+    this.bookmarks.update(bookmarks =>
+      bookmarks.filter(bmk => bmk.seriesId !== series.id)
+    );
 
-  async clearBookmarks(series: Series) {
-    if (!await this.confirmService.confirm(this.translocoService.translate('bookmarks.confirm-single-delete', {seriesName: series.name}))) {
-      return;
-    }
-
-    this.readerService.clearBookmarks(series.id).subscribe(() => {
-      // Filter out the bookmark for this series
-      this.bookmarks.update(bookmarks =>
-        bookmarks.filter(bmk => bmk.seriesId !== series.id)
-      );
-
-      this.toastr.success(this.translocoService.translate('delete-single-success', {seriesName: series.name}));
-      this.refresh.emit();
-      this.cdRef.markForCheck();
-    });
-  }
-
-  downloadBookmarks(series: Series) {
-    // Find the bookmark for this series
-    const bookmark = this.bookmarks().find(bmk => bmk.seriesId === series.id);
-    if (bookmark) {
-      this.downloadService.download('bookmark', [bookmark]);
-    }
+    this.refresh.emit();
   }
 
   updateFilter(data: FilterEvent<FilterField, SortField>) {

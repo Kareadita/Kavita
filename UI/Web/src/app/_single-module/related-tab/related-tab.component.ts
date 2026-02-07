@@ -44,7 +44,7 @@ export class RelatedTabComponent {
   bookmarks = input<PageBookmark[]>([]);
   bookmarkEntities = computed(() => this.bookmarks().map(b => CardEntityFactory.bookmark(b)));
   bookmarkConfig = computed(() => {
-    return this.cardConfigFactory.forBookmark(undefined, {
+    return this.cardConfigFactory.forBookmark({
       titleFunc: (d) => translate('related-tab.bookmarks-title'),
       coverFunc: (d) => this.imageService.getSeriesCoverImage(d.seriesId),
       metaTitleFunc: d => '',
