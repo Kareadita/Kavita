@@ -137,7 +137,7 @@ export class ChapterCardComponent implements OnInit, OnChanges {
       if (updateEvent.chapterId !== this.chapter.id) return;
 
       this.chapter.pagesRead = updateEvent.pagesRead;
-      this.cdRef.detectChanges();
+      this.onDataChanged(this.chapter);
     });
   }
 
@@ -148,8 +148,7 @@ export class ChapterCardComponent implements OnInit, OnChanges {
   }
 
   onDataChanged(entity: Chapter) {
-    this.chapterSignal.set(entity);
+    this.chapterSignal.set({...entity});
     this.dataChanged.emit(entity);
-    this.reload.emit(entity.id);
   }
 }

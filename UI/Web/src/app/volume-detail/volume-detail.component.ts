@@ -755,5 +755,18 @@ export class VolumeDetailComponent implements OnInit {
     }
   }
 
+  updateChapter(updatedChapter: Chapter) {
+    const volume = this.volume;
+    if (!volume) return;
+
+    const originalEntity = volume.chapters.find(s => s.id == updatedChapter.id);
+
+    if (originalEntity) {
+      Object.assign(originalEntity, updatedChapter);
+      volume.chapters = [...volume.chapters];
+      this.cdRef.markForCheck();
+    }
+  }
+
   protected readonly Breakpoint = Breakpoint;
 }

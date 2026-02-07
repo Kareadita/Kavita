@@ -48,10 +48,8 @@ export class SeriesCardComponent implements OnChanges {
   @Input() index = 0;
   @Input() maxIndex = 1;
 
-  @Output() clicked = new EventEmitter<Series>();
   @Output() reload = new EventEmitter<number>();
   @Output() dataChanged = new EventEmitter<Series>();
-  @Output() selection = new EventEmitter<boolean>();
 
   private seriesSignal = signal<Series | null>(null);
   private relationSignal = signal<RelationKind | undefined>(undefined);
@@ -90,7 +88,7 @@ export class SeriesCardComponent implements OnChanges {
   }
 
   onDataChanged(entity: Series) {
-    this.seriesSignal.set(entity);
+    this.seriesSignal.set({...entity});
     this.dataChanged.emit(entity);
   }
 
@@ -107,7 +105,6 @@ export class SeriesCardComponent implements OnChanges {
       return;
     }
 
-    this.clicked.emit(series);
     await this.router.navigate(['library', this.libraryId, 'series', series.id]);
   }
 }

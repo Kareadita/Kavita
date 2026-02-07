@@ -4,11 +4,13 @@ import {
   Component,
   computed,
   DestroyRef,
+  EventEmitter,
   inject,
   input,
   Input,
   OnChanges,
   OnInit,
+  Output,
   signal,
   SimpleChanges
 } from '@angular/core';
@@ -71,6 +73,15 @@ export class VolumeCardComponent implements OnInit, OnChanges {
    */
   @Input() allowSelection: boolean = false;
 
+  /**
+   * Emitted when the entity is deleted. Emits the entity id
+   */
+  @Output() reload: EventEmitter<number> = new EventEmitter();
+  /**
+   * Underlying data has mutated, mutated data is returned
+   */
+  @Output() dataChanged: EventEmitter<Volume> = new EventEmitter();
+
   private user: User | undefined;
 
   private volumeSignal = signal<Volume | null>(null);
@@ -119,7 +130,7 @@ export class VolumeCardComponent implements OnInit, OnChanges {
         sum += chapter.pagesRead;
       });
       this.volume.pagesRead = sum;
-      this.cdRef.detectChanges();
+      this.onDataChanged(this.volume);
     });
 
   }
@@ -133,5 +144,10 @@ export class VolumeCardComponent implements OnInit, OnChanges {
 
   handleClick(event: any) {
     this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'volume', this.volume.id]);
+  }
+
+  onDataChanged(entity: Volume) {
+    this.volumeSignal.set({...entity});
+    this.dataChanged.emit(entity);
   }
 }

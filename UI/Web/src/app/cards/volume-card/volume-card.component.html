@@ -3,4 +3,6 @@
   [config]="config()"
   [index]="index()"
   [maxIndex]="maxIndex()"
+  (reload)="reload.emit($event)"
+  (dataChanged)="onDataChanged($event)"
 />

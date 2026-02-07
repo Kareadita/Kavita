@@ -313,7 +313,7 @@ export class ActionService {
         return from(ref.closed).pipe(
           filter((res: EditVolumeModalCloseResult) => res.success),
           map((res: EditVolumeModalCloseResult) =>
-            this.fromAction(action, volume, res.isDeleted ? 'remove' : 'reload')
+            this.fromAction(action, volume, res.isDeleted ? 'remove' : 'update')
           )
         );
       }

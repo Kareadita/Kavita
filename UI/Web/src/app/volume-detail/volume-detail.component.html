@@ -176,6 +176,7 @@
                                       [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
                                       [maxIndex]="volume.chapters.length"
                                       [allowSelection]="true"
+                                      (dataChanged)="updateChapter($event)"
                      />
                   }
                 </div>
