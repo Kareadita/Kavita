@@ -12,10 +12,12 @@
 .content-quote {
   color: var(--drawer-text-color);
   max-height: 320px;
-  overflow: hidden;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
   display: -webkit-box;
   line-clamp: 2;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 8;
   -webkit-box-orient: vertical;
 }
 
