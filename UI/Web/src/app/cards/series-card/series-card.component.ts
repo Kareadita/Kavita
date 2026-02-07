@@ -92,7 +92,6 @@ export class SeriesCardComponent implements OnChanges {
   onDataChanged(entity: Series) {
     this.seriesSignal.set(entity);
     this.dataChanged.emit(entity);
-    this.reload.emit(entity.id);
   }
 
   private async handleClick(series: Series) {
