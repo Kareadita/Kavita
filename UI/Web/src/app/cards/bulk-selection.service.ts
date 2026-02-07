@@ -176,7 +176,7 @@ export class BulkSelectionService {
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'annotations').length > 0) {
-      return this.actionFactory.getAnnotationActions(callback);
+      return this.actionFactory.getAnnotationActions();
     }
 
     // TODO: This is more complicated as we need some extra state

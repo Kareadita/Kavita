@@ -83,7 +83,6 @@ export class AllAnnotationsComponent implements OnInit {
   refresh: EventEmitter<void> = new EventEmitter();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 
-  actions: ActionItem<Annotation>[] = [];
 
   constructor() {
     effect(() => {
@@ -103,8 +102,6 @@ export class AllAnnotationsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.actions = this.actionFactoryService.getAnnotationActions(this.actionFactoryService.dummyCallback);
-
     this.route.data.pipe(
       takeUntilDestroyed(this.destroyRef),
       map(data => data['filter'] as AnnotationsFilter | null | undefined),

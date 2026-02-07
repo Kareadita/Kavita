@@ -71,7 +71,7 @@ export class ReadingListsComponent implements OnInit {
   pagination!: Pagination;
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
-  globalActions: Array<ActionItem<any>> = [];
+  globalActions: Array<ActionItem<any>> = []; // TODO: Why is this empty? 
   trackByIdentity = (index: number, item: ReadingListCardEntity) => `${item.data.id}_${item.data.title}_${item.data.promoted}`;
 
   ngOnInit(): void {

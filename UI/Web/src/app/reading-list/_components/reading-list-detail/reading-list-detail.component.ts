@@ -288,7 +288,7 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
 
-  async handleReadingListActionCallback(event: ActionItem<ReadingList> | ActionResult<ReadingList>) {
+  handleReadingListActionCallback(event: ActionItem<ReadingList> | ActionResult<ReadingList>) {
 
     // This can be removed once actionable refactor is complete
     const isUpdatedActionSystem = 'effect' in event;

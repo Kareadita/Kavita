@@ -51,6 +51,7 @@ import {Router} from "@angular/router";
 import {EditCollectionTagsComponent} from "../cards/_modals/edit-collection-tags/edit-collection-tags.component";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationService} from "./annotation.service";
+import {ClientDevice} from "../_models/client-device";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -557,6 +558,10 @@ export class ActionService {
     }
   }
 
+  /**
+   * Centralized handler for all annotation actions.
+   * Returns Observable<ActionResult<Annotation>> so the caller can react to effects.
+   */
   handleAnnotationAction(action: ActionItem<Annotation>, annotation: Annotation) {
     switch (action.action) {
       case Action.Delete:
@@ -584,6 +589,24 @@ export class ActionService {
 
       default:
         return of(this.fromAction(action, annotation, 'none'));
+    }
+  }
+
+  handleClientDeviceAction(action: ActionItem<ClientDevice>, clientDevice: ClientDevice) {
+    switch (action.action) {
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-annotations'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.deviceService.deleteClientDevice(clientDevice.id)),
+          map((success) => this.fromAction(action, clientDevice,  success ? 'remove' : 'none'))
+        );
+
+      case Action.Edit:
+          // Special case: This actually just triggers an edit toggle. Since there is no edit modal, we send update to handle
+          return of(this.fromAction(action, clientDevice, 'update'));
+
+      default:
+        return of(this.fromAction(action, clientDevice, 'none'));
     }
   }
 

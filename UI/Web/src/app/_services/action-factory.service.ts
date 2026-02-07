@@ -132,6 +132,30 @@ export class ActionFactoryService {
     return actions;
   }
 
+  getAnnotationActions(shouldRenderFunc: ActionShouldRenderFunc<Annotation> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.annotationActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleAnnotationAction(action, entity)
+    );
+    return actions;
+  }
+
+  getClientDeviceActions(shouldRenderFunc: ActionShouldRenderFunc<ClientDevice> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.clientDeviceActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleClientDeviceAction(action, entity)
+    );
+    return actions;
+  }
+
   getSideNavStreamActions(callback: ActionCallback<SideNavStream>, shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.sideNavStreamActions, callback, shouldRenderFunc);
   }
@@ -146,14 +170,6 @@ export class ActionFactoryService {
 
   getSideNavHomeActions(callback: ActionCallback<void>, shouldRenderFunc: ActionShouldRenderFunc<void> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.sideNavHomeActions, callback, shouldRenderFunc);
-  }
-
-  getAnnotationActions(callback: ActionCallback<Annotation>, shouldRenderFunc: ActionShouldRenderFunc<Annotation> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.annotationActions, callback, shouldRenderFunc);
-  }
-
-  getClientDeviceActions(callback: ActionCallback<ClientDevice>, shouldRenderFunc: ActionShouldRenderFunc<ClientDevice> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.clientDeviceActions, callback, shouldRenderFunc);
   }
 
   dummyCallback(action: ActionItem<any>, entity: any) {}
