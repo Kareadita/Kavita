@@ -801,8 +801,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
         this.generalSettingsForm.get('pageSplitOption')?.disable();
         this.generalSettingsForm.get('widthSlider')?.disable();
-        this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
-        this.generalSettingsForm.get('fittingOption')?.disable();
+        if (window.innerWidth < Breakpoint.Mobile) {
+          this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
+          this.generalSettingsForm.get('fittingOption')?.disable();
+        }
         this.generalSettingsForm.get('emulateBook')?.enable();
         this.generalSettingsForm.get('pageOffset')?.enable();
       }
@@ -938,7 +940,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   disableDoubleRendererIfScreenTooSmall() {
-    if (window.innerWidth > window.innerHeight) {
+    if (window.innerWidth > window.innerHeight || window.innerWidth >= Breakpoint.Mobile) {
       if (this.generalSettingsForm.get('layoutMode')?.disabled) {
         this.generalSettingsForm.get('layoutMode')?.enable();
       }
@@ -1835,7 +1837,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (this.layoutMode !== LayoutMode.Single) {
         this.generalSettingsForm.get('pageSplitOption')?.disable();
-        this.generalSettingsForm.get('fittingOption')?.disable();
+        if (window.innerWidth < Breakpoint.Mobile) {
+          this.generalSettingsForm.get('fittingOption')?.disable();
+        }
         this.generalSettingsForm.get('pageOffset')?.enable();
       } else {
         this.generalSettingsForm.get('pageOffset')?.disable();

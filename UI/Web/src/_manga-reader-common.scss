@@ -9,7 +9,7 @@ img {
   align-items: center;
 
   &.full-width {
-    height: 100dvh;
+    min-height: 100dvh;
     display: grid;
   }
 
@@ -21,7 +21,7 @@ img {
   }
 
   &.original {
-    height: calc(100dvh);
+    min-height: calc(100dvh);
     display: grid;
   }
 
