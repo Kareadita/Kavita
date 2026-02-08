@@ -128,61 +128,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 
-
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
-
-    switch (action.action) {
-      case Action.AddToReadingList:
-        this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.AddToWantToReadList:
-        this.actionService.addMultipleSeriesToWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.AddToCollection:
-        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsRead:
-        this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsUnread:
-        this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.Delete:
-        this.actionService.deleteMultipleSeries(selectedSeries, successful => {
-          if (!successful) return;
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-          this.cdRef.markForCheck();
-        });
-        break;
-    }
-  }
-
   constructor() {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
@@ -213,6 +158,12 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
         this.updateTag(tagId);
         this.cdRef.markForCheck();
+      });
+
+      this.bulkSelectionService.registerDataSource('series', () => this.series);
+      this.bulkSelectionService.registerPostAction((res: ActionResult<Series>) => {
+        if (res.effect === 'none') return;
+        this.loadPage();
       });
   }
 

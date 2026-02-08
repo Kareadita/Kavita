@@ -10,12 +10,12 @@ import {
 } from '@angular/core';
 import {BulkSelectionService} from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AsyncPipe, DecimalPipe, NgStyle} from "@angular/common";
+import {DecimalPipe, NgStyle} from "@angular/common";
 import {TranslocoModule} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {KEY_CODES} from "../../shared/_services/utility.service";
-import {ActionItem, ActionShouldRenderFunc} from "../../_models/actionables/action-item";
+import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {ActionResult} from "../../_models/actionables/action-result";
@@ -23,7 +23,6 @@ import {ActionResult} from "../../_models/actionables/action-result";
 @Component({
   selector: 'app-bulk-operations',
   imports: [
-    AsyncPipe,
     CardActionablesComponent,
     TranslocoModule,
     NgbTooltip,
@@ -35,9 +34,6 @@ import {ActionResult} from "../../_models/actionables/action-result";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BulkOperationsComponent<T> implements OnInit {
-
-  @Input({required: true}) actionCallback!: (action: ActionItem<T>, data: any) => void;
-  @Input() shouldRenderFunc?: ActionShouldRenderFunc<T>;
   /**
    * Modal mode means don't fix to the top
    */
@@ -57,7 +53,7 @@ export class BulkOperationsComponent<T> implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  public readonly bulkSelectionService = inject(BulkSelectionService);
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly Action = Action;
 
   @HostListener('document:keydown.shift', ['$event'])
@@ -78,11 +74,9 @@ export class BulkOperationsComponent<T> implements OnInit {
   }
 
   ngOnInit(): void {
-    this.bulkSelectionService.actions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(actions => {
-      // We need to do a recursive callback apply
-      const shouldRender = this.shouldRenderFunc ? this.shouldRenderFunc.bind(this) : this.actionFactoryService.dummyShouldRender;
 
-      this.actions = this.actionFactoryService.applyOldCallbackToList(actions, this.actionCallback.bind(this), shouldRender);
+    this.bulkSelectionService.actions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(actions => {
+      this.actions = actions;
       this.hasMarkAsRead = this.actionFactoryService.hasAction(this.actions, Action.MarkAsRead);
       this.hasMarkAsUnread = this.actionFactoryService.hasAction(this.actions, Action.MarkAsUnread);
       this.cdRef.markForCheck();
@@ -93,7 +87,7 @@ export class BulkOperationsComponent<T> implements OnInit {
     // Skip ActionResults — they've already been handled
     if ('effect' in event) return;
 
-    this.actionCallback(event as ActionItem<any>, null);
+    event.callback2(event, null).subscribe();
   }
 
   executeAction(action: Action) {

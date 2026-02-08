@@ -88,10 +88,10 @@ export class ActionFactoryService {
     );
   }
 
-  getBookmarkActions(seriesId: number, libraryId: number, seriesName: string, shouldRenderFunc: ActionShouldRenderFunc<PageBookmark> = this.basicReadRender) {
+  getBookmarkActions(contextFunc: () => {seriesId: number, libraryId: number, seriesName: string}, shouldRenderFunc: ActionShouldRenderFunc<PageBookmark> = this.basicReadRender) {
     return this.applyCallbackToList(
       this.bookmarkActions,
-      (action, entity) => this.actionService.handleBookmarkAction(action, entity, seriesId, libraryId, seriesName),
+      (action, entity) => this.actionService.handleBookmarkAction(action, entity, contextFunc),
       shouldRenderFunc
     );
   }

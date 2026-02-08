@@ -348,86 +348,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   download$: Observable<DownloadEvent | null> | null = null;
 
-  bulkActionCallback = async (action: ActionItem<any>, data: any) => {
-    if (this.series() === undefined) {
-      return;
-    }
-    const seriesId = this.seriesId;
-    // we need to figure out what is actually selected now
-    const selectedVolumeIndexes = this.bulkSelectionService.getSelectedCardsForSource('volume');
-    const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
-    const selectedSpecialIndexes = this.bulkSelectionService.getSelectedCardsForSource('special');
-
-    // NOTE: This needs to check current tab as chapter array will be different
-    let chapterArray = this.storyChapters;
-    if (this.activeTabId === TabID.Chapters) chapterArray = this.chapters();
-
-    // We must augment chapter indices as Bulk Selection assumes all on one page, but Storyline has mixed
-    const chapterIndexModifier = this.activeTabId === TabID.Storyline ? this.volumes.length : 0;
-    const selectedChapterIds = chapterArray.filter((_chapter, index: number) => {
-      const mappedIndex = index + chapterIndexModifier;
-      return selectedChapterIndexes.includes(mappedIndex + '');
-    });
-    const selectedVolumeIds = this.volumes.filter((_volume, index: number) => selectedVolumeIndexes.includes(index + ''));
-    const selectedSpecials = this.specials.filter((_chapter, index: number) => selectedSpecialIndexes.includes(index + ''));
-    const chapters = [...selectedChapterIds, ...selectedSpecials];
-
-    switch (action.action) {
-      case Action.AddToReadingList:
-        this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsRead:
-        this.actionService.markMultipleAsRead(seriesId, selectedVolumeIds, chapters,  () => {
-          this.setContinuePoint();
-          // TODO: BUG: This doesn't update series pagesRead
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-
-        break;
-      case Action.MarkAsUnread:
-        this.actionService.markMultipleAsUnread(seriesId, selectedVolumeIds, chapters,  () => {
-          this.setContinuePoint();
-          // TODO: BUG: This doesn't update series pagesRead
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.SendTo:
-        const device = (action._extra!.data as Device);
-        this.actionService.sendToDevice(chapters.map(c => c.id), device);
-        this.bulkSelectionService.deselectAll();
-        this.cdRef.markForCheck();
-        break;
-      case Action.Delete:
-        if (chapters.length > 0) {
-          await this.actionService.deleteMultipleChapters(seriesId, chapters, () => {
-            // No need to update the page as the backend will spam volume/chapter deletions
-            this.bulkSelectionService.deselectAll();
-            this.cdRef.markForCheck();
-          });
-
-          // It's not possible to select both chapters and volumes
-          break;
-        }
-
-        if (selectedVolumeIds.length > 0) {
-          await this.actionService.deleteMultipleVolumes(selectedVolumeIds, () => {
-            // No need to update the page as the backend will spam volume deletions
-            this.bulkSelectionService.deselectAll();
-            this.cdRef.markForCheck();
-          });
-        }
-
-        break;
-    }
-  }
-
-
-
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
@@ -484,6 +404,29 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+
+    this.bulkSelectionService.registerResolver(() => {
+      // Tab-dependent chapter array
+      let chapterArray = this.activeTabId === TabID.Chapters ? this.chapters() : this.storyChapters;
+      const offset = this.activeTabId === TabID.Storyline ? this.volumes.length : 0;
+
+      const volIndices = this.bulkSelectionService.getSelectedCardsForSource('volume');
+      const chIndices = this.bulkSelectionService.getSelectedCardsForSource('chapter');
+      const spIndices = this.bulkSelectionService.getSelectedCardsForSource('special');
+
+      return {
+        volumes: this.volumes.filter((_, i) => volIndices.includes(i + '')),
+        chapters: [
+          ...chapterArray.filter((_, i) => chIndices.includes((i + offset) + '')),
+          ...this.specials.filter((_, i) => spIndices.includes(i + '')),
+        ],
+      };
+    });
+    this.bulkSelectionService.registerContext(() => ({ seriesId: this.seriesId, libraryId: this.libraryId, libraryType: this.libraryType() }));
+    this.bulkSelectionService.registerPostAction((res: ActionResult<ReadingList>) => {
+      if (res.effect === 'none') return;
+      this.setContinuePoint();
+    });
   }
 
   ngAfterContentChecked(): void {

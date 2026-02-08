@@ -524,13 +524,13 @@ export class ActionService {
    * Centralized handler for all bookmark actions.
    * Returns Observable<ActionResult<PageBookmark>> so the caller can react to effects.
    */
-  handleBookmarkAction(action: ActionItem<PageBookmark>, bookmark: PageBookmark, seriesId: number, libraryId: number, seriesName: string) {
+  handleBookmarkAction(action: ActionItem<PageBookmark>, bookmark: PageBookmark, contextFunc: () => {seriesId: number, libraryId: number, seriesName: string}) {
+    const ctx = contextFunc();
     switch (action.action) {
-
       case Action.Delete:
-        return from(this.confirmService.confirm(translate('bookmarks.confirm-single-delete', {seriesName}))).pipe(
+        return from(this.confirmService.confirm(translate('bookmarks.confirm-single-delete', {seriesName: ctx.seriesName}))).pipe(
           filter(confirmed => confirmed),
-          switchMap(() => this.readerService.clearBookmarks(seriesId)),
+          switchMap(() => this.readerService.clearBookmarks(ctx.seriesId)),
           tap(() => this.toastr.success(translate('bookmarks.delete-single-success'))),
           map(() => this.fromAction(action, bookmark, 'remove'))
         );
@@ -540,7 +540,7 @@ export class ActionService {
         return of(this.fromAction(action, bookmark, 'none'));
 
       case Action.ViewSeries:
-        this.router.navigate(['library', libraryId, 'series', seriesId]);
+        this.router.navigate(['library', ctx.libraryId, 'series', ctx.seriesId]);
         return of(this.fromAction(action, bookmark, 'none'));
 
       default:
@@ -783,6 +783,340 @@ export class ActionService {
    */
   handleBulkLibraryAction(action: ActionItem<Library>, library: Library) {
     return of(this.fromAction(action, library, 'none'));
+  }
+
+  // -------------------------------------------
+  //      BULK HANDLERS
+  // -------------------------------------------
+
+  handleBulkSeriesAction(action: ActionItem<any>, series: Series[]): Observable<ActionResult<Series[]>> {
+    switch (action.action) {
+      case Action.MarkAsRead:
+        return this.readerService.markMultipleSeriesRead(series.map(s => s.id)).pipe(
+          tap(() => {
+            series.forEach(s => s.pagesRead = s.pages);
+            this.toastr.success(translate('toasts.mark-read'));
+          }),
+          map(() => this.fromAction(action, series, 'update'))
+        );
+
+      case Action.MarkAsUnread:
+        return this.readerService.markMultipleSeriesUnread(series.map(s => s.id)).pipe(
+          tap(() => {
+            series.forEach(s => s.pagesRead = 0);
+            this.toastr.success(translate('toasts.mark-unread'));
+          }),
+          map(() => this.fromAction(action, series, 'update'))
+        );
+
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-multiple-series', {count: series.length}))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.seriesService.deleteMultipleSeries(series.map(s => s.id))),
+          tap(res => {
+            if (res) {
+              this.toastr.success(translate('toasts.series-deleted'));
+            } else {
+              this.toastr.error(translate('errors.generic'));
+            }
+          }),
+          filter(res => res),
+          map(() => this.fromAction(action, series, 'remove'))
+        );
+
+      case Action.AddToReadingList: {
+        if (this.readingListModalRef != null) return EMPTY;
+        this.readingListModalRef = this.modalService.open(AddToListModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
+        this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id);
+        this.readingListModalRef.componentInstance.title = translate('actionable.multiple-selections');
+        this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple_Series;
+
+        const ref = this.readingListModalRef;
+        return new Observable<ActionResult<Series[]>>(subscriber => {
+          ref.closed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.next(this.fromAction(action, series, 'none'));
+            subscriber.complete();
+          });
+          ref.dismissed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.complete();
+          });
+        });
+      }
+
+      case Action.AddToCollection: {
+        if (this.collectionModalRef != null) return EMPTY;
+        this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, {scrollable: true, size: 'md', windowClass: 'collection', fullscreen: 'md'});
+        this.collectionModalRef.componentInstance.seriesIds = series.map(s => s.id);
+        this.collectionModalRef.componentInstance.title = translate('actionable.new-collection');
+
+        const ref = this.collectionModalRef;
+        return new Observable<ActionResult<Series[]>>(subscriber => {
+          ref.closed.subscribe(() => {
+            this.collectionModalRef = null;
+            subscriber.next(this.fromAction(action, series, 'none'));
+            subscriber.complete();
+          });
+          ref.dismissed.subscribe(() => {
+            this.collectionModalRef = null;
+            subscriber.complete();
+          });
+        });
+      }
+
+      case Action.AddToWantToReadList:
+        return this.memberService.addSeriesToWantToRead(series.map(s => s.id)).pipe(
+          tap(() => this.toastr.success(translate('toasts.series-added-want-to-read'))),
+          map(() => this.fromAction(action, series, 'none'))
+        );
+
+      case Action.RemoveFromWantToReadList:
+        return this.memberService.removeSeriesToWantToRead(series.map(s => s.id)).pipe(
+          tap(() => this.toastr.success(translate('toasts.series-removed-want-to-read'))),
+          map(() => this.fromAction(action, series, 'reload'))
+        );
+
+      case Action.SetReadingProfile: {
+        if (this.readingListModalRef != null) return EMPTY;
+        this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
+        this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id);
+
+        const ref = this.readingListModalRef;
+        return new Observable<ActionResult<Series[]>>(subscriber => {
+          ref.closed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.next(this.fromAction(action, series, 'none'));
+            subscriber.complete();
+          });
+          ref.dismissed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.complete();
+          });
+        });
+      }
+
+      default:
+        return of(this.fromAction(action, series, 'none'));
+    }
+  }
+
+  handleBulkVolumeChapterAction(action: ActionItem<any>, volumes: Volume[], chapters: Chapter[], seriesId: number): Observable<ActionResult<any[]>> {
+    switch (action.action) {
+      case Action.MarkAsRead:
+        return this.readerService.markMultipleRead(seriesId, volumes.map(v => v.id), chapters.map(c => c.id)).pipe(
+          tap(() => {
+            volumes.forEach(v => {
+              v.pagesRead = v.pages;
+              v.chapters?.forEach(c => c.pagesRead = c.pages);
+            });
+            chapters.forEach(c => c.pagesRead = c.pages);
+            this.toastr.success(translate('toasts.mark-read'));
+          }),
+          map(() => this.fromAction(action, [...volumes, ...chapters], 'update'))
+        );
+
+      case Action.MarkAsUnread:
+        return this.readerService.markMultipleUnread(seriesId, volumes.map(v => v.id), chapters.map(c => c.id)).pipe(
+          tap(() => {
+            volumes.forEach(v => {
+              v.pagesRead = 0;
+              v.chapters?.forEach(c => c.pagesRead = 0);
+            });
+            chapters.forEach(c => c.pagesRead = 0);
+            this.toastr.success(translate('toasts.mark-unread'));
+          }),
+          map(() => this.fromAction(action, [...volumes, ...chapters], 'update'))
+        );
+
+      case Action.AddToReadingList: {
+        if (this.readingListModalRef != null) return EMPTY;
+        this.readingListModalRef = this.modalService.open(AddToListModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
+        this.readingListModalRef.componentInstance.seriesId = seriesId;
+        this.readingListModalRef.componentInstance.volumeIds = volumes.map(v => v.id);
+        this.readingListModalRef.componentInstance.chapterIds = chapters.map(c => c.id);
+        this.readingListModalRef.componentInstance.title = translate('actionable.multiple-selections');
+        this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple;
+
+        const ref = this.readingListModalRef;
+        return new Observable<ActionResult<any[]>>(subscriber => {
+          ref.closed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.next(this.fromAction(action, [...volumes, ...chapters], 'none'));
+            subscriber.complete();
+          });
+          ref.dismissed.subscribe(() => {
+            this.readingListModalRef = null;
+            subscriber.complete();
+          });
+        });
+      }
+
+      case Action.SendTo: {
+        const device = action._extra!.data as Device;
+        const chapterIds = [
+          ...volumes.flatMap(v => v.chapters?.map(c => c.id) ?? []),
+          ...chapters.map(c => c.id)
+        ];
+        return this.deviceService.sendToEmailDevice(chapterIds, device.id).pipe(
+          tap(() => this.toastr.success(translate('toasts.file-send-to', {name: device.name}))),
+          map(() => this.fromAction(action, [...volumes, ...chapters], 'none'))
+        );
+      }
+
+      case Action.Delete: {
+        const entities = [...volumes, ...chapters];
+        const deleteOps: Observable<any>[] = [];
+
+        if (volumes.length > 0) {
+          deleteOps.push(
+            from(this.confirmService.confirm(translate('toasts.confirm-delete-multiple-volumes', {count: volumes.length}))).pipe(
+              filter(confirmed => confirmed),
+              switchMap(() => this.volumeService.deleteMultipleVolumes(volumes.map(v => v.id)))
+            )
+          );
+        }
+
+        if (chapters.length > 0) {
+          deleteOps.push(
+            from(this.confirmService.confirm(translate('toasts.confirm-delete-multiple-chapters', {count: chapters.length}))).pipe(
+              filter(confirmed => confirmed),
+              switchMap(() => this.chapterService.deleteMultipleChapters(seriesId, chapters.map(c => c.id)))
+            )
+          );
+        }
+
+        if (deleteOps.length === 0) return EMPTY;
+
+        return from(deleteOps).pipe(
+          switchMap(op => op),
+          map(() => this.fromAction(action, entities, 'remove'))
+        );
+      }
+
+      default:
+        return of(this.fromAction(action, [...volumes, ...chapters], 'none'));
+    }
+  }
+
+  handleBulkBookmarkAction(action: ActionItem<any>, bookmarks: PageBookmark[], seriesIds: number[]): Observable<ActionResult<PageBookmark[]>> {
+    switch (action.action) {
+      case Action.DownloadBookmark:
+        this.downloadService.download('bookmark', bookmarks);
+        return of(this.fromAction(action, bookmarks, 'none'));
+
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('bookmarks.confirm-single-delete', {seriesName: ''}))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.readerService.clearMultipleBookmarks(seriesIds)),
+          tap(() => this.toastr.success(translate('bookmarks.delete-single-success'))),
+          map(() => this.fromAction(action, bookmarks, 'remove'))
+        );
+
+      default:
+        return of(this.fromAction(action, bookmarks, 'none'));
+    }
+  }
+
+  handleBulkCollectionAction(action: ActionItem<any>, collections: UserCollection[]): Observable<ActionResult<UserCollection[]>> {
+    switch (action.action) {
+      case Action.Promote:
+        return this.collectionTagService.promoteMultipleCollections(collections.map(c => c.id), true).pipe(
+          tap(() => this.toastr.success(translate('toasts.collections-promoted'))),
+          map(() => this.fromAction(action, collections.map(c => ({...c, promoted: true})), 'update'))
+        );
+
+      case Action.UnPromote:
+        return this.collectionTagService.promoteMultipleCollections(collections.map(c => c.id), false).pipe(
+          tap(() => this.toastr.success(translate('toasts.collections-unpromoted'))),
+          map(() => this.fromAction(action, collections.map(c => ({...c, promoted: false})), 'update'))
+        );
+
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-collections'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.collectionTagService.deleteMultipleCollections(collections.map(c => c.id))),
+          tap(() => this.toastr.success(translate('toasts.collections-deleted'))),
+          map(() => this.fromAction(action, collections, 'remove'))
+        );
+
+      default:
+        return of(this.fromAction(action, collections, 'none'));
+    }
+  }
+
+  handleBulkReadingListAction(action: ActionItem<any>, readingLists: ReadingList[]): Observable<ActionResult<ReadingList[]>> {
+    switch (action.action) {
+      case Action.Promote:
+        return this.readingListService.promoteMultipleReadingLists(readingLists.map(r => r.id), true).pipe(
+          tap(() => this.toastr.success(translate('toasts.reading-list-promoted'))),
+          map(() => this.fromAction(action, readingLists.map(r => ({...r, promoted: true})), 'update'))
+        );
+
+      case Action.UnPromote:
+        return this.readingListService.promoteMultipleReadingLists(readingLists.map(r => r.id), false).pipe(
+          tap(() => this.toastr.success(translate('toasts.reading-list-unpromoted'))),
+          map(() => this.fromAction(action, readingLists.map(r => ({...r, promoted: false})), 'update'))
+        );
+
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-reading-list'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.readingListService.deleteMultipleReadingLists(readingLists.map(r => r.id))),
+          tap(() => this.toastr.success(translate('toasts.reading-lists-deleted'))),
+          map(() => this.fromAction(action, readingLists, 'remove'))
+        );
+
+      default:
+        return of(this.fromAction(action, readingLists, 'none'));
+    }
+  }
+
+  handleBulkAnnotationAction(action: ActionItem<any>, annotations: Annotation[]): Observable<ActionResult<Annotation[]>> {
+    switch (action.action) {
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-annotations'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.annotationsService.bulkDelete(annotations.map(a => a.id))),
+          tap(() => this.toastr.success(translate('toasts.annotations-deleted'))),
+          map(() => this.fromAction(action, annotations, 'remove'))
+        );
+
+      case Action.Export:
+        return this.annotationsService.exportAnnotations(annotations.map(a => a.id)).pipe(
+          map(() => this.fromAction(action, annotations, 'none'))
+        );
+
+      case Action.Like:
+        return this.annotationsService.likeAnnotations(annotations.map(a => a.id)).pipe(
+          map(() => this.fromAction(action, annotations, 'update'))
+        );
+
+      case Action.UnLike:
+        return this.annotationsService.unLikeAnnotations(annotations.map(a => a.id)).pipe(
+          map(() => this.fromAction(action, annotations, 'update'))
+        );
+
+      default:
+        return of(this.fromAction(action, annotations, 'none'));
+    }
+  }
+
+  handleBulkSideNavStreamAction(action: ActionItem<any>, streams: SideNavStream[]): Observable<ActionResult<SideNavStream[]>> {
+    switch (action.action) {
+      case Action.MarkAsVisible:
+        return this.sideNavService.bulkToggleSideNavStreamVisibility(streams.map(s => s.id), true).pipe(
+          map(() => this.fromAction(action, streams.map(s => ({...s, visible: true})), 'update'))
+        );
+
+      case Action.MarkAsInvisible:
+        return this.sideNavService.bulkToggleSideNavStreamVisibility(streams.map(s => s.id), false).pipe(
+          map(() => this.fromAction(action, streams.map(s => ({...s, visible: false})), 'update'))
+        );
+
+      default:
+        return of(this.fromAction(action, streams, 'none'));
+    }
   }
 
   // -------------------------------------------

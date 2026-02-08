@@ -14,7 +14,6 @@ import {
 import {Title} from '@angular/platform-browser';
 import {Router} from '@angular/router';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Tag} from 'src/app/_models/tag';
@@ -28,7 +27,7 @@ import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {CollectionOwnerComponent} from "../collection-owner/collection-owner.component";
@@ -37,7 +36,6 @@ import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-opera
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {ActionService} from "../../../_services/action.service";
 import {WikiLink} from "../../../_models/wiki";
-import {DefaultModalOptions} from "../../../_models/default-modal-options";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {CardEntity, CardEntityFactory, CollectionCardEntity} from "../../../_models/card/card-entity";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
@@ -45,6 +43,7 @@ import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 
 @Component({
@@ -86,32 +85,32 @@ export class AllCollectionsComponent implements OnInit {
   collectionEntities = computed(() => this.collections().map(c => CardEntityFactory.collection(c)));
 
   collectionConfig = computed(() => {
-    const user = this.accountService.currentUserSignal();
-
-    // const actions = this.actionFactoryService.getCollectionTagActions(
-    //   this.handleCollectionActionCallback.bind(this), )
-    //   .filter(action => this.collectionService.actionListFilter(action, user!));
-
-  // TODO: Figure out how to do the Promote check for collections
     return this.cardConfigFactory.forCollection({shouldRenderAction: this.shouldRenderCollection.bind(this),
       titleRef: this.cardTitleTemplateRef(), metaTitleRef: this.cardSubtitleTemplateRef()});
-  })
+  });
 
   collectionTagActions: ActionItem<UserCollection>[] = [];
   jumpbarKeys: Array<JumpKey> = [];
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   trackByIdentity = (index: number, item: CollectionCardEntity) => `${item.data.id}_${item.data.title}_${item.data.owner}_${item.data.promoted}`;
-  user!: User;
 
 
   constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - ' + this.translocoService.translate('all-collections.title'));
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-      if (user) {
-        this.user = user;
-        this.cdRef.markForCheck();
+
+    this.bulkSelectionService.registerDataSource('collection', () => this.collections());
+    this.bulkSelectionService.registerPostAction((res: ActionResult<UserCollection[]>) => {
+      if (res.effect === 'none') return;
+      if (res.effect === 'update') {
+        const updatedItems = this.collections().map(item => {
+          const updated = res.entity.find(u => u.id === item.id);
+          return updated ? { ...updated } : item;
+        });
+        this.collections.set([...updatedItems]);
+        return;
       }
+      this.loadPage();
     });
   }
 
@@ -149,10 +148,6 @@ export class AllCollectionsComponent implements OnInit {
     }
   }
 
-  loadCollection(item: UserCollection) {
-    this.router.navigate(['collections', item.id]);
-  }
-
   loadPage() {
     this.isLoading = true;
     this.cdRef.markForCheck();
@@ -162,68 +157,5 @@ export class AllCollectionsComponent implements OnInit {
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(tags, (t: Tag) => t.title);
       this.cdRef.markForCheck();
     });
-  }
-
-  handleCollectionActionCallback(action: ActionItem<UserCollection>, collectionTag: UserCollection) {
-
-    if (collectionTag.owner != this.user.username) {
-      this.toastr.error(translate('toasts.collection-not-owned'));
-      return;
-    }
-
-    switch (action.action) {
-      case Action.Promote:
-        this.collectionService.promoteMultipleCollections([collectionTag.id], true).subscribe(_ => this.loadPage());
-        break;
-      case Action.UnPromote:
-        this.collectionService.promoteMultipleCollections([collectionTag.id], false).subscribe(_ => this.loadPage());
-        break;
-      case(Action.Delete):
-        this.collectionService.deleteTag(collectionTag.id).subscribe(res => {
-          this.loadPage();
-          this.toastr.success(res);
-        });
-        break;
-      case(Action.Edit):
-        const modalRef = this.modalService.open(EditCollectionTagsComponent, DefaultModalOptions);
-        modalRef.componentInstance.tag = collectionTag;
-        modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
-          if (results.success) {
-            this.loadPage();
-          }
-        });
-        break;
-      default:
-        break;
-    }
-  }
-
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedCollectionIndexies = this.bulkSelectionService.getSelectedCardsForSource('collection');
-    const selectedCollections = this.collections().filter((col, index: number) => selectedCollectionIndexies.includes(index + ''));
-
-    switch (action.action) {
-      case Action.Promote:
-        this.actionService.promoteMultipleCollections(selectedCollections, true, (success) => {
-          if (!success) return;
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-      case Action.UnPromote:
-        this.actionService.promoteMultipleCollections(selectedCollections, false, (success) => {
-          if (!success) return;
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-      case Action.Delete:
-        this.actionService.deleteMultipleCollections(selectedCollections, (successful) => {
-          if (!successful) return;
-          this.loadPage();
-          this.bulkSelectionService.deselectAll();
-        });
-        break;
-    }
   }
 }

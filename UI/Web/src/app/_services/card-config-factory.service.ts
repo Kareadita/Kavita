@@ -175,7 +175,7 @@ export class CardConfigFactory {
       ariaLabelFunc: (s) => s.series!.name,
       titleRouteParamsFunc: (s) => {return { bookmarkMode: true }},
 
-      actionableFunc: (s) => this.actionFactory.getBookmarkActions(s.series!.id, s.series!.libraryId, s.series!.name),
+      actionableFunc: (s) => this.actionFactory.getBookmarkActions(() => ({seriesId: s.series!.id, libraryId: s.series!.libraryId, seriesName: s.series!.name}), params?.shouldRenderAction),
 
       readFunc: (s) => this.router.navigate(['library', s.series!.libraryId, 'series', s.seriesId, 'manga', s.chapterId], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
       clickFunc: (s) => this.router.navigate(['library', s.series!.libraryId, 'series', s.seriesId, 'manga', s.chapterId], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
@@ -290,7 +290,7 @@ export class CardConfigFactory {
    */
   forCollection(params?: ConfigCardFactoryActionableParameters<UserCollection>): ActionableCardConfiguration<UserCollection> {
     const defaults: ActionableCardConfiguration<UserCollection> = {
-      allowSelection: false,
+      allowSelection: true,
       selectionType: 'collection',
       suppressArchiveWarning: true,
 

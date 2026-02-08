@@ -43,7 +43,6 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
 import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
 import {MetadataService} from "../_services/metadata.service";
-import {ToastrService} from "ngx-toastr";
 import {ActionItem} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";
 import {ActionResult} from "../_models/actionables/action-result";
@@ -73,7 +72,6 @@ export class LibraryDetailComponent implements OnInit {
   public readonly navService = inject(NavService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly metadataService = inject(MetadataService);
-  private readonly toastr = inject(ToastrService);
 
   libraryId!: number;
   libraryName = '';
@@ -189,6 +187,11 @@ export class LibraryDetailComponent implements OnInit {
     });
 
     this.actions = this.actionFactoryService.getLibraryActions();
+    this.bulkSelectionService.registerDataSource('series', () => this.series);
+    this.bulkSelectionService.registerPostAction((res: ActionResult<Series>) => {
+      if (res.effect === 'none') return;
+      this.loadPage();
+    });
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.filter = data['filter'] as FilterV2<FilterField, SortField>;

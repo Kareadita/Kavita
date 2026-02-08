@@ -39,8 +39,6 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {Select2Option} from "ng-select2-component";
-import {ActionItem} from "../../../_models/actionables/action-item";
-import {Action} from "../../../_models/actionables/action";
 
 
 @Component({
@@ -79,60 +77,16 @@ export class AllSeriesComponent implements OnInit {
   jumpbarKeys: Array<JumpKey> = [];
   browseTitlePipe = new BrowseTitlePipe();
 
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
-
-    switch (action.action) {
-      case Action.AddToReadingList:
-        this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-        });
-        break;
-      case Action.AddToWantToReadList:
-        this.actionService.addMultipleSeriesToWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-        });
-        break;
-      case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-        });
-        break;
-      case Action.AddToCollection:
-        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-        });
-        break;
-      case Action.MarkAsRead:
-        this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
-          this.loadPage();
-          this.bulkSelectionService.deselectAll();
-        });
-
-        break;
-      case Action.MarkAsUnread:
-        this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
-          this.loadPage();
-          this.bulkSelectionService.deselectAll();
-        });
-        break;
-      case Action.Delete:
-        this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
-          if (!successful) return;
-          this.loadPage();
-          this.bulkSelectionService.deselectAll();
-        });
-        break;
-    }
-  }
-
-
-
 
   constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
+    this.bulkSelectionService.registerDataSource('series', () => this.series);
+    this.bulkSelectionService.registerPostAction(res => {
+      if (res.effect === 'none') return;
+
+      this.loadPage();
+    })
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.filter = data['filter'] as FilterV2<FilterField, SortField>;

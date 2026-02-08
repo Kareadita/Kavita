@@ -77,6 +77,12 @@ export class ReadingListsComponent implements OnInit {
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));
     this.loadPage();
+
+    this.bulkSelectionService.registerDataSource('readingList', () => this.lists());
+    this.bulkSelectionService.registerPostAction((res: ActionResult<ReadingList>) => {
+      if (res.effect === 'none') return;
+      this.loadPage();
+    });
   }
 
   performGlobalAction(event: ActionItem<void> | ActionResult<void>) {
@@ -116,35 +122,6 @@ export class ReadingListsComponent implements OnInit {
       this.loadingLists = false;
       this.cdRef.markForCheck();
     });
-  }
-
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedReadingListIndexies = this.bulkSelectionService.getSelectedCardsForSource('readingList');
-    const selectedReadingLists = this.lists().filter((col, index: number) => selectedReadingListIndexies.includes(index + ''));
-
-    switch (action.action) {
-      case Action.Promote:
-        this.actionService.promoteMultipleReadingLists(selectedReadingLists, true, (success) => {
-          if (!success) return;
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-      case Action.UnPromote:
-        this.actionService.promoteMultipleReadingLists(selectedReadingLists, false, (success) => {
-          if (!success) return;
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-      case Action.Delete:
-        this.actionService.deleteMultipleReadingLists(selectedReadingLists, (successful) => {
-          if (!successful) return;
-          this.loadPage();
-          this.bulkSelectionService.deselectAll();
-        });
-        break;
-    }
   }
 
   shouldRenderReadingListAction(action: ActionItem<ReadingList>, entity: ReadingList, user: User) {

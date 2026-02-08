@@ -1,13 +1,37 @@
 import {inject, Injectable} from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
-import {ReplaySubject} from 'rxjs';
+import {Observable, ReplaySubject, tap} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {ActionFactoryService} from '../_services/action-factory.service';
+import {ActionService} from '../_services/action.service';
 import {toSignal} from "@angular/core/rxjs-interop";
-import {ActionItem} from "../_models/actionables/action-item";
+import {ActionItem, ActionShouldRenderFunc} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";
+import {ActionResult} from "../_models/actionables/action-result";
+import {LibraryType} from "../_models/library/library";
+import {Volume} from "../_models/volume";
+import {Chapter} from "../_models/chapter";
+import {Series} from "../_models/series";
+import {PageBookmark} from "../_models/readers/page-bookmark";
+import {UserCollection} from "../_models/collection-tag";
+import {ReadingList} from "../_models/reading-list";
+import {Annotation} from "../book-reader/_models/annotations/annotation";
+import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 
-export type BulkSelectionEntityDataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'sideNavStream' | 'collection' | 'readingList' | 'annotations';
+export type BulkSelectionEntityDataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'bookmarkData' | 'sideNavStream' | 'collection' | 'readingList' | 'annotations';
+
+/** a closure over a signal/array, called at trigger time **/
+export type BulkDataGetter<T> = () => T[];
+/** provides seriesId/libraryId/libraryType for volume/chapter ops **/
+export type BulkContextGetter = () => { seriesId: number; libraryId: number; libraryType?: LibraryType; };
+export interface BulkResolvedEntities {
+  volumes: Volume[];
+  chapters: Chapter[];  // includes specials
+}
+/** series-detail's custom resolver for mixed volume/chapter/special selections **/
+export type BulkEntityResolver = () => BulkResolvedEntities;
+
+export type BulkCallback = ((result: ActionResult<any>) => void);
 
 /**
  * Responsible for handling selections on cards. Can handle multiple card sources next to each other in different loops.
@@ -20,9 +44,16 @@ export type BulkSelectionEntityDataSource = 'volume' | 'chapter' | 'special' | '
 })
 export class BulkSelectionService {
   private actionFactory = inject(ActionFactoryService);
+  private actionService = inject(ActionService);
+
+  private dataGetters = new Map<BulkSelectionEntityDataSource, BulkDataGetter<any>>();
+  private contextGetter: BulkContextGetter | null = null;
+  private entityResolver: BulkEntityResolver | null = null;
+  private postActionCallback: BulkCallback | null = null;
+  private registeredShouldRender: ActionShouldRenderFunc<any> | null = null;
 
 
-  private debug: boolean = false;
+  private debug: boolean = true;
   private prevIndex: number = 0;
   private prevDataSource!: BulkSelectionEntityDataSource;
   private selectedCards: { [key: string]: {[key: number]: boolean} } = {};
@@ -48,6 +79,7 @@ export class BulkSelectionService {
         this.deselectAll();
         this.dataSourceMax = {};
         this.prevIndex = 0;
+        this.clearRegistrations();
       });
   }
 
@@ -80,7 +112,7 @@ export class BulkSelectionService {
     this.prevDataSource = dataSource;
     this.debugLog("Setting max for " + dataSource + " to " + maxIndex);
     this.dataSourceMax[dataSource] = maxIndex;
-    this.actionsSource.next(this.getActions(() => {}));
+    this.actionsSource.next(this.getActions());
   }
 
   isCardSelected(dataSource: BulkSelectionEntityDataSource, index: number) {
@@ -148,40 +180,157 @@ export class BulkSelectionService {
   }
 
   /**
-   * Returns the appropriate set of supported actions for the given mix of cards
-   * @param callback
+   * Returns the appropriate set of supported actions for the given mix of cards, pre-wired with callback2.
    */
-  getActions(callback: (action: ActionItem<any>, data: any) => void) {
+  getActions(): ActionItem<any>[] {
     const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection,
       Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList, Action.SetReadingProfile];
+    const shouldRender = this.registeredShouldRender ?? this.actionFactory.dummyShouldRender;
 
-    if (Object.keys(this.selectedCards).filter(item => item === 'series').length > 0) {
-      return this.applyFilterToList(this.actionFactory.getSeriesActions(), allowedActions);
+    if (this.hasDataSource('series')) {
+      const actions = this.applyFilterToList(this.actionFactory.getSeriesActions(shouldRender), allowedActions);
+      return this.wireBulkCallback(actions, (action) => {
+        const series = this.resolveEntities<Series>('series');
+        return this.actionService.handleBulkSeriesAction(action, series);
+      });
     }
 
-    if (Object.keys(this.selectedCards).filter(item => item === 'bookmark').length > 0) {
-      return this.applyFilterToList(this.actionFactory.getBookmarkActions(0, 0, 'TODO'), [Action.DownloadBookmark, Action.Delete]);
+    if (this.hasDataSource('bookmark')) {
+      const actions = this.applyFilterToList(this.actionFactory.getBookmarkActions(() => ({seriesId: 0, libraryId: 0, seriesName: ''})), [Action.DownloadBookmark, Action.Delete]);
+      return this.wireBulkCallback(actions, (action) => {
+        const selectedSeries = this.resolveEntities<any>('bookmark');
+        const seriesIds = selectedSeries.map((s: any) => s.id);
+        const allBookmarks: PageBookmark[] = this.dataGetters.get('bookmarkData' as any)?.() ?? [];
+        const relevantBookmarks = allBookmarks.filter(b => seriesIds.includes(b.seriesId));
+        return this.actionService.handleBulkBookmarkAction(action, relevantBookmarks, seriesIds);
+      });
     }
 
-    if (Object.keys(this.selectedCards).filter(item => item === 'sideNavStream').length > 0) {
-      return this.applyFilterToList(this.actionFactory.getSideNavStreamActions(), [Action.MarkAsInvisible, Action.MarkAsVisible]);
+    if (this.hasDataSource('sideNavStream')) {
+      const actions = this.applyFilterToList(this.actionFactory.getSideNavStreamActions(shouldRender), [Action.MarkAsInvisible, Action.MarkAsVisible]);
+      return this.wireBulkCallback(actions, (action) => {
+        const streams = this.resolveEntities<SideNavStream>('sideNavStream');
+        return this.actionService.handleBulkSideNavStreamAction(action, streams);
+      });
     }
 
-    if (Object.keys(this.selectedCards).filter(item => item === 'collection').length > 0) {
-      return this.applyFilterToList(this.actionFactory.getCollectionTagActions(), [Action.Promote, Action.UnPromote, Action.Delete]);
+    if (this.hasDataSource('collection')) {
+      const actions = this.applyFilterToList(this.actionFactory.getCollectionTagActions(shouldRender), [Action.Promote, Action.UnPromote, Action.Delete]);
+      return this.wireBulkCallback(actions, (action) => {
+        const collections = this.resolveEntities<UserCollection>('collection');
+        return this.actionService.handleBulkCollectionAction(action, collections);
+      });
     }
 
-    if (Object.keys(this.selectedCards).filter(item => item === 'readingList').length > 0) {
-      return this.applyFilterToList(this.actionFactory.getReadingListActions(), [Action.Promote, Action.UnPromote, Action.Delete]);
+    if (this.hasDataSource('readingList')) {
+      const actions = this.applyFilterToList(this.actionFactory.getReadingListActions(shouldRender), [Action.Promote, Action.UnPromote, Action.Delete]);
+      return this.wireBulkCallback(actions, (action) => {
+        const readingLists = this.resolveEntities<ReadingList>('readingList');
+        return this.actionService.handleBulkReadingListAction(action, readingLists);
+      });
     }
 
-    if (Object.keys(this.selectedCards).filter(item => item === 'annotations').length > 0) {
-      return this.actionFactory.getAnnotationActions();
+    if (this.hasDataSource('annotations')) {
+      const actions = this.actionFactory.getAnnotationActions(shouldRender);
+      return this.wireBulkCallback(actions, (action) => {
+        const annotations = this.resolveEntities<Annotation>('annotations');
+        return this.actionService.handleBulkAnnotationAction(action, annotations);
+      });
     }
 
-    // TODO: This is more complicated as we need some extra state
-    // Chapter/Volume
-    return this.applyFilterToList(this.actionFactory.getVolumeActions(0, 0, 0), [...allowedActions, Action.SendTo]);
+    // Volume/Chapter/Special (series-detail or volume-detail)
+    {
+      if (this.contextGetter == null) {
+        throw new Error("ContextGetter must be set for volume/chapter/special");
+      }
+      const ctx = this.contextGetter();
+      const actions = this.applyFilterToList(this.actionFactory.getVolumeActions(ctx.seriesId, ctx.libraryId, ctx.libraryType!, shouldRender), [...allowedActions, Action.SendTo]);
+      return this.wireBulkCallback(actions, (action) => {
+        let volumes: Volume[];
+        let chapters: Chapter[];
+
+        if (this.entityResolver) {
+          const resolved = this.entityResolver();
+          volumes = resolved.volumes;
+          chapters = resolved.chapters;
+        } else {
+          volumes = this.resolveEntities<Volume>('volume');
+          chapters = this.resolveEntities<Chapter>('chapter');
+        }
+
+        return this.actionService.handleBulkVolumeChapterAction(action, volumes, chapters, ctx.seriesId);
+      });
+    }
+  }
+
+  registerDataSource(key: BulkSelectionEntityDataSource, getter: BulkDataGetter<any>) {
+    this.dataGetters.set(key, getter);
+  }
+
+  registerContext(getter: BulkContextGetter) {
+    this.contextGetter = getter;
+  }
+
+  registerResolver(resolver: BulkEntityResolver) {
+    this.entityResolver = resolver;
+  }
+
+  registerPostAction(callback: BulkCallback) {
+    this.postActionCallback = callback;
+  }
+
+  registerShouldRender(func: ActionShouldRenderFunc<any>) {
+    this.registeredShouldRender = func;
+  }
+
+  /**
+   * Resolves the selected entities for a given data source by intersecting registered getter data with selected card indices.
+   */
+  resolveEntities<T>(dataSource: BulkSelectionEntityDataSource): T[] {
+    const getter = this.dataGetters.get(dataSource);
+    if (!getter) return [];
+    const allItems: T[] = getter();
+    const selectedIndices = this.getSelectedCardsForSource(dataSource);
+    return allItems.filter((_, i) => selectedIndices.includes(i + ''));
+  }
+
+  private hasDataSource(key: BulkSelectionEntityDataSource): boolean {
+    return Object.keys(this.selectedCards).includes(key);
+  }
+
+  /**
+   * Wires callback2 on each action (and children recursively) so that triggering
+   * the action resolves entities at trigger time, calls the bulk handler, then
+   * auto-deselects and fires the post-action callback.
+   */
+  private wireBulkCallback(
+    actions: ActionItem<any>[],
+    handler: (action: ActionItem<any>) => Observable<ActionResult<any>>
+  ): ActionItem<any>[] {
+    const wire = (action: ActionItem<any>) => {
+      action.callback2 = (act: ActionItem<any>, _entity: any) => {
+        return handler(act).pipe(
+          tap((act) => {
+            this.deselectAll();
+            this.postActionCallback?.(act);
+          })
+        );
+      };
+      if (action.children?.length) {
+        action.children = action.children.map(c => ({...c}));
+        action.children.forEach(c => wire(c));
+      }
+    };
+    actions.forEach(a => wire(a));
+    return actions;
+  }
+
+  private clearRegistrations() {
+    this.dataGetters.clear();
+    this.contextGetter = null;
+    this.entityResolver = null;
+    this.postActionCallback = null;
+    this.registeredShouldRender = null;
   }
 
   private debugLog(message: string, extraData?: any) {

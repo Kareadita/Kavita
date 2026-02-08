@@ -44,6 +44,7 @@ import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 
 @Component({
@@ -54,12 +55,12 @@ import {Action} from "../../../_models/actionables/action";
     imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
 })
 export class WantToReadComponent implements OnInit, AfterContentChecked {
-  imageService = inject(ImageService);
+  protected imageService = inject(ImageService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private seriesService = inject(SeriesService);
   private titleService = inject(Title);
-  bulkSelectionService = inject(BulkSelectionService);
+  protected bulkSelectionService = inject(BulkSelectionService);
   private actionService = inject(ActionService);
   private messageHub = inject(MessageHubService);
   private filterUtilityService = inject(FilterUtilitiesService);
@@ -106,8 +107,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  collectionTag: any;
-
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
@@ -122,6 +121,11 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   constructor() {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
       this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
+
+      this.bulkSelectionService.registerDataSource('series', () => this.series);
+      this.bulkSelectionService.registerPostAction((result: ActionResult<Series>) => {
+        this.loadPage();
+      });
 
 
       this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {

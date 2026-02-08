@@ -115,6 +115,14 @@ export class BookmarksComponent {
       this.cdRef.markForCheck();
     });
 
+    this.bulkSelectionService.registerDataSource('bookmark', () => this.series());
+    this.bulkSelectionService.registerDataSource('bookmarkData', () => this.bookmarks());
+    this.bulkSelectionService.registerPostAction(res => {
+      if (res.effect === 'none') return;
+
+      this.loadPage();
+    });
+
 
     this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
   }
