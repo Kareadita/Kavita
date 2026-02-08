@@ -77,7 +77,7 @@ export class ManageLibraryComponent implements OnInit {
   protected readonly Action = Action;
 
   actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-  bulkActions = this.actionFactoryService.getBulkLibraryActions(this.handleBulkAction.bind(this));
+  bulkActions = this.actionFactoryService.getBulkLibraryActions();
   libraries: Library[] = [];
   loading = false;
   /**
@@ -274,14 +274,14 @@ export class ManageLibraryComponent implements OnInit {
 
   async handleBulkAction(event: ActionItem<Library> | ActionResult<Library>) {
     // Skip ActionResults — they've already been handled
-    if ('effect' in event) return;
-
-    const action = event as ActionItem<Library>;
-    //Library is null for bulk actions
-    this.bulkAction = action.action;
+    // if ('effect' in event) return;
+    //
+    // const action = event as ActionItem<Library>;
+    // //Library is null for bulk actions
+    this.bulkAction = event.action;
     this.cdRef.markForCheck();
 
-    switch (action.action) {
+    switch (event.action) {
       case(Action.Scan):
       case(Action.RefreshMetadata):
       case(Action.GenerateColorScape):

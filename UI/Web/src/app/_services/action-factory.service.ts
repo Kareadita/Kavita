@@ -193,10 +193,71 @@ export class ActionFactoryService {
     return actions;
   }
 
-
-  getSideNavHomeActions(callback: ActionCallback<void>, shouldRenderFunc: ActionShouldRenderFunc<void> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.sideNavHomeActions, callback, shouldRenderFunc);
+  getSideNavHomeActions(shouldRenderFunc: ActionShouldRenderFunc<{}> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.sideNavHomeActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleSideNavHomeStream(action, entity)
+    );
+    return actions;
   }
+
+  getBulkLibraryActions(shouldRenderFunc: ActionShouldRenderFunc<Library> = this.basicReadRender) {
+
+    const filteredActions = this.flattenActions<Library>(this.libraryActions).filter(a => {
+      return [Action.Delete, Action.GenerateColorScape, Action.RefreshMetadata, Action.CopySettings].includes(a.action);
+    });
+
+    filteredActions.push({
+      _extra: undefined,
+      class: undefined,
+      description: '',
+      dynamicList: undefined,
+      action: Action.CopySettings,
+      callback: this.dummyCallback,
+      shouldRender: shouldRenderFunc,
+      children: [],
+      requiredRoles: [Role.Admin],
+      requiresAdmin: true,
+      title: 'copy-settings'
+    });
+
+    const actions = this.applyCallbackToList(
+      filteredActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleBulkLibraryAction(action, entity)
+    );
+    return actions;
+  }
+
+  // getBulkLibraryActions(callback: ActionCallback<Library>, shouldRenderFunc:  ActionShouldRenderFunc<Library> = this.dummyShouldRender) {
+  //
+  //   // Scan is currently not supported due to the backend not being able to handle it yet
+  //   const actions = this.flattenActions<Library>(this.libraryActions).filter(a => {
+  //     return [Action.Delete, Action.GenerateColorScape, Action.RefreshMetadata, Action.CopySettings].includes(a.action);
+  //   });
+  //
+  //   actions.push({
+  //     _extra: undefined,
+  //     class: undefined,
+  //     description: '',
+  //     dynamicList: undefined,
+  //     action: Action.CopySettings,
+  //     callback: this.dummyCallback,
+  //     shouldRender: shouldRenderFunc,
+  //     children: [],
+  //     requiredRoles: [Role.Admin],
+  //     requiresAdmin: true,
+  //     title: 'copy-settings'
+  //   })
+  //   return this.applyCallbackToList(actions, callback, shouldRenderFunc) as ActionItem<Library>[];
+  // }
 
   dummyCallback(action: ActionItem<any>, entity: any) {}
   dummyShouldRender(action: ActionItem<any>, entity: any, user: User) {return true;}
@@ -253,29 +314,6 @@ export class ActionFactoryService {
 
     // Filter out tasks that don't make sense
     return tasks.filter(t => !blacklist.includes(t.action));
-  }
-
-  getBulkLibraryActions(callback: ActionCallback<Library>, shouldRenderFunc:  ActionShouldRenderFunc<Library> = this.dummyShouldRender) {
-
-    // Scan is currently not supported due to the backend not being able to handle it yet
-    const actions = this.flattenActions<Library>(this.libraryActions).filter(a => {
-      return [Action.Delete, Action.GenerateColorScape, Action.RefreshMetadata, Action.CopySettings].includes(a.action);
-    });
-
-    actions.push({
-      _extra: undefined,
-      class: undefined,
-      description: '',
-      dynamicList: undefined,
-      action: Action.CopySettings,
-      callback: this.dummyCallback,
-      shouldRender: shouldRenderFunc,
-      children: [],
-      requiredRoles: [Role.Admin],
-      requiresAdmin: true,
-      title: 'copy-settings'
-    })
-    return this.applyCallbackToList(actions, callback, shouldRenderFunc) as ActionItem<Library>[];
   }
 
   flattenActions<T>(actions: Array<ActionItem<T>>): Array<ActionItem<T>> {

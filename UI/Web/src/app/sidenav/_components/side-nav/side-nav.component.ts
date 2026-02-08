@@ -68,7 +68,7 @@ export class SideNavComponent implements OnInit {
 
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-  homeActions: ActionItem<void>[] = this.actionFactoryService.getSideNavHomeActions(this.handleHomeAction.bind(this));
+  homeActions: ActionItem<void>[] = this.actionFactoryService.getSideNavHomeActions();
 
   filterQuery: string = '';
   filterLibrary = (stream: SideNavStream) => {
@@ -217,19 +217,9 @@ export class SideNavComponent implements OnInit {
     }
   }
 
-  performAction(action: ActionItem<Library>, library: Library) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, library);
-    }
-  }
-
   performHomeAction(event: ActionItem<void> | ActionResult<void>) {
-
-    // Skip ActionResults — they've already been handled
-    if ('effect' in event) return;
-
-    if (typeof event.callback === 'function') {
-      event.callback(event)
+    if (event.action === Action.Edit) {
+      this.showMore(true);
     }
   }
 
