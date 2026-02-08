@@ -64,6 +64,7 @@ export class CardActionablesComponent implements OnDestroy {
   performAction(event: any, action: ActionItem<ActionableEntity>) {
     this.preventEvent(event);
 
+    // BUG: This is preventing smart filter/carousel usage
     if (this.entity() === null) {
       this.actionHandler.emit(action);
       return;

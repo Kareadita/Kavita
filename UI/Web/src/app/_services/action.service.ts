@@ -55,6 +55,10 @@ import {ClientDevice} from "../_models/client-device";
 import {Person} from "../_models/metadata/person";
 import {EditPersonModalComponent} from "../person-detail/_modal/edit-person-modal/edit-person-modal.component";
 import {MergePersonModalComponent} from "../person-detail/_modal/merge-person-modal/merge-person-modal.component";
+import {SmartFilter} from "../_models/metadata/v2/smart-filter";
+import {
+  EditSmartFilterModalComponent
+} from "../sidenav/_components/edit-smart-filter-modal/edit-smart-filter-modal.component";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -618,6 +622,10 @@ export class ActionService {
     }
   }
 
+  /**
+   * Centralized handler for all person actions.
+   * Returns Observable<ActionResult<Person>> so the caller can react to effects.
+   */
   handlePersonAction(action: ActionItem<Person>, person: Person) {
     switch (action.action) {
       case Action.Edit:
@@ -646,6 +654,29 @@ export class ActionService {
     }
   }
 
+  handleSmartFilterAction(action: ActionItem<SmartFilter>, smartFilter: SmartFilter, allFilters: SmartFilter[]) {
+    switch (action.action) {
+      case Action.Edit:
+        const ref = this.modalService.open(EditSmartFilterModalComponent, DefaultModalOptions);
+        ref.componentInstance.smartFilter = smartFilter;
+        ref.componentInstance.allFilters = allFilters;
+        return from(ref.closed).pipe(
+          filter(success => success),
+          map((res: boolean) =>
+            this.fromAction(action, smartFilter, 'update')
+          )
+        );
+      case Action.Delete:
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-smart-filter'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.collectionService.deleteTag(smartFilter.id)),
+          tap(() => this.toastr.success(translate('toasts.smart-filter-deleted'))),
+          map(() => this.fromAction(action, smartFilter, 'remove'))
+        );
+      default:
+        return of(this.fromAction(action, smartFilter, 'none'));
+    }
+  }
   // -------------------------------------------
   //      INDIVIDUAL HANDLERS
   // -------------------------------------------

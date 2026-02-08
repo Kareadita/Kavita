@@ -168,15 +168,22 @@ export class ActionFactoryService {
     return actions;
   }
 
+  getSmartFilterActions(allFilters: SmartFilter[], shouldRenderFunc: ActionShouldRenderFunc<SmartFilter> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.smartFilterActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleSmartFilterAction(action, entity, allFilters)
+    );
+    return actions;
+  }
+
   getSideNavStreamActions(callback: ActionCallback<SideNavStream>, shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.sideNavStreamActions, callback, shouldRenderFunc);
   }
-
-  getSmartFilterActions(callback: ActionCallback<SmartFilter>, shouldRenderFunc: ActionShouldRenderFunc<SmartFilter> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.smartFilterActions, callback, shouldRenderFunc);
-  }
-
-
+  
   getSideNavHomeActions(callback: ActionCallback<void>, shouldRenderFunc: ActionShouldRenderFunc<void> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.sideNavHomeActions, callback, shouldRenderFunc);
   }

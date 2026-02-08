@@ -23,6 +23,7 @@ import {map, Observable, tap} from "rxjs";
 import {PaginatedResult} from "../../../_models/pagination";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {ActionableEntity} from "../../../_services/action-factory.service";
 
 register();
 
@@ -62,8 +63,14 @@ export class CarouselReelComponent {
    * Actionables to render to the left of the title
    */
   @Input() actionables: Array<ActionItem<any>> = [];
+  /**
+   * If using actionables, this is the entity to allow Action.Service to handle logic
+   */
+  @Input() actionableEntity: ActionableEntity = null;
   @Output() sectionClick = new EventEmitter<string>();
   @Output() handleAction = new EventEmitter<ActionItem<any>>();
+
+  @Output() actionHandler = new EventEmitter<ActionResult<any>>();
 
   currentPage = signal<number>(1);
   pageSize = input(20);
@@ -143,9 +150,12 @@ export class CarouselReelComponent {
     this.cdRef.markForCheck();
   }
 
-  performAction(event: ActionItem<void> | ActionResult<void>) {
-    // Skip ActionResults — they've already been handled
-    if ('effect' in event) return;
+  performAction(event: ActionItem<any> | ActionResult<any>) {
+    console.log('carousel handling action: ', event);
+    if ('effect' in event) {
+      this.actionHandler.emit(event);
+      return;
+    }
 
     if (typeof event.callback === 'function') {
       event.callback(event, undefined)
