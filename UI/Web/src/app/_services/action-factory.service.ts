@@ -193,9 +193,16 @@ export class ActionFactoryService {
     return actions;
   }
 
-
-  getSideNavHomeActions(callback: ActionCallback<void>, shouldRenderFunc: ActionShouldRenderFunc<void> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.sideNavHomeActions, callback, shouldRenderFunc);
+  getSideNavHomeActions(shouldRenderFunc: ActionShouldRenderFunc<{}> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.sideNavHomeActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleSideNavHomeStream(action, entity)
+    );
+    return actions;
   }
 
   dummyCallback(action: ActionItem<any>, entity: any) {}

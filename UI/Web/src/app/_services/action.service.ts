@@ -706,6 +706,19 @@ export class ActionService {
     }
   }
 
+  /**
+   * Centralized handler for all side nav home stream actions.
+   * Returns Observable<ActionResult<{}>> so the caller can react to effects.
+   */
+  handleSideNavHomeStream(action: ActionItem<{}>, entity: {}) {
+    switch (action.action) {
+      case Action.Edit:
+        return of(this.fromAction(action, entity, 'none'));
+
+      default:
+        return of(this.fromAction(action, entity, 'none'));
+    }
+  }
 
   // -------------------------------------------
   //      INDIVIDUAL HANDLERS
