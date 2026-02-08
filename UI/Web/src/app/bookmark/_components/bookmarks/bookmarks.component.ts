@@ -77,9 +77,9 @@ export class BookmarksComponent {
   });
   series = computed(() => this.bookmarks().map(b => b.series!));
   bookmarkConfig = computed(() => {
-    return this.cardConfigFactory.forBookmark({
-      countFunc: entity => this.seriesIds[entity.seriesId],
-    });
+    return this.cardConfigFactory.forBookmark({overrides: {
+        countFunc: entity => this.seriesIds[entity.seriesId],
+      }});
   });
 
   loadingBookmarks: boolean = false;

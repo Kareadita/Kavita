@@ -45,7 +45,7 @@ export class RelatedTabComponent {
 
   readingLists = input<ReadingList[]>([]);
   readingListEntities = computed(() => this.readingLists().map(r => CardEntityFactory.readingList(r)));
-  readingListConfig = computed(() => this.cardConfigFactory.forReadingList(undefined, undefined, {actionableFunc: () => []}));
+  readingListConfig = computed(() => this.cardConfigFactory.forReadingList({overrides: {actionableFunc: () => []}}));
 
   collections = input<UserCollection[]>([]);
   collectionEntities = computed(() => this.collections().map(c => CardEntityFactory.collection(c)));
@@ -56,10 +56,12 @@ export class RelatedTabComponent {
   bookmarkEntities = computed(() => this.bookmarks().map(b => CardEntityFactory.bookmark(b)));
   bookmarkConfig = computed(() => {
     return this.cardConfigFactory.forBookmark({
-      titleFunc: (d) => translate('related-tab.bookmarks-title'),
-      coverFunc: (d) => this.imageService.getSeriesCoverImage(d.seriesId),
-      metaTitleFunc: d => '',
-      allowSelection: false
+      overrides: {
+        titleFunc: (d) => translate('related-tab.bookmarks-title'),
+        coverFunc: (d) => this.imageService.getSeriesCoverImage(d.seriesId),
+        metaTitleFunc: d => '',
+        allowSelection: false
+      }
     });
   })
 

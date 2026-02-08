@@ -65,13 +65,13 @@ export class ReadingListsComponent implements OnInit {
   lists = signal<ReadingList[]>([]);
   listEntities = computed(() => this.lists().map(l => CardEntityFactory.readingList(l)));
   readingListConfig = computed(() => {
-    return this.cardConfigFactory.forReadingList(this.titleTemplateRef(), this.shouldRenderReadingListAction.bind(this));
+    return this.cardConfigFactory.forReadingList({titleRef: this.titleTemplateRef(), shouldRenderAction: this.shouldRenderReadingListAction.bind(this)});
   });
   loadingLists = false;
   pagination!: Pagination;
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
-  globalActions: Array<ActionItem<any>> = []; // TODO: Why is this empty? 
+  globalActions: Array<ActionItem<any>> = []; // TODO: Why is this empty?
   trackByIdentity = (index: number, item: ReadingListCardEntity) => `${item.data.id}_${item.data.title}_${item.data.promoted}`;
 
   ngOnInit(): void {

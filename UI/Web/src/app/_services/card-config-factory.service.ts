@@ -1,7 +1,7 @@
 import {inject, Injectable, TemplateRef} from "@angular/core";
 import {ImageService} from "./image.service";
 import {ReaderService} from "./reader.service";
-import {ActionFactoryService} from "./action-factory.service";
+import {ActionableEntity, ActionFactoryService} from "./action-factory.service";
 import {DownloadService} from "../shared/_services/download.service";
 import {Router} from "@angular/router";
 import {RelationshipPipe} from "../_pipes/relationship.pipe";
@@ -25,13 +25,26 @@ import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedSeriesPair} from "../_single-module/related-tab/related-tab.component";
 import {ActionItem} from "../_models/actionables/action-item";
 
-
-export interface CollectionParameters {
-  shouldRenderAction?: (action: ActionItem<UserCollection>, entity: UserCollection, user: User) => boolean,
+export interface ConfigCardFactoryBaseParameters<T> {
+  shouldRenderAction?: (action: ActionItem<T>, entity: T, user: User) => boolean,
   titleRef?: TemplateRef<{ $implicit: CardEntity }> | undefined,
   metaTitleRef?: TemplateRef<{ $implicit: CardEntity }> | undefined,
-  overrides?: CardConfigurationOverrides<UserCollection>,
+  overrides?: BaseCardConfigurationOverrides<T>,
 }
+
+export interface ConfigCardFactoryActionableParameters<T extends ActionableEntity> {
+  shouldRenderAction?: (action: ActionItem<T>, entity: T, user: User) => boolean,
+  titleRef?: TemplateRef<{ $implicit: CardEntity }> | undefined,
+  metaTitleRef?: TemplateRef<{ $implicit: CardEntity }> | undefined,
+  overrides?: CardConfigurationOverrides<T>,
+}
+
+export interface ConfigCardFactoryChapterVolumeParameters<T extends ActionableEntity> extends ConfigCardFactoryActionableParameters<T> {
+  seriesId: number;
+  libraryId: number;
+  libraryType: number;
+}
+
 
 /**
  * Factory service that creates CardConfiguration objects for each entity type.
@@ -59,7 +72,7 @@ export class CardConfigFactory {
    * Creates configuration for Series cards
    */
   forSeries(
-    overrides?: CardConfigurationOverrides<Series>
+    params?: ConfigCardFactoryActionableParameters<Series>
   ): ActionableCardConfiguration<Series> {
     const defaults: ActionableCardConfiguration<Series> = {
       allowSelection: false,
@@ -76,6 +89,8 @@ export class CardConfigFactory {
         }
         return s.localizedName || s.name;
       },
+      titleTemplate: params?.titleRef,
+      metaTitleTemplate: params?.metaTitleRef,
       tooltipFunc: (s) => s.name,
       progressFunc: (s) => ({ pages: s.pages, pagesRead: s.pagesRead }),
 
@@ -93,11 +108,11 @@ export class CardConfigFactory {
       )
     };
 
-    return this.mergeConfig(defaults, overrides);
+    return this.mergeConfig(defaults, params?.overrides);
   }
 
   forRelationship(
-    overrides?: BaseCardConfigurationOverrides<RelatedSeriesPair>
+    params?: ConfigCardFactoryBaseParameters<RelatedSeriesPair>
   ): BaseCardConfiguration<RelatedSeriesPair> {
     const defaults: BaseCardConfiguration<RelatedSeriesPair> = {
       allowSelection: false,
@@ -117,6 +132,9 @@ export class CardConfigFactory {
       tooltipFunc: (s) => s.series.name,
       progressFunc: (s) => ({ pages: s.series.pages, pagesRead: s.series.pagesRead }),
 
+      titleTemplate: params?.titleRef,
+      metaTitleTemplate: params?.metaTitleRef,
+
       formatBadgeFunc: (s) => s.series.format,
       countFunc: () => 0,
       showErrorFunc: (s) => s.series.pages === 0,
@@ -130,11 +148,11 @@ export class CardConfigFactory {
       )
     };
 
-    return this.mergeConfig(defaults, overrides);
+    return this.mergeConfig(defaults, params?.overrides);
   }
 
   forBookmark(
-    overrides?: CardConfigurationOverrides<PageBookmark>
+    params?: ConfigCardFactoryActionableParameters<PageBookmark>
   ): ActionableCardConfiguration<PageBookmark> {
     const defaults: ActionableCardConfiguration<PageBookmark> = {
       allowSelection: true,
@@ -147,6 +165,9 @@ export class CardConfigFactory {
       metaTitleFunc: (s, wrapper) => s.series!.name,
       tooltipFunc: (s) => s.series!.name,
       progressFunc: (s) => ({ pages: s.series!.pages, pagesRead: s.series!.pagesRead }),
+
+      titleTemplate: params?.titleRef,
+      metaTitleTemplate: params?.metaTitleRef,
 
       formatBadgeFunc: (s) => s.series!.format,
       countFunc: () => 0,
@@ -164,16 +185,14 @@ export class CardConfigFactory {
       )
     };
 
-    return this.mergeConfig(defaults, overrides);
+    return this.mergeConfig(defaults, params?.overrides);
   }
 
 
   /**
    * Creates configuration for Chapter cards
    */
-  forChapter(
-    seriesId: number, libraryId: number, libraryType: LibraryType,
-    overrides?: CardConfigurationOverrides<Chapter>  ): ActionableCardConfiguration<Chapter> {
+  forChapter(params: ConfigCardFactoryChapterVolumeParameters<Chapter>): ActionableCardConfiguration<Chapter> {
     const defaults: ActionableCardConfiguration<Chapter> = {
       allowSelection: false,
       selectionType: 'chapter',
@@ -181,7 +200,7 @@ export class CardConfigFactory {
 
       coverFunc: (c) => this.imageService.getChapterCoverImage(c.id),
       titleFunc: (c) => c.titleName || c.title || c.range,
-      titleRouteFunc: (c) => `/library/${libraryId}/series/${seriesId}/chapter/${c.id}`,
+      titleRouteFunc: (c) => `/library/${params.libraryId}/series/${params.seriesId}/chapter/${c.id}`,
       metaTitleFunc: (c, wrapper) => {
         if (c.isSpecial) {
           return c.title || c.range;
@@ -190,35 +209,34 @@ export class CardConfigFactory {
       },
       tooltipFunc: (c) => c.titleName || c.title || (c.range === (LooseLeafOrDefaultNumber + '') ? '' : c.range),
       progressFunc: (c) => ({ pages: c.pages, pagesRead: c.pagesRead }),
+      titleTemplate: params?.titleRef,
+      metaTitleTemplate: params?.metaTitleRef,
 
       formatBadgeFunc: () => null,
       countFunc: (c) => c.files?.length > 1 && c.files[0].format !== MangaFormat.IMAGE ? c.files.length : 0,
       showErrorFunc: (c) => {
-        const wrapper = overrides as unknown as ChapterCardEntity;
+        const wrapper = params?.overrides as unknown as ChapterCardEntity;
         return c.pages === 0 && !wrapper?.suppressArchiveWarning;
       },
       ariaLabelFunc: (c) => c.titleName || c.title || (c.range === (LooseLeafOrDefaultNumber + '') ? '' : c.range),
 
-      actionableFunc: (c) => this.actionFactory.getChapterActions(seriesId, libraryId, libraryType),
-      readFunc: (c) => this.readerService.readChapter(libraryId, seriesId, c, false),
-      clickFunc: (c) => this.router.navigate(['library', libraryId, 'series', seriesId, 'chapter', c.id]),
+      actionableFunc: (c) => this.actionFactory.getChapterActions(params.seriesId, params.libraryId, params.libraryType, params?.shouldRenderAction),
+      readFunc: (c) => this.readerService.readChapter(params.libraryId, params.seriesId, c, false),
+      clickFunc: (c) => this.router.navigate(['library', params.libraryId, 'series', params.seriesId, 'chapter', c.id]),
 
       downloadObservableFunc: (c) => this.downloadService.activeDownloads$.pipe(
         map(events => this.downloadService.mapToEntityType(events, c))
       )
     };
 
-    return this.mergeConfig(defaults, overrides);
+    return this.mergeConfig(defaults, params?.overrides);
   }
 
   /**
    * Creates configuration for Volume cards
    */
   forVolume(
-    seriesId: number,
-    libraryId: number,
-    libraryType: LibraryType,
-    overrides?: CardConfigurationOverrides<Volume>
+    params: ConfigCardFactoryChapterVolumeParameters<Volume>
   ): ActionableCardConfiguration<Volume> {
     const defaults: ActionableCardConfiguration<Volume> = {
       allowSelection: false,
@@ -227,10 +245,10 @@ export class CardConfigFactory {
 
       coverFunc: (v) => this.imageService.getVolumeCoverImage(v.id),
       titleFunc: (v) => v.name,
-      titleRouteFunc: (v) => `/library/${libraryId}/series/${seriesId}/volume/${v.id}`,
+      titleRouteFunc: (v) => `/library/${params.libraryId}/series/${params.seriesId}/volume/${v.id}`,
       metaTitleFunc: (v) => {
-        if (libraryType === LibraryType.Images) return '';
-        if ([LibraryType.LightNovel || LibraryType.Book].includes(libraryType)) {
+        if (params.libraryType === LibraryType.Images) return '';
+        if ([LibraryType.LightNovel || LibraryType.Book].includes(params.libraryType)) {
           return v.name;
         }
         if (v.hasOwnProperty('chapters') && v.chapters.length > 0 && v.chapters[0].titleName) {
@@ -242,6 +260,9 @@ export class CardConfigFactory {
       tooltipFunc: (v) => v.name,
       progressFunc: (v) => ({ pages: v.pages, pagesRead: v.pagesRead }),
 
+      titleTemplate: params?.titleRef,
+      metaTitleTemplate: params?.metaTitleRef,
+
       formatBadgeFunc: () => null,
       // Show file count if there are duplicate files for volume, not just chapter count
       countFunc: (v) => (v?.chapters || [])
@@ -251,9 +272,9 @@ export class CardConfigFactory {
       showErrorFunc: (v) => v.pages === 0,
       ariaLabelFunc: (v) => v.name,
 
-      actionableFunc: (v) => this.actionFactory.getVolumeActions(seriesId, libraryId, libraryType),
+      actionableFunc: (v) => this.actionFactory.getVolumeActions(params.seriesId, params.libraryId, params.libraryType, params?.shouldRenderAction),
       readFunc: (v) => {
-        this.readerService.readVolume(libraryId, seriesId, v, false);
+        this.readerService.readVolume(params.libraryId, params.seriesId, v, false);
       },
 
       downloadObservableFunc: (v) => this.downloadService.activeDownloads$.pipe(
@@ -261,13 +282,13 @@ export class CardConfigFactory {
       )
     };
 
-    return this.mergeConfig(defaults, overrides);
+    return this.mergeConfig(defaults, params?.overrides);
   }
 
   /**
    * Creates configuration for Collection cards
    */
-  forCollection(params?: CollectionParameters): ActionableCardConfiguration<UserCollection> {
+  forCollection(params?: ConfigCardFactoryActionableParameters<UserCollection>): ActionableCardConfiguration<UserCollection> {
     const defaults: ActionableCardConfiguration<UserCollection> = {
       allowSelection: false,
       selectionType: 'collection',
@@ -276,11 +297,12 @@ export class CardConfigFactory {
       coverFunc: (c) => this.imageService.getCollectionCoverImage(c.id),
       titleFunc: (c) => c.title,
       titleRouteFunc: (c) => `/collections/${c.id}`,
-      titleTemplate: params?.titleRef,
       metaTitleFunc: (c) => '',
-      metaTitleTemplate: params?.metaTitleRef,
       tooltipFunc: (c) => c.title,
       progressFunc: () => ({ pages: 0, pagesRead: 0 }),
+
+      titleTemplate: params?.titleRef,
+      metaTitleTemplate: params?.metaTitleRef,
 
       formatBadgeFunc: () => null,
       countFunc: (c) => c.itemCount,
@@ -298,11 +320,7 @@ export class CardConfigFactory {
   /**
    * Creates configuration for ReadingList cards
    */
-  forReadingList(
-    templateRef?: TemplateRef<{ $implicit: CardEntity }> | undefined,
-    shouldRenderAction?: (action: ActionItem<ReadingList>, entity: ReadingList, user: User) => boolean,
-    overrides?: CardConfigurationOverrides<ReadingList>
-  ): ActionableCardConfiguration<ReadingList> {
+  forReadingList(params?: ConfigCardFactoryActionableParameters<ReadingList>): ActionableCardConfiguration<ReadingList> {
     const defaults: ActionableCardConfiguration<ReadingList> = {
       allowSelection: true,
       selectionType: 'readingList',
@@ -310,22 +328,24 @@ export class CardConfigFactory {
 
       coverFunc: (r) => this.imageService.getReadingListCoverImage(r.id),
       titleFunc: (r) => r.title,
-      titleTemplate: templateRef,
       titleRouteFunc: (r) => `/lists/${r.id}`,
       metaTitleFunc: (r) => r.summary || '',
       tooltipFunc: (r) => r.title,
       progressFunc: () => ({ pages: 0, pagesRead: 0 }),
+
+      titleTemplate: params?.titleRef,
+      metaTitleTemplate: params?.metaTitleRef,
 
       formatBadgeFunc: () => null,
       countFunc: (r) => r.itemCount,
       showErrorFunc: () => false,
       ariaLabelFunc: (r) => r.title,
 
-      actionableFunc: (r) => this.actionFactory.getReadingListActions(shouldRenderAction),
+      actionableFunc: (r) => this.actionFactory.getReadingListActions(params?.shouldRenderAction),
       readFunc: () => {},
     };
 
-    return this.mergeConfig(defaults, overrides);
+    return this.mergeConfig(defaults, params?.overrides);
   }
 
   /**

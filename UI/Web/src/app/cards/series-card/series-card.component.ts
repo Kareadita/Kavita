@@ -67,12 +67,12 @@ export class SeriesCardComponent implements OnChanges {
   });
 
   config = computed(() => {
-    return this.configFactory.forSeries(
-      {
+    return this.configFactory.forSeries({
+      overrides: {
         allowSelection: this.allowSelection,
         clickFunc: this.handleClick.bind(this)
       }
-    );
+    });
   });
 
   ngOnChanges(changes: SimpleChanges): void {

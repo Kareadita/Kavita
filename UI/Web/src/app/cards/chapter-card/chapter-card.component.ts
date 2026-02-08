@@ -112,17 +112,17 @@ export class ChapterCardComponent implements OnInit, OnChanges {
   });
 
   config = computed<BaseCardConfiguration<Chapter>>(() => {
-    return this.configFactory.forChapter(
-      this.seriesId,
-      this.libraryId,
-      this.libraryType,
-      {
+    return this.configFactory.forChapter({
+      seriesId: this.seriesId,
+      libraryId: this.libraryId,
+      libraryType: this.libraryType,
+      overrides: {
         allowSelection: this.allowSelection,
         actionableFunc: () => this.actions,
         selectionType: this.dataSource(),
         titleTemplate: this.titleTemplateRef()
       }
-    );
+    });
   });
 
   ngOnInit() {

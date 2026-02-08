@@ -92,6 +92,6 @@ export class ProfileOverviewComponent {
     ];
   });
 
-  seriesConfig = computed(() => this.cardConfigFactory.forSeries({allowSelection: false}));
+  seriesConfig = computed(() => this.cardConfigFactory.forSeries({overrides: {allowSelection: false}}));
 
 }

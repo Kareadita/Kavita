@@ -96,16 +96,16 @@ export class VolumeCardComponent implements OnInit, OnChanges {
   });
 
   config = computed<BaseCardConfiguration<Volume>>(() => {
-    const baseConfig = this.configFactory.forVolume(
-      this.seriesId,
-      this.libraryId,
-      this.libraryType,
-      {
-        allowSelection: this.allowSelection,
-        clickFunc: this.handleClick.bind(this),
-        actionableFunc: (_) => this.actions,
-      }
-    );
+    const baseConfig = this.configFactory.forVolume({
+        seriesId: this.seriesId,
+        libraryId: this.libraryId,
+        libraryType: this.libraryType,
+        overrides: {
+          allowSelection: this.allowSelection,
+          clickFunc: this.handleClick.bind(this),
+          actionableFunc: (_) => this.actions,
+        }
+      });
 
     return baseConfig;
   });
