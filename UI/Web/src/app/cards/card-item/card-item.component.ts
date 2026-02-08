@@ -266,7 +266,6 @@ export class CardItemComponent implements OnInit {
     }
 
 
-    this.filterSendTo();
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       this.user = user;
     });
@@ -387,27 +386,6 @@ export class CardItemComponent implements OnInit {
     }
     this.selection.emit(this.selected);
     this.cdRef.detectChanges();
-  }
-
-  filterSendTo() {
-    if (!this.actions || this.actions.length === 0) return;
-
-    if (this.utilityService.isChapter(this.entity)) {
-      this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.entity as Chapter);
-    } else if (this.utilityService.isVolume(this.entity)) {
-      const vol = this.utilityService.asVolume(this.entity);
-      this.actions = this.actionFactoryService.filterSendToAction(this.actions, vol.chapters[0]);
-    } else if (this.utilityService.isSeries(this.entity)) {
-      const series = (this.entity as Series);
-      // if (series.format === MangaFormat.EPUB || series.format === MangaFormat.PDF) {
-      //   this.actions = this.actions.filter(a => a.title !== 'Send To');
-      // }
-    }
-
-    // this.actions = this.actions.filter(a => {
-    //   if (!a.isAllowed) return true;
-    //   return a.isAllowed(a, this.entity);
-    // });
   }
 
   clickRead(event: any) {

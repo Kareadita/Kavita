@@ -14,16 +14,12 @@ export interface ActionItem<T> {
   title: string;
   description: string;
   action: Action;
-  callback: ActionCallback<T>;           // old void-returning
-  callback2?: ActionResultCallback<T>;   // new observable-returning
+  callback?: ActionCallback<T>;           // old void-returning
+  callback2: ActionResultCallback<T>;   // new observable-returning
   /**
    * Roles required to be present for ActionItem to show. If empty, assumes anyone can see. At least one needs to apply.
    */
   requiredRoles: Role[];
-  /**
-   * @deprecated Use required Roles instead
-   */
-  requiresAdmin?: boolean;
   children: Array<ActionItem<T>>;
   /**
    * An optional class which applies to an item. ie) danger on a delete action
@@ -35,7 +31,7 @@ export interface ActionItem<T> {
    */
   dynamicList?: Observable<{title: string, data: any}[]> | undefined;
   /**
-   * Extra data that needs to be sent back from the card item. Used mainly for dynamicList. This will be the item from dyanamicList return
+   * Extra data that needs to be sent back from the card item. Used mainly for dynamicList. This will be the item from dynamicList return
    */
   _extra?: {title: string, data: any};
   /**
