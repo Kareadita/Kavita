@@ -483,25 +483,12 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   getTasks() {
     const blackList = [Action.Edit];
-    return this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getLibraryActions(this.runTask.bind(this)), blackList);
+    return this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getLibraryActions(), blackList);
   }
 
-  async runTask(action: ActionItem<Library>) {
-    switch (action.action) {
-      case Action.Scan:
-        await this.actionService.scanLibrary(this.library!);
-        break;
-      case Action.RefreshMetadata:
-        await this.actionService.refreshLibraryMetadata(this.library!);
-        break;
-      case Action.GenerateColorScape:
-        await this.actionService.refreshLibraryMetadata(this.library!, undefined, false);
-        break;
-      case Action.Delete:
-        await this.actionService.deleteLibrary(this.library!, () => {
-          this.modal.dismiss();
-        });
-        break;
+  runTask(task: ActionItem<Library>) {
+    if (task.callback2) {
+      task.callback2(task, this.library!).subscribe();
     }
   }
 

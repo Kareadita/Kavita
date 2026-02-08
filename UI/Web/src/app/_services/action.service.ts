@@ -110,12 +110,69 @@ export class ActionService {
   //      MAIN HANDLERS
   // -------------------------------------------
 
+  handleLibraryAction(action: ActionItem<Library>, library: Library): Observable<ActionResult<Library>> {
+    if (!library.hasOwnProperty('id') || library.id === undefined) {
+      return of(this.fromAction(action, library, 'none'));
+    }
+
+    switch (action.action) {
+      case Action.Scan:
+        return this.libraryService.scan(library.id, false).pipe(
+          tap(() => this.toastr.info(translate('toasts.scan-queued', {name: library.name}))),
+          map(() => this.fromAction(action, library, 'none'))
+        );
+
+      case Action.RefreshMetadata:
+        return from(this.confirmService.confirm(translate('toasts.confirm-regen-covers'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.libraryService.refreshMetadata(library.id, true, false)),
+          tap(() => this.toastr.info(translate('toasts.refresh-covers-queued', {name: library.name}))),
+          map(() => this.fromAction(action, library, 'none'))
+        );
+
+      case Action.GenerateColorScape:
+        return this.libraryService.refreshMetadata(library.id, false, false).pipe(
+          tap(() => this.toastr.info(translate('toasts.generate-colorscape-queued', {name: library.name}))),
+          map(() => this.fromAction(action, library, 'none'))
+        );
+
+      case Action.Delete:
+        return from(this.confirmService.alert(translate('toasts.confirm-library-delete'))).pipe(
+          filter(confirmed => confirmed),
+          switchMap(() => this.libraryService.delete(library.id)),
+          tap(() => this.toastr.info(translate('toasts.library-deleted', {name: library.name}))),
+          map(() => this.fromAction(action, library, 'remove'))
+        );
+
+      case Action.Edit: {
+        const modalRef = this.modalService.open(LibrarySettingsModalComponent, DefaultModalOptions);
+        modalRef.componentInstance.library = library;
+        return from(modalRef.closed).pipe(
+          filter((saved: boolean) => saved),
+          map(() => this.fromAction(action, library, 'reload'))
+        );
+      }
+
+      case Action.SetReadingProfile:
+        this.setReadingProfileForLibrary(library);
+        return of(this.fromAction(action, library, 'none'));
+
+      case Action.ClearReadingProfile:
+        return this.readingProfilesService.clearLibraryProfiles(library.id).pipe(
+          tap(() => this.toastr.success(translate('actionable.cleared-profile'))),
+          map(() => this.fromAction(action, library, 'none'))
+        );
+
+      default:
+        return of(this.fromAction(action, library, 'none'));
+    }
+  }
 
   /**
    * Centralized handler for all series actions.
    * Returns Observable<ActionResult<Series>> so the caller can react to effects.
    */
-  handleSeriesAction(action: ActionItem<Series>, series: Series): Observable<ActionResult<Series>> {
+  handleSeriesAction(action: ActionItem<Series>, series: Series) {
     switch (action.action) {
       case Action.MarkAsRead:
         return this.seriesService.markRead(series.id).pipe(
@@ -271,7 +328,7 @@ export class ActionService {
    * Centralized handler for all volume actions.
    * Returns Observable<ActionResult<Volume>> so the caller can react to effects.
    */
-  handleVolumeAction(action: ActionItem<Volume>, volume: Volume, seriesId: number, libraryId: number, libraryType: LibraryType): Observable<ActionResult<Volume>> {
+  handleVolumeAction(action: ActionItem<Volume>, volume: Volume, seriesId: number, libraryId: number, libraryType: LibraryType) {
     switch (action.action) {
       case Action.MarkAsRead:
         return this.readerService.markVolumeRead(seriesId, volume.id).pipe(
@@ -372,7 +429,7 @@ export class ActionService {
    * Centralized handler for all chapter actions.
    * Returns Observable<ActionResult<Chapter>> so the caller can react to effects.
    */
-  handleChapterAction(action: ActionItem<Chapter>, chapter: Chapter, seriesId: number, libraryId: number, libraryType: LibraryType): Observable<ActionResult<Chapter>> {
+  handleChapterAction(action: ActionItem<Chapter>, chapter: Chapter, seriesId: number, libraryId: number, libraryType: LibraryType) {
     switch (action.action) {
 
       case Action.MarkAsRead:
@@ -744,10 +801,7 @@ export class ActionService {
       return;
     }
 
-    // Prompt user if we should do a force or not
-    const force = false; // await this.promptIfForce();
-
-    this.libraryService.scan(library.id, force).subscribe((res: any) => {
+    this.libraryService.scan(library.id, false).subscribe((res: any) => {
       this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
       if (callback) {
         callback(library);

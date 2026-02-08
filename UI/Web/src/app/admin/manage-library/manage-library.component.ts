@@ -76,7 +76,7 @@ export class ManageLibraryComponent implements OnInit {
 
   protected readonly Action = Action;
 
-  actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
+  actions = this.actionFactoryService.getLibraryActions();
   bulkActions = this.actionFactoryService.getBulkLibraryActions();
   libraries: Library[] = [];
   loading = false;
@@ -300,28 +300,6 @@ export class ManageLibraryComponent implements OnInit {
           this.sourceCopyToLibrary = this.libraries.filter(l => l.id === res)[0];
           this.cdRef.markForCheck();
         });
-        break;
-    }
-  }
-
-  async handleAction(action: ActionItem<Library>, library: Library) {
-    switch (action.action) {
-      case(Action.Scan):
-        await this.actionService.scanLibrary(library);
-        break;
-      case(Action.RefreshMetadata):
-        await this.actionService.refreshLibraryMetadata(library);
-        break;
-      case(Action.GenerateColorScape):
-        await this.actionService.refreshLibraryMetadata(library, undefined, false, true);
-        break;
-      case(Action.Edit):
-        this.editLibrary(library)
-        break;
-      case (Action.Delete):
-        await this.deleteLibrary(library);
-        break;
-      default:
         break;
     }
   }

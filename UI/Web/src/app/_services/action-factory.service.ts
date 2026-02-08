@@ -46,7 +46,7 @@ export class ActionFactoryService {
   private personActions: Array<ActionItem<Person>> = [];
   private sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
   private smartFilterActions: Array<ActionItem<SmartFilter>> = [];
-  private sideNavHomeActions: Array<ActionItem<void>> = [];
+  private sideNavHomeActions: Array<ActionItem<{}>> = [];
   private annotationActions: Array<ActionItem<Annotation>> = [];
   private clientDeviceActions: Array<ActionItem<ClientDevice>> = [];
 
@@ -56,153 +56,113 @@ export class ActionFactoryService {
     });
   }
 
-  getLibraryActions(callback: ActionCallback<Library>, shouldRenderFunc: ActionShouldRenderFunc<Library> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.libraryActions, callback, shouldRenderFunc) as ActionItem<Library>[];
+  // getLibraryActions(callback: ActionCallback<Library>, shouldRenderFunc: ActionShouldRenderFunc<Library> = this.dummyShouldRender) {
+  //   return this.applyCallbackToList(this.libraryActions, callback, shouldRenderFunc) as ActionItem<Library>[];
+  // }
+
+  getLibraryActions(shouldRenderFunc: ActionShouldRenderFunc<Library> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.libraryActions,
+      (action, entity) => this.actionService.handleLibraryAction(action, entity),
+      shouldRenderFunc
+    );
   }
 
   getSeriesActions(shouldRenderFunc: ActionShouldRenderFunc<Series> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.seriesActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleSeriesAction(action, entity),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleSeriesAction(action, entity)
-    );
-    return actions;
   }
 
   getVolumeActions(seriesId: number, libraryId: number, libraryType: LibraryType, shouldRenderFunc: ActionShouldRenderFunc<Volume> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.volumeActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleVolumeAction(action, entity, seriesId, libraryId, libraryType),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleVolumeAction(action, entity, seriesId, libraryId, libraryType)
-    );
-    return actions;
   }
 
   getChapterActions(seriesId: number, libraryId: number, libraryType: LibraryType, shouldRenderFunc: ActionShouldRenderFunc<Chapter> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.chapterActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleChapterAction(action, entity, seriesId, libraryId, libraryType),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleChapterAction(action, entity, seriesId, libraryId, libraryType)
-    );
-    return actions;
   }
 
   getBookmarkActions(seriesId: number, libraryId: number, seriesName: string, shouldRenderFunc: ActionShouldRenderFunc<PageBookmark> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.bookmarkActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleBookmarkAction(action, entity, seriesId, libraryId, seriesName),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleBookmarkAction(action, entity, seriesId, libraryId, seriesName)
-    );
-    return actions;
   }
 
   getReadingListActions(shouldRenderFunc: ActionShouldRenderFunc<ReadingList> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.readingListActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleReadingListAction(action, entity),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleReadingListAction(action, entity)
-    );
-    return actions;
   }
 
   getCollectionTagActions(shouldRenderFunc: ActionShouldRenderFunc<UserCollection> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.collectionTagActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleCollectionAction(action, entity),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleCollectionAction(action, entity)
-    );
-    return actions;
   }
 
   getAnnotationActions(shouldRenderFunc: ActionShouldRenderFunc<Annotation> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.annotationActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleAnnotationAction(action, entity),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleAnnotationAction(action, entity)
-    );
-    return actions;
   }
 
   getClientDeviceActions(shouldRenderFunc: ActionShouldRenderFunc<ClientDevice> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.clientDeviceActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleClientDeviceAction(action, entity),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleClientDeviceAction(action, entity)
-    );
-    return actions;
   }
 
   getPersonActions(shouldRenderFunc: ActionShouldRenderFunc<Person> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.personActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handlePersonAction(action, entity),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handlePersonAction(action, entity)
-    );
-    return actions;
   }
 
   getSmartFilterActions(allFilters: SmartFilter[], shouldRenderFunc: ActionShouldRenderFunc<SmartFilter> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.smartFilterActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleSmartFilterAction(action, entity, allFilters),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleSmartFilterAction(action, entity, allFilters)
-    );
-    return actions;
   }
 
 
   getSideNavStreamActions(shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.sideNavStreamActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleSideNavStreamAction(action, entity),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleSideNavStreamAction(action, entity)
-    );
-    return actions;
   }
 
   getSideNavHomeActions(shouldRenderFunc: ActionShouldRenderFunc<{}> = this.basicReadRender) {
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       this.sideNavHomeActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleSideNavHomeStream(action, entity),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleSideNavHomeStream(action, entity)
-    );
-    return actions;
   }
 
   getBulkLibraryActions(shouldRenderFunc: ActionShouldRenderFunc<Library> = this.basicReadRender) {
@@ -225,39 +185,12 @@ export class ActionFactoryService {
       title: 'copy-settings'
     });
 
-    const actions = this.applyCallbackToList(
+    return this.applyCallbackToList(
       filteredActions,
-      this.dummyCallback,
+      (action, entity) => this.actionService.handleBulkLibraryAction(action, entity),
       shouldRenderFunc
     );
-    this.applyCallbackToList2(actions,
-      (action, entity) => this.actionService.handleBulkLibraryAction(action, entity)
-    );
-    return actions;
   }
-
-  // getBulkLibraryActions(callback: ActionCallback<Library>, shouldRenderFunc:  ActionShouldRenderFunc<Library> = this.dummyShouldRender) {
-  //
-  //   // Scan is currently not supported due to the backend not being able to handle it yet
-  //   const actions = this.flattenActions<Library>(this.libraryActions).filter(a => {
-  //     return [Action.Delete, Action.GenerateColorScape, Action.RefreshMetadata, Action.CopySettings].includes(a.action);
-  //   });
-  //
-  //   actions.push({
-  //     _extra: undefined,
-  //     class: undefined,
-  //     description: '',
-  //     dynamicList: undefined,
-  //     action: Action.CopySettings,
-  //     callback: this.dummyCallback,
-  //     shouldRender: shouldRenderFunc,
-  //     children: [],
-  //     requiredRoles: [Role.Admin],
-  //     requiresAdmin: true,
-  //     title: 'copy-settings'
-  //   })
-  //   return this.applyCallbackToList(actions, callback, shouldRenderFunc) as ActionItem<Library>[];
-  // }
 
   dummyCallback(action: ActionItem<any>, entity: any) {}
   dummyShouldRender(action: ActionItem<any>, entity: any, user: User) {return true;}
@@ -1155,8 +1088,9 @@ export class ActionFactoryService {
 
   }
 
-  private applyCallback(action: ActionItem<any>, callback: ActionCallback<any>, shouldRenderFunc: ActionShouldRenderFunc<any>) {
-    action.callback = callback;
+  private applyCallback(action: ActionItem<any>, callback: ActionResultCallback<any>, shouldRenderFunc: ActionShouldRenderFunc<any>) {
+    action.callback = this.dummyCallback;
+    action.callback2 = callback;
     action.shouldRender = shouldRenderFunc;
 
     if (action.children === null || action.children?.length === 0) return;
@@ -1170,7 +1104,7 @@ export class ActionFactoryService {
   }
 
   public applyCallbackToList<T>(list: Array<ActionItem<T>>,
-                             callback: ActionCallback<T>,
+                             callback: ActionResultCallback<any>,
                              shouldRenderFunc: ActionShouldRenderFunc<T> = this.dummyShouldRender): Array<ActionItem<T>> {
     // Create a clone of the list to ensure we aren't affecting the default state
     const actions = list.map((a) => {
@@ -1182,20 +1116,27 @@ export class ActionFactoryService {
     return actions;
   }
 
-  private applyCallback2(action: ActionItem<any>, callback: ActionResultCallback<any>) {
-    action.callback2 = callback;
-
-    if (action.children === null || action.children?.length === 0) return;
-
-    action.children = action.children.map(d => { return {...d}; });
-
-    action.children.forEach((childAction) => {
-      this.applyCallback2(childAction, callback);
+  /**
+   * Applies old-style void-returning callback to actions. Used by bulk-operations.
+   */
+  public applyOldCallbackToList<T>(list: Array<ActionItem<T>>,
+                             callback: ActionCallback<T>,
+                             shouldRenderFunc: ActionShouldRenderFunc<T> = this.dummyShouldRender): Array<ActionItem<T>> {
+    const actions = list.map((a) => {
+      return { ...a };
     });
-  }
 
-  private applyCallbackToList2<T>(list: Array<ActionItem<T>>, callback: ActionResultCallback<T>) {
-    list.forEach((action) => this.applyCallback2(action, callback));
+    const applyOld = (action: ActionItem<any>) => {
+      action.callback = callback;
+      action.shouldRender = shouldRenderFunc;
+      if (action.children?.length) {
+        action.children = action.children.map(d => ({...d}));
+        action.children.forEach(child => applyOld(child));
+      }
+    };
+
+    actions.forEach(action => applyOld(action));
+    return actions;
   }
 
   // Checks the whole tree for the action and returns true if it exists

@@ -34,7 +34,7 @@ import {DecimalPipe} from '@angular/common';
 import {
   SideNavCompanionBarComponent
 } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../_models/metadata/v2/filter-field";
@@ -43,7 +43,6 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
 import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
 import {MetadataService} from "../_services/metadata.service";
-import {ReadingProfileService} from "../_services/reading-profile.service";
 import {ToastrService} from "ngx-toastr";
 import {ActionItem} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";
@@ -74,9 +73,7 @@ export class LibraryDetailComponent implements OnInit {
   public readonly navService = inject(NavService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly metadataService = inject(MetadataService);
-  private readonly readingProfileService = inject(ReadingProfileService);
   private readonly toastr = inject(ToastrService);
-  private readonly translocoService = inject(TranslocoService);
 
   libraryId!: number;
   libraryName = '';
@@ -177,7 +174,7 @@ export class LibraryDetailComponent implements OnInit {
       return;
     }
 
-    this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
+    this.actions = this.actionFactoryService.getLibraryActions();
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
     this.libraryService.getLibraryNames().subscribe(names => {
@@ -191,7 +188,7 @@ export class LibraryDetailComponent implements OnInit {
       this.cdRef.markForCheck();
     });
 
-    this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
+    this.actions = this.actionFactoryService.getLibraryActions();
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.filter = data['filter'] as FilterV2<FilterField, SortField>;
@@ -267,60 +264,6 @@ export class LibraryDetailComponent implements OnInit {
     const evt = event as KeyboardEvent;
     if (evt.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = false;
-    }
-  }
-
-  async handleAction(action: ActionItem<Library>, library: Library) {
-    let lib: Partial<Library> = library;
-    if (library === undefined) {
-      this.libraryService.getLibrary(this.libraryId).subscribe(async library => {
-        switch (action.action) {
-          case(Action.Scan):
-            await this.actionService.scanLibrary(library);
-            break;
-          case(Action.RefreshMetadata):
-            await this.actionService.refreshLibraryMetadata(library);
-            break;
-          case(Action.GenerateColorScape):
-            await this.actionService.refreshLibraryMetadata(library, undefined, false);
-            break;
-          case (Action.Delete):
-            await this.actionService.deleteLibrary(library, () => {
-              this.loadPageSource.next(true);
-            });
-            break;
-          case(Action.Edit):
-            this.actionService.editLibrary(library);
-            break;
-          case Action.SetReadingProfile:
-            this.actionService.setReadingProfileForLibrary(library);
-            break;
-          case Action.ClearReadingProfile:
-            this.readingProfileService.clearLibraryProfiles(library.id).subscribe(() => {
-              this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
-            });
-            break;
-          default:
-            break;
-        }
-      });
-      return
-    }
-    switch (action.action) {
-      case(Action.Scan):
-        await this.actionService.scanLibrary(lib);
-        break;
-      case(Action.RefreshMetadata):
-        await this.actionService.refreshLibraryMetadata(lib);
-        break;
-      case(Action.GenerateColorScape):
-        await this.actionService.refreshLibraryMetadata(lib, undefined, false);
-        break;
-      case(Action.Edit):
-        this.actionService.editLibrary(lib);
-        break;
-      default:
-        break;
     }
   }
 

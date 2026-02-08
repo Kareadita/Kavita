@@ -81,7 +81,7 @@ export class BulkOperationsComponent<T> implements OnInit {
     this.bulkSelectionService.actions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(actions => {
       // We need to do a recursive callback apply
       const shouldRender = this.shouldRenderFunc ? this.shouldRenderFunc.bind(this) : this.actionFactoryService.dummyShouldRender;
-      this.actions = this.actionFactoryService.applyCallbackToList(actions, this.actionCallback.bind(this), shouldRender);
+      this.actions = this.actionFactoryService.applyOldCallbackToList(actions, this.actionCallback.bind(this), shouldRender);
       this.hasMarkAsRead = this.actionFactoryService.hasAction(this.actions, Action.MarkAsRead);
       this.hasMarkAsUnread = this.actionFactoryService.hasAction(this.actions, Action.MarkAsUnread);
       this.cdRef.markForCheck();

@@ -8,7 +8,6 @@ import {UtilityService} from '../../../shared/_services/utility.service';
 import {Library, LibraryType} from '../../../_models/library/library';
 import {AccountService} from '../../../_services/account.service';
 import {ActionFactoryService} from '../../../_services/action-factory.service';
-import {ActionService} from '../../../_services/action.service';
 import {NavService} from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
@@ -16,7 +15,7 @@ import {AsyncPipe, NgClass} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {FormsModule} from "@angular/forms";
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
@@ -25,7 +24,6 @@ import {SettingsTabId} from "../../preference-nav/preference-nav.component";
 import {LicenseService} from "../../../_services/license.service";
 import {CdkDrag, CdkDragDrop, CdkDropList} from "@angular/cdk/drag-drop";
 import {ToastrService} from "ngx-toastr";
-import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {BreakpointService} from "../../../_services/breakpoint.service";
@@ -51,7 +49,6 @@ export class SideNavComponent implements OnInit {
   private readonly router = inject(Router);
   protected readonly utilityService = inject(UtilityService);
   private readonly messageHub = inject(MessageHubService);
-  private readonly actionService = inject(ActionService);
   protected readonly navService = inject(NavService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly imageService = inject(ImageService);
@@ -60,15 +57,13 @@ export class SideNavComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly toastr = inject(ToastrService);
-  private readonly readingProfilesService = inject(ReadingProfileService);
-  private readonly translocoService = inject(TranslocoService);
   private readonly keyBindService = inject(KeyBindService);
   protected readonly breakpointService = inject(BreakpointService);
 
 
   cachedData: SideNavStream[] | null = null;
-  actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-  homeActions: ActionItem<void>[] = this.actionFactoryService.getSideNavHomeActions();
+  actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions();
+  homeActions: ActionItem<{}>[] = this.actionFactoryService.getSideNavHomeActions();
 
   filterQuery: string = '';
   filterLibrary = (stream: SideNavStream) => {
@@ -176,48 +171,7 @@ export class SideNavComponent implements OnInit {
     });
   }
 
-  async handleAction(action: ActionItem<Library>, library: Library) {
-    const lib = library;
-    switch (action.action) {
-      case(Action.Scan):
-        await this.actionService.scanLibrary(lib);
-        break;
-      case(Action.RefreshMetadata):
-        await this.actionService.refreshLibraryMetadata(lib);
-        break;
-      case(Action.GenerateColorScape):
-        await this.actionService.refreshLibraryMetadata(lib, undefined, false);
-        break;
-      case (Action.Delete):
-        await this.actionService.deleteLibrary(lib);
-        break;
-      case (Action.Edit):
-        this.actionService.editLibrary(lib, () => window.scrollTo(0, 0));
-        break;
-      case (Action.SetReadingProfile):
-        this.actionService.setReadingProfileForLibrary(lib);
-        break;
-      case (Action.ClearReadingProfile):
-        this.readingProfilesService.clearLibraryProfiles(lib.id).subscribe(() => {
-          this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
-        });
-        break;
-      default:
-        break;
-    }
-  }
-
-  async handleHomeAction(action: ActionItem<void>) {
-    switch (action.action) {
-      case Action.Edit:
-        this.showMore(true);
-        break;
-      default:
-        break;
-    }
-  }
-
-  performHomeAction(event: ActionItem<void> | ActionResult<void>) {
+  performHomeAction(event: ActionItem<{}> | ActionResult<{}>) {
     if (event.action === Action.Edit) {
       this.showMore(true);
     }
