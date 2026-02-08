@@ -164,7 +164,7 @@ export class BulkSelectionService {
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'sideNavStream').length > 0) {
-      return this.applyFilterToList(this.actionFactory.getSideNavStreamActions(callback), [Action.MarkAsInvisible, Action.MarkAsVisible]);
+      return this.applyFilterToList(this.actionFactory.getSideNavStreamActions(), [Action.MarkAsInvisible, Action.MarkAsVisible]);
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'collection').length > 0) {

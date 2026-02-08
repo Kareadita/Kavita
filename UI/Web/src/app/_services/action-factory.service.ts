@@ -180,10 +180,20 @@ export class ActionFactoryService {
     return actions;
   }
 
-  getSideNavStreamActions(callback: ActionCallback<SideNavStream>, shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.sideNavStreamActions, callback, shouldRenderFunc);
+
+  getSideNavStreamActions(shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.basicReadRender) {
+    const actions = this.applyCallbackToList(
+      this.sideNavStreamActions,
+      this.dummyCallback,
+      shouldRenderFunc
+    );
+    this.applyCallbackToList2(actions,
+      (action, entity) => this.actionService.handleSideNavStreamAction(action, entity)
+    );
+    return actions;
   }
-  
+
+
   getSideNavHomeActions(callback: ActionCallback<void>, shouldRenderFunc: ActionShouldRenderFunc<void> = this.dummyShouldRender) {
     return this.applyCallbackToList(this.sideNavHomeActions, callback, shouldRenderFunc);
   }

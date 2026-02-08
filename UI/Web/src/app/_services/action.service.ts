@@ -59,6 +59,8 @@ import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 import {
   EditSmartFilterModalComponent
 } from "../sidenav/_components/edit-smart-filter-modal/edit-smart-filter-modal.component";
+import {SideNavStream} from "../_models/sidenav/sidenav-stream";
+import {NavService} from "./nav.service";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -97,6 +99,7 @@ export class ActionService {
   private readonly readingProfilesService = inject(ReadingProfileService);
   private readonly router = inject(Router);
   private readonly annotationsService = inject(AnnotationService);
+  private readonly sideNavService = inject(NavService);
 
   private readingListModalRef: NgbModalRef | null = null;
   private collectionModalRef: NgbModalRef | null = null;
@@ -654,6 +657,10 @@ export class ActionService {
     }
   }
 
+  /**
+   * Centralized handler for all smart filter actions.
+   * Returns Observable<ActionResult<SmartFilter>> so the caller can react to effects.
+   */
   handleSmartFilterAction(action: ActionItem<SmartFilter>, smartFilter: SmartFilter, allFilters: SmartFilter[]) {
     switch (action.action) {
       case Action.Edit:
@@ -677,6 +684,29 @@ export class ActionService {
         return of(this.fromAction(action, smartFilter, 'none'));
     }
   }
+
+  /**
+   * Centralized handler for all side nav stream actions.
+   * Returns Observable<ActionResult<SideNavStream>> so the caller can react to effects.
+   */
+  handleSideNavStreamAction(action: ActionItem<SideNavStream>, sideNavStream: SideNavStream) {
+    switch (action.action) {
+      case Action.MarkAsVisible:
+        return this.sideNavService.bulkToggleSideNavStreamVisibility([sideNavStream.id], true).pipe(
+          map(() => this.fromAction(action, {...sideNavStream, visible: true}, 'update'))
+        );
+
+      case Action.MarkAsInvisible:
+        return this.sideNavService.bulkToggleSideNavStreamVisibility([sideNavStream.id], false).pipe(
+          map(() => this.fromAction(action, {...sideNavStream, visible: false}, 'update'))
+        );
+
+      default:
+        return of(this.fromAction(action, sideNavStream, 'none'));
+    }
+  }
+
+
   // -------------------------------------------
   //      INDIVIDUAL HANDLERS
   // -------------------------------------------
@@ -868,21 +898,6 @@ export class ActionService {
     });
   }
 
-  /**
-   * Mark all chapters and the volume as Read
-   * @param seriesId Series Id
-   * @param volume Volume, should have id, chapters and pagesRead populated
-   * @param callback Optional callback to perform actions after API completes
-   */
-  markVolumeAsRead2(seriesId: number, volume: Volume, callback?: ExtraActionCallback<Volume>) {
-    this.readerService.markVolumeRead(seriesId, volume.id).subscribe(() => {
-      volume.pagesRead = volume.pages;
-      volume.chapters?.forEach(c => c.pagesRead = c.pages);
-      this.toastr.success(translate('toasts.mark-read'));
-
-      callback?.(Action.MarkAsRead, volume);
-    });
-  }
 
   /**
    * Mark all chapters and the volume as unread
@@ -901,20 +916,6 @@ export class ActionService {
     });
   }
 
-  /**
-   * Mark all chapters and the volume as unread
-   * @param seriesId Series Id
-   * @param volume Volume, should have id, chapters and pagesRead populated
-   * @param callback Optional callback to perform actions after API completes
-   */
-  markVolumeAsUnread2(seriesId: number, volume: Volume, callback?: ExtraActionCallback<Volume>) {
-    this.readerService.markVolumeUnread(seriesId, volume.id).subscribe(() => {
-      volume.pagesRead = 0;
-      volume.chapters?.forEach(c => c.pagesRead = 0);
-      this.toastr.success(translate('toasts.mark-unread'));
-      callback?.(Action.MarkAsUnread, volume);
-    });
-  }
 
   /**
    * Mark a chapter as read
@@ -930,21 +931,6 @@ export class ActionService {
       if (callback) {
         callback(chapter);
       }
-    });
-  }
-
-  /**
-   * Mark a chapter as read
-   * @param libraryId Library Id
-   * @param seriesId Series Id
-   * @param chapter Chapter, should have id, pages, volumeId populated
-   * @param callback Optional callback to perform actions after API completes
-   */
-  markChapterAsRead2(libraryId: number, seriesId: number, chapter: Chapter, callback?: ExtraActionCallback<Chapter>) {
-    this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, chapter.pages).subscribe(() => {
-      chapter.pagesRead = chapter.pages;
-      this.toastr.success(translate('toasts.mark-read'));
-      callback?.(Action.MarkAsRead, chapter);
     });
   }
 
