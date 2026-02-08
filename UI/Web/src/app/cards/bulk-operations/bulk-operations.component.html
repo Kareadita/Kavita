@@ -6,25 +6,25 @@
           <div class="d-flex justify-content-around align-items-center">
 
           <span class="highlight">
-              <i class="fa fa-check me-1" aria-hidden="true"></i>
+            <i class="fa fa-check me-1" aria-hidden="true"></i>
             {{t('items-selected',{num: selectionCount | number})}}
           </span>
 
             <span>
-            @if (hasMarkAsUnread) {
-              <button class="btn btn-icon" (click)="executeAction(Action.MarkAsUnread)" [ngbTooltip]="t('mark-as-unread')" placement="bottom">
+              @if (hasMarkAsUnread) {
+                <button class="btn btn-icon" (click)="executeAction(Action.MarkAsUnread)" [ngbTooltip]="t('mark-as-unread')" placement="bottom">
                   <i class="fa-regular fa-circle-check" aria-hidden="true"></i>
                   <span class="visually-hidden">{{t('mark-as-unread')}}</span>
-              </button>
-            }
+                </button>
+              }
               @if (hasMarkAsRead) {
                 <button class="btn btn-icon" (click)="executeAction(Action.MarkAsRead)" [ngbTooltip]="t('mark-as-read')" placement="bottom">
                   <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
                   <span class="visually-hidden">{{t('mark-as-read')}}</span>
-              </button>
+                </button>
               }
-              <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" />
-          </span>
+              <app-card-actionables [actions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" (actionHandler)="performAction($event)"  />
+            </span>
 
             <span id="bulk-actions-header" class="visually-hidden">{{t('title')}}</span>
 

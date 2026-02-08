@@ -173,8 +173,7 @@ export class ActionFactoryService {
       description: '',
       dynamicList: undefined,
       action: Action.CopySettings,
-      callback: this.dummyCallback,
-        callback2: this.dummyCallback2,
+      callback2: this.dummyCallback2,
       shouldRender: shouldRenderFunc,
       children: [],
       requiredRoles: [Role.Admin],
@@ -261,7 +260,7 @@ export class ActionFactoryService {
         action: Action.Scan,
         title: 'scan-library',
         description: 'scan-library-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [Role.Admin],
@@ -271,7 +270,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'reading-profiles',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -280,7 +279,7 @@ export class ActionFactoryService {
             action: Action.SetReadingProfile,
             title: 'set-reading-profile',
             description: 'set-reading-profile-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
             requiredRoles: [],
@@ -290,7 +289,7 @@ export class ActionFactoryService {
             action: Action.ClearReadingProfile,
             title: 'clear-reading-profile',
             description: 'clear-reading-profile-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -303,7 +302,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'others',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -313,7 +312,7 @@ export class ActionFactoryService {
             action: Action.RefreshMetadata,
             title: 'refresh-covers',
             description: 'refresh-covers-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -324,7 +323,7 @@ export class ActionFactoryService {
             action: Action.GenerateColorScape,
             title: 'generate-colorscape',
             description: 'generate-colorscape-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -335,7 +334,7 @@ export class ActionFactoryService {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -348,7 +347,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'settings',
         description: 'settings-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -362,7 +361,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -373,7 +372,7 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'delete',
         description: 'delete-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -385,7 +384,7 @@ export class ActionFactoryService {
         action: Action.Promote,
         title: 'promote',
         description: 'promote-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -396,7 +395,7 @@ export class ActionFactoryService {
         action: Action.UnPromote,
         title: 'unpromote',
         description: 'unpromote-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -410,7 +409,7 @@ export class ActionFactoryService {
         action: Action.MarkAsRead,
         title: 'mark-as-read',
         description: 'mark-as-read-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -421,7 +420,7 @@ export class ActionFactoryService {
         action: Action.MarkAsUnread,
         title: 'mark-as-unread',
         description: 'mark-as-unread-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -432,7 +431,7 @@ export class ActionFactoryService {
         action: Action.Scan,
         title: 'scan-series',
         description: 'scan-series-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -443,7 +442,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'add-to',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -453,7 +452,7 @@ export class ActionFactoryService {
             action: Action.AddToWantToReadList,
             title: 'add-to-want-to-read',
             description: 'add-to-want-to-read-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -464,7 +463,7 @@ export class ActionFactoryService {
             action: Action.RemoveFromWantToReadList,
             title: 'remove-from-want-to-read',
             description: 'remove-to-want-to-read-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -475,7 +474,7 @@ export class ActionFactoryService {
             action: Action.AddToReadingList,
             title: 'add-to-reading-list',
             description: 'add-to-reading-list-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -486,7 +485,7 @@ export class ActionFactoryService {
             action: Action.AddToCollection,
             title: 'add-to-collection',
             description: 'add-to-collection-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -499,7 +498,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'send-to',
         description: 'send-to-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -509,7 +508,7 @@ export class ActionFactoryService {
             action: Action.SendTo,
             title: '',
             description: '',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -525,7 +524,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'reading-profiles',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -535,7 +534,7 @@ export class ActionFactoryService {
             action: Action.SetReadingProfile,
             title: 'set-reading-profile',
             description: 'set-reading-profile-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -546,7 +545,7 @@ export class ActionFactoryService {
             action: Action.ClearReadingProfile,
             title: 'clear-reading-profile',
             description: 'clear-reading-profile-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -559,7 +558,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'others',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -569,7 +568,7 @@ export class ActionFactoryService {
             action: Action.RefreshMetadata,
             title: 'refresh-covers',
             description: 'refresh-covers-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -580,7 +579,7 @@ export class ActionFactoryService {
             action: Action.GenerateColorScape,
             title: 'generate-colorscape',
             description: 'generate-colorscape-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -591,7 +590,7 @@ export class ActionFactoryService {
             action: Action.AnalyzeFiles,
             title: 'analyze-files',
             description: 'analyze-files-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -602,7 +601,7 @@ export class ActionFactoryService {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -616,7 +615,7 @@ export class ActionFactoryService {
         action: Action.Match,
         title: 'match',
         description: 'match-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -627,7 +626,7 @@ export class ActionFactoryService {
         action: Action.Download,
         title: 'download',
         description: 'download-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -638,7 +637,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -652,7 +651,7 @@ export class ActionFactoryService {
         action: Action.IncognitoRead,
         title: 'read-incognito',
         description: 'read-incognito-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -663,7 +662,7 @@ export class ActionFactoryService {
         action: Action.MarkAsRead,
         title: 'mark-as-read',
         description: 'mark-as-read-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -674,7 +673,7 @@ export class ActionFactoryService {
         action: Action.MarkAsUnread,
         title: 'mark-as-unread',
         description: 'mark-as-unread-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -685,7 +684,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'add-to',
         description: '=',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -695,7 +694,7 @@ export class ActionFactoryService {
             action: Action.AddToReadingList,
             title: 'add-to-reading-list',
             description: 'add-to-reading-list-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -708,7 +707,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'send-to',
         description: 'send-to-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -718,7 +717,7 @@ export class ActionFactoryService {
             action: Action.SendTo,
             title: '',
             description: '',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -734,7 +733,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'others',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -744,7 +743,7 @@ export class ActionFactoryService {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -755,7 +754,7 @@ export class ActionFactoryService {
             action: Action.Download,
             title: 'download',
             description: 'download-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -768,7 +767,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'details',
         description: 'edit-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -782,7 +781,7 @@ export class ActionFactoryService {
         action: Action.IncognitoRead,
         title: 'read-incognito',
         description: 'read-incognito-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -793,7 +792,7 @@ export class ActionFactoryService {
         action: Action.MarkAsRead,
         title: 'mark-as-read',
         description: 'mark-as-read-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -804,7 +803,7 @@ export class ActionFactoryService {
         action: Action.MarkAsUnread,
         title: 'mark-as-unread',
         description: 'mark-as-unread-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -815,7 +814,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'add-to',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -825,7 +824,7 @@ export class ActionFactoryService {
             action: Action.AddToReadingList,
             title: 'add-to-reading-list',
             description: 'add-to-reading-list-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -838,7 +837,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'send-to',
         description: 'send-to-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -848,7 +847,7 @@ export class ActionFactoryService {
             action: Action.SendTo,
             title: '',
             description: '',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -865,7 +864,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'others',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -875,7 +874,7 @@ export class ActionFactoryService {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -886,7 +885,7 @@ export class ActionFactoryService {
             action: Action.Download,
             title: 'download',
             description: 'download-tooltip',
-            callback: this.dummyCallback,
+
             callback2: this.dummyCallback2,
             shouldRender: this.dummyShouldRender,
 
@@ -899,7 +898,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -913,7 +912,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -924,7 +923,7 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'delete',
         description: 'delete-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -936,7 +935,7 @@ export class ActionFactoryService {
         action: Action.Promote,
         title: 'promote',
         description: 'promote-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -947,7 +946,7 @@ export class ActionFactoryService {
         action: Action.UnPromote,
         title: 'unpromote',
         description: 'unpromote-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -961,7 +960,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-person-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -972,7 +971,7 @@ export class ActionFactoryService {
         action: Action.Merge,
         title: 'merge',
         description: 'merge-person-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -986,7 +985,7 @@ export class ActionFactoryService {
         action: Action.ViewSeries,
         title: 'view-series',
         description: 'view-series-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -997,7 +996,7 @@ export class ActionFactoryService {
         action: Action.DownloadBookmark,
         title: 'download',
         description: 'download-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -1008,7 +1007,7 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'clear',
         description: 'delete-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
         class: 'danger',
@@ -1023,7 +1022,7 @@ export class ActionFactoryService {
         action: Action.MarkAsVisible,
         title: 'mark-visible',
         description: 'mark-visible-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -1034,7 +1033,7 @@ export class ActionFactoryService {
         action: Action.MarkAsInvisible,
         title: 'mark-invisible',
         description: 'mark-invisible-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -1048,7 +1047,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'rename',
         description: 'rename-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -1059,7 +1058,7 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'delete',
         description: 'delete-tooltip',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
 
@@ -1073,7 +1072,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'reorder',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1086,7 +1085,7 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'delete',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1096,7 +1095,7 @@ export class ActionFactoryService {
         action: Action.Export,
         title: 'export',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1106,7 +1105,7 @@ export class ActionFactoryService {
         action: Action.Like,
         title: 'like',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1116,7 +1115,7 @@ export class ActionFactoryService {
         action: Action.UnLike,
         title: 'unlike',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1129,7 +1128,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit-device-name',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1139,7 +1138,7 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'delete',
         description: '',
-        callback: this.dummyCallback,
+
         callback2: this.dummyCallback2,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1151,7 +1150,7 @@ export class ActionFactoryService {
   }
 
   private applyCallback(action: ActionItem<any>, callback: ActionResultCallback<any>, shouldRenderFunc: ActionShouldRenderFunc<any>) {
-    action.callback = this.dummyCallback;
+    //action.callback = this.dummyCallback;
     action.callback2 = callback;
     action.shouldRender = shouldRenderFunc;
 
@@ -1190,6 +1189,7 @@ export class ActionFactoryService {
 
     const applyOld = (action: ActionItem<any>) => {
       action.callback = callback;
+
       action.shouldRender = shouldRenderFunc;
       if (action.children?.length) {
         action.children = action.children.map(d => ({...d}));
