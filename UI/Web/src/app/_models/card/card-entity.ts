@@ -7,6 +7,7 @@ import {UserCollection} from "../collection-tag";
 import {LibraryType} from "../library/library";
 import {PageBookmark} from "../readers/page-bookmark";
 import {RelatedSeriesPair} from "../../_single-module/related-tab/related-tab.component";
+import {SeriesGroup} from "../series-group";
 
 /**
  * Discriminated union representing any entity that can be displayed as a card.
@@ -26,7 +27,8 @@ export type CardEntity =
   | ChapterCardEntity
   | ReadingListItemCardEntity
   | BookmarkCardEntity
-  | RelatedSeriesCardEntity;
+  | RelatedSeriesCardEntity
+  | RecentlyUpdatedSeriesCardEntity;
 
 export interface SeriesCardEntity {
   entityType: 'series';
@@ -81,6 +83,10 @@ export interface RelatedSeriesCardEntity {
   entityType: 'related';
   data: RelatedSeriesPair;
 }
+export interface RecentlyUpdatedSeriesCardEntity {
+  entityType: 'recentlyUpdatedSeries';
+  data: SeriesGroup;
+}
 
 /**
  * Type guard utilities for working with CardEntity
@@ -94,6 +100,7 @@ export const CardEntityGuards = {
   isReadingListItem: (e: CardEntity): e is ReadingListItemCardEntity => e.entityType === 'readinglist-item',
   isBookmark: (e: CardEntity): e is BookmarkCardEntity => e.entityType === 'bookmark',
   isRelatedSeries: (e: CardEntity): e is RelatedSeriesCardEntity => e.entityType === 'related',
+  isRecentlyUpdatedSeries: (e: CardEntity): e is RecentlyUpdatedSeriesCardEntity => e.entityType === 'recentlyUpdatedSeries',
 };
 
 /**
@@ -150,6 +157,11 @@ export const CardEntityFactory = {
 
   related: (data: RelatedSeriesPair): RelatedSeriesCardEntity => ({
     entityType: 'related',
+    data
+  }),
+
+  recentlyUpdatedSeries: (data: SeriesGroup): RecentlyUpdatedSeriesCardEntity => ({
+    entityType: 'recentlyUpdatedSeries',
     data
   }),
 };

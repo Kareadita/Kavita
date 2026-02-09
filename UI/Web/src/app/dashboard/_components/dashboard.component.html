@@ -81,12 +81,7 @@
             (sectionClick)="handleSectionClick(StreamId.RecentlyUpdatedSeries)"
           >
             <ng-template #carouselItem let-item>
-              <app-card-item [entity]="item" [title]="item.seriesName" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
-                            [suppressArchiveWarning]="true" [count]="item.count" (clicked)="handleRecentlyAddedChapterClick(item)"
-                            [showReadButton]="true" (readClicked)="handleRecentlyAddedChapterRead(item)"
-                            [linkUrl]="'/library/' + item.libraryId + '/series/' + item.seriesId" />
-
-
+              <app-entity-card [entity]="item" [config]="recentlyUpdatedConfig()" />
             </ng-template>
           </app-carousel-reel>
         }

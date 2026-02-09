@@ -22,7 +22,6 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
 import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {CardItemComponent} from '../../cards/card-item/card-item.component';
 import {CarouselReelComponent} from '../../carousel/_components/carousel-reel/carousel-reel.component';
 import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {
@@ -61,7 +60,7 @@ enum StreamId {
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, CardItemComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent, EntityCardComponent]
+  imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent, EntityCardComponent]
 })
 export class DashboardComponent implements OnInit {
 
@@ -96,6 +95,11 @@ export class DashboardComponent implements OnInit {
   streamsLoaded: number = 0;
 
   seriesConfig = computed(() => this.cardConfigFactory.forSeries());
+  recentlyUpdatedConfig = computed(() => this.cardConfigFactory.forRecentlyUpdated({
+    overrides: {
+      readFunc: this.handleRecentlyAddedChapterRead.bind(this)
+    }
+  }));
 
   /**
    * We use this Replay subject to slow the amount of times we reload the UI
@@ -168,7 +172,7 @@ export class DashboardComponent implements OnInit {
 
   onRecentlyUpdatedNextPage(stream: DashboardStream) {
     return (pageNum: number, pageSize: number) => {
-      return this.seriesService.getRecentlyUpdatedSeries(pageNum, pageSize);
+      return this.seriesService.getRecentlyUpdatedSeries(pageNum, pageSize).pipe(map(d => d.map(series => CardEntityFactory.recentlyUpdatedSeries(series))));
     }
   }
 
@@ -204,6 +208,7 @@ export class DashboardComponent implements OnInit {
           case StreamType.RecentlyUpdated:
             s.api = this.seriesService.getRecentlyUpdatedSeries(1, 20)
               .pipe(
+                map(d => d.map(series => CardEntityFactory.recentlyUpdatedSeries(series))),
                 tap(() => this.increment()),
                 takeUntilDestroyed(this.destroyRef),
                 shareReplay({bufferSize: 1, refCount: true})

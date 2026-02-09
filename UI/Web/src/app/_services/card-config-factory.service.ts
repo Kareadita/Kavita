@@ -24,6 +24,7 @@ import {User} from "../_models/user/user";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedSeriesPair} from "../_single-module/related-tab/related-tab.component";
 import {ActionItem} from "../_models/actionables/action-item";
+import {SeriesGroup} from "../_models/series-group";
 
 export interface ConfigCardFactoryBaseParameters<T> {
   shouldRenderAction?: (action: ActionItem<T>, entity: T, user: User) => boolean,
@@ -343,6 +344,38 @@ export class CardConfigFactory {
 
       actionableFunc: (r) => this.actionFactory.getReadingListActions(params?.shouldRenderAction),
       readFunc: () => {},
+    };
+
+    return this.mergeConfig(defaults, params?.overrides);
+  }
+
+  /**
+   * Creates configuration for Recently cards
+   */
+  forRecentlyUpdated(
+    params?: ConfigCardFactoryBaseParameters<SeriesGroup>
+  ): BaseCardConfiguration<SeriesGroup> {
+    const defaults: BaseCardConfiguration<SeriesGroup> = {
+      allowSelection: false,
+      selectionType: 'series',
+      suppressArchiveWarning: false,
+
+      coverFunc: (s) => this.imageService.getSeriesCoverImage(s.seriesId),
+      titleFunc: (s) => s.seriesName,
+      titleRouteFunc: (s) => `/library/${s.libraryId}/series/${s.seriesId}`,
+      metaTitleFunc: (s, wrapper) => '',
+      titleTemplate: params?.titleRef,
+      metaTitleTemplate: params?.metaTitleRef,
+      tooltipFunc: (s) => s.seriesName,
+      progressFunc: (s) => ({ pages: 0, pagesRead: 0 }),
+
+      formatBadgeFunc: (s) => null,
+      countFunc: (s) => s.count,
+      showErrorFunc: (s) => false,
+      ariaLabelFunc: (s) => s.seriesName,
+
+      readFunc: (s) => null,
+      clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.seriesId]),
     };
 
     return this.mergeConfig(defaults, params?.overrides);

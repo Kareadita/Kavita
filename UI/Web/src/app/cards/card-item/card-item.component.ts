@@ -47,7 +47,7 @@ import {PromotedIconComponent} from "../../shared/_components/promoted-icon/prom
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
-import {ActionableEntity, ActionFactoryService} from "../../_services/action-factory.service";
+import {ActionableEntity} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {ActionResult} from "../../_models/actionables/action-result";
@@ -89,7 +89,6 @@ export class CardItemComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly actionFactoryService = inject(ActionFactoryService);
 
   protected readonly MangaFormat = MangaFormat;
 
