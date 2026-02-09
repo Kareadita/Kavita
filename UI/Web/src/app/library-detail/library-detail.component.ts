@@ -4,7 +4,6 @@ import {
   Component,
   DestroyRef,
   EventEmitter,
-  HostListener,
   inject,
   input,
   OnInit
@@ -12,7 +11,7 @@ import {
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {BulkSelectionService} from '../cards/bulk-selection.service';
-import {KEY_CODES, UtilityService} from '../shared/_services/utility.service';
+import {UtilityService} from '../shared/_services/utility.service';
 import {SeriesAddedEvent} from '../_models/events/series-added-event';
 import {Library} from '../_models/library/library';
 import {Pagination} from '../_models/pagination';
@@ -255,31 +254,7 @@ export class LibraryDetailComponent implements OnInit {
       }
     });
   }
-
-
-  @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: Event) {
-    const evt = event as KeyboardEvent;
-    if (evt.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = true;
-    }
-  }
-
-  @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: Event) {
-    const evt = event as KeyboardEvent;
-    if (evt.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = false;
-    }
-  }
-
-  performAction(event: ActionResult<void>) {
-    // Skip ActionResults — they've already been handled
-    if ('effect' in event) return;
-
-
-  }
-
+  
   updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;

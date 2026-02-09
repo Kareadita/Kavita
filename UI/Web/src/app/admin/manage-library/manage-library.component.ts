@@ -48,7 +48,6 @@ import {
 } from "@siemens/ngx-datatable";
 import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../_services/action-factory.service";
-import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {ActionResult} from "../../_models/actionables/action-result";
 
@@ -272,12 +271,7 @@ export class ManageLibraryComponent implements OnInit {
     }
   }
 
-  async handleBulkAction(event: ActionItem<Library> | ActionResult<Library>) {
-    // Skip ActionResults — they've already been handled
-    // if ('effect' in event) return;
-    //
-    // const action = event as ActionItem<Library>;
-    // //Library is null for bulk actions
+  async handleBulkAction(event: ActionResult<Library>) {
     this.bulkAction = event.action;
     this.cdRef.markForCheck();
 
