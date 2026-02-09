@@ -70,7 +70,7 @@
 
 
 
-              @if (accountService.isAdmin$ | async) {
+              @if (accountService.isAdmin()) {
                 <div class="col-auto ms-2">
                   <button class="btn btn-actions" id="edit-btn--komf" (click)="openEditModal()" [ngbTooltip]="t('edit-series-alt')">
                     <span><i class="fa fa-pen" aria-hidden="true"></i></span>

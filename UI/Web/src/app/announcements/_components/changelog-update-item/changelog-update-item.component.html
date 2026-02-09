@@ -24,7 +24,7 @@
 
         <div class="mb-1 mt-2">
           <span class="text-muted">{{t('published-label')}}{{update.publishDate | date: 'short'}}</span>
-          @if (!update.isDocker && (accountService.isAdmin$ | async)) {
+          @if (!update.isDocker && (accountService.isAdmin())) {
             @if (update.updateVersion === update.currentVersion) {
               <a href="{{update.updateUrl}}" class="btn disabled btn-{{index === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('installed')}}</a>
             } @else {

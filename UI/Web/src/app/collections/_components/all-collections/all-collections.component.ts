@@ -80,7 +80,7 @@ export class AllCollectionsComponent implements OnInit {
   protected cardTitleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
 
 
-  isLoading: boolean = true;
+  isLoading = signal<boolean>(true);
   collections = signal<UserCollection[]>([]);
   collectionEntities = computed(() => this.collections().map(c => CardEntityFactory.collection(c)));
 
@@ -149,11 +149,11 @@ export class AllCollectionsComponent implements OnInit {
   }
 
   loadPage() {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.cdRef.markForCheck();
     this.collectionService.allCollections().subscribe(tags => {
       this.collections.set([...tags]);
-      this.isLoading = false;
+      this.isLoading.set(false);
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(tags, (t: Tag) => t.title);
       this.cdRef.markForCheck();
     });

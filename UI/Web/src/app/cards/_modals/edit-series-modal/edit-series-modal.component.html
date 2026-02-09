@@ -708,7 +708,7 @@
                             <div class="row">
                               <div class="col">
                                 <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
-                                        [attr.aria-expanded]="!volumeCollapsed[volume.name]" [disabled]="!isAdmin">
+                                        [attr.aria-expanded]="!volumeCollapsed[volume.name]" [disabled]="!accountService.isAdmin()">
                                   {{t('view-files')}}
                                 </button>
                               </div>

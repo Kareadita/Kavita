@@ -624,7 +624,7 @@
                 </div>
               }
 
-              @if (accountService.isAdmin$ | async) {
+              @if (accountService.isAdmin()) {
                 <div class="row">
                   <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
                     <ng-template #view>

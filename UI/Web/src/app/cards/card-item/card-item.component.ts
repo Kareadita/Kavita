@@ -79,6 +79,7 @@ export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookma
 })
 export class CardItemComponent implements OnInit {
 
+  // TODO: This can be removed
   private readonly destroyRef = inject(DestroyRef);
   public readonly imageService = inject(ImageService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
