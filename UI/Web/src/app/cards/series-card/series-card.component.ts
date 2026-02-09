@@ -19,6 +19,7 @@ import {Series} from "../../_models/series";
 import {RelationKind} from "../../_models/series-detail/relation-kind";
 import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
+import {ProgressUpdateResult} from "../../_models/card/card-configuration";
 
 @Component({
   selector: 'app-series-card',
@@ -50,6 +51,8 @@ export class SeriesCardComponent implements OnChanges {
 
   @Output() reload = new EventEmitter<number>();
   @Output() dataChanged = new EventEmitter<Series>();
+  /** Emitted when a progress update is processed. */
+  @Output() progressUpdated = new EventEmitter<ProgressUpdateResult<Series>>();
 
   private seriesSignal = signal<Series | null>(null);
   private relationSignal = signal<RelationKind | undefined>(undefined);
@@ -90,6 +93,15 @@ export class SeriesCardComponent implements OnChanges {
   onDataChanged(entity: Series) {
     this.seriesSignal.set({...entity});
     this.dataChanged.emit(entity);
+  }
+
+  onProgressUpdated(result: ProgressUpdateResult<Series>) {
+    if (result.requiresRefetch) {
+      this.reload.emit(result.entity!.id);
+      return;
+    }
+    
+    this.onDataChanged(result.entity!);
   }
 
   private async handleClick(series: Series) {

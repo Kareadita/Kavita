@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
@@ -17,41 +16,38 @@ import {
   viewChild
 } from '@angular/core';
 import {ImageService} from "../../_services/image.service";
-import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
 import {Chapter} from "../../_models/chapter";
 import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FormsModule} from "@angular/forms";
 import {EntityTitleComponent} from "../entity-title/entity-title.component";
-import {filter, map} from "rxjs/operators";
-import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update-event";
 import {LibraryType} from "../../_models/library/library";
 import {MangaFormat} from "../../_models/manga-format";
 import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
-import {BaseCardConfiguration} from "../../_models/card/card-configuration";
+import {BaseCardConfiguration, ProgressUpdateResult} from "../../_models/card/card-configuration";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {BulkSelectionEntityDataSource} from "../bulk-selection.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 
 @Component({
-    selector: 'app-chapter-card',
+  selector: 'app-chapter-card',
   imports: [
     FormsModule,
     EntityTitleComponent,
     EntityCardComponent
   ],
-    templateUrl: './chapter-card.component.html',
-    styleUrl: './chapter-card.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './chapter-card.component.html',
+  styleUrl: './chapter-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChapterCardComponent implements OnInit, OnChanges {
   private readonly destroyRef = inject(DestroyRef);
   public readonly imageService = inject(ImageService);
   private readonly messageHub = inject(MessageHubService);
   private readonly accountService = inject(AccountService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly configFactory = inject(CardConfigFactory);
 
   protected readonly LibraryType = LibraryType;
@@ -129,16 +125,6 @@ export class ChapterCardComponent implements OnInit, OnChanges {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       this.user = user;
     });
-
-    // TODO: I don't think we can port this easily. It might be worth just removing this functionality from the app
-    this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
-      map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed(this.destroyRef)).subscribe( updateEvent => {
-      if (this.user === undefined || this.user.username !== updateEvent.username) return;
-      if (updateEvent.chapterId !== this.chapter.id) return;
-
-      this.chapter.pagesRead = updateEvent.pagesRead;
-      this.onDataChanged(this.chapter);
-    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -150,5 +136,14 @@ export class ChapterCardComponent implements OnInit, OnChanges {
   onDataChanged(entity: Chapter) {
     this.chapterSignal.set({...entity});
     this.dataChanged.emit(entity);
+  }
+
+  onProgressUpdated(result: ProgressUpdateResult<Chapter>) {
+    if (result.requiresRefetch) {
+      this.reload.emit(result.entity!.id);
+      return;
+    }
+
+    this.onDataChanged(result.entity!);
   }
 }

@@ -7,6 +7,7 @@ import {TemplateRef} from "@angular/core";
 import {ActionableEntity} from "../../_services/action-factory.service";
 import {IHasProgress} from "../common/i-has-progress";
 import {ActionItem} from "../actionables/action-item";
+import {UserProgressUpdateEvent} from "../events/user-progress-update-event";
 
 /**
  * Configuration object that defines how a card renders and behaves.
@@ -82,6 +83,12 @@ export interface BaseCardConfiguration<T> {
    * Returns key/values for route params (bookmark mode)
    */
   titleRouteParamsFunc?: (entity: T) => Record<string, any>;
+
+  /**
+   * Optional strategy for handling real-time progress updates.
+   * If not provided, the card ignores progress events.
+   */
+  progressUpdateStrategy?: ProgressUpdateStrategy<T>;
 }
 
 /**
@@ -109,25 +116,50 @@ export function hasActionables<T>(
   );
 }
 
-
 /**
  * Partial configuration for overrides. All properties optional.
  */
 export type CardConfigurationOverrides<T extends ActionableEntity> = Partial<ActionableCardConfiguration<T>>;
 export type BaseCardConfigurationOverrides<T> = Partial<BaseCardConfiguration<T>>;
 
+
 /**
- * Minimal configuration - only the truly required fields.
- * Used internally by factory to ensure all required fields are set.
+ * Defines how a card entity matches and responds to real-time progress updates.
+ * The card component uses this to:
+ * 1. Filter relevant SignalR events
+ * 2. Apply local updates to the entity
+ * 3. Notify the parent via a callback for state synchronization
  */
-export type RequiredCardConfiguration<T extends ActionableEntity> = Pick<BaseCardConfiguration<T>,
-  | 'allowSelection'
-  | 'selectionType'
-  | 'coverFunc'
-  | 'titleFunc'
-  | 'titleRouteFunc'
-  | 'metaTitleFunc'
-  | 'tooltipFunc'
-  | 'progressFunc'
-  | 'readFunc'
->;
+export interface ProgressUpdateStrategy<T> {
+  /**
+   * Extract matching criteria from the entity.
+   * Used to filter incoming UserProgressUpdateEvent.
+   */
+  getMatchCriteria: (entity: T) => ProgressMatchCriteria;
+
+  /**
+   * Apply the update to the entity and return the new state.
+   * Return null if the entity cannot be updated locally (e.g., series without chapter data)
+   * and requires a full refetch.
+   */
+  applyUpdate: (entity: T, event: UserProgressUpdateEvent) => T | null;
+}
+
+export interface ProgressMatchCriteria {
+  chapterId?: number;
+  volumeId?: number;
+  seriesId?: number;
+}
+
+/**
+ * Result emitted after a progress update is processed.
+ * Parent components use this to update their state.
+ */
+export interface ProgressUpdateResult<T> {
+  /** The updated entity (null if refetch required) */
+  entity: T | null;
+  /** The original event that triggered the update */
+  event: UserProgressUpdateEvent;
+  /** Whether the parent should refetch instead of using the entity */
+  requiresRefetch: boolean;
+}

@@ -106,7 +106,14 @@ export class CardConfigFactory {
 
       downloadObservableFunc: (s) => this.downloadService.activeDownloads$.pipe(
         map(events => this.downloadService.mapToEntityType(events, s))
-      )
+      ),
+
+      progressUpdateStrategy: {
+        getMatchCriteria: (s) => ({ seriesId: s.id }),
+        // Series cards don't contain chapter/volume details
+        // Signal that parent needs to refetch
+        applyUpdate: () => null
+      }
     };
 
     return this.mergeConfig(defaults, params?.overrides);
@@ -227,7 +234,15 @@ export class CardConfigFactory {
 
       downloadObservableFunc: (c) => this.downloadService.activeDownloads$.pipe(
         map(events => this.downloadService.mapToEntityType(events, c))
-      )
+      ),
+
+      progressUpdateStrategy: {
+        getMatchCriteria: (c) => ({ chapterId: c.id }),
+        applyUpdate: (c, event) => ({
+          ...c,
+          pagesRead: event.pagesRead
+        })
+      }
     };
 
     return this.mergeConfig(defaults, params?.overrides);
@@ -280,7 +295,28 @@ export class CardConfigFactory {
 
       downloadObservableFunc: (v) => this.downloadService.activeDownloads$.pipe(
         map(events => this.downloadService.mapToEntityType(events, v))
-      )
+      ),
+
+      progressUpdateStrategy: {
+        getMatchCriteria: (v) => ({volumeId: v.id}),
+        applyUpdate: (v, event) => {
+          // Find and update the specific chapter
+          const chapterIndex = v.chapters.findIndex(c => c.id === event.chapterId);
+          if (chapterIndex === -1) return v; // Chapter not in this volume
+
+          const updatedChapters = [...v.chapters];
+          updatedChapters[chapterIndex] = {
+            ...updatedChapters[chapterIndex],
+            pagesRead: event.pagesRead
+          };
+
+          return {
+            ...v,
+            chapters: updatedChapters,
+            pagesRead: updatedChapters.reduce((sum, c) => sum + c.pagesRead, 0)
+          };
+        }
+      }
     };
 
     return this.mergeConfig(defaults, params?.overrides);

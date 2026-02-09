@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
@@ -16,12 +15,10 @@ import {
 } from '@angular/core';
 import {Router} from "@angular/router";
 import {ImageService} from "../../_services/image.service";
-import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {MessageHubService} from "../../_services/message-hub.service";
 import {AccountService} from "../../_services/account.service";
 import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {filter, map} from "rxjs/operators";
-import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update-event";
 import {Volume} from "../../_models/volume";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {LibraryType} from "../../_models/library/library";
@@ -29,7 +26,7 @@ import {FormsModule} from "@angular/forms";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
 import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
-import {BaseCardConfiguration} from "../../_models/card/card-configuration";
+import {BaseCardConfiguration, ProgressUpdateResult} from "../../_models/card/card-configuration";
 import {ActionItem} from "../../_models/actionables/action-item";
 
 @Component({
@@ -48,7 +45,6 @@ export class VolumeCardComponent implements OnInit, OnChanges {
   public readonly imageService = inject(ImageService);
   private readonly messageHub = inject(MessageHubService);
   private readonly accountService = inject(AccountService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
   protected readonly utilityService = inject(UtilityService);
   private readonly configFactory = inject(CardConfigFactory);
@@ -115,30 +111,21 @@ export class VolumeCardComponent implements OnInit, OnChanges {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       this.user = user;
     });
-
-    // TODO: Decide if I want to port this feature over or leave it off going forward
-    this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
-      map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed(this.destroyRef))
-      .subscribe(updateEvent => {
-      if (this.user === undefined || this.user.username !== updateEvent.username) return;
-      if (updateEvent.volumeId !== this.volume.id) return;
-
-      let sum = 0;
-      const chapters = this.volume.chapters.filter(c => c.volumeId === updateEvent.volumeId);
-      chapters.forEach(chapter => {
-        chapter.pagesRead = updateEvent.pagesRead;
-        sum += chapter.pagesRead;
-      });
-      this.volume.pagesRead = sum;
-      this.onDataChanged(this.volume);
-    });
-
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['volume']) {
       this.volumeSignal.set(this.volume);
     }
+  }
+
+  onProgressUpdated(result: ProgressUpdateResult<Volume>) {
+    if (result.requiresRefetch) {
+      this.reload.emit(result.entity!.id);
+      return;
+    }
+
+    this.onDataChanged(result.entity!);
   }
 
 

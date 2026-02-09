@@ -14,12 +14,14 @@ import {
 } from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DownloadEvent} from "../../shared/_services/download.service";
-import {Observable} from "rxjs";
+import {filter, Observable} from "rxjs";
 import {MangaFormat} from "../../_models/manga-format";
 import {
   ActionableCardConfiguration,
   BaseCardConfiguration,
-  hasActionables
+  hasActionables,
+  ProgressUpdateResult,
+  ProgressUpdateStrategy
 } from "../../_models/card/card-configuration";
 import {CardEntity} from "../../_models/card/card-entity";
 import {ScrollService} from "../../_services/scroll.service";
@@ -39,6 +41,10 @@ import {IHasProgress} from "../../_models/common/i-has-progress";
 import {ThemeService} from "../../_services/theme.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {ActionResult} from "../../_models/actionables/action-result";
+import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {AccountService} from "../../_services/account.service";
+import {map} from "rxjs/operators";
+import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update-event";
 
 @Component({
   selector: 'app-entity-card',
@@ -64,6 +70,8 @@ export class EntityCardComponent<T> implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly scrollService = inject(ScrollService);
   private readonly themeService = inject(ThemeService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly accountService = inject(AccountService);
   protected readonly imageService = inject(ImageService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
 
@@ -95,6 +103,9 @@ export class EntityCardComponent<T> implements OnInit {
 
   /** Emitted when underlying entity data changes */
   @Output() dataChanged = new EventEmitter<T>();
+
+  /** Emitted when a progress update is processed. */
+  @Output() progressUpdated = new EventEmitter<ProgressUpdateResult<T>>();
 
 
 
@@ -203,6 +214,62 @@ export class EntityCardComponent<T> implements OnInit {
 
   ngOnInit() {
     this.setupDownloadTracking();
+    this.setupProgressTracking();
+  }
+
+  private setupProgressTracking() {
+    const strategy = this.config().progressUpdateStrategy;
+    if (!strategy) return;
+
+    this.messageHub.messages$.pipe(
+      filter(event => event.event === EVENTS.UserProgressUpdate),
+      map(evt => evt.payload as UserProgressUpdateEvent),
+      filter(event => this.isEventForCurrentUser(event)),
+      filter(event => this.eventMatchesEntity(event, strategy)),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(event => {
+      this.handleProgressUpdate(event, strategy);
+    });
+  }
+
+  private isEventForCurrentUser(event: UserProgressUpdateEvent) {
+    const currentUser = this.accountService.currentUserSignal();
+    return currentUser?.username === event.username;
+  }
+
+  private eventMatchesEntity(event: UserProgressUpdateEvent, strategy: ProgressUpdateStrategy<T>) {
+    const criteria = strategy.getMatchCriteria(this.data());
+
+    // Match on the most specific identifier available
+    if (criteria.chapterId !== undefined) {
+      return criteria.chapterId === event.chapterId;
+    }
+    if (criteria.volumeId !== undefined) {
+      return criteria.volumeId === event.volumeId;
+    }
+    if (criteria.seriesId !== undefined) {
+      return criteria.seriesId === event.seriesId;
+    }
+
+    return false;
+  }
+
+  private handleProgressUpdate(event: UserProgressUpdateEvent, strategy: ProgressUpdateStrategy<T>) {
+    const updated = strategy.applyUpdate(this.data(), event);
+
+    const result: ProgressUpdateResult<T> = {
+      entity: updated,
+      event,
+      requiresRefetch: updated === null
+    };
+
+    // Emit for parent to handle
+    this.progressUpdated.emit(result);
+
+    // Also emit dataChanged for backward compatibility if we have an updated entity
+    if (updated) {
+      this.dataChanged.emit(updated);
+    }
   }
 
   private setupDownloadTracking() {
@@ -281,8 +348,7 @@ export class EntityCardComponent<T> implements OnInit {
     this.cdRef.detectChanges();
   }
 
-  onActionResult(event: ActionItem<any> | ActionResult<any>) {
-    if (!('effect' in event)) return; // Ignore legacy ActionItem events
+  onActionResult(event: ActionResult<any>) {
     const result = event as ActionResult<any>;
     switch (result.effect) {
       case 'update':
