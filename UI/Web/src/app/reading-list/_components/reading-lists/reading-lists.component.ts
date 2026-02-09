@@ -88,10 +88,6 @@ export class ReadingListsComponent implements OnInit {
   performGlobalAction(event: ActionItem<void> | ActionResult<void>) {
     // Skip ActionResults — they've already been handled
     if ('effect' in event) return;
-
-    if (typeof event.callback === 'function') {
-      event.callback(event, undefined)
-    }
   }
 
   updateReadingList(updatedEntity: ReadingList) {

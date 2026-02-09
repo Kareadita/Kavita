@@ -367,10 +367,6 @@ export class CardItemComponent implements OnInit {
       }
       return; // Don't propagate the download from a card
     }
-
-    if (typeof event.callback === 'function') {
-      event.callback(event, undefined)
-    }
   }
 
 

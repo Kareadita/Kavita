@@ -46,7 +46,7 @@ export class CardActionablesComponent implements OnDestroy {
   /**
    * This will only emit when the action is clicked and the entity is null. Otherwise, the entity callback handler will be invoked.
    */
-  @Output() actionHandler = new EventEmitter<ActionItem<any> | ActionResult<any>>();
+  @Output() actionHandler = new EventEmitter<ActionResult<any>>();
 
   currentUser = this.accountService.currentUserSignal;
   submenu: {[key: string]: NgbDropdown} = {};
@@ -64,20 +64,9 @@ export class CardActionablesComponent implements OnDestroy {
   performAction(event: any, action: ActionItem<ActionableEntity>) {
     this.preventEvent(event);
 
-    // BUG: This is preventing smart filter/carousel usage
-    if (this.entity() === null) {
-      this.actionHandler.emit(action);
-      return;
-    }
-
-    // Prefer callback2 (observable-returning) over callback
-    if (action.callback2) {
-      action.callback2(action, this.entity()).subscribe(actionResult => {
-        this.actionHandler.emit(actionResult);
-      });
-    } else if (typeof action.callback === 'function') {
-      action.callback(action, this.entity());
-    }
+    action.callback2(action, this.entity()).subscribe(actionResult => {
+      this.actionHandler.emit(actionResult);
+    });
   }
 
   /**

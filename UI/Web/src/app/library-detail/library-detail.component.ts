@@ -6,6 +6,7 @@ import {
   EventEmitter,
   HostListener,
   inject,
+  input,
   OnInit
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
@@ -73,6 +74,8 @@ export class LibraryDetailComponent implements OnInit {
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly metadataService = inject(MetadataService);
 
+  // From Resolver
+  library = input<Library>();
   libraryId!: number;
   libraryName = '';
   series: Series[] = [];
@@ -270,13 +273,11 @@ export class LibraryDetailComponent implements OnInit {
     }
   }
 
-  performAction(event: ActionItem<void> | ActionResult<void>) {
+  performAction(event: ActionResult<void>) {
     // Skip ActionResults — they've already been handled
     if ('effect' in event) return;
 
-    if (typeof event.callback === 'function') {
-      event.callback(event, undefined)
-    }
+
   }
 
   updateFilter(data: FilterEvent<FilterField, SortField>) {

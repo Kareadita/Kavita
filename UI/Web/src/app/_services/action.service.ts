@@ -71,7 +71,6 @@ export type ReadingListActionCallback = (readingList: ReadingList) => void;
 export type VoidActionCallback = () => void;
 export type BooleanActionCallback = (result: boolean) => void;
 
-export type ExtraActionCallback<T> = (action: Action, data: T) => void;
 
 /**
  * Responsible for executing actions
@@ -110,7 +109,7 @@ export class ActionService {
   //      MAIN HANDLERS
   // -------------------------------------------
 
-  handleLibraryAction(action: ActionItem<Library>, library: Library): Observable<ActionResult<Library>> {
+  handleLibraryAction(action: ActionItem<Library>, library: Library) {
     if (!library.hasOwnProperty('id') || library.id === undefined) {
       return of(this.fromAction(action, library, 'none'));
     }
@@ -1249,47 +1248,6 @@ export class ActionService {
   }
 
   /**
-   * Start a file scan for analyze files for a Series
-   * @param series Series, must have libraryId and name populated
-   * @param callback Optional callback to perform actions after API completes
-   */
-  analyzeFilesForSeries(series: Series, callback?: SeriesActionCallback) {
-    this.seriesService.analyzeFiles(series.libraryId, series.id).subscribe(() => {
-      this.toastr.info(translate('toasts.scan-queued', {name: series.name}));
-      if (callback) {
-        callback(series);
-      }
-    });
-  }
-
-  /**
-   * Start a metadata refresh for a Series
-   * @param series Series, must have libraryId, id and name populated
-   * @param callback Optional callback to perform actions after API completes
-   * @param forceUpdate If cache should be checked or not
-   * @param forceColorscape If cache should be checked or not
-   */
-  async refreshSeriesMetadata(series: Series, callback?: SeriesActionCallback, forceUpdate: boolean = true, forceColorscape: boolean = false) {
-
-    // Prompt the user if we are doing a forced call
-    if (forceUpdate) {
-      if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
-        callback?.(series)
-        return;
-      }
-    }
-
-    const message = forceUpdate ? 'toasts.refresh-covers-queued' : 'toasts.generate-colorscape-queued';
-
-    this.seriesService.refreshMetadata(series, forceUpdate, forceColorscape).subscribe(() => {
-      this.toastr.info(translate(message, {name: series.name}));
-      if (callback) {
-        callback(series);
-      }
-    });
-  }
-
-  /**
    * Mark all chapters and the volume as Read
    * @param seriesId Series Id
    * @param volume Volume, should have id, chapters and pagesRead populated
@@ -1360,20 +1318,6 @@ export class ActionService {
     });
   }
 
-  /**
-   * Mark a chapter as unread
-   * @param libraryId Library Id
-   * @param seriesId Series Id
-   * @param chapter Chapter, should have id, pages, volumeId populated
-   * @param callback Optional callback to perform actions after API completes
-   */
-  markChapterAsUnread2(libraryId: number, seriesId: number, chapter: Chapter, callback?: ExtraActionCallback<Chapter>) {
-    this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0).subscribe(() => {
-      chapter.pagesRead = 0;
-      this.toastr.success(translate('toasts.mark-unread'));
-      callback?.(Action.MarkAsUnread, chapter);
-    });
-  }
 
   /**
    * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
@@ -1392,26 +1336,6 @@ export class ActionService {
       this.toastr.success(translate('toasts.mark-read'));
 
       callback?.()
-    });
-  }
-
-  /**
-   * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
-   * @param seriesId Series Id
-   * @param volumes Volumes, should have id, chapters and pagesRead populated
-   * @param chapters Optional Chapters, should have id
-   * @param callback Optional callback to perform actions after API completes
-   */
-  markMultipleAsRead2(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: ExtraActionCallback<void>) {
-    this.readerService.markMultipleRead(seriesId, volumes.map(v => v.id), chapters?.map(c => c.id)).subscribe(() => {
-      volumes.forEach(volume => {
-        volume.pagesRead = volume.pages;
-        volume.chapters?.forEach(c => c.pagesRead = c.pages);
-      });
-      chapters?.forEach(c => c.pagesRead = c.pages);
-      this.toastr.success(translate('toasts.mark-read'));
-
-      callback?.(Action.MarkAsRead);
     });
   }
 
@@ -1638,24 +1562,6 @@ export class ActionService {
       this.collectionModalRef.dismissed.subscribe(() => {
         this.collectionModalRef = null;
         callback?.(false)
-      });
-  }
-
-  addSeriesToReadingList(series: Series, callback?: SeriesActionCallback) {
-    if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
-      this.readingListModalRef.componentInstance.seriesId = series.id;
-      this.readingListModalRef.componentInstance.title = series.name;
-      this.readingListModalRef.componentInstance.type = ADD_FLOW.Series;
-
-
-      this.readingListModalRef.closed.subscribe(() => {
-        this.readingListModalRef = null;
-        callback?.(series)
-      });
-      this.readingListModalRef.dismissed.subscribe(() => {
-        this.readingListModalRef = null;
-        callback?.(series)
       });
   }
 

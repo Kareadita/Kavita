@@ -150,15 +150,7 @@ export class CarouselReelComponent {
     this.cdRef.markForCheck();
   }
 
-  performAction(event: ActionItem<any> | ActionResult<any>) {
-    console.log('carousel handling action: ', event);
-    if ('effect' in event) {
-      this.actionHandler.emit(event);
-      return;
-    }
-
-    if (typeof event.callback === 'function') {
-      event.callback(event, undefined)
-    }
+  performAction(event: ActionResult<any>) {
+    this.actionHandler.emit(event);
   }
 }

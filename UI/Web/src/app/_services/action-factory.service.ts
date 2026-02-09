@@ -18,7 +18,7 @@ import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {ClientDevice} from "../_models/client-device";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {ActionService} from "./action.service";
-import {ActionCallback, ActionItem, ActionShouldRenderFunc} from "../_models/actionables/action-item";
+import {ActionItem, ActionShouldRenderFunc} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";
 import {ActionResultCallback} from "../_models/actionables/action-result";
 
@@ -1150,7 +1150,6 @@ export class ActionFactoryService {
   }
 
   private applyCallback(action: ActionItem<any>, callback: ActionResultCallback<any>, shouldRenderFunc: ActionShouldRenderFunc<any>) {
-    //action.callback = this.dummyCallback;
     action.callback2 = callback;
     action.shouldRender = shouldRenderFunc;
 
@@ -1177,29 +1176,6 @@ export class ActionFactoryService {
     return actions;
   }
 
-  /**
-   * Applies old-style void-returning callback to actions. Used by bulk-operations.
-   */
-  public applyOldCallbackToList<T>(list: Array<ActionItem<T>>,
-                             callback: ActionCallback<T>,
-                             shouldRenderFunc: ActionShouldRenderFunc<T> = this.dummyShouldRender): Array<ActionItem<T>> {
-    const actions = list.map((a) => {
-      return { ...a };
-    });
-
-    const applyOld = (action: ActionItem<any>) => {
-      action.callback = callback;
-
-      action.shouldRender = shouldRenderFunc;
-      if (action.children?.length) {
-        action.children = action.children.map(d => ({...d}));
-        action.children.forEach(child => applyOld(child));
-      }
-    };
-
-    actions.forEach(action => applyOld(action));
-    return actions;
-  }
 
   // Checks the whole tree for the action and returns true if it exists
   public hasAction(actions: Array<ActionItem<any>>, action: Action) {

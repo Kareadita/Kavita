@@ -235,10 +235,6 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
   performAction(event: ActionItem<void> | ActionResult<void>) {
     // Skip ActionResults — they've already been handled
     if ('effect' in event) return;
-
-    if (typeof event.callback === 'function') {
-      event.callback(event, undefined)
-    }
   }
 
   applyMetadataFilter(event: FilterEvent<number, number>) {
