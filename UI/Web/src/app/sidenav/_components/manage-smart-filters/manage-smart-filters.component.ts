@@ -84,14 +84,7 @@ export class ManageSmartFiltersComponent {
     return !decodeURIComponent(filter.filter).includes('¦');
   }
 
-  handleActionCallback(event: ActionItem<any> | ActionResult<any>) {
-    // This can be removed once actionable refactor is complete
-    const isUpdatedActionSystem = 'effect' in event;
-    if (!isUpdatedActionSystem) return;
-
-    const result = event as unknown as ActionResult<SmartFilter>;
-
-    console.log('result', result);
+  handleActionCallback(result: ActionResult<SmartFilter>) {
     switch (result.effect) {
       case 'update':
       case 'remove':

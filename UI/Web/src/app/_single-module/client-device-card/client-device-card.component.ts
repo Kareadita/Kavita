@@ -170,14 +170,8 @@ export class ClientDeviceCardComponent {
 
 
 
-  handleActionCallback(event: ActionItem<any> | ActionResult<any>) {
-    // This can be removed once actionable refactor is complete
-    const isUpdatedActionSystem = 'effect' in event;
-    if (!isUpdatedActionSystem) return;
-
-    const result = event as unknown as ActionResult<ClientDevice>;
-
-    switch (result.effect) {
+  handleActionCallback(event: ActionResult<ClientDevice>) {
+    switch (event.effect) {
       case 'update':
         // We have purposedly encoded Edit as an Update
         // The actionable modal needs some time to clean up
@@ -188,7 +182,7 @@ export class ClientDeviceCardComponent {
         }
         break;
       case 'remove':
-        this.deviceDeleted.emit(result.entity.id);
+        this.deviceDeleted.emit(event.entity.id);
         break;
       case 'reload':
       case 'none':

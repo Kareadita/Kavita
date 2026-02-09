@@ -100,15 +100,6 @@ export type CardConfiguration<T> = T extends ActionableEntity
   ? ActionableCardConfiguration<T> | BaseCardConfiguration<T>
   : BaseCardConfiguration<T>;
 
-// export function hasActionables<T>(
-//   config: BaseCardConfiguration<T>
-// ): config is BaseCardConfiguration<T> & { actionables: ActionItem<any>[] } {
-//   return (
-//     'actionableFunc' in config &&
-//     typeof (config as any).actionables === 'function'
-//   );
-// }
-
 export function hasActionables<T>(
   config: BaseCardConfiguration<T>
 ): config is BaseCardConfiguration<T> & { actionableFunc: (entity: any) => ActionItem<any>[] } {

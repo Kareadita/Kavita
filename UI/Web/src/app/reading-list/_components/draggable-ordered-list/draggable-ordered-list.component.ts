@@ -18,6 +18,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {FormsModule} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {tap} from "rxjs";
 
 export interface IndexUpdateEvent {
   fromPosition: number;
@@ -87,10 +88,9 @@ export class DraggableOrderedListComponent {
 
   constructor() {
     this.bulkSelectionService.selections$.pipe(
-        takeUntilDestroyed(this.destroyRef)
-    ).subscribe((s) => {
-      this.cdRef.markForCheck()
-    });
+      takeUntilDestroyed(this.destroyRef),
+      tap(() => this.cdRef.markForCheck()),
+    ).subscribe();
   }
 
   drop(event: CdkDragDrop<string[]>) {

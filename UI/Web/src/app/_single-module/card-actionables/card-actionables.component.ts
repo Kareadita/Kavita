@@ -145,7 +145,6 @@ export class CardActionablesComponent implements OnDestroy {
     ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);
 
     ref.componentInstance.actionPerformed.subscribe((actionOrResult: any) => {
-      // ActionResult from callback2 — already executed
       this.actionHandler.emit(actionOrResult);
     });
   }

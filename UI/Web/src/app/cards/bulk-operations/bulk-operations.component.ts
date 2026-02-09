@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   HostListener,
   inject,
   Input,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 import {BulkSelectionService} from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -46,9 +48,10 @@ export class BulkOperationsComponent<T> implements OnInit {
    * On Series Detail this should be 12
    */
   @Input() marginRight: number = 8;
-  hasMarkAsRead: boolean = false;
-  hasMarkAsUnread: boolean = false;
-  actions: Array<ActionItem<T>> = [];
+
+  actions = signal<ActionItem<T>[]>([]);
+  hasMarkAsRead = computed(() => this.actionFactoryService.hasAction(this.actions(), Action.MarkAsRead));
+  hasMarkAsUnread = computed(() => this.actionFactoryService.hasAction(this.actions(), Action.MarkAsUnread));
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -74,12 +77,8 @@ export class BulkOperationsComponent<T> implements OnInit {
   }
 
   ngOnInit(): void {
-
     this.bulkSelectionService.actions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(actions => {
-      this.actions = actions;
-      this.hasMarkAsRead = this.actionFactoryService.hasAction(this.actions, Action.MarkAsRead);
-      this.hasMarkAsUnread = this.actionFactoryService.hasAction(this.actions, Action.MarkAsUnread);
-      this.cdRef.markForCheck();
+      this.actions.set(actions);
     });
   }
 
@@ -91,7 +90,7 @@ export class BulkOperationsComponent<T> implements OnInit {
   }
 
   executeAction(action: Action) {
-    const foundActions = this.actions.filter(act => act.action === action);
+    const foundActions = this.actions().filter(act => act.action === action);
     if (foundActions.length > 0) {
       this.performAction(foundActions[0]);
     }

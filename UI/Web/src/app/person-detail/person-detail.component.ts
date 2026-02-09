@@ -214,15 +214,7 @@ export class PersonDetailComponent implements OnInit {
     this.filterUtilityService.applyFilterWithParams(['all-series'], searchFilter, params).subscribe();
   }
 
-  navigateToSeries(series: Series) {
-    this.router.navigate(['library', series.libraryId, 'series', series.id]);
-  }
-
-  handleActionCallback(event: ActionItem<any> | ActionResult<any>) {
-    // This can be removed once actionable refactor is complete
-    const isUpdatedActionSystem = 'effect' in event;
-    if (!isUpdatedActionSystem) return;
-
+  handleActionCallback(event: ActionResult<Person>) {
     const result = event as unknown as ActionResult<Person>;
 
     switch (result.effect) {

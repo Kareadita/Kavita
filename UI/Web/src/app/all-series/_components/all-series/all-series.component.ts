@@ -17,7 +17,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {ActionService} from 'src/app/_services/action.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {SeriesService} from 'src/app/_services/series.service';
@@ -55,7 +54,6 @@ export class AllSeriesComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly seriesService = inject(SeriesService);
   private readonly titleService = inject(Title);
-  private readonly actionService = inject(ActionService);
   private readonly hubService = inject(MessageHubService);
   private readonly utilityService = inject(UtilityService);
   private readonly route = inject(ActivatedRoute);
