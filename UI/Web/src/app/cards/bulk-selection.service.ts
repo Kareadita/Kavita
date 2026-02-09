@@ -53,7 +53,7 @@ export class BulkSelectionService {
   private registeredShouldRender: ActionShouldRenderFunc<any> | null = null;
 
 
-  private debug: boolean = true;
+  private debug: boolean = false;
   private prevIndex: number = 0;
   private prevDataSource!: BulkSelectionEntityDataSource;
   private selectedCards: { [key: string]: {[key: number]: boolean} } = {};
@@ -308,7 +308,7 @@ export class BulkSelectionService {
     handler: (action: ActionItem<any>) => Observable<ActionResult<any>>
   ): ActionItem<any>[] {
     const wire = (action: ActionItem<any>) => {
-      action.callback2 = (act: ActionItem<any>, _entity: any) => {
+      action.callback = (act: ActionItem<any>, _entity: any) => {
         return handler(act).pipe(
           tap((act) => {
             this.deselectAll();

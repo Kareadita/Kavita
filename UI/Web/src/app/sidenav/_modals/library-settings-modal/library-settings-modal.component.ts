@@ -487,8 +487,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   runTask(task: ActionItem<Library>) {
-    if (task.callback2) {
-      task.callback2(task, this.library!).subscribe();
+    if (task.callback) {
+      task.callback(task, this.library!).subscribe();
     }
   }
 

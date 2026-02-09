@@ -64,7 +64,7 @@ export class CardActionablesComponent implements OnDestroy {
   performAction(event: any, action: ActionItem<ActionableEntity>) {
     this.preventEvent(event);
 
-    action.callback2(action, this.entity()).subscribe(actionResult => {
+    action.callback(action, this.entity()).subscribe(actionResult => {
       this.actionHandler.emit(actionResult);
     });
   }
@@ -143,19 +143,10 @@ export class CardActionablesComponent implements OnDestroy {
     ref.componentInstance.actions = this.actions();
     ref.componentInstance.willRenderAction = this.willRenderAction.bind(this);
     ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);
-    // ref.componentInstance.actionPerformed.subscribe((action: ActionItem<any>) => {
-    //   this.performAction(event, action);
-    // });
 
     ref.componentInstance.actionPerformed.subscribe((actionOrResult: any) => {
-      // If it's an ActionResult (from callback2), just forward it — action already executed
-      if ('effect' in actionOrResult) {
-        // ActionResult from callback2 — already executed
-        this.actionHandler.emit(actionOrResult);
-      } else {
-        // Legacy ActionItem — needs execution
-        this.performAction(event, actionOrResult);
-      }
+      // ActionResult from callback2 — already executed
+      this.actionHandler.emit(actionOrResult);
     });
   }
 }

@@ -14,7 +14,7 @@ export interface ActionItem<T> {
   title: string;
   description: string;
   action: Action;
-  callback2: ActionResultCallback<T>;   // new observable-returning
+  callback: ActionResultCallback<T>;
   /**
    * Roles required to be present for ActionItem to show. If empty, assumes anyone can see. At least one needs to apply.
    */

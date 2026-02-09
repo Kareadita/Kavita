@@ -87,7 +87,7 @@ export class BulkOperationsComponent<T> implements OnInit {
     // Skip ActionResults — they've already been handled
     if ('effect' in event) return;
 
-    event.callback2(event, null).subscribe();
+    event.callback(event, null).subscribe();
   }
 
   executeAction(action: Action) {

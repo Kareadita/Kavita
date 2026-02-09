@@ -100,7 +100,7 @@ export class ActionableModalComponent implements OnInit {
       //   ? item.callback2(item, this.entity)
       //   : item.callback(item, this.entity);
 
-      const result = item.callback2(item, this.entity);
+      const result = item.callback(item, this.entity);
 
       if (result && typeof (result as any).subscribe === 'function') {
         (result as Observable<ActionResult<any>>).subscribe(actionResult => {
