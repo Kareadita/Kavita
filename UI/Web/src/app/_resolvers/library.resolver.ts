@@ -8,10 +8,10 @@ export const libraryResolver: ResolveFn<Library | UrlTree> = (route, state) => {
   const libraryService = inject(LibraryService);
   const router = inject(Router);
 
-  const libId = route.paramMap.get('libraryId') || route.parent?.paramMap.get('libraryId');
+  const libId = route.parent?.paramMap.get('libraryId') || route.paramMap.get('libraryId');
 
-  if (!libId) {
-    console.error('Library ID not found in route params');
+  if (!libId || libId === '0') {
+    console.error('Library ID not found in route params or 0');
     return of(router.parseUrl('/home'));
   }
 

@@ -8,11 +8,8 @@ import {
   inject,
   signal
 } from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ToastrService} from 'ngx-toastr';
+import {ActivatedRoute} from '@angular/router';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {ConfirmService} from 'src/app/shared/confirm.service';
-import {DownloadService} from 'src/app/shared/_services/download.service';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {Pagination} from 'src/app/_models/pagination';
@@ -27,7 +24,7 @@ import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-opera
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
@@ -49,12 +46,7 @@ import {BookmarkCardEntity, CardEntityFactory} from "../../../_models/card/card-
 })
 export class BookmarksComponent {
 
-  private readonly translocoService = inject(TranslocoService);
   private readonly readerService = inject(ReaderService);
-  private readonly downloadService = inject(DownloadService);
-  private readonly toastr = inject(ToastrService);
-  private readonly confirmService = inject(ConfirmService);
-  private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly route = inject(ActivatedRoute);
@@ -84,6 +76,7 @@ export class BookmarksComponent {
   seriesIds = computed(() => {
     const bookmarks = this.bookmarks();
     const seriesIds = {} as {[id: number]: number};
+
     bookmarks.forEach(bmk => {
       if (!seriesIds.hasOwnProperty(bmk.seriesId)) {
         seriesIds[bmk.seriesId] = 0;
@@ -93,7 +86,8 @@ export class BookmarksComponent {
     return seriesIds;
   });
   jumpbarKeys = computed(() => {
-    return this.jumpbarService.getJumpKeys(this.series(), (t: Series) => t.name);
+    const series = this.series();
+    return this.jumpbarService.getJumpKeys(series, (t: Series) => t.name);
   });
 
   pagination: Pagination = new Pagination();
@@ -149,7 +143,7 @@ export class BookmarksComponent {
       });
       const uniqueBookmarks = Array.from(uniqueBySeriesMap.values());
 
-      this.bookmarks.set(uniqueBookmarks);
+      this.bookmarks.set([...uniqueBookmarks]);
       this.isLoadingBookmarks.set(false);
     });
   }

@@ -405,7 +405,7 @@ export class CardConfigFactory {
       tooltipFunc: (s) => s.seriesName,
       progressFunc: (s) => ({ pages: 0, pagesRead: 0 }),
 
-      formatBadgeFunc: (s) => null,
+      formatBadgeFunc: (s) => s.format,
       countFunc: (s) => s.count,
       showErrorFunc: (s) => false,
       ariaLabelFunc: (s) => s.seriesName,
