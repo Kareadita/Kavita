@@ -14,7 +14,6 @@ import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
@@ -75,14 +74,27 @@ export class BookmarksComponent {
   });
   series = computed(() => this.bookmarks().map(b => b.series!));
   bookmarkConfig = computed(() => {
+    const seriesIds = this.seriesIds();
     return this.cardConfigFactory.forBookmark({overrides: {
-        countFunc: entity => this.seriesIds[entity.seriesId],
+        countFunc: entity => seriesIds[entity.seriesId],
       }});
   });
 
   isLoadingBookmarks = signal<boolean>(false);
-  seriesIds: {[id: number]: number} = {};
-  jumpbarKeys: Array<JumpKey> = [];
+  seriesIds = computed(() => {
+    const bookmarks = this.bookmarks();
+    const seriesIds = {} as {[id: number]: number};
+    bookmarks.forEach(bmk => {
+      if (!seriesIds.hasOwnProperty(bmk.seriesId)) {
+        seriesIds[bmk.seriesId] = 0;
+      }
+      seriesIds[bmk.seriesId] += 1;
+    });
+    return seriesIds;
+  });
+  jumpbarKeys = computed(() => {
+    return this.jumpbarService.getJumpKeys(this.series(), (t: Series) => t.name);
+  });
 
   pagination: Pagination = new Pagination();
   filter: FilterV2<FilterField> | undefined = undefined;
@@ -117,7 +129,6 @@ export class BookmarksComponent {
     this.bulkSelectionService.registerDataSource('bookmarkData', () => this.bookmarks());
     this.bulkSelectionService.registerPostAction(res => {
       if (res.effect === 'none') return;
-
       this.loadPage();
     });
 
@@ -129,15 +140,6 @@ export class BookmarksComponent {
     this.isLoadingBookmarks.set(true);
 
     this.readerService.getAllBookmarks(this.filter).subscribe(bookmarks => {
-
-      // Get the total number of bookmarks per series before deduplication
-      bookmarks.forEach(bmk => {
-        if (!this.seriesIds.hasOwnProperty(bmk.seriesId)) {
-          this.seriesIds[bmk.seriesId] = 0;
-        }
-        this.seriesIds[bmk.seriesId] += 1;
-      });
-
       // Deduplicate: keep first bookmark per series
       const uniqueBySeriesMap = new Map<number, PageBookmark>();
       bookmarks.forEach(bmk => {
@@ -148,10 +150,7 @@ export class BookmarksComponent {
       const uniqueBookmarks = Array.from(uniqueBySeriesMap.values());
 
       this.bookmarks.set(uniqueBookmarks);
-
-      this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series(), (t: Series) => t.name);
       this.isLoadingBookmarks.set(false);
-      this.cdRef.markForCheck();
     });
   }
 
