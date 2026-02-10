@@ -110,60 +110,60 @@ export class EntityCardComponent<T> implements OnInit {
 
 
   /** Underlying entity data extracted from wrapper */
-  protected data: Signal<T> = computed(() => this.entity().data as T);
+  protected readonly data: Signal<T> = computed(() => this.entity().data as T);
 
   /** Cover image URL */
-  protected coverUrl: Signal<string> = computed(() =>
+  protected readonly coverUrl: Signal<string> = computed(() =>
     this.config().coverFunc(this.data())
   );
 
   /** Primary title text */
-  protected title: Signal<string> = computed(() =>
+  protected readonly title: Signal<string> = computed(() =>
     this.config().titleFunc(this.data())
   );
 
   /** Router link for title */
-  protected titleRoute: Signal<string> = computed(() =>
+  protected readonly titleRoute: Signal<string> = computed(() =>
     this.config().titleRouteFunc(this.data())
   );
 
   /** Router link for title */
-  protected titleRouteParams: Signal<Record<string, any>> = computed(() =>
+  protected readonly titleRouteParams: Signal<Record<string, any>> = computed(() =>
     this.config().titleRouteParamsFunc?.(this.data()) ?? {}
   );
 
   /** Meta title text (fallback when no template) */
-  protected metaTitle: Signal<string> = computed(() =>
+  protected readonly metaTitle: Signal<string> = computed(() =>
     this.config().metaTitleFunc(this.data(), this.entity()) ?? ''
   );
 
   /** Tooltip text */
-  protected tooltip: Signal<string> = computed(() =>
+  protected readonly tooltip: Signal<string> = computed(() =>
     this.config().tooltipFunc(this.data())
   );
 
   /** Reading progress */
-  protected progress: Signal<IHasProgress> = computed(() =>
+  protected readonly progress: Signal<IHasProgress> = computed(() =>
     this.config().progressFunc(this.data())
   );
 
   /** Format badge value (null hides it) */
-  protected formatBadge: Signal<MangaFormat | null> = computed(() =>
+  protected readonly formatBadge: Signal<MangaFormat | null> = computed(() =>
     this.config().formatBadgeFunc?.(this.data()) ?? null
   );
 
   /** Count badge value (0 or 1 hides it) */
-  protected count: Signal<number> = computed(() =>
+  protected readonly count: Signal<number> = computed(() =>
     this.config().countFunc?.(this.data()) ?? 0
   );
 
   /** Whether to show error banner */
-  protected showError: Signal<boolean> = computed(() =>
+  protected readonly showError: Signal<boolean> = computed(() =>
     this.config().showErrorFunc?.(this.data()) ?? this.progress().pages === 0
   );
 
   /** Whether this card is selected */
-  protected isSelected: Signal<boolean> = computed(() => {
+  protected readonly isSelected: Signal<boolean> = computed(() => {
     this.bulkSelectionService.selectionSignal(); // Ensure we re-render when deselect occurs
     return this.config().allowSelection &&
       this.bulkSelectionService.isCardSelected(this.config().selectionType, this.index());
@@ -174,7 +174,8 @@ export class EntityCardComponent<T> implements OnInit {
     this.actionables().length > 0
   );
 
-  protected actionables: Signal<ActionItem<any>[]> = computed(() => {
+  /** Actual actionables */
+  protected readonly actionables: Signal<ActionItem<any>[]> = computed(() => {
     const config = this.config();
     const data = this.data();
 
@@ -187,23 +188,52 @@ export class EntityCardComponent<T> implements OnInit {
     return [];
   });
 
-  protected actionableEntity: Signal<ActionableEntity | null> = computed(() => {
+  /** Entity for the actionable otherwise null */
+  protected readonly actionableEntity: Signal<ActionableEntity | null> = computed(() => {
     return this.hasActionables()
       ? (this.data() as unknown as ActionableEntity)
       : null;
   });
 
   /** Aria label for accessibility */
-  protected ariaLabel: Signal<string> = computed(() =>
+  protected readonly ariaLabel: Signal<string> = computed(() =>
     this.config().ariaLabelFunc?.(this.data()) ?? this.title()
   );
 
-  protected cardWidth = computed(() => {
+  protected readonly cardWidth = computed(() => {
     return this.themeService.getCssVariable('--card-image-width');
   });
 
-  protected cardHeight = computed(() => {
+  protected readonly cardHeight = computed(() => {
     return this.themeService.getCssVariable('--card-image-height');
+  });
+
+  /** Check if meta title is not empty/null **/
+  protected readonly shouldRenderMetaTitle = computed(() => {
+    return !!this.metaTitle() || this.hasMetaTitleTemplate();
+  });
+
+  /** Check if meta title template is provided */
+  protected readonly hasMetaTitleTemplate = computed(() => {
+    return !!this.config().metaTitleTemplate;
+  });
+
+  protected readonly hasTitleTemplate = computed(() => {
+    return !!this.config().titleTemplate;
+  });
+
+  protected readonly metaTitleTemplate = computed(() =>  {
+    return this.config().metaTitleTemplate;
+  });
+
+  protected readonly titleTemplate = computed(() =>  {
+    return this.config().titleTemplate;
+  });
+
+  /** Get entity ID for accessibility attributes */
+  protected readonly entityId = computed(() =>  {
+    const data = this.data() as { id?: number };
+    return data.id ?? 0;
   });
 
   protected download$: Observable<DownloadEvent | null> | null = null;
@@ -371,33 +401,5 @@ export class EntityCardComponent<T> implements OnInit {
     if (this.bulkSelectionService.hasSelections()) return;
 
     this.config().readFunc(this.data());
-  }
-
-  /** Check if meta title is not empty/null **/
-  get shouldRenderMetaTitle() {
-    return !!this.metaTitle() || this.hasMetaTitleTemplate;
-  }
-
-  /** Check if meta title template is provided */
-  get hasMetaTitleTemplate() {
-    return !!this.config().metaTitleTemplate;
-  }
-
-  get hasTitleTemplate() {
-    return !!this.config().titleTemplate;
-  }
-
-  get metaTitleTemplate() {
-    return this.config().metaTitleTemplate;
-  }
-
-  get titleTemplate() {
-    return this.config().titleTemplate;
-  }
-
-  /** Get entity ID for accessibility attributes */
-  get entityId() {
-    const data = this.data() as { id?: number };
-    return data.id ?? 0;
   }
 }

@@ -27,27 +27,7 @@
         />
       }
 
-      <!-- Progress Banner -->
-      <div class="progress-banner">
-        @if (entityProgress.pagesRead > 0 &&
-        entityProgress.pagesRead < entityProgress.pages &&
-        entityProgress.pages > 0) {
-          <p
-            [ngbTooltip]="((entityProgress.pagesRead / entityProgress.pages) * 100 | number:'1.0-1') + '%'"
-            container="body">
-            <ngb-progressbar
-              type="primary"
-              height="5px"
-              [value]="entityProgress.pagesRead"
-              [max]="entityProgress.pages"
-            />
-          </p>
-        }
 
-        <span class="download">
-          <app-download-indicator [download$]="download$" />
-        </span>
-      </div>
 
       @if (showError()) {
         <div class="error-banner">
@@ -84,8 +64,25 @@
         </div>
       }
 
-      <!-- Overlay gradient -->
-      <div class="card-overlay"></div>
+      <div class="progress-banner">
+        @if (entityProgress.pagesRead > 0 &&
+        entityProgress.pagesRead < entityProgress.pages &&
+        entityProgress.pages > 0) {
+          <p
+            [ngbTooltip]="((entityProgress.pagesRead / entityProgress.pages) * 100 | number:'1.0-1') + '%'"
+            container="body">
+            <ngb-progressbar
+              type="primary"
+              height="5px"
+              [value]="entityProgress.pagesRead"
+              [max]="entityProgress.pages"
+            />
+          </p>
+        }
+      </div>
+      <div class="download">
+          <app-download-indicator [download$]="download$" />
+      </div>
 
       <!-- Read Button (visible on hover) -->
       @if (!bulkSelectionService.hasSelections()) {
@@ -108,14 +105,17 @@
       }
     </div>
 
+    <!-- Overlay gradient -->
+    <div class="card-overlay"></div>
+
     <!-- Meta Title Area (above main title) -->
-    @if (shouldRenderMetaTitle) {
+    @if (shouldRenderMetaTitle()) {
       <div
         class="card-body meta-title"
         [ngbTooltip]="metaTitle().length > 34 ? metaTitle() : null">
-        @if (hasMetaTitleTemplate) {
+        @if (hasMetaTitleTemplate()) {
           <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
-            <ng-container *ngTemplateOutlet="metaTitleTemplate!; context: { $implicit: entity() }" />
+            <ng-container *ngTemplateOutlet="metaTitleTemplate()!; context: { $implicit: entity() }" />
           </div>
         } @else {
           <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
@@ -139,10 +139,10 @@
         class="card-title"
         [ngbTooltip]="tooltip()"
         placement="top"
-        [id]="'entity-' + entityId">
+        [id]="'entity-' + entityId()">
         <a class="dark-exempt btn-icon" [routerLink]="titleRoute()" [queryParams]="titleRouteParams()">
-          @if (hasTitleTemplate) {
-            <ng-container *ngTemplateOutlet="titleTemplate!; context: { $implicit: entity() }" />
+          @if (hasTitleTemplate()) {
+            <ng-container *ngTemplateOutlet="titleTemplate()!; context: { $implicit: entity() }" />
           } @else {
             {{ title() }}
           }

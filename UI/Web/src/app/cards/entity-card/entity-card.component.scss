@@ -1,6 +1,7 @@
 :host {
   --card-image-height: 232.91px;
   --card-image-width: 160px;
+  --card-progress-height: 5px;
 }
 
 .card-item-container {
@@ -26,10 +27,7 @@
 
 .progress-banner {
   width: var(--card-image-width);
-  height: 5px;
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  height: var(--card-progress-height);
   z-index: 10;
 
   .progress {
@@ -43,7 +41,7 @@
   height: 80px;
   position: absolute;
   top: 25%;
-  right: 30%;
+  right: 25%;
 }
 
 .badge-container {
@@ -108,6 +106,7 @@
       z-index: 110;
     }
 
+
     &:hover {
       visibility: visible;
 
@@ -120,6 +119,8 @@
         display: -webkit-box;
         visibility: visible;
         pointer-events: none;
+        //bottom: 45px // Account for the progress
+
       }
     }
 
