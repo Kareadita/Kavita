@@ -27,6 +27,10 @@
 .progress-banner {
   width: var(--card-image-width);
   height: 5px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
 
   .progress {
     color: var(--card-progress-bar-color);
@@ -96,6 +100,8 @@
 }
 
 .overlay {
+  position: relative;
+
   &:hover {
     .bulk-mode {
       visibility: visible;
@@ -178,10 +184,7 @@
   }
 }
 
-.card-actions {
-  z-index: 115;
-  min-width: 15.82px;
-}
+
 
 .library {
   font-size: 13px;
@@ -195,25 +198,38 @@
   align-items: center;
   padding: 0 5px;
 
-  :first-child {
-    min-width: 22px;
-  }
-
   .card-title {
     font-size: 0.8rem;
     margin: 0;
     text-align: center;
-    max-width: 90px;
+
+    flex: 1;
+    min-width: 0;
+    max-width: none;
 
     a {
+      display: block;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 }
 
 .card-format {
   min-width: 22px;
+  flex-shrink: 0;
+}
+
+.card-actions {
+  z-index: 115;
+  min-width: 15.82px;
+  flex-shrink: 0;
+
+  &:empty {
+    min-width: 0;
+    display: none;
+  }
 }
 
 ::ng-deep app-card-actionables .dropdown .dropdown-toggle {
