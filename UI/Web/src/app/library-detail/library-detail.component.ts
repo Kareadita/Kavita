@@ -18,7 +18,6 @@ import {Pagination} from '../_models/pagination';
 import {Series} from '../_models/series';
 import {FilterEvent, SortField} from '../_models/metadata/series-filter';
 import {ActionFactoryService} from '../_services/action-factory.service';
-import {ActionService} from '../_services/action.service';
 import {LibraryService} from '../_services/library.service';
 import {EVENTS, MessageHubService} from '../_services/message-hub.service';
 import {SeriesService} from '../_services/series.service';
@@ -64,7 +63,6 @@ export class LibraryDetailComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly titleService = inject(Title);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly actionService = inject(ActionService);
   private readonly hubService = inject(MessageHubService);
   private readonly utilityService = inject(UtilityService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
@@ -73,8 +71,8 @@ export class LibraryDetailComponent implements OnInit {
   public readonly metadataService = inject(MetadataService);
 
   // From Resolver
-  library = input<Library>();
-  libraryId!: number;
+  libraryId = input.required<number>();
+  library = input.required<Library>();
   libraryName = '';
   series: Series[] = [];
   loadingSeries = false;
@@ -100,22 +98,29 @@ export class LibraryDetailComponent implements OnInit {
 
 
   constructor() {
-    const routeId = this.route.snapshot.paramMap.get('libraryId');
-    if (routeId === null) {
-      this.router.navigateByUrl('/home');
-      return;
-    }
+    // TODO: Clean up this code, the library guard does this for us
+    // const routeId = this.route.snapshot.paramMap.get('libraryId');
+    // if (routeId === null) {
+    //   this.router.navigateByUrl('/home');
+    //   return;
+    // }
+
+
+  }
+
+
+  ngOnInit(): void {
 
     this.actions = this.actionFactoryService.getLibraryActions();
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.libraryId = parseInt(routeId, 10);
+
     this.libraryService.getLibraryNames().subscribe(names => {
-      this.libraryName = names[this.libraryId];
+      this.libraryName = names[this.libraryId()];
       this.titleService.setTitle('Kavita - ' + this.libraryName);
       this.cdRef.markForCheck();
     });
 
-    this.libraryService.getJumpBar(this.libraryId).subscribe(barDetails => {
+    this.libraryService.getJumpBar(this.libraryId()).subscribe(barDetails => {
       this.jumpKeys = barDetails;
       this.cdRef.markForCheck();
     });
@@ -130,7 +135,7 @@ export class LibraryDetailComponent implements OnInit {
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.filter = data['filter'] as FilterV2<FilterField, SortField>;
 
-      const defaultStmt = {field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal};
+      const defaultStmt = {field: FilterField.Libraries, value: this.libraryId() + '', comparison: FilterComparison.Equal};
 
       if (this.filter == null) {
         this.filter = this.metadataService.createDefaultFilterDto('series');
@@ -146,14 +151,11 @@ export class LibraryDetailComponent implements OnInit {
 
       this.cdRef.markForCheck();
     });
-  }
 
-
-  ngOnInit(): void {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
-        if (seriesAdded.libraryId !== this.libraryId) return;
+        if (seriesAdded.libraryId !== this.libraryId()) return;
         if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
           this.loadPageSource.next(true);
           return;
@@ -173,7 +175,7 @@ export class LibraryDetailComponent implements OnInit {
 
       } else if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemoved = event.payload as SeriesRemovedEvent;
-        if (seriesRemoved.libraryId !== this.libraryId) return;
+        if (seriesRemoved.libraryId !== this.libraryId()) return;
         if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
           this.loadPageSource.next(true);
           return;

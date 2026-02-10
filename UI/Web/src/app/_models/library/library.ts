@@ -16,6 +16,7 @@ export const allLibraryTypes = [LibraryType.Manga, LibraryType.ComicVine, Librar
 export const allKavitaPlusMetadataApplicableTypes = [LibraryType.Manga, LibraryType.LightNovel, LibraryType.ComicVine, LibraryType.Comic];
 export const allKavitaPlusScrobbleEligibleTypes = [LibraryType.Manga, LibraryType.LightNovel];
 
+
 export interface Library {
     id: number;
     name: string;
