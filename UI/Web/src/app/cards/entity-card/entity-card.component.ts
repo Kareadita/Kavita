@@ -337,14 +337,15 @@ export class EntityCardComponent<T> implements OnInit {
       event.stopPropagation();
     }
 
+    const existingState = this.isSelected();
     this.bulkSelectionService.handleCardSelection(
       this.config().selectionType,
       this.index(),
       this.maxIndex(),
-      this.isSelected()
+      existingState
     );
 
-    this.selection.emit(!this.isSelected());
+    this.selection.emit(!existingState);
     this.cdRef.detectChanges();
   }
 

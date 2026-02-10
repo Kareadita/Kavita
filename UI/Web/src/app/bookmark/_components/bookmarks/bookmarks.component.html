@@ -8,7 +8,7 @@
     </app-side-nav-companion-bar>
     @if (filter) {
       <app-card-detail-layout
-        [isLoading]="loadingBookmarks"
+        [isLoading]="isLoadingBookmarks()"
         [items]="bookmarkEntities()"
         [filterSettings]="filterSettings"
         [trackByIdentity]="trackByIdentity"
@@ -21,10 +21,10 @@
           <app-bulk-operations />
         </ng-template>
 
-        <ng-template #cardItem let-item let-position="idx">
+        <ng-template #cardItem let-item  let-position="idx">
           <app-entity-card [entity]="item" [config]="bookmarkConfig()"
                            [index]="position" [maxIndex]="bookmarkEntities().length"
-                           (reload)="clearBookmarks(item.series)"
+                           (reload)="clearBookmarks(item.data.series)"
 
           />
         </ng-template>

@@ -4,7 +4,7 @@
       <app-carousel-reel [items]="relationEntities()" [title]="t('relations-title')">
         <ng-template #carouselItem let-item let-idx>
           <app-entity-card [entity]="item" [config]="relatedConfig()" [index]="idx" [maxIndex]="relationEntities().length"
-                           (reload)="reload.emit({entity: 'relation', id: item.series.id})" />
+                           (reload)="reload.emit({entity: 'relation', id: item.data.series.id})" />
         </ng-template>
       </app-carousel-reel>
     }

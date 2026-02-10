@@ -40,8 +40,6 @@ import {MetadataService} from "../../../_services/metadata.service";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
 import {BookmarkCardEntity, CardEntityFactory} from "../../../_models/card/card-entity";
-import {ActionItem} from "../../../_models/actionables/action-item";
-import {Action} from "../../../_models/actionables/action";
 
 @Component({
   selector: 'app-bookmarks',
@@ -82,7 +80,7 @@ export class BookmarksComponent {
       }});
   });
 
-  loadingBookmarks: boolean = false;
+  isLoadingBookmarks = signal<boolean>(false);
   seriesIds: {[id: number]: number} = {};
   jumpbarKeys: Array<JumpKey> = [];
 
@@ -127,40 +125,8 @@ export class BookmarksComponent {
     this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
   }
 
-
-  bulkActionCallback = async (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('bookmark');
-    const selectedSeries = this.series().filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
-    const seriesIds = selectedSeries.map(item => item.id);
-
-    switch (action.action) {
-      case Action.DownloadBookmark:
-        this.downloadService.download('bookmark', this.bookmarks().filter(bmk => seriesIds.includes(bmk.seriesId)),
-          (d) => {
-          if (!d) {
-            this.bulkSelectionService.deselectAll();
-          }
-        });
-        break;
-      case Action.Delete:
-        if (!await this.confirmService.confirm(this.translocoService.translate('bookmarks.confirm-delete'))) {
-          break;
-        }
-
-        this.readerService.clearMultipleBookmarks(seriesIds).subscribe(() => {
-          this.toastr.success(this.translocoService.translate('bookmarks.delete-success'));
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-      default:
-        break;
-    }
-  }
-
   loadPage() {
-    this.loadingBookmarks = true;
-    this.cdRef.markForCheck();
+    this.isLoadingBookmarks.set(true);
 
     this.readerService.getAllBookmarks(this.filter).subscribe(bookmarks => {
 
@@ -184,7 +150,7 @@ export class BookmarksComponent {
       this.bookmarks.set(uniqueBookmarks);
 
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series(), (t: Series) => t.name);
-      this.loadingBookmarks = false;
+      this.isLoadingBookmarks.set(false);
       this.cdRef.markForCheck();
     });
   }

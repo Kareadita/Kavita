@@ -42,8 +42,6 @@ import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {MetadataService} from "../../../_services/metadata.service";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {ActionItem} from "../../../_models/actionables/action-item";
-import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
 
 
@@ -92,20 +90,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
-
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
-
-    switch (action.action) {
-      case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-    }
-  }
+  
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';

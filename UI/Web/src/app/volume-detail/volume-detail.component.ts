@@ -10,7 +10,7 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
+import {DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {SeriesService} from "../_services/series.service";
@@ -143,7 +143,6 @@ interface VolumeCast extends IHasCast {
     NgbNavContent,
     NgbNav,
     ReadMoreComponent,
-    AsyncPipe,
     NgbDropdownItem,
     NgbDropdownMenu,
     NgbDropdown,
@@ -245,52 +244,6 @@ export class VolumeDetailComponent implements OnInit {
   volumeActions: Array<ActionItem<Volume>> = [];
   chapterActions: Array<ActionItem<Chapter>> = [];
 
-  bulkActionCallback = async (action: ActionItem<Chapter>, _: any) => {
-    if (this.volume === null) {
-      return;
-    }
-    const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
-    const selectedChapterIds = this.volume.chapters.filter((_chapter, index: number) => {
-      return selectedChapterIndexes.includes(index + '');
-    });
-
-    switch (action.action) {
-      case Action.AddToReadingList:
-        this.actionService.addMultipleToReadingList(this.seriesId, [], selectedChapterIds, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsRead:
-        this.actionService.markMultipleAsRead(this.seriesId, [], selectedChapterIds,  () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadVolume();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsUnread:
-        this.actionService.markMultipleAsUnread(this.seriesId, [], selectedChapterIds,  () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadVolume();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.SendTo:
-        const device = (action._extra!.data as Device);
-        this.actionService.sendToDevice(selectedChapterIds.map(c => c.id), device);
-        this.bulkSelectionService.deselectAll();
-        this.cdRef.markForCheck();
-        break;
-      case Action.Delete:
-        await this.actionService.deleteMultipleChapters(this.seriesId, selectedChapterIds, () => {
-          // No need to update the page as the backend will spam volume/chapter deletions
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-    }
-  }
-
   /**
    * This is the download we get from download service.
    */
@@ -389,6 +342,13 @@ export class VolumeDetailComponent implements OnInit {
     this.volumeId = parseInt(volumeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.coverImage = this.imageService.getVolumeCoverImage(this.volumeId);
+
+    this.bulkSelectionService.registerDataSource('chapter', () => this.volume?.chapters ?? []);
+    this.bulkSelectionService.registerPostAction(res => {
+      if (res.effect === 'none') return;
+      this.loadVolume();
+    });
+    this.bulkSelectionService.registerContext(() => ({seriesId: this.seriesId, libraryId: this.libraryId, libraryType: this.libraryType!}));
 
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
@@ -585,7 +545,7 @@ export class VolumeDetailComponent implements OnInit {
 
   loadVolume() {
     this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
-      this.volume = v;
+      this.volume = {...v};
       this.setContinuePoint();
       this.cdRef.markForCheck();
     });

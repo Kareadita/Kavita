@@ -10,7 +10,7 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
+import {DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
 import {
@@ -97,7 +97,6 @@ enum TabID {
 @Component({
   selector: 'app-chapter-detail',
   imports: [
-    AsyncPipe,
     CardActionablesComponent,
     LoadingComponent,
     NgbDropdown,
@@ -320,7 +319,7 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   loadReadingListsForChapter(chapterId: number) {
-    this.readingListService.getReadingListsForChapter(this.chapterId).subscribe(lists => {
+    this.readingListService.getReadingListsForChapter(chapterId).subscribe(lists => {
       this.readingLists = lists;
       this.cdRef.markForCheck();
     });

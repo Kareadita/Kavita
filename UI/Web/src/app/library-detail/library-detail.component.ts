@@ -44,7 +44,6 @@ import {debounceTime, ReplaySubject, tap} from "rxjs";
 import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
 import {MetadataService} from "../_services/metadata.service";
 import {ActionItem} from "../_models/actionables/action-item";
-import {Action} from "../_models/actionables/action";
 import {ActionResult} from "../_models/actionables/action-result";
 
 @Component({
@@ -98,73 +97,6 @@ export class LibraryDetailComponent implements OnInit {
 
   loadPageSource = new ReplaySubject(1);
   loadPage$ = this.loadPageSource.asObservable();
-
-  bulkActionCallback = async (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
-
-    switch (action.action) {
-      case Action.AddToReadingList:
-        this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.AddToWantToReadList:
-        this.actionService.addMultipleSeriesToWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.AddToCollection:
-        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsRead:
-        this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-
-        break;
-      case Action.MarkAsUnread:
-        this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-      case Action.Delete:
-        if (selectedSeries.length > 25) {
-          this.bulkLoader = true;
-          this.cdRef.markForCheck();
-        }
-
-        await this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
-          this.bulkLoader = false;
-          this.cdRef.markForCheck();
-          if (!successful) return;
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-      case Action.SetReadingProfile:
-        this.actionService.setReadingProfileForMultiple(selectedSeries, (success) => {
-          this.bulkLoader = false;
-          this.cdRef.markForCheck();
-          if (!success) return;
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        })
-    }
-  }
 
 
   constructor() {
@@ -254,7 +186,7 @@ export class LibraryDetailComponent implements OnInit {
       }
     });
   }
-  
+
   updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
