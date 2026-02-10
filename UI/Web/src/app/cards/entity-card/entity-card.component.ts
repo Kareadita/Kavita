@@ -210,7 +210,9 @@ export class EntityCardComponent<T> implements OnInit {
 
   /** Check if meta title is not empty/null **/
   protected readonly shouldRenderMetaTitle = computed(() => {
-    return !!this.metaTitle() || this.hasMetaTitleTemplate();
+    const metadataTitle = this.metaTitle();
+    const hasTemplate = this.hasMetaTitleTemplate();
+    return !!metadataTitle || hasTemplate;
   });
 
   /** Check if meta title template is provided */

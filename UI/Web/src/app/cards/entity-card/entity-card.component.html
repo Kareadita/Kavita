@@ -35,6 +35,9 @@
         </div>
       }
 
+      <!-- Overlay gradient -->
+      <div class="card-overlay"></div>
+
       <!-- Unread Badge -->
       @if (entityProgress.pagesRead === 0 && entityProgress.pages > 0) {
         <div class="badge-container">
@@ -89,7 +92,7 @@
         <div class="overlay-information">
           <div class="overlay-information--centered">
             <span
-              class="card-title library mx-auto"
+              class="card-title read-btn mx-auto"
               style="width: auto;"
               role="button"
               tabindex="0"
@@ -104,9 +107,6 @@
         </div>
       }
     </div>
-
-    <!-- Overlay gradient -->
-    <div class="card-overlay"></div>
 
     <!-- Meta Title Area (above main title) -->
     @if (shouldRenderMetaTitle()) {
