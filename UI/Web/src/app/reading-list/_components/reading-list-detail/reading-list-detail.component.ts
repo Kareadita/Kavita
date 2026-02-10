@@ -288,14 +288,7 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
 
-  handleReadingListActionCallback(event: ActionItem<ReadingList> | ActionResult<ReadingList>) {
-
-    // This can be removed once actionable refactor is complete
-    const isUpdatedActionSystem = 'effect' in event;
-    if (!isUpdatedActionSystem) return;
-
-    const result = event as unknown as ActionResult<ReadingList>;
-
+  handleReadingListActionCallback(result: ActionResult<ReadingList>) {
     switch (result.effect) {
       case 'update':
         this.readingList.set({...result.entity});

@@ -781,6 +781,7 @@ export class ActionService {
    * Returns Observable<ActionResult<Library>> so the caller can react to effects.
    */
   handleBulkLibraryAction(action: ActionItem<Library>, library: Library) {
+    // manage-library handles all actions, the actionables don't perform as other implementations
     return of(this.fromAction(action, library, 'none'));
   }
 

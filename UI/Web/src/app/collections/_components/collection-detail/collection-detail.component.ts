@@ -248,14 +248,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  async handleActionCallback(event: ActionItem<UserCollection> | ActionResult<UserCollection>) {
-
-    // This can be removed once actionable refactor is complete
-    const isUpdatedActionSystem = 'effect' in event;
-    if (!isUpdatedActionSystem) return;
-
-    const result = event as unknown as ActionResult<UserCollection>;
-
+  async handleActionCallback(result: ActionResult<UserCollection>) {
     switch (result.effect) {
       case 'update':
         this.updateTag(this.collectionTag.id);
