@@ -103,7 +103,7 @@ import {
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {UserCollection} from "../../../_models/collection-tag";
 import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
-import {DefaultModalOptions} from "../../../_models/default-modal-options";
+import {DefaultModalOptions} from "../../../_models/modal/default-modal-options";
 import {LicenseService} from "../../../_services/license.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {VolumeRemovedEvent} from "../../../_models/events/volume-removed-event";
@@ -906,15 +906,12 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     modalRef.closed.subscribe((closeResult: EditSeriesModalCloseResult) => {
       if (closeResult.success) {
         window.scrollTo(0, 0);
-        this.loadPageSource.next(closeResult.updateExternal);
-      } else if (closeResult.updateExternal) {
-        this.loadPageSource.next(closeResult.updateExternal);
       }
+      this.loadPageSource.next(false);
     });
   }
 
   toggleWantToRead() {
-
     if (this.isWantToRead()) {
       this.actionService.removeMultipleSeriesFromWantToReadList([this.seriesId]);
     } else {

@@ -35,6 +35,7 @@ import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {SelectionModel} from "../../../typeahead/_models/selection-model";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {modalSaved} from "../../../_models/modal/modal-result";
 
 
 enum TabID {
@@ -220,8 +221,8 @@ export class EditCollectionTagsComponent implements OnInit {
     }
 
     concat(...apis).subscribe(() => {
-      this.modal.close({success: true, coverImageUpdated: selectedIndex > 0, updatedEntity: tag});
       this.toastr.success(translate('toasts.collection-updated'));
+      this.modal.close(modalSaved(tag, selectedIndex > 0));
     });
   }
 

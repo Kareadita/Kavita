@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {UtilityService} from "../../shared/_services/utility.service";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {AsyncPipe, NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
@@ -41,6 +41,7 @@ import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {ActionFactoryService} from "../../_services/action-factory.service";
+import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
 
 enum TabID {
   General = 'general-tab',
@@ -50,14 +51,6 @@ enum TabID {
   Tasks = 'tasks-tab',
   Tags = 'tags-tab',
   Weblinks = 'weblinks-tab', // TODO: Weblinks are not implemented
-}
-
-export interface EditChapterModalCloseResult {
-  success: boolean;
-  chapter: Chapter;
-  coverImageUpdate: boolean;
-  needsReload: boolean;
-  isDeleted: boolean;
 }
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
@@ -70,7 +63,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     NgbNavContent,
     NgbNavLink,
     TranslocoDirective,
-    AsyncPipe,
     NgbNavOutlet,
     ReactiveFormsModule,
     NgbNavItem,
@@ -265,7 +257,8 @@ export class EditChapterModalComponent implements OnInit {
     }
 
     concat(...apis).subscribe(results => {
-      this.modal.close({success: true, chapter: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, needsReload: needsReload, isDeleted: false} as EditChapterModalCloseResult);
+      const needsCoverUpdate = selectedIndex > 0 || this.coverImageReset;
+      this.modal.close(modalSaved(model, needsCoverUpdate));
     });
   }
 
@@ -294,7 +287,7 @@ export class EditChapterModalComponent implements OnInit {
       case Action.Delete:
         await this.actionService.deleteChapter(this.chapter.id, (b) => {
           if (!b) return;
-          this.modal.close({success: b, chapter: this.chapter, coverImageUpdate: false, needsReload: true, isDeleted: b} as EditChapterModalCloseResult);
+          this.modal.close(modalDeleted(this.chapter));
         });
         break;
       case Action.Download:

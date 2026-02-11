@@ -7,7 +7,7 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingsService} from "../../admin/settings.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {EditDeviceModalComponent} from "../_modals/edit-device-modal/edit-device-modal.component";
-import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {DefaultModalOptions} from "../../_models/modal/default-modal-options";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map} from "rxjs";
 import {shareReplay} from "rxjs/operators";

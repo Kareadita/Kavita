@@ -68,7 +68,7 @@ import {Device} from "../_models/device/device";
 import {ActionService} from "../_services/action.service";
 import {DefaultDatePipe} from "../_pipes/default-date.pipe";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
-import {DefaultModalOptions} from "../_models/default-modal-options";
+import {DefaultModalOptions} from "../_models/modal/default-modal-options";
 import {UserReview} from "../_models/user-review";
 import {User} from "../_models/user/user";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";

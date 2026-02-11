@@ -62,6 +62,7 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
+import {modalSaved} from "../../../_models/modal/modal-result";
 
 enum TabID {
   General = 0,
@@ -156,8 +157,6 @@ export class EditSeriesModalComponent implements OnInit {
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
-  hasForcedKPlus = false;
-  forceIsLoading = false;
 
 
   // Typeaheads
@@ -501,17 +500,8 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.close({success: false, series: undefined, coverImageUpdate: this.coverImageReset, updateExternal: this.hasForcedKPlus});
-  }
-
-  forceScan() {
-    this.forceIsLoading = true;
-    this.metadataService.forceRefreshFromPlus(this.series.id).subscribe(() => {
-      this.hasForcedKPlus = true;
-      this.forceIsLoading = false;
-      this.toastr.info(translate('toasts.force-kavita+-refresh-success'));
-      this.cdRef.markForCheck();
-    });
+    //this.modal.close({success: false, series: undefined, coverImageUpdate: this.coverImageReset});
+    this.modal.dismiss();
   }
 
   updateWeblinks(items: Array<string>) {
@@ -547,7 +537,7 @@ export class EditSeriesModalComponent implements OnInit {
     this.saveNestedComponents.emit();
 
     concat(...apis).subscribe(results => {
-      this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, updateExternal: this.hasForcedKPlus});
+      this.modal.close(modalSaved(model, selectedIndex > 0 || this.coverImageReset));
     });
   }
 

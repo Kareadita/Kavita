@@ -20,7 +20,7 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {PreviewImageModalComponent} from "../../shared/_components/carousel-modal/preview-image-modal.component";
-import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {DefaultModalOptions} from "../../_models/modal/default-modal-options";
 
 interface ThemeContainer {
   downloadable?: DownloadableSiteTheme;
