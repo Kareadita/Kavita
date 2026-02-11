@@ -300,7 +300,7 @@ export class EntityCardComponent<T> implements OnInit {
 
     // Also emit dataChanged for backward compatibility if we have an updated entity
     if (updated) {
-      this.dataChanged.emit(updated);
+      this.dataChanged.emit(updated); // TODO: Probably want to remove this as it can cause double firing
     }
   }
 

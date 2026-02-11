@@ -314,6 +314,22 @@ export class BulkSelectionService {
     }
   }
 
+  patchEntity<T>(arr: T[], entity: T, selector: (item: T) => any = (item: any) => item.id): T[] {
+    const entityKey = selector(entity);
+    const idx = arr.findIndex(item => selector(item) === entityKey);
+    if (idx === -1) return arr;
+    const result = [...arr];
+    result[idx] = { ...entity };
+    return result;
+  }
+
+  patchEntitySignal<T>(signal: WritableSignal<T[]>, entity: T, selector?: (item: T) => any): void {
+    const patched = this.patchEntity(signal(), entity, selector);
+    if (patched !== signal()) {
+      signal.set(patched);
+    }
+  }
+
   private hasDataSource(key: BulkSelectionEntityDataSource): boolean {
     return Object.keys(this.selectedCards).includes(key);
   }

@@ -192,7 +192,6 @@ export class ActionFactoryService {
   basicReadRender(action: ActionItem<any>, entity: any, user: User) {
     if (entity === null || entity === undefined) return true;
     if (!entity.hasOwnProperty('pagesRead') && !entity.hasOwnProperty('pages')) return true;
-
     switch (action.action) {
       case(Action.MarkAsRead):
         return entity.pagesRead < entity.pages;

@@ -1061,6 +1061,16 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }, 10);
   }
 
+  updateChapter(c: Chapter) {
+    this.bulkSelectionService.patchEntitySignal(this.chapters, c);
+    this.bulkSelectionService.patchEntitySignal(this.specials, c);
+    this.bulkSelectionService.patchEntitySignal(this.storylineChapters, c);
+  }
+
+  updateVolume(c: Volume) {
+    this.bulkSelectionService.patchEntitySignal(this.volumes, c);
+  }
+
   protected readonly LibraryType = LibraryType;
   protected readonly TabID = TabID;
   protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;

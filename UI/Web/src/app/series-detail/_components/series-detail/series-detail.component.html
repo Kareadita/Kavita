@@ -398,15 +398,17 @@
 
   <ng-template #nonSpecialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
     <app-entity-card class="col-auto mt-2 mb-2" [entity]="item" [config]="chapterConfig()" [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
-                     [maxIndex]="totalLength" />
+                     [maxIndex]="totalLength" (dataChanged)="updateChapter($event)" (progressUpdated)="updateChapter($event.entity!)" />
   </ng-template>
 
   <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-    <app-entity-card class="col-auto mt-2 mb-2" [entity]="item" [config]="volumeConfig()" [index]="scroll.viewPortInfo.startIndexWithBuffer + idx" [maxIndex]="totalLength" />
+    <app-entity-card class="col-auto mt-2 mb-2" [entity]="item" [config]="volumeConfig()" [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
+                     [maxIndex]="totalLength" (dataChanged)="updateVolume($event)" (progressUpdated)="updateVolume($event.entity!)" />
   </ng-template>
 
   <ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-    <app-entity-card class="col-auto mt-2 mb-2" [entity]="item" [config]="specialConfig()" [index]="scroll.viewPortInfo.startIndexWithBuffer + idx" [maxIndex]="totalLength" />
+    <app-entity-card class="col-auto mt-2 mb-2" [entity]="item" [config]="specialConfig()" [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
+                     [maxIndex]="totalLength" (dataChanged)="updateChapter($event)" (progressUpdated)="updateChapter($event.entity!)" />
   </ng-template>
 
 
