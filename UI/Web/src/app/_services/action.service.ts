@@ -603,8 +603,8 @@ export class ActionService {
         const ref = this.modalService.open(EditCollectionTagsComponent, DefaultModalOptions);
         ref.componentInstance.tag = collection;
         return from(ref.closed).pipe(
-          map((res: {success: boolean, coverImageUpdated: boolean}) =>
-            this.fromAction(action, collection, 'update')
+          map((res: {success: boolean, coverImageUpdated: boolean, updatedEntity: UserCollection}) =>
+            this.fromAction(action, res.updatedEntity, 'update')
           )
         );
 

@@ -46,6 +46,7 @@ import {LicenseService} from "../../_services/license.service";
 import {EntityCardComponent} from "../../cards/entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
 import {CardEntityFactory} from "../../_models/card/card-entity";
+import {BulkSelectionService} from "../../cards/bulk-selection.service";
 
 enum StreamId {
   OnDeck,
@@ -82,6 +83,7 @@ export class DashboardComponent implements OnInit {
   private readonly readerService = inject(ReaderService);
   private readonly licenseService = inject(LicenseService);
   private readonly cardConfigFactory = inject(CardConfigFactory);
+  private readonly bulkSelectionService = inject(BulkSelectionService);
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = signal<boolean>(true);
@@ -255,14 +257,21 @@ export class DashboardComponent implements OnInit {
   reloadStream(streamId: number, onDeck = false) {
     const index = this.streams.findIndex(s => s.id === streamId);
     if (index < 0) return;
-    if (onDeck) {
-      // TODO: Need to figure out a better way to refresh just one stream
-      this.refreshStreams$.next();
-      this.cdRef.markForCheck();
-    } else {
-      this.streams[index] = {...this.streams[index]};
-      this.cdRef.markForCheck();
-    }
+    // if (onDeck) {
+    //
+    //   this.refreshStreams$.next();
+    //   this.cdRef.markForCheck();
+    // } else {
+    //   // We can't just patch the streamId anymore since we aren't passing the data back
+    //   //this.streams[index] = {...this.streams[index]};
+    //   const entityMap = new Map<number, any>([data].map(e => [e.id, e]));
+    //   this.bulkSelectionService.patchArray(this.streams[index], data);
+    //   this.cdRef.markForCheck();
+    // }
+
+    // TODO: Need to figure out a better way to refresh just one stream (or patch in the changes into the stream
+    // We can't just patch the streamId anymore since we aren't passing the data back
+    this.refreshStreams$.next();
   }
 
   async handleRecentlyAddedChapterClick(item: RecentlyAddedItem) {
