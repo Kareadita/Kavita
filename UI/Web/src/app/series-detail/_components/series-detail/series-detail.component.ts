@@ -78,10 +78,6 @@ import {MetadataService} from "../../../_services/metadata.service";
 import {Rating} from "../../../_models/rating";
 import {ThemeService} from "../../../_services/theme.service";
 import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
-import {
-  EditChapterModalCloseResult,
-  EditChapterModalComponent
-} from "../../../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
@@ -98,7 +94,6 @@ import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {MetadataDetailRowComponent} from "../metadata-detail-row/metadata-detail-row.component";
 import {DownloadButtonComponent} from "../download-button/download-button.component";
 import {hasAnyCast} from "../../../_models/common/i-has-cast";
-import {EditVolumeModalComponent} from "../../../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {CoverUpdateEvent} from "../../../_models/events/cover-update-event";
 import {
   RelatedSeriesPair,
@@ -195,7 +190,6 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly breakpointService = inject(BreakpointService);
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
-  @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
 
   /**
@@ -278,36 +272,42 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
   seriesActions: ActionItem<Series>[] = [];
-  volumeActions: ActionItem<Volume>[] = [];
-  chapterActions: ActionItem<Chapter>[] = [];
 
-
-  hasSpecials = false;
+  hasSpecials = computed(() => this.specials().length > 0);
 
   activeTabId = TabID.Storyline;
 
   reviews: Array<UserReview> = [];
   plusReviews: Array<UserReview> = [];
-  bookmarks: Array<PageBookmark> = [];
-  ratings: Array<Rating> = [];
+  bookmarks = signal<PageBookmark[]>([]);
+  ratings = signal<Rating[]>([]);
   libraryType = signal<LibraryType>(LibraryType.Manga);
 
   seriesMetadata = signal<SeriesMetadata | null>(null);
-  readingLists: Array<ReadingList> = [];
-  collections: Array<UserCollection> = [];
+  readingLists = signal<ReadingList[]>([]);
+  collections = signal<UserCollection[]>([]);
   isWantToRead = signal<boolean>(false);
   unreadCount: number = 0;
   totalCount: number = 0;
   totalSize = computed(() => {
-    // TODO: We can refactor this to be much faster/less GC
-    const uniqueChapters = Array.from(
-      new Map([...this.chapters(), ...this.volumes().flatMap(v => v.chapters), ...this.specials()]
-        .map(c => [c.id, c])).values()
-    );
+    const seen = new Set<number>();
+    let total = 0;
 
-    return uniqueChapters
-      .flatMap(c => c.files)
-      .reduce((sum, f) => sum + f.bytes, 0);
+    const addChapter = (c: Chapter) => {
+      if (seen.has(c.id)) return;
+      seen.add(c.id);
+      for (const f of c.files) {
+        total += f.bytes;
+      }
+    };
+
+    for (const c of this.chapters()) addChapter(c);
+    for (const v of this.volumes()) {
+      for (const c of v.chapters) addChapter(c);
+    }
+    for (const c of this.specials()) addChapter(c);
+
+    return total;
   })
 
   readingTimeLeft: HourEstimateRange | null = null;
@@ -376,10 +376,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.minNumber}_${item.maxNumber}_${item.volumeId}_${item.pagesRead}`;
 
-  /**
-   * Are there any related series
-   */
-  hasRelations: boolean = false;
+
   /**
    * Are there recommendations
    */
@@ -388,7 +385,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   /**
    * Related Series. Sorted by backend
    */
-  relations: Array<RelatedSeriesPair> = [];
+  relations = signal<RelatedSeriesPair[]>([]);
   relationships: RelatedSeries | null = null;
   /**
    * Recommended Series
@@ -403,14 +400,17 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   download$: Observable<DownloadEvent | null> | null = null;
 
+  totalRelatedCount = computed(() => this.relations().length + this.readingLists().length + this.collections().length + (this.bookmarks().length > 0 ? 1 : 0));
+  /** Are there any related series */
+  hasRelations = computed(() => this.relations().length > 0);
+
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
     if (navbar === null) return 'calc(var(--vh)*100)';
 
-    const companionHeight = this.companionBar?.nativeElement.offsetHeight || 0;
     const navbarHeight = navbar.offsetHeight;
-    const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
+    const totalHeight = navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
@@ -480,22 +480,15 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.bulkSelectionService.registerContext(() => ({ seriesId: this.seriesId, libraryId: this.libraryId, libraryType: this.libraryType() }));
     this.bulkSelectionService.registerPostAction((res: ActionResult<Volume[] | Chapter[]>) => {
-      console.log('series detail bulk action: ', res);
       if (res.effect === 'none') return;
+      if (res.effect === 'reload') {
+        this.loadPageSource.next(false);
+        return;
+      }
+
       if (res.effect === 'update') {
         const entityMap = new Map<number, any>(res.entity.map(e => [e.id, e]));
 
-        // Patch volumes
-        // const updatedVolumes = this.volumes().map(v => {
-        //   const updated = entityMap.get(v.id);
-        //   return updated && 'chapters' in updated ? { ...updated } as Volume : v;
-        // });
-        // // Only reassign if something actually changed
-        // if (updatedVolumes.some((v, i) => v !== this.volumes()[i])) {
-        //   this.bulkSelectionService.patchSignalArray(this.volumes, entityMap);
-        // }
-
-        // Patch chapters (tab-dependent)
         this.bulkSelectionService.patchSignalArray(this.volumes, entityMap);
         this.bulkSelectionService.patchSignalArray(this.chapters, entityMap);
         this.bulkSelectionService.patchSignalArray(this.specials, entityMap);
@@ -665,8 +658,6 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       this.titleService.setTitle('Kavita - ' + results.series.name + ' Details');
 
-      this.volumeActions = this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType());
-      this.chapterActions = this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType());
       this.seriesActions = this.actionFactoryService.getSeriesActions()
               .filter(action => action.action !== Action.Edit);
 
@@ -692,7 +683,6 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.unreadCount = detail.unreadCount;
         this.totalCount = detail.totalCount;
 
-        this.hasSpecials = detail.specials.length > 0;
         this.specials.set(detail.specials);
         this.chapters.set(detail.chapters);
         this.volumes.set(detail.volumes);
@@ -704,10 +694,10 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
           // Validate that the tab we are selected is still there (in case this comes from a messageHub)
           switch (this.activeTabId) {
             case TabID.Related:
-              if (!this.hasRelations) this.updateSelectedTab();
+              if (!this.hasRelations()) this.updateSelectedTab();
               break;
             case TabID.Specials:
-              if (!this.hasSpecials) this.updateSelectedTab();
+              if (!this.hasSpecials()) this.updateSelectedTab();
               break;
             case TabID.Volumes:
               if (this.volumes().length === 0) this.updateSelectedTab();
@@ -737,7 +727,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private loadRelatedSeries(seriesId: number) {
     this.seriesService.getRelatedForSeries(seriesId).subscribe((relations: RelatedSeries) => {
       this.relationships = relations;
-      this.relations = [
+      this.relations.set([
         ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),
         ...relations.sequels.map(item => this.createRelatedSeries(item, RelationKind.Sequel)),
         ...relations.sideStories.map(item => this.createRelatedSeries(item, RelationKind.SideStory)),
@@ -752,47 +742,37 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
         ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
         ...relations.editions.map(item => this.createRelatedSeries(item, RelationKind.Edition)),
         ...relations.annuals.map(item => this.createRelatedSeries(item, RelationKind.Annual)),
-      ];
-
-      if (this.relations.length > 0) {
-        this.hasRelations = true;
-        this.cdRef.markForCheck();
-      } else {
-        this.hasRelations = false;
-        this.cdRef.markForCheck();
-      }
+      ]);
     });
   }
 
   private loadReadingLists(seriesId: number) {
     this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
-      this.readingLists = lists;
-      this.cdRef.markForCheck();
+      this.readingLists.set(lists);
     });
   }
 
   private loadCollections(seriesId: number) {
     this.collectionTagService.allCollectionsForSeries(seriesId, false).subscribe(tags => {
-      this.collections = tags;
-      this.cdRef.markForCheck();
+      this.collections.set(tags);
     });
   }
 
   private loadBookmarks(seriesId: number) {
     this.readerService.getBookmarksForSeries(seriesId).subscribe(bookmarks => {
-      if (bookmarks.length > 0) {
-        this.bookmarks = Object.values(
-          bookmarks.reduce((acc, bookmark) => {
-            if (!acc[bookmark.seriesId]) {
-              acc[bookmark.seriesId] = bookmark; // Select the first one per seriesId
-            }
-            return acc;
-          }, {} as Record<number, PageBookmark>)
-        );
-      } else {
-        this.bookmarks = [];
+      if (bookmarks.length === 0) {
+        this.bookmarks.set([]);
+        return;
       }
-      this.cdRef.markForCheck();
+
+      const seen = new Map<number, PageBookmark>();
+      for (const bookmark of bookmarks) {
+        if (!seen.has(bookmark.chapterId)) {
+          seen.set(bookmark.chapterId, bookmark);
+        }
+      }
+
+      this.bookmarks.set(Array.from(seen.values()));
     });
   }
 
@@ -831,7 +811,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     } else {
       if (libType == LibraryType.Comic || libType == LibraryType.ComicVine) {
         if (this.chapters().length === 0) {
-          if (this.specials.length > 0) {
+          if (this.specials().length > 0) {
             this.activeTabId = TabID.Specials;
           } else {
             this.activeTabId = TabID.Volumes;
@@ -867,7 +847,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.plusReviews = data.reviews.filter(r => r.isExternal);
 
       if (data.ratings) {
-        this.ratings = [...data.ratings];
+        this.ratings.set([...data.ratings]);
       }
 
 
@@ -893,52 +873,11 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  markVolumeAsRead(vol: Volume) {
-    if (this.series() === undefined) {
-      return;
-    }
-
-    this.actionService.markVolumeAsRead(this.seriesId, vol, () => {
-      this.setContinuePoint();
-    });
-  }
-
-  markVolumeAsUnread(vol: Volume) {
-    if (this.series() === undefined) {
-      return;
-    }
-
-    this.actionService.markVolumeAsUnread(this.seriesId, vol, () => {
-      this.setContinuePoint();
-    });
-  }
-
-  markChapterAsRead(chapter: Chapter) {
-    if (this.series() === undefined) {
-      return;
-    }
-
-    this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter, () => {
-      this.setContinuePoint();
-    });
-  }
-
-  markChapterAsUnread(chapter: Chapter) {
-    if (this.series() === undefined) {
-      return;
-    }
-
-    this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, chapter, () => {
-      this.setContinuePoint();
-    });
-  }
-
   read(incognitoMode: boolean = false) {
     if (this.bulkSelectionService.hasSelections()) return;
 
     this.readerService.readSeries(this.series()!, incognitoMode);
   }
-
 
   handleRelatedReload(event: RelatedTabChangeEvent) {
     switch (event.entity) {
@@ -961,44 +900,6 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  openChapter(chapter: Chapter, incognitoMode = false, promptForReread: boolean = true) {
-    if (this.bulkSelectionService.hasSelections()) return;
-    this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'chapter', chapter.id]);
-
-    this.readerService.readChapter(this.libraryId, this.seriesId, chapter, incognitoMode);
-  }
-
-
-  openEditChapter(chapter: Chapter) {
-    const seriesValue = this.series();
-    const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);
-    ref.componentInstance.chapter = chapter;
-    ref.componentInstance.libraryType = this.libraryType();
-    ref.componentInstance.seriesId = seriesValue?.id;
-    ref.componentInstance.libraryId = seriesValue?.libraryId;
-
-    ref.closed.subscribe((res: EditChapterModalCloseResult) => {
-      if (res.success && res.isDeleted) {
-        this.loadPageSource.next(false);
-      }
-    });
-  }
-
-  openEditVolume(volume: Volume) {
-    const seriesValue = this.series();
-    const ref = this.modalService.open(EditVolumeModalComponent, DefaultModalOptions);
-    ref.componentInstance.volume = volume;
-    ref.componentInstance.libraryType = this.libraryType();
-    ref.componentInstance.seriesId = seriesValue?.id;
-    ref.componentInstance.libraryId = seriesValue?.libraryId;
-
-    ref.closed.subscribe((res: EditChapterModalCloseResult) => {
-      if (res.success && res.isDeleted) {
-        this.loadPageSource.next(false);
-      }
-    });
-  }
-
   openEditSeriesModal() {
     const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
     modalRef.componentInstance.series = this.series();
@@ -1009,13 +910,6 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
       } else if (closeResult.updateExternal) {
         this.loadPageSource.next(closeResult.updateExternal);
       }
-    });
-  }
-
-  downloadSeries() {
-    this.downloadService.download('series', this.series()!, (d) => {
-      this.downloadInProgress = !!d;
-      this.cdRef.markForCheck();
     });
   }
 

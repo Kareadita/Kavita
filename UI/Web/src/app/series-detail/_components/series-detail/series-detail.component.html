@@ -55,7 +55,7 @@
 
           <div class="mt-2 mb-2">
             <app-external-rating [seriesId]="seriesValue.id"
-                                 [ratings]="ratings"
+                                 [ratings]="ratings()"
                                  [userRating]="seriesValue.userRating"
                                  [hasUserRated]="seriesValue.hasUserRated"
                                  [libraryType]="libraryTypeValue"
@@ -265,7 +265,7 @@
             </li>
           }
 
-          @if (hasSpecials) {
+          @if (hasSpecials()) {
             <li [ngbNavItem]="TabID.Specials">
               <a ngbNavLink>
                 {{t(TabID.Specials)}}
@@ -273,7 +273,7 @@
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Specials; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="specialEntities()"  [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="specialEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item.data.id + '_' + item.data.pagesRead + '_specials') {
                         <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: specialEntities().length}" />
@@ -299,18 +299,18 @@
             </li>
           }
 
-          @if (hasRelations || readingLists.length > 0 || collections.length > 0 || bookmarks.length > 0) {
+          @if (totalRelatedCount() > 0) {
             <li [ngbNavItem]="TabID.Related">
               <a ngbNavLink>
                 {{t(TabID.Related)}}
-                <span class="badge rounded-pill text-bg-secondary">{{relations.length + readingLists.length + collections.length + (bookmarks.length > 0 ? 1 : 0)}}</span>
+                <span class="badge rounded-pill text-bg-secondary">{{relations().length + readingLists().length + collections().length + (bookmarks().length > 0 ? 1 : 0)}}</span>
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                  <app-related-tab [readingLists]="readingLists"
-                                   [collections]="collections"
-                                   [relations]="relations"
-                                   [bookmarks]="bookmarks"
+                  <app-related-tab [readingLists]="readingLists()"
+                                   [collections]="collections()"
+                                   [relations]="relations()"
+                                   [bookmarks]="bookmarks()"
                                    (reload)="handleRelatedReload($event)"
                                    (dataChanged)="handleRelatedReload($event)"/>
                 }
