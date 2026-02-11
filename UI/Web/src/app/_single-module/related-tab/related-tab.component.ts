@@ -10,6 +10,8 @@ import {PageBookmark} from "../../_models/readers/page-bookmark";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
 import {EntityCardComponent} from "../../cards/entity-card/entity-card.component";
 import {CardEntityFactory} from "../../_models/card/card-entity";
+import {CollectionOwnerComponent} from "../../collections/_components/collection-owner/collection-owner.component";
+import {PromotedIconComponent} from "../../shared/_components/promoted-icon/promoted-icon.component";
 
 export interface RelatedSeriesPair {
   series: Series;
@@ -32,7 +34,9 @@ export interface RelatedTabChangeEvent {
   imports: [
     CarouselReelComponent,
     TranslocoDirective,
-    EntityCardComponent
+    EntityCardComponent,
+    CollectionOwnerComponent,
+    PromotedIconComponent
   ],
   templateUrl: './related-tab.component.html',
   styleUrl: './related-tab.component.scss',

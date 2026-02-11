@@ -71,7 +71,7 @@ export const routes: Routes = [
           {
             path: 'series/:seriesId',
             pathMatch: 'full',
-            loadComponent: () => import('./series-detail/_components/series-detail/series-detail.component').then(c => c.SeriesDetailComponent)
+            loadComponent: () => import('./series-detail/_components/series-detail/series-detail.component').then(c => c.default)
           },
           {
             path: 'series/:seriesId/chapter/:chapterId',

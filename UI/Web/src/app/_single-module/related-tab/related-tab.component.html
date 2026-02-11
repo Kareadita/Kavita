@@ -13,7 +13,14 @@
       <app-carousel-reel [items]="collectionEntities()" [title]="t('collections-title')">
         <ng-template #carouselItem let-item let-idx>
         <app-entity-card [entity]="item" [config]="collectionConfig()" [index]="idx" [maxIndex]="collectionEntities().length"
-                         (reload)="reload.emit({entity: 'collection', id: $event})" />
+                         (reload)="reload.emit({entity: 'collection', id: $event})">
+          <ng-template #subtitle>
+            <app-collection-owner [collection]="item.data" />
+          </ng-template>
+          <ng-template #title let-entity>
+            <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}
+          </ng-template>
+        </app-entity-card>
         </ng-template>
       </app-carousel-reel>
     }
@@ -23,7 +30,11 @@
       <app-carousel-reel [items]="readingListEntities()" [title]="t('reading-lists-title')">
         <ng-template #carouselItem let-item let-idx>
           <app-entity-card [entity]="item" [index]="idx" [maxIndex]="readingListEntities().length" [config]="readingListConfig()"
-                           (reload)="reload.emit({entity: 'readingList', id: $event})" />
+                           (reload)="reload.emit({entity: 'readingList', id: $event})">
+            <ng-template #title let-entity>
+              <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}
+            </ng-template>
+          </app-entity-card>
         </ng-template>
       </app-carousel-reel>
     }

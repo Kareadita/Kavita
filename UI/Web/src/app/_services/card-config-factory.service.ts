@@ -255,7 +255,7 @@ export class CardConfigFactory {
     params: ConfigCardFactoryChapterVolumeParameters<Volume>
   ): ActionableCardConfiguration<Volume> {
     const defaults: ActionableCardConfiguration<Volume> = {
-      allowSelection: false,
+      allowSelection: true,
       selectionType: 'volume',
       suppressArchiveWarning: false,
 

@@ -14,7 +14,6 @@
   @let seriesMetadataValue = seriesMetadata();
   @let weblinksValue = weblinks();
   @let seriesValue = series();
-  @let chaptersValue = chapters();
 
   @if (seriesValue && seriesMetadataValue && libraryTypeValue !== null) {
     <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
@@ -88,9 +87,9 @@
               </div>
 
               <div class="col-auto ms-2">
-                <button class="btn btn-actions" (click)="toggleWantToRead()" ngbTooltip="{{isWantToRead ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
+                <button class="btn btn-actions" (click)="toggleWantToRead()" ngbTooltip="{{isWantToRead() ? t('remove-from-want-to-read') : t('add-to-want-to-read')}}">
                   <span>
-                      <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
+                      <i class="{{isWantToRead() ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
                   </span>
                 </button>
               </div>
@@ -204,12 +203,12 @@
               <a ngbNavLink>{{t(TabID.Storyline)}}</a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Storyline; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="storylineItems()" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
 
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item) {
                         @if (item.isChapter) {
-                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, totalLength: storyChapters.length}" />
+                          <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, totalLength: storylineChapters().length}" />
                         } @else {
                           <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item.volume, scroll: scroll, idx: idx, totalLength: volumes().length}" />
                         }
@@ -232,10 +231,10 @@
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Volumes; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="volumes()" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="volumeEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead +  + '_volumes') {
-                        <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumes().length}" />
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.data.id + '_' + item.data.pagesRead +  + '_volumes') {
+                        <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumeEntities().length}" />
                       }
                       <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}" />
                     </div>
@@ -249,14 +248,14 @@
             <li [ngbNavItem]="TabID.Chapters">
               <a ngbNavLink>
                 {{utilityService.formatChapterName(libraryTypeValue)}}
-                <span class="badge rounded-pill text-bg-secondary">{{chaptersValue.length}}</span>
+                <span class="badge rounded-pill text-bg-secondary">{{chapterEntities().length}}</span>
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="chaptersValue" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="chapterEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for (item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_chapters') {
-                        <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chaptersValue.length}" />
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.data.id + '_' + item.data.pagesRead + '_chapters') {
+                        <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapterEntities().length}" />
                       }
                       <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}" />
                     </div>
@@ -270,14 +269,14 @@
             <li [ngbNavItem]="TabID.Specials">
               <a ngbNavLink>
                 {{t(TabID.Specials)}}
-                <span class="badge rounded-pill text-bg-secondary">{{specials.length}}</span>
+                <span class="badge rounded-pill text-bg-secondary">{{specialEntities().length}}</span>
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Specials; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="specialEntities()"  [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead + '_specials') {
-                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chaptersValue.length}" />
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.data.id + '_' + item.data.pagesRead + '_specials') {
+                        <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: specialEntities().length}" />
                       }
                     </div>
                   </virtual-scroller>
@@ -398,28 +397,16 @@
   }
 
   <ng-template #nonSpecialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-    <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesValue!.id"
-                      [libraryId]="libraryId"
-                      [actions]="chapterActions"
-                      [libraryType]="libraryTypeValue"
-                      [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
-                      [maxIndex]="totalLength" [allowSelection]="true" />
+    <app-entity-card class="col-auto mt-2 mb-2" [entity]="item" [config]="chapterConfig()" [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
+                     [maxIndex]="totalLength" />
   </ng-template>
 
   <ng-template #nonChapterVolumeCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-    <app-volume-card class="col-auto mt-2 mb-2" [volume]="item" [seriesId]="seriesId" [libraryId]="libraryId" [libraryType]="libraryTypeValue"
-                     [actions]="volumeActions" [index]="scroll.viewPortInfo.startIndexWithBuffer + idx" [maxIndex]="totalLength" [allowSelection]="true" />
+    <app-entity-card class="col-auto mt-2 mb-2" [entity]="item" [config]="volumeConfig()" [index]="scroll.viewPortInfo.startIndexWithBuffer + idx" [maxIndex]="totalLength" />
   </ng-template>
 
   <ng-template #specialChapterCard let-item let-scroll="scroll" let-idx="idx" let-totalLength="totalLength">
-    <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item" [seriesId]="seriesValue!.id"
-                      [libraryId]="libraryId"
-                      [actions]="chapterActions"
-                      [libraryType]="libraryTypeValue"
-                      [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
-                      [maxIndex]="totalLength"
-                      [dataSource]="'special'"
-                      [allowSelection]="true" />
+    <app-entity-card class="col-auto mt-2 mb-2" [entity]="item" [config]="specialConfig()" [index]="scroll.viewPortInfo.startIndexWithBuffer + idx" [maxIndex]="totalLength" />
   </ng-template>
 
 

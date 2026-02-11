@@ -8,6 +8,9 @@ import {
   DestroyRef,
   ElementRef,
   inject,
+  Input,
+  input,
+  numberAttribute,
   OnInit,
   signal,
   ViewChild
@@ -40,10 +43,9 @@ import {
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
-import {Device} from 'src/app/_models/device/device';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
-import {LibraryType} from 'src/app/_models/library/library';
+import {Library, LibraryType} from 'src/app/_models/library/library';
 import {ReadingList} from 'src/app/_models/reading-list';
 import {Series} from 'src/app/_models/series';
 import {RelatedSeries} from 'src/app/_models/series-detail/related-series';
@@ -81,8 +83,6 @@ import {
   EditChapterModalComponent
 } from "../../../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event";
-import {ChapterCardComponent} from "../../../cards/chapter-card/chapter-card.component";
-import {VolumeCardComponent} from "../../../cards/volume-card/volume-card.component";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {AgeRating} from "../../../_models/metadata/age-rating";
@@ -113,7 +113,6 @@ import {LicenseService} from "../../../_services/license.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {VolumeRemovedEvent} from "../../../_models/events/volume-removed-event";
 import {ReviewsComponent} from "../../../_single-module/reviews/reviews.component";
-import {ReadingProfileService} from "../../../_services/reading-profile.service";
 import {AnnotationsTabComponent} from "../../../_single-module/annotations-tab/annotations-tab.component";
 import {Annotation} from "../../../book-reader/_models/annotations/annotation";
 import {AnnotationService} from "../../../_services/annotation.service";
@@ -124,6 +123,9 @@ import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.servi
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {CardEntityFactory, ChapterCardEntity, VolumeCardEntity} from "../../../_models/card/card-entity";
+import {CardConfigFactory} from "../../../_services/card-config-factory.service";
+import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 
 
 enum TabID {
@@ -139,8 +141,8 @@ enum TabID {
 }
 
 interface StoryLineItem {
-  chapter?: Chapter;
-  volume?: Volume;
+  chapter?: ChapterCardEntity;
+  volume?: VolumeCardEntity;
   isChapter: boolean;
 }
 
@@ -154,11 +156,10 @@ interface StoryLineItem {
     NgbDropdownItem, BulkOperationsComponent,
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
-    NgClass, DetailsTabComponent, ChapterCardComponent,
-    VolumeCardComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
-    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent, ReadingProgressStatusPipePipe, ReadingProgressIconPipePipe]
+    NgClass, DetailsTabComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
+    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent, ReadingProgressStatusPipePipe, ReadingProgressIconPipePipe, EntityCardComponent]
 })
-export class SeriesDetailComponent implements OnInit, AfterContentChecked {
+class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
@@ -179,7 +180,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly collectionTagService = inject(CollectionTagService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrollService = inject(ScrollService);
-  private readonly readingProfileService = inject(ReadingProfileService);
+  private readonly cardConfigFactory = inject(CardConfigFactory);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly imageService = inject(ImageService);
@@ -200,13 +201,55 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   /**
    * Series Id. Set at load before UI renders
    */
-  seriesId!: number;
+  @Input({transform: numberAttribute}) seriesId = 0;
+  @Input({transform: numberAttribute}) libraryId = 0;
+  /** This can be {id} only for non-admin users */
+  library = input.required<Library>();
+
   series = signal<Series | null>(null);
   volumes = signal<Volume[]>([]);
+  volumeEntities = computed(() => this.volumes().map(v => CardEntityFactory.volume(v, this.seriesId, this.libraryId)));
+  volumeConfig = computed(() => {
+    const seriesId = this.seriesId;
+    const libraryId = this.libraryId;
+    const libraryType = this.libraryType();
+    return this.cardConfigFactory.forVolume({seriesId, libraryId, libraryType})
+  });
   chapters = signal<Chapter[]>([]);
-  storyChapters: Chapter[] = [];
-  storylineItems: StoryLineItem[] = [];
-  libraryId = 0;
+  chapterEntities = computed(() => this.chapters().map(v => CardEntityFactory.chapter(v, this.seriesId, this.libraryId)));
+  chapterConfig = computed(() => {
+    const seriesId = this.seriesId;
+    const libraryId = this.libraryId;
+    const libraryType = this.libraryType();
+    return this.cardConfigFactory.forChapter({seriesId, libraryId, libraryType})
+  });
+  specials = signal<Chapter[]>([]);
+  specialEntities = computed(() => this.specials().map(v => CardEntityFactory.chapter(v, this.seriesId, this.libraryId)));
+  specialConfig = computed(() => {
+    const seriesId = this.seriesId;
+    const libraryId = this.libraryId;
+    const libraryType = this.libraryType();
+    return this.cardConfigFactory.forChapter({seriesId, libraryId, libraryType, overrides: {selectionType: 'special'}})
+  });
+  storylineChapters = signal<Chapter[]>([]);
+  private storylineChapterEntities = computed(() => this.storylineChapters().map(v => CardEntityFactory.chapter(v, this.seriesId, this.libraryId)));
+  storylineItems = computed(() => {
+    const items: StoryLineItem[] = [];
+    const volumes = this.volumeEntities();
+    const storylineChapterEntities = this.storylineChapterEntities();
+
+    const v = volumes.map(v => {
+      return {volume: v, chapter: undefined, isChapter: false} as StoryLineItem;
+    });
+    items.push(...v);
+    const c = storylineChapterEntities.map(c => {
+      return {volume: undefined, chapter: c, isChapter: true} as StoryLineItem;
+    });
+    items.push(...c);
+
+    return items;
+  });
+
 
   isAdmin = computed(() => {
     return this.accountService.isAdmin();
@@ -238,8 +281,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   volumeActions: ActionItem<Volume>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
 
+
   hasSpecials = false;
-  specials: Array<Chapter> = [];
+
   activeTabId = TabID.Storyline;
 
   reviews: Array<UserReview> = [];
@@ -251,10 +295,21 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   seriesMetadata = signal<SeriesMetadata | null>(null);
   readingLists: Array<ReadingList> = [];
   collections: Array<UserCollection> = [];
-  isWantToRead: boolean = false;
+  isWantToRead = signal<boolean>(false);
   unreadCount: number = 0;
   totalCount: number = 0;
-  totalSize = signal<number | undefined>(undefined);
+  totalSize = computed(() => {
+    // TODO: We can refactor this to be much faster/less GC
+    const uniqueChapters = Array.from(
+      new Map([...this.chapters(), ...this.volumes().flatMap(v => v.chapters), ...this.specials()]
+        .map(c => [c.id, c])).values()
+    );
+
+    return uniqueChapters
+      .flatMap(c => c.files)
+      .reduce((sum, f) => sum + f.bytes, 0);
+  })
+
   readingTimeLeft: HourEstimateRange | null = null;
   /**
    * Poster image for the Series
@@ -278,7 +333,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     if (libType === LibraryType.ComicVine) return false;
 
     // Edge case for bad pdf parse
-    if ((libType === LibraryType.Book || libType === LibraryType.LightNovel) && (this.volumes().length === 0 && chapters.length === 0 && this.storyChapters.length > 0)) return true;
+    if ((libType === LibraryType.Book || libType === LibraryType.LightNovel) && (this.volumes().length === 0 && chapters.length === 0 && this.storylineChapters().length > 0)) return true;
 
     return (libType !== LibraryType.Book && libType !== LibraryType.LightNovel && libType !== LibraryType.Comic)
       && (this.volumes().length > 0 || chapters.length > 0);
@@ -291,7 +346,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     if (libType === LibraryType.ComicVine) {
       if (this.volumes().length > 1) return true;
 
-      return this.specials.length === 0 && chapters.length === 0;
+      return this.specials().length === 0 && chapters.length === 0;
 
     }
 
@@ -405,9 +460,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
+
     this.bulkSelectionService.registerResolver(() => {
       // Tab-dependent chapter array
-      let chapterArray = this.activeTabId === TabID.Chapters ? this.chapters() : this.storyChapters;
+      let chapterArray = this.activeTabId === TabID.Chapters ? this.chapters() : this.storylineChapters();
       const offset = this.activeTabId === TabID.Storyline ? this.volumes().length : 0;
 
       const volIndices = this.bulkSelectionService.getSelectedCardsForSource('volume');
@@ -418,7 +474,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         volumes: this.volumes().filter((_, i) => volIndices.includes(i + '')),
         chapters: [
           ...chapterArray.filter((_, i) => chIndices.includes((i + offset) + '')),
-          ...this.specials.filter((_, i) => spIndices.includes(i + '')),
+          ...this.specials().filter((_, i) => spIndices.includes(i + '')),
         ],
       };
     });
@@ -430,22 +486,20 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         const entityMap = new Map<number, any>(res.entity.map(e => [e.id, e]));
 
         // Patch volumes
-        const updatedVolumes = this.volumes().map(v => {
-          const updated = entityMap.get(v.id);
-          return updated && 'chapters' in updated ? { ...updated } as Volume : v;
-        });
-        // Only reassign if something actually changed
-        if (updatedVolumes.some((v, i) => v !== this.volumes()[i])) {
-          this.bulkSelectionService.patchSignalArray(this.volumes, entityMap);
-        }
+        // const updatedVolumes = this.volumes().map(v => {
+        //   const updated = entityMap.get(v.id);
+        //   return updated && 'chapters' in updated ? { ...updated } as Volume : v;
+        // });
+        // // Only reassign if something actually changed
+        // if (updatedVolumes.some((v, i) => v !== this.volumes()[i])) {
+        //   this.bulkSelectionService.patchSignalArray(this.volumes, entityMap);
+        // }
 
         // Patch chapters (tab-dependent)
+        this.bulkSelectionService.patchSignalArray(this.volumes, entityMap);
         this.bulkSelectionService.patchSignalArray(this.chapters, entityMap);
-        this.storyChapters = this.bulkSelectionService.patchArray(this.storyChapters, entityMap);
-
-        // Patch specials
-        this.specials = this.bulkSelectionService.patchArray(this.specials, entityMap);
-        this.cdRef.markForCheck();
+        this.bulkSelectionService.patchSignalArray(this.specials, entityMap);
+        this.bulkSelectionService.patchSignalArray(this.storylineChapters, entityMap);
       }
       this.setContinuePoint();
     });
@@ -456,13 +510,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   ngOnInit(): void {
-    const routeId = this.route.snapshot.paramMap.get('seriesId');
-    const libraryId = this.route.snapshot.paramMap.get('libraryId');
-    if (routeId === null || libraryId == null) {
-      this.router.navigateByUrl('/home');
-      return;
-    }
-
     // Set up the download in progress
     this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
       return this.downloadService.mapToEntityType(events, this.series()!);
@@ -499,8 +546,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
     });
 
-    this.seriesId = parseInt(routeId, 10);
-    this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.cdRef.markForCheck();
 
@@ -562,90 +607,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  async handleVolumeActionCallback(action: ActionItem<Volume>, volume: Volume) {
-    switch(action.action) {
-      case(Action.MarkAsRead):
-        this.markVolumeAsRead(volume);
-        break;
-      case(Action.MarkAsUnread):
-        this.markVolumeAsUnread(volume);
-        break;
-      case(Action.Edit):
-        this.openEditVolume(volume);
-        break;
-      case(Action.Delete):
-        await this.actionService.deleteVolume(volume.id, (b) => {
-          if (!b) return;
-          this.loadPageSource.next(false);
-        });
-        break;
-      case(Action.AddToReadingList):
-        this.actionService.addVolumeToReadingList(volume, this.seriesId, () => {/* No Operation */ });
-        break;
-      case(Action.IncognitoRead):
-        if (volume.chapters != undefined && volume.chapters?.length >= 1) {
-          this.openChapter(volume.chapters.sort(this.utilityService.sortChapters)[0], true);
-        }
-        break;
-      case (Action.SendTo):
-        {
-          const device = (action._extra!.data as Device);
-          this.actionService.sendToDevice(volume.chapters.map(c => c.id), device);
-          break;
-        }
-      case (Action.Download):
-        this.downloadService.download('volume', volume);
-        break;
-      default:
-        break;
-    }
-  }
-
-  async handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
-    switch (action.action) {
-      case(Action.MarkAsRead):
-        this.markChapterAsRead(chapter);
-        break;
-      case(Action.MarkAsUnread):
-        this.markChapterAsUnread(chapter);
-        break;
-      case(Action.Edit):
-        this.openEditChapter(chapter);
-        break;
-      case(Action.AddToReadingList):
-        this.actionService.addChapterToReadingList(chapter, this.seriesId, () => {/* No Operation */ });
-        break;
-      case(Action.IncognitoRead):
-        this.openChapter(chapter, true);
-        break;
-      case (Action.SendTo):
-        const device = (action._extra!.data as Device);
-        this.actionService.sendToDevice([chapter.id], device);
-        break;
-      case (Action.Delete):
-        await this.actionService.deleteChapter(chapter.id, (success) => {
-          if (!success) return;
-          const chps = this.chapters();
-          this.chapters.set(chps.filter(c => c.id != chapter.id));
-        });
-        break;
-      case (Action.Download):
-        this.downloadService.download('chapter', chapter);
-        break;
-      default:
-        break;
-    }
-  }
-
-
-  async deleteSeries(series: Series) {
-    await this.actionService.deleteSeries(series, (result: boolean) => {
-      this.cdRef.markForCheck();
-      if (result) {
-        this.router.navigate(['library', this.libraryId]);
-      }
-    });
-  }
 
   loadSeries(seriesId: number, loadExternal: boolean = false) {
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
@@ -669,8 +630,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
 
     this.seriesService.isWantToRead(seriesId).subscribe(isWantToRead => {
-      this.isWantToRead = isWantToRead;
-      this.cdRef.markForCheck();
+      this.isWantToRead.set(isWantToRead);
     });
 
     this.loadReadingLists(seriesId);
@@ -733,30 +693,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.totalCount = detail.totalCount;
 
         this.hasSpecials = detail.specials.length > 0;
-        this.specials = detail.specials;
-
+        this.specials.set(detail.specials);
         this.chapters.set(detail.chapters);
         this.volumes.set(detail.volumes);
-        this.storyChapters = detail.storylineChapters;
-
-        const uniqueChapters = Array.from(
-          new Map([...detail.chapters, ...detail.volumes.flatMap(v => v.chapters)]
-            .map(c => [c.id, c])).values()
-        );
-
-        this.totalSize.set(uniqueChapters
-          .flatMap(c => c.files)
-          .reduce((sum, f) => sum + f.bytes, 0));
-
-        this.storylineItems = [];
-        const v = this.volumes().map(v => {
-          return {volume: v, chapter: undefined, isChapter: false} as StoryLineItem;
-        });
-        this.storylineItems.push(...v);
-        const c = this.storyChapters.map(c => {
-          return {volume: undefined, chapter: c, isChapter: true} as StoryLineItem;
-        });
-        this.storylineItems.push(...c);
+        this.storylineChapters.set(detail.storylineChapters);
 
         if (!this.router.url.includes('#')) {
           this.updateSelectedTab();
@@ -794,7 +734,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.router.navigateByUrl('/home');
     });
   }
-
   private loadRelatedSeries(seriesId: number) {
     this.seriesService.getRelatedForSeries(seriesId).subscribe((relations: RelatedSeries) => {
       this.relationships = relations;
@@ -873,7 +812,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     // Book libraries only have Volumes or Specials enabled
     if (libType === LibraryType.Book || libType === LibraryType.LightNovel) {
       if (this.volumes().length === 0) {
-        if (this.specials.length === 0 && this.storyChapters.length > 0) {
+        if (this.specials().length === 0 && this.storylineChapters().length > 0) {
           // NOTE: This is an edge case caused by bad parsing of pdf files. Once the new pdf parser is in place, this should be removed
           this.activeTabId = TabID.Storyline;
         } else {
@@ -887,7 +826,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
-    if (this.volumes().length === 0 && this.chapters().length === 0 && this.specials.length > 0) {
+    if (this.volumes().length === 0 && this.chapters().length === 0 && this.specials().length > 0) {
       this.activeTabId = TabID.Specials;
     } else {
       if (libType == LibraryType.Comic || libType == LibraryType.ComicVine) {
@@ -1082,14 +1021,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   toggleWantToRead() {
 
-    if (this.isWantToRead) {
+    if (this.isWantToRead()) {
       this.actionService.removeMultipleSeriesFromWantToReadList([this.seriesId]);
     } else {
       this.actionService.addMultipleSeriesToWantToReadList([this.seriesId]);
     }
 
-    this.isWantToRead = !this.isWantToRead;
-    this.cdRef.markForCheck();
+    this.isWantToRead.update(x => !x);
   }
 
   openFilter(field: FilterField, value: string | number) {
@@ -1133,3 +1071,5 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly encodeURIComponent = encodeURIComponent;
   protected readonly Breakpoint = Breakpoint;
 }
+
+export default SeriesDetailComponent
