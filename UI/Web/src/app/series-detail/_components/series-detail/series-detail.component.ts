@@ -202,7 +202,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   seriesId!: number;
   series = signal<Series | null>(null);
-  volumes: Volume[] = [];
+  volumes = signal<Volume[]>([]);
   chapters = signal<Chapter[]>([]);
   storyChapters: Chapter[] = [];
   storylineItems: StoryLineItem[] = [];
@@ -278,10 +278,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     if (libType === LibraryType.ComicVine) return false;
 
     // Edge case for bad pdf parse
-    if ((libType === LibraryType.Book || libType === LibraryType.LightNovel) && (this.volumes.length === 0 && chapters.length === 0 && this.storyChapters.length > 0)) return true;
+    if ((libType === LibraryType.Book || libType === LibraryType.LightNovel) && (this.volumes().length === 0 && chapters.length === 0 && this.storyChapters.length > 0)) return true;
 
     return (libType !== LibraryType.Book && libType !== LibraryType.LightNovel && libType !== LibraryType.Comic)
-      && (this.volumes.length > 0 || chapters.length > 0);
+      && (this.volumes().length > 0 || chapters.length > 0);
   });
 
   readonly shouldShowVolumeTab = computed(() => {
@@ -289,13 +289,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     const chapters = this.chapters();
 
     if (libType === LibraryType.ComicVine) {
-      if (this.volumes.length > 1) return true;
+      if (this.volumes().length > 1) return true;
 
       return this.specials.length === 0 && chapters.length === 0;
 
     }
 
-    return this.volumes.length > 0;
+    return this.volumes().length > 0;
   });
 
   showDetailsTab = computed(() => {
@@ -363,7 +363,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     if (this.currentlyReadingChapter === undefined || !this.hasReadingProgress()) return '';
 
     if (!this.currentlyReadingChapter.isSpecial) {
-      const vol = this.volumes.filter(v => v.id === this.currentlyReadingChapter?.volumeId);
+      const vol = this.volumes().filter(v => v.id === this.currentlyReadingChapter?.volumeId);
 
       let chapterLocaleKey = 'common.chapter-num-shorthand';
       let volumeLocaleKey = 'common.volume-num-shorthand';
@@ -408,14 +408,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.bulkSelectionService.registerResolver(() => {
       // Tab-dependent chapter array
       let chapterArray = this.activeTabId === TabID.Chapters ? this.chapters() : this.storyChapters;
-      const offset = this.activeTabId === TabID.Storyline ? this.volumes.length : 0;
+      const offset = this.activeTabId === TabID.Storyline ? this.volumes().length : 0;
 
       const volIndices = this.bulkSelectionService.getSelectedCardsForSource('volume');
       const chIndices = this.bulkSelectionService.getSelectedCardsForSource('chapter');
       const spIndices = this.bulkSelectionService.getSelectedCardsForSource('special');
 
       return {
-        volumes: this.volumes.filter((_, i) => volIndices.includes(i + '')),
+        volumes: this.volumes().filter((_, i) => volIndices.includes(i + '')),
         chapters: [
           ...chapterArray.filter((_, i) => chIndices.includes((i + offset) + '')),
           ...this.specials.filter((_, i) => spIndices.includes(i + '')),
@@ -423,8 +423,30 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       };
     });
     this.bulkSelectionService.registerContext(() => ({ seriesId: this.seriesId, libraryId: this.libraryId, libraryType: this.libraryType() }));
-    this.bulkSelectionService.registerPostAction((res: ActionResult<ReadingList>) => {
+    this.bulkSelectionService.registerPostAction((res: ActionResult<Volume[] | Chapter[]>) => {
+      console.log('series detail bulk action: ', res);
       if (res.effect === 'none') return;
+      if (res.effect === 'update') {
+        const entityMap = new Map<number, any>(res.entity.map(e => [e.id, e]));
+
+        // Patch volumes
+        const updatedVolumes = this.volumes().map(v => {
+          const updated = entityMap.get(v.id);
+          return updated && 'chapters' in updated ? { ...updated } as Volume : v;
+        });
+        // Only reassign if something actually changed
+        if (updatedVolumes.some((v, i) => v !== this.volumes()[i])) {
+          this.bulkSelectionService.patchSignalArray(this.volumes, entityMap);
+        }
+
+        // Patch chapters (tab-dependent)
+        this.bulkSelectionService.patchSignalArray(this.chapters, entityMap);
+        this.storyChapters = this.bulkSelectionService.patchArray(this.storyChapters, entityMap);
+
+        // Patch specials
+        this.specials = this.bulkSelectionService.patchArray(this.specials, entityMap);
+        this.cdRef.markForCheck();
+      }
       this.setContinuePoint();
     });
   }
@@ -714,7 +736,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.specials = detail.specials;
 
         this.chapters.set(detail.chapters);
-        this.volumes = detail.volumes;
+        this.volumes.set(detail.volumes);
         this.storyChapters = detail.storylineChapters;
 
         const uniqueChapters = Array.from(
@@ -727,7 +749,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
           .reduce((sum, f) => sum + f.bytes, 0));
 
         this.storylineItems = [];
-        const v = this.volumes.map(v => {
+        const v = this.volumes().map(v => {
           return {volume: v, chapter: undefined, isChapter: false} as StoryLineItem;
         });
         this.storylineItems.push(...v);
@@ -748,7 +770,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
               if (!this.hasSpecials) this.updateSelectedTab();
               break;
             case TabID.Volumes:
-              if (this.volumes.length === 0) this.updateSelectedTab();
+              if (this.volumes().length === 0) this.updateSelectedTab();
               break;
             case TabID.Chapters:
               if (this.chapters().length === 0) this.updateSelectedTab();
@@ -850,7 +872,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     const libType = this.libraryType();
     // Book libraries only have Volumes or Specials enabled
     if (libType === LibraryType.Book || libType === LibraryType.LightNovel) {
-      if (this.volumes.length === 0) {
+      if (this.volumes().length === 0) {
         if (this.specials.length === 0 && this.storyChapters.length > 0) {
           // NOTE: This is an edge case caused by bad parsing of pdf files. Once the new pdf parser is in place, this should be removed
           this.activeTabId = TabID.Storyline;
@@ -865,7 +887,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
-    if (this.volumes.length === 0 && this.chapters().length === 0 && this.specials.length > 0) {
+    if (this.volumes().length === 0 && this.chapters().length === 0 && this.specials.length > 0) {
       this.activeTabId = TabID.Specials;
     } else {
       if (libType == LibraryType.Comic || libType == LibraryType.ComicVine) {
