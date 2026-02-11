@@ -75,11 +75,6 @@ public class Startup
         services.Configure<AppSettingsDto>(_config);
         services.AddApplicationServices(_config, _env);
 
-        // Store keys inside database, such that cookies can be decrypted between container restarts
-        services.AddDataProtection()
-            .PersistKeysToDbContext<DataContext>()
-            .SetApplicationName(BuildInfo.AppName);
-
         services.AddControllers(options =>
         {
             options.CacheProfiles.Add(ResponseCacheProfiles.Minute,

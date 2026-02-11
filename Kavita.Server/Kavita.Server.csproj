@@ -60,11 +60,6 @@
       <ProjectReference Include="..\Kavita.Services\Kavita.Services.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Include="NeoSmart.Caching.Sqlite" Version="9.0.1" />
-      <PackageReference Include="NeoSmart.Caching.Sqlite.AspNetCore" Version="9.0.1" />
-    </ItemGroup>
-
   <ItemGroup>
     <None Remove="obj\**" />
     <None Remove="cache\**" />

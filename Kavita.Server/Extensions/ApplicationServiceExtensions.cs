@@ -1,7 +1,6 @@
 ﻿using Kavita.API.Services;
 using Kavita.API.Store;
 using Kavita.Common;
-using Kavita.Database;
 using Kavita.Database.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Server.Logging;
@@ -11,11 +10,8 @@ using Kavita.Services.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NeoSmart.Caching.Sqlite;
 
 namespace Kavita.Server.Extensions;
 
@@ -34,7 +30,6 @@ public static class ApplicationServiceExtensions
         services.AddKavitaDatabases();
         services.AddKavitaServices();
 
-        services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
 
         services.AddEasyCaching(options =>
@@ -64,23 +59,6 @@ public static class ApplicationServiceExtensions
         services.AddSwaggerGen(g =>
         {
             g.UseInlineDefinitionsForEnums();
-        });
-    }
-
-    private static void AddSqLite(this IServiceCollection services)
-    {
-        services.AddSqliteCache("config/cache.db");
-
-        services.AddDbContextPool<DataContext>(options =>
-        {
-            options.UseSqlite("Data source=config/kavita.db", builder =>
-            {
-                builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            });
-            options.EnableDetailedErrors();
-            options.EnableSensitiveDataLogging();
-            options.ConfigureWarnings(warnings =>
-                warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
     }
 }
