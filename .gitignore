@@ -546,3 +546,8 @@ API.Tests/Services/Test Data/ImageService/**/*.html
 
 
 API.Tests/Services/Test Data/ScannerService/ScanTests/**/*
+
+
+# Temp
+API/config
+API/wwwroot

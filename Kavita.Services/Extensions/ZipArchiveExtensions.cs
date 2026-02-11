@@ -1,0 +1,18 @@
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+
+namespace Kavita.Services.Extensions;
+
+public static class ZipArchiveExtensions
+{
+    /// <summary>
+    /// Checks if the archive has one or more files. Excludes directory entries.
+    /// </summary>
+    /// <param name="archive"></param>
+    /// <returns></returns>
+    public static bool HasFiles(this ZipArchive archive)
+    {
+        return archive.Entries.Any(x => Path.HasExtension(x.FullName));
+    }
+}

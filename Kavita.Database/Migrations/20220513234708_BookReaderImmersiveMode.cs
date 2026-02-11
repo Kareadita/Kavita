@@ -1,0 +1,26 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Kavita.Database.Migrations
+{
+    public partial class BookReaderImmersiveMode : Migration
+    {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<bool>(
+                name: "BookReaderImmersiveMode",
+                table: "AppUserPreferences",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "BookReaderImmersiveMode",
+                table: "AppUserPreferences");
+        }
+    }
+}
