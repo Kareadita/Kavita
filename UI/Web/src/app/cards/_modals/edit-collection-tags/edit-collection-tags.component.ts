@@ -220,7 +220,7 @@ export class EditCollectionTagsComponent implements OnInit {
     }
 
     concat(...apis).subscribe(() => {
-      this.modal.close({success: true, coverImageUpdated: selectedIndex > 0});
+      this.modal.close({success: true, coverImageUpdated: selectedIndex > 0, updatedEntity: tag});
       this.toastr.success(translate('toasts.collection-updated'));
     });
   }

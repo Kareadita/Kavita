@@ -50,7 +50,6 @@ import {WikiLink} from "../../../_models/wiki";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../../settings/_components/setting-switch/setting-switch.component";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
-import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
 import {ActionService} from "../../../_services/action.service";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
@@ -59,6 +58,9 @@ import {setupLanguageSettings, TypeaheadSettings} from "../../../typeahead/_mode
 import {Language} from "../../../_models/metadata/language";
 import {MetadataService} from "../../../_services/metadata.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../../_services/action-factory.service";
+import {Action} from "../../../_models/actionables/action";
+import {ActionItem} from "../../../_models/actionables/action-item";
 
 enum TabID {
   General = 'general-tab',
@@ -481,25 +483,12 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   getTasks() {
     const blackList = [Action.Edit];
-    return this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getLibraryActions(this.runTask.bind(this)), blackList);
+    return this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getLibraryActions(), blackList);
   }
 
-  async runTask(action: ActionItem<Library>) {
-    switch (action.action) {
-      case Action.Scan:
-        await this.actionService.scanLibrary(this.library!);
-        break;
-      case Action.RefreshMetadata:
-        await this.actionService.refreshLibraryMetadata(this.library!);
-        break;
-      case Action.GenerateColorScape:
-        await this.actionService.refreshLibraryMetadata(this.library!, undefined, false);
-        break;
-      case Action.Delete:
-        await this.actionService.deleteLibrary(this.library!, () => {
-          this.modal.dismiss();
-        });
-        break;
+  runTask(task: ActionItem<Library>) {
+    if (task.callback) {
+      task.callback(task, this.library!).subscribe();
     }
   }
 

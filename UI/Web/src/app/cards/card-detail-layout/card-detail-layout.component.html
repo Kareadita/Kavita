@@ -5,11 +5,9 @@
     <div class="row mt-2 g-0 pb-2">
       <div class="col me-auto">
         <h4>
-          @if (actions().length > 0) {
-            <span>
-              <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions()" [labelBy]="header()" />&nbsp;
-            </span>
-          }
+          <span>
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions()" [labelBy]="header()" />&nbsp;
+          </span>
 
           <span>
             {{header()}}&nbsp;

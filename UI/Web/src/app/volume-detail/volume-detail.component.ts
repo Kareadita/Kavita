@@ -10,7 +10,7 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
+import {DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {SeriesService} from "../_services/series.service";
@@ -53,13 +53,12 @@ import {Person} from "../_models/metadata/person";
 import {IHasCast} from "../_models/common/i-has-cast";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
-import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
 import {UtilityService} from "../shared/_services/utility.service";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {Genre} from "../_models/metadata/genre";
 import {Tag} from "../_models/tag";
-import {RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
+import {RelatedTabChangeEvent, RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
@@ -91,6 +90,9 @@ import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 import {ReadingProgressIconPipePipe} from "../_pipes/reading-progress-icon-pipe.pipe";
 import {Breakpoint, BreakpointService} from "../_services/breakpoint.service";
+import {ActionFactoryService} from "../_services/action-factory.service";
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 enum TabID {
   Chapters = 'chapters-tab',
@@ -141,7 +143,6 @@ interface VolumeCast extends IHasCast {
     NgbNavContent,
     NgbNav,
     ReadMoreComponent,
-    AsyncPipe,
     NgbDropdownItem,
     NgbDropdownMenu,
     NgbDropdown,
@@ -240,54 +241,8 @@ export class VolumeDetailComponent implements OnInit {
   mobileSeriesImgBackground: string | undefined;
   downloadInProgress: boolean = false;
 
-  volumeActions: Array<ActionItem<Volume>> = this.actionFactoryService.getVolumeActions(this.handleVolumeAction.bind(this), this.shouldRenderVolumeAction.bind(this));
-  chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
-
-  bulkActionCallback = async (action: ActionItem<Chapter>, _: any) => {
-    if (this.volume === null) {
-      return;
-    }
-    const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
-    const selectedChapterIds = this.volume.chapters.filter((_chapter, index: number) => {
-      return selectedChapterIndexes.includes(index + '');
-    });
-
-    switch (action.action) {
-      case Action.AddToReadingList:
-        this.actionService.addMultipleToReadingList(this.seriesId, [], selectedChapterIds, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsRead:
-        this.actionService.markMultipleAsRead(this.seriesId, [], selectedChapterIds,  () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadVolume();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsUnread:
-        this.actionService.markMultipleAsUnread(this.seriesId, [], selectedChapterIds,  () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadVolume();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.SendTo:
-        const device = (action._extra!.data as Device);
-        this.actionService.sendToDevice(selectedChapterIds.map(c => c.id), device);
-        this.bulkSelectionService.deselectAll();
-        this.cdRef.markForCheck();
-        break;
-      case Action.Delete:
-        await this.actionService.deleteMultipleChapters(this.seriesId, selectedChapterIds, () => {
-          // No need to update the page as the backend will spam volume/chapter deletions
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-    }
-  }
+  volumeActions: Array<ActionItem<Volume>> = [];
+  chapterActions: Array<ActionItem<Chapter>> = [];
 
   /**
    * This is the download we get from download service.
@@ -388,6 +343,13 @@ export class VolumeDetailComponent implements OnInit {
     this.libraryId = parseInt(libraryId, 10);
     this.coverImage = this.imageService.getVolumeCoverImage(this.volumeId);
 
+    this.bulkSelectionService.registerDataSource('chapter', () => this.volume?.chapters ?? []);
+    this.bulkSelectionService.registerPostAction(res => {
+      if (res.effect === 'none') return;
+      this.loadVolume();
+    });
+    this.bulkSelectionService.registerContext(() => ({seriesId: this.seriesId, libraryId: this.libraryId, libraryType: this.libraryType!}));
+
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       if (event.event === EVENTS.CoverUpdate) {
@@ -430,6 +392,9 @@ export class VolumeDetailComponent implements OnInit {
         sum + c.files.reduce((fileSum, f) => fileSum + f.bytes, 0), 0);
       this.libraryType = results.libraryType;
 
+      this.volumeActions = this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType, this.shouldRenderVolumeAction.bind(this));
+      this.chapterActions = this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType);
+
       if (this.volume.pagesRead > 0 && this.volume.pagesRead < this.volume.pages) {
         this.readingProgressStatus = ReadingProgressStatus.Progress;
       } else if (this.volume.pagesRead >= this.volume.pages) {
@@ -465,12 +430,8 @@ export class VolumeDetailComponent implements OnInit {
         }
       }), takeUntilDestroyed(this.destroyRef)).subscribe();
 
-      if (this.volume.chapters.length === 1) {
-        this.readingListService.getReadingListsForChapter(this.volume.chapters[0].id).subscribe(lists => {
-          this.readingLists = lists;
-          this.cdRef.markForCheck();
-        });
-      }
+
+      this.loadReadingLists();
 
       // Calculate all the writes/artists for all chapters
       this.volumeCast.writers = this.volume.chapters
@@ -566,9 +527,25 @@ export class VolumeDetailComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
+  private loadReadingLists(switchTabsIfNoList = false) {
+    // TODO: Why can't we have a bulk flow for this?
+    const volume = this.volume;
+    if (!volume) return;
+
+    if (volume.chapters.length === 1) {
+      this.readingListService.getReadingListsForChapter(volume.chapters[0].id).subscribe(lists => {
+        this.readingLists = lists;
+        if (switchTabsIfNoList && lists.length === 0) {
+          this.switchTabsToDetail();
+        }
+        this.cdRef.markForCheck();
+      });
+    }
+  }
+
   loadVolume() {
     this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
-      this.volume = v;
+      this.volume = {...v};
       this.setContinuePoint();
       this.cdRef.markForCheck();
     });
@@ -611,6 +588,12 @@ export class VolumeDetailComponent implements OnInit {
     const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
     this.location.replaceState(newUrl)
+  }
+
+  handleRelatedReload(event: RelatedTabChangeEvent) {
+    if (event.entity === 'readingList') {
+      this.loadReadingLists(true);
+    }
   }
 
   async handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
@@ -729,6 +712,19 @@ export class VolumeDetailComponent implements OnInit {
       this.cdRef.markForCheck();
     } else {
       this.currentlyReadingChapter = undefined;
+    }
+  }
+
+  updateChapter(updatedChapter: Chapter) {
+    const volume = this.volume;
+    if (!volume) return;
+
+    const originalEntity = volume.chapters.find(s => s.id == updatedChapter.id);
+
+    if (originalEntity) {
+      Object.assign(originalEntity, updatedChapter);
+      volume.chapters = [...volume.chapters];
+      this.cdRef.markForCheck();
     }
   }
 

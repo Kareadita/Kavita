@@ -13,11 +13,11 @@ import {AgeRating} from '../_models/metadata/age-rating';
 import {AgeRestriction} from '../_models/metadata/age-restriction';
 import {TextResonse} from '../_types/text-response';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
-import {Action} from "./action-factory.service";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AuthKey, OpdsName} from "../_models/user/auth-key";
+import {Action} from "../_models/actionables/action";
 
 export enum Role {
   Admin = 'Admin',

@@ -130,15 +130,17 @@ export class EditReadingListModalComponent implements OnInit {
 
   updateSelectedIndex(index: number) {
     this.coverImageIndex = index;
-    this.cdRef.detectChanges();
+    this.cdRef.markForCheck();
   }
 
   updateSelectedImage(url: string) {
     this.selectedCover = url;
+    this.cdRef.markForCheck();
   }
 
   handleReset() {
     this.coverImageLocked = false;
+    this.cdRef.markForCheck();
   }
 
 }

@@ -26,7 +26,6 @@ import {Series} from 'src/app/_models/series';
 import {User} from 'src/app/_models/user/user';
 import {Volume} from 'src/app/_models/volume';
 import {AccountService} from 'src/app/_services/account.service';
-import {Action, ActionableEntity, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
@@ -48,6 +47,10 @@ import {PromotedIconComponent} from "../../shared/_components/promoted-icon/prom
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
+import {ActionableEntity} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter | BrowsePerson;
 
@@ -76,6 +79,7 @@ export type CardEntity = Series | Volume | Chapter | UserCollection | PageBookma
 })
 export class CardItemComponent implements OnInit {
 
+  // TODO: This can be removed
   private readonly destroyRef = inject(DestroyRef);
   public readonly imageService = inject(ImageService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
@@ -86,7 +90,6 @@ export class CardItemComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly actionFactoryService = inject(ActionFactoryService);
 
   protected readonly MangaFormat = MangaFormat;
 
@@ -263,7 +266,6 @@ export class CardItemComponent implements OnInit {
     }
 
 
-    this.filterSendTo();
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       this.user = user;
     });
@@ -348,8 +350,11 @@ export class CardItemComponent implements OnInit {
   }
 
 
-  performAction(action: ActionItem<any>) {
-    if (action.action == Action.Download) {
+  performAction(event: ActionItem<void> | ActionResult<void>) {
+    // Skip ActionResults — they've already been handled
+    if ('effect' in event) return;
+
+    if (event.action == Action.Download) {
       if (this.utilityService.isVolume(this.entity)) {
         const volume = this.utilityService.asVolume(this.entity);
         this.downloadService.download('volume', volume);
@@ -361,10 +366,6 @@ export class CardItemComponent implements OnInit {
         this.downloadService.download('series', series);
       }
       return; // Don't propagate the download from a card
-    }
-
-    if (typeof action.callback === 'function') {
-      action.callback(action, this.entity);
     }
   }
 
@@ -381,27 +382,6 @@ export class CardItemComponent implements OnInit {
     }
     this.selection.emit(this.selected);
     this.cdRef.detectChanges();
-  }
-
-  filterSendTo() {
-    if (!this.actions || this.actions.length === 0) return;
-
-    if (this.utilityService.isChapter(this.entity)) {
-      this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.entity as Chapter);
-    } else if (this.utilityService.isVolume(this.entity)) {
-      const vol = this.utilityService.asVolume(this.entity);
-      this.actions = this.actionFactoryService.filterSendToAction(this.actions, vol.chapters[0]);
-    } else if (this.utilityService.isSeries(this.entity)) {
-      const series = (this.entity as Series);
-      // if (series.format === MangaFormat.EPUB || series.format === MangaFormat.PDF) {
-      //   this.actions = this.actions.filter(a => a.title !== 'Send To');
-      // }
-    }
-
-    // this.actions = this.actions.filter(a => {
-    //   if (!a.isAllowed) return true;
-    //   return a.isAllowed(a, this.entity);
-    // });
   }
 
   clickRead(event: any) {

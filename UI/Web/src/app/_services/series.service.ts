@@ -143,7 +143,8 @@ export class SeriesService {
     return this.httpClient.post<Series[]>(url, data, {observe: 'response', params}).pipe(
       map(response => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
-    }));
+      })
+    );
   }
 
   isWantToRead(seriesId: number) {
@@ -166,7 +167,8 @@ export class SeriesService {
     return this.httpClient.post<Series[]>(url, data, {observe: 'response', params}).pipe(
       map(response => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
-    }));
+      })
+    );
   }
 
 

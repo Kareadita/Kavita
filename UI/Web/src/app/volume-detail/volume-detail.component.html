@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix: 'series-detail'">
 
-  <app-bulk-operations [actionCallback]="bulkActionCallback" [marginLeft]="12" [marginRight]="0" />
+  <app-bulk-operations [marginLeft]="12" [marginRight]="0" />
 
   <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
 
@@ -70,7 +70,7 @@
 
 
 
-              @if (accountService.isAdmin$ | async) {
+              @if (accountService.isAdmin()) {
                 <div class="col-auto ms-2">
                   <button class="btn btn-actions" (click)="openEditModal()" [ngbTooltip]="t('edit-series-alt')">
                     <span><i class="fa fa-pen" aria-hidden="true"></i></span>
@@ -173,8 +173,10 @@
                                       [libraryId]="libraryId"
                                       [libraryType]="libraryType"
                                       [actions]="chapterActions"
-                                      (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, volume!.chapters.length, $event)"
-                                      [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"
+                                      [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
+                                      [maxIndex]="volume.chapters.length"
+                                      [allowSelection]="true"
+                                      (dataChanged)="updateChapter($event)"
                      />
                   }
                 </div>
@@ -188,7 +190,7 @@
             <a ngbNavLink>{{t('related-tab')}}</a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                <app-related-tab [readingLists]="readingLists" />
+                <app-related-tab [readingLists]="readingLists" (reload)="handleRelatedReload($event)" (dataChanged)="handleRelatedReload($event)" />
               }
             </ng-template>
           </li>

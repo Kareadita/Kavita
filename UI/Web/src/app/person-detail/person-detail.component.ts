@@ -29,22 +29,21 @@ import {Series} from "../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {AccountService} from "../_services/account.service";
-import {CardItemComponent} from "../cards/card-item/card-item.component";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
-import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
+import {ActionFactoryService} from "../_services/action-factory.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {EditPersonModalComponent} from "./_modal/edit-person-modal/edit-person-modal.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {ThemeService} from "../_services/theme.service";
-import {DefaultModalOptions} from "../_models/default-modal-options";
 import {ToastrService} from "ngx-toastr";
 import {LicenseService} from "../_services/license.service";
 import {SafeUrlPipe} from "../_pipes/safe-url.pipe";
-import {MergePersonModalComponent} from "./_modal/merge-person-modal/merge-person-modal.component";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {MetadataService} from "../_services/metadata.service";
+import {SeriesCardComponent} from "../cards/series-card/series-card.component";
+import {ActionItem} from "../_models/actionables/action-item";
+import {ActionResult} from "../_models/actionables/action-result";
 
 interface PersonMergeEvent {
   srcId: number,
@@ -62,12 +61,12 @@ interface PersonMergeEvent {
     ReadMoreComponent,
     PersonRolePipe,
     CarouselReelComponent,
-    CardItemComponent,
     CardActionablesComponent,
     TranslocoDirective,
     ChapterCardComponent,
     SafeUrlPipe,
-    BadgeExpanderComponent
+    BadgeExpanderComponent,
+    SeriesCardComponent
   ],
   templateUrl: './person-detail.component.html',
   styleUrl: './person-detail.component.scss',
@@ -99,7 +98,7 @@ export class PersonDetailComponent implements OnInit {
   person: Person | null = null;
   works$: Observable<Series[]> | null = null;
   filter: FilterV2<FilterField> | null = null;
-  personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions(this.handleAction.bind(this));
+  personActions: Array<ActionItem<Person>> = this.actionService.getPersonActions();
   chaptersByRole: any = {};
 
   private readonly personSubject = new BehaviorSubject<Person | null>(null);
@@ -215,33 +214,15 @@ export class PersonDetailComponent implements OnInit {
     this.filterUtilityService.applyFilterWithParams(['all-series'], searchFilter, params).subscribe();
   }
 
-  navigateToSeries(series: Series) {
-    this.router.navigate(['library', series.libraryId, 'series', series.id]);
-  }
+  handleActionCallback(event: ActionResult<Person>) {
+    const result = event as unknown as ActionResult<Person>;
 
-  handleAction(action: ActionItem<Person>, person: Person) {
-    switch (action.action) {
-      case(Action.Edit):
-        this.editPersonAction();
-        break;
-      case (Action.Merge):
-        this.mergePersonAction();
-        break;
-      default:
-        break;
-    }
-  }
-
-  private editPersonAction() {
-    const ref = this.modalService.open(EditPersonModalComponent, DefaultModalOptions);
-    ref.componentInstance.person = this.person;
-
-    ref.closed.subscribe(r => {
-      if (r.success) {
-        const nameChanged = this.personName !== r.person.name;
+    switch (result.effect) {
+      case 'update':
+        const nameChanged = this.personName !== result.entity.name;
 
         // Reload person as the web links (and roles) may have changed
-        this.personService.get(r.person.name).subscribe(person => {
+        this.personService.get(result.entity.name).subscribe(person => {
           this.setPerson(person!);
 
           // Update the url to reflect the new name change
@@ -252,23 +233,17 @@ export class PersonDetailComponent implements OnInit {
 
           this.cdRef.markForCheck();
         });
-      }
-    });
-  }
-
-  private mergePersonAction() {
-    const ref = this.modalService.open(MergePersonModalComponent, DefaultModalOptions);
-    ref.componentInstance.person = this.person;
-
-    ref.closed.subscribe(r => {
-      if (r.success) {
-        // Reload the person data, as relations may have changed
-        this.personService.get(r.person.name).subscribe(person => {
+        break;
+      case 'reload':
+        this.personService.get(result.entity.name).subscribe(person => {
           this.setPerson(person!);
           this.cdRef.markForCheck();
         });
-      }
-    });
+        break;
+      case 'remove':
+      case 'none':
+        break;
+    }
   }
 
 }

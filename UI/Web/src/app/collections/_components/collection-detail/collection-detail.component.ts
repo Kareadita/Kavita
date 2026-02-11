@@ -26,7 +26,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {ImageService} from 'src/app/_services/image.service';
@@ -64,6 +63,10 @@ import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {MetadataService} from "../../../_services/metadata.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../../_services/action-factory.service";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {Action} from "../../../_models/actionables/action";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-collection-detail',
@@ -125,61 +128,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 
-
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
-
-    switch (action.action) {
-      case Action.AddToReadingList:
-        this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.AddToWantToReadList:
-        this.actionService.addMultipleSeriesToWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.AddToCollection:
-        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsRead:
-        this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsUnread:
-        this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.Delete:
-        this.actionService.deleteMultipleSeries(selectedSeries, successful => {
-          if (!successful) return;
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-          this.cdRef.markForCheck();
-        });
-        break;
-    }
-  }
-
   constructor() {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
@@ -211,14 +159,19 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
         this.updateTag(tagId);
         this.cdRef.markForCheck();
       });
+
+      this.bulkSelectionService.registerDataSource('series', () => this.series);
+      this.bulkSelectionService.registerPostAction((res: ActionResult<Series>) => {
+        if (res.effect === 'none') return;
+        this.loadPage();
+      });
   }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (!user) return;
       this.user = user;
-      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(
-        this.handleCollectionActionCallback.bind(this), this.shouldRenderCollection.bind(this))
+      this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.shouldRenderCollection.bind(this))
         .filter(action => this.collectionService.actionListFilter(action, user));
       this.cdRef.markForCheck();
     });
@@ -251,6 +204,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     this.scrollService.setScrollContainer(this.scrollingBlock);
   }
 
+  // TODO: This is a very weird implementation, let's clean it up
   updateTag(tagId: number) {
     this.collectionService.allCollections().subscribe(tags => {
       const matchingTags = tags.filter(t => t.id === tagId);
@@ -260,11 +214,15 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
         return;
       }
 
-      this.collectionTag = matchingTags[0];
-      this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
-      this.titleService.setTitle(this.translocoService.translate('collection-detail.title-alt', {collectionName: this.collectionTag.title}));
-      this.cdRef.markForCheck();
+      this.setTag(matchingTags[0]);
     });
+  }
+
+  private setTag(tag: UserCollection) {
+    this.collectionTag = {...tag};
+    this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
+    this.titleService.setTitle(this.translocoService.translate('collection-detail.title-alt', {collectionName: this.collectionTag.title}));
+    this.cdRef.markForCheck();
   }
 
   loadPage() {
@@ -280,6 +238,32 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       this.cdRef.markForCheck();
     });
   }
+
+  updateSeries(updatedEntity: Series) {
+    const originalEntity = this.series.find(s => s.id == updatedEntity.id);
+    if (originalEntity) {
+      Object.assign(originalEntity, updatedEntity);
+      this.series = [...this.series];
+      this.cdRef.markForCheck();
+    }
+  }
+
+  async handleActionCallback(result: ActionResult<UserCollection>) {
+    switch (result.effect) {
+      case 'update':
+        this.updateTag(this.collectionTag.id);
+        break;
+      case 'remove':
+        this.router.navigateByUrl('/collections');
+        break;
+      case 'reload':
+        this.loadPage();
+        break;
+      case 'none':
+        break;
+    }
+  }
+
 
   updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;

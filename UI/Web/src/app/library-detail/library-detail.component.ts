@@ -4,22 +4,20 @@ import {
   Component,
   DestroyRef,
   EventEmitter,
-  HostListener,
   inject,
+  input,
   OnInit
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {take} from 'rxjs/operators';
 import {BulkSelectionService} from '../cards/bulk-selection.service';
-import {KEY_CODES, UtilityService} from '../shared/_services/utility.service';
+import {UtilityService} from '../shared/_services/utility.service';
 import {SeriesAddedEvent} from '../_models/events/series-added-event';
 import {Library} from '../_models/library/library';
 import {Pagination} from '../_models/pagination';
 import {Series} from '../_models/series';
 import {FilterEvent, SortField} from '../_models/metadata/series-filter';
-import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
-import {ActionService} from '../_services/action.service';
+import {ActionFactoryService} from '../_services/action-factory.service';
 import {LibraryService} from '../_services/library.service';
 import {EVENTS, MessageHubService} from '../_services/message-hub.service';
 import {SeriesService} from '../_services/series.service';
@@ -35,7 +33,7 @@ import {DecimalPipe} from '@angular/common';
 import {
   SideNavCompanionBarComponent
 } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../_models/metadata/v2/filter-field";
@@ -44,8 +42,8 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
 import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
 import {MetadataService} from "../_services/metadata.service";
-import {ReadingProfileService} from "../_services/reading-profile.service";
-import {ToastrService} from "ngx-toastr";
+import {ActionItem} from "../_models/actionables/action-item";
+import {ActionResult} from "../_models/actionables/action-result";
 
 @Component({
     selector: 'app-library-detail',
@@ -65,18 +63,16 @@ export class LibraryDetailComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly titleService = inject(Title);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly actionService = inject(ActionService);
   private readonly hubService = inject(MessageHubService);
   private readonly utilityService = inject(UtilityService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   public readonly navService = inject(NavService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly metadataService = inject(MetadataService);
-  private readonly readingProfileService = inject(ReadingProfileService);
-  private readonly toastr = inject(ToastrService);
-  private readonly translocoService = inject(TranslocoService);
 
-  libraryId!: number;
+  // From Resolver
+  libraryId = input.required<number>();
+  library = input.required<Library>();
   libraryName = '';
   series: Series[] = [];
   loadingSeries = false;
@@ -100,101 +96,46 @@ export class LibraryDetailComponent implements OnInit {
   loadPageSource = new ReplaySubject(1);
   loadPage$ = this.loadPageSource.asObservable();
 
-  bulkActionCallback = async (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
 
-    switch (action.action) {
-      case Action.AddToReadingList:
-        this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.AddToWantToReadList:
-        this.actionService.addMultipleSeriesToWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.AddToCollection:
-        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-        break;
-      case Action.MarkAsRead:
-        this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
+  constructor() {
+    // TODO: Clean up this code, the library guard does this for us
+    // const routeId = this.route.snapshot.paramMap.get('libraryId');
+    // if (routeId === null) {
+    //   this.router.navigateByUrl('/home');
+    //   return;
+    // }
 
-        break;
-      case Action.MarkAsUnread:
-        this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-      case Action.Delete:
-        if (selectedSeries.length > 25) {
-          this.bulkLoader = true;
-          this.cdRef.markForCheck();
-        }
 
-        await this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
-          this.bulkLoader = false;
-          this.cdRef.markForCheck();
-          if (!successful) return;
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-      case Action.SetReadingProfile:
-        this.actionService.setReadingProfileForMultiple(selectedSeries, (success) => {
-          this.bulkLoader = false;
-          this.cdRef.markForCheck();
-          if (!success) return;
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        })
-    }
   }
 
 
-  constructor() {
-    const routeId = this.route.snapshot.paramMap.get('libraryId');
-    if (routeId === null) {
-      this.router.navigateByUrl('/home');
-      return;
-    }
+  ngOnInit(): void {
 
-    this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
+    this.actions = this.actionFactoryService.getLibraryActions();
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.libraryId = parseInt(routeId, 10);
+
     this.libraryService.getLibraryNames().subscribe(names => {
-      this.libraryName = names[this.libraryId];
+      this.libraryName = names[this.libraryId()];
       this.titleService.setTitle('Kavita - ' + this.libraryName);
       this.cdRef.markForCheck();
     });
 
-    this.libraryService.getJumpBar(this.libraryId).subscribe(barDetails => {
+    this.libraryService.getJumpBar(this.libraryId()).subscribe(barDetails => {
       this.jumpKeys = barDetails;
       this.cdRef.markForCheck();
     });
 
-    this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
+    this.actions = this.actionFactoryService.getLibraryActions();
+    this.bulkSelectionService.registerDataSource('series', () => this.series);
+    this.bulkSelectionService.registerPostAction((res: ActionResult<Series>) => {
+      if (res.effect === 'none') return;
+      this.loadPage();
+    });
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.filter = data['filter'] as FilterV2<FilterField, SortField>;
 
-      const defaultStmt = {field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal};
+      const defaultStmt = {field: FilterField.Libraries, value: this.libraryId() + '', comparison: FilterComparison.Equal};
 
       if (this.filter == null) {
         this.filter = this.metadataService.createDefaultFilterDto('series');
@@ -210,14 +151,11 @@ export class LibraryDetailComponent implements OnInit {
 
       this.cdRef.markForCheck();
     });
-  }
 
-
-  ngOnInit(): void {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
-        if (seriesAdded.libraryId !== this.libraryId) return;
+        if (seriesAdded.libraryId !== this.libraryId()) return;
         if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
           this.loadPageSource.next(true);
           return;
@@ -237,7 +175,7 @@ export class LibraryDetailComponent implements OnInit {
 
       } else if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemoved = event.payload as SeriesRemovedEvent;
-        if (seriesRemoved.libraryId !== this.libraryId) return;
+        if (seriesRemoved.libraryId !== this.libraryId()) return;
         if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
           this.loadPageSource.next(true);
           return;
@@ -249,83 +187,6 @@ export class LibraryDetailComponent implements OnInit {
         this.refresh.emit();
       }
     });
-  }
-
-
-  @HostListener('document:keydown.shift', ['$event'])
-  handleKeypress(event: Event) {
-    const evt = event as KeyboardEvent;
-    if (evt.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = true;
-    }
-  }
-
-  @HostListener('document:keyup.shift', ['$event'])
-  handleKeyUp(event: Event) {
-    const evt = event as KeyboardEvent;
-    if (evt.key === KEY_CODES.SHIFT) {
-      this.bulkSelectionService.isShiftDown = false;
-    }
-  }
-
-  async handleAction(action: ActionItem<Library>, library: Library) {
-    let lib: Partial<Library> = library;
-    if (library === undefined) {
-      this.libraryService.getLibrary(this.libraryId).subscribe(async library => {
-        switch (action.action) {
-          case(Action.Scan):
-            await this.actionService.scanLibrary(library);
-            break;
-          case(Action.RefreshMetadata):
-            await this.actionService.refreshLibraryMetadata(library);
-            break;
-          case(Action.GenerateColorScape):
-            await this.actionService.refreshLibraryMetadata(library, undefined, false);
-            break;
-          case (Action.Delete):
-            await this.actionService.deleteLibrary(library, () => {
-              this.loadPageSource.next(true);
-            });
-            break;
-          case(Action.Edit):
-            this.actionService.editLibrary(library);
-            break;
-          case Action.SetReadingProfile:
-            this.actionService.setReadingProfileForLibrary(library);
-            break;
-          case Action.ClearReadingProfile:
-            this.readingProfileService.clearLibraryProfiles(library.id).subscribe(() => {
-              this.toastr.success(this.translocoService.translate('actionable.cleared-profile'));
-            });
-            break;
-          default:
-            break;
-        }
-      });
-      return
-    }
-    switch (action.action) {
-      case(Action.Scan):
-        await this.actionService.scanLibrary(lib);
-        break;
-      case(Action.RefreshMetadata):
-        await this.actionService.refreshLibraryMetadata(lib);
-        break;
-      case(Action.GenerateColorScape):
-        await this.actionService.refreshLibraryMetadata(lib, undefined, false);
-        break;
-      case(Action.Edit):
-        this.actionService.editLibrary(lib);
-        break;
-      default:
-        break;
-    }
-  }
-
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action, undefined);
-    }
   }
 
   updateFilter(data: FilterEvent<FilterField, SortField>) {

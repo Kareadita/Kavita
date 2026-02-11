@@ -75,7 +75,9 @@
 
                 <div class="col-auto ms-2">
                   <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
-                    <app-card-actionables [entity]="rl" [actions]="actions" [labelBy]="rl.title" iconClass="fa-ellipsis-h" btnClass="btn" />
+                    <app-card-actionables [entity]="rl" [actions]="actions" [labelBy]="rl.title"
+                                          iconClass="fa-ellipsis-h" btnClass="btn"
+                                          (actionHandler)="handleReadingListActionCallback($event)" />
                   </div>
                 </div>
 

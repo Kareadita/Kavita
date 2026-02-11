@@ -1,8 +1,19 @@
 import {DecimalPipe, DOCUMENT, NgStyle} from '@angular/common';
-import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, EventEmitter, inject, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterContentChecked,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  ElementRef,
+  EventEmitter,
+  inject,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {debounceTime, take} from 'rxjs';
+import {debounceTime} from 'rxjs';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
@@ -11,7 +22,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {Action, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
@@ -32,6 +42,7 @@ import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {MetadataService} from "../../../_services/metadata.service";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 
 @Component({
@@ -42,12 +53,12 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
     imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
 })
 export class WantToReadComponent implements OnInit, AfterContentChecked {
-  imageService = inject(ImageService);
+  protected imageService = inject(ImageService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private seriesService = inject(SeriesService);
   private titleService = inject(Title);
-  bulkSelectionService = inject(BulkSelectionService);
+  protected bulkSelectionService = inject(BulkSelectionService);
   private actionService = inject(ActionService);
   private messageHub = inject(MessageHubService);
   private filterUtilityService = inject(FilterUtilitiesService);
@@ -79,22 +90,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
-
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
-
-    switch (action.action) {
-      case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-    }
-  }
-
-  collectionTag: any;
+  
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
@@ -110,6 +106,11 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   constructor() {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
       this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
+
+      this.bulkSelectionService.registerDataSource('series', () => this.series);
+      this.bulkSelectionService.registerPostAction((result: ActionResult<Series>) => {
+        this.loadPage();
+      });
 
 
       this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {

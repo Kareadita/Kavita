@@ -10,7 +10,7 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
-import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
+import {DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
 import {
@@ -54,7 +54,7 @@ import {FilterUtilitiesService} from "../shared/_services/filter-utilities.servi
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
-import {RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
+import {RelatedTabChangeEvent, RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {
   MetadataDetailRowComponent
@@ -64,7 +64,6 @@ import {hasAnyCast} from "../_models/common/i-has-cast";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {CoverUpdateEvent} from "../_models/events/cover-update-event";
 import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
-import {Action, ActionFactoryService, ActionItem} from "../_services/action-factory.service";
 import {Device} from "../_models/device/device";
 import {ActionService} from "../_services/action.service";
 import {DefaultDatePipe} from "../_pipes/default-date.pipe";
@@ -84,6 +83,9 @@ import {ReadingProgressStatus} from "../_models/series-detail/reading-progress";
 import {ReadingProgressStatusPipePipe} from "../_pipes/reading-progress-status-pipe.pipe";
 import {ReadingProgressIconPipePipe} from "../_pipes/reading-progress-icon-pipe.pipe";
 import {BreakpointService} from "../_services/breakpoint.service";
+import {ActionFactoryService} from "../_services/action-factory.service";
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 enum TabID {
   Related = 'related-tab',
@@ -95,7 +97,6 @@ enum TabID {
 @Component({
   selector: 'app-chapter-detail',
   imports: [
-    AsyncPipe,
     CardActionablesComponent,
     LoadingComponent,
     NgbDropdown,
@@ -198,7 +199,7 @@ export class ChapterDetailComponent implements OnInit {
         (chp?.tags || []).length > 0 || (chp?.webLinks || []).length > 0 || this.accountService.hasAdminRole(user!);
   })
   mobileSeriesImgBackground: string | undefined;
-  chapterActions: Array<ActionItem<Chapter>> = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
+  chapterActions: Array<ActionItem<Chapter>> = [];
 
   user: User | undefined;
 
@@ -280,6 +281,8 @@ export class ChapterDetailComponent implements OnInit {
       this.hasBeenRated = results.chapterDetail.hasBeenRated;
       this.ratings = results.chapterDetail.ratings;
 
+      this.chapterActions = this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType);
+
       if (results.chapter.pagesRead > 0 && results.chapter.pagesRead < results.chapter.pages) {
         this.readingProgressStatus.set(ReadingProgressStatus.Progress);
       } else if (results.chapter.pagesRead >= results.chapter.pages) {
@@ -293,10 +296,7 @@ export class ChapterDetailComponent implements OnInit {
         return this.downloadService.mapToEntityType(events, this.chapter()!);
       }));
 
-      this.readingListService.getReadingListsForChapter(this.chapterId).subscribe(lists => {
-        this.readingLists = lists;
-        this.cdRef.markForCheck();
-      });
+      this.loadReadingListsForChapter(this.chapterId);
 
       this.route.fragment.pipe(tap(frag => {
         if (frag !== null && this.activeTabId !== (frag as TabID)) {
@@ -316,6 +316,13 @@ export class ChapterDetailComponent implements OnInit {
     });
 
     this.cdRef.markForCheck();
+  }
+
+  loadReadingListsForChapter(chapterId: number) {
+    this.readingListService.getReadingListsForChapter(chapterId).subscribe(lists => {
+      this.readingLists = lists;
+      this.cdRef.markForCheck();
+    });
   }
 
   loadData() {
@@ -411,6 +418,12 @@ export class ChapterDetailComponent implements OnInit {
           this.router.navigate(['library', this.libraryId, 'series', this.seriesId]);
         });
         break;
+    }
+  }
+
+  handleRelatedReload(event: RelatedTabChangeEvent) {
+    if (event.entity === 'readingList') {
+      this.loadReadingListsForChapter(this.chapterId);
     }
   }
 

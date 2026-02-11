@@ -1492,7 +1492,9 @@
     },
 
     "card-item": {
-        "cannot-read": "Cannot Read"
+        "cannot-read": "Cannot Read",
+        "select": "Select",
+        "read": "read"
     },
 
     "details-tab": {
@@ -3362,8 +3364,11 @@
         "collections-unpromoted": "Collections un-promoted",
         "reading-list-promoted": "Reading List promoted",
         "reading-list-unpromoted": "Reading List un-promoted",
+        "confirm-delete-collection": "Are you sure you want to delete the collection? This cannot be undone.",
         "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
         "collections-deleted": "Collections deleted",
+        "confirm-delete-annotations": "Are you sure you want to delete the annotations? This cannot be undone.",
+        "annotations-deleted": "Annotation deleted",
         "chapter-deleted": "Chapter deleted",
         "volume-deleted": "Volume deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",

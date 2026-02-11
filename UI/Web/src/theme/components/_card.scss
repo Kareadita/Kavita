@@ -1,15 +1,4 @@
-//@use 'bootstrap/scss/functions' as functions;
-//@use 'bootstrap/scss/variables' as variables;
-//@use './theme/variables' as theme;
-//@use 'bootstrap/scss/mixins/breakpoints' as breakpoints;
-
-//
-//// TODO: Rewrite this because it's not working with breakpoints - doesn't seem to do anything either
-//@include breakpoints.media-breakpoint-down(md) {
-//    .card-actions {
-//        visibility: visible !important;
-//    }
-//}
+// TODO: This has been moved into entity-card. Find what is needed for other cards and streamline it.
 
 .card {
     background-color: var(--card-bg-color);
@@ -34,9 +23,7 @@
     }
 }
 
-$image-height: 232.91px;
 $image-filter-height: 160px;
-$image-width: 160px;
 
 .card-title {
     --bs-card-title-color: var(--card-title-text-color);
@@ -44,7 +31,7 @@ $image-width: 160px;
 
 .card-item-container {
     .card {
-        max-width: $image-width;
+        max-width: var(--card-image-width);
         cursor: pointer;
         padding-left: 0px;
         padding-right: 0px;
@@ -68,18 +55,18 @@ $image-width: 160px;
     }
 
     .overlay {
-        height: $image-height;
+        height: var(--card-image-height);
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
         z-index: 10;
 
-        &.filter {
-            height: $image-filter-height;
-
-            .card-overlay {
-                height: $image-filter-height;
-            }
-        }
+        //&.filter {
+        //    height: $image-filter-height;
+        //
+        //    .card-overlay {
+        //        height: $image-filter-height;
+        //    }
+        //}
 
         & .card-title {
             color: var(--card-overlay-text-color);
@@ -97,7 +84,6 @@ $image-width: 160px;
         border-style: var(--card-border-style);
         border-color: var(--card-border-color);
         position: absolute;
-        bottom: 0;
         z-index: 115;
         width: 100%;
         bottom: 39px;
@@ -122,7 +108,7 @@ $image-width: 160px;
         top: 0;
         left: 0;
         width: 100%;
-        height: $image-height;
+        height: var(--card-image-height);
         z-index: 10;
         transition: all 0.2s;
         border-top-left-radius: 4px;

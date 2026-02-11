@@ -27,7 +27,7 @@ export class EditSmartFilterModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   @Input({required: true}) smartFilter!: SmartFilter;
-  @Input({required: true}) allFilters!: SmartFilter[];
+  @Input({required: true}) allFilters!: SmartFilter[]; // TODO: Refactor so it's handled within the component
 
   smartFilterForm: FormGroup = new FormGroup({
     'name': new FormControl('', [Validators.required]),

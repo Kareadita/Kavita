@@ -1,13 +1,16 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, computed,
+  Component,
+  computed,
   ContentChild,
   CUSTOM_ELEMENTS_SCHEMA,
   EventEmitter,
-  inject, input,
-  Input, model,
-  Output, signal,
+  inject,
+  input,
+  Input,
+  Output,
+  signal,
   TemplateRef
 } from '@angular/core';
 import {Swiper} from 'swiper/types';
@@ -15,10 +18,12 @@ import {register} from 'swiper/element/bundle';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
-import {ActionItem} from "../../../_services/action-factory.service";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {map, Observable, tap} from "rxjs";
 import {PaginatedResult} from "../../../_models/pagination";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {ActionResult} from "../../../_models/actionables/action-result";
+import {ActionableEntity} from "../../../_services/action-factory.service";
 
 register();
 
@@ -58,8 +63,14 @@ export class CarouselReelComponent {
    * Actionables to render to the left of the title
    */
   @Input() actionables: Array<ActionItem<any>> = [];
+  /**
+   * If using actionables, this is the entity to allow Action.Service to handle logic
+   */
+  @Input() actionableEntity: ActionableEntity = null;
   @Output() sectionClick = new EventEmitter<string>();
   @Output() handleAction = new EventEmitter<ActionItem<any>>();
+
+  @Output() actionHandler = new EventEmitter<ActionResult<any>>();
 
   currentPage = signal<number>(1);
   pageSize = input(20);
@@ -139,8 +150,7 @@ export class CarouselReelComponent {
     this.cdRef.markForCheck();
   }
 
-
-  performAction(action: ActionItem<any>) {
-    this.handleAction.emit(action);
+  performAction(event: ActionResult<any>) {
+    this.actionHandler.emit(event);
   }
 }

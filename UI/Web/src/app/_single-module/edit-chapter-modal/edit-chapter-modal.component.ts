@@ -16,7 +16,6 @@ import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {ImageService} from "../../_services/image.service";
 import {UploadService} from "../../_services/upload.service";
 import {MetadataService} from "../../_services/metadata.service";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ActionService} from "../../_services/action.service";
 import {DownloadService} from "../../shared/_services/download.service";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -39,6 +38,9 @@ import {ChapterService} from "../../_services/chapter.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
+import {ActionFactoryService} from "../../_services/action-factory.service";
 
 enum TabID {
   General = 'general-tab',
@@ -127,7 +129,8 @@ export class EditChapterModalComponent implements OnInit {
   genres: Genre[] = [];
   ageRatings: Array<AgeRatingDto> = [];
 
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getChapterActions(this.runTask.bind(this)), blackList);
+  tasks = this.actionFactoryService.getActionablesForSettingsPage(
+    this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType), blackList);
   /**
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
    */

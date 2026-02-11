@@ -8,7 +8,8 @@
               <h4>
                 <app-promoted-icon [promoted]="collectionTag.promoted" />
                 <span class="ms-2">{{collectionTag.title}}</span>
-                <app-card-actionables [entity]="collectionTag" [disabled]="actionInProgress" [actions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v" />
+                <app-card-actionables [entity]="collectionTag" [disabled]="actionInProgress" [actions]="collectionTagActions"
+                                      [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v" (actionHandler)="handleActionCallback($event)" />
               </h4>
             }
             <h5 subtitle class="ms-2 subtitle-with-actionables">{{t('item-count', {num: series.length})}}</h5>
@@ -65,13 +66,12 @@
                                   (applyFilter)="updateFilter($event)">
 
             <ng-template #topBar>
-              <app-bulk-operations [actionCallback]="bulkActionCallback" />
+              <app-bulk-operations />
             </ng-template>
 
             <ng-template #cardItem let-item let-position="idx">
-              <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="loadPage()"
-                               (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
-                               [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
+              <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="loadPage()" (dataChanged)="updateSeries($event)"
+                               [index]="position" [maxIndex]="series.length" [allowSelection]="true"
                />
             </ng-template>
 

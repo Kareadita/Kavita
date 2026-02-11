@@ -1,13 +1,15 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, inject, input, OnDestroy, Output} from '@angular/core';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {AccountService} from 'src/app/_services/account.service';
-import {ActionableEntity, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionableEntity} from 'src/app/_services/action-factory.service';
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
 import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 
 @Component({
@@ -44,7 +46,7 @@ export class CardActionablesComponent implements OnDestroy {
   /**
    * This will only emit when the action is clicked and the entity is null. Otherwise, the entity callback handler will be invoked.
    */
-  @Output() actionHandler = new EventEmitter<ActionItem<any>>();
+  @Output() actionHandler = new EventEmitter<ActionResult<any>>();
 
   currentUser = this.accountService.currentUserSignal;
   submenu: {[key: string]: NgbDropdown} = {};
@@ -62,13 +64,9 @@ export class CardActionablesComponent implements OnDestroy {
   performAction(event: any, action: ActionItem<ActionableEntity>) {
     this.preventEvent(event);
 
-    if (typeof action.callback === 'function') {
-      if (this.entity() === null) {
-        this.actionHandler.emit(action);
-      } else {
-        action.callback(action, this.entity());
-      }
-    }
+    action.callback(action, this.entity()).subscribe(actionResult => {
+      this.actionHandler.emit(actionResult);
+    });
   }
 
   /**
@@ -145,8 +143,9 @@ export class CardActionablesComponent implements OnDestroy {
     ref.componentInstance.actions = this.actions();
     ref.componentInstance.willRenderAction = this.willRenderAction.bind(this);
     ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);
-    ref.componentInstance.actionPerformed.subscribe((action: ActionItem<any>) => {
-      this.performAction(event, action);
+
+    ref.componentInstance.actionPerformed.subscribe((actionOrResult: any) => {
+      this.actionHandler.emit(actionOrResult);
     });
   }
 }

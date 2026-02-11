@@ -31,7 +31,6 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {NgTemplateOutlet} from "@angular/common";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {UtilityService} from "../../shared/_services/utility.service";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ActionService} from "../../_services/action.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {catchError} from "rxjs";
@@ -48,6 +47,9 @@ import {
   DatatableComponent
 } from "@siemens/ngx-datatable";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../_services/action-factory.service";
+import {Action} from "../../_models/actionables/action";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-manage-library',
@@ -73,8 +75,8 @@ export class ManageLibraryComponent implements OnInit {
 
   protected readonly Action = Action;
 
-  actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-  bulkActions = this.actionFactoryService.getBulkLibraryActions(this.handleBulkAction.bind(this));
+  actions = this.actionFactoryService.getLibraryActions();
+  bulkActions = this.actionFactoryService.getBulkLibraryActions();
   libraries: Library[] = [];
   loading = false;
   /**
@@ -269,12 +271,11 @@ export class ManageLibraryComponent implements OnInit {
     }
   }
 
-  async handleBulkAction(action: ActionItem<Library>, _: Library) {
-    //Library is null for bulk actions
-    this.bulkAction = action.action;
+  async handleBulkAction(event: ActionResult<Library>) {
+    this.bulkAction = event.action;
     this.cdRef.markForCheck();
 
-    switch (action.action) {
+    switch (event.action) {
       case(Action.Scan):
       case(Action.RefreshMetadata):
       case(Action.GenerateColorScape):
@@ -293,28 +294,6 @@ export class ManageLibraryComponent implements OnInit {
           this.sourceCopyToLibrary = this.libraries.filter(l => l.id === res)[0];
           this.cdRef.markForCheck();
         });
-        break;
-    }
-  }
-
-  async handleAction(action: ActionItem<Library>, library: Library) {
-    switch (action.action) {
-      case(Action.Scan):
-        await this.actionService.scanLibrary(library);
-        break;
-      case(Action.RefreshMetadata):
-        await this.actionService.refreshLibraryMetadata(library);
-        break;
-      case(Action.GenerateColorScape):
-        await this.actionService.refreshLibraryMetadata(library, undefined, false, true);
-        break;
-      case(Action.Edit):
-        this.editLibrary(library)
-        break;
-      case (Action.Delete):
-        await this.deleteLibrary(library);
-        break;
-      default:
         break;
     }
   }

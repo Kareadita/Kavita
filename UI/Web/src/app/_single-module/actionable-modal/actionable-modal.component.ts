@@ -12,11 +12,14 @@ import {
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {Action, ActionableEntity, ActionItem} from "../../_services/action-factory.service";
 import {AccountService} from "../../_services/account.service";
-import {tap} from "rxjs";
+import {Observable, tap} from "rxjs";
 import {User} from "../../_models/user/user";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ActionableEntity} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 @Component({
     selector: 'app-actionable-modal',
@@ -39,7 +42,7 @@ export class ActionableModalComponent implements OnInit {
   @Input() actions: ActionItem<any>[] = [];
   @Input() willRenderAction!: (action: ActionItem<any>, user: User) => boolean;
   @Input() shouldRenderSubMenu!: (action: ActionItem<any>, dynamicList: null | Array<any>) => boolean;
-  @Output() actionPerformed = new EventEmitter<ActionItem<any>>();
+  @Output() actionPerformed = new EventEmitter<ActionItem<any> | ActionResult<any>>();
 
   currentLevel: string[] = [];
   currentItems: ActionItem<any>[] = [];
@@ -93,7 +96,15 @@ export class ActionableModalComponent implements OnInit {
       }
     }
     else {
-      this.actionPerformed.emit(item);
+      const result = item.callback(item, this.entity);
+
+      if (result && typeof (result as any).subscribe === 'function') {
+        (result as Observable<ActionResult<any>>).subscribe(actionResult => {
+          this.actionPerformed.emit(actionResult);
+          this.modal.close(actionResult);
+        });
+        return;
+      }
       this.modal.close(item);
     }
     this.cdRef.markForCheck();
