@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Kavita.API.Attributes;
 using Kavita.API.Services;
 using Kavita.API.Store;
 using Microsoft.AspNetCore.Http;
@@ -60,10 +61,3 @@ public class DeviceTrackingMiddleware(RequestDelegate next, ILogger<DeviceTracki
         await next(context);
     }
 }
-
-/// <summary>
-/// Attribute to skip device tracking on specific endpoints.
-/// Use for high-frequency endpoints where device tracking adds unnecessary overhead.
-/// </summary>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public class SkipDeviceTrackingAttribute : Attribute;

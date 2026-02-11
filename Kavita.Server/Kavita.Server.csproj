@@ -9,7 +9,7 @@
       <TieredPGO>true</TieredPGO>
       <TieredCompilation>true</TieredCompilation>
       <ApplicationIcon>../favicon.ico</ApplicationIcon>
-      <Nullable>warnings</Nullable>
+      <Nullable>enable</Nullable>
       <LangVersion>latestmajor</LangVersion>
       <EFCoreHostAssets>false</EFCoreHostAssets>
       <ImplicitUsings>disable</ImplicitUsings>
