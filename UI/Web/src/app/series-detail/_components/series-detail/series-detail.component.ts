@@ -260,6 +260,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   readingProgressStatus = computed(() => {
     const hasProgress = this.hasReadingProgress();
     const series = this.series();
+
     if (!series || !hasProgress) return ReadingProgressStatus.NoProgress;
 
     if (series.pagesRead >= series.pages) {
@@ -866,6 +867,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.readerService.hasSeriesProgress(this.seriesId).subscribe(hasProgress => {
       this.hasReadingProgress.set(hasProgress);
     });
+
     this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => {
       this.currentlyReadingChapter = chapter;
       this.cdRef.markForCheck();
