@@ -29,6 +29,7 @@ import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
+import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
 
 enum TabID {
   General = 'general-tab',
@@ -36,14 +37,6 @@ enum TabID {
   Info = 'info-tab',
   Tasks = 'tasks-tab',
   Progress = 'progress-tab',
-}
-
-export interface EditVolumeModalCloseResult {
-  success: boolean;
-  volume: Volume;
-  coverImageUpdate: boolean;
-  needsReload: boolean;
-  isDeleted: boolean;
 }
 
 
@@ -152,7 +145,8 @@ export class EditVolumeModalComponent implements OnInit {
     }
 
     forkJoin(apis).subscribe(results => {
-      this.modal.close({success: true, volume: this.volume, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, needsReload: false, isDeleted: false} as EditVolumeModalCloseResult);
+      const needsCoverUpdate = selectedIndex > 0 || this.coverImageReset;
+      this.modal.close(modalSaved(this.volume, needsCoverUpdate));
     });
   }
 
@@ -174,7 +168,7 @@ export class EditVolumeModalComponent implements OnInit {
       case Action.Delete:
         await this.actionService.deleteVolume(this.volume.id, (b) => {
           if (!b) return;
-          this.modal.close({success: b, volume: this.volume, coverImageUpdate: false, needsReload: true, isDeleted: b} as EditVolumeModalCloseResult);
+          this.modal.close(modalDeleted(this.volume));
         });
         break;
       case Action.Download:

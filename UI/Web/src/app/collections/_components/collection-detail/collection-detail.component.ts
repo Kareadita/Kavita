@@ -55,7 +55,7 @@ import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
 import {
   SmartCollectionDrawerComponent
 } from "../../../_single-module/smart-collection-drawer/smart-collection-drawer.component";
-import {DefaultModalOptions} from "../../../_models/default-modal-options";
+import {DefaultModalOptions} from "../../../_models/modal/default-modal-options";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
@@ -67,6 +67,7 @@ import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {ModalResult} from "../../../_models/modal/modal-result";
 
 @Component({
   selector: 'app-collection-detail',
@@ -314,7 +315,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   openEditCollectionTagModal(collectionTag: UserCollection) {
     const modalRef = this.modalService.open(EditCollectionTagsComponent, DefaultModalOptions);
     modalRef.componentInstance.tag = this.collectionTag;
-    modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
+    modalRef.closed.subscribe((results: ModalResult<UserCollection>) => {
       this.updateTag(this.collectionTag.id);
       this.loadPage();
     });

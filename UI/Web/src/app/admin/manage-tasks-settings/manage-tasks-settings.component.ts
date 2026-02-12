@@ -32,7 +32,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
-import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {DefaultModalOptions} from "../../_models/modal/default-modal-options";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 

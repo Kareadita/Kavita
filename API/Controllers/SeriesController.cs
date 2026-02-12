@@ -159,9 +159,9 @@ public class SeriesController : BaseApiController
     /// Updates the Series
     /// </summary>
     /// <param name="updateSeries"></param>
-    /// <returns></returns>
+    /// <returns>Updated Series</returns>
     [HttpPost("update")]
-    public async Task<ActionResult> UpdateSeries(UpdateSeriesDto updateSeries)
+    public async Task<ActionResult<SeriesDto>> UpdateSeries(UpdateSeriesDto updateSeries)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
         if (series == null)
@@ -206,7 +206,7 @@ public class SeriesController : BaseApiController
             await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
         }
 
-        return Ok();
+        return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(series.Id, UserId));
     }
 
     /// <summary>
