@@ -75,14 +75,6 @@ enum TabID {
   Tasks = 7
 }
 
-export interface EditSeriesModalCloseResult {
-  success: boolean;
-  series: Series;
-  coverImageUpdate: boolean;
-  updateExternal: boolean
-}
-
-
 @Component({
   selector: 'app-edit-series-modal',
   imports: [
@@ -500,7 +492,6 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   close() {
-    //this.modal.close({success: false, series: undefined, coverImageUpdate: this.coverImageReset});
     this.modal.dismiss();
   }
 
