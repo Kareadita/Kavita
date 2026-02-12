@@ -37,6 +37,7 @@ public interface ILibraryRepository
     void Update(Library library);
     void Delete(Library? library);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
+    Task<LibraryDto?> GetLibraryDtoByIdAsync(int libraryId);
     Task<bool> LibraryExists(string libraryName);
     Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None);
     Task<IList<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);
@@ -212,6 +213,17 @@ public class LibraryRepository : ILibraryRepository
             .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<LibraryDto?> GetLibraryDtoByIdAsync(int libraryId)
+    {
+        return await _context.Library
+            .Include(f => f.Folders)
+            .Include(l => l.LibraryFileTypes)
+            .OrderBy(l => l.Name)
+            .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(l => l.Id == libraryId);
     }
 
     public async Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None)

@@ -126,7 +126,7 @@ export class LibraryService {
   }
 
   create(model: {name: string, type: number, folders: string[]}) {
-    return this.httpClient.post(this.baseUrl + 'library/create', model);
+    return this.httpClient.post<Library>(this.baseUrl + 'library/create', model);
   }
 
   delete(libraryId: number) {
