@@ -666,7 +666,7 @@ public class LibraryController : BaseApiController
 
         await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
 
-        return Ok();
+        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtoByIdAsync(library.Id));
 
     }
 

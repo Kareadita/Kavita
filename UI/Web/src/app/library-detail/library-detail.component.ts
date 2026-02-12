@@ -226,7 +226,7 @@ export class LibraryDetailComponent implements OnInit {
         break;
       case 'remove':
       case 'reload':
-        this.router.navigate([this.router.url]);
+        this.router.navigateByUrl(this.router.url);
         break;
       case 'none':
         break;

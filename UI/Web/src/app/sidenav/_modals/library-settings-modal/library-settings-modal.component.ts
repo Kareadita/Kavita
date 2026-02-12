@@ -404,8 +404,8 @@ export class LibrarySettingsModalComponent implements OnInit {
         if (!await this.confirmService.confirm(translate('toasts.confirm-library-type-change'))) return;
       }
 
-      this.libraryService.update(model).subscribe(() => {
-        this.modal.close(modalSaved(model));
+      this.libraryService.update(model).subscribe((updatedLib) => {
+        this.modal.close(modalSaved(updatedLib));
       });
     } else {
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);

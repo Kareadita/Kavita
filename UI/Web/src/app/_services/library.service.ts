@@ -141,7 +141,7 @@ export class LibraryService {
   }
 
   update(model: {name: string, folders: string[], id: number}) {
-    return this.httpClient.post(this.baseUrl + 'library/update', model);
+    return this.httpClient.post<Library>(this.baseUrl + 'library/update', model);
   }
 
   getLibraryType(libraryId: number) {

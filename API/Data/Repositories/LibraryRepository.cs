@@ -220,7 +220,6 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Library
             .Include(f => f.Folders)
             .Include(l => l.LibraryFileTypes)
-            .OrderBy(l => l.Name)
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .FirstOrDefaultAsync(l => l.Id == libraryId);
