@@ -50,7 +50,6 @@ import {WikiLink} from "../../../_models/wiki";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../../settings/_components/setting-switch/setting-switch.component";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
-import {ActionService} from "../../../_services/action.service";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
@@ -61,6 +60,7 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {Action} from "../../../_models/actionables/action";
 import {ActionItem} from "../../../_models/actionables/action-item";
+import {modalSaved} from "../../../_models/modal/modal-result";
 
 enum TabID {
   General = 'general-tab',
@@ -99,7 +99,6 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly imageService = inject(ImageService);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly actionService = inject(ActionService);
   private readonly metadataService = inject(MetadataService);
   protected readonly breakpointService = inject(BreakpointService);
 
@@ -368,8 +367,8 @@ export class LibrarySettingsModalComponent implements OnInit {
     this.setValues();
   }
 
-  close(returnVal= false) {
-    this.modal.close(returnVal);
+  close() {
+    this.modal.dismiss();
   }
 
   forceScan() {
@@ -405,15 +404,15 @@ export class LibrarySettingsModalComponent implements OnInit {
         if (!await this.confirmService.confirm(translate('toasts.confirm-library-type-change'))) return;
       }
 
-      this.libraryService.update(model).subscribe(() => {
-        this.close(true);
+      this.libraryService.update(model).subscribe((updatedLib) => {
+        this.modal.close(modalSaved(updatedLib));
       });
     } else {
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
       model.type = parseInt(model.type, 10);
-      this.libraryService.create(model).subscribe(() => {
+      this.libraryService.create(model).subscribe((lib) => {
         this.toastr.success(translate('toasts.library-created'));
-        this.close(true);
+        this.modal.close(modalSaved(lib));
       });
     }
   }

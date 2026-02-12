@@ -20,7 +20,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
-import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {DefaultModalOptions} from "../../_models/modal/default-modal-options";
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
 import {SettingsService} from "../settings.service";

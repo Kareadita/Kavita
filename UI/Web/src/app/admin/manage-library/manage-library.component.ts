@@ -50,6 +50,7 @@ import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {Action} from "../../_models/actionables/action";
 import {ActionResult} from "../../_models/actionables/action-result";
+import {ModalResult} from "../../_models/modal/modal-result";
 
 @Component({
   selector: 'app-manage-library',
@@ -167,19 +168,15 @@ export class ManageLibraryComponent implements OnInit {
   editLibrary(library: Library) {
     const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl', fullscreen: 'md' });
     modalRef.componentInstance.library = library;
-    modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
-      if (refresh) {
-        this.getLibraries();
-      }
+    modalRef.closed.subscribe((result: ModalResult<Library>) => {
+      this.getLibraries();
     });
   }
 
   addLibrary() {
     const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl', fullscreen: 'md' });
-    modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
-      if (refresh) {
-        this.getLibraries();
-      }
+    modalRef.closed.subscribe((result: ModalResult<Library>) => {
+      this.getLibraries();
     });
   }
 

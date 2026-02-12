@@ -61,7 +61,7 @@ export const routes: Routes = [
         path: 'library/:libraryId',
         runGuardsAndResolvers: 'always',
         canActivate: [libraryAccessGuard],
-        resolve: { library: libraryResolver },
+        resolve: { libraryData: libraryResolver },
         children: [
           {
             path: '',

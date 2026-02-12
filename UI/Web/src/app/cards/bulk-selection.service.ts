@@ -1,4 +1,4 @@
-import {inject, Injectable, WritableSignal} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {Observable, ReplaySubject, tap} from 'rxjs';
 import {filter} from 'rxjs/operators';
@@ -292,42 +292,6 @@ export class BulkSelectionService {
     const allItems: T[] = getter();
     const selectedIndices = this.getSelectedCardsForSource(dataSource);
     return allItems.filter((_, i) => selectedIndices.includes(i + ''));
-  }
-
-  patchArray<T extends { id: number }>(arr: T[], entityMap: Map<number, any>): T[] {
-    let changed = false;
-    const result = arr.map(item => {
-      const updated = entityMap.get(item.id);
-      if (updated) {
-        changed = true;
-        return { ...updated } as T;
-      }
-      return item;
-    });
-    return changed ? result : arr;
-  }
-
-  patchSignalArray<T extends { id: number }>(signal: WritableSignal<T[]>, entityMap: Map<number, any>): void {
-    const patched = this.patchArray(signal(), entityMap);
-    if (patched !== signal()) {
-      signal.set([...patched]);
-    }
-  }
-
-  patchEntity<T>(arr: T[], entity: T, selector: (item: T) => any = (item: any) => item.id): T[] {
-    const entityKey = selector(entity);
-    const idx = arr.findIndex(item => selector(item) === entityKey);
-    if (idx === -1) return arr;
-    const result = [...arr];
-    result[idx] = { ...entity };
-    return result;
-  }
-
-  patchEntitySignal<T>(signal: WritableSignal<T[]>, entity: T, selector?: (item: T) => any): void {
-    const patched = this.patchEntity(signal(), entity, selector);
-    if (patched !== signal()) {
-      signal.set(patched);
-    }
   }
 
   private hasDataSource(key: BulkSelectionEntityDataSource): boolean {

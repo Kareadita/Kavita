@@ -6,6 +6,7 @@ import {
   EventEmitter,
   inject,
   input,
+  linkedSignal,
   OnInit
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
@@ -72,7 +73,9 @@ export class LibraryDetailComponent implements OnInit {
 
   // From Resolver
   libraryId = input.required<number>();
-  library = input.required<Library>();
+  readonly libraryData = input.required<Library>();
+  library = linkedSignal(() => this.libraryData());
+
   libraryName = '';
   series: Series[] = [];
   loadingSeries = false;
@@ -97,28 +100,12 @@ export class LibraryDetailComponent implements OnInit {
   loadPage$ = this.loadPageSource.asObservable();
 
 
-  constructor() {
-    // TODO: Clean up this code, the library guard does this for us
-    // const routeId = this.route.snapshot.paramMap.get('libraryId');
-    // if (routeId === null) {
-    //   this.router.navigateByUrl('/home');
-    //   return;
-    // }
-
-
-  }
-
-
   ngOnInit(): void {
 
     this.actions = this.actionFactoryService.getLibraryActions();
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-    this.libraryService.getLibraryNames().subscribe(names => {
-      this.libraryName = names[this.libraryId()];
-      this.titleService.setTitle('Kavita - ' + this.libraryName);
-      this.cdRef.markForCheck();
-    });
+    this.getLibraryName();
 
     this.libraryService.getJumpBar(this.libraryId()).subscribe(barDetails => {
       this.jumpKeys = barDetails;
@@ -189,6 +176,14 @@ export class LibraryDetailComponent implements OnInit {
     });
   }
 
+  private getLibraryName() {
+    this.libraryService.getLibraryNames().subscribe(names => {
+      this.libraryName = names[this.libraryId()];
+      this.titleService.setTitle('Kavita - ' + this.libraryName);
+      this.cdRef.markForCheck();
+    });
+  }
+
   updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
@@ -218,4 +213,23 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.id}_${item.name}_${item.localizedName}_${item.pagesRead}`;
+
+  protected handleActionCallback(event: ActionResult<Library>) {
+    switch (event.effect) {
+      case 'update':
+        this.library.set({...event.entity});
+
+        // For now, until we refactor backend to send it as a basic library for non-admin users
+        this.libraryName = event.entity.name;
+        this.titleService.setTitle('Kavita - ' + this.libraryName);
+        this.cdRef.markForCheck();
+        break;
+      case 'remove':
+      case 'reload':
+        this.router.navigateByUrl(this.router.url);
+        break;
+      case 'none':
+        break;
+    }
+  }
 }

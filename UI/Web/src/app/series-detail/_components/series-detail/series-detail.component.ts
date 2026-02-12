@@ -36,10 +36,7 @@ import {ToastrService} from 'ngx-toastr';
 import {catchError, debounceTime, forkJoin, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {
-  EditSeriesModalCloseResult,
-  EditSeriesModalComponent
-} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
+import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
 import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
@@ -103,7 +100,7 @@ import {
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {UserCollection} from "../../../_models/collection-tag";
 import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
-import {DefaultModalOptions} from "../../../_models/default-modal-options";
+import {DefaultModalOptions} from "../../../_models/modal/default-modal-options";
 import {LicenseService} from "../../../_services/license.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {VolumeRemovedEvent} from "../../../_models/events/volume-removed-event";
@@ -121,6 +118,8 @@ import {ActionResult} from "../../../_models/actionables/action-result";
 import {CardEntityFactory, ChapterCardEntity, VolumeCardEntity} from "../../../_models/card/card-entity";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
+import {ModalResult} from "../../../_models/modal/modal-result";
+import {patchEntitySignal, patchSignalArray} from "../../../../libs/patch";
 
 
 enum TabID {
@@ -489,10 +488,10 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (res.effect === 'update') {
         const entityMap = new Map<number, any>(res.entity.map(e => [e.id, e]));
 
-        this.bulkSelectionService.patchSignalArray(this.volumes, entityMap);
-        this.bulkSelectionService.patchSignalArray(this.chapters, entityMap);
-        this.bulkSelectionService.patchSignalArray(this.specials, entityMap);
-        this.bulkSelectionService.patchSignalArray(this.storylineChapters, entityMap);
+        patchSignalArray(this.volumes, entityMap);
+        patchSignalArray(this.chapters, entityMap);
+        patchSignalArray(this.specials, entityMap);
+        patchSignalArray(this.storylineChapters, entityMap);
       }
       this.setContinuePoint();
     });
@@ -903,18 +902,15 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   openEditSeriesModal() {
     const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
     modalRef.componentInstance.series = this.series();
-    modalRef.closed.subscribe((closeResult: EditSeriesModalCloseResult) => {
+    modalRef.closed.subscribe((closeResult: ModalResult<Series>) => {
       if (closeResult.success) {
         window.scrollTo(0, 0);
-        this.loadPageSource.next(closeResult.updateExternal);
-      } else if (closeResult.updateExternal) {
-        this.loadPageSource.next(closeResult.updateExternal);
       }
+      this.loadPageSource.next(false);
     });
   }
 
   toggleWantToRead() {
-
     if (this.isWantToRead()) {
       this.actionService.removeMultipleSeriesFromWantToReadList([this.seriesId]);
     } else {
@@ -956,13 +952,13 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   updateChapter(c: Chapter) {
-    this.bulkSelectionService.patchEntitySignal(this.chapters, c);
-    this.bulkSelectionService.patchEntitySignal(this.specials, c);
-    this.bulkSelectionService.patchEntitySignal(this.storylineChapters, c);
+    patchEntitySignal(this.chapters, c);
+    patchEntitySignal(this.specials, c);
+    patchEntitySignal(this.storylineChapters, c);
   }
 
   updateVolume(c: Volume) {
-    this.bulkSelectionService.patchEntitySignal(this.volumes, c);
+    patchEntitySignal(this.volumes, c);
   }
 
   protected readonly LibraryType = LibraryType;
