@@ -226,7 +226,7 @@ export class LibraryDetailComponent implements OnInit {
         break;
       case 'remove':
       case 'reload':
-        this.router.navigateByUrl(this.router.url);
+        this.router.navigateByUrl(this.router.url); // TODO: This is a hack until we have an api for non-admin users
         break;
       case 'none':
         break;

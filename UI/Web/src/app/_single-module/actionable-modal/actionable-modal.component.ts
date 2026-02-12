@@ -7,18 +7,19 @@ import {
   inject,
   Input,
   OnInit,
-  Output
+  Output,
+  signal
 } from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {AccountService} from "../../_services/account.service";
 import {Observable} from "rxjs";
-import {User} from "../../_models/user/user";
 import {ActionableEntity} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {ActionResult} from "../../_models/actionables/action-result";
+import {willRenderAction} from "../../../libs/action-utils";
 
 @Component({
     selector: 'app-actionable-modal',
@@ -37,86 +38,72 @@ export class ActionableModalComponent implements OnInit {
   protected readonly cdRef = inject(ChangeDetectorRef);
   protected readonly destroyRef = inject(DestroyRef);
 
+
   @Input() entity: ActionableEntity = null;
   /** This assumes these are filtered actions */
   @Input() filteredActions: ActionItem<any>[] = [];
-  @Input() willRenderAction!: (action: ActionItem<any>, user: User) => boolean;
-  @Input() shouldRenderSubMenu!: (action: ActionItem<any>, dynamicList: null | Array<any>) => boolean;
   @Output() actionPerformed = new EventEmitter<ActionItem<any> | ActionResult<any>>();
 
-  currentLevel: string[] = [];
-  currentItems: ActionItem<any>[] = [];
-  //user!: User | undefined;
+  currentItems = signal<ActionItem<any>[]>([]);
+  currentLevel = signal<string[]>([]);
 
   ngOnInit() {
+
     // Copy as the list may be shared between entities
-    const actionItems = this.filteredActions.map(action => this.utilityService.copyActionItem(action));
+    const actionItems = this.surfaceDownloadAction(
+      this.filteredActions.map(a => this.utilityService.copyActionItem(a))
+    );
+    this.currentItems.set(this.translateOptions(actionItems));
 
-    // On Mobile, surface download
-    const otherActionIndex = actionItems.findIndex(i => i.action === Action.Submenu && i.title === 'others')
-    if (otherActionIndex >= 0) {
-      const downloadActionIndex = actionItems[otherActionIndex].children.findIndex(a => a.action === Action.Download);
-
-      if (downloadActionIndex >= 0) {
-        const downloadAction = actionItems[otherActionIndex].children.splice(downloadActionIndex, 1)[0];
-        actionItems.push(downloadAction);
-
-        // Check if Other has any other children, else remove
-        if (actionItems[otherActionIndex].children.length === 0) {
-          actionItems.splice(otherActionIndex, 1);
-        }
-      }
-    }
-
-    this.filteredActions = actionItems;
-    this.currentItems = this.translateOptions(this.filteredActions)
   }
 
   handleItemClick(item: ActionItem<any>) {
-    if (item.children && item.children.length > 0) {
-      this.currentLevel.push(item.title);
+
+    if (item.children?.length > 0) {
+      this.currentLevel.update(levels => [...levels, item.title]);
 
       if (item.children.length === 1 && item.children[0].dynamicList) {
         item.children[0].dynamicList.subscribe(dynamicItems => {
-          this.currentItems = dynamicItems.map(di => ({
+          this.currentItems.set(dynamicItems.map(di => ({
             ...item,
             children: [], // Required as dynamic list is only one deep
             title: di.title,
             _extra: di,
             action: item.children[0].action // override action to be correct from child
-          }));
+          })));
         });
       } else {
-        this.currentItems = this.translateOptions(item.children);
+        this.currentItems.set(this.translateOptions(item.children));
       }
+      return;
     }
-    else {
-      const result = item.callback(item, this.entity);
 
-      if (result && typeof (result as any).subscribe === 'function') {
-        (result as Observable<ActionResult<any>>).subscribe(actionResult => {
-          this.actionPerformed.emit(actionResult);
-          this.modal.close(actionResult);
-        });
-        return;
-      }
-      this.modal.close(item);
+    const result = item.callback(item, this.entity);
+
+    if (result && typeof (result as any).subscribe === 'function') {
+      (result as Observable<ActionResult<any>>).subscribe(actionResult => {
+        this.actionPerformed.emit(actionResult);
+        this.modal.close(actionResult);
+      });
+      return;
     }
-    this.cdRef.markForCheck();
+    this.modal.close(item);
   }
 
   handleBack() {
-    if (this.currentLevel.length > 0) {
-      this.currentLevel.pop();
+    this.currentLevel.update(levels => {
+      const next = levels.slice(0, -1);
 
-      let items = this.filteredActions;
-      for (let level of this.currentLevel) {
-        items = items.find(item => item.title === level)?.children || [];
+      let items = this.filteredActions.map(a => this.utilityService.copyActionItem(a));
+      items = this.surfaceDownloadAction(items);
+
+      for (const level of next) {
+        items = items.find(i => i.title === level)?.children || [];
       }
 
-      this.currentItems = this.translateOptions(items);
-      this.cdRef.markForCheck();
-    }
+      this.currentItems.set(this.translateOptions(items));
+      return next;
+    });
   }
 
   translateOptions(opts: Array<ActionItem<any>>) {
@@ -125,4 +112,25 @@ export class ActionableModalComponent implements OnInit {
     })
   }
 
+  /**
+   * On mobile, pull the Download action out of the "Others" submenu to top-level.
+   */
+  private surfaceDownloadAction(items: ActionItem<any>[]): ActionItem<any>[] {
+    const otherIdx = items.findIndex(i => i.action === Action.Submenu && i.title === 'others');
+    if (otherIdx < 0) return items;
+
+    const dlIdx = items[otherIdx].children.findIndex(a => a.action === Action.Download);
+    if (dlIdx < 0) return items;
+
+    const downloadAction = items[otherIdx].children.splice(dlIdx, 1)[0];
+    items.push(downloadAction);
+
+    if (items[otherIdx].children.length === 0) {
+      items.splice(otherIdx, 1);
+    }
+
+    return items;
+  }
+
+  protected readonly willRenderAction = willRenderAction;
 }

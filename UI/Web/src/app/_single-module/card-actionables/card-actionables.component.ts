@@ -19,6 +19,7 @@ import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {ActionResult} from "../../_models/actionables/action-result";
+import {filterActionTree} from "../../../libs/action-utils";
 
 
 @Component({
@@ -63,7 +64,7 @@ export class CardActionablesComponent implements OnDestroy {
     const actions = this.actions();
     if (!user || !actions.length) return [];
 
-    return this.filterActionTree(actions, entity, user);
+    return filterActionTree(actions, entity, user, this.accountService);
   });
 
   currentUser = this.accountService.currentUserSignal;
@@ -149,29 +150,10 @@ export class CardActionablesComponent implements OnDestroy {
 
     const ref = this.modalService.open(ActionableModalComponent, {fullscreen: true, centered: true});
     ref.componentInstance.entity = this.entity();
-    ref.componentInstance.actions = this.filteredActions();
-
-    ref.componentInstance.willRenderAction = this.willRenderAction.bind(this);
-    ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);
+    ref.componentInstance.filteredActions = this.filteredActions();
 
     ref.componentInstance.actionPerformed.subscribe((actionOrResult: any) => {
       this.actionHandler.emit(actionOrResult);
     });
-  }
-
-  private filterActionTree(actions: ActionItem<any>[], entity: any, user: User): ActionItem<any>[] {
-    return actions
-      .map(action => {
-        if (action.children?.length > 0 && !action.dynamicList) {
-          // Recursively filter children first
-          const filteredChildren = this.filterActionTree(action.children, entity, user);
-          if (filteredChildren.length === 0) return null; // No renderable children = hide submenu
-          return { ...action, children: filteredChildren };
-        }
-        // Leaf action — check if it should render
-        if (!this.willRenderAction(action, user)) return null;
-        return action;
-      })
-      .filter((a): a is ActionItem<any> => a !== null);
   }
 }
