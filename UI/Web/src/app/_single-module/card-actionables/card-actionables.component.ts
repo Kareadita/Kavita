@@ -14,7 +14,7 @@ import {ActionableEntity} from 'src/app/_services/action-factory.service';
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
-import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
+import {ActionableModalComponent} from "./_modals/actionable-modal/actionable-modal.component";
 import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionItem} from "../../_models/actionables/action-item";

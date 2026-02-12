@@ -11,15 +11,14 @@ import {
   signal
 } from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {UtilityService} from "../../shared/_services/utility.service";
+import {UtilityService} from "../../../../shared/_services/utility.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {AccountService} from "../../_services/account.service";
+import {AccountService} from "../../../../_services/account.service";
 import {Observable} from "rxjs";
-import {ActionableEntity} from "../../_services/action-factory.service";
-import {ActionItem} from "../../_models/actionables/action-item";
-import {Action} from "../../_models/actionables/action";
-import {ActionResult} from "../../_models/actionables/action-result";
-import {willRenderAction} from "../../../libs/action-utils";
+import {ActionableEntity} from "../../../../_services/action-factory.service";
+import {ActionItem} from "../../../../_models/actionables/action-item";
+import {Action} from "../../../../_models/actionables/action";
+import {ActionResult} from "../../../../_models/actionables/action-result";
 
 @Component({
     selector: 'app-actionable-modal',
@@ -48,17 +47,14 @@ export class ActionableModalComponent implements OnInit {
   currentLevel = signal<string[]>([]);
 
   ngOnInit() {
-
     // Copy as the list may be shared between entities
     const actionItems = this.surfaceDownloadAction(
       this.filteredActions.map(a => this.utilityService.copyActionItem(a))
     );
     this.currentItems.set(this.translateOptions(actionItems));
-
   }
 
   handleItemClick(item: ActionItem<any>) {
-
     if (item.children?.length > 0) {
       this.currentLevel.update(levels => [...levels, item.title]);
 
@@ -131,6 +127,4 @@ export class ActionableModalComponent implements OnInit {
 
     return items;
   }
-
-  protected readonly willRenderAction = willRenderAction;
 }

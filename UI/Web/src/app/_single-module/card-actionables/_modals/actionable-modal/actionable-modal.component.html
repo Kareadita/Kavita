@@ -6,7 +6,7 @@
     <button type="button" class="btn-close" aria-label="close" (click)="modal.close()"></button>
   </div>
   <div class="modal-body scrollable-modal">
-    @if (currentLevel.length > 0) {
+    @if (currentLevel().length > 0) {
       <button class="btn btn-secondary w-100 mb-3 text-start" (click)="handleBack()">
         ← {{t('back-to', {action: currentLevel()[currentLevel().length - 1]})}}
       </button>
