@@ -2831,7 +2831,11 @@
         "custom-scopes-label": "Niestandardowe zakresy",
         "custom-scopes-tooltip": "Dodatkowe zakresy (scopes) do pobrania od dostawcy OIDC podczas logowania. Oddzielaj wiele wartości przecinkami. Nieprawidłowe wartości mogą uniemożliwić logowanie.",
         "tls-required": "Dostawca OIDC musi używać tls (https)",
-        "other-field-invalid": "{{validation.other-field-invalid}}"
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "reset-label": "Resetuj ID",
+        "reset-tooltip": "Zresetuj identyfikatory zewnętrzne wszystkich użytkowników. Użyj tej opcji, aby zresetować powiązania między użytkownikami w Kavita a dostawcą tożsamości",
+        "reset-confirm": "Czy na pewno chcesz zresetować identyfikatory zewnętrzne wszystkich użytkowników?",
+        "auto-save-required": "Zmieniłeś ważne ustawienia, aby je zachować, zapisz je automatycznie."
     },
     "import-mappings": {
         "replace": "Zamień",

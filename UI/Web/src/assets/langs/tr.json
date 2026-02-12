@@ -5,7 +5,8 @@
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Şifremi Unuttum?",
-        "submit": "Oturum aç"
+        "submit": "Oturum aç",
+        "oidc": "OpenID Bağlantısı"
     },
     "dashboard": {
         "no-libraries": "Kurulmuş kütüphane yok. Bir tane oluştur",
@@ -27,13 +28,19 @@
         "account-detail-title": "Hesap ayrıntıları",
         "invalid-email-warning": "Doğru olmayan bir e-posta, Kavita'nın bazı işlevlerini engelleyecektir",
         "notice": "Uyarı!",
-        "identity-provider": "Kimlik sağlayıcı"
+        "identity-provider": "Kimlik sağlayıcı",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}",
+        "warning-read-only": "Salt okunur hesapların izinleri sınırlıdır",
+        "out-of-sync": "Bu kullanıcı OIDC aracılığıyla oluşturulmuştur. SyncUsers ayarı etkinleştirilirse, bu hesapta yapılan tüm değişiklikler üzerine yazılabilir.",
+        "oidc-managed": "Bu kullanıcı OIDC aracılığıyla yönetilmektedir. Herhangi bir değişiklik talebinde bulunmak için lütfen OIDC yöneticinize başvurun.",
+        "identity-provider-tooltip": "Kavita kullanıcıları hiçbir zaman OIDC hesaplarıyla senkronize edilmez."
     },
     "user-scrobble-history": {
         "title": "Arşiv geçmişi",
         "filter-label": "{{common.filter}}",
-        "created-header": "Oluşturulmuş",
-        "last-modified-header": "En son değiştirilmiş",
+        "created-header": "Oluşturuldu",
+        "last-modified-header": "Son Değişiklik",
         "type-header": "Tip",
         "series-header": "Seriler",
         "data-header": "Veri",
@@ -44,7 +51,16 @@
         "special": "{{entity-title.special}}",
         "select-all-label": "Tümünü seç",
         "delete-selected-label": "Seçilenleri sil",
-        "chapter-num": "Bölüm {{num}}"
+        "chapter-num": "Bölüm {{num}}",
+        "volume-and-chapter-num": "Cilt {{v}} Bölüm {{n}}",
+        "volume-num": "Cilt {{num}}",
+        "description": "Burada, hesabınızla bağlantılı tüm scrobble etkinliklerini bulabilirsiniz. Etkinliklerin görünmesi için, aktif bir scrobble sağlayıcısı yapılandırmış olmanız gerekir. İşlenen tüm etkinlikler bir ay sonra silinir. İşlenmemiş etkinlikler varsa, bunlar muhtemelen yukarı akışta eşleşmeler oluşturamaz. Bunların düzeltilmesi için lütfen yöneticinize başvurun.",
+        "not-read-warning": "Yukarı akış sağlayıcılar her zaman en yüksek sayıyı koruyacaktır",
+        "is-processed-header": "İşlenmiştir",
+        "generate-scrobble-events": "Geri Doldurma Etkinlikleri",
+        "token-expired": "AniList jetonunuzun süresi doldu! Hesaplar sayfasında yenileme yapana kadar scrobbling etkinlikleri işlenmeyecektir.",
+        "rating": "Derecelendirme {{r}}",
+        "scrobbling-disabled": "Scrobbling, Hesap Ayarlarınızda devre dışı bırakılmıştır."
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Okuma İlerlemesi",
@@ -65,7 +81,9 @@
     "review-card": {
         "your-review": "Sizin incelemeniz",
         "external-review": "Diğer İncelemeler",
-        "local-review": "Yerel inceleme"
+        "local-review": "Yerel inceleme",
+        "rating-percentage": "Derecelendirme {{r}}%",
+        "critic": "eleştiri"
     },
     "want-to-read": {
         "title": "Okuyacaklarım",
@@ -106,10 +124,15 @@
         "social-settings-title": "Sosyal Ayarlar",
         "font-tab": "Yazı tipi",
         "opds-settings-title": "OPDS Ayarları",
-        "social-libraries-label": "Sosyal Kütüphaneler"
+        "social-libraries-label": "Sosyal Kütüphaneler",
+        "social-include-unknowns-label": "Bilinmeyenleri dahil et"
     },
     "user-holds": {
-        "no-data": "{{typeahead.no-data}}"
+        "no-data": "{{typeahead.no-data}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "delete-label": "{{common.remove}}",
+        "description": "Bu, yukarı akış sağlayıcılara scrobble edilmeyecek, kullanıcı tarafından yönetilen bir seri listesidir. Bir seriyi istediğiniz zaman kaldırabilirsiniz ve bir sonraki scrobble edilebilir olay (okuma ilerlemesi, derecelendirme, okumak istiyorum durumu) scrobble işlemini tetikleyecektir."
     },
     "theme-manager": {
         "set-default": "Varsayılan Yap",
@@ -128,7 +151,8 @@
         "preview-title": "Önizleme",
         "preview-default-admin": "Önce bir tema seçin veya manuel olarak yükleyin",
         "active-theme": "Aktif",
-        "upload-continued": "bir css dosyası"
+        "upload-continued": "bir css dosyası",
+        "description": "Kavita birçok renkte mevcuttur, ihtiyaçlarınıza uygun bir renk şeması bulun veya kendiniz bir tane oluşturun ve paylaşın. Temalar hesabınıza veya tüm hesaplara uygulanabilir."
     },
     "theme": {
         "theme-dark": "Karanlık",
@@ -140,8 +164,8 @@
         "title": "Yaş sınırlaması kısıtlaması",
         "not-applicable-for-admins": "Bu yöneticiler için uygullanamaz.",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
-        "no-restriction": "Hiçbir sınırlama yok",
-        "include-unknowns-label": "Bilinmeyenleri ekle",
+        "no-restriction": "Kısıtlama Yok",
+        "include-unknowns-label": "Bilinmeyenleri Dahil Et",
         "description": "Seçildiğinde, seçilen kısıtlamadan daha büyük olan en az bir ögeye sahip tüm seri ve okuma listeleri sonuçlardan kaldırılır.",
         "include-unknowns-tooltip": "Eğer doğruysa, bilinmeyenlere yaş kısıtlaması ile izin verilecektir. Bu, yaş kısıtlamaları olan kullanıcılara atılmayan medyanın sızmasına yol açabilir."
     },
@@ -197,7 +221,8 @@
         "current-password-label": "Geçerli parola",
         "email-updated-title": "E-posta güncellendi",
         "email-not-confirmed": "Bu e-posta onaylanmadı",
-        "email-confirmed": "Bu e-posta onaylandı"
+        "email-confirmed": "Bu e-posta onaylandı",
+        "invite-url-label": "Davet Url'si"
     },
     "change-age-restriction": {
         "reset": "{{common.reset}}",
@@ -243,7 +268,8 @@
         "name-header": "İsim",
         "share": "Paylaş",
         "title": "Bir Klasör Seçin",
-        "path-placeholder": "Yazmaya başlayın veya yolu seçin"
+        "path-placeholder": "Yazmaya başlayın veya yolu seçin",
+        "instructions": "Girmek istediğiniz klasörü seçin. Klasörünüzü göremiyor musunuz? Önce / işaretini kontrol edin."
     },
     "library-access-modal": {
         "select-all": "{{common.select-all}}",
@@ -252,7 +278,8 @@
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "title": "Kütüphane Erişimi"
+        "title": "Kütüphane Erişimi",
+        "no-data": "Henüz hiçbir kütüphane kurulmadı."
     },
     "person-role-pipe": {
         "team": "{{filter-field-pipe.team}}",
@@ -263,14 +290,17 @@
         "translator": "Çevirmen",
         "publisher": "Yayıncı",
         "other": "Diğer",
-        "imprint": "Künye"
+        "imprint": "Künye",
+        "penciller": "Çizer",
+        "artist": "Sanatçı",
+        "inker": "Mürekkepçi"
     },
     "reset-password": {
         "email-label": "{{common.email}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}",
-        "title": "Parolayı sıfırla"
+        "title": "Parolayı Sıfırla"
     },
     "reset-password-modal": {
         "close": "{{common.close}}",
@@ -286,7 +316,8 @@
     },
     "all-filters": {
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}"
+        "create": "{{common.create}}",
+        "title": "Tüm Akıllı Filtreler"
     },
     "out-of-date-modal": {
         "close": "{{common.close}}"
@@ -302,11 +333,17 @@
         "title": "Kullanıcı Davet Et",
         "setup-user-title": "Kullanıcı davet edildi",
         "invite": "Davet et",
-        "inviting": "Davet ediliyor…"
+        "inviting": "Davet ediliyor…",
+        "invite-url-label": "Davet Url'si",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}",
+        "setup-user-account-tooltip": "Bunu kopyalayıp yeni bir sekmede yapıştırın. Oturumunuzu kapatmanız gerekebilir."
     },
     "library-selector": {
         "select-all": "{{common.select-all}}",
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "title": "{{common.libraries}}",
+        "no-data": "Henüz hiçbir kütüphane kurulmadı."
     },
     "license": {
         "cancel": "{{common.cancel}}",
@@ -332,16 +369,32 @@
         "license-valid": "Lisans Geçerlidir",
         "license-not-valid": "Lisans Geçersiz",
         "email-label": "Kayıtlı E-posta",
-        "k+-already-registered-header": "Lisans zaten kayıtlı"
+        "k+-already-registered-header": "Lisans zaten kayıtlı",
+        "check": "Kontrol et",
+        "no-license-key": "Lisans anahtarı yok",
+        "actions-title": "Eylemler",
+        "expiration-label": "Sona erme",
+        "title": "Kavita+ Lisansı",
+        "help-label": "{{common.help}}",
+        "faq-title": "SSS",
+        "kavita+-desc-part-3": "bugün!"
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "save": "{{common.save}}",
-        "copy": "Kopyala"
+        "copy": "Kopyala",
+        "bookmark": "Yer imi"
     },
     "book-reader": {
-        "go-to-page-prompt": "Toplam {{totalPages}} sayfa var. Hangi sayfaya gitmek istersiniz? Sayfa 1'den başlar."
+        "go-to-page-prompt": "Toplam {{totalPages}} sayfa var. Hangi sayfaya gitmek istersiniz? Sayfa 1'den başlar.",
+        "page-label": "Sayfa",
+        "next": "Sonraki",
+        "previous": "Önceki",
+        "close-reader-alt": "Okuyucuyu Kapat",
+        "go-to-page": "Sayfaya gidin",
+        "go-back": "Geri Dön",
+        "skip-header": "Ana içeriğe atla"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -349,7 +402,9 @@
         "email-label": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "valid-email": "{{common.valid-email}}",
-        "password-validation": "{{validation.password-validation}}"
+        "password-validation": "{{validation.password-validation}}",
+        "title": "Kaydol",
+        "register": "Kaydol"
     },
     "confirm-reset-password": {
         "password-label": "{{common.password}}",
@@ -357,7 +412,7 @@
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}",
         "description": "Yeni parola girin",
-        "title": "Parolayı sıfırla"
+        "title": "Parolayı Sıfırla"
     },
     "register": {
         "username-label": "{{common.username}}",
@@ -365,7 +420,9 @@
         "password-label": "{{common.password}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
-        "password-validation": "{{validation.password-validation}}"
+        "password-validation": "{{validation.password-validation}}",
+        "register": "Kaydol",
+        "title": "Kaydol"
     },
     "series-detail": {
         "close": "{{common.close}}",
@@ -394,7 +451,13 @@
         "read-options-alt": "Okuma seçenekleri",
         "pages-count": "{{num}} Sayfa",
         "weblinks-title": "Linkler",
-        "words-count": "{{num}} Kelime"
+        "words-count": "{{num}} Kelime",
+        "annotations-tab": "{{tabs.annotations-tab}}",
+        "publication-status-tooltip": "Yayın Durumu",
+        "page-settings-title": "Sayfa Ayarları",
+        "on": "{{reader-settings.on}}",
+        "off": "{{reader-settings.off}}",
+        "loading": "{{common.loading}}"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -407,19 +470,27 @@
         "teams-title": "Takımlar",
         "locations-title": "Konumlar",
         "writers-title": "Yazarlar",
-        "publishers-title": "Yayıncılar"
+        "publishers-title": "Yayıncılar",
+        "pencillers-title": "Çizerler",
+        "age-rating-title": "Yaş Derecelendirmesi",
+        "editors-title": "Editörler",
+        "links-title": "Web bağlantıları",
+        "cover-artists-title": "Sanatçılar"
     },
     "external-rating": {
         "close": "{{common.close}}",
-        "kavita-rating-title": "Puanınız"
+        "kavita-rating-title": "Puanınız",
+        "critic": "{{review-card.critic}}"
     },
     "update-notification-modal": {
         "close": "{{common.close}}",
         "download": "İndir",
-        "title": "Yeni Güncelleme Mevcut!"
+        "title": "Yeni Güncelleme Mevcut!",
+        "help": "Nasıl Güncellenir"
     },
     "side-nav-companion-bar": {
-        "page-settings-title": "{{series-detail.page-settings-title}}"
+        "page-settings-title": "{{series-detail.page-settings-title}}",
+        "filter-and-sort-alt": "Sırala / Filtrele"
     },
     "side-nav": {
         "filter-label": "{{common.filter}}",
@@ -427,7 +498,14 @@
         "customize": "{{settings.customize}}",
         "back": "Geri",
         "home": "Ana Sayfa",
-        "collections": "Koleksiyonlar"
+        "collections": "Koleksiyonlar",
+        "reading-lists": "Okuma Listeleri",
+        "edit": "{{common.edit}}",
+        "all-series": "Tüm Seriler",
+        "bookmarks": "Yer imleri",
+        "donate": "Bağış yap",
+        "browse-people": "Kişilere Göz At",
+        "want-to-read": "Okuyacaklarım"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -443,7 +521,18 @@
         "help": "{{common.help}}",
         "force-scan": "Taramaya zorla",
         "type-label": "Tip",
-        "name-label": "İsim"
+        "name-label": "İsim",
+        "add-title": "Kütüphane Ekle",
+        "last-scanned-label": "Son Tarama:",
+        "edit-title": "Düzenle {{name}}",
+        "manage-reading-list-label": "Okuma Listelerini Yönet",
+        "manage-collection-label": "Koleksiyonları Yönet",
+        "folder-description": "Kütüphanenize klasörler ekleyin",
+        "library-name-unique": "Kütüphane adı benzersiz olmalıdır",
+        "next": "Sonraki",
+        "naming-conventions-part-2": "klasör gereksinimleri.",
+        "default-language-label": "Varsayılan dil",
+        "file-type-group-label": "Dosya Türleri"
     },
     "reader-settings": {
         "font-family-label": "{{manage-reading-profiles.font-family-label}}",
@@ -456,14 +545,30 @@
         "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "reset-to-defaults": "Varsayılanlara sıfırla",
         "vertical": "Dikey",
-        "horizontal": "Yatay"
+        "horizontal": "Yatay",
+        "theme-white": "Beyaz",
+        "color-theme-title": "Renk Teması",
+        "reader-settings-title": "Okuyucu Ayarları",
+        "general-settings-title": "Genel Ayarlar",
+        "left-to-right": "Soldan Sağa",
+        "right-to-left": "Sağdan Sola",
+        "fullscreen-label": "Tam Ekran",
+        "theme-paper": "Kağıt",
+        "loading": "yükleniyor",
+        "update-parent": "{{name}}'e kaydet",
+        "exit": "Çıkış",
+        "enter": "Gir",
+        "layout-mode-option-scroll": "Kaydır",
+        "theme-dark": "Karanlık"
     },
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
         "series-count": "{{common.series-count}}"
     },
     "bulk-operations": {
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "mark-as-unread": "Okunmamış olarak işaretle",
+        "mark-as-read": "Okundu olarak işaretle"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -482,12 +587,20 @@
         "genres-title": "{{metadata-fields.genres-title}}",
         "tags-title": "{{metadata-fields.tags-title}}",
         "weblinks-title": "{{tabs.weblink-tab}}",
-        "file-path-title": "Klasör yolu"
+        "file-path-title": "Klasör yolu",
+        "read-time-title": "{{edit-chapter-modal.reading-time-label}}",
+        "format-title": "{{metadata-filter.format-label}}",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}",
+        "folder-path-title": "Klasör yolu",
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "length-title": "{{edit-chapter-modal.words-label}}",
+        "release-title": "{{sort-field-pipe.release-year}}"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.related-tab}}"
+        "relations-title": "{{tabs.related-tab}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "reset": "{{common.reset}}",
@@ -497,11 +610,20 @@
         "load": "Yükle",
         "back": "Geri",
         "url-label": "Url",
-        "url": "Url"
+        "url": "Url",
+        "image-num": "Resim {{num}}",
+        "enter-an-url-pre-title": "Bir {{url}} girin",
+        "upload": "Yükleme",
+        "drag-n-drop": "Sürükle ve bırak",
+        "upload-continued": "bir resim"
     },
     "edit-series-relation": {
         "remove": "{{common.remove}}",
-        "parent": "{{relationship-pipe.parent}}"
+        "parent": "{{relationship-pipe.parent}}",
+        "target-series": "Hedef Seriler",
+        "description-part-1": "Hangi ilişkiyi ekleyeceğinizden emin değil misiniz? Bakın",
+        "add-relationship": "İlişki Ekle",
+        "relationship": "İlişki"
     },
     "bulk-add-to-collection": {
         "promoted": "{{common.promoted}}",
@@ -509,21 +631,37 @@
         "filter-label": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "loading": "{{common.loading}}",
-        "create": "{{common.create}}"
+        "create": "{{common.create}}",
+        "collection-label": "Koleksiyon",
+        "title": "Koleksiyona Ekle",
+        "no-data": "Henüz koleksiyon oluşturulmadı"
     },
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
         "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "single-volume": "Tek cilt"
+        "single-volume": "Tek cilt",
+        "special": "Özel",
+        "vol-num": "{{user-scrobble-history.volume-num}}"
     },
     "manage-media-issues": {
-        "filter-label": "{{common.filter}}"
+        "filter-label": "{{common.filter}}",
+        "no-data": "{{common.no-data}}",
+        "comment-header": "Yorum",
+        "file-header": "Dosya",
+        "created-header": "Oluşturuldu",
+        "clear-alerts": "Uyarıları Temizle"
     },
     "manage-email-settings": {
         "reset": "{{common.reset}}",
         "reset-to-default": "{{common.reset-to-default}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "email-settings-title": "Eposta Ayarları",
+        "host-name-label": "Ana Bilgisayar Adı",
+        "host-label": "Ana Bilgisayar",
+        "username-label": "Kullanıcı adı",
+        "sender-displayname-label": "Görünen Ad",
+        "port-label": "Port"
     },
     "manage-library": {
         "loading": "{{common.loading}}",
@@ -535,22 +673,34 @@
         "apply": "{{common.apply}}",
         "type-title": "Tip",
         "shared-folders-title": "Klasörler",
-        "edit-library": "Düzenle"
+        "edit-library": "Düzenle",
+        "add-library": "Kütüphane Ekle",
+        "folder-count": "{{num}} klasör",
+        "delete-library": "Kütüphaneyi Sil",
+        "edit-library-by-name": "{{name}} silin",
+        "delete-library-by-name": "{{name}} silin",
+        "scan-library": "Kütüphaneyi Tara",
+        "title": "{{common.libraries}}"
     },
     "copy-settings-from-library-modal": {
         "close": "{{common.close}}",
-        "select": "Seç"
+        "select": "Seç",
+        "select-option": "Bir Kütüphane Seçin"
     },
     "manage-media-settings": {
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "change": "Değiştir"
+        "change": "Değiştir",
+        "bookmark-dir-label": "Yer İmleri Dizini"
     },
     "manage-scrobble-errors": {
         "filter-label": "{{common.filter}}",
         "edit-header": "Düzenle",
-        "series-header": "Seriler"
+        "series-header": "Seriler",
+        "clear-errors": "Hataları Temizle",
+        "comment-header": "Yorum",
+        "created-header": "Oluşturuldu"
     },
     "manage-settings": {
         "host-name-label": "{{manage-email-settings.host-name-label}}",
@@ -559,7 +709,10 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "field-required": "{{validation.field-required}}"
+        "field-required": "{{validation.field-required}}",
+        "opds-label": "OPDS",
+        "port-label": "Port",
+        "cache-size-validation": "En az 50 MB'a ihtiyacınız var."
     },
     "manage-tasks-settings": {
         "reset-to-default": "{{common.reset-to-default}}",
@@ -567,14 +720,29 @@
         "save": "{{common.save}}",
         "required": "{{validation.required-field}}",
         "backup-database-task": "Veritabanını Yedekle",
-        "check-for-updates-task": "Güncellemeleri Kontrol Et"
+        "check-for-updates-task": "Güncellemeleri Kontrol Et",
+        "custom": "Kişiselleştir",
+        "description-header": "Açıklama",
+        "recurring-tasks-title": "{{title}}",
+        "daily": "Günlük"
     },
     "manage-users": {
         "edit-user-tooltip": "Düzenle",
         "all-libraries": "Tüm Kütüphaneler",
         "name-header": "İsim",
         "delete-user-tooltip": "Kullanıcıyı Sil",
-        "change-password-tooltip": "Şifreyi Değiştir"
+        "change-password-tooltip": "Şifreyi Değiştir",
+        "actions-header": "Eylemler",
+        "roles-header": "{{common.roles}}",
+        "delete-user-alt": "Kullanıcıyı Sil {{user}}",
+        "change-password-alt": "Şifreyi Değiştir {{user}}",
+        "online-now-tooltip": "Şimdi Çevrimiçi",
+        "profile-link-alt": "Profil",
+        "last-active-header": "Son Etkinlik",
+        "edit-user-alt": "Kullanıcıyı Düzenle {{user}}",
+        "setup-user-tooltip": "Kullanıcı Ayarları",
+        "setup-user-alt": "Kullanıcı Ayarları {{user}}",
+        "sharing-header": "Paylaşım"
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",
@@ -589,7 +757,12 @@
         "select-all": "{{common.select-all}}",
         "filter-label": "{{common.filter}}",
         "total-series-title": "Toplam Seriler:",
-        "name-label": "İsim"
+        "name-label": "İsim",
+        "summary-label": "Özet",
+        "title": "{{collectionName}} Koleksiyonunu Düzenle",
+        "missing-series-title": "Kayıp Seriler:",
+        "source-url-title": "Kaynak Url:",
+        "name-validation": "İsim benzersiz olmalıdır"
     },
     "library-recommended": {
         "on-deck": "{{dashboard.on-deck-title}}"
@@ -612,17 +785,31 @@
         "admin-email-history": "E-Posta Geçmişi",
         "devices": "Aygıtlar",
         "admin-general": "Genel",
-        "insights-section-title": "Görüşler"
+        "insights-section-title": "Görüşler",
+        "theme": "Tema",
+        "reading-profiles": "Okuma Profilleri",
+        "admin-libraries": "{{common.libraries}}",
+        "admin-oidc": "OpenID Bağlantısı",
+        "admin-mappings-import": "Meta Veri Ayarları",
+        "admin-public-metadata": "Meta Verileri Yönet",
+        "admin-metadata": "Meta Verileri Yönet"
     },
     "collection-detail": {
-        "item-count": "{{common.item-count}}"
+        "item-count": "{{common.item-count}}",
+        "last-sync": "Son Senkron: {{date}}",
+        "title-alt": "Kavita - {{collectionName}} Koleksiyonu",
+        "sync-progress": "Derlenen Seriler: {{title}}"
     },
     "all-collections": {
         "item-count": "{{common.item-count}}",
-        "title": "Koleksiyonlar"
+        "title": "Koleksiyonlar",
+        "create-one-part-2": "bir"
     },
     "reading-lists": {
-        "item-count": "{{common.item-count}}"
+        "item-count": "{{common.item-count}}",
+        "create-one-part-2": "bir",
+        "title": "Okuma Listeleri",
+        "no-data": "Okuma listesi yok."
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
@@ -630,20 +817,46 @@
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
-        "library": "Kütüphane"
+        "library": "Kütüphane",
+        "provided": "Sağlanan",
+        "smart-filter": "Akıllı Filtre",
+        "delete": "{{common.delete}}",
+        "load-filter": "Yükleme Filtresi",
+        "external-source": "Dış Kaynak"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
         "read": "{{common.read}}",
         "characters-title": "{{metadata-fields.characters-title}}",
-        "read-options-alt": "Okuma seçenekleri"
+        "read-options-alt": "Okuma seçenekleri",
+        "edit-alt": "{{common.edit}}",
+        "more-alt": "{{series-detail.more-alt}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "storyline-tab": "{{series-detail.storyline-tab}}",
+        "page-settings-title": "Sayfa Ayarları",
+        "continue": "Devam et",
+        "incognito-alt": "(Gizli mod)",
+        "items-title": "Öğeler",
+        "details-tab": "{{series-detail.details-tab}}",
+        "edit-label": "Düzenleme Modu",
+        "no-data": "Hiçbir şey eklenmedi"
     },
     "events-widget": {
         "close": "{{common.close}}"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",
-        "double-click": "çift tık"
+        "double-click": "çift tık",
+        "next-page": "Sonraki sayfaya geç",
+        "close-reader": "Okuyucuyu kapat",
+        "prev-page": "Önceki sayfaya git",
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
+        "title": "Klavye Kısayolları",
+        "toggle-menu": "Menüyü Aç/Kapat",
+        "go-to": "Sayfaya Git iletişim kutusunu aç",
+        "bookmark": "Mevcut sayfayı yer imlerine ekle"
     },
     "grouped-typeahead": {
         "genres": "{{metadata-fields.genres-title}}",
@@ -651,12 +864,27 @@
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "tags": "Etiketler",
-        "collections": "Koleksiyonlar"
+        "collections": "Koleksiyonlar",
+        "chapters": "Bölümler",
+        "annotations": "{{tabs.annotations-tab}}",
+        "files": "Dosyalar",
+        "libraries": "{{common.libraries}}",
+        "reading-lists": "Okuma Listeleri",
+        "people": "Kişi"
     },
     "nav-header": {
         "help": "{{common.help}}",
         "close": "{{common.close}}",
-        "settings": "Ayarlar"
+        "settings": "Ayarlar",
+        "server-settings": "Sunucu Ayarları",
+        "all-filters": "Akıllı Filtreler",
+        "skip-alt": "Ana içeriğe atla",
+        "browse-tags": "Etiketlere Gözat",
+        "announcements": "Duyurular",
+        "logout": "Oturumu kapat",
+        "search-alt": "Arama…",
+        "browse-genres": "Türlere Gözat",
+        "my-profile": "Profilim"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -666,7 +894,10 @@
         "filter-label": "{{common.filter}}",
         "promoted-alt": "{{common.promoted}}",
         "loading": "{{common.loading}}",
-        "create": "{{common.create}}"
+        "create": "{{common.create}}",
+        "reading-list-label": "Okuma Listesi",
+        "no-data": "Henüz oluşturulmuş liste yok",
+        "title": "Okuma Listesine Ekle"
     },
     "edit-reading-list-modal": {
         "general-tab": "{{tabs.general-tab}}",
@@ -674,7 +905,10 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
-        "year-label": "Yıl"
+        "year-label": "Yıl",
+        "name-unique-validation": "İsim benzersiz olmalıdır",
+        "summary-label": "Özet",
+        "month-label": "Ay"
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
@@ -682,14 +916,23 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "import": "İçe Aktar"
+        "import": "İçe Aktar",
+        "final-import-step": "Son Adım",
+        "help-label": "{{common.help}}",
+        "next": "Sonraki",
+        "prev": "Önce",
+        "restart": "Yeniden başlat"
     },
     "manga-reader": {
         "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
         "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
         "layout-mode-switched": "Düzen modu, çift düzeni oluşturmak için yetersiz alan nedeniyle tek düzene geçti",
         "back": "Geri",
-        "settings-tooltip": "Ayarlar"
+        "settings-tooltip": "Ayarlar",
+        "off": "{{reader-settings.off}}",
+        "left-to-right-alt": "Soldan Sağa",
+        "right-to-left-alt": "Sağdan Sola",
+        "fullscreen": "Tam Ekran"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -704,7 +947,18 @@
         "collections-label": "Koleksiyonlar",
         "ascending-alt": "Artan",
         "descending-alt": "Azalan",
-        "read": "Oku"
+        "read": "Oku",
+        "series-name-label": "Seri Adı",
+        "editor-label": "Editör",
+        "publication-status-label": "Yayın Durumu",
+        "libraries-label": "{{common.libraries}}",
+        "penciller-label": "Çizer",
+        "inker-label": "Mürekkepçi",
+        "read-progress-label": "Okunma İlerlemesi",
+        "unread": "Okunmamış",
+        "in-progress": "Devam Ediyor",
+        "publisher-label": "Yayıncı",
+        "format-label": "Biçim"
     },
     "metadata-filter-row": {
         "unit-user-rating": "0.0 - 5.0 yıldız",
@@ -750,7 +1004,19 @@
         "library-title": "Kütüphane",
         "name-label": "İsim",
         "size-title": "Boyut",
-        "folder-path-title": "Klasör Yolu"
+        "folder-path-title": "Klasör Yolu",
+        "info-title": "Bilgi",
+        "no-data": "{{common.no-data}}",
+        "title": "{{seriesName}} Ayrıntılar",
+        "publication-status-label": "Yayın Durumu",
+        "publication-status-title": "Yayın Durumu",
+        "created-title": "Oluşturuldu",
+        "total-pages-title": "Toplam Sayfa",
+        "total-words-title": "Toplam Kelime",
+        "added-title": "Eklendi",
+        "summary-label": "Özet",
+        "last-modified-title": "Son Değişiklik",
+        "format-title": "Biçim"
     },
     "edit-chapter-modal": {
         "close": "{{common.close}}",
@@ -792,7 +1058,14 @@
         "reading-time-label": "Okuma Süresi",
         "pages-count": "{{num}} Sayfa",
         "pages-label": "Sayfalar",
-        "words-count": "{{num}} Kelime"
+        "words-count": "{{num}} Kelime",
+        "words-label": "Uzunluk",
+        "title-label": "Başlık",
+        "release-date-label": "Yayın",
+        "range-hours": "{{value}} {{hourWord}}",
+        "isbn-label": "ISBN",
+        "files-label": "Dosyalar",
+        "date-added-label": "Eklenme Tarihi"
     },
     "edit-volume-modal": {
         "close": "{{common.close}}",
@@ -818,13 +1091,16 @@
         "last-90-days": "{{time-periods.last-90-days}}",
         "last-year": "{{time-periods.last-year}}",
         "all-time": "{{time-periods.all-time}}",
-        "all-users": "Tüm Kullanıcılar"
+        "all-users": "Tüm Kullanıcılar",
+        "y-axis-label": "Okunan Saat",
+        "title": "Okuma Etkinliği"
     },
     "series-preview-drawer": {
         "tags-label": "{{filter-field-pipe.tags}}",
         "genres-label": "{{filter-field-pipe.genres}}",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
-        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
+        "view-series": "Serileri Görüntüle"
     },
     "server-stats": {
         "tags": "{{metadata-fields.tags-title}}",
@@ -846,12 +1122,31 @@
         "total-volumes-label": "Toplam Ciltler",
         "total-genres-label": "Toplam Türler",
         "total-people-label": "Toplam Kişi",
-        "genre-count": "{{num}} Tür"
+        "genre-count": "{{num}} Tür",
+        "users": "kullanıcılar",
+        "tag-count": "{{num}} Etiketler",
+        "readers": "okuyucular",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "series-count": "{{num}} Seri",
+        "volume-count": "{{num}} Cilt",
+        "file-count": "{{num}} Dosya",
+        "people-count": "{{num}} Kişi",
+        "people": "Kişi",
+        "popular-libraries-title": "Popüler Kütüphaneler",
+        "reads": "okumalar",
+        "popular-series-title": "Popüler Seriler",
+        "popular-decades-title": "Popüler On Yıllar",
+        "popular-tags-title": "Popüler Etiketler",
+        "popular-person-title": "Popüler {{role}}",
+        "popular-genres-title": "Popüler Türler",
+        "popular-reading-lists-title": "En Çok Okunan Okuma Listeleri",
+        "management-tab": "{{tabs.management-tab}}"
     },
     "customize-dashboard-streams": {
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
     },
     "customize-sidenav-streams": {
         "add": "{{common.add}}",
@@ -859,18 +1154,22 @@
         "clear": "{{common.clear}}",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
         "reorder-when-filter-present": "Bir süzgeç mevcutken ögeleri sürükle ve bırak yoluyla yeniden sıralayamazsınız. {{customize-sidenav-streams.order-numbers-label}} kullanın",
-        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}"
+        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
+        "smart-filters-title": "Akıllı Filtreler"
     },
     "manage-external-sources": {
         "clear": "{{common.clear}}",
-        "filter": "{{common.filter}}"
+        "filter": "{{common.filter}}",
+        "add-source": "Ekle"
     },
     "manage-smart-filters": {
         "delete": "{{common.delete}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "cancel": "{{common.cancel}}",
-        "name-label": "İsim"
+        "name-label": "İsim",
+        "edit-smart-filter": "Düzenle {{name}}",
+        "edit": "{{common.edit}}"
     },
     "edit-external-source-item": {
         "save": "{{common.save}}",
@@ -878,7 +1177,8 @@
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
         "required": "{{validation.required-field}}",
-        "name-label": "İsim"
+        "name-label": "İsim",
+        "host-label": "Ana Bilgisayar"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -889,7 +1189,8 @@
         "collections": "{{side-nav.collections}}",
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
-        "all-series": "{{side-nav.all-series}}"
+        "all-series": "{{side-nav.all-series}}",
+        "browse-authors": "{{side-nav.browse-people}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -903,7 +1204,21 @@
         "path": "Yol",
         "file-path": "Dosya Yolu",
         "file-size": "Dosya boyutu",
-        "read-time": "Okuma Süresi"
+        "read-time": "Okuma Süresi",
+        "series-name": "Seri Adı",
+        "editor": "Editör",
+        "languages": "Diller",
+        "publication-status": "Yayın Durumu",
+        "libraries": "{{common.libraries}}",
+        "penciller": "Çizer",
+        "inker": "Mürekkepçi",
+        "want-to-read": "Okumak İstiyorum",
+        "user-rating": "Kullanıcı Puanı",
+        "read-date": "Okuma Tarihi",
+        "read-progress": "Okunma İlerlemesi",
+        "summary": "Özet",
+        "read-last": "Son Okunan",
+        "publisher": "Yayıncı"
     },
     "actionable": {
         "clear": "{{common.clear}}",
@@ -913,7 +1228,35 @@
         "download": "İndir",
         "settings": "Ayarlar",
         "merge": "Birleştir",
-        "read": "Oku"
+        "read": "Oku",
+        "title": "Eylemler",
+        "scan-series": "Serileri Tara",
+        "scan-series-tooltip": "Değişiklikler için Serileri Tara",
+        "mark-as-unread": "Okunmamış olarak işaretle",
+        "add-to-collection": "Koleksiyona Ekle",
+        "new-collection": "Yeni Koleksiyon",
+        "export": "Dışa Aktar",
+        "refresh-covers": "Kapakları Yenile",
+        "scan-library": "Kütüphaneyi Tara",
+        "mark-as-read": "Okundu olarak işaretle",
+        "details": "Ayrıntılar",
+        "rename": "Yeniden adlandır",
+        "edit-device-name": "Adı Düzenle",
+        "read-incognito": "Gizli Modda Oku",
+        "details-tooltip": "YAPILACAKLAR",
+        "view-series-tooltip": "YAPILACAKLAR",
+        "customize-tooltip": "YAPILACAKLAR",
+        "mark-visible-tooltip": "YAPILACAKLAR",
+        "mark-invisible-tooltip": "YAPILACAKLAR",
+        "unlike": "Beğenileri kaldır",
+        "multiple-selections": "Çoklu Seçimler",
+        "mark-visible": "Görünür olarak işaretle",
+        "mark-invisible": "Görünmez olarak işaretle",
+        "view-series": "Serileri Görüntüle",
+        "rename-tooltip": "Akıllı Filtreyi Yeniden Adlandır",
+        "like": "Beğen",
+        "reorder": "Yeniden Sırala",
+        "add-to-reading-list": "Okuma Listesine Ekle"
     },
     "preferences": {
         "1-column": "1 Sütun",
@@ -926,7 +1269,16 @@
         "list": "Liste",
         "pdf-book": "Kitap",
         "vertical": "Dikey",
-        "horizontal": "Yatay"
+        "horizontal": "Yatay",
+        "pdf-multiple": "Varsayılan",
+        "left-to-right": "Soldan Sağa",
+        "right-to-left": "Sağdan Sola",
+        "split-right-to-left": "Sağdan Sola bölün",
+        "split-left-to-right": "Soldan Sağa bölün",
+        "pdf-vertical": "Dikey Kaydırma",
+        "pdf-horizontal": "Yatay Kaydırma",
+        "scroll": "Kaydır",
+        "pdf-dark": "Karanlık"
     },
     "validation": {
         "required-field": "Bu alan gereklidir",
@@ -972,9 +1324,12 @@
         "issue-count": "{{num}} Sorun",
         "chapter-num-shorthand": "Bl {{num}}",
         "issue-num-shorthand": "#{{num}}",
-        "volume-num-shorthand": "Cilt {{num}}",
+        "volume-num-shorthand": "C {{num}}",
         "volume-nums": "Ciltler",
-        "deselect-all": "Tümünün Seçimini Kaldır"
+        "deselect-all": "Tümünün Seçimini Kaldır",
+        "confirm": "Onayla",
+        "selected": "Seçilen",
+        "roles": "Roller"
     },
     "tabs": {
         "account-tab": "Hesap",
@@ -994,20 +1349,42 @@
         "weblink-tab": "Web Linkleri",
         "series-tab": "Seriler",
         "info-tab": "Bilgi",
-        "preferences-tab": "Tercihler"
+        "preferences-tab": "Tercihler",
+        "activity-tab": "Aktivite",
+        "smart-filters-tab": "Akıllı Filtreler",
+        "people-tab": "Kişi",
+        "metadata-tab": "Meta veri",
+        "management-tab": "Yöneticilik"
     },
     "toasts": {
         "account-registration-complete": "Hesap kaydı tamamlandı",
         "account-migration-complete": "Hesap taşıma tamamlandı",
         "reset-ip-address": "IP adresleri sıfırla",
-        "password-reset": "Parola sıfırla",
-        "age-restriction-updated": "Yaş kısıtlaması güncellendi"
+        "password-reset": "Parolayı sıfırla",
+        "age-restriction-updated": "Yaş kısıtlaması güncellendi",
+        "confirm-delete-user": "Bu kullanıcıyı silmek istediğinize emin misiniz?",
+        "server-settings-updated": "Sunucu ayarları güncellendi",
+        "user-deleted": "{{user}} silindi",
+        "item-removed": "Öğe kaldırıldı",
+        "series-deleted": "Seri silindi",
+        "library-deleted": "{{name}} kütüphanesi kaldırıldı",
+        "library-created": "Kütüphane başarıyla oluşturuldu. Tarama başlatıldı.",
+        "collection-tag-deleted": "Koleksiyon Etiketi silindi",
+        "collections-deleted": "Koleksiyonlar silindi",
+        "chapter-deleted": "Bölüm silindi",
+        "volume-deleted": "Cilt silindi",
+        "smart-filter-deleted": "Akıllı Filtre Silindi"
     },
     "api-key": {
-        "copy": "Kopyala"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "confirm": {
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "confirm": "Onayla",
+        "info": "Bilgi",
+        "ok": "Tamam",
+        "alert": "Alarm",
+        "prompt": "Soru"
     },
     "publication-status-pipe": {
         "cancelled": "İptal edildi",
@@ -1026,12 +1403,21 @@
         "change-restriction": "Kısıtlamayı değiştir",
         "download": "İndir",
         "login": "Giriş",
-        "change-password": "Şifreyi Değiştir"
+        "change-password": "Şifreyi Değiştir",
+        "read-only": "Salt Okunur",
+        "promote": "Tanıtım",
+        "admin": "Yönetim",
+        "bookmark": "Yer imi"
     },
     "file-breakdown-stats": {
         "total-file-size-title": "Toplam dosya boyutu:",
         "total-files-header": "Toplam Dosyalar",
-        "total-size-header": "Toplam Boyut"
+        "total-size-header": "Toplam Boyut",
+        "data-table-label": "Veri Tablosu",
+        "no-data": "{{common.no-data}}",
+        "extension-header": "Uzantı",
+        "format-header": "Biçim",
+        "format-title": "Biçim"
     },
     "cbl-import-result-pipe": {
         "failure": "Başarısız",
@@ -1046,7 +1432,11 @@
         "adaptation": "Uyarlama",
         "alternative-setting": "Alternatif Ayar",
         "alternative-version": "Alternatif Sürüm",
-        "edition": "Baskı"
+        "edition": "Baskı",
+        "contains": "İçerik",
+        "doujinshi": "Hayranların Çizgi Romanları",
+        "sequel": "Devamı",
+        "annual": "Bir Yıllık"
     },
     "manage-metadata-settings": {
         "derive-publication-status-tooltip": "Yayın durumunun toplam bölüm/cilt sayılarından türetilmesine izin ver.",
@@ -1061,20 +1451,30 @@
         "tag": "Etiket",
         "genre": "Tür",
         "tags-header": "Etiketler",
-        "enable-genres-label": "Türler"
+        "enable-genres-label": "Türler",
+        "derive-publication-status-label": "Yayın Durumu",
+        "person-roles-label": "{{common.roles}}",
+        "enable-people-label": "Kişi",
+        "people-header": "Kişi"
     },
     "card-detail-layout": {
-        "total-items": "Toplam {{count}} öge"
+        "total-items": "Toplam {{count}} öge",
+        "no-data": "{{common.no-data}}"
     },
     "pdf-layout-mode-pipe": {
-        "single": "Tek sayfa"
+        "single": "Tek sayfa",
+        "multiple": "Varsayılan"
     },
     "font-manager": {
         "back": "Geri",
         "load": "Yükle",
         "enter-an-url-pre-title": "Bir {{url}} girin",
         "url": "url",
-        "url-label": "Url"
+        "url-label": "Url",
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}"
     },
     "manage-reading-profiles": {
         "reading-profile-library-settings-title": "Kütüphane",
@@ -1082,15 +1482,25 @@
         "pdf-scroll-mode-label": "Kaydırma Modu",
         "pdf-reader-settings-title": "PDF Okuyucu",
         "reading-profile-series-settings-title": "Seriler",
-        "make-default": "Varsayılan olarak ayarla"
+        "make-default": "Varsayılan olarak ayarla",
+        "default-profile": "Varsayılan",
+        "add": "{{common.add}}",
+        "reset": "{{common.reset}}",
+        "book-reader-settings-title": "Kitap Okuyucu",
+        "color-theme-book-label": "Renk Teması",
+        "delete": "{{common.delete}}"
     },
     "entity-type": {
         "chapter": "bölüm",
         "series": "seriler",
-        "volume": "cilt"
+        "volume": "cilt",
+        "bookmark": "yer imi"
     },
     "oidc": {
-        "login": "Giriş ekranına dön"
+        "login": "Giriş ekranına dön",
+        "title": "OIDC Geri Çağrısı",
+        "error-loading-info": "OIDC bilgilerini yüklerken bir hata oluştu, yöneticinize başvurun",
+        "timeout": "OIDC çözünürlüğü zaman aşımına uğradı veya bir hata oluştu"
     },
     "manage-oidc-connect": {
         "defaults-title": "Varsayılanlar",
@@ -1103,11 +1513,53 @@
         "disable-password-authentication-label": "Parola doğrulamasını devre dışı bırak",
         "disable-password-authentication-tooltip": "Yönetici rolüne sahip kullanıcılar bu kısıtlamayı aşabilir",
         "advanced-title": "Gelişmiş ayarlar",
-        "provider-title": "Sağlayıcı"
+        "provider-title": "Sağlayıcı",
+        "default-libraries-label": "{{common.libraries}}",
+        "default-roles-label": "{{common.roles}}",
+        "save": "{{common.save}}",
+        "other-field-required": "{{validation.other-field-required}}",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "reset-label": "Kimlikleri sıfırla",
+        "reset-tooltip": "Tüm kullanıcıların harici kimliklerini sıfırlayın, bunu Kavita ve kimlik sağlayıcınız arasındaki bağlantıları sıfırlamak için kullanın",
+        "reset-confirm": "Tüm kullanıcıların harici kimliklerini sıfırlamak istediğinize emin misiniz?",
+        "reset-success": "Tüm kullanıcılar için harici kimlikler sıfırlandı, bağlantı kurmak için yeniden kimlik doğrulaması yapın",
+        "save-success": "OIDC ayarlarınız başarıyla güncellendi",
+        "notice": "Bildirim",
+        "restart-required": "Sağlayıcıyı veya gelişmiş ayarları değiştirmek için Kavita'nın manuel olarak yeniden başlatılması gerekir.",
+        "auto-save-required": "Kritik ayarları değiştirdiniz, değişiklikler kalıcı olsun diye otomatik kaydet özelliğini kullanın",
+        "tls-required": "OIDC sağlayıcısı tls (https) kullanmalıdır",
+        "manual-save-label": "Sağlayıcı ayarlarını değiştirmek için manuel olarak kaydetmeniz gerekir",
+        "provider-tooltip": "Sağlayıcı ayarları için manuel olarak Kaydet'i tıklamanız gerekir. Kavita, gizli bir istemci olarak yapılandırılmalıdır ve bir yönlendirme URL'si gerektirir. Daha fazla bilgi için <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> sayfasına bakın.",
+        "authority-tooltip": "OIDC sağlayıcınızın URL'sine .well-known/openid-configuration yolunu eklemeyin",
+        "client-id-label": "Müşteri Kimliği",
+        "client-id-tooltip": "OIDC sağlayıcınızda ayarlanan ClientID herhangi bir şey olabilir",
+        "secret-label": "Müşteri gizli bilgisi",
+        "secret-tooltip": "OIDC sağlayıcınız tarafından oluşturulan gizli bilgi, ayarlandıktan sonra gösterilmeyecektir",
+        "provision-accounts-label": "Karşılık hesapları",
+        "provision-accounts-tooltip": "OIDC üzerinden giriş yapıldığında mevcut bir hesapla eşleştirilememesi durumunda otomatik olarak yeni bir hesap oluşturulur",
+        "require-verified-email-tooltip": "Yeni bir hesap oluştururken veya mevcut bir hesapla eşleştirirken e-posta doğrulaması gerekir. Yeni oluşturulan bir hesabın doğrulanmış bir e-postası varsa, Kavita tarafında otomatik olarak doğrulanır.",
+        "sync-user-settings-label": "Kullanıcı ayarlarını OIDC rolleriyle senkronize edin",
+        "sync-user-settings-tooltip": "OIDC aracılığıyla oluşturulan kullanıcılar, roller, kütüphane erişimi ve yaş derecelendirmesi dahil olmak üzere kimlik sağlayıcı tarafından tamamen yönetilecektir. Bu seçenek devre dışı bırakılırsa, kullanıcılar hesap oluşturulduktan sonra hiçbir içeriğe erişemeyecektir. Daha fazla ayrıntı için belgelere bakın.",
+        "auto-login-tooltip": "Giriş ekranı açıldığında otomatik olarak OIDC sağlayıcısına yönlendirilir",
+        "defaults-requirement": "Kullanıcı Ayarlarını Senkronize Et seçeneği kapalıyken bir kullanıcı OIDC aracılığıyla kaydedildiğinde aşağıdaki ayarlar kullanılır",
+        "default-include-unknowns-label": "Bilinmeyenleri dahil et",
+        "default-include-unknowns-tooltip": "Bilinmeyen yaş derecelendirmelerini dahil et",
+        "default-age-restriction-label": "Yaş derecelendirmesi",
+        "default-age-restriction-tooltip": "Yeni kullanıcılara gösterilen maksimum yaş derecelendirmesi",
+        "advanced-tooltip": "Bu seçenekleri yalnızca etkilerini anlıyorsanız değiştirin.",
+        "roles-prefix-label": "Roller öneki",
+        "roles-prefix-tooltip": "Kavita sadece bu önekle başlayan rolleri dikkate alacaktır.",
+        "roles-claim-label": "Rol talepleri",
+        "roles-claim-tooltip": "Kavita'nın rolleri çıkarmak için kullanacağı talep. Varsayılanı kullanmak için boş bırakın.",
+        "custom-scopes-label": "Özel kapsamlar",
+        "custom-scopes-tooltip": "Giriş sırasında OIDC sağlayıcınızdan talep edeceğiniz ek kapsamlar. Birden fazla kapsamı virgülle ayırın. Yanlış değerler girişi engelleyebilir."
     },
     "multi-check-box-form": {
         "select-all": "Tümünü seç",
-        "deselect-all": "Tümünün seçimini kaldır"
+        "deselect-all": "Tümünün seçimini kaldır",
+        "no-data": "{{typeahead.no-data}}"
     },
     "time-periods": {
         "this-week": "Bu Hafta",
@@ -1159,14 +1611,19 @@
         "adults-only": "Sadece 18+ Yetişkinler",
         "everyone-10-plus": "10 Yaş ve Üzeri Herkes",
         "kids-to-adults": "Çocuklardan Yetişkinlere",
-        "teen": "Genç"
+        "teen": "Genç",
+        "mature": "Olgun",
+        "mature-17-plus": "Olgun 17+",
+        "not-applicable": "Uygulanamaz"
     },
     "announcements": {
         "title": "Duyurular"
     },
     "changelog": {
         "download": "İndir",
-        "installed": "Kuruldu"
+        "installed": "Kuruldu",
+        "nightly": "Gecelik: {{version}}",
+        "available": "Mevcut"
     },
     "changelog-update-item": {
         "download": "İndir",
@@ -1177,43 +1634,87 @@
         "fixed": "Düzeltildi",
         "developer": "Geliştirici",
         "known-issues": "Bilinen Sorunlar",
-        "feature-requests": "Özellik Talepleri"
+        "feature-requests": "Özellik Talepleri",
+        "installed": "{{changelog.installed}}"
     },
     "new-version-modal": {
         "refresh": "Tazele",
-        "title": "Kavita güncellendi!"
+        "title": "Kavita güncellendi!",
+        "added": "{{changelog.added}}",
+        "changed": "{{changelog.changed}}",
+        "fixed": "{{changelog.fixed}}",
+        "developer": "{{changelog.developer}}",
+        "theme": "{{changelog.theme}}",
+        "removed": "{{changelog.removed}}",
+        "known-issues": "{{changelog.known-issues}}",
+        "api": "{{changelog.api}}",
+        "close": "{{common.close}}"
     },
     "manage-matched-metadata": {
         "library-name-header": "Kütüphane",
         "series-name-header": "Seriler",
-        "status-header": "Durum"
+        "status-header": "Durum",
+        "actions-header": "Eylemler",
+        "no-data": "{{common.no-data}}",
+        "dont-match-status-label": "{{dont-match-label}}"
     },
     "cover-image-size": {
-        "default": "Varsayılan (320x455)"
+        "default": "Varsayılan (320x455)",
+        "medium": "Orta (640x909)",
+        "large": "Büyük (900x1277)",
+        "xlarge": "Ekstra Büyük (1265x1795)"
     },
     "view-edit-annotation-drawer": {
         "edit": "Düzenle",
-        "delete": "Sil"
+        "delete": "Sil",
+        "create": "Oluştur",
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
     },
     "download-button": {
         "download-tooltip": "İndir",
         "downloading-status": "İndiriliyor…"
     },
     "identity-provider-pipe": {
-        "kavita": "Kavita"
+        "kavita": "Kavita",
+        "oidc": "OpenID Bağlantısı"
     },
     "manage-auth-keys": {
         "name-label": "İsim",
         "key-label": "Anahtar",
         "rotate": "Döndür",
-        "add-auth-key": "Yeni"
+        "add-auth-key": "Yeni",
+        "actions-label": "Eylemler",
+        "image-only": "Görseller",
+        "delete": "{{common.delete}}",
+        "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
+        "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
+        "clients-opds-description": "{{user-preferences.clients-opds-description}}",
+        "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
+        "expires-label": "Sona erme",
+        "last-accessed-label": "Son Erişim",
+        "copy-key": "{{common.copy}}",
+        "auth-keys-title": "Yetkilendirme Anahtarlarını Yönet",
+        "opds": "OPDS",
+        "description": "Kimlik doğrulama anahtarı bir parola gibidir. Anahtarın değiştirilmesi, mevcut tüm istemcilerin yetkisini geçersiz kılacaktır."
     },
     "create-auth-key": {
         "never": "Asla",
-        "name-label": "İsim"
+        "name-label": "İsim",
+        "total-key-length": "Toplam Anahtar Uzunluğu: {{length}}",
+        "required-field": "{{validations.required-field}}",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "key-length-label": "Anahtar Uzunluğu",
+        "expiration-label": "Sona erme",
+        "create-title": "Kimlik Doğrulama Anahtarı Oluştur",
+        "rotate-title": "Kimlik Doğrulama Anahtarını Döndür"
     },
     "breakpoint-pipe": {
-        "never": "Asla"
+        "never": "Asla",
+        "tablet": "Tablet",
+        "desktop": "Masaüstü",
+        "mobile": "Mobil"
     },
     "default-date-pipe": {
         "never": "Asla"
@@ -1222,39 +1723,80 @@
         "toc-header": "Kitap"
     },
     "view-bookmark-drawer": {
-        "load-bookmark": "Yükle"
+        "load-bookmark": "Yükle",
+        "page-num-label": "{{book-reader.page-num-label}}",
+        "text-header": "Metin",
+        "no-data": "{{common.no-data}}",
+        "image-header": "Resim"
     },
     "pdf-scroll-mode-pipe": {
         "vertical": "Dikey",
         "horizontal": "Yatay"
     },
     "pdf-reader": {
-        "loading-message": "Yükleniyor..."
+        "loading-message": "Yükleniyor...",
+        "light-theme-alt": "Açık Tema",
+        "dark-theme-alt": "Karanlık Tema",
+        "close-reader-alt": "Okuyucuyu Kapat"
     },
     "import-mappings": {
         "import-step": "İçe Aktar",
         "fields-to-import": "Ayarlar",
-        "merge": "Birleştir"
+        "merge": "Birleştir",
+        "import": "{{import-cbl-modal.import}}",
+        "save": "{{common.save}}",
+        "to-pick": "Çözünürlük seçin",
+        "keep": "Koru",
+        "configure-step": "Yapılandır",
+        "finalize-step": "Sonlandır",
+        "next": "{{import-cbl-modal.next}}",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import-mode-label": "İçe aktarma modu",
+        "replace": "Yerine Koy"
     },
     "browse-genres": {
-        "genre-count": "{{num}} Tür"
+        "genre-count": "{{num}} Tür",
+        "series-count": "{{common.series-count}}",
+        "issue-count": "{{common.issue-count}}",
+        "title": "Türlere Gözat"
     },
     "browse-people": {
-        "name-label": "İsim"
+        "name-label": "İsim",
+        "series-count": "{{common.series-count}}",
+        "roles-label": "{{common.roles}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "author-count": "{{num}} Kişi",
+        "issue-count": "{{common.issue-count}}"
     },
     "sort-field-pipe": {
         "person-name": "İsim",
         "annotation-owner": "Sahibi",
         "read-progress": "Son Okuma",
-        "release-year": "Yayınlanma Yılı"
+        "release-year": "Yayınlanma Yılı",
+        "annotation-series": "Seri adı",
+        "random": "Rastgele",
+        "annotation-color": "Renk",
+        "person-chapter-count": "Bölüm Sayısı",
+        "created": "Oluşturuldu",
+        "last-modified": "Son Değişiklik"
     },
     "generic-filter-field-pipe": {
         "person-name": "İsim",
-        "annotation-owner": "Sahibi"
+        "annotation-owner": "Sahibi",
+        "annotation-series": "Seri adı",
+        "series": "{{tabs.series-tab}}",
+        "person-chapter-count": "Bölüm Sayısı"
     },
     "activity-graph": {
         "pages": "Sayfalar",
-        "words": "Kelimeler"
+        "words": "Kelimeler",
+        "all-time": "{{time-periods.all-time}}",
+        "low-activity-alt": "Düşük Aktivite",
+        "reading-time": "Okunma Süresi",
+        "moderate-activity-alt": "Orta Düzeyde Aktivite",
+        "good-activity-alt": "İyi Aktivite",
+        "high-activity-alt": "Yüksek Aktivite",
+        "title": "Okuma Etkinliği"
     },
     "day-label-pipe": {
         "wednesday": "Çarşamba",
@@ -1280,7 +1822,8 @@
         "screen-label": "Ekran",
         "platform-label": "Platform",
         "auth-type-label": "Kimlik Doğrulama Türü",
-        "active": "Aktif"
+        "active": "Aktif",
+        "save": "{{common.save}}"
     },
     "read-more": {
         "read-more": "Devamını Oku",
@@ -1290,12 +1833,375 @@
         "more-items": "ve {{count}} daha fazla"
     },
     "reading-progress-status-pipe": {
-        "no-progress": "Oku"
+        "no-progress": "Oku",
+        "full-read": "Tekrar Oku",
+        "no-progress-incognito": "Gizli modda oku",
+        "progress": "Devam et"
     },
     "duration-pipe": {
         "seconds": "{{num}} saniye",
         "minutes": "{{num}} dakika",
         "hours": "{{num}} saat",
         "combo": "{{hour}}s {{min}}d"
+    },
+    "log-level-pipe": {
+        "warning": "Uyarı",
+        "information": "Bilgi",
+        "critical": "Kritik",
+        "debug": "Hata Ayıklama"
+    },
+    "browse-title-pipe": {
+        "editor": "Düzenleyen {{value}}",
+        "team": "Takım {{value}}",
+        "artist": "Çizen {{value}}",
+        "writer": "Yazan {{value}}",
+        "user-rating": "{{value}} yıldız derecelendirmesi",
+        "translator": "Çeviren {{value}}"
+    },
+    "draggable-ordered-list": {
+        "remove-item-alt": "Öğeyi kaldır",
+        "reorder-label": "Yeniden Sırala",
+        "bulk-select-label": "Toplu Seçim öğesi",
+        "instructions-alt": "Yeniden sıralama girişine bir sayı girdiğinizde, öğe o konuma eklenir ve diğer tüm öğelerin sırası güncellenir."
+    },
+    "device-platform-pipe": {
+        "custom": "Kişiselleştir"
+    },
+    "download-indicator": {
+        "progress": "{{percentage}}% indirildi"
+    },
+    "smart-time-picker": {
+        "select-year": "Yıl Seçin",
+        "close": "{{common.close}}",
+        "during-from-to": "{{startYear}}'dan {{endYear}}'a",
+        "forever": "Sonsuza kadar"
+    },
+    "genre-breakdown": {
+        "no-data": "{{common.no-data}}"
+    },
+    "highlight-bar": {
+        "close": "{{common.close}}",
+        "edit": "{{common.edit}}"
+    },
+    "infinite-scroller": {
+        "continuous-reading-next-chapter": "Sonraki Bölüm",
+        "continuous-reading-prev-chapter": "Önceki Bölüm"
+    },
+    "bulk-set-reading-profile-modal": {
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "loading": "{{common.loading}}",
+        "no-data": "Henüz koleksiyon oluşturulmadı",
+        "clear": "{{common.clear}}"
+    },
+    "personal-table-of-contents": {
+        "filter-label": "{{common.filter}}"
+    },
+    "view-annotations-drawer": {
+        "title": "{{tabs.annotations-tab}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "annotation-card": {
+        "page-num": "{{book-reader.page-num-label}}",
+        "location-tooltip": "{{library}} - {{series}}"
+    },
+    "epub-setting-drawer": {
+        "title": "Kitap Ayarları",
+        "close": "{{common.close}}"
+    },
+    "manage-user-tokens": {
+        "no-data": "{{common.no-data}}",
+        "username-header": "Kullanıcı adı"
+    },
+    "email-history": {
+        "no-data": "{{common.no-data}}",
+        "template-header": "Şablon"
+    },
+    "server-devices": {
+        "no-data": "{{common.no-data}}"
+    },
+    "preferred-format": {
+        "no-data": "{{common.no-data}}"
+    },
+    "favorite-authors": {
+        "no-data": "{{common.no-data}}"
+    },
+    "page-spread": {
+        "no-data": "{{common.no-data}}",
+        "data-type": "{{data}} bölümleri"
+    },
+    "word-spread": {
+        "no-data": "{{common.no-data}}",
+        "data-type": "{{data}} bölümleri"
+    },
+    "tag-breakdown": {
+        "no-data": "{{common.no-data}}"
+    },
+    "reads-by-month": {
+        "no-data": "{{common.no-data}}"
+    },
+    "avg-time-reading-by-hour": {
+        "no-data": "{{common.no-data}}"
+    },
+    "reading-pace": {
+        "no-data": "{{common.no-data}}",
+        "books-read": "Okunan Kitaplar",
+        "per-year": "Yılda",
+        "per-month": "Ayda",
+        "per-day": "Günde",
+        "pages-read": "Okunan Sayfa",
+        "words-read": "Okunan Kelime",
+        "hours-read": "Okunan Saat",
+        "comics-read": "Okunan Çizgi Roman"
+    },
+    "files-over-time": {
+        "no-data": "{{common.no-data}}"
+    },
+    "publication-status-stats": {
+        "no-data": "{{common.no-data}}",
+        "title": "Yayın Durumu",
+        "status-header": "{{manage-matched-metadata.status-header}}",
+        "data-table-label": "Veri Tablosu"
+    },
+    "browse-tags": {
+        "genre-count": "{{num}} Etiketler",
+        "series-count": "{{common.series-count}}",
+        "issue-count": "{{common.issue-count}}",
+        "title": "Etiketlere Gözat"
+    },
+    "metadata-setting-field-pipe": {
+        "tags": "{{metadata-fields.tags-title}}",
+        "covers": "Kapaklar",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "people": "{{tabs.people-tab}}",
+        "summary": "{{filter-field-pipe.summary}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "chapter-covers": "Kapaklar (Bölüm)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Bölüm)",
+        "chapter-title": "Başlık (Bölüm)",
+        "chapter-release-date": "Yayın Tarihi (Bölüm)",
+        "chapter-summary": "Özet (Bölüm)"
+    },
+    "all-annotations": {
+        "export": "Dışa Aktar"
+    },
+    "read-time-pipe": {
+        "hour": "Saat",
+        "hours": "Saat",
+        "less-than-hour": "<1 Saat"
+    },
+    "pdf-render-resolution": {
+        "default": "Varsayılan (1080x1920)",
+        "high": "Yüksek (1920x2560)",
+        "ultra": "Ultra (2160x3840)"
+    },
+    "review-list-item": {
+        "created-alt": "Oluşturuldu",
+        "by-label": "Tarafından"
+    },
+    "review-modal": {
+        "delete": "{{common.delete}}",
+        "required": "{{validation.required-field}}",
+        "title": "Değerlendirmeyi Düzenle",
+        "review-label": "Değerlendirme",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "min-length": "Değerlendirme en az {{count}} karakterden oluşmalıdır"
+    },
+    "reread-modal": {
+        "cancel": "{{common.cancel}}",
+        "reread": "Baştan Başla",
+        "title": "Tekrar Oku",
+        "description-full-read": "{{name}}'yi zaten bitirdiniz! Baştan başlamak ister misiniz?",
+        "read-incognito": "Gizli modda oku"
+    },
+    "user-stats-info-cards": {
+        "pages-count": "{{num}} sayfa",
+        "words-count": "{{num}} kelime"
+    },
+    "person-detail": {
+        "all-roles": "{{common.roles}}"
+    },
+    "edit-person-modal": {
+        "required-field": "{{validation.required-field}}",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "save": "{{common.save}}",
+        "description-label": "Açıklama"
+    },
+    "client-device-type-pipe": {
+        "tablet": "Tablet",
+        "desktop": "Masaüstü",
+        "mobile": "Mobil",
+        "Unknown": "{{common.unknown}}"
+    },
+    "month-label-pipe": {
+        "january": "Ocak",
+        "january-short": "Oca",
+        "february": "Şubat",
+        "february-short": "Şub",
+        "march": "Mart",
+        "march-short": "Mar",
+        "april": "Nisan",
+        "april-short": "Nis",
+        "may": "Mayıs",
+        "may-short": "May",
+        "june": "Haziran",
+        "june-short": "Haz",
+        "july": "Temmuz",
+        "july-short": "Tem",
+        "august": "Ağustos",
+        "august-short": "Ağu",
+        "september": "Eylül",
+        "september-short": "Eyl",
+        "october": "Ekim",
+        "october-short": "Eki",
+        "november": "Kasım",
+        "november-short": "Kas",
+        "december": "Aralık",
+        "december-short": "Ara"
+    },
+    "errors": {
+        "series-doesnt-exist": "Bu seri artık mevcut değil",
+        "error-code": "{{num}} Hata",
+        "unknown-crit": "Bilinmeyen kritik bir hata oluştu",
+        "invalid-confirmation-email": "Geçersiz onay e-postası"
+    },
+    "metadata-builder": {
+        "add-rule": "Kural Ekle"
+    },
+    "customize-dashboard-modal": {
+        "title-smart-filters": "Akıllı Filtreler",
+        "smart-filters": "Akıllı Filtreler",
+        "dashboard": "Kontrol Paneli"
+    },
+    "keybind-setting-description-pipe": {
+        "key-bind-title-go-to": "Sayfaya git",
+        "key-bind-title-toggle-menu": "Menüyü aç/kapat",
+        "key-bind-title-page-left": "Sayfa sol",
+        "key-bind-title-page-right": "Sayfa sağ",
+        "key-bind-title-page-up": "Sayfa yukarı",
+        "key-bind-title-page-down": "Sayfa aşağı",
+        "key-bind-tooltip-page-right": "Bir sayfayı sağa kaydır",
+        "key-bind-tooltip-page-up": "Bir sayfa yukarı kaydır",
+        "key-bind-tooltip-page-down": "Bir sayfa aşağı kaydır",
+        "key-bind-tooltip-page-left": "Bir sayfayı sola kaydır"
+    },
+    "manage-custom-key-binds": {
+        "readers-header": "Okuyucular"
+    },
+    "profile": {
+        "overview-tab": "{{tabs.overview-tab}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "reviews-tab": "{{tabs.reviews-tab}}",
+        "activity-tab": "{{tabs.activity-tab}}",
+        "title": "{{username}}'in Profili",
+        "last-read-label": "Son Okuma:",
+        "total-reads-badge": "{{reads}} Okuma",
+        "time-reading-label": "Toplam Okuma Süresi:",
+        "joined-label": "Katılan:"
+    },
+    "activity-card": {
+        "total-pages-label": "Toplam Sayfa",
+        "total-words-label": "Toplam Kelime",
+        "total-chapters-label": "Bölümler"
+    },
+    "server-activity": {
+        "no-data": "Burada görülecek bir şey yok"
+    },
+    "profile-stat-bar": {
+        "books-read-label": "Okunan Kitaplar",
+        "pages-read-label": "Okunan Sayfa",
+        "words-read-label": "Okunan Kelime",
+        "comics-read-label": "Okunan Çizgi Roman"
+    },
+    "filter-comparison-pipe": {
+        "contains": "İçerik"
+    },
+    "reviews": {
+        "user-reviews-local": "Yerel Değerlendirmeler",
+        "user-reviews-plus": "Dış Değerlendirmeler"
+    },
+    "match-series-result-item": {
+        "volume-count": "{{server-stats.volume-count}}",
+        "chapter-count": "{{common.chapter-count}}",
+        "issue-count": "{{common.issue-count}}"
+    },
+    "match-series-modal": {
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
+    },
+    "carousel-reel": {
+        "prev-items": "Önceki Öğeler",
+        "next-items": "Sonraki Öğeler"
+    },
+    "active-user-card": {
+        "total-hours": "{{duration}} toplam",
+        "comics-count": "{{count}} çizgi roman",
+        "books-count": "{{count}} kitap"
+    },
+    "time-frame-label": {
+        "week": "Bu hafta",
+        "month": "Bu ay",
+        "year": "Bu yıl",
+        "overall": "Genel olarak"
+    },
+    "most-active-users": {
+        "title": "En Aktif Okuyucular",
+        "no-data": "Zaman dilimi için okuma etkinliği yok"
+    },
+    "cbl-conflict-reason-pipe": {
+        "all-series-missing": "Hesabınızda listedeki tüm serilere erişim yok veya Kavita'nın listede yer alan hiçbir içeriği bulunmuyor.",
+        "success": "{{series}} cilt {{volume}} bölüm {{chapter}} başarıyla eşleştirildi."
+    },
+    "page-chapter-label-pipe": {
+        "page-only": "— Sayfa {{pageNumber}}"
+    },
+    "file-type-group-pipe": {
+        "archive": "Arşiv",
+        "epub": "Epub",
+        "pdf": "Pdf",
+        "image": "Resim"
+    },
+    "client-device-platform-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}"
+    },
+    "client-device-client-type-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}",
+        "web-browser": "Web Tarayıcı",
+        "panels": "Paneller"
+    },
+    "client-device-auth-type-pipe": {
+        "unknown": "Bilinmeyen"
+    },
+    "manage-system": {
+        "title": "Sistem Hakkında",
+        "version-title": "Sürüm",
+        "home-page-title": "Ana sayfa:",
+        "wiki-title": "Wiki:",
+        "discord-title": "Discord :",
+        "donations-title": "Bağışlar:",
+        "source-title": "Kaynak:",
+        "localization-title": "Yerelleştirmeler:",
+        "updates-title": "Güncelleme Geçmişi",
+        "installId-title": "Kurulum Kimliği",
+        "first-install-date-title": "İlk Kurulum Tarihi",
+        "more-info-title": "Daha Fazla Bilgi"
+    },
+    "profile-activity": {
+        "info-alt": "Daha Fazla Bilgi"
+    },
+    "profile-overview": {
+        "want-to-read": "{{side-nav.want-to-read}}"
+    },
+    "next-expected-card": {
+        "title": "~{{date}}"
+    },
+    "merge-person-modal": {
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
     }
 }

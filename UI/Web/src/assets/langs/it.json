@@ -2373,6 +2373,19 @@
     "manage-oidc-connect": {
         "save-success": "Impostazioni OIDC aggiornate con successo",
         "notice": "Avviso",
-        "restart-required": "La modifica dell'Autorità o del ClientID richiede un riavvio manuale di Kavita."
+        "restart-required": "La modifica del Provide o delle impostazioni avanzate richiede un riavvio manuale di Kavita.",
+        "save": "{{common.save}}",
+        "reset-label": "Reset ids",
+        "auto-save-required": "Hai cambiato impostazioni critiche, salva per mentenerle",
+        "provider-title": "Provider",
+        "provider-tooltip": "Modifiche al Provider richiedono il salvattaggio manuale. Kavita deve essere configurato come client confidenziale e necessita di un URL di reindirizzamento. Maggiori informazione nella <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>guida</a>.",
+        "behavior-title": "Comportamento",
+        "other-field-required": "{{validation.other-field-required}}",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "tls-required": "Il provider OIDC richiede tls (https)",
+        "manual-save-label": "Modifiche al provider richiedono un salvataggio manuale",
+        "authority-tooltip": "L'URL del provider OIDC, non include il percorso .well-known/openid-configuration",
+        "client-id-label": "Client ID"
     }
 }

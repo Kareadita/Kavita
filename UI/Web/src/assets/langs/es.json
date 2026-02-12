@@ -2361,13 +2361,19 @@
         "reset-success": "Se han eliminado los IDs para todos los usuarios, vuelva a iniciar sesión para vincular",
         "notice": "Aviso",
         "restart-required": "Para cambiar de Proveedor o modificar la configuración avanzada, es necesario reiniciar Kavita manualmente para que los cambios surtan efecto.",
-        "auto-save-required": "Haz realizado cambios importantes, guarda para conservar los cambios",
+        "auto-save-required": "Haz realizado cambios importantes, guarda para conservarlos",
         "other-field-invalid": "{{validation.other-field-invalid}}",
         "tls-required": "El proveedor OIDC debe utilizar TLS (https)",
         "authority-label": "Autoridad",
         "client-id-label": "ID Cliente",
         "secret-label": "Cliente secreto",
-        "secret-tooltip": "La clave secreta generada por su proveedor OIDC no se mostrará después de haberlo configurado"
+        "secret-tooltip": "La clave secreta generada por su proveedor OIDC no se mostrará después de haberlo configurado",
+        "authority-tooltip": "La URL de tu proveedor se OIDC. No incluyas la ruta de configuración de .well-know/openid-configuration",
+        "sync-user-settings-label": "Sincronizar configuración de usuario con roles OIDC",
+        "sync-user-settings-tooltip": "Usuarios creados via OIDC son controlados enteramente por el proveedor de identidad, incluyendo roles, acceso a la biblioteca, y clasificación de edad. Si esta opción está deshabilitada, los usuarios no tendrán acceso a ningún contenido tras la creación de la cuenta. Consulte la documentación para ver más detalles.",
+        "default-roles-label": "{{common.roles}}",
+        "roles-claim-label": "Afirmación de roles",
+        "roles-claim-tooltip": "La afirmación que Kavita usará para extraer los roles. Dejar en blanco para usar el valor por defecto."
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
