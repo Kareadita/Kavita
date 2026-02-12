@@ -13,9 +13,8 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {AccountService} from "../../_services/account.service";
-import {Observable, tap} from "rxjs";
+import {Observable} from "rxjs";
 import {User} from "../../_models/user/user";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ActionableEntity} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
@@ -39,18 +38,19 @@ export class ActionableModalComponent implements OnInit {
   protected readonly destroyRef = inject(DestroyRef);
 
   @Input() entity: ActionableEntity = null;
-  @Input() actions: ActionItem<any>[] = [];
+  /** This assumes these are filtered actions */
+  @Input() filteredActions: ActionItem<any>[] = [];
   @Input() willRenderAction!: (action: ActionItem<any>, user: User) => boolean;
   @Input() shouldRenderSubMenu!: (action: ActionItem<any>, dynamicList: null | Array<any>) => boolean;
   @Output() actionPerformed = new EventEmitter<ActionItem<any> | ActionResult<any>>();
 
   currentLevel: string[] = [];
   currentItems: ActionItem<any>[] = [];
-  user!: User | undefined;
+  //user!: User | undefined;
 
   ngOnInit() {
     // Copy as the list may be shared between entities
-    const actionItems = this.actions.map(action => this.utilityService.copyActionItem(action));
+    const actionItems = this.filteredActions.map(action => this.utilityService.copyActionItem(action));
 
     // On Mobile, surface download
     const otherActionIndex = actionItems.findIndex(i => i.action === Action.Submenu && i.title === 'others')
@@ -68,13 +68,8 @@ export class ActionableModalComponent implements OnInit {
       }
     }
 
-    this.actions = actionItems;
-    this.currentItems = this.translateOptions(this.actions)
-
-    this.accountService.currentUser$.pipe(tap(user => {
-      this.user = user;
-      this.cdRef.markForCheck();
-    }), takeUntilDestroyed(this.destroyRef)).subscribe();
+    this.filteredActions = actionItems;
+    this.currentItems = this.translateOptions(this.filteredActions)
   }
 
   handleItemClick(item: ActionItem<any>) {
@@ -114,7 +109,7 @@ export class ActionableModalComponent implements OnInit {
     if (this.currentLevel.length > 0) {
       this.currentLevel.pop();
 
-      let items = this.actions;
+      let items = this.filteredActions;
       for (let level of this.currentLevel) {
         items = items.find(item => item.title === level)?.children || [];
       }

@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, inject, input, OnDestroy, Output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  EventEmitter,
+  inject,
+  input,
+  OnDestroy,
+  Output
+} from '@angular/core';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {AccountService} from 'src/app/_services/account.service';
 import {ActionableEntity} from 'src/app/_services/action-factory.service';
@@ -48,6 +57,15 @@ export class CardActionablesComponent implements OnDestroy {
    */
   @Output() actionHandler = new EventEmitter<ActionResult<any>>();
 
+  filteredActions = computed(() => {
+    const entity = this.entity();
+    const user = this.accountService.currentUserSignal();
+    const actions = this.actions();
+    if (!user || !actions.length) return [];
+
+    return this.filterActionTree(actions, entity, user);
+  });
+
   currentUser = this.accountService.currentUserSignal;
   submenu: {[key: string]: NgbDropdown} = {};
   private closeTimeout: any = null;
@@ -75,7 +93,11 @@ export class CardActionablesComponent implements OnDestroy {
    * @param user
    */
   willRenderAction(action: ActionItem<ActionableEntity>, user: User) {
-    return (!action.requiredRoles?.length || this.accountService.hasAnyRole(user, action.requiredRoles)) && action.shouldRender(action, this.entity(), user);
+    const hasValidRole = !action.requiredRoles?.length || this.accountService.hasAnyRole(user, action.requiredRoles);
+    const shouldRenderFuncPasses = action.shouldRender(action, this.entity(), user);
+    //console.log('Action: ', action, 'has valid role: ', hasValidRole, ' and should render func passes: ', shouldRenderFuncPasses);
+
+    return hasValidRole && shouldRenderFuncPasses;
   }
 
   shouldRenderSubMenu(action: ActionItem<any>, dynamicList: null | Array<any>) {
@@ -117,19 +139,6 @@ export class CardActionablesComponent implements OnDestroy {
     }
   }
 
-  hasRenderableChildren(action: ActionItem<ActionableEntity>, user: User): boolean {
-    if (!action.children || action.children.length === 0) return false;
-
-    for (const child of action.children) {
-      const dynamicList = child.dynamicList;
-      if (dynamicList !== undefined) return true; // Dynamic list gets rendered if loaded
-
-      if (this.willRenderAction(child, user)) return true;
-      if (child.children?.length && this.hasRenderableChildren(child, user)) return true;
-    }
-    return false;
-  }
-
   performDynamicClick(event: any, action: ActionItem<ActionableEntity>, dynamicItem: any) {
     action._extra = dynamicItem;
     this.performAction(event, action);
@@ -140,12 +149,29 @@ export class CardActionablesComponent implements OnDestroy {
 
     const ref = this.modalService.open(ActionableModalComponent, {fullscreen: true, centered: true});
     ref.componentInstance.entity = this.entity();
-    ref.componentInstance.actions = this.actions();
+    ref.componentInstance.actions = this.filteredActions();
+
     ref.componentInstance.willRenderAction = this.willRenderAction.bind(this);
     ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);
 
     ref.componentInstance.actionPerformed.subscribe((actionOrResult: any) => {
       this.actionHandler.emit(actionOrResult);
     });
+  }
+
+  private filterActionTree(actions: ActionItem<any>[], entity: any, user: User): ActionItem<any>[] {
+    return actions
+      .map(action => {
+        if (action.children?.length > 0 && !action.dynamicList) {
+          // Recursively filter children first
+          const filteredChildren = this.filterActionTree(action.children, entity, user);
+          if (filteredChildren.length === 0) return null; // No renderable children = hide submenu
+          return { ...action, children: filteredChildren };
+        }
+        // Leaf action — check if it should render
+        if (!this.willRenderAction(action, user)) return null;
+        return action;
+      })
+      .filter((a): a is ActionItem<any> => a !== null);
   }
 }

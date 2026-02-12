@@ -1,6 +1,6 @@
   <ng-container *transloco="let t; prefix: 'actionable'">
     @let labelId = 'actions-' + labelBy();
-    @if (actions().length > 0) {
+    @if (filteredActions().length > 0) {
       @if (breakpointService.isTabletOrBelow()) {
         <button [disabled]="disabled()" class="btn {{btnClass()}}" id="{{labelId}}"
                 (click)="openMobileActionableMenu($event)">
@@ -15,7 +15,7 @@
             <i class="fa {{iconClass()}}" aria-hidden="true"></i>
           </button>
           <div ngbDropdownMenu attr.aria-labelledby="{{labelId}}">
-            <ng-container *ngTemplateOutlet="submenu; context: { list: actions() }" />
+            <ng-container *ngTemplateOutlet="submenu; context: { list: filteredActions() }" />
           </div>
         </div>
         <ng-template #submenu let-list="list">
@@ -26,11 +26,11 @@
                 @for(dynamicItem of dList; track dynamicItem.title) {
                   <button ngbDropdownItem (click)="performDynamicClick($event, action, dynamicItem)">{{dynamicItem.title}}</button>
                 }
-              } @else if (willRenderAction(action, this.currentUser()!)) {
+              } @else {
                 <button ngbDropdownItem (click)="performAction($event, action)">{{t(action.title)}}</button>
               }
             } @else {
-              @if (shouldRenderSubMenu(action, action.children?.[0].dynamicList | async) && hasRenderableChildren(action, this.currentUser()!)) {
+              @if (shouldRenderSubMenu(action, action.children?.[0].dynamicList | async)) {
                 <!-- Submenu items -->
                 <div ngbDropdown #subMenuHover="ngbDropdown" placement="right left"
                      (click)="openSubmenu(action.title, subMenuHover)"
