@@ -76,7 +76,6 @@ import {Device} from "../_models/device/device";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
-import {DefaultModalOptions} from "../_models/modal/default-modal-options";
 import {UserReview} from "../_models/user-review";
 import {ReviewsComponent} from "../_single-module/reviews/reviews.component";
 import {ExternalRatingComponent} from "../series-detail/_components/external-rating/external-rating.component";
@@ -558,7 +557,7 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   openEditModal() {
-    const ref = this.modalService.open(EditVolumeModalComponent, DefaultModalOptions);
+    const ref = this.modalService.open(EditVolumeModalComponent);
     ref.componentInstance.volume = this.volume;
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.libraryId = this.libraryId;
@@ -568,7 +567,7 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   openEditChapterModal(chapter: Chapter) {
-    const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);
+    const ref = this.modalService.open(EditChapterModalComponent);
     ref.componentInstance.chapter = chapter;
     ref.componentInstance.libraryType = this.libraryType;
     ref.componentInstance.libraryId = this.libraryId;

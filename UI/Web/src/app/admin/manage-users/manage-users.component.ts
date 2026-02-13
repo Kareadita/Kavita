@@ -20,7 +20,6 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
-import {DefaultModalOptions} from "../../_models/modal/default-modal-options";
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
 import {SettingsService} from "../settings.service";
@@ -121,7 +120,7 @@ export class ManageUsersComponent implements OnInit {
   openEditUser(member: Member) {
     if (!this.settings) return;
 
-    const modalRef = this.modalService.open(EditUserComponent, DefaultModalOptions);
+    const modalRef = this.modalService.open(EditUserComponent);
     modalRef.componentInstance.member.set(member);
     modalRef.componentInstance.settings.set(this.settings);
     modalRef.closed.subscribe(() => {
@@ -142,7 +141,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   inviteUser() {
-    const modalRef = this.modalService.open(InviteUserComponent, DefaultModalOptions);
+    const modalRef = this.modalService.open(InviteUserComponent);
     modalRef.closed.subscribe((successful: boolean) => {
       this.loadMembers();
     });
@@ -168,7 +167,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   updatePassword(member: Member) {
-    const modalRef = this.modalService.open(ResetPasswordModalComponent, DefaultModalOptions);
+    const modalRef = this.modalService.open(ResetPasswordModalComponent);
     modalRef.componentInstance.member = member;
   }
 

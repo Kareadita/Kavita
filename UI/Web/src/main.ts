@@ -31,11 +31,13 @@ import {
   PreloadAllModules,
   provideRouter,
   withComponentInputBinding,
-  withInMemoryScrolling, withNavigationErrorHandler,
+  withInMemoryScrolling,
+  withNavigationErrorHandler,
   withPreloading
 } from "@angular/router";
 import {routingErrorHandler} from "./app/_interceptors/routing-error.handler";
 import {registerECharts} from "./echarts";
+import {NgbModalConfig, NgbRatingConfig} from "@ng-bootstrap/ng-bootstrap";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -135,6 +137,7 @@ function bootstrapUser() {
   ));
 }
 
+
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule,
@@ -174,7 +177,22 @@ bootstrapApplication(AppComponent, {
         },
         provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor, clientInfoInterceptor]), withFetch()),
         provideAppInitializer(() => bootstrapUser()),
-        provideZoneChangeDetection()
+        provideZoneChangeDetection(),
+        {
+          provide: NgbModalConfig,
+          useFactory: () => Object.assign(new NgbModalConfig(), {
+            scrollable: true,
+            size: 'xl',
+            fullscreen: 'xl',
+          } satisfies Partial<NgbModalConfig>)
+        },
+        {
+          provide: NgbRatingConfig,
+          useFactory: () => Object.assign(new NgbRatingConfig(), {
+            max: 5,
+            resettable: true,
+          } satisfies Partial<NgbRatingConfig>)
+        }
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));

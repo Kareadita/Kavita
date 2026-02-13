@@ -29,7 +29,6 @@ import {FilterService} from "./filter.service";
 import {ReadingListService} from "./reading-list.service";
 import {ChapterService} from "./chapter.service";
 import {VolumeService} from "./volume.service";
-import {DefaultModalOptions} from "../_models/modal/default-modal-options";
 import {MatchSeriesModalComponent} from "../_single-module/match-series-modal/match-series-modal.component";
 import {
   BulkSetReadingProfileModalComponent
@@ -142,7 +141,7 @@ export class ActionService {
         );
 
       case Action.Edit: {
-        const modalRef = this.modalService.open(LibrarySettingsModalComponent, DefaultModalOptions);
+        const modalRef = this.modalService.open(LibrarySettingsModalComponent);
         modalRef.componentInstance.library = library;
         return this.handleEditModal(modalRef, action, library);
       }
@@ -215,13 +214,13 @@ export class ActionService {
         );
 
       case Action.Edit: {
-        const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
+        const modalRef = this.modalService.open(EditSeriesModalComponent);
         modalRef.componentInstance.series = series;
         return this.handleEditModal(modalRef, action, series);
       }
 
       case Action.Match: {
-        const ref = this.modalService.open(MatchSeriesModalComponent, DefaultModalOptions);
+        const ref = this.modalService.open(MatchSeriesModalComponent);
         ref.componentInstance.series = series;
         return from(ref.closed).pipe(
           filter((saved: boolean) => saved),
@@ -356,7 +355,7 @@ export class ActionService {
         );
 
       case Action.Edit: {
-        const ref = this.modalService.open(EditVolumeModalComponent, DefaultModalOptions);
+        const ref = this.modalService.open(EditVolumeModalComponent);
         ref.componentInstance.volume = volume;
         ref.componentInstance.libraryType = libraryType;
         ref.componentInstance.seriesId = seriesId;
@@ -454,7 +453,7 @@ export class ActionService {
         return of(this.fromAction(action, chapter, 'none'));
 
       case Action.Edit:
-        const ref = this.modalService.open(EditChapterModalComponent, DefaultModalOptions);
+        const ref = this.modalService.open(EditChapterModalComponent);
         ref.componentInstance.chapter = chapter;
         ref.componentInstance.libraryType = libraryType;
         ref.componentInstance.seriesId = seriesId;
@@ -542,7 +541,7 @@ export class ActionService {
         );
 
       case Action.Edit:
-        const ref = this.modalService.open(EditReadingListModalComponent, DefaultModalOptions);
+        const ref = this.modalService.open(EditReadingListModalComponent);
         ref.componentInstance.readingList = readingList;
         return this.handleEditModal(ref, action, readingList);
       case Action.Promote:
@@ -576,7 +575,7 @@ export class ActionService {
         );
 
       case Action.Edit:
-        const ref = this.modalService.open(EditCollectionTagsComponent, DefaultModalOptions);
+        const ref = this.modalService.open(EditCollectionTagsComponent);
         ref.componentInstance.tag = collection;
         return this.handleEditModal(ref, action, collection);
 
@@ -660,13 +659,13 @@ export class ActionService {
   handlePersonAction(action: ActionItem<Person>, person: Person) {
     switch (action.action) {
       case Action.Edit:
-        const ref = this.modalService.open(EditPersonModalComponent, DefaultModalOptions);
+        const ref = this.modalService.open(EditPersonModalComponent);
         ref.componentInstance.person = person;
 
         return this.handleEditModal(ref, action, person);
 
       case Action.Merge:
-        const ref2 = this.modalService.open(MergePersonModalComponent, DefaultModalOptions);
+        const ref2 = this.modalService.open(MergePersonModalComponent);
         ref2.componentInstance.person = person;
 
         return from(ref2.closed).pipe(
@@ -687,7 +686,7 @@ export class ActionService {
   handleSmartFilterAction(action: ActionItem<SmartFilter>, smartFilter: SmartFilter, allFilters: SmartFilter[]) {
     switch (action.action) {
       case Action.Edit:
-        const ref = this.modalService.open(EditSmartFilterModalComponent, DefaultModalOptions);
+        const ref = this.modalService.open(EditSmartFilterModalComponent);
         ref.componentInstance.smartFilter = smartFilter;
         ref.componentInstance.allFilters = allFilters;
         return this.handleEditModal(ref, action, smartFilter);
@@ -1229,7 +1228,7 @@ export class ActionService {
   }
 
   editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
-    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, DefaultModalOptions);
+    const readingListModalRef = this.modalService.open(EditReadingListModalComponent);
     readingListModalRef.componentInstance.readingList = readingList;
     readingListModalRef.closed.pipe(take(1)).subscribe((list) => {
       if (callback && list !== undefined) {
@@ -1293,7 +1292,7 @@ export class ActionService {
   }
 
   matchSeries(series: Series, callback?: BooleanActionCallback) {
-   const ref = this.modalService.open(MatchSeriesModalComponent, DefaultModalOptions);
+   const ref = this.modalService.open(MatchSeriesModalComponent);
    ref.componentInstance.series = series;
    ref.closed.subscribe(saved => {
      if (callback) {

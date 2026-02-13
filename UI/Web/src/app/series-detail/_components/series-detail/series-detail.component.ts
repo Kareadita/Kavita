@@ -100,7 +100,6 @@ import {
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {UserCollection} from "../../../_models/collection-tag";
 import {CoverImageComponent} from "../../../_single-module/cover-image/cover-image.component";
-import {DefaultModalOptions} from "../../../_models/modal/default-modal-options";
 import {LicenseService} from "../../../_services/license.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {VolumeRemovedEvent} from "../../../_models/events/volume-removed-event";
@@ -902,7 +901,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openEditSeriesModal() {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, DefaultModalOptions);
+    const modalRef = this.modalService.open(EditSeriesModalComponent);
     modalRef.componentInstance.series = this.series();
     modalRef.closed.subscribe((closeResult: ModalResult<Series>) => {
       if (closeResult.success) {
