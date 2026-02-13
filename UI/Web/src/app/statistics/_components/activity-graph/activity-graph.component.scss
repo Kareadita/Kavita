@@ -17,6 +17,8 @@
   --activity-graph-cell-focus-outline-color: var(--bs-primary);
   --activity-graph-cell-outline-color: rgba(240, 246, 252, 0.1);
 
+  --activity-graph-cell-today-outline-color: white;
+
   --activity-graph-text-color: var(--bs-secondary);
   --activity-graph-font-size: 12px;
 }
@@ -93,6 +95,10 @@
 
 .empty-cell {
   background: transparent;
+}
+
+.today {
+  outline: 1px solid var(--activity-graph-cell-today-outline-color);
 }
 
 .activity-cell {
