@@ -38,6 +38,7 @@ import {
 import {routingErrorHandler} from "./app/_interceptors/routing-error.handler";
 import {registerECharts} from "./echarts";
 import {NgbModalConfig, NgbRatingConfig} from "@ng-bootstrap/ng-bootstrap";
+import {DefaultModalOptions} from "./app/_models/modal/modal-options";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -180,11 +181,7 @@ bootstrapApplication(AppComponent, {
         provideZoneChangeDetection(),
         {
           provide: NgbModalConfig,
-          useFactory: () => Object.assign(new NgbModalConfig(), {
-            scrollable: true,
-            size: 'xl',
-            fullscreen: 'xl',
-          } satisfies Partial<NgbModalConfig>)
+          useFactory: () => Object.assign(new NgbModalConfig(), DefaultModalOptions) satisfies Partial<NgbModalConfig>
         },
         {
           provide: NgbRatingConfig,

@@ -58,6 +58,7 @@ import {
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {NavService} from "./nav.service";
 import {ModalResult} from "../_models/modal/modal-result";
+import {addToModal, editModal} from "../_models/modal/modal-options";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -141,7 +142,7 @@ export class ActionService {
         );
 
       case Action.Edit: {
-        const modalRef = this.modalService.open(LibrarySettingsModalComponent);
+        const modalRef = this.modalService.open(LibrarySettingsModalComponent, editModal());
         modalRef.componentInstance.library = library;
         return this.handleEditModal(modalRef, action, library);
       }
@@ -214,13 +215,13 @@ export class ActionService {
         );
 
       case Action.Edit: {
-        const modalRef = this.modalService.open(EditSeriesModalComponent);
+        const modalRef = this.modalService.open(EditSeriesModalComponent, editModal());
         modalRef.componentInstance.series = series;
         return this.handleEditModal(modalRef, action, series);
       }
 
       case Action.Match: {
-        const ref = this.modalService.open(MatchSeriesModalComponent);
+        const ref = this.modalService.open(MatchSeriesModalComponent, editModal());
         ref.componentInstance.series = series;
         return from(ref.closed).pipe(
           filter((saved: boolean) => saved),
@@ -230,7 +231,7 @@ export class ActionService {
 
       case Action.AddToReadingList: {
         if (this.readingListModalRef != null) return EMPTY;
-        this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+        this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
         this.readingListModalRef.componentInstance.seriesId = series.id;
         this.readingListModalRef.componentInstance.title = series.name;
         this.readingListModalRef.componentInstance.type = ADD_FLOW.Series;
@@ -251,7 +252,7 @@ export class ActionService {
 
       case Action.AddToCollection: {
         if (this.collectionModalRef != null) return EMPTY;
-        this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection', fullscreen: 'md' });
+        this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, addToModal());
         this.collectionModalRef.componentInstance.seriesIds = [series.id];
         this.collectionModalRef.componentInstance.title = translate('actionable.new-collection');
 
@@ -355,7 +356,7 @@ export class ActionService {
         );
 
       case Action.Edit: {
-        const ref = this.modalService.open(EditVolumeModalComponent);
+        const ref = this.modalService.open(EditVolumeModalComponent, editModal());
         ref.componentInstance.volume = volume;
         ref.componentInstance.libraryType = libraryType;
         ref.componentInstance.seriesId = seriesId;
@@ -365,7 +366,7 @@ export class ActionService {
 
       case Action.AddToReadingList: {
         if (this.readingListModalRef != null) return EMPTY;
-        this.readingListModalRef = this.modalService.open(AddToListModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
+        this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
         this.readingListModalRef.componentInstance.seriesId = seriesId;
         this.readingListModalRef.componentInstance.volumeId = volume.id;
         this.readingListModalRef.componentInstance.type = ADD_FLOW.Volume;
@@ -453,7 +454,7 @@ export class ActionService {
         return of(this.fromAction(action, chapter, 'none'));
 
       case Action.Edit:
-        const ref = this.modalService.open(EditChapterModalComponent);
+        const ref = this.modalService.open(EditChapterModalComponent, editModal());
         ref.componentInstance.chapter = chapter;
         ref.componentInstance.libraryType = libraryType;
         ref.componentInstance.seriesId = seriesId;
@@ -463,7 +464,7 @@ export class ActionService {
 
       case Action.AddToReadingList:
         if (this.readingListModalRef != null) return EMPTY;
-        this.readingListModalRef = this.modalService.open(AddToListModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
+        this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
         this.readingListModalRef.componentInstance.seriesId = seriesId;
         this.readingListModalRef.componentInstance.volumeId = chapter.volumeId;
         this.readingListModalRef.componentInstance.chapterId = chapter.id;
@@ -541,7 +542,7 @@ export class ActionService {
         );
 
       case Action.Edit:
-        const ref = this.modalService.open(EditReadingListModalComponent);
+        const ref = this.modalService.open(EditReadingListModalComponent, editModal());
         ref.componentInstance.readingList = readingList;
         return this.handleEditModal(ref, action, readingList);
       case Action.Promote:
@@ -575,7 +576,7 @@ export class ActionService {
         );
 
       case Action.Edit:
-        const ref = this.modalService.open(EditCollectionTagsComponent);
+        const ref = this.modalService.open(EditCollectionTagsComponent, editModal());
         ref.componentInstance.tag = collection;
         return this.handleEditModal(ref, action, collection);
 
@@ -659,13 +660,13 @@ export class ActionService {
   handlePersonAction(action: ActionItem<Person>, person: Person) {
     switch (action.action) {
       case Action.Edit:
-        const ref = this.modalService.open(EditPersonModalComponent);
+        const ref = this.modalService.open(EditPersonModalComponent, editModal());
         ref.componentInstance.person = person;
 
         return this.handleEditModal(ref, action, person);
 
       case Action.Merge:
-        const ref2 = this.modalService.open(MergePersonModalComponent);
+        const ref2 = this.modalService.open(MergePersonModalComponent, editModal());
         ref2.componentInstance.person = person;
 
         return from(ref2.closed).pipe(
@@ -686,7 +687,7 @@ export class ActionService {
   handleSmartFilterAction(action: ActionItem<SmartFilter>, smartFilter: SmartFilter, allFilters: SmartFilter[]) {
     switch (action.action) {
       case Action.Edit:
-        const ref = this.modalService.open(EditSmartFilterModalComponent);
+        const ref = this.modalService.open(EditSmartFilterModalComponent, editModal());
         ref.componentInstance.smartFilter = smartFilter;
         ref.componentInstance.allFilters = allFilters;
         return this.handleEditModal(ref, action, smartFilter);
@@ -787,7 +788,7 @@ export class ActionService {
 
       case Action.AddToReadingList: {
         if (this.readingListModalRef != null) return EMPTY;
-        this.readingListModalRef = this.modalService.open(AddToListModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
+        this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
         this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id);
         this.readingListModalRef.componentInstance.title = translate('actionable.multiple-selections');
         this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple_Series;
@@ -808,7 +809,7 @@ export class ActionService {
 
       case Action.AddToCollection: {
         if (this.collectionModalRef != null) return EMPTY;
-        this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, {scrollable: true, size: 'md', windowClass: 'collection', fullscreen: 'md'});
+        this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, addToModal());
         this.collectionModalRef.componentInstance.seriesIds = series.map(s => s.id);
         this.collectionModalRef.componentInstance.title = translate('actionable.new-collection');
 
@@ -840,7 +841,7 @@ export class ActionService {
 
       case Action.SetReadingProfile: {
         if (this.readingListModalRef != null) return EMPTY;
-        this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
+        this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, addToModal());
         this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id);
 
         const ref = this.readingListModalRef;
@@ -892,7 +893,7 @@ export class ActionService {
 
       case Action.AddToReadingList: {
         if (this.readingListModalRef != null) return EMPTY;
-        this.readingListModalRef = this.modalService.open(AddToListModalComponent, {scrollable: true, size: 'md', fullscreen: 'md'});
+        this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
         this.readingListModalRef.componentInstance.seriesId = seriesId;
         this.readingListModalRef.componentInstance.volumeIds = volumes.map(v => v.id);
         this.readingListModalRef.componentInstance.chapterIds = chapters.map(c => c.id);
@@ -1193,7 +1194,7 @@ export class ActionService {
 
   addVolumeToReadingList(volume: Volume, seriesId: number, callback?: VolumeActionCallback) {
     if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
       this.readingListModalRef.componentInstance.seriesId = seriesId;
       this.readingListModalRef.componentInstance.volumeId = volume.id;
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Volume;
@@ -1211,7 +1212,7 @@ export class ActionService {
 
   addChapterToReadingList(chapter: Chapter, seriesId: number, callback?: ChapterActionCallback) {
     if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
       this.readingListModalRef.componentInstance.seriesId = seriesId;
       this.readingListModalRef.componentInstance.chapterId = chapter.id;
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Chapter;
@@ -1228,7 +1229,7 @@ export class ActionService {
   }
 
   editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
-    const readingListModalRef = this.modalService.open(EditReadingListModalComponent);
+    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, editModal());
     readingListModalRef.componentInstance.readingList = readingList;
     readingListModalRef.closed.pipe(take(1)).subscribe((list) => {
       if (callback && list !== undefined) {
@@ -1309,7 +1310,7 @@ export class ActionService {
   setReadingProfileForMultiple(series: Array<Series>, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
 
-    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, addToModal());
     this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id)
 
     this.readingListModalRef.closed.subscribe(() => {
@@ -1334,7 +1335,7 @@ export class ActionService {
   setReadingProfileForLibrary(library: Library, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
 
-    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, { scrollable: true, size: 'md', fullscreen: 'md' });
+    this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, addToModal());
     this.readingListModalRef.componentInstance.libraryId = library.id;
 
     this.readingListModalRef.closed.subscribe(() => {
