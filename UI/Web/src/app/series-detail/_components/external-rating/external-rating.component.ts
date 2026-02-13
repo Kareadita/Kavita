@@ -73,7 +73,7 @@ export class ExternalRatingComponent implements OnInit {
   }
 
   openRatingModal() {
-    const modalRef = this.modalService.open(RatingModalComponent, {size: 'xl'});
+    const modalRef = this.modalService.open(RatingModalComponent);
     modalRef.componentInstance.userRating = this.userRating;
     modalRef.componentInstance.seriesId = this.seriesId;
     modalRef.componentInstance.hasUserRated = this.hasUserRated;

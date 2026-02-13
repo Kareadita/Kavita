@@ -51,6 +51,7 @@ import {ActionFactoryService} from "../../_services/action-factory.service";
 import {Action} from "../../_models/actionables/action";
 import {ActionResult} from "../../_models/actionables/action-result";
 import {ModalResult} from "../../_models/modal/modal-result";
+import {editModal} from "../../_models/modal/modal-options";
 
 @Component({
   selector: 'app-manage-library',
@@ -166,7 +167,7 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   editLibrary(library: Library) {
-    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl', fullscreen: 'md' });
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, editModal());
     modalRef.componentInstance.library = library;
     modalRef.closed.subscribe((result: ModalResult<Library>) => {
       this.getLibraries();
@@ -174,7 +175,7 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   addLibrary() {
-    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl', fullscreen: 'md' });
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, editModal());
     modalRef.closed.subscribe((result: ModalResult<Library>) => {
       this.getLibraries();
     });

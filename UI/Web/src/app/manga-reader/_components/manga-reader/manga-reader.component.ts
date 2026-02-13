@@ -84,6 +84,7 @@ import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {ImageOnlyName} from "../../../_models/user/auth-key";
+import {mediumModal} from "../../../_models/modal/modal-options";
 
 
 const PREFETCH_PAGES = 10;
@@ -1913,7 +1914,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.shortCutModalOpen()) return;
 
     this.shortCutModalOpen.set(true);
-    this.shortCutModalRef = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
+    this.shortCutModalRef = this.modalService.open(ShortcutsModalComponent, mediumModal());
     this.shortCutModalRef.componentInstance.shortcuts = [
       {keyBindTarget: KeyBindTarget.PageLeft, description: 'prev-page'},
       {keyBindTarget: KeyBindTarget.PageRight, description: 'next-page'},

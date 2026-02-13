@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, take, tap} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {DirectoryPickerComponent, DirectoryPickerResult} from '../_modals/directory-picker/directory-picker.component';
@@ -9,7 +9,7 @@ import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {allEncodeFormats} from '../_models/encode-format';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {allCoverImageSizes, CoverImageSize} from '../_models/cover-image-size';
-import {PdfRenderResolution, allPdfRenderResolutions} from '../_models/pdf-render-resolution';
+import {allPdfRenderResolutions, PdfRenderResolution} from '../_models/pdf-render-resolution';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {EncodeFormatPipe} from "../../_pipes/encode-format.pipe";
 import {CoverImageSizePipe} from "../../_pipes/cover-image-size.pipe";
@@ -123,7 +123,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   }
 
   openDirectoryChooser(existingDirectory: string, formControl: string) {
-    const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg', fullscreen: 'md' });
+    const modalRef = this.modalService.open(DirectoryPickerComponent);
     modalRef.componentInstance.startingFolder = existingDirectory || '';
     modalRef.componentInstance.helpUrl = '';
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
