@@ -40,7 +40,7 @@ export class ReviewCardComponent {
     } else {
       component = ReviewCardModalComponent;
     }
-    const ref = this.modalService.open(component, {size: 'lg', fullscreen: 'md'});
+    const ref = this.modalService.open(component);
 
     ref.componentInstance.review = this.review();
     ref.closed.subscribe((res: ReviewModalCloseEvent | undefined) => {

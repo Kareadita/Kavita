@@ -4,7 +4,7 @@ import {map, shareReplay, take} from 'rxjs/operators';
 import {AccountService} from './_services/account.service';
 import {LibraryService} from './_services/library.service';
 import {NavService} from './_services/nav.service';
-import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
 import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
 import {filter, Observable} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
@@ -44,21 +44,10 @@ export class AppComponent implements OnInit {
   private readonly breakpointService = inject(BreakpointService); // Needs to be injected to run background job
   private readonly licenseService = inject(LicenseService);
   private readonly localizationService = inject(LocalizationService);
-
   transitionState$!: Observable<boolean>;
 
 
   constructor() {
-    const ratingConfig = inject(NgbRatingConfig);
-    const modalConfig = inject(NgbModalConfig);
-
-
-    modalConfig.fullscreen = 'lg';
-
-    // Setup default rating config
-    ratingConfig.max = 5;
-    ratingConfig.resettable = true;
-
     // Close any open modals when a route change occurs
     this.router.events
       .pipe(

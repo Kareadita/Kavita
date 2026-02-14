@@ -148,7 +148,8 @@ export class CardActionablesComponent implements OnDestroy {
   openMobileActionableMenu(event: any) {
     this.preventEvent(event);
 
-    const ref = this.modalService.open(ActionableModalComponent, {fullscreen: true, centered: true});
+    // TODO: See if we can use a drawer instead
+    const ref = this.modalService.open(ActionableModalComponent);
     ref.componentInstance.entity = this.entity();
     ref.componentInstance.filteredActions = this.filteredActions();
 

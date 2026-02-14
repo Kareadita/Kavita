@@ -10,7 +10,6 @@ import {
   ReviewModalCloseEvent,
   ReviewModalComponent
 } from "../review-modal/review-modal.component";
-import {DefaultModalOptions} from "../../_models/modal/default-modal-options";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {Series} from "../../_models/series";
 import {Chapter} from "../../_models/chapter";
@@ -51,7 +50,7 @@ export class ReviewsComponent {
   openReviewModal() {
     const userReview = this.getUserReviews();
 
-    const modalRef = this.modalService.open(ReviewModalComponent, DefaultModalOptions);
+    const modalRef = this.modalService.open(ReviewModalComponent);
 
     if (userReview.length > 0) {
       modalRef.componentInstance.review = userReview[0];

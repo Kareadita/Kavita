@@ -17,7 +17,6 @@ import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {NgClass, NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {DefaultModalOptions} from "../../../_models/modal/default-modal-options";
 import {RouterLink} from "@angular/router";
 import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
 
@@ -123,7 +122,7 @@ export class EventsWidgetComponent implements OnInit {
 
   handleUpdateAvailableClick(message: NotificationProgressEvent | UpdateVersionEvent) {
     if (this.updateNotificationModalRef != null) { return; }
-    this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent, DefaultModalOptions);
+    this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent);
     if (message.hasOwnProperty('body')) {
       this.updateNotificationModalRef.componentInstance.updateData = (message as NotificationProgressEvent).body as UpdateVersionEvent;
     } else {

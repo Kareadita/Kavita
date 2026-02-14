@@ -194,7 +194,7 @@ export class VersionService implements OnDestroy{
           this.modalOpen = true;
 
           this.serverService.getChangelog(1).subscribe(changelog => {
-            const ref = this.modalService.open(NewUpdateModalComponent, { size: 'lg' });
+            const ref = this.modalService.open(NewUpdateModalComponent, { size: 'lg', fullscreen: 'md' });
             ref.componentInstance.versionsOutOfDate = versionsOutOfDate;
             ref.componentInstance.update = changelog[0];
             ref.componentInstance.requiresRefresh = false;
@@ -221,7 +221,7 @@ export class VersionService implements OnDestroy{
       this.pauseChecks();
       this.modalOpen = true;
 
-      const ref = this.modalService.open(OutOfDateModalComponent, { size: 'xl', fullscreen: 'md' });
+      const ref = this.modalService.open(OutOfDateModalComponent, { size: 'lg', fullscreen: 'md' });
       ref.componentInstance.versionsOutOfDate = versionsOutOfDate;
 
       // Update the last shown timestamp

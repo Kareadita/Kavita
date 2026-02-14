@@ -7,7 +7,6 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingsService} from "../../admin/settings.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {EditDeviceModalComponent} from "../_modals/edit-device-modal/edit-device-modal.component";
-import {DefaultModalOptions} from "../../_models/modal/default-modal-options";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map} from "rxjs";
 import {shareReplay} from "rxjs/operators";
@@ -85,7 +84,7 @@ export class ManageDevicesComponent implements OnInit {
   }
 
   addDevice() {
-    const ref = this.modalService.open(EditDeviceModalComponent, DefaultModalOptions);
+    const ref = this.modalService.open(EditDeviceModalComponent);
     ref.componentInstance.device = null;
 
     ref.closed.subscribe((result: Device | null) => {
@@ -96,7 +95,7 @@ export class ManageDevicesComponent implements OnInit {
   }
 
   editDevice(device: Device) {
-    const ref = this.modalService.open(EditDeviceModalComponent, DefaultModalOptions);
+    const ref = this.modalService.open(EditDeviceModalComponent);
     ref.componentInstance.device = device;
 
     ref.closed.subscribe((result: Device | null) => {

@@ -678,9 +678,7 @@ export class ReaderService {
     if (!prompt.shouldPrompt) return of({prompt: prompt, result: RereadPromptResult.Continue});
 
 
-    const [modal, component] = this.modalService.open(ListSelectModalComponent, {
-      centered: true,
-    });
+    const [modal, component] = this.modalService.open(ListSelectModalComponent);
 
     component.showFooter.set(false);
     component.title.set(translate('reread-modal.title'));

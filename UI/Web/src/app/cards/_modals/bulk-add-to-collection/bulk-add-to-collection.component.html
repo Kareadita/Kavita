@@ -40,20 +40,13 @@
       </ul>
     </div>
     <div class="modal-footer" style="justify-content: normal">
-      <div style="width: 100%;">
-        <div class="d-flex">
-          <div class="col-9 col-lg-10">
-            <label class="form-label visually-hidden" for="add-rlist">{{t('collection-label')}}</label>
-            <input width="100%" #title ngbAutofocus type="text" class="form-control mb-2" id="add-rlist" formControlName="title">
-          </div>
-          <div class="col-2">
-            <button type="submit" class="btn btn-primary" [disabled]="isCreating" (click)="create()">{{t('create')}}</button>
-          </div>
-        </div>
+      <div class="input-group mb-2">
+        <label class="form-label visually-hidden" for="add-rlist">{{t('collection-label')}}</label>
+        <input width="100%" #title ngbAutofocus type="text" class="form-control" id="add-rlist" formControlName="title">
+        <button type="submit" class="btn btn-primary" [disabled]="isCreating" (click)="create()">{{t('create')}}</button>
       </div>
     </div>
   </form>
-
 
 
 </ng-container>
