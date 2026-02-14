@@ -2,6 +2,7 @@ import {Routes} from '@angular/router';
 import {AuthGuard} from './_guards/auth.guard';
 import {libraryAccessGuard} from './_guards/library-access.guard';
 import {libraryResolver} from "./_resolvers/library.resolver";
+import {seriesResolver} from "./_resolvers/series.resolver";
 
 export const routes: Routes = [
   {
@@ -71,6 +72,7 @@ export const routes: Routes = [
           {
             path: 'series/:seriesId',
             pathMatch: 'full',
+            resolve: { series: seriesResolver },
             loadComponent: () => import('./series-detail/_components/series-detail/series-detail.component').then(c => c.default)
           },
           {
