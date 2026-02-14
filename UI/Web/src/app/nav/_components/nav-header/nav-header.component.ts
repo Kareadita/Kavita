@@ -47,7 +47,6 @@ import {QuillViewComponent} from "ngx-quill";
 import {AnnotationService} from "../../../_services/annotation.service";
 import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile-icon.component";
 import {BreakpointService} from "../../../_services/breakpoint.service";
-import {VersionService} from "../../../_services/version.service";
 import {ModalService} from "../../../_services/modal.service";
 
 @Component({
@@ -74,8 +73,6 @@ export class NavHeaderComponent {
   protected readonly metadataService = inject(MetadataService);
   private readonly annotationService = inject(AnnotationService);
   private readonly document = inject(DOCUMENT);
-
-  protected readonly versionService = inject(VersionService);
 
 
   @ViewChild('search') searchViewRef!: any;

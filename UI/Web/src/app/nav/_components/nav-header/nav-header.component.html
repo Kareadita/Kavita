@@ -195,18 +195,6 @@
             </div>
           }
 
-          <div class="nav-item">
-            <button class="btn btn-secondary" (click)="versionService.debugRefresh()">R</button>
-          </div>
-
-          <div class="nav-item">
-            <button class="btn btn-secondary" (click)="versionService.debugUpdateAvailable()">UA</button>
-          </div>
-
-          <div class="nav-item">
-            <button class="btn btn-secondary" (click)="versionService.debugOutOfDate()">OOD</button>
-          </div>
-
           @if(breakpointService.isMobileOrBelow()) {
             <button class="btn btn-outline-secondary primary-text" (click)="openLinkSelectionMenu()">
               <app-profile-icon [userId]="user.id" [size]="20" />

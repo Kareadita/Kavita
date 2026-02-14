@@ -1,4 +1,4 @@
-import {inject, Injectable, OnDestroy} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {interval, Subscription, switchMap} from 'rxjs';
 import {ServerService} from "./server.service";
 import {AccountService} from "./account.service";
@@ -11,11 +11,12 @@ import {
 import {versionNotifyModal, versionRefreshModal} from "../_models/modal/modal-options";
 import {UpdateVersionEvent} from "../_models/events/update-version-event";
 import {ModalService} from "./modal.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
 })
-export class VersionService implements OnDestroy{
+export class VersionService {
 
   private readonly serverService = inject(ServerService);
   private readonly accountService = inject(AccountService);
@@ -27,14 +28,19 @@ export class VersionService implements OnDestroy{
   private static readonly DISMISS_KEY_PREFIX = 'kavita--update-dismiss-';
 
   private readonly VERSION_CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutes
-  private readonly OUT_OF_BAND_AMOUNT = 3; // Threshold: above this count shows "out of date" instead of "update available"
+  /** Threshold: above this count shows "out of date" instead of "update available" */
+  private readonly OUT_OF_BAND_AMOUNT = 3;
 
   /** Backoff intervals indexed by dismiss count: [after 1st dismiss, after 2nd dismiss] */
   private readonly BACKOFF_INTERVALS = [
+    1 * 24 * 60 * 60 * 1000,  // 1 day
+    3 * 24 * 60 * 60 * 1000,  // 3 days
     7 * 24 * 60 * 60 * 1000,  // 1 week
     14 * 24 * 60 * 60 * 1000, // 2 weeks
+    30 * 24 * 60 * 60 * 1000, // 1 month
   ];
-  private readonly MAX_DISMISSALS = 3;
+  /** After this many dismissals, Kavita will stop pestering the user */
+  private readonly MAX_DISMISSALS = 5;
 
   /** Routes where version update modals should not be shown */
   private readonly EXCLUDED_ROUTES = [
@@ -56,11 +62,6 @@ export class VersionService implements OnDestroy{
     this.startInitialVersionCheck();
     this.startVersionCheck();
   }
-
-  ngOnDestroy() {
-    this.versionCheckSubscription?.unsubscribe();
-  }
-
 
   /**
    * Initial version check to ensure localStorage is populated on first load
@@ -90,7 +91,8 @@ export class VersionService implements OnDestroy{
         filter(user => !!user && !this.modalOpen),
         switchMap(user => this.serverService.getVersion(user!.authKeys.filter(k => k.name === OpdsName)[0].key)),
         filter(update => !!update),
-        tap(serverVersion => this.handleVersionCheck(serverVersion))
+        tap(serverVersion => this.handleVersionCheck(serverVersion)),
+        takeUntilDestroyed()
       ).subscribe();
   }
 
@@ -105,8 +107,6 @@ export class VersionService implements OnDestroy{
   /**
    * Given a server version string, determines whether to show a refresh modal
    * (server updated mid-session) or check for available updates.
-   *
-   * Call with the result of `plugin/version`.
    */
   handleVersionCheck(serverVersion: string): void {
     if (this.modalOpen || this.isExcludedRoute()) return;
