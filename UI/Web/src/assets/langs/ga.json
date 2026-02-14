@@ -494,14 +494,6 @@
     "announcements": {
         "title": "Fógraí"
     },
-    "out-of-date-modal": {
-        "title": "Ná titim taobh thiar de!",
-        "close": "{{common.close}}",
-        "subtitle": "Dealraíonn sé go bhfuil do shuiteáil níos mó ná {{count}} leaganacha taobh thiar de!",
-        "description-1": "Smaoinigh ar uasghrádú ionas go mbeidh an leagan is déanaí de Kavita á rith agat.",
-        "description-2": "Féach ar ár <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> le haghaidh treoracha ar conas é a nuashonrú.",
-        "description-3": "Má tá cúis ar leith nach bhfuil tú suas chun dáta fós ba bhreá linn a fháil amach cad atá á choinneáil agat ar leagan as dáta! Stop ag ár discord agus in iúl dúinn cad atá ag cur bac ar do chosán uasghrádú."
-    },
     "changelog": {
         "installed": "Suiteáilte",
         "download": "Íoslódáil",
@@ -746,12 +738,6 @@
     "read-more": {
         "read-more": "Léigh Tuilleadh",
         "read-less": "Léigh Lúide"
-    },
-    "update-notification-modal": {
-        "title": "Nuashonrú Nua ar Fáil!",
-        "close": "{{common.close}}",
-        "help": "Conas nuashonrú a dhéanamh",
-        "download": "Íoslódáil"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2473,20 +2459,6 @@
         "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
         "invalid-amazon-code": "Ba chóir go dtosódh ASIN le B0 nó BT"
     },
-    "new-version-modal": {
-        "description": "Tá leagan nua de Kavita ar fáil. Athnuaigh le nuashonrú.",
-        "fixed": "{{changelog.fixed}}",
-        "changed": "{{changelog.changed}}",
-        "title": "Nuashonraíodh Kavita!",
-        "added": "{{changelog.added}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "refresh": "Athnuaigh",
-        "known-issues": "{{changelog.known-issues}}"
-    },
     "changelog-update-item": {
         "download": "Íosluchtaigh",
         "added": "Curtha leis",
@@ -3410,5 +3382,25 @@
         "pages-count": "{{num}} leathanach",
         "words-read-by-year-title": "Focail léite de réir bliana",
         "words-count": "{{num}} focal"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Ná titim taobh thiar de!",
+            "subtitle": "Dealraíonn sé go bhfuil do shuiteáil níos mó ná {{count}} leaganacha taobh thiar de!",
+            "description-1": "Smaoinigh ar uasghrádú ionas go mbeidh an leagan is déanaí de Kavita á rith agat.",
+            "description-2": "Féach ar ár <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> le haghaidh treoracha ar conas é a nuashonrú.",
+            "description-3": "Má tá cúis ar leith nach bhfuil tú suas chun dáta fós ba bhreá linn a fháil amach cad atá á choinneáil agat ar leagan as dáta! Stop ag ár discord agus in iúl dúinn cad atá ag cur bac ar do chosán uasghrádú."
+        },
+        "new-version": {
+            "title": "Nuashonraíodh Kavita!",
+            "description": "Tá leagan nua de Kavita ar fáil. Athnuaigh le nuashonrú.",
+            "refresh": "Athnuaigh"
+        },
+        "update-notification": {
+            "title": "Nuashonrú Nua ar Fáil!",
+            "help": "Conas nuashonrú a dhéanamh",
+            "download": "Íoslódáil"
+        }
     }
 }

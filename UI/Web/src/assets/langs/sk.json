@@ -482,14 +482,6 @@
     "announcements": {
         "title": "Oznámenia"
     },
-    "out-of-date-modal": {
-        "title": "Nezaostávajte!",
-        "close": "{{common.close}}",
-        "subtitle": "Zdá sa, že vaša inštalácia zaostáva o viac ako {{count}} verzií!",
-        "description-1": "Zvážte aktualizáciu, aby ste používali najnovšiu verziu Kavity.",
-        "description-2": "Pozrite sa na <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> pre inštrukcie, ako aktualizovať.",
-        "description-3": "Ak existuje konkrétny dôvod, prečo ste ešte neaktualizovali, radi by sme vedeli, čo vás drží na zastaranej verzii! Zastavte sa na našom Discorde a dajte nám vedieť, čo bráni vašej ceste inovácie."
-    },
     "changelog": {
         "installed": "Nainštalované",
         "download": "Stiahnuť",
@@ -728,12 +720,6 @@
     "read-more": {
         "read-more": "Čítaj viac",
         "read-less": "Čítaj menej"
-    },
-    "update-notification-modal": {
-        "title": "Nová Aktualizácia k dispozícii!",
-        "close": "{{common.close}}",
-        "help": "Ako aktualizovať",
-        "download": "Stiahnuť"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2428,20 +2414,6 @@
         "feature-requests": "Požiadavky na funkcie",
         "known-issues": "Známe problémy"
     },
-    "new-version-modal": {
-        "title": "Kavita bola aktualizovaná!",
-        "description": "K dispozícii je nová verzia Kavity. Aktualizujte obnovením.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "refresh": "Obnoviť",
-        "known-issues": "{{changelog.known-issues}}"
-    },
     "manage-matched-metadata": {
         "description": "Všetky príslušné série, ktoré je možné priradiť k externým metaúdajom, sa nachádzajú tu. Kavita vopred načíta alebo obnoví metadáta série, 50 sérií za 24 hodín denne.",
         "title": "Zhodné metadáta",
@@ -2962,5 +2934,25 @@
         "name-label": "Meno",
         "key-label": "Kľúč",
         "expires-label": "Expirácia"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Nezaostávajte!",
+            "subtitle": "Zdá sa, že vaša inštalácia zaostáva o viac ako {{count}} verzií!",
+            "description-1": "Zvážte aktualizáciu, aby ste používali najnovšiu verziu Kavity.",
+            "description-2": "Pozrite sa na <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> pre inštrukcie, ako aktualizovať.",
+            "description-3": "Ak existuje konkrétny dôvod, prečo ste ešte neaktualizovali, radi by sme vedeli, čo vás drží na zastaranej verzii! Zastavte sa na našom Discorde a dajte nám vedieť, čo bráni vašej ceste inovácie."
+        },
+        "new-version": {
+            "title": "Kavita bola aktualizovaná!",
+            "description": "K dispozícii je nová verzia Kavity. Aktualizujte obnovením.",
+            "refresh": "Obnoviť"
+        },
+        "update-notification": {
+            "title": "Nová Aktualizácia k dispozícii!",
+            "help": "Ako aktualizovať",
+            "download": "Stiahnuť"
+        }
     }
 }

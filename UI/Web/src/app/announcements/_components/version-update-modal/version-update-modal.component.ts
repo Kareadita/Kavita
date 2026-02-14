@@ -27,7 +27,6 @@ export class VersionUpdateModalComponent {
   update = input<UpdateVersionEvent | null>(null);
   /** Number of versions out of date, only applicable for 'out-of-date' modal */
   versionsOutOfDate = input<number>(0);
-  // TODO: I might want to drive this with an options pattern to dictate what is required or not
 
   isDocker = computed(() => this.update()?.isDocker ?? false);
   /** Wiki help link — Docker or native install guide */

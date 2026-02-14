@@ -397,14 +397,6 @@
         "create": "{{common.create}}",
         "title": "Все умные фильтры"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "subtitle": "Похоже, что ваша установка отстала более чем на {{count}} версий!",
-        "description-1": "Пожалуйста, подумайте об обновлении, чтобы использовать последнюю версию Kavita.",
-        "description-2": "Взгляните на наш <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>вики</a> с инструкциями по обновлению.",
-        "description-3": "Если есть какая-то конкретная причина, по которой вы ещё не обновлялись, мы хотели бы знать, что удерживает вас на устаревшей версии! Зайдите в наш discord и сообщите нам, что мешает вам перейти на новую версию.",
-        "title": "Не отставай!"
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -616,12 +608,6 @@
         "kavita-tooltip": "Ваш рейтинг + Общий",
         "kavita-rating-title": "Ваш рейтинг",
         "critic": "{{review-card.critic}}"
-    },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "title": "Доступно новое обновление!",
-        "help": "Как обновить",
-        "download": "Загрузить"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -1557,20 +1543,6 @@
         "download": "Загрузить",
         "nightly": "Ночной: {{version}}"
     },
-    "new-version-modal": {
-        "title": "Kavita была обновлена!",
-        "description": "Доступна новая версия Kavita. Приступить к обновлению.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "refresh": "Сброс"
-    },
     "file-type-group-pipe": {
         "archive": "Архив",
         "epub": "ePub",
@@ -2042,5 +2014,25 @@
     "card-detail-layout": {
         "total-items": "Всего элементов: {{count}}",
         "no-data": "{{common.no-data}}"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Не отставай!",
+            "subtitle": "Похоже, что ваша установка отстала более чем на {{count}} версий!",
+            "description-1": "Пожалуйста, подумайте об обновлении, чтобы использовать последнюю версию Kavita.",
+            "description-2": "Взгляните на наш <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>вики</a> с инструкциями по обновлению.",
+            "description-3": "Если есть какая-то конкретная причина, по которой вы ещё не обновлялись, мы хотели бы знать, что удерживает вас на устаревшей версии! Зайдите в наш discord и сообщите нам, что мешает вам перейти на новую версию."
+        },
+        "new-version": {
+            "title": "Kavita была обновлена!",
+            "description": "Доступна новая версия Kavita. Приступить к обновлению.",
+            "refresh": "Сброс"
+        },
+        "update-notification": {
+            "title": "Доступно новое обновление!",
+            "help": "Как обновить",
+            "download": "Загрузить"
+        }
     }
 }

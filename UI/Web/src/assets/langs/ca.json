@@ -62,10 +62,6 @@
         "api": "API",
         "theme": "Tema"
     },
-    "new-version-modal": {
-        "title": "S'ha actualitzat el Kavita.",
-        "refresh": "Actualitza"
-    },
     "change-password": {
         "current-password-label": "Contrasenya actual",
         "confirm-password-label": "Confirmeu la contrasenya",
@@ -469,5 +465,12 @@
     },
     "restriction-selector": {
         "no-restriction": "Cap restricció"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "new-version": {
+            "title": "S'ha actualitzat el Kavita.",
+            "refresh": "Actualitza"
+        }
     }
 }

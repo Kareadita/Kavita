@@ -302,14 +302,6 @@
         "create": "{{common.create}}",
         "title": "Alla smarta-filter"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "description-3": "Om det finns en specifik anledning till att du ännu inte har uppdaterat, vill vi gärna veta vad som håller dig kvar på en äldre version! Titta gärna in på vår Discord och berätta vad som hindrar dig från att uppgradera.",
-        "description-2": "Ta en titt på våran <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> för instruktioner om hur du uppdaterar.",
-        "title": "Hamna inte efter!",
-        "subtitle": "Det verkar som att din installation är mer än {{count}} versioner efter!",
-        "description-1": "Överväg att uppgradera så att du kör den senaste versionen av Kavita."
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -505,12 +497,6 @@
         "kavita-tooltip": "Ditt betyg + Sammanlagt",
         "kavita-rating-title": "Ditt betyg",
         "entry-label": "Se detaljer"
-    },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "title": "Ny Uppdatering Tillgänglig!",
-        "help": "Hur du uppdaterar",
-        "download": "Ladda ner"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -1671,20 +1657,6 @@
         "local-review": "Lokal recension",
         "rating-percentage": "Betyg {{r}}%"
     },
-    "new-version-modal": {
-        "changed": "{{changelog.changed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "title": "Kavita blev uppdaterad!",
-        "refresh": "Uppdatera",
-        "fixed": "{{changelog.fixed}}",
-        "description": "En ny version av Kavita finns tillgänglig. Uppdatera för att applicera.",
-        "added": "{{changelog.added}}",
-        "removed": "{{changelog.removed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}"
-    },
     "manage-metadata-settings": {
         "enabled-tooltip": "Tillåt Kavita att ladda ner metadata och skriva till sin databas.",
         "summary-label": "Handling",
@@ -2438,5 +2410,25 @@
     },
     "manage-oidc-connect": {
         "save": "{{common.save}}"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Hamna inte efter!",
+            "subtitle": "Det verkar som att din installation är mer än {{count}} versioner efter!",
+            "description-1": "Överväg att uppgradera så att du kör den senaste versionen av Kavita.",
+            "description-2": "Ta en titt på våran <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> för instruktioner om hur du uppdaterar.",
+            "description-3": "Om det finns en specifik anledning till att du ännu inte har uppdaterat, vill vi gärna veta vad som håller dig kvar på en äldre version! Titta gärna in på vår Discord och berätta vad som hindrar dig från att uppgradera."
+        },
+        "new-version": {
+            "title": "Kavita blev uppdaterad!",
+            "description": "En ny version av Kavita finns tillgänglig. Uppdatera för att applicera.",
+            "refresh": "Uppdatera"
+        },
+        "update-notification": {
+            "title": "Ny Uppdatering Tillgänglig!",
+            "help": "Hur du uppdaterar",
+            "download": "Ladda ner"
+        }
     }
 }

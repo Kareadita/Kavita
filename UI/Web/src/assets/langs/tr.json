@@ -288,9 +288,6 @@
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
         "create": "{{common.create}}"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}"
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -412,11 +409,6 @@
     "external-rating": {
         "close": "{{common.close}}",
         "kavita-rating-title": "Puanınız"
-    },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "download": "İndir",
-        "title": "Yeni Güncelleme Mevcut!"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}"
@@ -1179,10 +1171,6 @@
         "known-issues": "Bilinen Sorunlar",
         "feature-requests": "Özellik Talepleri"
     },
-    "new-version-modal": {
-        "refresh": "Tazele",
-        "title": "Kavita güncellendi!"
-    },
     "manage-matched-metadata": {
         "library-name-header": "Kütüphane",
         "series-name-header": "Seriler",
@@ -1297,5 +1285,17 @@
         "minutes": "{{num}} dakika",
         "hours": "{{num}} saat",
         "combo": "{{hour}}s {{min}}d"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {},
+        "new-version": {
+            "title": "Kavita güncellendi!",
+            "refresh": "Tazele"
+        },
+        "update-notification": {
+            "title": "Yeni Güncelleme Mevcut!",
+            "download": "İndir"
+        }
     }
 }

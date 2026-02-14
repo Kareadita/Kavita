@@ -25,5 +25,8 @@
         "manual-save-label": "Tiekėjo nustatymų keitimas reikalauja rankinio išsaugojimo",
         "authority-tooltip": "URL į jūsų OIDC tiekėją neturi .well-known/openid-configuration kelio",
         "client-id-tooltip": "ClientID nustatytas pas jūsų OIDC tiekėją, gali būti bet koks"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}"
     }
 }
