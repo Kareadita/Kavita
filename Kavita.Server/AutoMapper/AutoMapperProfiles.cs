@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
@@ -35,10 +35,10 @@ using Kavita.Models.Entities.Person;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
+using Kavita.Server.Helpers;
 using Kavita.Services.Helpers;
 
-namespace Kavita.Server.Helpers;
-#nullable enable
+namespace Kavita.Server.AutoMapper;
 
 public class AutoMapperProfiles : Profile
 {
