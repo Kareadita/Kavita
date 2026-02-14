@@ -30,11 +30,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
-import {ModalService} from "../../_services/modal.service";
-import {
-  VersionUpdateModalComponent
-} from "../../announcements/_components/version-update-modal/version-update-modal.component";
-import {versionUpdateModal} from "../../_models/modal/modal-options";
+import {VersionService} from "../../_services/version.service";
 
 interface AdhocTask {
   name: string;
@@ -60,7 +56,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
   private readonly serverService = inject(ServerService);
-  private readonly modalService = inject(ModalService);
+  private readonly versionService = inject(VersionService);
   private readonly downloadService = inject(DownloadService);
 
   serverSettings!: ServerSettings;
@@ -135,9 +131,7 @@ export class ManageTasksSettingsComponent implements OnInit {
           this.toastr.info(translate('toasts.no-updates'));
           return;
         }
-        const modalRef = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
-        modalRef.setInput('update', update);
-        modalRef.setInput('mode', 'update-available');
+        this.versionService.showUpdateModal('update-available', { update });
       }
     },
   ];

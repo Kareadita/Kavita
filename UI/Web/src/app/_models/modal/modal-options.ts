@@ -24,12 +24,22 @@ export function addToModal(): Partial<NgbModalOptions> {
   return {...DefaultModalOptions, size: 'md', fullscreen: 'sm'};
 }
 
-export function versionUpdateModal(): Partial<NgbModalOptions> {
+/** Non-dismissible — for refresh-required modals only */
+export function versionRefreshModal(): Partial<NgbModalOptions> {
   return {
     ...DefaultModalOptions,
     size: 'lg',
     keyboard: false,
     scrollable: true,
-    backdrop: 'static' // Prevent closing by clicking outside
+    backdrop: 'static'
+  };
+}
+
+/** Dismissible — for update-available and out-of-date modals */
+export function versionNotifyModal(): Partial<NgbModalOptions> {
+  return {
+    ...DefaultModalOptions,
+    size: 'lg',
+    scrollable: true,
   };
 }

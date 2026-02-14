@@ -2,13 +2,14 @@ import {inject, Injectable, OnDestroy} from '@angular/core';
 import {interval, Subscription, switchMap} from 'rxjs';
 import {ServerService} from "./server.service";
 import {AccountService} from "./account.service";
-import {filter, take} from "rxjs/operators";
+import {filter, take, tap} from "rxjs/operators";
 import {Router} from "@angular/router";
 import {OpdsName} from "../_models/user/auth-key";
 import {
   VersionUpdateModalComponent
 } from "../announcements/_components/version-update-modal/version-update-modal.component";
-import {versionUpdateModal} from "../_models/modal/modal-options";
+import {versionNotifyModal, versionRefreshModal} from "../_models/modal/modal-options";
+import {UpdateVersionEvent} from "../_models/events/update-version-event";
 import {ModalService} from "./modal.service";
 
 @Injectable({
@@ -48,6 +49,8 @@ export class VersionService implements OnDestroy{
   private versionCheckSubscription?: Subscription;
   private outOfDateCheckSubscription?: Subscription;
   private modalOpen = false;
+  /** Version fetched on initial page load — used to detect mid-session server updates */
+  private loadedVersion: string | null = null;
 
   constructor() {
     this.startInitialVersionCheck();
@@ -61,9 +64,6 @@ export class VersionService implements OnDestroy{
   }
 
 
-
-
-
   /**
    * Initial version check to ensure localStorage is populated on first load
    */
@@ -75,197 +75,175 @@ export class VersionService implements OnDestroy{
         switchMap(user => this.serverService.getVersion(user!.authKeys.filter(k => k.name === OpdsName)[0].key))
       )
       .subscribe(serverVersion => {
-        const cachedVersion = localStorage.getItem(VersionService.SERVER_VERSION_KEY);
-
-        // Always update localStorage on first load
+        this.loadedVersion = serverVersion;
         localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
-
-        console.log('Initial version check - Server version:', serverVersion, 'Cached version:', cachedVersion);
+        console.log('Initial version check - Server version:', serverVersion);
       });
   }
+
 
   /**
    * Periodic check for server version to detect client refreshes and new updates
    */
   private startVersionCheck(): void {
-    console.log('Starting version checker');
     this.versionCheckSubscription = interval(this.VERSION_CHECK_INTERVAL)
       .pipe(
         switchMap(() => this.accountService.currentUser$),
         filter(user => !!user && !this.modalOpen),
         switchMap(user => this.serverService.getVersion(user!.authKeys.filter(k => k.name === OpdsName)[0].key)),
         filter(update => !!update),
-      ).subscribe(version => this.handleVersionUpdate(version));
+        tap(serverVersion => this.handleVersionCheck(serverVersion))
+      ).subscribe();
   }
 
   /**
    * Checks if the server is out of date compared to the latest release
    */
   private startOutOfDateCheck() {
-    console.log('Starting out-of-date checker');
     this.outOfDateCheckSubscription = interval(this.OUT_OF_DATE_CHECK_INTERVAL)
       .pipe(
         switchMap(() => this.accountService.currentUser$),
         filter(u => u !== undefined && this.accountService.hasAdminRole(u) && !this.modalOpen),
         switchMap(_ => this.serverService.checkHowOutOfDate(true)),
         filter(versionsOutOfDate => !isNaN(versionsOutOfDate) && versionsOutOfDate > this.OUT_Of_BAND_AMOUNT),
-      )
-      .subscribe(versionsOutOfDate => this.handleOutOfDateNotification(versionsOutOfDate));
+        tap(versionsOutOfDate => this.handleOutOfDate(versionsOutOfDate))
+      ).subscribe();
   }
 
   /**
    * Checks if the current route is in the excluded routes list
    */
-  private isExcludedRoute(): boolean {
+  isExcludedRoute(): boolean {
     const currentUrl = this.router.url;
     return this.EXCLUDED_ROUTES.some(route => currentUrl.includes(route));
   }
 
   /**
-   * Handles the version check response to determine if client refresh or new update notification is needed
+   * Given a server version string, determines whether to show a refresh modal
+   * (server updated mid-session) or check for available updates.
+   *
+   * Call with the result of `plugin/version`.
    */
-  private handleVersionUpdate(serverVersion: string) {
-    if (this.modalOpen) return;
+  handleVersionCheck(serverVersion: string): void {
+    if (this.modalOpen || this.isExcludedRoute()) return;
 
-    // Validate if we are on a reader route and if so, suppress
-    if (this.isExcludedRoute()) {
-      console.log('Version update blocked due to user reading');
-      return;
-    }
+    const isNewServerVersion = this.loadedVersion !== null && this.loadedVersion !== serverVersion;
 
-    const cachedVersion = localStorage.getItem(VersionService.SERVER_VERSION_KEY);
-    console.log('Server version:', serverVersion, 'Cached version:', cachedVersion);
-
-    const isNewServerVersion = cachedVersion !== null && cachedVersion !== serverVersion;
-
-    // Case 1: Client Refresh needed (server has updated since last client load)
     if (isNewServerVersion) {
-      this.showClientRefreshNotification();
+      // Server was updated mid-session — don't update loadedVersion so the
+      // refresh prompt persists until the user actually refreshes.
+      localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
+      this.serverService.getChangelog(1).subscribe(changelog => {
+        this.showRefreshModal(changelog[0]);
+        localStorage.setItem(VersionService.CLIENT_REFRESH_KEY, Date.now().toString());
+      });
+    } else {
+      this.handleUpdateCheck();
     }
-    // Case 2: Check for new updates (for server admin)
-    else {
-      this.checkForNewUpdates();
-    }
-
-    // Always update the cached version
-    localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
   }
 
   /**
-   * Shows a notification that client refresh is needed due to server update
+   * Checks if the admin should be notified of a new update (1–3 versions behind).
+   * Fetches versionsOutOfDate from the API, applies weekly throttle, then shows modal.
    */
-  private showClientRefreshNotification(): void {
-    this.pauseChecks();
-
-    // Client refresh notifications should always show (once)
-    this.modalOpen = true;
-
-    this.serverService.getChangelog(1).subscribe(changelog => {
-      const ref = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
-      ref.setInput('mode', 'refresh');
-      ref.setInput('update', changelog[0]);
-
-      // Update the last shown timestamp
-      localStorage.setItem(VersionService.CLIENT_REFRESH_KEY, Date.now().toString());
-
-      ref.closed.subscribe(_ => this.onModalClosed());
-      ref.dismissed.subscribe(_ => this.onModalClosed());
-    });
-  }
-
-  /**
-   * Checks for new server updates and shows notification if appropriate
-   */
-  private checkForNewUpdates(): void {
+  handleUpdateCheck(): void {
     this.accountService.currentUser$
       .pipe(
         take(1),
         filter(user => user !== undefined && this.accountService.hasAdminRole(user)),
         switchMap(_ => this.serverService.checkHowOutOfDate()),
-        filter(versionsOutOfDate => !isNaN(versionsOutOfDate) && versionsOutOfDate > 0 && versionsOutOfDate <= this.OUT_Of_BAND_AMOUNT)
-      )
-      .subscribe(versionsOutOfDate => {
-        const lastShown = Number(localStorage.getItem(VersionService.NEW_UPDATE_KEY) || '0');
-        const currentTime = Date.now();
-
-        // Show notification if it hasn't been shown in the last week
-        if (currentTime - lastShown >= this.NEW_UPDATE_INTERVAL) {
-          this.pauseChecks();
-          this.modalOpen = true;
-
-          this.serverService.getChangelog(1).subscribe(changelog => {
-            const ref = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
-            ref.setInput('versionsOutOfDate', versionsOutOfDate);
-            ref.setInput('update', changelog[0]);
-            ref.setInput('mode', 'update-available');
-
-            // Update the last shown timestamp
-            localStorage.setItem(VersionService.NEW_UPDATE_KEY, currentTime.toString());
-
-            ref.closed.subscribe(_ => this.onModalClosed());
-            ref.dismissed.subscribe(_ => this.onModalClosed());
-          });
-        }
-      });
+        filter(versionsOutOfDate => !isNaN(versionsOutOfDate) && versionsOutOfDate > 0 && versionsOutOfDate <= this.OUT_Of_BAND_AMOUNT),
+        tap(versionsOutOfDate => this.handleUpdateAvailable(versionsOutOfDate))
+      ).subscribe();
   }
 
   /**
-   * Handles the notification for servers that are significantly out of date
+   * Given a versionsOutOfDate count (1–3), applies weekly throttle and shows the
+   * update-available modal if appropriate.
    */
-  private handleOutOfDateNotification(versionsOutOfDate: number): void {
+  handleUpdateAvailable(versionsOutOfDate: number): void {
+    const lastShown = Number(localStorage.getItem(VersionService.NEW_UPDATE_KEY) || '0');
+    const currentTime = Date.now();
+
+    if (currentTime - lastShown < this.NEW_UPDATE_INTERVAL) return;
+
+    this.serverService.getChangelog(1).subscribe(changelog => {
+      this.showUpdateAvailableModal(changelog[0], versionsOutOfDate);
+      localStorage.setItem(VersionService.NEW_UPDATE_KEY, currentTime.toString());
+    });
+  }
+
+  /**
+   * Given a versionsOutOfDate count (4+), applies monthly throttle and shows the
+   * out-of-date modal if appropriate.
+   */
+  handleOutOfDate(versionsOutOfDate: number): void {
     const lastShown = Number(localStorage.getItem(VersionService.OUT_OF_BAND_KEY) || '0');
     const currentTime = Date.now();
 
-    // Show notification if it hasn't been shown in the last month
-    if (currentTime - lastShown >= this.OUT_OF_BAND_INTERVAL) {
-      this.pauseChecks();
-      this.modalOpen = true;
+    if (currentTime - lastShown < this.OUT_OF_BAND_INTERVAL) return;
 
-      const ref = this.modalService.open(VersionService, versionUpdateModal());
-      ref.setInput('mode', 'out-of-date');
-      ref.setInput('versionOutOfDate', versionsOutOfDate);
-
-      // Update the last shown timestamp
-      localStorage.setItem(VersionService.OUT_OF_BAND_KEY, currentTime.toString());
-
-      ref.closed.subscribe(_ => this.onModalClosed());
-      ref.dismissed.subscribe(_ => this.onModalClosed());
-    }
-  }
-
-  // region Debug Methods — call from browser console via: ng.getComponent(document.querySelector('app-root')).injector.get(VersionService).debugRefresh()
-
-  debugRefresh(): void {
-    this.serverService.getChangelog(1).subscribe(changelog => {
-      const ref = this.modalService.open<VersionUpdateModalComponent>(VersionUpdateModalComponent, versionUpdateModal());
-      ref.setInput('mode', 'refresh');
-      ref.setInput('update', changelog[0]);
-      ref.closed.subscribe(() => console.log('[debug] refresh modal closed'));
-      ref.dismissed.subscribe(() => console.log('[debug] refresh modal dismissed'));
-    });
-  }
-
-  debugUpdateAvailable(): void {
-    this.serverService.getChangelog(1).subscribe(changelog => {
-      const ref = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
-      ref.setInput('mode', 'update-available');
-      ref.setInput('versionsOutOfDate', 2);
-      ref.setInput('update', changelog[0]);
-
-      ref.closed.subscribe(() => console.log('[debug] update-available modal closed'));
-      ref.dismissed.subscribe(() => console.log('[debug] update-available modal dismissed'));
-    });
-  }
-
-  debugOutOfDate(versionsOutOfDate: number = 5): void {
-    const ref = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
-    ref.setInput('mode', 'out-of-date');
-    ref.setInput('versionsOutOfDate', versionsOutOfDate);
-    ref.closed.subscribe(() => console.log('[debug] out-of-date modal closed'));
-    ref.dismissed.subscribe(() => console.log('[debug] out-of-date modal dismissed'));
+    this.showOutOfDateModal(versionsOutOfDate);
+    localStorage.setItem(VersionService.OUT_OF_BAND_KEY, currentTime.toString());
   }
 
   // endregion
+
+  /**
+   * Single entry point for opening version update modals.
+   * Prevents stacking — only one modal can be open at a time.
+   * Used internally by background checks and externally by EventsWidget / admin settings.
+   */
+  showUpdateModal(mode: 'refresh' | 'update-available' | 'out-of-date', data: { update?: UpdateVersionEvent | null, versionsOutOfDate?: number } = {}): void {
+    if (this.modalOpen) return;
+
+    this.pauseChecks();
+    this.modalOpen = true;
+
+    const options = mode === 'refresh' ? versionRefreshModal() : versionNotifyModal();
+    const ref = this.modalService.open(VersionUpdateModalComponent, options);
+    ref.setInput('mode', mode);
+
+    if (data?.update != null) ref.setInput('update', data.update);
+    if (data?.versionsOutOfDate != null) ref.setInput('versionsOutOfDate', data.versionsOutOfDate);
+
+    ref.closed.subscribe(_ => this.onModalClosed());
+    ref.dismissed.subscribe(_ => this.onModalClosed());
+  }
+
+  /**
+   * Shows the refresh-required modal. The server was updated mid-session
+   * and the browser needs to reload to pick up new client assets.
+   */
+  showRefreshModal(update: UpdateVersionEvent): void {
+    this.showUpdateModal('refresh', { update });
+  }
+
+  /**
+   * Shows the update-available modal. A newer version exists that the admin can download.
+   */
+  showUpdateAvailableModal(update: UpdateVersionEvent, versionsOutOfDate: number = 1): void {
+    this.showUpdateModal('update-available', { update, versionsOutOfDate });
+  }
+
+  /**
+   * Shows the out-of-date warning modal. The server is significantly behind the latest release.
+   */
+  showOutOfDateModal(versionsOutOfDate: number): void {
+    this.showUpdateModal('out-of-date', { versionsOutOfDate });
+  }
+
+  debugRefresh(): void {
+    this.serverService.getChangelog(1).subscribe(changelog => this.showRefreshModal(changelog[0]));
+  }
+
+  debugUpdateAvailable(): void {
+    this.serverService.getChangelog(1).subscribe(changelog => this.showUpdateAvailableModal(changelog[0], 2));
+  }
+
+  debugOutOfDate(): void {
+    this.showOutOfDateModal(5);
+  }
 
   /**
    * Pauses all version checks while modals are open

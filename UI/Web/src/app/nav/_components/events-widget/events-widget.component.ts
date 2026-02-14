@@ -16,11 +16,7 @@ import {NgClass, NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {RouterLink} from "@angular/router";
 import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
-import {ModalService, TypedModalRef} from "../../../_services/modal.service";
-import {versionUpdateModal} from "../../../_models/modal/modal-options";
-import {
-  VersionUpdateModalComponent
-} from "../../../announcements/_components/version-update-modal/version-update-modal.component";
+import {VersionService} from "../../../_services/version.service";
 
 @Component({
   selector: 'app-nav-events-toggle',
@@ -32,7 +28,7 @@ import {
 export class EventsWidgetComponent implements OnInit {
   public readonly downloadService = inject(DownloadService);
   public readonly messageHub = inject(MessageHubService);
-  private readonly modalService = inject(ModalService);
+  private readonly versionService = inject(VersionService);
   protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
@@ -45,8 +41,6 @@ export class EventsWidgetComponent implements OnInit {
   readonly errors = signal<ErrorEvent[]>([]);
   readonly infos = signal<InfoEvent[]>([]);
   readonly activeReadingSessions = signal<Set<number>>(new Set());
-
-  private updateNotificationModalRef: TypedModalRef<VersionUpdateModalComponent> | null = null;
 
   /**
    * Does not include active reading sessions
@@ -123,22 +117,10 @@ export class EventsWidgetComponent implements OnInit {
 
 
   handleUpdateAvailableClick(message: NotificationProgressEvent | UpdateVersionEvent) {
-    if (this.updateNotificationModalRef != null) { return; }
-    this.updateNotificationModalRef = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
-    this.updateNotificationModalRef.setInput('mode', 'update-available');
-
-    if (message.hasOwnProperty('body')) {
-      this.updateNotificationModalRef.setInput('update', (message as NotificationProgressEvent).body as UpdateVersionEvent);
-    } else {
-      this.updateNotificationModalRef.setInput('update', message as UpdateVersionEvent);
-    }
-
-    this.updateNotificationModalRef.closed.subscribe(() => {
-      this.updateNotificationModalRef = null;
-    });
-    this.updateNotificationModalRef.dismissed.subscribe(() => {
-      this.updateNotificationModalRef = null;
-    });
+    const update = 'body' in message
+      ? (message as NotificationProgressEvent).body as UpdateVersionEvent
+      : message as UpdateVersionEvent;
+    this.versionService.showUpdateModal('update-available', { update });
   }
 
   async seeMore(event: ErrorEvent | InfoEvent) {
