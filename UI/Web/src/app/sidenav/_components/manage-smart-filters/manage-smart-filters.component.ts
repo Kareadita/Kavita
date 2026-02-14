@@ -4,7 +4,6 @@ import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
-import {ActionService} from "../../../_services/action.service";
 import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CarouselReelComponent} from "../../../carousel/_components/carousel-reel/carousel-reel.component";
@@ -17,7 +16,6 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {ActionResult} from "../../../_models/actionables/action-result";
-import {ModalService} from "../../../_services/modal.service";
 
 @Component({
   selector: 'app-manage-smart-filters',
@@ -32,10 +30,8 @@ export class ManageSmartFiltersComponent {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly seriesService = inject(SeriesService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly actionService = inject(ActionService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly modelService = inject(ModalService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
 
   @Input() target: '_self' | '_blank' = '_blank';

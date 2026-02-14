@@ -120,7 +120,7 @@ export class EventsWidgetComponent implements OnInit {
     const update = 'body' in message
       ? (message as NotificationProgressEvent).body as UpdateVersionEvent
       : message as UpdateVersionEvent;
-    this.versionService.showUpdateModal('update-available', { update });
+    this.versionService.showUpdateModal('update-available', { update }, true);
   }
 
   async seeMore(event: ErrorEvent | InfoEvent) {

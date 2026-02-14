@@ -131,7 +131,7 @@ export class ManageTasksSettingsComponent implements OnInit {
           this.toastr.info(translate('toasts.no-updates'));
           return;
         }
-        this.versionService.showUpdateModal('update-available', { update });
+        this.versionService.showUpdateModal('update-available', { update }, true);
       }
     },
   ];

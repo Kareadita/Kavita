@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {DestroyRef, inject, Injectable} from '@angular/core';
 import {interval, Subscription, switchMap} from 'rxjs';
 import {ServerService} from "./server.service";
 import {AccountService} from "./account.service";
@@ -22,6 +22,7 @@ export class VersionService {
   private readonly accountService = inject(AccountService);
   private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   public static readonly SERVER_VERSION_KEY = 'kavita--version';
   public static readonly CLIENT_REFRESH_KEY = 'kavita--client-refresh-last-shown';
@@ -92,7 +93,7 @@ export class VersionService {
         switchMap(user => this.serverService.getVersion(user!.authKeys.filter(k => k.name === OpdsName)[0].key)),
         filter(update => !!update),
         tap(serverVersion => this.handleVersionCheck(serverVersion)),
-        takeUntilDestroyed()
+        takeUntilDestroyed(this.destroyRef)
       ).subscribe();
   }
 
@@ -169,11 +170,11 @@ export class VersionService {
    * Prevents stacking — only one modal can be open at a time.
    * For non-refresh modes, applies per-version backoff before opening.
    */
-  showUpdateModal(mode: 'refresh' | 'update-available' | 'out-of-date', data: { update?: UpdateVersionEvent | null, versionsOutOfDate?: number } = {}): void {
+  showUpdateModal(mode: 'refresh' | 'update-available' | 'out-of-date', data: { update?: UpdateVersionEvent | null, versionsOutOfDate?: number } = {}, force: boolean = false): void {
     if (this.modalOpen) return;
 
-    // Per-version backoff for dismissible modes
-    if (mode !== 'refresh') {
+    // Per-version backoff for dismissible modes (skipped for refresh and user-initiated actions)
+    if (mode !== 'refresh' && !force) {
       const backoffVersion = this.getBackoffVersion(mode, data);
       if (backoffVersion && !this.shouldShowNotification(backoffVersion)) return;
       this.activeModalVersion = backoffVersion;
