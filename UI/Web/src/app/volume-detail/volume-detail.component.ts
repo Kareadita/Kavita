@@ -25,7 +25,6 @@ import {
   NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle,
-  NgbModal,
   NgbNav,
   NgbNavChangeEvent,
   NgbNavContent,
@@ -92,6 +91,7 @@ import {Breakpoint, BreakpointService} from "../_services/breakpoint.service";
 import {ActionFactoryService} from "../_services/action-factory.service";
 import {ActionItem} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";
+import {ModalService} from "../_services/modal.service";
 
 enum TabID {
   Chapters = 'chapters-tab',
@@ -186,7 +186,7 @@ export class VolumeDetailComponent implements OnInit {
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);

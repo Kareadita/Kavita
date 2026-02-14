@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
-import {NgbModal, NgbModalRef, NgbPopover} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModalRef, NgbPopover} from '@ng-bootstrap/ng-bootstrap';
 import {ConfirmConfig} from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {
@@ -19,6 +19,7 @@ import {NgClass, NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {RouterLink} from "@angular/router";
 import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
+import {ModalService} from "../../../_services/modal.service";
 
 @Component({
   selector: 'app-nav-events-toggle',
@@ -30,7 +31,7 @@ import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session
 export class EventsWidgetComponent implements OnInit {
   public readonly downloadService = inject(DownloadService);
   public readonly messageHub = inject(MessageHubService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);

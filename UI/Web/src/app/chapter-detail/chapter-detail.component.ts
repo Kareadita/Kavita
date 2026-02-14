@@ -18,7 +18,6 @@ import {
   NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle,
-  NgbModal,
   NgbNav,
   NgbNavChangeEvent,
   NgbNavContent,
@@ -85,6 +84,7 @@ import {BreakpointService} from "../_services/breakpoint.service";
 import {ActionFactoryService} from "../_services/action-factory.service";
 import {ActionItem} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";
+import {ModalService} from "../_services/modal.service";
 
 enum TabID {
   Related = 'related-tab',
@@ -149,7 +149,7 @@ export class ChapterDetailComponent implements OnInit {
   private readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly readingListService = inject(ReadingListService);

@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {map, take} from 'rxjs/operators';
 import {BulkAddToCollectionComponent} from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
@@ -25,7 +25,6 @@ import {SeriesService} from './series.service';
 import {translate} from "@jsverse/transloco";
 import {UserCollection} from "../_models/collection-tag";
 import {CollectionTagService} from "./collection-tag.service";
-import {FilterService} from "./filter.service";
 import {ReadingListService} from "./reading-list.service";
 import {ChapterService} from "./chapter.service";
 import {VolumeService} from "./volume.service";
@@ -59,6 +58,7 @@ import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {NavService} from "./nav.service";
 import {ModalResult} from "../_models/modal/modal-result";
 import {addToModal, editModal} from "../_models/modal/modal-options";
+import {ModalService} from "./modal.service";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -84,12 +84,11 @@ export class ActionService {
   private readonly seriesService = inject(SeriesService);
   private readonly readerService = inject(ReaderService);
   private readonly toastr = inject(ToastrService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
   private readonly memberService = inject(MemberService);
   private readonly deviceService = inject(DeviceService);
   private readonly collectionTagService = inject(CollectionTagService);
-  private readonly filterService = inject(FilterService);
   private readonly readingListService = inject(ReadingListService);
   private readonly collectionService = inject(CollectionTagService);
   private readonly downloadService = inject(DownloadService);

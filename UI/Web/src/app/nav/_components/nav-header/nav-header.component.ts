@@ -24,7 +24,7 @@ import {NavService} from 'src/app/_services/nav.service';
 import {SearchService} from 'src/app/_services/search.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
-import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
 import {EventsWidgetComponent} from '../events-widget/events-widget.component';
 import {SeriesFormatComponent} from '../../../shared/series-format/series-format.component';
 import {ImageComponent} from '../../../shared/image/image.component';
@@ -47,6 +47,8 @@ import {QuillViewComponent} from "ngx-quill";
 import {AnnotationService} from "../../../_services/annotation.service";
 import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile-icon.component";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {VersionService} from "../../../_services/version.service";
+import {ModalService} from "../../../_services/modal.service";
 
 @Component({
   selector: 'app-nav-header',
@@ -68,10 +70,13 @@ export class NavHeaderComponent {
   protected readonly navService = inject(NavService);
   protected readonly imageService = inject(ImageService);
   protected readonly breakpointService = inject(BreakpointService);
-  protected readonly modalService = inject(NgbModal);
+  protected readonly modalService = inject(ModalService);
   protected readonly metadataService = inject(MetadataService);
   private readonly annotationService = inject(AnnotationService);
   private readonly document = inject(DOCUMENT);
+
+  protected readonly versionService = inject(VersionService);
+
 
   @ViewChild('search') searchViewRef!: any;
 

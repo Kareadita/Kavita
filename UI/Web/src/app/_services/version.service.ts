@@ -3,11 +3,15 @@ import {interval, Subscription, switchMap} from 'rxjs';
 import {ServerService} from "./server.service";
 import {AccountService} from "./account.service";
 import {filter, take} from "rxjs/operators";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {NewUpdateModalComponent} from "../announcements/_components/new-update-modal/new-update-modal.component";
 import {OutOfDateModalComponent} from "../announcements/_components/out-of-date-modal/out-of-date-modal.component";
 import {Router} from "@angular/router";
 import {OpdsName} from "../_models/user/auth-key";
+import {
+  VersionUpdateModalComponent
+} from "../announcements/_components/version-update-modal/version-update-modal.component";
+import {versionUpdateModal} from "../_models/modal/modal-options";
+import {ModalService} from "./modal.service";
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +20,7 @@ export class VersionService implements OnDestroy{
 
   private readonly serverService = inject(ServerService);
   private readonly accountService = inject(AccountService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly router = inject(Router);
 
   public static readonly SERVER_VERSION_KEY = 'kavita--version';
@@ -57,6 +61,10 @@ export class VersionService implements OnDestroy{
     this.versionCheckSubscription?.unsubscribe();
     this.outOfDateCheckSubscription?.unsubscribe();
   }
+
+
+
+
 
   /**
    * Initial version check to ensure localStorage is populated on first load
@@ -134,7 +142,7 @@ export class VersionService implements OnDestroy{
 
     // Case 1: Client Refresh needed (server has updated since last client load)
     if (isNewServerVersion) {
-      this.showClientRefreshNotification(serverVersion);
+      this.showClientRefreshNotification();
     }
     // Case 2: Check for new updates (for server admin)
     else {
@@ -148,22 +156,17 @@ export class VersionService implements OnDestroy{
   /**
    * Shows a notification that client refresh is needed due to server update
    */
-  private showClientRefreshNotification(newVersion: string): void {
+  private showClientRefreshNotification(): void {
     this.pauseChecks();
 
     // Client refresh notifications should always show (once)
     this.modalOpen = true;
 
     this.serverService.getChangelog(1).subscribe(changelog => {
-      const ref = this.modalService.open(NewUpdateModalComponent, {
-        size: 'lg',
-        keyboard: false,
-        backdrop: 'static' // Prevent closing by clicking outside
-      });
+      const ref = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
 
-      ref.componentInstance.version = newVersion;
+      ref.componentInstance.mode = 'refresh';
       ref.componentInstance.update = changelog[0];
-      ref.componentInstance.requiresRefresh = true;
 
       // Update the last shown timestamp
       localStorage.setItem(VersionService.CLIENT_REFRESH_KEY, Date.now().toString());
@@ -197,7 +200,6 @@ export class VersionService implements OnDestroy{
             const ref = this.modalService.open(NewUpdateModalComponent, { size: 'lg', fullscreen: 'md' });
             ref.componentInstance.versionsOutOfDate = versionsOutOfDate;
             ref.componentInstance.update = changelog[0];
-            ref.componentInstance.requiresRefresh = false;
 
             // Update the last shown timestamp
             localStorage.setItem(VersionService.NEW_UPDATE_KEY, currentTime.toString());
@@ -231,6 +233,40 @@ export class VersionService implements OnDestroy{
       ref.dismissed.subscribe(_ => this.onModalClosed());
     }
   }
+
+  // region Debug Methods — call from browser console via: ng.getComponent(document.querySelector('app-root')).injector.get(VersionService).debugRefresh()
+
+  debugRefresh(): void {
+    this.serverService.getChangelog(1).subscribe(changelog => {
+      const ref = this.modalService.open<VersionUpdateModalComponent>(VersionUpdateModalComponent, versionUpdateModal());
+      ref.setInput('mode', 'refresh');
+      ref.setInput('update', changelog[0]);
+      ref.closed.subscribe(() => console.log('[debug] refresh modal closed'));
+      ref.dismissed.subscribe(() => console.log('[debug] refresh modal dismissed'));
+    });
+  }
+
+  debugUpdateAvailable(): void {
+    this.serverService.getChangelog(1).subscribe(changelog => {
+      const ref = this.modalService.open(VersionUpdateModalComponent, { size: 'lg', fullscreen: 'md', scrollable: true });
+      ref.setInput('mode', 'update-available');
+      ref.setInput('versionsOutOfDate', 2);
+      ref.setInput('update', changelog[0]);
+
+      ref.closed.subscribe(() => console.log('[debug] update-available modal closed'));
+      ref.dismissed.subscribe(() => console.log('[debug] update-available modal dismissed'));
+    });
+  }
+
+  debugOutOfDate(versionsOutOfDate: number = 5): void {
+    const ref = this.modalService.open(VersionUpdateModalComponent, { size: 'lg', fullscreen: 'md', scrollable: true });
+    ref.setInput('mode', 'out-of-date');
+    ref.setInput('versionsOutOfDate', versionsOutOfDate);
+    ref.closed.subscribe(() => console.log('[debug] out-of-date modal closed'));
+    ref.dismissed.subscribe(() => console.log('[debug] out-of-date modal dismissed'));
+  }
+
+  // endregion
 
   /**
    * Pauses all version checks while modals are open

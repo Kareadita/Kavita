@@ -21,7 +21,6 @@ import {Job} from 'src/app/_models/job/job';
 import {
   UpdateNotificationModalComponent
 } from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
 import {AsyncPipe, TitleCasePipe} from '@angular/common';
@@ -34,6 +33,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {ModalService} from "../../_services/modal.service";
 
 interface AdhocTask {
   name: string;
@@ -59,7 +59,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
   private readonly serverService = inject(ServerService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly downloadService = inject(DownloadService);
 
   serverSettings!: ServerSettings;

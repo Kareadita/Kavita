@@ -1,0 +1,32 @@
+<ng-container *transloco="let t; prefix: 'version-update-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <!--Do I need  scrollable-modal or will the open() method handle for me -->
+  <div class="modal-body">
+    <!--out-of-date-modal localization keys-->
+    @if (mode() === 'out-of-date') {
+      <p><strong>{{t('subtitle', {count: versionsOutOfDate()})}}</strong></p>
+      <p>{{t('description-1')}}</p>
+      <p [innerHTML]="t('description-2') | safeHtml"></p>
+      <p>{{t('description-3')}}</p>
+    } @else if(update()) {
+      <app-changelog-update-item [update]="update()" [showExtras]="false" />
+    }
+
+  </div>
+
+  <div class="modal-footer">
+    @if (mode() === 'out-of-date') {
+      <a class="btn btn-link me-1" href="https://discord.gg/b52wT37kt7" target="_blank" rel="noreferrer noopener">Discord</a>
+    } @else {
+      <a class="btn btn-icon me-1" [href]="updateUrl()" target="_blank" rel="noopener noreferrer">{{t('help')}}</a>
+    }
+
+    <button type="button" class="btn {{isDocker() ? 'btn-primary' : 'btn-secondary'}}" (click)="close()">{{t('close')}}</button>
+    @if(!isDocker()) {
+      <a href="{{updateUrl()}}" class="btn btn-primary" target="_blank" rel="noopener noreferrer" (click)="close()">{{t('download')}}</a>
+    }
+  </div>
+</ng-container>

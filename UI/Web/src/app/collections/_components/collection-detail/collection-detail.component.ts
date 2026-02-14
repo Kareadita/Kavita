@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgbModal, NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {debounceTime} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
@@ -26,7 +26,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {ActionService} from 'src/app/_services/action.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
@@ -67,6 +66,7 @@ import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {ModalResult} from "../../../_models/modal/modal-result";
+import {ModalService} from "../../../_services/modal.service";
 
 @Component({
   selector: 'app-collection-detail',
@@ -89,11 +89,10 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   private readonly toastr = inject(ToastrService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly accountService = inject(AccountService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly offcanvasService = inject(NgbOffcanvas);
   private readonly titleService = inject(Title);
   private readonly jumpbarService = inject(JumpbarService);
-  private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   protected readonly utilityService = inject(UtilityService);

@@ -10,12 +10,12 @@ import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {ToggleVisibilityDirective} from "../../_directives/toggle-visibility.directive";
 import {ConfirmService} from "../../shared/confirm.service";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {CreateAuthKeyComponent} from "../_modals/create-auth-key/create-auth-key.component";
 import {Clipboard} from "@angular/cdk/clipboard";
 import {DatePipe} from "@angular/common";
 import {ToastrService} from "ngx-toastr";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
   selector: 'app-manage-auth-keys',
@@ -38,7 +38,7 @@ export class ManageAuthKeysComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly settingsService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly clipboard = inject(Clipboard);
   private readonly toastr = inject(ToastrService);
 

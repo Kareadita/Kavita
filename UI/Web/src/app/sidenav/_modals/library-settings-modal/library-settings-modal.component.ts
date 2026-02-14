@@ -11,7 +11,6 @@ import {
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
-  NgbModal,
   NgbModalModule,
   NgbNav,
   NgbNavContent,
@@ -61,6 +60,7 @@ import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {Action} from "../../../_models/actionables/action";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {ModalService} from "../../../_services/modal.service";
 
 enum TabID {
   General = 'general-tab',
@@ -92,7 +92,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   protected readonly modal = inject(NgbActiveModal);
   private readonly destroyRef = inject(DestroyRef);
   private readonly uploadService = inject(UploadService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
   private readonly libraryService = inject(LibraryService);
   private readonly toastr = inject(ToastrService);
