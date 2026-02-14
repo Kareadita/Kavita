@@ -3,8 +3,6 @@ import {interval, Subscription, switchMap} from 'rxjs';
 import {ServerService} from "./server.service";
 import {AccountService} from "./account.service";
 import {filter, take} from "rxjs/operators";
-import {NewUpdateModalComponent} from "../announcements/_components/new-update-modal/new-update-modal.component";
-import {OutOfDateModalComponent} from "../announcements/_components/out-of-date-modal/out-of-date-modal.component";
 import {Router} from "@angular/router";
 import {OpdsName} from "../_models/user/auth-key";
 import {
@@ -164,9 +162,8 @@ export class VersionService implements OnDestroy{
 
     this.serverService.getChangelog(1).subscribe(changelog => {
       const ref = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
-
-      ref.componentInstance.mode = 'refresh';
-      ref.componentInstance.update = changelog[0];
+      ref.setInput('mode', 'refresh');
+      ref.setInput('update', changelog[0]);
 
       // Update the last shown timestamp
       localStorage.setItem(VersionService.CLIENT_REFRESH_KEY, Date.now().toString());
@@ -197,9 +194,10 @@ export class VersionService implements OnDestroy{
           this.modalOpen = true;
 
           this.serverService.getChangelog(1).subscribe(changelog => {
-            const ref = this.modalService.open(NewUpdateModalComponent, { size: 'lg', fullscreen: 'md' });
-            ref.componentInstance.versionsOutOfDate = versionsOutOfDate;
-            ref.componentInstance.update = changelog[0];
+            const ref = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
+            ref.setInput('versionsOutOfDate', versionsOutOfDate);
+            ref.setInput('update', changelog[0]);
+            ref.setInput('mode', 'update-available');
 
             // Update the last shown timestamp
             localStorage.setItem(VersionService.NEW_UPDATE_KEY, currentTime.toString());
@@ -223,8 +221,9 @@ export class VersionService implements OnDestroy{
       this.pauseChecks();
       this.modalOpen = true;
 
-      const ref = this.modalService.open(OutOfDateModalComponent, { size: 'lg', fullscreen: 'md' });
-      ref.componentInstance.versionsOutOfDate = versionsOutOfDate;
+      const ref = this.modalService.open(VersionService, versionUpdateModal());
+      ref.setInput('mode', 'out-of-date');
+      ref.setInput('versionOutOfDate', versionsOutOfDate);
 
       // Update the last shown timestamp
       localStorage.setItem(VersionService.OUT_OF_BAND_KEY, currentTime.toString());
@@ -248,7 +247,7 @@ export class VersionService implements OnDestroy{
 
   debugUpdateAvailable(): void {
     this.serverService.getChangelog(1).subscribe(changelog => {
-      const ref = this.modalService.open(VersionUpdateModalComponent, { size: 'lg', fullscreen: 'md', scrollable: true });
+      const ref = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
       ref.setInput('mode', 'update-available');
       ref.setInput('versionsOutOfDate', 2);
       ref.setInput('update', changelog[0]);
@@ -259,7 +258,7 @@ export class VersionService implements OnDestroy{
   }
 
   debugOutOfDate(versionsOutOfDate: number = 5): void {
-    const ref = this.modalService.open(VersionUpdateModalComponent, { size: 'lg', fullscreen: 'md', scrollable: true });
+    const ref = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
     ref.setInput('mode', 'out-of-date');
     ref.setInput('versionsOutOfDate', versionsOutOfDate);
     ref.closed.subscribe(() => console.log('[debug] out-of-date modal closed'));

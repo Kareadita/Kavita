@@ -1,5 +1,5 @@
 import {ComponentRef, inject, Injectable, Type} from '@angular/core';
-import {NgbModalOptions, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalOptions, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 
 export interface TypedModalRef<C> extends NgbModalRef {
   setInput<K extends string>(key: K, value: unknown): void;
@@ -10,7 +10,7 @@ export interface TypedModalRef<C> extends NgbModalRef {
 })
 export class ModalService {
 
-  private modal = inject(ModalService);
+  private modal = inject(NgbModal);
 
   /** * TODO: This is a hack to get the ComponentRef because NgbModalRef does not expose it.
    * See https://github.com/ng-bootstrap/ng-bootstrap/issues/4688 */

@@ -18,9 +18,6 @@ import {
 } from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
-import {
-  UpdateNotificationModalComponent
-} from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
 import {AsyncPipe, TitleCasePipe} from '@angular/common';
@@ -34,6 +31,10 @@ import {SettingButtonComponent} from "../../settings/_components/setting-button/
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {ModalService} from "../../_services/modal.service";
+import {
+  VersionUpdateModalComponent
+} from "../../announcements/_components/version-update-modal/version-update-modal.component";
+import {versionUpdateModal} from "../../_models/modal/modal-options";
 
 interface AdhocTask {
   name: string;
@@ -134,8 +135,9 @@ export class ManageTasksSettingsComponent implements OnInit {
           this.toastr.info(translate('toasts.no-updates'));
           return;
         }
-        const modalRef = this.modalService.open(UpdateNotificationModalComponent);
-        modalRef.componentInstance.updateData = update;
+        const modalRef = this.modalService.open(VersionUpdateModalComponent, versionUpdateModal());
+        modalRef.setInput('update', update);
+        modalRef.setInput('mode', 'update-available');
       }
     },
   ];

@@ -29,23 +29,21 @@ export class VersionUpdateModalComponent {
   versionsOutOfDate = input<number>(0);
   // TODO: I might want to drive this with an options pattern to dictate what is required or not
 
-  isDocker = computed(() => this.update()?.isDocker);
-  updateUrl = computed(() => {
-    return this.isDocker() ?  WikiLink.UpdateDocker : WikiLink.UpdateNative;
+  isDocker = computed(() => this.update()?.isDocker ?? false);
+  /** Wiki help link — Docker or native install guide */
+  helpUrl = computed(() => {
+    return this.isDocker() ? WikiLink.UpdateDocker : WikiLink.UpdateNative;
   });
-  discordUrl = 'https://discord.gg/b52wT37kt7';
-
-
-
+  private readonly localePrefix: Record<string, string> = {
+    'refresh': 'new-version',
+    'update-available': 'update-notification',
+    'out-of-date': 'out-of-date',
+  };
+  title = computed(() => `${this.localePrefix[this.mode()]}.title`);
 
   close() {
-    if (this.mode() == 'refresh') {
-      this.refresh();
-      return;
-    }
     this.modal.dismiss();
   }
-
 
   refresh() {
     this.bustLocaleCache();
