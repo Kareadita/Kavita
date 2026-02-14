@@ -1,16 +1,16 @@
 import {inject, Injectable} from '@angular/core';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {take} from 'rxjs/operators';
 import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component';
 import {ConfirmConfig} from './confirm-dialog/_models/confirm-config';
 import {confirmModal} from "../_models/modal/modal-options";
+import {ModalService} from "../_services/modal.service";
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConfirmService {
-  private modalService = inject(NgbModal);
+  private modalService = inject(ModalService);
 
 
   defaultConfirm = new ConfirmConfig();

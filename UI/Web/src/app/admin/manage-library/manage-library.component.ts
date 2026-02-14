@@ -9,7 +9,7 @@ import {
   OnInit,
   TrackByFunction
 } from '@angular/core';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {distinctUntilChanged, filter, take} from 'rxjs/operators';
 import {ConfirmService} from 'src/app/shared/confirm.service';
@@ -52,6 +52,7 @@ import {Action} from "../../_models/actionables/action";
 import {ActionResult} from "../../_models/actionables/action-result";
 import {ModalResult} from "../../_models/modal/modal-result";
 import {editModal} from "../../_models/modal/modal-options";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
   selector: 'app-manage-library',
@@ -64,7 +65,7 @@ import {editModal} from "../../_models/modal/modal-options";
 export class ManageLibraryComponent implements OnInit {
 
   private readonly libraryService = inject(LibraryService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   private readonly hubService = inject(MessageHubService);

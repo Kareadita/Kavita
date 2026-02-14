@@ -494,14 +494,6 @@
     "announcements": {
         "title": "공지 사항"
     },
-    "out-of-date-modal": {
-        "title": "뒤처지지 마세요!",
-        "close": "{{common.close}}",
-        "subtitle": "귀하의 설치 버전이 {{count}}개 이상 뒤처진 것 같습니다!",
-        "description-1": "최신 버전의 Kavita를 실행할 수 있도록 업그레이드하는 것을 고려해 보세요.",
-        "description-2": "업데이트 방법에 대한 지침은 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>를 살펴보세요.",
-        "description-3": "아직 업데이트하지 않은 특별한 이유가 있는 경우 오래된 버전을 유지하는 이유가 무엇인지 알고 싶습니다! 우리의 불일치에 들러 업그레이드 경로를 방해하는 것이 무엇인지 알려주십시오."
-    },
     "changelog": {
         "installed": "설치됨",
         "download": "다운로드",
@@ -746,12 +738,6 @@
     "read-more": {
         "read-more": "더 읽기",
         "read-less": "그만 읽기"
-    },
-    "update-notification-modal": {
-        "title": "새로운 업데이트 사용가능!",
-        "close": "{{common.close}}",
-        "help": "업데이트 방법",
-        "download": "다운로드"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2479,20 +2465,6 @@
         "published-label": "게시된 날짜: ",
         "installed": "{{changelog.installed}}"
     },
-    "new-version-modal": {
-        "known-issues": "{{changelog.known-issues}}",
-        "close": "{{common.close}}",
-        "theme": "{{changelog.theme}}",
-        "changed": "{{changelog.changed}}",
-        "refresh": "새로고침",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "title": "Kavita가 업데이트되었습니다!",
-        "description": "Kavita의 새 버전이 출시되었습니다. 업데이트하려면 새로 고침하세요.",
-        "added": "{{changelog.added}}"
-    },
     "manage-matched-metadata": {
         "title": "일치하는 메타데이터",
         "library-name-header": "라이브러리",
@@ -3377,5 +3349,25 @@
         "week": "이번 주",
         "month": "이번 달",
         "year": "올해"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "뒤처지지 마세요!",
+            "subtitle": "귀하의 설치 버전이 {{count}}개 이상 뒤처진 것 같습니다!",
+            "description-1": "최신 버전의 Kavita를 실행할 수 있도록 업그레이드하는 것을 고려해 보세요.",
+            "description-2": "업데이트 방법에 대한 지침은 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>를 살펴보세요.",
+            "description-3": "아직 업데이트하지 않은 특별한 이유가 있는 경우 오래된 버전을 유지하는 이유가 무엇인지 알고 싶습니다! 우리의 불일치에 들러 업그레이드 경로를 방해하는 것이 무엇인지 알려주십시오."
+        },
+        "new-version": {
+            "title": "Kavita가 업데이트되었습니다!",
+            "description": "Kavita의 새 버전이 출시되었습니다. 업데이트하려면 새로 고침하세요.",
+            "refresh": "새로고침"
+        },
+        "update-notification": {
+            "title": "새로운 업데이트 사용가능!",
+            "help": "업데이트 방법",
+            "download": "다운로드"
+        }
     }
 }

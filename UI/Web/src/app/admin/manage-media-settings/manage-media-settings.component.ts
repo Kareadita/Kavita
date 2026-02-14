@@ -5,7 +5,6 @@ import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, t
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {DirectoryPickerComponent, DirectoryPickerResult} from '../_modals/directory-picker/directory-picker.component';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {allEncodeFormats} from '../_models/encode-format';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {allCoverImageSizes, CoverImageSize} from '../_models/cover-image-size';
@@ -17,6 +16,7 @@ import {PdfRenderResolutionPipe} from "../../_pipes/pdf-render-resolution.pipe"
 import {ConfirmService} from "../../shared/confirm.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {pageLayoutModes} from "../../_models/preferences/reading-profiles";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
   selector: 'app-manage-media-settings',
@@ -32,7 +32,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly allEncodeFormats = allEncodeFormats;

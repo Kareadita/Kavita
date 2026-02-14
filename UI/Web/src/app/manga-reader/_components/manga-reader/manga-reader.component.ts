@@ -35,7 +35,7 @@ import {
 import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {NgbModal, NgbModalRef, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModalRef, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import {Stack} from 'src/app/shared/data-structures/stack';
@@ -85,6 +85,7 @@ import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service"
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {ImageOnlyName} from "../../../_models/user/auth-key";
 import {mediumModal} from "../../../_models/modal/modal-options";
+import {ModalService} from "../../../_services/modal.service";
 
 
 const PREFETCH_PAGES = 10;
@@ -162,7 +163,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
   private readonly navService = inject(NavService);
   private readonly memberService = inject(MemberService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
   private readonly readingProfileService = inject(ReadingProfileService);

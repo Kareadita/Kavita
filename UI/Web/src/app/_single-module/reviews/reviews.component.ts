@@ -10,9 +10,9 @@ import {
   ReviewModalCloseEvent,
   ReviewModalComponent
 } from "../review-modal/review-modal.component";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {Series} from "../../_models/series";
 import {Chapter} from "../../_models/chapter";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
   selector: 'app-reviews',
@@ -28,7 +28,7 @@ import {Chapter} from "../../_models/chapter";
 export class ReviewsComponent {
 
   private readonly accountService = inject(AccountService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
   @Input({required: true}) userReviews!: Array<UserReview>;

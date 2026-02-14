@@ -8,7 +8,7 @@ import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {
   GenericListModalComponent
 } from "../../../statistics/_components/_modals/generic-list-modal/generic-list-modal.component";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {ModalService} from "../../../_services/modal.service";
 
 export interface ProfileStatBar {
   booksRead: number;
@@ -33,7 +33,7 @@ export interface ProfileStatBar {
 })
 export class ProfileStatBarComponent {
   private readonly statsService = inject(StatisticsService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
 
   userId = input.required<number>();
   year = input.required<number>();

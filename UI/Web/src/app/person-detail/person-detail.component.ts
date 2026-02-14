@@ -31,7 +31,6 @@ import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {AccountService} from "../_services/account.service";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {ActionFactoryService} from "../_services/action-factory.service";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {ThemeService} from "../_services/theme.service";
@@ -44,6 +43,7 @@ import {MetadataService} from "../_services/metadata.service";
 import {SeriesCardComponent} from "../cards/series-card/series-card.component";
 import {ActionItem} from "../_models/actionables/action-item";
 import {ActionResult} from "../_models/actionables/action-result";
+import {ModalService} from "../_services/modal.service";
 
 interface PersonMergeEvent {
   srcId: number,
@@ -80,7 +80,7 @@ export class PersonDetailComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly personService = inject(PersonService);
   private readonly actionService = inject(ActionFactoryService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   protected readonly imageService = inject(ImageService);
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);

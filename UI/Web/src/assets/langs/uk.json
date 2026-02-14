@@ -351,14 +351,6 @@
         "create": "{{common.create}}",
         "title": "Усі розумні фільтри"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "title": "Не відставай!",
-        "subtitle": "Схоже, ваша інсталяція відстає на понад {{count}} версій!",
-        "description-1": "Будь ласка, розгляньте можливість оновлення, щоб використовувати найновішу версію Kavita.",
-        "description-2": "Перегляньте нашу <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>вікі</a>, щоб отримати інструкції щодо оновлення.",
-        "description-3": "Якщо є конкретна причина, чому ви ще не оновилися, ми будемо раді дізнатися, чому ви користуєтеся застарілою версією! Завітайте до нашого Discord та повідомте нам, що заважає вам оновитися."
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -572,12 +564,6 @@
         "kavita-tooltip": "Ваша оцінка + загальний результат",
         "kavita-rating-title": "Ваша оцінка",
         "critic": "{{review-card.critic}}"
-    },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "title": "Нове оновлення доступне!",
-        "help": "Як оновити",
-        "download": "Завантажити"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2035,20 +2021,6 @@
         "feature-requests": "Запити на функції",
         "known-issues": "Відомі проблеми"
     },
-    "new-version-modal": {
-        "title": "Кавіту оновили!",
-        "description": "Доступна нова версія Kavita. Оновіть сторінку для оновлення.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "refresh": "Оновити"
-    },
     "manage-matched-metadata": {
         "title": "Зіставлені метадані",
         "description": "Усі відповідні серії, які можна зіставити із зовнішніми метаданими, знаходяться тут. Kavita попередньо завантажуватиме або оновлюватиме метадані серій, 50 серій на добу щодня.",
@@ -3410,5 +3382,25 @@
         "pages-count": "{{num}} сторінки",
         "words-read-by-year-title": "Слова, прочитані за роками",
         "words-count": "{{num}} слова"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Не відставай!",
+            "subtitle": "Схоже, ваша інсталяція відстає на понад {{count}} версій!",
+            "description-1": "Будь ласка, розгляньте можливість оновлення, щоб використовувати найновішу версію Kavita.",
+            "description-2": "Перегляньте нашу <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>вікі</a>, щоб отримати інструкції щодо оновлення.",
+            "description-3": "Якщо є конкретна причина, чому ви ще не оновилися, ми будемо раді дізнатися, чому ви користуєтеся застарілою версією! Завітайте до нашого Discord та повідомте нам, що заважає вам оновитися."
+        },
+        "new-version": {
+            "title": "Кавіту оновили!",
+            "description": "Доступна нова версія Kavita. Оновіть сторінку для оновлення.",
+            "refresh": "Оновити"
+        },
+        "update-notification": {
+            "title": "Нове оновлення доступне!",
+            "help": "Як оновити",
+            "download": "Завантажити"
+        }
     }
 }

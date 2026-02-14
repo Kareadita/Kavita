@@ -23,7 +23,6 @@ import {
   NgbDropdownItem,
   NgbDropdownMenu,
   NgbDropdownToggle,
-  NgbModal,
   NgbNav,
   NgbNavChangeEvent,
   NgbNavContent,
@@ -119,6 +118,7 @@ import {CardConfigFactory} from "../../../_services/card-config-factory.service"
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {ModalResult} from "../../../_models/modal/modal-result";
 import {patchEntitySignal, patchSignalArray} from "../../../../libs/patch";
+import {ModalService} from "../../../_services/modal.service";
 
 
 enum TabID {
@@ -159,7 +159,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   private readonly seriesService = inject(SeriesService);
   private readonly metadataService = inject(MetadataService);
   private readonly router = inject(Router);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly toastr = inject(ToastrService);
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);

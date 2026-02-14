@@ -8,7 +8,7 @@ import {
   OnDestroy,
   Output
 } from '@angular/core';
-import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
 import {AccountService} from 'src/app/_services/account.service';
 import {ActionableEntity} from 'src/app/_services/action-factory.service';
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
@@ -20,6 +20,7 @@ import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {ActionResult} from "../../_models/actionables/action-result";
 import {filterActionTree} from "../../../libs/action-utils";
+import {ModalService} from "../../_services/modal.service";
 
 
 @Component({
@@ -35,7 +36,7 @@ import {filterActionTree} from "../../../libs/action-utils";
 export class CardActionablesComponent implements OnDestroy {
 
   private readonly accountService = inject(AccountService);
-  protected readonly modalService = inject(NgbModal);
+  protected readonly modalService = inject(ModalService);
   protected readonly breakpointService = inject(BreakpointService);
 
   iconClass = input<string>('fa-ellipsis-v');

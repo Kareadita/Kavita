@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, TrackByFunction} from '@angular/core';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {take} from 'rxjs/operators';
 import {MemberService} from 'src/app/_services/member.service';
 import {Member} from 'src/app/_models/auth/member';
@@ -33,6 +33,7 @@ import {
   DataTableColumnHeaderDirective,
   DatatableComponent
 } from "@siemens/ngx-datatable";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
   selector: 'app-manage-users',
@@ -52,7 +53,7 @@ export class ManageUsersComponent implements OnInit {
   private readonly memberService = inject(MemberService);
   private readonly accountService = inject(AccountService);
   private readonly settingsService = inject(SettingsService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   public readonly messageHub = inject(MessageHubService);

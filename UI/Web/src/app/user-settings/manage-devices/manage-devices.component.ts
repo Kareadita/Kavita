@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, injec
 import {Device} from 'src/app/_models/device/device';
 import {DeviceService} from 'src/app/_services/device.service';
 import {DevicePlatformPipe} from '../../_pipes/device-platform.pipe';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingsService} from "../../admin/settings.service";
 import {ConfirmService} from "../../shared/confirm.service";
@@ -17,6 +16,7 @@ import {ClientDevice} from "../../_models/client-device";
 import {ClientDeviceCardComponent} from "../../_single-module/client-device-card/client-device-card.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
     selector: 'app-manage-devices',
@@ -32,7 +32,7 @@ export class ManageDevicesComponent implements OnInit {
   private readonly deviceService = inject(DeviceService);
   private readonly settingsService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly accountService = inject(AccountService);
 
   //devices: Array<Device> = [];
