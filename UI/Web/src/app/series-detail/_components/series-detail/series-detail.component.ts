@@ -9,7 +9,6 @@ import {
   ElementRef,
   inject,
   Input,
-  input,
   numberAttribute,
   OnInit,
   signal,
@@ -41,7 +40,7 @@ import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
-import {Library, LibraryType} from 'src/app/_models/library/library';
+import {LibraryType} from 'src/app/_models/library/library';
 import {ReadingList} from 'src/app/_models/reading-list';
 import {Series} from 'src/app/_models/series';
 import {RelatedSeries} from 'src/app/_models/series-detail/related-series';
@@ -119,6 +118,7 @@ import {EntityCardComponent} from "../../../cards/entity-card/entity-card.compon
 import {ModalResult} from "../../../_models/modal/modal-result";
 import {patchEntitySignal, patchSignalArray} from "../../../../libs/patch";
 import {ModalService} from "../../../_services/modal.service";
+import {getResolvedData} from "../../../../libs/route-util";
 
 
 enum TabID {
@@ -196,27 +196,27 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   @Input({transform: numberAttribute}) seriesId = 0;
   @Input({transform: numberAttribute}) libraryId = 0;
   /** This can be {id} only for non-admin users */
-  library = input.required<Library>();
+  library = getResolvedData(this.route, 'library');
 
   series = signal<Series | null>(null);
   volumes = signal<Volume[]>([]);
-  volumeEntities = computed(() => this.volumes().map(v => CardEntityFactory.volume(v, this.seriesId, this.libraryId)));
+  volumeEntities = computed(() => this.volumes().map(v => CardEntityFactory.volume(v, this.seriesId, this.library().id)));
   volumeConfig = computed(() => {
     const seriesId = this.seriesId;
-    const libraryId = this.libraryId;
+    const libraryId = this.library().id;
     const libraryType = this.libraryType();
     return this.cardConfigFactory.forVolume({seriesId, libraryId, libraryType})
   });
   chapters = signal<Chapter[]>([]);
-  chapterEntities = computed(() => this.chapters().map(v => CardEntityFactory.chapter(v, this.seriesId, this.libraryId)));
+  chapterEntities = computed(() => this.chapters().map(v => CardEntityFactory.chapter(v, this.seriesId, this.library().id)));
   chapterConfig = computed(() => {
     const seriesId = this.seriesId;
-    const libraryId = this.libraryId;
+    const libraryId = this.library().id;
     const libraryType = this.libraryType();
     return this.cardConfigFactory.forChapter({seriesId, libraryId, libraryType})
   });
   specials = signal<Chapter[]>([]);
-  specialEntities = computed(() => this.specials().map(v => CardEntityFactory.chapter(v, this.seriesId, this.libraryId)));
+  specialEntities = computed(() => this.specials().map(v => CardEntityFactory.chapter(v, this.seriesId, this.library().id)));
   specialConfig = computed(() => {
     const seriesId = this.seriesId;
     const libraryId = this.libraryId;
@@ -224,7 +224,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     return this.cardConfigFactory.forChapter({seriesId, libraryId, libraryType, overrides: {selectionType: 'special'}})
   });
   storylineChapters = signal<Chapter[]>([]);
-  private storylineChapterEntities = computed(() => this.storylineChapters().map(v => CardEntityFactory.chapter(v, this.seriesId, this.libraryId)));
+  private storylineChapterEntities = computed(() => this.storylineChapters().map(v => CardEntityFactory.chapter(v, this.seriesId, this.library().id)));
   storylineItems = computed(() => {
     const items: StoryLineItem[] = [];
     const volumes = this.volumeEntities();
@@ -280,7 +280,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   plusReviews: Array<UserReview> = [];
   bookmarks = signal<PageBookmark[]>([]);
   ratings = signal<Rating[]>([]);
-  libraryType = signal<LibraryType>(LibraryType.Manga);
+  libraryType = computed(() => this.library().type);
 
   seriesMetadata = signal<SeriesMetadata | null>(null);
   readingLists = signal<ReadingList[]>([]);
@@ -477,7 +477,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
         ],
       };
     });
-    this.bulkSelectionService.registerContext(() => ({ seriesId: this.seriesId, libraryId: this.libraryId, libraryType: this.libraryType() }));
+    this.bulkSelectionService.registerContext(() => ({ seriesId: this.seriesId, libraryId: this.library().id, libraryType: this.libraryType() }));
     this.bulkSelectionService.registerPostAction((res: ActionResult<Volume[] | Chapter[]>) => {
       if (res.effect === 'none') return;
       if (res.effect === 'reload') {
@@ -584,7 +584,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.loadPageSource.next(false);
         break;
       case 'remove':
-        this.router.navigate(['library', this.libraryId]);
+        this.router.navigate(['library', this.library().id]);
         break;
       case 'reload':
         this.loadSeries(this.seriesId, true);
@@ -643,16 +643,14 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
     forkJoin({
-      libType: this.libraryService.getLibraryType(this.libraryId),
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
-      this.libraryType.set(results.libType);
       this.series.set(results.series);
 
       this.themeService.setColorScape(results.series.primaryColor, results.series.secondaryColor);
 
       if (loadExternal) {
-        this.loadPlusMetadata(this.seriesId, results.libType);
+        this.loadPlusMetadata(this.seriesId, this.library().type);
       }
 
       this.titleService.setTitle('Kavita - ' + results.series.name + ' Details');

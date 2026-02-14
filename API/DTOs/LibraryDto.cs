@@ -6,15 +6,25 @@ using API.Entities.Enums;
 namespace API.DTOs;
 #nullable enable
 
-public sealed record LibraryDto
+/// <summary>
+/// This is a LibraryDto that non-admins can resolve that has the core information they need
+/// </summary>
+public record LiteLibraryDto
 {
     public int Id { get; init; }
     public string? Name { get; init; }
+    public LibraryType Type { get; init; }
+}
+
+public sealed record LibraryDto : LiteLibraryDto
+{
+    public int Id { get; init; }
+    public string? Name { get; init; }
+    public LibraryType Type { get; init; }
     /// <summary>
     /// Last time Library was scanned
     /// </summary>
     public DateTime LastScanned { get; init; }
-    public LibraryType Type { get; init; }
     /// <summary>
     /// An optional Cover Image or null
     /// </summary>

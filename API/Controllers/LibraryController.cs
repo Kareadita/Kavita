@@ -24,6 +24,7 @@ using EasyCaching.Core;
 using Hangfire;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -207,12 +208,19 @@ public class LibraryController : BaseApiController
     /// <summary>
     /// Return a specific library
     /// </summary>
+    /// <remarks>If the user is not an admin, only id, type, and name will be returned</remarks>
     /// <returns></returns>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [ProducesResponseType<LibraryDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<LiteLibraryDto>(StatusCodes.Status200OK)]
     [HttpGet]
     public async Task<ActionResult<LibraryDto?>> GetLibrary(int libraryId)
     {
-        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtoByIdAsync(libraryId));
+        if (User.IsInRole(PolicyConstants.AdminRole))
+        {
+            return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtoByIdAsync(libraryId));
+        }
+        return Ok(await _unitOfWork.LibraryRepository.GetLiteLibraryDtoByIdAsync(libraryId));
     }
 
     /// <summary>
