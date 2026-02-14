@@ -24,20 +24,19 @@ export class VersionService implements OnDestroy{
 
   public static readonly SERVER_VERSION_KEY = 'kavita--version';
   public static readonly CLIENT_REFRESH_KEY = 'kavita--client-refresh-last-shown';
-  public static readonly NEW_UPDATE_KEY = 'kavita--new-update-last-shown';
-  public static readonly OUT_OF_BAND_KEY = 'kavita--out-of-band-last-shown';
+  private static readonly DISMISS_KEY_PREFIX = 'kavita--update-dismiss-';
 
-  // Notification intervals
-  private readonly CLIENT_REFRESH_INTERVAL = 0; // Show immediately (once)
-  private readonly NEW_UPDATE_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
-  private readonly OUT_OF_BAND_INTERVAL = 30 * 24 * 60 * 60 * 1000; // 1 month in milliseconds
-
-  // Check intervals
   private readonly VERSION_CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutes
-  private readonly OUT_OF_DATE_CHECK_INTERVAL = 2 * 60 * 60 * 1000; // 2 hours
-  private readonly OUT_Of_BAND_AMOUNT = 3; // How many releases before we show "You're X releases out of date"
+  private readonly OUT_OF_BAND_AMOUNT = 3; // Threshold: above this count shows "out of date" instead of "update available"
 
-  // Routes where version update modals should not be shown
+  /** Backoff intervals indexed by dismiss count: [after 1st dismiss, after 2nd dismiss] */
+  private readonly BACKOFF_INTERVALS = [
+    7 * 24 * 60 * 60 * 1000,  // 1 week
+    14 * 24 * 60 * 60 * 1000, // 2 weeks
+  ];
+  private readonly MAX_DISMISSALS = 3;
+
+  /** Routes where version update modals should not be shown */
   private readonly EXCLUDED_ROUTES = [
     '/manga/',
     '/book/',
@@ -47,20 +46,19 @@ export class VersionService implements OnDestroy{
 
 
   private versionCheckSubscription?: Subscription;
-  private outOfDateCheckSubscription?: Subscription;
   private modalOpen = false;
   /** Version fetched on initial page load — used to detect mid-session server updates */
   private loadedVersion: string | null = null;
+  /** Tracks which version the currently-open modal is for, so we can record dismissal on close */
+  private activeModalVersion: string | null = null;
 
   constructor() {
     this.startInitialVersionCheck();
     this.startVersionCheck();
-    this.startOutOfDateCheck();
   }
 
   ngOnDestroy() {
     this.versionCheckSubscription?.unsubscribe();
-    this.outOfDateCheckSubscription?.unsubscribe();
   }
 
 
@@ -97,20 +95,6 @@ export class VersionService implements OnDestroy{
   }
 
   /**
-   * Checks if the server is out of date compared to the latest release
-   */
-  private startOutOfDateCheck() {
-    this.outOfDateCheckSubscription = interval(this.OUT_OF_DATE_CHECK_INTERVAL)
-      .pipe(
-        switchMap(() => this.accountService.currentUser$),
-        filter(u => u !== undefined && this.accountService.hasAdminRole(u) && !this.modalOpen),
-        switchMap(_ => this.serverService.checkHowOutOfDate(true)),
-        filter(versionsOutOfDate => !isNaN(versionsOutOfDate) && versionsOutOfDate > this.OUT_Of_BAND_AMOUNT),
-        tap(versionsOutOfDate => this.handleOutOfDate(versionsOutOfDate))
-      ).subscribe();
-  }
-
-  /**
    * Checks if the current route is in the excluded routes list
    */
   isExcludedRoute(): boolean {
@@ -143,8 +127,8 @@ export class VersionService implements OnDestroy{
   }
 
   /**
-   * Checks if the admin should be notified of a new update (1–3 versions behind).
-   * Fetches versionsOutOfDate from the API, applies weekly throttle, then shows modal.
+   * Checks if the admin should be notified of a new update or that the server is significantly out of date.
+   * Single API call to checkHowOutOfDate determines which modal (if any) to show.
    */
   handleUpdateCheck(): void {
     this.accountService.currentUser$
@@ -152,50 +136,48 @@ export class VersionService implements OnDestroy{
         take(1),
         filter(user => user !== undefined && this.accountService.hasAdminRole(user)),
         switchMap(_ => this.serverService.checkHowOutOfDate()),
-        filter(versionsOutOfDate => !isNaN(versionsOutOfDate) && versionsOutOfDate > 0 && versionsOutOfDate <= this.OUT_Of_BAND_AMOUNT),
-        tap(versionsOutOfDate => this.handleUpdateAvailable(versionsOutOfDate))
-      ).subscribe();
+        filter(versionsOutOfDate => !isNaN(versionsOutOfDate) && versionsOutOfDate > 0),
+      ).subscribe(versionsOutOfDate => {
+        if (versionsOutOfDate > this.OUT_OF_BAND_AMOUNT) {
+          this.handleOutOfDate(versionsOutOfDate);
+        } else {
+          this.handleUpdateAvailable(versionsOutOfDate);
+        }
+      });
   }
 
   /**
-   * Given a versionsOutOfDate count (1–3), applies weekly throttle and shows the
-   * update-available modal if appropriate.
+   * Given a versionsOutOfDate count (1–3), fetches changelog and shows the
+   * update-available modal. Backoff is applied in showUpdateModal.
    */
   handleUpdateAvailable(versionsOutOfDate: number): void {
-    const lastShown = Number(localStorage.getItem(VersionService.NEW_UPDATE_KEY) || '0');
-    const currentTime = Date.now();
-
-    if (currentTime - lastShown < this.NEW_UPDATE_INTERVAL) return;
-
     this.serverService.getChangelog(1).subscribe(changelog => {
       this.showUpdateAvailableModal(changelog[0], versionsOutOfDate);
-      localStorage.setItem(VersionService.NEW_UPDATE_KEY, currentTime.toString());
     });
   }
 
   /**
-   * Given a versionsOutOfDate count (4+), applies monthly throttle and shows the
-   * out-of-date modal if appropriate.
+   * Given a versionsOutOfDate count (4+), shows the out-of-date modal.
+   * Backoff is applied in showUpdateModal.
    */
   handleOutOfDate(versionsOutOfDate: number): void {
-    const lastShown = Number(localStorage.getItem(VersionService.OUT_OF_BAND_KEY) || '0');
-    const currentTime = Date.now();
-
-    if (currentTime - lastShown < this.OUT_OF_BAND_INTERVAL) return;
-
     this.showOutOfDateModal(versionsOutOfDate);
-    localStorage.setItem(VersionService.OUT_OF_BAND_KEY, currentTime.toString());
   }
-
-  // endregion
 
   /**
    * Single entry point for opening version update modals.
    * Prevents stacking — only one modal can be open at a time.
-   * Used internally by background checks and externally by EventsWidget / admin settings.
+   * For non-refresh modes, applies per-version backoff before opening.
    */
   showUpdateModal(mode: 'refresh' | 'update-available' | 'out-of-date', data: { update?: UpdateVersionEvent | null, versionsOutOfDate?: number } = {}): void {
     if (this.modalOpen) return;
+
+    // Per-version backoff for dismissible modes
+    if (mode !== 'refresh') {
+      const backoffVersion = this.getBackoffVersion(mode, data);
+      if (backoffVersion && !this.shouldShowNotification(backoffVersion)) return;
+      this.activeModalVersion = backoffVersion;
+    }
 
     this.pauseChecks();
     this.modalOpen = true;
@@ -246,19 +228,53 @@ export class VersionService implements OnDestroy{
   }
 
   /**
-   * Pauses all version checks while modals are open
+   * Determines the version string used for backoff tracking.
+   * update-available: the version available to update to.
+   * out-of-date: the current server version (resets when user updates).
    */
-  private pauseChecks(): void {
-    this.versionCheckSubscription?.unsubscribe();
-    this.outOfDateCheckSubscription?.unsubscribe();
+  private getBackoffVersion(mode: string, data: { update?: UpdateVersionEvent | null }): string | null {
+    if (mode === 'update-available') return data.update?.updateVersion ?? null;
+    if (mode === 'out-of-date') return this.loadedVersion;
+    return null;
   }
 
   /**
-   * Resumes all checks when modals are closed
+   * Checks per-version dismissal history to determine if we should show the notification.
+   * Returns false if the user has dismissed enough times or too recently.
    */
+  shouldShowNotification(targetVersion: string): boolean {
+    const raw = localStorage.getItem(VersionService.DISMISS_KEY_PREFIX + targetVersion);
+    if (!raw) return true;
+
+    const { count, lastDismissed } = JSON.parse(raw) as { count: number; lastDismissed: number };
+    if (count >= this.MAX_DISMISSALS) return false;
+
+    const interval = this.BACKOFF_INTERVALS[Math.min(count - 1, this.BACKOFF_INTERVALS.length - 1)];
+    return Date.now() - lastDismissed >= interval;
+  }
+
+  /**
+   * Records a dismissal for the given version, incrementing the count and updating the timestamp.
+   */
+  recordDismissal(targetVersion: string): void {
+    const raw = localStorage.getItem(VersionService.DISMISS_KEY_PREFIX + targetVersion);
+    const current = raw ? JSON.parse(raw) as { count: number } : { count: 0 };
+    localStorage.setItem(VersionService.DISMISS_KEY_PREFIX + targetVersion, JSON.stringify({
+      count: current.count + 1,
+      lastDismissed: Date.now(),
+    }));
+  }
+
+  private pauseChecks(): void {
+    this.versionCheckSubscription?.unsubscribe();
+  }
+
   private onModalClosed(): void {
+    if (this.activeModalVersion) {
+      this.recordDismissal(this.activeModalVersion);
+      this.activeModalVersion = null;
+    }
     this.modalOpen = false;
     this.startVersionCheck();
-    this.startOutOfDateCheck();
   }
 }
