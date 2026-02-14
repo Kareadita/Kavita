@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using Kavita.API.Attributes;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -14,6 +13,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
+using Kavita.Server.Attributes;
 using Kavita.Services.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,11 +26,9 @@ public class ChapterController(
     IUnitOfWork unitOfWork,
     ILocalizationService localizationService,
     IEventHub eventHub,
-    ILogger<ChapterController> logger,
-    IMapper mapper)
+    ILogger<ChapterController> logger)
     : BaseApiController
 {
-    private readonly IMapper _mapper = mapper;
 
     /// <summary>
     /// Gets a single chapter
@@ -38,6 +36,7 @@ public class ChapterController(
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet]
+    [ChapterAccess]
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
     {
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId);
@@ -411,6 +410,7 @@ public class ChapterController(
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("chapter-detail-plus")]
     public async Task<ActionResult<ChapterDetailPlusDto>> ChapterDetailPlus([FromQuery] int chapterId)
     {

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Kavita.API.Attributes;
+namespace Kavita.Server.Attributes;
 
 /// <summary>
 /// An attribute to restrict endpoint usage to either the user itself (authenticated user == userId) or the

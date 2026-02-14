@@ -7,6 +7,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.ReadingLists.CBL;
+using Kavita.Server.Attributes;
 using Kavita.Services.Reading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

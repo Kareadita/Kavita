@@ -11,6 +11,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.WantToRead;
 using Kavita.Models.Entities.User;
+using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Microsoft.AspNetCore.Mvc;
 

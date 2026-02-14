@@ -10,6 +10,7 @@ using Kavita.API.Services.Reading;
 using Kavita.Models.Constants;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
+using Kavita.Server.Attributes;
 using Kavita.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -49,6 +50,7 @@ public class ImageController : BaseApiController
     /// <param name="chapterId"></param>
     /// <param name="apiKey"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("chapter-cover")]
     public async Task<ActionResult> GetChapterCoverImage(int chapterId, string apiKey)
     {
@@ -62,6 +64,7 @@ public class ImageController : BaseApiController
     /// <param name="libraryId"></param>
     /// <param name="apiKey"></param>
     /// <returns></returns>
+    [LibraryAccess]
     [HttpGet("library-cover")]
     public async Task<ActionResult> GetLibraryCoverImage(int libraryId, string apiKey)
     {
@@ -75,6 +78,7 @@ public class ImageController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="apiKey"></param>
     /// <returns></returns>
+    [VolumeAccess]
     [HttpGet("volume-cover")]
     public async Task<ActionResult> GetVolumeCoverImage(int volumeId, string apiKey)
     {
@@ -88,6 +92,7 @@ public class ImageController : BaseApiController
     /// <param name="seriesId">Id of Series</param>
     /// <param name="apiKey"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("series-cover")]
     public async Task<ActionResult> GetSeriesCoverImage(int seriesId, string apiKey)
     {
@@ -104,6 +109,7 @@ public class ImageController : BaseApiController
     [HttpGet("collection-cover")]
     public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId, string apiKey)
     {
+        // TODO: Check acess to cover image
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
         {
@@ -123,6 +129,7 @@ public class ImageController : BaseApiController
     [HttpGet("readinglist-cover")]
     public async Task<ActionResult> GetReadingListCoverImage(int readingListId, string apiKey)
     {
+        // TODO: Check acess to cover image
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ReadingListRepository.GetCoverImageAsync(readingListId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
         {
@@ -158,6 +165,7 @@ public class ImageController : BaseApiController
     /// <param name="apiKey">API Key for user. Needed to authenticate request</param>
     /// <param name="imageOffset">Only applicable for Epubs - handles multiple images on one page</param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("bookmark")]
     public async Task<ActionResult> GetBookmarkImage(int chapterId, int pageNum, string apiKey, int imageOffset = 0)
     {
@@ -246,6 +254,7 @@ public class ImageController : BaseApiController
     [HttpGet("person-cover")]
     public async Task<ActionResult> GetPersonCoverImage(int personId, string apiKey)
     {
+        // TODO: Check access to cover image
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.UserRepository.GetPersonCoverImageAsync(personId));
         return PhysicalFile(path);
     }
@@ -259,6 +268,8 @@ public class ImageController : BaseApiController
     [HttpGet("user-cover")]
     public async Task<ActionResult> GetUserCoverImage(int userId, string apiKey)
     {
+        // TODO: Does this need any checks? Can we use profile privacy?
+        //    I don't think so, you could share annotations but not profile. So how would this work?
         var filename = await _unitOfWork.UserRepository.GetCoverImageAsync(userId, UserId);
         var path = Path.Join(_directoryService.CoverImageDirectory, filename);
         return CachedFile(path);

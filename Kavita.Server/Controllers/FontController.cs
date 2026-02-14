@@ -10,6 +10,7 @@ using Kavita.Common;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Font;
 using Kavita.Models.Entities.Enums.Font;
+using Kavita.Server.Attributes;
 using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

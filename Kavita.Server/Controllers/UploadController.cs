@@ -14,6 +14,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Uploads;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
+using Kavita.Server.Attributes;
 using Kavita.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

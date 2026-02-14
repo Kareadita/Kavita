@@ -12,6 +12,7 @@ using Kavita.Models.DTOs.Downloads;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Server.Attributes;
 using Kavita.Services.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,6 +45,7 @@ public class DownloadController(
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
+    [VolumeAccess]
     [HttpGet("volume-size")]
     public async Task<ActionResult<long>> GetVolumeSize(int volumeId)
     {
@@ -56,6 +58,7 @@ public class DownloadController(
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("chapter-size")]
     public async Task<ActionResult<long>> GetChapterSize(int chapterId)
     {
@@ -68,6 +71,7 @@ public class DownloadController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("series-size")]
     public async Task<ActionResult<long>> GetSeriesSize(int seriesId)
     {
@@ -81,15 +85,17 @@ public class DownloadController(
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    [Authorize(PolicyGroups.DownloadPolicy)]
+    [VolumeAccess]
     [HttpGet("volume")]
+    [Authorize(PolicyGroups.DownloadPolicy)]
     public async Task<ActionResult> DownloadVolume(int volumeId)
     {
-        if (!await HasDownloadPermission()) return BadRequest(await localizationService.Translate(UserId, "permission-denied"));
         var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId);
         if (volume == null) return BadRequest(await localizationService.Translate(UserId, "volume-doesnt-exist"));
+
         var files = await unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
+
         try
         {
             return await DownloadFiles(files, $"download_{Username!}_v{volumeId}", $"{series!.Name} - Volume {volume.Name}.zip");
@@ -98,13 +104,6 @@ public class DownloadController(
         {
             return BadRequest(ex.Message);
         }
-    }
-
-    private async Task<bool> HasDownloadPermission()
-    {
-        var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
-        if (user == null) return false;
-        return await accountService.HasDownloadPermission(user);
     }
 
     private PhysicalFileResult GetFirstFileDownload(IEnumerable<MangaFile> files)
@@ -118,15 +117,17 @@ public class DownloadController(
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("chapter")]
     public async Task<ActionResult> DownloadChapter(int chapterId)
     {
-        if (!await HasDownloadPermission()) return BadRequest(await localizationService.Translate(UserId, "permission-denied"));
         var files = await unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
         if (chapter == null) return BadRequest(await localizationService.Translate(UserId, "chapter-doesnt-exist"));
+
         var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId);
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume!.SeriesId);
+
         try
         {
             return await DownloadFiles(files, $"download_{Username!}_c{chapterId}", $"{series!.Name} - Chapter {chapter.GetNumberTitle()}.zip");
@@ -180,11 +181,11 @@ public class DownloadController(
         }
     }
 
+    [SeriesAccess]
     [HttpGet("series")]
+    [Authorize(PolicyGroups.DownloadPolicy)]
     public async Task<ActionResult> DownloadSeries(int seriesId)
     {
-        if (!await HasDownloadPermission()) return BadRequest(await localizationService.Translate(UserId, "permission-denied"));
-
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         if (series == null) return BadRequest("Invalid Series");
 
@@ -205,9 +206,10 @@ public class DownloadController(
     /// <param name="downloadBookmarkDto"></param>
     /// <returns></returns>
     [HttpPost("bookmarks")]
+    [Authorize(PolicyGroups.DownloadPolicy)]
     public async Task<ActionResult> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
     {
-        if (!await HasDownloadPermission()) return BadRequest(await localizationService.Translate(UserId, "permission-denied"));
+        // TODO: Check series access
         if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest(await localizationService.Translate(UserId, "bookmarks-empty"));
 
         // We know that all bookmarks will be for one single seriesId

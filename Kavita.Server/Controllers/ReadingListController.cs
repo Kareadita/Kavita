@@ -12,6 +12,7 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities.Enums;
+using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Reading;
 using Microsoft.AspNetCore.Authorization;

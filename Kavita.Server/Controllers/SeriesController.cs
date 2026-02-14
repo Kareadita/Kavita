@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyCaching.Core;
 using Hangfire;
-using Kavita.API.Attributes;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
@@ -20,6 +19,7 @@ using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
+using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -28,8 +28,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
-
-#nullable enable
 
 public class SeriesController(
     ILogger<SeriesController> logger,
@@ -73,6 +71,7 @@ public class SeriesController(
     /// <param name="seriesId">Series Id to fetch details for</param>
     /// <returns></returns>
     /// <exception cref="NoContent">Throws an exception if the series Id does exist</exception>
+    [SeriesAccess]
     [HttpGet("{seriesId:int}")]
     public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
     {
@@ -86,8 +85,8 @@ public class SeriesController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns>If the series was deleted or not</returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpDelete("{seriesId}")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<bool>> DeleteSeries(int seriesId)
     {
         var username = Username!;
@@ -96,8 +95,13 @@ public class SeriesController(
         return Ok(await seriesService.DeleteMultipleSeries([seriesId]));
     }
 
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    /// <summary>
+    /// Deletes multiple series from Kavita at once
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("delete-multiple")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> DeleteMultipleSeries(DeleteSeriesDto dto)
     {
         var username = Username!;
@@ -113,12 +117,19 @@ public class SeriesController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("volumes")]
     public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
     {
         return Ok(await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, UserId));
     }
 
+    /// <summary>
+    /// Returns a single Volume with progress information and Chapters
+    /// </summary>
+    /// <param name="volumeId"></param>
+    /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("volume")]
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
@@ -127,6 +138,7 @@ public class SeriesController(
         return Ok(vol);
     }
 
+    [ChapterAccess]
     [HttpGet("chapter")]
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
     {
@@ -142,6 +154,7 @@ public class SeriesController(
     /// <param name="updateSeries"></param>
     /// <returns></returns>
     [HttpPost("update")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> UpdateSeries(UpdateSeriesDto updateSeries)
     {
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
@@ -299,8 +312,8 @@ public class SeriesController(
     /// </summary>
     /// <param name="refreshSeriesDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("refresh-metadata")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
     {
         await taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, refreshSeriesDto.ForceUpdate, refreshSeriesDto.ForceColorscape);
@@ -312,8 +325,8 @@ public class SeriesController(
     /// </summary>
     /// <param name="refreshSeriesDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("scan")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public ActionResult ScanSeries(RefreshSeriesDto refreshSeriesDto)
     {
         taskScheduler.ScanSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
@@ -325,8 +338,8 @@ public class SeriesController(
     /// </summary>
     /// <param name="refreshSeriesDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("analyze")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public ActionResult AnalyzeSeries(RefreshSeriesDto refreshSeriesDto)
     {
         taskScheduler.AnalyzeFilesForSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, refreshSeriesDto.ForceUpdate);
@@ -338,6 +351,7 @@ public class SeriesController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("metadata")]
     public async Task<ActionResult<SeriesMetadataDto>> GetSeriesMetadata(int seriesId)
     {
@@ -350,6 +364,7 @@ public class SeriesController(
     /// <param name="updateSeriesMetadataDto"></param>
     /// <returns></returns>
     [HttpPost("metadata")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
     {
         if (!await seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
@@ -394,8 +409,8 @@ public class SeriesController(
     /// </summary>
     /// <param name="ageRating"></param>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = ["ageRating"])]
     [HttpGet("age-rating")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = ["ageRating"])]
     public async Task<ActionResult<string>> GetAgeRating(int ageRating)
     {
         var val = (AgeRating) ageRating;
@@ -411,6 +426,7 @@ public class SeriesController(
     /// <param name="seriesId"></param>
     /// <returns></returns>
     /// <remarks>Do not rely on this API externally. May change without hesitation. </remarks>
+    [SeriesAccess]
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {
@@ -432,6 +448,7 @@ public class SeriesController(
     /// <param name="seriesId"></param>
     /// <param name="relation">Type of Relationship to pull back</param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("related")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRelatedSeries(int seriesId, RelationKind relation)
     {
@@ -443,6 +460,7 @@ public class SeriesController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("all-related")]
     public async Task<ActionResult<RelatedSeriesDto>> GetAllRelatedSeries(int seriesId)
     {
@@ -455,8 +473,8 @@ public class SeriesController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("update-related")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
     {
         if (await seriesService.UpdateRelatedSeries(dto))
@@ -467,8 +485,8 @@ public class SeriesController(
         return BadRequest(await localizationService.Translate(UserId, "generic-relationship"));
     }
 
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("external-series-detail")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? seriesId)
     {
         if (!await licenseService.HasActiveLicense())
@@ -501,6 +519,7 @@ public class SeriesController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("next-expected")]
     public async Task<ActionResult<NextExpectedChapterDto>> GetNextExpectedChapter(int seriesId)
     {
@@ -514,7 +533,7 @@ public class SeriesController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [HttpPost("match")]
+    [HttpPost("match")] // TODO: Need admin policy?
     public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
     {
         var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}";
@@ -536,7 +555,7 @@ public class SeriesController(
     /// <param name="match"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpPost("update-match")]
+    [HttpPost("update-match")] // TODO: Need admin policy?
     public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int? aniListId, [FromQuery] long? malId, [FromQuery] int? cbrId)
     {
         BackgroundJob.Enqueue(() => externalMetadataService.FixSeriesMatch(seriesId, aniListId, malId, cbrId));
@@ -550,7 +569,7 @@ public class SeriesController(
     /// <param name="seriesId"></param>
     /// <param name="dontMatch"></param>
     /// <returns></returns>
-    [HttpPost("dont-match")]
+    [HttpPost("dont-match")] // TODO: Need admin policy?
     public async Task<ActionResult> UpdateDontMatch([FromQuery] int seriesId, [FromQuery] bool dontMatch)
     {
         await externalMetadataService.UpdateSeriesDontMatch(seriesId, dontMatch);

@@ -9,6 +9,7 @@ using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Theme;
+using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

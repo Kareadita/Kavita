@@ -13,6 +13,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Metadata.Browse.Requests;
 using Kavita.Models.DTOs.Reader;
+using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

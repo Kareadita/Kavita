@@ -6,6 +6,7 @@ using Kavita.API.Services;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.SideNav;
+using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;

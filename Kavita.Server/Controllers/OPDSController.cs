@@ -12,6 +12,7 @@ using Kavita.Models.DTOs.OPDS;
 using Kavita.Models.DTOs.OPDS.Requests;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities.Enums;
+using Kavita.Server.Attributes;
 using Kavita.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,6 @@ public class OpdsController(
     IDirectoryService directoryService,
     ICacheService cacheService,
     IReaderService readerService,
-    IAccountService accountService,
     ILocalizationService localizationService,
     IOpdsService opdsService)
     : BaseApiController
@@ -550,6 +550,7 @@ public class OpdsController(
     /// <param name="apiKey"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("{apiKey}/series/{seriesId}")]
     [Produces("application/xml")]
     public async Task<IActionResult> GetSeriesDetail(string apiKey, int seriesId)
@@ -583,6 +584,7 @@ public class OpdsController(
     /// <param name="seriesId"></param>
     /// <param name="volumeId"></param>
     /// <returns></returns>
+    [VolumeAccess]
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}")]
     [Produces("application/xml")]
     public async Task<IActionResult> GetVolume(string apiKey, int seriesId, int volumeId)
@@ -618,6 +620,7 @@ public class OpdsController(
     /// <param name="volumeId"></param>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}")]
     [Produces("application/xml")]
     public async Task<IActionResult> GetChapter(string apiKey, int seriesId, int volumeId, int chapterId)
@@ -655,16 +658,11 @@ public class OpdsController(
     /// <param name="chapterId"></param>
     /// <param name="filename">Not used. Only for Chunky to allow download links</param>
     /// <returns></returns>
+    [ChapterAccess]
+    [Authorize(PolicyConstants.DownloadRole)]
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}")]
     public async Task<ActionResult> DownloadFile(string apiKey, int seriesId, int volumeId, int chapterId, string filename)
     {
-        var userId = UserId;
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (!await accountService.HasDownloadPermission(user))
-        {
-            return Forbid(await localizationService.Translate(userId, "download-not-allowed"));
-        }
-
         var files = await unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
         var (zipFile, contentType, fileDownloadName) = downloadService.GetFirstFileDownload(files);
         return PhysicalFile(zipFile, contentType, fileDownloadName, true);
@@ -692,6 +690,7 @@ public class OpdsController(
     /// <param name="pageNumber"></param>
     /// <param name="saveProgress">Optional parameter. Can pass false and progress saving will be suppressed</param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("{apiKey}/image")]
     public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int libraryId, [FromQuery] int seriesId,
         [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber, [FromQuery] bool saveProgress = true)

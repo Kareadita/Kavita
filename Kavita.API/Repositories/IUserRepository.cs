@@ -115,6 +115,8 @@ public interface IUserRepository
     #region Permissions
     Task<bool> HasAccessToLibrary(int libraryId, int userId, CancellationToken ct = default);
     Task<bool> HasAccessToSeries(int userId, int seriesId, CancellationToken ct = default);
+    Task<bool> HasAccessToVolume(int userId, int volumeId, CancellationToken ct = default);
+    Task<bool> HasAccessToChapter(int userId, int chapterId, CancellationToken ct = default);
     #endregion
 
     #region Scrobbling & Holds

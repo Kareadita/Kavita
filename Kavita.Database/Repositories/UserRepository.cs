@@ -248,6 +248,33 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .AnyAsync(s => s.Id == seriesId, ct);
     }
 
+    public async Task<bool> HasAccessToVolume(int userId, int volumeId, CancellationToken ct = default)
+    {
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        return await context.Volume
+            .Where(v => v.Id == volumeId)
+            .Include(v => v.Series)
+            .ThenInclude(s => s.Library)
+            .Where(v => v.Series.Library.AppUsers.Any(user => user.Id == userId))
+            .Select(v => v.Series)
+            .RestrictAgainstAgeRestriction(userRating)
+            .AsSplitQuery()
+            .AnyAsync(ct);
+    }
+
+    public async Task<bool> HasAccessToChapter(int userId, int chapterId, CancellationToken ct = default)
+    {
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        return await context.Chapter
+            .Include(c => c.Volume)
+            .ThenInclude(v => v.Series)
+            .ThenInclude(s => s.Library)
+            .Where(c => c.Volume.Series.Library.AppUsers.Any(user => user.Id == userId))
+            .RestrictAgainstAgeRestriction(userRating)
+            .AsSplitQuery()
+            .AnyAsync(c => c.Id == chapterId, ct);
+    }
+
     public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true, CancellationToken ct = default)
     {
         var query = context.AppUser.Includes(includeFlags);

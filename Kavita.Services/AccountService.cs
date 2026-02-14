@@ -111,19 +111,6 @@ public partial class AccountService(
     }
 
     /// <summary>
-    /// Does the user have the Download permission or admin rights
-    /// </summary>
-    /// <param name="user"></param>
-    /// <returns></returns>
-    public async Task<bool> HasDownloadPermission(AppUser? user)
-    {
-        if (user == null) return false;
-        var roles = await userManager.GetRolesAsync(user);
-
-        return roles.Contains(PolicyConstants.DownloadRole) || roles.Contains(PolicyConstants.AdminRole);
-    }
-
-    /// <summary>
     /// Does the user have Change Restriction permission or admin rights and not Read Only
     /// </summary>
     /// <param name="user"></param>

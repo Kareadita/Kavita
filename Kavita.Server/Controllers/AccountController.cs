@@ -27,6 +27,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
+using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services;
 using Microsoft.AspNetCore.Authentication;

@@ -18,6 +18,7 @@ using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.Statistics;
 using Kavita.Models.DTOs.Stats.V3.ClientDevice;
 using Kavita.Models.Entities.Enums;
+using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Authorization;

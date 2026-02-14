@@ -15,7 +15,6 @@ public interface IAccountService
     Task<IEnumerable<ApiException>> ValidateUsername(string? username);
     Task<IEnumerable<ApiException>> ValidateEmail(string email);
     Task<bool> HasBookmarkPermission(AppUser? user);
-    Task<bool> HasDownloadPermission(AppUser? user);
     Task<bool> CanChangeAgeRestriction(AppUser? user);
 
     /// <summary>

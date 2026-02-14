@@ -11,6 +11,7 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.Entities.User;
+using Kavita.Server.Attributes;
 using Kavita.Services;
 using Kavita.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
