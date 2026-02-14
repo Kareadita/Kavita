@@ -77,6 +77,7 @@ export class VersionService {
       .subscribe(serverVersion => {
         this.loadedVersion = serverVersion;
         localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
+        this.cleanupOldDismissals(serverVersion);
         console.log('Initial version check - Server version:', serverVersion);
       });
   }
@@ -264,6 +265,20 @@ export class VersionService {
       count: current.count + 1,
       lastDismissed: Date.now(),
     }));
+  }
+
+  /**
+   * Removes dismiss keys for versions other than the current server version.
+   * Prevents stale backoff data from carrying over after an update.
+   */
+  private cleanupOldDismissals(currentVersion: string): void {
+    const keepKey = VersionService.DISMISS_KEY_PREFIX + currentVersion;
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(VersionService.DISMISS_KEY_PREFIX) && key !== keepKey) {
+        localStorage.removeItem(key);
+      }
+    }
   }
 
   private pauseChecks(): void {
