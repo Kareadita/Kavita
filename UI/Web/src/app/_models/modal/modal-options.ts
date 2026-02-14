@@ -8,18 +8,18 @@ export const DefaultModalOptions: Partial<NgbModalOptions> = {
 
 /** Any Edit Entity modal should use this */
 export function editModal(): Partial<NgbModalOptions> {
-  return { ...DefaultModalOptions, size: 'xl', fullscreen: 'xl' };
+  return {...DefaultModalOptions, size: 'xl', fullscreen: 'xl'};
 }
 
 export function mediumModal(): Partial<NgbModalOptions> {
-  return { ...DefaultModalOptions, size: 'md' };
+  return {...DefaultModalOptions, size: 'md', fullscreen: 'sm'};
 }
 
 export function confirmModal(): Partial<NgbModalOptions> {
-  return {size: 'lg', fullscreen: 'md'};
+  return {...DefaultModalOptions, size: 'lg', fullscreen: 'md'};
 }
 
-/** Any Edit Entity modal should use this */
+/** Any Add-To flow (Add to Reading List/Collection/etc) modal should use this. A thinned out modal.  */
 export function addToModal(): Partial<NgbModalOptions> {
-  return { ...DefaultModalOptions, size: 'md', fullscreen: 'sm' };
+  return {...DefaultModalOptions, size: 'md', fullscreen: 'sm'};
 }
