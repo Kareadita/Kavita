@@ -229,7 +229,6 @@ export class VolumeDetailComponent implements OnInit {
   plusReviews: Array<UserReview> = [];
   rating: number = 0;
   hasBeenRated: boolean = false;
-  size: number = 0;
   annotations = signal<Annotation[]>([]);
   totalReads = computed(() => {
     const chapters = this.volume()?.chapters || [];
@@ -241,6 +240,11 @@ export class VolumeDetailComponent implements OnInit {
     const chapters = this.volume()?.chapters || [];
     return chapters.flatMap(c => c.files);
   });
+  size = computed(() => {
+    return this.volume().chapters.reduce((sum, c) =>
+      sum + c.files.reduce((fileSum, f) => fileSum + f.bytes, 0), 0);
+  });
+
 
   readingProgressStatus = computed(() => {
     if (this.volume().pagesRead > 0 && this.volume().pagesRead < this.volume().pages) {
@@ -395,8 +399,6 @@ export class VolumeDetailComponent implements OnInit {
       }
     });
 
-    this.size = this.volume().chapters.reduce((sum, c) =>
-      sum + c.files.reduce((fileSum, f) => fileSum + f.bytes, 0), 0);
 
     this.volumeActions = this.actionFactoryService.getVolumeActions(this.series().id, this.library().id, this.libraryType(), this.shouldRenderVolumeAction.bind(this));
     this.chapterActions = this.actionFactoryService.getChapterActions(this.series().id, this.library().id, this.libraryType());

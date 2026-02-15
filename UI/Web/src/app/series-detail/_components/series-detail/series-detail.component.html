@@ -20,14 +20,14 @@
       <div class="row mb-0 mb-xl-3 info-container">
         <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''"
              class="image-container series col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
-          <app-cover-image [entity]="seriesValue" [coverImage]="imageService.getSeriesCoverImage(seriesValue.id)" [continueTitle]="ContinuePointTitle" (read)="read()" />
+          <app-cover-image [entity]="seriesValue" [coverImage]="imageService.getSeriesCoverImage(seriesValue.id)" [continueTitle]="continueReadingTitle()" (read)="read()" />
         </div>
 
         <div class="col-xl-10 col-lg-7 col-md-12 col-sm-12 col-xs-12">
           <h4 class="title mb-2">
             <span>{{seriesValue.name}}
 
-              @if(isLoadingExtra || isLoading) {
+              @if(showLoader()) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
                   <span class="visually-hidden">{{t('loading')}}</span>
                 </div>
@@ -102,10 +102,10 @@
                 </div>
               }
 
-              @if ((licenseService.hasValidLicenseSignal()) && libraryAllowsScrobbling) {
+              @if (showScrobbleControls()) {
                 <div class="col-auto ms-2">
-                  <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip', {value: isScrobbling ? t('on') : t('off')})">
-                    <i class="fa-solid fa-tower-{{(isScrobbling) ? 'broadcast' : 'observation'}}" aria-hidden="true"></i>
+                  <button class="btn btn-actions" (click)="toggleScrobbling($event)" [ngbTooltip]="t('scrobbling-tooltip', {value: isScrobbling() ? t('on') : t('off')})">
+                    <i class="fa-solid fa-tower-{{isScrobbling() ? 'broadcast' : 'observation'}}" aria-hidden="true"></i>
                   </button>
                 </div>
               }
@@ -318,15 +318,15 @@
             </li>
           }
 
-          @if (hasRecommendations) {
+          @if (hasRecommendations()) {
             <li [ngbNavItem]="TabID.Recommendations">
               <a ngbNavLink>
                 {{t(TabID.Recommendations)}}
-                <span class="badge rounded-pill text-bg-secondary">{{combinedRecs.length}}</span>
+                <span class="badge rounded-pill text-bg-secondary">{{combinedRecs().length}}</span>
               </a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === TabID.Recommendations; prefetch on idle) {
-                  <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock" [childHeight]="1">
+                  <virtual-scroller #scroll [items]="combinedRecs()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track idx) {
                         @if (!item.hasOwnProperty('coverUrl')) {
@@ -377,19 +377,19 @@
 
 
     <ng-template #estimatedNextCard let-tabId="tabId">
-      @if (nextExpectedChapter) {
+      @if (nextExpectedChapter()!) {
         @switch (tabId) {
           @case (TabID.Volumes) {
-            @if (nextExpectedChapter.volumeNumber !== SpecialVolumeNumber && nextExpectedChapter.chapterNumber === LooseLeafOrSpecialNumber) {
-              <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter"
+            @if (nextExpectedChapter()!.volumeNumber !== SpecialVolumeNumber && nextExpectedChapter()!.chapterNumber === LooseLeafOrSpecialNumber) {
+              <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter()!"
                                       [imageUrl]="imageService.getSeriesCoverImage(seriesValue.id)" />
             }
           }
           @case (TabID.Chapters) {
-            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(seriesValue.id)" />
+            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter()!" [imageUrl]="imageService.getSeriesCoverImage(seriesValue.id)" />
           }
           @case (TabID.Storyline) {
-            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter" [imageUrl]="imageService.getSeriesCoverImage(seriesValue.id)" />
+            <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapter()!" [imageUrl]="imageService.getSeriesCoverImage(seriesValue.id)" />
           }
         }
       }

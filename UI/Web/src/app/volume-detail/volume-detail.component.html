@@ -26,7 +26,7 @@
                                  [readingTimeEntity]="volume()"
                                  [libraryType]="libraryType()"
                                  [mangaFormat]="series().format"
-                                 [totalBytes]="size"
+                                 [totalBytes]="size()"
                                  [releaseYear]="(volume().chapters.at(0)?.releaseDate | utcToLocalDate)?.getFullYear()"
                                  [totalReads]="totalReads()"
         />

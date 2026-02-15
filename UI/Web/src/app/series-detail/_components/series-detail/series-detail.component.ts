@@ -51,7 +51,6 @@ import {AccountService} from 'src/app/_services/account.service';
 import {ActionFactoryService} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {ImageService} from 'src/app/_services/image.service';
-import {LibraryService} from 'src/app/_services/library.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
 import {NavService} from 'src/app/_services/nav.service';
 import {ReaderService} from 'src/app/_services/reader.service';
@@ -119,6 +118,7 @@ import {ModalResult} from "../../../_models/modal/modal-result";
 import {patchEntitySignal, patchSignalArray} from "../../../../libs/patch";
 import {ModalService} from "../../../_services/modal.service";
 import {getResolvedData} from "../../../../libs/route-util";
+import {ExternalSeries} from "../../../_models/series-detail/external-series";
 
 
 enum TabID {
@@ -150,7 +150,8 @@ interface StoryLineItem {
     NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, DetailsTabComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
-    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent, AnnotationsTabComponent, ReadingProgressStatusPipePipe, ReadingProgressIconPipePipe, EntityCardComponent]
+    PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent,
+    AnnotationsTabComponent, ReadingProgressStatusPipePipe, ReadingProgressIconPipePipe, EntityCardComponent]
 })
 class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -164,7 +165,6 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly libraryService = inject(LibraryService);
   private readonly titleService = inject(Title);
   private readonly downloadService = inject(DownloadService);
   private readonly actionService = inject(ActionService);
@@ -247,14 +247,61 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     return this.accountService.isAdmin();
   });
 
-  isLoading = true;
-  isLoadingExtra = false;
-  libraryAllowsScrobbling = false;
-  isScrobbling: boolean = true;
-  mobileSeriesImgBackground = getComputedStyle(this.document.documentElement)
-    .getPropertyValue('--mobile-series-img-background').trim();
+  activeTabId = TabID.Storyline;
+  downloadInProgress: boolean = false;
+  mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
 
-  currentlyReadingChapter: Chapter | undefined = undefined;
+  isLoading = signal<boolean>(true);
+  isLoadingExtra = signal<boolean>(false);
+  showLoader = computed(() => this.isLoading() || this.isLoadingExtra());
+
+  libraryAllowsScrobbling  = signal<boolean>(false);
+  isScrobbling = signal<boolean>(true);
+  showScrobbleControls = computed(() => this.licenseService.hasValidLicenseSignal() && this.libraryAllowsScrobbling());
+
+  currentlyReadingChapter = signal<Chapter | null>(null);
+  continueReadingTitle = computed(() => {
+    const currentlyReadingChp = this.currentlyReadingChapter();
+    if (currentlyReadingChp === null || !this.hasReadingProgress()) return '';
+
+    if (!currentlyReadingChp.isSpecial) {
+      const vol = this.volumes().filter(v => v.id === currentlyReadingChp.volumeId);
+
+      let chapterLocaleKey = 'common.chapter-num-shorthand';
+      let volumeLocaleKey = 'common.volume-num-shorthand';
+      switch (this.libraryType()) {
+        case LibraryType.ComicVine:
+        case LibraryType.Comic:
+          chapterLocaleKey = 'common.issue-num-shorthand';
+          break;
+        case LibraryType.Book:
+        case LibraryType.LightNovel:
+          chapterLocaleKey = 'common.book-num-shorthand';
+          break;
+        case LibraryType.Manga:
+        case LibraryType.Images:
+          chapterLocaleKey = 'common.chapter-num-shorthand';
+          break;
+      }
+
+      // This is a lone chapter
+      if (vol.length === 0) {
+        if (currentlyReadingChp.minNumber === LooseLeafOrDefaultNumber) {
+          return currentlyReadingChp.titleName;
+        }
+        return translate(chapterLocaleKey, {num: currentlyReadingChp.minNumber});
+      }
+
+      if (currentlyReadingChp.minNumber === LooseLeafOrDefaultNumber) {
+        return translate(volumeLocaleKey, {num: vol[0].minNumber});
+      }
+
+      return translate(volumeLocaleKey, {num: vol[0].minNumber})
+        + ' ' + translate(chapterLocaleKey, {num: currentlyReadingChp.minNumber});
+    }
+
+    return currentlyReadingChp.title;
+  });
   hasReadingProgress = signal<boolean>(false);
   readingProgressStatus = computed(() => {
     const hasProgress = this.hasReadingProgress();
@@ -268,13 +315,9 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
     return ReadingProgressStatus.Progress;
   });
-
-
-  seriesActions: ActionItem<Series>[] = [];
-
   hasSpecials = computed(() => this.specials().length > 0);
 
-  activeTabId = TabID.Storyline;
+
 
   reviews: Array<UserReview> = [];
   plusReviews: Array<UserReview> = [];
@@ -288,6 +331,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   isWantToRead = signal<boolean>(false);
   unreadCount: number = 0;
   totalCount: number = 0;
+  seriesActions: ActionItem<Series>[] = [];
   totalSize = computed(() => {
     const seen = new Set<number>();
     let total = 0;
@@ -307,16 +351,12 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     for (const c of this.specials()) addChapter(c);
 
     return total;
-  })
+  });
 
   readingTimeLeft: HourEstimateRange | null = null;
-  /**
-   * Poster image for the Series
-   */
-  seriesImage: string = '';
-  downloadInProgress: boolean = false;
 
-  nextExpectedChapter: NextExpectedChapter | undefined;
+
+  nextExpectedChapter = signal<NextExpectedChapter | null>(null);
   loadPageSource = new ReplaySubject<boolean>(1);
   loadPage$ = this.loadPageSource.asObservable();
 
@@ -377,19 +417,14 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
   /**
-   * Are there recommendations
-   */
-  hasRecommendations: boolean = false;
-
-  /**
    * Related Series. Sorted by backend
    */
   relations = signal<RelatedSeriesPair[]>([]);
-  relationships: RelatedSeries | null = null;
   /**
    * Recommended Series
    */
-  combinedRecs: Array<any> = [];
+  combinedRecs = signal<Array<Series | ExternalSeries>>([]);
+  hasRecommendations = computed(() => this.combinedRecs().length > 0);
 
   showChapterTab = computed(() => this.chapters().length > 0);
   annotations = signal<Annotation[]>([]);
@@ -413,47 +448,6 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
-  get ContinuePointTitle() {
-    if (this.currentlyReadingChapter === undefined || !this.hasReadingProgress()) return '';
-
-    if (!this.currentlyReadingChapter.isSpecial) {
-      const vol = this.volumes().filter(v => v.id === this.currentlyReadingChapter?.volumeId);
-
-      let chapterLocaleKey = 'common.chapter-num-shorthand';
-      let volumeLocaleKey = 'common.volume-num-shorthand';
-      switch (this.libraryType()) {
-        case LibraryType.ComicVine:
-        case LibraryType.Comic:
-          chapterLocaleKey = 'common.issue-num-shorthand';
-          break;
-        case LibraryType.Book:
-        case LibraryType.LightNovel:
-          chapterLocaleKey = 'common.book-num-shorthand';
-          break;
-        case LibraryType.Manga:
-        case LibraryType.Images:
-          chapterLocaleKey = 'common.chapter-num-shorthand';
-          break;
-      }
-
-      // This is a lone chapter
-      if (vol.length === 0) {
-        if (this.currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
-          return this.currentlyReadingChapter.titleName;
-        }
-        return translate(chapterLocaleKey, {num: this.currentlyReadingChapter.minNumber});
-      }
-
-      if (this.currentlyReadingChapter.minNumber === LooseLeafOrDefaultNumber) {
-        return translate(volumeLocaleKey, {num: vol[0].minNumber});
-      }
-
-      return translate(volumeLocaleKey, {num: vol[0].minNumber})
-        + ' ' + translate(chapterLocaleKey, {num: this.currentlyReadingChapter.minNumber});
-    }
-
-    return this.currentlyReadingChapter.title;
-  }
 
 
   constructor() {
@@ -538,17 +532,13 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
     });
 
-    this.seriesImage = this.imageService.getSeriesCoverImage(this.series().id);
-    this.cdRef.markForCheck();
 
     this.scrobbleService.hasHold(this.series().id).subscribe(res => {
-      this.isScrobbling = !res;
-      this.cdRef.markForCheck();
+      this.isScrobbling.set(!res);
     });
 
     this.scrobbleService.libraryAllowsScrobbling(this.series().id).subscribe(res => {
-      this.libraryAllowsScrobbling = res;
-      this.cdRef.markForCheck();
+      this.libraryAllowsScrobbling.set(res);
     });
 
 
@@ -608,16 +598,14 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       this.seriesService.getNextExpectedChapterDate(seriesId).subscribe(date => {
         if (date == null || date.expectedDate === null) {
-          if (this.nextExpectedChapter !== undefined) {
+          if (this.nextExpectedChapter !== null) {
             // Clear out the data so the card removes
-            this.nextExpectedChapter = undefined;
-            this.cdRef.markForCheck();
+            this.nextExpectedChapter.set(null);
           }
           return;
         }
 
-        this.nextExpectedChapter = date;
-        this.cdRef.markForCheck();
+        this.nextExpectedChapter.set(date);
       });
     });
 
@@ -697,7 +685,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
             if (this.chapters().length === 0) this.updateSelectedTab();
             break;
           case TabID.Recommendations:
-            if (!this.hasRecommendations) this.updateSelectedTab();
+            if (!this.hasRecommendations()) this.updateSelectedTab();
             break;
           case TabID.Reviews:
             if (this.reviews.length === 0) this.updateSelectedTab();
@@ -708,14 +696,13 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.cdRef.markForCheck();
       }
 
-      this.isLoading = false;
+      this.isLoading.set(false);
       this.cdRef.markForCheck();
     });
 
   }
   private loadRelatedSeries(seriesId: number) {
     this.seriesService.getRelatedForSeries(seriesId).subscribe((relations: RelatedSeries) => {
-      this.relationships = relations;
       this.relations.set([
         ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),
         ...relations.sequels.map(item => this.createRelatedSeries(item, RelationKind.Sequel)),
@@ -821,13 +808,11 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
   loadPlusMetadata(seriesId: number, libraryType: LibraryType) {
-    this.isLoadingExtra = true;
-    this.cdRef.markForCheck();
+    this.isLoadingExtra.set(true);
 
     this.metadataService.getSeriesMetadataFromPlus(seriesId, libraryType).subscribe(data => {
       if (data === null) {
-        this.isLoadingExtra = false;
-        this.cdRef.markForCheck();
+        this.isLoadingExtra.set(false);
         return;
       }
 
@@ -842,13 +827,11 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       // Recommendations
       if (data.recommendations) {
-        this.combinedRecs = [...data.recommendations.ownedSeries, ...data.recommendations.externalSeries];
+        this.combinedRecs.set([...data.recommendations.ownedSeries, ...data.recommendations.externalSeries]);
       }
 
-      this.hasRecommendations = this.combinedRecs.length > 0;
 
-      this.isLoadingExtra = false;
-      this.cdRef.markForCheck();
+      this.isLoadingExtra.set(false);
     });
   }
 
@@ -858,8 +841,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
 
     this.readerService.getCurrentChapter(this.series().id).subscribe(chapter => {
-      this.currentlyReadingChapter = chapter;
-      this.cdRef.markForCheck();
+      this.currentlyReadingChapter.set(chapter);
     });
   }
 
@@ -918,22 +900,19 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   toggleScrobbling(evt: any) {
     evt.stopPropagation();
-    if (this.isScrobbling) {
-      this.scrobbleService.addHold(this.series().id).subscribe(() => {
-        this.isScrobbling = !this.isScrobbling;
-        this.cdRef.markForCheck();
-      });
+
+    if (this.isScrobbling()) {
+      this.scrobbleService.addHold(this.series().id).subscribe();
     } else {
-      this.scrobbleService.removeHold(this.series().id).subscribe(() => {
-        this.isScrobbling = !this.isScrobbling;
-        this.cdRef.markForCheck();
-      });
+      this.scrobbleService.removeHold(this.series().id).subscribe();
     }
+    this.isScrobbling.update(x => !x);
   }
 
   switchTabsToDetail() {
     this.activeTabId = TabID.Details;
     this.cdRef.markForCheck();
+
     setTimeout(() => {
       const tabElem = this.document.querySelector('#details-tab');
       if (tabElem) {
