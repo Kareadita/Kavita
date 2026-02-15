@@ -197,8 +197,8 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   @Input({transform: numberAttribute}) libraryId = 0;
   /** This will be {id,type,name} only for non-admin users */
   library = getResolvedData(this.route, 'library');
-
   series = getResolvedData(this.route, 'series');
+
   volumes = signal<Volume[]>([]);
   volumeEntities = computed(() => this.volumes().map(v => CardEntityFactory.volume(v, this.series().id, this.library().id)));
   volumeConfig = computed(() => {

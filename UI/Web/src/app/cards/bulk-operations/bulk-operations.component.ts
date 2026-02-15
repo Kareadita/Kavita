@@ -41,11 +41,11 @@ export class BulkOperationsComponent<T> implements OnInit {
    */
   @Input() modalMode = false;
   /**
-   * On Series Detail this should be 12
+   * On Series Detail this should be 0
    */
   @Input() marginLeft: number = 0;
   /**
-   * On Series Detail this should be 12
+   * On Series Detail this should be 0
    */
   @Input() marginRight: number = 8;
 

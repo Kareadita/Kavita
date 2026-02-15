@@ -3,6 +3,7 @@ import {AuthGuard} from './_guards/auth.guard';
 import {libraryAccessGuard} from './_guards/library-access.guard';
 import {libraryResolver} from "./_resolvers/library.resolver";
 import {seriesResolver} from "./_resolvers/series.resolver";
+import {volumeResolver} from "./_resolvers/volume.resolver";
 
 export const routes: Routes = [
   {
@@ -76,14 +77,15 @@ export const routes: Routes = [
             loadComponent: () => import('./series-detail/_components/series-detail/series-detail.component').then(c => c.default)
           },
           {
+            path: 'series/:seriesId/volume/:volumeId',
+            pathMatch: 'full',
+            resolve: { series: seriesResolver, volume: volumeResolver },
+            loadComponent: () => import('./volume-detail/volume-detail.component').then(c => c.VolumeDetailComponent)
+          },
+          {
             path: 'series/:seriesId/chapter/:chapterId',
             pathMatch: 'full',
             loadComponent: () => import('./chapter-detail/chapter-detail.component').then(c => c.ChapterDetailComponent)
-          },
-          {
-            path: 'series/:seriesId/volume/:volumeId',
-            pathMatch: 'full',
-            loadComponent: () => import('./volume-detail/volume-detail.component').then(c => c.VolumeDetailComponent)
           },
           {
             path: 'series/:seriesId/manga',

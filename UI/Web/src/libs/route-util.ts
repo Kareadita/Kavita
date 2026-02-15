@@ -1,9 +1,10 @@
 import {Library} from "../app/_models/library/library";
 import {Series} from "../app/_models/series";
 import {ActivatedRoute} from "@angular/router";
-import {Signal} from "@angular/core";
-import {toSignal} from "@angular/core/rxjs-interop";
+import {DestroyRef, inject, signal, Signal, WritableSignal} from "@angular/core";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {map} from "rxjs/operators";
+import {Volume} from "../app/_models/volume";
 
 /**
  * Type-safety for router resolvers. Add new fields as needed.
@@ -11,18 +12,9 @@ import {map} from "rxjs/operators";
 export interface ResolvedData {
   library?: Library;
   series?: Series;
+  volume?: Volume;
 }
 
-// export function getResolvedData<K extends keyof ResolvedData>(
-//   route: ActivatedRoute,
-//   key: K
-// ): NonNullable<ResolvedData[K]> {
-//   const value = route.snapshot.data[key];
-//   if (value == null) {
-//     throw new Error(`Route data '${key}' not found. Is the resolver configured?`);
-//   }
-//   return value as NonNullable<ResolvedData[K]>;
-// }
 
 export function getResolvedData<K extends keyof ResolvedData>(
   route: ActivatedRoute,
@@ -32,4 +24,17 @@ export function getResolvedData<K extends keyof ResolvedData>(
     route.data.pipe(map(data => data[key] as NonNullable<ResolvedData[K]>)),
     { requireSync: true }
   );
+}
+
+export function getWritableResolvedData<K extends keyof ResolvedData>(
+  route: ActivatedRoute, key: K
+): WritableSignal<NonNullable<ResolvedData[K]>> {
+  const destroyRef = inject(DestroyRef);
+  const initial = route.snapshot.data[key] as NonNullable<ResolvedData[K]>;
+  const sig = signal(initial);
+  route.data.pipe(
+    map(data => data[key] as NonNullable<ResolvedData[K]>),
+    takeUntilDestroyed(destroyRef)
+  ).subscribe(value => sig.set(value));
+  return sig;
 }

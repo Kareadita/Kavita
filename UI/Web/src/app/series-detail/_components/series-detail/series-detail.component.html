@@ -15,7 +15,7 @@
   @let weblinksValue = weblinks();
   @let seriesValue = series();
 
-  @if (seriesValue && seriesMetadataValue && libraryTypeValue !== null) {
+  @if (seriesMetadataValue) {
     <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
       <div class="row mb-0 mb-xl-3 info-container">
         <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''"

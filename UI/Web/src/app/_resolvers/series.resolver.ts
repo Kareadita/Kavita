@@ -4,11 +4,7 @@ import {catchError, of} from "rxjs";
 import {SeriesService} from "../_services/series.service";
 import {Series} from "../_models/series";
 
-/**
- * Get Series
- * @param route
- * @param state
- */
+
 export const seriesResolver: ResolveFn<Series | UrlTree> = (route, state) => {
   const seriesService = inject(SeriesService);
   const router = inject(Router);
