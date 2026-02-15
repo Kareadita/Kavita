@@ -11,7 +11,7 @@
 
       <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12">
         <h4 class="title mb-2">
-          <a routerLink="/library/{{series().libraryId}}/series/{{series().id}}" class="dark-exempt btn-icon">{{series().name}}</a>
+          <a routerLink="/library/{{libraryId()}}/series/{{seriesId()}}" class="dark-exempt btn-icon">{{series().name}}</a>
         </h4>
         <div class="subtitle mt-2 mb-2">
             <span>
@@ -33,7 +33,7 @@
 
         @if (volume().chapters.length === 1) {
           <div class="mt-2 mb-2">
-            <app-external-rating [seriesId]="series().id"
+            <app-external-rating [seriesId]="seriesId()"
                                  [ratings]="[]"
                                  [userRating]="rating"
                                  [hasUserRated]="hasBeenRated"
@@ -168,8 +168,8 @@
                 <div class="card-container row g-0" #container>
                   @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
                     <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item"
-                                      [seriesId]="seriesId"
-                                      [libraryId]="libraryId"
+                                      [seriesId]="seriesId()"
+                                      [libraryId]="libraryId()"
                                       [libraryType]="libraryType()"
                                       [actions]="chapterActions"
                                       [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
@@ -218,7 +218,7 @@
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
                 <app-reviews [userReviews]="userReviews" [plusReviews]="plusReviews"
-                             [series]="series()" [volumeId]="volumeId" [chapter]="volume().chapters[0]" />
+                             [series]="series()" [volumeId]="volumeId()" [chapter]="volume().chapters[0]" />
               }
             </ng-template>
           </li>

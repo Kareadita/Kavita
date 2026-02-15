@@ -6,6 +6,8 @@ import {
   DestroyRef,
   ElementRef,
   inject,
+  input,
+  numberAttribute,
   OnInit,
   signal,
   ViewChild
@@ -208,9 +210,9 @@ export class VolumeDetailComponent implements OnInit {
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
 
-  volumeId: number = 0;
-  seriesId: number = 0;
-  libraryId: number = 0;
+  seriesId = input(0, {transform: numberAttribute });
+  libraryId = input(0, {transform: numberAttribute });
+  volumeId = input(0, {transform: numberAttribute });
 
   volume = getWritableResolvedData(this.route, 'volume');
   series = getResolvedData(this.route, 'series');
@@ -372,18 +374,18 @@ export class VolumeDetailComponent implements OnInit {
       if (res.effect === 'none') return;
       this.loadVolume();
     });
-    this.bulkSelectionService.registerContext(() => ({seriesId: this.series().id, libraryId: this.library().id, libraryType: this.libraryType()}));
+    this.bulkSelectionService.registerContext(() => ({seriesId: this.seriesId(), libraryId: this.libraryId(), libraryType: this.libraryType()}));
 
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       if (event.event === EVENTS.CoverUpdate) {
         const coverUpdateEvent = event.payload as CoverUpdateEvent;
-        if (coverUpdateEvent.entityType === 'volume' && coverUpdateEvent.id === this.volumeId) {
+        if (coverUpdateEvent.entityType === 'volume' && coverUpdateEvent.id === this.volumeId()) {
           this.themeService.refreshColorScape('volume', coverUpdateEvent.id).subscribe();
         }
       } else if (event.event === EVENTS.ChapterRemoved) {
         const removedEvent = event.payload as ChapterRemovedEvent;
-        if (removedEvent.seriesId !== this.series().id) return;
+        if (removedEvent.seriesId !== this.seriesId()) return;
 
         // remove the chapter from the tab
         if (this.volume()) {
@@ -392,7 +394,7 @@ export class VolumeDetailComponent implements OnInit {
         }
       } else if (event.event === EVENTS.VolumeRemoved) {
         const removedEvent = event.payload as VolumeRemovedEvent;
-        if (removedEvent.volumeId !== this.volumeId) return;
+        if (removedEvent.volumeId !== this.volumeId()) return;
 
         // remove the chapter from the tab
         this.navigateToSeries();
@@ -400,12 +402,12 @@ export class VolumeDetailComponent implements OnInit {
     });
 
 
-    this.volumeActions = this.actionFactoryService.getVolumeActions(this.series().id, this.library().id, this.libraryType(), this.shouldRenderVolumeAction.bind(this));
-    this.chapterActions = this.actionFactoryService.getChapterActions(this.series().id, this.library().id, this.libraryType());
+    this.volumeActions = this.actionFactoryService.getVolumeActions(this.seriesId(), this.libraryId(), this.libraryType(), this.shouldRenderVolumeAction.bind(this));
+    this.chapterActions = this.actionFactoryService.getChapterActions(this.seriesId(), this.libraryId(), this.libraryType());
 
 
     if (this.volume().chapters.length === 1) {
-      this.chapterService.chapterDetailPlus(this.series().id, this.volume().chapters[0].id).subscribe(detail => {
+      this.chapterService.chapterDetailPlus(this.seriesId(), this.volume().chapters[0].id).subscribe(detail => {
         this.userReviews = detail.reviews.filter(r => !r.isExternal);
         this.plusReviews = detail.reviews.filter(r => r.isExternal);
         this.rating = detail.rating;
@@ -542,7 +544,7 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   loadVolume() {
-    this.volumeService.getVolumeMetadata(this.volumeId).subscribe(v => {
+    this.volumeService.getVolumeMetadata(this.volumeId()).subscribe(v => {
       this.volume.set({...v});
     });
   }
@@ -550,15 +552,15 @@ export class VolumeDetailComponent implements OnInit {
   readVolume(incognitoMode: boolean = false) {
     if (!this.volume) return;
 
-    this.readerService.readVolume(this.library().id, this.series().id, this.volume(), incognitoMode);
+    this.readerService.readVolume(this.libraryId(), this.seriesId(), this.volume(), incognitoMode);
   }
 
   openEditModal() {
     const ref = this.modalService.open(EditVolumeModalComponent);
     ref.componentInstance.volume = this.volume();
     ref.componentInstance.libraryType = this.libraryType();
-    ref.componentInstance.libraryId = this.library().id;
-    ref.componentInstance.seriesId = this.series().id;
+    ref.componentInstance.libraryId = this.libraryId();
+    ref.componentInstance.seriesId = this.seriesId();
 
     ref.closed.subscribe((res: ModalResult<Volume>) => {
       if (res.success && res.data) {
@@ -571,8 +573,8 @@ export class VolumeDetailComponent implements OnInit {
     const ref = this.modalService.open(EditChapterModalComponent);
     ref.componentInstance.chapter = chapter;
     ref.componentInstance.libraryType = this.libraryType();
-    ref.componentInstance.libraryId = this.library().id;
-    ref.componentInstance.seriesId = this.series().id;
+    ref.componentInstance.libraryId = this.libraryId();
+    ref.componentInstance.seriesId = this.seriesId();
 
     ref.closed.subscribe((res: ModalResult<Volume>) => {
       if (res.success && res.data) {
@@ -627,7 +629,7 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   navigateToSeries() {
-    this.router.navigate(['library', this.library().id, 'series', this.series().id]);
+    this.router.navigate(['library', this.libraryId(), 'series', this.seriesId()]);
   }
 
 

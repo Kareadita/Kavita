@@ -1,6 +1,6 @@
 import {DOCUMENT, Location, NgClass, NgStyle, NgTemplateOutlet} from '@angular/common';
 import {
-  AfterContentChecked,
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -8,7 +8,7 @@ import {
   DestroyRef,
   ElementRef,
   inject,
-  Input,
+  input,
   numberAttribute,
   OnInit,
   signal,
@@ -108,7 +108,6 @@ import {ReadingProgressStatus} from "../../../_models/series-detail/reading-prog
 import {ReadingProgressStatusPipePipe} from "../../../_pipes/reading-progress-status-pipe.pipe";
 import {ReadingProgressIconPipePipe} from "../../../_pipes/reading-progress-icon-pipe.pipe";
 import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
-import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {CardEntityFactory, ChapterCardEntity, VolumeCardEntity} from "../../../_models/card/card-entity";
@@ -153,7 +152,7 @@ interface StoryLineItem {
     PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent,
     AnnotationsTabComponent, ReadingProgressStatusPipePipe, ReadingProgressIconPipePipe, EntityCardComponent]
 })
-class SeriesDetailComponent implements OnInit, AfterContentChecked {
+class SeriesDetailComponent implements OnInit, AfterViewInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
@@ -190,41 +189,38 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
 
 
-  /**
-   * Series Id. Set at load before UI renders
-   */
-  @Input({transform: numberAttribute}) seriesId = 0;
-  @Input({transform: numberAttribute}) libraryId = 0;
+  seriesId = input(0, {transform: numberAttribute });
+  libraryId = input(0, {transform: numberAttribute });
   /** This will be {id,type,name} only for non-admin users */
   library = getResolvedData(this.route, 'library');
   series = getResolvedData(this.route, 'series');
 
   volumes = signal<Volume[]>([]);
-  volumeEntities = computed(() => this.volumes().map(v => CardEntityFactory.volume(v, this.series().id, this.library().id)));
+  volumeEntities = computed(() => this.volumes().map(v => CardEntityFactory.volume(v, this.seriesId(), this.libraryId())));
   volumeConfig = computed(() => {
-    const seriesId = this.seriesId;
-    const libraryId = this.library().id;
+    const seriesId = this.seriesId();
+    const libraryId = this.libraryId();
     const libraryType = this.libraryType();
     return this.cardConfigFactory.forVolume({seriesId, libraryId, libraryType})
   });
   chapters = signal<Chapter[]>([]);
-  chapterEntities = computed(() => this.chapters().map(v => CardEntityFactory.chapter(v, this.series().id, this.library().id)));
+  chapterEntities = computed(() => this.chapters().map(v => CardEntityFactory.chapter(v, this.seriesId(), this.libraryId())));
   chapterConfig = computed(() => {
-    const seriesId = this.series().id;
-    const libraryId = this.library().id;
+    const seriesId = this.seriesId();
+    const libraryId = this.libraryId();
     const libraryType = this.libraryType();
     return this.cardConfigFactory.forChapter({seriesId, libraryId, libraryType})
   });
   specials = signal<Chapter[]>([]);
-  specialEntities = computed(() => this.specials().map(v => CardEntityFactory.chapter(v, this.series().id, this.library().id)));
+  specialEntities = computed(() => this.specials().map(v => CardEntityFactory.chapter(v, this.seriesId(), this.libraryId())));
   specialConfig = computed(() => {
-    const seriesId = this.series().id;
-    const libraryId = this.libraryId;
+    const seriesId = this.seriesId();
+    const libraryId = this.libraryId();
     const libraryType = this.libraryType();
     return this.cardConfigFactory.forChapter({seriesId, libraryId, libraryType, overrides: {selectionType: 'special'}})
   });
   storylineChapters = signal<Chapter[]>([]);
-  private storylineChapterEntities = computed(() => this.storylineChapters().map(v => CardEntityFactory.chapter(v, this.series().id, this.library().id)));
+  private storylineChapterEntities = computed(() => this.storylineChapters().map(v => CardEntityFactory.chapter(v, this.seriesId(), this.libraryId())));
   storylineItems = computed(() => {
     const items: StoryLineItem[] = [];
     const volumes = this.volumeEntities();
@@ -319,8 +315,9 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
 
 
-  reviews: Array<UserReview> = [];
-  plusReviews: Array<UserReview> = [];
+  reviews = signal<UserReview[]>([]);
+  plusReviews = signal<UserReview[]>([]);
+  reviewCount = computed(() => this.reviews().length + this.plusReviews().length);
   bookmarks = signal<PageBookmark[]>([]);
   ratings = signal<Rating[]>([]);
   libraryType = computed(() => this.library().type);
@@ -329,9 +326,17 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   readingLists = signal<ReadingList[]>([]);
   collections = signal<UserCollection[]>([]);
   isWantToRead = signal<boolean>(false);
-  unreadCount: number = 0;
-  totalCount: number = 0;
-  seriesActions: ActionItem<Series>[] = [];
+  unreadCount = signal(0);
+  totalCount = signal(0);
+  seriesActions = computed(() => {
+    const hasLicense = this.licenseService.hasValidLicenseSignal();
+    let actions = this.actionFactoryService.getSeriesActions()
+      .filter(action => action.action !== Action.Edit);
+    if (!hasLicense) {
+      actions = actions.filter(action => action.action !== Action.Match);
+    }
+    return actions;
+  });
   totalSize = computed(() => {
     const seen = new Set<number>();
     let total = 0;
@@ -353,9 +358,11 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     return total;
   });
 
-  readingTimeLeft: HourEstimateRange | null = null;
+  readingTimeLeft = signal<HourEstimateRange | null>(null);
 
 
+  seriesCoverImage = computed(() => this.imageService.getSeriesCoverImage(this.seriesId()));
+  chapterTabName = computed(() => this.utilityService.formatChapterName(this.libraryType()));
   nextExpectedChapter = signal<NextExpectedChapter | null>(null);
   loadPageSource = new ReplaySubject<boolean>(1);
   loadPage$ = this.loadPageSource.asObservable();
@@ -471,7 +478,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
         ],
       };
     });
-    this.bulkSelectionService.registerContext(() => ({ seriesId: this.series().id, libraryId: this.library().id, libraryType: this.libraryType() }));
+    this.bulkSelectionService.registerContext(() => ({ seriesId: this.seriesId(), libraryId: this.libraryId(), libraryType: this.libraryType() }));
     this.bulkSelectionService.registerPostAction((res: ActionResult<Volume[] | Chapter[]>) => {
       if (res.effect === 'none') return;
       if (res.effect === 'reload') {
@@ -491,7 +498,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  ngAfterContentChecked(): void {
+  ngAfterViewInit(): void {
     this.scrollService.setScrollContainer(this.scrollingBlock);
   }
 
@@ -501,43 +508,43 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return this.downloadService.mapToEntityType(events, this.series()!);
     }));
 
-    this.loadPage$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(300), tap(val => this.loadSeries(this.series().id, val))).subscribe();
+    this.loadPage$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(300), tap(val => this.loadSeries(this.seriesId(), val))).subscribe();
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemovedEvent = event.payload as SeriesRemovedEvent;
-        if (seriesRemovedEvent.seriesId === this.series().id) {
+        if (seriesRemovedEvent.seriesId === this.seriesId()) {
           this.toastr.info(translate('errors.series-doesnt-exist'));
           this.router.navigateByUrl('/home');
         }
       } else if (event.event === EVENTS.ScanSeries) {
         const seriesScanEvent = event.payload as ScanSeriesEvent;
-        if (seriesScanEvent.seriesId === this.series().id) {
+        if (seriesScanEvent.seriesId === this.seriesId()) {
           this.loadPageSource.next(false);
         }
       } else if (event.event === EVENTS.CoverUpdate) {
         const coverUpdateEvent = event.payload as CoverUpdateEvent;
-        if (coverUpdateEvent.id === this.series().id) {
-          this.themeService.refreshColorScape('series', this.series().id).subscribe();
+        if (coverUpdateEvent.id === this.seriesId()) {
+          this.themeService.refreshColorScape('series', this.seriesId()).subscribe();
         }
       } else if (event.event === EVENTS.ChapterRemoved) {
         const removedEvent = event.payload as ChapterRemovedEvent;
-        if (removedEvent.seriesId !== this.series().id) return;
+        if (removedEvent.seriesId !== this.seriesId()) return;
         this.loadPageSource.next(false);
       } else if (event.event === EVENTS.VolumeRemoved) {
         const volumeRemoveEvent = event.payload as VolumeRemovedEvent;
-        if (volumeRemoveEvent.seriesId === this.series().id) {
+        if (volumeRemoveEvent.seriesId === this.seriesId()) {
           this.loadPageSource.next(false);
         }
       }
     });
 
 
-    this.scrobbleService.hasHold(this.series().id).subscribe(res => {
+    this.scrobbleService.hasHold(this.seriesId()).subscribe(res => {
       this.isScrobbling.set(!res);
     });
 
-    this.scrobbleService.libraryAllowsScrobbling(this.series().id).subscribe(res => {
+    this.scrobbleService.libraryAllowsScrobbling(this.seriesId()).subscribe(res => {
       this.libraryAllowsScrobbling.set(res);
     });
 
@@ -574,10 +581,10 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.loadPageSource.next(false);
         break;
       case 'remove':
-        this.router.navigate(['library', this.library().id]);
+        this.router.navigate(['library', this.libraryId()]);
         break;
       case 'reload':
-        this.loadSeries(this.series().id, true);
+        this.loadSeries(this.seriesId(), true);
         break;
       case 'none':
         if (result.action === Action.Download) {
@@ -623,8 +630,7 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
 
     this.readerService.getTimeLeft(seriesId).subscribe((timeLeft) => {
-      this.readingTimeLeft = timeLeft;
-      this.cdRef.markForCheck();
+      this.readingTimeLeft.set(timeLeft);
     });
 
     this.setContinuePoint();
@@ -632,25 +638,16 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.themeService.setColorScape(this.series().primaryColor, this.series().secondaryColor);
 
     if (loadExternal) {
-      this.loadPlusMetadata(this.series().id, this.library().type);
+      this.loadPlusMetadata(this.seriesId(), this.library().type);
     }
 
     this.titleService.setTitle('Kavita - ' + this.series().name + ' Details');
 
-    this.seriesActions = this.actionFactoryService.getSeriesActions()
-      .filter(action => action.action !== Action.Edit);
-
-    this.licenseService.hasValidLicense$.subscribe(hasLic => {
-      if (!hasLic) {
-        this.seriesActions = this.seriesActions.filter(action => action.action !== Action.Match);
-        this.cdRef.markForCheck();
-      }
-    });
 
 
 
 
-    this.seriesService.getSeriesDetail(this.series().id).pipe(catchError(err => {
+    this.seriesService.getSeriesDetail(this.seriesId()).pipe(catchError(err => {
       this.router.navigateByUrl('/home');
       return of(null);
     })).subscribe(detail => {
@@ -659,8 +656,8 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
         return;
       }
 
-      this.unreadCount = detail.unreadCount;
-      this.totalCount = detail.totalCount;
+      this.unreadCount.set(detail.unreadCount);
+      this.totalCount.set(detail.totalCount);
 
       this.specials.set(detail.specials);
       this.chapters.set(detail.chapters);
@@ -688,16 +685,14 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
             if (!this.hasRecommendations()) this.updateSelectedTab();
             break;
           case TabID.Reviews:
-            if (this.reviews.length === 0) this.updateSelectedTab();
+            if (this.reviews().length === 0) this.updateSelectedTab();
             break;
           case TabID.Details:
             break;
         }
-        this.cdRef.markForCheck();
       }
 
       this.isLoading.set(false);
-      this.cdRef.markForCheck();
     });
 
   }
@@ -817,8 +812,8 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
 
       // Reviews
-      this.reviews = data.reviews.filter(r => !r.isExternal);
-      this.plusReviews = data.reviews.filter(r => r.isExternal);
+      this.reviews.set(data.reviews.filter(r => !r.isExternal));
+      this.plusReviews.set(data.reviews.filter(r => r.isExternal));
 
       if (data.ratings) {
         this.ratings.set([...data.ratings]);
@@ -836,11 +831,11 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   setContinuePoint() {
-    this.readerService.hasSeriesProgress(this.series().id).subscribe(hasProgress => {
+    this.readerService.hasSeriesProgress(this.seriesId()).subscribe(hasProgress => {
       this.hasReadingProgress.set(hasProgress);
     });
 
-    this.readerService.getCurrentChapter(this.series().id).subscribe(chapter => {
+    this.readerService.getCurrentChapter(this.seriesId()).subscribe(chapter => {
       this.currentlyReadingChapter.set(chapter);
     });
   }
@@ -854,19 +849,19 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
   handleRelatedReload(event: RelatedTabChangeEvent) {
     switch (event.entity) {
       case 'bookmark':
-        this.loadBookmarks(this.series().id);
+        this.loadBookmarks(this.seriesId());
         this.updateSelectedTab();
         break;
       case 'collection':
-        this.loadCollections(this.series().id);
+        this.loadCollections(this.seriesId());
         this.updateSelectedTab();
         break;
       case 'readingList':
-        this.loadReadingLists(this.series().id);
+        this.loadReadingLists(this.seriesId());
         this.updateSelectedTab();
         break;
       case 'relation':
-        this.loadRelatedSeries(this.series().id);
+        this.loadRelatedSeries(this.seriesId());
         this.updateSelectedTab();
         break;
     }
@@ -885,9 +880,9 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   toggleWantToRead() {
     if (this.isWantToRead()) {
-      this.actionService.removeMultipleSeriesFromWantToReadList([this.series().id]);
+      this.actionService.removeMultipleSeriesFromWantToReadList([this.seriesId()]);
     } else {
-      this.actionService.addMultipleSeriesToWantToReadList([this.series().id]);
+      this.actionService.addMultipleSeriesToWantToReadList([this.seriesId()]);
     }
 
     this.isWantToRead.update(x => !x);
@@ -902,9 +897,9 @@ class SeriesDetailComponent implements OnInit, AfterContentChecked {
     evt.stopPropagation();
 
     if (this.isScrobbling()) {
-      this.scrobbleService.addHold(this.series().id).subscribe();
+      this.scrobbleService.addHold(this.seriesId()).subscribe();
     } else {
-      this.scrobbleService.removeHold(this.series().id).subscribe();
+      this.scrobbleService.removeHold(this.seriesId()).subscribe();
     }
     this.isScrobbling.update(x => !x);
   }
