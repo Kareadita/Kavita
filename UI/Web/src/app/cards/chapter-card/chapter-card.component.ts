@@ -5,9 +5,9 @@ import {
   EventEmitter,
   inject,
   input,
+  linkedSignal,
   OnChanges,
   Output,
-  signal,
   SimpleChanges,
   TemplateRef,
   viewChild
@@ -82,7 +82,7 @@ export class ChapterCardComponent implements OnChanges {
   protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
 
 
-  private chapterSignal = signal<Chapter | null>(null);
+  private chapterSignal = linkedSignal<Chapter>(() => this.chapter());
 
   cardEntity = computed<CardEntity>(() => {
     const chapter = this.chapterSignal();
