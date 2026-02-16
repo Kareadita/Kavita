@@ -299,7 +299,7 @@ export class BulkSelectionService {
   }
 
   /**
-   * Wires callback2 on each action (and children recursively) so that triggering
+   * Wires callback on each action (and children recursively) so that triggering
    * the action resolves entities at trigger time, calls the bulk handler, then
    * auto-deselects and fires the post-action callback.
    */

@@ -54,10 +54,8 @@ import {IHasCast} from "../_models/common/i-has-cast";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UtilityService} from "../shared/_services/utility.service";
-import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
+import {CardConfigFactory} from "../_services/card-config-factory.service";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
-import {Genre} from "../_models/metadata/genre";
-import {Tag} from "../_models/tag";
 import {RelatedTabChangeEvent, RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
 import {ReadingList} from "../_models/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
@@ -94,6 +92,7 @@ import {Action} from "../_models/actionables/action";
 import {ModalService} from "../_services/modal.service";
 import {getResolvedData, getWritableResolvedData} from "../../libs/route-util";
 import {ModalResult} from "../_models/modal/modal-result";
+import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 
 enum TabID {
   Chapters = 'chapters-tab',
@@ -155,7 +154,6 @@ interface VolumeCast extends IHasCast {
     NgClass,
     TranslocoDirective,
     VirtualScrollerModule,
-    ChapterCardComponent,
     RelatedTabComponent,
     BadgeExpanderComponent,
     MetadataDetailRowComponent,
@@ -168,7 +166,8 @@ interface VolumeCast extends IHasCast {
     AnnotationsTabComponent,
     UtcToLocalDatePipe,
     ReadingProgressStatusPipePipe,
-    ReadingProgressIconPipePipe
+    ReadingProgressIconPipePipe,
+    ChapterCardComponent
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
@@ -193,6 +192,7 @@ export class VolumeDetailComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
+  private readonly cardConfigFactory = inject(CardConfigFactory);
   protected readonly utilityService = inject(UtilityService);
   private readonly readingListService = inject(ReadingListService);
   private readonly messageHub = inject(MessageHubService);
@@ -221,16 +221,16 @@ export class VolumeDetailComponent implements OnInit {
 
   coverImage = computed(() => this.imageService.getVolumeCoverImage(this.volume().id));
 
-  isLoading: boolean = true;
+  isLoading = signal(true);
 
   activeTabId = TabID.Chapters;
-  readingLists: ReadingList[] = [];
+  readingLists = signal<ReadingList[]>([]);
 
   // Only populated if the volume has exactly one chapter
-  userReviews: Array<UserReview> = [];
-  plusReviews: Array<UserReview> = [];
-  rating: number = 0;
-  hasBeenRated: boolean = false;
+  userReviews = signal<UserReview[]>([]);
+  plusReviews = signal<UserReview[]>([]);
+  rating = signal(0);
+  hasBeenRated = signal(false);
   annotations = signal<Annotation[]>([]);
   totalReads = computed(() => {
     const chapters = this.volume()?.chapters || [];
@@ -259,8 +259,10 @@ export class VolumeDetailComponent implements OnInit {
 
   mobileSeriesImgBackground: string | undefined;
 
-  volumeActions: Array<ActionItem<Volume>> = [];
-  chapterActions: Array<ActionItem<Chapter>> = [];
+  volumeActions = computed(() => this.actionFactoryService.getVolumeActions(this.seriesId(), this.libraryId(), this.libraryType(), this.shouldRenderVolumeAction.bind(this)));
+
+  chapters = computed(() => this.volume()?.chapters || []);
+
 
   /**
    * This is the download we get from download service.
@@ -310,38 +312,42 @@ export class VolumeDetailComponent implements OnInit {
     return translate(chapterLocaleKey, {num: currentlyReadingChapter.minNumber});
   })
 
-  maxAgeRating: AgeRating = AgeRating.Unknown;
-  volumeCast: VolumeCast = {
-    characterLocked: false,
-    characters: [],
-    coloristLocked: false,
-    colorists: [],
-    coverArtistLocked: false,
-    coverArtists: [],
-    editorLocked: false,
-    editors: [],
-    imprintLocked: false,
-    imprints: [],
-    inkerLocked: false,
-    inkers: [],
-    languageLocked: false,
-    lettererLocked: false,
-    letterers: [],
-    locationLocked: false,
-    locations: [],
-    pencillerLocked: false,
-    pencillers: [],
-    publisherLocked: false,
-    publishers: [],
-    teamLocked: false,
-    teams: [],
-    translatorLocked: false,
-    translators: [],
-    writerLocked: false,
-    writers: []
-  };
-  tags: Array<Tag> = [];
-  genres: Array<Genre> = [];
+  volumeCast = computed<VolumeCast>(() => {
+    const chapters = this.volume()?.chapters || [];
+    return {
+      characterLocked: false, characters: this.distinctPersons(chapters, c => c.characters),
+      coloristLocked: false, colorists: this.distinctPersons(chapters, c => c.colorists),
+      coverArtistLocked: false, coverArtists: this.distinctPersons(chapters, c => c.coverArtists),
+      editorLocked: false, editors: this.distinctPersons(chapters, c => c.editors),
+      imprintLocked: false, imprints: this.distinctPersons(chapters, c => c.imprints),
+      inkerLocked: false, inkers: this.distinctPersons(chapters, c => c.inkers),
+      languageLocked: false, lettererLocked: false,
+      letterers: this.distinctPersons(chapters, c => c.letterers),
+      locationLocked: false, locations: this.distinctPersons(chapters, c => c.locations),
+      pencillerLocked: false, pencillers: this.distinctPersons(chapters, c => c.pencillers),
+      publisherLocked: false, publishers: this.distinctPersons(chapters, c => c.publishers),
+      teamLocked: false, teams: this.distinctPersons(chapters, c => c.teams),
+      translatorLocked: false, translators: this.distinctPersons(chapters, c => c.translators),
+      writerLocked: false, writers: this.distinctPersons(chapters, c => c.writers),
+    };
+  });
+
+  genres = computed(() => (this.volume()?.chapters || [])
+    .flatMap(c => c.genres)
+    .filter((tag, i, self) => i === self.findIndex(w => w.title === tag.title)));
+
+  tags = computed(() => (this.volume()?.chapters || [])
+    .flatMap(c => c.tags)
+    .filter((tag, i, self) => i === self.findIndex(w => w.title === tag.title)));
+
+  maxAgeRating = computed(() => {
+    const chapters = this.volume()?.chapters || [];
+    if (chapters.length === 0) return AgeRating.Unknown;
+    return Math.max(...chapters.map(c => c.ageRating));
+  });
+
+  chapterTabName = computed(() => this.utilityService.formatChapterName(this.libraryType(), false, false, true));
+  reviewCount = computed(() => this.userReviews().length + this.plusReviews().length);
 
 
 
@@ -358,14 +364,6 @@ export class VolumeDetailComponent implements OnInit {
 
 
   ngOnInit() {
-    const seriesId = this.route.snapshot.paramMap.get('seriesId');
-    const libraryId = this.route.snapshot.paramMap.get('libraryId');
-    const volumeId = this.route.snapshot.paramMap.get('volumeId');
-    if (seriesId === null || libraryId === null || volumeId === null) {
-      this.router.navigateByUrl('/home');
-      return;
-    }
-
     this.mobileSeriesImgBackground = getComputedStyle(document.documentElement)
       .getPropertyValue('--mobile-series-img-background').trim();
 
@@ -401,17 +399,12 @@ export class VolumeDetailComponent implements OnInit {
       }
     });
 
-
-    this.volumeActions = this.actionFactoryService.getVolumeActions(this.seriesId(), this.libraryId(), this.libraryType(), this.shouldRenderVolumeAction.bind(this));
-    this.chapterActions = this.actionFactoryService.getChapterActions(this.seriesId(), this.libraryId(), this.libraryType());
-
-
     if (this.volume().chapters.length === 1) {
       this.chapterService.chapterDetailPlus(this.seriesId(), this.volume().chapters[0].id).subscribe(detail => {
-        this.userReviews = detail.reviews.filter(r => !r.isExternal);
-        this.plusReviews = detail.reviews.filter(r => r.isExternal);
-        this.rating = detail.rating;
-        this.hasBeenRated = detail.hasBeenRated;
+        this.userReviews.set(detail.reviews.filter(r => !r.isExternal));
+        this.plusReviews.set(detail.reviews.filter(r => r.isExternal));
+        this.rating.set(detail.rating);
+        this.hasBeenRated.set(detail.hasBeenRated);
       });
 
       this.annotationService.getAllAnnotations(this.volume().chapters[0].id).subscribe(annotations => {
@@ -438,107 +431,24 @@ export class VolumeDetailComponent implements OnInit {
 
     this.loadReadingLists();
 
-    // Calculate all the writes/artists for all chapters
-    this.volumeCast.writers = this.volume().chapters
-      .flatMap(c => c.writers)  // Flatten the array of writers from all chapters
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name) // Check for distinct names
-      );
+    this.isLoading.set(false);
+  }
 
-    this.volumeCast.coverArtists = this.volume().chapters
-      .flatMap(c => c.coverArtists)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-
-    this.volumeCast.characters = this.volume().chapters
-      .flatMap(c => c.characters)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-    this.volumeCast.colorists = this.volume().chapters
-      .flatMap(c => c.colorists)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-    this.volumeCast.editors = this.volume().chapters
-      .flatMap(c => c.editors)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-    this.volumeCast.imprints = this.volume().chapters
-      .flatMap(c => c.imprints)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-    this.volumeCast.inkers = this.volume().chapters
-      .flatMap(c => c.inkers)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-    this.volumeCast.letterers = this.volume().chapters
-      .flatMap(c => c.letterers)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-    this.volumeCast.locations = this.volume().chapters
-      .flatMap(c => c.locations)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-
-    this.volumeCast.teams = this.volume().chapters
-      .flatMap(c => c.teams)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-
-    this.volumeCast.translators = this.volume().chapters
-      .flatMap(c => c.translators)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-
-    this.volumeCast.publishers = this.volume().chapters
-      .flatMap(c => c.publishers)
-      .filter((person, index, self) =>
-        index === self.findIndex(w => w.name === person.name)
-      );
-
-    this.genres = this.volume().chapters
-      .flatMap(c => c.genres)
-      .filter((tag, index, self) =>
-        index === self.findIndex(w => w.title === tag.title)
-      );
-
-    this.tags = this.volume().chapters
-      .flatMap(c => c.tags)
-      .filter((tag, index, self) =>
-        index === self.findIndex(w => w.title === tag.title)
-      );
-
-    this.maxAgeRating = Math.max(
-      ...this.volume().chapters
-        .flatMap(c => c.ageRating)
-    );
-
-
-    this.isLoading = false;
-    this.cdRef.markForCheck();
+  private distinctPersons(chapters: Chapter[], selector: (c: Chapter) => Person[]): Person[] {
+    return chapters.flatMap(selector)
+      .filter((person, i, self) => i === self.findIndex(w => w.name === person.name));
   }
 
   private loadReadingLists(switchTabsIfNoList = false) {
-    // TODO: Why can't we have a bulk flow for this?
     const volume = this.volume();
     if (!volume) return;
 
     if (volume.chapters.length === 1) {
       this.readingListService.getReadingListsForChapter(volume.chapters[0].id).subscribe(lists => {
-        this.readingLists = lists;
+        this.readingLists.set(lists);
         if (switchTabsIfNoList && lists.length === 0) {
           this.switchTabsToDetail();
         }
-        this.cdRef.markForCheck();
       });
     }
   }
@@ -636,13 +546,11 @@ export class VolumeDetailComponent implements OnInit {
   updateChapter(updatedChapter: Chapter) {
     const volume = this.volume();
     if (!volume) return;
-
-    const originalEntity = volume.chapters.find(s => s.id == updatedChapter.id);
-
-    if (originalEntity) {
-      Object.assign(originalEntity, updatedChapter);
-      volume.chapters = [...volume.chapters];
-      this.cdRef.markForCheck();
+    const idx = volume.chapters.findIndex(c => c.id === updatedChapter.id);
+    if (idx >= 0) {
+      const chapters = [...volume.chapters];
+      chapters[idx] = {...updatedChapter};
+      this.volume.set({...volume, chapters});
     }
   }
 

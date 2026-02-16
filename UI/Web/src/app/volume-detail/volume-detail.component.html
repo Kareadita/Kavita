@@ -20,8 +20,8 @@
             </span>
         </div>
 
-        <app-metadata-detail-row [entity]="volumeCast"
-                                 [ageRating]="maxAgeRating"
+        <app-metadata-detail-row [entity]="volumeCast()"
+                                 [ageRating]="maxAgeRating()"
                                  [hasReadingProgress]="volume().pagesRead > 0"
                                  [readingTimeEntity]="volume()"
                                  [libraryType]="libraryType()"
@@ -35,8 +35,8 @@
           <div class="mt-2 mb-2">
             <app-external-rating [seriesId]="seriesId()"
                                  [ratings]="[]"
-                                 [userRating]="rating"
-                                 [hasUserRated]="hasBeenRated"
+                                 [userRating]="rating()"
+                                 [hasUserRated]="hasBeenRated()"
                                  [libraryType]="libraryType()"
                                  [chapterId]="volume().chapters[0].id"
             />
@@ -79,7 +79,7 @@
 
             <div class="col-auto ms-2">
               <div class="card-actions mt-2" [ngbTooltip]="t('more-alt')">
-                <app-card-actionables [entity]="volume()" [actions]="volumeActions" [labelBy]="series.name + ' ' + volume().minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn" />
+                <app-card-actionables [entity]="volume()" [actions]="volumeActions()" [labelBy]="series.name + ' ' + volume().minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn" />
               </div>
             </div>
 
@@ -99,7 +99,7 @@
             <div class="col-6">
               <span class="fw-bold">{{t('writers-title')}}</span>
               <div>
-                <app-badge-expander [items]="volumeCast.writers" [allowToggle]="false" (toggle)="switchTabsToDetail()">
+                <app-badge-expander [items]="volumeCast().writers" [allowToggle]="false" (toggle)="switchTabsToDetail()">
                   <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                     <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                   </ng-template>
@@ -109,7 +109,7 @@
             <div class="col-6">
               <span class="fw-bold">{{t('cover-artists-title')}}</span>
               <div>
-                <app-badge-expander [items]="volumeCast.coverArtists" [allowToggle]="false" (toggle)="switchTabsToDetail()">
+                <app-badge-expander [items]="volumeCast().coverArtists" [allowToggle]="false" (toggle)="switchTabsToDetail()">
                   <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                     <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                   </ng-template>
@@ -124,7 +124,7 @@
             <div class="col-6 pe-5">
               <span class="fw-bold">{{t('genres-title')}}</span>
               <div>
-                <app-badge-expander [items]="genres"
+                <app-badge-expander [items]="genres()"
                                     [itemsTillExpander]="3"
                                     [allowToggle]="false"
                                     (toggle)="switchTabsToDetail()">
@@ -138,7 +138,7 @@
             <div class="col-6">
               <span class="fw-bold">{{t('tags-title')}}</span>
               <div>
-                <app-badge-expander [items]="tags"
+                <app-badge-expander [items]="tags()"
                                     [itemsTillExpander]="3"
                                     [allowToggle]="false"
                                     (toggle)="switchTabsToDetail()">
@@ -159,19 +159,18 @@
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" (navChange)="onNavChange($event)">
         <li [ngbNavItem]="TabID.Chapters">
           <a ngbNavLink>
-            {{utilityService.formatChapterName(libraryType(), false, false, true)}}
+            {{chapterTabName()}}
             <span class="badge rounded-pill text-bg-secondary">{{volume().chapters.length}}</span>
           </a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
-              <virtual-scroller #scroll [items]="volume().chapters" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
+              <virtual-scroller #scroll [items]="chapters()" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
                 <div class="card-container row g-0" #container>
                   @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_' + item.pagesRead) {
                     <app-chapter-card class="col-auto mt-2 mb-2" [chapter]="item"
                                       [seriesId]="seriesId()"
                                       [libraryId]="libraryId()"
                                       [libraryType]="libraryType()"
-                                      [actions]="chapterActions"
                                       [index]="scroll.viewPortInfo.startIndexWithBuffer + idx"
                                       [maxIndex]="volume().chapters.length"
                                       [allowSelection]="true"
@@ -184,12 +183,12 @@
           </ng-template>
         </li>
 
-        @if (volume().chapters.length === 1 && readingLists.length > 0) {
+        @if (volume().chapters.length === 1 && readingLists().length > 0) {
           <li [ngbNavItem]="TabID.Related">
             <a ngbNavLink>{{t('related-tab')}}</a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                <app-related-tab [readingLists]="readingLists" (reload)="handleRelatedReload($event)" (dataChanged)="handleRelatedReload($event)" />
+                <app-related-tab [readingLists]="readingLists()" (reload)="handleRelatedReload($event)" (dataChanged)="handleRelatedReload($event)" />
               }
             </ng-template>
           </li>
@@ -213,11 +212,11 @@
           <li [ngbNavItem]="TabID.Reviews">
             <a ngbNavLink>
               {{t('reviews-tab')}}
-              <span class="badge rounded-pill text-bg-secondary">{{userReviews.length + plusReviews.length}}</span>
+              <span class="badge rounded-pill text-bg-secondary">{{reviewCount()}}</span>
             </a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
-                <app-reviews [userReviews]="userReviews" [plusReviews]="plusReviews"
+                <app-reviews [userReviews]="userReviews()" [plusReviews]="plusReviews()"
                              [series]="series()" [volumeId]="volumeId()" [chapter]="volume().chapters[0]" />
               }
             </ng-template>
@@ -228,9 +227,9 @@
           <a ngbNavLink>{{t('details-tab')}}</a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Details; prefetch on idle) {
-              <app-details-tab [metadata]="volumeCast"
-                               [genres]="genres"
-                               [tags]="tags"
+              <app-details-tab [metadata]="volumeCast()"
+                               [genres]="genres()"
+                               [tags]="tags()"
                                [files]="files()"
               />
             }
@@ -242,7 +241,7 @@
     <div [ngbNavOutlet]="nav" style="min-height: 300px"></div>
 
 
-    <app-loading [loading]="isLoading" />
+    <app-loading [loading]="isLoading()" />
   </div>
 
 </ng-container>
