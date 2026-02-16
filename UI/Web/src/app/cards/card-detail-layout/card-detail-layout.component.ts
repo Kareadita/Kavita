@@ -4,7 +4,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  ContentChild,
+  contentChild,
   effect,
   EventEmitter,
   HostListener,
@@ -14,7 +14,7 @@ import {
   signal,
   TemplateRef,
   TrackByFunction,
-  ViewChild,
+  viewChild,
   WritableSignal
 } from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
@@ -102,18 +102,18 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
   itemClicked = output<any>();
   applyFilter = output<FilterEvent>();
 
-  @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
-  @ContentChild('noData') noDataTemplate: TemplateRef<any> | null = null;
+  itemTemplate = contentChild.required<TemplateRef<any>>('cardItem');
+  noDataTemplate = contentChild<TemplateRef<any>>('noData');
   /**
    * Template that is rendered next to the save button
    */
-  @ContentChild('extraButtons') extraButtonsRef!: TemplateRef<any>;
+  extraButtonsRef = contentChild<TemplateRef<any>>('extraButtons');
   /**
    * Template that is rendered above the grid, but always below the filter
    */
-  @ContentChild('topBar') topBar!: TemplateRef<any>;
+  topBar = contentChild<TemplateRef<any>>('topBar');
 
-  @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
+  private virtualScroller = viewChild(VirtualScrollerComponent);
 
   bufferAmount: number = 1;
   resumed: boolean = false;
@@ -159,7 +159,7 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     effect((onCleanup) => {
       const refreshEmitter = this.refresh();
       if (!refreshEmitter) return;
-      const sub = refreshEmitter.subscribe(() => this.virtualScroller?.refresh());
+      const sub = refreshEmitter.subscribe(() => this.virtualScroller()?.refresh());
       onCleanup(() => sub.unsubscribe());
     });
 
@@ -206,8 +206,8 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
       targetIndex += keys[i].size;
     }
 
-    this.virtualScroller.scrollToIndex(targetIndex, true, 0, ANIMATION_TIME_MS);
-    setTimeout(() => this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.startIndex), ANIMATION_TIME_MS + 100);
+    this.virtualScroller()?.scrollToIndex(targetIndex, true, 0, ANIMATION_TIME_MS);
+    setTimeout(() => this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller()!.viewPortInfo.startIndex), ANIMATION_TIME_MS + 100);
   }
 
   tryToSaveJumpKey(item: any) {
@@ -224,8 +224,9 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
       name = item.title;
     }
     this.jumpbarService.saveResumeKey(this.router.url, name.charAt(0));
-    if (this.virtualScroller) {
-      this.jumpbarService.saveResumePosition(this.router.url, this.virtualScroller.viewPortInfo.scrollStartPosition);
+    const scroller = this.virtualScroller();
+    if (scroller) {
+      this.jumpbarService.saveResumePosition(this.router.url, scroller.viewPortInfo.scrollStartPosition);
     }
   }
 
@@ -234,7 +235,7 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     const scrollOffset = this.jumpbarService.getResumePosition(this.router.url);
     if (scrollOffset > 0) {
       setTimeout(() => {
-        this.virtualScroller?.scrollToPosition(scrollOffset, ANIMATION_TIME_MS);
+        this.virtualScroller()?.scrollToPosition(scrollOffset, ANIMATION_TIME_MS);
       }, 100);
     } else {
       const resumeKey = this.jumpbarService.getResumeKey(this.router.url);

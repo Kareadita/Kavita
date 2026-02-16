@@ -25,18 +25,18 @@
   @if (filterSettings(); as fs) {
     <app-metadata-filter [filterSettings]="fs" [filterOpen]="filterOpen()!" (applyFilter)="applyMetadataFilter($event)">
       <ng-template #extraButtons>
-        <ng-container [ngTemplateOutlet]="extraButtonsRef" />
+        <ng-container [ngTemplateOutlet]="extraButtonsRef()" />
       </ng-template>
     </app-metadata-filter>
   }
 
-  <ng-container [ngTemplateOutlet]="topBar" />
+  <ng-container [ngTemplateOutlet]="topBar()" />
 
   <div class="viewport-container ms-1" [ngClass]="{'empty': items().length === 0 && !isLoading()}">
     <div class="content-container">
       <div class="card-container">
         @if (items().length === 0 && !isLoading()) {
-          <p><ng-container [ngTemplateOutlet]="noDataTemplate" /></p>
+          <p><ng-container [ngTemplateOutlet]="noDataTemplate()" /></p>
         }
 
         <virtual-scroller [ngClass]="{'empty': items().length === 0 && !isLoading()}" #scroll [items]="items()" [bufferAmount]="bufferAmount" [parentScroll]="parentScroll()!">
@@ -46,7 +46,7 @@
                 (click)="tryToSaveJumpKey(item)"
                 id="jumpbar-index--{{i}}"
                 [attr.jumpbar-index]="i">
-                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }" />
+                <ng-container [ngTemplateOutlet]="itemTemplate()" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }" />
               </div>
             }
           </div>
@@ -65,7 +65,7 @@
 
         @for (item of scroll.viewPortItems; track trackItem(i, item); let i = $index) {
           <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey(item)" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
-            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
+            <ng-container [ngTemplateOutlet]="itemTemplate()" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
           </div>
         }
 
@@ -75,8 +75,8 @@
     @if (items().length === 0 && !isLoading()) {
       <div class="mx-auto" style="width: 200px;">
         <p>
-          @if (noDataTemplate) {
-            <ng-container [ngTemplateOutlet]="noDataTemplate" />
+          @if (noDataTemplate()) {
+            <ng-container [ngTemplateOutlet]="noDataTemplate()" />
           } @else {
             {{t('no-data')}}
           }
