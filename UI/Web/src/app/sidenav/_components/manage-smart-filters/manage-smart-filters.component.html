@@ -26,7 +26,7 @@
           <app-carousel-reel [items]="data" [title]="stream.name" [titleLink]="baseUrl + 'all-series?' + stream.filter"
                              [actionables]="actions" [actionableEntity]="stream" (actionHandler)="handleActionCallback($event)">
             <ng-template #carouselItem let-item>
-              <app-series-card [series]="item" [libraryId]="item.libraryId" />
+              <app-series-card [series]="item" />
             </ng-template>
           </app-carousel-reel>
         }

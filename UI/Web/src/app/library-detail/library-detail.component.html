@@ -29,7 +29,7 @@
         </ng-template>
 
         <ng-template #cardItem let-item let-position="idx">
-          <app-series-card [series]="item" [libraryId]="libraryId()" [suppressLibraryLink]="true" (reload)="loadPage()"
+          <app-series-card [series]="item" [suppressLibraryLink]="true" (reload)="loadPage()"
                            [index]="position" [maxIndex]="series.length" [allowSelection]="true" />
         </ng-template>
 

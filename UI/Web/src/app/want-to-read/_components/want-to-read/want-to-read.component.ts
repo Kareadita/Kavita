@@ -22,7 +22,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {ActionService} from 'src/app/_services/action.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
@@ -59,7 +58,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   private seriesService = inject(SeriesService);
   private titleService = inject(Title);
   protected bulkSelectionService = inject(BulkSelectionService);
-  private actionService = inject(ActionService);
   private messageHub = inject(MessageHubService);
   private filterUtilityService = inject(FilterUtilitiesService);
   private utilityService = inject(UtilityService);
@@ -90,7 +88,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
-  
+
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';

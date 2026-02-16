@@ -70,7 +70,7 @@
             </ng-template>
 
             <ng-template #cardItem let-item let-position="idx">
-              <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="loadPage()" (dataChanged)="updateSeries($event)"
+              <app-series-card [series]="item" (reload)="loadPage()" (dataChanged)="updateSeries($event)"
                                [index]="position" [maxIndex]="series.length" [allowSelection]="true"
                />
             </ng-template>
