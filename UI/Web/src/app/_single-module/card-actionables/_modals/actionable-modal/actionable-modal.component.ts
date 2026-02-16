@@ -5,7 +5,7 @@ import {
   DestroyRef,
   EventEmitter,
   inject,
-  Input,
+  input,
   OnInit,
   Output,
   signal
@@ -38,9 +38,9 @@ export class ActionableModalComponent implements OnInit {
   protected readonly destroyRef = inject(DestroyRef);
 
 
-  @Input() entity: ActionableEntity = null;
+  entity = input<ActionableEntity>(null);
   /** This assumes these are filtered actions */
-  @Input() filteredActions: ActionItem<any>[] = [];
+  filteredActions = input<ActionItem<any>[]>([]);
   @Output() actionPerformed = new EventEmitter<ActionItem<any> | ActionResult<any>>();
 
   currentItems = signal<ActionItem<any>[]>([]);
@@ -49,7 +49,7 @@ export class ActionableModalComponent implements OnInit {
   ngOnInit() {
     // Copy as the list may be shared between entities
     const actionItems = this.surfaceDownloadAction(
-      this.filteredActions.map(a => this.utilityService.copyActionItem(a))
+      this.filteredActions().map(a => this.utilityService.copyActionItem(a))
     );
     this.currentItems.set(this.translateOptions(actionItems));
   }
@@ -74,7 +74,7 @@ export class ActionableModalComponent implements OnInit {
       return;
     }
 
-    const result = item.callback(item, this.entity);
+    const result = item.callback(item, this.entity());
 
     if (result && typeof (result as any).subscribe === 'function') {
       (result as Observable<ActionResult<any>>).subscribe(actionResult => {
@@ -90,7 +90,7 @@ export class ActionableModalComponent implements OnInit {
     this.currentLevel.update(levels => {
       const next = levels.slice(0, -1);
 
-      let items = this.filteredActions.map(a => this.utilityService.copyActionItem(a));
+      let items = this.filteredActions().map(a => this.utilityService.copyActionItem(a));
       items = this.surfaceDownloadAction(items);
 
       for (const level of next) {

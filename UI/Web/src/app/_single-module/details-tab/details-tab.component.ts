@@ -45,14 +45,17 @@ export class DetailsTabComponent {
   genres = input<Genre[]>([]);
   tags = input<Tag[]>([]);
   webLinks = input<string[]>([]);
-  @Input() suppressEmptyGenres: boolean = false;
-  @Input() suppressEmptyTags: boolean = false;
+  suppressEmptyGenres = input<boolean>(false);
+  suppressEmptyTags = input<boolean>(false);
   filePaths = input<string[]>([]);
   files = input<MangaFile[]>([]);
 
   hasUpperMetadata = computed(() => {
     return this.genres().length > 0 || this.tags().length > 0 || this.webLinks().length > 0;
   });
+
+  showTags = computed(() => !this.suppressEmptyTags() || this.tags().length > 0);
+  showGenres = computed(() => !this.suppressEmptyGenres() || this.genres().length > 0);
 
   openGeneric(queryParamName: FilterField, filter: string | number) {
     if (queryParamName === FilterField.None) return;

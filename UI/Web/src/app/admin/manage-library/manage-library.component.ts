@@ -76,8 +76,6 @@ export class ManageLibraryComponent implements OnInit {
   private readonly actionService = inject(ActionService);
   protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly Action = Action;
-
   actions = this.actionFactoryService.getLibraryActions();
   bulkActions = this.actionFactoryService.getBulkLibraryActions();
   libraries: Library[] = [];
@@ -286,8 +284,7 @@ export class ManageLibraryComponent implements OnInit {
         // Prompt the user for the library, then wait for them to manually trigger applyBulkAction
         const ref = this.modalService.open(CopySettingsFromLibraryModalComponent, {size: 'lg', fullscreen: 'md'});
         ref.componentInstance.libraries = this.libraries;
-        ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: number | null) => {
-          if (res === null) return;
+        ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: number) => {
           // res will be the library the user chose
           this.bulkMode = true;
           this.sourceCopyToLibrary = this.libraries.filter(l => l.id === res)[0];
@@ -348,4 +345,6 @@ export class ManageLibraryComponent implements OnInit {
     this.selectAll = false;
       this.cdRef.markForCheck();
   }
+
+  protected readonly Action = Action;
 }

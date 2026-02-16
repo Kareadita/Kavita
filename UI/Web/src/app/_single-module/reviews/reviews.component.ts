@@ -1,10 +1,8 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, model} from '@angular/core';
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {ReviewCardComponent} from "../review-card/review-card.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {UserReview} from "../../_models/user-review";
-import {User} from "../../_models/user/user";
-import {AccountService} from "../../_services/account.service";
 import {
   ReviewModalCloseAction,
   ReviewModalCloseEvent,
@@ -13,6 +11,7 @@ import {
 import {Series} from "../../_models/series";
 import {Chapter} from "../../_models/chapter";
 import {ModalService} from "../../_services/modal.service";
+import {AccountService} from "../../_services/account.service";
 
 @Component({
   selector: 'app-reviews',
@@ -29,23 +28,12 @@ export class ReviewsComponent {
 
   private readonly accountService = inject(AccountService);
   private readonly modalService = inject(ModalService);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
-  @Input({required: true}) userReviews!: Array<UserReview>;
-  @Input({required: true}) plusReviews!: Array<UserReview>;
-  @Input({required: true}) series!: Series;
-  @Input() volumeId: number | undefined;
-  @Input() chapter: Chapter | undefined;
-
-  user: User | undefined = undefined;
-
-  constructor() {
-    this.accountService.currentUser$.subscribe(user => {
-      if (user) {
-        this.user = user;
-      }
-    });
-  }
+  userReviews = model.required<UserReview[]>();
+  plusReviews = input.required<UserReview[]>();
+  series = input.required<Series>();
+  volumeId = input<number | undefined>(undefined);
+  chapter = input<Chapter | undefined>(undefined);
 
   openReviewModal() {
     const userReview = this.getUserReviews();
@@ -56,9 +44,9 @@ export class ReviewsComponent {
       modalRef.componentInstance.review = userReview[0];
     } else {
       modalRef.componentInstance.review = {
-        seriesId: this.series.id,
-        volumeId: this.volumeId,
-        chapterId: this.chapter?.id,
+        seriesId: this.series().id,
+        volumeId: this.volumeId(),
+        chapterId: this.chapter()?.id,
         tagline: '',
         body: ''
       };
@@ -67,36 +55,30 @@ export class ReviewsComponent {
     modalRef.closed.subscribe((closeResult) => {
       this.updateOrDeleteReview(closeResult);
     });
-
   }
 
   updateOrDeleteReview(closeResult: ReviewModalCloseEvent) {
     if (closeResult.action === ReviewModalCloseAction.Close) return;
 
-    const index = this.userReviews.findIndex(r => r.username === closeResult.review!.username);
+    const reviews = this.userReviews();
+    const index = reviews.findIndex(r => r.username === closeResult.review!.username);
+
     if (closeResult.action === ReviewModalCloseAction.Edit) {
-      if (index === -1 ) {
-        this.userReviews = [closeResult.review, ...this.userReviews];
-        this.cdRef.markForCheck();
-        return;
+      if (index === -1) {
+        this.userReviews.set([closeResult.review!, ...reviews]);
+      } else {
+        this.userReviews.set(reviews.map((r, i) => i === index ? closeResult.review! : r));
       }
-      this.userReviews[index] = closeResult.review;
-      this.cdRef.markForCheck();
       return;
     }
 
     if (closeResult.action === ReviewModalCloseAction.Delete) {
-      this.userReviews = [...this.userReviews.filter(r => r.username !== closeResult.review!.username)];
-      this.cdRef.markForCheck();
-      return;
+      this.userReviews.set(reviews.filter(r => r.username !== closeResult.review!.username));
     }
   }
 
   getUserReviews() {
-    if (!this.user) {
-      return [];
-    }
-    return this.userReviews.filter(r => r.username === this.user?.username && !r.isExternal);
+    return this.userReviews().filter(r => r.username === this.accountService.currentUserSignal()!.username && !r.isExternal);
   }
 
 }

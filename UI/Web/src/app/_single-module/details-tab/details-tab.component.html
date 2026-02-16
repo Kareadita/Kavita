@@ -24,8 +24,7 @@
     </div>
   }
 
-  @if (!suppressEmptyGenres || genres().length > 0) {
-
+  @if (showGenres()) {
     <div class="mb-3 ms-1">
       <h4 class="header">{{t('genres-title')}}</h4>
       <div class="ms-3">
@@ -38,7 +37,7 @@
     </div>
   }
 
-  @if (!suppressEmptyTags || tags().length > 0) {
+  @if (showTags()) {
     <div class="mb-3 ms-1">
       <h4 class="header">{{t('tags-title')}}</h4>
       <div class="ms-3">

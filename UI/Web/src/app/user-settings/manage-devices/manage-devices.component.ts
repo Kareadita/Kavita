@@ -17,12 +17,14 @@ import {ClientDeviceCardComponent} from "../../_single-module/client-device-card
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {ModalService} from "../../_services/modal.service";
+import {ModalResult} from "../../_models/modal/modal-result";
+import {patchSignalArray} from "../../../libs/patch";
 
 @Component({
-    selector: 'app-manage-devices',
-    templateUrl: './manage-devices.component.html',
-    styleUrls: ['./manage-devices.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-manage-devices',
+  templateUrl: './manage-devices.component.html',
+  styleUrls: ['./manage-devices.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule, ClientDeviceCardComponent, LoadingComponent, ResponsiveTableComponent]
 })
 export class ManageDevicesComponent implements OnInit {
@@ -35,7 +37,6 @@ export class ManageDevicesComponent implements OnInit {
   private readonly modalService = inject(ModalService);
   private readonly accountService = inject(AccountService);
 
-  //devices: Array<Device> = [];
   devices = signal<Device[]>([]);
   hasEmailSetup = signal<boolean>(false);
   trackBy = (idx: number, item: Device) => `${item.name}_${item.emailAddress}_${item.platform}_${item.lastUsed}`;
@@ -85,24 +86,19 @@ export class ManageDevicesComponent implements OnInit {
 
   addDevice() {
     const ref = this.modalService.open(EditDeviceModalComponent);
-    ref.componentInstance.device = null;
+    ref.setInput('device', null);
 
-    ref.closed.subscribe((result: Device | null) => {
-      if (result === null) return;
-
+    ref.closed.subscribe((result: ModalResult<Device>) => {
       this.loadDevices();
     });
   }
 
   editDevice(device: Device) {
     const ref = this.modalService.open(EditDeviceModalComponent);
-    ref.componentInstance.device = device;
+    ref.setInput('device', device);
 
-    ref.closed.subscribe((result: Device | null) => {
-      if (result === null) return;
-
-      device = result;
-      this.cdRef.markForCheck();
+    ref.closed.subscribe((result: ModalResult<Device>) => {
+      patchSignalArray(this.devices, new Map([[result.data!.id, result.data!]]));
     });
   }
 }
