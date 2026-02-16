@@ -10,7 +10,7 @@ import {
   HostListener,
   inject,
   input,
-  Output,
+  output,
   signal,
   TemplateRef,
   TrackByFunction,
@@ -99,8 +99,8 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
   customSort = input(false);
   jumpBarKeys = input<Array<JumpKey>>([]); // This is approx 784 pixels tall, original keys
 
-  @Output() itemClicked: EventEmitter<any> = new EventEmitter();
-  @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
+  itemClicked = output<any>();
+  applyFilter = output<FilterEvent>();
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
   @ContentChild('noData') noDataTemplate: TemplateRef<any> | null = null;
@@ -183,7 +183,6 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
   measureViewport() {
     const h = (this.document.querySelector('.viewport-container')?.getBoundingClientRect().height || 10) - 30;
     this.viewportHeight.set(h);
-    console.log('setting height: ', h)
   }
 
   performAction(event: ActionItem<void> | ActionResult<void>) {
