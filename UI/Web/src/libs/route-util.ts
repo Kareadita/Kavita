@@ -5,6 +5,7 @@ import {DestroyRef, inject, signal, Signal, WritableSignal} from "@angular/core"
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {map} from "rxjs/operators";
 import {Volume} from "../app/_models/volume";
+import {Chapter} from "../app/_models/chapter";
 
 /**
  * Type-safety for router resolvers. Add new fields as needed.
@@ -13,6 +14,7 @@ export interface ResolvedData {
   library?: Library;
   series?: Series;
   volume?: Volume;
+  chapter?: Chapter;
 }
 
 

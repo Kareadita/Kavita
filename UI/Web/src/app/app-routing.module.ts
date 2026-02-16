@@ -4,6 +4,7 @@ import {libraryAccessGuard} from './_guards/library-access.guard';
 import {libraryResolver} from "./_resolvers/library.resolver";
 import {seriesResolver} from "./_resolvers/series.resolver";
 import {volumeResolver} from "./_resolvers/volume.resolver";
+import {chapterResolver} from "./_resolvers/chapter.resolver";
 
 export const routes: Routes = [
   {
@@ -85,6 +86,7 @@ export const routes: Routes = [
           {
             path: 'series/:seriesId/chapter/:chapterId',
             pathMatch: 'full',
+            resolve: { series: seriesResolver, chapter: chapterResolver },
             loadComponent: () => import('./chapter-detail/chapter-detail.component').then(c => c.ChapterDetailComponent)
           },
           {
