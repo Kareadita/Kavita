@@ -6,6 +6,7 @@ import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {map} from "rxjs/operators";
 import {Volume} from "../app/_models/volume";
 import {Chapter} from "../app/_models/chapter";
+import {Person} from "../app/_models/metadata/person";
 
 /**
  * Type-safety for router resolvers. Add new fields as needed.
@@ -15,6 +16,7 @@ export interface ResolvedData {
   series?: Series;
   volume?: Volume;
   chapter?: Chapter;
+  person?: Person;
 }
 
 

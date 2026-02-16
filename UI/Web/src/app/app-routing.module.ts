@@ -5,6 +5,7 @@ import {libraryResolver} from "./_resolvers/library.resolver";
 import {seriesResolver} from "./_resolvers/series.resolver";
 import {volumeResolver} from "./_resolvers/volume.resolver";
 import {chapterResolver} from "./_resolvers/chapter.resolver";
+import {personResolver} from "./_resolvers/person.resolver";
 
 export const routes: Routes = [
   {
@@ -49,8 +50,11 @@ export const routes: Routes = [
         loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
       },
       {
-        path: 'person',
-        loadChildren: () => import('./_routes/person-detail-routing.module').then(m => m.routes)
+        path: 'person/:name',
+        runGuardsAndResolvers: 'always',
+        canActivate: [AuthGuard],
+        resolve: { person: personResolver },
+        loadComponent: () => import('./person-detail/person-detail.component').then(m => m.PersonDetailComponent)
       },
       {
         path: 'browse',
