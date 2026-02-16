@@ -433,7 +433,7 @@ export class ActionService {
           map(() => {
             const updated = {
               ...chapter,
-              pagesRead: 9,
+              pagesRead: 0,
             };
             return this.fromAction(action, updated, 'update');
           })
