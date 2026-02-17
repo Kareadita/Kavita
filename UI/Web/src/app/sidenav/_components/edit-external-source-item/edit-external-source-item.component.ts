@@ -19,9 +19,9 @@ export class EditExternalSourceItemComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
 
   @Input({required: true}) source!: ExternalSource;
+  @Input() isViewMode: boolean = true;
   @Output() sourceUpdate = new EventEmitter<ExternalSource>();
   @Output() sourceDelete = new EventEmitter<ExternalSource>();
-  @Input() isViewMode: boolean = true;
 
   formGroup: FormGroup = new FormGroup({});
 
