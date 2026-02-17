@@ -1,4 +1,4 @@
-import {Directive, EventEmitter, Input, Output} from "@angular/core";
+import {Directive, Input, output} from "@angular/core";
 
 export const compare = (v1: string | number, v2: string | number) => (v1 < v2 ? -1 : v1 > v2 ? 1 : 0);
 export type SortColumn<T> = keyof T | '';
@@ -24,7 +24,7 @@ export interface SortEvent<T> {
 export class SortableHeader<T> {
 	@Input() sortable: SortColumn<T> = '';
 	@Input() direction: SortDirection = '';
-	@Output() sort = new EventEmitter<SortEvent<T>>();
+	sort = output<SortEvent<T>>();
 
 	rotate() {
 		this.direction = rotate[this.direction];

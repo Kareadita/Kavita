@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -41,7 +41,7 @@ export class DetailsTabComponent {
   protected readonly FilterField = FilterField;
   protected readonly MangaFormat = MangaFormat;
 
-  @Input({required: true}) metadata!: IHasCast;
+  metadata = input.required<IHasCast>();
   genres = input<Genre[]>([]);
   tags = input<Tag[]>([]);
   webLinks = input<string[]>([]);
