@@ -17,7 +17,9 @@ import {NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {debounceTime} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {EditCollectionTagsComponent} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
+import {
+  EditCollectionTagsModalComponent
+} from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags-modal.component';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
@@ -311,8 +313,8 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openEditCollectionTagModal(collectionTag: UserCollection) {
-    const modalRef = this.modalService.open(EditCollectionTagsComponent);
-    modalRef.componentInstance.tag = this.collectionTag;
+    const modalRef = this.modalService.open(EditCollectionTagsModalComponent);
+    modalRef.setInput('tag', this.collectionTag);
     modalRef.closed.subscribe((results: ModalResult<UserCollection>) => {
       this.updateTag(this.collectionTag.id);
       this.loadPage();

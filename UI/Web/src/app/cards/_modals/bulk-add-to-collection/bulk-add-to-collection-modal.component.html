@@ -6,7 +6,7 @@
   </div>
   <form style="width: 100%" [formGroup]="listForm">
     <div class="modal-body">
-      @if (lists.length >= MaxItems) {
+      @if (lists().length >= MaxItems) {
         <div class="mb-3">
           <label for="filter" class="form-label">{{t('filter-label')}}</label>
           <div class="input-group">
@@ -17,8 +17,8 @@
       }
 
       <ul class="list-group">
-        @for(collectionTag of lists | filter: filterList; let i = $index; track collectionTag.title + collectionTag.promoted) {
-          <li class="list-group-item clickable" tabindex="0" role="option"  (click)="addToCollection(collectionTag)">
+        @for(collectionTag of filteredLists(); let i = $index; track collectionTag.title + collectionTag.promoted) {
+          <li class="list-group-item clickable" tabindex="0" role="option" (click)="addToCollection(collectionTag)">
             {{collectionTag.title}}
             @if (collectionTag.promoted) {
               <i class="fa fa-angle-double-up" [title]="t('promoted')"></i>
@@ -26,11 +26,11 @@
           </li>
         }
 
-        @if (lists.length === 0 && !loading) {
+        @if (lists().length === 0 && !loading()) {
           <li class="list-group-item">{{t('no-data')}}</li>
         }
 
-        @if (loading) {
+        @if (loading()) {
           <li class="list-group-item">
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">{{t('loading')}}</span>
@@ -43,10 +43,9 @@
       <div class="input-group mb-2">
         <label class="form-label visually-hidden" for="add-rlist">{{t('collection-label')}}</label>
         <input width="100%" #title ngbAutofocus type="text" class="form-control" id="add-rlist" formControlName="title">
-        <button type="submit" class="btn btn-primary" [disabled]="isCreating" (click)="create()">{{t('create')}}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="isCreating()" (click)="create()">{{t('create')}}</button>
       </div>
     </div>
   </form>
-
 
 </ng-container>

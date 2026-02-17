@@ -42,11 +42,10 @@ export class ReviewCardModalComponent {
         const componentRef = this.container().createComponent<SpoilerComponent>(SpoilerComponent, {
           projectableNodes: [[document.createTextNode('')]]
         });
-        componentRef.instance.html = spoiler.innerHTML;
+        componentRef.setInput('html', spoiler.innerHTML);
         if (spoiler.parentNode != null) {
           spoiler.parentNode.replaceChild(componentRef.location.nativeElement, spoiler);
         }
-        componentRef.instance.cdRef.markForCheck();
       }
     });
   }
@@ -54,5 +53,4 @@ export class ReviewCardModalComponent {
   close() {
     this.modal.dismiss();
   }
-
 }
