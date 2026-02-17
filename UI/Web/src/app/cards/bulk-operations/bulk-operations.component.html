@@ -2,7 +2,7 @@
   @let selectionCount = bulkSelectionService.selectionSignal() ?? 0;
 
   @if (selectionCount > 0) {
-    <div class="bulk-select-container" [ngStyle]="{'margin-left': marginLeft + 'px', 'margin-right': marginRight + 'px'}">
+    <div class="bulk-select-container" [style.margin-left.px]="marginLeft()" [style.margin-right.px]="marginRight()">
       <div class="bulk-select">
         <div class="d-flex justify-content-around align-items-center">
 

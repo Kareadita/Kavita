@@ -1,9 +1,10 @@
 <ng-container *transloco="let t; prefix: 'external-series-card'">
-  @if (data !== undefined) {
+  @let externalSeries = data();
+  @if (externalSeries) {
     <div class="card-item-container card clickable position-relative">
       <div class="overlay" (click)="handleClick()">
         <ng-container>
-          <app-image [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="232.91px" width="160px" [imageUrl]="data.coverUrl" />
+          <app-image [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="232.91px" width="160px" [imageUrl]="externalSeries.coverUrl" />
         </ng-container>
 
 
@@ -18,11 +19,11 @@
       </div>
 
       <div class="card-title-container">
-        @if (data.name.length > 0) {
-          <img class="me-1" [ngSrc]="data.provider | providerImage" width="20" height="20" alt="">
-          <a #link class="card-title" [href]="data.url" target="_blank" rel="noreferrer nofollow">
-            <span class="card-title" placement="top" id="{{data.name}}" [ngbTooltip]="data.name" (click)="handleClick()" tabindex="0">
-              {{data.name}}
+        @if (externalSeries.name.length > 0) {
+          <img class="me-1" [ngSrc]="externalSeries.provider | providerImage" width="20" height="20" alt="">
+          <a #link class="card-title" [href]="externalSeries.url" target="_blank" rel="noreferrer nofollow">
+            <span class="card-title" placement="top" id="{{externalSeries.name}}" [ngbTooltip]="externalSeries.name" (click)="handleClick()" tabindex="0">
+              {{externalSeries.name}}
             </span>
           </a>
 

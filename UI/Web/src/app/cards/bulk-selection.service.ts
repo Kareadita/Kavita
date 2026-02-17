@@ -62,6 +62,7 @@ export class BulkSelectionService {
 
   private actionsSource = new ReplaySubject<ActionItem<any>[]>(1);
   public actions$ = this.actionsSource.asObservable();
+  public actionsSignal = toSignal(this.actionsSource);
 
   private selectionsSource = new ReplaySubject<number>(1);
   /**
