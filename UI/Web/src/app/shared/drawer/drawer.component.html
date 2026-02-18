@@ -1,5 +1,5 @@
 <ng-container *transloco="let t">
-  <div class="offcanvas offcanvas-{{position}}" [class.show]="isOpen" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel"
+  <div class="offcanvas offcanvas-{{position()}}" [class.show]="isOpen()" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel"
        [style.top.px]="options().topOffset" [ngStyle]="{'visibility': isOpen() ? 'visible' : 'hidden'}" role="dialog">
     <div class="offcanvas-header">
       <div class="offcanvas-title" id="offcanvasLabel">

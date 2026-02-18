@@ -16,11 +16,9 @@ import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PreviewImageModalComponent {
-  protected readonly modalService = inject(NgbActiveModal);
+  protected readonly modal = inject(NgbActiveModal);
 
   title = input.required<string>();
   image = input.required<string>();
-
-
 
 }

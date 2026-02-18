@@ -1,6 +1,14 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  signal
+} from '@angular/core';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
-import {filter, map, tap} from 'rxjs';
+import {filter} from 'rxjs';
 import {NavService} from 'src/app/_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {NgClass, NgTemplateOutlet} from "@angular/common";
@@ -16,10 +24,9 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
   styleUrls: ['./side-nav-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SideNavItemComponent implements OnInit {
+export class SideNavItemComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
-  private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly navService = inject(NavService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly breakpointService = inject(BreakpointService);
@@ -27,136 +34,123 @@ export class SideNavItemComponent implements OnInit {
   /**
    * Id for automatic scrolling to.
    */
-  @Input() id: string | null = null;
+  id = input<string | null>(null);
 
   /**
    * Icon to display next to item. ie) 'fa-home'
    */
-  @Input() icon: string = '';
-  @Input() imageUrl: string | null = '';
+  icon = input<string>('');
+  imageUrl = input<string | null>(null);
   /**
    * Removes all the space around the icon area
    */
-  @Input() noIcon: boolean = false;
+  noIcon = input<boolean>(false)
   /**
    * Text for the item
    */
-  @Input() title: string = '';
-
+  title = input<string>('');
   /**
    * If a link should be generated when clicked. By default (undefined), no link will be generated
    */
-  @Input() link: string | undefined;
+  link = input<string | undefined>(undefined);
   /**
    * If external, link will be used as full href and rel will be applied
    */
-  @Input() external: boolean = false;
+  external = input<boolean>(false);
   /**
    * If using a link, then you can pass optional queryParameters
    */
-  @Input() queryParams: any | undefined = undefined;
+  queryParams = input<any | undefined>(undefined);
   /**
-   * If using a lin, then you can pass optional fragment to append to the end
+   * If using a link, then you can pass optional fragment to append to the end
    */
-  @Input() fragment: string | undefined = undefined;
+  fragment = input<string | undefined>(undefined);
   /**
    * Optional count to pass in that will show as a red badge on the side, indicating some action needs to be taken
    */
-  @Input() badgeCount: number | null = -1;
+  badgeCount = input<number>(-1);
 
   /**
    * Optional, display item in edit mode (replaces icon with handle)
    */
-  @Input() editMode: boolean = false;
+  editMode = input<boolean>(false);
   /**
    * Comparison Method for route to determine when to highlight item based on route
    */
-  @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
+  comparisonMethod = input<'startsWith' | 'equals'>('equals');
 
+  private currentUrl = signal(this.router.url);
 
+  highlighted = computed(() => {
+    const routeUrl = this.currentUrl();
+    const link = this.link();
+    if (!link) return false;
 
-  highlighted = false;
+    const [url, queryParamsStr] = routeUrl.split('?');
+    const [page, fragmentPart = ''] = url.split('#');
+    const routeFragment = url.includes('#') ? fragmentPart : undefined;
+
+    return this.isHighlighted(page, queryParamsStr, routeFragment);
+  });
 
   constructor() {
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef),
-        map(evt => evt as NavigationEnd),
-        tap((evt: NavigationEnd) => this.triggerHighlightCheck(evt.url)),
-        tap(_ => this.collapseNavIfApplicable())
-      ).subscribe();
+      ).subscribe((evt: NavigationEnd) => {
+        this.currentUrl.set(evt.url);
+        this.collapseNavIfApplicable();
+      });
   }
 
-  ngOnInit(): void {
-    setTimeout(() => {
-      this.triggerHighlightCheck(this.router.url);
-    }, 100);
-  }
+  private isHighlighted(page: string, queryParamsStr?: string, fragment?: string): boolean {
+    const link = this.link();
+    if (!link) return false;
 
-  triggerHighlightCheck(routeUrl: string) {
-    const [url, queryParams] = routeUrl.split('?');
-    const [page, fragment = ''] = url.split('#');
-
-    this.updateHighlight(page, queryParams, url.includes('#') ? fragment : undefined);
-  }
-
-
-  updateHighlight(page: string, queryParams?: string, fragment?: string) {
-    if (this.link === undefined) {
-      this.highlighted = false;
-      this.cdRef.markForCheck();
-      return;
-    }
-
-    if (!page.endsWith('/') && !queryParams && this.fragment === undefined && queryParams === undefined) {
+    if (!page.endsWith('/') && !queryParamsStr && this.fragment() === undefined && queryParamsStr === undefined) {
       page = page + '/';
     }
 
     let fragmentEqual = false;
-    if (fragment === this.fragment) {
+    if (fragment === this.fragment()) {
       fragmentEqual = true;
     }
-    if (this.fragment === '' && fragment === undefined) { // This is the case where we load a fragment of nothing and browser removes the #
+    if (this.fragment() === '' && fragment === undefined) {
       fragmentEqual = true;
     }
 
-    const queryParamsEqual = this.queryParams === queryParams;
+    const queryParamsEqual = this.queryParams() === queryParamsStr;
 
-    if (this.comparisonMethod === 'equals' && page === this.link && fragmentEqual && queryParamsEqual) {
-      this.highlighted = true;
-      this.cdRef.markForCheck();
-      return;
+    if (this.comparisonMethod() === 'equals' && page === link && fragmentEqual && queryParamsEqual) {
+      return true;
     }
 
-    if (this.comparisonMethod === 'startsWith' && page.startsWith(this.link)) {
-      if (queryParams && queryParams === this.queryParams && fragmentEqual) {
-        this.highlighted = true;
-        this.cdRef.markForCheck();
-        return;
+    if (this.comparisonMethod() === 'startsWith' && page.startsWith(link)) {
+      if (queryParamsStr && queryParamsStr === this.queryParams() && fragmentEqual) {
+        return true;
       }
-
-      this.highlighted = true;
-      this.cdRef.markForCheck();
-      return;
+      return true;
     }
 
-    this.highlighted = false;
-    this.cdRef.markForCheck();
+    return false;
   }
 
   openLink() {
     this.collapseNavIfApplicable();
 
-    if (Object.keys(this.queryParams).length !== 0) {
-      this.router.navigateByUrl(this.link + '?' + this.queryParams);
+    const queryParams = this.queryParams();
+    const fragment = this.fragment();
+
+    if (queryParams && Object.keys(queryParams).length !== 0) {
+      this.router.navigateByUrl(this.link() + '?' + queryParams);
       return;
-    } else if (this.fragment) {
-      this.router.navigateByUrl(this.link + '#' + this.fragment);
+    } else if (fragment) {
+      this.router.navigateByUrl(this.link() + '#' + fragment);
       return;
     }
 
-    this.router.navigateByUrl(this.link!);
+    this.router.navigateByUrl(this.link()!);
   }
 
   // If on mobile, automatically collapse the side nav after making a selection
