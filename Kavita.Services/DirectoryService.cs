@@ -33,6 +33,7 @@ public class DirectoryService : IDirectoryService
     public string PublisherDirectory { get; }
     public string LongTermCacheDirectory { get; }
     public string EpubFontDirectory { get; }
+    public string BackupDirectory { get; }
 
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
@@ -42,7 +43,6 @@ public class DirectoryService : IDirectoryService
         MatchOptions, Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
         MatchOptions, Parser.RegexTimeout);
-    public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 
     public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
     {
@@ -77,12 +77,14 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(LongTermCacheDirectory);
         EpubFontDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "fonts");
         ExistOrCreate(EpubFontDirectory);
+        BackupDirectory = FileSystem.Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
+        ExistOrCreate(BackupDirectory);
     }
 
     /// <summary>
     /// Given a set of regex search criteria, get files in the given path.
     /// </summary>
-    /// <remarks>This will always exclude <see cref="YamlDotNet.Core.Scanner.Parser.Parser.MacOsMetadataFileStartsWith"/> patterns</remarks>
+    /// <remarks>This will always exclude <see cref="Parser.MacOsMetadataFileStartsWith"/> patterns</remarks>
     /// <param name="path">Directory to search</param>
     /// <param name="searchPatternExpression">Regex version of search pattern (e.g., \.mp3|\.mp4). Defaults to * meaning all files.</param>
     /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>

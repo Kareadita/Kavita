@@ -4,7 +4,6 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using API;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common;

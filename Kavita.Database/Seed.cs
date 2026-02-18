@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -12,19 +11,17 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
-using Kavita.Common.Helpers;
 using Kavita.Models;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Kavita.Services;
+namespace Kavita.Database;
 
 public static class Seed
 {
@@ -157,7 +154,7 @@ public static class Seed
                 new() {Key = ServerSettingKey.LoggingLevel, Value = "Debug"},
                 new()
                 {
-                    Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(DirectoryService.BackupDirectory)
+                    Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(directoryService.BackupDirectory)
                 },
                 new()
                 {
@@ -221,7 +218,7 @@ public static class Seed
         (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.CacheDirectory)).Value =
             directoryService.CacheDirectory + string.Empty;
         (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.BackupDirectory)).Value =
-            DirectoryService.BackupDirectory + string.Empty;
+            directoryService.BackupDirectory + string.Empty;
         (await context.ServerSetting.FirstAsync(s => s.Key == ServerSettingKey.CacheSize)).Value =
             Configuration.CacheSize + string.Empty;
 
