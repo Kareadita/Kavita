@@ -18,6 +18,7 @@ using Kavita.Database;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Internal;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Extensions;
 using Kavita.Server.Extensions;
 using Kavita.Server.Logging;
 using Kavita.Server.ManualMigrations.v0._7._11;
@@ -73,6 +74,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.Configure<AppSettingsDto>(_config);
+        services.AddMappings();
         services.AddApplicationServices(_config, _env);
 
         services.AddControllers(options =>

@@ -20,8 +20,6 @@ public static class ApplicationServiceExtensions
 {
     public static void AddApplicationServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
     {
-        services.AddAutoMapper(typeof(Program).Assembly);
-
         services.AddScoped<ILoggingService, LoggingService>();
         services.AddSingleton<IClientInfoAccessor, ClientInfoAccessor>();
         services.AddScoped<UserContext>();

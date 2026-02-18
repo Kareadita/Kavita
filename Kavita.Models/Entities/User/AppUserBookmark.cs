@@ -4,6 +4,11 @@ using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.Entities.User;
 
+public class BookmarkSeriesPair
+{
+    public AppUserBookmark Bookmark { get; init; } = null!;
+    public Series Series { get; init; } = null!;
+}
 
 /// <summary>
 /// Represents a saved page in a Chapter entity for a given user.

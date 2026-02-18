@@ -4,7 +4,7 @@ using AutoMapper;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;
 
-namespace Kavita.Server.AutoMapper;
+namespace Kavita.Models.AutoMapper;
 
 /// <summary>
 /// Maps ReadingList and ReadingListItem entities to DTOs with user progress attached at the DB level.

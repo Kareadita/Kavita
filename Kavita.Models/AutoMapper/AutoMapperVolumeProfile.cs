@@ -3,7 +3,7 @@ using AutoMapper;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities;
 
-namespace Kavita.Server.AutoMapper;
+namespace Kavita.Models.AutoMapper;
 
 /// <summary>
 /// Maps Volume entities to VolumeDto with user progress attached at the DB level via JOIN.

@@ -7,7 +7,7 @@ using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 
-namespace Kavita.Server.Helpers;
+namespace Kavita.Models.AutoMapper.Converters;
 
 public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>, ServerSettingDto>
 {

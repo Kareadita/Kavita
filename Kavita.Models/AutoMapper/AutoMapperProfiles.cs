@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using Kavita.Database.Extensions;
+using Kavita.Common.Helpers;
+using Kavita.Models.AutoMapper.Converters;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Annotations;
@@ -35,10 +36,8 @@ using Kavita.Models.Entities.Person;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
-using Kavita.Server.Helpers;
-using Kavita.Services.Helpers;
 
-namespace Kavita.Server.AutoMapper;
+namespace Kavita.Models.AutoMapper;
 
 public class AutoMapperProfiles : Profile
 {
@@ -278,7 +277,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<UserReviewDto, ExternalReview>()
             .ForMember(dest => dest.BodyJustText,
                 opt =>
-                    opt.MapFrom(src => ReviewHelper.GetCharacters(src.Body)));
+                    opt.MapFrom(src => HtmlHelper.GetCharacters(src.Body)));
 
         CreateMap<ExternalRecommendation, ExternalSeriesDto>();
         CreateMap<Series, ManageMatchSeriesDto>()

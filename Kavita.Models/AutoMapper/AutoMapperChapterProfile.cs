@@ -5,7 +5,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 
-namespace Kavita.Server.AutoMapper;
+namespace Kavita.Models.AutoMapper;
 
 /// <summary>
 /// Maps Chapter entities to ChapterDto with user progress attached at the DB level via JOIN.

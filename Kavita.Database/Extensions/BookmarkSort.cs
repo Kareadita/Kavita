@@ -6,12 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Extensions;
 
-public class BookmarkSeriesPair
-{
-    public AppUserBookmark Bookmark { get; init; } = null!;
-    public Series Series { get; init; } = null!;
-}
-
 public static class BookmarkSort
 {
     /// <summary>

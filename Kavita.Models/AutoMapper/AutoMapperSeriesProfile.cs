@@ -4,7 +4,7 @@ using AutoMapper;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities;
 
-namespace Kavita.Server.AutoMapper;
+namespace Kavita.Models.AutoMapper;
 
 /// <summary>
 /// This is a way to attach progress at the DB level via a JOIN. Critical for healthy response time.
