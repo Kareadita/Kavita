@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Docnet.Core;
 using Docnet.Core.Converters;
@@ -13,7 +14,6 @@ using Docnet.Core.Readers;
 using ExCSS;
 using HtmlAgilityPack;
 using Kavita.API.Database;
-using Kavita.API.Parser;
 using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Common.Extensions;
@@ -42,8 +42,7 @@ public partial class BookService(
     IDirectoryService directoryService,
     IImageService imageService,
     IMediaErrorService mediaErrorService,
-    IUnitOfWork unitOfWork,
-    IPdfComicInfoExtractor pdfComicInfoExtractor)
+    IUnitOfWork unitOfWork)
     : IBookService
 {
     private readonly StylesheetParser _cssParser = new ();
@@ -51,6 +50,8 @@ public partial class BookService(
     private const string CssScopeClass = ".book-content";
     private const string BookApiUrl = "book-resources?file=";
     public const string BookReaderBodyScope = "//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]";
+
+    private readonly PdfComicInfoExtractor _pdfComicInfoExtractor = new(logger, mediaErrorService);
 
     /// <summary>
     /// Setup the most lenient book parsing options possible as people have some really bad epubs
@@ -177,8 +178,10 @@ public partial class BookService(
     /// <param name="apiBase"></param>
     /// <param name="filename">If the stylesheetHtml contains Import statements, when scoping the filename, scope needs to be wrt filepath.</param>
     /// <param name="book">Book Reference, needed for if you expect Import statements</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book)
+    public async Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book,
+        CancellationToken ct = default)
     {
         // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be Scoped
         var prepend = filename.Length > 0 ? filename.Replace(Path.GetFileName(filename), string.Empty) : string.Empty;
@@ -194,7 +197,7 @@ public partial class BookService(
             {
                 key = prepend + key;
             }
-            if (!book.Content.AllFiles.TryGetLocalFileRefByKey(key, out var bookFile)) continue;
+            if (!book.Content.AllFiles.TryGetLocalFileRefByKey(key, out var bookFile) || bookFile == null) continue;
 
             var content = await bookFile.ReadContentAsBytesAsync();
             importBuilder.Append(Encoding.UTF8.GetString(content));
@@ -216,7 +219,7 @@ public partial class BookService(
 
         if (string.IsNullOrEmpty(styleContent)) return string.Empty;
 
-        var stylesheet = await _cssParser.ParseAsync(styleContent);
+        var stylesheet = await _cssParser.ParseAsync(styleContent, ct);
         foreach (var styleRule in stylesheet.StyleRules)
         {
             if (styleRule.Selector.Text == CssScopeClass) continue;
@@ -238,6 +241,7 @@ public partial class BookService(
         {
             logger.LogError(ex, "There was an issue escaping css, likely due to an unsupported css rule");
         }
+
         return RemoveWhiteSpaceFromStylesheets($"{CssScopeClass} {styleContent}");
     }
 
@@ -424,7 +428,7 @@ public partial class BookService(
         }
     }
 
-    private async Task InlineStyles(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body)
+    private async Task InlineStyles(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, CancellationToken ct = default)
     {
         var inlineStyles = doc.DocumentNode.SelectNodes("//style");
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
@@ -432,7 +436,7 @@ public partial class BookService(
         {
             foreach (var inlineStyle in inlineStyles)
             {
-                var styleContent = await ScopeStyles(inlineStyle.InnerHtml, apiBase, "", book);
+                var styleContent = await ScopeStyles(inlineStyle.InnerHtml, apiBase, "", book, ct);
                 body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
             }
         }
@@ -463,7 +467,7 @@ public partial class BookService(
                     var cssFile = book.Content.Css.GetLocalFileRefByKey(key);
 
                     var stylesheetHtml = await cssFile.ReadContentAsync();
-                    var styleContent = await ScopeStyles(stylesheetHtml, apiBase, cssFile.FilePath, book);
+                    var styleContent = await ScopeStyles(stylesheetHtml, apiBase, cssFile.FilePath, book, ct);
                     // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
                     if (styleContent != null)
                     {
@@ -473,8 +477,8 @@ public partial class BookService(
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "There was an error reading css file for inlining likely due to a key mismatch in metadata");
-                    await mediaErrorService.ReportMediaIssueAsync(book.FilePath, MediaErrorProducer.BookService,
-                        "There was an error reading css file for inlining likely due to a key mismatch in metadata", ex);
+                    await mediaErrorService.ReportMediaIssueAsync(book.FilePath ?? string.Empty, MediaErrorProducer.BookService,
+                        "There was an error reading css file for inlining likely due to a key mismatch in metadata", ex, ct);
                 }
             }
         }
@@ -660,7 +664,7 @@ public partial class BookService(
 
     private EpubBookRef? OpenEpubWithFallback(string filePath, EpubBookRef? epubBook)
     {
-        // TODO: Refactor this to use the Async version
+        // default: Refactor this to use the Async version
         try
         {
             epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
@@ -687,7 +691,7 @@ public partial class BookService(
 
         if (Parser.IsPdf(filePath))
         {
-            return pdfComicInfoExtractor.GetComicInfo(filePath);
+            return _pdfComicInfoExtractor.GetComicInfo(filePath);
         }
 
         return GetEpubComicInfo(filePath);
@@ -865,7 +869,8 @@ public partial class BookService(
         return key.Replace("../", string.Empty);
     }
 
-    public async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book)
+    public async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book,
+        CancellationToken ct = default)
     {
         var dict = new Dictionary<string, int>();
         var pageCount = 0;
@@ -881,13 +886,15 @@ public partial class BookService(
         return dict;
     }
 
-    public async Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath)
+    public async Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath, CancellationToken ct = default)
     {
         var ret = new Dictionary<int, int>();
         try
         {
             using var book = await EpubReader.OpenBookAsync(bookFilePath, LenientBookReaderOptions);
-            var mappings = await CreateKeyToPageMappingAsync(book);
+            if (book == null) return null;
+
+            var mappings = await CreateKeyToPageMappingAsync(book, ct);
 
             var doc = new HtmlDocument {OptionFixNestedTags = true};
 
@@ -965,6 +972,7 @@ public partial class BookService(
 
 
     #region Count Letters Between XPaths
+
     /// <summary>
     /// Counts the (estimated) words for a given book from a starting xpath (or beginning if null) to and ending xpath.
     /// May cross page boundaries
@@ -974,8 +982,10 @@ public partial class BookService(
     /// <param name="startPage">Page number of starting xpath</param>
     /// <param name="endXpath"></param>
     /// <param name="endPage">Page number of ending xpath</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, int startPage, string endXpath, int endPage)
+    public async Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, int startPage,
+        string endXpath, int endPage, CancellationToken ct = default)
     {
         if (string.IsNullOrEmpty(endXpath)) return 0;
         if (endPage < startPage) return 0;
@@ -1140,7 +1150,8 @@ public partial class BookService(
         return textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) ?? 0;
     }
 
-    public async Task<string> CopyImageToTempFromBook(int chapterId, BookmarkDto bookmarkDto, string cachedBookPath)
+    public async Task<string> CopyImageToTempFromBook(int chapterId, BookmarkDto bookmarkDto, string cachedBookPath,
+        CancellationToken ct = default)
     {
         using var book = await EpubReader.OpenBookAsync(cachedBookPath, LenientBookReaderOptions);
 
@@ -1227,7 +1238,7 @@ public partial class BookService(
             var tempFilePath = Path.Combine(tempChapterDir, uniqueFilename);
 
             // Write the image to the temp file
-            await File.WriteAllBytesAsync(tempFilePath, imageContent);
+            await File.WriteAllBytesAsync(tempFilePath, imageContent, ct);
 
             return tempFilePath;
         }
@@ -1256,8 +1267,10 @@ public partial class BookService(
     /// </summary>
     /// <param name="bookFilePath"></param>
     /// <param name="requestedKey"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey)
+    public async Task<BookResourceResultDto> GetResourceAsync(string bookFilePath, string requestedKey,
+        CancellationToken ct = default)
     {
         using var book = await EpubReader.OpenBookAsync(bookFilePath, LenientBookReaderOptions);
         var key = CoalesceKeyForAnyFile(book, requestedKey);
@@ -1440,11 +1453,14 @@ public partial class BookService(
     /// <param name="mappings">Epub mappings</param>
     /// <param name="page">Page number we are loading</param>
     /// <param name="ptocBookmarks">Ptoc (Text) Bookmarks to tie against</param>
+    /// <param name="annotations"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
     private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body,
-        Dictionary<string, int> mappings, int page, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations)
+        Dictionary<string, int> mappings, int page, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations,
+        CancellationToken ct = default)
     {
-        await InlineStyles(doc, book, apiBase, body);
+        await InlineStyles(doc, book, apiBase, body, ct);
 
         RewriteAnchors(page, doc, mappings);
 
@@ -1518,11 +1534,15 @@ public partial class BookService(
     /// this is used to rewrite anchors in the book text so that we always load properly in our reader.
     /// </summary>
     /// <param name="chapter">Chapter with at least one file</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter)
+    public async Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter,
+        CancellationToken ct = default)
     {
         using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, LenientBookReaderOptions);
-        var mappings = await CreateKeyToPageMappingAsync(book);
+        if (book == null) return [];
+
+        var mappings = await CreateKeyToPageMappingAsync(book, ct);
 
         var navItems = await book.GetNavigationAsync();
         var chaptersList = new List<BookChapterItem>();
@@ -1548,7 +1568,7 @@ public partial class BookService(
             k.Equals("NAVIGATION.XHTML", StringComparison.InvariantCultureIgnoreCase));
 
         if (string.IsNullOrEmpty(tocPage)) return chaptersList;
-        if (!book.Content.Html.TryGetLocalFileRefByKey(tocPage, out var file)) return chaptersList;
+        if (!book.Content.Html.TryGetLocalFileRefByKey(tocPage, out var file) || file == null) return chaptersList;
         var content = await file.ReadContentAsync();
 
         var doc = new HtmlDocument();
@@ -1659,13 +1679,16 @@ public partial class BookService(
     /// <param name="chapterId">The chapterId</param>
     /// <param name="cachedEpubPath">The path to the cached epub file</param>
     /// <param name="baseUrl">The API base for Kavita, to rewrite urls to so we load though our endpoint</param>
+    /// <param name="ptocBookmarks"></param>
+    /// <param name="annotations"></param>
+    /// <param name="ct"></param>
     /// <returns>Full epub HTML Page, scoped to Kavita's reader</returns>
     /// <exception cref="KavitaException">All exceptions throw this</exception>
     public async Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl,
-        List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations)
+        List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations, CancellationToken ct = default)
     {
         using var book = await EpubReader.OpenBookAsync(cachedEpubPath, LenientBookReaderOptions);
-        var mappings = await CreateKeyToPageMappingAsync(book);
+        var mappings = await CreateKeyToPageMappingAsync(book, ct);
         var apiBase = baseUrl + "book/" + chapterId + "/" + BookApiUrl;
 
         var counter = 0;
@@ -1707,13 +1730,13 @@ public partial class BookService(
                     body = doc.DocumentNode.SelectSingleNode("/html/body");
                 }
 
-                return await ScopePage(doc, book, apiBase, body!, mappings, page, ptocBookmarks, annotations);
+                return await ScopePage(doc, book, apiBase, body!, mappings, page, ptocBookmarks, annotations, ct);
             }
         } catch (Exception ex)
         {
             logger.LogError(ex, "There was an issue reading one of the pages for {Book}", book.FilePath);
-            await mediaErrorService.ReportMediaIssueAsync(book.FilePath, MediaErrorProducer.BookService,
-                "There was an issue reading one of the pages for", ex);
+            await mediaErrorService.ReportMediaIssueAsync(book.FilePath ?? string.Empty, MediaErrorProducer.BookService,
+                "There was an issue reading one of the pages for", ex, ct);
         }
 
         throw new KavitaException("epub-html-missing");
@@ -1737,6 +1760,7 @@ public partial class BookService(
         }
 
         using var epubBook = EpubReader.OpenBook(fileFilePath, LenientBookReaderOptions);
+        if (epubBook == null) return string.Empty;
 
         try
         {

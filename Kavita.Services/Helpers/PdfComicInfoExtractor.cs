@@ -9,7 +9,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Kavita.API.Parser;
 using Kavita.API.Services;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
@@ -23,7 +22,6 @@ namespace Kavita.Services.Helpers;
 /// Translate PDF metadata (See PdfMetadataExtractor.cs) into ComicInfo structure.
 /// </summary>
 public class PdfComicInfoExtractor(ILogger<IBookService> logger, IMediaErrorService mediaErrorService)
-    : IPdfComicInfoExtractor
 {
     private readonly string[] _pdfDateFormats = [ // PDF Spec 7.9.4
             "D:yyyyMMddHHmmsszzz:", "D:yyyyMMddHHmmss+", "D:yyyyMMddHHmmss",

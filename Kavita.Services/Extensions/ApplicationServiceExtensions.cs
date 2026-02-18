@@ -1,6 +1,4 @@
 using System.IO.Abstractions;
-using Kavita.API.Database;
-using Kavita.API.Parser;
 using Kavita.API.Services;
 using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Metadata;
@@ -8,8 +6,6 @@ using Kavita.API.Services.Plus;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
-using Kavita.API.Store;
-using Kavita.Database;
 using Kavita.Services.Helpers;
 using Kavita.Services.Metadata;
 using Kavita.Services.Plus;
@@ -66,7 +62,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ILibraryWatcher, LibraryWatcher>();
         services.AddScoped<ITachiyomiService, TachiyomiService>();
         services.AddScoped<ICollectionTagService, CollectionTagService>();
-        services.AddScoped<IPdfComicInfoExtractor, PdfComicInfoExtractor>();
 
         services.AddScoped<IFileSystem, FileSystem>();
         services.AddScoped<IDirectoryService, DirectoryService>();
