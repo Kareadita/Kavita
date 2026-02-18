@@ -1194,43 +1194,6 @@ export class ActionService {
     });
   }
 
-
-  addVolumeToReadingList(volume: Volume, seriesId: number, callback?: VolumeActionCallback) {
-    if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
-      this.readingListModalRef.componentInstance.seriesId = seriesId;
-      this.readingListModalRef.componentInstance.volumeId = volume.id;
-      this.readingListModalRef.componentInstance.type = ADD_FLOW.Volume;
-
-
-      this.readingListModalRef.closed.subscribe(() => {
-        this.readingListModalRef = null;
-        callback?.(volume)
-      });
-      this.readingListModalRef.dismissed.subscribe(() => {
-        this.readingListModalRef = null;
-        callback?.(volume)
-      });
-  }
-
-  addChapterToReadingList(chapter: Chapter, seriesId: number, callback?: ChapterActionCallback) {
-    if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
-      this.readingListModalRef.componentInstance.seriesId = seriesId;
-      this.readingListModalRef.componentInstance.chapterId = chapter.id;
-      this.readingListModalRef.componentInstance.type = ADD_FLOW.Chapter;
-
-
-      this.readingListModalRef.closed.subscribe(() => {
-        this.readingListModalRef = null;
-        callback?.(chapter)
-      });
-      this.readingListModalRef.dismissed.subscribe(() => {
-        this.readingListModalRef = null;
-        callback?.(chapter)
-      });
-  }
-
   editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
     const readingListModalRef = this.modalService.open(EditReadingListModalComponent, editModal());
     readingListModalRef.componentInstance.readingList = readingList;

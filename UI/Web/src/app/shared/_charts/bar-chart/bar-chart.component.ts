@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
-import {EChartsDirective, ECOption} from "../../../_directives/echarts.directive";
-import {LabelFormatterCallback, TopLevelFormatterParams, TooltipOption} from "echarts/types/dist/shared";
+import {EChartsDirective} from "../../../_directives/echarts.directive";
+import {LabelFormatterCallback, TooltipOption, TopLevelFormatterParams} from "echarts/types/dist/shared";
 import {BarSeriesOption} from "echarts/charts";
 import {ThemeService} from "../../../_services/theme.service";
 
@@ -26,7 +26,7 @@ type ArrayAble<T> = T | T[];
 })
 export class BarChartComponent {
 
-  private themeService = inject(ThemeService);
+  private readonly themeService = inject(ThemeService);
 
   /**
    * Data used for the series

@@ -138,7 +138,7 @@
                   <app-badge-expander [items]="seriesMetadataValue.writers"
                                       [itemsTillExpander]="3"
                                       [allowToggle]="false"
-                                      (toggle)="switchTabsToDetail()">
+                                      (toggled)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                     </ng-template>
@@ -171,7 +171,7 @@
                   <app-badge-expander [items]="seriesMetadataValue.genres"
                                       [itemsTillExpander]="3"
                                       [allowToggle]="false"
-                                      (toggle)="switchTabsToDetail()">
+                                      (toggled)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Genres, item.id)">{{item.title}}</a>
                     </ng-template>
@@ -185,7 +185,7 @@
                   <app-badge-expander [items]="seriesMetadataValue.tags"
                                       [itemsTillExpander]="3"
                                       [allowToggle]="false"
-                                      (toggle)="switchTabsToDetail()">
+                                      (toggled)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Tags, item.id)">{{item.title}}</a>
                     </ng-template>
