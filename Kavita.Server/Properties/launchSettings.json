@@ -17,7 +17,7 @@
                 "ASPNETCORE_ENVIRONMENT": "Development"
             }
         },
-        "API": {
+        "Server": {
             "workingDirectory": ".",
             "commandName": "Project",
             "dotnetRunMessages": "true",
