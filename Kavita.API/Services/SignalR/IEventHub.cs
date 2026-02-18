@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.SignalR;
 
@@ -8,6 +9,6 @@ namespace Kavita.API.Services.SignalR;
 /// </summary>
 public interface IEventHub
 {
-    Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = true);
-    Task SendMessageToAsync(string method, SignalRMessage message, int userId);
+    Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = true, CancellationToken ct = default);
+    Task SendMessageToAsync(string method, SignalRMessage message, int userId, CancellationToken ct = default);
 }

@@ -154,7 +154,9 @@ public static class IdentityServiceExtensions
             .AddPolicy(PolicyGroups.DownloadPolicy,
                 policy => policy.RequireRole(PolicyConstants.DownloadRole, PolicyConstants.AdminRole))
             .AddPolicy(PolicyGroups.ChangePasswordPolicy,
-                policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
+                policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole))
+            .AddPolicy(PolicyGroups.BookmarkPolicy,
+                policy => policy.RequireRole(PolicyConstants.BookmarkRole, PolicyConstants.AdminRole));
 
         return services;
     }

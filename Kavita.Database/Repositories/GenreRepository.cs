@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -16,86 +17,76 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Repositories;
 
-
-
-public class GenreRepository : IGenreRepository
+public class GenreRepository(DataContext context, IMapper mapper) : IGenreRepository
 {
-    private readonly DataContext _context;
-    private readonly IMapper _mapper;
-
-    public GenreRepository(DataContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
-
     public void Attach(Genre genre)
     {
-        _context.Genre.Attach(genre);
+        context.Genre.Attach(genre);
     }
 
     public void Remove(Genre genre)
     {
-        _context.Genre.Remove(genre);
+        context.Genre.Remove(genre);
     }
 
-    public async Task<Genre?> FindByNameAsync(string genreName)
+    public async Task<Genre?> FindByNameAsync(string genreName, CancellationToken ct = default)
     {
         var normalizedName = genreName.ToNormalized();
-        return await _context.Genre
-            .FirstOrDefaultAsync(g => g.NormalizedTitle != null && g.NormalizedTitle.Equals(normalizedName));
+        return await context.Genre
+            .FirstOrDefaultAsync(g => g.NormalizedTitle != null && g.NormalizedTitle.Equals(normalizedName), cancellationToken: ct);
     }
 
-    public async Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false)
+    public async Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false, CancellationToken ct = default)
     {
-        var genresWithNoConnections = await _context.Genre
+        var genresWithNoConnections = await context.Genre
             .Include(p => p.SeriesMetadatas)
             .Include(p => p.Chapters)
             .Where(p => p.SeriesMetadatas.Count == 0 && p.Chapters.Count == 0)
             .AsSplitQuery()
-            .ToListAsync();
+            .ToListAsync(cancellationToken: ct);
 
-        _context.Genre.RemoveRange(genresWithNoConnections);
+        context.Genre.RemoveRange(genresWithNoConnections);
 
-        await _context.SaveChangesAsync();
+        await context.SaveChangesAsync(ct);
     }
 
-    public async Task<int> GetCountAsync()
+    public async Task<int> GetCountAsync(CancellationToken ct = default)
     {
-        return await _context.Genre.CountAsync();
+        return await context.Genre.CountAsync(cancellationToken: ct);
     }
 
-    public async Task<GenreTagDto?> GetRandomGenre()
+    public async Task<GenreTagDto?> GetRandomGenre(CancellationToken ct = default)
     {
-        var genreCount = await GetCountAsync();
+        var genreCount = await GetCountAsync(ct);
         if (genreCount == 0) return null;
 
         var randomIndex = new Random().Next(0, genreCount);
-        return await _context.Genre
+        return await context.Genre
             .Skip(randomIndex)
             .Take(1)
-            .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
+            .ProjectTo<GenreTagDto>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
-    public async Task<GenreTagDto?> GetGenreById(int id)
+    public async Task<GenreTagDto?> GetGenreById(int id, CancellationToken ct = default)
     {
-        return await _context.Genre
+        return await context.Genre
             .Where(g => g.Id == id)
-            .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
+            .ProjectTo<GenreTagDto>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(cancellationToken: ct);
     }
 
-    public async Task<IList<Genre>> GetAllGenresAsync()
+    public async Task<IList<Genre>> GetAllGenresAsync(CancellationToken ct = default)
     {
-        return await _context.Genre.ToListAsync();
+        return await context.Genre.ToListAsync(ct);
     }
 
-    public async Task<IList<Genre>> GetAllGenresByNamesAsync(IEnumerable<string> normalizedNames)
+    public async Task<IList<Genre>> GetAllGenresByNamesAsync(IEnumerable<string> normalizedNames,
+        CancellationToken ct = default)
     {
-        return await _context.Genre
+        return await context.Genre
             .Where(g => normalizedNames.Contains(g.NormalizedTitle))
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <summary>
@@ -104,26 +95,29 @@ public class GenreRepository : IGenreRepository
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="libraryIds"></param>
+    /// <param name="context1"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null, QueryContext context = QueryContext.None)
+    public async Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null,
+        QueryContext context1 = QueryContext.None, CancellationToken ct = default)
     {
-        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var userLibs = await _context.Library.GetUserLibraries(userId, context).ToListAsync();
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userLibs = await context.Library.GetUserLibraries(userId, context1).ToListAsync(ct);
 
         if (libraryIds is {Count: > 0})
         {
             userLibs = userLibs.Where(libraryIds.Contains).ToList();
         }
 
-        return await _context.Series
+        return await context.Series
             .Where(s => userLibs.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(userRating)
             .SelectMany(s => s.Metadata.Genres)
             .AsSplitQuery()
             .Distinct()
             .OrderBy(p => p.NormalizedTitle)
-            .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .ProjectTo<GenreTagDto>(mapper.ConfigurationProvider)
+            .ToListAsync(ct);
     }
 
     /// <summary>
@@ -131,8 +125,10 @@ public class GenreRepository : IGenreRepository
     /// Normalizes genres for lookup, but returns non-normalized names for creation.
     /// </summary>
     /// <param name="genreNames">The list of genre names (non-normalized).</param>
+    /// <param name="ct"></param>
     /// <returns>A list of genre names that do not exist in the system.</returns>
-    public async Task<List<string>> GetAllGenresNotInListAsync(ICollection<string> genreNames)
+    public async Task<List<string>> GetAllGenresNotInListAsync(ICollection<string> genreNames,
+        CancellationToken ct = default)
     {
         // Group the genres by their normalized names, keeping track of the original names
         var normalizedToOriginalMap = genreNames
@@ -143,10 +139,10 @@ public class GenreRepository : IGenreRepository
         var normalizedGenreNames = normalizedToOriginalMap.Keys.ToList();
 
         // Query the database for existing genres using the normalized names
-        var existingGenres = await _context.Genre
+        var existingGenres = await context.Genre
             .Where(g => normalizedGenreNames.Contains(g.NormalizedTitle)) // Assuming you have a normalized field
             .Select(g => g.NormalizedTitle)
-            .ToListAsync();
+            .ToListAsync(ct);
 
         // Find the normalized genres that do not exist in the database
         var missingGenres = normalizedGenreNames.Except(existingGenres).ToList();
@@ -155,16 +151,19 @@ public class GenreRepository : IGenreRepository
         return missingGenres.Select(normalizedName => normalizedToOriginalMap[normalizedName]).ToList();
     }
 
-    public async Task<PagedList<BrowseGenreDto>> GetBrowseableGenre(int userId, UserParams userParams)
+    public async Task<PagedList<BrowseGenreDto>> GetBrowseableGenre(int userId, UserParams userParams,
+        CancellationToken ct = default)
     {
-        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
 
-        var allLibrariesCount = await _context.Library.CountAsync();
-        var userLibs = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        var allLibrariesCount = await context.Library.CountAsync(ct);
+        var userLibs = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
 
-        var seriesIds = await _context.Series.Where(s => userLibs.Contains(s.LibraryId)).Select(s => s.Id).ToListAsync();
+        var seriesIds = await context.Series
+            .Where(s => userLibs.Contains(s.LibraryId))
+            .Select(s => s.Id).ToListAsync(ct);
 
-        var query = _context.Genre
+        var query = context.Genre
             .RestrictAgainstAgeRestriction(ageRating)
             .WhereIf(allLibrariesCount != userLibs.Count,
                 genre => genre.Chapters.Any(cp => seriesIds.Contains(cp.Volume.SeriesId)) ||
@@ -186,6 +185,6 @@ public class GenreRepository : IGenreRepository
             })
             .OrderBy(g => g.Title);
 
-        return await PagedList<BrowseGenreDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        return await PagedList<BrowseGenreDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
     }
 }

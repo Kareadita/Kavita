@@ -718,6 +718,7 @@ public class ReaderController : BaseApiController
     /// <param name="bookmarkDto"></param>
     /// <returns></returns>
     [HttpPost("bookmark")]
+    [Authorize(PolicyGroups.BookmarkPolicy)]
     public async Task<ActionResult> BookmarkPage(BookmarkDto bookmarkDto)
     {
         try
@@ -726,9 +727,6 @@ public class ReaderController : BaseApiController
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!,
                 AppUserIncludes.Bookmarks);
             if (user == null) return new UnauthorizedResult();
-
-            if (!await _accountService.HasBookmarkPermission(user))
-                return BadRequest(await _localizationService.Translate(UserId, "bookmark-permission"));
 
             var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
             if (chapter == null || chapter.Files.Count == 0)
@@ -784,16 +782,13 @@ public class ReaderController : BaseApiController
     /// <param name="bookmarkDto"></param>
     /// <returns></returns>
     [HttpPost("unbookmark")]
+    [Authorize(PolicyGroups.BookmarkPolicy)]
     public async Task<ActionResult> UnBookmarkPage(BookmarkDto bookmarkDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Bookmarks);
         if (user == null) return new UnauthorizedResult();
-        if (user.Bookmarks == null || user.Bookmarks.Count == 0) return Ok();
 
-        if (!await _accountService.HasBookmarkPermission(user))
-        {
-            return BadRequest(await _localizationService.Translate(UserId, "bookmark-permission"));
-        }
+        if (user.Bookmarks == null || user.Bookmarks.Count == 0) return Ok();
 
         if (!await _bookmarkService.RemoveBookmarkPage(user, bookmarkDto))
         {

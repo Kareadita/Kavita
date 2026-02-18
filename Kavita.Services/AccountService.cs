@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Kavita.API.Database;
@@ -34,9 +34,9 @@ public partial class AccountService(
     private static readonly Regex AllowedUsernameRegex = AllowedUsernameRegexAttr();
 
 
-    public async Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword)
+    public async Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword, CancellationToken ct = default)
     {
-        var passwordValidationIssues = (await ValidatePassword(user, newPassword)).ToList();
+        var passwordValidationIssues = (await ValidatePassword(user, newPassword, ct)).ToList();
         if (passwordValidationIssues.Count != 0) return passwordValidationIssues;
 
         var result = await userManager.RemovePasswordAsync(user);
@@ -53,7 +53,7 @@ public partial class AccountService(
         return result.Errors.Select(e => new ApiException(400, e.Code, e.Description));
     }
 
-    public async Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password)
+    public async Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password, CancellationToken ct = default)
     {
         foreach (var validator in userManager.PasswordValidators)
         {
@@ -64,9 +64,9 @@ public partial class AccountService(
             }
         }
 
-        return Array.Empty<ApiException>();
+        return [];
     }
-    public async Task<IEnumerable<ApiException>> ValidateUsername(string? username)
+    public async Task<IEnumerable<ApiException>> ValidateUsername(string? username, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(username) || !AllowedUsernameRegex.IsMatch(username))
         {
@@ -75,7 +75,7 @@ public partial class AccountService(
 
         // Reverted because of https://go.microsoft.com/fwlink/?linkid=2129535
         if (await userManager.Users.AnyAsync(x => x.NormalizedUserName != null
-                                                   && x.NormalizedUserName == username.ToUpper()))
+                                                   && x.NormalizedUserName == username.ToUpper(), ct))
         {
             return
             [
@@ -86,9 +86,9 @@ public partial class AccountService(
         return [];
     }
 
-    public async Task<IEnumerable<ApiException>> ValidateEmail(string email)
+    public async Task<IEnumerable<ApiException>> ValidateEmail(string email, CancellationToken ct = default)
     {
-        var user = await unitOfWork.UserRepository.GetUserByEmailAsync(email);
+        var user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, ct: ct);
         if (user == null) return [];
 
         return
@@ -98,24 +98,12 @@ public partial class AccountService(
     }
 
     /// <summary>
-    /// Does the user have the Bookmark permission or admin rights
-    /// </summary>
-    /// <param name="user"></param>
-    /// <returns></returns>
-    public async Task<bool> HasBookmarkPermission(AppUser? user)
-    {
-        if (user == null) return false;
-        var roles = await userManager.GetRolesAsync(user);
-
-        return roles.Contains(PolicyConstants.BookmarkRole) || roles.Contains(PolicyConstants.AdminRole);
-    }
-
-    /// <summary>
     /// Does the user have Change Restriction permission or admin rights and not Read Only
     /// </summary>
     /// <param name="user"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<bool> CanChangeAgeRestriction(AppUser? user)
+    public async Task<bool> CanChangeAgeRestriction(AppUser? user, CancellationToken ct = default)
     {
         if (user == null) return false;
 
@@ -125,9 +113,10 @@ public partial class AccountService(
         return roles.Contains(PolicyConstants.ChangeRestrictionRole) || roles.Contains(PolicyConstants.AdminRole);
     }
 
-    public async Task<bool> ChangeIdentityProvider(int actingUserId, AppUser user, IdentityProvider identityProvider)
+    public async Task<bool> ChangeIdentityProvider(int actingUserId, AppUser user, IdentityProvider identityProvider,
+        CancellationToken ct = default)
     {
-        var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
+        var defaultAdminUser = await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct);
         if (user.Id == defaultAdminUser.Id)
         {
             if (identityProvider == IdentityProvider.OpenIdConnect)
@@ -139,11 +128,11 @@ public partial class AccountService(
         }
 
         // Allow changes if users aren't being synced
-        var oidcSettings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        var oidcSettings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).OidcConfig;
         if (!oidcSettings.SyncUserSettings)
         {
             user.IdentityProvider = identityProvider;
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
             return false;
         }
 
@@ -154,13 +143,14 @@ public partial class AccountService(
         }
 
         user.IdentityProvider = identityProvider;
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
+
         return user.IdentityProvider == IdentityProvider.OpenIdConnect;
     }
 
-    public async Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole)
+    public async Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole, CancellationToken ct = default)
     {
-        var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.AppUser)).ToList();
+        var allLibraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.AppUser, ct: ct)).ToList();
         var currentLibrary = allLibraries.Where(l => l.AppUsers.Contains(user)).ToList();
 
         List<Library> libraries;
@@ -192,7 +182,8 @@ public partial class AccountService(
         }
     }
 
-    public async Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles)
+    public async Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles,
+        CancellationToken ct = default)
     {
         var existingRoles = await userManager.GetRolesAsync(user);
         var hasAdminRole = roles.Contains(PolicyConstants.AdminRole);
@@ -213,19 +204,20 @@ public partial class AccountService(
         return [];
     }
 
-    public async Task SeedUser(AppUser user)
+    public async Task SeedUser(AppUser user, CancellationToken ct = default)
     {
-        AddDefaultStreamsToUser(user);
+        AddDefaultStreamsToUser(user, ct);
         AddDefaultHighlightSlotsToUser(user);
         AddAuthKeys(user);
-        await AddDefaultReadingProfileToUser(user); // Commits
+        await AddDefaultReadingProfileToUser(user, ct); // Commits
     }
 
     /// <summary>
     /// Assign default streams
     /// </summary>
     /// <param name="user"></param>
-    public void AddDefaultStreamsToUser(AppUser user)
+    /// <param name="ct"></param>
+    public void AddDefaultStreamsToUser(AppUser user, CancellationToken ct = default)
     {
         foreach (var newStream in Defaults.DefaultStreams.Select(mapper.Map<AppUserDashboardStream, AppUserDashboardStream>))
         {
@@ -258,14 +250,17 @@ public partial class AccountService(
     /// Assign default reading profile
     /// </summary>
     /// <param name="user"></param>
-    public async Task AddDefaultReadingProfileToUser(AppUser user)
+    /// <param name="ct"></param>
+    public async Task AddDefaultReadingProfileToUser(AppUser user, CancellationToken ct = default)
     {
         var profile = new AppUserReadingProfileBuilder(user.Id)
             .WithName("Default Profile")
             .WithKind(ReadingProfileKind.Default)
             .Build();
+
         unitOfWork.AppUserReadingProfileRepository.Add(profile);
-        await unitOfWork.CommitAsync();
+
+        await unitOfWork.CommitAsync(ct);
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9\-._@+/]*$")]

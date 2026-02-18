@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.Entities;
@@ -13,8 +14,9 @@ public interface ICacheService
     /// </summary>
     /// <param name="chapterId"></param>
     /// <param name="extractPdfToImages">Extracts a PDF into images for a different reading experience</param>
+    /// <param name="ct"></param>
     /// <returns>Chapter for the passed chapterId. Side-effect from ensuring cache.</returns>
-    Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false);
+    Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false, CancellationToken ct = default);
     /// <summary>
     /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
     /// </summary>
@@ -30,6 +32,6 @@ public interface ICacheService
     string GetCachedFile(Chapter chapter);
     string GetCachedFile(int chapterId, string firstFilePath);
     public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
-    Task<int> CacheBookmarkForSeries(int userId, int seriesId);
+    Task<int> CacheBookmarkForSeries(int userId, int seriesId, CancellationToken ct = default);
     void CleanupBookmarkCache(int seriesId);
 }

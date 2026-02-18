@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Services.SignalR;
 using Kavita.Models.DTOs.SignalR;
@@ -12,7 +12,7 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
 {
     // TODO: When sending a message, queue the message up and on re-connect, reply the queued messages. Queue messages expire on a rolling basis (rolling array)
 
-    public async Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = true)
+    public async Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = true, CancellationToken ct = default)
     {
         // TODO: If libraryId and NOT onlyAdmins, then perform RBS check before sending the event
 
@@ -24,7 +24,7 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
         }
 
 
-        await users.SendAsync(method, message);
+        await users.SendAsync(method, message, cancellationToken: ct);
     }
 
     /// <summary>
@@ -33,10 +33,11 @@ public class EventHub(IHubContext<MessageHub> messageHub, IPresenceTracker prese
     /// <param name="method"></param>
     /// <param name="message"></param>
     /// <param name="userId"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task SendMessageToAsync(string method, SignalRMessage message, int userId)
+    public async Task SendMessageToAsync(string method, SignalRMessage message, int userId, CancellationToken ct = default)
     {
-        await messageHub.Clients.Users(new List<string>() {userId + string.Empty}).SendAsync(method, message);
+        await messageHub.Clients.Users([userId + string.Empty]).SendAsync(method, message, cancellationToken: ct);
     }
 
 }

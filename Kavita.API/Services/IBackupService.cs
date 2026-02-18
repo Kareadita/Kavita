@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kavita.API.Services;
@@ -7,7 +8,7 @@ public interface IBackupService
 {
     public const string LogFile = "config/logs/kavita.log";
 
-    Task BackupDatabase();
+    Task BackupDatabase(CancellationToken ct = default);
     /// <summary>
     /// Returns a list of all log files for Kavita
     /// </summary>

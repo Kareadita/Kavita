@@ -17,4 +17,8 @@ public static class PolicyGroups
     /// Requires Admin or Change Password to execute
     /// </summary>
     public const string ChangePasswordPolicy = "RequireChangePasswordRole";
+    /// <summary>
+    /// Requires Admin or Bookmark to execute
+    /// </summary>
+    public const string BookmarkPolicy = "RequireBookmarkRole";
 }

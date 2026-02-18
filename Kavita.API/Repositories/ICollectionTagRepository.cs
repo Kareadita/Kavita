@@ -27,9 +27,9 @@ public enum CollectionIncludes
 public interface ICollectionTagRepository
 {
     void Remove(AppUserCollection tag);
+    void Update(AppUserCollection tag);
     Task<string?> GetCoverImageAsync(int collectionTagId, CancellationToken ct = default);
     Task<AppUserCollection?> GetCollectionAsync(int tagId, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
-    void Update(AppUserCollection tag);
     Task<int> RemoveCollectionsWithoutSeries(CancellationToken ct = default);
 
     Task<IEnumerable<AppUserCollection>> GetAllCollectionsAsync(CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);

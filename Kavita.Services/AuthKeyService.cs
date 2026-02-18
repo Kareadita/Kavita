@@ -12,12 +12,13 @@ namespace Kavita.Services;
 
 public class AuthKeyService(IDataContext context, ILogger<AuthKeyService> logger, HybridCache cache) : IAuthKeyService
 {
-    public async Task UpdateLastAccessedAsync(string authKey)
+    public async Task UpdateLastAccessedAsync(string authKey, CancellationToken ct = default)
     {
         logger.LogTrace("Updating last accessed Auth key:  {AuthKey}", authKey);
         await context.AppUserAuthKey
             .Where(k => k.Key == authKey)
-            .ExecuteUpdateAsync(s => s.SetProperty(k => k.LastAccessedAtUtc, DateTime.UtcNow));
+            .ExecuteUpdateAsync(s =>
+                s.SetProperty(k => k.LastAccessedAtUtc, DateTime.UtcNow), cancellationToken: ct);
     }
 
     public async Task InvalidateAsync(string keyValue, CancellationToken cancellationToken = default)

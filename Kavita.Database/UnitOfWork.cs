@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Kavita.API.Database;
@@ -93,13 +94,15 @@ public class UnitOfWork : IUnitOfWork
     {
         return _context.SaveChanges() > 0;
     }
+
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<bool> CommitAsync()
+    public async Task<bool> CommitAsync(CancellationToken ct = default)
     {
-        return await _context.SaveChangesAsync() > 0;
+        return await _context.SaveChangesAsync(ct) > 0;
     }
 
     /// <summary>
@@ -124,12 +127,13 @@ public class UnitOfWork : IUnitOfWork
     /// <summary>
     /// Rollback transaction
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<bool> RollbackAsync()
+    public async Task<bool> RollbackAsync(CancellationToken ct = default)
     {
         try
         {
-            await _context.Database.RollbackTransactionAsync();
+            await _context.Database.RollbackTransactionAsync(ct);
         }
         catch (Exception)
         {

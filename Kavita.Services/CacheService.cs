@@ -134,16 +134,18 @@ public class CacheService(
     /// </summary>
     /// <param name="chapterId"></param>
     /// <param name="extractPdfToImages">Defaults to false. Extract pdf file into images rather than copying just the pdf file</param>
+    /// <param name="ct"></param>
     /// <returns>This will always return the Chapter for the chapterId</returns>
-    public async Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false)
+    public async Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false, CancellationToken ct = default)
     {
         directoryService.ExistOrCreate(directoryService.CacheDirectory);
-        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId, ct: ct);
         var extractPath = GetCachePath(chapterId);
 
         var extractLock = ExtractLocks.GetOrAdd(chapterId, id => new SemaphoreSlim(1,1));
 
-        await extractLock.WaitAsync();
+        await extractLock.WaitAsync(ct);
+
         try {
             if (directoryService.Exists(extractPath))
             {
@@ -319,15 +321,17 @@ public class CacheService(
         return GetPageFromFiles(files, page);
     }
 
-    public async Task<int> CacheBookmarkForSeries(int userId, int seriesId)
+    public async Task<int> CacheBookmarkForSeries(int userId, int seriesId, CancellationToken ct = default)
     {
         var destDirectory = directoryService.FileSystem.Path.Join(directoryService.CacheDirectory, seriesId + "_bookmarks");
         if (directoryService.Exists(destDirectory)) return directoryService.GetFiles(destDirectory).Count();
 
-        var bookmarkDtos = await unitOfWork.UserRepository.GetBookmarkDtosForSeries(userId, seriesId);
-        var files = (await bookmarkService.GetBookmarkFilesById(bookmarkDtos.Select(b => b.Id))).ToList();
+        var bookmarkDtos = await unitOfWork.UserRepository.GetBookmarkDtosForSeries(userId, seriesId, ct);
+
+        var files = (await bookmarkService.GetBookmarkFilesById(bookmarkDtos.Select(b => b.Id), ct)).ToList();
         directoryService.CopyFilesToDirectory(files, destDirectory,
             Enumerable.Range(1, files.Count).Select(i => i + string.Empty).ToList());
+
         return files.Count;
     }
 

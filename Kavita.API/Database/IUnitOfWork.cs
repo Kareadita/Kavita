@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Repositories;
 
@@ -35,7 +36,7 @@ public interface IUnitOfWork
     IReadingSessionRepository ReadingSessionRepository { get; }
     IClientDeviceRepository ClientDeviceRepository { get; }
     bool Commit();
-    Task<bool> CommitAsync();
+    Task<bool> CommitAsync(CancellationToken ct = default);
     bool HasChanges();
-    Task<bool> RollbackAsync();
+    Task<bool> RollbackAsync(CancellationToken ct = default);
 }

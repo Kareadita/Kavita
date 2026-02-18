@@ -1,9 +1,9 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Kavita.API.Database;
@@ -40,9 +40,10 @@ public class AnnotationService(
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="dto"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
     /// <exception cref="KavitaException">Message is not localized</exception>
-    public async Task<AnnotationDto> CreateAnnotation(int userId, AnnotationDto dto)
+    public async Task<AnnotationDto> CreateAnnotation(int userId, AnnotationDto dto, CancellationToken ct = default)
     {
         try
         {
@@ -51,7 +52,7 @@ public class AnnotationService(
                 throw new KavitaException("invalid-payload");
             }
 
-            var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId) ?? throw new KavitaException("chapter-doesnt-exist");
+            var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId, ct: ct) ?? throw new KavitaException("chapter-doesnt-exist");
             var chapterTitle = string.Empty;
 
             try
@@ -90,9 +91,9 @@ public class AnnotationService(
             };
 
             unitOfWork.AnnotationRepository.Attach(annotation);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
 
-            return (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id))!;
+            return (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id, ct))!;
         }
         catch (Exception ex)
         {
@@ -106,13 +107,14 @@ public class AnnotationService(
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="dto"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
     /// <exception cref="KavitaException">Message is not localized</exception>
-    public async Task<AnnotationDto> UpdateAnnotation(int userId, AnnotationDto dto)
+    public async Task<AnnotationDto> UpdateAnnotation(int userId, AnnotationDto dto, CancellationToken ct = default)
     {
         try
         {
-            var annotation = await unitOfWork.AnnotationRepository.GetAnnotation(dto.Id);
+            var annotation = await unitOfWork.AnnotationRepository.GetAnnotation(dto.Id, ct);
             if (annotation == null || annotation.AppUserId != userId) throw new KavitaException("denied");
 
             annotation.ContainsSpoiler = dto.ContainsSpoiler;
@@ -123,12 +125,13 @@ public class AnnotationService(
 
             unitOfWork.AnnotationRepository.Update(annotation);
 
-            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync())
+            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct))
             {
-                dto = (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id))!;
+                dto = (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id, ct))!;
 
                 await eventHub.SendMessageToAsync(MessageFactory.AnnotationUpdate,
                     MessageFactory.AnnotationUpdateEvent(dto), userId);
+
                 return dto;
             }
         } catch (Exception ex)
@@ -139,7 +142,8 @@ public class AnnotationService(
         throw new KavitaException("generic-error");
     }
 
-    public async Task<string> ExportAnnotations(int userId, IList<int>? annotationIds = null)
+    public async Task<string> ExportAnnotations(int userId, IList<int>? annotationIds = null,
+        CancellationToken ct = default)
     {
         try
         {
@@ -147,11 +151,11 @@ public class AnnotationService(
             IList<FullAnnotationDto> annotations;
             if (annotationIds == null)
             {
-                annotations = await unitOfWork.AnnotationRepository.GetFullAnnotationsByUserIdAsync(userId);
+                annotations = await unitOfWork.AnnotationRepository.GetFullAnnotationsByUserIdAsync(userId, ct);
             }
             else
             {
-                annotations = await unitOfWork.AnnotationRepository.GetFullAnnotations(userId, annotationIds);
+                annotations = await unitOfWork.AnnotationRepository.GetFullAnnotations(userId, annotationIds, ct);
             }
 
             var userIds = annotations.Select(a => a.UserId)
@@ -159,12 +163,12 @@ public class AnnotationService(
                 .ToList();
 
             // Get users with preferences for highlight colors
-            var users = (await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences, false))
+            var users = (await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences, false, ct))
                 .Where(u => userIds.Contains(u.Id))
                 .ToDictionary(u => u.Id, u => u);
 
             // Get settings for hostname
-            var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
             var hostname = !string.IsNullOrWhiteSpace(settings.HostName) ? settings.HostName : $"http://localhost:{Configuration.Port}";
 
             // Group annotations by series, then by volume

@@ -20,6 +20,11 @@ public enum ReadingListIncludes
 
 public interface IReadingListRepository
 {
+    void Remove(ReadingListItem item);
+    void Add(ReadingList list);
+    void BulkRemove(IEnumerable<ReadingListItem> items);
+    void Update(ReadingList list);
+
     Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true, CancellationToken ct = default);
     Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None, CancellationToken ct = default);
     Task<IList<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId, UserParams? userParams = null, CancellationToken ct = default);
@@ -30,10 +35,6 @@ public interface IReadingListRepository
         bool includePromoted, CancellationToken ct = default);
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForChapterAndUserAsync(int userId, int chapterId,
         bool includePromoted, CancellationToken ct = default);
-    void Remove(ReadingListItem item);
-    void Add(ReadingList list);
-    void BulkRemove(IEnumerable<ReadingListItem> items);
-    void Update(ReadingList list);
     Task<int> Count(CancellationToken ct = default);
     Task<string?> GetCoverImageAsync(int readingListId, CancellationToken ct = default);
     Task<IList<string>> GetRandomCoverImagesAsync(int readingListId, CancellationToken ct = default);

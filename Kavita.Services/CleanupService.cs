@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Database;
@@ -31,8 +32,9 @@ public class CleanupService(
     /// <summary>
     /// Cleans up Temp, cache, deleted cover images,  and old database backups
     /// </summary>
+    /// <param name="ct"></param>
     [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail, DelaysInSeconds = [120, 300, 300])]
-    public async Task Cleanup()
+    public async Task Cleanup(CancellationToken ct = default)
     {
         if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToEncoding", [],
                 TaskScheduler.DefaultQueue, true) ||
@@ -48,9 +50,9 @@ public class CleanupService(
         logger.LogInformation("Starting Cleanup");
 
         // TODO: Why do I have clear temp directory then immediately do it again?
-        var cleanupSteps = new List<(Func<Task>, string)>
+        var cleanupSteps = new List<(Func<CancellationToken, Task>, string)>
         {
-            (() => Task.Run(() => directoryService.ClearDirectory(directoryService.TempDirectory)), "Cleaning temp directory"),
+            (innerCt => Task.Run(() => directoryService.ClearDirectory(directoryService.TempDirectory), innerCt), "Cleaning temp directory"),
             (CleanupCacheAndTempDirectories, "Cleaning cache and temp directories"),
             (CleanupBackups, "Cleaning old database backups"),
             (ConsolidateProgress, "Consolidating Progress Events"),
@@ -58,12 +60,12 @@ public class CleanupService(
             (CleanupDbEntries, "Cleaning abandoned database rows"), // Cleanup DB before removing files linked to DB entries
             (DeleteSeriesCoverImages, "Cleaning deleted series cover images"),
             (DeleteChapterCoverImages, "Cleaning deleted chapter cover images"),
-            (() => Task.WhenAll(DeleteTagCoverImages(), DeleteReadingListCoverImages(), DeletePersonCoverImages()), "Cleaning deleted cover images"),
+            (innerCt => Task.WhenAll(DeleteTagCoverImages(innerCt), DeleteReadingListCoverImages(innerCt), DeletePersonCoverImages(innerCt)), "Cleaning deleted cover images"),
             (CleanupLogs, "Cleaning old logs"),
             (EnsureChapterProgressIsCapped, "Cleaning progress events that exceed 100%")
         };
 
-        await SendProgress(0F, "Starting cleanup");
+        await SendProgress(0F, "Starting cleanup", ct);
 
         for (var i = 0; i < cleanupSteps.Count; i++)
         {
@@ -71,36 +73,36 @@ public class CleanupService(
             var progress = (float)(i + 1) / (cleanupSteps.Count + 1);
 
             logger.LogInformation("{Message}", subtitle);
-            await method();
-            await SendProgress(progress, subtitle);
+            await method(ct);
+            await SendProgress(progress, subtitle, ct);
         }
 
-        await SendProgress(1F, "Cleanup finished");
+        await SendProgress(1F, "Cleanup finished", ct);
         logger.LogInformation("Cleanup finished");
     }
 
     /// <summary>
     /// Cleans up abandon rows in the DB
     /// </summary>
-    public async Task CleanupDbEntries()
+    public async Task CleanupDbEntries(CancellationToken ct = default)
     {
-        await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
-        await unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
-        await unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
-        await unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries();
-        await unitOfWork.ReadingListRepository.RemoveReadingListsWithoutSeries();
+        await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters(ct);
+        await unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated(ct);
+        await unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated(ct: ct);
+        await unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries(ct);
+        await unitOfWork.ReadingListRepository.RemoveReadingListsWithoutSeries(ct);
     }
 
-    private async Task SendProgress(float progress, string subtitle)
+    private async Task SendProgress(float progress, string subtitle, CancellationToken ct = default)
     {
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.CleanupProgressEvent(progress, subtitle));
+            MessageFactory.CleanupProgressEvent(progress, subtitle), ct: ct);
     }
 
     /// <summary>
     /// Removes all series images that are not in the database. They must follow <see cref="ImageService.SeriesCoverImageRegex"/> filename pattern.
     /// </summary>
-    public async Task DeleteSeriesCoverImages()
+    public async Task DeleteSeriesCoverImages(CancellationToken ct = default)
     {
         var images = await unitOfWork.SeriesRepository.GetAllCoverImagesAsync();
         var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.SeriesCoverImageRegex);
@@ -110,7 +112,7 @@ public class CleanupService(
     /// <summary>
     /// Removes all chapter/volume images that are not in the database. They must follow <see cref="ImageService.ChapterCoverImageRegex"/> filename pattern.
     /// </summary>
-    public async Task DeleteChapterCoverImages()
+    public async Task DeleteChapterCoverImages(CancellationToken ct = default)
     {
         var images = await unitOfWork.ChapterRepository.GetAllCoverImagesAsync();
         var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
@@ -120,7 +122,7 @@ public class CleanupService(
     /// <summary>
     /// Removes all collection tag images that are not in the database. They must follow <see cref="ImageService.CollectionTagCoverImageRegex"/> filename pattern.
     /// </summary>
-    public async Task DeleteTagCoverImages()
+    public async Task DeleteTagCoverImages(CancellationToken ct = default)
     {
         var images = await unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
         var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
@@ -130,7 +132,7 @@ public class CleanupService(
     /// <summary>
     /// Removes all reading list images that are not in the database. They must follow <see cref="ImageService.ReadingListCoverImageRegex"/> filename pattern.
     /// </summary>
-    public async Task DeleteReadingListCoverImages()
+    public async Task DeleteReadingListCoverImages(CancellationToken ct = default)
     {
         var images = await unitOfWork.ReadingListRepository.GetAllCoverImagesAsync();
         var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.ReadingListCoverImageRegex);
@@ -140,7 +142,7 @@ public class CleanupService(
     /// <summary>
     /// Remove all person cover images no longer associated with a person in the database
     /// </summary>
-    public async Task DeletePersonCoverImages()
+    public async Task DeletePersonCoverImages(CancellationToken ct = default)
     {
         var images = await unitOfWork.PersonRepository.GetAllCoverImagesAsync();
         var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.PersonCoverImageRegex);
@@ -150,7 +152,7 @@ public class CleanupService(
     /// <summary>
     /// Removes all files and directories in the cache and temp directory
     /// </summary>
-    public Task CleanupCacheAndTempDirectories()
+    public Task CleanupCacheAndTempDirectories(CancellationToken ct = default)
     {
         logger.LogInformation("Performing cleanup of Cache & Temp directories");
         directoryService.ExistOrCreate(directoryService.CacheDirectory);
@@ -191,7 +193,7 @@ public class CleanupService(
     /// <summary>
     /// Removes Database backups older than configured total backups. If all backups are older than total backups days, only the latest is kept.
     /// </summary>
-    public async Task CleanupBackups()
+    public async Task CleanupBackups(CancellationToken ct = default)
     {
         var dayThreshold = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).TotalBackups;
         logger.LogInformation("Beginning cleanup of Database backups at {Time}", DateTime.Now);
@@ -221,7 +223,7 @@ public class CleanupService(
     /// <summary>
     /// Find any progress events that have duplicate, find the highest page read event, then copy over information from that and delete others, to leave one.
     /// </summary>
-    public async Task ConsolidateProgress()
+    public async Task ConsolidateProgress(CancellationToken ct = default)
     {
         logger.LogInformation("Consolidating Progress Events");
         // AppUserProgress
@@ -277,7 +279,7 @@ public class CleanupService(
     /// <summary>
     /// Scans through Media Error and removes any entries that have been fixed and are within the DB (proper files where wordcount/pagecount > 0)
     /// </summary>
-    public async Task CleanupMediaErrors()
+    public async Task CleanupMediaErrors(CancellationToken ct = default)
     {
         try
         {
@@ -320,7 +322,7 @@ public class CleanupService(
         }
     }
 
-    public async Task CleanupLogs()
+    public async Task CleanupLogs(CancellationToken ct = default)
     {
         logger.LogInformation("Performing cleanup of logs directory");
         var dayThreshold = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).TotalLogs;
@@ -364,7 +366,7 @@ public class CleanupService(
     /// Ensures that each chapter's progress (pages read) is capped at the total pages. This can get out of sync when a chapter is replaced after being read with one with lower page count.
     /// </summary>
     /// <returns></returns>
-    public async Task EnsureChapterProgressIsCapped()
+    public async Task EnsureChapterProgressIsCapped(CancellationToken ct = default)
     {
         logger.LogInformation("Cleaning up any progress rows that exceed chapter page count");
         await unitOfWork.AppUserProgressRepository.UpdateAllProgressThatAreMoreThanChapterPages();
@@ -374,7 +376,7 @@ public class CleanupService(
     /// <summary>
     /// This does not cleanup any Series that are not Completed or Cancelled
     /// </summary>
-    public async Task CleanupWantToRead()
+    public async Task CleanupWantToRead(CancellationToken ct = default)
     {
         logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list");
 
