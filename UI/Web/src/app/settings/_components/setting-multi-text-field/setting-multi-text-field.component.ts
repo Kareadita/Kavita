@@ -75,8 +75,6 @@ export class SettingMultiTextFieldComponent<T> implements ControlValueAccessor {
   selectedValues = signal<T[]>([]);
   disabled = signal(false);
 
-  textFieldValueTracker = '';
-
   private _onChange: (value: T[]) => void = () => {};
   private _onTouched: () => void = () => {};
 
@@ -91,7 +89,6 @@ export class SettingMultiTextFieldComponent<T> implements ControlValueAccessor {
 
   writeValue(obj: T[]): void {
     this.selectedValues.set(obj || []);
-    this.textFieldValueTracker = obj.map(this.stringConvertor()).join(',');
   }
 
   registerOnChange(fn: (_: T[]) => void): void {

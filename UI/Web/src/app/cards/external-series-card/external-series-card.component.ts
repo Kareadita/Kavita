@@ -23,7 +23,7 @@ export class ExternalSeriesCardComponent {
    * When clicking on the series, instead of opening, opens a preview drawer
    */
   previewOnClick = input<boolean>(false);
-  link = viewChild('link', {read: ElementRef<HTMLAnchorElement>})
+  link = viewChild<ElementRef<HTMLAnchorElement>>('link')
 
 
   handleClick() {

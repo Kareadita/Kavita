@@ -25,7 +25,7 @@ export class ScrobbleProviderItemComponent {
   provider = input.required<ScrobbleProvider>();
   token = input.required<string>();
   isEditMode = input<boolean>(false);
-  editRef = contentChild('edit', {read: TemplateRef<any>});
+  editRef = contentChild<TemplateRef<any>>('edit');
 
   hasExpired = signal<boolean>(false);
 

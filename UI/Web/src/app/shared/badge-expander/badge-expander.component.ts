@@ -35,7 +35,7 @@ export class BadgeExpanderComponent implements OnInit {
    * Invoked when the "and more" is clicked
    */
   toggled = output();
-  itemTemplate = contentChild('badgeExpanderItem', {read: TemplateRef<any>});
+  itemTemplate = contentChild<TemplateRef<any>>('badgeExpanderItem');
 
   isCollapsed = signal<boolean | undefined>(undefined);
   visibleItems = computed(() => {

@@ -2,13 +2,12 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  EventEmitter,
   HostListener,
   inject,
   input,
   model,
   OnInit,
-  Output,
+  output,
   signal,
   ViewChild
 } from '@angular/core';
@@ -59,11 +58,11 @@ export class SettingColorPickerComponent implements OnInit {
 
   showPicker = signal(false);
 
-  @Output() selectPicker = new EventEmitter<void>();
+  selectPicker = output();
   /**
    * Emits the raw color from the color picker rather than our RgbaColor
    */
-  @Output() rawColorChange = new EventEmitter<Color>();
+  rawColorChange = output<Color>();
 
   chromeControl!: ColorPickerControl;
 

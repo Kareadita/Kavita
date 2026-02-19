@@ -42,7 +42,7 @@ export class BulkAddToCollectionModalComponent implements OnInit {
    * Series Ids to add to Collection Tag
    */
   seriesIds = input<number[]>([]);
-  inputElem = viewChild('title', {read: ElementRef<HTMLInputElement>});
+  inputElem = viewChild<ElementRef<HTMLInputElement>>('title');
 
   /**
    * All existing collections sorted by recent use date
