@@ -1,12 +1,10 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
-  EventEmitter,
   inject,
-  OnInit
+  signal
 } from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import {shareReplay, take} from 'rxjs';
@@ -30,33 +28,27 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
     imports: [RestrictionSelectorComponent, AgeRatingPipe, TranslocoDirective,
         ReactiveFormsModule, SettingItemComponent, NgClass]
 })
-export class ChangeAgeRestrictionComponent implements OnInit {
+export class ChangeAgeRestrictionComponent {
 
   protected readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
-
-  user: User | undefined = undefined;
+  user = signal<User | undefined>(undefined);
   selectedRestriction!: AgeRestriction;
   originalRestriction!: AgeRestriction;
-  reset: EventEmitter<AgeRestriction> = new EventEmitter();
+  resetValue = signal<AgeRestriction | undefined>(undefined);
 
   canEdit = computed(() => {
     return this.accountService.hasChangeAgeRestrictionRole(this.accountService.currentUserSignal()!);
   });
 
-
-  ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), take(1)).subscribe(user => {
+  constructor() {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(), shareReplay(), take(1)).subscribe(user => {
       if (!user) return;
-      this.user = user;
-      this.originalRestriction = this.user.ageRestriction;
-      this.cdRef.markForCheck();
+      this.user.set(user);
+      this.originalRestriction = user.ageRestriction;
     });
-
-    this.cdRef.markForCheck();
   }
 
   updateRestrictionSelection(restriction: AgeRestriction) {
@@ -64,24 +56,22 @@ export class ChangeAgeRestrictionComponent implements OnInit {
   }
 
   resetForm() {
-    if (!this.user) return;
-    this.reset.emit(this.originalRestriction);
-    this.cdRef.markForCheck();
+    if (!this.user()) return;
+    this.resetValue.set({...this.originalRestriction});
   }
 
   saveForm() {
-    if (this.user === undefined) { return; }
+    if (this.user() === undefined) { return; }
 
     this.accountService.updateAgeRestriction(this.selectedRestriction.ageRating, this.selectedRestriction.includeUnknowns).subscribe(() => {
       this.toastr.success(translate('toasts.age-restriction-updated'));
       this.originalRestriction = this.selectedRestriction;
-      if (this.user) {
-        this.user.ageRestriction.ageRating = this.selectedRestriction.ageRating;
-        this.user.ageRestriction.includeUnknowns = this.selectedRestriction.includeUnknowns;
+      const currentUser = this.user();
+      if (currentUser) {
+        currentUser.ageRestriction.ageRating = this.selectedRestriction.ageRating;
+        currentUser.ageRestriction.includeUnknowns = this.selectedRestriction.includeUnknowns;
       }
       this.resetForm();
-
-      this.cdRef.markForCheck();
     });
   }
 
