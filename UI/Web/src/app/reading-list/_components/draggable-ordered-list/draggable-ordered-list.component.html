@@ -19,7 +19,7 @@
       </div>
     } @else {
       <div cdkDropList class="{{items.length > 0 ? 'example-list list-group-flush' : ''}}" (cdkDropListDropped)="drop($event)">
-        @for(item of items; track item; let i = $index) {
+        @for(item of items; track trackByIdentity(i, item); let i = $index) {
           <div class="example-box" cdkDrag
                [cdkDragData]="item" cdkDragBoundary=".example-list"
                [cdkDragDisabled]="accessibilityMode || disabled || bulkMode" cdkDragPreviewContainer="parent">

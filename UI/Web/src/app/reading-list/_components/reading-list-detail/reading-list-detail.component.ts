@@ -10,6 +10,7 @@ import {
   numberAttribute,
   OnInit,
   signal,
+  TrackByFunction,
   viewChild
 } from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -193,6 +194,7 @@ export class ReadingListDetailComponent implements OnInit {
     'accessibilityMode': new FormControl(false, []),
   });
 
+  trackByIdentity: TrackByFunction<ReadingListItem> = (index, item) => `${item.order}_${item.title}_${item.summary?.length}_${item.pagesRead}_${item.chapterId}`;
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock() === undefined) return 'calc(var(--vh)*100)';

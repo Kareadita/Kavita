@@ -200,7 +200,8 @@
                                                   [disabled]="!(formGroup.get('edit')?.value || false)"
                                                   (orderUpdated)="orderUpdated($event)"
                                                   (itemRemove)="removeItem($event)"
-                                                  [showRemoveButton]="formGroup.get('edit')?.value || false">
+                                                  [showRemoveButton]="formGroup.get('edit')?.value || false"
+                                                  [trackByIdentity]="trackByIdentity">
 
                         <ng-template #draggableItem let-item let-position="idx">
                           <app-reading-list-item [ngClass]="{'content-container': items().length < 100, 'non-virtualized-container': items().length >= 100}" [item]="item"
