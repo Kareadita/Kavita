@@ -49,7 +49,6 @@
               }
 
               @if (bulkMode()) {
-                @let _ = selectionSignal();
                 <label for="select-{{idx}}" class="form-label visually-hidden">{{t('bulk-select-label')}}</label>
                 <input id="select-{{idx}}" class="form-check-input mt-0" type="checkbox" (change)="selectItem($event, idx)"
                        [ngModel]="bulkSelectionService.isCardSelected('sideNavStream', idx)" [ngModelOptions]="{standalone: true}">
