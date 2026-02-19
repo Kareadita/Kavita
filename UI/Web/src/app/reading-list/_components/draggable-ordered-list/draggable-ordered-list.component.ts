@@ -41,9 +41,8 @@ export class DraggableOrderedListComponent {
 
   protected readonly bulkSelectionService = inject(BulkSelectionService);
 
-  // eslint-disable-next-line @angular-eslint/no-input-rename
-  private readonly _items = input<Array<any>>([], { alias: 'items' });
-  protected readonly items = linkedSignal(() => [...this._items()]);
+  readonly items = input<Array<any>>([]);
+  protected readonly localItems = linkedSignal(() => [...this.items()]);
   /**
    * After this many elements, drag and drop is disabled, and we use a virtualized list instead
    */
@@ -56,7 +55,7 @@ export class DraggableOrderedListComponent {
   /**
    * Parent scroll for virtualize pagination
    */
-  parentScroll = input<Element | Window | undefined>(undefined);
+  parentScroll = input<Element | Window>();
   /**
    * Disables drag and drop functionality. Useful if a filter is present which will skew actual index.
    */
@@ -79,12 +78,12 @@ export class DraggableOrderedListComponent {
 
   itemTemplate = contentChild.required<TemplateRef<any>>('draggableItem');
 
-  protected readonly bufferAmount = computed(() => Math.floor(Math.min(this.items().length / 20, 20)));
+  protected readonly bufferAmount = computed(() => Math.floor(Math.min(this.localItems().length / 20, 20)));
   protected readonly selectionSignal = this.bulkSelectionService.selectionSignal;
 
   drop(event: CdkDragDrop<string[]>) {
     if (event.previousIndex === event.currentIndex) return;
-    this.items.update(arr => {
+    this.localItems.update(arr => {
       moveItemInArray(arr, event.previousIndex, event.currentIndex);
       return [...arr];
     });
@@ -101,7 +100,7 @@ export class DraggableOrderedListComponent {
     if (!inputElem) return;
     const newIndex = parseInt(inputElem.value, 10);
     if (item.order === newIndex) return;
-    this.items.update(arr => {
+    this.localItems.update(arr => {
       moveItemInArray(arr, item.order, newIndex);
       return [...arr];
     });
@@ -122,6 +121,6 @@ export class DraggableOrderedListComponent {
 
   selectItem(updatedVal: Event, index: number) {
     const boolVal = (updatedVal.target as HTMLInputElement).value == 'true';
-    this.bulkSelectionService.handleCardSelection('sideNavStream', index, this.items().length, boolVal);
+    this.bulkSelectionService.handleCardSelection('sideNavStream', index, this.localItems().length, boolVal);
   }
 }
