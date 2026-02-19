@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix:'scrobbling-providers'">
 
-  <app-setting-title [title]="t('title')" [canEdit]="hasValidLicense" [isEditMode]="!isViewMode" (editMode)="updateEditMode($event)" />
+  <app-setting-title [title]="t('title')" [canEdit]="hasValidLicense" [isEditMode]="!isViewMode" (isEditModeChange)="updateEditMode($event)" />
 
   @if (loaded) {
     @if(!hasValidLicense) {
