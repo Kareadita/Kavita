@@ -205,7 +205,7 @@ export class LibraryDetailComponent implements OnInit {
 
     this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filter)
       .subscribe(series => {
-        this.series = series.result;
+        this.series = [...series.result];
         this.pagination = series.pagination;
         this.loadingSeries = false;
         this.cdRef.markForCheck();
