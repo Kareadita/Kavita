@@ -132,22 +132,25 @@ public class ComicInfo
 
     public IList<string> GetPeopleForRole(PersonRole role) => role switch
     {
+        PersonRole.Writer => SplitNames(Writer),
+        PersonRole.Penciller => SplitNames(Penciller),
+        PersonRole.Inker => SplitNames(Inker),
+        PersonRole.Colorist => SplitNames(Colorist),
+        PersonRole.Letterer => SplitNames(Letterer),
+        PersonRole.CoverArtist => SplitNames(CoverArtist),
+        PersonRole.Editor => SplitNames(Editor),
+        PersonRole.Publisher => SplitNames(Publisher),
+        PersonRole.Translator => SplitNames(Translator),
+        PersonRole.Imprint => SplitNames(Imprint),
+        PersonRole.Character => SplitNames(Characters),
+        PersonRole.Team => SplitNames(Teams),
+        PersonRole.Location => SplitNames(Locations),
         PersonRole.Other => [],
-        PersonRole.Writer => Writer.Split(','),
-        PersonRole.Penciller => Penciller.Split(','),
-        PersonRole.Inker => Inker.Split(','),
-        PersonRole.Colorist => Colorist.Split(','),
-        PersonRole.Letterer => Letterer.Split(','),
-        PersonRole.CoverArtist => CoverArtist.Split(','),
-        PersonRole.Editor => Editor.Split(','),
-        PersonRole.Publisher => Publisher.Split(','),
-        PersonRole.Character => Characters.Split(','),
-        PersonRole.Translator => Translator.Split(','),
-        PersonRole.Imprint => Imprint.Split(','),
-        PersonRole.Team => Teams.Split(','),
-        PersonRole.Location => Locations.Split(','),
         _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
     };
+
+    private static string[] SplitNames(string value) =>
+        value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
     public static AgeRating ConvertAgeRatingToEnum(string value)
     {
