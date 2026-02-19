@@ -7,6 +7,7 @@ import {map} from "rxjs/operators";
 import {Volume} from "../app/_models/volume";
 import {Chapter} from "../app/_models/chapter";
 import {Person} from "../app/_models/metadata/person";
+import {ReadingList} from "../app/_models/reading-list";
 
 /**
  * Type-safety for router resolvers. Add new fields as needed.
@@ -17,6 +18,7 @@ export interface ResolvedData {
   volume?: Volume;
   chapter?: Chapter;
   person?: Person;
+  readingList?: ReadingList;
 }
 
 
@@ -36,6 +38,7 @@ export function getWritableResolvedData<K extends keyof ResolvedData>(
   const destroyRef = inject(DestroyRef);
   const initial = route.snapshot.data[key] as NonNullable<ResolvedData[K]>;
   const sig = signal(initial);
+
   route.data.pipe(
     map(data => data[key] as NonNullable<ResolvedData[K]>),
     takeUntilDestroyed(destroyRef)

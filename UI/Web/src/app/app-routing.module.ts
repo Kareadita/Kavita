@@ -6,6 +6,7 @@ import {seriesResolver} from "./_resolvers/series.resolver";
 import {volumeResolver} from "./_resolvers/volume.resolver";
 import {chapterResolver} from "./_resolvers/chapter.resolver";
 import {personResolver} from "./_resolvers/person.resolver";
+import {readingListResolver} from "./_resolvers/reading-list.resolver";
 
 export const routes: Routes = [
   {
@@ -20,10 +21,6 @@ export const routes: Routes = [
       {
         path: 'collections',
         loadChildren: () => import('./_routes/collections-routing.module').then(m => m.routes)
-      },
-      {
-        path: 'lists',
-        loadChildren: () => import('./_routes/reading-list-routing.module').then(m => m.routes)
       },
       {
         path: 'announcements',
@@ -63,6 +60,18 @@ export const routes: Routes = [
       {
         path: 'profile',
         loadChildren: () => import('./_routes/profile-routing.module').then(m => m.routes)
+      },
+      {
+        path: 'lists',
+        pathMatch: 'full',
+        loadComponent: () => import('./reading-list/_components/reading-lists/reading-lists.component').then(c => c.ReadingListsComponent)
+      },
+      {
+        path: 'lists/:readingListId',
+        runGuardsAndResolvers: 'always',
+        canActivate: [AuthGuard],
+        resolve: { readingList: readingListResolver },
+        loadComponent: () => import('./reading-list/_components/reading-list-detail/reading-list-detail.component').then(c => c.ReadingListDetailComponent)
       },
       {
         path: 'library/:libraryId',

@@ -1,19 +1,20 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
+  input,
+  numberAttribute,
   OnInit,
   signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {DatePipe, DecimalPipe, DOCUMENT, Location, NgClass, NgStyle} from '@angular/common';
+import {DecimalPipe, DOCUMENT, formatDate, Location, NgClass, NgStyle} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
-import {take} from 'rxjs/operators';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {LibraryType} from 'src/app/_models/library/library';
@@ -29,7 +30,7 @@ import {
   IndexUpdateEvent,
   ItemRemoveEvent
 } from '../draggable-ordered-list/draggable-ordered-list.component';
-import {forkJoin, startWith, tap} from 'rxjs';
+import {startWith, tap} from 'rxjs';
 import {ReaderService} from 'src/app/_services/reader.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {ReadingListItemComponent} from '../reading-list-item/reading-list-item.component';
@@ -65,6 +66,7 @@ import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.servi
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {getWritableResolvedData} from "../../../../libs/route-util";
 
 enum TabID {
   Storyline = 'storyline-tab',
@@ -80,56 +82,83 @@ enum TabID {
   imports: [CardActionablesComponent, ImageComponent, NgbDropdown,
     NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent,
     LoadingComponent, DraggableOrderedListComponent,
-    ReadingListItemComponent, NgClass, DecimalPipe, DatePipe, TranslocoDirective, ReactiveFormsModule,
+    ReadingListItemComponent, NgClass, DecimalPipe, TranslocoDirective, ReactiveFormsModule,
     NgbNav, NgbNavContent, NgbNavLink, NgbTooltip,
     RouterLink, VirtualScrollerModule, NgStyle, NgbNavOutlet, NgbNavItem, PromotedIconComponent, DefaultValuePipe, DetailsTabComponent]
 })
 export class ReadingListDetailComponent implements OnInit {
-  private document = inject<Document>(DOCUMENT);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private readingListService = inject(ReadingListService);
-  private actionService = inject(ActionService);
-  private actionFactoryService = inject(ActionFactoryService);
-  protected utilityService = inject(UtilityService);
-  protected imageService = inject(ImageService);
-  private accountService = inject(AccountService);
-  private toastr = inject(ToastrService);
-  private confirmService = inject(ConfirmService);
-  private libraryService = inject(LibraryService);
-  private readerService = inject(ReaderService);
-  private cdRef = inject(ChangeDetectorRef);
-  private titleService = inject(Title);
-  private location = inject(Location);
-  private destroyRef = inject(DestroyRef);
+  private readonly document = inject<Document>(DOCUMENT);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly readingListService = inject(ReadingListService);
+  private readonly actionService = inject(ActionService);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  protected readonly utilityService = inject(UtilityService);
+  protected readonly imageService = inject(ImageService);
+  private readonly accountService = inject(AccountService);
+  private readonly toastr = inject(ToastrService);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly readerService = inject(ReaderService);
+  private readonly titleService = inject(Title);
+  private readonly location = inject(Location);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly MangaFormat = MangaFormat;
   protected readonly TabID = TabID;
   protected readonly encodeURIComponent = encodeURIComponent;
 
+  scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
 
-  @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
-  @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
+  readingListId = input(0, {transform: numberAttribute});
 
-  items: Array<ReadingListItem> = [];
-  listId!: number;
-  readingList = signal<ReadingList | undefined>(undefined);
-  actions: Array<ActionItem<any>> = [];
-  isAdmin: boolean = false;
-  isLoading: boolean = false;
-  accessibilityMode: boolean = false;
-  editMode: boolean = false;
+  readingList = getWritableResolvedData(this.route, 'readingList');
   readingListSummary = computed(() => {
     return (this.readingList()?.summary || '').replace(/\n/g, '<br>');
   });
+  imageUrl = computed(() => {
+    const rl = this.readingList();
+    return rl ? this.imageService.getReadingListCoverImage(rl.id) : '';
+  });
+  dateRangeLabel = computed<string | null>(() => {
+    const rl = this.readingList();
+    if (!rl || rl.startingYear === 0) return null;
 
-  libraryTypes: {[key: number]: LibraryType} = {};
+    const formatMonth = (month: number) => {
+      if (month <= 0) return '';
+      return formatDate(new Date(2020, month - 1, 1), 'MMM', 'en-US');
+    };
+
+    let result = '';
+
+    if (rl.startingMonth > 0) result += formatMonth(rl.startingMonth);
+    if (rl.startingMonth > 0 && rl.startingYear > 0) result += ', ';
+    if (rl.startingYear > 0) result += rl.startingYear;
+    result += ' — ';
+    if (rl.endingYear > 0) {
+      if (rl.endingMonth > 0) result += formatMonth(rl.endingMonth);
+      if (rl.endingMonth > 0 && rl.endingYear > 0) result += ', ';
+      if (rl.endingYear > 0) result += rl.endingYear;
+    }
+
+    return result;
+  });
+
+  items = signal<Array<ReadingListItem>>([]);
+  actions = computed(() => this.actionFactoryService
+    .getReadingListActions(this.shouldRenderReadingListAction.bind(this))
+    .filter(action => this.readingListService.actionListFilter(action, this.readingList(), this.isAdmin())));
+  isAdmin = computed(() => this.accountService.hasAdminRole(this.accountService.currentUserSignal()!));
+  isLoading = signal(false);
+  accessibilityMode = signal(false);
+  editMode = signal(false);
+
+  libraryTypes = signal<{[key: number]: LibraryType}>({});
   activeTabId = TabID.Storyline;
-  showStorylineTab = true;
-  isOwnedReadingList: boolean = false;
-  rlInfo: ReadingListInfo | null = null;
-  castInfo: IHasCast = {
+  isOwnedReadingList = computed(() => this.actions().filter(a => a.action === Action.Edit).length > 0);
+  rlInfo = signal<ReadingListInfo | null>(null);
+  castInfo = signal<IHasCast>({
     characterLocked: false,
     characters: [],
     coloristLocked: false,
@@ -157,7 +186,7 @@ export class ReadingListDetailComponent implements OnInit {
     translators: [],
     writerLocked: false,
     writers: []
-  };
+  });
 
   formGroup = new FormGroup({
     'edit': new FormControl(false, []),
@@ -166,47 +195,31 @@ export class ReadingListDetailComponent implements OnInit {
 
 
   get ScrollingBlockHeight() {
-    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
+    if (this.scrollingBlock() === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
     if (navbar === null) return 'calc(var(--vh)*100)';
 
-    const companionHeight = this.companionBar?.nativeElement.offsetHeight || 0;
     const navbarHeight = navbar.offsetHeight;
-    const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
+    const totalHeight = navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
-
-  ngOnInit(): void {
-    const listId = this.route.snapshot.paramMap.get('id');
-
-    if (listId === null) {
-      this.router.navigateByUrl('/home');
-      return;
-    }
-
-    this.listId = parseInt(listId, 10);
-
-
-    this.readingListService.getAllPeople(this.listId).subscribe(allPeople => {
-      this.castInfo = allPeople;
-      this.cdRef.markForCheck();
+  constructor() {
+    // Set the page title reactively when readingList changes
+    effect(() => {
+      const rl = this.readingList();
+      console.log('reading list: ', rl);
+      if (rl) {
+        this.titleService.setTitle('Kavita - ' + rl.title);
+      }
     });
 
-
-
-
-    this.readingListService.getReadingListInfo(this.listId).subscribe(info => {
-      this.rlInfo = info;
-      this.cdRef.markForCheck();
-    });
-
+    // Form subscriptions
     this.formGroup.get('edit')!.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
       startWith(false),
       tap(mode => {
-        this.editMode = (mode || false);
-        this.cdRef.markForCheck();
+        this.editMode.set(mode || false);
       })
     ).subscribe();
 
@@ -214,8 +227,7 @@ export class ReadingListDetailComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
       startWith(this.breakpointService.isMobile()),
       tap(mode => {
-        this.accessibilityMode = (mode || this.breakpointService.isMobile());
-        this.cdRef.markForCheck();
+        this.accessibilityMode.set(mode || this.breakpointService.isMobile());
       })
     ).subscribe();
 
@@ -223,59 +235,40 @@ export class ReadingListDetailComponent implements OnInit {
       this.formGroup.get('accessibilityMode')?.disable();
     }
 
-    this.accessibilityMode = this.breakpointService.isMobile();
-    this.editMode = false;
-    this.cdRef.markForCheck();
+    this.accessibilityMode.set(this.breakpointService.isMobile());
 
-    forkJoin([
-      this.libraryService.getLibraries(),
-      this.readingListService.getReadingList(this.listId)
-    ]).subscribe(results => {
-      const libraries = results[0];
-      const readingList = results[1];
-
-
-
+    // Fetch libraries
+    this.libraryService.getLibraries().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(libraries => {
+      const types: {[key: number]: LibraryType} = {};
       libraries.forEach(lib => {
-        this.libraryTypes[lib.id] = lib.type;
+        types[lib.id] = lib.type;
       });
+      this.libraryTypes.set(types);
+    });
+  }
 
-      if (readingList == null) {
-        // The list doesn't exist
-        this.toastr.error(translate('toasts.list-doesnt-exist'));
-        this.router.navigateByUrl('library');
-        return;
-      }
+  ngOnInit() {
+    const id = this.readingListId();
 
-      this.readingList.set(readingList);
-      this.titleService.setTitle('Kavita - ' + readingList.title);
+    this.readingListService.getAllPeople(id).subscribe(allPeople => {
+      this.castInfo.set(allPeople);
+    });
 
-      this.cdRef.markForCheck();
-
-      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-        if (user) {
-          this.isAdmin = this.accountService.hasAdminRole(user);
-
-          this.actions = this.actionFactoryService
-            .getReadingListActions(this.shouldRenderReadingListAction.bind(this))
-            .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
-          this.isOwnedReadingList = this.actions.filter(a => a.action === Action.Edit).length > 0;
-          this.cdRef.markForCheck();
-        }
-      });
+    this.readingListService.getReadingListInfo(id).subscribe(info => {
+      this.rlInfo.set(info);
     });
 
     this.getListItems();
   }
 
   getListItems() {
-    this.isLoading = true;
-    this.cdRef.markForCheck();
+    this.isLoading.set(true);
 
-    this.readingListService.getListItems(this.listId).subscribe(items => {
-      this.items = [...items];
-      this.isLoading = false;
-      this.cdRef.markForCheck();
+    this.readingListService.getListItems(this.readingListId()).subscribe(items => {
+      this.items.set([...items]);
+      this.isLoading.set(false);
     });
   }
 
@@ -294,8 +287,10 @@ export class ReadingListDetailComponent implements OnInit {
         this.readingList.set({...result.entity});
         break;
       case 'remove':
-      case 'reload':
         this.router.navigateByUrl('/lists');
+        break;
+      case 'reload':
+        this.router.navigateByUrl(`/list/${this.readingListId()}`);
         break;
       case 'none':
         break;
@@ -317,86 +312,78 @@ export class ReadingListDetailComponent implements OnInit {
     if (!readingList) return;
     this.actionService.editReadingList(readingList, (readingList: ReadingList) => {
       // Reload information around list
-      this.readingListService.getReadingList(this.listId).subscribe(rl => {
+      this.readingListService.getReadingList(this.readingListId()).subscribe(rl => {
         this.readingList.set(rl!);
-        this.cdRef.markForCheck();
       });
-    });
-  }
-
-  async deleteList(readingList: ReadingList) {
-    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-reading-list'))) return;
-
-    this.readingListService.delete(readingList.id).subscribe(() => {
-      this.toastr.success(translate('toasts.reading-list-deleted'));
-      this.router.navigateByUrl('/lists'); // NOTE: This needs to be a side effect
     });
   }
 
   orderUpdated(event: IndexUpdateEvent) {
     if (!this.readingList()) return;
-    this.readingListService.updatePosition(this.readingList()!.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
+    this.readingListService.updatePosition(this.readingList().id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
       this.getListItems();
     });
   }
 
   removeItem(removeEvent: ItemRemoveEvent) {
     if (!this.readingList()) return;
-    this.readingListService.deleteItem(this.readingList()!.id, removeEvent.item.id).subscribe(() => {
-      this.items.splice(removeEvent.position, 1);
-      this.items = [...this.items];
-      this.cdRef.markForCheck();
+    this.readingListService.deleteItem(this.readingList().id, removeEvent.item.id).subscribe(() => {
+      const currentItems = this.items();
+      const updated = [...currentItems];
+
+      updated.splice(removeEvent.position, 1);
+
+      this.items.set(updated);
       this.toastr.success(translate('toasts.item-removed'));
     });
   }
 
   removeRead() {
     if (!this.readingList()) return;
-    this.isLoading = true;
-    this.cdRef.markForCheck();
-    this.readingListService.removeRead(this.readingList()!.id).subscribe((resp) => {
+
+    this.isLoading.set(true);
+    this.readingListService.removeRead(this.readingList().id).subscribe((resp) => {
       if (resp === 'Nothing to remove') {
         this.toastr.info(translate('toasts.nothing-to-remove'));
         return;
       }
+
       this.getListItems();
     });
   }
 
   read(incognitoMode: boolean = false) {
     if (!this.readingList()) return;
-    const firstItem = this.items[0];
+    const firstItem = this.items()[0];
     this.router.navigate(
       this.readerService.getNavigationArray(firstItem.libraryId, firstItem.seriesId, firstItem.chapterId, firstItem.seriesFormat),
-      {queryParams: {readingListId: this.readingList()!.id, incognitoMode: incognitoMode}});
+      {queryParams: {readingListId: this.readingList().id, incognitoMode: incognitoMode}});
   }
 
   continue(incognitoMode: boolean = false) {
-    // TODO: Can I do this in the backend?
     if (!this.readingList()) return;
-    let currentlyReadingChapter = this.items[0];
-    for (let i = 0; i < this.items.length; i++) {
-      if (this.items[i].pagesRead >= this.items[i].pagesTotal) {
+    const currentItems = this.items();
+    let currentlyReadingChapter = currentItems[0];
+    for (let i = 0; i < currentItems.length; i++) {
+      if (currentItems[i].pagesRead >= currentItems[i].pagesTotal) {
         continue;
       }
-      currentlyReadingChapter = this.items[i];
+      currentlyReadingChapter = currentItems[i];
       break;
     }
 
     this.router.navigate(
       this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat),
-      {queryParams: {readingListId: this.readingList()!.id, incognitoMode: incognitoMode}});
+      {queryParams: {readingListId: this.readingList().id, incognitoMode: incognitoMode}});
   }
 
   toggleReorder() {
     this.formGroup.get('edit')?.setValue(!this.formGroup.get('edit')!.value);
-    this.cdRef.markForCheck();
   }
 
 
   onNavChange(event: NgbNavChangeEvent) {
     this.updateUrl(event.nextId);
-    this.cdRef.markForCheck();
   }
 
   private updateUrl(activeTab: TabID) {
@@ -407,7 +394,6 @@ export class ReadingListDetailComponent implements OnInit {
 
   switchTabsToDetail() {
     this.activeTabId = TabID.Details;
-    this.cdRef.markForCheck();
     setTimeout(() => {
       const tabElem = this.document.querySelector('#details-tab');
       if (tabElem) {

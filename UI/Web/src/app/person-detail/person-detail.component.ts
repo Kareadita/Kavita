@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {PersonService} from "../_services/person.service";
-import {EMPTY, Observable, switchMap, tap} from "rxjs";
+import {Observable} from "rxjs";
 import {Person, PersonRole} from "../_models/metadata/person";
 import {AsyncPipe} from "@angular/common";
 import {ImageComponent} from "../shared/image/image.component";
@@ -98,28 +98,6 @@ export class PersonDetailComponent {
 
 
   constructor() {
-    this.route.paramMap.pipe(
-      switchMap(params => {
-        const personName = params.get('name');
-        if (!personName) {
-          this.router.navigateByUrl('/home');
-          return EMPTY;
-        }
-
-        return this.personService.get(personName);
-      }),
-      tap((person) => {
-        if (person == null) {
-          this.toastr.error(translate('toasts.unauthorized-1'));
-          this.router.navigateByUrl('/home');
-          return;
-        }
-
-        this.setPerson(person);
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
-
     this.messageHubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
       if (message.event !== EVENTS.PersonMerged) return;
 
