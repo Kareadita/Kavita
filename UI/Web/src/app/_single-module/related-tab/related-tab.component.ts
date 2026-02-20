@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, EventEmitter, inject, input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
 import {ReadingList} from "../../_models/reading-list";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {ImageService} from "../../_services/image.service";
@@ -77,7 +77,7 @@ export class RelatedTabComponent {
   relatedConfig = computed(() => this.cardConfigFactory.forRelationship());
 
   /** Emits when an entity type is deleted and a full refresh is needed **/
-  @Output() reload = new EventEmitter<RelatedTabChangeEvent>();
+  readonly reload = output<RelatedTabChangeEvent>();
   /** Emits when an entity's internal state is changed and it needs to be updated **/
-  @Output() dataChanged = new EventEmitter<RelatedTabChangeEvent>();
+  readonly dataChanged = output<RelatedTabChangeEvent>();
 }

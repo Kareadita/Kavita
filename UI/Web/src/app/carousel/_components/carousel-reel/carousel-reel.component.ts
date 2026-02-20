@@ -5,13 +5,12 @@ import {
   computed,
   ContentChild,
   CUSTOM_ELEMENTS_SCHEMA,
-  EventEmitter,
   inject,
   input,
   Input,
-  Output,
   signal,
-  TemplateRef
+  TemplateRef,
+  output
 } from '@angular/core';
 import {Swiper} from 'swiper/types';
 import {register} from 'swiper/element/bundle';
@@ -67,10 +66,10 @@ export class CarouselReelComponent {
    * If using actionables, this is the entity to allow Action.Service to handle logic
    */
   @Input() actionableEntity: ActionableEntity = null;
-  @Output() sectionClick = new EventEmitter<string>();
-  @Output() handleAction = new EventEmitter<ActionItem<any>>();
+  readonly sectionClick = output<string>();
+  readonly handleAction = output<ActionItem<any>>();
 
-  @Output() actionHandler = new EventEmitter<ActionResult<any>>();
+  readonly actionHandler = output<ActionResult<any>>();
 
   currentPage = signal<number>(1);
   pageSize = input(20);

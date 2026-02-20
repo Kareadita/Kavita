@@ -4,12 +4,11 @@ import {
   ChangeDetectorRef,
   Component, DestroyRef,
   ElementRef,
-  EventEmitter,
   inject,
   Input,
   OnInit,
-  Output,
-  ViewChild
+  ViewChild,
+  output
 } from '@angular/core';
 import { filter, map, Observable, of, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
@@ -48,7 +47,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   @Input({required: true}) bookmark$!: Observable<number>;
   @Input({required: true}) showClickOverlay$!: Observable<boolean>;
   @Input() imageFit$!: Observable<FITTING_OPTION>;
-  @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
+  readonly imageHeight = output<number>();
 
 
   @ViewChild('content') canvas: ElementRef | undefined;

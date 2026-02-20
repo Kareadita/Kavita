@@ -11,7 +11,7 @@ import {
   input,
   Input,
   OnInit,
-  Output,
+  output,
   Signal,
   TemplateRef
 } from '@angular/core';
@@ -77,7 +77,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
 
   filterSettings = input.required<FilterSettingsBase<TFilter, TSort>>();
 
-  @Output() applyFilter: EventEmitter<FilterEvent<TFilter, TSort>> = new EventEmitter();
+  readonly applyFilter = output<FilterEvent<TFilter, TSort>>();
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
 
   /**

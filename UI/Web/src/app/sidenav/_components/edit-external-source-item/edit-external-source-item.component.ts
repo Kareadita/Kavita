@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, Input, OnInit, output} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
@@ -19,8 +19,8 @@ export class EditExternalSourceItemComponent implements OnInit {
 
   @Input({required: true}) source!: ExternalSource;
   @Input() isViewMode: boolean = true;
-  @Output() sourceUpdate = new EventEmitter<ExternalSource>();
-  @Output() sourceDelete = new EventEmitter<ExternalSource>();
+  readonly sourceUpdate = output<ExternalSource>();
+  readonly sourceDelete = output<ExternalSource>();
 
   formGroup: FormGroup = new FormGroup({});
 

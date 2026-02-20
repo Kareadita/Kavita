@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, inject, input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, output} from '@angular/core';
 import {DecimalPipe, DOCUMENT} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../shared/image/image.component";
@@ -28,7 +28,7 @@ export class CoverImageComponent {
   coverImage = input.required<string>();
   entity = input.required<IHasProgress>();
   continueTitle = input<string>('');
-  @Output() read = new EventEmitter();
+  readonly read = output();
 
   mobileSeriesImgBackground = getComputedStyle(this.document.documentElement)
     .getPropertyValue('--mobile-series-img-background').trim();

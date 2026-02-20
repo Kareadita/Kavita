@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, EventEmitter, input, OnInit, Output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, OnInit, signal, output} from '@angular/core';
 import {ContentChange, QuillEditorComponent, QuillFormat} from "ngx-quill";
 import type QuillType from 'quill'
 import {FormGroup, ReactiveFormsModule} from "@angular/forms";
@@ -124,7 +124,10 @@ export class QuillWrapperComponent {
   /**
    * Deligation of the quill onContentChange event
    */
-  @Output() contentChanged = new EventEmitter<{raw: ContentChange, html?: string}>();
+  readonly contentChanged = output<{
+    raw: ContentChange;
+    html?: string;
+}>();
 
   /**
    * Items to show in the toolbar

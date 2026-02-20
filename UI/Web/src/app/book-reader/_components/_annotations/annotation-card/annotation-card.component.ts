@@ -3,13 +3,12 @@ import {
   Component,
   computed,
   effect,
-  EventEmitter,
   inject,
   input,
   model,
-  Output,
   signal,
-  Signal
+  Signal,
+  output
 } from '@angular/core';
 import {Annotation} from "../../../_models/annotations/annotation";
 import {UtcToLocalDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
@@ -96,12 +95,12 @@ export class AnnotationCardComponent {
   inBookReader = input<boolean>(false);
 
   selected = input<boolean>(false);
-  @Output() delete = new EventEmitter();
-  @Output() navigate = new EventEmitter<Annotation>();
+  readonly delete = output();
+  readonly navigate = output<Annotation>();
   /**
    * Fire when the checkbox is pressed, with the last known state (inverse of checked state)
    */
-  @Output() selection = new EventEmitter<boolean>();
+  readonly selection = output<boolean>();
 
   titleColor: Signal<string>;
   hasClicked = signal<boolean>(false);

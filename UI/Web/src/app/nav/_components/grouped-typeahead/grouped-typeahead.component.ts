@@ -5,14 +5,13 @@ import {
   ContentChild,
   DestroyRef,
   ElementRef,
-  EventEmitter,
   HostListener,
   inject,
   Input,
   OnInit,
-  Output,
   TemplateRef,
-  ViewChild
+  ViewChild,
+  output
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
@@ -73,19 +72,19 @@ export class GroupedTypeaheadComponent implements OnInit {
   /**
    * Emits when the input changes from user interaction
    */
-  @Output() inputChanged: EventEmitter<SearchEvent> = new EventEmitter();
+  readonly inputChanged = output<SearchEvent>();
   /**
    * Emits when something is clicked/selected
    */
-  @Output() selected: EventEmitter<any> = new EventEmitter();
+  readonly selected = output<any>();
   /**
    * Emits an event when the field is cleared
    */
-  @Output() clearField: EventEmitter<void> = new EventEmitter();
+  readonly clearField = output<void>();
   /**
    * Emits when a change in the search field looses/gains focus
    */
-  @Output() focusChanged: EventEmitter<boolean> = new EventEmitter();
+  readonly focusChanged = output<boolean>();
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
   @ContentChild('itemTemplate') itemTemplate!: TemplateRef<any>;

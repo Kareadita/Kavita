@@ -8,18 +8,17 @@ import {
   DestroyRef,
   effect,
   ElementRef,
-  EventEmitter,
   inject,
   Injector,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
-  Output,
   Renderer2,
   Signal,
   SimpleChanges,
-  ViewChild
+  ViewChild,
+  output
 } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
@@ -116,9 +115,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   @Input({required: true}) urlProvider!: (page: number) => string;
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
   @Input({required: true}) readingProfile!: ReadingProfile;
-  @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
-  @Output() loadNextChapter: EventEmitter<void> = new EventEmitter<void>();
-  @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();
+  readonly pageNumberChange = output<number>();
+  readonly loadNextChapter = output<void>();
+  readonly loadPrevChapter = output<void>();
 
   @Input() goToPage: BehaviorSubject<number> | undefined;
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
@@ -500,6 +499,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
         requestAnimationFrame(() => this.scrollService.scrollTo((SPACER_SCROLL_INTO_PX / 2), reader));
       } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
         // If already at top, then we are moving on
+        // TODO: The 'emit' function requires a mandatory void argument
         this.loadPrevChapter.emit();
         this.cdRef.markForCheck();
       }
@@ -681,6 +681,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     if (!this.allImagesLoaded) return;
 
     this.setPageNum(this.totalPages);
+    // TODO: The 'emit' function requires a mandatory void argument
     this.loadNextChapter.emit();
   }
 

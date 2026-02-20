@@ -5,13 +5,12 @@ import {
   Component,
   computed,
   DestroyRef,
-  EventEmitter,
   inject,
   Injector,
   Input,
   OnInit,
-  Output,
-  Signal
+  Signal,
+  output
 } from '@angular/core';
 import {combineLatest, filter, map, Observable, of, shareReplay, switchMap, tap} from 'rxjs';
 import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
@@ -47,7 +46,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
   @Input({required: true}) showClickOverlay$!: Observable<boolean>;
   @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
 
-  @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
+  readonly imageHeight = output<number>();
   private readonly destroyRef = inject(DestroyRef);
 
   imageFitClass$!: Observable<string>;

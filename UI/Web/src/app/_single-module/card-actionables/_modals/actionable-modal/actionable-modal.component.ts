@@ -3,12 +3,11 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter,
   inject,
   input,
   OnInit,
-  Output,
-  signal
+  signal,
+  output
 } from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {UtilityService} from "../../../../shared/_services/utility.service";
@@ -41,7 +40,7 @@ export class ActionableModalComponent implements OnInit {
   entity = input<ActionableEntity>(null);
   /** This assumes these are filtered actions */
   filteredActions = input<ActionItem<any>[]>([]);
-  @Output() actionPerformed = new EventEmitter<ActionItem<any> | ActionResult<any>>();
+  readonly actionPerformed = output<ActionItem<any> | ActionResult<any>>();
 
   currentItems = signal<ActionItem<any>[]>([]);
   currentLevel = signal<string[]>([]);

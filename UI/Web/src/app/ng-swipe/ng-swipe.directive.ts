@@ -1,4 +1,4 @@
-import { Directive, ElementRef, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output, inject } from '@angular/core';
+import { Directive, ElementRef, Input, NgZone, OnDestroy, OnInit, inject, output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import {createSwipeSubscription, SwipeDirection, SwipeEvent, SwipeStartEvent} from './ag-swipe.core';
 
@@ -13,12 +13,12 @@ export class SwipeDirective implements OnInit, OnDestroy {
   private swipeSubscription: Subscription | undefined;
 
   @Input() restrictSwipeToLeftSide: boolean = false;
-  @Output() swipeMove: EventEmitter<SwipeEvent> = new EventEmitter<SwipeEvent>();
-  @Output() swipeEnd: EventEmitter<SwipeEvent> = new EventEmitter<SwipeEvent>();
-  @Output() swipeLeft: EventEmitter<void> = new EventEmitter<void>();
-  @Output() swipeRight: EventEmitter<void> = new EventEmitter<void>();
-  @Output() swipeUp: EventEmitter<void> = new EventEmitter<void>();
-  @Output() swipeDown: EventEmitter<void> = new EventEmitter<void>();
+  readonly swipeMove = output<SwipeEvent>();
+  readonly swipeEnd = output<SwipeEvent>();
+  readonly swipeLeft = output<void>();
+  readonly swipeRight = output<void>();
+  readonly swipeUp = output<void>();
+  readonly swipeDown = output<void>();
 
   ngOnInit() {
     this.zone.runOutsideAngular(() => {
@@ -52,14 +52,18 @@ export class SwipeDirective implements OnInit, OnDestroy {
   private detectSwipeDirection(swipeEvent: SwipeEvent) {
     if (swipeEvent.direction === SwipeDirection.X) {
       if (swipeEvent.distance > 0) {
+        // TODO: The 'emit' function requires a mandatory void argument
         this.swipeRight.emit();
       } else {
+        // TODO: The 'emit' function requires a mandatory void argument
         this.swipeLeft.emit();
       }
     } else if (swipeEvent.direction === SwipeDirection.Y) {
       if (swipeEvent.distance > 0) {
+        // TODO: The 'emit' function requires a mandatory void argument
         this.swipeDown.emit();
       } else {
+        // TODO: The 'emit' function requires a mandatory void argument
         this.swipeUp.emit();
       }
     }

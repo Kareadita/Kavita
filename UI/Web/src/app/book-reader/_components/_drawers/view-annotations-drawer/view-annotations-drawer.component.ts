@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, inject, Output, Signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Signal, output} from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AnnotationCardComponent} from "../../_annotations/annotation-card/annotation-card.component";
@@ -31,7 +31,7 @@ export class ViewAnnotationsDrawerComponent {
   private readonly annotationService = inject(AnnotationService);
   protected readonly accountService = inject(AccountService);
 
-  @Output() loadAnnotation: EventEmitter<Annotation> = new EventEmitter();
+  readonly loadAnnotation = output<Annotation>();
 
   annotations: Signal<Annotation[]> = this.annotationService.annotations;
   formGroup = new FormGroup({

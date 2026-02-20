@@ -2,11 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  EventEmitter,
   inject,
   input,
   OnDestroy,
-  Output
+  output
 } from '@angular/core';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
 import {AccountService} from 'src/app/_services/account.service';
@@ -57,7 +56,7 @@ export class CardActionablesComponent implements OnDestroy {
   /**
    * This will only emit when the action is clicked and the entity is null. Otherwise, the entity callback handler will be invoked.
    */
-  @Output() actionHandler = new EventEmitter<ActionResult<any>>();
+  readonly actionHandler = output<ActionResult<any>>();
 
   filteredActions = computed(() => {
     const entity = this.entity();

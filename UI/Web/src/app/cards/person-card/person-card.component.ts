@@ -4,12 +4,11 @@ import {
   Component,
   ContentChild,
   DestroyRef,
-  EventEmitter,
   HostListener,
   inject,
   Input,
-  Output,
-  TemplateRef
+  TemplateRef,
+  output
 } from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
@@ -80,11 +79,11 @@ export class PersonCardComponent {
   /**
    * Event emitted when item is clicked
    */
-  @Output() clicked = new EventEmitter<string>();
+  readonly clicked = output<string>();
   /**
    * When the card is selected.
    */
-  @Output() selection = new EventEmitter<boolean>();
+  readonly selection = output<boolean>();
   @ContentChild('subtitle') subtitleTemplate!: TemplateRef<any>;
 
   tooltipTitle: string = this.title;
