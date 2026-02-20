@@ -3,7 +3,7 @@
     <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
       <h4 title>
         <span>{{libraryName()}}</span>
-        <app-card-actionables [actions]="actions" [entity]="library()" (actionHandler)="handleActionCallback($event)"  />
+        <app-card-actionables [actions]="actions()" [entity]="library()" (actionHandler)="handleActionCallback($event)"  />
       </h4>
       @if (active.fragment === '') {
         <h5 subtitle class="subtitle-with-actionables">{{t('common.series-count', {num: pagination.totalItems | number})}} </h5>
@@ -14,7 +14,7 @@
     @if (filter) {
       <app-card-detail-layout
         [isLoading]="loadingSeries"
-        [items]="series"
+        [items]="series()"
         [pagination]="pagination"
         [filterSettings]="filterSettings"
         [trackByIdentity]="trackByIdentity"
@@ -30,7 +30,7 @@
 
         <ng-template #cardItem let-item let-position="idx">
           <app-series-card [series]="item" [suppressLibraryLink]="true" (reload)="loadPage()"
-                           [index]="position" [maxIndex]="series.length" [allowSelection]="true" />
+                           [index]="position" [maxIndex]="series().length" [allowSelection]="true" />
         </ng-template>
 
         <ng-template #noData>
