@@ -5,6 +5,7 @@ using Kavita.API.Database;
 using Kavita.Common.Constants;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Database;
+using Kavita.Models.Constants;
 using Kavita.Models.Entities.History;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;

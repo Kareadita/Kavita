@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Kavita.Common.Constants;
 using Kavita.Common.Extensions;
+using Kavita.Models.Constants;
 using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Services.Scanner;
@@ -1211,6 +1213,7 @@ public static partial class Parser
         return match.Groups["Year"].Value;
     }
 
+    [return: NotNullIfNotNull(nameof(filename))]
     public static string? RemoveExtensionIfSupported(string? filename)
     {
         if (string.IsNullOrEmpty(filename)) return filename;

@@ -7,6 +7,7 @@ using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
 using Kavita.Common.Constants;
 using Kavita.Database.Extensions;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Reader;

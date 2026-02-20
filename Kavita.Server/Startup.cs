@@ -51,7 +51,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi;
 using Serilog;
-using Headers = Kavita.Models.Constants.Headers;
 using TaskScheduler = Kavita.Services.TaskScheduler;
 
 namespace Kavita.Server;

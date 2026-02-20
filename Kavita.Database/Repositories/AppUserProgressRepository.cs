@@ -9,6 +9,7 @@ using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
 using Kavita.Common.Constants;
 using Kavita.Database.Extensions;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Progress;

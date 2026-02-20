@@ -1,0 +1,177 @@
+﻿using System.IO.Abstractions.TestingHelpers;
+using Kavita.API.Database;
+using Kavita.API.Services;
+using Kavita.API.Services.Plus;
+using Kavita.API.Services.Reading;
+using Kavita.API.Services.SignalR;
+using Kavita.Common.Extensions;
+using Kavita.Database.Tests;
+using Kavita.Models.Builders;
+using Kavita.Models.Entities;
+using Kavita.Models.Entities.Enums;
+using Kavita.Services.Builders;
+using Kavita.Services.Helpers;
+using Kavita.Services.Metadata;
+using Kavita.Services.Reading;
+using Kavita.Services.Scanner;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using Xunit.Abstractions;
+
+namespace Kavita.Services.Tests;
+
+public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
+{
+    private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
+    private const long WordCount = 33608; // 37417 if splitting on space, 33608 if just character count
+    private const long MinHoursToRead = 1;
+    private const float AvgHoursToRead = 1.66954792f;
+    private const long MaxHoursToRead = 3;
+
+    private IReaderService Setup(IUnitOfWork unitOfWork)
+    {
+        return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
+            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityNamingService>(),
+            Substitute.For<ILocalizationService>());
+    }
+
+    [Fact]
+    public async Task ReadingTimeShouldBeNonZero()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var readerService = Setup(unitOfWork);
+
+        var series = new SeriesBuilder("Test Series")
+            .WithFormat(MangaFormat.Epub)
+            .Build();
+
+        var chapter = new ChapterBuilder("")
+            .WithFile(new MangaFileBuilder(
+                Path.Join(_testDirectory,
+                    "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub"),
+                MangaFormat.Epub).Build())
+            .Build();
+
+        context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+            .WithSeries(series)
+            .Build());
+
+        series.Volumes = new List<Volume>()
+        {
+            new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithChapter(chapter)
+                .Build(),
+        };
+
+        await context.SaveChangesAsync();
+
+
+        var cacheService = new CacheHelper(new FileService());
+        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
+            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>());
+
+
+        await service.ScanSeries(1, 1);
+
+        Assert.Equal(WordCount, series.WordCount);
+        Assert.Equal(MinHoursToRead, series.MinHoursToRead);
+        Assert.True(series.AvgHoursToRead.Is(AvgHoursToRead));
+        Assert.Equal(MaxHoursToRead, series.MaxHoursToRead);
+
+        // Validate the Chapter gets updated correctly
+        var volume = series.Volumes[0];
+        Assert.Equal(WordCount, volume.WordCount);
+        Assert.Equal(MinHoursToRead, volume.MinHoursToRead);
+        Assert.Equal(AvgHoursToRead, volume.AvgHoursToRead);
+        Assert.Equal(MaxHoursToRead, volume.MaxHoursToRead);
+
+        Assert.Equal(WordCount, chapter.WordCount);
+        Assert.Equal(MinHoursToRead, chapter.MinHoursToRead);
+        Assert.Equal(AvgHoursToRead, chapter.AvgHoursToRead);
+        Assert.Equal(MaxHoursToRead, chapter.MaxHoursToRead);
+    }
+
+
+
+    [Fact]
+    public async Task ReadingTimeShouldIncreaseWhenNewBookAdded()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var readerService = Setup(unitOfWork);
+
+        var chapter = new ChapterBuilder("")
+            .WithFile(new MangaFileBuilder(
+                Path.Join(_testDirectory,
+                    "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub"),
+                MangaFormat.Epub).Build())
+            .Build();
+        var series = new SeriesBuilder("Test Series")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithChapter(chapter)
+                .Build())
+            .Build();
+
+        context.Library.Add(new LibraryBuilder("Test", LibraryType.Book)
+            .WithSeries(series)
+            .Build());
+
+
+        await context.SaveChangesAsync();
+
+
+        var cacheService = new CacheHelper(new FileService());
+        var service = new WordCountAnalyzerService(Substitute.For<ILogger<WordCountAnalyzerService>>(), unitOfWork,
+            Substitute.For<IEventHub>(), cacheService, Substitute.For<IMediaErrorService>());
+        await service.ScanSeries(1, 1);
+
+        var chapter2 = new ChapterBuilder("2")
+            .WithFile(new MangaFileBuilder(
+                Path.Join(_testDirectory,
+                    "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub"),
+                MangaFormat.Epub).Build())
+            .Build();
+
+
+        series.Volumes.Add(new VolumeBuilder("1")
+            .WithChapter(chapter2)
+            .Build());
+
+        series.Volumes[0].Chapters.Add(chapter2);
+        await unitOfWork.CommitAsync();
+
+        await service.ScanSeries(1, 1);
+
+        Assert.Equal(WordCount * 2L, series.WordCount);
+        Assert.Equal(MinHoursToRead * 2, series.MinHoursToRead);
+
+        var firstVolume = series.Volumes[0];
+        Assert.Equal(WordCount, firstVolume.WordCount);
+        Assert.Equal(MinHoursToRead, firstVolume.MinHoursToRead);
+        Assert.True(series.AvgHoursToRead.Is(AvgHoursToRead * 2));
+        Assert.Equal(MaxHoursToRead, firstVolume.MaxHoursToRead);
+
+        var secondVolume = series.Volumes[1];
+        Assert.Equal(WordCount, secondVolume.WordCount);
+        Assert.Equal(MinHoursToRead, secondVolume.MinHoursToRead);
+        Assert.Equal(AvgHoursToRead, secondVolume.AvgHoursToRead);
+        Assert.Equal(MaxHoursToRead, secondVolume.MaxHoursToRead);
+
+        // Validate original chapter doesn't change
+        Assert.Equal(WordCount, chapter.WordCount);
+        Assert.Equal(MinHoursToRead, chapter.MinHoursToRead);
+        Assert.Equal(AvgHoursToRead, chapter.AvgHoursToRead);
+        Assert.Equal(MaxHoursToRead, chapter.MaxHoursToRead);
+
+        // Validate new chapter gets updated
+        Assert.Equal(WordCount, chapter2.WordCount);
+        Assert.Equal(MinHoursToRead, chapter2.MinHoursToRead);
+        Assert.Equal(AvgHoursToRead, chapter2.AvgHoursToRead);
+        Assert.Equal(MaxHoursToRead, chapter2.MaxHoursToRead);
+    }
+
+
+}

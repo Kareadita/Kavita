@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.Common.Constants;
+using Kavita.Models.Constants;
 
 namespace Kavita.API.Services.Scanner;
 

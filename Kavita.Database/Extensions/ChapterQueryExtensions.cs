@@ -1,5 +1,6 @@
 using System.Linq;
 using Kavita.Common.Constants;
+using Kavita.Models.Constants;
 using Kavita.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
