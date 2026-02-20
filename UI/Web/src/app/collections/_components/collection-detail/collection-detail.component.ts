@@ -4,10 +4,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
+  effect,
   ElementRef,
   EventEmitter,
   inject,
+  input,
+  numberAttribute,
   OnInit,
   ViewChild
 } from '@angular/core';
@@ -69,6 +73,7 @@ import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {ModalResult} from "../../../_models/modal/modal-result";
 import {ModalService} from "../../../_services/modal.service";
+import {getWritableResolvedData} from "../../../../libs/route-util";
 
 @Component({
   selector: 'app-collection-detail',
@@ -108,16 +113,16 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
+  collectionId = input(0, {transform: numberAttribute});
+  collectionTag = getWritableResolvedData(this.route, 'collection');
+  summary = computed(() => (this.collectionTag()?.summary ?? '').replace(/\n/g, '<br>'));
 
-
-  collectionTag!: UserCollection;
   isLoading: boolean = true;
   series: Array<Series> = [];
   pagination: Pagination = new Pagination();
   collectionTagActions: ActionItem<UserCollection>[] = [];
   filter: FilterV2<FilterField> | undefined = undefined;
   filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
-  summary: string = '';
   user!: User;
 
   actionInProgress: boolean = false;
@@ -132,15 +137,17 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   constructor() {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-      const routeId = this.route.snapshot.paramMap.get('id');
-      if (routeId === null) {
-        this.router.navigate(['collections']);
-        return;
-      }
-      const tagId = parseInt(routeId, 10);
+      effect(() => {
+        const tag = this.collectionTag();
+        if (tag) {
+          this.titleService.setTitle(this.translocoService.translate('collection-detail.title-alt', {collectionName: tag.title}));
+        }
+      });
 
       this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
         this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+        const tag = this.collectionTag();
+        const tagId = tag?.id ?? 0;
 
         const defaultStmt =  {field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal};
 
@@ -157,7 +164,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
         this.filterActiveCheck!.statements.push(defaultStmt);
         this.filterSettings.presetsV2 =  this.filter;
 
-        this.updateTag(tagId);
+        this.loadPage();
         this.cdRef.markForCheck();
       });
 
@@ -181,7 +188,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(2000)).subscribe(event => {
       if (event.event == EVENTS.CollectionUpdated) {
         const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
-        if (collectionEvent.tagId === this.collectionTag.id) {
+        if (collectionEvent.tagId === this.collectionTag()?.id) {
           this.loadPage();
         }
       } else if (event.event === EVENTS.SeriesRemoved) {
@@ -203,27 +210,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
   ngAfterContentChecked(): void {
     this.scrollService.setScrollContainer(this.scrollingBlock);
-  }
-
-  // TODO: This is a very weird implementation, let's clean it up
-  updateTag(tagId: number) {
-    this.collectionService.allCollections().subscribe(tags => {
-      const matchingTags = tags.filter(t => t.id === tagId);
-      if (matchingTags.length === 0) {
-        this.toastr.error(this.translocoService.translate('errors.collection-invalid-access'));
-        this.router.navigateByUrl('/');
-        return;
-      }
-
-      this.setTag(matchingTags[0]);
-    });
-  }
-
-  private setTag(tag: UserCollection) {
-    this.collectionTag = {...tag};
-    this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
-    this.titleService.setTitle(this.translocoService.translate('collection-detail.title-alt', {collectionName: this.collectionTag.title}));
-    this.cdRef.markForCheck();
   }
 
   loadPage() {
@@ -252,7 +238,9 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   async handleActionCallback(result: ActionResult<UserCollection>) {
     switch (result.effect) {
       case 'update':
-        this.updateTag(this.collectionTag.id);
+        this.collectionService.getCollectionById(this.collectionTag()!.id).subscribe(tag => {
+          this.collectionTag.set(tag);
+        });
         break;
       case 'remove':
         this.router.navigateByUrl('/collections');
@@ -287,22 +275,22 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     }
     switch (action.action) {
       case Action.Promote:
-        this.collectionService.promoteMultipleCollections([this.collectionTag.id], true).subscribe(() => {
-          this.collectionTag.promoted = true;
+        this.collectionService.promoteMultipleCollections([this.collectionTag()!.id], true).subscribe(() => {
+          this.collectionTag.update(tag => ({...tag, promoted: true}));
           this.cdRef.markForCheck();
         });
         break;
       case Action.UnPromote:
-        this.collectionService.promoteMultipleCollections([this.collectionTag.id], false).subscribe(() => {
-          this.collectionTag.promoted = false;
+        this.collectionService.promoteMultipleCollections([this.collectionTag()!.id], false).subscribe(() => {
+          this.collectionTag.update(tag => ({...tag, promoted: false}));
           this.cdRef.markForCheck();
         });
         break;
       case(Action.Edit):
-        this.openEditCollectionTagModal(this.collectionTag);
+        this.openEditCollectionTagModal(this.collectionTag()!);
         break;
       case (Action.Delete):
-        this.collectionService.deleteTag(this.collectionTag.id).subscribe(() => {
+        this.collectionService.deleteTag(this.collectionTag()!.id).subscribe(() => {
           this.toastr.success(translate('toasts.collection-tag-deleted'));
           this.router.navigateByUrl('collections');
         });
@@ -314,16 +302,18 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
   openEditCollectionTagModal(collectionTag: UserCollection) {
     const modalRef = this.modalService.open(EditCollectionTagsModalComponent);
-    modalRef.setInput('tag', this.collectionTag);
+    modalRef.setInput('tag', this.collectionTag()!);
     modalRef.closed.subscribe((results: ModalResult<UserCollection>) => {
-      this.updateTag(this.collectionTag.id);
+      this.collectionService.getCollectionById(this.collectionTag()!.id).subscribe(tag => {
+        this.collectionTag.set(tag);
+      });
       this.loadPage();
     });
   }
 
   openSyncDetailDrawer() {
     const ref = this.offcanvasService.open(SmartCollectionDrawerComponent, {position: 'end', panelClass: ''});
-    ref.componentInstance.collection = this.collectionTag;
+    ref.componentInstance.collection = this.collectionTag();
     ref.componentInstance.series = this.series;
   }
 
