@@ -32,15 +32,15 @@ BuildUI()
 {
     ProgressStart 'Building UI'
     echo 'Removing old wwwroot'
-    rm -rf API/wwwroot/*
+    rm -rf Kavita.Server/wwwroot/*
     cd UI/Web/ || exit
     echo 'Installing web dependencies'
     npm install --legacy-peer-deps
     echo 'Building UI'
     npm run prod
     echo 'Copying back to Kavita wwwroot'
-    mkdir -p ../../API/wwwroot
-    cp -R dist/browser/* ../../API/wwwroot
+    mkdir -p ../../Kavita.Server/wwwroot
+    cp -R dist/browser/* ../../Kavita.Server/wwwroot
     cd ../../ || exit
     ProgressEnd 'Building UI'
 }
@@ -54,7 +54,7 @@ Package()
 
     # TODO: Use no-restore? Because Build should have already done it for us
     echo "Building"
-    cd API
+    cd Kavita.Server
     echo dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder"
     dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder"
 
@@ -64,8 +64,8 @@ Package()
     echo "Copying LICENSE"
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
 
-    echo "Renaming API -> Kavita"
-    mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
+    echo "Renaming Kavita.Server -> Kavita"
+    mv "$lOutputFolder"/Kavita.Server "$lOutputFolder"/Kavita
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/

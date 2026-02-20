@@ -20,7 +20,7 @@ FROM ubuntu:noble
 
 COPY --from=copytask /Kavita /kavita
 COPY --from=copytask /files/wwwroot /kavita/wwwroot
-COPY API/config/appsettings.json /tmp/config/appsettings.json
+COPY Kavita.Server/config/appsettings.json /tmp/config/appsettings.json
 
 #Installs program dependencies
 ENV DEBIAN_FRONTEND=noninteractive

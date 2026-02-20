@@ -50,15 +50,15 @@ BuildUI()
 {
     ProgressStart 'Building UI'
     echo 'Removing old wwwroot'
-    rm -rf API/wwwroot/*
+    rm -rf Kavita.Server/wwwroot/*
     cd UI/Web/ || exit
     echo 'Installing web dependencies'
     npm install --legacy-peer-deps
     echo 'Building UI'
     npm run prod
     echo 'Copying back to Kavita wwwroot'
-    mkdir -p ../../API/wwwroot
-    cp -R dist/browser/* ../../API/wwwroot
+    mkdir -p ../../Kavita.Server/wwwroot
+    cp -R dist/browser/* ../../Kavita.Server/wwwroot
     cd ../../ || exit
     ProgressEnd 'Building UI'
 }
@@ -72,7 +72,7 @@ Package()
 
     # TODO: Use no-restore? Because Build should have already done it for us
     echo "Building"
-    cd API
+    cd Kavita.Server
     echo dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder"
     dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder"
 
@@ -92,20 +92,17 @@ Package()
     echo "Copying LICENSE"
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
 
-    echo "Renaming API -> Kavita"
+    echo "Renaming Kavita.Server -> Kavita"
     if [ $runtime == "win-x64" ] || [ $runtime == "win-x86" ]
     then
-        mv "$lOutputFolder"/API.exe "$lOutputFolder"/Kavita.exe
+        mv "$lOutputFolder"/Kavita.Server.exe "$lOutputFolder"/Kavita.exe
     else
-        mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
+        mv "$lOutputFolder"/Kavita.Server "$lOutputFolder"/Kavita
     fi
 
+    mkdir -p $lOutputFolder/config
     echo "Copying appsettings.json"
     cp config/appsettings.json $lOutputFolder/config/appsettings-init.json
-    echo "Removing appsettings.Development.json"
-    rm $lOutputFolder/config/appsettings.Development.json
-    echo "Removing appsettings.json"
-    rm $lOutputFolder/config/appsettings.json
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/

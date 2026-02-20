@@ -19,6 +19,7 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.2" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
       <PackageReference Include="Microsoft.Net.Http.Headers" Version="2.3.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
       <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
       <PackageReference Include="SonarAnalyzer.CSharp" Version="10.18.0.131500">
         <PrivateAssets>all</PrivateAssets>

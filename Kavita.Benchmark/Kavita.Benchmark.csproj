@@ -37,10 +37,6 @@
   </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Kavita.Models\Kavita.Models.csproj" />
       <ProjectReference Include="..\Kavita.Services\Kavita.Services.csproj" />
     </ItemGroup>
