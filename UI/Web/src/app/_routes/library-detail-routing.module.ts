@@ -7,6 +7,7 @@ export const routes: Routes = [
   {
     path: '',
     component: LibraryDetailComponent,
+    data: {titleField: 'library', titleProp: 'name'},
     resolve: {
       filter: UrlFilterResolver
     }

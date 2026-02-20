@@ -11,7 +11,6 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {debounceTime} from 'rxjs';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
@@ -34,7 +33,7 @@ import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-opera
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
@@ -56,7 +55,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private seriesService = inject(SeriesService);
-  private titleService = inject(Title);
   protected bulkSelectionService = inject(BulkSelectionService);
   private messageHub = inject(MessageHubService);
   private filterUtilityService = inject(FilterUtilitiesService);
@@ -103,7 +101,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   constructor() {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-      this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
 
       this.bulkSelectionService.registerDataSource('series', () => this.series);
       this.bulkSelectionService.registerPostAction((result: ActionResult<Series>) => {

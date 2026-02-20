@@ -22,9 +22,8 @@ import {DecimalPipe} from '@angular/common';
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
-import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
@@ -51,7 +50,6 @@ export class ReadingListsComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly jumpbarService = inject(JumpbarService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly titleService = inject(Title);
   private readonly cardConfigFactory = inject(CardConfigFactory);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly actionService = inject(ActionService);
@@ -75,7 +73,6 @@ export class ReadingListsComponent implements OnInit {
   trackByIdentity = (index: number, item: ReadingListCardEntity) => `${item.data.id}_${item.data.title}_${item.data.promoted}`;
 
   ngOnInit(): void {
-    this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));
     this.loadPage();
 
     this.bulkSelectionService.registerDataSource('readingList', () => this.lists());

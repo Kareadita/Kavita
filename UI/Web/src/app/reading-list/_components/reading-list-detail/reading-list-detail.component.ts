@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   ElementRef,
   inject,
   input,
@@ -54,7 +53,6 @@ import {
 import {ImageComponent} from '../../../shared/image/image.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
-import {Title} from "@angular/platform-browser";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
@@ -101,7 +99,6 @@ export class ReadingListDetailComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   private readonly libraryService = inject(LibraryService);
   private readonly readerService = inject(ReaderService);
-  private readonly titleService = inject(Title);
   private readonly location = inject(Location);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly breakpointService = inject(BreakpointService);
@@ -207,15 +204,6 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   constructor() {
-    // Set the page title reactively when readingList changes
-    effect(() => {
-      const rl = this.readingList();
-      console.log('reading list: ', rl);
-      if (rl) {
-        this.titleService.setTitle('Kavita - ' + rl.title);
-      }
-    });
-
     // Form subscriptions
     this.formGroup.get('edit')!.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),

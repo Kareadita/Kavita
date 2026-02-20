@@ -5,7 +5,6 @@ import {
   Component,
   computed,
   DestroyRef,
-  effect,
   ElementRef,
   EventEmitter,
   inject,
@@ -14,7 +13,6 @@ import {
   signal,
   viewChild
 } from '@angular/core';
-import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {debounceTime} from 'rxjs/operators';
@@ -42,7 +40,7 @@ import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
@@ -87,7 +85,6 @@ export class CollectionDetailComponent implements AfterContentChecked {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly accountService = inject(AccountService);
   private readonly offcanvasService = inject(NgbOffcanvas);
-  private readonly titleService = inject(Title);
   private readonly jumpbarService = inject(JumpbarService);
   private readonly messageHub = inject(MessageHubService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
@@ -135,13 +132,6 @@ export class CollectionDetailComponent implements AfterContentChecked {
 
   constructor() {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-
-      effect(() => {
-        const tag = this.collectionTag();
-        if (tag) {
-          this.titleService.setTitle(translate('collection-detail.title-alt', {collectionName: tag.title}));
-        }
-      });
 
       this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
         let filter = data['filter'] as FilterV2<FilterField, SortField>;

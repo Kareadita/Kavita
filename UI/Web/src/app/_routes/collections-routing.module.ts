@@ -5,8 +5,9 @@ import {UrlFilterResolver} from "../_resolvers/url-filter.resolver";
 import {collectionResolver} from "../_resolvers/collection.resolver";
 
 export const routes: Routes = [
-  {path: '', component: AllCollectionsComponent, pathMatch: 'full'},
+  {path: '', component: AllCollectionsComponent, pathMatch: 'full', title: 'title.collections'},
   {path: ':collectionId', component: CollectionDetailComponent,
+    data: {titleField: 'collection', titleProp: 'title'},
     resolve: {
       collection: collectionResolver,
       filter: UrlFilterResolver

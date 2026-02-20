@@ -5,10 +5,8 @@ import {
   computed,
   DestroyRef,
   inject,
-  OnInit,
   signal
 } from '@angular/core';
-import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
 import {filter, Observable, ReplaySubject, Subject, switchMap} from 'rxjs';
 import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
@@ -63,7 +61,7 @@ enum StreamId {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent, EntityCardComponent]
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
@@ -73,7 +71,6 @@ export class DashboardComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   protected readonly seriesService = inject(SeriesService);
   private readonly router = inject(Router);
-  private readonly titleService = inject(Title);
   public readonly imageService = inject(ImageService);
   private readonly messageHub = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -147,10 +144,6 @@ export class DashboardComponent implements OnInit {
       }
       this.cdRef.markForCheck();
     });
-  }
-
-  ngOnInit(): void {
-    this.titleService.setTitle('Kavita');
   }
 
   smartFilterNextPage(stream: DashboardStream) {

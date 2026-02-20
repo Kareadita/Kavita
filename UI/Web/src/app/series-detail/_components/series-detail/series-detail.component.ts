@@ -15,7 +15,6 @@ import {
   ViewChild
 } from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
-import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {
   NgbDropdown,
@@ -164,7 +163,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly titleService = inject(Title);
   private readonly downloadService = inject(DownloadService);
   private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
@@ -641,7 +639,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       this.loadPlusMetadata(this.seriesId(), this.library().type);
     }
 
-    this.titleService.setTitle('Kavita - ' + this.series().name + ' Details');
 
 
 

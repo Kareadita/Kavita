@@ -28,7 +28,7 @@ import {Chapter} from 'src/app/_models/chapter';
 import {NavService} from 'src/app/_services/nav.service';
 import {CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService} from 'src/app/_services/reader.service';
 import {SeriesService} from 'src/app/_services/series.service';
-import {DomSanitizer, SafeHtml, Title} from '@angular/platform-browser';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {BookService} from '../../_services/book.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {BookChapterItem} from '../../_models/book-chapter-item';
@@ -71,6 +71,7 @@ import afterFrame from "afterframe";
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {KavitaTitleStrategy} from "../../../_services/kavita-title.strategy";
 
 
 interface HistoryPoint {
@@ -155,7 +156,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly readerSettingsService = inject(EpubReaderSettingsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly annotationService = inject(AnnotationService);
-  private readonly titleService = inject(Title);
+  private readonly kavitaTitleStrategy = inject(KavitaTitleStrategy);
   private readonly document = inject(DOCUMENT);
   private readonly layoutService = inject(LayoutMeasurementService);
   private readonly colorscapeService = inject(ColorscapeService);
@@ -927,7 +928,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.bookTitle.set(info.bookTitle);
-      this.titleService.setTitle('Kavita - ' + this.bookTitle());
+      this.kavitaTitleStrategy.setFormattedTitle(this.bookTitle() + ' Reader');
       this.cdRef.markForCheck();
 
       await this.readerSettingsService.initialize(this.libraryId, this.seriesId, this.readingProfile);

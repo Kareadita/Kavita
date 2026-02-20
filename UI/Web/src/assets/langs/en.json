@@ -1,4 +1,18 @@
 {
+    "title": {
+        "reading-list": "Reading Lists",
+        "home": "Home",
+        "bookmarks": "Bookmarks",
+        "collections": "Collections",
+        "browse-genres": "Browse Genres",
+        "browse-tags": "Browse Tags",
+        "want-to-read": "Want To Read",
+        "reading-lists": "Reading Lists",
+        "settings": "Settings",
+        "all-series": "All Series",
+        "profile": "{{username}}'s Profile"
+    },
+
     "login": {
         "title": "Sign in to your account",
         "username": "{{common.username}}",

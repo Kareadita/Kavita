@@ -30,11 +30,13 @@ import {clientInfoInterceptor} from "./app/_interceptors/client-info.interceptor
 import {
   PreloadAllModules,
   provideRouter,
+  TitleStrategy,
   withComponentInputBinding,
   withInMemoryScrolling,
   withNavigationErrorHandler,
   withPreloading
 } from "@angular/router";
+import {KavitaTitleStrategy} from "./app/_services/kavita-title.strategy";
 import {routingErrorHandler} from "./app/_interceptors/routing-error.handler";
 import {registerECharts} from "./echarts";
 import {NgbModalConfig, NgbRatingConfig} from "@ng-bootstrap/ng-bootstrap";
@@ -170,6 +172,7 @@ bootstrapApplication(AppComponent, {
           ttl: environment.production ? 129600 : 0 // 1.5 days in seconds for prod
         }),
         Title,
+        { provide: TitleStrategy, useClass: KavitaTitleStrategy },
         { provide: SAVER, useFactory: getSaver },
         {
           provide: APP_BASE_HREF,

@@ -64,12 +64,14 @@ export const routes: Routes = [
       {
         path: 'lists',
         pathMatch: 'full',
+        title: 'title.reading-lists',
         loadComponent: () => import('./reading-list/_components/reading-lists/reading-lists.component').then(c => c.ReadingListsComponent)
       },
       {
         path: 'lists/:readingListId',
         runGuardsAndResolvers: 'always',
         canActivate: [AuthGuard],
+        data: {titleField: 'readingList', titleProp: 'title'},
         resolve: { readingList: readingListResolver },
         loadComponent: () => import('./reading-list/_components/reading-list-detail/reading-list-detail.component').then(c => c.ReadingListDetailComponent)
       },
@@ -87,6 +89,7 @@ export const routes: Routes = [
           {
             path: 'series/:seriesId',
             pathMatch: 'full',
+            data: {titleField: 'series', titleProp: 'name', titleSuffix: ' Details'},
             resolve: { series: seriesResolver },
             loadComponent: () => import('./series-detail/_components/series-detail/series-detail.component').then(c => c.default)
           },
