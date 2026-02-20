@@ -66,10 +66,12 @@ public class CollectionController : BaseApiController
     /// <param name="collectionId"></param>
     /// <returns></returns>
     [HttpGet("single")]
-    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetTag(int collectionId)
+    public async Task<ActionResult<AppUserCollectionDto>> GetTag(int collectionId)
     {
-        var collections = await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(UserId, false);
-        return Ok(collections.FirstOrDefault(c => c.Id == collectionId));
+        var result = await _unitOfWork.CollectionTagRepository.GetCollectionDtoAsync(collectionId, UserId);
+        if (result == null) return NotFound(); // TODO: Figure out how to best handle restrictions/not found across the codebase
+
+        return Ok(result);
     }
 
     /// <summary>
