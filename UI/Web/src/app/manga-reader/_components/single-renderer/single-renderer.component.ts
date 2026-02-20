@@ -23,7 +23,6 @@ import {ImageRenderer} from '../../_models/renderer';
 import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
-import {UtilityService} from "../../../shared/_services/utility.service";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 
@@ -31,16 +30,14 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
     selector: 'app-single-renderer',
     templateUrl: './single-renderer.component.html',
     styleUrls: ['./single-renderer.component.scss'],
+    imports: [AsyncPipe, SafeStylePipe],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [AsyncPipe, SafeStylePipe]
 })
 export class SingleRendererComponent implements OnInit, ImageRenderer {
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly document = inject<Document>(DOCUMENT);
   protected readonly mangaReaderService = inject(MangaReaderService);
-  private document = inject<Document>(DOCUMENT);
   protected readonly breakpointService = inject(BreakpointService);
-
-  private readonly utilityService = inject(UtilityService);
   private readonly injector = inject(Injector);
 
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
