@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{1
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Common", "Kavita.Common\Kavita.Common.csproj", "{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Benchmark", "API.Benchmark\API.Benchmark.csproj", "{3D781D18-2452-421F-A81A-59254FEE1FEC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.API", "Kavita.API\Kavita.API.csproj", "{01191616-53A6-4C12-B39E-CC6B30364399}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Server", "Kavita.Server\Kavita.Server.csproj", "{D5AED3C5-1CB2-43EC-B17B-6635FD88407B}"
@@ -28,6 +26,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Common.Tests", "Kavita.Common.Tests\Kavita.Common.Tests.csproj", "{5C8EE151-361E-4C2C-BB1D-9828A7922876}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Models.Tests", "Kavita.Models.Tests\Kavita.Models.Tests.csproj", "{7CAAB7E1-D5F3-4AC0-AF8E-6A0432E6A3B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Benchmark", "Kavita.Benchmark\Kavita.Benchmark.csproj", "{CF765586-FAF5-4701-900D-C2CE8897CCC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,18 +66,6 @@ Global
 		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Release|x64.Build.0 = Release|Any CPU
 		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Release|x86.ActiveCfg = Release|Any CPU
 		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Release|x86.Build.0 = Release|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Debug|x64.Build.0 = Debug|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Debug|x86.Build.0 = Debug|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Release|x64.ActiveCfg = Release|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Release|x64.Build.0 = Release|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Release|x86.ActiveCfg = Release|Any CPU
-		{3D781D18-2452-421F-A81A-59254FEE1FEC}.Release|x86.Build.0 = Release|Any CPU
 		{01191616-53A6-4C12-B39E-CC6B30364399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{01191616-53A6-4C12-B39E-CC6B30364399}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01191616-53A6-4C12-B39E-CC6B30364399}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -198,5 +186,17 @@ Global
 		{7CAAB7E1-D5F3-4AC0-AF8E-6A0432E6A3B1}.Release|x64.Build.0 = Release|Any CPU
 		{7CAAB7E1-D5F3-4AC0-AF8E-6A0432E6A3B1}.Release|x86.ActiveCfg = Release|Any CPU
 		{7CAAB7E1-D5F3-4AC0-AF8E-6A0432E6A3B1}.Release|x86.Build.0 = Release|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Debug|x64.Build.0 = Debug|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Debug|x86.Build.0 = Debug|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Release|x64.ActiveCfg = Release|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Release|x64.Build.0 = Release|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

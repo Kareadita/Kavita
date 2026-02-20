@@ -1,6 +1,6 @@
 ﻿using BenchmarkDotNet.Running;
 
-namespace API.Benchmark;
+namespace Kavita.Benchmark;
 
 /// <summary>
 /// To build this, cd into API.Benchmark directory and run

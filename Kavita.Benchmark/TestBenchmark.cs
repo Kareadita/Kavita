@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using API.DTOs;
-using API.Extensions;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+using Kavita.Common.Extensions;
+using Kavita.Models.DTOs;
+using Kavita.Services.Extensions;
 
-namespace API.Benchmark;
+namespace Kavita.Benchmark;
 
 /// <summary>
 /// This is used as a scratchpad for testing

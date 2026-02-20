@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
+using Kavita.Services.Scanner;
 
-namespace API.Benchmark;
+namespace Kavita.Benchmark;
 
 [MemoryDiagnoser]
 public class CleanTitleBenchmarks
@@ -17,7 +16,7 @@ public class CleanTitleBenchmarks
     {
         foreach (var name in _names)
         {
-            Services.Tasks.Scanner.Parser.Parser.CleanTitle(name, true);
+            Parser.CleanTitle(name, true);
         }
     }
 }

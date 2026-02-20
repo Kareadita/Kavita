@@ -1,10 +1,9 @@
-using API.Helpers.Builders;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
-using System;
-using API.Entities.Enums;
+using Kavita.Models.Entities.Enums;
+using Kavita.Services.Builders;
 
-namespace API.Benchmark
+namespace Kavita.Benchmark
 {
     [StopOnFirstError]
     [MemoryDiagnoser]

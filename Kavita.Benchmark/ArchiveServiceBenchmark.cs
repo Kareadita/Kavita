@@ -1,17 +1,16 @@
-﻿using System;
-using System.IO;
-using System.IO.Abstractions;
-using Microsoft.Extensions.Logging.Abstractions;
-using API.Services;
+﻿using System.IO.Abstractions;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+using Kavita.API.Services;
+using Kavita.Services;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 
-namespace API.Benchmark;
+namespace Kavita.Benchmark;
 
 [StopOnFirstError]
 [MemoryDiagnoser]
