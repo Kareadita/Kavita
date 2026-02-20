@@ -90,6 +90,10 @@ export class ManageCustomKeyBindsComponent implements OnInit {
     this.keyBindForm = this.fb.group(groupConfig);
     this.duplicatedKeyBinds.set(this.extractDuplicated(keyBinds)); // Set initial
 
+    if (this.accountService.isReadOnly()) {
+      this.keyBindForm.disable({ emitEvent: false });
+    }
+
     this.keyBindForm.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
       debounceTime(250),
