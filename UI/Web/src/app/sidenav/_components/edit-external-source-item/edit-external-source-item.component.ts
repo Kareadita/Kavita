@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
@@ -13,7 +13,6 @@ import {ToastrService} from "ngx-toastr";
     styleUrls: ['./edit-external-source-item.component.scss']
 })
 export class EditExternalSourceItemComponent implements OnInit {
-  private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly externalSourceService = inject(ExternalSourceService);
   private readonly toastr = inject(ToastrService);

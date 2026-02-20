@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  EventEmitter,
-  inject,
-  input,
-  linkedSignal,
-  Output,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, output, signal} from '@angular/core';
 import {Router} from '@angular/router';
 import {NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
 import {FormsModule} from "@angular/forms";
@@ -42,10 +32,10 @@ export class SeriesCardComponent {
   index = input<number>(0);
   maxIndex = input<number>(1);
 
-  @Output() reload = new EventEmitter<number>();
-  @Output() dataChanged = new EventEmitter<Series>();
+  reload = output<number>();
+  dataChanged = output<Series>();
   /** Emitted when a progress update is processed. */
-  @Output() progressUpdated = new EventEmitter<ProgressUpdateResult<Series>>();
+  progressUpdated = output<ProgressUpdateResult<Series>>();
 
   private seriesSignal = linkedSignal(() => this.series());
   private relationSignal = signal<RelationKind | undefined>(undefined);

@@ -51,7 +51,7 @@ const ANIMATION_SPEED = 200;
   ]
 })
 export class TypeaheadComponent implements OnInit {
-  private document = inject<Document>(DOCUMENT);
+  private readonly document = inject<Document>(DOCUMENT);
 
   /**
    * Settings for the typeahead
