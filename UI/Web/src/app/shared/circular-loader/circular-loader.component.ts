@@ -1,45 +1,45 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {NgClass, NgStyle} from "@angular/common";
-import {NgCircleProgressModule } from "ng-circle-progress";
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
+import {NgStyle} from "@angular/common";
+import {NgCircleProgressModule} from "ng-circle-progress";
 
 @Component({
-    selector: 'app-circular-loader',
-    imports: [NgCircleProgressModule, NgStyle, NgClass],
-    templateUrl: './circular-loader.component.html',
-    styleUrls: ['./circular-loader.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-circular-loader',
+  imports: [NgCircleProgressModule, NgStyle],
+  templateUrl: './circular-loader.component.html',
+  styleUrls: ['./circular-loader.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CircularLoaderComponent {
 
-  @Input() currentValue: number = 0;
+  currentValue = input<number>(0);
   /**
    * If an animation should be used
    */
-  @Input() animation: boolean = true;
+  animation = input<boolean>(true);
   /**
    * Color of an inner bar
    */
-  @Input() innerStrokeColor: string = 'transparent';
+  innerStrokeColor = input<string>('transparent');
   /**
    * Color of the Downloader bar
    */
-  @Input() outerStrokeColor: string = '#4ac694';
-  @Input() backgroundColor: string = '#000';
-  @Input() fontSize: string = '36px';
+  outerStrokeColor = input<string>('#4ac694');
+  backgroundColor= input<string>('#000');
+  fontSize = input<number>(36);
   /**
    * Show the icon inside the downloader
    */
-  @Input() showIcon: boolean = true;
+  showIcon = input<boolean>(true);
   /**
    * The width in pixels of the loader
    */
-  @Input() width: string = '100px';
+  width = input<number>(100);
   /**
    * The height in pixels of the loader
    */
-  @Input() height: string = '100px';
+  height = input<number>(100);
   /**
    * Centers the icon in the middle of the loader. Best for card use.
    */
-  @Input() center: boolean = true;
+  center = input<boolean>(true);
 }

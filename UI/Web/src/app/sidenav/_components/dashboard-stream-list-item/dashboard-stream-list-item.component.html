@@ -1,22 +1,22 @@
 <ng-container *transloco="let t; prefix: 'stream-list-item'">
   <div class="row pt-2 g-0 list-item">
     <div class="g-0">
-      <h5 class="mb-1 pb-0" id="item.id--{{position}}">
+      <h5 class="mb-1 pb-0" id="item().id--{{position()}}">
         <span>
-          @if (item.isProvided) {
-            {{item.name | streamName }}
+          @if (item().isProvided) {
+            {{item().name | streamName }}
           } @else {
-            {{item.name}}
+            {{item().name}}
           }
         </span>
         <span class="float-end">
-            <button class="btn btn-icon p-0" (click)="hide.emit(item)">
-              <i class="me-1" [ngClass]="{'fas fa-eye': item.visible, 'fa-solid fa-eye-slash': !item.visible}" aria-hidden="true"></i>
+            <button class="btn btn-icon p-0" (click)="hide.emit(item())">
+              <i class="me-1" [ngClass]="{'fas fa-eye': item().visible, 'fa-solid fa-eye-slash': !item().visible}" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('remove')}}</span>
             </button>
 
-            @if (item.streamType===StreamType.SmartFilter) {
-              <button class="btn btn-icon" (click)="delete.emit(item)">
+            @if (item().streamType===StreamType.SmartFilter) {
+              <button class="btn btn-icon" (click)="delete.emit(item())">
                 <i class="fa-solid fa-trash" aria-hidden="true"></i>
                 <span class="visually-hidden">{{t('delete')}}</span>
               </button>
@@ -25,11 +25,11 @@
       </h5>
       <div class="meta">
         <div class="ps-1">
-          {{t(item.isProvided ? 'provided' : 'smart-filter')}}
+          {{t(item().isProvided ? 'provided' : 'smart-filter')}}
         </div>
-        @if (!item.isProvided) {
+        @if (!item().isProvided) {
           <div class="ps-1">
-            <a [href]="baseUrl + 'all-series?' + this.item.smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
+            <a [href]="baseUrl + 'all-series?' + this.item().smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
           </div>
         }
       </div>

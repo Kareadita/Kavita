@@ -59,6 +59,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
   target = input.required<KeyBindTarget>();
   index = input.required<number>();
   duplicated = input.required<boolean>();
+  tooltipPlacement = input<string>('auto');
 
   selectedKeyBind = signal<KeyBind>({key: KeyCode.Empty});
   disabled = signal(false);

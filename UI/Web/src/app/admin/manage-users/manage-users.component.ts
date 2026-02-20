@@ -169,7 +169,7 @@ export class ManageUsersComponent implements OnInit {
 
   updatePassword(member: Member) {
     const modalRef = this.modalService.open(ResetPasswordModalComponent);
-    modalRef.componentInstance.member = member;
+    modalRef.setInput('member', member);
   }
 
   hasAdminRole(member: Member) {

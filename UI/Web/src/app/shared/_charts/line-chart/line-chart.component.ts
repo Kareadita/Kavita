@@ -16,7 +16,7 @@ type ArrayAble<T> = T | T[];
 })
 export class LineChartComponent {
 
-  private themeService = inject(ThemeService);
+  private readonly themeService = inject(ThemeService);
 
   /**
    * Data used for the series

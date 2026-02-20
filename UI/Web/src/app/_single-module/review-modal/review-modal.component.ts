@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {UserReview} from "../../_models/user-review";
@@ -11,8 +11,7 @@ import {ReviewService} from "../../_services/review.service";
 export enum ReviewModalCloseAction {
   Create,
   Edit,
-  Delete,
-  Close
+  Delete
 }
 export interface ReviewModalCloseEvent {
   success: boolean,
@@ -36,24 +35,24 @@ export class ReviewModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   protected readonly minLength = 5;
 
-  @Input({required: true}) review!: UserReview;
+  review = input.required<UserReview>();
   reviewGroup!: FormGroup;
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({
-      reviewBody: new FormControl(this.review.body, [Validators.required, Validators.minLength(this.minLength)]),
+      reviewBody: new FormControl(this.review().body, [Validators.required, Validators.minLength(this.minLength)]),
     });
     this.cdRef.markForCheck();
   }
 
   close() {
-    this.modal.close({success: false, review: this.review, action: ReviewModalCloseAction.Close});
+    this.modal.dismiss();
   }
 
   async delete() {
     if (!await this.confirmService.confirm(translate('toasts.delete-review'))) return;
 
-    this.reviewService.deleteReview(this.review.seriesId, this.review.chapterId).subscribe(() => {
+    this.reviewService.deleteReview(this.review().seriesId, this.review().chapterId).subscribe(() => {
       this.toastr.success(translate('toasts.review-deleted'));
       this.modal.close({success: true, review: this.review, action: ReviewModalCloseAction.Delete});
     });
@@ -65,7 +64,7 @@ export class ReviewModalComponent implements OnInit {
       return;
     }
 
-    this.reviewService.updateReview(this.review.seriesId, model.reviewBody, this.review.chapterId).subscribe(review => {
+    this.reviewService.updateReview(this.review().seriesId, model.reviewBody, this.review().chapterId).subscribe(review => {
       this.modal.close({success: true, review: review, action: ReviewModalCloseAction.Edit});
     });
 

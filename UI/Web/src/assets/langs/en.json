@@ -1,4 +1,18 @@
 {
+    "title": {
+        "reading-list": "Reading Lists",
+        "home": "Home",
+        "bookmarks": "Bookmarks",
+        "collections": "Collections",
+        "browse-genres": "Browse Genres",
+        "browse-tags": "Browse Tags",
+        "want-to-read": "Want To Read",
+        "reading-lists": "Reading Lists",
+        "settings": "Settings",
+        "all-series": "All Series",
+        "profile": "{{username}}'s Profile"
+    },
+
     "login": {
         "title": "Sign in to your account",
         "username": "{{common.username}}",
@@ -2724,7 +2738,8 @@
         "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Chapters",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "Provided by"
+        "provided-by-label": "Provided by",
+        "story-and-art-label": "Story & Art"
     },
 
     "next-expected-card": {

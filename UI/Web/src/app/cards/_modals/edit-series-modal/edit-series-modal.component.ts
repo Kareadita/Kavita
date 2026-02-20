@@ -520,6 +520,11 @@ export class EditSeriesModalComponent implements OnInit {
       apis.push(this.seriesService.updateSeries(model).pipe(
         tap(result => updatedSeries = result)
       ));
+    } else {
+      // We need to ensure we at least update or get the series to return it to action service
+      apis.push(this.seriesService.getSeries(this.series.id).pipe(
+        tap(result => updatedSeries = result)
+      ));
     }
 
 

@@ -217,18 +217,6 @@ export class VersionService {
     this.showUpdateModal('out-of-date', { versionsOutOfDate });
   }
 
-  debugRefresh(): void {
-    this.serverService.getChangelog(1).subscribe(changelog => this.showRefreshModal(changelog[0]));
-  }
-
-  debugUpdateAvailable(): void {
-    this.serverService.getChangelog(1).subscribe(changelog => this.showUpdateAvailableModal(changelog[0], 2));
-  }
-
-  debugOutOfDate(): void {
-    this.showOutOfDateModal(5);
-  }
-
   /**
    * Determines the version string used for backoff tracking.
    * update-available: the version available to update to.

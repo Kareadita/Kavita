@@ -24,9 +24,8 @@ import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-opera
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
-import {Title} from "@angular/platform-browser";
 import {WikiLink} from "../../../_models/wiki";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
@@ -51,7 +50,6 @@ export class BookmarksComponent {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly route = inject(ActivatedRoute);
   private readonly jumpbarService = inject(JumpbarService);
-  private readonly titleService = inject(Title);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly imageService = inject(ImageService);
   public readonly metadataService = inject(MetadataService);
@@ -127,7 +125,6 @@ export class BookmarksComponent {
     });
 
 
-    this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
   }
 
   loadPage() {

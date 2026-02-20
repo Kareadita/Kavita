@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  signal
+} from '@angular/core';
 import {FilterService} from "../../../_services/filter.service";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -14,7 +23,6 @@ import {QueryContext} from "../../../_models/metadata/v2/query-context";
 import {map, shareReplay} from "rxjs/operators";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
-import {ActionItem} from "../../../_models/actionables/action-item";
 import {ActionResult} from "../../../_models/actionables/action-result";
 
 @Component({
@@ -34,14 +42,16 @@ export class ManageSmartFiltersComponent {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly baseUrl = inject(APP_BASE_HREF);
 
-  @Input() target: '_self' | '_blank' = '_blank';
+  target = input<'_self' | '_blank'>('_blank');
 
-  filters: Array<SmartFilter> = [];
+  filters = signal<SmartFilter[]>([]);
+  hasFilterControl = computed(() => this.filters().length >= 5);
+
   listForm: FormGroup = new FormGroup({
     'filterQuery': new FormControl('', [])
   });
   filterApiMap: { [key: string]: Observable<any> } = {};
-  actions: ActionItem<SmartFilter>[] = [];
+  actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.filters()));
 
   filterList = (listItem: SmartFilter) => {
     const filterVal = (this.listForm.value.filterQuery || '').toLowerCase();
@@ -54,9 +64,7 @@ export class ManageSmartFiltersComponent {
 
   loadData() {
     this.filterService.getAllFilters().subscribe(filters => {
-      this.filters = [...filters];
-
-      this.actions = this.actionFactoryService.getSmartFilterActions(this.filters);
+      this.filters.set([...filters]);
 
       this.filterApiMap = {};
       for(let filter of filters) {

@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix: 'edit-collection-tags'">
 
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{t('title', {collectionName: tag.title})}}</h4>
+    <h4 class="modal-title" id="modal-basic-title">{{t('title', {collectionName: tag().title})}}</h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
   <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
@@ -48,7 +48,7 @@
         </ng-template>
       </li>
 
-      @if (tag.source === ScrobbleProvider.Kavita) {
+      @if (tag().source === ScrobbleProvider.Kavita) {
         <li [ngbNavItem]="TabID.Series">
           <a ngbNavLink>{{t(TabID.Series)}}</a>
           <ng-template ngbNavContent>
@@ -65,7 +65,7 @@
                   </div>
                 </form>
                 <div class="form-check">
-                  <input id="select-all" type="checkbox" class="form-check-input" [disabled]="tag.source !== ScrobbleProvider.Kavita"
+                  <input id="select-all" type="checkbox" class="form-check-input" [disabled]="tag().source !== ScrobbleProvider.Kavita"
                          [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
                   <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
                 </div>
@@ -73,7 +73,7 @@
                   @for (item of series | filter: filterList; let i = $index; track item.id) {
                     <li class="list-group-item">
                       <div class="form-check">
-                        <input id="series-{{i}}" type="checkbox" class="form-check-input" [disabled]="tag.source !== ScrobbleProvider.Kavita"
+                        <input id="series-{{i}}" type="checkbox" class="form-check-input" [disabled]="tag().source !== ScrobbleProvider.Kavita"
                                [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
                         <label for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
                       </div>
@@ -99,41 +99,41 @@
         <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
         <ng-template ngbNavContent>
           <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)"
-                                   (selectedBase64Url)="updateSelectedImage($event)" [showReset]="tag.coverImageLocked"
+                                   (selectedBase64Url)="updateSelectedImage($event)" [showReset]="tag().coverImageLocked"
                                    (resetClicked)="handleReset()" />
         </ng-template>
       </li>
 
-      @if (tag.source !== ScrobbleProvider.Kavita) {
+      @if (tag().source !== ScrobbleProvider.Kavita) {
         <li [ngbNavItem]="TabID.Info">
           <a ngbNavLink>{{t(TabID.Info)}}</a>
           <ng-template ngbNavContent>
             <div class="row g-0 mb-2">
               <div class="col-md-6">
                 <div>{{t('last-sync-title')}}</div>
-                <div>{{tag.lastSyncUtc | utcToLocalTime:'shortDate' | defaultDate}}</div>
+                <div>{{tag().lastSyncUtc | utcToLocalTime:'shortDate' | defaultDate}}</div>
               </div>
               <div class="col-md-6">
                 <div>{{t('source-url-title')}}</div>
-                <a [href]="tag.sourceUrl | safeUrl" rel="noopener noreferrer" target="_blank">{{tag.sourceUrl}}</a>
+                <a [href]="tag().sourceUrl | safeUrl" rel="noopener noreferrer" target="_blank">{{tag().sourceUrl}}</a>
               </div>
             </div>
             <div class="row g-0 mb-2">
               <div class="col-md-6">
                 <div>{{t('total-series-title')}}</div>
-                <div>{{tag.totalSourceCount | number}}</div>
+                <div>{{tag().totalSourceCount | number}}</div>
               </div>
               <div class="col-md-6">
                 <div>{{t('missing-series-title')}}</div>
-                <div>{{tag.totalSourceCount - series.length}}</div>
+                <div>{{tag().totalSourceCount - series.length}}</div>
               </div>
             </div>
 
-
-            @if (tag.missingSeriesFromSource !== null && (tag.totalSourceCount - series.length) > 0) {
+            @let missingSeriesFromSource = tag().missingSeriesFromSource;
+            @if (missingSeriesFromSource !== null && (tag().totalSourceCount - series.length) > 0) {
               <h6>{{t('missing-series-title')}}</h6>
               <div class="row g-0">
-                <p [innerHTML]="tag.missingSeriesFromSource | safeHtml"></p>
+                <p [innerHTML]="missingSeriesFromSource | safeHtml"></p>
               </div>
             }
           </ng-template>

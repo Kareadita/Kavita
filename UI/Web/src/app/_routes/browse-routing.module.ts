@@ -20,8 +20,8 @@ export const routes: Routes = [
     },
     runGuardsAndResolvers: 'always',
   },
-  {path: 'genres', component: BrowseGenresComponent, pathMatch: 'full'},
-  {path: 'tags', component: BrowseTagsComponent, pathMatch: 'full'},
+  {path: 'genres', component: BrowseGenresComponent, pathMatch: 'full', title: 'title.browse-genres'},
+  {path: 'tags', component: BrowseTagsComponent, pathMatch: 'full', title: 'title.browse-tags'},
   {path: 'annotations', component: AllAnnotationsComponent, pathMatch: 'full',
     resolve: {
       filter: UrlFilterResolver,

@@ -19,6 +19,10 @@ export class CollectionTagService {
 
   baseUrl = environment.apiUrl;
 
+  getCollectionById(collectionId: number) {
+    return this.httpClient.get<UserCollection>(this.baseUrl + 'collection/single?collectionId=' + collectionId);
+  }
+
   allCollections(ownedOnly = false) {
     return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection?ownedOnly=' + ownedOnly);
   }
@@ -28,7 +32,7 @@ export class CollectionTagService {
   }
 
   updateTag(tag: UserCollection) {
-    return this.httpClient.post(this.baseUrl + 'collection/update', tag, TextResonse);
+    return this.httpClient.post<UserCollection>(this.baseUrl + 'collection/update', tag);
   }
 
   promoteMultipleCollections(tags: Array<number>, promoted: boolean) {

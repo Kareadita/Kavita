@@ -9,7 +9,6 @@ import {
   TemplateRef,
   viewChild
 } from '@angular/core';
-import {Title} from '@angular/platform-browser';
 import {Router} from '@angular/router';
 import {UserCollection} from 'src/app/_models/collection-tag';
 import {Tag} from 'src/app/_models/tag';
@@ -22,7 +21,7 @@ import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective, TranslocoService} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {CollectionOwnerComponent} from "../collection-owner/collection-owner.component";
 import {User} from "../../../_models/user/user";
@@ -50,10 +49,8 @@ import {ActionResult} from "../../../_models/actionables/action-result";
 })
 export class AllCollectionsComponent implements OnInit {
 
-  private readonly translocoService = inject(TranslocoService);
   private readonly collectionService = inject(CollectionTagService);
   private readonly router = inject(Router);
-  private readonly titleService = inject(Title);
   private readonly jumpbarService = inject(JumpbarService);
   public readonly imageService = inject(ImageService);
   public readonly accountService = inject(AccountService);
@@ -84,7 +81,6 @@ export class AllCollectionsComponent implements OnInit {
 
   constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.titleService.setTitle('Kavita - ' + this.translocoService.translate('all-collections.title'));
 
     this.bulkSelectionService.registerDataSource('collection', () => this.collections());
     this.bulkSelectionService.registerPostAction((res: ActionResult<UserCollection[]>) => {

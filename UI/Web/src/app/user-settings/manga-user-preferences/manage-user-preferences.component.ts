@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, injec
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Preferences} from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
-import {Title} from "@angular/platform-browser";
 import {Router} from "@angular/router";
 import {LocalizationService} from "../../_services/localization.service";
 import {
@@ -89,7 +88,6 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
-  private readonly titleService = inject(Title);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly localizationService = inject(LocalizationService);
@@ -132,7 +130,6 @@ export class ManageUserPreferencesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.titleService.setTitle('Kavita - User Preferences');
     this.cdRef.markForCheck();
 
     forkJoin({

@@ -1,18 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  DestroyRef,
-  HostListener,
-  inject,
-  Input,
-  OnInit,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, HostListener, inject, input} from '@angular/core';
 import {BulkSelectionService} from '../bulk-selection.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {DecimalPipe, NgStyle} from "@angular/common";
+import {DecimalPipe} from "@angular/common";
 import {TranslocoModule} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
@@ -28,36 +16,30 @@ import {ActionResult} from "../../_models/actionables/action-result";
     CardActionablesComponent,
     TranslocoModule,
     NgbTooltip,
-    NgStyle,
     DecimalPipe
   ],
   templateUrl: './bulk-operations.component.html',
   styleUrls: ['./bulk-operations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BulkOperationsComponent<T> implements OnInit {
-  /**
-   * Modal mode means don't fix to the top
-   */
-  @Input() modalMode = false;
-  /**
-   * On Series Detail this should be 12
-   */
-  @Input() marginLeft: number = 0;
-  /**
-   * On Series Detail this should be 12
-   */
-  @Input() marginRight: number = 8;
+export class BulkOperationsComponent<T> {
 
-  actions = signal<ActionItem<T>[]>([]);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
+
+  /**
+   * On Series Detail this should be 0
+   */
+  marginLeft = input<number>(0);
+  /**
+   * On Series Detail this should be 0
+   */
+  marginRight = input<number>(8);
+
+  actions = computed(() => this.bulkSelectionService.actionsSignal() ?? []);
   hasMarkAsRead = computed(() => this.actionFactoryService.hasAction(this.actions(), Action.MarkAsRead));
   hasMarkAsUnread = computed(() => this.actionFactoryService.hasAction(this.actions(), Action.MarkAsUnread));
 
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly actionFactoryService = inject(ActionFactoryService);
-  protected readonly bulkSelectionService = inject(BulkSelectionService);
-  protected readonly Action = Action;
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: Event) {
@@ -76,12 +58,6 @@ export class BulkOperationsComponent<T> implements OnInit {
     }
   }
 
-  ngOnInit(): void {
-    this.bulkSelectionService.actions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(actions => {
-      this.actions.set(actions);
-    });
-  }
-
   performAction(event: ActionItem<any> | ActionResult<any>) {
     // Skip ActionResults — they've already been handled
     if ('effect' in event) return;
@@ -95,4 +71,6 @@ export class BulkOperationsComponent<T> implements OnInit {
       this.performAction(foundActions[0]);
     }
   }
+
+  protected readonly Action = Action;
 }

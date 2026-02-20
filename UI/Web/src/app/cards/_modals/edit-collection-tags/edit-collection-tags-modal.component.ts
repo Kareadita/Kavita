@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
@@ -11,7 +11,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {concat, debounceTime, distinctUntilChanged, forkJoin, switchMap, tap} from 'rxjs';
+import {concat, debounceTime, delay, distinctUntilChanged, forkJoin, last, Observable, switchMap, tap} from 'rxjs';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
@@ -50,11 +50,11 @@ enum TabID {
   imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
     CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DefaultDatePipe,
     SafeHtmlPipe, SafeUrlPipe, DecimalPipe, UtcToLocalTimePipe],
-  templateUrl: './edit-collection-tags.component.html',
-  styleUrls: ['./edit-collection-tags.component.scss'],
+  templateUrl: './edit-collection-tags-modal.component.html',
+  styleUrls: ['./edit-collection-tags-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditCollectionTagsComponent implements OnInit {
+export class EditCollectionTagsModalComponent implements OnInit {
 
   public readonly modal = inject(NgbActiveModal);
   public readonly utilityService = inject(UtilityService);
@@ -70,10 +70,10 @@ export class EditCollectionTagsComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly TabID = TabID;
-  protected readonly ScrobbleProvider = ScrobbleProvider;
 
-  @Input({required: true}) tag!: UserCollection;
+
+
+  tag = input.required<UserCollection>();
 
   series: Array<Series> = [];
   selections!: SelectionModel<Series>;
@@ -103,15 +103,16 @@ export class EditCollectionTagsComponent implements OnInit {
     if (this.pagination == undefined) {
       this.pagination = {totalPages: 1, totalItems: 200, itemsPerPage: 200, currentPage: 0};
     }
+    const tag = this.tag();
     this.collectionTagForm = new FormGroup({
-      title: new FormControl(this.tag.title, { nonNullable: true, validators: [Validators.required] }),
-      summary: new FormControl(this.tag.summary, { nonNullable: true, validators: [] }),
-      coverImageLocked: new FormControl(this.tag.coverImageLocked, { nonNullable: true, validators: [] }),
+      title: new FormControl(tag.title, { nonNullable: true, validators: [Validators.required] }),
+      summary: new FormControl(tag.summary, { nonNullable: true, validators: [] }),
+      coverImageLocked: new FormControl(tag.coverImageLocked, { nonNullable: true, validators: [] }),
       coverImageIndex: new FormControl(0, { nonNullable: true, validators: [] }),
-      promoted: new FormControl(this.tag.promoted, { nonNullable: true, validators: [] }),
+      promoted: new FormControl(tag.promoted, { nonNullable: true, validators: [] }),
     });
 
-    if (this.tag.source !== ScrobbleProvider.Kavita) {
+    if (tag.source !== ScrobbleProvider.Kavita) {
       this.collectionTagForm.get('title')?.disable();
       this.collectionTagForm.get('summary')?.disable();
     }
@@ -130,7 +131,7 @@ export class EditCollectionTagsComponent implements OnInit {
       distinctUntilChanged(),
       switchMap(name => this.collectionService.tagNameExists(name)),
       tap(exists => {
-        const isExistingName = this.collectionTagForm.get('title')?.value === this.tag.title;
+        const isExistingName = this.collectionTagForm.get('title')?.value === this.tag().title;
         if (!exists || isExistingName) {
           this.collectionTagForm.get('title')?.setErrors(null);
         } else {
@@ -141,7 +142,7 @@ export class EditCollectionTagsComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
-    this.imageUrls.push(this.imageService.randomize(this.imageService.getCollectionCoverImage(this.tag.id)));
+    this.imageUrls.push(this.imageService.randomize(this.imageService.getCollectionCoverImage(this.tag().id)));
     this.loadSeries();
   }
 
@@ -158,7 +159,7 @@ export class EditCollectionTagsComponent implements OnInit {
 
   loadSeries() {
     forkJoin([
-      this.seriesService.getSeriesForTag(this.tag.id, this.pagination.currentPage, this.pagination.itemsPerPage),
+      this.seriesService.getSeriesForTag(this.tag().id, this.pagination.currentPage, this.pagination.itemsPerPage),
       this.libraryService.getLibraryNames()
     ]).subscribe(results => {
       const series = results[0];
@@ -197,7 +198,8 @@ export class EditCollectionTagsComponent implements OnInit {
     const selectedIndex = this.collectionTagForm.get('coverImageIndex')?.value || 0;
     const unselectedIds = this.selections.unselected().map(s => s.id);
     const tag = this.collectionTagForm.value;
-    tag.id = this.tag.id;
+
+    tag.id = this.tag().id;
     tag.title = this.collectionTagForm.get('title')!.value;
     tag.summary = this.collectionTagForm.get('summary')!.value;
 
@@ -207,8 +209,9 @@ export class EditCollectionTagsComponent implements OnInit {
       return;
     }
 
-    const apis = [
-      this.collectionService.updateTag(tag),
+    let updatedTag: UserCollection | null = null;
+    const apis: Observable<any>[] = [
+      this.collectionService.updateTag(tag).pipe(tap(t => updatedTag = t)),
     ];
 
     const unselectedSeries = this.selections.unselected().map(s => s.id);
@@ -217,12 +220,15 @@ export class EditCollectionTagsComponent implements OnInit {
     }
 
     if (selectedIndex > 0) {
-      apis.push(this.uploadService.updateCollectionCoverImage(this.tag.id, this.selectedCover));
+      apis.push(this.uploadService.updateCollectionCoverImage(this.tag().id, this.selectedCover));
     }
 
-    concat(...apis).subscribe(() => {
+    concat(...apis).pipe(
+      delay(10),
+      last()
+    ).subscribe(() => {
       this.toastr.success(translate('toasts.collection-updated'));
-      this.modal.close(modalSaved(tag, selectedIndex > 0));
+      this.modal.close(modalSaved(updatedTag ?? tag, selectedIndex > 0));
     });
   }
 
@@ -243,4 +249,7 @@ export class EditCollectionTagsComponent implements OnInit {
     });
     this.cdRef.markForCheck();
   }
+
+  protected readonly TabID = TabID;
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 }

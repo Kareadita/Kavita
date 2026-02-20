@@ -2,7 +2,9 @@ import {inject, Injectable} from '@angular/core';
 import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {map, take} from 'rxjs/operators';
-import {BulkAddToCollectionComponent} from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
+import {
+  BulkAddToCollectionModalComponent
+} from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection-modal.component';
 import {ADD_FLOW, AddToListModalComponent} from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
 import {
   EditReadingListModalComponent
@@ -43,7 +45,9 @@ import {ActionEffect, ActionResult} from "../_models/actionables/action-result";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {Router} from "@angular/router";
-import {EditCollectionTagsComponent} from "../cards/_modals/edit-collection-tags/edit-collection-tags.component";
+import {
+  EditCollectionTagsModalComponent
+} from "../cards/_modals/edit-collection-tags/edit-collection-tags-modal.component";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {AnnotationService} from "./annotation.service";
 import {ClientDevice} from "../_models/client-device";
@@ -58,7 +62,7 @@ import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 import {NavService} from "./nav.service";
 import {ModalResult} from "../_models/modal/modal-result";
 import {addToModal, editModal} from "../_models/modal/modal-options";
-import {ModalService} from "./modal.service";
+import {ModalService, TypedModalRef} from "./modal.service";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -97,8 +101,8 @@ export class ActionService {
   private readonly annotationsService = inject(AnnotationService);
   private readonly sideNavService = inject(NavService);
 
-  private readingListModalRef: NgbModalRef | null = null;
-  private collectionModalRef: NgbModalRef | null = null;
+  private readingListModalRef: TypedModalRef<BulkSetReadingProfileModalComponent> | null = null;
+  private collectionModalRef: TypedModalRef<BulkAddToCollectionModalComponent> | null = null;
 
 
 
@@ -251,9 +255,9 @@ export class ActionService {
 
       case Action.AddToCollection: {
         if (this.collectionModalRef != null) return EMPTY;
-        this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, addToModal());
-        this.collectionModalRef.componentInstance.seriesIds = [series.id];
-        this.collectionModalRef.componentInstance.title = translate('actionable.new-collection');
+        this.collectionModalRef = this.modalService.open(BulkAddToCollectionModalComponent, addToModal());
+        this.collectionModalRef.setInput('seriesIds', [series.id]);
+        this.collectionModalRef.setInput('title', translate('actionable.new-collection'));
 
         const ref = this.collectionModalRef;
         return new Observable<ActionResult<Series>>(subscriber => {
@@ -433,7 +437,7 @@ export class ActionService {
           map(() => {
             const updated = {
               ...chapter,
-              pagesRead: 9,
+              pagesRead: 0,
             };
             return this.fromAction(action, updated, 'update');
           })
@@ -575,8 +579,8 @@ export class ActionService {
         );
 
       case Action.Edit:
-        const ref = this.modalService.open(EditCollectionTagsComponent, editModal());
-        ref.componentInstance.tag = collection;
+        const ref = this.modalService.open(EditCollectionTagsModalComponent, editModal());
+        ref.setInput('tag', collection);
         return this.handleEditModal(ref, action, collection);
 
       case Action.Promote:
@@ -808,9 +812,9 @@ export class ActionService {
 
       case Action.AddToCollection: {
         if (this.collectionModalRef != null) return EMPTY;
-        this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, addToModal());
-        this.collectionModalRef.componentInstance.seriesIds = series.map(s => s.id);
-        this.collectionModalRef.componentInstance.title = translate('actionable.new-collection');
+        this.collectionModalRef = this.modalService.open(BulkAddToCollectionModalComponent, addToModal());
+        this.collectionModalRef.setInput('seriesIds', series.map(s => s.id));
+        this.collectionModalRef.setInput('title', translate('actionable.new-collection'));
 
         const ref = this.collectionModalRef;
         return new Observable<ActionResult<Series[]>>(subscriber => {
@@ -841,7 +845,7 @@ export class ActionService {
       case Action.SetReadingProfile: {
         if (this.readingListModalRef != null) return EMPTY;
         this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, addToModal());
-        this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id);
+        this.readingListModalRef.setInput('seriesIds', series.map(s => s.id));
 
         const ref = this.readingListModalRef;
         return new Observable<ActionResult<Series[]>>(subscriber => {
@@ -1190,43 +1194,6 @@ export class ActionService {
     });
   }
 
-
-  addVolumeToReadingList(volume: Volume, seriesId: number, callback?: VolumeActionCallback) {
-    if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
-      this.readingListModalRef.componentInstance.seriesId = seriesId;
-      this.readingListModalRef.componentInstance.volumeId = volume.id;
-      this.readingListModalRef.componentInstance.type = ADD_FLOW.Volume;
-
-
-      this.readingListModalRef.closed.subscribe(() => {
-        this.readingListModalRef = null;
-        callback?.(volume)
-      });
-      this.readingListModalRef.dismissed.subscribe(() => {
-        this.readingListModalRef = null;
-        callback?.(volume)
-      });
-  }
-
-  addChapterToReadingList(chapter: Chapter, seriesId: number, callback?: ChapterActionCallback) {
-    if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, addToModal());
-      this.readingListModalRef.componentInstance.seriesId = seriesId;
-      this.readingListModalRef.componentInstance.chapterId = chapter.id;
-      this.readingListModalRef.componentInstance.type = ADD_FLOW.Chapter;
-
-
-      this.readingListModalRef.closed.subscribe(() => {
-        this.readingListModalRef = null;
-        callback?.(chapter)
-      });
-      this.readingListModalRef.dismissed.subscribe(() => {
-        this.readingListModalRef = null;
-        callback?.(chapter)
-      });
-  }
-
   editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
     const readingListModalRef = this.modalService.open(EditReadingListModalComponent, editModal());
     readingListModalRef.componentInstance.readingList = readingList;
@@ -1310,7 +1277,7 @@ export class ActionService {
     if (this.readingListModalRef != null) { return; }
 
     this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, addToModal());
-    this.readingListModalRef.componentInstance.seriesIds = series.map(s => s.id)
+    this.readingListModalRef.setInput('seriesIds', series.map(s => s.id));
 
     this.readingListModalRef.closed.subscribe(() => {
       this.readingListModalRef = null;
@@ -1335,7 +1302,7 @@ export class ActionService {
     if (this.readingListModalRef != null) { return; }
 
     this.readingListModalRef = this.modalService.open(BulkSetReadingProfileModalComponent, addToModal());
-    this.readingListModalRef.componentInstance.libraryId = library.id;
+    this.readingListModalRef.setInput('libraryId', library.id);
 
     this.readingListModalRef.closed.subscribe(() => {
       this.readingListModalRef = null;

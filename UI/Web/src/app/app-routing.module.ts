@@ -2,6 +2,11 @@ import {Routes} from '@angular/router';
 import {AuthGuard} from './_guards/auth.guard';
 import {libraryAccessGuard} from './_guards/library-access.guard';
 import {libraryResolver} from "./_resolvers/library.resolver";
+import {seriesResolver} from "./_resolvers/series.resolver";
+import {volumeResolver} from "./_resolvers/volume.resolver";
+import {chapterResolver} from "./_resolvers/chapter.resolver";
+import {personResolver} from "./_resolvers/person.resolver";
+import {readingListResolver} from "./_resolvers/reading-list.resolver";
 
 export const routes: Routes = [
   {
@@ -16,10 +21,6 @@ export const routes: Routes = [
       {
         path: 'collections',
         loadChildren: () => import('./_routes/collections-routing.module').then(m => m.routes)
-      },
-      {
-        path: 'lists',
-        loadChildren: () => import('./_routes/reading-list-routing.module').then(m => m.routes)
       },
       {
         path: 'announcements',
@@ -46,8 +47,11 @@ export const routes: Routes = [
         loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
       },
       {
-        path: 'person',
-        loadChildren: () => import('./_routes/person-detail-routing.module').then(m => m.routes)
+        path: 'person/:name',
+        runGuardsAndResolvers: 'always',
+        canActivate: [AuthGuard],
+        resolve: { person: personResolver },
+        loadComponent: () => import('./person-detail/person-detail.component').then(m => m.PersonDetailComponent)
       },
       {
         path: 'browse',
@@ -58,10 +62,24 @@ export const routes: Routes = [
         loadChildren: () => import('./_routes/profile-routing.module').then(m => m.routes)
       },
       {
+        path: 'lists',
+        pathMatch: 'full',
+        title: 'title.reading-lists',
+        loadComponent: () => import('./reading-list/_components/reading-lists/reading-lists.component').then(c => c.ReadingListsComponent)
+      },
+      {
+        path: 'lists/:readingListId',
+        runGuardsAndResolvers: 'always',
+        canActivate: [AuthGuard],
+        data: {titleField: 'readingList', titleProp: 'title'},
+        resolve: { readingList: readingListResolver },
+        loadComponent: () => import('./reading-list/_components/reading-list-detail/reading-list-detail.component').then(c => c.ReadingListDetailComponent)
+      },
+      {
         path: 'library/:libraryId',
         runGuardsAndResolvers: 'always',
         canActivate: [libraryAccessGuard],
-        resolve: { libraryData: libraryResolver },
+        resolve: { library: libraryResolver },
         children: [
           {
             path: '',
@@ -71,17 +89,21 @@ export const routes: Routes = [
           {
             path: 'series/:seriesId',
             pathMatch: 'full',
+            data: {titleField: 'series', titleProp: 'name', titleSuffix: ' Details'},
+            resolve: { series: seriesResolver },
             loadComponent: () => import('./series-detail/_components/series-detail/series-detail.component').then(c => c.default)
-          },
-          {
-            path: 'series/:seriesId/chapter/:chapterId',
-            pathMatch: 'full',
-            loadComponent: () => import('./chapter-detail/chapter-detail.component').then(c => c.ChapterDetailComponent)
           },
           {
             path: 'series/:seriesId/volume/:volumeId',
             pathMatch: 'full',
+            resolve: { series: seriesResolver, volume: volumeResolver },
             loadComponent: () => import('./volume-detail/volume-detail.component').then(c => c.VolumeDetailComponent)
+          },
+          {
+            path: 'series/:seriesId/chapter/:chapterId',
+            pathMatch: 'full',
+            resolve: { series: seriesResolver, chapter: chapterResolver },
+            loadComponent: () => import('./chapter-detail/chapter-detail.component').then(c => c.ChapterDetailComponent)
           },
           {
             path: 'series/:seriesId/manga',

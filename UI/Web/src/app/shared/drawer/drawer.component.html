@@ -1,6 +1,6 @@
 <ng-container *transloco="let t">
-  <div class="offcanvas offcanvas-{{position}}" [class.show]="isOpen" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel"
-    [ngStyle]="{'top': options.topOffset + 'px', 'visibility': isOpen ? 'visible' : 'hidden'}" role="dialog">
+  <div class="offcanvas offcanvas-{{position()}}" [class.show]="isOpen()" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel"
+       [style.top.px]="options().topOffset" [ngStyle]="{'visibility': isOpen() ? 'visible' : 'hidden'}" role="dialog">
     <div class="offcanvas-header">
       <div class="offcanvas-title" id="offcanvasLabel">
         <ng-content select="[header]" />
@@ -16,7 +16,7 @@
     </div>
   </div>
   <!-- TODO: Replace this with official component when released. This is some hacky solution to mimic Bootstrap 5 Javascript code -->
-  @if (isOpen) {
+  @if (isOpen()) {
     <div class="offcanvas-backdrop fade show" (click)="close()"></div>
   }
 </ng-container>

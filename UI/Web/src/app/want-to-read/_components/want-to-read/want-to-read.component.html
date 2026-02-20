@@ -28,7 +28,7 @@
           </ng-template>
 
           <ng-template #cardItem let-item let-position="idx">
-            <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="removeSeries($event)"
+            <app-series-card [series]="item" (reload)="removeSeries($event)"
                              [index]="position" [maxIndex]="series.length" [allowSelection]="true"
              />
           </ng-template>

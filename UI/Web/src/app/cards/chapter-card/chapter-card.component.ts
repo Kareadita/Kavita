@@ -2,25 +2,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   EventEmitter,
   inject,
   input,
-  Input,
+  linkedSignal,
   OnChanges,
-  OnInit,
   Output,
-  signal,
   SimpleChanges,
   TemplateRef,
   viewChild
 } from '@angular/core';
 import {ImageService} from "../../_services/image.service";
-import {MessageHubService} from "../../_services/message-hub.service";
-import {AccountService} from "../../_services/account.service";
 import {Chapter} from "../../_models/chapter";
-import {User} from "../../_models/user/user";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FormsModule} from "@angular/forms";
 import {EntityTitleComponent} from "../entity-title/entity-title.component";
 import {LibraryType} from "../../_models/library/library";
@@ -30,7 +23,7 @@ import {BaseCardConfiguration, ProgressUpdateResult} from "../../_models/card/ca
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {BulkSelectionEntityDataSource} from "../bulk-selection.service";
-import {ActionItem} from "../../_models/actionables/action-item";
+import {ActionFactoryService} from "../../_services/action-factory.service";
 
 @Component({
   selector: 'app-chapter-card',
@@ -43,20 +36,19 @@ import {ActionItem} from "../../_models/actionables/action-item";
   styleUrl: './chapter-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChapterCardComponent implements OnInit, OnChanges {
-  private readonly destroyRef = inject(DestroyRef);
+export class ChapterCardComponent implements OnChanges {
   public readonly imageService = inject(ImageService);
-  private readonly messageHub = inject(MessageHubService);
-  private readonly accountService = inject(AccountService);
   private readonly configFactory = inject(CardConfigFactory);
+  private readonly actionFactory = inject(ActionFactoryService);
+
 
   protected readonly LibraryType = LibraryType;
   protected readonly MangaFormat = MangaFormat;
 
-  @Input({required: true}) libraryId: number = 0;
-  @Input({required: true}) seriesId: number = 0;
-  @Input({required: true}) chapter!: Chapter;
-  @Input({required: true}) libraryType!: LibraryType;
+  libraryId = input.required<number>();
+  seriesId = input.required<number>();
+  chapter = input.required<Chapter>();
+  libraryType = input.required<number>();
 
   index = input<number>(0);
   maxIndex = input<number>(1);
@@ -65,19 +57,15 @@ export class ChapterCardComponent implements OnInit, OnChanges {
   /**
    * Any actions to perform on the card
    */
-  @Input() actions: ActionItem<Chapter>[] = [];
-  /**
-   * If the entity is selected or not.
-   */
-  @Input() selected: boolean = false;
+  actions = computed(() => this.actionFactory.getChapterActions(this.seriesId(), this.libraryId(), this.libraryType()));
   /**
    * If the entity should show selection code
    */
-  @Input() allowSelection: boolean = false;
+  allowSelection = input<boolean>(false);
   /**
    * This will suppress the "cannot read archive warning" when total pages is 0
    */
-  @Input() suppressArchiveWarning: boolean = false;
+  suppressArchiveWarning = input<boolean>(false);
   /**
    * When the card is selected.
    */
@@ -94,9 +82,7 @@ export class ChapterCardComponent implements OnInit, OnChanges {
   protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
 
 
-  private user: User | undefined;
-
-  private chapterSignal = signal<Chapter | null>(null);
+  private chapterSignal = linkedSignal<Chapter>(() => this.chapter());
 
   cardEntity = computed<CardEntity>(() => {
     const chapter = this.chapterSignal();
@@ -104,32 +90,27 @@ export class ChapterCardComponent implements OnInit, OnChanges {
       // Return a placeholder - shouldn't render in practice
       return CardEntityFactory.chapter({} as Chapter, 0, 0);
     }
-    return CardEntityFactory.chapter(chapter, this.seriesId, this.libraryId);
+    return CardEntityFactory.chapter(chapter, this.seriesId(), this.libraryId());
   });
 
   config = computed<BaseCardConfiguration<Chapter>>(() => {
     return this.configFactory.forChapter({
-      seriesId: this.seriesId,
-      libraryId: this.libraryId,
-      libraryType: this.libraryType,
+      seriesId: this.seriesId(),
+      libraryId: this.libraryId(),
+      libraryType: this.libraryType(),
       overrides: {
-        allowSelection: this.allowSelection,
-        actionableFunc: () => this.actions,
+        allowSelection: this.allowSelection(),
+        actionableFunc: () => this.actions(),
         selectionType: this.dataSource(),
         titleTemplate: this.titleTemplateRef()
       }
     });
   });
 
-  ngOnInit() {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-      this.user = user;
-    });
-  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['chapter']) {
-      this.chapterSignal.set(this.chapter);
+      this.chapterSignal.set(this.chapter());
     }
   }
 

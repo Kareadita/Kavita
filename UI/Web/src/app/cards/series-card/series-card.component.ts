@@ -4,11 +4,10 @@ import {
   computed,
   EventEmitter,
   inject,
-  Input,
-  OnChanges,
+  input,
+  linkedSignal,
   Output,
-  signal,
-  SimpleChanges
+  signal
 } from '@angular/core';
 import {Router} from '@angular/router';
 import {NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
@@ -28,33 +27,27 @@ import {ProgressUpdateResult} from "../../_models/card/card-configuration";
   styleUrls: ['./series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeriesCardComponent implements OnChanges {
+export class SeriesCardComponent {
 
   private readonly router = inject(Router);
   private readonly offcanvasService = inject(NgbOffcanvas);
   private readonly configFactory = inject(CardConfigFactory);
 
-  // ============================================================
-  // EXISTING PUBLIC API (maintained for backwards compatibility)
-  // ============================================================
-
-  @Input({ required: true }) series!: Series;
-  @Input() libraryId = 0;
-  @Input() suppressLibraryLink = false;
-  @Input() selected = false;
-  @Input() allowSelection = false;
-  @Input() relation: RelationKind | undefined = undefined;
-  @Input() isOnDeck = false;
-  @Input() previewOnClick = false;
-  @Input() index = 0;
-  @Input() maxIndex = 1;
+  series = input.required<Series>();
+  suppressLibraryLink = input<boolean>(false);
+  allowSelection = input<boolean>(false);
+  relation = input<RelationKind | undefined>(undefined);
+  isOnDeck = input<boolean>(false);
+  previewOnClick = input<boolean>(false);
+  index = input<number>(0);
+  maxIndex = input<number>(1);
 
   @Output() reload = new EventEmitter<number>();
   @Output() dataChanged = new EventEmitter<Series>();
   /** Emitted when a progress update is processed. */
   @Output() progressUpdated = new EventEmitter<ProgressUpdateResult<Series>>();
 
-  private seriesSignal = signal<Series | null>(null);
+  private seriesSignal = linkedSignal(() => this.series());
   private relationSignal = signal<RelationKind | undefined>(undefined);
   private isOnDeckSignal = signal(false);
 
@@ -72,25 +65,14 @@ export class SeriesCardComponent implements OnChanges {
   config = computed(() => {
     return this.configFactory.forSeries({
       overrides: {
-        allowSelection: this.allowSelection,
+        allowSelection: this.allowSelection(),
         clickFunc: this.handleClick.bind(this)
       }
     });
   });
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['series']) {
-      this.seriesSignal.set(this.series);
-    }
-    if (changes['relation']) {
-      this.relationSignal.set(this.relation);
-    }
-    if (changes['isOnDeck']) {
-      this.isOnDeckSignal.set(this.isOnDeck);
-    }
-  }
-
   onDataChanged(entity: Series) {
+    console.log('series updated, ', entity);
     this.seriesSignal.set({...entity});
     this.dataChanged.emit(entity);
   }
@@ -100,12 +82,12 @@ export class SeriesCardComponent implements OnChanges {
       this.reload.emit(result.entity!.id);
       return;
     }
-    
+
     this.onDataChanged(result.entity!);
   }
 
   private async handleClick(series: Series) {
-    if (this.previewOnClick) {
+    if (this.previewOnClick()) {
       const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {
         position: 'end',
         panelClass: ''
@@ -117,6 +99,6 @@ export class SeriesCardComponent implements OnChanges {
       return;
     }
 
-    await this.router.navigate(['library', this.libraryId, 'series', series.id]);
+    await this.router.navigate(['library', series.libraryId, 'series', series.id]);
   }
 }

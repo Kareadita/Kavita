@@ -9,7 +9,6 @@ import {
   linkedSignal,
   OnInit
 } from '@angular/core';
-import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import {BulkSelectionService} from '../cards/bulk-selection.service';
 import {UtilityService} from '../shared/_services/utility.service';
@@ -45,6 +44,7 @@ import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
 import {MetadataService} from "../_services/metadata.service";
 import {ActionItem} from "../_models/actionables/action-item";
 import {ActionResult} from "../_models/actionables/action-result";
+import {KavitaTitleStrategy} from "../_services/kavita-title.strategy";
 
 @Component({
     selector: 'app-library-detail',
@@ -62,7 +62,7 @@ export class LibraryDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly seriesService = inject(SeriesService);
   private readonly libraryService = inject(LibraryService);
-  private readonly titleService = inject(Title);
+  private readonly kavitaTitleStrategy = inject(KavitaTitleStrategy);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly hubService = inject(MessageHubService);
   private readonly utilityService = inject(UtilityService);
@@ -104,8 +104,6 @@ export class LibraryDetailComponent implements OnInit {
 
     this.actions = this.actionFactoryService.getLibraryActions();
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-
-    this.getLibraryName();
 
     this.libraryService.getJumpBar(this.libraryId()).subscribe(barDetails => {
       this.jumpKeys = barDetails;
@@ -176,14 +174,6 @@ export class LibraryDetailComponent implements OnInit {
     });
   }
 
-  private getLibraryName() {
-    this.libraryService.getLibraryNames().subscribe(names => {
-      this.libraryName = names[this.libraryId()];
-      this.titleService.setTitle('Kavita - ' + this.libraryName);
-      this.cdRef.markForCheck();
-    });
-  }
-
   updateFilter(data: FilterEvent<FilterField, SortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
@@ -205,7 +195,7 @@ export class LibraryDetailComponent implements OnInit {
 
     this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filter)
       .subscribe(series => {
-        this.series = series.result;
+        this.series = [...series.result];
         this.pagination = series.pagination;
         this.loadingSeries = false;
         this.cdRef.markForCheck();
@@ -221,7 +211,7 @@ export class LibraryDetailComponent implements OnInit {
 
         // For now, until we refactor backend to send it as a basic library for non-admin users
         this.libraryName = event.entity.name;
-        this.titleService.setTitle('Kavita - ' + this.libraryName);
+        this.kavitaTitleStrategy.setFormattedTitle(event.entity.name);
         this.cdRef.markForCheck();
         break;
       case 'remove':

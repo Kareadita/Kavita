@@ -5,8 +5,8 @@ import {
   DestroyRef,
   ElementRef,
   inject,
-  input, OnInit,
-  Renderer2
+  input,
+  OnInit
 } from '@angular/core';
 import {DOCUMENT} from "@angular/common";
 import {filter, fromEvent, merge, tap} from "rxjs";
@@ -18,8 +18,8 @@ interface Dimensions {
 }
 
 export enum ResizeMode {
-  Width = "width",
-  Height = "height",
+  Width = 'width',
+  Height = 'height',
 }
 
 @Component({
@@ -34,7 +34,6 @@ export class OffCanvasResizeComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
   private readonly el = inject(ElementRef);
-  private readonly renderer = inject(Renderer2);
 
   /**
    * Minimum height of the canvas element in viewport

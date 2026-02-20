@@ -62,6 +62,7 @@ export class BulkSelectionService {
 
   private actionsSource = new ReplaySubject<ActionItem<any>[]>(1);
   public actions$ = this.actionsSource.asObservable();
+  public actionsSignal = toSignal(this.actionsSource);
 
   private selectionsSource = new ReplaySubject<number>(1);
   /**
@@ -299,7 +300,7 @@ export class BulkSelectionService {
   }
 
   /**
-   * Wires callback2 on each action (and children recursively) so that triggering
+   * Wires callback on each action (and children recursively) so that triggering
    * the action resolves entities at trigger time, calls the bulk handler, then
    * auto-deselects and fires the post-action callback.
    */

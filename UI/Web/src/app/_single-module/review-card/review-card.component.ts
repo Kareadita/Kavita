@@ -40,7 +40,7 @@ export class ReviewCardComponent {
       ref = this.modalService.open(ReviewCardModalComponent);
     }
 
-    ref.componentInstance.review = this.review();
+    ref.setInput('review', this.review());
     ref.closed.subscribe((res: ReviewModalCloseEvent | undefined) => {
       if (res) {
         this.refresh.emit(res);

@@ -36,6 +36,7 @@
                         [index]="$index"
                         [duplicated]="duplicatedKeyBinds()[element.target]?.includes($index) ?? false"
                         [ngbTooltip]="errorToolTip(element.target, $index, keyBindControl.errors)"
+                        [tooltipPlacement]="'right'"
                         (longClick)="removeKeyBind(element.target, $index)"
                       />
                     } @empty {

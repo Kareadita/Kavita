@@ -1,14 +1,15 @@
-@if (person !== undefined) {
-  <a class="btn btn-icon p-0" routerLink="/person/{{encodeURIComponent(person.name)}}">
+@let personValue = person();
+@if (personValue) {
+  <a class="btn btn-icon p-0" routerLink="/person/{{encodeURIComponent(personValue.name)}}">
     <div class="tagbadge cursor clickable">
       <div class="d-flex flex-column align-items-center justify-content-center">
         <div class="image-container d-flex align-items-center justify-content-center">
-          @if (HasCoverImage) {
+          @if (hasCoverImage()) {
             <app-image objectFit="cover"
                       [styles]="{'object-position': 'top'}"
                       height="96px"
                       width="96px"
-                      [imageUrl]="ImageUrl"
+                      [imageUrl]="imageUrl()"
                       [errorImage]="imageService.noPersonImage" />
           } @else {
              <i class="fas fa-user" aria-hidden="true"></i>
@@ -16,7 +17,7 @@
         </div>
 
         <div class="flex-grow-1 text-center mt-2">
-          <span class="mt-1 mb-0">{{person.name}}</span>
+          <span class="mt-1 mb-0">{{personValue.name}}</span>
         </div>
       </div>
     </div>

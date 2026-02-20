@@ -1,8 +1,8 @@
 <app-entity-card
   [entity]="cardEntity()"
   [config]="config()"
-  [index]="index"
-  [maxIndex]="maxIndex"
+  [index]="index()"
+  [maxIndex]="maxIndex()"
   (reload)="reload.emit($event)"
   (dataChanged)="onDataChanged($event)"
   (progressUpdated)="onProgressUpdated($event)"

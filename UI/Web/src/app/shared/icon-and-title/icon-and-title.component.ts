@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, input, Output} from '@angular/core';
 import {NgClass} from "@angular/common";
 
 @Component({
@@ -14,19 +14,19 @@ export class IconAndTitleComponent {
   /**
    * If the component is clickable and should emit click events
    */
-  @Input() clickable: boolean = true;
-  @Input() title: string = '';
-  @Input() label: string = '';
+  clickable = input<boolean>(true);
+  title = input<string>('');
+  label = input<string>('');
   /**
    * Font classes used to display font
    */
-  @Input() fontClasses: string = '';
+  fontClasses = input<string>('');
 
-  @Output() click: EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
+  @Output() clicked: EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
 
   constructor() { }
 
   handleClick(event: MouseEvent) {
-    if (this.clickable) this.click.emit(event);
+    if (this.clickable()) this.clicked.emit(event);
   }
 }

@@ -30,6 +30,7 @@ export class EditListComponent implements OnInit {
   @Input({required: true}) label = '';
   @Input() validators: ValidatorFn[] = []
   @Input() asyncValidators: AsyncValidatorFn[] = [];
+
   // TODO: Make this more dynamic based on which validator failed
   @Input() errorMessage: string | null = null;
   @Output() updateItems = new EventEmitter<Array<string>>();

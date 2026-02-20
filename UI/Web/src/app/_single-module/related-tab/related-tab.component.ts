@@ -49,11 +49,14 @@ export class RelatedTabComponent {
 
   readingLists = input<ReadingList[]>([]);
   readingListEntities = computed(() => this.readingLists().map(r => CardEntityFactory.readingList(r)));
-  readingListConfig = computed(() => this.cardConfigFactory.forReadingList({overrides: {actionableFunc: () => []}}));
+  readingListConfig = computed(() => this.cardConfigFactory.forReadingList({overrides: {
+    actionableFunc: () => [],
+    allowSelection: false
+  }}));
 
   collections = input<UserCollection[]>([]);
   collectionEntities = computed(() => this.collections().map(c => CardEntityFactory.collection(c)));
-  collectionConfig = computed(() => this.cardConfigFactory.forCollection())
+  collectionConfig = computed(() => this.cardConfigFactory.forCollection({overrides: {allowSelection: false}}))
 
 
   bookmarks = input<PageBookmark[]>([]);

@@ -1,9 +1,9 @@
 <ng-container *transloco="let t; prefix: 'book-line-overlay'">
-  @if(selectedText.length > 0 || mode !== BookLineOverlayMode.None) {
+  @if(showOverlay()) {
     <div class="overlay">
 
       <div class="row g-0 justify-content-between">
-        @switch (mode) {
+        @switch (mode()) {
           @case (BookLineOverlayMode.None) {
             <div class="col-auto">
               <button class="btn btn-icon btn-sm" (click)="copy()">
@@ -37,7 +37,7 @@
           }
 
           @case (BookLineOverlayMode.Annotate) {
-
+            <!--There is no secondary rendering here, it pops up a drawer -->
           }
 
           @case (BookLineOverlayMode.Bookmark) {
