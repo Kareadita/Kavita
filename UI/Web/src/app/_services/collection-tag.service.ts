@@ -32,7 +32,7 @@ export class CollectionTagService {
   }
 
   updateTag(tag: UserCollection) {
-    return this.httpClient.post(this.baseUrl + 'collection/update', tag, TextResonse);
+    return this.httpClient.post<UserCollection>(this.baseUrl + 'collection/update', tag);
   }
 
   promoteMultipleCollections(tags: Array<number>, promoted: boolean) {

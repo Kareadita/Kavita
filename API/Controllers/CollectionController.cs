@@ -103,10 +103,10 @@ public class CollectionController : BaseApiController
     /// <remarks>UI does not contain controls to update title</remarks>
     /// </summary>
     /// <param name="updatedTag"></param>
-    /// <returns></returns>
+    /// <returns>The updated tag entity</returns>
     [HttpPost("update")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> UpdateTag(AppUserCollectionDto updatedTag)
+    public async Task<ActionResult<AppUserCollectionDto>> UpdateTag(AppUserCollectionDto updatedTag)
     {
         try
         {
@@ -114,7 +114,7 @@ public class CollectionController : BaseApiController
             {
                 await _eventHub.SendMessageAsync(MessageFactory.CollectionUpdated,
                     MessageFactory.CollectionUpdatedEvent(updatedTag.Id), false);
-                return Ok(await _localizationService.Translate(UserId, "collection-updated-successfully"));
+                return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtoAsync(updatedTag.Id, UserId));
             }
         }
         catch (KavitaException ex)

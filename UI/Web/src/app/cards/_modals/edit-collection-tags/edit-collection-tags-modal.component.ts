@@ -11,7 +11,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {concat, debounceTime, distinctUntilChanged, forkJoin, switchMap, tap} from 'rxjs';
+import {concat, debounceTime, delay, distinctUntilChanged, forkJoin, last, Observable, switchMap, tap} from 'rxjs';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {UserCollection} from 'src/app/_models/collection-tag';
@@ -198,6 +198,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
     const selectedIndex = this.collectionTagForm.get('coverImageIndex')?.value || 0;
     const unselectedIds = this.selections.unselected().map(s => s.id);
     const tag = this.collectionTagForm.value;
+
     tag.id = this.tag().id;
     tag.title = this.collectionTagForm.get('title')!.value;
     tag.summary = this.collectionTagForm.get('summary')!.value;
@@ -208,8 +209,9 @@ export class EditCollectionTagsModalComponent implements OnInit {
       return;
     }
 
-    const apis = [
-      this.collectionService.updateTag(tag),
+    let updatedTag: UserCollection | null = null;
+    const apis: Observable<any>[] = [
+      this.collectionService.updateTag(tag).pipe(tap(t => updatedTag = t)),
     ];
 
     const unselectedSeries = this.selections.unselected().map(s => s.id);
@@ -221,9 +223,12 @@ export class EditCollectionTagsModalComponent implements OnInit {
       apis.push(this.uploadService.updateCollectionCoverImage(this.tag().id, this.selectedCover));
     }
 
-    concat(...apis).subscribe(() => {
+    concat(...apis).pipe(
+      delay(10),
+      last()
+    ).subscribe(() => {
       this.toastr.success(translate('toasts.collection-updated'));
-      this.modal.close(modalSaved(tag, selectedIndex > 0));
+      this.modal.close(modalSaved(updatedTag ?? tag, selectedIndex > 0));
     });
   }
 
