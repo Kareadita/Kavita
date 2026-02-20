@@ -12,7 +12,7 @@ import {
   numberAttribute,
   OnInit,
   signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
@@ -184,7 +184,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   private readonly document = inject(DOCUMENT);
   protected readonly breakpointService = inject(BreakpointService);
 
-  @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
+  readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
 
 
   seriesId = input(0, {transform: numberAttribute });
@@ -444,7 +444,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   hasRelations = computed(() => this.relations().length > 0);
 
   get ScrollingBlockHeight() {
-    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
+    if (this.scrollingBlock() === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
     if (navbar === null) return 'calc(var(--vh)*100)';
 
@@ -497,7 +497,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.scrollService.setScrollContainer(this.scrollingBlock);
+    this.scrollService.setScrollContainer(this.scrollingBlock());
   }
 
   ngOnInit(): void {

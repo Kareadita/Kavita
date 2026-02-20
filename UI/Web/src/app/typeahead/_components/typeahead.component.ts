@@ -4,7 +4,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
   DestroyRef,
   ElementRef,
   EventEmitter,
@@ -16,7 +15,8 @@ import {
   Renderer2,
   RendererStyleFlags2,
   TemplateRef,
-  ViewChild
+  ViewChild,
+  contentChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Observable, ReplaySubject} from 'rxjs';
@@ -85,8 +85,8 @@ export class TypeaheadComponent implements OnInit {
 
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
-  @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
-  @ContentChild('badgeItem') badgeTemplate!: TemplateRef<any>;
+  readonly optionTemplate = contentChild.required<TemplateRef<any>>('optionItem');
+  readonly badgeTemplate = contentChild.required<TemplateRef<any>>('badgeItem');
 
   optionSelection!: SelectionModel<any>;
 

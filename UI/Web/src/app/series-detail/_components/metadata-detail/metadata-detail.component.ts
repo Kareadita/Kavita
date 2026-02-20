@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ContentChild, inject, Input, TemplateRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ContentChild, inject, Input, TemplateRef, contentChild} from '@angular/core';
 import {NgTemplateOutlet} from '@angular/common';
 import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
@@ -29,7 +29,7 @@ export class MetadataDetailComponent {
   @Input({required: true}) heading!: string;
   @Input() queryParam: FilterField = FilterField.None;
   @Input() includeComma: boolean = true;
-  @ContentChild('titleTemplate') titleTemplate!: TemplateRef<any>;
+  readonly titleTemplate = contentChild.required<TemplateRef<any>>('titleTemplate');
   @ContentChild('itemTemplate') itemTemplate?: TemplateRef<any>;
 
 

@@ -10,8 +10,9 @@ import {
   Input,
   OnInit,
   TemplateRef,
-  ViewChild,
-  output
+  output,
+  viewChild,
+  contentChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
@@ -86,15 +87,15 @@ export class GroupedTypeaheadComponent implements OnInit {
    */
   readonly focusChanged = output<boolean>();
 
-  @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
-  @ContentChild('itemTemplate') itemTemplate!: TemplateRef<any>;
+  readonly inputElem = viewChild.required<ElementRef<HTMLInputElement>>('input');
+  readonly itemTemplate = contentChild.required<TemplateRef<any>>('itemTemplate');
   @ContentChild('seriesTemplate') seriesTemplate: TemplateRef<any> | undefined;
   @ContentChild('collectionTemplate') collectionTemplate: TemplateRef<any> | undefined;
   @ContentChild('tagTemplate') tagTemplate: TemplateRef<any> | undefined;
   @ContentChild('personTemplate') personTemplate: TemplateRef<any> | undefined;
   @ContentChild('genreTemplate') genreTemplate!: TemplateRef<any>;
   @ContentChild('noResultsTemplate') noResultsTemplate!: TemplateRef<any>;
-  @ContentChild('extraTemplate') extraTemplate!: TemplateRef<any>;
+  readonly extraTemplate = contentChild.required<TemplateRef<any>>('extraTemplate');
   @ContentChild('libraryTemplate') libraryTemplate!: TemplateRef<any>;
   @ContentChild('readingListTemplate') readingListTemplate!: TemplateRef<any>;
   @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
@@ -141,10 +142,11 @@ export class GroupedTypeaheadComponent implements OnInit {
   }
 
   private focusElement(e: KeyBindEvent) {
-    if (this.inputElem.nativeElement) {
+    const inputElem = this.inputElem();
+    if (inputElem.nativeElement) {
       e.triggered = true;
-      this.inputElem.nativeElement.focus();
-      this.inputElem.nativeElement.click();
+      inputElem.nativeElement.focus();
+      inputElem.nativeElement.click();
     }
   }
 
@@ -222,8 +224,9 @@ export class GroupedTypeaheadComponent implements OnInit {
 
     if (!firstRun) {
       this.hasFocus = true;
-      if (this.inputElem && this.inputElem.nativeElement) {
-        this.inputElem.nativeElement.focus();
+      const inputElem = this.inputElem();
+      if (inputElem && inputElem.nativeElement) {
+        inputElem.nativeElement.focus();
       }
 
       this.openDropdown();

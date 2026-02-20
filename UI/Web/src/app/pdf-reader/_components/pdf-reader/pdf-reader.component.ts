@@ -10,7 +10,7 @@ import {
   OnDestroy,
   OnInit,
   signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
@@ -75,7 +75,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   protected readonly ScrollModeType = ScrollModeType;
 
-  @ViewChild('container') container!: ElementRef;
+  readonly container = viewChild.required<ElementRef>('container');
 
   libraryId!: number;
   seriesId!: number;
@@ -228,7 +228,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   calcScrollbarNeeded() {
     const viewContainer = this.document.querySelector('#viewerContainer');
     if (viewContainer == null) return;
-    this.scrollbarNeeded = viewContainer.scrollHeight > this.container?.nativeElement?.clientHeight;
+    this.scrollbarNeeded = viewContainer.scrollHeight > this.container()?.nativeElement?.clientHeight;
     this.cdRef.markForCheck();
   }
 
@@ -315,7 +315,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       }
       this.cdRef.markForCheck();
     });
-    setTimeout(() => this.readerService.enableWakeLock(this.container.nativeElement), 1000);
+    setTimeout(() => this.readerService.enableWakeLock(this.container().nativeElement), 1000);
   }
 
   /**

@@ -173,7 +173,7 @@
 
             @if (searchTerm.length > 0 && !isLoading) {
               <li class="list-group-item" style="min-height: 34px" (click)="$event.stopPropagation()">
-                <ng-container [ngTemplateOutlet]="extraTemplate" />
+                <ng-container [ngTemplateOutlet]="extraTemplate()" />
                 <form [formGroup]="searchSettingsForm">
                   <div class="form-check form-switch">
                     <input type="checkbox" id="search-include-extras" role="switch" formControlName="includeExtras" class="form-check-input" switch

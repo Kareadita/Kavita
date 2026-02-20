@@ -9,7 +9,7 @@ import {
   EventEmitter,
   inject,
   OnInit,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {debounceTime} from 'rxjs';
@@ -66,8 +66,8 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   private jumpbarService = inject(JumpbarService);
 
 
-  @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
-  @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
+  readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
+  readonly companionBar = viewChild<ElementRef<HTMLDivElement>>('companionBar');
   private readonly destroyRef = inject(DestroyRef);
   private readonly metadataService = inject(MetadataService);
 
@@ -89,11 +89,11 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
 
   get ScrollingBlockHeight() {
-    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
+    if (this.scrollingBlock() === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
     if (navbar === null) return 'calc(var(--vh)*100)';
 
-    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
+    const companionHeight = this.companionBar()!.nativeElement.offsetHeight;
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
@@ -153,7 +153,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   }
 
   ngAfterContentChecked(): void {
-    this.scrollService.setScrollContainer(this.scrollingBlock);
+    this.scrollService.setScrollContainer(this.scrollingBlock());
   }
 
   removeSeries(seriesId: number) {

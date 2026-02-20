@@ -7,7 +7,7 @@ import {
   input,
   model,
   signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {Clipboard} from '@angular/cdk/clipboard';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -41,7 +41,7 @@ export class ApiKeyComponent {
   })
 
 
-  @ViewChild('apiKey') inputElem!: ElementRef;
+  readonly inputElem = viewChild.required<ElementRef>('apiKey');
 
   async copy() {
     this.clipboard.copy(this.key());
@@ -49,8 +49,9 @@ export class ApiKeyComponent {
   }
 
   selectAll() {
-    if (this.inputElem) {
-      this.inputElem.nativeElement.setSelectionRange(0, this.key().length);
+    const inputElem = this.inputElem();
+    if (inputElem) {
+      inputElem.nativeElement.setSelectionRange(0, this.key().length);
     }
   }
 

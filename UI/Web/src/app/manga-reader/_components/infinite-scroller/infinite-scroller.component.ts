@@ -17,8 +17,8 @@ import {
   Renderer2,
   Signal,
   SimpleChanges,
-  ViewChild,
-  output
+  output,
+  viewChild
 } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
@@ -123,7 +123,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
   @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
 
-  @ViewChild('bottomSpacer', {static: false}) bottomSpacer!: ElementRef;
+  readonly bottomSpacer = viewChild.required<ElementRef>('bottomSpacer');
   bottomSpacerIntersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleBottomIntersection(entries),
     { threshold: 1.0 });
 
@@ -363,7 +363,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   ngAfterViewInit() {
-    this.bottomSpacerIntersectionObserver.observe(this.bottomSpacer.nativeElement);
+    this.bottomSpacerIntersectionObserver.observe(this.bottomSpacer().nativeElement);
   }
 
   recalculateImageWidth() {

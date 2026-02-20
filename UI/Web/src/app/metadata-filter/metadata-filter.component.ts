@@ -3,7 +3,6 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
-  ContentChild,
   DestroyRef,
   effect,
   EventEmitter,
@@ -13,7 +12,8 @@ import {
   OnInit,
   output,
   Signal,
-  TemplateRef
+  TemplateRef,
+  contentChild
 } from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
@@ -78,12 +78,12 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
   filterSettings = input.required<FilterSettingsBase<TFilter, TSort>>();
 
   readonly applyFilter = output<FilterEvent<TFilter, TSort>>();
-  @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
+  readonly collapse = contentChild.required<NgbCollapse>('[ngbCollapse]');
 
   /**
    * Template that is rendered next to the save button
    */
-  @ContentChild('extraButtons') extraButtonsRef!: TemplateRef<any>;
+  readonly extraButtonsRef = contentChild.required<TemplateRef<any>>('extraButtons');
 
 
 

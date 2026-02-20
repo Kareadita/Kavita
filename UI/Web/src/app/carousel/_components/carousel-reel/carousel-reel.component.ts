@@ -3,14 +3,14 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
-  ContentChild,
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
   input,
   Input,
   signal,
   TemplateRef,
-  output
+  output,
+  contentChild
 } from '@angular/core';
 import {Swiper} from 'swiper/types';
 import {register} from 'swiper/element/bundle';
@@ -40,8 +40,8 @@ export class CarouselReelComponent {
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
-  @ContentChild('carouselItem') carouselItemTemplate!: TemplateRef<any>;
-  @ContentChild('promptToAdd') promptToAddTemplate!: TemplateRef<any>;
+  readonly carouselItemTemplate = contentChild.required<TemplateRef<any>>('carouselItem');
+  readonly promptToAddTemplate = contentChild.required<TemplateRef<any>>('promptToAdd');
   @Input() items: any[] = [];
   @Input() title = '';
   /**
