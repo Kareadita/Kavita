@@ -2,11 +2,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   EventEmitter,
   inject,
   input,
-  linkedSignal,
   OnInit
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -45,6 +45,7 @@ import {MetadataService} from "../_services/metadata.service";
 import {ActionItem} from "../_models/actionables/action-item";
 import {ActionResult} from "../_models/actionables/action-result";
 import {KavitaTitleStrategy} from "../_services/kavita-title.strategy";
+import {getWritableResolvedData} from "../../libs/route-util";
 
 @Component({
     selector: 'app-library-detail',
@@ -72,11 +73,10 @@ export class LibraryDetailComponent implements OnInit {
   public readonly metadataService = inject(MetadataService);
 
   // From Resolver
+  readonly library = getWritableResolvedData(this.route, 'library');
   libraryId = input.required<number>();
-  readonly libraryData = input.required<Library>();
-  library = linkedSignal(() => this.libraryData());
+  libraryName = computed(() => this.library().name);
 
-  libraryName = '';
   series: Series[] = [];
   loadingSeries = false;
   pagination: Pagination = {currentPage: 0, totalPages: 0, totalItems: 0, itemsPerPage: 0};
@@ -208,11 +208,7 @@ export class LibraryDetailComponent implements OnInit {
     switch (event.effect) {
       case 'update':
         this.library.set({...event.entity});
-
-        // For now, until we refactor backend to send it as a basic library for non-admin users
-        this.libraryName = event.entity.name;
         this.kavitaTitleStrategy.setFormattedTitle(event.entity.name);
-        this.cdRef.markForCheck();
         break;
       case 'remove':
       case 'reload':
