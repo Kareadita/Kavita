@@ -770,6 +770,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Updates the TOC current page anchor, last scene path and saves progress
    */
   handleScrollEvent(bypassSave: boolean = false) {
+    // If a scroll is pending (e.g. initial load), do not update/save progress based on the intermediate scroll position (e.g. top of page).
+    if (this.hasDelayedScroll) return;
 
     // TODO: See if we can move this to a service for ToC
     // Highlight the current chapter we are on
@@ -1034,6 +1036,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @private
    */
   private snapScrollOnResize() {
+    // If a scroll is pending, let it finish, to not snap to the current (potentially incorrect) position.
+    if (this.hasDelayedScroll) return;
+
     const layoutMode = this.layoutMode();
     if (layoutMode === BookPageLayoutMode.Default) return;
 
