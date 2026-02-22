@@ -190,20 +190,9 @@ export class ManageUserPreferencesComponent implements OnInit {
          })
        });
 
-        // Disable entire form for readonly users (all controls, recursively, without emitting events)
+        // Disable entire form for readonly users
         if (this.accountService.isReadOnly()) {
-          var disableRecursive = (ctrl: any) => {
-            if (!ctrl) return;
-
-            if (typeof ctrl.disable === 'function') {
-              ctrl.disable({ onlySelf: true, emitEvent: false });
-            }
-
-            if (ctrl.controls) {
-              Object.values(ctrl.controls).forEach((c: any) => disableRecursive(c));
-            }
-          };
-          disableRecursive(this.settingsForm);
+          this.settingsForm.disable({ emitEvent: false });
         }
 
         // Ensure we don't treat programmatic initialization changes as "user changes"
