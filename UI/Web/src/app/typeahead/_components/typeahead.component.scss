@@ -124,6 +124,15 @@ input {
     }
 }
 
+.dropdown {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.dropdown-inner {
+  overflow: hidden;
+}
+
 .slide-in-from-top {
   animation: slideDown 200ms ease-out;
 }
@@ -134,22 +143,18 @@ input {
 
 @keyframes slideDown {
   from {
-    height: 0;
-    overflow: hidden;
+    grid-template-rows: 0fr;
   }
   to {
-    height: 100%;
-    overflow: auto;
+    grid-template-rows: 1fr;
   }
 }
 
 @keyframes slideUp {
   from {
-    height: 100%;
-    overflow: hidden;
+    grid-template-rows: 1fr;
   }
   to {
-    height: 0;
-    overflow: hidden;
+    grid-template-rows: 0fr;
   }
 }
