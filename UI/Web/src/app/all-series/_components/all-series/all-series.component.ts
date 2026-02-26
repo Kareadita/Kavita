@@ -178,5 +178,5 @@ export class AllSeriesComponent implements OnInit {
     }
   }
 
-  trackByIdentity = (_: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
+  trackByIdentity = (_: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}_${item.libraryId}`;
 }
