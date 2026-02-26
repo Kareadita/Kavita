@@ -1,6 +1,6 @@
-import { Directive, ElementRef, Input, NgZone, OnDestroy, OnInit, inject, output } from '@angular/core';
-import { Subscription } from 'rxjs';
-import {createSwipeSubscription, SwipeDirection, SwipeEvent, SwipeStartEvent} from './ag-swipe.core';
+import {Directive, ElementRef, inject, Input, NgZone, OnDestroy, OnInit, output} from '@angular/core';
+import {Subscription} from 'rxjs';
+import {createSwipeSubscription, SwipeDirection, SwipeEvent} from './ag-swipe.core';
 
 @Directive({
     selector: '[ngSwipe]',
@@ -52,19 +52,15 @@ export class SwipeDirective implements OnInit, OnDestroy {
   private detectSwipeDirection(swipeEvent: SwipeEvent) {
     if (swipeEvent.direction === SwipeDirection.X) {
       if (swipeEvent.distance > 0) {
-        // TODO: The 'emit' function requires a mandatory void argument
-        this.swipeRight.emit();
+        this.swipeRight.emit(undefined);
       } else {
-        // TODO: The 'emit' function requires a mandatory void argument
-        this.swipeLeft.emit();
+        this.swipeLeft.emit(undefined);
       }
     } else if (swipeEvent.direction === SwipeDirection.Y) {
       if (swipeEvent.distance > 0) {
-        // TODO: The 'emit' function requires a mandatory void argument
-        this.swipeDown.emit();
+        this.swipeDown.emit(undefined);
       } else {
-        // TODO: The 'emit' function requires a mandatory void argument
-        this.swipeUp.emit();
+        this.swipeUp.emit(undefined);
       }
     }
   }

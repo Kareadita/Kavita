@@ -6,9 +6,9 @@ import {
   inject,
   input,
   model,
+  output,
   signal,
-  Signal,
-  output
+  Signal
 } from '@angular/core';
 import {Annotation} from "../../../_models/annotations/annotation";
 import {UtcToLocalDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
@@ -169,7 +169,7 @@ export class AnnotationCardComponent {
     if (!annotation) return;
 
     this.annotationService.delete(annotation.id).subscribe(_ => {
-      this.delete.emit();
+      this.delete.emit(undefined);
     });
   }
 }

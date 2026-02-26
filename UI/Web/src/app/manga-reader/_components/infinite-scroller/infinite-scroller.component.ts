@@ -14,10 +14,10 @@ import {
   OnChanges,
   OnDestroy,
   OnInit,
+  output,
   Renderer2,
   Signal,
   SimpleChanges,
-  output,
   viewChild
 } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, tap} from 'rxjs';
@@ -499,8 +499,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
         requestAnimationFrame(() => this.scrollService.scrollTo((SPACER_SCROLL_INTO_PX / 2), reader));
       } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
         // If already at top, then we are moving on
-        // TODO: The 'emit' function requires a mandatory void argument
-        this.loadPrevChapter.emit();
+        this.loadPrevChapter.emit(undefined);
         this.cdRef.markForCheck();
       }
     }
@@ -681,8 +680,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     if (!this.allImagesLoaded) return;
 
     this.setPageNum(this.totalPages);
-    // TODO: The 'emit' function requires a mandatory void argument
-    this.loadNextChapter.emit();
+    this.loadNextChapter.emit(undefined);
   }
 
   /**
