@@ -1,3 +1,16 @@
+.highlight-new-font {
+  animation: highlight-bg 2s ease-out;
+}
+
+@keyframes highlight-bg {
+  from {
+    background-color: var(--primary-color);
+  }
+  to {
+    background-color: var(--list-group-item-bg-color);
+  }
+}
+
 .pill {
   font-size: .8rem;
   background-color: var(--card-bg-color);

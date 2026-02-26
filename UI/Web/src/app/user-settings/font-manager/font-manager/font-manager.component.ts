@@ -10,7 +10,6 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {animate, style, transition, trigger} from "@angular/animations";
 import {WikiLink} from "../../../_models/wiki";
 import {ToastrService} from "ngx-toastr";
 
@@ -30,15 +29,7 @@ import {ToastrService} from "ngx-toastr";
   templateUrl: './font-manager.component.html',
   styleUrl: './font-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  animations: [
-    trigger('loadNewFontAnimation', [
-      transition('void => loaded', [
-        style({ backgroundColor: 'var(--primary-color)' }),
-        animate('2s', style({ backgroundColor: 'var(--list-group-item-bg-color)' }))
-      ])
-    ])
-  ],
+  standalone: true
 })
 export class FontManagerComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
@@ -47,8 +38,7 @@ export class FontManagerComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   protected readonly fontService = inject(FontService);
 
-  protected readonly FontProvider = FontProvider;
-  protected readonly WikiLink = WikiLink.EpubFontManager;
+
   protected readonly user = this.accountService.currentUserSignal;
   protected readonly isReadOnly = computed(() => {
     const u = this.accountService.currentUserSignal();
@@ -77,6 +67,7 @@ export class FontManagerComponent implements OnInit {
   selectedFont = signal<EpubFont | undefined>(undefined);
   isUploadingFont = signal(false);
   uploadMode = signal<'file' | 'url' | 'all'>('all');
+  initialLoadComplete = signal(false);
 
   form: FormGroup = new FormGroup({
     fontUrl: new FormControl('', []),
@@ -92,6 +83,7 @@ export class FontManagerComponent implements OnInit {
   }
 
   loadFonts() {
+    this.initialLoadComplete.set(false);
     this.fontService.getFonts().subscribe(fonts => {
       this.fonts.set(fonts);
 
@@ -99,6 +91,7 @@ export class FontManagerComponent implements OnInit {
       if (fonts.filter(f => f.provider != FontProvider.System).length > 0 && !this.hideSystemFonts()) {
         this.setHideSystemFontsFilter(true);
       }
+      setTimeout(() => this.initialLoadComplete.set(true), 100);
     });
   }
 
@@ -206,9 +199,8 @@ export class FontManagerComponent implements OnInit {
     setTimeout(() => this.selectedFont.set(font), 100);
   }
 
-  animationState(font: EpubFont) {
-    return this.loadedFonts().includes(font) ? 'loaded' : '';
-  }
 
   protected readonly FontService = FontService;
+  protected readonly FontProvider = FontProvider;
+  protected readonly WikiLink = WikiLink.EpubFontManager;
 }
