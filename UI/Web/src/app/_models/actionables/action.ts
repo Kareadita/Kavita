@@ -49,10 +49,6 @@ export enum Action {
    */
   AddToCollection = 11,
   /**
-   * Essentially a download, but handled differently. Needed so card bubbles it up for handling
-   */
-  DownloadBookmark = 12,
-  /**
    * Open Series detail page for said series
    */
   ViewSeries = 13,
