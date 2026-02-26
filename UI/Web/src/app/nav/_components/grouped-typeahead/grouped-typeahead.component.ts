@@ -239,7 +239,7 @@ export class GroupedTypeaheadComponent implements OnInit {
   resetField() {
     this.prevSearchTerm = '';
     this.typeaheadForm.get('typeahead')?.setValue(this.initialValue);
-    this.clearField.emit();
+    this.clearField.emit(undefined);
     this.cdRef.markForCheck();
   }
 

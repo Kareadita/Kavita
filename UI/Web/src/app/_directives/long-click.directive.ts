@@ -34,7 +34,7 @@ export class LongClickDirective implements OnDestroy {
     this.eventSubscribe = start$
       .pipe(
         switchMap(() => timer(this.threshold()).pipe(takeUntil(end$))),
-        tap(() => this.longClick.emit())
+        tap(() => this.longClick.emit(undefined))
       ).subscribe();
   }
 

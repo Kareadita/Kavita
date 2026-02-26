@@ -81,7 +81,7 @@ export class SettingColorPickerComponent implements OnInit {
   }
 
   onSelect() {
-    this.selectPicker.emit();
+    this.selectPicker.emit(undefined);
   }
 
   longClick() {
