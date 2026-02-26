@@ -33,7 +33,6 @@ import {
   tap
 } from 'rxjs';
 import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
-import {animate, state, style, transition, trigger} from '@angular/animations';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgbModalRef, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
@@ -93,7 +92,6 @@ const PREFETCH_PAGES = 10;
 const CHAPTER_ID_NOT_FETCHED = -2;
 const CHAPTER_ID_DOESNT_EXIST = -1;
 
-const ANIMATION_SPEED = 200;
 const OVERLAY_AUTO_CLOSE_TIME = 3000;
 const CLICK_OVERLAY_TIMEOUT = 3000;
 
@@ -116,28 +114,6 @@ enum KeyDirection {
     styleUrls: ['./manga-reader.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [MangaReaderService],
-    animations: [
-        trigger('slideFromTop', [
-            state('in', style({ transform: 'translateY(0)' })),
-            transition('void => *', [
-                style({ transform: 'translateY(-100%)' }),
-                animate(ANIMATION_SPEED)
-            ]),
-            transition('* => void', [
-                animate(ANIMATION_SPEED, style({ transform: 'translateY(-100%)' })),
-            ])
-        ]),
-        trigger('slideFromBottom', [
-            state('in', style({ transform: 'translateY(0)' })),
-            transition('void => *', [
-                style({ transform: 'translateY(100%)' }),
-                animate(ANIMATION_SPEED)
-            ]),
-            transition('* => void', [
-                animate(ANIMATION_SPEED, style({ transform: 'translateY(100%)' })),
-            ])
-        ])
-    ],
   imports: [NgStyle, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
     DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
     NgxSliderModule, ReactiveFormsModule, FittingIconPipe, ReaderModeIconPipe,
@@ -1232,7 +1208,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.toggleMenu();
     }, OVERLAY_AUTO_CLOSE_TIME);
   }
-
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
