@@ -21,6 +21,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
+using Kavita.Server.Attributes;
 using Kavita.Services;
 using Kavita.Services.Metadata;
 using Kavita.Services.Reading;
@@ -77,18 +78,14 @@ public class ReaderController : BaseApiController
     /// <param name="apiKey">Auth Key for authentication</param>
     /// <param name="extractPdf">Converts PDF into images per-page - Used for Mihon mainly</param>
     /// <returns></returns>
-    [HttpGet("pdf")]
+    [ChapterAccess]
     [SkipDeviceTracking]
+    [HttpGet("pdf")]
     public async Task<ActionResult> GetPdf(int chapterId, string apiKey, bool extractPdf = false)
     {
         if (!UserContext.IsAuthenticated) return Unauthorized();
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return NoContent();
-
-        // Validate the user has access to the PDF
-        var series = await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapter.Id,
-            await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(Username!));
-        if (series == null) return BadRequest(await _localizationService.Translate(UserId, "invalid-access"));
 
         try
         {
@@ -112,9 +109,9 @@ public class ReaderController : BaseApiController
     /// <param name="apiKey">User's API Key for authentication</param>
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <returns></returns>
-    [HttpGet("image")]
+    [ChapterAccess]
     [SkipDeviceTracking]
-    [AllowAnonymous]
+    [HttpGet("image")]
     public async Task<ActionResult> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
     {
         if (page < 0) page = 0;
@@ -141,13 +138,14 @@ public class ReaderController : BaseApiController
     /// <param name="pageNum"></param>
     /// <param name="apiKey"></param>
     /// <returns></returns>
-    [HttpGet("thumbnail")]
+    [ChapterAccess]
     [SkipDeviceTracking]
-    [AllowAnonymous]
+    [HttpGet("thumbnail")]
     public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
     {
         var chapter = await _cacheService.Ensure(chapterId, true);
         if (chapter == null) return NoContent();
+
         var images = _cacheService.GetCachedPages(chapterId);
 
         var path = await _readerService.GetThumbnail(chapter, pageNum, images);
@@ -162,9 +160,9 @@ public class ReaderController : BaseApiController
     /// <param name="page"></param>
     /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
     /// <returns></returns>
-    [HttpGet("bookmark-image")]
+    [SeriesAccess]
     [SkipDeviceTracking]
-    [AllowAnonymous]
+    [HttpGet("bookmark-image")]
     public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
     {
         if (page < 0) page = 0;
@@ -194,8 +192,9 @@ public class ReaderController : BaseApiController
     /// <param name="chapterId"></param>
     /// <param name="extractPdf"></param>
     /// <returns></returns>
-    [HttpGet("file-dimensions")]
+    [ChapterAccess]
     [SkipDeviceTracking]
+    [HttpGet("file-dimensions")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "extractPdf"])]
     public async Task<ActionResult<IEnumerable<FileDimensionDto>>> GetFileDimensions(int chapterId, bool extractPdf = false)
     {
@@ -214,6 +213,7 @@ public class ReaderController : BaseApiController
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <param name="includeDimensions">Include file dimensions. Only useful for image-based reading</param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("chapter-info")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId", "extractPdf", "includeDimensions"])]
     public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId, bool extractPdf = false, bool includeDimensions = false)
@@ -286,6 +286,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId">Series Id for all bookmarks</param>
     /// <param name="includeDimensions">Include file dimensions (extra I/O). Defaults to true.</param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("bookmark-info")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "includeDimensions"])]
     public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId, bool includeDimensions = true)
@@ -811,8 +812,9 @@ public class ReaderController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="currentChapterId"></param>
     /// <returns>chapter id for next manga</returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "volumeId", "currentChapterId"])]
+    [SeriesAccess]
     [HttpGet("next-chapter")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "volumeId", "currentChapterId"])]
     public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
     {
         return Ok(await _readerService.GetNextChapterIdAsync(seriesId, volumeId, currentChapterId, UserId));
@@ -829,8 +831,9 @@ public class ReaderController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="currentChapterId"></param>
     /// <returns>chapter id for next manga</returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "volumeId", "currentChapterId"])]
+    [SeriesAccess]
     [HttpGet("prev-chapter")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "volumeId", "currentChapterId"])]
     public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
     {
         return Ok(await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, UserId));
@@ -842,6 +845,7 @@ public class ReaderController : BaseApiController
     /// <remarks>For Epubs, this does not check words inside a chapter due to overhead so may not work in all cases.</remarks>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("time-left")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId"])]
     public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletion(int seriesId)
@@ -876,6 +880,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("time-left-for-chapter")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "chapterId"])]
     public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletionForChapter(int seriesId, int chapterId)
@@ -913,6 +918,7 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("ptoc")]
     public ActionResult<IEnumerable<PersonalToCDto>> GetPersonalToC(int chapterId)
     {
@@ -926,6 +932,7 @@ public class ReaderController : BaseApiController
     /// <param name="pageNum"></param>
     /// <param name="title"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpDelete("ptoc")]
     public async Task<ActionResult> DeletePersonalToc([FromQuery] int chapterId, [FromQuery] int pageNum, [FromQuery] string title)
     {
@@ -988,7 +995,9 @@ public class ReaderController : BaseApiController
     /// Check if we should prompt the user for rereads for the given series
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="libraryId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("prompt-reread/series")]
     public async Task<ActionResult<RereadDto>> ShouldPromptForSeriesReRead(int seriesId, int libraryId)
     {
@@ -1002,6 +1011,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <param name="volumeId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("prompt-reread/volume")]
     public async Task<ActionResult<RereadDto>> ShouldPromptForVolumeReRead(int libraryId, int seriesId, int volumeId)
     {
@@ -1015,6 +1025,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("prompt-reread/chapter")]
     public async Task<ActionResult<RereadDto>> ShouldPromptForChapterReRead(int libraryId, int seriesId, int chapterId)
     {
