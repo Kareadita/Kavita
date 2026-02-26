@@ -137,7 +137,12 @@ $action-bar-height: 38px;
   position: relative;
   direction: ltr;
 
-  //background-color: green !important;
+  opacity: 1;
+  transition: opacity 200ms ease;
+
+  &.is-loading {
+    opacity: 0;
+  }
 
   &.column-layout-1 {
     height: calc((var(--vh, 1vh) * 100) - $action-bar-height);

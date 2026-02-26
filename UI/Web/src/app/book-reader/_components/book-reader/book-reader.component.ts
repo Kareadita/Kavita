@@ -16,8 +16,8 @@ import {
   resource,
   signal,
   Signal,
-  ViewContainerRef,
-  viewChild
+  viewChild,
+  ViewContainerRef
 } from '@angular/core';
 import {DOCUMENT, NgClass, NgStyle, NgTemplateOutlet, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -32,7 +32,6 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {BookService} from '../../_services/book.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {BookChapterItem} from '../../_models/book-chapter-item';
-import {animate, state, style, transition, trigger} from '@angular/animations';
 import {Stack} from 'src/app/shared/data-structures/stack';
 import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
 import {WritingStyle} from "../../../_models/preferences/writing-style";
@@ -114,24 +113,13 @@ const minImageSize = {
 const SCROLL_DELAY = 10;
 
 @Component({
-    selector: 'app-book-reader',
-    templateUrl: './book-reader.component.html',
-    styleUrls: ['./book-reader.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [
-        trigger('isLoading', [
-            state('false', style({ opacity: 1 })),
-            state('true', style({ opacity: 0 })),
-            transition('false <=> true', animate('200ms'))
-        ]),
-        trigger('fade', [
-            state('true', style({ opacity: 0 })),
-            state('false', style({ opacity: 0.5 })),
-            transition('false <=> true', animate('4000ms'))
-        ])
-    ],
+  selector: 'app-book-reader',
+  templateUrl: './book-reader.component.html',
+  styleUrls: ['./book-reader.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet, NgStyle, NgClass, NgbTooltip,
-    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe, WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule],
+    BookLineOverlayComponent, TranslocoDirective, ColumnLayoutClassPipe,
+    WritingStyleClassPipe, ReadTimeLeftPipe, PercentPipe, NgxSliderModule],
   providers: [EpubReaderSettingsService, LayoutMeasurementService],
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
