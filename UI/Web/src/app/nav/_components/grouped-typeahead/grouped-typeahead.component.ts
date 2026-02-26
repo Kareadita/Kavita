@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
   contentChild,
   DestroyRef,
   ElementRef,
@@ -89,19 +88,19 @@ export class GroupedTypeaheadComponent implements OnInit {
 
   readonly inputElem = viewChild.required<ElementRef<HTMLInputElement>>('input');
   readonly itemTemplate = contentChild.required<TemplateRef<any>>('itemTemplate');
-  @ContentChild('seriesTemplate') seriesTemplate: TemplateRef<any> | undefined;
-  @ContentChild('collectionTemplate') collectionTemplate: TemplateRef<any> | undefined;
-  @ContentChild('tagTemplate') tagTemplate: TemplateRef<any> | undefined;
-  @ContentChild('personTemplate') personTemplate: TemplateRef<any> | undefined;
-  @ContentChild('genreTemplate') genreTemplate!: TemplateRef<any>;
-  @ContentChild('noResultsTemplate') noResultsTemplate!: TemplateRef<any>;
+  readonly seriesTemplate = contentChild<TemplateRef<any>>('seriesTemplate');
+  readonly collectionTemplate = contentChild<TemplateRef<any>>('collectionTemplate');
+  readonly tagTemplate = contentChild<TemplateRef<any>>('tagTemplate');
+  readonly personTemplate = contentChild<TemplateRef<any>>('personTemplate');
+  readonly genreTemplate = contentChild.required<TemplateRef<any>>('genreTemplate');
+  readonly noResultsTemplate = contentChild.required<TemplateRef<any>>('noResultsTemplate');
   readonly extraTemplate = contentChild.required<TemplateRef<any>>('extraTemplate');
-  @ContentChild('libraryTemplate') libraryTemplate!: TemplateRef<any>;
-  @ContentChild('readingListTemplate') readingListTemplate!: TemplateRef<any>;
-  @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
-  @ContentChild('chapterTemplate') chapterTemplate!: TemplateRef<any>;
-  @ContentChild('bookmarkTemplate') bookmarkTemplate!: TemplateRef<any>;
-  @ContentChild('annotationTemplate') annotationTemplate!: TemplateRef<any>;
+  readonly libraryTemplate = contentChild.required<TemplateRef<any>>('libraryTemplate');
+  readonly readingListTemplate = contentChild.required<TemplateRef<any>>('readingListTemplate');
+  readonly fileTemplate = contentChild.required<TemplateRef<any>>('fileTemplate');
+  readonly chapterTemplate = contentChild.required<TemplateRef<any>>('chapterTemplate');
+  readonly bookmarkTemplate = contentChild.required<TemplateRef<any>>('bookmarkTemplate');
+  readonly annotationTemplate = contentChild.required<TemplateRef<any>>('annotationTemplate');
 
 
   hasFocus: boolean = false;

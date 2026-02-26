@@ -15,7 +15,7 @@ import {
   Renderer2,
   RendererStyleFlags2,
   TemplateRef,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Observable, ReplaySubject} from 'rxjs';
@@ -68,7 +68,7 @@ export class TypeaheadComponent implements OnInit {
   @Output() lockedChange = new EventEmitter<boolean>();
 
 
-  @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
+  readonly inputElem = viewChild.required<ElementRef<HTMLInputElement>>('input');
   readonly optionTemplate = contentChild.required<TemplateRef<any>>('optionItem');
   readonly badgeTemplate = contentChild.required<TemplateRef<any>>('badgeItem');
 
@@ -134,8 +134,9 @@ export class TypeaheadComponent implements OnInit {
       .pipe(
         // Adjust input box to grow
         tap((val: string) => {
-          if (this.inputElem != null && this.inputElem.nativeElement != null) {
-            this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 15 * (val.trim().length + 1) + 'px');
+          const inputElem = this.inputElem();
+          if (this.inputElem != null && inputElem.nativeElement != null) {
+            this.renderer2.setStyle(inputElem.nativeElement, 'width', 15 * (val.trim().length + 1) + 'px');
             this.focusedIndex = 0;
           }
         }),
@@ -348,11 +349,12 @@ export class TypeaheadComponent implements OnInit {
       return;
     }
 
-    if (this.inputElem) {
+    const inputElem = this.inputElem();
+    if (inputElem) {
       // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
       this.document.body.click();
 
-      this.inputElem.nativeElement.focus();
+      inputElem.nativeElement.focus();
       this.hasFocus = true;
     }
 
@@ -362,8 +364,9 @@ export class TypeaheadComponent implements OnInit {
 
 
   resetField() {
-    if (this.inputElem && this.inputElem.nativeElement) {
-      this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 4, RendererStyleFlags2.Important);
+    const inputElem = this.inputElem();
+    if (inputElem && inputElem.nativeElement) {
+      this.renderer2.setStyle(inputElem.nativeElement, 'width', 4, RendererStyleFlags2.Important);
     }
     this.typeaheadControl.setValue('');
     this.focusedIndex = 0;
