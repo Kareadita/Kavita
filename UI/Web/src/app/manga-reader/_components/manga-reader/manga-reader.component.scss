@@ -64,24 +64,43 @@ $pointer-offset: 5px;
   background-color: var(--manga-reader-overlay-bg-color);
   backdrop-filter: var(--manga-reader-overlay-filter); // BUG: This doesn't work on Firefox
   color: var(--manga-reader-overlay-text-color);
+}
 
-  &.slide-from-top {
-    transform: translateY(-100%);
-    transition: transform 200ms cubic-bezier(.4,0,.2,1);
+/* Enter/leave classes applied by Angular automatically */
+.slide-in-top {
+  animation: enter-from-top 200ms cubic-bezier(.4, 0, .2, 1);
+}
 
-    &.visible {
-      transform: translateY(0);
-    }
-  }
+.slide-out-top {
+  animation: leave-to-top 200ms cubic-bezier(.4, 0, .2, 1);
+}
 
-  &.slide-from-bottom {
-    transform: translateY(100%);
-    transition: transform 200ms cubic-bezier(.4,0,.2,1);
+.slide-in-bottom {
+  animation: enter-from-bottom 200ms cubic-bezier(.4, 0, .2, 1);
+}
 
-    &.visible {
-      transform: translateY(0);
-    }
-  }
+.slide-out-bottom {
+  animation: leave-to-bottom 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+@keyframes enter-from-top {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes leave-to-top {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
+}
+
+@keyframes enter-from-bottom {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes leave-to-bottom {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
 }
 
 @media(min-width: 600px) {
