@@ -120,7 +120,7 @@ export class ImageComponent {
         });
       }
 
-      if (classes != '') {
+      if (classes !== '') {
         const classTokens = classes.split(' ');
         classTokens.forEach(cls => this.renderer.addClass(elem, cls));
       }

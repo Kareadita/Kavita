@@ -2,13 +2,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
+  contentChild,
   DestroyRef,
   HostListener,
   inject,
   Input,
-  TemplateRef,
-  output
+  output,
+  TemplateRef
 } from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
@@ -84,7 +84,7 @@ export class PersonCardComponent {
    * When the card is selected.
    */
   readonly selection = output<boolean>();
-  @ContentChild('subtitle') subtitleTemplate!: TemplateRef<any>;
+  subtitleTemplate = contentChild<TemplateRef<any>>('subtitle');
 
   tooltipTitle: string = this.title;
   /**

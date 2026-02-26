@@ -164,7 +164,7 @@ export class LibraryDetailComponent implements OnInit {
           return;
         }
 
-        this.series.set(this.series().filter(s => s.id != seriesRemoved.seriesId));
+        this.series.set(this.series().filter(s => s.id !== seriesRemoved.seriesId));
         this.pagination.totalItems--;
         this.cdRef.markForCheck();
         this.refresh.emit();
