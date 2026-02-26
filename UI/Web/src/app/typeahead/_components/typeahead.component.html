@@ -44,29 +44,27 @@
           <div class="dropdown"
                animate.enter="slide-in-from-top"
                animate.leave="slide-out-to-top">
-            <div class="dropdown-inner">
-              <ul class="list-group results" #results>
-                @if (showAddItem) {
-                  <li class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
-                    {{t('add-item', {item: typeaheadControl.value})}}
-                  </li>
-                }
+            <ul class="list-group results" #results>
+              @if (showAddItem) {
+                <li class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
+                  {{t('add-item', {item: typeaheadControl.value})}}
+                </li>
+              }
 
-                @for(option of options; track settings.trackByIdentityFn(index, option); let index = $index) {
-                  <li (click)="handleOptionClick(option)"
-                      class="list-group-item" role="option" [attr.data-index]="index"
-                      (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
-                    <ng-container [ngTemplateOutlet]="optionTemplate()" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  typeaheadControl.value }" />
-                  </li>
-                }
+              @for(option of options; track settings.trackByIdentityFn(index, option); let index = $index) {
+                <li (click)="handleOptionClick(option)"
+                    class="list-group-item" role="option" [attr.data-index]="index"
+                    (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
+                  <ng-container [ngTemplateOutlet]="optionTemplate()" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  typeaheadControl.value }" />
+                </li>
+              }
 
-                @if (options.length === 0 && !showAddItem) {
-                  <li class="list-group-item no-hover" role="listitem">
-                    {{t('no-data')}}{{settings.addIfNonExisting ? t('add-custom-item') : ''}}
-                  </li>
-                }
-              </ul>
-            </div>
+              @if (options.length === 0 && !showAddItem) {
+                <li class="list-group-item no-hover" role="listitem">
+                  {{t('no-data')}}{{settings.addIfNonExisting ? t('add-custom-item') : ''}}
+                </li>
+              }
+            </ul>
           </div>
         }
       }

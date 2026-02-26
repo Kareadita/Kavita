@@ -125,12 +125,7 @@ input {
 }
 
 .dropdown {
-  display: grid;
-  grid-template-rows: 1fr;
-}
-
-.dropdown-inner {
-  overflow: hidden;
+  overflow: auto;
 }
 
 .slide-in-from-top {
@@ -143,18 +138,25 @@ input {
 
 @keyframes slideDown {
   from {
-    grid-template-rows: 0fr;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
   }
   to {
-    grid-template-rows: 1fr;
+    max-height: 400px;
+    opacity: 1;
+    overflow: auto;
   }
 }
 
 @keyframes slideUp {
   from {
-    grid-template-rows: 1fr;
+    max-height: 400px;
+    opacity: 1;
   }
   to {
-    grid-template-rows: 0fr;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
   }
 }
