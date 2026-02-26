@@ -123,3 +123,33 @@ input {
         border-bottom-color: var(--list-group-hover-text-color);
     }
 }
+
+.slide-in-from-top {
+  animation: slideDown 200ms ease-out;
+}
+
+.slide-out-to-top {
+  animation: slideUp 200ms ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    height: 0;
+    overflow: hidden;
+  }
+  to {
+    height: 100%;
+    overflow: auto;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    height: 100%;
+    overflow: hidden;
+  }
+  to {
+    height: 0;
+    overflow: hidden;
+  }
+}

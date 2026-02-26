@@ -1,9 +1,9 @@
-import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AsyncPipe, DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  contentChild,
   DestroyRef,
   ElementRef,
   EventEmitter,
@@ -15,8 +15,7 @@ import {
   Renderer2,
   RendererStyleFlags2,
   TemplateRef,
-  ViewChild,
-  contentChild
+  ViewChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Observable, ReplaySubject} from 'rxjs';
@@ -28,27 +27,12 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SelectionModel} from "../_models/selection-model";
 
-
-const ANIMATION_SPEED = 200;
-
 @Component({
   selector: 'app-typeahead',
   imports: [TagBadgeComponent, ReactiveFormsModule, TranslocoDirective, AsyncPipe, NgTemplateOutlet, NgClass],
   templateUrl: './typeahead.component.html',
   styleUrls: ['./typeahead.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-      trigger('slideFromTop', [
-          state('in', style({ height: '0px' })),
-          transition('void => *', [
-              style({ height: '100%', overflow: 'auto' }),
-              animate(ANIMATION_SPEED)
-          ]),
-          transition('* => void', [
-              animate(ANIMATION_SPEED, style({ height: '0px' })),
-          ])
-      ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TypeaheadComponent implements OnInit {
   private readonly document = inject<Document>(DOCUMENT);
