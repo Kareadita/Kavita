@@ -8,7 +8,6 @@ import {
 import {AppComponent} from './app/app.component';
 import {NgCircleProgressModule} from 'ng-circle-progress';
 import {ToastrModule} from 'ngx-toastr';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {routes} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
 import {jwtInterceptor} from './app/_interceptors/jwt.interceptor';
@@ -43,6 +42,9 @@ import {NgbModalConfig, NgbRatingConfig} from "@ng-bootstrap/ng-bootstrap";
 import {DefaultModalOptions} from "./app/_models/modal/modal-options";
 
 const disableAnimations = !('animate' in document.documentElement);
+if (disableAnimations) {
+  document.documentElement.classList.add('no-animations');
+}
 
 registerSwiperElements();
 registerECharts();
@@ -144,7 +146,6 @@ function bootstrapUser() {
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule,
-          BrowserAnimationsModule.withConfig({ disableAnimations }),
           LazyLoadImageModule,
           ToastrModule.forRoot({
             positionClass: 'toast-bottom-right',
