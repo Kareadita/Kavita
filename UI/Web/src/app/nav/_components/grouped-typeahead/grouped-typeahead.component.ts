@@ -3,16 +3,16 @@ import {
   ChangeDetectorRef,
   Component,
   ContentChild,
+  contentChild,
   DestroyRef,
   ElementRef,
   HostListener,
   inject,
   Input,
   OnInit,
-  TemplateRef,
   output,
-  viewChild,
-  contentChild
+  TemplateRef,
+  viewChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
