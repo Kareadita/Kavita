@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
+  contentChild,
   DestroyRef,
   effect,
   EventEmitter,
@@ -12,8 +13,7 @@ import {
   OnInit,
   output,
   Signal,
-  TemplateRef,
-  contentChild
+  TemplateRef
 } from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
@@ -29,7 +29,6 @@ import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
-import {animate, style, transition, trigger} from "@angular/animations";
 import {SortButtonComponent} from "../_single-module/sort-button/sort-button.component";
 import {FilterSettingsBase} from "./filter-settings";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
@@ -40,18 +39,6 @@ import {Breakpoint, BreakpointService} from "../_services/breakpoint.service";
   selector: 'app-metadata-filter',
   templateUrl: './metadata-filter.component.html',
   styleUrls: ['./metadata-filter.component.scss'],
-  animations: [
-      trigger('inOutAnimation', [
-          transition(':enter', [
-              style({ height: 0, opacity: 0 }),
-              animate('.5s ease-out', style({ height: 300, opacity: 1 }))
-          ]),
-          transition(':leave', [
-              style({ height: 300, opacity: 1 }),
-              animate('.5s ease-in', style({ height: 0, opacity: 0 }))
-          ])
-      ]),
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet, DrawerComponent,
     ReactiveFormsModule, FormsModule, AsyncPipe, TranslocoModule,

@@ -1,8 +1,10 @@
 <ng-container *transloco="let t; prefix: 'metadata-filter'">
   @if (toggleService.toggleState$ | async; as isOpen) {
     @if (breakpointService.isTabletOrAbove()) {
-      <div [@inOutAnimation]>
-        <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}" />
+      <div class="filter-animate-wrapper" animate.enter="filter-enter" animate.leave="filter-leave">
+        <div class="filter-animate-inner">
+          <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}" />
+        </div>
       </div>
     } @else {
       <div>
