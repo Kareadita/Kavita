@@ -64,24 +64,6 @@ $pointer-offset: 5px;
   background-color: var(--manga-reader-overlay-bg-color);
   backdrop-filter: var(--manga-reader-overlay-filter); // BUG: This doesn't work on Firefox
   color: var(--manga-reader-overlay-text-color);
-
-  &.slide-from-top {
-    transform: translateY(-100%);
-    transition: transform 200ms cubic-bezier(.4,0,.2,1);
-
-    &.visible {
-      transform: translateY(0);
-    }
-  }
-
-  &.slide-from-bottom {
-    transform: translateY(100%);
-    transition: transform 200ms cubic-bezier(.4,0,.2,1);
-
-    &.visible {
-      transform: translateY(0);
-    }
-  }
 }
 
 @media(min-width: 600px) {
