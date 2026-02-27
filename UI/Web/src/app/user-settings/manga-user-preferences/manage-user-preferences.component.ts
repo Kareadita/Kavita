@@ -88,7 +88,7 @@ type UserPreferencesForm = FormGroup<{
 export class ManageUserPreferencesComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly titleService = inject(Title);
   private readonly router = inject(Router);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -190,15 +190,12 @@ export class ManageUserPreferencesComponent implements OnInit {
          })
        });
 
-        // Disable entire form for readonly users
         if (this.accountService.isReadOnly()) {
           this.settingsForm.disable({ emitEvent: false });
         }
 
-        // Ensure we don't treat programmatic initialization changes as "user changes"
         this.settingsForm.markAsPristine();
 
-       // Automatically save settings as we edit them (only on actual user changes, not on init)
        this.settingsForm.valueChanges.pipe(
          distinctUntilChanged(),
          debounceTime(100),
@@ -213,8 +210,7 @@ export class ManageUserPreferencesComponent implements OnInit {
            if (this.user) {
              this.user.preferences = {...prefs};
              this.cdRef.markForCheck();
-             // Reset dirty state after successful save
-             this.settingsForm.markAsPristine();
+              this.settingsForm.markAsPristine();
            }
          })
        ).subscribe();

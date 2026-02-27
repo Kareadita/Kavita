@@ -53,7 +53,7 @@ const MAX_KEYBINDS_PER_TARGET = 5;
 })
 export class ManageCustomKeyBindsComponent implements OnInit {
 
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   protected readonly keyBindService = inject(KeyBindService);
   private readonly transLoco = inject(TranslocoService);
   private readonly fb = inject(NonNullableFormBuilder);
