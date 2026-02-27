@@ -2892,7 +2892,7 @@
         "default-libraries-label": "{{common.libraries}}",
         "tls-required": "Poskytovatel OIDC musí používat tls (https)",
         "other-field-invalid": "{{validation.other-field-invalid}}",
-        "reset-label": "Resetovat ID",
+        "reset-label": "Obnovit identifikátory",
         "reset-tooltip": "Obnovte externí identifikátory všech uživatelů. Tuto funkci použijte k obnovení propojení mezi uživateli v Kavita a vaším poskytovatelem identit",
         "reset-confirm": "Opravdu chcete resetovat externí ID všech uživatelů?",
         "reset-success": "Externí ID všech uživatelů byla resetována, proveďte opětovné ověření pro propojení",

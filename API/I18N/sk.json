@@ -220,5 +220,8 @@
     "genre-doesnt-exist": "Žáner neexistuje",
     "font-url-not-allowed": "Nahrávanie písma pomocou adresy URL je povolené iba z Google Fonts",
     "annotation-export-failed": "Nepodarilo sa exportovať anotácie, skontrolujte protokoly",
-    "download-not-allowed": "Používateľ nemá povolenia na sťahovanie"
+    "download-not-allowed": "Používateľ nemá povolenia na sťahovanie",
+    "client-device-doesnt-exist": "Klientske zariadenie neexistuje",
+    "auth-key-unique": "Názov autorizačného kľúča musí byť jedinečný pre váš účet",
+    "role-restricted": "Prístup odmietnutý: Vaša rola nemá povolenie na túto akciu"
 }

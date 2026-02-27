@@ -208,5 +208,7 @@
     "smart-filter-name-required": "Smart Filter namn krävs",
     "sidenav-stream-only-delete-smart-filter": "Bara smarta-filter-strömmar kan tas bort från sidomenyn",
     "smart-filter-system-name": "Du kan inte använda namnet från en ström som systemet tillhandahåller",
-    "password-authentication-disabled": "Lösenords autentisering har stängts av, logga in via OpenID Connect"
+    "password-authentication-disabled": "Lösenords autentisering har stängts av, logga in via OpenID Connect",
+    "oidc-managed": "Användare som hanteras av OIDC kan inte redigeras.",
+    "cannot-change-identity-provider-original-user": "Identitetsleverantören för det ursprungliga administratörskontot kan inte ändras"
 }

@@ -1,6 +1,8 @@
 {
     "login": {
-        "forgot-password": "Heu oblidat la contrasenya?"
+        "forgot-password": "Heu oblidat la contrasenya?",
+        "title": "Inici de sessió amb el teu compte",
+        "submit": "Accedir"
     },
     "dashboard": {
         "no-libraries": "Encara no s'ha configurat cap biblioteca. Creeu-ne una de nova a",
