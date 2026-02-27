@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
-import {of, shareReplay} from 'rxjs';
+import {of} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
 import {Preferences} from '../_models/preferences/preferences';
@@ -12,7 +12,7 @@ import {UserUpdateEvent} from '../_models/events/user-update-event';
 import {AgeRating} from '../_models/metadata/age-rating';
 import {AgeRestriction} from '../_models/metadata/age-restriction';
 import {TextResonse} from '../_types/text-response';
-import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
@@ -58,16 +58,8 @@ export class AccountService {
   public static lastLoginKey = 'kavita-lastlogin';
   public static localeKey = 'kavita-locale';
 
-  // Source of truth
   private readonly _currentUser = signal<User | undefined>(undefined);
-
-  // Public read-only signal (replaces currentUser)
   public readonly currentUser = this._currentUser.asReadonly();
-
-  // Backward-compat observable for consumers
-  public readonly currentUser$ = toObservable(this._currentUser).pipe(
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
 
   // Derived signals
   public readonly isLoggedIn = computed(() => this._currentUser() !== undefined);
