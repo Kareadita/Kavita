@@ -6,7 +6,7 @@ import {ToastrService} from 'ngx-toastr';
 import {catchError} from 'rxjs/operators';
 import {AccountService} from '../_services/account.service';
 import {translate, TranslocoService} from "@jsverse/transloco";
-import {AuthGuard} from "../_guards/auth.guard";
+import {AUTH_URL_KEY} from "../_guards/auth.guard";
 import {APP_BASE_HREF} from "@angular/common";
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
@@ -136,7 +136,7 @@ function handleAuthError(
 
   const path = window.location.pathname;
   if (path !== '/login' && !path.startsWith(baseURL + "registration") && path !== '') {
-    localStorage.setItem(AuthGuard.urlKey, path);
+    localStorage.setItem(AUTH_URL_KEY, path);
   }
 
   if (error.error && error.error !== 'Unauthorized') {

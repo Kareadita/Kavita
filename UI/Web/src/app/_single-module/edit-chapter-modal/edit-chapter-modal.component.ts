@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  Input,
+  OnInit
+} from '@angular/core';
 import {UtilityService} from "../../shared/_services/utility.service";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
@@ -134,6 +143,14 @@ export class EditChapterModalComponent implements OnInit {
     return this.chapter.webLinks.split(',');
   }
 
+  constructor() {
+    effect(() => {
+      if (!this.accountService.hasAdminRole()) {
+        this.activeId = TabID.Info;
+        this.cdRef.markForCheck();
+      }
+    });
+  }
 
 
   ngOnInit() {
@@ -141,12 +158,6 @@ export class EditChapterModalComponent implements OnInit {
     this.imageUrls.push(this.imageService.getChapterCoverImage(this.chapter.id));
 
     this.size = this.utilityService.asChapter(this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), tap(u => {
-      if (!this.accountService.hasAdminRole()) {
-        this.activeId = TabID.Info;
-        this.cdRef.markForCheck();
-      }
-    })).subscribe();
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
     this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), [Validators.required, Validators.min(0)]));

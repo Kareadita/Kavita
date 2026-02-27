@@ -3,7 +3,7 @@
     {{t('pref-description')}}
   </p>
 
-  @if (user) {
+  @if (!loading()) {
     <form [formGroup]="settingsForm" class="mb-4">
       <h4>{{t('global-settings-title')}}</h4>
       <ng-container>
@@ -15,7 +15,7 @@
             </ng-template>
             <ng-template #edit>
               <select class="form-select" aria-describedby="global-header" formControlName="locale" id="locale">
-                @for(opt of locales; track opt.renderName) {
+                @for(opt of locales(); track opt.renderName) {
                   <option [value]="opt.fileName">{{opt.renderName | titlecase}} ({{opt.translationCompletion | number:'1.0-1'}}%)</option>
                 }
               </select>

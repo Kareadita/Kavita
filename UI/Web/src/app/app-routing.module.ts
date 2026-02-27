@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {AuthGuard} from './_guards/auth.guard';
+import {authGuard} from './_guards/auth.guard';
 import {libraryAccessGuard} from './_guards/library-access.guard';
 import {libraryResolver} from "./_resolvers/library.resolver";
 import {seriesResolver} from "./_resolvers/series.resolver";
@@ -11,7 +11,7 @@ import {readingListResolver} from "./_resolvers/reading-list.resolver";
 export const routes: Routes = [
   {
     path: '',
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
@@ -49,7 +49,7 @@ export const routes: Routes = [
       {
         path: 'person/:name',
         runGuardsAndResolvers: 'always',
-        canActivate: [AuthGuard],
+        canActivate: [authGuard],
         resolve: { person: personResolver },
         loadComponent: () => import('./person-detail/person-detail.component').then(m => m.PersonDetailComponent)
       },
@@ -70,7 +70,7 @@ export const routes: Routes = [
       {
         path: 'lists/:readingListId',
         runGuardsAndResolvers: 'always',
-        canActivate: [AuthGuard],
+        canActivate: [authGuard],
         data: {titleField: 'readingList', titleProp: 'title'},
         resolve: { readingList: readingListResolver },
         loadComponent: () => import('./reading-list/_components/reading-list-detail/reading-list-detail.component').then(c => c.ReadingListDetailComponent)
