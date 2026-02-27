@@ -160,7 +160,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly matchedMetadataBadgeCount$ = this.accountService.currentUser$.pipe(
     take(1),
     switchMap(user => {
-      if (!user || !this.accountService.hasAdminRole(user)) {
+      if (!user || !this.accountService.hasAdminRole()) {
         // If no user or user does not have the admin role, return an observable of -1
         return of(-1);
       } else {
@@ -180,7 +180,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly scrobblingErrorBadgeCount$ = this.accountService.currentUser$.pipe(
     take(1),
     switchMap(user => {
-      if (!user || !this.accountService.hasAdminRole(user)) {
+      if (!user || !this.accountService.hasAdminRole()) {
         // If no user or user does not have the admin role, return an observable of -1
         return of(-1);
       } else {
@@ -196,7 +196,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly mediaIssuesBadgeCount$ = this.accountService.currentUser$.pipe(
     take(1),
     switchMap(user => {
-      if (!user || !this.accountService.hasAdminRole(user)) {
+      if (!user || !this.accountService.hasAdminRole()) {
         // If no user or user does not have the admin role, return an observable of -1
         return of(-1);
       }
@@ -218,7 +218,7 @@ export class PreferenceNavComponent implements AfterViewInit {
 
       const isCollapsed = untracked(() => this.navService.sideNavCollapsedSignal());
       if (isCollapsed) return;
-      
+
       this.navService.collapseSideNav(true);
     });
 

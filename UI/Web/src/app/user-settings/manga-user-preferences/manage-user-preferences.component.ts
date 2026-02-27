@@ -232,7 +232,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   }
 
   packSettings(): Preferences {
-    const customKeyBinds = this.accountService.currentUserSignal()!.preferences.customKeyBinds;
+    const customKeyBinds = this.accountService.currentUser()!.preferences.customKeyBinds;
     return {
       customKeyBinds,
       ...this.settingsForm.getRawValue(),

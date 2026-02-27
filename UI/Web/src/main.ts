@@ -116,7 +116,7 @@ function getBaseHref(platformLocation: PlatformLocation): string {
 
 
 function loadUserLocale(transloco: TranslocoService, accountService: AccountService) {
-  const user = accountService.currentUserSignal();
+  const user = accountService.currentUser();
   const locale = user?.preferences?.locale || localStorage.getItem(AccountService.localeKey) || 'en';
 
   transloco.setActiveLang(locale);

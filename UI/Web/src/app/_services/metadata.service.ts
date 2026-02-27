@@ -55,7 +55,7 @@ export class MetadataService {
   private readonly seriesService = inject(SeriesService)
 
   private readonly highlightSlots = computed(() => {
-    return this.accountService.currentUserSignal()?.preferences?.bookReaderHighlightSlots ?? [];
+    return this.accountService.currentUser()?.preferences?.bookReaderHighlightSlots ?? [];
   });
 
   baseUrl = environment.apiUrl;
@@ -180,9 +180,9 @@ export class MetadataService {
   createDefaultFilterStatement(entityType: ValidFilterEntity) {
     switch (entityType) {
       case "annotation":
-        const userId = this.accountService.currentUserSignal()?.id;
+        const userId = this.accountService.currentUser()?.id;
         if (userId) {
-          return this.createFilterStatement(AnnotationsFilterField.Owner, FilterComparison.Equal, `${this.accountService.currentUserSignal()!.id}`);
+          return this.createFilterStatement(AnnotationsFilterField.Owner, FilterComparison.Equal, `${this.accountService.currentUser()!.id}`);
         }
         return this.createFilterStatement(AnnotationsFilterField.Owner);
       case 'series':

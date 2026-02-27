@@ -193,10 +193,9 @@ export class ChapterDetailComponent implements OnInit {
   readingLists = signal<ReadingList[]>([]);
   showDetailsTab = computed(() => {
     const chp = this.chapter();
-    const user = this.accountService.currentUserSignal();
 
     return hasAnyCast(chp) || (chp?.genres || []).length > 0 ||
-      (chp?.tags || []).length > 0 || (chp?.webLinks || []).length > 0 || this.accountService.hasAdminRole(user!);
+      (chp?.tags || []).length > 0 || (chp?.webLinks || []).length > 0 || this.accountService.hasAdminRole();
   })
   mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
 

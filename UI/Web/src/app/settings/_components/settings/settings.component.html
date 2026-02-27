@@ -7,13 +7,13 @@
     </app-side-nav-companion-bar>
     <div class="container-fluid row col-me-4 pb-3">
 
-      @let user = accountService.currentUserSignal();
+      @let user = accountService.currentUser();
       @if (user) {
         @switch (fragment) {
 
           <!-- Admin Tabs -->
           @case (SettingsTabId.Activity) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="col-xxl-6 col-12">
                   <app-server-activity />
@@ -23,7 +23,7 @@
           }
 
           @case (SettingsTabId.AdminDevices) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="col-xxl-12 col-12">
                   <app-server-devices />
@@ -33,7 +33,7 @@
           }
 
           @case (SettingsTabId.General) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="col-xxl-6 col-12">
                   <app-manage-settings />
@@ -43,7 +43,7 @@
           }
 
           @case (SettingsTabId.OpenIDConnect) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="col-xxl-6 col-12">
                   <app-manage-open-idconnect />
@@ -53,7 +53,7 @@
           }
 
           @case (SettingsTabId.Email) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="col-xxl-6 col-12">
                   <app-manage-email-settings />
@@ -63,7 +63,7 @@
           }
 
           @case (SettingsTabId.Media) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="col-xxl-6 col-12">
                   <app-manage-media-settings />
@@ -73,7 +73,7 @@
           }
 
           @case (SettingsTabId.Users) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-manage-users />
@@ -83,7 +83,7 @@
           }
 
           @case (SettingsTabId.Libraries) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-manage-library />
@@ -93,7 +93,7 @@
           }
 
           @case (SettingsTabId.ManageMetadata) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-manage-public-metadata-settings />
@@ -103,7 +103,7 @@
           }
 
           @case (SettingsTabId.MediaIssues) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-manage-media-issues />
@@ -113,7 +113,7 @@
           }
 
           @case (SettingsTabId.EmailHistory) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-email-history />
@@ -123,7 +123,7 @@
           }
 
           @case (SettingsTabId.System) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-manage-system />
@@ -133,7 +133,7 @@
           }
 
           @case (SettingsTabId.Statistics) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-server-stats />
@@ -143,7 +143,7 @@
           }
 
           @case (SettingsTabId.Tasks) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-manage-tasks-settings />
@@ -153,7 +153,7 @@
           }
 
           @case (SettingsTabId.KavitaPlusLicense) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-license />
@@ -163,7 +163,7 @@
           }
 
           @case (SettingsTabId.MatchedMetadata) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-manage-matched-metadata />
@@ -173,7 +173,7 @@
           }
 
           @case (SettingsTabId.ManageUserTokens) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-manage-user-tokens />
@@ -183,7 +183,7 @@
           }
 
           @case (SettingsTabId.MappingsImport) {
-            @if (accountService.hasAdminRole(user)) {
+            @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-import-mappings />

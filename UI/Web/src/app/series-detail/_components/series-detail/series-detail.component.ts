@@ -238,7 +238,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
 
   isAdmin = computed(() => {
-    return this.accountService.isAdmin();
+    return this.accountService.hasAdminRole();
   });
 
   activeTabId = TabID.Storyline;

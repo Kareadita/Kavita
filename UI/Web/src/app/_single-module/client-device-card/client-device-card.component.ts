@@ -71,7 +71,7 @@ export class ClientDeviceCardComponent {
   });
 
   currentUserId = computed(() => {
-    return this.accountService.currentUserSignal()?.id;
+    return this.accountService.currentUser()?.id;
   });
 
   ipAddress = computed(() => {
@@ -156,15 +156,14 @@ export class ClientDeviceCardComponent {
 
 
   constructor() {
-    const user = this.accountService.currentUserSignal();
-    if (user && !this.accountService.hasReadOnlyRole(user)) {
+    if (!this.accountService.hasReadOnlyRole()) {
       this.actions.set(this.actionFactoryService.getClientDeviceActions(this.shouldRenderAction.bind(this)));
     }
   }
 
 
   shouldRenderAction(action: ActionItem<ClientDevice>, entity: ClientDevice, user: User) {
-    const loggedInUser = this.accountService.currentUserSignal();
+    const loggedInUser = this.accountService.currentUser();
     return entity.ownerUserId === loggedInUser?.id; // Only a user can manipulate their own devices
   }
 

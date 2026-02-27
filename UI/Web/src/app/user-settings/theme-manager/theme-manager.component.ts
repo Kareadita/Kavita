@@ -55,11 +55,7 @@ export class ThemeManagerComponent {
   downloadableThemes: Array<DownloadableSiteTheme> = [];
   downloadedThemes: Array<SiteTheme> = [];
 
-  canUseThemes = computed(() => {
-    const user = this.accountService.currentUserSignal();
-    if (!user) return false;
-    return !this.accountService.hasReadOnlyRole(user);
-  });
+  canUseThemes = computed(() => !this.accountService.hasReadOnlyRole());
 
   files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.css'].join(',');
@@ -106,7 +102,7 @@ export class ThemeManagerComponent {
   }
 
   applyTheme(theme: SiteTheme) {
-    const user = this.accountService.currentUserSignal();
+    const user = this.accountService.currentUser();
     if (!user) return;
 
     // Updating theme emits the new theme to load on the themes$

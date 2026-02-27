@@ -60,14 +60,14 @@ export class CardActionablesComponent implements OnDestroy {
 
   filteredActions = computed(() => {
     const entity = this.entity();
-    const user = this.accountService.currentUserSignal();
+    const user = this.accountService.currentUser();
     const actions = this.actions();
     if (!user || !actions.length) return [];
 
     return filterActionTree(actions, entity, user, this.accountService);
   });
 
-  currentUser = this.accountService.currentUserSignal;
+  currentUser = this.accountService.currentUser;
   submenu: {[key: string]: NgbDropdown} = {};
   private closeTimeout: any = null;
 

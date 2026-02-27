@@ -147,7 +147,7 @@ export class ManageReadingProfilesComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      const user = this.accountService.currentUserSignal();
+      const user = this.accountService.currentUser();
       if (user) {
         this.user = user;
       }

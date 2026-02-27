@@ -79,11 +79,11 @@ export class NavHeaderComponent {
 
 
   profileLink = computed(() => {
-    return ['/profile', this.accountService.currentUserSignal()?.id ?? ''];
+    return ['/profile', this.accountService.currentUser()?.id ?? ''];
   });
 
   currentUser = computed(() => {
-    return this.accountService.currentUserSignal();
+    return this.accountService.currentUser();
   });
 
   isLoading = signal<boolean>(false);

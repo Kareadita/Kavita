@@ -64,7 +64,7 @@ export class AnnotationService {
   }
 
   updateSlotColor(index: number, color: RgbaColor) {
-    const user = this.accountService.currentUserSignal();
+    const user = this.accountService.currentUser();
     if (!user) return of([]);
 
     const preferences = user.preferences;
@@ -206,7 +206,7 @@ export class AnnotationService {
    * @param ids
    */
   likeAnnotations(ids: number[]) {
-    const userId = this.accountService.currentUserSignal()?.id;
+    const userId = this.accountService.currentUser()?.id;
     if (!userId) return of();
 
     return this.httpClient.post(this.baseUrl + 'annotation/like', ids);
@@ -217,7 +217,7 @@ export class AnnotationService {
    * @param ids
    */
   unLikeAnnotations(ids: number[]) {
-    const userId = this.accountService.currentUserSignal()?.id;
+    const userId = this.accountService.currentUser()?.id;
     if (!userId) return of();
 
     return this.httpClient.post(this.baseUrl + 'annotation/unlike', ids);

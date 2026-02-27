@@ -24,7 +24,6 @@ import {PersonRole} from "../../_models/metadata/person";
 import {forkJoin} from "rxjs";
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
-import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
@@ -92,9 +91,7 @@ export class EditVolumeModalComponent implements OnInit {
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
-  user!: User;
-
-
+  
   tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType), this.blacklist);
   /**
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
@@ -105,14 +102,10 @@ export class EditVolumeModalComponent implements OnInit {
   files: Array<MangaFile> = [];
 
   constructor() {
-    this.accountService.currentUser$.subscribe(user => {
-      this.user = user!;
-
-      if (!this.accountService.hasAdminRole(user!)) {
-        this.activeId = TabID.Info;
-      }
+    if (!this.accountService.hasAdminRole()) {
+      this.activeId = TabID.Info;
       this.cdRef.markForCheck();
-    });
+    }
   }
 
   get blacklist() {

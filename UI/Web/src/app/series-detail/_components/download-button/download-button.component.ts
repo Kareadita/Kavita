@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy, ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  OnInit,
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit,} from '@angular/core';
 import {AsyncPipe} from "@angular/common";
 import {Observable, shareReplay, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -43,7 +36,7 @@ export class DownloadButtonComponent implements OnInit {
   isDownloading = false;
   canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
     takeUntilDestroyed(this.destroyRef),
-    map(u => !!u && (this.accountService.hasAdminRole(u) || this.accountService.hasDownloadRole(u)),
+    map(u => !!u && (this.accountService.hasAdminRole() || this.accountService.hasDownloadRole()),
     shareReplay({bufferSize: 1, refCount: true})
   ));
 

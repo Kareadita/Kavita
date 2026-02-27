@@ -202,7 +202,7 @@ export class KeyBindService {
    * @private
    */
   private readonly customKeyBinds = computed(() => {
-    const customKeyBinds = this.accountService.currentUserSignal()?.preferences.customKeyBinds ?? {};
+    const customKeyBinds = this.accountService.currentUser()?.preferences.customKeyBinds ?? {};
     return Object.fromEntries(Object.entries(customKeyBinds).filter(([target, _]) => {
       return DefaultKeyBinds[target as KeyBindTarget] !== undefined; // Filter out unused or old targets
     }))

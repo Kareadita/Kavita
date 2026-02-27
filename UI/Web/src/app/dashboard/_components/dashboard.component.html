@@ -1,7 +1,7 @@
 <div class="main-container">
 <app-side-nav-companion-bar />
 
-  @let isAdmin = accountService.isAdmin();
+  @let isAdmin = accountService.hasAdminRole();
 
   <ng-container *transloco="let t; prefix: 'dashboard'">
     @if (libraries$ | async; as libraries) {

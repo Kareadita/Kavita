@@ -137,7 +137,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   isSearchOpen: boolean = false;
 
   canDownload = computed(() =>
-    this.accountService.hasDownloadRole(this.accountService.currentUserSignal()!)
+    this.accountService.hasDownloadRole()
   );
 
   constructor() {
@@ -217,7 +217,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   private downloadHandler = (event: KeyboardEvent) => {
     if (event.ctrlKey && event.key.toLowerCase() === 's') {
-      if (!this.accountService.hasDownloadRole(this.accountService.currentUserSignal()!)) {
+      if (!this.accountService.hasDownloadRole()) {
         event.preventDefault();
         event.stopImmediatePropagation(); // Stops ALL other handlers
       }

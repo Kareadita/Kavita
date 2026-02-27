@@ -96,7 +96,7 @@ export class ThemeService {
     });
 
     effect(() => {
-      const user = this.accountService.currentUserSignal();
+      const user = this.accountService.currentUser();
       if (user?.preferences && user?.preferences.theme) {
         this.setTheme(user.preferences.theme.name);
       } else {

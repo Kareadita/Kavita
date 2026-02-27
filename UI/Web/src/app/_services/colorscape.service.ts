@@ -176,7 +176,7 @@ export class ColorscapeService {
    * @param complementaryColor
    */
   setColorScape(primaryColor: string, complementaryColor: string | null = null) {
-    if (this.accountService.currentUserSignal()?.preferences?.colorScapeEnabled === false || this.getCssVariable('--colorscape-enabled') === 'false') {
+    if (this.accountService.currentUser()?.preferences?.colorScapeEnabled === false || this.getCssVariable('--colorscape-enabled') === 'false') {
       return;
     }
 

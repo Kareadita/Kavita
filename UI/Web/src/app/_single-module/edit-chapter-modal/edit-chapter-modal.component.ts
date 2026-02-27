@@ -36,7 +36,6 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {ChapterService} from "../../_services/chapter.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
-import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
@@ -129,7 +128,6 @@ export class EditChapterModalComponent implements OnInit {
   initChapter!: Chapter;
   imageUrls: Array<string> = [];
   size: number = 0;
-  user!: User;
 
   get WebLinks() {
     if (this.chapter.webLinks === '') return [];
@@ -144,14 +142,10 @@ export class EditChapterModalComponent implements OnInit {
 
     this.size = this.utilityService.asChapter(this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), tap(u => {
-      if (!u) return;
-      this.user = u;
-
-      if (!this.accountService.hasAdminRole(this.user)) {
+      if (!this.accountService.hasAdminRole()) {
         this.activeId = TabID.Info;
+        this.cdRef.markForCheck();
       }
-      this.cdRef.markForCheck();
-
     })).subscribe();
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));

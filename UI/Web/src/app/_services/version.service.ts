@@ -136,7 +136,7 @@ export class VersionService {
     this.accountService.currentUser$
       .pipe(
         take(1),
-        filter(user => user !== undefined && this.accountService.hasAdminRole(user)),
+        filter(user => user !== undefined && this.accountService.hasAdminRole()),
         switchMap(_ => this.serverService.checkHowOutOfDate()),
         filter(versionsOutOfDate => !isNaN(versionsOutOfDate) && versionsOutOfDate > 0),
       ).subscribe(versionsOutOfDate => {

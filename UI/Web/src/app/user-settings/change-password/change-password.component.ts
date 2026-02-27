@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   inject,
   OnDestroy,
@@ -9,20 +10,17 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {map, Observable, of, shareReplay} from 'rxjs';
 import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {AsyncPipe} from "@angular/common";
 
 @Component({
     selector: 'app-change-password',
     templateUrl: './change-password.component.html',
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, AsyncPipe]
+  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
 
@@ -33,30 +31,23 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
 
   passwordChangeForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
-  hasChangePasswordAbility: Observable<boolean> = of(false);
+  hasChangePasswordAbility = computed(() => {
+    const readOnly = this.accountService.hasReadOnlyRole();
+    const isAdmin = this.accountService.hasAdminRole();
+    const changePassword = this.accountService.hasChangePasswordRole();
+    return !readOnly && (isAdmin || changePassword);
+  });
   observableHandles: Array<any> = [];
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
   isEditMode: boolean = false;
-  canEdit: boolean = false;
+
 
 
   public get password() { return this.passwordChangeForm.get('password'); }
   public get confirmPassword() { return this.passwordChangeForm.get('confirmPassword'); }
 
   ngOnInit(): void {
-
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay()).subscribe(user => {
-      this.user = user;
-      this.canEdit = !this.accountService.hasReadOnlyRole(user!);
-      this.cdRef.markForCheck();
-    });
-
-    this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), map(user => {
-      return user !== undefined && !this.accountService.hasReadOnlyRole(user) && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
-    }));
-    this.cdRef.markForCheck();
-
     this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
     this.passwordChangeForm.addControl('confirmPassword', new FormControl('', [Validators.required]));
     this.passwordChangeForm.addControl('oldPassword', new FormControl('', [Validators.required]));

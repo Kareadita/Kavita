@@ -4,7 +4,7 @@
   @let filePathsValue = filePaths();
   @let filesValue = files();
 
-  @if (accountService.isAdmin() && (filePathsValue.length > 0 || filesValue.length > 0)) {
+  @if (accountService.hasAdminRole() && (filePathsValue.length > 0 || filesValue.length > 0)) {
     <div class="mb-3 ms-1">
       <h4 class="header">{{t(filesValue.length > 0 ? 'file-path-title' : 'folder-path-title')}}</h4>
       <div class="ms-3 d-flex flex-column">

@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, signal} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import {shareReplay, take} from 'rxjs';
 import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
@@ -39,9 +32,7 @@ export class ChangeAgeRestrictionComponent {
   originalRestriction!: AgeRestriction;
   resetValue = signal<AgeRestriction | undefined>(undefined);
 
-  canEdit = computed(() => {
-    return this.accountService.hasChangeAgeRestrictionRole(this.accountService.currentUserSignal()!);
-  });
+  canEdit = this.accountService.hasChangeAgeRestrictionRole;
 
   constructor() {
     this.accountService.currentUser$.pipe(takeUntilDestroyed(), shareReplay(), take(1)).subscribe(user => {

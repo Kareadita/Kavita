@@ -597,7 +597,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
       this.user = user;
-      this.hasBookmarkRights = this.accountService.hasBookmarkRole(user) || this.accountService.hasAdminRole(user);
+      this.hasBookmarkRights = this.accountService.hasBookmarkRole() || this.accountService.hasAdminRole();
 
       this.memberService.hasReadingProgress(this.libraryId).subscribe(progress => {
         if (!progress) {
@@ -1835,7 +1835,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
     if (this.bookmarkMode()) return;
-    if (!(this.accountService.hasBookmarkRole(this.user) || this.accountService.hasAdminRole(this.user))) return;
+    if (!(this.accountService.hasBookmarkRole() || this.accountService.hasAdminRole())) return;
 
     const pageNum = this.pageNum;
     // if canvasRenderer and doubleRenderer is undefined, then we are in webtoon mode

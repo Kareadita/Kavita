@@ -35,7 +35,7 @@ export class ReviewsComponent {
   volumeId = input<number | undefined>(undefined);
   chapter = input<Chapter | undefined>(undefined);
 
-  myReviews = computed(() => this.userReviews().filter(r => r.username === this.accountService.currentUserSignal()!.username && !r.isExternal));
+  myReviews = computed(() => this.userReviews().filter(r => r.username === this.accountService.currentUser()!.username && !r.isExternal));
 
   openReviewModal() {
     const userReview = this.myReviews();

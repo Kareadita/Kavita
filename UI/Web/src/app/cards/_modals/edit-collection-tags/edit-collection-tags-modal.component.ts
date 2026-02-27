@@ -119,7 +119,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
 
     this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (!user) return;
-      if (!this.accountService.hasPromoteRole(user)) {
+      if (!this.accountService.hasPromoteRole()) {
         this.collectionTagForm.get('promoted')?.disable();
         this.cdRef.markForCheck();
       }

@@ -189,7 +189,7 @@
         </ul>
 
         @if (user) {
-          @if (accountService.isAdmin()) {
+          @if (accountService.hasAdminRole()) {
             <div class="nav-item me-2">
               <app-nav-events-toggle [user]="user" />
             </div>

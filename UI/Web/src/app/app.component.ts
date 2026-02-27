@@ -98,12 +98,12 @@ export class AppComponent implements OnInit {
 
 
   setCurrentUser() {
-    const user = this.accountService.currentUserSignal();
+    const user = this.accountService.currentUser();
     if (!user) return;
 
     // Refresh the user data
     this.accountService.refreshAccount().subscribe(account => {
-      if (this.accountService.hasAdminRole(user)) {
+      if (this.accountService.hasAdminRole()) {
         this.licenseService.licenseInfo().subscribe();
       }
     });
