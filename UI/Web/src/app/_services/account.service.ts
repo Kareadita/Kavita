@@ -136,6 +136,7 @@ export class AccountService {
   canCurrentUserInvokeAction(action: Action) {
     const user = this.currentUser();
     if (!user) return false;
+
     return this.canInvokeAction(user, action);
   }
 

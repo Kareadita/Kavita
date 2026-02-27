@@ -103,7 +103,7 @@ export class AllCollectionsComponent implements OnInit {
 
   shouldRenderCollection(action: ActionItem<UserCollection>, entity: UserCollection, user: User) {
 
-    const hasPromotionRights = this.accountService.canInvokeAction(this.accountService.currentUser()!, action.action);
+    const hasPromotionRights = this.accountService.canCurrentUserInvokeAction(action.action);
 
     switch (action.action) {
       case Action.Promote:
