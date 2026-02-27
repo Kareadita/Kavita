@@ -92,15 +92,15 @@ export class GroupedTypeaheadComponent implements OnInit {
   readonly collectionTemplate = contentChild<TemplateRef<any>>('collectionTemplate');
   readonly tagTemplate = contentChild<TemplateRef<any>>('tagTemplate');
   readonly personTemplate = contentChild<TemplateRef<any>>('personTemplate');
-  readonly genreTemplate = contentChild.required<TemplateRef<any>>('genreTemplate');
-  readonly noResultsTemplate = contentChild.required<TemplateRef<any>>('noResultsTemplate');
-  readonly extraTemplate = contentChild.required<TemplateRef<any>>('extraTemplate');
-  readonly libraryTemplate = contentChild.required<TemplateRef<any>>('libraryTemplate');
-  readonly readingListTemplate = contentChild.required<TemplateRef<any>>('readingListTemplate');
-  readonly fileTemplate = contentChild.required<TemplateRef<any>>('fileTemplate');
-  readonly chapterTemplate = contentChild.required<TemplateRef<any>>('chapterTemplate');
-  readonly bookmarkTemplate = contentChild.required<TemplateRef<any>>('bookmarkTemplate');
-  readonly annotationTemplate = contentChild.required<TemplateRef<any>>('annotationTemplate');
+  readonly genreTemplate = contentChild<TemplateRef<any>>('genreTemplate');
+  readonly noResultsTemplate = contentChild<TemplateRef<any>>('noResultsTemplate');
+  readonly libraryTemplate = contentChild<TemplateRef<any>>('libraryTemplate');
+  readonly readingListTemplate = contentChild<TemplateRef<any>>('readingListTemplate');
+  readonly fileTemplate = contentChild<TemplateRef<any>>('fileTemplate');
+  readonly chapterTemplate = contentChild<TemplateRef<any>>('chapterTemplate');
+  readonly bookmarkTemplate = contentChild<TemplateRef<any>>('bookmarkTemplate');
+  readonly annotationTemplate = contentChild<TemplateRef<any>>('annotationTemplate');
+  readonly extraTemplate = contentChild<TemplateRef<any>>('extraTemplate');
 
 
   hasFocus: boolean = false;
