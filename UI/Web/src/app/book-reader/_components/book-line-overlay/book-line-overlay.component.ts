@@ -260,7 +260,7 @@ export class BookLineOverlayComponent implements OnInit {
         return of();
     })).subscribe(() => {
       this.reset();
-      this.refreshToC.emit();
+      this.refreshToC.emit(undefined);
       this.cdRef.markForCheck();
     });
   }

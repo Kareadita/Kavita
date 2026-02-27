@@ -12,7 +12,7 @@
           @if (optionSelection) {
             @for (option of optionSelection.selected(); track option; let i = $index) {
               <app-tag-badge fillStyle="filled">
-                <ng-container [ngTemplateOutlet]="badgeTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: i, value:  typeaheadControl.value }" />
+                <ng-container [ngTemplateOutlet]="badgeTemplate()" [ngTemplateOutletContext]="{ $implicit: option, idx: i, value:  typeaheadControl.value }" />
                 @if (!disabled) {
                   <i class="fa fa-times" (click)="toggleSelection(option)" tabindex="0" [attr.aria-label]="t('close')"></i>
                 }
@@ -41,7 +41,9 @@
 
       @if (filteredOptions | async; as options) {
         @if (hasFocus) {
-          <div class="dropdown" [@slideFromTop]="hasFocus">
+          <div class="dropdown"
+               animate.enter="slide-in-from-top"
+               animate.leave="slide-out-to-top">
             <ul class="list-group results" #results>
               @if (showAddItem) {
                 <li class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
@@ -51,9 +53,9 @@
 
               @for(option of options; track settings.trackByIdentityFn(index, option); let index = $index) {
                 <li (click)="handleOptionClick(option)"
-                     class="list-group-item" role="option" [attr.data-index]="index"
-                     (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
-                  <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  typeaheadControl.value }" />
+                    class="list-group-item" role="option" [attr.data-index]="index"
+                    (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
+                  <ng-container [ngTemplateOutlet]="optionTemplate()" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  typeaheadControl.value }" />
                 </li>
               }
 

@@ -2,12 +2,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   EventEmitter,
   inject,
   input,
-  linkedSignal,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {BulkSelectionService} from '../cards/bulk-selection.service';
@@ -42,9 +43,9 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
 import {SeriesFilterSettings} from "../metadata-filter/filter-settings";
 import {MetadataService} from "../_services/metadata.service";
-import {ActionItem} from "../_models/actionables/action-item";
 import {ActionResult} from "../_models/actionables/action-result";
 import {KavitaTitleStrategy} from "../_services/kavita-title.strategy";
+import {getWritableResolvedData} from "../../libs/route-util";
 
 @Component({
     selector: 'app-library-detail',
@@ -72,15 +73,14 @@ export class LibraryDetailComponent implements OnInit {
   public readonly metadataService = inject(MetadataService);
 
   // From Resolver
+  readonly library = getWritableResolvedData(this.route, 'library');
   libraryId = input.required<number>();
-  readonly libraryData = input.required<Library>();
-  library = linkedSignal(() => this.libraryData());
+  libraryName = computed(() => this.library().name);
 
-  libraryName = '';
-  series: Series[] = [];
+  series = signal<Series[]>([]);
   loadingSeries = false;
   pagination: Pagination = {currentPage: 0, totalPages: 0, totalItems: 0, itemsPerPage: 0};
-  actions: ActionItem<Library>[] = [];
+  actions = computed(() => this.actionFactoryService.getLibraryActions());
   filter: FilterV2<FilterField> | undefined = undefined;
   filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
@@ -102,7 +102,6 @@ export class LibraryDetailComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.actions = this.actionFactoryService.getLibraryActions();
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     this.libraryService.getJumpBar(this.libraryId()).subscribe(barDetails => {
@@ -110,8 +109,7 @@ export class LibraryDetailComponent implements OnInit {
       this.cdRef.markForCheck();
     });
 
-    this.actions = this.actionFactoryService.getLibraryActions();
-    this.bulkSelectionService.registerDataSource('series', () => this.series);
+    this.bulkSelectionService.registerDataSource('series', () => this.series());
     this.bulkSelectionService.registerPostAction((res: ActionResult<Series>) => {
       if (res.effect === 'none') return;
       this.loadPage();
@@ -146,12 +144,12 @@ export class LibraryDetailComponent implements OnInit {
           return;
         }
         this.seriesService.getSeries(seriesAdded.seriesId).subscribe(s => {
-          if (this.series.filter(sObj => s.id === sObj.id).length > 0) return;
-          this.series = [...this.series, s].sort((s1: Series, s2: Series) => {
+          if (this.series().filter(sObj => s.id === sObj.id).length > 0) return;
+          this.series.set([...this.series(), s].sort((s1: Series, s2: Series) => {
             if (s1.sortName < s2.sortName) return -1;
             if (s1.sortName > s2.sortName) return 1;
             return 0;
-          });
+          }));
           this.pagination.totalItems++;
           this.cdRef.markForCheck();
           this.refresh.emit();
@@ -166,7 +164,7 @@ export class LibraryDetailComponent implements OnInit {
           return;
         }
 
-        this.series = this.series.filter(s => s.id != seriesRemoved.seriesId);
+        this.series.set(this.series().filter(s => s.id !== seriesRemoved.seriesId));
         this.pagination.totalItems--;
         this.cdRef.markForCheck();
         this.refresh.emit();
@@ -195,7 +193,7 @@ export class LibraryDetailComponent implements OnInit {
 
     this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filter)
       .subscribe(series => {
-        this.series = [...series.result];
+        this.series.set([...series.result]);
         this.pagination = series.pagination;
         this.loadingSeries = false;
         this.cdRef.markForCheck();
@@ -208,11 +206,7 @@ export class LibraryDetailComponent implements OnInit {
     switch (event.effect) {
       case 'update':
         this.library.set({...event.entity});
-
-        // For now, until we refactor backend to send it as a basic library for non-admin users
-        this.libraryName = event.entity.name;
         this.kavitaTitleStrategy.setFormattedTitle(event.entity.name);
-        this.cdRef.markForCheck();
         break;
       case 'remove':
       case 'reload':

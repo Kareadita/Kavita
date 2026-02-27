@@ -197,7 +197,7 @@ export class BulkSelectionService {
     }
 
     if (this.hasDataSource('bookmark')) {
-      const actions = this.applyFilterToList(this.actionFactory.getBookmarkActions(() => ({seriesId: 0, libraryId: 0, seriesName: ''})), [Action.DownloadBookmark, Action.Delete]);
+      const actions = this.applyFilterToList(this.actionFactory.getBookmarkActions(() => ({seriesId: 0, libraryId: 0, seriesName: ''})), [Action.Download, Action.Delete]);
       return this.wireBulkCallback(actions, (action) => {
         const selectedSeries = this.resolveEntities<any>('bookmark');
         const seriesIds = selectedSeries.map((s: any) => s.id);

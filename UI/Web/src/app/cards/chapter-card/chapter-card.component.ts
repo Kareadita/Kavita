@@ -2,12 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  EventEmitter,
   inject,
   input,
   linkedSignal,
   OnChanges,
-  Output,
+  output,
   SimpleChanges,
   TemplateRef,
   viewChild
@@ -69,15 +68,15 @@ export class ChapterCardComponent implements OnChanges {
   /**
    * When the card is selected.
    */
-  @Output() selection = new EventEmitter<boolean>();
+  selection = output<boolean>();
   /**
    * Emitted when the entity is deleted. Emits the entity id
    */
-  @Output() reload: EventEmitter<number> = new EventEmitter();
+  reload = output<number>();
   /**
    * Underlying data has mutated, mutated data is returned
    */
-  @Output() dataChanged: EventEmitter<Chapter> = new EventEmitter();
+  dataChanged = output<Chapter>();
 
   protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
 

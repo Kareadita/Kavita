@@ -7,7 +7,7 @@ import {
   DestroyRef,
   inject,
   signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {Chapter} from 'src/app/_models/chapter';
@@ -75,7 +75,7 @@ export class NavHeaderComponent {
   private readonly document = inject(DOCUMENT);
 
 
-  @ViewChild('search') searchViewRef!: any;
+  readonly searchViewRef = viewChild.required<any>('search');
 
 
   profileLink = computed(() => {
@@ -131,7 +131,7 @@ export class NavHeaderComponent {
   }
 
   clearSearch() {
-    this.searchViewRef.clear();
+    this.searchViewRef().clear();
     this.searchTerm = '';
     this.searchResults = new SearchResultGroup();
     this.cdRef.markForCheck();

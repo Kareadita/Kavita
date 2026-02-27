@@ -4,13 +4,12 @@ import {
   Component,
   computed,
   DestroyRef,
-  EventEmitter,
   HostListener,
   inject,
   input,
   OnInit,
-  Output,
-  Signal
+  Signal,
+  output
 } from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DownloadEvent} from "../../shared/_services/download.service";
@@ -96,16 +95,16 @@ export class EntityCardComponent<T> implements OnInit {
   // ============================================================
 
   /** Emitted when selection state changes */
-  @Output() selection = new EventEmitter<boolean>();
+  readonly selection = output<boolean>();
 
   /** Emitted when card data changes and parent should reload */
-  @Output() reload = new EventEmitter<number>();
+  readonly reload = output<number>();
 
   /** Emitted when underlying entity data changes */
-  @Output() dataChanged = new EventEmitter<T>();
+  readonly dataChanged = output<T>();
 
   /** Emitted when a progress update is processed. */
-  @Output() progressUpdated = new EventEmitter<ProgressUpdateResult<T>>();
+  readonly progressUpdated = output<ProgressUpdateResult<T>>();
 
 
 

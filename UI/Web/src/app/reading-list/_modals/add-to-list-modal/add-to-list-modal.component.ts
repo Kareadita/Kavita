@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, inject, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, inject, Input, OnInit, viewChild} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -66,7 +66,7 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
   loading: boolean = false;
   listForm: FormGroup = new FormGroup({});
 
-  @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
+  readonly inputElem = viewChild.required<ElementRef<HTMLInputElement>>('title');
 
   filterList = (listItem: ReadingList) => {
     return listItem.title.toLowerCase().indexOf((this.listForm.value.filterQuery || '').toLowerCase()) >= 0;
@@ -90,8 +90,9 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     // Shift focus to input
-    if (this.inputElem) {
-      this.inputElem.nativeElement.select();
+    const inputElem = this.inputElem();
+    if (inputElem) {
+      inputElem.nativeElement.select();
     }
   }
 

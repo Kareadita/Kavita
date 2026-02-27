@@ -517,7 +517,7 @@ export class ActionService {
           map(() => this.fromAction(action, bookmark, 'remove'))
         );
 
-      case Action.DownloadBookmark:
+      case Action.Download:
         this.downloadService.download('bookmark', [bookmark]);
         return of(this.fromAction(action, bookmark, 'none'));
 
@@ -966,7 +966,7 @@ export class ActionService {
 
   handleBulkBookmarkAction(action: ActionItem<any>, bookmarks: PageBookmark[], seriesIds: number[]): Observable<ActionResult<PageBookmark[]>> {
     switch (action.action) {
-      case Action.DownloadBookmark:
+      case Action.Download:
         this.downloadService.download('bookmark', bookmarks);
         return of(this.fromAction(action, bookmarks, 'none'));
 

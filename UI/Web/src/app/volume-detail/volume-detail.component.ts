@@ -10,7 +10,7 @@ import {
   numberAttribute,
   OnInit,
   signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
@@ -206,8 +206,8 @@ export class VolumeDetailComponent implements OnInit {
   protected readonly FilterField = FilterField;
   protected readonly encodeURIComponent = encodeURIComponent;
 
-  @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
-  @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
+  readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
+  readonly companionBar = viewChild<ElementRef<HTMLDivElement>>('companionBar');
 
 
   seriesId = input(0, {transform: numberAttribute });
@@ -352,11 +352,11 @@ export class VolumeDetailComponent implements OnInit {
 
 
   get ScrollingBlockHeight() {
-    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
+    if (this.scrollingBlock() === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
     if (navbar === null) return 'calc(var(--vh)*100)';
 
-    const companionHeight = this.companionBar?.nativeElement.offsetHeight || 0;
+    const companionHeight = this.companionBar()?.nativeElement.offsetHeight || 0;
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';

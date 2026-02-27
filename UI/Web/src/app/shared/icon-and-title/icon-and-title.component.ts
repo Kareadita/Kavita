@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, output} from '@angular/core';
 import {NgClass} from "@angular/common";
 
 @Component({
@@ -22,7 +22,7 @@ export class IconAndTitleComponent {
    */
   fontClasses = input<string>('');
 
-  @Output() clicked: EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
+  clicked = output<MouseEvent>();
 
   constructor() { }
 

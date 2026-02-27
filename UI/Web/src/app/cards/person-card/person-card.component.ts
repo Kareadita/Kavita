@@ -2,13 +2,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
+  contentChild,
   DestroyRef,
-  EventEmitter,
   HostListener,
   inject,
   Input,
-  Output,
+  output,
   TemplateRef
 } from '@angular/core';
 import {ImageService} from "../../_services/image.service";
@@ -80,12 +79,12 @@ export class PersonCardComponent {
   /**
    * Event emitted when item is clicked
    */
-  @Output() clicked = new EventEmitter<string>();
+  readonly clicked = output<string>();
   /**
    * When the card is selected.
    */
-  @Output() selection = new EventEmitter<boolean>();
-  @ContentChild('subtitle') subtitleTemplate!: TemplateRef<any>;
+  readonly selection = output<boolean>();
+  subtitleTemplate = contentChild<TemplateRef<any>>('subtitle');
 
   tooltipTitle: string = this.title;
   /**

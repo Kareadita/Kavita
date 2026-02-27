@@ -66,6 +66,43 @@ $pointer-offset: 5px;
   color: var(--manga-reader-overlay-text-color);
 }
 
+/* Enter/leave classes applied by Angular automatically */
+.slide-in-top {
+  animation: enter-from-top 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+.slide-out-top {
+  animation: leave-to-top 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+.slide-in-bottom {
+  animation: enter-from-bottom 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+.slide-out-bottom {
+  animation: leave-to-bottom 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+@keyframes enter-from-top {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes leave-to-top {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
+}
+
+@keyframes enter-from-bottom {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes leave-to-bottom {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
+}
+
 @media(min-width: 600px) {
   .overlay .left .i {
       left: 20px;

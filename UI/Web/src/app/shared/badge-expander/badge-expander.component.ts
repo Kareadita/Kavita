@@ -59,7 +59,7 @@ export class BadgeExpanderComponent implements OnInit {
   }
 
   toggleVisible() {
-    this.toggled.emit();
+    this.toggled.emit(undefined);
     if (!this.allowToggle()) return;
 
     this.isCollapsed.update(x => !x);

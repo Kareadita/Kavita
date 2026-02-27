@@ -123,3 +123,40 @@ input {
         border-bottom-color: var(--list-group-hover-text-color);
     }
 }
+
+.dropdown {
+  overflow: auto;
+}
+
+.slide-in-from-top {
+  animation: slideDown 200ms ease-out;
+}
+
+.slide-out-to-top {
+  animation: slideUp 200ms ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+  to {
+    max-height: 400px;
+    opacity: 1;
+    overflow: auto;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    max-height: 400px;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+}

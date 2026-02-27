@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, EventEmitter, inject, input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 import {UserReview} from "../../_models/user-review";
 import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.component";
@@ -27,7 +27,7 @@ export class ReviewCardComponent {
 
 
   review = input.required<UserReview>();
-  @Output() refresh = new EventEmitter<ReviewModalCloseEvent>();
+  readonly refresh = output<ReviewModalCloseEvent>();
 
   isMyReview = computed(() =>
     this.review().username === this.accountService.currentUserSignal()?.username && !this.review().isExternal);

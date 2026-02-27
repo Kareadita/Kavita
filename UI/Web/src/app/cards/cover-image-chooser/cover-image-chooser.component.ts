@@ -105,7 +105,7 @@ export class CoverImageChooserComponent {
 
   resetImage() {
     if (this.showApplyButton()) {
-      this.resetCover.emit();
+      this.resetCover.emit(undefined);
     }
   }
 
@@ -176,7 +176,7 @@ export class CoverImageChooserComponent {
   }
 
   reset() {
-    this.resetClicked.emit();
+    this.resetClicked.emit(undefined);
     this.selectedIndex.set(-1);
   }
 

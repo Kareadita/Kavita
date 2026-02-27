@@ -991,7 +991,7 @@ export class ActionFactoryService {
         children: [],
       },
       {
-        action: Action.DownloadBookmark,
+        action: Action.Download,
         title: 'download',
         description: 'download-tooltip',
 

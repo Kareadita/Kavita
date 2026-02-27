@@ -8,8 +8,8 @@ import {
   OnInit,
   signal,
   Signal,
-  ViewChild,
-  ViewContainerRef
+  ViewContainerRef,
+  viewChild
 } from '@angular/core';
 import {NgbActiveOffcanvas, NgbOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {AnnotationService} from "../../../../_services/annotation.service";
@@ -89,7 +89,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   private readonly offcanvasService = inject(NgbOffcanvas);
   protected readonly breakpointService = inject(BreakpointService);
 
-  @ViewChild('renderTarget', {read: ViewContainerRef}) renderTarget!: ViewContainerRef;
+  readonly renderTarget = viewChild.required('renderTarget', { read: ViewContainerRef });
 
   annotation = signal<Annotation | null>(null);
   mode = signal<AnnotationMode>(AnnotationMode.View);
@@ -295,10 +295,10 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     if (highlightAnnotation === null) return;
 
     // Clear any existing components first
-    this.renderTarget.clear();
+    this.renderTarget().clear();
 
     const parentElem = this.document.querySelector('#render-target');
-    this.epubHighlightService.initializeHighlightElements([highlightAnnotation], this.renderTarget, parentElem, {showIcon: false, showHighlight: true});
+    this.epubHighlightService.initializeHighlightElements([highlightAnnotation], this.renderTarget(), parentElem, {showIcon: false, showHighlight: true});
   }
 
   private isSelectedTextAfterPunctuation(contextText: string, selectedIndex: number): boolean {
