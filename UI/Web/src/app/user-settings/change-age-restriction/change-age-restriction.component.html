@@ -1,15 +1,16 @@
 <ng-container *transloco="let t; prefix:'change-age-restriction'">
-  @if (user()) {
+  @let user = accountService.currentUser();
+  @if (user) {
     <app-setting-item [title]="t('age-restriction-label')" [canEdit]="canEdit()">
       <ng-template #view>
-        <span class="col-12" [ngClass]="{'disabled': !canEdit()}">{{user()!.ageRestriction.ageRating | ageRating }}
-          @if (user()!.ageRestriction.ageRating !== AgeRating.NotApplicable && user()!.ageRestriction.includeUnknowns) {
+        <span class="col-12" [ngClass]="{'disabled': !canEdit()}">{{user.ageRestriction.ageRating | ageRating }}
+          @if (user.ageRestriction.ageRating !== AgeRating.NotApplicable && user.ageRestriction.includeUnknowns) {
             <span class="ms-1 me-1">+</span> {{t('unknowns')}}
           }
         </span>
       </ng-template>
       <ng-template #edit>
-        <app-restriction-selector (selected)="updateRestrictionSelection($event)" [showContext]="false" [member]="user()" [resetValue]="resetValue()" />
+        <app-restriction-selector (selected)="updateRestrictionSelection($event)" [showContext]="false" [member]="user" [resetValue]="resetValue()" />
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
           <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="age-restriction" (click)="resetForm()">{{t('reset')}}</button>
           <button type="submit" class="flex-fill btn btn-primary" aria-describedby="age-restriction" (click)="saveForm()">{{t('save')}}</button>

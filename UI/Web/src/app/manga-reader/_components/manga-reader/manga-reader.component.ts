@@ -29,7 +29,6 @@ import {
   Observable,
   ReplaySubject,
   Subject,
-  take,
   tap
 } from 'rxjs';
 import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
@@ -45,7 +44,6 @@ import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
 import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
 import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
 import {ScalingOption} from 'src/app/_models/preferences/scaling-option';
-import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {MemberService} from 'src/app/_services/member.service';
 import {NavService} from 'src/app/_services/nav.service';
@@ -82,7 +80,6 @@ import {ConfirmService} from "../../../shared/confirm.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
-import {ImageOnlyName} from "../../../_models/user/auth-key";
 import {mediumModal} from "../../../_models/modal/modal-options";
 import {ModalService} from "../../../_services/modal.service";
 
@@ -188,7 +185,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   maxPages = 1;
   totalSeriesPages = 0;
   totalSeriesPagesRead = 0;
-  user!: User;
   readingProfile!: ReadingProfile;
   /**
    * The reading profile itself, unless readingProfile is implicit
@@ -216,7 +212,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   layoutModesTranslated = layoutModes.map(this.translatePrefOptions);
 
   isLoading = true;
-  hasBookmarkRights: boolean = false; // TODO: This can be an observable
+  hasBookmarkRights = computed(() => this.accountService.hasBookmarkRole() || this.accountService.hasAdminRole());
 
 
   getPageFn!: (pageNum: number) => HTMLImageElement;
@@ -414,7 +410,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
 
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
-    if (this.bookmarkMode()) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.authKeys.filter(k => k.name === ImageOnlyName)[0].key, pageNum);
+    const imageKey = this.accountService.currentUserImageAuthKey();
+    if (this.bookmarkMode()) return this.readerService.getBookmarkPageUrl(this.seriesId, imageKey!, pageNum);
     return this.readerService.getPageUrl(chapterId, pageNum);
   }
 
@@ -589,45 +586,34 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.continuousChaptersStack.push(this.chapterId);
 
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (!user) {
-        this.router.navigateByUrl('/login');
-        return;
+    this.memberService.hasReadingProgress(this.libraryId).subscribe(progress => {
+      if (!progress) {
+        this.toggleMenu();
+        this.toastr.info(translate('manga-reader.first-time-reading-manga'));
       }
-
-
-      this.user = user;
-      this.hasBookmarkRights = this.accountService.hasBookmarkRole() || this.accountService.hasAdminRole();
-
-      this.memberService.hasReadingProgress(this.libraryId).subscribe(progress => {
-        if (!progress) {
-          this.toggleMenu();
-          this.toastr.info(translate('manga-reader.first-time-reading-manga'));
-        }
-      });
-
-      this.init(true);
-
-      // Update implicit reading profile while changing settings
-      this.generalSettingsForm.valueChanges.pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef),
-        map(_ => this.packReadingProfile()),
-        distinctUntilChanged(),
-        tap(newProfile => {
-          this.readingProfileService.updateImplicit(this.libraryId, this.seriesId, newProfile).subscribe({
-            next: updatedProfile => {
-              this.readingProfile = updatedProfile;
-              this.cdRef.markForCheck();
-            },
-            error: err => {
-              console.error(err);
-            }
-          })
-        })
-      ).subscribe();
     });
+
+    this.init(true);
+
+    // Update implicit reading profile while changing settings
+    this.generalSettingsForm.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef),
+      map(_ => this.packReadingProfile()),
+      distinctUntilChanged(),
+      tap(newProfile => {
+        this.readingProfileService.updateImplicit(this.libraryId, this.seriesId, newProfile).subscribe({
+          next: updatedProfile => {
+            this.readingProfile = updatedProfile;
+            this.cdRef.markForCheck();
+          },
+          error: err => {
+            console.error(err);
+          }
+        })
+      })
+    ).subscribe();
   }
 
   ngAfterViewInit() {

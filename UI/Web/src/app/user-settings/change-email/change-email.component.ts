@@ -1,17 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  OnInit
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, effect, inject} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {shareReplay} from 'rxjs';
 import {AccountService} from 'src/app/_services/account.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ApiKeyComponent} from '../api-key/api-key.component';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -25,9 +15,8 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent, DefaultValuePipe]
 })
-export class ChangeEmailComponent implements OnInit {
+export class ChangeEmailComponent {
 
-  private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly accountService = inject(AccountService);
@@ -44,8 +33,11 @@ export class ChangeEmailComponent implements OnInit {
   protected get email() { return this.form.get('email'); }
 
 
-  ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay()).subscribe(user => {
+  constructor() {
+    effect(() => {
+      const user = this.accountService.currentUser();
+      if (!user) return;
+
       this.form.addControl('email', new FormControl(user?.email, [Validators.required, Validators.email]));
       this.form.addControl('password', new FormControl('', [Validators.required]));
       this.cdRef.markForCheck();

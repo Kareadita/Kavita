@@ -36,7 +36,7 @@
               <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
             </button>
-            @if (!bookmarkMode() && hasBookmarkRights) {
+            @if (!bookmarkMode() && hasBookmarkRights()) {
               <button class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
                       title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
                 <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>

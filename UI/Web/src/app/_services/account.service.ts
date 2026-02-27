@@ -16,7 +16,7 @@ import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {LicenseService} from "./license.service";
 import {LocalizationService} from "./localization.service";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
-import {AuthKey, OpdsName} from "../_models/user/auth-key";
+import {AuthKey, ImageOnlyName, OpdsName} from "../_models/user/auth-key";
 import {Action} from "../_models/actionables/action";
 
 export enum Role {
@@ -86,6 +86,9 @@ export class AccountService {
 
   public readonly currentUserGenericApiKey = computed(() =>
     this._currentUser()?.authKeys.find(k => k.name === OpdsName)?.key
+  );
+  public readonly currentUserImageAuthKey = computed(() =>
+    this._currentUser()?.authKeys.find(k => k.name === ImageOnlyName)?.key
   );
 
   /**

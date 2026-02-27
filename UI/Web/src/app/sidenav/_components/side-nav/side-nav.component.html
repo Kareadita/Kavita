@@ -3,9 +3,9 @@
   @let sideNavVisible = navService.sideNavVisibilitySignal();
   @let sideNavCollapsed = navService.sideNavCollapsedSignal();
 
-  @if (accountService.currentUser$ | async; as user) {
+  @if (accountService.currentUser()) {
     <div class="side-nav-container" [ngClass]="{'closed' : sideNavCollapsed,
-    'hidden': sideNavVisible === false,
+    'hidden': !sideNavVisible,
     'no-donate': (licenseService.hasValidLicense$ | async) === true}">
       <div class="side-nav" cdkDropList (cdkDropListDropped)="reorderDrop($event)">
 
@@ -111,7 +111,7 @@
   }
 
   <div class="sidenav-bottom" [ngClass]="{'closed' : sideNavCollapsed,
-      'hidden': sideNavVisible === false || (licenseService.hasValidLicense$ | async) === true}">
+      'hidden': !sideNavVisible || (licenseService.hasValidLicense$ | async) === true}">
     @if ((licenseService.hasValidLicense$ | async) === false) {
       <app-side-nav-item [ngClass]="'donate'" icon="fa-heart"
                         [ngbTooltip]="t('donate-tooltip')"
