@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.OPDS;
 using Kavita.Models.DTOs.OPDS.Requests;
@@ -6,26 +7,26 @@ namespace Kavita.API.Services;
 
 public interface IOpdsService
 {
-    Task<Feed> GetCatalogue(OpdsCatalogueRequest request);
-    Task<Feed> GetSmartFilters(OpdsPaginatedCatalogueRequest request);
-    Task<Feed> GetLibraries(OpdsPaginatedCatalogueRequest request);
-    Task<Feed> GetWantToRead(OpdsPaginatedCatalogueRequest request);
-    Task<Feed> GetCollections(OpdsPaginatedCatalogueRequest request);
-    Task<Feed> GetReadingLists(OpdsPaginatedCatalogueRequest request);
-    Task<Feed> GetRecentlyAdded(OpdsPaginatedCatalogueRequest request);
-    Task<Feed> GetRecentlyUpdated(OpdsPaginatedCatalogueRequest request);
-    Task<Feed> GetOnDeck(OpdsPaginatedCatalogueRequest request);
+    Task<Feed> GetCatalogue(OpdsCatalogueRequest request, CancellationToken ct = default);
+    Task<Feed> GetSmartFilters(OpdsPaginatedCatalogueRequest request, CancellationToken ct = default);
+    Task<Feed> GetLibraries(OpdsPaginatedCatalogueRequest request, CancellationToken ct = default);
+    Task<Feed> GetWantToRead(OpdsPaginatedCatalogueRequest request, CancellationToken ct = default);
+    Task<Feed> GetCollections(OpdsPaginatedCatalogueRequest request, CancellationToken ct = default);
+    Task<Feed> GetReadingLists(OpdsPaginatedCatalogueRequest request, CancellationToken ct = default);
+    Task<Feed> GetRecentlyAdded(OpdsPaginatedCatalogueRequest request, CancellationToken ct = default);
+    Task<Feed> GetRecentlyUpdated(OpdsPaginatedCatalogueRequest request, CancellationToken ct = default);
+    Task<Feed> GetOnDeck(OpdsPaginatedCatalogueRequest request, CancellationToken ct = default);
 
-    Task<Feed> GetMoreInGenre(OpdsItemsFromEntityIdRequest request);
-    Task<Feed> GetSeriesFromSmartFilter(OpdsItemsFromEntityIdRequest request);
-    Task<Feed> GetSeriesFromCollection(OpdsItemsFromEntityIdRequest request);
-    Task<Feed> GetSeriesFromLibrary(OpdsItemsFromEntityIdRequest request);
-    Task<Feed> GetReadingListItems(OpdsItemsFromEntityIdRequest request);
-    Task<Feed> GetSeriesDetail(OpdsItemsFromEntityIdRequest request);
-    Task<Feed> GetItemsFromVolume(OpdsItemsFromCompoundEntityIdsRequest request);
-    Task<Feed> GetItemsFromChapter(OpdsItemsFromCompoundEntityIdsRequest request);
+    Task<Feed> GetMoreInGenre(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default);
+    Task<Feed> GetSeriesFromSmartFilter(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default);
+    Task<Feed> GetSeriesFromCollection(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default);
+    Task<Feed> GetSeriesFromLibrary(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default);
+    Task<Feed> GetReadingListItems(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default);
+    Task<Feed> GetSeriesDetail(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default);
+    Task<Feed> GetItemsFromVolume(OpdsItemsFromCompoundEntityIdsRequest request, CancellationToken ct = default);
+    Task<Feed> GetItemsFromChapter(OpdsItemsFromCompoundEntityIdsRequest request, CancellationToken ct = default);
 
-    Task<Feed> Search(OpdsSearchRequest request);
+    Task<Feed> Search(OpdsSearchRequest request, CancellationToken ct = default);
 
     string SerializeXml(Feed? feed);
 }

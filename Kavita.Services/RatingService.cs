@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Database;
@@ -14,10 +15,11 @@ namespace Kavita.Services;
 public class RatingService(IUnitOfWork unitOfWork, IScrobblingService scrobblingService, ILogger<RatingService> logger)
     : IRatingService
 {
-    public async Task<bool> UpdateSeriesRating(AppUser user, UpdateRatingDto updateRatingDto)
+    public async Task<bool> UpdateSeriesRating(AppUser user, UpdateRatingDto updateRatingDto,
+        CancellationToken ct = default)
     {
         var userRating =
-            await unitOfWork.UserRepository.GetUserRatingAsync(updateRatingDto.SeriesId, user.Id) ??
+            await unitOfWork.UserRepository.GetUserRatingAsync(updateRatingDto.SeriesId, user.Id, ct) ??
             new AppUserRating();
 
         try
@@ -34,7 +36,7 @@ public class RatingService(IUnitOfWork unitOfWork, IScrobblingService scrobbling
 
             unitOfWork.UserRepository.Update(user);
 
-            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync())
+            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct))
             {
                 BackgroundJob.Enqueue(() =>
                     scrobblingService.ScrobbleRatingUpdate(user.Id, updateRatingDto.SeriesId,
@@ -47,13 +49,14 @@ public class RatingService(IUnitOfWork unitOfWork, IScrobblingService scrobbling
             logger.LogError(ex, "There was an exception saving rating");
         }
 
-        await unitOfWork.RollbackAsync();
+        await unitOfWork.RollbackAsync(ct);
         user.Ratings?.Remove(userRating);
 
         return false;
     }
 
-    public async Task<bool> UpdateChapterRating(AppUser user, UpdateRatingDto updateRatingDto)
+    public async Task<bool> UpdateChapterRating(AppUser user, UpdateRatingDto updateRatingDto,
+        CancellationToken ct = default)
     {
         if (updateRatingDto.ChapterId == null)
         {
@@ -61,7 +64,7 @@ public class RatingService(IUnitOfWork unitOfWork, IScrobblingService scrobbling
         }
 
         var userRating =
-            await unitOfWork.UserRepository.GetUserChapterRatingAsync(user.Id, updateRatingDto.ChapterId.Value) ??
+            await unitOfWork.UserRepository.GetUserChapterRatingAsync(user.Id, updateRatingDto.ChapterId.Value, ct) ??
             new AppUserChapterRating();
 
         try
@@ -79,7 +82,7 @@ public class RatingService(IUnitOfWork unitOfWork, IScrobblingService scrobbling
 
             unitOfWork.UserRepository.Update(user);
 
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
             return true;
         }
         catch (Exception ex)
@@ -87,7 +90,7 @@ public class RatingService(IUnitOfWork unitOfWork, IScrobblingService scrobbling
             logger.LogError(ex, "There was an exception saving rating");
         }
 
-        await unitOfWork.RollbackAsync();
+        await unitOfWork.RollbackAsync(ct);
         user.ChapterRatings?.Remove(userRating);
 
         return false;

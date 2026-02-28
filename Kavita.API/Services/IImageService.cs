@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
@@ -45,8 +46,16 @@ public interface IImageService
     /// <param name="filePath">Full path to the image to convert</param>
     /// <param name="outputPath">Where to output the file</param>
     /// <param name="encodeFormat">Encoding Format</param>
+    /// <param name="ct"></param>
     /// <returns>File of written encoded image</returns>
-    Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
-    Task<bool> IsImage(string filePath);
+    Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat, CancellationToken ct = default);
+
+    /// <summary>
+    /// Performs I/O to determine if the file is a valid Image
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<bool> IsImage(string filePath, CancellationToken ct = default);
     void UpdateColorScape(IHasCoverImage entity);
 }

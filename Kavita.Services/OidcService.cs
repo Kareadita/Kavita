@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Flurl.Http;
@@ -37,7 +38,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Kavita.Services;
 
 /// <summary>
-/// The ConfigurationManager will refresh the configuration periodically to ensure the data stays up to date
+/// The ConfigurationManager will refresh the configuration periodically to ensure the data stays up to date.
 /// We can store the same one indefinitely as the authority does not change unless Kavita is restarted
 /// </summary>
 /// <remarks>The ConfigurationManager has its own lock, it loads data thread safe</remarks>
@@ -61,9 +62,10 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
     private static readonly ConcurrentDictionary<string, bool> RefreshInProgress = new();
     private static readonly ConcurrentDictionary<string, DateTimeOffset> LastFailedRefresh = new();
 
-    public async Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal)
+    public async Task<AppUser?> LoginOrCreate(HttpRequest request, ClaimsPrincipal principal,
+        CancellationToken ct = default)
     {
-        var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+        var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).OidcConfig;
 
         var oidcId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(oidcId))
@@ -71,7 +73,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             throw new KavitaException("errors.oidc.missing-external-id");
         }
 
-        var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
+        var user = await unitOfWork.UserRepository.GetByOidcId(oidcId, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams, ct);
         if (user != null)
         {
             await SyncUserSettings(request, settings, principal, user);
@@ -91,7 +93,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         }
 
 
-        user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams);
+        user = await unitOfWork.UserRepository.GetUserByEmailAsync(email, AppUserIncludes.UserPreferences | AppUserIncludes.SideNavStreams, ct);
         if (user != null)
         {
             // Don't allow taking over accounts
@@ -103,7 +105,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
             logger.LogDebug("User {UserName} has matched on email to {OidcId}", user.Id, oidcId);
             user.OidcId = oidcId;
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
 
             await SyncUserSettings(request, settings, principal, user);
 
@@ -113,11 +115,11 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         return await CreateNewAccount(request, principal, settings, oidcId);
     }
 
-    public async Task<AppUser?> RefreshCookieToken(CookieValidatePrincipalContext ctx)
+    public async Task<AppUser?> RefreshCookieToken(CookieValidatePrincipalContext ctx, CancellationToken ct = default)
     {
         if (ctx.Principal == null) return null;
 
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(ctx.Principal.GetUserId()) ?? throw new UnauthorizedAccessException();
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(ctx.Principal.GetUserId(), ct: ct) ?? throw new UnauthorizedAccessException();
         var key = ctx.Principal.GetUsername();
 
         var refreshToken = ctx.Properties.GetTokenValue(RefreshToken);
@@ -137,7 +139,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
         try
         {
-            var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
+            var settings = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).OidcConfig;
 
             var tokenResponse = await RefreshTokenAsync(settings, refreshToken);
             if (tokenResponse == null || !string.IsNullOrEmpty(tokenResponse.Error))
@@ -171,19 +173,19 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         return user;
     }
 
-    public async Task ClearOidcIds()
+    public async Task ClearOidcIds(CancellationToken ct = default)
     {
-        var users = await unitOfWork.UserRepository.GetAllUsersAsync();
+        var users = await unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
         foreach (var user in users)
         {
             user.OidcId = null;
         }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
     /// <summary>
-    /// Tries to construct a new account from the OIDC Principal, may fail if required conditions aren't met
+    /// Tries to construct a new account from the OIDC Principal may fail if required conditions aren't met
     /// </summary>
     /// <param name="request"></param>
     /// <param name="principal"></param>
@@ -400,7 +402,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         // Will just need to be documented on the wiki.
         if (!string.IsNullOrEmpty(picture) && string.IsNullOrEmpty(user.CoverImage))
         {
-            // Run in background to not block http thread, pass id to Hangfire doesn't kill itself
+            // Run in the background to not block http thread, pass id to Hangfire doesn't kill itself
             BackgroundJob.Enqueue(() => coverDbService.SetUserCoverByUrl(user.Id, picture, false));
         }
     }

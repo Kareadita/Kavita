@@ -86,9 +86,9 @@ public class ClientDeviceService(IDataContext context, IUnitOfWork unitOfWork ,I
         return await RegisterNewDeviceAsync(userId, clientInfo, uiFingerprint, fingerprint);
     }
 
-    public async Task<bool> RenameDeviceAsync(int userId, int deviceId, string newName)
+    public async Task<bool> RenameDeviceAsync(int userId, int deviceId, string newName, CancellationToken ct = default)
     {
-        var device = await unitOfWork.ClientDeviceRepository.GetClientDeviceById(deviceId, userId);
+        var device = await unitOfWork.ClientDeviceRepository.GetClientDeviceById(deviceId, userId, ct);
 
         if (device == null)
         {
@@ -96,7 +96,7 @@ public class ClientDeviceService(IDataContext context, IUnitOfWork unitOfWork ,I
         }
 
         device.FriendlyName = newName;
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         logger.LogInformation("User {UserId} renamed device {DeviceId} to '{Name}'",
             userId, deviceId, newName);
@@ -104,9 +104,9 @@ public class ClientDeviceService(IDataContext context, IUnitOfWork unitOfWork ,I
         return true;
     }
 
-    public async Task<bool> DeleteDeviceAsync(int userId, int deviceId)
+    public async Task<bool> DeleteDeviceAsync(int userId, int deviceId, CancellationToken ct = default)
     {
-        var device = await unitOfWork.ClientDeviceRepository.GetClientDeviceById(deviceId, userId);
+        var device = await unitOfWork.ClientDeviceRepository.GetClientDeviceById(deviceId, userId, ct);
 
         if (device == null)
         {
@@ -114,7 +114,7 @@ public class ClientDeviceService(IDataContext context, IUnitOfWork unitOfWork ,I
         }
 
         device.IsActive = false;
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         logger.LogInformation("User {UserId} removed device {DeviceId}", userId, deviceId);
 
@@ -122,15 +122,15 @@ public class ClientDeviceService(IDataContext context, IUnitOfWork unitOfWork ,I
     }
 
 
-    public async Task UpdateFriendlyNameAsync(int userId, UpdateClientDeviceNameDto dto)
+    public async Task UpdateFriendlyNameAsync(int userId, UpdateClientDeviceNameDto dto, CancellationToken ct = default)
     {
-        var device = await unitOfWork.ClientDeviceRepository.GetClientDeviceById(dto.DeviceId, userId)
+        var device = await unitOfWork.ClientDeviceRepository.GetClientDeviceById(dto.DeviceId, userId, ct)
                      ?? throw new KavitaException("client-device-doesnt-exist");
 
         if (!string.IsNullOrWhiteSpace(dto.Name))
         {
             device.FriendlyName = dto.Name;
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
         }
     }
 

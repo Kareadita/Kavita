@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.Entities;
 
@@ -5,10 +6,8 @@ namespace Kavita.API.Services;
 
 public interface IFontService
 {
-    public static readonly string DefaultFont = "Default";
-
-    Task<EpubFont> CreateFontFromFileAsync(string path);
-    Task Delete(int fontId);
-    Task<EpubFont> CreateFontFromUrl(string url);
-    Task<bool> IsFontInUse(int fontId);
+    Task<EpubFont> CreateFontFromFileAsync(string path, CancellationToken ct = default);
+    Task Delete(int fontId, CancellationToken ct = default);
+    Task<EpubFont> CreateFontFromUrl(string url, CancellationToken ct = default);
+    Task<bool> IsFontInUse(int fontId, CancellationToken ct = default);
 }

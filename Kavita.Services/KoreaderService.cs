@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
@@ -25,19 +26,20 @@ public class KoreaderService(
     /// </summary>
     /// <param name="koreaderBookDto"></param>
     /// <param name="userId"></param>
-    public async Task SaveProgress(KoreaderBookDto koreaderBookDto, int userId)
+    /// <param name="ct"></param>
+    public async Task SaveProgress(KoreaderBookDto koreaderBookDto, int userId, CancellationToken ct = default)
     {
         logger.LogDebug("Saving Koreader progress for User ({UserId}): {KoreaderProgress}", userId, koreaderBookDto.progress.Sanitize());
-        var file = await unitOfWork.MangaFileRepository.GetByKoreaderHash(koreaderBookDto.document);
+        var file = await unitOfWork.MangaFileRepository.GetByKoreaderHash(koreaderBookDto.document, ct);
         if (file == null) throw new KavitaException(await localizationService.Translate(userId, "file-missing"));
 
-        var userProgressDto = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
+        var userProgressDto = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId, ct);
         if (userProgressDto == null)
         {
-            var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(file.ChapterId, userId);
+            var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(file.ChapterId, userId, ct);
             if (chapterDto == null) throw new KavitaException(await localizationService.Translate(userId, "chapter-doesnt-exist"));
 
-            var volumeDto = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapterDto.VolumeId);
+            var volumeDto = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapterDto.VolumeId, ct: ct);
             if (volumeDto == null) throw new KavitaException(await localizationService.Translate(userId, "volume-doesnt-exist"));
 
             var seriesDto = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(volumeDto.SeriesId, userId);
@@ -65,19 +67,20 @@ public class KoreaderService(
     }
 
     /// <summary>
-    /// Returns a Koreader Dto representing current book and the progress within
+    /// Returns a Koreader Dto representing the current book and the progress within
     /// </summary>
     /// <param name="bookHash"></param>
     /// <param name="userId"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<KoreaderBookDto> GetProgress(string bookHash, int userId)
+    public async Task<KoreaderBookDto> GetProgress(string bookHash, int userId, CancellationToken ct = default)
     {
-        var settingsDto = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var settingsDto = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
 
-        var file = await unitOfWork.MangaFileRepository.GetByKoreaderHash(bookHash);
+        var file = await unitOfWork.MangaFileRepository.GetByKoreaderHash(bookHash, ct);
         if (file == null) throw new KavitaException(await localizationService.Translate(userId, "file-missing"));
 
-        var progressDto = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId);
+        var progressDto = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId, ct);
 
         // Non-epubs use the pageNum as the progress. KOReader is 1-index based
         var koreaderProgress = $"{progressDto?.PageNum + 1 ?? 0}";

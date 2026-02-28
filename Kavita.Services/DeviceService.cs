@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
@@ -24,7 +25,7 @@ public class DeviceService(
     IReadingProfileService readingProfileService)
     : IDeviceService
 {
-    public async Task<Device?> Create(CreateEmailDeviceDto dto, AppUser userWithDevices)
+    public async Task<Device?> Create(CreateEmailDeviceDto dto, AppUser userWithDevices, CancellationToken ct = default)
     {
         try
         {
@@ -42,18 +43,18 @@ public class DeviceService(
             unitOfWork.UserRepository.Update(userWithDevices);
 
             if (!unitOfWork.HasChanges()) return existingDevice;
-            if (await unitOfWork.CommitAsync()) return existingDevice;
+            if (await unitOfWork.CommitAsync(ct)) return existingDevice;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an error when creating your device");
-            await unitOfWork.RollbackAsync();
+            await unitOfWork.RollbackAsync(ct);
         }
 
         return null;
     }
 
-    public async Task<Device?> Update(UpdateEmailDeviceDto dto, AppUser userWithDevices)
+    public async Task<Device?> Update(UpdateEmailDeviceDto dto, AppUser userWithDevices, CancellationToken ct = default)
     {
         try
         {
@@ -65,18 +66,18 @@ public class DeviceService(
             existingDevice.EmailAddress = dto.EmailAddress;
 
             if (!unitOfWork.HasChanges()) return existingDevice;
-            if (await unitOfWork.CommitAsync()) return existingDevice;
+            if (await unitOfWork.CommitAsync(ct)) return existingDevice;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an error when updating your device");
-            await unitOfWork.RollbackAsync();
+            await unitOfWork.RollbackAsync(ct);
         }
 
         return null;
     }
 
-    public async Task<bool> Delete(AppUser userWithDevices, int deviceId)
+    public async Task<bool> Delete(AppUser userWithDevices, int deviceId, CancellationToken ct = default)
     {
         try
         {
@@ -86,7 +87,7 @@ public class DeviceService(
             await readingProfileService.RemoveDeviceLinks(userWithDevices.Id, deviceId);
 
             if (!unitOfWork.HasChanges()) return true;
-            if (await unitOfWork.CommitAsync()) return true;
+            if (await unitOfWork.CommitAsync(ct)) return true;
         }
         catch (Exception ex)
         {
@@ -96,16 +97,16 @@ public class DeviceService(
         return false;
     }
 
-    public async Task<bool> SendTo(IReadOnlyList<int> chapterIds, int deviceId)
+    public async Task<bool> SendTo(IReadOnlyList<int> chapterIds, int deviceId, CancellationToken ct = default)
     {
-        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         if (!settings.IsEmailSetupForSendToDevice())
             throw new KavitaException("send-to-kavita-email");
 
-        var device = await unitOfWork.DeviceRepository.GetDeviceById(deviceId);
+        var device = await unitOfWork.DeviceRepository.GetDeviceById(deviceId, ct);
         if (device == null) throw new KavitaException("device-doesnt-exist");
 
-        var files = await unitOfWork.ChapterRepository.GetFilesForChaptersAsync(chapterIds);
+        var files = await unitOfWork.ChapterRepository.GetFilesForChaptersAsync(chapterIds, ct);
         if (files.Any(f => f.Format is not (MangaFormat.Epub or MangaFormat.Pdf)) && device.Platform == EmailDevicePlatform.Kindle)
             throw new KavitaException("send-to-permission");
 
@@ -118,7 +119,7 @@ public class DeviceService(
         {
             device.UpdateLastUsed();
             unitOfWork.DeviceRepository.Update(device);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
         }
         catch (Exception ex)
         {

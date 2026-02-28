@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.Entities.Person;
 
@@ -11,9 +12,10 @@ public interface IPersonService
     /// </summary>
     /// <param name="src">Merged person</param>
     /// <param name="dst">Remaining person</param>
+    /// <param name="ct"></param>
     /// <remarks>The entities passed as arguments **must** include all relations</remarks>
     /// <returns></returns>
-    Task MergePeopleAsync(Person src, Person dst);
+    Task MergePeopleAsync(Person src, Person dst, CancellationToken ct = default);
 
     /// <summary>
     /// Adds the alias to the person, requires that the aliases are not shared with anyone else
@@ -21,6 +23,7 @@ public interface IPersonService
     /// <remarks>This method does NOT commit changes</remarks>
     /// <param name="person"></param>
     /// <param name="aliases"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<bool> UpdatePersonAliasesAsync(Person person, IList<string> aliases);
+    Task<bool> UpdatePersonAliasesAsync(Person person, IList<string> aliases, CancellationToken ct = default);
 }

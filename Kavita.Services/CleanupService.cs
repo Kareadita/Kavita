@@ -43,7 +43,7 @@ public class CleanupService(
         {
             logger.LogInformation("Cleanup put on hold as a media conversion in progress");
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ErrorEvent("Cleanup", "Cleanup put on hold as a media conversion in progress"));
+                MessageFactory.ErrorEvent("Cleanup", "Cleanup put on hold as a media conversion in progress"), ct: ct);
             return;
         }
 
@@ -114,7 +114,7 @@ public class CleanupService(
     /// </summary>
     public async Task DeleteChapterCoverImages(CancellationToken ct = default)
     {
-        var images = await unitOfWork.ChapterRepository.GetAllCoverImagesAsync();
+        var images = await unitOfWork.ChapterRepository.GetAllCoverImagesAsync(ct);
         var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
         directoryService.DeleteFiles(files.Where(file => !images.Contains(directoryService.FileSystem.Path.GetFileName(file))));
     }
@@ -124,7 +124,7 @@ public class CleanupService(
     /// </summary>
     public async Task DeleteTagCoverImages(CancellationToken ct = default)
     {
-        var images = await unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
+        var images = await unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync(ct);
         var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
         directoryService.DeleteFiles(files.Where(file => !images.Contains(directoryService.FileSystem.Path.GetFileName(file))));
     }
@@ -134,7 +134,7 @@ public class CleanupService(
     /// </summary>
     public async Task DeleteReadingListCoverImages(CancellationToken ct = default)
     {
-        var images = await unitOfWork.ReadingListRepository.GetAllCoverImagesAsync();
+        var images = await unitOfWork.ReadingListRepository.GetAllCoverImagesAsync(ct);
         var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.ReadingListCoverImageRegex);
         directoryService.DeleteFiles(files.Where(file => !images.Contains(directoryService.FileSystem.Path.GetFileName(file))));
     }
@@ -144,7 +144,7 @@ public class CleanupService(
     /// </summary>
     public async Task DeletePersonCoverImages(CancellationToken ct = default)
     {
-        var images = await unitOfWork.PersonRepository.GetAllCoverImagesAsync();
+        var images = await unitOfWork.PersonRepository.GetAllCoverImagesAsync(ct);
         var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.PersonCoverImageRegex);
         directoryService.DeleteFiles(files.Where(file => !images.Contains(directoryService.FileSystem.Path.GetFileName(file))));
     }
@@ -195,10 +195,10 @@ public class CleanupService(
     /// </summary>
     public async Task CleanupBackups(CancellationToken ct = default)
     {
-        var dayThreshold = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).TotalBackups;
+        var dayThreshold = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).TotalBackups;
         logger.LogInformation("Beginning cleanup of Database backups at {Time}", DateTime.Now);
         var backupDirectory =
-            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Value;
+            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory, ct)).Value;
         if (!directoryService.Exists(backupDirectory)) return;
 
         var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
@@ -227,7 +227,7 @@ public class CleanupService(
     {
         logger.LogInformation("Consolidating Progress Events");
         // AppUserProgress
-        var allProgress = await unitOfWork.AppUserProgressRepository.GetAllProgress();
+        var allProgress = await unitOfWork.AppUserProgressRepository.GetAllProgress(ct);
 
         // Group by the unique identifiers that would make a progress entry unique
         var duplicateGroups = allProgress
@@ -273,7 +273,7 @@ public class CleanupService(
         }
 
         // Save changes
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
     /// <summary>
@@ -284,7 +284,7 @@ public class CleanupService(
         try
         {
             List<string> errorStrings = ["This archive cannot be read or not supported", "File format not supported"];
-            var mediaErrors = await unitOfWork.MediaErrorRepository.GetAllErrorsAsync(errorStrings);
+            var mediaErrors = await unitOfWork.MediaErrorRepository.GetAllErrorsAsync(errorStrings, ct);
             logger.LogInformation("Beginning consolidation of {Count} Media Errors", mediaErrors.Count);
 
             var pathToErrorMap = mediaErrors
@@ -300,7 +300,7 @@ public class CleanupService(
             var validFiles = await unitOfWork.DataContext.MangaFile
                 .Where(f => normalizedPaths.Contains(f.FilePath) && f.Pages > 0)
                 .Select(f => f.FilePath)
-                .ToListAsync();
+                .ToListAsync(cancellationToken: ct);
 
             var removalCount = 0;
             foreach (var validFilePath in validFiles)
@@ -311,7 +311,7 @@ public class CleanupService(
                 removalCount++;
             }
 
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
 
             logger.LogInformation("Finished consolidation of {Count} Media Errors, Removed: {RemovalCount}",
                 mediaErrors.Count, removalCount);
@@ -325,7 +325,7 @@ public class CleanupService(
     public async Task CleanupLogs(CancellationToken ct = default)
     {
         logger.LogInformation("Performing cleanup of logs directory");
-        var dayThreshold = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).TotalLogs;
+        var dayThreshold = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).TotalLogs;
         var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
         var allLogs = directoryService.GetFiles(directoryService.LogDirectory).ToList();
         var expiredLogs = allLogs.Select(filename => directoryService.FileSystem.FileInfo.New(filename))
@@ -369,7 +369,7 @@ public class CleanupService(
     public async Task EnsureChapterProgressIsCapped(CancellationToken ct = default)
     {
         logger.LogInformation("Cleaning up any progress rows that exceed chapter page count");
-        await unitOfWork.AppUserProgressRepository.UpdateAllProgressThatAreMoreThanChapterPages();
+        await unitOfWork.AppUserProgressRepository.UpdateAllProgressThatAreMoreThanChapterPages(ct);
         logger.LogInformation("Cleaning up any progress rows that exceed chapter page count - complete");
     }
 
@@ -380,7 +380,7 @@ public class CleanupService(
     {
         logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list");
 
-        var libraryIds = (await unitOfWork.LibraryRepository.GetLibrariesAsync()).Select(l => l.Id).ToList();
+        var libraryIds = (await unitOfWork.LibraryRepository.GetLibrariesAsync(ct: ct)).Select(l => l.Id).ToList();
         var filter = new FilterDto()
         {
             PublicationStatus = new List<PublicationStatus>()
@@ -396,7 +396,7 @@ public class CleanupService(
                 NotRead = false
             }
         };
-        foreach (var user in await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead))
+        foreach (var user in await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead, ct: ct))
         {
             var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, user.Id, new UserParams(), filter);
             var seriesIds = series.Select(s => s.Id).ToList();
@@ -409,7 +409,7 @@ public class CleanupService(
 
         if (unitOfWork.HasChanges())
         {
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
         }
 
         logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list, completed");

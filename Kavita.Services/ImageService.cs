@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Services;
 using Kavita.Models.DTOs;
@@ -228,7 +229,8 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         return filename;
     }
 
-    public Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat)
+    public Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat,
+        CancellationToken ct = default)
     {
         var file = directoryService.FileSystem.FileInfo.New(filePath);
         var fileName = file.Name.Replace(file.Extension, string.Empty);
@@ -239,16 +241,11 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         return Task.FromResult(outputFile);
     }
 
-    /// <summary>
-    /// Performs I/O to determine if the file is a valid Image
-    /// </summary>
-    /// <param name="filePath"></param>
-    /// <returns></returns>
-    public async Task<bool> IsImage(string filePath)
+    public async Task<bool> IsImage(string filePath, CancellationToken ct = default)
     {
         try
         {
-            var info = await SixLabors.ImageSharp.Image.IdentifyAsync(filePath);
+            var info = await SixLabors.ImageSharp.Image.IdentifyAsync(filePath, ct);
             if (info == null) return false;
 
             return true;

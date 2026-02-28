@@ -7,6 +7,7 @@ using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.Common.Extensions;
+using Kavita.Models;
 using Kavita.Models.DTOs.Font;
 using Kavita.Models.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ public class EpubFontRepository(DataContext context, IMapper mapper) : IEpubFont
     public async Task<IList<EpubFontDto>> GetFontDtosAsync(CancellationToken ct = default)
     {
         return await context.EpubFont
-            .OrderBy(s => s.Name == IFontService.DefaultFont ? -1 : 0)
+            .OrderBy(s => s.Name == Defaults.DefaultFont ? -1 : 0)
             .ThenBy(s => s)
             .ProjectTo<EpubFontDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);

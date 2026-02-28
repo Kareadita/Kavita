@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
@@ -60,7 +61,8 @@ public interface ISeriesRepository
     void Update(SeriesMetadata seriesMetadata);
     void Remove(Series series);
     void Remove(IEnumerable<Series> series);
-    Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format);
+    Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format, CancellationToken ct = default);
+
     /// <summary>
     /// Adds user information like progress, ratings, etc
     /// </summary>
@@ -68,8 +70,10 @@ public interface ISeriesRepository
     /// <param name="userId"></param>
     /// <param name="userParams">Pagination info</param>
     /// <param name="filter">Filtering/Sorting to apply</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter);
+    Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter, CancellationToken ct = default);
+
     /// <summary>
     /// Does not add user information like progress, ratings, etc.
     /// </summary>
@@ -78,62 +82,63 @@ public interface ISeriesRepository
     /// <param name="libraryIds"></param>
     /// <param name="searchQuery"></param>
     /// <param name="includeChapterAndFiles">Includes Files in the Search</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery, bool includeChapterAndFiles = true);
-    Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None);
-    Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId);
-    Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
-    Task<IList<SeriesDto>> GetSeriesDtoByIdsAsync(IEnumerable<int> seriesIds, AppUser user);
-    Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds, bool fullSeries = true);
-    Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
-    Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
-    Task<string?> GetSeriesCoverImageAsync(int seriesId);
-    Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto? filter);
-    Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);
-    Task<PagedList<SeriesDto>> GetRecentlyAddedV2(int userId, UserParams userParams, FilterV2Dto filter);
-    Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId);
-    Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
-    Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
-    Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId);
-    Task<IList<string>> GetAllCoverImagesAsync();
-    Task<IEnumerable<string>> GetLockedCoverImagesAsync();
-    Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams);
-    Task<Series?> GetFullSeriesForSeriesIdAsync(int seriesId);
-    Task<Chunk> GetChunkInfo(int libraryId = 0);
-    Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams? userParams);
-    Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
-    Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind);
-    Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams);
-    Task<PagedList<SeriesDto>> GetQuickCatchupReads(int userId, int libraryId, UserParams userParams);
-    Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams);
-    Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams);
-    Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams);
-    Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId);
-    Task<SeriesDto?> GetSeriesForChapter(int chapterId, int userId);
-    Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
-    Task<PagedList<SeriesDto>> GetWantToReadForUserV2Async(int userId, UserParams userParams, FilterV2Dto filter);
-    Task<IList<Series>> GetWantToReadForUserAsync(int userId);
-    Task<bool> IsSeriesInWantToRead(int userId, int seriesId);
-    Task<Series?> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
-    Task<Series?> GetSeriesThatContainsLowestFolderPath(string path, SeriesIncludes includes = SeriesIncludes.None);
+    Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery, bool includeChapterAndFiles = true, CancellationToken ct = default);
+    Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
+    Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId, CancellationToken ct = default);
+    Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata, CancellationToken ct = default);
+    Task<IList<SeriesDto>> GetSeriesDtoByIdsAsync(IEnumerable<int> seriesIds, AppUser user, CancellationToken ct = default);
+    Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds, bool fullSeries = true, CancellationToken ct = default);
+    Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds, CancellationToken ct = default);
+    Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds, CancellationToken ct = default);
+    Task<string?> GetSeriesCoverImageAsync(int seriesId, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto? filter, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetRecentlyAddedV2(int userId, UserParams userParams, FilterV2Dto filter, CancellationToken ct = default);
+    Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams, CancellationToken ct = default);
+    Task<IList<MangaFile>> GetFilesForSeries(int seriesId, CancellationToken ct = default);
+    Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId, CancellationToken ct = default);
+    Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
+    Task<IEnumerable<string>> GetLockedCoverImagesAsync(CancellationToken ct = default);
+    Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams, CancellationToken ct = default);
+    Task<Series?> GetFullSeriesForSeriesIdAsync(int seriesId, CancellationToken ct = default);
+    Task<Chunk> GetChunkInfo(int libraryId = 0, CancellationToken ct = default);
+    Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams? userParams, CancellationToken ct = default);
+    Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId, CancellationToken ct = default);
+    Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetQuickCatchupReads(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);
+    Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId, CancellationToken ct = default);
+    Task<SeriesDto?> GetSeriesForChapter(int chapterId, int userId, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetWantToReadForUserV2Async(int userId, UserParams userParams, FilterV2Dto filter, CancellationToken ct = default);
+    Task<IList<Series>> GetWantToReadForUserAsync(int userId, CancellationToken ct = default);
+    Task<bool> IsSeriesInWantToRead(int userId, int seriesId, CancellationToken ct = default);
+    Task<Series?> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
+    Task<Series?> GetSeriesThatContainsLowestFolderPath(string path, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
     Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
-        int userId, SeriesIncludes includes = SeriesIncludes.None);
-    Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
+        int userId, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
+    Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true, CancellationToken ct = default);
     Task<Series?> GetSeriesByAnyName(IList<string> names, IList<MangaFormat> formats,
-        int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None);
-    Task<Series?> GetSeriesByAnyName(string seriesName, string localizedName, IList<MangaFormat> formats, int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None);
+        int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
+    Task<Series?> GetSeriesByAnyName(string seriesName, string localizedName, IList<MangaFormat> formats, int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
     public Task<IList<Series>> GetAllSeriesByAnyName(string seriesName, string localizedName, int libraryId,
-        MangaFormat format);
-    Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
-    Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
-    Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
-    Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
-    Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
-    Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIds(IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl);
-    Task<int> GetAverageUserRating(int seriesId, int userId);
-    Task RemoveFromOnDeck(int seriesId, int userId);
-    Task ClearOnDeckRemoval(int seriesId, int userId);
-    Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None);
-    Task<PlusSeriesRequestDto?> GetPlusSeriesDto(int seriesId);
-    Task<Series?> MatchSeries(ExternalSeriesDetailDto externalSeries);
+        MangaFormat format, CancellationToken ct = default);
+    Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId, CancellationToken ct = default);
+    Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId, CancellationToken ct = default);
+    Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds, CancellationToken ct = default);
+    Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds, CancellationToken ct = default);
+    Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true, CancellationToken ct = default);
+    Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIds(IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl, CancellationToken ct = default);
+    Task<int> GetAverageUserRating(int seriesId, int userId, CancellationToken ct = default);
+    Task RemoveFromOnDeck(int seriesId, int userId, CancellationToken ct = default);
+    Task ClearOnDeckRemoval(int seriesId, int userId, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None, CancellationToken ct = default);
+    Task<PlusSeriesRequestDto?> GetPlusSeriesDto(int seriesId, CancellationToken ct = default);
+    Task<Series?> MatchSeries(ExternalSeriesDetailDto externalSeries, CancellationToken ct = default);
 }

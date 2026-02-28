@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
@@ -12,7 +13,7 @@ namespace Kavita.Services;
 public class PersonService(IUnitOfWork unitOfWork): IPersonService
 {
 
-    public async Task MergePeopleAsync(Person src, Person dst)
+    public async Task MergePeopleAsync(Person src, Person dst, CancellationToken ct = default)
     {
         if (dst.Id == src.Id) return;
 
@@ -58,7 +59,7 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
 
         unitOfWork.PersonRepository.Remove(src);
         unitOfWork.PersonRepository.Update(dst);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
     private static void MergeChapterPeople(Person dst, Person src)
@@ -102,7 +103,7 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
         }
     }
 
-    public async Task<bool> UpdatePersonAliasesAsync(Person person, IList<string> aliases)
+    public async Task<bool> UpdatePersonAliasesAsync(Person person, IList<string> aliases, CancellationToken ct = default)
     {
         var normalizedAliases = aliases
             .Select(a => a.ToNormalized())
@@ -115,7 +116,7 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
             return true;
         }
 
-        var others = await unitOfWork.PersonRepository.GetPeopleByNames(normalizedAliases);
+        var others = await unitOfWork.PersonRepository.GetPeopleByNames(normalizedAliases, ct: ct);
         others = others.Where(p => p.Id != person.Id).ToList();
 
         if (others.Count != 0) return false;

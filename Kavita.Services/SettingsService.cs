@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Hangfire;
@@ -42,10 +43,11 @@ public class SettingsService(
     /// Update the metadata settings for Kavita+ Metadata feature
     /// </summary>
     /// <param name="dto"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<MetadataSettingsDto> UpdateMetadataSettings(MetadataSettingsDto dto)
+    public async Task<MetadataSettingsDto> UpdateMetadataSettings(MetadataSettingsDto dto, CancellationToken ct = default)
     {
-        var existingMetadataSetting = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        var existingMetadataSetting = await unitOfWork.SettingsRepository.GetMetadataSettings(ct);
         existingMetadataSetting.Enabled = dto.Enabled;
         existingMetadataSetting.EnableExtendedMetadataProcessing = dto.EnableExtendedMetadataProcessing;
         existingMetadataSetting.EnableSummary = dto.EnableSummary;
@@ -96,13 +98,14 @@ public class SettingsService(
         }
 
         // Save changes
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         // Return updated settings
-        return await unitOfWork.SettingsRepository.GetMetadataSettingDto();
+        return await unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
     }
 
-    public async Task<FieldMappingsImportResultDto> ImportFieldMappings(FieldMappingsDto dto, ImportSettingsDto settings)
+    public async Task<FieldMappingsImportResultDto> ImportFieldMappings(FieldMappingsDto dto,
+        ImportSettingsDto settings, CancellationToken ct = default)
     {
         if (dto.AgeRatingMappings.Keys.Distinct().Count() != dto.AgeRatingMappings.Count)
         {
@@ -250,12 +253,13 @@ public class SettingsService(
     /// Update Server Settings
     /// </summary>
     /// <param name="updateSettingsDto"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
     /// <exception cref="KavitaException"></exception>
-    public async Task<ServerSettingDto> UpdateSettings(ServerSettingDto updateSettingsDto)
+    public async Task<ServerSettingDto> UpdateSettings(ServerSettingDto updateSettingsDto, CancellationToken ct = default)
     {
         // We do not allow CacheDirectory changes, so we will ignore.
-        var currentSettings = await unitOfWork.SettingsRepository.GetSettingsAsync();
+        var currentSettings = await unitOfWork.SettingsRepository.GetSettingsAsync(ct);
         var updateBookmarks = false;
         var originalBookmarkDirectory = directoryService.BookmarkDirectory;
 
@@ -449,7 +453,7 @@ public class SettingsService(
 
         try
         {
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
 
             if (!updateSettingsDto.AllowStatCollection)
             {
@@ -493,7 +497,7 @@ public class SettingsService(
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an exception when updating server settings");
-            await unitOfWork.RollbackAsync();
+            await unitOfWork.RollbackAsync(ct);
             throw new KavitaException("generic-error");
         }
 
@@ -503,7 +507,7 @@ public class SettingsService(
         return updateSettingsDto;
     }
 
-    public async Task<bool> IsValidAuthority(string authority)
+    public async Task<bool> IsValidAuthority(string authority, CancellationToken ct = default)
     {
         if (string.IsNullOrEmpty(authority))
         {
@@ -520,7 +524,7 @@ public class SettingsService(
             var hasTrailingSlash = authority.EndsWith('/');
             var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
 
-            var json = await url.GetStringAsync();
+            var json = await url.GetStringAsync(cancellationToken: ct);
             var config = OpenIdConnectConfiguration.Create(json);
             return config.Issuer == authority;
         }

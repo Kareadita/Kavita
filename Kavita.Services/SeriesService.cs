@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -81,13 +82,15 @@ public class SeriesService(
     /// Updates the Series Metadata.
     /// </summary>
     /// <param name="updateSeriesMetadataDto"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
+    public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto,
+        CancellationToken ct = default)
     {
         try
         {
             var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
-            var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
+            var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata, ct);
             if (series == null) return false;
 
             series.Metadata ??= new SeriesMetadataBuilder()
@@ -142,7 +145,7 @@ public class SeriesService(
             if (updateSeriesMetadataDto.SeriesMetadata?.Genres != null &&
                 updateSeriesMetadataDto.SeriesMetadata.Genres.Count != 0)
             {
-                var allGenres = (await unitOfWork.GenreRepository.GetAllGenresByNamesAsync(updateSeriesMetadataDto.SeriesMetadata.Genres.Select(t => Parser.Normalize(t.Title)))).ToList();
+                var allGenres = (await unitOfWork.GenreRepository.GetAllGenresByNamesAsync(updateSeriesMetadataDto.SeriesMetadata.Genres.Select(t => Parser.Normalize(t.Title)), ct)).ToList();
                 series.Metadata.Genres ??= [];
                 GenreHelper.UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata?.Genres, series, allGenres, genre =>
                 {
@@ -158,7 +161,7 @@ public class SeriesService(
             if (updateSeriesMetadataDto.SeriesMetadata?.Tags is {Count: > 0})
             {
                 var allTags = (await unitOfWork.TagRepository
-                    .GetAllTagsByNameAsync(updateSeriesMetadataDto.SeriesMetadata.Tags.Select(t => Parser.Normalize(t.Title))))
+                    .GetAllTagsByNameAsync(updateSeriesMetadataDto.SeriesMetadata.Tags.Select(t => Parser.Normalize(t.Title)), ct))
                     .ToList();
                 series.Metadata.Tags ??= [];
                 TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Tags, series, allTags, tag =>
@@ -182,7 +185,7 @@ public class SeriesService(
             {
                 if (!series.Metadata.AgeRatingLocked)
                 {
-                    var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettingDto();
+                    var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
                     var allTags = series.Metadata.Tags.Select(t => t.Title).Concat(series.Metadata.Genres.Select(g => g.Title));
 
                     if (metadataSettings.EnableExtendedMetadataProcessing)
@@ -308,7 +311,7 @@ public class SeriesService(
             }
 
             unitOfWork.SeriesRepository.Update(series.Metadata);
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
 
             // Trigger code to clean up tags, collections, people, etc
             try
@@ -325,7 +328,7 @@ public class SeriesService(
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an exception when updating metadata");
-            await unitOfWork.RollbackAsync();
+            await unitOfWork.RollbackAsync(ct);
         }
 
         return false;
@@ -339,7 +342,7 @@ public class SeriesService(
     /// <param name="role"></param>
     public static async Task HandlePeopleUpdateAsync(SeriesMetadata metadata, ICollection<PersonDto> peopleDtos, PersonRole role, IUnitOfWork unitOfWork)
     {
-        // TODO: Cleanup this code so we aren't using UnitOfWork like this
+        // default: Cleanup this code so we aren't using UnitOfWork like this
 
         // Normalize all names from the DTOs
         var normalizedNames = peopleDtos
@@ -363,7 +366,7 @@ public class SeriesService(
             // Check if the person exists in the dictionary
             if (existingPeopleDictionary.TryGetValue(normalizedPersonName, out var p))
             {
-                // TODO: Should I add more controls here to map back?
+                // default: Should I add more controls here to map back?
                 if (personDto.AniListId > 0 && p.AniListId <= 0 && p.AniListId != personDto.AniListId)
                 {
                     p.AniListId = personDto.AniListId;
@@ -434,12 +437,12 @@ public class SeriesService(
     }
 
 
-    public async Task<bool> DeleteMultipleSeries(IList<int> seriesIds)
+    public async Task<bool> DeleteMultipleSeries(IList<int> seriesIds, CancellationToken ct = default)
     {
         try
         {
             var chapterMappings =
-                await unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync([.. seriesIds]);
+                await unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync([.. seriesIds], ct);
 
             var allChapterIds = new List<int>();
             foreach (var mapping in chapterMappings)
@@ -448,27 +451,27 @@ public class SeriesService(
             }
 
             // NOTE: This isn't getting all the people and whatnot currently due to the lack of includes
-            var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds);
+            var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds, ct: ct);
             unitOfWork.SeriesRepository.Remove(series);
 
             var libraryIds = series.Select(s => s.LibraryId);
-            var libraries = await unitOfWork.LibraryRepository.GetLibraryForIdsAsync(libraryIds);
+            var libraries = await unitOfWork.LibraryRepository.GetLibraryForIdsAsync(libraryIds, ct: ct);
             foreach (var library in libraries)
             {
                 library.UpdateLastModified();
                 unitOfWork.LibraryRepository.Update(library);
             }
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
 
 
             foreach (var s in series)
             {
                 await eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
-                    MessageFactory.SeriesRemovedEvent(s.Id, s.Name, s.LibraryId), false);
+                    MessageFactory.SeriesRemovedEvent(s.Id, s.Name, s.LibraryId), false, ct);
             }
 
-            await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
-            await unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries();
+            await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters(ct);
+            await unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries(ct);
             taskScheduler.CleanupChapters([.. allChapterIds]);
 
             return true;
@@ -485,27 +488,28 @@ public class SeriesService(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="userId"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId)
+    public async Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId, CancellationToken ct = default)
     {
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId, ct);
         if (series == null) throw new KavitaException(await localizationService.Translate(userId, "series-doesnt-exist"));
 
-        var libraryIds = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
+        var libraryIds = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId, ct: ct);
         if (!libraryIds.Contains(series.LibraryId))
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
 
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         if (user!.AgeRestriction != AgeRating.NotApplicable)
         {
-            var seriesMetadata = await unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
+            var seriesMetadata = await unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId, ct);
             if (seriesMetadata!.AgeRating > user.AgeRestriction)
                 throw new UnauthorizedAccessException("series-restricted-age-restriction");
         }
 
 
-        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var volumes = await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
+        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId, ct);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId, ct: ct);
         var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, libraryType);
         var bookTreatment = libraryType is LibraryType.Book or LibraryType.LightNovel;
 
@@ -574,7 +578,7 @@ public class SeriesService(
             StorylineChapters = storylineChapters,
             TotalCount = chapters.Count,
             UnreadCount = chapters.Count(c => c.Pages > 0 && c.PagesRead < c.Pages),
-            // TODO: See if we can get the ContinueFrom here
+            // default: See if we can get the ContinueFrom here
         };
     }
 
@@ -593,20 +597,22 @@ public class SeriesService(
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId)
+    public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId, CancellationToken ct = default)
     {
-        return await unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId);
+        return await unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId, ct);
     }
 
     /// <summary>
     /// Update the relations attached to the Series. Generates associated Sequel/Prequel pairs on target series.
     /// </summary>
     /// <param name="dto"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
+    public async Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto, CancellationToken ct = default)
     {
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, SeriesIncludes.Related);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, SeriesIncludes.Related, ct);
         if (series == null) return false;
 
         UpdateRelationForKind(dto.Adaptations, series.Relations.Where(r => r.RelationKind == RelationKind.Adaptation).ToList(), series, RelationKind.Adaptation);
@@ -625,7 +631,7 @@ public class SeriesService(
         await UpdatePrequelSequelRelations(dto.Sequels, series, RelationKind.Sequel);
 
         if (!unitOfWork.HasChanges()) return true;
-        return await unitOfWork.CommitAsync();
+        return await unitOfWork.CommitAsync(ct);
     }
 
     /// <summary>
@@ -737,11 +743,12 @@ public class SeriesService(
         }
     }
 
-    public async Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId)
+    public async Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId,
+        CancellationToken ct = default)
     {
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library, ct);
         if (series == null) throw new KavitaException(await localizationService.Translate(userId, "series-doesnt-exist"));
-        if (!(await unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId)))
+        if (!(await unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId, ct)))
         {
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
         }
@@ -770,7 +777,7 @@ public class SeriesService(
                 VolumeMinNumber = c.Volume.MinNumber
             })
             .OrderBy(c => c.CreatedUtc)
-            .ToListAsync();
+            .ToListAsync(cancellationToken: ct);
 
         if (chapterData.Count < minimumChaptersRequired) return _emptyExpectedChapter;
 
@@ -899,9 +906,10 @@ public class SeriesService(
         return result;
     }
 
-    public async Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams)
+    public async Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams,
+        CancellationToken ct = default)
     {
-        var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
 
         var filter = new FilterV2Dto
         {
@@ -933,20 +941,21 @@ public class SeriesService(
             ],
         };
 
-        filter.Statements.AddRange(await GetProfilePrivacyStatements(userId, requestingUserId));
+        filter.Statements.AddRange(await GetProfilePrivacyStatements(userId, requestingUserId, ct));
 
-        return await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter);
+        return await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter, ct: ct);
     }
 
-    public async Task<List<FilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId)
+    public async Task<List<FilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId,
+        CancellationToken ct = default)
     {
         if (userId == requestingUserId) return [];
 
-        var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId);
-        var requestingUser = (await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId))!;
+        var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId, ct);
+        var requestingUser = (await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId, ct: ct))!;
 
-        var librariesUser = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
-        var librariesRequestingUser = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(requestingUserId);
+        var librariesUser = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId, ct: ct);
+        var librariesRequestingUser = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(requestingUserId, ct: ct);
 
         var libIds = librariesRequestingUser.Intersect(librariesUser);
         if (socialPreferences.SocialLibraries.Count > 0)

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
@@ -16,22 +17,22 @@ namespace Kavita.Services;
 
 public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub) : ICollectionTagService
 {
-    public async Task<bool> DeleteTag(int tagId, AppUser user)
+    public async Task<bool> DeleteTag(int tagId, AppUser user, CancellationToken ct = default)
     {
-        var collectionTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(tagId);
+        var collectionTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(tagId, ct: ct);
         if (collectionTag == null) return true;
 
         user.Collections.Remove(collectionTag);
 
         if (!unitOfWork.HasChanges()) return true;
 
-        return await unitOfWork.CommitAsync();
+        return await unitOfWork.CommitAsync(ct);
     }
 
 
-    public async Task<bool> UpdateTag(AppUserCollectionDto dto, int userId)
+    public async Task<bool> UpdateTag(AppUserCollectionDto dto, int userId, CancellationToken ct = default)
     {
-        var existingTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(dto.Id);
+        var existingTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(dto.Id, ct: ct);
         if (existingTag == null) throw new KavitaException("collection-doesnt-exist");
         if (existingTag.AppUserId != userId) throw new KavitaException("access-denied");
 
@@ -39,7 +40,7 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub) : 
         if (string.IsNullOrEmpty(title)) throw new KavitaException("collection-tag-title-required");
 
         // Ensure the title doesn't exist on the user's account already
-        if (!title.Equals(existingTag.Title) && await unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, userId))
+        if (!title.Equals(existingTag.Title) && await unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, userId, ct))
             throw new KavitaException("collection-tag-duplicate");
 
         existingTag.Items ??= [];
@@ -49,7 +50,7 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub) : 
             existingTag.NormalizedTitle = dto.Title.ToNormalized();
         }
 
-        var roles = await unitOfWork.UserRepository.GetRoles(userId);
+        var roles = await unitOfWork.UserRepository.GetRoles(userId, ct);
         if (roles.Contains(PolicyConstants.AdminRole) || roles.Contains(PolicyConstants.PromoteRole))
         {
             existingTag.Promoted = dto.Promoted;
@@ -65,27 +66,21 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub) : 
             unitOfWork.CollectionTagRepository.Update(existingTag);
         }
 
-        // If we unlock the cover image it means reset
+        // If we unlock the cover image, it means reset
         if (!dto.CoverImageLocked)
         {
             existingTag.CoverImageLocked = false;
             existingTag.CoverImage = string.Empty;
             await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(existingTag.Id, MessageFactoryEntityTypes.Collection), false);
+                MessageFactory.CoverUpdateEvent(existingTag.Id, MessageFactoryEntityTypes.Collection), false, ct);
             unitOfWork.CollectionTagRepository.Update(existingTag);
         }
 
         if (!unitOfWork.HasChanges()) return true;
-        return await unitOfWork.CommitAsync();
+        return await unitOfWork.CommitAsync(ct);
     }
 
-    /// <summary>
-    /// Removes series from Collection tag. Will recalculate max age rating.
-    /// </summary>
-    /// <param name="tag"></param>
-    /// <param name="seriesIds"></param>
-    /// <returns></returns>
-    public async Task<bool> RemoveTagFromSeries(AppUserCollection? tag, IEnumerable<int> seriesIds)
+    public async Task<bool> RemoveTagFromSeries(AppUserCollection? tag, IEnumerable<int> seriesIds, CancellationToken ct = default)
     {
         if (tag == null) return false;
 
@@ -99,10 +94,10 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub) : 
 
         if (!unitOfWork.HasChanges()) return true;
 
-        var result  =  await unitOfWork.CommitAsync();
+        var result  =  await unitOfWork.CommitAsync(ct);
         if (tag.Items.Count > 0)
         {
-            await unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag);
+            await unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag, ct);
         }
 
         return result;
