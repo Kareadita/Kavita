@@ -18,13 +18,13 @@
     @let itemsBeforeVirtualValue = itemsBeforeVirtual();
 
     @if (descriptionValue) {
-      <span class="text-muted"> {{descriptionValue}} </span>
+      <span class="text-muted mb-3"> {{descriptionValue}} </span>
     }
     @if (invalidSelection) {
-      <span class="text-danger"> {{invalidSelectWarningValue}} </span>
+      <span class="text-danger mb-3"> {{invalidSelectWarningValue}} </span>
     }
     @if (hideItemsWhenInvalid() && hiddenItems() > 0) {
-      <span class="text-warning" role="alert">{{t(hiddenTranslationKey(), {amount: hiddenItems()})}}</span>
+      <span class="text-warning mb-3" role="alert">{{t(hiddenTranslationKey(), {amount: hiddenItems()})}}</span>
     }
 
     <form [formGroup]="filterForm">
@@ -40,7 +40,7 @@
       }
     </form>
 
-    <ul class="list-group mt-4">
+    <ul class="list-group">
       @if (!loading()) {
 
         @if (itemsBeforeVirtualValue && itemsValue.length > itemsBeforeVirtualValue) {
@@ -85,13 +85,24 @@
   </div>
 
   @if (showFooter()) {
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.close')}}</button>
-
-      @if (showConfirm()) {
-        <button type="button" class="btn btn-primary" (click)="confirm()" [disabled]="invalidSelection">{{t('common.confirm')}}</button>
+    <div class="modal-footer d-block">
+      @if (showCreate()) {
+        <div class="input-group mb-2">
+          <label class="form-label visually-hidden" for="create-input">{{createLabel() ?? ''}}</label>
+          <input id="create-input" type="text" class="form-control"
+                 [formControl]="createControl" [placeholder]="createLabel() ?? ''">
+          <button type="button" class="btn btn-primary" [disabled]="isCreating()" (click)="create()">
+            {{createButtonLabel() ?? t('common.create')}}
+          </button>
+        </div>
       }
+      <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.close')}}</button>
 
+        @if (showConfirm()) {
+          <button type="button" class="btn btn-primary" (click)="confirm()" [disabled]="invalidSelection">{{t('common.confirm')}}</button>
+        }
+      </div>
     </div>
   }
 
