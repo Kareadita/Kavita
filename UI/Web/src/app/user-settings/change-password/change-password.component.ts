@@ -3,14 +3,12 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
-  DestroyRef,
   inject,
   OnDestroy,
   OnInit
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
@@ -24,13 +22,11 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
 
-  private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
   passwordChangeForm: FormGroup = new FormGroup({});
-  user: User | undefined = undefined;
   hasChangePasswordAbility = computed(() => {
     const readOnly = this.accountService.hasReadOnlyRole();
     const isAdmin = this.accountService.hasAdminRole();
@@ -72,11 +68,9 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   }
 
   savePasswordForm() {
-    if (this.user === undefined) { return; }
-
     const model = this.passwordChangeForm.value;
     this.resetPasswordErrors = [];
-    this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword, model.oldPassword).subscribe(() => {
+    this.observableHandles.push(this.accountService.resetPassword(this.accountService.username()!, model.confirmPassword, model.oldPassword).subscribe(() => {
       this.toastr.success(translate('toasts.password-updated'));
       this.resetPasswordForm();
       this.isEditMode = false;

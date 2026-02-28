@@ -61,7 +61,9 @@ export class ConfirmEmailComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.navService.showSideNav();
+    if (this.accountService.isLoggedIn()) {
+      this.navService.showSideNav();
+    }
   }
 
   isNullOrEmpty(v: string | null | undefined) {

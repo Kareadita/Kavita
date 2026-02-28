@@ -252,7 +252,8 @@ export class AccountService {
   }
 
   setCurrentUser(user?: User, refreshConnections = true) {
-    const isSameUser = this._currentUser() === user;
+    const currentUser = this._currentUser();
+    const isSameUser = !!currentUser && !!user && currentUser.username === user.username;
 
     if (user) {
       localStorage.setItem(AccountService.userKey, JSON.stringify(user));
