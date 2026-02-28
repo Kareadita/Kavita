@@ -85,24 +85,21 @@
   </div>
 
   @if (showFooter()) {
-    <div class="modal-footer d-block">
+    <div class="modal-footer">
       @if (showCreate()) {
-        <div class="input-group mb-2">
-          <label class="form-label visually-hidden" for="create-input">{{createLabel() ?? ''}}</label>
-          <input id="create-input" type="text" class="form-control"
-                 [formControl]="createControl" [placeholder]="createLabel() ?? ''">
-          <button type="button" class="btn btn-primary" [disabled]="isCreating()" (click)="create()">
-            {{createButtonLabel() ?? t('common.create')}}
-          </button>
-        </div>
-      }
-      <div class="d-flex justify-content-end gap-2">
+        <label class="form-label visually-hidden" for="create-input">{{createLabel() ?? ''}}</label>
+        <input id="create-input" type="text" class="form-control"
+               [formControl]="createControl" [placeholder]="createLabel() ?? ''">
+        <button type="button" class="btn btn-primary" [disabled]="isCreating()" (click)="create()">
+          {{createButtonLabel() ?? t('common.create')}}
+        </button>
+      } @else {
         <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.close')}}</button>
 
         @if (showConfirm()) {
           <button type="button" class="btn btn-primary" (click)="confirm()" [disabled]="invalidSelection">{{t('common.confirm')}}</button>
         }
-      </div>
+      }
     </div>
   }
 

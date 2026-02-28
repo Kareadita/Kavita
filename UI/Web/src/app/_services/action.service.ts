@@ -2,9 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {map, take} from 'rxjs/operators';
-import {
-  ListSelectModalComponent
-} from '../shared/_components/list-select-modal/list-select-modal.component';
+import {ListSelectModalComponent} from '../shared/_components/list-select-modal/list-select-modal.component';
 import {ScrobbleProvider} from './scrobbling.service';
 import {
   EditReadingListModalComponent
@@ -101,8 +99,8 @@ export class ActionService {
   private readonly annotationsService = inject(AnnotationService);
   private readonly sideNavService = inject(NavService);
 
-  private readingListModalRef: TypedModalRef<any> | null = null;
-  private collectionModalRef: TypedModalRef<any> | null = null;
+  private readingListModalRef: TypedModalRef<ListSelectModalComponent<ReadingList>> | null = null;
+  private collectionModalRef: TypedModalRef<ListSelectModalComponent<UserCollection>> | null = null;
 
 
 

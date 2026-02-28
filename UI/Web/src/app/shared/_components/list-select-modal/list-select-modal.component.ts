@@ -4,7 +4,6 @@ import {
   computed,
   effect,
   inject,
-  input,
   model,
   signal,
   TemplateRef,
