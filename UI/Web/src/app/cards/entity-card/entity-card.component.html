@@ -114,11 +114,11 @@
         class="card-body meta-title"
         [ngbTooltip]="metaTitle().length > 34 ? metaTitle() : null">
         @if (hasMetaTitleTemplate()) {
-          <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+          <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:3.625rem;">
             <ng-container *ngTemplateOutlet="metaTitleTemplate()!; context: { $implicit: entity() }" />
           </div>
         } @else {
-          <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:58px;">
+          <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:3.625rem;">
             {{ metaTitle() }}
           </div>
         }

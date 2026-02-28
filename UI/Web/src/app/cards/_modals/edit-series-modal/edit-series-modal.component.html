@@ -9,7 +9,7 @@
       <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
         <form [formGroup]="editSeriesForm">
           <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" [destroyOnHide]="false"
-              orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+              orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
             <li [ngbNavItem]="tabs[TabID.General]">
               <a ngbNavLink>{{t(tabs[TabID.General])}}</a>
@@ -693,7 +693,7 @@
                   <ul class="list-unstyled">
                     @for (volume of seriesVolumes; track volume.id) {
                       <li class="d-flex my-4">
-                        <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)" />
+                        <app-image class="me-3" style="width: 4.625rem;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)" />
                         <div class="flex-grow-1">
                           <h5 class="mt-0 mb-1">{{formatVolumeName(volume)}}</h5>
                           <div>

@@ -11,7 +11,7 @@
 
 .content-quote {
   color: var(--drawer-text-color);
-  max-height: 320px;
+  max-height: 20rem;
   overflow: hidden;
   display: -webkit-box;
   line-clamp: 2;
@@ -24,7 +24,7 @@
 }
 
 .setting-section-break {
-  margin: 10px 0 !important;
+  margin: 0.625rem 0 !important;
 }
 
 .offcanvas-title-right {

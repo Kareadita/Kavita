@@ -103,7 +103,7 @@
   }
 
   .ng-autocomplete {
-    margin-bottom: 0px;
+    margin-bottom: 0;
   }
 
   .primary-text {
@@ -124,7 +124,7 @@
     color: var(--search-result-text-lite-color) !important;
   }
 
-/* small devices (phones, 650px and down) */
+/* small devices (phones, 40.625rem and down) */
 @media only screen and (max-width:650px) {
   .navbar-nav {
     width: 0;

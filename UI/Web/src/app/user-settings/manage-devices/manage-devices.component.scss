@@ -1,8 +1,8 @@
 @use '../../../theme/variables' as theme;
 
 .custom-position {
-  right: 15px;
-  top: -42px;
+  right: 0.9375rem;
+  top: -2.625rem;
 }
 
 .table {
@@ -20,7 +20,7 @@
       justify-content: center;
     }
     .btn {
-      width: 32px;
+      width: 2rem;
     }
   }
 }

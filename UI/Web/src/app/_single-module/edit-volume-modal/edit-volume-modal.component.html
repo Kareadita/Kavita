@@ -6,7 +6,7 @@
     </div>
     <div class="modal-body scrollable-modal" [ngClass]="{'d-flex': breakpointService.isAboveMobile()}">
       <form [formGroup]="editForm">
-        <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills" orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills" orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
           <!-- Info Tab -->
           <li [ngbNavItem]="TabID.Info">
