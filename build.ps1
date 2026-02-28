@@ -71,7 +71,12 @@ function Package {
 
     # Compute the path from the current repo root before any directory changes
     $repoRoot = Get-Location
-    $lOutputFolder = Join-Path $repoRoot "_output" $runtime "Kavita"
+    $runtimeFolder = Join-Path $repoRoot "_output" $runtime
+    $lOutputFolder = Join-Path $runtimeFolder "Kavita"
+
+    # Ensure the runtime output folders exist so dotnet publish and subsequent operations succeed
+    if (-not (Test-Path $runtimeFolder)) { New-Item -ItemType Directory -Path $runtimeFolder -Force | Out-Null }
+    if (-not (Test-Path $lOutputFolder)) { New-Item -ItemType Directory -Path $lOutputFolder -Force | Out-Null }
 
     ProgressStart "Creating $runtime Package"
 
@@ -114,11 +119,18 @@ function Package {
     # switch back to repository root (pop off the API location)
     Pop-Location
 
-    # move into the specific runtime output directory before tarring
-    Push-Location $lOutputFolder
-    if (Test-Path "../kavita-$runtime.tar.gz") { Remove-Item "../kavita-$runtime.tar.gz" -Force }
-    # tar should be available on Windows 10+; use native if not.  run from inside the runtime folder
-    tar -czvf "../kavita-$runtime.tar.gz" "Kavita"
+    # Create tar from the runtime output parent folder (_output/$runtime)
+    $outputRuntimePath = Join-Path $repoRoot "_output" $runtime
+    $tarOutputPath = Join-Path $repoRoot "_output" "kavita-$runtime.tar.gz"
+    
+    # Remove existing tar if it exists
+    if (Test-Path $tarOutputPath) { 
+        Remove-Item $tarOutputPath -Force 
+    }
+    
+    # Change to _output folder and tar the runtime-specific directory
+    Push-Location (Join-Path $repoRoot "_output")
+    tar -czvf "kavita-$runtime.tar.gz" $runtime
     Pop-Location
 
     ProgressEnd "Creating $runtime Package"
