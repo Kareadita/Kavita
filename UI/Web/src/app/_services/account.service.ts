@@ -77,10 +77,10 @@ export class AccountService {
   public readonly hasPromoteRole = computed(() => this.hasRole(this._currentUser(), Role.Promote) || this.hasRole(this._currentUser(), Role.Admin));
 
   public readonly currentUserGenericApiKey = computed(() =>
-    this._currentUser()?.authKeys.find(k => k.name === OpdsName)?.key
+    this._currentUser()?.authKeys?.find(k => k.name === OpdsName)?.key
   );
   public readonly currentUserImageAuthKey = computed(() =>
-    this._currentUser()?.authKeys.find(k => k.name === ImageOnlyName)?.key
+    this._currentUser()?.authKeys?.find(k => k.name === ImageOnlyName)?.key
   );
 
   /**
@@ -103,7 +103,7 @@ export class AccountService {
         tap(({authKey}) => {
           const existing = this._currentUser();
           if (!existing) return;
-          const existingKeys = existing.authKeys;
+          const existingKeys = existing.authKeys ?? [];
           const index = existingKeys.findIndex(k => k.id === authKey.id);
           const authKeys = index >= 0
             ? existingKeys.map(k => k.id === authKey.id ? authKey : k)
@@ -118,7 +118,7 @@ export class AccountService {
       tap(({id}) => {
         const existing = this._currentUser();
         if (!existing) return;
-        this.setCurrentUser({ ...existing, authKeys: existing.authKeys.filter(k => k.id !== id) }, false);
+        this.setCurrentUser({ ...existing, authKeys: (existing.authKeys ?? []).filter(k => k.id !== id) }, false);
       }),
     ).subscribe();
 
@@ -251,12 +251,18 @@ export class AccountService {
     );
   }
 
+  /** Omit auth keys since they are long-lived. The auth keys will be set from refreshAccount() */
+  private getPersistableUser(user: User): Omit<User, 'authKeys'> {
+    const { authKeys, ...persistable } = user;
+    return persistable;
+  }
+
   setCurrentUser(user?: User, refreshConnections = true) {
     const currentUser = this._currentUser();
     const isSameUser = !!currentUser && !!user && currentUser.username === user.username;
 
     if (user) {
-      localStorage.setItem(AccountService.userKey, JSON.stringify(user));
+      localStorage.setItem(AccountService.userKey, JSON.stringify(this.getPersistableUser(user)));
       localStorage.setItem(AccountService.lastLoginKey, user.username);
     }
 
