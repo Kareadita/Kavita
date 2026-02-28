@@ -1,5 +1,6 @@
 <ng-container *transloco="let t; prefix: 'pdf-reader'">
-  @if (accountService.currentUser$ | async; as user) {
+  @let user = accountService.currentUser();
+  @if (user) {
     <div class="{{theme}}" #container>
 
       @if (isLoading && !disableLoadingIndicator()) {

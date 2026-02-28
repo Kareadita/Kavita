@@ -8,7 +8,7 @@
 
   @if (tokenExpired()) {
     <p class="alert alert-warning">{{t('token-expired')}}</p>
-  } @else if (!accountService.currentUserSignal()!.preferences.aniListScrobblingEnabled) {
+  } @else if (!accountService.currentUser()!.preferences.aniListScrobblingEnabled) {
     <p class="alert alert-warning">{{t('scrobbling-disabled')}}</p>
   }
 

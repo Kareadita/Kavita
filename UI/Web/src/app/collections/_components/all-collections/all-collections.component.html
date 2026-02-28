@@ -31,7 +31,7 @@
 
       <ng-template #noData>
         {{t('no-data')}}
-        @if (accountService.isAdmin()) {
+        @if (accountService.hasAdminRole()) {
           {{t('create-one-part-1')}}
           <a [href]="WikiLink.Collections" rel="noopener noreferrer" target="_blank">
             {{t('create-one-part-2')}}

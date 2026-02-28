@@ -102,7 +102,7 @@ export class CollectionDetailComponent implements AfterContentChecked {
   collectionTag = getWritableResolvedData(this.route, 'collection');
   summary = computed(() => (this.collectionTag()?.summary ?? '').replace(/\n/g, '<br>'));
 
-  user = this.accountService.currentUserSignal;
+  user = this.accountService.currentUser;
 
   isLoading = signal(true);
   series = signal<Array<Series>>([]);

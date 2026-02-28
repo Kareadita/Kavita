@@ -54,11 +54,11 @@ export class ProfileImageComponent {
   imageSelected: ImageUploadResult | null = null;
 
   canUploadImage = computed(() => {
-    return this.accountService.currentUserSignal()?.id === this.userId();
+    return this.accountService.currentUser()?.id === this.userId();
   });
 
   canDeleteImage = computed(() => {
-    return this.accountService.currentUserSignal()?.coverImage && !this.uploadInProgress() && this.showEditButton();
+    return this.accountService.currentUser()?.coverImage && !this.uploadInProgress() && this.showEditButton();
   });
 
   isImageUploadMode = computed(() => {

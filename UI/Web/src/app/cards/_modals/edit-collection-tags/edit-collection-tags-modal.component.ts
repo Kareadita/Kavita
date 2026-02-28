@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  OnInit
+} from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
@@ -98,6 +107,15 @@ export class EditCollectionTagsModalComponent implements OnInit {
     return listItem.name.toLowerCase().indexOf(query) >= 0 || listItem.localizedName.toLowerCase().indexOf(query) >= 0;
   }
 
+  constructor() {
+    effect(() => {
+      if (!this.accountService.hasPromoteRole()) {
+        this.collectionTagForm.get('promoted')?.disable();
+        this.cdRef.markForCheck();
+      }
+    });
+  }
+
 
   ngOnInit(): void {
     if (this.pagination == undefined) {
@@ -116,14 +134,6 @@ export class EditCollectionTagsModalComponent implements OnInit {
       this.collectionTagForm.get('title')?.disable();
       this.collectionTagForm.get('summary')?.disable();
     }
-
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-      if (!user) return;
-      if (!this.accountService.hasPromoteRole(user)) {
-        this.collectionTagForm.get('promoted')?.disable();
-        this.cdRef.markForCheck();
-      }
-    });
 
 
     this.collectionTagForm.get('title')?.valueChanges.pipe(

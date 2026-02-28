@@ -39,13 +39,8 @@ export class FontManagerComponent implements OnInit {
   protected readonly fontService = inject(FontService);
 
 
-  protected readonly user = this.accountService.currentUserSignal;
-  protected readonly isReadOnly = computed(() => {
-    const u = this.accountService.currentUserSignal();
-    if (!u) return true;
-
-    return this.accountService.hasReadOnlyRole(u);
-  });
+  protected readonly user = this.accountService.currentUser;
+  protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
 
   fonts = signal<EpubFont[]>([]);
   visibleFonts = computed(() => {
@@ -154,9 +149,7 @@ export class FontManagerComponent implements OnInit {
         return;
       }
 
-      const isAdmin = this.accountService.hasAdminRole(this.accountService.currentUserSignal()!);
-
-      if (!isAdmin) {
+      if (!this.accountService.hasAdminRole()) {
         this.toastr.info(translate('toasts.font-in-use'))
         return;
       }

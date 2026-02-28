@@ -44,10 +44,10 @@ export class ManageAuthKeysComponent implements OnInit {
 
   protected readonly opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
 
-  isReadOnly = this.accountService.isReadOnly;
+  isReadOnly = this.accountService.hasReadOnlyRole;
   opdsUrl = signal<string>('');
   authKeys = computed(() => {
-    const account = this.accountService.currentUserSignal();
+    const account = this.accountService.currentUser();
     if (!account) return null;
 
     return account.authKeys;

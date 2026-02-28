@@ -1,23 +1,24 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, computed,
-  effect, inject,
+  Component,
+  computed,
+  effect,
+  inject,
   OnInit,
   signal
 } from '@angular/core';
-import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
-import { AccountService } from '../../_services/account.service';
-import { MemberService } from '../../_services/member.service';
-import { NavService } from '../../_services/nav.service';
-import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
+import {ToastrService} from 'ngx-toastr';
+import {AccountService} from '../../_services/account.service';
+import {MemberService} from '../../_services/member.service';
+import {NavService} from '../../_services/nav.service';
+import {SplashContainerComponent} from '../_components/splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {environment} from "../../../environments/environment";
 import {ImageComponent} from "../../shared/image/image.component";
-import { SettingsService } from 'src/app/admin/settings.service';
+import {SettingsService} from 'src/app/admin/settings.service';
 import {OidcPublicConfig} from "../../admin/_models/oidc-config";
 
 
@@ -89,16 +90,17 @@ export class UserLoginComponent implements OnInit {
         window.location.href = this.baseUrl + 'oidc/login';
       }
     });
+
+    effect(() => {
+      const user = this.accountService.currentUser();
+      if (!user) return;
+      this.navService.handleLogin();
+      this.cdRef.markForCheck();
+    });
+
   }
 
   ngOnInit(): void {
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.navService.handleLogin()
-        this.cdRef.markForCheck();
-      }
-    });
-
     this.settingsService.getPublicOidcConfig().subscribe(config => {
       this.oidcConfig.set(config);
     });

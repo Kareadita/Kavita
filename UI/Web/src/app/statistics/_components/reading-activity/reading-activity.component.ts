@@ -47,7 +47,7 @@ export class ReadingActivityComponent implements OnInit {
   userId = input<number>(0);
   individualUserMode = input<boolean>(false);
 
-  isAdmin = computed(() => this.accountService.isAdmin() ?? false);
+  isAdmin = computed(() => this.accountService.hasAdminRole() ?? false);
 
   selectedUserId = signal<number>(0);
 

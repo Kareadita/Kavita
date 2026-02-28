@@ -31,12 +31,9 @@ export class SettingSwitchComponent implements AfterContentInit {
   title = input.required<string>();
   subtitle = input<string | undefined>();
   id = input<string | undefined>();
-  switchRef = contentChild<TemplateRef<any>>('switch');
-
-  /**
-   * For wiring up with a real label
-   */
+  /** For wiring up with a real label */
   labelId = signal('');
+  switchRef = contentChild<TemplateRef<any>>('switch');
 
   ngAfterContentInit(): void {
     setTimeout(() => {

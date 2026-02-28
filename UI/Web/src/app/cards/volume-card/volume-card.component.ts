@@ -2,23 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   EventEmitter,
   inject,
   input,
   Input,
   OnChanges,
-  OnInit,
   Output,
   signal,
   SimpleChanges
 } from '@angular/core';
 import {Router} from "@angular/router";
 import {ImageService} from "../../_services/image.service";
-import {MessageHubService} from "../../_services/message-hub.service";
-import {AccountService} from "../../_services/account.service";
-import {User} from "../../_models/user/user";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Volume} from "../../_models/volume";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {LibraryType} from "../../_models/library/library";
@@ -39,12 +33,9 @@ import {ActionItem} from "../../_models/actionables/action-item";
   styleUrl: './volume-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class VolumeCardComponent implements OnInit, OnChanges {
+export class VolumeCardComponent implements OnChanges {
 
-  private readonly destroyRef = inject(DestroyRef);
   public readonly imageService = inject(ImageService);
-  private readonly messageHub = inject(MessageHubService);
-  private readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
   protected readonly utilityService = inject(UtilityService);
   private readonly configFactory = inject(CardConfigFactory);
@@ -78,11 +69,9 @@ export class VolumeCardComponent implements OnInit, OnChanges {
    */
   @Output() dataChanged: EventEmitter<Volume> = new EventEmitter();
 
-  private user: User | undefined;
+  private readonly volumeSignal = signal<Volume | null>(null);
 
-  private volumeSignal = signal<Volume | null>(null);
-
-  cardEntity = computed<CardEntity>(() => {
+  readonly cardEntity = computed<CardEntity>(() => {
     const volume = this.volumeSignal();
     if (!volume) {
       // Return a placeholder - shouldn't render in practice
@@ -91,7 +80,7 @@ export class VolumeCardComponent implements OnInit, OnChanges {
     return CardEntityFactory.volume(volume, this.seriesId, this.libraryId);
   });
 
-  config = computed<BaseCardConfiguration<Volume>>(() => {
+  readonly config = computed<BaseCardConfiguration<Volume>>(() => {
     const baseConfig = this.configFactory.forVolume({
         seriesId: this.seriesId,
         libraryId: this.libraryId,
@@ -106,12 +95,6 @@ export class VolumeCardComponent implements OnInit, OnChanges {
     return baseConfig;
   });
 
-
-  ngOnInit() {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-      this.user = user;
-    });
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['volume']) {

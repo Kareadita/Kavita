@@ -267,7 +267,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     if (this.isEditMode()) return;
 
     const annotation = this.annotation();
-    if (annotation == null || annotation.ownerUsername !== this.accountService.currentUserSignal()?.username) return;
+    if (annotation == null || annotation.ownerUsername !== this.accountService.currentUser()?.username) return;
 
     this.mode.set(AnnotationMode.Edit);
   }

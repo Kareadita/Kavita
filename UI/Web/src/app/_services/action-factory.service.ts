@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {effect, inject, Injectable} from '@angular/core';
 import {EMPTY, map, shareReplay} from 'rxjs';
 import {Chapter} from '../_models/chapter';
 import {UserCollection} from '../_models/collection-tag';
@@ -51,7 +51,8 @@ export class ActionFactoryService {
   private clientDeviceActions: Array<ActionItem<ClientDevice>> = [];
 
   constructor() {
-    this.accountService.currentUser$.subscribe((_) => {
+    effect(() => {
+      this.accountService.currentUser();
       this._resetActions();
     });
   }

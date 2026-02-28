@@ -30,7 +30,7 @@ export class ReviewCardComponent {
   readonly refresh = output<ReviewModalCloseEvent>();
 
   isMyReview = computed(() =>
-    this.review().username === this.accountService.currentUserSignal()?.username && !this.review().isExternal);
+    this.review().username === this.accountService.currentUser()?.username && !this.review().isExternal);
 
   showModal() {
     let ref;

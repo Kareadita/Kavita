@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, TrackByFunction} from '@angular/core';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {take} from 'rxjs/operators';
 import {MemberService} from 'src/app/_services/member.service';
 import {Member} from 'src/app/_models/auth/member';
 import {AccountService, Role} from 'src/app/_services/account.service';
@@ -62,22 +61,13 @@ export class ManageUsersComponent implements OnInit {
   members: Member[] = [];
   settings: ServerSettings | undefined = undefined;
   oidcSyncEnabled: boolean = false;
-  loggedInUsername = '';
+  loggedInUsername = this.accountService.username;
   loadingMembers = false;
   libraryCount: number = 0;
 
   trackByMember: TrackByFunction<Member> = (_, m) =>
     `${m.username}_${m.lastActiveUtc}_${m.roles.length}`;
 
-
-  constructor() {
-    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
-      if (user) {
-        this.loggedInUsername = user.username;
-        this.cdRef.markForCheck();
-      }
-    });
-  }
 
   ngOnInit(): void {
     this.loadMembers();
@@ -96,11 +86,12 @@ export class ManageUsersComponent implements OnInit {
       this.members = members;
       // Show logged-in user at the top of the list
       this.members.sort((a: Member, b: Member) => {
-        if (a.username === this.loggedInUsername) return 1;
-        if (b.username === this.loggedInUsername) return 1;
+        if (a.username === this.loggedInUsername()) return -1;
+        if (b.username === this.loggedInUsername()) return 1;
 
         const nameA = a.username.toUpperCase();
         const nameB = b.username.toUpperCase();
+
         if (nameA < nameB) return -1;
         if (nameA > nameB) return 1;
         return 0;
@@ -114,8 +105,8 @@ export class ManageUsersComponent implements OnInit {
     });
   }
 
-  canEditMember(member: Member): boolean {
-    return this.loggedInUsername !== member.username;
+  isMemberYou(member: Member): boolean {
+    return this.loggedInUsername() === member.username;
   }
 
   openEditUser(member: Member) {

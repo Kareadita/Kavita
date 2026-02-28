@@ -147,7 +147,7 @@ export class ReadingListDetailComponent implements OnInit {
   actions = computed(() => this.actionFactoryService
     .getReadingListActions(this.shouldRenderReadingListAction.bind(this))
     .filter(action => this.readingListService.actionListFilter(action, this.readingList(), this.isAdmin())));
-  isAdmin = computed(() => this.accountService.hasAdminRole(this.accountService.currentUserSignal()!));
+  isAdmin = this.accountService.hasAdminRole;
   isLoading = signal(false);
   accessibilityMode = signal(false);
   editMode = signal(false);

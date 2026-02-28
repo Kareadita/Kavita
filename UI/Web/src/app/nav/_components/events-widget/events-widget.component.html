@@ -36,7 +36,7 @@
       }
 
       <!-- Progress Events-->
-      @for (message of progressEvents(); track message.name) {
+      @for (message of progressEvents(); track message.name + '_' + message.eventType) {
         @if (message.progress === 'indeterminate' || message.progress === 'none') {
           <li class="list-group-item dark-menu-item">
             <div class="h6 mb-1">{{message.title}}</div>

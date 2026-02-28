@@ -119,7 +119,7 @@ export class ReadingListsComponent implements OnInit {
 
   shouldRenderReadingListAction(action: ActionItem<ReadingList>, entity: ReadingList, user: User) {
     const isPromoteAction = action.action === Action.Promote || action.action === Action.UnPromote;
-    const hasPromotionAbility = this.accountService.hasAdminRole(user) || this.accountService.hasPromoteRole(user);
+    const hasPromotionAbility = this.accountService.hasAdminRole() || this.accountService.hasPromoteRole();
 
     if (isPromoteAction && !hasPromotionAbility) {
       return false;

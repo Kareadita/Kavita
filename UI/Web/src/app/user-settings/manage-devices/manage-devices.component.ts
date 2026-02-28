@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {Device} from 'src/app/_models/device/device';
 import {DeviceService} from 'src/app/_services/device.service';
 import {DevicePlatformPipe} from '../../_pipes/device-platform.pipe';
@@ -6,12 +6,8 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingsService} from "../../admin/settings.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {EditDeviceModalComponent} from "../_modals/edit-device-modal/edit-device-modal.component";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {map} from "rxjs";
-import {shareReplay} from "rxjs/operators";
 import {AccountService} from "../../_services/account.service";
 import {NgxDatatableModule} from "@siemens/ngx-datatable";
-import {AsyncPipe} from "@angular/common";
 import {ClientDevice} from "../../_models/client-device";
 import {ClientDeviceCardComponent} from "../../_single-module/client-device-card/client-device-card.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
@@ -25,11 +21,10 @@ import {patchSignalArray} from "../../../libs/patch";
   templateUrl: './manage-devices.component.html',
   styleUrls: ['./manage-devices.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DevicePlatformPipe, TranslocoDirective, AsyncPipe, NgxDatatableModule, ClientDeviceCardComponent, LoadingComponent, ResponsiveTableComponent]
+  imports: [DevicePlatformPipe, TranslocoDirective, NgxDatatableModule, ClientDeviceCardComponent, LoadingComponent, ResponsiveTableComponent]
 })
 export class ManageDevicesComponent implements OnInit {
 
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly deviceService = inject(DeviceService);
   private readonly settingsService = inject(SettingsService);
@@ -43,12 +38,7 @@ export class ManageDevicesComponent implements OnInit {
 
   clientDevices = signal<ClientDevice[]>([]);
 
-
-  isReadOnly$ = this.accountService.currentUser$.pipe(
-    takeUntilDestroyed(this.destroyRef),
-    map(c => c && this.accountService.hasReadOnlyRole(c)),
-    shareReplay({refCount: true, bufferSize: 1}),
-  );
+  isReadOnly = this.accountService.hasReadOnlyRole;
 
   constructor() {
     this.loadClientDevices();

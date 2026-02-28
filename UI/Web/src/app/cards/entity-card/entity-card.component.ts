@@ -264,7 +264,7 @@ export class EntityCardComponent<T> implements OnInit {
   }
 
   private isEventForCurrentUser(event: UserProgressUpdateEvent) {
-    const currentUser = this.accountService.currentUserSignal();
+    const currentUser = this.accountService.currentUser();
     return currentUser?.username === event.username;
   }
 

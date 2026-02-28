@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, effect, inject} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {distinctUntilChanged, filter, map, take, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {ImageService} from 'src/app/_services/image.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
 import {UtilityService} from '../../../shared/_services/utility.service';
@@ -39,13 +39,7 @@ import {ActionResult} from "../../../_models/actionables/action-result";
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SideNavComponent implements OnInit {
-
-  protected readonly WikiLink = WikiLink;
-  protected readonly ItemLimit = 13;
-  protected readonly SideNavStreamType = SideNavStreamType;
-  protected readonly SettingsTabId = SettingsTabId;
-
+export class SideNavComponent {
   private readonly router = inject(Router);
   protected readonly utilityService = inject(UtilityService);
   private readonly messageHub = inject(MessageHubService);
@@ -72,7 +66,7 @@ export class SideNavComponent implements OnInit {
   showAll: boolean = false;
   editMode: boolean = false;
   totalSize = 0;
-  isReadOnly = false;
+  isReadOnly = this.accountService.hasReadOnlyRole;
 
   private showAllSubject = new BehaviorSubject<boolean>(false);
   showAll$ = this.showAllSubject.asObservable();
@@ -160,15 +154,12 @@ export class SideNavComponent implements OnInit {
       {condition$: this.licenseService.hasValidLicense$},
     );
 
-  }
-
-  ngOnInit(): void {
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+    effect(() => {
+      const user = this.accountService.currentUser();
       if (!user) return;
-      this.isReadOnly = this.accountService.hasReadOnlyRole(user!);
-      this.cdRef.markForCheck();
       this.loadDataSubject.next();
-    });
+    })
+
   }
 
   performHomeAction(event: ActionItem<{}> | ActionResult<{}>) {
@@ -234,4 +225,9 @@ export class SideNavComponent implements OnInit {
       }
     });
   }
+
+  protected readonly WikiLink = WikiLink;
+  protected readonly ItemLimit = 13;
+  protected readonly SideNavStreamType = SideNavStreamType;
+  protected readonly SettingsTabId = SettingsTabId;
 }

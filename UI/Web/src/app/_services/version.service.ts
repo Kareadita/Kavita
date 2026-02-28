@@ -2,16 +2,15 @@ import {DestroyRef, inject, Injectable} from '@angular/core';
 import {interval, Subscription, switchMap} from 'rxjs';
 import {ServerService} from "./server.service";
 import {AccountService} from "./account.service";
-import {filter, take, tap} from "rxjs/operators";
+import {filter, map, take, tap} from "rxjs/operators";
 import {Router} from "@angular/router";
-import {OpdsName} from "../_models/user/auth-key";
 import {
   VersionUpdateModalComponent
 } from "../announcements/_components/version-update-modal/version-update-modal.component";
 import {versionNotifyModal, versionRefreshModal} from "../_models/modal/modal-options";
 import {UpdateVersionEvent} from "../_models/events/update-version-event";
 import {ModalService} from "./modal.service";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
@@ -68,18 +67,16 @@ export class VersionService {
    * Initial version check to ensure localStorage is populated on first load
    */
   private startInitialVersionCheck(): void {
-    this.accountService.currentUser$
-      .pipe(
-        filter(user => !!user),
-        take(1),
-        switchMap(user => this.serverService.getVersion(user!.authKeys.filter(k => k.name === OpdsName)[0].key))
-      )
-      .subscribe(serverVersion => {
-        this.loadedVersion = serverVersion;
-        localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
-        this.cleanupOldDismissals(serverVersion);
-        console.log('Initial version check - Server version:', serverVersion);
-      });
+    toObservable(this.accountService.currentUserGenericApiKey).pipe(
+      filter((key): key is string => !!key),
+      take(1),
+      switchMap(key => this.serverService.getVersion(key))
+    ).subscribe(serverVersion => {
+      this.loadedVersion = serverVersion;
+      localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
+      this.cleanupOldDismissals(serverVersion);
+      console.log('Initial version check - Server version:', serverVersion);
+    });
   }
 
 
@@ -89,9 +86,9 @@ export class VersionService {
   private startVersionCheck(): void {
     this.versionCheckSubscription = interval(this.VERSION_CHECK_INTERVAL)
       .pipe(
-        switchMap(() => this.accountService.currentUser$),
-        filter(user => !!user && !this.modalOpen),
-        switchMap(user => this.serverService.getVersion(user!.authKeys.filter(k => k.name === OpdsName)[0].key)),
+        map(() => this.accountService.currentUserGenericApiKey()),
+        filter((key): key is string => !!key && !this.modalOpen),
+        switchMap(key => this.serverService.getVersion(key)),
         filter(update => !!update),
         tap(serverVersion => this.handleVersionCheck(serverVersion)),
         takeUntilDestroyed(this.destroyRef)
@@ -133,19 +130,16 @@ export class VersionService {
    * Single API call to checkHowOutOfDate determines which modal (if any) to show.
    */
   handleUpdateCheck(): void {
-    this.accountService.currentUser$
-      .pipe(
-        take(1),
-        filter(user => user !== undefined && this.accountService.hasAdminRole(user)),
-        switchMap(_ => this.serverService.checkHowOutOfDate()),
-        filter(versionsOutOfDate => !isNaN(versionsOutOfDate) && versionsOutOfDate > 0),
-      ).subscribe(versionsOutOfDate => {
-        if (versionsOutOfDate > this.OUT_OF_BAND_AMOUNT) {
-          this.handleOutOfDate(versionsOutOfDate);
-        } else {
-          this.handleUpdateAvailable(versionsOutOfDate);
-        }
-      });
+    if (!this.accountService.hasAdminRole()) return;
+    this.serverService.checkHowOutOfDate().pipe(
+      filter(versionsOutOfDate => !isNaN(versionsOutOfDate) && versionsOutOfDate > 0),
+    ).subscribe(versionsOutOfDate => {
+      if (versionsOutOfDate > this.OUT_OF_BAND_AMOUNT) {
+        this.handleOutOfDate(versionsOutOfDate);
+      } else {
+        this.handleUpdateAvailable(versionsOutOfDate);
+      }
+    });
   }
 
   /**

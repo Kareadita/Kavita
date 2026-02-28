@@ -69,7 +69,7 @@
 
 
 
-            @if (accountService.isAdmin()) {
+            @if (accountService.hasAdminRole()) {
               <div class="col-auto ms-2">
                 <button class="btn btn-actions" (click)="openEditModal()" [ngbTooltip]="t('edit-series-alt')">
                   <span><i class="fa fa-pen" aria-hidden="true"></i></span>
