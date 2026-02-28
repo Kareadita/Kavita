@@ -18,13 +18,13 @@
     @let itemsBeforeVirtualValue = itemsBeforeVirtual();
 
     @if (descriptionValue) {
-      <span class="text-muted mb-3"> {{descriptionValue}} </span>
+      <span class="text-muted mb-1"> {{descriptionValue}} </span>
     }
     @if (invalidSelection) {
-      <span class="text-danger mb-3"> {{invalidSelectWarningValue}} </span>
+      <span class="text-danger mb-1"> {{invalidSelectWarningValue}} </span>
     }
     @if (hideItemsWhenInvalid() && hiddenItems() > 0) {
-      <span class="text-warning mb-3" role="alert">{{t(hiddenTranslationKey(), {amount: hiddenItems()})}}</span>
+      <span class="text-warning mb-1" role="alert">{{t(hiddenTranslationKey(), {amount: hiddenItems()})}}</span>
     }
 
     <form [formGroup]="filterForm">
