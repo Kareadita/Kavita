@@ -172,7 +172,7 @@ export class ClientDeviceCardComponent {
   handleActionCallback(event: ActionResult<ClientDevice>) {
     switch (event.effect) {
       case 'update':
-        // We have purposedly encoded Edit as an Update
+        // We have purposely encoded Edit as an Update
         // The actionable modal needs some time to clean up
         if (this.breakpointService.activeBreakpoint() < Breakpoint.Tablet) {
           setTimeout(() => this.toggleEdit(), 100);

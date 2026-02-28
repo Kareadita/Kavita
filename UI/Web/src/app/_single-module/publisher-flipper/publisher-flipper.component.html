@@ -3,7 +3,7 @@
 
 @if (currentPublisherValue) {
   <div class="publisher-wrapper">
-    <div class="publisher-flipper" [class.is-flipped]="isFlipped">
+    <div class="publisher-flipper" [class.is-flipped]="isFlipped()">
       <div class="publisher-side publisher-front">
         <div class="publisher-img-container d-inline-flex align-items-center me-2 position-relative">
           <app-image [imageUrl]="imageService.getPublisherImage(currentPublisherValue.name)"
