@@ -8,11 +8,7 @@ export const readingListResolver: ResolveFn<ReadingList | UrlTree> = (route, sta
   const readingListService = inject(ReadingListService);
   const router = inject(Router);
 
-  console.log('param map: ', route.paramMap);
-
   const readingListId = route.paramMap.get('readingListId') || route.parent?.paramMap.get('readingListId');
-
-  console.log('readingListId: ', readingListId);
 
   if (!readingListId || readingListId === '0') {
     console.error('Reading List ID not found in route params or 0');

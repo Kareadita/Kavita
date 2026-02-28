@@ -1,7 +1,4 @@
 import {Routes} from "@angular/router";
-import {
-  ReadingListDetailComponent
-} from "../reading-list/_components/reading-list-detail/reading-list-detail.component";
 import {ReadingListsComponent} from "../reading-list/_components/reading-lists/reading-lists.component";
 import {authGuard} from "../_guards/auth.guard";
 import {readingListResolver} from "../_resolvers/reading-list.resolver";
@@ -18,6 +15,6 @@ export const routes: Routes = [
     runGuardsAndResolvers: 'always',
     canActivate: [authGuard],
     resolve: { readingList: readingListResolver },
-    loadComponent: () => import('../reading-list/_components/reading-list-detail/reading-list-detail.component').then(c => ReadingListDetailComponent),
+    loadComponent: () => import('../reading-list/_components/reading-list-detail/reading-list-detail.component').then(c => c.ReadingListDetailComponent),
   }
 ];

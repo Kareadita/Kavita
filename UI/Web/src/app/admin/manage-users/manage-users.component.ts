@@ -50,12 +50,12 @@ export class ManageUsersComponent implements OnInit {
   private readonly translocoService = inject(TranslocoService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly memberService = inject(MemberService);
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly settingsService = inject(SettingsService);
   private readonly modalService = inject(ModalService);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
-  public readonly messageHub = inject(MessageHubService);
+  protected readonly messageHub = inject(MessageHubService);
   private readonly router = inject(Router);
 
   members: Member[] = [];

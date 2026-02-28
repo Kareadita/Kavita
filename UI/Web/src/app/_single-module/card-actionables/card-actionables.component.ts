@@ -150,8 +150,8 @@ export class CardActionablesComponent implements OnDestroy {
 
     // TODO: See if we can use a drawer instead
     const ref = this.modalService.open(ActionableModalComponent);
-    ref.componentInstance.entity = this.entity();
-    ref.componentInstance.filteredActions = this.filteredActions();
+    ref.setInput('entity', this.entity());
+    ref.setInput('filteredActions', this.filteredActions());
 
     ref.componentInstance.actionPerformed.subscribe((actionOrResult: any) => {
       this.actionHandler.emit(actionOrResult);

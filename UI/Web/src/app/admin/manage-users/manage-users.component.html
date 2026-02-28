@@ -51,7 +51,7 @@
           <ng-template ngx-datatable-header-template>{{t('last-active-header')}}</ng-template>
           <ng-template let-member="row" ngx-datatable-cell-template>
             <span [ngbTooltip]="member.lastActiveUtc | utcToLocalTime | defaultDate">
-              @if ((messageHub.onlineUsers$ | async)?.includes(member.username)) {
+              @if ((messageHub.onlineUsersSignal() ?? []).includes(member.username)) {
                 {{t('online-now-tooltip')}}
               } @else {
                 {{member.lastActiveUtc | utcToLocalDate | timeAgo | sentenceCase | defaultDate}}
@@ -176,7 +176,7 @@
   </ng-template>
 
   <ng-template #actionsTemplate let-member>
-    @if (!isMemberYou(member)) {
+    @if (!isMemberYou(member) && accountService.hasAdminRole()) {
       <div class="btn-container">
         <button class="btn btn-danger btn-sm me-2 mb-2" (click)="deleteUser(member)"
                 [ngbTooltip]="t('delete-user-tooltip')" [attr.aria-label]="t('delete-user-alt', {user: member.username | titlecase})">
