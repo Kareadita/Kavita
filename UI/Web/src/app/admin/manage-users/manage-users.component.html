@@ -37,7 +37,7 @@
                 <span class="visually-hidden">{{t('profile-link-alt')}}</span>
               </a>
             }
-            <span class="member-name" [id]="'member-name--' + idx" [ngClass]="{'highlight': !isMemberYou(member)}">
+            <span class="member-name" [id]="'member-name--' + idx" [ngClass]="{'highlight': isMemberYou(member)}">
               {{member.username | titlecase}}
             </span>
             @if (member.isPending) {
@@ -103,7 +103,7 @@
                 <app-image class="me-2" [ngbTooltip]="t('identity-provider-native-tooltip')" imageUrl="assets/icons/favicon-16x16.png" height="16px" width="16px" />
               }
             }
-            <h5 class="card-title mb-0" [ngClass]="{'highlight': !isMemberYou(member)}">
+            <h5 class="card-title mb-0" [ngClass]="{'highlight': isMemberYou(member)}">
               {{member.username | titlecase}}
             </h5>
             @if (member.isPending) {
@@ -176,7 +176,7 @@
   </ng-template>
 
   <ng-template #actionsTemplate let-member>
-    @if (isMemberYou(member)) {
+    @if (!isMemberYou(member)) {
       <div class="btn-container">
         <button class="btn btn-danger btn-sm me-2 mb-2" (click)="deleteUser(member)"
                 [ngbTooltip]="t('delete-user-tooltip')" [attr.aria-label]="t('delete-user-alt', {user: member.username | titlecase})">

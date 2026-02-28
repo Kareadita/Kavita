@@ -73,7 +73,7 @@ export class AccountService {
   public readonly hasChangeAgeRestrictionRole = computed(() => this.hasRole(this._currentUser(), Role.ChangeRestriction));
   public readonly hasDownloadRole = computed(() => this.hasRole(this._currentUser(), Role.Download));
   public readonly hasBookmarkRole = computed(() => this.hasRole(this._currentUser(), Role.Bookmark));
-  public readonly hasReadOnlyRole = computed(() => this.hasRole(this._currentUser(), Role.ReadOnly));
+  public readonly hasReadOnlyRole = computed(() => this._currentUser() ? this.hasRole(this._currentUser(), Role.ReadOnly) : true);
   public readonly hasPromoteRole = computed(() => this.hasRole(this._currentUser(), Role.Promote) || this.hasRole(this._currentUser(), Role.Admin));
 
   public readonly currentUserGenericApiKey = computed(() =>

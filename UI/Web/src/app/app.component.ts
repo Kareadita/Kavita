@@ -44,7 +44,7 @@ export class AppComponent implements OnInit {
   private readonly breakpointService = inject(BreakpointService); // Needs to be injected to run background job
   private readonly licenseService = inject(LicenseService);
   private readonly localizationService = inject(LocalizationService);
-  transitionState = computed(() => this.accountService.userPreferences()?.noTransitions ?? true);
+  transitionState = computed(() => this.accountService.userPreferences()?.noTransitions ?? false);
 
 
   constructor() {
