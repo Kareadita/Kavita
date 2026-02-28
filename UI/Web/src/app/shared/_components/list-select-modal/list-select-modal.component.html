@@ -91,7 +91,7 @@
           <label class="form-label visually-hidden" for="create-input">{{createLabel() ?? ''}}</label>
           <input id="create-input" type="text" class="form-control"
                  [formControl]="createControl" [placeholder]="createLabel() ?? ''">
-          <button type="button" class="btn btn-primary" [disabled]="isCreating()" (click)="create()">
+          <button type="button" class="btn btn-primary" [disabled]="isCreating() || createControl.invalid" (click)="create()">
             {{createButtonLabel() ?? t('common.create')}}
           </button>
         </div>

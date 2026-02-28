@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {NgTemplateOutlet} from "@angular/common";
@@ -134,7 +134,7 @@ export class ListSelectModalComponent<T> {
   interceptCreate = model<((name: string) => Observable<unknown>) | null>(null);
 
   protected readonly isCreating = signal(false);
-  protected readonly createControl = new FormControl('', { nonNullable: true });
+  protected readonly createControl = new FormControl('', { nonNullable: true, validators: Validators.required });
 
   protected validSelection = computed(() => {
     const fn = this.isSelectionValidFunc();
