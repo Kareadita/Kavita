@@ -51,6 +51,7 @@ export class ActionFactoryService {
   private clientDeviceActions: Array<ActionItem<ClientDevice>> = [];
 
   constructor() {
+    this._resetActions();
     effect(() => {
       this.accountService.currentUser();
       this._resetActions();
