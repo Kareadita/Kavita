@@ -551,3 +551,5 @@ API.Tests/Services/Test Data/ScannerService/ScanTests/**/*
 # Temp
 API/config
 API/wwwroot
+
+Kavita.Server/config/appsettings.*.json

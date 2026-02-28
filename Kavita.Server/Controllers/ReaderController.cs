@@ -596,6 +596,7 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("chapter-bookmarks")]
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
     {
@@ -695,6 +696,7 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
+    [VolumeAccess]
     [HttpGet("volume-bookmarks")]
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForVolume(int volumeId)
     {
@@ -706,6 +708,7 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("series-bookmarks")]
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForSeries(int seriesId)
     {
@@ -725,8 +728,7 @@ public class ReaderController : BaseApiController
         try
         {
             // Don't let user save past total pages.
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!,
-                AppUserIncludes.Bookmarks);
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Bookmarks);
             if (user == null) return new UnauthorizedResult();
 
             var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);

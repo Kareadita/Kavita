@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Extensions;
 
-public static class BookmarkSort
+public static class BookmarkSortExtensions
 {
     /// <summary>
     /// Applies the correct sort based on <see cref="SortOptions"/>

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Extensions;
 
-public static class SeriesSort
+public static class SeriesSortExtensions
 {
     /// <summary>
     /// Applies the correct sort based on <see cref="SortOptions"/>
