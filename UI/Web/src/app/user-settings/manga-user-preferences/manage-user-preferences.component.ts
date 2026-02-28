@@ -1,9 +1,7 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Preferences} from "../../_models/preferences/preferences";
 import {AccountService} from "../../_services/account.service";
-import {Title} from "@angular/platform-browser";
-import {Router} from "@angular/router";
 import {LocalizationService} from "../../_services/localization.service";
 import {
   FormArray,
@@ -13,11 +11,9 @@ import {
   ReactiveFormsModule,
   Validators
 } from "@angular/forms";
-import {User} from "../../_models/user/user";
 import {KavitaLocale} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, distinctUntilChanged, filter, forkJoin, of, switchMap, tap} from "rxjs";
-import {take} from "rxjs/operators";
+import {debounceTime, distinctUntilChanged, filter, forkJoin, of, switchMap} from "rxjs";
 import {AsyncPipe, DecimalPipe, TitleCasePipe} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
@@ -89,9 +85,6 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
-  private readonly titleService = inject(Title);
-  private readonly router = inject(Router);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly localizationService = inject(LocalizationService);
   protected readonly licenseService = inject(LicenseService);
   private readonly libraryService = inject(LibraryService);
@@ -102,17 +95,16 @@ export class ManageUserPreferencesComponent implements OnInit {
   loading = signal(true);
   ageRatings = signal<AgeRatingDto[]>([]);
   libraries = signal<Library[]>([]);
-
-  locales: Array<KavitaLocale> = [];
+  locales = signal<KavitaLocale[]>([]);
+  libraryTypeAheadSettings = signal(new TypeaheadSettings<Library>());
 
   settingsForm!: UserPreferencesForm;
-  user: User | undefined = undefined;
-  libraryTypeAheadSettings = signal(new TypeaheadSettings<Library>());
+
 
   get Locale() {
     if (!this.settingsForm.get('locale')) return 'English';
 
-    const locale = (this.locales || []).find(l => l.fileName === this.settingsForm.get('locale')!.value);
+    const locale = (this.locales() || []).find(l => l.fileName === this.settingsForm.get('locale')!.value);
     if (!locale) {
       return 'English';
     }
@@ -123,32 +115,16 @@ export class ManageUserPreferencesComponent implements OnInit {
 
   constructor() {
     this.localizationService.getLocales().subscribe(res => {
-      this.locales = res.sort((l1, l2) => {
-        return l1.renderName.localeCompare(l2.renderName)
-      });
-
-      this.cdRef.markForCheck();
+      this.locales.set(res.sort((l1, l2) => l1.renderName.localeCompare(l2.renderName)));
     });
   }
 
   ngOnInit(): void {
-    this.titleService.setTitle('Kavita - User Preferences');
-    this.cdRef.markForCheck();
-
     forkJoin({
-      user: this.accountService.currentUser$.pipe(take(1)),
       pref: this.accountService.getPreferences(),
       libraries: this.libraryService.getLibraries(),
       ageRatings: this.metadataService.getAllAgeRatings(),
-    }).subscribe(({user, pref, libraries, ageRatings}) => {
-      if (user === undefined) {
-        this.router.navigateByUrl('/login');
-        return;
-      }
-
-      this.user = user;
-      this.user.preferences = pref;
-
+    }).subscribe(({pref, libraries, ageRatings}) => {
       this.loading.set(false);
       this.libraries.set(libraries);
       this.ageRatings.set([{
@@ -200,21 +176,13 @@ export class ManageUserPreferencesComponent implements OnInit {
           const data = this.packSettings();
           return this.accountService.updatePreferences(data);
         }),
-        tap(prefs => {
-          if (this.user) {
-            this.user.preferences = {...prefs};
-            this.cdRef.markForCheck();
-          }
-        })
       ).subscribe();
-
-      this.cdRef.markForCheck();
     });
   }
 
   private setupLibraryTypeAheadSettings() {
     const libs = this.libraries();
-    const selectedLibs = this.user!.preferences.socialPreferences.socialLibraries;
+    const selectedLibs = this.accountService.userPreferences()!.socialPreferences.socialLibraries;
 
     const settings = new TypeaheadSettings<Library>();
     settings.multiple = true;
@@ -235,7 +203,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   }
 
   packSettings(): Preferences {
-    const customKeyBinds = this.accountService.currentUserSignal()!.preferences.customKeyBinds;
+    const customKeyBinds = this.accountService.userPreferences()!.customKeyBinds;
     return {
       customKeyBinds,
       ...this.settingsForm.getRawValue(),

@@ -66,10 +66,12 @@ public class CollectionController : BaseApiController
     /// <param name="collectionId"></param>
     /// <returns></returns>
     [HttpGet("single")]
-    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetTag(int collectionId)
+    public async Task<ActionResult<AppUserCollectionDto>> GetTag(int collectionId)
     {
-        var collections = await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(UserId, false);
-        return Ok(collections.FirstOrDefault(c => c.Id == collectionId));
+        var result = await _unitOfWork.CollectionTagRepository.GetCollectionDtoAsync(collectionId, UserId);
+        if (result == null) return NotFound(); // TODO: Figure out how to best handle restrictions/not found across the codebase
+
+        return Ok(result);
     }
 
     /// <summary>
@@ -101,10 +103,10 @@ public class CollectionController : BaseApiController
     /// <remarks>UI does not contain controls to update title</remarks>
     /// </summary>
     /// <param name="updatedTag"></param>
-    /// <returns></returns>
+    /// <returns>The updated tag entity</returns>
     [HttpPost("update")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> UpdateTag(AppUserCollectionDto updatedTag)
+    public async Task<ActionResult<AppUserCollectionDto>> UpdateTag(AppUserCollectionDto updatedTag)
     {
         try
         {
@@ -112,7 +114,7 @@ public class CollectionController : BaseApiController
             {
                 await _eventHub.SendMessageAsync(MessageFactory.CollectionUpdated,
                     MessageFactory.CollectionUpdatedEvent(updatedTag.Id), false);
-                return Ok(await _localizationService.Translate(UserId, "collection-updated-successfully"));
+                return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtoAsync(updatedTag.Id, UserId));
             }
         }
         catch (KavitaException ex)

@@ -7,7 +7,8 @@ import {
   inject,
   input,
   model, OnInit,
-  Resource, signal, untracked, ViewChild
+  Resource, signal, untracked,
+  viewChild
 } from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgxStarsComponent, NgxStarsModule} from "ngx-stars";
@@ -41,7 +42,7 @@ export class ProfileReviewListComponent implements OnInit {
   private readonly reviewService = inject(ReviewService);
   private readonly destroyRef = inject(DestroyRef);
 
-  @ViewChild(NgxStarsComponent) starsComponent!: NgxStarsComponent;
+  readonly starsComponent = viewChild.required(NgxStarsComponent);
 
   memberInfo = input.required<MemberInfo>();
 
@@ -87,6 +88,6 @@ export class ProfileReviewListComponent implements OnInit {
   }
 
   resetRating() {
-    this.starsComponent.setRating(0);
+    this.starsComponent().setRating(0);
   }
 }

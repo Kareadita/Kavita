@@ -12,7 +12,6 @@ import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {CardActionablesComponent} from "../card-actionables/card-actionables.component";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {DeviceService} from "../../_services/device.service";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -20,6 +19,9 @@ import {DOCUMENT} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
 import {User} from "../../_models/user/user";
 import {Breakpoint, BreakpointService} from "../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-client-device-card',
@@ -69,7 +71,7 @@ export class ClientDeviceCardComponent {
   });
 
   currentUserId = computed(() => {
-    return this.accountService.currentUserSignal()?.id;
+    return this.accountService.currentUser()?.id;
   });
 
   ipAddress = computed(() => {
@@ -154,31 +156,35 @@ export class ClientDeviceCardComponent {
 
 
   constructor() {
-    const user = this.accountService.currentUserSignal();
-    if (user && !this.accountService.hasReadOnlyRole(user)) {
-      this.actions.set(this.actionFactoryService.getClientDeviceActions(this.handleActionCallback.bind(this), this.shouldRenderAction.bind(this)));
+    if (!this.accountService.hasReadOnlyRole()) {
+      this.actions.set(this.actionFactoryService.getClientDeviceActions(this.shouldRenderAction.bind(this)));
     }
   }
 
 
   shouldRenderAction(action: ActionItem<ClientDevice>, entity: ClientDevice, user: User) {
-    const loggedInUser = this.accountService.currentUserSignal();
+    const loggedInUser = this.accountService.currentUser();
     return entity.ownerUserId === loggedInUser?.id; // Only a user can manipulate their own devices
   }
 
 
-  handleActionCallback(action: ActionItem<ClientDevice>, entity: ClientDevice) {
-    switch (action.action) {
-      case Action.Delete:
-        this.deleteDevice();
-        break;
-      case Action.Edit:
+
+  handleActionCallback(event: ActionResult<ClientDevice>) {
+    switch (event.effect) {
+      case 'update':
+        // We have purposely encoded Edit as an Update
         // The actionable modal needs some time to clean up
         if (this.breakpointService.activeBreakpoint() < Breakpoint.Tablet) {
           setTimeout(() => this.toggleEdit(), 100);
         } else {
           this.toggleEdit();
         }
+        break;
+      case 'remove':
+        this.deviceDeleted.emit(event.entity.id);
+        break;
+      case 'reload':
+      case 'none':
         break;
     }
   }
@@ -191,20 +197,8 @@ export class ClientDeviceCardComponent {
     });
   }
 
-  deleteDevice() {
-    const id = this.clientDevice().id;
-    this.deviceService.deleteClientDevice(id).subscribe(successful => {
-      if (successful) {
-        this.deviceDeleted.emit(id);
-      }
-    });
-  }
-
   toggleEdit() {
     this.deviceForm.get('name')!.setValue(this.clientDevice().friendlyName);
     this.isEditMode.update(x => !x);
   }
-
-
-
 }

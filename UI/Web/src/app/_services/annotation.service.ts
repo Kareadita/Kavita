@@ -6,7 +6,6 @@ import {TextResonse} from "../_types/text-response";
 import {asyncScheduler, map, of, tap} from "rxjs";
 import {switchMap, throttleTime} from "rxjs/operators";
 import {AccountService} from "./account.service";
-import {User} from "../_models/user/user";
 import {MessageHubService} from "./message-hub.service";
 import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
 import {Router} from "@angular/router";
@@ -50,21 +49,15 @@ export class AnnotationService {
   private _events = signal<AnnotationEvent | null>(null);
   public readonly events = this._events.asReadonly();
 
-  private readonly user = signal<User | null>(null);
   public readonly slots = computed(() => {
-    const currentUser = this.user();
+    const currentUser = this.accountService.currentUser();
 
     return currentUser?.preferences?.bookReaderHighlightSlots ?? [];
   });
 
-  constructor() {
-    this.accountService.currentUser$.subscribe(user => {
-      this.user.set(user!);
-    });
-  }
 
   updateSlotColor(index: number, color: RgbaColor) {
-    const user = this.accountService.currentUserSignal();
+    const user = this.accountService.currentUser();
     if (!user) return of([]);
 
     const preferences = user.preferences;
@@ -206,7 +199,7 @@ export class AnnotationService {
    * @param ids
    */
   likeAnnotations(ids: number[]) {
-    const userId = this.accountService.currentUserSignal()?.id;
+    const userId = this.accountService.currentUser()?.id;
     if (!userId) return of();
 
     return this.httpClient.post(this.baseUrl + 'annotation/like', ids);
@@ -217,7 +210,7 @@ export class AnnotationService {
    * @param ids
    */
   unLikeAnnotations(ids: number[]) {
-    const userId = this.accountService.currentUserSignal()?.id;
+    const userId = this.accountService.currentUser()?.id;
     if (!userId) return of();
 
     return this.httpClient.post(this.baseUrl + 'annotation/unlike', ids);

@@ -3,11 +3,10 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter,
   inject,
   Input,
   OnInit,
-  Output
+  output
 } from '@angular/core';
 import {AsyncValidatorFn, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn} from "@angular/forms";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -30,9 +29,10 @@ export class EditListComponent implements OnInit {
   @Input({required: true}) label = '';
   @Input() validators: ValidatorFn[] = []
   @Input() asyncValidators: AsyncValidatorFn[] = [];
+
   // TODO: Make this more dynamic based on which validator failed
   @Input() errorMessage: string | null = null;
-  @Output() updateItems = new EventEmitter<Array<string>>();
+  readonly updateItems = output<Array<string>>();
 
   form: FormGroup = new FormGroup({items: new FormArray([])});
 

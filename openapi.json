@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.1",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.2",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.1"
+    "version": "0.8.9.2"
   },
   "servers": [
     {
@@ -2204,26 +2204,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AppUserCollectionDto"
-                  }
+                  "$ref": "#/components/schemas/AppUserCollectionDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AppUserCollectionDto"
-                  }
+                  "$ref": "#/components/schemas/AppUserCollectionDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AppUserCollectionDto"
-                  }
+                  "$ref": "#/components/schemas/AppUserCollectionDto"
                 }
               }
             }
@@ -2358,7 +2349,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppUserCollectionDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppUserCollectionDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppUserCollectionDto"
+                }
+              }
+            }
           }
         }
       }
@@ -5521,7 +5529,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LibraryDto"
+                }
+              }
+            }
           }
         }
       }
@@ -5639,6 +5664,7 @@
           "Library"
         ],
         "summary": "Return a specific library",
+        "description": "If the user is not an admin, only id, type, and name will be returned",
         "parameters": [
           {
             "name": "libraryId",
@@ -5655,17 +5681,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/LibraryDto"
+                  "$ref": "#/components/schemas/LiteLibraryDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LibraryDto"
+                  "$ref": "#/components/schemas/LiteLibraryDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LibraryDto"
+                  "$ref": "#/components/schemas/LiteLibraryDto"
                 }
               }
             }
@@ -13995,7 +14021,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeriesDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeriesDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeriesDto"
+                }
+              }
+            }
           }
         }
       }
@@ -14111,7 +14154,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/RecentlyAddedItemDto"
+                    "$ref": "#/components/schemas/GroupedSeriesDto"
                   }
                 }
               },
@@ -14119,7 +14162,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/RecentlyAddedItemDto"
+                    "$ref": "#/components/schemas/GroupedSeriesDto"
                   }
                 }
               },
@@ -14127,7 +14170,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/RecentlyAddedItemDto"
+                    "$ref": "#/components/schemas/GroupedSeriesDto"
                   }
                 }
               }
@@ -23617,6 +23660,73 @@
         },
         "additionalProperties": false
       },
+      "GroupedSeriesDto": {
+        "type": "object",
+        "properties": {
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryType": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "chapterId": {
+            "type": "integer",
+            "description": "Chapter Id if this is a chapter. Not guaranteed to be set.",
+            "format": "int32"
+          },
+          "volumeId": {
+            "type": "integer",
+            "description": "Volume Id if this is a chapter. Not guaranteed to be set.",
+            "format": "int32"
+          },
+          "id": {
+            "type": "integer",
+            "description": "This is used only on the UI. It is just index of being added.",
+            "format": "int32"
+          },
+          "format": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of items that are updated. This provides a sort of grouping when multiple chapters are added per Volume/Series",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "This is a representation of a Series with some amount of underlying files within it. This is used for Recently Updated Series section"
+      },
       "HighlightSlot": {
         "type": "object",
         "properties": {
@@ -23995,11 +24105,6 @@
             "type": "string",
             "nullable": true
           },
-          "lastScanned": {
-            "type": "string",
-            "description": "Last time Library was scanned",
-            "format": "date-time"
-          },
           "type": {
             "enum": [
               0,
@@ -24011,6 +24116,11 @@
             ],
             "type": "integer",
             "format": "int32"
+          },
+          "lastScanned": {
+            "type": "string",
+            "description": "Last time Library was scanned",
+            "format": "date-time"
           },
           "coverImage": {
             "type": "string",
@@ -24156,6 +24266,33 @@
           }
         },
         "additionalProperties": false
+      },
+      "LiteLibraryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "This is a LibraryDto that non-admins can resolve that has the core information they need"
       },
       "LoginDto": {
         "type": "object",
@@ -26135,73 +26272,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "RecentlyAddedItemDto": {
-        "type": "object",
-        "properties": {
-          "seriesName": {
-            "type": "string",
-            "nullable": true
-          },
-          "seriesId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "libraryId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "libraryType": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
-          },
-          "title": {
-            "type": "string",
-            "description": "This will automatically map to Volume X, Chapter Y, etc.",
-            "nullable": true
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "chapterId": {
-            "type": "integer",
-            "description": "Chapter Id if this is a chapter. Not guaranteed to be set.",
-            "format": "int32"
-          },
-          "volumeId": {
-            "type": "integer",
-            "description": "Volume Id if this is a chapter. Not guaranteed to be set.",
-            "format": "int32"
-          },
-          "id": {
-            "type": "integer",
-            "description": "This is used only on the UI. It is just index of being added.",
-            "format": "int32"
-          },
-          "format": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4
-            ],
-            "type": "integer",
-            "description": "Represents the format of the file",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false,
-        "description": "A mesh of data for Recently added volume/chapters"
       },
       "RecommendationDto": {
         "type": "object",

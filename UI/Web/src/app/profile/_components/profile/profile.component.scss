@@ -6,7 +6,7 @@
 	.profile-image-wrapper {
 		display: flex;
 		align-items: center;
-		margin-right: 12px;
+		margin-right: 0.75rem;
 
 		.image-container {
 			margin-top: 0 !important;
@@ -22,11 +22,11 @@
 
 	.badges {
 		display: flex;
-		gap: 8px;
+		gap: 0.5rem;
 
 		.badge {
-			padding: 4px 8px;
-			border-radius: 999px;
+			padding: 0.25rem 0.5rem;
+			border-radius: 62.4375rem;
 			font-size: 0.75rem;
 			font-weight: 600;
 		}
@@ -55,7 +55,7 @@
 		background-size: cover;
 		background-position: center;
 		transform: scale(1.04);
-		filter: blur(12px) saturate(.9) brightness(.7);
+		filter: blur(0.75rem) saturate(.9) brightness(.7);
 		opacity: 0.45;
 		z-index: 0;
 		pointer-events: none;
@@ -71,6 +71,6 @@
 
 /* Round the background container */
 .main-container.has-bg {
-	border-radius: 5px;
+	border-radius: 0.3125rem;
 }
 

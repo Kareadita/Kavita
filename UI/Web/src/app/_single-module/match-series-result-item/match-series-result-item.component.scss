@@ -1,7 +1,7 @@
 .search-result {
     img {
-        max-width: 100px;
-        min-width: 100px;
+        max-width: 6.25rem;
+        min-width: 6.25rem;
     }
 }
 .title {
@@ -19,7 +19,7 @@
     &.light {
         background-color: var(--elevation-layer6);
     }
-    border-radius: 15px;
+    border-radius: 0.9375rem;
 
     &:hover {
         &.dark {

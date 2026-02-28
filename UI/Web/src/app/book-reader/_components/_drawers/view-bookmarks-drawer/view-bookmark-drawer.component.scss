@@ -7,7 +7,7 @@
 
 .drawer-text i {
   color: var(--drawer-text-color);
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .drawer-text:hover i {
@@ -19,18 +19,18 @@
   background: var(--bs-dark, #2b2b2b);
   border-radius: .5rem;
   overflow: hidden;
-  min-height: 92px;
-  box-shadow: 0 2px 4px rgba(0,0,0,.4);
+  min-height: 5.75rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.4);
   outline: none;
 
   &:focus-visible {
-    box-shadow: 0 0 0 3px rgba(100,150,250,.6);
+    box-shadow: 0 0 0 0.1875rem rgba(100,150,250,.6);
   }
 }
 
 .thumb-wrapper {
-  width: 80px;
-  flex: 0 0 80px;
+  width: 5rem;
+  flex: 0 0 5rem;
   background: #111;
   position: relative;
   display: flex;
@@ -88,9 +88,9 @@
 // Mobile tweaks
 @media (max-width: 576px) {
   .bookmark-item {
-    min-height: 84px;
+    min-height: 5.25rem;
   }
-  .thumb-wrapper { width: 64px; flex-basis: 64px; }
+  .thumb-wrapper { width: 4rem; flex-basis: 4rem; }
   .bookmark-meta { padding: .5rem .5rem .6rem; }
   .chapter-title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
 }

@@ -2,8 +2,8 @@
   <ng-container *transloco="let t">
     <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
       <h4 title>
-        <span>{{libraryName}}</span>
-        <app-card-actionables [actions]="actions" (actionHandler)="performAction($event)" />
+        <span>{{libraryName()}}</span>
+        <app-card-actionables [actions]="actions()" [entity]="library()" (actionHandler)="handleActionCallback($event)"  />
       </h4>
       @if (active.fragment === '') {
         <h5 subtitle class="subtitle-with-actionables">{{t('common.series-count', {num: pagination.totalItems | number})}} </h5>
@@ -14,7 +14,7 @@
     @if (filter) {
       <app-card-detail-layout
         [isLoading]="loadingSeries"
-        [items]="series"
+        [items]="series()"
         [pagination]="pagination"
         [filterSettings]="filterSettings"
         [trackByIdentity]="trackByIdentity"
@@ -25,13 +25,12 @@
       >
 
         <ng-template #topBar>
-          <app-bulk-operations [actionCallback]="bulkActionCallback" />
+          <app-bulk-operations />
         </ng-template>
 
         <ng-template #cardItem let-item let-position="idx">
-          <app-series-card [series]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"
-                           (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
-                           [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true" />
+          <app-series-card [series]="item" [suppressLibraryLink]="true" (reload)="loadPage()"
+                           [index]="position" [maxIndex]="series().length" [allowSelection]="true" />
         </ng-template>
 
         <ng-template #noData>

@@ -61,5 +61,9 @@
     "reading-list-item-delete": "No s'han pogut suprimir els elements",
     "generic-reading-list-create": "S'ha produït un problema en crear la llista de lectura",
     "generic-reading-list-update": "S'ha produït un problema en actualitzar la llista de lectura",
-    "generic-create-temp-archive": "S'ha produït un problema en crear l'arxiu temporal"
+    "generic-create-temp-archive": "S'ha produït un problema en crear l'arxiu temporal",
+    "locked-out": "S'ha bloquejat l'accés degut a masses intents d'autentificació. Si us plau, espera 10 minuts.",
+    "disabled-account": "El seu compte s'ha deshabilitat. Contacti amb l'administrador.",
+    "register-user": "Hi ha hagut un error al registrar-se",
+    "validate-email": "Hi ha hagut un error al validar l'e-mail: {0}"
 }

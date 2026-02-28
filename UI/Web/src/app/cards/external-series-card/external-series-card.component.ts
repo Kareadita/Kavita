@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ElementRef, inject, Input, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, inject, input, viewChild} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 import {ExternalSeries} from "../../_models/series-detail/external-series";
 import {ImageComponent} from "../../shared/image/image.component";
@@ -18,25 +18,26 @@ import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 export class ExternalSeriesCardComponent {
   private readonly offcanvasService = inject(NgbOffcanvas);
 
-  @Input({required: true}) data!: ExternalSeries;
+  data = input.required<ExternalSeries>();
   /**
    * When clicking on the series, instead of opening, opens a preview drawer
    */
-  @Input() previewOnClick: boolean = false;
-  @ViewChild('link', {static: false}) link!: ElementRef<HTMLAnchorElement>;
+  previewOnClick = input<boolean>(false);
+  link = viewChild<ElementRef<HTMLAnchorElement>>('link')
 
 
   handleClick() {
-    if (this.previewOnClick) {
+    if (this.previewOnClick()) {
       const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: ''});
       ref.componentInstance.isExternalSeries = true;
-      ref.componentInstance.aniListId = this.data.aniListId;
-      ref.componentInstance.malId = this.data.malId;
-      ref.componentInstance.name = this.data.name;
+      ref.componentInstance.aniListId = this.data().aniListId;
+      ref.componentInstance.malId = this.data().malId;
+      ref.componentInstance.name = this.data().name;
       return;
     }
-    if (this.link) {
-      this.link.nativeElement.click();
+    const linkElem = this.link()?.nativeElement;
+    if (linkElem) {
+      linkElem.click();
     }
   }
 }

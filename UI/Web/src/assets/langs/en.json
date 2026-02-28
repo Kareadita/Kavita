@@ -1,4 +1,18 @@
 {
+    "title": {
+        "reading-list": "Reading Lists",
+        "home": "Home",
+        "bookmarks": "Bookmarks",
+        "collections": "Collections",
+        "browse-genres": "Browse Genres",
+        "browse-tags": "Browse Tags",
+        "want-to-read": "Want To Read",
+        "reading-lists": "Reading Lists",
+        "settings": "Settings",
+        "all-series": "All Series",
+        "profile": "{{username}}'s Profile"
+    },
+
     "login": {
         "title": "Sign in to your account",
         "username": "{{common.username}}",
@@ -766,15 +780,6 @@
         "title": "Announcements"
     },
 
-    "out-of-date-modal": {
-        "title": "Don't fall behind!",
-        "close": "{{common.close}}",
-        "subtitle": "It seems your install is more than {{count}} versions behind!",
-        "description-1": "Please consider upgrading so that you're running the latest version of Kavita.",
-        "description-2": "Take a look at our <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> for instructions on how to update.",
-        "description-3": "If there is a specific reason you haven't updated yet we would love to know what is keeping you on an outdated version! Stop by our discord and let us know what is blocking your upgrade path."
-    },
-
     "changelog": {
         "installed": "Installed",
         "download": "Download",
@@ -797,20 +802,28 @@
         "known-issues": "Known Issues"
     },
 
-    "new-version-modal": {
-        "title": "Kavita was updated!",
-        "description": "A new version of Kavita is available. Refresh to update.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
+    "version-update-modal": {
         "close": "{{common.close}}",
-        "refresh": "Refresh"
+        "out-of-date": {
+            "title": "Don't fall behind!",
+            "subtitle": "It seems your install is more than {{count}} versions behind!",
+            "description-1": "Please consider upgrading so that you're running the latest version of Kavita.",
+            "description-2": "Take a look at our <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> for instructions on how to update.",
+            "description-3": "If there is a specific reason you haven't updated yet we would love to know what is keeping you on an outdated version! Stop by our discord and let us know what is blocking your upgrade path."
+        },
+        "new-version": {
+            "title": "Kavita was updated!",
+            "description": "A new version of Kavita is available. Refresh to update.",
+            "refresh": "Refresh"
+        },
+        "update-notification": {
+            "title": "New Update Available!",
+            "help": "How to Update",
+            "download": "Download"
+        }
     },
+
+
 
     "invite-user": {
         "title": "Invite User",
@@ -1270,13 +1283,6 @@
         "read-less": "Read Less"
     },
 
-    "update-notification-modal": {
-        "title": "New Update Available!",
-        "close": "{{common.close}}",
-        "help": "How to Update",
-        "download": "Download"
-    },
-
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
         "open-filter-and-sort": "Open Filtering and Sorting",
@@ -1492,7 +1498,9 @@
     },
 
     "card-item": {
-        "cannot-read": "Cannot Read"
+        "cannot-read": "Cannot Read",
+        "select": "Select",
+        "read": "read"
     },
 
     "details-tab": {
@@ -2730,7 +2738,8 @@
         "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Chapters",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "Provided by"
+        "provided-by-label": "Provided by",
+        "story-and-art-label": "Story & Art"
     },
 
     "next-expected-card": {
@@ -3362,8 +3371,11 @@
         "collections-unpromoted": "Collections un-promoted",
         "reading-list-promoted": "Reading List promoted",
         "reading-list-unpromoted": "Reading List un-promoted",
+        "confirm-delete-collection": "Are you sure you want to delete the collection? This cannot be undone.",
         "confirm-delete-collections": "Are you sure you want to delete multiple collections?",
         "collections-deleted": "Collections deleted",
+        "confirm-delete-annotations": "Are you sure you want to delete the annotations? This cannot be undone.",
+        "annotations-deleted": "Annotation deleted",
         "chapter-deleted": "Chapter deleted",
         "volume-deleted": "Volume deleted",
         "pdf-book-mode-screen-size": "Screen too small for Book mode",

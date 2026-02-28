@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
@@ -11,5 +11,5 @@ import {TranslocoDirective} from "@jsverse/transloco";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PromotedIconComponent {
-  @Input({required: true}) promoted: boolean = false;
+  promoted = input.required<boolean>();
 }

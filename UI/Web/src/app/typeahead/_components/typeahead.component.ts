@@ -1,10 +1,9 @@
-import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AsyncPipe, DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
+  contentChild,
   DestroyRef,
   ElementRef,
   EventEmitter,
@@ -16,7 +15,7 @@ import {
   Renderer2,
   RendererStyleFlags2,
   TemplateRef,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Observable, ReplaySubject} from 'rxjs';
@@ -28,30 +27,15 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SelectionModel} from "../_models/selection-model";
 
-
-const ANIMATION_SPEED = 200;
-
 @Component({
   selector: 'app-typeahead',
   imports: [TagBadgeComponent, ReactiveFormsModule, TranslocoDirective, AsyncPipe, NgTemplateOutlet, NgClass],
   templateUrl: './typeahead.component.html',
   styleUrls: ['./typeahead.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-      trigger('slideFromTop', [
-          state('in', style({ height: '0px' })),
-          transition('void => *', [
-              style({ height: '100%', overflow: 'auto' }),
-              animate(ANIMATION_SPEED)
-          ]),
-          transition('* => void', [
-              animate(ANIMATION_SPEED, style({ height: '0px' })),
-          ])
-      ])
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TypeaheadComponent implements OnInit {
-  private document = inject<Document>(DOCUMENT);
+  private readonly document = inject<Document>(DOCUMENT);
 
   /**
    * Settings for the typeahead
@@ -84,9 +68,9 @@ export class TypeaheadComponent implements OnInit {
   @Output() lockedChange = new EventEmitter<boolean>();
 
 
-  @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
-  @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
-  @ContentChild('badgeItem') badgeTemplate!: TemplateRef<any>;
+  readonly inputElem = viewChild.required<ElementRef<HTMLInputElement>>('input');
+  readonly optionTemplate = contentChild.required<TemplateRef<any>>('optionItem');
+  readonly badgeTemplate = contentChild.required<TemplateRef<any>>('badgeItem');
 
   optionSelection!: SelectionModel<any>;
 
@@ -150,8 +134,9 @@ export class TypeaheadComponent implements OnInit {
       .pipe(
         // Adjust input box to grow
         tap((val: string) => {
-          if (this.inputElem != null && this.inputElem.nativeElement != null) {
-            this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 15 * (val.trim().length + 1) + 'px');
+          const inputElem = this.inputElem();
+          if (this.inputElem != null && inputElem.nativeElement != null) {
+            this.renderer2.setStyle(inputElem.nativeElement, 'width', 15 * (val.trim().length + 1) + 'px');
             this.focusedIndex = 0;
           }
         }),
@@ -364,11 +349,12 @@ export class TypeaheadComponent implements OnInit {
       return;
     }
 
-    if (this.inputElem) {
+    const inputElem = this.inputElem();
+    if (inputElem) {
       // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
       this.document.body.click();
 
-      this.inputElem.nativeElement.focus();
+      inputElem.nativeElement.focus();
       this.hasFocus = true;
     }
 
@@ -378,8 +364,9 @@ export class TypeaheadComponent implements OnInit {
 
 
   resetField() {
-    if (this.inputElem && this.inputElem.nativeElement) {
-      this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 4, RendererStyleFlags2.Important);
+    const inputElem = this.inputElem();
+    if (inputElem && inputElem.nativeElement) {
+      this.renderer2.setStyle(inputElem.nativeElement, 'width', 4, RendererStyleFlags2.Important);
     }
     this.typeaheadControl.setValue('');
     this.focusedIndex = 0;

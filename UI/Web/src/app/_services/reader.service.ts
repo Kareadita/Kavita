@@ -672,24 +672,22 @@ export class ReaderService {
     ).catch(err => console.error(err)));
   }
 
-  private handlePrompt(prompt: RereadPrompt, incognitoMode: boolean) {
+  private handlePrompt<T>(prompt: RereadPrompt, incognitoMode: boolean) {
     if (incognitoMode) return of({prompt: prompt, result: RereadPromptResult.ReadIncognito});
 
     if (!prompt.shouldPrompt) return of({prompt: prompt, result: RereadPromptResult.Continue});
 
 
-    const [modal, component] = this.modalService.open(ListSelectModalComponent, {
-      centered: true,
-    });
+    const ref = this.modalService.open<ListSelectModalComponent<T>>(ListSelectModalComponent);
 
-    component.showFooter.set(false);
-    component.title.set(translate('reread-modal.title'));
+    ref.componentInstance.showFooter.set(false);
+    ref.componentInstance.title.set(translate('reread-modal.title'));
 
     if (prompt.timePrompt) {
-      component.description.set(translate('reread-modal.description-time-passed',
+      ref.componentInstance.description.set(translate('reread-modal.description-time-passed',
         { days: prompt.daysSinceLastRead, name: prompt.chapterOnReread.label }));
     } else {
-      component.description.set(translate('reread-modal.description-full-read', { name: prompt.chapterOnReread.label }));
+      ref.componentInstance.description.set(translate('reread-modal.description-full-read', { name: prompt.chapterOnReread.label }));
     }
 
     const options = [
@@ -703,10 +701,10 @@ export class ReaderService {
 
     options.push({label: translate('reread-modal.cancel'), value: RereadPromptResult.Cancel});
 
-    component.inputItems.set(options);
+    ref.setInput('inputItems', options);
 
-    return modal.closed.pipe(
-      takeUntil(modal.dismissed),
+    return ref.closed.pipe(
+      takeUntil(ref.dismissed),
       take(1),
       map(res => ({prompt: prompt, result: res as RereadPromptResult})),
       catchError(() => of({prompt: prompt, result: RereadPromptResult.Cancel}))

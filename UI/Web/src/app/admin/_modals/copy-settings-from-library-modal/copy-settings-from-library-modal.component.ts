@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {Library} from "../../../_models/library/library";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -17,7 +17,7 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 export class CopySettingsFromLibraryModalComponent {
   protected readonly modal = inject(NgbActiveModal);
 
-  @Input() libraries: Array<Library> = [];
+  libraries = input<Library[]>([]);
 
   libForm = new FormGroup({
     'library': new FormControl(null),

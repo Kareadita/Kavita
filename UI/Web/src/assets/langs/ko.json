@@ -494,14 +494,6 @@
     "announcements": {
         "title": "공지 사항"
     },
-    "out-of-date-modal": {
-        "title": "뒤처지지 마세요!",
-        "close": "{{common.close}}",
-        "subtitle": "귀하의 설치 버전이 {{count}}개 이상 뒤처진 것 같습니다!",
-        "description-1": "최신 버전의 Kavita를 실행할 수 있도록 업그레이드하는 것을 고려해 보세요.",
-        "description-2": "업데이트 방법에 대한 지침은 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>를 살펴보세요.",
-        "description-3": "아직 업데이트하지 않은 특별한 이유가 있는 경우 오래된 버전을 유지하는 이유가 무엇인지 알고 싶습니다! 우리의 불일치에 들러 업그레이드 경로를 방해하는 것이 무엇인지 알려주십시오."
-    },
     "changelog": {
         "installed": "설치됨",
         "download": "다운로드",
@@ -746,12 +738,6 @@
     "read-more": {
         "read-more": "더 읽기",
         "read-less": "그만 읽기"
-    },
-    "update-notification-modal": {
-        "title": "새로운 업데이트 사용가능!",
-        "close": "{{common.close}}",
-        "help": "업데이트 방법",
-        "download": "다운로드"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2487,20 +2473,6 @@
         "published-label": "게시된 날짜: ",
         "installed": "{{changelog.installed}}"
     },
-    "new-version-modal": {
-        "known-issues": "{{changelog.known-issues}}",
-        "close": "{{common.close}}",
-        "theme": "{{changelog.theme}}",
-        "changed": "{{changelog.changed}}",
-        "refresh": "새로고침",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "title": "Kavita가 업데이트되었습니다!",
-        "description": "Kavita의 새 버전이 출시되었습니다. 업데이트하려면 새로 고침하세요.",
-        "added": "{{changelog.added}}"
-    },
     "manage-matched-metadata": {
         "title": "일치하는 메타데이터",
         "library-name-header": "라이브러리",
@@ -2887,7 +2859,7 @@
         "other-field-required": "{{validation.other-field-required}}",
         "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "프로바이더(인증 제공자) 설정을 변경하려면 수동으로 저장해야 합니다",
-        "authority-label": "OIDC URL",
+        "authority-label": "권한",
         "authority-tooltip": "OIDC 인증 제공자의 기본 URL을 입력합니다 .well-known/openid-configuration 경로는 포함하지 마세요",
         "client-id-label": "클라이언트 ID",
         "client-id-tooltip": "OIDC 인증 제공자에 ClientID를 설정합니다. 어떤 제공자도 사용할 수 있습니다",
@@ -2896,7 +2868,7 @@
         "provision-accounts-label": "계정 자동 생성",
         "provision-accounts-tooltip": "OIDC 로그인 시 기존 계정과 매칭되지 않으면, 자동으로 새 계정을 생성합니다",
         "require-verified-email-label": "이메일 인증 필수",
-        "require-verified-email-tooltip": "새 계정을 생성하거나 기존 계정과 매칭할 때, 이메일이 인증되어야만 로그인이 가능합니다. OIDC 쪽 계정이 이미 인증된 이메일을 가지고 있다면, Kavita에서도 자동으로 이메일이 인증된 상태로 처리됩니다.",
+        "require-verified-email-tooltip": "새 계정을 생성하거나 기존 계정과 매칭할 때, 이메일이 인증되어야만 로그인이 가능합니다. 신규 생성된 계정이 이미 인증된 이메일을 가지고 있다면, Kavita에서도 자동으로 이메일이 인증된 상태로 처리됩니다.",
         "sync-user-settings-label": "OIDC 역할 동기화",
         "sync-user-settings-tooltip": "OIDC를 통해 생성된 사용자는 ID 제공자(OIDC Provider)가 역할(Role), 라이브러리 접근 권한, 연령 제한 등을 전적으로 관리합니다. 이 옵션을 비활성화하면, 신규 계정은 생성되더라도 콘텐츠에 접근할 수 없습니다. 자세한 내용은 문서를 참조하세요.",
         "auto-login-label": "자동 로그인",
@@ -2987,14 +2959,14 @@
         "close": "{{common.close}}"
     },
     "font-manager": {
-        "description": "Kavita의 EPUB 리더에는 몇 가지 기본 폰트가 포함되어 있습니다. 글꼴 파일을 업로드하거나 Google 폰트 URL을 사용하십시오. 자세한 내용은 <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>위키</a>를 참고하십시오.",
+        "description": "Kavita의 EPUB 리더에는 몇 가지 기본 글꼴이 포함되어 있습니다. 글꼴 파일을 업로드하거나 Google 글꼴 URL을 사용하십시오. 자세한 내용은 <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>위키</a>를 참고하십시오.",
         "enter-an-url-pre-title": "{{url}}을(를) 입력하십시오",
         "url": "URL",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "폰트 파일",
-        "preview-default": "당신의 폰트 파일 또는 Google 폰트 URL로 업로드하십시오",
+        "preview-default": "당신의 글꼴 파일 또는 Google 글꼴 URL로 업로드하십시오",
         "delete": "{{common.delete}}",
         "url-label": "URL",
         "back": "뒤로",
@@ -3410,5 +3382,25 @@
         "pages-count": "{{num}} 페이지",
         "words-read-by-year-title": "연간 읽은 단어",
         "words-count": "{{num}} 단어"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "뒤처지지 마세요!",
+            "subtitle": "귀하의 설치 버전이 {{count}}개 이상 뒤처진 것 같습니다!",
+            "description-1": "최신 버전의 Kavita를 실행할 수 있도록 업그레이드하는 것을 고려해 보세요.",
+            "description-2": "업데이트 방법에 대한 지침은 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>를 살펴보세요.",
+            "description-3": "아직 업데이트하지 않은 특별한 이유가 있는 경우 오래된 버전을 유지하는 이유가 무엇인지 알고 싶습니다! 우리의 불일치에 들러 업그레이드 경로를 방해하는 것이 무엇인지 알려주십시오."
+        },
+        "new-version": {
+            "title": "Kavita가 업데이트되었습니다!",
+            "description": "Kavita의 새 버전이 출시되었습니다. 업데이트하려면 새로 고침하세요.",
+            "refresh": "새로고침"
+        },
+        "update-notification": {
+            "title": "새로운 업데이트 사용가능!",
+            "help": "업데이트 방법",
+            "download": "다운로드"
+        }
     }
 }

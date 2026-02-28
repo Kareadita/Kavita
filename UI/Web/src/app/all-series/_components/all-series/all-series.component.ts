@@ -7,9 +7,8 @@ import {
   inject,
   OnInit
 } from '@angular/core';
-import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {debounceTime, take} from 'rxjs/operators';
+import {debounceTime} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
@@ -17,8 +16,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {Action, ActionItem} from 'src/app/_services/action-factory.service';
-import {ActionService} from 'src/app/_services/action.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {SeriesService} from 'src/app/_services/series.service';
@@ -40,6 +37,7 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {Select2Option} from "ng-select2-component";
+import {KavitaTitleStrategy} from "../../../_services/kavita-title.strategy";
 
 
 @Component({
@@ -55,8 +53,7 @@ export class AllSeriesComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly seriesService = inject(SeriesService);
-  private readonly titleService = inject(Title);
-  private readonly actionService = inject(ActionService);
+  private readonly kavitaTitleStrategy = inject(KavitaTitleStrategy);
   private readonly hubService = inject(MessageHubService);
   private readonly utilityService = inject(UtilityService);
   private readonly route = inject(ActivatedRoute);
@@ -78,60 +75,16 @@ export class AllSeriesComponent implements OnInit {
   jumpbarKeys: Array<JumpKey> = [];
   browseTitlePipe = new BrowseTitlePipe();
 
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
-
-    switch (action.action) {
-      case Action.AddToReadingList:
-        this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-        });
-        break;
-      case Action.AddToWantToReadList:
-        this.actionService.addMultipleSeriesToWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-        });
-        break;
-      case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-        });
-        break;
-      case Action.AddToCollection:
-        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, (success) => {
-          if (success) this.bulkSelectionService.deselectAll();
-        });
-        break;
-      case Action.MarkAsRead:
-        this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
-          this.loadPage();
-          this.bulkSelectionService.deselectAll();
-        });
-
-        break;
-      case Action.MarkAsUnread:
-        this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
-          this.loadPage();
-          this.bulkSelectionService.deselectAll();
-        });
-        break;
-      case Action.Delete:
-        this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
-          if (!successful) return;
-          this.loadPage();
-          this.bulkSelectionService.deselectAll();
-        });
-        break;
-    }
-  }
-
-
-
 
   constructor() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
+    this.bulkSelectionService.registerDataSource('series', () => this.series);
+    this.bulkSelectionService.registerPostAction(res => {
+      if (res.effect === 'none') return;
+
+      this.loadPage();
+    })
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.filter = data['filter'] as FilterV2<FilterField, SortField>;
@@ -142,7 +95,7 @@ export class AllSeriesComponent implements OnInit {
       }
 
       this.title = this.route.snapshot.queryParamMap.get('title') || this.filter!.name || this.title;
-      this.titleService.setTitle('Kavita - ' + this.title);
+      this.kavitaTitleStrategy.setFormattedTitle(this.title);
 
       // To provide a richer experience, when we are browsing just a Genre/Tag/etc, we regenerate the title (if not explicitly passed) to "Browse {GenreName}"
       if (this.shouldRewriteTitle()) {
@@ -158,7 +111,7 @@ export class AllSeriesComponent implements OnInit {
           const newTitle = this.browseTitlePipe.transform(field, value);
           if (newTitle !== '') {
             this.title = newTitle;
-            this.titleService.setTitle('Kavita - ' + this.title);
+            this.kavitaTitleStrategy.setFormattedTitle(this.title);
             this.cdRef.markForCheck();
           }
         });
@@ -216,5 +169,14 @@ export class AllSeriesComponent implements OnInit {
     });
   }
 
-  trackByIdentity = (_: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
+  updateSeries(updatedSeries: Series) {
+    const originalEntity = this.series.find(s => s.id == updatedSeries.id);
+
+    if (originalEntity) {
+      Object.assign(originalEntity, updatedSeries);
+      this.cdRef.markForCheck();
+    }
+  }
+
+  trackByIdentity = (_: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}_${item.libraryId}`;
 }

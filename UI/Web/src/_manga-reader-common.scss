@@ -1,4 +1,4 @@
-$scrollbarHeight: 35px;
+$scrollbarHeight: 2.1875rem;
 
 img {
   user-select: none;
@@ -67,12 +67,12 @@ img {
 .highlight {
   background-color: var(--manga-reader-next-highlight-bg-color) !important;
   animation: fadein .5s both;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(0.625rem);
 }
 .highlight-2 {
   background-color: var(--manga-reader-prev-highlight-bg-color) !important;
   animation: fadein .5s both;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(0.625rem);
 }
 
 
@@ -83,19 +83,19 @@ img {
   left: 50%;
   height: 100%;
   box-shadow:
-      0px 0px calc(17px*3.14) 25px rgb(0 0 0 / 43%),
-      0px 0px calc(2px*3.14) 2px rgb(0 0 0 / 43%),
-      0px 0px calc(5px*3.14) 4px rgb(0 0 0 / 43%),
-      0px 0px calc(0.5px*3.14) 0.3px rgb(0 0 0 / 43%);
+      0 0 calc(1.0625rem*3.14) 1.5625rem rgb(0 0 0 / 43%),
+      0 0 calc(0.125rem*3.14) 0.125rem rgb(0 0 0 / 43%),
+      0 0 calc(0.3125rem*3.14) 0.25rem rgb(0 0 0 / 43%),
+      0 0 calc(0.0312rem*3.14) 0.0187rem rgb(0 0 0 / 43%);
 }
 
 @supports (-moz-appearance:none) {
   ::ng-deep .image-container.book-shadow[class*="double-offset"]:before, ::ng-deep .image-container.book-shadow.wide:before {
     box-shadow:
-      0px 0px calc(17px*3.14) 25px rgb(0 0 0 / 43%),
-      0px 0px calc(2px*3.14) 2px rgb(0 0 0 / 43%),
-      0px 0px calc(5px*3.14) 4px rgb(0 0 0 / 43%),
-      0px 0px calc(0.5px*3.14) 0.3px rgb(0 0 0 / 43%),
-      0px 0px 1px 0.5px rgb(0 0 0 / 43%);
+      0 0 calc(1.0625rem*3.14) 1.5625rem rgb(0 0 0 / 43%),
+      0 0 calc(0.125rem*3.14) 0.125rem rgb(0 0 0 / 43%),
+      0 0 calc(0.3125rem*3.14) 0.25rem rgb(0 0 0 / 43%),
+      0 0 calc(0.0312rem*3.14) 0.0187rem rgb(0 0 0 / 43%),
+      0 0 0.0625rem 0.0312rem rgb(0 0 0 / 43%);
   }
 }

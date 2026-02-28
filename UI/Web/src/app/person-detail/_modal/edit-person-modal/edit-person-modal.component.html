@@ -8,7 +8,7 @@
       </div>
       <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
         <form [formGroup]="editForm">
-          <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+          <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
             <li [ngbNavItem]="TabID.General">
               <a ngbNavLink>{{t(TabID.General)}}</a>

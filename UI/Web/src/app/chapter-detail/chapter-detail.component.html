@@ -6,18 +6,18 @@
   <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
     @let readingProgressStatusValue = readingProgressStatus();
 
-    @if (chapterValue && seriesValue && libraryType !== null) {
+    @if (chapterValue && seriesValue) {
       <div class="row mb-0 mb-xl-3 info-container">
         <div [ngClass]="mobileSeriesImgBackground === 'true' ? 'mobile-bg' : ''" class="image-container col-5 col-sm-12 col-md-12 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
           <app-cover-image [entity]="chapterValue" [coverImage]="imageService.getChapterCoverImage(chapterValue.id)" (read)="read()" />
         </div>
         <div class="col-xl-10 col-lg-7 col-md-12 col-xs-12 col-sm-12">
           <h4 class="title mb-2">
-            <a routerLink="/library/{{libraryId}}/series/{{seriesId}}" class="dark-exempt btn-icon">{{seriesValue.name}}</a>
+            <a routerLink="/library/{{libraryId()}}/series/{{seriesId()}}" class="dark-exempt btn-icon">{{seriesValue.name}}</a>
           </h4>
           <div class="subtitle mt-2 mb-2">
             <span class="me-2">
-              <app-entity-title [libraryType]="libraryType" [entity]="chapterValue" [prioritizeTitleName]="true" [includeChapter]="true" />
+              <app-entity-title [libraryType]="libraryType()" [entity]="chapterValue" [prioritizeTitleName]="true" [includeChapter]="true" />
             </span>
           </div>
 
@@ -25,7 +25,7 @@
                                    [ageRating]="chapterValue.ageRating"
                                    [hasReadingProgress]="chapterValue.pagesRead > 0"
                                    [readingTimeEntity]="chapterValue"
-                                   [libraryType]="libraryType"
+                                   [libraryType]="libraryType()"
                                    [mangaFormat]="seriesValue.format"
                                    [totalBytes]="size()"
                                    [releaseYear]="(chapterValue.releaseDate | utcToLocalDate)?.getFullYear()"
@@ -35,12 +35,12 @@
 
 
           <div class="mt-2 mb-2">
-            <app-external-rating [seriesId]="seriesId"
-                                 [ratings]="ratings"
-                                 [userRating]="rating"
-                                 [hasUserRated]="hasBeenRated"
-                                 [libraryType]="libraryType!"
-                                 [chapterId]="chapterId"
+            <app-external-rating [seriesId]="seriesId()"
+                                 [ratings]="ratings()"
+                                 [userRating]="rating()"
+                                 [hasUserRated]="hasBeenRated()"
+                                 [libraryType]="libraryType()"
+                                 [chapterId]="chapterId()"
              />
           </div>
 
@@ -70,7 +70,7 @@
 
 
 
-              @if (accountService.isAdmin$ | async) {
+              @if (accountService.hasAdminRole()) {
                 <div class="col-auto ms-2">
                   <button class="btn btn-actions" id="edit-btn--komf" (click)="openEditModal()" [ngbTooltip]="t('edit-series-alt')">
                     <span><i class="fa fa-pen" aria-hidden="true"></i></span>
@@ -80,7 +80,7 @@
 
               <div class="col-auto ms-2k">
                 <div class="card-actions" [ngbTooltip]="t('more-alt')">
-                  <app-card-actionables [entity]="chapterValue"  [actions]="chapterActions" [labelBy]="series.name + ' ' + chapterValue.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn" />
+                  <app-card-actionables [entity]="chapterValue" [actions]="chapterActions()" [labelBy]="series.name + ' ' + chapterValue.minNumber" iconClass="fa-ellipsis-h" btnClass="btn-actions btn" />
                 </div>
               </div>
 
@@ -100,7 +100,7 @@
               <div class="col-6">
                 <span class="fw-bold">{{t('writers-title')}}</span>
                 <div>
-                  <app-badge-expander [items]="chapterValue.writers" [allowToggle]="false" (toggle)="switchTabsToDetail()">
+                  <app-badge-expander [items]="chapterValue.writers" [allowToggle]="false" (toggled)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                     </ng-template>
@@ -108,7 +108,7 @@
                 </div>
               </div>
               <div class="col-6">
-                @if (chapterValue.releaseDate !== '0001-01-01T00:00:00' && (libraryType === LibraryType.ComicVine || libraryType === LibraryType.Comic)) {
+                @if (chapterValue.releaseDate !== '0001-01-01T00:00:00' && (libraryType() === LibraryType.ComicVine || libraryType() === LibraryType.Comic)) {
                   <span class="fw-bold">{{t('release-date-title')}}</span>
                   <div>
                     <a class="dark-exempt btn-icon" href="javascript:void(0);">{{chapterValue.releaseDate | utcToLocalTime: 'shortDate' | defaultDate:'—'}}</a>
@@ -116,7 +116,7 @@
                 } @else {
                   <span class="fw-bold">{{t('cover-artists-title')}}</span>
                   <div>
-                    <app-badge-expander [items]="chapterValue.coverArtists" [allowToggle]="false" (toggle)="switchTabsToDetail()">
+                    <app-badge-expander [items]="chapterValue.coverArtists" [allowToggle]="false" (toggled)="switchTabsToDetail()">
                       <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                         <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                       </ng-template>
@@ -135,7 +135,7 @@
                   <app-badge-expander [items]="chapterValue.genres"
                                       [itemsTillExpander]="3"
                                       [allowToggle]="false"
-                                      (toggle)="switchTabsToDetail()">
+                                      (toggled)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Genres, item.id)">{{item.title}}</a>
                     </ng-template>
@@ -149,7 +149,7 @@
                   <app-badge-expander [items]="chapterValue.tags"
                                       [itemsTillExpander]="3"
                                       [allowToggle]="false"
-                                      (toggle)="switchTabsToDetail()">
+                                      (toggled)="switchTabsToDetail()">
                     <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                       <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Tags, item.id)">{{item.title}}</a>
                     </ng-template>
@@ -173,7 +173,7 @@
                 <app-details-tab [metadata]="chapterValue"
                                  [genres]="chapterValue.genres"
                                  [tags]="chapterValue.tags"
-                                 [webLinks]="weblinks"
+                                 [webLinks]="weblinks()"
                                  [files]="chapterValue.files"
                 />
               }
@@ -199,22 +199,22 @@
         <li [ngbNavItem]="TabID.Reviews">
           <a ngbNavLink>
             {{t('reviews-tab')}}
-            <span class="badge rounded-pill text-bg-secondary">{{userReviews.length + plusReviews.length}}</span>
+            <span class="badge rounded-pill text-bg-secondary">{{totalReviewCount()}}</span>
           </a>
           <ng-template ngbNavContent>
             @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
-              <app-reviews [userReviews]="userReviews" [plusReviews]="plusReviews"
+              <app-reviews [userReviews]="userReviews()" [plusReviews]="plusReviews()"
                            [series]="seriesValue" [chapter]="chapterValue" [volumeId]="chapterValue.volumeId" />
             }
           </ng-template>
         </li>
 
-        @if(readingLists.length > 0) {
+        @if(readingLists().length > 0) {
           <li [ngbNavItem]="TabID.Related">
             <a ngbNavLink>{{t('related-tab')}}</a>
             <ng-template ngbNavContent>
               @defer (when activeTabId === TabID.Related; prefetch on idle) {
-                <app-related-tab [readingLists]="readingLists" />
+                <app-related-tab [readingLists]="readingLists()" (reload)="handleRelatedReload($event)" (dataChanged)="handleRelatedReload($event)" />
               }
             </ng-template>
           </li>
@@ -227,7 +227,7 @@
 
 
 
-    <app-loading [loading]="isLoading()" style="min-height: 300px" />
+    <app-loading [loading]="isLoading()" style="min-height: 18.75rem" />
   </div>
 
 </ng-container>

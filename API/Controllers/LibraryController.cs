@@ -24,6 +24,7 @@ using EasyCaching.Core;
 using Hangfire;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -68,10 +69,10 @@ public class LibraryController : BaseApiController
     /// Creates a new Library. Upon library creation, adds new library to all Admin accounts.
     /// </summary>
     /// <param name="dto"></param>
-    /// <returns></returns>
+    /// <returns>Created Library</returns>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("create")]
-    public async Task<ActionResult> AddLibrary(UpdateLibraryDto dto)
+    public async Task<ActionResult<LibraryDto?>> AddLibrary(UpdateLibraryDto dto)
     {
         if (await _unitOfWork.LibraryRepository.LibraryExists(dto.Name))
         {
@@ -161,7 +162,7 @@ public class LibraryController : BaseApiController
         await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
             MessageFactory.SideNavUpdateEvent(UserId), false);
 
-        return Ok();
+        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtoByIdAsync(library.Id));
     }
 
     /// <summary>
@@ -207,17 +208,18 @@ public class LibraryController : BaseApiController
     /// <summary>
     /// Return a specific library
     /// </summary>
+    /// <remarks>If the user is not an admin, only id, type, and name will be returned</remarks>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [ProducesResponseType<LibraryDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<LiteLibraryDto>(StatusCodes.Status200OK)]
     [HttpGet]
     public async Task<ActionResult<LibraryDto?>> GetLibrary(int libraryId)
     {
-        var username = Username!;
-        if (string.IsNullOrEmpty(username)) return Unauthorized();
-
-        var libraries = await GetLibrariesForUser(username);
-
-        return Ok(libraries.FirstOrDefault(l => l.Id == libraryId));
+        if (User.IsInRole(PolicyConstants.AdminRole))
+        {
+            return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtoByIdAsync(libraryId));
+        }
+        return Ok(await _unitOfWork.LibraryRepository.GetLiteLibraryDtoByIdAsync(libraryId));
     }
 
     /// <summary>
@@ -227,10 +229,7 @@ public class LibraryController : BaseApiController
     [HttpGet("libraries")]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
     {
-        var username = Username!;
-        if (string.IsNullOrEmpty(username)) return Unauthorized();
-
-        return Ok(await GetLibrariesForUser(username));
+        return Ok(await GetLibrariesForUser(Username!));
     }
 
     /// <summary>
@@ -674,7 +673,7 @@ public class LibraryController : BaseApiController
 
         await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
 
-        return Ok();
+        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtoByIdAsync(library.Id));
 
     }
 

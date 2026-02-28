@@ -319,9 +319,6 @@
         "create": "{{common.create}}",
         "title": "Tüm Akıllı Filtreler"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}"
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -481,12 +478,6 @@
         "close": "{{common.close}}",
         "kavita-rating-title": "Puanınız",
         "critic": "{{review-card.critic}}"
-    },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "download": "İndir",
-        "title": "Yeni Güncelleme Mevcut!",
-        "help": "Nasıl Güncellenir"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -1637,19 +1628,6 @@
         "feature-requests": "Özellik Talepleri",
         "installed": "{{changelog.installed}}"
     },
-    "new-version-modal": {
-        "refresh": "Tazele",
-        "title": "Kavita güncellendi!",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}"
-    },
     "manage-matched-metadata": {
         "library-name-header": "Kütüphane",
         "series-name-header": "Seriler",
@@ -2203,5 +2181,29 @@
         "title": "{{personName}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "refresh": "Tazele",
+        "title": "Kavita güncellendi!",
+        "added": "{{changelog.added}}",
+        "changed": "{{changelog.changed}}",
+        "fixed": "{{changelog.fixed}}",
+        "developer": "{{changelog.developer}}",
+        "theme": "{{changelog.theme}}",
+        "removed": "{{changelog.removed}}",
+        "known-issues": "{{changelog.known-issues}}",
+        "api": "{{changelog.api}}",
+        "out-of-date": {},
+        "new-version": {
+            "title": "Kavita güncellendi!",
+            "refresh": "Tazele"
+        },
+        "update-notification": {
+          "close": "{{common.close}}",
+          "download": "İndir",
+          "title": "Yeni Güncelleme Mevcut!",
+          "help": "Nasıl Güncellenir"
+        }
     }
 }

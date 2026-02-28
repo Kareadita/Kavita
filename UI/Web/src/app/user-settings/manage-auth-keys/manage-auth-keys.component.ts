@@ -10,13 +10,12 @@ import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {ToggleVisibilityDirective} from "../../_directives/toggle-visibility.directive";
 import {ConfirmService} from "../../shared/confirm.service";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {CreateAuthKeyComponent} from "../_modals/create-auth-key/create-auth-key.component";
 import {Clipboard} from "@angular/cdk/clipboard";
 import {DatePipe} from "@angular/common";
 import {ToastrService} from "ngx-toastr";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
   selector: 'app-manage-auth-keys',
@@ -39,16 +38,16 @@ export class ManageAuthKeysComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly settingsService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly clipboard = inject(Clipboard);
   private readonly toastr = inject(ToastrService);
 
   protected readonly opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
 
-  isReadOnly = this.accountService.isReadOnly;
+  isReadOnly = this.accountService.hasReadOnlyRole;
   opdsUrl = signal<string>('');
   authKeys = computed(() => {
-    const account = this.accountService.currentUserSignal();
+    const account = this.accountService.currentUser();
     if (!account) return null;
 
     return account.authKeys;
@@ -68,7 +67,7 @@ export class ManageAuthKeysComponent implements OnInit {
   }
 
   createAuthKey() {
-    const ref = this.modalService.open(CreateAuthKeyComponent, DefaultModalOptions);
+    const ref = this.modalService.open(CreateAuthKeyComponent);
 
     ref.closed.subscribe((result: AuthKey | null) => {
       if (result === null) return;
@@ -77,7 +76,7 @@ export class ManageAuthKeysComponent implements OnInit {
   }
 
   rotate(authKey: AuthKey) {
-    const ref = this.modalService.open(CreateAuthKeyComponent, DefaultModalOptions);
+    const ref = this.modalService.open(CreateAuthKeyComponent);
     ref.componentInstance.authKey.set(authKey);
 
     ref.closed.subscribe((result: AuthKey | null) => {

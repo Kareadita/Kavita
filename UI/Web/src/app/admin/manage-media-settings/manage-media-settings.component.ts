@@ -1,15 +1,14 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, take, tap} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {DirectoryPickerComponent, DirectoryPickerResult} from '../_modals/directory-picker/directory-picker.component';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {allEncodeFormats} from '../_models/encode-format';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {allCoverImageSizes, CoverImageSize} from '../_models/cover-image-size';
-import {PdfRenderResolution, allPdfRenderResolutions} from '../_models/pdf-render-resolution';
+import {allPdfRenderResolutions, PdfRenderResolution} from '../_models/pdf-render-resolution';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {EncodeFormatPipe} from "../../_pipes/encode-format.pipe";
 import {CoverImageSizePipe} from "../../_pipes/cover-image-size.pipe";
@@ -17,6 +16,7 @@ import {PdfRenderResolutionPipe} from "../../_pipes/pdf-render-resolution.pipe"
 import {ConfirmService} from "../../shared/confirm.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {pageLayoutModes} from "../../_models/preferences/reading-profiles";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
   selector: 'app-manage-media-settings',
@@ -32,7 +32,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly allEncodeFormats = allEncodeFormats;
@@ -123,7 +123,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   }
 
   openDirectoryChooser(existingDirectory: string, formControl: string) {
-    const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg', fullscreen: 'md' });
+    const modalRef = this.modalService.open(DirectoryPickerComponent);
     modalRef.componentInstance.startingFolder = existingDirectory || '';
     modalRef.componentInstance.helpUrl = '';
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {

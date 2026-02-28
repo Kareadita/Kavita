@@ -2,7 +2,7 @@
   <div class="modal-header" [class.book-reader]="config.bookReader">
     <h4 class="modal-title" id="modal-basic-title">{{config.header | confirmTranslate}}</h4>
     @if (!config.disableEscape) {
-      <button type="button" class="btn-unstyled ms-auto" [attr.aria-label]="t('close')" (click)="close()">
+      <button type="button" class="btn-unstyled ms-auto" [attr.aria-label]="t('common.close')" (click)="close()">
         <i class="fas fa-times"></i>
       </button>
     }

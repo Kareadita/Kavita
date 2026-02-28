@@ -179,7 +179,7 @@
         "delete": "{{common.delete}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
-        "upload-continued": "Comhad CSS",
+        "upload-continued": "comhad css",
         "preview-default": "Roghnaigh téama ar dtús",
         "preview-default-admin": "Roghnaigh téama ar dtús nó uaslódáil ceann de láimh",
         "preview-title": "Réamhamharc",
@@ -494,14 +494,6 @@
     "announcements": {
         "title": "Fógraí"
     },
-    "out-of-date-modal": {
-        "title": "Ná titim taobh thiar de!",
-        "close": "{{common.close}}",
-        "subtitle": "Dealraíonn sé go bhfuil do shuiteáil níos mó ná {{count}} leaganacha taobh thiar de!",
-        "description-1": "Smaoinigh ar uasghrádú ionas go mbeidh an leagan is déanaí de Kavita á rith agat.",
-        "description-2": "Féach ar ár <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> le haghaidh treoracha ar conas é a nuashonrú.",
-        "description-3": "Má tá cúis ar leith nach bhfuil tú suas chun dáta fós ba bhreá linn a fháil amach cad atá á choinneáil agat ar leagan as dáta! Stop ag ár discord agus in iúl dúinn cad atá ag cur bac ar do chosán uasghrádú."
-    },
     "changelog": {
         "installed": "Suiteáilte",
         "download": "Íoslódáil",
@@ -746,12 +738,6 @@
     "read-more": {
         "read-more": "Léigh Tuilleadh",
         "read-less": "Léigh Lúide"
-    },
-    "update-notification-modal": {
-        "title": "Nuashonrú Nua ar Fáil!",
-        "close": "{{common.close}}",
-        "help": "Conas nuashonrú a dhéanamh",
-        "download": "Íoslódáil"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -1123,7 +1109,7 @@
         "base-url-label": "Bun Url",
         "base-url-tooltip": "Bain úsáid as seo más mian leat Kavita a óstáil ar url bonn ie) yourdomain.com/kavita. Ní thacaítear leis ar Docker ag baint úsáide as úsáideoir neamh-fhréamh.",
         "ip-address-label": "Seoltaí IP",
-        "ip-address-tooltip": "Camóg scartha liosta de seoltaí IP éisteann an freastalaí ar. Socraítear é seo má tá tú ag rith ar Docker. Éilíonn atosú chun éifeacht a ghlacadh.",
+        "ip-address-tooltip": "Liosta seoltaí IP a n-éisteann an freastalaí leo, scartha le camóga. Tá sé seo socraithe má tá tú ag rith ar Docker. Éilíonn atosú chun go dtiocfaidh sé i bhfeidhm.",
         "port-label": "Port",
         "port-tooltip": "Port a éisteann an freastalaí air. Socraítear é seo má tá tú ag rith ar Docker. Éilíonn atosú chun éifeacht a ghlacadh.",
         "backup-label": "Laethanta cúltacaí",
@@ -2160,7 +2146,7 @@
         "confirm-delete-series": "An bhfuil tú cinnte go bhfuil fonn ort an tsraith seo a scriosadh? Ní athróidh sé comhaid ar an diosca.",
         "confirm-delete-chapter": "An bhfuil tú cinnte gur mhaith leat an chaibidil seo a scriosadh? Ní athróidh sé comhaid ar diosca.",
         "confirm-delete-volume": "An bhfuil tú cinnte gur mhaith leat an t-imleabhar seo a scriosadh? Ní athróidh sé comhaid ar diosca.",
-        "alert-bad-theme": "Tá CSS neamhbhailí nó neamhshábháilte sa téama. Téigh i dteagmháil le do riarthóir chun é seo a cheartú. Réamhshocrú le téama dorcha.",
+        "alert-bad-theme": "Tá css neamhbhailí nó neamhshábháilte sa téama. Téigh i dteagmháil le do riarthóir le go gceartófar é seo. Ag an réamhshocrú, úsáidtear téama dorcha.",
         "confirm-library-delete": "An bhfuil tú cinnte go bhfuil fonn ort an leabharlann {{name}} a scriosadh? Ní féidir leat an gníomh seo a chealú.",
         "confirm-library-type-change": "Má dhéantar an cineál leabharlainne a athrú, cuirfear tús le scanadh nua a mbeidh rialacha éagsúla parsála ann agus d’fhéadfadh sé go n-athchruthófar sraitheanna agus mar sin seans go gcaillfidh tú dul chun cinn agus leabharmharcanna. Ba cheart duit cúltaca a dhéanamh sula ndéanann tú é seo. An bhfuil tú cinnte gur mhaith leat leanúint ar aghaidh?",
         "confirm-download-size": "Is é an {{entityType}} {{size}}. An bhfuil tú cinnte go bhfuil fonn ort leanúint ar aghaidh?",
@@ -2472,20 +2458,6 @@
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
         "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
         "invalid-amazon-code": "Ba chóir go dtosódh ASIN le B0 nó BT"
-    },
-    "new-version-modal": {
-        "description": "Tá leagan nua de Kavita ar fáil. Athnuaigh le nuashonrú.",
-        "fixed": "{{changelog.fixed}}",
-        "changed": "{{changelog.changed}}",
-        "title": "Nuashonraíodh Kavita!",
-        "added": "{{changelog.added}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "refresh": "Athnuaigh",
-        "known-issues": "{{changelog.known-issues}}"
     },
     "changelog-update-item": {
         "download": "Íosluchtaigh",
@@ -3410,5 +3382,25 @@
         "pages-count": "{{num}} leathanach",
         "words-read-by-year-title": "Focail léite de réir bliana",
         "words-count": "{{num}} focal"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Ná titim taobh thiar de!",
+            "subtitle": "Dealraíonn sé go bhfuil do shuiteáil níos mó ná {{count}} leaganacha taobh thiar de!",
+            "description-1": "Smaoinigh ar uasghrádú ionas go mbeidh an leagan is déanaí de Kavita á rith agat.",
+            "description-2": "Féach ar ár <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> le haghaidh treoracha ar conas é a nuashonrú.",
+            "description-3": "Má tá cúis ar leith nach bhfuil tú suas chun dáta fós ba bhreá linn a fháil amach cad atá á choinneáil agat ar leagan as dáta! Stop ag ár discord agus in iúl dúinn cad atá ag cur bac ar do chosán uasghrádú."
+        },
+        "new-version": {
+            "title": "Nuashonraíodh Kavita!",
+            "description": "Tá leagan nua de Kavita ar fáil. Athnuaigh le nuashonrú.",
+            "refresh": "Athnuaigh"
+        },
+        "update-notification": {
+            "title": "Nuashonrú Nua ar Fáil!",
+            "help": "Conas nuashonrú a dhéanamh",
+            "download": "Íoslódáil"
+        }
     }
 }

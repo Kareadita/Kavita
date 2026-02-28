@@ -2,40 +2,41 @@
   <ng-container *transloco="let t; prefix: 'all-collections'">
     <app-side-nav-companion-bar [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
       <h4 title>{{t('title')}}</h4>
-      <h5 subtitle>{{t('item-count', {num: collections.length | number})}}</h5>
+      <h5 subtitle>{{t('item-count', {num: collections().length | number})}}</h5>
     </app-side-nav-companion-bar>
 
     <app-card-detail-layout
-      [isLoading]="isLoading"
-      [items]="collections"
+      [isLoading]="isLoading()"
+      [items]="collectionEntities()"
       [filterOpen]="filterOpen"
-      [jumpBarKeys]="jumpbarKeys"
+      [jumpBarKeys]="jumpbarKeys()"
       [trackByIdentity]="trackByIdentity"
     >
 
       <ng-template #topBar>
-        <app-bulk-operations [actionCallback]="bulkActionCallback" />
+        <app-bulk-operations />
       </ng-template>
 
       <ng-template #cardItem let-item let-position="idx">
-        <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [actionEntity]="item"
-                       [imageUrl]="imageService.getCollectionCoverImage(item.id)"
-                       [linkUrl]="'/collections/' + item.id"
-                       [count]="item.itemCount"
-                       (clicked)="loadCollection(item)"
-                       (selection)="bulkSelectionService.handleCardSelection('collection', position, collections.length, $event)"
-                       [selected]="bulkSelectionService.isCardSelected('collection', position)" [allowSelection]="true" [showFormat]="false">
-
+        <app-entity-card [entity]="item" [index]="position" [maxIndex]="collectionEntities().length"
+                         [config]="collectionConfig()" (reload)="loadPage()" (dataChanged)="updateCollection($event)">
           <ng-template #subtitle>
-            <app-collection-owner [collection]="item" />
+            <app-collection-owner [collection]="item.data" />
           </ng-template>
-        </app-card-item>
+          <ng-template #title let-entity>
+            <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}
+          </ng-template>
+        </app-entity-card>
       </ng-template>
 
       <ng-template #noData>
         {{t('no-data')}}
-        @if(accountService.isAdmin$ | async) {
-          {{t('create-one-part-1')}} <a [href]="WikiLink.Collections" rel="noopener noreferrer" target="_blank">{{t('create-one-part-2')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
+        @if (accountService.hasAdminRole()) {
+          {{t('create-one-part-1')}}
+          <a [href]="WikiLink.Collections" rel="noopener noreferrer" target="_blank">
+            {{t('create-one-part-2')}}
+            <i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i>
+          </a>
         }
       </ng-template>
     </app-card-detail-layout>

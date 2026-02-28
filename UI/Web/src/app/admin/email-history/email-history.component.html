@@ -1,15 +1,19 @@
 <ng-container *transloco="let t; prefix:'email-history'">
   <p>{{t('description')}}</p>
 
-  @if (data.length === 0) {
-    <p>{{t('no-data')}}</p>
+  @if (data().length === 0) {
+    @if (!isLoading()) {
+      <p>{{t('no-data')}}</p>
+    }
+    <app-loading [loading]="isLoading()" />
+
   } @else {
-    <app-responsive-table [rows]="data" [trackByFn]="trackBy">
+    <app-responsive-table [rows]="data()" [trackByFn]="trackBy">
       <ng-template #tableTemplate>
         <ngx-datatable
           class="bootstrap"
-          [rows]="data"
-          [columnMode]="ColumnMode.force"
+          [rows]="data()"
+          [columnMode]="'force'"
           rowHeight="auto"
           [footerHeight]="50"
         >

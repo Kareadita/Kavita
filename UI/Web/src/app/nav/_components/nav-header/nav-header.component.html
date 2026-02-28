@@ -34,7 +34,7 @@
                 >
 
                   <ng-template #libraryTemplate let-item>
-                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
+                    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickLibraryResult(item)">
                       <div class="ms-1">
                         <span>{{item.name}}</span>
                       </div>
@@ -42,8 +42,8 @@
                   </ng-template>
 
                   <ng-template #seriesTemplate let-item>
-                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickSeriesSearchResult(item)">
-                      <div style="width: 24px" class="me-1">
+                    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickSeriesSearchResult(item)">
+                      <div style="width: 1.5rem" class="me-1">
                         <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
                       </div>
                       <div class="ms-1">
@@ -63,7 +63,7 @@
                   </ng-template>
 
                   <ng-template #annotationTemplate let-item>
-                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickAnnotationSearchResult(item)">
+                    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickAnnotationSearchResult(item)">
                       <div class="ms-1">
                         @let normalizedSearchTerm = searchTerm.toLowerCase().trim();
 
@@ -78,8 +78,8 @@
                   </ng-template>
 
                   <ng-template #bookmarkTemplate let-item>
-                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickBookmarkSearchResult(item)">
-                      <div style="width: 24px" class="me-1">
+                    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickBookmarkSearchResult(item)">
+                      <div style="width: 1.5rem" class="me-1">
                         <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
                       </div>
                       <div class="ms-1">
@@ -97,8 +97,8 @@
                   </ng-template>
 
                   <ng-template #collectionTemplate let-item>
-                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
-                      <div style="width: 24px" class="me-1">
+                    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickCollectionSearchResult(item)">
+                      <div style="width: 1.5rem" class="me-1">
                         <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)" />
                       </div>
                       <div class="ms-1">
@@ -112,7 +112,7 @@
                   </ng-template>
 
                   <ng-template #readingListTemplate let-item>
-                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickReadingListSearchResult(item)">
+                    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickReadingListSearchResult(item)">
                       <div class="ms-1">
                         <span>{{item.title}}</span>
                         <app-promoted-icon [promoted]="item.promoted" />
@@ -121,7 +121,7 @@
                   </ng-template>
 
                   <ng-template #tagTemplate let-item>
-                    <div class="clickable" style="display: flex;padding: 5px;" (click)="goToOther(FilterField.Tags, item.id)">
+                    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="goToOther(FilterField.Tags, item.id)">
                       <div class="ms-1">
                         <span>{{item.title}}</span>
                       </div>
@@ -129,8 +129,8 @@
                   </ng-template>
 
               <ng-template #personTemplate let-item>
-                <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item)">
-                  <div style="width: 24px" class="me-1">
+                <div style="display: flex;padding: 0.3125rem;" class="clickable" (click)="goToPerson(item)">
+                  <div style="width: 1.5rem" class="me-1">
                     <app-image class="me-3 search-result"
                                [styles]="{'background': 'none', 'max-height': '24px', 'height': '24px', 'width': '24px', 'border-radius': '50%'}"
                                width="24px" [imageUrl]="imageService.getPersonImage(item.id)" [errorImage]="imageService.noPersonImage" />
@@ -149,7 +149,7 @@
               </ng-template>
 
                   <ng-template #genreTemplate let-item>
-                    <div style="display: flex;padding: 5px;" class="clickable" (click)="goToOther(FilterField.Genres, item.id)">
+                    <div style="display: flex;padding: 0.3125rem;" class="clickable" (click)="goToOther(FilterField.Genres, item.id)">
                       <div class="ms-1">
                         <div [innerHTML]="item.title"></div>
                       </div>
@@ -159,7 +159,7 @@
 
 
                   <ng-template #chapterTemplate let-item>
-                    <div style="display: flex;padding: 5px;" class="clickable" (click)="clickChapterSearchResult(item)">
+                    <div style="display: flex;padding: 0.3125rem;" class="clickable" (click)="clickChapterSearchResult(item)">
                       <div class="ms-1">
                         @if (item.files.length > 0) {
                           <app-series-format [format]="item.files?.[0].format" />
@@ -171,7 +171,7 @@
                   </ng-template>
 
                   <ng-template #fileTemplate let-item>
-                    <div class="clickable" style="display: flex;padding: 5px;" (click)="clickFileSearchResult(item)">
+                    <div class="clickable" style="display: flex;padding: 0.3125rem;" (click)="clickFileSearchResult(item)">
                       <div class="ms-1">
                         <app-series-format [format]="item.format" />
                         <span>{{item.filePath}}</span>
@@ -189,7 +189,7 @@
         </ul>
 
         @if (user) {
-          @if (accountService.isAdmin()) {
+          @if (accountService.hasAdminRole()) {
             <div class="nav-item me-2">
               <app-nav-events-toggle [user]="user" />
             </div>

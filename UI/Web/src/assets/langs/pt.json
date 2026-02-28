@@ -494,14 +494,6 @@
     "announcements": {
         "title": "Anúncios"
     },
-    "out-of-date-modal": {
-        "title": "Não fique para trás!",
-        "close": "{{common.close}}",
-        "subtitle": "A sua instalação está mais de {{count}} versões atrasada!",
-        "description-1": "Por favor pondere atualizar para que esteja a usar a última versão do Kavita.",
-        "description-2": "Veja no nosso <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> as instruções sobre como atualizar.",
-        "description-3": "Se existir uma razão específica para não ter atualizado gostaríamos de saber os seus motivos! Vá ao nosso discord e diga-nos o que está a impedi-lo de fazer a atualização."
-    },
     "changelog": {
         "installed": "Instalado",
         "download": "Descarregar",
@@ -746,12 +738,6 @@
     "read-more": {
         "read-more": "Ler Mais",
         "read-less": "Ler Menos"
-    },
-    "update-notification-modal": {
-        "title": "Nova Atualização Disponível!",
-        "close": "{{common.close}}",
-        "help": "Como Atualizar",
-        "download": "Descarregar"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2498,20 +2484,6 @@
         "dont-match-tooltip": "Optar que esta série não tenha correspondências ou scrobbling",
         "description": "Selecione uma correspondência para refazer os metadados do Kavita+ e voltar a gerar eventos de scrobble. A opção \"Não Corresponder\" pode ser usada para impedir que o Kavita faça scrobbling e correspondência de metadados."
     },
-    "new-version-modal": {
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "refresh": "Refrescar",
-        "title": "O Kavita foi atualizado!",
-        "description": "Está disponível uma nova versão do Kavita. Refresque para atualizar.",
-        "fixed": "{{changelog.fixed}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "known-issues": "{{changelog.known-issues}}"
-    },
     "match-series-result-item": {
         "volume-count": "{{server-stats.volume-count}}",
         "chapter-count": "{{common.chapter-count}}",
@@ -3409,5 +3381,25 @@
         "friday-short": "Sex",
         "saturday": "Sábado",
         "saturday-short": "Sab"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Não fique para trás!",
+            "subtitle": "A sua instalação está mais de {{count}} versões atrasada!",
+            "description-1": "Por favor pondere atualizar para que esteja a usar a última versão do Kavita.",
+            "description-2": "Veja no nosso <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> as instruções sobre como atualizar.",
+            "description-3": "Se existir uma razão específica para não ter atualizado gostaríamos de saber os seus motivos! Vá ao nosso discord e diga-nos o que está a impedi-lo de fazer a atualização."
+        },
+        "new-version": {
+            "title": "O Kavita foi atualizado!",
+            "description": "Está disponível uma nova versão do Kavita. Refresque para atualizar.",
+            "refresh": "Refrescar"
+        },
+        "update-notification": {
+            "title": "Nova Atualização Disponível!",
+            "help": "Como Atualizar",
+            "download": "Descarregar"
+        }
     }
 }

@@ -69,7 +69,7 @@
   }
 
   <div class="my-4">
-    <app-library-and-time-selector [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUserSignal()!.id"
+    <app-library-and-time-selector [label]="t('stats-title', {libraryName: ''})" [userId]="accountService.currentUser()!.id"
                                    (filterChange)="filter.set($event)" (yearChange)="year.set($event)" [locale]="'server'" />
   </div>
 

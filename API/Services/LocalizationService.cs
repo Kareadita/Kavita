@@ -292,7 +292,7 @@ public class LocalizationService : ILocalizationService
         try
         {
             var cultureInfo = new System.Globalization.CultureInfo(fileName.Replace('_', '-'));
-            return cultureInfo.NativeName;
+            return cultureInfo.EnglishName;
         }
         catch
         {

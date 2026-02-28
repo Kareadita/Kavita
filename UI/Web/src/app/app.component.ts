@@ -1,12 +1,12 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, OnInit} from '@angular/core';
 import {NavigationStart, Router, RouterOutlet} from '@angular/router';
-import {map, shareReplay, take} from 'rxjs/operators';
+import {shareReplay, take} from 'rxjs/operators';
 import {AccountService} from './_services/account.service';
 import {LibraryService} from './_services/library.service';
 import {NavService} from './_services/nav.service';
-import {NgbModal, NgbModalConfig, NgbOffcanvas, NgbRatingConfig} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
 import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
-import {filter, Observable} from 'rxjs';
+import {filter} from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
 import {SideNavComponent} from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
@@ -44,21 +44,10 @@ export class AppComponent implements OnInit {
   private readonly breakpointService = inject(BreakpointService); // Needs to be injected to run background job
   private readonly licenseService = inject(LicenseService);
   private readonly localizationService = inject(LocalizationService);
-
-  transitionState$!: Observable<boolean>;
+  transitionState = computed(() => this.accountService.userPreferences()?.noTransitions ?? false);
 
 
   constructor() {
-    const ratingConfig = inject(NgbRatingConfig);
-    const modalConfig = inject(NgbModalConfig);
-
-
-    modalConfig.fullscreen = 'lg';
-
-    // Setup default rating config
-    ratingConfig.max = 5;
-    ratingConfig.resettable = true;
-
     // Close any open modals when a route change occurs
     this.router.events
       .pipe(
@@ -83,13 +72,6 @@ export class AppComponent implements OnInit {
         }
       });
 
-
-    this.transitionState$ = this.accountService.currentUser$.pipe(
-      map((user) => {
-      if (!user) return false;
-      return user.preferences.noTransitions;
-    }), takeUntilDestroyed(this.destroyRef));
-
     this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
   }
 
@@ -109,12 +91,12 @@ export class AppComponent implements OnInit {
 
 
   setCurrentUser() {
-    const user = this.accountService.currentUserSignal();
+    const user = this.accountService.currentUser();
     if (!user) return;
 
     // Refresh the user data
     this.accountService.refreshAccount().subscribe(account => {
-      if (this.accountService.hasAdminRole(user)) {
+      if (this.accountService.hasAdminRole()) {
         this.licenseService.licenseInfo().subscribe();
       }
     });

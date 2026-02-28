@@ -1,6 +1,8 @@
 <ng-container *transloco="let t; prefix:'change-email'">
 
-  <app-setting-item [title]="t('email-title')" [canEdit]="canEdit" [isEditMode]="isEditMode" (editMode)="updateEditMode($event)">
+  @let user = accountService.currentUser();
+
+  <app-setting-item [title]="t('email-title')" [canEdit]="canEdit()" [isEditMode]="isEditMode" (isEditModeChange)="updateEditMode($event)">
     <ng-template #view>
       <span>{{user?.email | defaultValue}}</span>
       @if(emailConfirmed) {

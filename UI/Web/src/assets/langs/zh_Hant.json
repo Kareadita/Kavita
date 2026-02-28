@@ -491,14 +491,6 @@
         "create": "{{common.create}}",
         "title": "所有的智慧篩選器"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "subtitle": "您的安裝版本似乎落後於 {{count}} 個版本！",
-        "description-2": "請參閱我們的 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wik</a> 獲取更新說明。",
-        "title": "別落後！",
-        "description-1": "請考慮升級，以便使用最新版本的 Kavita。",
-        "description-3": "如果您有特定原因尚未更新，我們很想知道為什麼您仍在使用過時的版本！請來我們的 Discord 告訴我們是什麼阻礙了您的升級之路。"
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -712,12 +704,6 @@
         "kavita-rating-title": "您的評分",
         "entry-label": "查看詳情",
         "critic": "{{review-card.critic}}"
-    },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "title": "發現可用更新！",
-        "help": "更新方法",
-        "download": "下載"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2709,20 +2695,6 @@
         "known-for-title": "代表作",
         "merge-warning": "如果您繼續，選定的人物將被移除。該人物的姓名將被新增為別名，且其所有角色都將被轉移。"
     },
-    "new-version-modal": {
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "title": "Kavita 已更新！",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "description": "Kavita 有新版本囉！請重新整理以更新。",
-        "fixed": "{{changelog.fixed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "removed": "{{changelog.removed}}",
-        "refresh": "重新整理"
-    },
     "changelog-update-item": {
         "download": "下載",
         "fixed": "修正",
@@ -3410,5 +3382,25 @@
     },
     "list-select-modal": {
         "hidden": "{{amount}} 個項目因狀態異常而隱藏"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "別落後！",
+            "subtitle": "您的安裝版本似乎落後於 {{count}} 個版本！",
+            "description-1": "請考慮升級，以便使用最新版本的 Kavita。",
+            "description-2": "請參閱我們的 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wik</a> 獲取更新說明。",
+            "description-3": "如果您有特定原因尚未更新，我們很想知道為什麼您仍在使用過時的版本！請來我們的 Discord 告訴我們是什麼阻礙了您的升級之路。"
+        },
+        "new-version": {
+            "title": "Kavita 已更新！",
+            "description": "Kavita 有新版本囉！請重新整理以更新。",
+            "refresh": "重新整理"
+        },
+        "update-notification": {
+            "title": "發現可用更新！",
+            "help": "更新方法",
+            "download": "下載"
+        }
     }
 }

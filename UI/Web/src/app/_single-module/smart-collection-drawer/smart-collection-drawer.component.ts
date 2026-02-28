@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {UserCollection} from "../../_models/collection-tag";
 import {DecimalPipe} from "@angular/common";
@@ -11,30 +11,25 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 
 @Component({
-    selector: 'app-smart-collection-drawer',
-    imports: [
-        TranslocoDirective,
-        SafeHtmlPipe,
-        RouterLink,
-        DefaultDatePipe,
-        UtcToLocalTimePipe,
-        SettingItemComponent,
-        DecimalPipe
-    ],
-    templateUrl: './smart-collection-drawer.component.html',
-    styleUrl: './smart-collection-drawer.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-smart-collection-drawer',
+  imports: [
+      TranslocoDirective,
+      SafeHtmlPipe,
+      RouterLink,
+      DefaultDatePipe,
+      UtcToLocalTimePipe,
+      SettingItemComponent,
+      DecimalPipe
+  ],
+  templateUrl: './smart-collection-drawer.component.html',
+  styleUrl: './smart-collection-drawer.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SmartCollectionDrawerComponent implements OnInit {
+export class SmartCollectionDrawerComponent {
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
-  @Input({required: true}) collection!: UserCollection;
-  @Input({required: true}) series: Series[] = [];
-
-  ngOnInit() {
-
-  }
+  collection = input.required<UserCollection>();
+  series = input.required<Series[]>();
 
   close() {
     this.activeOffcanvas.close();

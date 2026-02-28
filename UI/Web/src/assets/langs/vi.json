@@ -283,14 +283,6 @@
         "create": "{{common.create}}",
         "title": "Tất Cả Bộ Lọc"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "description-3": "Nếu có lý do cụ thể nào khiến bạn chưa cập nhật, chúng tôi rất muốn biết lý do khiến bạn vẫn sử dụng phiên bản cũ! Hãy ghé qua discord của chúng tôi và cho chúng tôi biết lý do khiến bạn không nâng cấp.",
-        "title": "Đừng tụt hậu!",
-        "subtitle": "Có vẻ như bản cài đặt của bạn chậm hơn {{count}} phiên bản!",
-        "description-1": "Vui lòng cân nhắc nâng cấp để bạn có thể chạy phiên bản Kavita mới nhất.",
-        "description-2": "Hãy tham khảo <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> của chúng tôi để biết hướng dẫn về cách cập nhật."
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -463,12 +455,6 @@
         "entry-label": "Xem Chi Tiết",
         "kavita-tooltip": "Xếp hạng của bạn + Tổng thể",
         "kavita-rating-title": "Xếp hạng của bạn"
-    },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "help": "Hướng Dẫn Cập Nhật",
-        "title": "Đã có bản cập nhật mới!",
-        "download": "Tải Xuống"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2168,5 +2154,20 @@
         "count-header": "Đếm",
         "visualisation-label": "Hình Ảnh Hóa",
         "data-table-label": "Bảng Dữ Liệu"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Đừng tụt hậu!",
+            "subtitle": "Có vẻ như bản cài đặt của bạn chậm hơn {{count}} phiên bản!",
+            "description-1": "Vui lòng cân nhắc nâng cấp để bạn có thể chạy phiên bản Kavita mới nhất.",
+            "description-2": "Hãy tham khảo <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> của chúng tôi để biết hướng dẫn về cách cập nhật.",
+            "description-3": "Nếu có lý do cụ thể nào khiến bạn chưa cập nhật, chúng tôi rất muốn biết lý do khiến bạn vẫn sử dụng phiên bản cũ! Hãy ghé qua discord của chúng tôi và cho chúng tôi biết lý do khiến bạn không nâng cấp."
+        },
+        "update-notification": {
+            "title": "Đã có bản cập nhật mới!",
+            "help": "Hướng Dẫn Cập Nhật",
+            "download": "Tải Xuống"
+        }
     }
 }

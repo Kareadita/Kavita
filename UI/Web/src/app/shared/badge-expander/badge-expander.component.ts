@@ -1,9 +1,12 @@
 import {
   ChangeDetectionStrategy,
-  Component, computed,
-  ContentChild, EventEmitter,
+  Component,
+  computed,
+  contentChild,
   input,
-  OnInit, Output, signal,
+  OnInit,
+  output,
+  signal,
   TemplateRef
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
@@ -11,11 +14,11 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 @Component({
-    selector: 'app-badge-expander',
-    imports: [TranslocoDirective, NgTemplateOutlet, DefaultValuePipe],
-    templateUrl: './badge-expander.component.html',
-    styleUrls: ['./badge-expander.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-badge-expander',
+  imports: [TranslocoDirective, NgTemplateOutlet, DefaultValuePipe],
+  templateUrl: './badge-expander.component.html',
+  styleUrls: ['./badge-expander.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BadgeExpanderComponent implements OnInit {
 
@@ -31,8 +34,8 @@ export class BadgeExpanderComponent implements OnInit {
   /**
    * Invoked when the "and more" is clicked
    */
-  @Output() toggle = new EventEmitter<void>();
-  @ContentChild('badgeExpanderItem') itemTemplate!: TemplateRef<any>;
+  toggled = output();
+  itemTemplate = contentChild<TemplateRef<any>>('badgeExpanderItem');
 
   isCollapsed = signal<boolean | undefined>(undefined);
   visibleItems = computed(() => {
@@ -56,7 +59,7 @@ export class BadgeExpanderComponent implements OnInit {
   }
 
   toggleVisible() {
-    this.toggle.emit();
+    this.toggled.emit(undefined);
     if (!this.allowToggle()) return;
 
     this.isCollapsed.update(x => !x);

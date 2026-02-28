@@ -16,12 +16,12 @@ import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.en
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
-import {Action, ActionItem} from "../../../_services/action-factory.service";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
@@ -73,34 +73,19 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
     return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
   }
 
-  bulkActionCallback = (action: ActionItem<SideNavStream>, data: SideNavStream) => {
-    const selectedItems = this.bulkSelectionService.getSelectedCardsForSource('sideNavStream');
-    const streams = selectedItems
-        .map(index => this.items[parseInt(index, 10)]);
-    let visibleState = false;
-    switch (action.action) {
-      case Action.MarkAsVisible:
-        visibleState = true;
-        break;
-      case Action.MarkAsInvisible:
-        visibleState = false;
-        break;
-    }
-
-    for(let index of selectedItems.map(s => parseInt(s, 10))) {
-      this.items[index].visible = visibleState;
-      this.items[index] = {...this.items[index]};
-    }
-    this.cdRef.markForCheck();
-    // Make bulk call
-    this.sideNavService.bulkToggleSideNavStreamVisibility(streams.map(s => s.id), visibleState)
-        .subscribe(() => {
-          this.bulkSelectionService.deselectAll();
-          this.cdRef.markForCheck();
-        });
-  }
-
   constructor() {
+
+    this.bulkSelectionService.registerDataSource('sideNavStream', () => this.items);
+    this.bulkSelectionService.registerPostAction((result: ActionResult<SideNavStream[]>) => {
+
+      const updatedStreams = result.entity;
+
+      this.items = this.items.map(item => {
+        const updated = updatedStreams.find(u => u.id === item.id);
+        return updated ? { ...updated } : item;
+      });
+      this.cdRef.markForCheck();
+    })
 
     this.pageOperationsForm.get('accessibilityMode')?.valueChanges.pipe(
         tap(_ => {

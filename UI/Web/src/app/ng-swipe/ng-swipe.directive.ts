@@ -1,6 +1,6 @@
-import { Directive, ElementRef, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
-import {createSwipeSubscription, SwipeDirection, SwipeEvent, SwipeStartEvent} from './ag-swipe.core';
+import {Directive, ElementRef, inject, Input, NgZone, OnDestroy, OnInit, output} from '@angular/core';
+import {Subscription} from 'rxjs';
+import {createSwipeSubscription, SwipeDirection, SwipeEvent} from './ag-swipe.core';
 
 @Directive({
     selector: '[ngSwipe]',
@@ -13,12 +13,12 @@ export class SwipeDirective implements OnInit, OnDestroy {
   private swipeSubscription: Subscription | undefined;
 
   @Input() restrictSwipeToLeftSide: boolean = false;
-  @Output() swipeMove: EventEmitter<SwipeEvent> = new EventEmitter<SwipeEvent>();
-  @Output() swipeEnd: EventEmitter<SwipeEvent> = new EventEmitter<SwipeEvent>();
-  @Output() swipeLeft: EventEmitter<void> = new EventEmitter<void>();
-  @Output() swipeRight: EventEmitter<void> = new EventEmitter<void>();
-  @Output() swipeUp: EventEmitter<void> = new EventEmitter<void>();
-  @Output() swipeDown: EventEmitter<void> = new EventEmitter<void>();
+  readonly swipeMove = output<SwipeEvent>();
+  readonly swipeEnd = output<SwipeEvent>();
+  readonly swipeLeft = output<void>();
+  readonly swipeRight = output<void>();
+  readonly swipeUp = output<void>();
+  readonly swipeDown = output<void>();
 
   ngOnInit() {
     this.zone.runOutsideAngular(() => {
@@ -52,15 +52,15 @@ export class SwipeDirective implements OnInit, OnDestroy {
   private detectSwipeDirection(swipeEvent: SwipeEvent) {
     if (swipeEvent.direction === SwipeDirection.X) {
       if (swipeEvent.distance > 0) {
-        this.swipeRight.emit();
+        this.swipeRight.emit(undefined);
       } else {
-        this.swipeLeft.emit();
+        this.swipeLeft.emit(undefined);
       }
     } else if (swipeEvent.direction === SwipeDirection.Y) {
       if (swipeEvent.distance > 0) {
-        this.swipeDown.emit();
+        this.swipeDown.emit(undefined);
       } else {
-        this.swipeUp.emit();
+        this.swipeUp.emit(undefined);
       }
     }
   }
