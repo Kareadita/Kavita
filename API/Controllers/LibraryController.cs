@@ -210,7 +210,6 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <remarks>If the user is not an admin, only id, type, and name will be returned</remarks>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [ProducesResponseType<LibraryDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<LiteLibraryDto>(StatusCodes.Status200OK)]
     [HttpGet]

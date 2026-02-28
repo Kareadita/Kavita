@@ -18,9 +18,6 @@ public record LiteLibraryDto
 
 public sealed record LibraryDto : LiteLibraryDto
 {
-    public int Id { get; init; }
-    public string? Name { get; init; }
-    public LibraryType Type { get; init; }
     /// <summary>
     /// Last time Library was scanned
     /// </summary>
