@@ -8,6 +8,7 @@ using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Models.DTOs;
+using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Misc;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Scanner;
@@ -16,8 +17,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
-
-#nullable enable
 
 [SkipDeviceTracking]
 public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService, ILogger<PluginController> logger)
@@ -85,7 +84,7 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
     /// <remarks>Will always return null if the Auth Key does not belong to this account</remarks>
     /// <returns></returns>
     [HttpGet("authkey-expires")]
-    public async Task<ActionResult<DateTime?>> GetAuthKeyExpiration()
+    public async Task<ActionResult<AuthKeyExpiresAtDto>> GetAuthKeyExpiration()
     {
         var authKey = AuthKey;
         if (string.IsNullOrEmpty(authKey))
@@ -93,7 +92,7 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
 
         var exp = await unitOfWork.UserRepository.GetAuthKeyExpiration(authKey, UserId);
 
-        return Ok(new { ExpiresAt = exp?.ToUniversalTime() });
+        return Ok(new AuthKeyExpiresAtDto { ExpiresAt = exp?.ToUniversalTime() });
     }
 
 

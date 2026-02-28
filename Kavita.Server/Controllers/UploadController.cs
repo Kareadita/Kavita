@@ -155,9 +155,8 @@ public class UploadController : BaseApiController
     /// </summary>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("collection")]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     public async Task<ActionResult> UploadCollectionCoverImageFromUrl(UploadFileDto uploadFileDto)
     {
         // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
@@ -166,6 +165,9 @@ public class UploadController : BaseApiController
         {
             var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(uploadFileDto.Id);
             if (tag == null) return BadRequest(await _localizationService.Translate(UserId, "collection-doesnt-exist"));
+
+            if (!User.IsInRole(PolicyConstants.AdminRole) && tag.AppUserId != UserId)
+                return Unauthorized();
 
             var filePath = string.Empty;
             var lockState = false;
