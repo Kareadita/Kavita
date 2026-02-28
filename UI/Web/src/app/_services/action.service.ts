@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {map, take} from 'rxjs/operators';
+import {catchError, finalize, map, take} from 'rxjs/operators';
 import {ListSelectModalComponent} from '../shared/_components/list-select-modal/list-select-modal.component';
 import {ScrobbleProvider} from './scrobbling.service';
 import {
@@ -240,10 +240,14 @@ export class ActionService {
         rlRef.setInput('createLabel', translate('add-to-list-modal.reading-list-label'));
         rlRef.setInput('inputItems', []);
         rlRef.setInput('loading', true);
+        rlRef.setInput('createInitialValue', series.name);
 
-        this.readingListService.getReadingLists(false, true).subscribe(result => {
+        this.readingListService.getReadingLists(false, true).pipe(
+          take(1),
+          catchError(() => EMPTY),
+          finalize(() => rlRef.setInput('loading', false))
+        ).subscribe(result => {
           rlRef.setInput('inputItems', result.result.map(l => ({ label: l.title, value: l })));
-          rlRef.setInput('loading', false);
         });
 
         rlRef.setInput('interceptCreate', (name: string) =>
@@ -287,10 +291,13 @@ export class ActionService {
         colRef.setInput('inputItems', []);
         colRef.setInput('loading', true);
 
-        this.collectionService.allCollections(true).subscribe(tags => {
+        this.collectionService.allCollections(true).pipe(
+          take(1),
+          catchError(() => EMPTY),
+          finalize(() => colRef.setInput('loading', false))
+        ).subscribe(tags => {
           const collections = tags.filter(t => t.source === ScrobbleProvider.Kavita);
           colRef.setInput('inputItems', collections.map(c => ({ label: c.title, value: c })));
-          colRef.setInput('loading', false);
         });
 
         colRef.setInput('interceptCreate', (name: string) =>
@@ -425,9 +432,12 @@ export class ActionService {
         rlRef.setInput('inputItems', []);
         rlRef.setInput('loading', true);
 
-        this.readingListService.getReadingLists(false, true).subscribe(result => {
+        this.readingListService.getReadingLists(false, true).pipe(
+          take(1),
+          catchError(() => EMPTY),
+          finalize(() => rlRef.setInput('loading', false))
+        ).subscribe(result => {
           rlRef.setInput('inputItems', result.result.map(l => ({ label: l.title, value: l })));
-          rlRef.setInput('loading', false);
         });
 
         rlRef.setInput('interceptCreate', (name: string) =>
@@ -546,9 +556,12 @@ export class ActionService {
         rlRef.setInput('inputItems', []);
         rlRef.setInput('loading', true);
 
-        this.readingListService.getReadingLists(false, true).subscribe(result => {
+        this.readingListService.getReadingLists(false, true).pipe(
+          take(1),
+          catchError(() => EMPTY),
+          finalize(() => rlRef.setInput('loading', false))
+        ).subscribe(result => {
           rlRef.setInput('inputItems', result.result.map(l => ({ label: l.title, value: l })));
-          rlRef.setInput('loading', false);
         });
 
         rlRef.setInput('interceptCreate', (name: string) =>
@@ -894,9 +907,12 @@ export class ActionService {
         rlRef.setInput('inputItems', []);
         rlRef.setInput('loading', true);
 
-        this.readingListService.getReadingLists(false, true).subscribe(result => {
+        this.readingListService.getReadingLists(false, true).pipe(
+          take(1),
+          catchError(() => EMPTY),
+          finalize(() => rlRef.setInput('loading', false))
+        ).subscribe(result => {
           rlRef.setInput('inputItems', result.result.map(l => ({ label: l.title, value: l })));
-          rlRef.setInput('loading', false);
         });
 
         rlRef.setInput('interceptCreate', (name: string) =>
@@ -940,10 +956,13 @@ export class ActionService {
         colRef.setInput('inputItems', []);
         colRef.setInput('loading', true);
 
-        this.collectionService.allCollections(true).subscribe(tags => {
+        this.collectionService.allCollections(true).pipe(
+          take(1),
+          catchError(() => EMPTY),
+          finalize(() => colRef.setInput('loading', false))
+        ).subscribe(tags => {
           const collections = tags.filter(t => t.source === ScrobbleProvider.Kavita);
           colRef.setInput('inputItems', collections.map(c => ({ label: c.title, value: c })));
-          colRef.setInput('loading', false);
         });
 
         colRef.setInput('interceptCreate', (name: string) =>
@@ -1050,9 +1069,12 @@ export class ActionService {
         rlRef.setInput('inputItems', []);
         rlRef.setInput('loading', true);
 
-        this.readingListService.getReadingLists(false, true).subscribe(result => {
+        this.readingListService.getReadingLists(false, true).pipe(
+          take(1),
+          catchError(() => EMPTY),
+          finalize(() => rlRef.setInput('loading', false))
+        ).subscribe(result => {
           rlRef.setInput('inputItems', result.result.map(l => ({ label: l.title, value: l })));
-          rlRef.setInput('loading', false);
         });
 
         rlRef.setInput('interceptCreate', (name: string) =>
