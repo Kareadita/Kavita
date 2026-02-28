@@ -235,25 +235,25 @@ export class ActionService {
         const rlRef = this.modalService.open(ListSelectModalComponent, addToModal()) as TypedModalRef<ListSelectModalComponent<ReadingList>>;
         this.readingListModalRef = rlRef;
 
-        rlRef.componentInstance.title.set(series.name);
-        rlRef.componentInstance.showCreate.set(true);
-        rlRef.componentInstance.createLabel.set(translate('add-to-list-modal.reading-list-label'));
-        rlRef.componentInstance.inputItems.set([]);
-        rlRef.componentInstance.loading.set(true);
+        rlRef.setInput('title', series.name);
+        rlRef.setInput('showCreate', true);
+        rlRef.setInput('createLabel', translate('add-to-list-modal.reading-list-label'));
+        rlRef.setInput('inputItems', []);
+        rlRef.setInput('loading', true);
 
         this.readingListService.getReadingLists(false, true).subscribe(result => {
-          rlRef.componentInstance.inputItems.set(result.result.map(l => ({ label: l.title, value: l })));
-          rlRef.componentInstance.loading.set(false);
+          rlRef.setInput('inputItems', result.result.map(l => ({ label: l.title, value: l })));
+          rlRef.setInput('loading', false);
         });
 
-        rlRef.componentInstance.interceptCreate.set((name: string) =>
+        rlRef.setInput('interceptCreate', (name: string) =>
           this.readingListService.createList(name).pipe(
             switchMap(list => this.readingListService.updateBySeries(list.id, series.id)),
             tap(() => this.toastr.success(translate('toasts.series-added-to-reading-list')))
           )
         );
 
-        rlRef.componentInstance.interceptConfirm.set((item: ReadingList | ReadingList[]) => {
+        rlRef.setInput('interceptConfirm', (item: ReadingList | ReadingList[]) => {
           const list = item as ReadingList;
           this.readingListService.updateBySeries(list.id, series.id).subscribe(() => {
             this.toastr.success(translate('toasts.series-added-to-reading-list'));
@@ -280,26 +280,26 @@ export class ActionService {
         this.collectionModalRef = colRef;
 
         const singleSeriesIds = [series.id];
-        colRef.componentInstance.title.set(translate('bulk-add-to-collection.title'));
-        colRef.componentInstance.showCreate.set(true);
-        colRef.componentInstance.createLabel.set(translate('bulk-add-to-collection.collection-label'));
-        colRef.componentInstance.createInitialValue.set(translate('actionable.new-collection'));
-        colRef.componentInstance.inputItems.set([]);
-        colRef.componentInstance.loading.set(true);
+        colRef.setInput('title', translate('bulk-add-to-collection.title'));
+        colRef.setInput('showCreate', true);
+        colRef.setInput('createLabel', translate('bulk-add-to-collection.collection-label'));
+        colRef.setInput('createInitialValue', translate('actionable.new-collection'));
+        colRef.setInput('inputItems', []);
+        colRef.setInput('loading', true);
 
         this.collectionService.allCollections(true).subscribe(tags => {
           const collections = tags.filter(t => t.source === ScrobbleProvider.Kavita);
-          colRef.componentInstance.inputItems.set(collections.map(c => ({ label: c.title, value: c })));
-          colRef.componentInstance.loading.set(false);
+          colRef.setInput('inputItems', collections.map(c => ({ label: c.title, value: c })));
+          colRef.setInput('loading', false);
         });
 
-        colRef.componentInstance.interceptCreate.set((name: string) =>
+        colRef.setInput('interceptCreate', (name: string) =>
           this.collectionService.addByMultiple(0, singleSeriesIds, name).pipe(
             tap(() => this.toastr.success(translate('toasts.series-added-to-collection', { collectionName: name })))
           )
         );
 
-        colRef.componentInstance.interceptConfirm.set((item: UserCollection | UserCollection[]) => {
+        colRef.setInput('interceptConfirm', (item: UserCollection | UserCollection[]) => {
           const tag = item as UserCollection;
           this.collectionService.addByMultiple(tag.id, singleSeriesIds, '').subscribe(() => {
             this.toastr.success(translate('toasts.series-added-to-collection', { collectionName: tag.title }));
@@ -419,25 +419,25 @@ export class ActionService {
         const rlRef = this.modalService.open(ListSelectModalComponent, addToModal()) as TypedModalRef<ListSelectModalComponent<ReadingList>>;
         this.readingListModalRef = rlRef;
 
-        rlRef.componentInstance.title.set(translate('add-to-list-modal.title'));
-        rlRef.componentInstance.showCreate.set(true);
-        rlRef.componentInstance.createLabel.set(translate('add-to-list-modal.reading-list-label'));
-        rlRef.componentInstance.inputItems.set([]);
-        rlRef.componentInstance.loading.set(true);
+        rlRef.setInput('title', translate('add-to-list-modal.title'));
+        rlRef.setInput('showCreate', true);
+        rlRef.setInput('createLabel', translate('add-to-list-modal.reading-list-label'));
+        rlRef.setInput('inputItems', []);
+        rlRef.setInput('loading', true);
 
         this.readingListService.getReadingLists(false, true).subscribe(result => {
-          rlRef.componentInstance.inputItems.set(result.result.map(l => ({ label: l.title, value: l })));
-          rlRef.componentInstance.loading.set(false);
+          rlRef.setInput('inputItems', result.result.map(l => ({ label: l.title, value: l })));
+          rlRef.setInput('loading', false);
         });
 
-        rlRef.componentInstance.interceptCreate.set((name: string) =>
+        rlRef.setInput('interceptCreate', (name: string) =>
           this.readingListService.createList(name).pipe(
             switchMap(list => this.readingListService.updateByVolume(list.id, seriesId, volume.id)),
             tap(() => this.toastr.success(translate('toasts.volumes-added-to-reading-list')))
           )
         );
 
-        rlRef.componentInstance.interceptConfirm.set((item: ReadingList | ReadingList[]) => {
+        rlRef.setInput('interceptConfirm', (item: ReadingList | ReadingList[]) => {
           const list = item as ReadingList;
           this.readingListService.updateByVolume(list.id, seriesId, volume.id).subscribe(() => {
             this.toastr.success(translate('toasts.volumes-added-to-reading-list'));
@@ -540,25 +540,25 @@ export class ActionService {
         const rlRef = this.modalService.open(ListSelectModalComponent, addToModal()) as TypedModalRef<ListSelectModalComponent<ReadingList>>;
         this.readingListModalRef = rlRef;
 
-        rlRef.componentInstance.title.set(translate('add-to-list-modal.title'));
-        rlRef.componentInstance.showCreate.set(true);
-        rlRef.componentInstance.createLabel.set(translate('add-to-list-modal.reading-list-label'));
-        rlRef.componentInstance.inputItems.set([]);
-        rlRef.componentInstance.loading.set(true);
+        rlRef.setInput('title', translate('add-to-list-modal.title'));
+        rlRef.setInput('showCreate', true);
+        rlRef.setInput('createLabel', translate('add-to-list-modal.reading-list-label'));
+        rlRef.setInput('inputItems', []);
+        rlRef.setInput('loading', true);
 
         this.readingListService.getReadingLists(false, true).subscribe(result => {
-          rlRef.componentInstance.inputItems.set(result.result.map(l => ({ label: l.title, value: l })));
-          rlRef.componentInstance.loading.set(false);
+          rlRef.setInput('inputItems', result.result.map(l => ({ label: l.title, value: l })));
+          rlRef.setInput('loading', false);
         });
 
-        rlRef.componentInstance.interceptCreate.set((name: string) =>
+        rlRef.setInput('interceptCreate', (name: string) =>
           this.readingListService.createList(name).pipe(
             switchMap(list => this.readingListService.updateByChapter(list.id, seriesId, chapter.id)),
             tap(() => this.toastr.success(translate('toasts.chapter-added-to-reading-list')))
           )
         );
 
-        rlRef.componentInstance.interceptConfirm.set((item: ReadingList | ReadingList[]) => {
+        rlRef.setInput('interceptConfirm', (item: ReadingList | ReadingList[]) => {
           const list = item as ReadingList;
           this.readingListService.updateByChapter(list.id, seriesId, chapter.id).subscribe(() => {
             this.toastr.success(translate('toasts.chapter-added-to-reading-list'));
@@ -888,25 +888,25 @@ export class ActionService {
         this.readingListModalRef = rlRef;
 
         const bulkSeriesIds = series.map(s => s.id);
-        rlRef.componentInstance.title.set(translate('actionable.multiple-selections'));
-        rlRef.componentInstance.showCreate.set(true);
-        rlRef.componentInstance.createLabel.set(translate('add-to-list-modal.reading-list-label'));
-        rlRef.componentInstance.inputItems.set([]);
-        rlRef.componentInstance.loading.set(true);
+        rlRef.setInput('title', translate('actionable.multiple-selections'));
+        rlRef.setInput('showCreate', true);
+        rlRef.setInput('createLabel', translate('add-to-list-modal.reading-list-label'));
+        rlRef.setInput('inputItems', []);
+        rlRef.setInput('loading', true);
 
         this.readingListService.getReadingLists(false, true).subscribe(result => {
-          rlRef.componentInstance.inputItems.set(result.result.map(l => ({ label: l.title, value: l })));
-          rlRef.componentInstance.loading.set(false);
+          rlRef.setInput('inputItems', result.result.map(l => ({ label: l.title, value: l })));
+          rlRef.setInput('loading', false);
         });
 
-        rlRef.componentInstance.interceptCreate.set((name: string) =>
+        rlRef.setInput('interceptCreate', (name: string) =>
           this.readingListService.createList(name).pipe(
             switchMap(list => this.readingListService.updateByMultipleSeries(list.id, bulkSeriesIds)),
             tap(() => this.toastr.success(translate('toasts.series-added-to-reading-list')))
           )
         );
 
-        rlRef.componentInstance.interceptConfirm.set((item: ReadingList | ReadingList[]) => {
+        rlRef.setInput('interceptConfirm', (item: ReadingList | ReadingList[]) => {
           const list = item as ReadingList;
           this.readingListService.updateByMultipleSeries(list.id, bulkSeriesIds).subscribe(() => {
             this.toastr.success(translate('toasts.series-added-to-reading-list'));
@@ -933,26 +933,26 @@ export class ActionService {
         this.collectionModalRef = colRef;
 
         const bulkColSeriesIds = series.map(s => s.id);
-        colRef.componentInstance.title.set(translate('bulk-add-to-collection.title'));
-        colRef.componentInstance.showCreate.set(true);
-        colRef.componentInstance.createLabel.set(translate('bulk-add-to-collection.collection-label'));
-        colRef.componentInstance.createInitialValue.set(translate('actionable.new-collection'));
-        colRef.componentInstance.inputItems.set([]);
-        colRef.componentInstance.loading.set(true);
+        colRef.setInput('title', translate('bulk-add-to-collection.title'));
+        colRef.setInput('showCreate', true);
+        colRef.setInput('createLabel', translate('bulk-add-to-collection.collection-label'));
+        colRef.setInput('createInitialValue', translate('actionable.new-collection'));
+        colRef.setInput('inputItems', []);
+        colRef.setInput('loading', true);
 
         this.collectionService.allCollections(true).subscribe(tags => {
           const collections = tags.filter(t => t.source === ScrobbleProvider.Kavita);
-          colRef.componentInstance.inputItems.set(collections.map(c => ({ label: c.title, value: c })));
-          colRef.componentInstance.loading.set(false);
+          colRef.setInput('inputItems', collections.map(c => ({ label: c.title, value: c })));
+          colRef.setInput('loading', false);
         });
 
-        colRef.componentInstance.interceptCreate.set((name: string) =>
+        colRef.setInput('interceptCreate', (name: string) =>
           this.collectionService.addByMultiple(0, bulkColSeriesIds, name).pipe(
             tap(() => this.toastr.success(translate('toasts.series-added-to-collection', { collectionName: name })))
           )
         );
 
-        colRef.componentInstance.interceptConfirm.set((item: UserCollection | UserCollection[]) => {
+        colRef.setInput('interceptConfirm', (item: UserCollection | UserCollection[]) => {
           const tag = item as UserCollection;
           this.collectionService.addByMultiple(tag.id, bulkColSeriesIds, '').subscribe(() => {
             this.toastr.success(translate('toasts.series-added-to-collection', { collectionName: tag.title }));
@@ -1044,25 +1044,25 @@ export class ActionService {
 
         const volumeIdList = volumes.map(v => v.id);
         const chapterIdList = chapters.map(c => c.id);
-        rlRef.componentInstance.title.set(translate('actionable.multiple-selections'));
-        rlRef.componentInstance.showCreate.set(true);
-        rlRef.componentInstance.createLabel.set(translate('add-to-list-modal.reading-list-label'));
-        rlRef.componentInstance.inputItems.set([]);
-        rlRef.componentInstance.loading.set(true);
+        rlRef.setInput('title', translate('actionable.multiple-selections'));
+        rlRef.setInput('showCreate', true);
+        rlRef.setInput('createLabel', translate('add-to-list-modal.reading-list-label'));
+        rlRef.setInput('inputItems', []);
+        rlRef.setInput('loading', true);
 
         this.readingListService.getReadingLists(false, true).subscribe(result => {
-          rlRef.componentInstance.inputItems.set(result.result.map(l => ({ label: l.title, value: l })));
-          rlRef.componentInstance.loading.set(false);
+          rlRef.setInput('inputItems', result.result.map(l => ({ label: l.title, value: l })));
+          rlRef.setInput('loading', false);
         });
 
-        rlRef.componentInstance.interceptCreate.set((name: string) =>
+        rlRef.setInput('interceptCreate', (name: string) =>
           this.readingListService.createList(name).pipe(
             switchMap(list => this.readingListService.updateByMultiple(list.id, seriesId, volumeIdList, chapterIdList)),
             tap(() => this.toastr.success(translate('toasts.multiple-added-to-reading-list')))
           )
         );
 
-        rlRef.componentInstance.interceptConfirm.set((item: ReadingList | ReadingList[]) => {
+        rlRef.setInput('interceptConfirm', (item: ReadingList | ReadingList[]) => {
           const list = item as ReadingList;
           this.readingListService.updateByMultiple(list.id, seriesId, volumeIdList, chapterIdList).subscribe(() => {
             this.toastr.success(translate('toasts.multiple-added-to-reading-list'));

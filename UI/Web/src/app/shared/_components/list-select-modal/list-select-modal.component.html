@@ -87,12 +87,14 @@
   @if (showFooter()) {
     <div class="modal-footer">
       @if (showCreate()) {
-        <label class="form-label visually-hidden" for="create-input">{{createLabel() ?? ''}}</label>
-        <input id="create-input" type="text" class="form-control"
-               [formControl]="createControl" [placeholder]="createLabel() ?? ''">
-        <button type="button" class="btn btn-primary" [disabled]="isCreating()" (click)="create()">
-          {{createButtonLabel() ?? t('common.create')}}
-        </button>
+        <div class="input-group">
+          <label class="form-label visually-hidden" for="create-input">{{createLabel() ?? ''}}</label>
+          <input id="create-input" type="text" class="form-control"
+                 [formControl]="createControl" [placeholder]="createLabel() ?? ''">
+          <button type="button" class="btn btn-primary" [disabled]="isCreating()" (click)="create()">
+            {{createButtonLabel() ?? t('common.create')}}
+          </button>
+        </div>
       } @else {
         <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.close')}}</button>
 
