@@ -54,9 +54,7 @@ export class EventsWidgetComponent implements OnInit {
 
   /** Intercepts from Single Updates to show an extra indicator to the user */
   readonly updateAvailable = signal(false);
-
   readonly activeDownloads = toSignal(this.downloadService.activeDownloads$, { initialValue: [] });
-  readonly onlineUsers = toSignal(this.messageHub.onlineUsers$, { initialValue: [] });
 
 
   ngOnInit(): void {
