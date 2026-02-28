@@ -1,4 +1,4 @@
-$image-height: 160px;
+$image-height: 10rem;
 @use '../../../card-item-common';
 
 // Override so we can have square cards
@@ -34,7 +34,7 @@ $image-height: 160px;
     bottom: 0;
     background-color: transparent;
     position: unset !important;
-    margin-bottom: 5px;
+    margin-bottom: 0.3125rem;
     display: flex;
     flex-direction: column;
 

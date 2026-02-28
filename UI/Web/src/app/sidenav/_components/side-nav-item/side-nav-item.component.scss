@@ -2,26 +2,26 @@
 
 ::ng-deep .side-nav app-side-nav-item:first-child {
     .active-highlight {
-        border-top-left-radius: 3px;
+        border-top-left-radius: 0.1875rem;
     }
 }
 
 ::ng-deep .side-nav app-side-nav-item:first-child {
     .side-nav-item {
-        border-top-left-radius: 3px;
+        border-top-left-radius: 0.1875rem;
     }
 }
 
 @media (max-width: theme.$grid-breakpoints-lg) {
     ::ng-deep .side-nav app-side-nav-item:first-child {
         .side-nav-item {
-            border-top-left-radius: 0px;
+            border-top-left-radius: 0;
         }
     }
 
     ::ng-deep .side-nav app-side-nav-item:last-child {
         .side-nav-item {
-            border-bottom-left-radius: 0px;
+            border-bottom-left-radius: 0;
         }
     }
 }

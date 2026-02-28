@@ -15,7 +15,7 @@
   border: 1px solid var(--bs-border-color-translucent);
 
   &.completed {
-    border-left: 3px solid var(--bs-success);
+    border-left: 0.1875rem solid var(--bs-success);
   }
 }
 
@@ -32,8 +32,8 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--bs-primary);
-    outline-offset: 2px;
+    outline: 0.125rem solid var(--bs-primary);
+    outline-offset: 0.125rem;
   }
 }
 
@@ -41,7 +41,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 200px;
+  min-height: 12.5rem;
 }
 
 // Mobile optimizations
@@ -58,8 +58,8 @@
   ::ng-deep .pagination {
     .page-link {
       padding: 0.5rem 0.75rem;
-      min-width: 44px; // Minimum touch target
-      min-height: 44px;
+      min-width: 2.75rem; // Minimum touch target
+      min-height: 2.75rem;
       display: flex;
       align-items: center;
       justify-content: center;

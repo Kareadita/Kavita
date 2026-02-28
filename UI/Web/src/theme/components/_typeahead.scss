@@ -1,14 +1,14 @@
 :root {
   /* size */
-  --select2-single-height: 36px;
-  --select2-multiple-height: 36px;
+  --select2-single-height: 2.25rem;
+  --select2-multiple-height: 2.25rem;
 
   /* label */
   --select2-label-text-color: #000;
   --select2-required-color: red;
 
   /* selection */
-  --select2-selection-border-radius: 4px;
+  --select2-selection-border-radius: 0.25rem;
   --select2-selection-background: var(--input-bg-readonly-color);
   --select2-selection-disabled-background: #eee;
   --select2-selection-border-color: var(--input-border-color);
@@ -50,7 +50,7 @@
   /* search field */
   --select2-search-border-color: var(--input-border-color);
   --select2-search-background: var(--input-bg-readonly-color);
-  --select2-search-border-radius: 0px;
+  --select2-search-border-radius: 0;
 
   /* dropdown option */
   --select2-option-text-color: var(--body-text-color);

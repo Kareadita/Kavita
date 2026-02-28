@@ -2,8 +2,8 @@
 
 
 .main-container {
-  margin-top: 10px;
-  padding: 0 0 0 10px;
+  margin-top: 0.625rem;
+  padding: 0 0 0 0.625rem;
 }
 
 
@@ -17,10 +17,10 @@
 }
 
 .dropdown-toggle-split {
-    border-top-right-radius: 6px !important;
-    border-bottom-right-radius: 6px !important;
-    border-top-left-radius: 0px !important;
-    border-bottom-left-radius: 0px !important;
+    border-top-right-radius: 0.375rem !important;
+    border-bottom-right-radius: 0.375rem !important;
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
 }
 
 .reading-list-years {
@@ -30,8 +30,8 @@
 .scroll-container {
     display: flex;
     flex-direction: row;
-    height: calc((var(--vh) *100) - 173px);
-    margin-bottom: 10px;
+    height: calc((var(--vh) *100) - 10.8125rem);
+    margin-bottom: 0.625rem;
 
     &.empty {
         height: auto;

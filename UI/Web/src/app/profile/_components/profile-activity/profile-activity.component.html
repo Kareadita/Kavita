@@ -33,7 +33,7 @@
           <div class="row g-3">
             <div class="col-auto d-sm-block">
               <app-image [imageUrl]="imageService.getSeriesCoverImage(entry.seriesId)" class="d-block"
-                         style="width: 80px; height: auto;"/>
+                         style="width: 5rem; height: auto;"/>
             </div>
 
             <div class="col">
@@ -59,7 +59,7 @@
                   <div class="col-auto d-none d-sm-block chapter-cover"
                        [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId, 'chapter', chapter.chapterId]">
                     <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block" [ngbTooltip]="chapter.label"
-                               style="width: 40px; height: auto;"/>
+                               style="width: 2.5rem; height: auto;"/>
                   </div>
                 }
               </div>
@@ -98,7 +98,7 @@
     [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId, 'chapter', chapter.chapterId]">
     <div class="col-auto d-none d-sm-block chapter-cover me-2">
       <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block"
-                 style="width: 40px; height: auto;"/>
+                 style="width: 2.5rem; height: auto;"/>
     </div>
 
     <ng-container [ngTemplateOutlet]="readStatsTemplate()"

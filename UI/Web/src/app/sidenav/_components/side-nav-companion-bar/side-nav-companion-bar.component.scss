@@ -8,8 +8,8 @@
 
 .icon-position {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: -0.125rem;
+  right: -0.125rem;
   font-size: 0.8em;
   color: var(--primary-color);
 }
@@ -30,10 +30,10 @@
 .icon-container::after {
   content: '';
   position: absolute;
-  left: 10px;
-  bottom: -4px;
-  width: 23px;
-  height: 2px;
+  left: 0.625rem;
+  bottom: -0.25rem;
+  width: 1.4375rem;
+  height: 0.125rem;
   background-color: var(--primary-color);
   transition: width 0.3s ease, left 0.3s ease;
 }

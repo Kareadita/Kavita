@@ -2,7 +2,7 @@
 
   <!--Client Type Breakdown - Percentage distribution (Web App vs OPDS vs KOReader, etc.)-->
   <div class="row">
-    <div class="col-md-6 col-sm-12" style="height: 300px">
+    <div class="col-md-6 col-sm-12" style="height: 18.75rem">
       <h4>{{t('client-devices-this-month-header')}}</h4>
       @if (clientDevices().length === 0) {
         <span>{{t('no-data')}}</span>
@@ -10,7 +10,7 @@
         <app-pie-chart [data]="clientDeviceTypeBreakdown()" [valueTransformer]="clientDeviceClientTypeTransformer.bind(this)" />
       }
     </div>
-    <div class="col-md-6 col-sm-12" style="height: 300px">
+    <div class="col-md-6 col-sm-12" style="height: 18.75rem">
       <h4>{{t('client-devices-mobile-vs-pc-header')}}</h4>
       @if (clientDevices().length === 0) {
         <span>{{t('no-data')}}</span>
