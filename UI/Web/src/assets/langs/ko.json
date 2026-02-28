@@ -1245,7 +1245,8 @@
         "pending-tooltip": "이 사용자는 이메일을 확인하지 않았습니다",
         "all-libraries": "모든 라이브러리",
         "identity-provider-oidc-tooltip": "OIDC",
-        "identity-provider-native-tooltip": "네이티브"
+        "identity-provider-native-tooltip": "네이티브",
+        "profile-link-alt": "프로필"
     },
     "edit-collection-tags": {
         "title": "편집 {{collectionName}} 컬렉션",
@@ -1403,7 +1404,8 @@
         "active-events-title": "활성 이벤트:",
         "no-data": "아무것도 없습니다",
         "left-to-process": "처리할 남은 항목: {{leftToProcess}} / {{totalToProcess}}",
-        "download-in-queue": "대기열에서 {{num}} 다운로드"
+        "download-in-queue": "대기열에서 {{num}} 다운로드",
+        "reading-now": "{{num}}명이 읽는 중"
     },
     "shortcuts-modal": {
         "title": "키보드 단축키",
@@ -1590,7 +1592,8 @@
         "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
         "reading-profile-updated": "읽기 프로필 업데이트 완료",
         "reading-profile-promoted": "읽기 프로필 생성 완료",
-        "page-offset-label": "페이지 오프셋"
+        "page-offset-label": "페이지 오프셋",
+        "offset-only-double": "페이지 오프셋은 양면 표시에서만 사용할 수 있습니다"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1815,7 +1818,8 @@
         "not-classified": "분류되지 않음",
         "total-file-size-title": "총 파일 크기:",
         "download-file-for-extension-header": "보고서 다운로드",
-        "download-file-for-extension-alt": "{{extension}}에 대한 파일 보고서 다운로드"
+        "download-file-for-extension-alt": "{{extension}}에 대한 파일 보고서 다운로드",
+        "no-data": "{{common.no-data}}"
     },
     "reading-activity": {
         "title": "읽기 활동",
@@ -1837,7 +1841,9 @@
         "title": "출판현황",
         "visualisation-label": "시각화",
         "data-table-label": "데이터 테이블",
-        "count-header": "카운트"
+        "count-header": "카운트",
+        "status-header": "{{manage-matched-metadata.status-header}}",
+        "no-data": "{{common.no-data}}"
     },
     "series-preview-drawer": {
         "staff-label": "스태프",
@@ -2187,7 +2193,8 @@
         "confirm-force-delete-font": "이 폰트는 현재 사용 중입니다. 강제로 삭제하시겠습니까? 기본 폰트로 강제 전환됩니다.",
         "font-in-use": "한 명 이상의 사용자가 이 폰트를 사용하고 있어 삭제할 수 없습니다.",
         "k+-resend-welcome-email-success": "당신의 Kavita+ 이메일로 메일이 전송되었습니다",
-        "confirm-delete-auth-key": "이 인증 키를 삭제하시겠습니까?"
+        "confirm-delete-auth-key": "이 인증 키를 삭제하시겠습니까?",
+        "profile-unauthorized": "이 사용자는 프로필을 공유하지 않습니다"
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -2356,7 +2363,8 @@
         "smart-filters-tab": "스마트 필터",
         "annotations-tab": "주석",
         "overview-tab": "개요",
-        "management-tab": "관리"
+        "management-tab": "관리",
+        "activity-tab": "활동"
     },
     "common": {
         "reset-to-default": "기본값으로 재설정",
@@ -2742,7 +2750,8 @@
         "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "기기 설정",
-        "select-devices-for": "{{name}} 기기 설정"
+        "select-devices-for": "{{name}} 기기 설정",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
     "browse-genres": {
         "series-count": "{{common.series-count}}",
@@ -2850,7 +2859,7 @@
         "other-field-required": "{{validation.other-field-required}}",
         "invalid-uri": "{{validation.invalid-uri}}",
         "manual-save-label": "프로바이더(인증 제공자) 설정을 변경하려면 수동으로 저장해야 합니다",
-        "authority-label": "OIDC URL",
+        "authority-label": "권한",
         "authority-tooltip": "OIDC 인증 제공자의 기본 URL을 입력합니다 .well-known/openid-configuration 경로는 포함하지 마세요",
         "client-id-label": "클라이언트 ID",
         "client-id-tooltip": "OIDC 인증 제공자에 ClientID를 설정합니다. 어떤 제공자도 사용할 수 있습니다",
@@ -2859,7 +2868,7 @@
         "provision-accounts-label": "계정 자동 생성",
         "provision-accounts-tooltip": "OIDC 로그인 시 기존 계정과 매칭되지 않으면, 자동으로 새 계정을 생성합니다",
         "require-verified-email-label": "이메일 인증 필수",
-        "require-verified-email-tooltip": "새 계정을 생성하거나 기존 계정과 매칭할 때, 이메일이 인증되어야만 로그인이 가능합니다. OIDC 쪽 계정이 이미 인증된 이메일을 가지고 있다면, Kavita에서도 자동으로 이메일이 인증된 상태로 처리됩니다.",
+        "require-verified-email-tooltip": "새 계정을 생성하거나 기존 계정과 매칭할 때, 이메일이 인증되어야만 로그인이 가능합니다. 신규 생성된 계정이 이미 인증된 이메일을 가지고 있다면, Kavita에서도 자동으로 이메일이 인증된 상태로 처리됩니다.",
         "sync-user-settings-label": "OIDC 역할 동기화",
         "sync-user-settings-tooltip": "OIDC를 통해 생성된 사용자는 ID 제공자(OIDC Provider)가 역할(Role), 라이브러리 접근 권한, 연령 제한 등을 전적으로 관리합니다. 이 옵션을 비활성화하면, 신규 계정은 생성되더라도 콘텐츠에 접근할 수 없습니다. 자세한 내용은 문서를 참조하세요.",
         "auto-login-label": "자동 로그인",
@@ -2950,14 +2959,14 @@
         "close": "{{common.close}}"
     },
     "font-manager": {
-        "description": "Kavita의 EPUB 리더에는 몇 가지 기본 폰트가 포함되어 있습니다. 글꼴 파일을 업로드하거나 Google 폰트 URL을 사용하십시오. 자세한 내용은 <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>위키</a>를 참고하십시오.",
+        "description": "Kavita의 EPUB 리더에는 몇 가지 기본 글꼴이 포함되어 있습니다. 글꼴 파일을 업로드하거나 Google 글꼴 URL을 사용하십시오. 자세한 내용은 <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>위키</a>를 참고하십시오.",
         "enter-an-url-pre-title": "{{url}}을(를) 입력하십시오",
         "url": "URL",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "폰트 파일",
-        "preview-default": "당신의 폰트 파일 또는 Google 폰트 URL로 업로드하십시오",
+        "preview-default": "당신의 글꼴 파일 또는 Google 글꼴 URL로 업로드하십시오",
         "delete": "{{common.delete}}",
         "url-label": "URL",
         "back": "뒤로",
@@ -3149,7 +3158,8 @@
         "reviews-tab": "{{tabs.reviews-tab}}",
         "no-reviews": "아직 리뷰가 없습니다",
         "total-reads-badge": "{{reads}} 읽음",
-        "k+-badge": "K+ 구독자"
+        "k+-badge": "K+ 구독자",
+        "activity-tab": "{{tabs.activity-tab}}"
     },
     "profile-review-list": {
         "no-data": "리뷰가 없거나 리뷰가 공유되지 않고 있습니다",
@@ -3245,7 +3255,8 @@
         "low-activity-alt": "낮은 활동",
         "moderate-activity-alt": "중간 강도 활동",
         "good-activity-alt": "좋은 활동",
-        "high-activity-alt": "높은 활동"
+        "high-activity-alt": "높은 활동",
+        "aggregated-count": "{{year}}에 {{totalPages}}페이지, {{totalWords}}단어를 읽었습니다"
     },
     "reading-pace": {
         "hours-read": "읽은 시간",
@@ -3272,7 +3283,8 @@
         "during-from-to": "{{startYear}}년부터 {{endYear}}년까지",
         "during-select": "시간 범위 선택",
         "during-entire-life-profile": "전체 기간 동안",
-        "during-entire-life-server": "처음부터 누적"
+        "during-entire-life-server": "처음부터 누적",
+        "close": "{{common.close}}"
     },
     "client-device-type-pipe": {
         "mobile": "모바일",
@@ -3349,6 +3361,27 @@
         "week": "이번 주",
         "month": "이번 달",
         "year": "올해"
+    },
+    "profile-activity": {
+        "time-filter-title": "{{username}}의 활동",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "no-data": "{{common.no-data}}",
+        "duration": "기간",
+        "pages-read": "{{reading-pace.pages-read}}",
+        "words-read": "{{reading-pace.words-read}}",
+        "time": "시간",
+        "info-alt": "상세 정보",
+        "today": "오늘",
+        "yesterday": "어제",
+        "pagination-label": "활동 표시 설정",
+        "page-info": "{{current}} / {{total}} 페이지 (총 {{items}}건)"
+    },
+    "user-stats-info-cards": {
+        "pages-read-by-year-title": "연간 읽은 페이지 수",
+        "pages-count": "{{num}} 페이지",
+        "words-read-by-year-title": "연간 읽은 단어",
+        "words-count": "{{num}} 단어"
     },
     "version-update-modal": {
         "close": "{{common.close}}",
