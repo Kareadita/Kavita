@@ -770,8 +770,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Updates the TOC current page anchor, last scene path and saves progress
    */
   handleScrollEvent(bypassSave: boolean = false) {
-    // If a scroll is pending (e.g. initial load), do not update/save progress based on the intermediate scroll position (e.g. top of page).
-    if (this.hasDelayedScroll) return;
+    // If a scroll is pending (e.g. initial load), do not update/save progress based on the intermediate scroll position
+    // (e.g. top of page). Delay the progress event until the pending scroll finished.
+    if (this.hasDelayedScroll) {
+      setTimeout(() => this.handleScrollEvent(bypassSave), SCROLL_DELAY);
+      return;
+    }
 
     // TODO: See if we can move this to a service for ToC
     // Highlight the current chapter we are on
@@ -1458,7 +1462,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // we need to click the document before arrow keys will scroll down.
     this.reader.nativeElement.focus();
-    afterFrame(() => this.handleScrollEvent()); // Will set lastSeenXPath
     this.isLoading.set(false);
     this.cdRef.markForCheck();
 
@@ -1476,6 +1479,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => {
         this.hasDelayedScroll = false;
         lambda();
+        afterFrame(() => this.handleScrollEvent());
       }, SCROLL_DELAY)
     });
   }
