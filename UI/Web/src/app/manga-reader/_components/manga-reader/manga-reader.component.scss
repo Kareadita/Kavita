@@ -222,6 +222,7 @@ $pointer-offset: 0.3125rem;
     //$pagination-bg: rgba(0, 0, 255, 0.4); // DEBUG CODE
     cursor: pointer;
     z-index: 100;
+    user-select: none;
 
     i {
         color: white;
@@ -239,7 +240,7 @@ $pointer-offset: 0.3125rem;
     }
 
     .top {
-        position: absolute;
+        position: fixed;
         right: 0;
         top: 0;
         width: 100%;

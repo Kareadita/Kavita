@@ -226,6 +226,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm.addControl('allowAutomaticWebtoonReaderDetection', new FormControl(this.selectedProfile.allowAutomaticWebtoonReaderDetection, []));
     this.readingProfileForm.addControl('widthOverride', new FormControl(this.selectedProfile.widthOverride, [Validators.min(0), Validators.max(100)]));
     this.readingProfileForm.addControl('disableWidthOverride', new FormControl(this.selectedProfile.disableWidthOverride, []))
+    this.readingProfileForm.addControl('webtoonScrollAmount', new FormControl(this.selectedProfile.webtoonScrollAmount || 85, [Validators.min(50), Validators.max(100)]));
 
     // Epub reader
     this.readingProfileForm.addControl('bookReaderFontFamily', new FormControl(this.selectedProfile.bookReaderFontFamily, []));

@@ -277,6 +277,23 @@
                             </app-setting-item>
                           </div>
 
+                          <div class="row g-0 mt-4 mb-4">
+                            <app-setting-item [title]="t('webtoon-scroll-amount-label')" [subtitle]="t('webtoon-scroll-amount-tooltip')">
+                              <ng-template #view>
+                                <span class="range-text">{{readingProfileForm.get('webtoonScrollAmount')?.value + '%'}}</span>
+                              </ng-template>
+                              <ng-template #edit>
+                                <div class="row g-0">
+                                  <div class="col-10">
+                                    <input type="range" class="form-range" id="webtoon-scroll-amount"
+                                           min="50" max="100" step="5" formControlName="webtoonScrollAmount">
+                                  </div>
+                                  <span class="ps-2 col-2 align-middle">{{readingProfileForm.get('webtoonScrollAmount')?.value + '%'}}</span>
+                                </div>
+                              </ng-template>
+                            </app-setting-item>
+                          </div>
+
                         </div>
                       }
                     </ng-template>

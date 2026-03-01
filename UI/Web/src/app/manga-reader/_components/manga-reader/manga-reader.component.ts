@@ -426,6 +426,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Renderer interaction
   readerSettings$!: Observable<ReaderSetting>;
+  private webtoonLastClickTime = 0;
+  private webtoonClickTimeout: any = null;
   private currentImage: Subject<HTMLImageElement | null> = new ReplaySubject(1);
   currentImage$: Observable<HTMLImageElement | null> = this.currentImage.asObservable().pipe(
     shareReplay({refCount: true, bufferSize: 2})
@@ -686,14 +688,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.readerMode === ReaderMode.Webtoon) {
-      e.triggered = false;
+      this.scrollByViewport(-1);
     }
-
   }
 
   private handlePageLeft() {
     if (this.readerMode === ReaderMode.LeftRight && this.checkIfPaginationAllowed(KeyDirection.Left)) {
       this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
+    } else if (this.readerMode === ReaderMode.Webtoon) {
+      this.scrollByViewport(-1);
     }
   }
 
@@ -703,13 +706,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.readerMode === ReaderMode.Webtoon) {
-      e.triggered = false;
+      this.scrollByViewport(1);
     }
   }
 
   private handlePageRight() {
     if (this.readerMode === ReaderMode.LeftRight && this.checkIfPaginationAllowed(KeyDirection.Right)) {
       this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
+    } else if (this.readerMode === ReaderMode.Webtoon) {
+      this.scrollByViewport(1);
     }
   }
 
@@ -748,6 +753,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       darkness: new FormControl(100),
       emulateBook: new FormControl(this.readingProfile.emulateBook),
       swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate),
+      webtoonScrollAmount: new FormControl(this.readingProfile.webtoonScrollAmount || 85),
       pageOffset: new FormControl(false),
       readingDirection: this.readingDirection,
     });
@@ -1247,7 +1253,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }, OVERLAY_AUTO_CLOSE_TIME);
   }
 
-  toggleMenu() {
+  toggleMenu(event?: Event) {
+    if (this.isInWebtoonScrollZone(event)) return;
     this.menuOpen = !this.menuOpen;
     this.cdRef.markForCheck();
 
@@ -1402,10 +1409,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   handlePageChange(event: any, direction: KeyDirection) {
     // Webtoons and UpDown reading mode should not take ReadingDirection into account
     if (this.readerMode === ReaderMode.Webtoon || this.readerMode === ReaderMode.UpDown) {
-      if (direction === KeyDirection.Right) {
-        this.nextPage(event);
+      if (this.readerMode === ReaderMode.Webtoon) {
+        if (direction === KeyDirection.Right || direction === KeyDirection.Down) {
+          this.scrollByViewport(1);
+        } else {
+          this.scrollByViewport(-1);
+        }
       } else {
-        this.prevPage(event);
+        if (direction === KeyDirection.Right) {
+          this.nextPage(event);
+        } else {
+          this.prevPage(event);
+        }
       }
       return;
     }
@@ -1879,6 +1894,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Bookmarks the current page for the chapter
    */
   bookmarkPage(event: Event | undefined = undefined) {
+    if (this.isInWebtoonScrollZone(event)) return;
     if (event) {
       event.stopPropagation();
       event.preventDefault();
@@ -1989,8 +2005,52 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     data.swipeToPaginate = modelSettings.swipeToPaginate;
     data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
     data.widthOverride = modelSettings.widthSlider === 'none' ? null : modelSettings.widthSlider;
+    data.webtoonScrollAmount = parseInt(modelSettings.webtoonScrollAmount, 10) || 85;
 
     return data;
+  }
+
+  handleWebtoonClick(event: MouseEvent) {
+    const y = event.clientY;
+    const viewportHeight = window.innerHeight;
+    const tapZoneSize = 0.25;
+
+    if (this.menuOpen) {
+      this.toggleMenu();
+      return;
+    }
+
+    if (y < viewportHeight * tapZoneSize) {
+      this.scrollByViewport(-1);
+    } else if (y > viewportHeight * (1 - tapZoneSize)) {
+      this.scrollByViewport(1);
+    } else {
+      // Center zone — single click = toggleMenu, double click = bookmarkPage
+      const now = Date.now();
+      if (now - this.webtoonLastClickTime < 300) {
+        clearTimeout(this.webtoonClickTimeout);
+        this.bookmarkPage(event);
+      } else {
+        this.webtoonClickTimeout = setTimeout(() => {
+          this.toggleMenu();
+        }, 300);
+      }
+      this.webtoonLastClickTime = now;
+    }
+  }
+
+  private isInWebtoonScrollZone(event?: Event): boolean {
+    if (this.readerMode !== ReaderMode.Webtoon) return false;
+    if (!event || !(event instanceof MouseEvent || event instanceof PointerEvent)) return false;
+    const y = event.clientY;
+    const viewportHeight = window.innerHeight;
+    const tapZoneSize = 0.25;
+    return y < viewportHeight * tapZoneSize || y > viewportHeight * (1 - tapZoneSize);
+  }
+
+  scrollByViewport(direction: 1 | -1) {
+    const scrollPercent = (this.generalSettingsForm?.get('webtoonScrollAmount')?.value || 85) / 100;
+    document.body.scrollBy({ top: document.body.clientHeight * scrollPercent * direction, behavior: 'smooth' });
   }
 
   protected readonly ReadingProfileKind = ReadingProfileKind;

@@ -117,7 +117,7 @@
         </div>
       } @else {
         @if (!isLoading && !inSetup) {
-          <div class="webtoon-images" appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
+          <div class="webtoon-images" (click)="handleWebtoonClick($event)">
             <app-infinite-scroller [pageNum]="pageNum"
                                    [bufferPages]="5"
                                    [goToPage]="goToPageEvent"
@@ -292,6 +292,15 @@
                   <input type="range" class="form-range" id="darkness"
                          min="10" max="100" step="1" formControlName="darkness">
                 </div>
+
+                @if (readerMode === ReaderMode.Webtoon) {
+                  <div class="col-md-6 col-sm-12">
+                    <label for="webtoon-scroll-amount" class="form-label range-label">{{t('webtoon-scroll-amount-label')}}</label>
+                    <span class="ms-1 range-text">{{generalSettingsForm.get('webtoonScrollAmount')?.value + '%'}}</span>
+                    <input type="range" class="form-range" id="webtoon-scroll-amount"
+                           min="50" max="100" step="5" formControlName="webtoonScrollAmount">
+                  </div>
+                }
 
                 <div class="col-md-6 col-sm-12">
                   <label for="width-override-slider" class="form-label">{{t('width-override-label')}}:

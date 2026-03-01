@@ -78,6 +78,9 @@ public sealed record UserReadingProfileDto
     [EnumDataType(typeof(BreakPoint))]
     public BreakPoint DisableWidthOverride { get; set; } = BreakPoint.Never;
 
+    /// <inheritdoc cref="AppUserReadingProfile.WebtoonScrollAmount"/>
+    public int WebtoonScrollAmount { get; set; } = 85;
+
     #endregion
 
     #region EpubReader
