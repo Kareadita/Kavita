@@ -1,45 +1,49 @@
 <ng-container *transloco="let t; prefix: 'related-tab'">
   <div class="pb-2">
-    @if (relations.length > 0) {
-      <app-carousel-reel [items]="relations" [title]="t('relations-title')">
-        <ng-template #carouselItem let-item>
-          <app-series-card class="col-auto mt-2 mb-2" [series]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation" />
+    @if (relationEntities().length > 0) {
+      <app-carousel-reel [items]="relationEntities()" [title]="t('relations-title')">
+        <ng-template #carouselItem let-item let-idx>
+          <app-entity-card [entity]="item" [config]="relatedConfig()" [index]="idx" [maxIndex]="relationEntities().length"
+                           (reload)="reload.emit({entity: 'relation', id: item.data.series.id})" />
         </ng-template>
       </app-carousel-reel>
     }
 
-    @if (collections.length > 0) {
-      <app-carousel-reel [items]="collections" [title]="t('collections-title')">
-        <ng-template #carouselItem let-item>
-          <app-card-item [title]="item.title" [entity]="item"
-                         [count]="item.itemCount"
-                         [suppressLibraryLink]="true" [imageUrl]="imageService.getCollectionCoverImage(item.id)"
-                         (clicked)="openCollection(item)" [linkUrl]="'/collections/' + item.id" [showFormat]="false" />
+    @if (collectionEntities().length > 0) {
+      <app-carousel-reel [items]="collectionEntities()" [title]="t('collections-title')">
+        <ng-template #carouselItem let-item let-idx>
+        <app-entity-card [entity]="item" [config]="collectionConfig()" [index]="idx" [maxIndex]="collectionEntities().length"
+                         (reload)="reload.emit({entity: 'collection', id: $event})">
+          <ng-template #subtitle>
+            <app-collection-owner [collection]="item.data" />
+          </ng-template>
+          <ng-template #title let-entity>
+            <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}
+          </ng-template>
+        </app-entity-card>
         </ng-template>
       </app-carousel-reel>
     }
 
 
-    @if (readingLists.length > 0) {
-      <app-carousel-reel [items]="readingLists" [title]="t('reading-lists-title')">
-        <ng-template #carouselItem let-item>
-          <app-card-item [title]="item.title" [entity]="item"
-                         [count]="item.itemCount"
-                         [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
-                         (clicked)="openReadingList(item)" [linkUrl]="'/lists/' + item.id" [showFormat]="false" />
+    @if (readingListEntities().length > 0) {
+      <app-carousel-reel [items]="readingListEntities()" [title]="t('reading-lists-title')">
+        <ng-template #carouselItem let-item let-idx>
+          <app-entity-card [entity]="item" [index]="idx" [maxIndex]="readingListEntities().length" [config]="readingListConfig()"
+                           (reload)="reload.emit({entity: 'readingList', id: $event})">
+            <ng-template #title let-entity>
+              <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}
+            </ng-template>
+          </app-entity-card>
         </ng-template>
       </app-carousel-reel>
     }
 
-    @if (bookmarks.length > 0) {
-      <app-carousel-reel [items]="bookmarks" [title]="t('bookmarks-title')">
-        <ng-template #carouselItem let-item>
-          <app-card-item [entity]="item" [title]="t('bookmarks-title')" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
-                         [suppressArchiveWarning]="true"
-                         [linkUrl]="'/library/' + libraryId + '/series/' + item.seriesId + '/manga/0?bookmarkMode=true'"
-                         (clicked)="viewBookmark(item)"
-                         [count]="bookmarks.length"
-                         [allowSelection]="false" />
+    @if (bookmarks().length > 0) {
+      <app-carousel-reel [items]="bookmarkEntities()" [title]="t('bookmarks-title')">
+        <ng-template #carouselItem let-item let-idx>
+          <app-entity-card [entity]="item" [index]="idx" [maxIndex]="bookmarkEntities().length" [config]="bookmarkConfig()"
+                           (reload)="reload.emit({entity: 'bookmark', id: $event})" />
         </ng-template>
       </app-carousel-reel>
     }

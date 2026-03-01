@@ -1,6 +1,15 @@
 import {DOCUMENT} from '@angular/common';
-import {DestroyRef, inject, Injectable, Renderer2, RendererFactory2, RendererStyleFlags2, signal} from '@angular/core';
-import {filter, take} from 'rxjs';
+import {
+  DestroyRef,
+  effect,
+  inject,
+  Injectable,
+  Renderer2,
+  RendererFactory2,
+  RendererStyleFlags2,
+  signal
+} from '@angular/core';
+import {filter} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
@@ -10,7 +19,7 @@ import {map} from "rxjs/operators";
 import {NavigationEnd, Router} from "@angular/router";
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {WikiLink} from "../_models/wiki";
-import {AuthGuard} from "../_guards/auth.guard";
+import {AUTH_URL_KEY} from "../_guards/auth.guard";
 
 /**
  * NavItem used to construct the dropdown or NavLinkModal on mobile
@@ -120,15 +129,16 @@ export class NavService {
 
   constructor() {
     const rendererFactory = inject(RendererFactory2);
-
     this.renderer = rendererFactory.createRenderer(null, null);
 
+
     // To avoid flashing, let's check if we are authenticated before we show
-    this.accountService.currentUser$.pipe(take(1)).subscribe(u => {
-      if (u) {
+    effect(() => {
+      const user = this.accountService.currentUser();
+      if (user) {
         this.showNavBar();
       }
-    });
+    })
 
     const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
     this.sideNavCollapsed.set(sideNavState);
@@ -204,12 +214,12 @@ export class NavService {
     this.showSideNav();
 
     // Check if user came here from another url, else send to library route
-    const pageResume = localStorage.getItem(AuthGuard.urlKey);
+    const pageResume = localStorage.getItem(AUTH_URL_KEY);
     if (pageResume && pageResume !== '/login') {
-      localStorage.setItem(AuthGuard.urlKey, '');
+      localStorage.setItem(AUTH_URL_KEY, '');
       this.router.navigateByUrl(pageResume);
     } else {
-      localStorage.setItem(AuthGuard.urlKey, '');
+      localStorage.setItem(AUTH_URL_KEY, '');
       this.router.navigateByUrl('/home');
     }
   }

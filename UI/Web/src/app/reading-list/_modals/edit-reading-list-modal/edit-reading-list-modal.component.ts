@@ -22,6 +22,7 @@ import {CoverImageChooserComponent} from '../../../cards/cover-image-chooser/cov
 import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {modalSaved} from "../../../_models/modal/modal-result";
 
 enum TabID {
   General = 'general-tab',
@@ -123,22 +124,24 @@ export class EditReadingListModalComponent implements OnInit {
       this.readingList.summary = model.summary;
       this.readingList.coverImageLocked = this.coverImageLocked;
       this.readingList.promoted = model.promoted;
-      this.ngModal.close(this.readingList);
+      this.ngModal.close(modalSaved(this.readingList));
       this.toastr.success(translate('toasts.reading-list-updated'));
     });
   }
 
   updateSelectedIndex(index: number) {
     this.coverImageIndex = index;
-    this.cdRef.detectChanges();
+    this.cdRef.markForCheck();
   }
 
   updateSelectedImage(url: string) {
     this.selectedCover = url;
+    this.cdRef.markForCheck();
   }
 
   handleReset() {
     this.coverImageLocked = false;
+    this.cdRef.markForCheck();
   }
 
 }

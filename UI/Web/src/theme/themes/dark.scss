@@ -90,8 +90,8 @@
   --theme-color: #000000;
   --color-scheme: dark;
   --tile-color: var(--primary-color);
-  --nav-offset: 60px;
-  --nav-mobile-offset: 55px;
+  --nav-offset: 3.75rem;
+  --nav-mobile-offset: 3.4375rem;
 
   /* Should we render the series cover as background on mobile */
   --mobile-series-img-background: true;
@@ -114,11 +114,11 @@
   --navbar-bg-color: black;
   --navbar-text-color: white;
   --navbar-fa-icon-color: white;
-  --navbar-border-radius: 0px; // 4px for Plex navbar
+  --navbar-border-radius: 0; // 4px for Plex navbar
   --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
-  --navbar-header-margin: 0px; // 8px allows for the Plex navbar + --nav-offset: 56px;
-  --navbar-header-mobile-x-margin: 0px; // 8px allows for the Plex navbar
-  --navbar-header-mobile-y-margin: 0px; // 12px allows for the Plex navbar
+  --navbar-header-margin: 0; // 8px allows for the Plex navbar + --nav-offset: 56px;
+  --navbar-header-mobile-x-margin: 0; // 8px allows for the Plex navbar
+  --navbar-header-mobile-y-margin: 0; // 12px allows for the Plex navbar
 
   /* Inputs */
   --input-bg-color: #343a40;
@@ -182,12 +182,12 @@
 
 
   /* Nav (Tabs) */
-  --nav-item-min-width: 150px;
-  --nav-item-max-width: 150px;
+  --nav-item-min-width: 9.375rem;
+  --nav-item-max-width: 9.375rem;
   --nav-tab-border-color: rgba(44, 118, 88, 0.7);
   --nav-tab-text-color: var(--elevation-layer10);
   --nav-tab-bg-color: transparent;
-  --nav-tab-border-width: 0 0 3px 0;
+  --nav-tab-border-width: 0 0 0.1875rem 0;
   --nav-tab-hover-border-color: var(--primary-color);
   --nav-tab-active-text-color: white;
   --nav-tab-border-hover-color: transparent;
@@ -238,18 +238,18 @@
   --tagbadge-filled-bg-color: var(--primary-color);
 
   /* Side Nav */
-  --side-nav-width: 230px;
+  --side-nav-width: 14.375rem;
   --side-nav-icon-size: 0.9rem;
   --side-nav-bg-color: var(--elevation-layer9-dark);
   --side-nav-mobile-bg-color: var(--elevation-layer2-dark-solid);
   --side-nav-openclose-transition: 0.15s ease-in-out;
   --side-nav-box-shadow: var(--elevation-layer0);
-  --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
+  --side-nav-mobile-box-shadow: 0.1875rem 0em 0.3125rem 10em rgb(0 0 0 / 50%);
   --side-nav-hover-text-color: white;
   --side-nav-hover-bg-color: black;
   --side-nav-text-color: hsla(0, 0%, 100%, .85);
   --side-nav-header-text-color: white;
-  --side-nav-border-radius: 3px;
+  --side-nav-border-radius: 0.1875rem;
   --side-nav-border: none;
   --side-nav-border-closed: none;
   --side-nav-border-transition: 0.5s ease-in-out;
@@ -272,15 +272,15 @@
   --list-group-hover-text-color: white;
   --list-group-hover-bg-color: rgb(22, 27, 34);
   --list-group-active-border-color: none;
-  --list-group-item-border-top-left-radius: 0px;
-  --list-group-item-border-top-right-radius: 0px;
-  --list-group-item-border-bottom-left-radius: 0px;
-  --list-group-item-border-bottom-right-radius: 0px;
+  --list-group-item-border-top-left-radius: 0;
+  --list-group-item-border-top-right-radius: 0;
+  --list-group-item-border-bottom-left-radius: 0;
+  --list-group-item-border-bottom-right-radius: 0;
   --list-group-item-border-width: 1px 0 1px 0;
   --list-group-item-border-color: rgba(239, 239, 239, 0.125);
   --list-group-item-border-style: solid;
-  --list-group-item-first-border-width: 0px 0px 1px 0px;
-  --list-group-item-last-border-width: 0px 0px 0px 0px;
+  --list-group-item-first-border-width: 0 0 1px 0;
+  --list-group-item-last-border-width: 0 0 0 0;
 
   /* Popover */
   --popover-body-bg-color: #2C2C2C;
@@ -354,16 +354,19 @@
   --card-border-width: 0 1px 1px 1px;
   --card-border-style: solid;
   --card-border-color: transparent;
-  --card-border-radius: 5px;
+  --card-border-radius: 0.3125rem;
   --card-progress-bar-color: var(--primary-color);
   --card-overlay-bg-color: rgba(0, 0, 0, 0);
   --card-overlay-hover-bg-color: rgba(30,30,30,.6);
-  --card-progress-triangle-size: 28px;
+  --card-progress-triangle-size: 1.75rem;
   --card-body-bg-color: rgba(0,0,0,0.7);
   --card-title-text-color: var(--card-text-color);
   --card-overlay-text-color: var(--card-text-color);
   --card-hover-text-color: var(--card-text-color);
   --card-hover-bg-color: #3a3a3a;
+  --card-image-height: 14.5625rem;
+  --card-image-width: 10rem;
+  --card-progress-height: 0.3125rem;
 
   /* Slider */
   --slider-text-color: white;
@@ -371,7 +374,7 @@
   --input-range-active-color: var(--primary-color-darker-shade);
 
   /* Manga Reader */
-  --manga-reader-overlay-filter: blur(10px);
+  --manga-reader-overlay-filter: blur(0.625rem);
   --manga-reader-overlay-bg-color: rgba(0,0,0,0.5);
   --manga-reader-overlay-text-color: white;
   --manga-reader-next-highlight-bg-color: rgba(65, 225, 100, 0.5);
@@ -426,16 +429,16 @@
   /** Login **/
   --login-card-bg-color: #212121;
   --login-logo-image: url("/assets/images/logo.png");
-  --login-logo-height: 55px;
-  --login-logo-width: 55px;
+  --login-logo-height: 3.4375rem;
+  --login-logo-width: 3.4375rem;
   --login-logo-bg-size: contain;
   --login-logo-bg-repeat: no-repeat;
-  --login-card-border-width: 3px 0px 0px 0px;
+  --login-card-border-width: 0.1875rem 0 0 0;
   --login-card-border-style: solid;
   --login-card-border-color: var(--primary-color);
   --login-input-border-color: transparent;
   --login-input-border-color-focus: transparent;
-  --login-input-box-shadow-focus: 0 0 0 1px rgba(74, 198, 148, 0.8);
+  --login-input-box-shadow-focus: 0 0 0 0.0625rem rgba(74, 198, 148, 0.8);
   --login-input-background-color: #353535;
   --login-input-color: #fff;
   --login-forgot-password-color: var(--primary-color);

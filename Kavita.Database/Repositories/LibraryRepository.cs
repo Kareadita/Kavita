@@ -174,6 +174,23 @@ public class LibraryRepository(DataContext context, IMapper mapper) : ILibraryRe
             .ToListAsync(ct);
     }
 
+    public async Task<LibraryDto?> GetLibraryDtoByIdAsync(int libraryId, CancellationToken ct = default)
+    {
+        return await context.Library
+            .Include(f => f.Folders)
+            .Include(l => l.LibraryFileTypes)
+            .ProjectTo<LibraryDto>(mapper.ConfigurationProvider)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(l => l.Id == libraryId, ct);
+    }
+
+    public async Task<LiteLibraryDto?> GetLiteLibraryDtoByIdAsync(int libraryId, CancellationToken ct = default)
+    {
+        return await context.Library
+            .ProjectTo<LiteLibraryDto>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(l => l.Id == libraryId, ct);
+    }
+
     public async Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None,
         CancellationToken ct = default)
     {

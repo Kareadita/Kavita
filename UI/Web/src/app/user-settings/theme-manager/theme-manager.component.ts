@@ -18,9 +18,8 @@ import {ConfirmService} from "../../shared/confirm.service";
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
 import {ReactiveFormsModule} from "@angular/forms";
 import {LoadingComponent} from "../../shared/loading/loading.component";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {PreviewImageModalComponent} from "../../shared/_components/carousel-modal/preview-image-modal.component";
-import {DefaultModalOptions} from "../../_models/default-modal-options";
+import {ModalService} from "../../_services/modal.service";
 
 interface ThemeContainer {
   downloadable?: DownloadableSiteTheme;
@@ -45,7 +44,7 @@ export class ThemeManagerComponent {
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
 
   protected readonly ThemeProvider = ThemeProvider;
   protected readonly ScrobbleProvider = ScrobbleProvider;
@@ -56,11 +55,7 @@ export class ThemeManagerComponent {
   downloadableThemes: Array<DownloadableSiteTheme> = [];
   downloadedThemes: Array<SiteTheme> = [];
 
-  canUseThemes = computed(() => {
-    const user = this.accountService.currentUserSignal();
-    if (!user) return false;
-    return !this.accountService.hasReadOnlyRole(user);
-  });
+  canUseThemes = computed(() => !this.accountService.hasReadOnlyRole());
 
   files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.css'].join(',');
@@ -107,7 +102,7 @@ export class ThemeManagerComponent {
   }
 
   applyTheme(theme: SiteTheme) {
-    const user = this.accountService.currentUserSignal();
+    const user = this.accountService.currentUser();
     if (!user) return;
 
     // Updating theme emits the new theme to load on the themes$
@@ -180,7 +175,7 @@ export class ThemeManagerComponent {
   previewImage(imgUrl: string) {
     if (imgUrl === '') return;
 
-    const ref = this.modalService.open(PreviewImageModalComponent, DefaultModalOptions);
+    const ref = this.modalService.open(PreviewImageModalComponent);
     ref.componentInstance.title = this.selectedTheme!.name;
     ref.componentInstance.image = imgUrl;
   }

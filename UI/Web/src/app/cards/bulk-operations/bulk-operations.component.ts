@@ -1,66 +1,45 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  HostListener,
-  inject,
-  Input,
-  OnInit
-} from '@angular/core';
-import {
-  Action,
-  ActionFactoryService,
-  ActionItem,
-  ActionShouldRenderFunc
-} from 'src/app/_services/action-factory.service';
+import {ChangeDetectionStrategy, Component, computed, HostListener, inject, input} from '@angular/core';
 import {BulkSelectionService} from '../bulk-selection.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {AsyncPipe, DecimalPipe, NgStyle} from "@angular/common";
+import {DecimalPipe} from "@angular/common";
 import {TranslocoModule} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {KEY_CODES} from "../../shared/_services/utility.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
+import {ActionFactoryService} from "../../_services/action-factory.service";
+import {ActionResult} from "../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-bulk-operations',
   imports: [
-    AsyncPipe,
     CardActionablesComponent,
     TranslocoModule,
     NgbTooltip,
-    NgStyle,
     DecimalPipe
   ],
   templateUrl: './bulk-operations.component.html',
   styleUrls: ['./bulk-operations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BulkOperationsComponent<T> implements OnInit {
+export class BulkOperationsComponent<T> {
 
-  @Input({required: true}) actionCallback!: (action: ActionItem<T>, data: any) => void;
-  @Input() shouldRenderFunc?: ActionShouldRenderFunc<T>;
-  /**
-   * Modal mode means don't fix to the top
-   */
-  @Input() modalMode = false;
-  /**
-   * On Series Detail this should be 12
-   */
-  @Input() marginLeft: number = 0;
-  /**
-   * On Series Detail this should be 12
-   */
-  @Input() marginRight: number = 8;
-  hasMarkAsRead: boolean = false;
-  hasMarkAsUnread: boolean = false;
-  actions: Array<ActionItem<T>> = [];
-
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  public readonly bulkSelectionService = inject(BulkSelectionService);
-  protected readonly Action = Action;
+  protected readonly bulkSelectionService = inject(BulkSelectionService);
+
+  /**
+   * On Series Detail this should be 0
+   */
+  marginLeft = input<number>(0);
+  /**
+   * On Series Detail this should be 0
+   */
+  marginRight = input<number>(8);
+
+  actions = computed(() => this.bulkSelectionService.actionsSignal() ?? []);
+  hasMarkAsRead = computed(() => this.actionFactoryService.hasAction(this.actions(), Action.MarkAsRead));
+  hasMarkAsUnread = computed(() => this.actionFactoryService.hasAction(this.actions(), Action.MarkAsUnread));
+
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: Event) {
@@ -79,25 +58,19 @@ export class BulkOperationsComponent<T> implements OnInit {
     }
   }
 
-  ngOnInit(): void {
-    this.bulkSelectionService.actions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(actions => {
-      // We need to do a recursive callback apply
-      const shouldRender = this.shouldRenderFunc ? this.shouldRenderFunc.bind(this) : this.actionFactoryService.dummyShouldRender;
-      this.actions = this.actionFactoryService.applyCallbackToList(actions, this.actionCallback.bind(this), shouldRender);
-      this.hasMarkAsRead = this.actionFactoryService.hasAction(this.actions, Action.MarkAsRead);
-      this.hasMarkAsUnread = this.actionFactoryService.hasAction(this.actions, Action.MarkAsUnread);
-      this.cdRef.markForCheck();
-    });
-  }
+  performAction(event: ActionItem<any> | ActionResult<any>) {
+    // Skip ActionResults — they've already been handled
+    if ('effect' in event) return;
 
-  performAction(action: ActionItem<any>) {
-    this.actionCallback(action, null);
+    event.callback(event, null).subscribe();
   }
 
   executeAction(action: Action) {
-    const foundActions = this.actions.filter(act => act.action === action);
+    const foundActions = this.actions().filter(act => act.action === action);
     if (foundActions.length > 0) {
       this.performAction(foundActions[0]);
     }
   }
+
+  protected readonly Action = Action;
 }

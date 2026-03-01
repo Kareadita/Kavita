@@ -1,16 +1,16 @@
 .chooser {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 160px);
+  grid-template-columns: repeat(auto-fill, 10rem);
   grid-gap: 0.5rem;
   justify-content: space-around;
 }
 
 .scroller {
-  max-height: calc(100dvh - 180px);
+  max-height: calc(100dvh - 11.25rem);
   overflow-y: auto;
 
   @media (max-width: 576px) {
-    max-height: calc(100dvh - 480px);
+    max-height: calc(100dvh - 30rem);
   }
 }
 
@@ -30,12 +30,12 @@
 
   &:hover {
     background-color: var(--card-bg-color);
-    border-radius: 5px;
+    border-radius: 0.3125rem;
   }
 
   &:active, &.active {
     background-color: var(--card-bg-color);
-    border-radius: 5px;
+    border-radius: 0.3125rem;
   }
 
 
@@ -55,9 +55,9 @@
 ngx-file-drop ::ng-deep > div {
   // styling for the outer drop box
   width: 100%;
-  border: 2px solid var(--primary-color);
-  border-radius: 5px;
-  height: 100px;
+  border: 0.125rem solid var(--primary-color);
+  border-radius: 0.3125rem;
+  height: 6.25rem;
   margin: auto;
 
   > div {
@@ -69,8 +69,8 @@ ngx-file-drop ::ng-deep > div {
 }
 
 .custom-position {
-  right: 15px;
-  top: -42px;
+  right: 0.9375rem;
+  top: -2.625rem;
 }
 
 .section-header {

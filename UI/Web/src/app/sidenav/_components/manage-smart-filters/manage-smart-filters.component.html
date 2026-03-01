@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix:'manage-smart-filters'">
   <form [formGroup]="listForm">
-    @if (filters.length >= 5) {
+    @if (hasFilterControl()) {
       <div class="mb-3">
         <label for="filter" class="form-label">{{t('filter')}}</label>
         <div class="input-group">
@@ -12,7 +12,7 @@
   </form>
 
   <ul>
-    @for(stream of filters | filter: filterList; track stream.name) {
+    @for(stream of filters() | filter: filterList; track stream.name) {
 
       @if (isErrored(stream)) {
         <li class="list-group-item d-block mb-3">
@@ -23,9 +23,10 @@
         </li>
       } @else {
         @if(filterApiMap[stream.name] | async; as data) {
-          <app-carousel-reel [items]="data" [title]="stream.name" [titleLink]="baseUrl + 'all-series?' + stream.filter" [actionables]="actions" (handleAction)="handleAction($event, stream)">
+          <app-carousel-reel [items]="data" [title]="stream.name" [titleLink]="baseUrl + 'all-series?' + stream.filter"
+                             [actionables]="actions()" [actionableEntity]="stream" (actionHandler)="handleActionCallback($event)">
             <ng-template #carouselItem let-item>
-              <app-series-card [series]="item" [libraryId]="item.libraryId" />
+              <app-series-card [series]="item" />
             </ng-template>
           </app-carousel-reel>
         }

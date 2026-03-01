@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
-  ContentChild,
+  contentChild,
   DestroyRef,
   effect,
   EventEmitter,
@@ -11,7 +11,7 @@ import {
   input,
   Input,
   OnInit,
-  Output,
+  output,
   Signal,
   TemplateRef
 } from '@angular/core';
@@ -29,7 +29,6 @@ import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
-import {animate, style, transition, trigger} from "@angular/animations";
 import {SortButtonComponent} from "../_single-module/sort-button/sort-button.component";
 import {FilterSettingsBase} from "./filter-settings";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
@@ -40,18 +39,6 @@ import {Breakpoint, BreakpointService} from "../_services/breakpoint.service";
   selector: 'app-metadata-filter',
   templateUrl: './metadata-filter.component.html',
   styleUrls: ['./metadata-filter.component.scss'],
-  animations: [
-      trigger('inOutAnimation', [
-          transition(':enter', [
-              style({ height: 0, opacity: 0 }),
-              animate('.5s ease-out', style({ height: 300, opacity: 1 }))
-          ]),
-          transition(':leave', [
-              style({ height: 300, opacity: 1 }),
-              animate('.5s ease-in', style({ height: 0, opacity: 0 }))
-          ])
-      ]),
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgTemplateOutlet, DrawerComponent,
     ReactiveFormsModule, FormsModule, AsyncPipe, TranslocoModule,
@@ -77,13 +64,13 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
 
   filterSettings = input.required<FilterSettingsBase<TFilter, TSort>>();
 
-  @Output() applyFilter: EventEmitter<FilterEvent<TFilter, TSort>> = new EventEmitter();
-  @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
+  readonly applyFilter = output<FilterEvent<TFilter, TSort>>();
+  readonly collapse = contentChild.required<NgbCollapse>('[ngbCollapse]');
 
   /**
    * Template that is rendered next to the save button
    */
-  @ContentChild('extraButtons') extraButtonsRef!: TemplateRef<any>;
+  readonly extraButtonsRef = contentChild.required<TemplateRef<any>>('extraButtons');
 
 
 

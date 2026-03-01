@@ -4,14 +4,13 @@ import {
   Component,
   computed,
   DestroyRef,
-  EventEmitter,
   inject,
   Injector,
   input,
   Input,
   OnInit,
-  Output,
   Signal,
+  output
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
@@ -129,7 +128,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
    */
   @Input() preset!: FilterStatement<TFilter>;
   entityType = input.required<ValidFilterEntity>();
-  @Output() filterStatement = new EventEmitter<FilterStatement<TFilter>>();
+  readonly filterStatement = output<FilterStatement<TFilter>>();
 
 
   formGroup!: FormGroup;

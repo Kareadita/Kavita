@@ -1,8 +1,18 @@
 import {DecimalPipe, DOCUMENT, NgStyle} from '@angular/common';
-import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, EventEmitter, inject, OnInit, ViewChild } from '@angular/core';
-import {Title} from '@angular/platform-browser';
+import {
+  AfterContentChecked,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  ElementRef,
+  EventEmitter,
+  inject,
+  OnInit,
+  viewChild
+} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {debounceTime, take} from 'rxjs';
+import {debounceTime} from 'rxjs';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
@@ -11,8 +21,6 @@ import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
-import {Action, ActionItem} from 'src/app/_services/action-factory.service';
-import {ActionService} from 'src/app/_services/action.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
@@ -25,13 +33,14 @@ import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-opera
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {MetadataService} from "../../../_services/metadata.service";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 
 @Component({
@@ -42,13 +51,11 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
     imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
 })
 export class WantToReadComponent implements OnInit, AfterContentChecked {
-  imageService = inject(ImageService);
+  protected imageService = inject(ImageService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private seriesService = inject(SeriesService);
-  private titleService = inject(Title);
-  bulkSelectionService = inject(BulkSelectionService);
-  private actionService = inject(ActionService);
+  protected bulkSelectionService = inject(BulkSelectionService);
   private messageHub = inject(MessageHubService);
   private filterUtilityService = inject(FilterUtilitiesService);
   private utilityService = inject(UtilityService);
@@ -59,8 +66,8 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   private jumpbarService = inject(JumpbarService);
 
 
-  @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
-  @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
+  readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
+  readonly companionBar = viewChild<ElementRef<HTMLDivElement>>('companionBar');
   private readonly destroyRef = inject(DestroyRef);
   private readonly metadataService = inject(MetadataService);
 
@@ -80,28 +87,13 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
-
-    switch (action.action) {
-      case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
-          this.bulkSelectionService.deselectAll();
-          this.loadPage();
-        });
-        break;
-    }
-  }
-
-  collectionTag: any;
 
   get ScrollingBlockHeight() {
-    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
+    if (this.scrollingBlock() === undefined) return 'calc(var(--vh)*100)';
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
     if (navbar === null) return 'calc(var(--vh)*100)';
 
-    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
+    const companionHeight = this.companionBar()!.nativeElement.offsetHeight;
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
@@ -109,7 +101,11 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   constructor() {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-      this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
+
+      this.bulkSelectionService.registerDataSource('series', () => this.series);
+      this.bulkSelectionService.registerPostAction((result: ActionResult<Series>) => {
+        this.loadPage();
+      });
 
 
       this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
@@ -157,7 +153,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   }
 
   ngAfterContentChecked(): void {
-    this.scrollService.setScrollContainer(this.scrollingBlock);
+    this.scrollService.setScrollContainer(this.scrollingBlock());
   }
 
   removeSeries(seriesId: number) {

@@ -8,6 +8,7 @@ import {FilterService} from "../../../_services/filter.service";
 import {debounceTime, distinctUntilChanged, switchMap} from "rxjs/operators";
 import {of, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {modalSaved} from "../../../_models/modal/modal-result";
 
 @Component({
   selector: 'app-edit-smart-filter-modal',
@@ -27,7 +28,7 @@ export class EditSmartFilterModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   @Input({required: true}) smartFilter!: SmartFilter;
-  @Input({required: true}) allFilters!: SmartFilter[];
+  @Input({required: true}) allFilters!: SmartFilter[]; // TODO: Refactor so it's handled within the component
 
   smartFilterForm: FormGroup = new FormGroup({
     'name': new FormControl('', [Validators.required]),
@@ -64,18 +65,18 @@ export class EditSmartFilterModalComponent implements OnInit {
   }
 
 
-  close(closeVal: boolean = false) {
-    this.modal.close(closeVal);
+  close() {
+    this.modal.dismiss();
   }
 
   save() {
     this.smartFilter.name = this.smartFilterForm.get('name')!.value;
     this.filterService.renameSmartFilter(this.smartFilter).subscribe({
       next: () => {
-        this.modal.close(true);
+        this.modal.close(modalSaved(this.smartFilter));
       },
       error: () => {
-        this.modal.close(false);
+        this.modal.dismiss();
       }
     });
   }

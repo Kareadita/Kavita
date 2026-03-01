@@ -2,8 +2,8 @@
   <div>
     <ng-content />
 
-    @if (subtitle) {
-      <div class="description text-muted mt-1" [innerHTML]="subtitle | safeHtml"></div>
+    @if (subtitle()) {
+      <div class="description text-muted mt-1" [innerHTML]="subtitle() | safeHtml"></div>
     }
   </div>
 </ng-container>

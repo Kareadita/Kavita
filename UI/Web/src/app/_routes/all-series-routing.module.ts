@@ -5,6 +5,7 @@ import {UrlFilterResolver} from "../_resolvers/url-filter.resolver";
 
 export const routes: Routes = [
   {path: '', component: AllSeriesComponent, pathMatch: 'full',
+    title: 'title.all-series',
     runGuardsAndResolvers: 'always',
     resolve: {
       filter: UrlFilterResolver

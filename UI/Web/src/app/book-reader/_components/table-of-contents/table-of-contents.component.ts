@@ -3,11 +3,10 @@ import {
   Component,
   computed,
   effect,
-  EventEmitter,
   inject,
   model,
-  Output,
-  signal
+  signal,
+  output
 } from '@angular/core';
 import {BookChapterItem} from '../../_models/book-chapter-item';
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -42,7 +41,10 @@ export class TableOfContentsComponent {
   isDisplayingChildrenOnly = computed(() => this.chapters().length === 1);
 
 
-  @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
+  readonly loadChapter = output<{
+    pageNum: number;
+    part: string;
+}>();
 
   constructor() {
     effect(() => {

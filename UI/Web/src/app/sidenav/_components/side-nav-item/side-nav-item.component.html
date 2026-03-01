@@ -1,26 +1,26 @@
 
 @let isSideNavCollapsed = navService.sideNavCollapsedSignal();
 
-@if (link === undefined || link.length === 0) {
-  <div class="side-nav-item" [ngClass]="{'closed': isSideNavCollapsed, 'active': highlighted}">
+@if (!link()) {
+  <div class="side-nav-item" [ngClass]="{'closed': isSideNavCollapsed, 'active': highlighted()}">
     <ng-container [ngTemplateOutlet]="inner" />
   </div>
 } @else {
-  @if (external) {
-    <a [id]="id" class="side-nav-item" [href]="link" [ngClass]="{'closed': isSideNavCollapsed, 'active': highlighted}" rel="noopener noreferrer" target="_blank">
+  @if (external()) {
+    <a [id]="id()" class="side-nav-item" [href]="link()" [ngClass]="{'closed': isSideNavCollapsed, 'active': highlighted()}" rel="noopener noreferrer" target="_blank">
       <ng-container [ngTemplateOutlet]="inner" />
     </a>
   } @else {
-    @if (queryParams && queryParams !== {}) {
-      <a [id]="id" class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': isSideNavCollapsed, 'active': highlighted}" (click)="openLink()">
+    @if (queryParams()) {
+      <a [id]="id()" class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': isSideNavCollapsed, 'active': highlighted()}" (click)="openLink()">
         <ng-container [ngTemplateOutlet]="inner" />
       </a>
-    } @else if (fragment) {
-      <a [id]="id" class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': isSideNavCollapsed, 'active': highlighted}" [routerLink]="link" [fragment]="fragment">
+    } @else if (fragment()) {
+      <a [id]="id()" class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': isSideNavCollapsed, 'active': highlighted()}" [routerLink]="link()" [fragment]="fragment()">
         <ng-container [ngTemplateOutlet]="inner" />
       </a>
     } @else {
-      <a [id]="id" class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': isSideNavCollapsed, 'active': highlighted}" [routerLink]="link" [queryParams]="queryParams">
+      <a [id]="id()" class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': isSideNavCollapsed, 'active': highlighted()}" [routerLink]="link()" [queryParams]="queryParams()">
         <ng-container [ngTemplateOutlet]="inner" />
       </a>
     }
@@ -29,19 +29,20 @@
 
 <ng-template #inner>
     <div class="active-highlight"></div>
-    @if (editMode) {
-      <span class="phone-hidden" title="{{title}}">
+    @if (editMode()) {
+      <span class="phone-hidden" title="{{title()}}">
         <div>
           <i class="fa fa-grip-vertical drag-handle" aria-hidden="true"></i>
         </div>
       </span>
-    } @else if (!noIcon) {
-      <span class="phone-hidden" title="{{title}}">
+    } @else if (!noIcon()) {
+      <span class="phone-hidden" title="{{title()}}">
         <div>
-          @if (imageUrl !== null && imageUrl !== '') {
-            <app-image [imageUrl]="imageUrl" width="20px" height="20px" />
+          @let imageUrlValue = imageUrl();
+          @if (imageUrlValue) {
+            <app-image [imageUrl]="imageUrlValue" width="20px" height="20px" />
           } @else {
-            <i class="fa {{icon}}" aria-hidden="true"></i>
+            <i class="fa {{icon()}}" aria-hidden="true"></i>
           }
         </div>
       </span>
@@ -49,9 +50,9 @@
 
     <span class="side-nav-text">
         <div>
-          {{title}}
-          @if (badgeCount && badgeCount > 0) {
-            <span class="badge bg-danger rounded-pill ms-2">{{badgeCount}}</span>
+          {{title()}}
+          @if (badgeCount() > 0) {
+            <span class="badge bg-danger rounded-pill ms-2">{{badgeCount()}}</span>
           }
         </div>
     </span>

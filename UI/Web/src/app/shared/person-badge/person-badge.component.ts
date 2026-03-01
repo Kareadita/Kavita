@@ -1,5 +1,5 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
-import { Person } from '../../_models/metadata/person';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
+import {Person} from '../../_models/metadata/person';
 
 import {SeriesStaff} from "../../_models/series-detail/external-series-detail";
 import {ImageComponent} from "../image/image.component";
@@ -13,31 +13,28 @@ import {RouterLink} from "@angular/router";
     styleUrls: ['./person-badge.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PersonBadgeComponent implements OnInit {
+export class PersonBadgeComponent {
 
   protected readonly imageService = inject(ImageService);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
-  @Input({required: true}) person!: Person | SeriesStaff;
-  @Input() isStaff = false;
+  person = input.required<Person | SeriesStaff>();
+  isStaff = input(false);
 
-  staff!: SeriesStaff;
+  staff = computed(() => this.person() as SeriesStaff);
 
-  get HasCoverImage() {
-    return this.isStaff || (this.person as Person).coverImage;
-  }
+  hasCoverImage = computed(() => {
+    return this.isStaff() || !!(this.person() as Person).coverImage;
+  });
 
-  get ImageUrl() {
-    if (this.isStaff && this.staff.imageUrl && !this.staff.imageUrl.endsWith('default.jpg')) {
-      return (this.person as SeriesStaff).imageUrl || '';
+  imageUrl = computed(() => {
+    if (this.isStaff()) {
+      const s = this.staff();
+      if (s.imageUrl && !s.imageUrl.endsWith('default.jpg')) {
+        return s.imageUrl;
+      }
     }
-    return this.imageService.getPersonImage((this.person as Person).id);
-  }
+    return this.imageService.getPersonImage((this.person() as Person).id);
+  });
 
-  ngOnInit() {
-    this.staff = this.person as SeriesStaff;
-    this.cdRef.markForCheck();
-  }
-
-    protected readonly encodeURIComponent = encodeURIComponent;
+  protected readonly encodeURIComponent = encodeURIComponent;
 }

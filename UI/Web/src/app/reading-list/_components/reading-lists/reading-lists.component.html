@@ -13,7 +13,7 @@
 
     <app-card-detail-layout
       [isLoading]="loadingLists"
-      [items]="lists"
+      [items]="listEntities()"
       [pagination]="pagination"
       [jumpBarKeys]="jumpbarKeys"
       [filteringDisabled]="true"
@@ -21,18 +21,17 @@
     >
 
       <ng-template #topBar>
-        <app-bulk-operations [actionCallback]="bulkActionCallback" />
+        <app-bulk-operations />
       </ng-template>
 
       <ng-template #cardItem let-item let-position="idx" >
-        <app-card-item [title]="item.title" [entity]="item" [actions]="actions[item.id]" [actionEntity]="item"
-                       [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
-                       [linkUrl]="'/lists/' + item.id"
-                       [count]="item.itemCount"
-                       (clicked)="handleClick(item)"
-                       [selected]="bulkSelectionService.isCardSelected('readingList', position)"
-                       [allowSelection]="true" [showFormat]="false"
-                       (selection)="bulkSelectionService.handleCardSelection('readingList', position, lists.length, $event)" />
+        <app-entity-card [entity]="item" [index]="position" [maxIndex]="listEntities().length" [config]="readingListConfig()"
+        (reload)="loadPage()" (dataChanged)="updateReadingList($event)">
+          <ng-template #title let-entity>
+            <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}
+          </ng-template>
+        </app-entity-card>
+
       </ng-template>
 
       <ng-template #noData>

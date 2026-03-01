@@ -68,4 +68,8 @@ If you just want to play with Swagger, you can just
 If you have a build issue around swagger run:
 ` swagger tofile --output ../openapi.json API/bin/Debug/net8.0/API.dll v1` to see the error and correct it
 
+### Building external scripts/apps ###
+We welcome anyone to build external scripts and applications. Reach out to us about publishing, we will link from our wiki and discord. 
+Please do not use words like "Kavita reader" or "Kavita" as your explicit app name. Use of "[name]: A Kavita Reader" is preferred. 
+
 If you have any questions about any of this, please let us know.

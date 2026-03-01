@@ -9,8 +9,8 @@
 }
 
 .user-avatar {
-  width: 48px;
-  height: 48px;
+  width: 3rem;
+  height: 3rem;
   flex-shrink: 0;
 
   img {
@@ -49,8 +49,8 @@
 }
 
 .series-cover {
-  width: 60px;
-  height: 90px;
+  width: 3.75rem;
+  height: 5.625rem;
   border-radius: 0.25rem;
   object-fit: cover;
   background: var(--elevation-layer3);

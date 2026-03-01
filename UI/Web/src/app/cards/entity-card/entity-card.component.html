@@ -1,0 +1,165 @@
+<ng-container *transloco="let t; prefix: 'card-item'">
+  <div
+    class="card-item-container card position-relative"
+    [class.selected-highlight]="isSelected()"
+    [attr.aria-label]="ariaLabel()"
+    role="article"
+  >
+    @let entityProgress = progress();
+
+    <!-- Card Image & Overlay Area -->
+    <div class="overlay" (click)="handleClick($event)">
+
+      <!-- Cover Image -->
+      @if (!showError()) {
+        <app-image
+          [height]="cardHeight()"
+          [width]="cardWidth()"
+          [styles]="{'border-radius': '.25rem .25rem 0 0'}"
+          [imageUrl]="coverUrl()"
+        />
+      } @else {
+        <app-image
+          [height]="cardHeight()"
+          [width]="cardWidth()"
+          [styles]="{'border-radius': '.25rem .25rem 0 0'}"
+          [imageUrl]="imageService.errorImage"
+        />
+      }
+
+
+
+      @if (showError()) {
+        <div class="error-banner">
+          {{ t('cannot-read') }}
+        </div>
+      }
+
+      <!-- Overlay gradient -->
+      <div class="card-overlay"></div>
+
+      <!-- Unread Badge -->
+      @if (entityProgress.pagesRead === 0 && entityProgress.pages > 0) {
+        <div class="badge-container">
+          <div class="not-read-badge"></div>
+        </div>
+      }
+
+      @if (config().allowSelection) {
+        <div
+          class="bulk-mode"
+          [class.always-show]="bulkSelectionService.hasSelections()"
+          (click)="handleSelection($event)">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            [attr.aria-label]="t('select') + ' ' + ariaLabel()"
+            [ngModel]="isSelected()"
+            [ngModelOptions]="{standalone: true}"
+          />
+        </div>
+      }
+
+      <!-- Count Badge -->
+      @if (count() > 1) {
+        <div class="count">
+          <span class="badge bg-primary">{{ count() }}</span>
+        </div>
+      }
+
+      <div class="progress-banner">
+        @if (entityProgress.pagesRead > 0 &&
+        entityProgress.pagesRead < entityProgress.pages &&
+        entityProgress.pages > 0) {
+          <p
+            [ngbTooltip]="((entityProgress.pagesRead / entityProgress.pages) * 100 | number:'1.0-1') + '%'"
+            container="body">
+            <ngb-progressbar
+              type="primary"
+              height="5px"
+              [value]="entityProgress.pagesRead"
+              [max]="entityProgress.pages"
+            />
+          </p>
+        }
+      </div>
+      <div class="download">
+          <app-download-indicator [download$]="download$" />
+      </div>
+
+      <!-- Read Button (visible on hover) -->
+      @if (!bulkSelectionService.hasSelections()) {
+        <div class="overlay-information">
+          <div class="overlay-information--centered">
+            <span
+              class="card-title read-btn mx-auto"
+              style="width: auto;"
+              role="button"
+              tabindex="0"
+              (click)="handleRead($event)"
+              (keydown.enter)="handleRead($event)"
+              [attr.aria-label]="t('read') + ' ' + ariaLabel()">
+              <div>
+                <i class="fa-solid fa-book" aria-hidden="true"></i>
+              </div>
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Meta Title Area (above main title) -->
+    @if (shouldRenderMetaTitle()) {
+      <div
+        class="card-body meta-title"
+        [ngbTooltip]="metaTitle().length > 34 ? metaTitle() : null">
+        @if (hasMetaTitleTemplate()) {
+          <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:3.625rem;">
+            <ng-container *ngTemplateOutlet="metaTitleTemplate()!; context: { $implicit: entity() }" />
+          </div>
+        } @else {
+          <div class="card-content d-flex justify-content-center align-items-center text-center" style="width:100%;min-height:3.625rem;">
+            {{ metaTitle() }}
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Footer: Format Badge, Title, Actions -->
+    <div class="card-title-container">
+      <!-- Format Badge (optional) -->
+      @if (formatBadge()) {
+        <app-series-format [format]="formatBadge()!" />
+      } @else {
+        <span class="card-format"></span>
+      }
+
+      <!-- Title Link -->
+      <span
+        class="card-title"
+        [ngbTooltip]="tooltip()"
+        placement="top"
+        [id]="'entity-' + entityId()">
+        <a class="dark-exempt btn-icon" [routerLink]="titleRoute()" [queryParams]="titleRouteParams()">
+          @if (hasTitleTemplate()) {
+            <ng-container *ngTemplateOutlet="titleTemplate()!; context: { $implicit: entity() }" />
+          } @else {
+            {{ title() }}
+          }
+        </a>
+      </span>
+
+      <!-- Action Menu -->
+      @if (hasActionables()) {
+        <span class="card-actions">
+          <app-card-actionables
+            [entity]="actionableEntity()"
+            [actions]="actionables()"
+            [labelBy]="ariaLabel()"
+            (actionHandler)="onActionResult($event)"
+          />
+        </span>
+      }
+    </div>
+  </div>
+</ng-container>

@@ -28,6 +28,8 @@ public interface ILibraryRepository
     void Update(Library library);
     void Delete(Library? library);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync(CancellationToken ct = default);
+    Task<LibraryDto?> GetLibraryDtoByIdAsync(int libraryId, CancellationToken ct = default);
+    Task<LiteLibraryDto?> GetLiteLibraryDtoByIdAsync(int libraryId, CancellationToken ct = default);
     Task<bool> LibraryExists(string libraryName, CancellationToken ct = default);
     Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None, CancellationToken ct = default);
     Task<IList<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName, CancellationToken ct = default);

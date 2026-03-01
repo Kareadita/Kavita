@@ -1,38 +1,40 @@
 <ng-container *transloco="let t; prefix: 'bulk-operations'">
-  @if (bulkSelectionService.selections$ | async; as selectionCount) {
-    @if (selectionCount > 0) {
-      <div class="bulk-select-container" [ngStyle]="{'margin-left': marginLeft + 'px', 'margin-right': marginRight + 'px'}">
-        <div class="bulk-select">
-          <div class="d-flex justify-content-around align-items-center">
+  @let selectionCount = bulkSelectionService.selectionSignal() ?? 0;
+
+  @if (selectionCount > 0) {
+    <div class="bulk-select-container" [style.margin-left.px]="marginLeft()" [style.margin-right.px]="marginRight()">
+      <div class="bulk-select">
+        <div class="d-flex justify-content-around align-items-center">
 
           <span class="highlight">
-              <i class="fa fa-check me-1" aria-hidden="true"></i>
-            {{t('items-selected',{num: selectionCount | number})}}
+            <i class="fa fa-check me-1" aria-hidden="true"></i>
+            {{t('items-selected', {num: selectionCount | number})}}
           </span>
 
-            <span>
-            @if (hasMarkAsUnread) {
-              <button class="btn btn-icon" (click)="executeAction(Action.MarkAsUnread)" [ngbTooltip]="t('mark-as-unread')" placement="bottom">
+          <span>
+              @if (hasMarkAsUnread()) {
+                <button class="btn btn-icon" (click)="executeAction(Action.MarkAsUnread)" [ngbTooltip]="t('mark-as-unread')" placement="bottom">
                   <i class="fa-regular fa-circle-check" aria-hidden="true"></i>
                   <span class="visually-hidden">{{t('mark-as-unread')}}</span>
-              </button>
-            }
-              @if (hasMarkAsRead) {
-                <button class="btn btn-icon" (click)="executeAction(Action.MarkAsRead)" [ngbTooltip]="t('mark-as-read')" placement="bottom">
+                </button>
+              }
+            @if (hasMarkAsRead()) {
+              <button class="btn btn-icon" (click)="executeAction(Action.MarkAsRead)" [ngbTooltip]="t('mark-as-read')" placement="bottom">
                   <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
                   <span class="visually-hidden">{{t('mark-as-read')}}</span>
-              </button>
-              }
-              <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" />
-          </span>
+                </button>
+            }
+            <app-card-actionables [actions]="actions()" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" (actionHandler)="performAction($event)"  />
+            </span>
 
-            <span id="bulk-actions-header" class="visually-hidden">{{t('title')}}</span>
+          <span id="bulk-actions-header" class="visually-hidden">{{t('title')}}</span>
 
-            <button class="btn btn-icon" (click)="bulkSelectionService.deselectAll()"><i class="fa fa-times me-1" aria-hidden="true"></i>{{t('deselect-all')}}</button>
-          </div>
+          <button class="btn btn-icon" (click)="bulkSelectionService.deselectAll()">
+            <i class="fa fa-times me-1" aria-hidden="true"></i>
+            {{t('deselect-all')}}
+          </button>
         </div>
       </div>
-    }
-
+    </div>
   }
 </ng-container>

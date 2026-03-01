@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'download-button'">
-  @if (canDownload$ | async) {
+  @if (canDownload()) {
     @if (download$ | async; as download) {
       <button class="btn btn-actions" (click)="downloadClicked()" [ngbTooltip]="t('download-tooltip')" [disabled]="download !== null">
         @if (download) {

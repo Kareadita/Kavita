@@ -1,10 +1,10 @@
 import {
-  AfterViewInit,
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   inject,
-  Input,
-  ViewChild,
+  input,
+  viewChild,
   ViewContainerRef,
   ViewEncapsulation
 } from '@angular/core';
@@ -25,33 +25,32 @@ import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
-export class ReviewCardModalComponent implements AfterViewInit {
-  private document = inject<Document>(DOCUMENT);
+export class ReviewCardModalComponent {
 
+  private readonly document = inject<Document>(DOCUMENT);
+  private readonly modal = inject(NgbActiveModal);
 
-  private modal = inject(NgbActiveModal);
+  review = input.required<UserReview>();
+  container = viewChild.required('container', { read: ViewContainerRef });
 
-  @Input({required: true}) review!: UserReview;
-  @ViewChild('container', { read: ViewContainerRef }) container!: ViewContainerRef;
+  constructor() {
+    afterNextRender(() => {
+      const spoilers = this.document.querySelectorAll('span.spoiler');
+
+      for (let i = 0; i < spoilers.length; i++) {
+        const spoiler = spoilers[i];
+        const componentRef = this.container().createComponent<SpoilerComponent>(SpoilerComponent, {
+          projectableNodes: [[document.createTextNode('')]]
+        });
+        componentRef.setInput('html', spoiler.innerHTML);
+        if (spoiler.parentNode != null) {
+          spoiler.parentNode.replaceChild(componentRef.location.nativeElement, spoiler);
+        }
+      }
+    });
+  }
 
   close() {
-    this.modal.close();
+    this.modal.dismiss();
   }
-
-  ngAfterViewInit() {
-    const spoilers = this.document.querySelectorAll('span.spoiler');
-
-    for (let i = 0; i < spoilers.length; i++) {
-      const spoiler = spoilers[i];
-      const componentRef = this.container.createComponent<SpoilerComponent>(SpoilerComponent,
-        {projectableNodes: [[document.createTextNode('')]]});
-      componentRef.instance.html = spoiler.innerHTML;
-      if (spoiler.parentNode != null) {
-        spoiler.parentNode.replaceChild(componentRef.location.nativeElement, spoiler);
-      }
-      componentRef.instance.cdRef.markForCheck();
-    }
-  }
-
-
 }

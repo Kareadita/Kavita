@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Download} from 'src/app/shared/_models/download';
 import {DownloadEvent} from 'src/app/shared/_services/download.service';
@@ -18,5 +18,5 @@ export class DownloadIndicatorComponent {
   /**
    * Observable that represents when the download completes
    */
-  @Input({required: true}) download$!: Observable<Download | DownloadEvent | null> | null;
+  download$ = input.required<Observable<Download | DownloadEvent | null> | null>();
 }

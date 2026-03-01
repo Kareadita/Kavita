@@ -152,10 +152,9 @@ public class SeriesController(
     /// Updates the Series
     /// </summary>
     /// <param name="updateSeries"></param>
-    /// <returns></returns>
+    /// <returns>Updated Series</returns>
     [HttpPost("update")]
-    [Authorize(PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult> UpdateSeries(UpdateSeriesDto updateSeries)
+    public async Task<ActionResult<SeriesDto>> UpdateSeries(UpdateSeriesDto updateSeries)
     {
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
         if (series == null)
@@ -200,7 +199,7 @@ public class SeriesController(
             await taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
         }
 
-        return Ok();
+        return Ok(await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(series.Id, UserId));
     }
 
     /// <summary>
@@ -227,7 +226,7 @@ public class SeriesController(
     /// <param name="userParams">Page size and offset</param>
     /// <returns></returns>
     [HttpPost("recently-updated-series")]
-    public async Task<ActionResult<IList<RecentlyAddedItemDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
+    public async Task<ActionResult<IList<GroupedSeriesDto>>> GetRecentlyAddedChapters([FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
         return Ok(await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(UserId, userParams));

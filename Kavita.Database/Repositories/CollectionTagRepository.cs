@@ -70,6 +70,17 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
             .ToListAsync(ct);
     }
 
+    public async Task<AppUserCollectionDto?> GetCollectionDtoAsync(int collectionId, int userId, CancellationToken ct = default)
+    {
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
+        return await context.AppUserCollection
+            .Where(uc => (uc.AppUserId == userId || uc.Promoted) && uc.Id == collectionId)
+            .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
+            .OrderBy(uc => uc.Title)
+            .ProjectTo<AppUserCollectionDto>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<PagedList<AppUserCollectionDto>> GetCollectionDtosPagedAsync(int userId, UserParams userParams,
         bool includePromoted = false, CancellationToken ct = default)
     {

@@ -34,7 +34,8 @@
         "identity-provider": "Poskytovateľ identity",
         "identity-provider-tooltip": "Používatelia Kavity nie sú nikdy synchronizovaní s účtami OIDC.",
         "libraries-label": "{{common.libraries}}",
-        "roles-label": "{{common.roles}}"
+        "roles-label": "{{common.roles}}",
+        "warning-read-only": "Účty s prístupom iba na čítanie majú obmedzené možnosti"
     },
     "user-scrobble-history": {
         "title": "História Scrobblingu",
@@ -145,7 +146,14 @@
         "social-max-age-rating-label": "Maximálne vekové hodnotenie",
         "social-max-age-rating-tooltip": "Maximálne vekové obmedzenie, pri ktorom budú sociálne funkcie fungovať",
         "social-include-unknowns-label": "Zahrňte neznáme",
-        "social-include-unknowns-tooltip": "Povoliť sociálne funkcie pre série a kapitoly s neznámym vekovým obmedzením"
+        "social-include-unknowns-tooltip": "Povoliť sociálne funkcie pre série a kapitoly s neznámym vekovým obmedzením",
+        "opds-settings-title": "Nastavenia OPDS",
+        "prompt-for-rereads-after-label": "Pripomenutie pre opätovné čítanie",
+        "prompt-for-rereads-after-tooltip": "Zobraziť pripomenutie opätovného čítania, ak od posledného postupu uplynulo X dní. Nastavenie 0 úplne deaktivuje pripomenutie.",
+        "social-share-profile-label": "Zdieľať profil",
+        "social-share-profile-tooltip": "Povoliť, aby ostatní členovia servera videli vaše čitateľské aktivity",
+        "embed-progress-indicator-label": "Zobraziť indikátor priebehu",
+        "embed-progress-indicator-tooltip": "Zobraziť indikátor priebehu v názve"
     },
     "user-holds": {
         "title": "Scrobble tituly",
@@ -482,14 +490,6 @@
     "announcements": {
         "title": "Oznámenia"
     },
-    "out-of-date-modal": {
-        "title": "Nezaostávajte!",
-        "close": "{{common.close}}",
-        "subtitle": "Zdá sa, že vaša inštalácia zaostáva o viac ako {{count}} verzií!",
-        "description-1": "Zvážte aktualizáciu, aby ste používali najnovšiu verziu Kavity.",
-        "description-2": "Pozrite sa na <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> pre inštrukcie, ako aktualizovať.",
-        "description-3": "Ak existuje konkrétny dôvod, prečo ste ešte neaktualizovali, radi by sme vedeli, čo vás drží na zastaranej verzii! Zastavte sa na našom Discorde a dajte nám vedieť, čo bráni vašej ceste inovácie."
-    },
     "changelog": {
         "installed": "Nainštalované",
         "download": "Stiahnuť",
@@ -728,12 +728,6 @@
     "read-more": {
         "read-more": "Čítaj viac",
         "read-less": "Čítaj menej"
-    },
-    "update-notification-modal": {
-        "title": "Nová Aktualizácia k dispozícii!",
-        "close": "{{common.close}}",
-        "help": "Ako aktualizovať",
-        "download": "Stiahnuť"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2296,7 +2290,8 @@
         "issue-count": "{{num}} Problémov",
         "unknown": "Neznámy",
         "roles": "Roly",
-        "libraries": "Knižnice"
+        "libraries": "Knižnice",
+        "selected": "Vybrané"
     },
     "person-detail": {
         "all-roles": "{{common.roles}}",
@@ -2427,20 +2422,6 @@
         "installed": "{{changelog.installed}}",
         "feature-requests": "Požiadavky na funkcie",
         "known-issues": "Známe problémy"
-    },
-    "new-version-modal": {
-        "title": "Kavita bola aktualizovaná!",
-        "description": "K dispozícii je nová verzia Kavity. Aktualizujte obnovením.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "refresh": "Obnoviť",
-        "known-issues": "{{changelog.known-issues}}"
     },
     "manage-matched-metadata": {
         "description": "Všetky príslušné série, ktoré je možné priradiť k externým metaúdajom, sa nachádzajú tu. Kavita vopred načíta alebo obnoví metadáta série, 50 sérií za 24 hodín denne.",
@@ -2961,6 +2942,57 @@
         "auth-keys-title": "Spravovať autorizačné kľúče",
         "name-label": "Meno",
         "key-label": "Kľúč",
+        "expires-label": "Expirácia",
+        "last-accessed-label": "Posledný prístup",
+        "actions-label": "Akcie",
+        "rotate": "Vystriedať",
+        "delete": "{{common.delete}}",
+        "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
+        "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
+        "clients-opds-description": "{{user-preferences.clients-opds-description}}",
+        "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
+        "opds": "OPDS",
+        "image-only": "Obrázky",
+        "add-auth-key": "Nový",
+        "description": "Autorizačný kľúč je ako heslo. Jeho zmena zneplatní všetkých existujúcich klientov.",
+        "copy-key": "{{common.copy}}"
+    },
+    "create-auth-key": {
+        "create-title": "Vytvor autorizačný kľúč",
+        "rotate-title": "Vymeniť autorizačný kľúč",
+        "name-label": "Názov",
+        "key-length-label": "Dĺžka kľúča",
+        "expiration-label": "Vypršanie platnosti",
+        "required-field": "{{validations.required-field}}",
+        "total-key-length": "Celková dĺžka kľúča: {{length}}",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "never": "Nikdy"
+    },
+    "review-list-item": {
+        "by-label": "Ku",
+        "created-alt": "Vytvorené",
         "expires-label": "Expirácia"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Nezaostávajte!",
+            "subtitle": "Zdá sa, že vaša inštalácia zaostáva o viac ako {{count}} verzií!",
+            "description-1": "Zvážte aktualizáciu, aby ste používali najnovšiu verziu Kavity.",
+            "description-2": "Pozrite sa na <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> pre inštrukcie, ako aktualizovať.",
+            "description-3": "Ak existuje konkrétny dôvod, prečo ste ešte neaktualizovali, radi by sme vedeli, čo vás drží na zastaranej verzii! Zastavte sa na našom Discorde a dajte nám vedieť, čo bráni vašej ceste inovácie."
+        },
+        "new-version": {
+            "title": "Kavita bola aktualizovaná!",
+            "description": "K dispozícii je nová verzia Kavity. Aktualizujte obnovením.",
+            "refresh": "Obnoviť"
+        },
+        "update-notification": {
+            "title": "Nová Aktualizácia k dispozícii!",
+            "help": "Ako aktualizovať",
+            "download": "Stiahnuť"
+        }
     }
 }

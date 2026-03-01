@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit,} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, input, OnInit,} from '@angular/core';
 import {DeviceService} from "../../../_services/device.service";
 import {ToastrService} from "ngx-toastr";
 import {Device} from "../../../_models/device/device";
@@ -8,6 +8,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {DevicePlatformPipe} from "../../../_pipes/device-platform.pipe";
+import {modalSaved} from "../../../_models/modal/modal-result";
 
 @Component({
     selector: 'app-edit-device-modal',
@@ -28,16 +29,16 @@ export class EditDeviceModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly modalRef = inject(NgbActiveModal);
 
-  @Input() device: Device | null = null;
+  device = input<Device | null>(null);
 
   settingsForm: FormGroup = new FormGroup({});
   devicePlatforms = devicePlatforms;
 
   ngOnInit(): void {
 
-    this.settingsForm.addControl('name', new FormControl(this.device?.name || '', [Validators.required]));
-    this.settingsForm.addControl('email', new FormControl(this.device?.emailAddress || '', [Validators.required, Validators.email]));
-    this.settingsForm.addControl('platform', new FormControl(this.device?.platform || DevicePlatform.Custom, [Validators.required]));
+    this.settingsForm.addControl('name', new FormControl(this.device()?.name || '', [Validators.required]));
+    this.settingsForm.addControl('email', new FormControl(this.device()?.emailAddress || '', [Validators.required, Validators.email]));
+    this.settingsForm.addControl('platform', new FormControl(this.device()?.platform || DevicePlatform.Custom, [Validators.required]));
 
     // If user has filled in email and the platform hasn't been explicitly updated, try to update it for them
     this.settingsForm.get('email')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(email => {
@@ -51,8 +52,9 @@ export class EditDeviceModalComponent implements OnInit {
   }
 
   save() {
-    if (this.device !== null) {
-      this.deviceService.updateEmailDevice(this.device.id, this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email)
+    const device = this.device();
+    if (device !== null) {
+      this.deviceService.updateEmailDevice(device.id, this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email)
         .subscribe((device) => {
           this.settingsForm.reset();
           this.toastr.success(translate('toasts.device-updated'));
@@ -72,6 +74,10 @@ export class EditDeviceModalComponent implements OnInit {
   }
 
   close(device: Device | null = null) {
-    this.modalRef.close(device);
+    if (device !== null) {
+      this.modalRef.close(modalSaved(device));
+      return;
+    }
+    this.modalRef.dismiss();
   }
 }
