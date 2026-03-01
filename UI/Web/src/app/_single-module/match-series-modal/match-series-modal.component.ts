@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, OnInit, signal} from '@angular/core';
 import {Series} from "../../_models/series";
 import {SeriesService} from "../../_services/series.service";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
@@ -30,7 +30,6 @@ import {catchError, of, tap} from "rxjs";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MatchSeriesModalComponent implements OnInit {
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly seriesService = inject(SeriesService);
   private readonly modalService = inject(NgbActiveModal);
   private readonly toastr = inject(ToastrService);
