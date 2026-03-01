@@ -8,13 +8,10 @@ import {
   OnChanges,
   output,
   SimpleChanges,
-  TemplateRef,
-  viewChild
 } from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {Chapter} from "../../_models/chapter";
 import {FormsModule} from "@angular/forms";
-import {EntityTitleComponent} from "../entity-title/entity-title.component";
 import {LibraryType} from "../../_models/library/library";
 import {MangaFormat} from "../../_models/manga-format";
 import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
@@ -28,7 +25,6 @@ import {ActionFactoryService} from "../../_services/action-factory.service";
   selector: 'app-chapter-card',
   imports: [
     FormsModule,
-    EntityTitleComponent,
     EntityCardComponent
   ],
   templateUrl: './chapter-card.component.html',
@@ -78,9 +74,6 @@ export class ChapterCardComponent implements OnChanges {
    */
   dataChanged = output<Chapter>();
 
-  protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
-
-
   private chapterSignal = linkedSignal<Chapter>(() => this.chapter());
 
   cardEntity = computed<CardEntity>(() => {
@@ -101,11 +94,9 @@ export class ChapterCardComponent implements OnChanges {
         allowSelection: this.allowSelection(),
         actionableFunc: () => this.actions(),
         selectionType: this.dataSource(),
-        titleTemplate: this.titleTemplateRef()
       }
     });
   });
-
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['chapter']) {
