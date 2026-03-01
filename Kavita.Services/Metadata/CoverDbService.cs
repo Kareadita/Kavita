@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyCaching.Core;
 using Flurl;
@@ -78,6 +79,7 @@ public class CoverDbService : ICoverDbService
     /// </summary>
     /// <param name="url">The full URL of the website to extract the favicon from.</param>
     /// <param name="encodeFormat">The desired image encoding format for saving the favicon (e.g., WebP, PNG).</param>
+    /// <param name="ct"></param>
     /// <returns>
     /// A string representing the filename of the downloaded favicon image, saved to the configured favicon directory.
     /// </returns>
@@ -89,7 +91,7 @@ public class CoverDbService : ICoverDbService
     /// It then attempts to parse HTML for `link` tags pointing to `.png` favicons and
     /// falls back to an internal fallback method if needed. Valid results are saved to disk.
     /// </remarks>
-    public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat)
+    public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat, CancellationToken ct = default)
     {
         // Parse the URL to get the domain (including subdomain)
         var uri = new Uri(url);
@@ -98,7 +100,7 @@ public class CoverDbService : ICoverDbService
 
 
         var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Favicon);
-        var res = await provider.GetAsync<string>(baseUrl);
+        var res = await provider.GetAsync<string>(baseUrl, ct);
         if (res.HasValue)
         {
             var sanitizedBaseUrl = baseUrl.Sanitize();
@@ -106,7 +108,7 @@ public class CoverDbService : ICoverDbService
             throw new KavitaException($"Kavita has already tried to fetch from {sanitizedBaseUrl} and failed. Skipping duplicate check");
         }
 
-        await provider.SetAsync(baseUrl, string.Empty, _cacheTime);
+        await provider.SetAsync(baseUrl, string.Empty, _cacheTime, ct);
         if (FaviconUrlMapper.TryGetValue(baseUrl, out var value))
         {
             url = value;
@@ -116,7 +118,7 @@ public class CoverDbService : ICoverDbService
 
         try
         {
-            var htmlContent = url.GetStringAsync().Result;
+            var htmlContent = url.GetStringAsync(cancellationToken: ct).Result;
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(htmlContent);
 
@@ -160,7 +162,7 @@ public class CoverDbService : ICoverDbService
             // Download the favicon.ico file using Flurl
             var faviconStream = await finalUrl
                 .AllowHttpStatus("2xx,304")
-                .GetStreamAsync();
+                .GetStreamAsync(cancellationToken: ct);
 
             // Create the destination file path
             using var image = Image.PngloadStream(faviconStream);
@@ -177,21 +179,22 @@ public class CoverDbService : ICoverDbService
         }
     }
 
-    public async Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat)
+    public async Task<string> DownloadPublisherImageAsync(string publisherName, EncodeFormat encodeFormat,
+        CancellationToken ct = default)
     {
         try
         {
             // Sanitize user input
             publisherName = publisherName.Replace(Environment.NewLine, string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty);
             var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Publisher);
-            var res = await provider.GetAsync<string>(publisherName);
+            var res = await provider.GetAsync<string>(publisherName, ct);
             if (res.HasValue)
             {
                 _logger.LogInformation("Kavita has already tried to fetch Publisher: {PublisherName} and failed. Skipping duplicate check", publisherName);
                 throw new KavitaException($"Kavita has already tried to fetch Publisher: {publisherName} and failed. Skipping duplicate check");
             }
 
-            await provider.SetAsync(publisherName, string.Empty, _cacheTime);
+            await provider.SetAsync(publisherName, string.Empty, _cacheTime, ct);
             var publisherLink = await FallbackToKavitaReaderPublisher(publisherName);
             if (string.IsNullOrEmpty(publisherLink))
             {
@@ -219,8 +222,10 @@ public class CoverDbService : ICoverDbService
     /// </summary>
     /// <param name="person"></param>
     /// <param name="encodeFormat"></param>
+    /// <param name="ct"></param>
     /// <returns>Person image (in correct directory) or null if not found/error</returns>
-    public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat)
+    public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat,
+        CancellationToken ct = default)
     {
         try
         {
@@ -229,7 +234,7 @@ public class CoverDbService : ICoverDbService
             {
                 throw new KavitaException($"Could not grab person image for {person.Name}");
             }
-            return await DownloadPersonImageAsync(person, encodeFormat, personImageLink);
+            return await DownloadPersonImageAsync(person, encodeFormat, personImageLink, ct);
         } catch (Exception ex)
         {
             _logger.LogError(ex, "Error downloading image for {PersonName}", person.Name);
@@ -244,10 +249,12 @@ public class CoverDbService : ICoverDbService
     /// <param name="person"></param>
     /// <param name="encodeFormat"></param>
     /// <param name="url"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
     /// <exception cref="KavitaException"></exception>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url)
+    public async Task<string?> DownloadPersonImageAsync(Person person, EncodeFormat encodeFormat, string url,
+        CancellationToken ct = default)
     {
         try
         {
@@ -273,7 +280,7 @@ public class CoverDbService : ICoverDbService
 
     private async Task<string> DownloadImageFromUrl(string filenameWithoutExtension, EncodeFormat encodeFormat, string url, string? targetDirectory = null)
     {
-        // TODO: I need to unit test this to ensure it works when overwriting, etc
+        // default: I need to unit test this to ensure it works when overwriting, etc
 
         // Target Directory defaults to CoverImageDirectory, but can be temp for when comparison between images is used
         targetDirectory ??= _directoryService.CoverImageDirectory;
@@ -465,7 +472,9 @@ public class CoverDbService : ICoverDbService
     /// <param name="fromBase64"></param>
     /// <param name="checkNoImagePlaceholder">Will check against all known null image placeholders to avoid writing it</param>
     /// <param name="chooseBetterImage">If we check cross-reference the current cover for the better option</param>
-    public async Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true, bool checkNoImagePlaceholder = false, bool chooseBetterImage = true)
+    /// <param name="ct"></param>
+    public async Task SetPersonCoverByUrl(Person person, string url, bool fromBase64 = true,
+        bool checkNoImagePlaceholder = false, bool chooseBetterImage = true, CancellationToken ct = default)
     {
         if (!string.IsNullOrEmpty(url))
         {
@@ -545,9 +554,9 @@ public class CoverDbService : ICoverDbService
 
         if (_unitOfWork.HasChanges())
         {
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(ct);
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(person.Id, MessageFactoryEntityTypes.Person), false);
+                MessageFactory.CoverUpdateEvent(person.Id, MessageFactoryEntityTypes.Person), false, ct);
         }
     }
 
@@ -558,7 +567,9 @@ public class CoverDbService : ICoverDbService
     /// <param name="url"></param>
     /// <param name="fromBase64"></param>
     /// <param name="chooseBetterImage">If images are similar, will choose the higher quality image</param>
-    public async Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true, bool chooseBetterImage = false)
+    /// <param name="ct"></param>
+    public async Task SetSeriesCoverByUrl(Series series, string url, bool fromBase64 = true,
+        bool chooseBetterImage = false, CancellationToken ct = default)
     {
         if (!string.IsNullOrEmpty(url))
         {
@@ -628,14 +639,15 @@ public class CoverDbService : ICoverDbService
 
         if (_unitOfWork.HasChanges())
         {
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(ct);
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
+                MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false, ct);
         }
     }
 
-    // TODO: Refactor this to IHasCoverImage instead of a hard entity type
-    public async Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true, bool chooseBetterImage = false)
+    // default: Refactor this to IHasCoverImage instead of a hard entity type
+    public async Task SetChapterCoverByUrl(Chapter chapter, string url, bool fromBase64 = true,
+        bool chooseBetterImage = false, CancellationToken ct = default)
     {
         if (!string.IsNullOrEmpty(url))
         {
@@ -701,24 +713,25 @@ public class CoverDbService : ICoverDbService
 
         if (_unitOfWork.HasChanges())
         {
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(ct);
             await _eventHub.SendMessageAsync(
                 MessageFactory.CoverUpdate,
                 MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter),
-                false
-            );
+                false, ct);
         }
     }
 
-    public async Task SetUserCoverByUrl(int userId, string url, bool fromBase64 = true, bool chooseBetterImage = false)
+    public async Task SetUserCoverByUrl(int userId, string url, bool fromBase64 = true, bool chooseBetterImage = false,
+        CancellationToken ct = default)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
         if (user == null) return;
 
-        await SetUserCoverByUrl(user, url, fromBase64, chooseBetterImage);
+        await SetUserCoverByUrl(user, url, fromBase64, chooseBetterImage, ct);
     }
 
-    public async Task SetUserCoverByUrl(AppUser user, string url, bool fromBase64 = true, bool chooseBetterImage = false)
+    public async Task SetUserCoverByUrl(AppUser user, string url, bool fromBase64 = true,
+        bool chooseBetterImage = false, CancellationToken ct = default)
     {
         if (!string.IsNullOrEmpty(url))
         {
@@ -753,9 +766,9 @@ public class CoverDbService : ICoverDbService
 
         if (_unitOfWork.HasChanges())
         {
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(ct);
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(user.Id, MessageFactoryEntityTypes.User), false);
+                MessageFactory.CoverUpdateEvent(user.Id, MessageFactoryEntityTypes.User), false, ct);
         }
     }
 

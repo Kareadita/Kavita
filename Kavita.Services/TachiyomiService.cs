@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using AutoMapper;
 using Kavita.API.Database;
 using Kavita.API.Services;
@@ -23,54 +24,37 @@ namespace Kavita.Services;
 /// All APIs are for Tachiyomi extension and app. They have hacks for our implementation and should not be used for any
 /// other purposes.
 /// </summary>
-public class TachiyomiService : ITachiyomiService
+public class TachiyomiService(
+    IUnitOfWork unitOfWork,
+    IMapper mapper,
+    ILogger<TachiyomiService> logger,
+    IReaderService readerService)
+    : ITachiyomiService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
-    private readonly ILogger<TachiyomiService> _logger;
-    private readonly IReaderService _readerService;
-
     private static readonly CultureInfo EnglishCulture = CultureInfo.CreateSpecificCulture("en-US");
 
-    public TachiyomiService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<TachiyomiService> logger, IReaderService readerService)
+    public async Task<TachiyomiChapterDto?> GetLatestChapter(int seriesId, int userId, CancellationToken ct = default)
     {
-        _unitOfWork = unitOfWork;
-        _readerService = readerService;
-        _mapper = mapper;
-        _logger = logger;
-    }
-
-    /// <summary>
-    /// Gets the latest chapter/volume read.
-    /// </summary>
-    /// <param name="seriesId"></param>
-    /// <param name="userId"></param>
-    /// <returns>Due to how Tachiyomi works we need a hack to properly return both chapters and volumes.
-    /// If its a chapter, return the chapterDto as is.
-    /// If it's a volume, the volume number gets returned in the 'Number' attribute of a chapterDto encoded.
-    /// The volume number gets divided by 10,000 because that's how Tachiyomi interprets volumes</returns>
-    public async Task<TachiyomiChapterDto?> GetLatestChapter(int seriesId, int userId)
-    {
-        var currentChapter = await _readerService.GetContinuePoint(seriesId, userId);
+        var currentChapter = await readerService.GetContinuePoint(seriesId, userId);
 
         var prevChapterId =
-            await _readerService.GetPrevChapterIdAsync(seriesId, currentChapter.VolumeId, currentChapter.Id, userId);
+            await readerService.GetPrevChapterIdAsync(seriesId, currentChapter.VolumeId, currentChapter.Id, userId);
 
         // If prevChapterId is -1, this means either nothing is read or everything is read.
         if (prevChapterId == -1)
         {
-            var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+            var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId, ct);
             var userHasProgress = series.PagesRead != 0 && series.PagesRead <= series.Pages;
 
             // If the user doesn't have progress, then return null, which the extension will catch as 204 (no content) and report nothing as read
             if (!userHasProgress) return null;
 
             // Else return the max chapter to Tachiyomi so it can consider everything read
-            var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(seriesId)).ToImmutableList();
+            var volumes = (await unitOfWork.VolumeRepository.GetVolumes(seriesId, ct)).ToImmutableList();
             var looseLeafChapterVolume = volumes.GetLooseLeafVolumeOrDefault();
             if (looseLeafChapterVolume == null)
             {
-                var volumeChapter = _mapper.Map<ChapterDto>(volumes
+                var volumeChapter = mapper.Map<ChapterDto>(volumes
                     [^1].Chapters
                     .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultFirst.Default)
                     .Last());
@@ -88,13 +72,13 @@ public class TachiyomiService : ITachiyomiService
                 .OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default)
                 .Last();
 
-            return _mapper.Map<TachiyomiChapterDto>(lastChapter);
+            return mapper.Map<TachiyomiChapterDto>(lastChapter);
         }
 
         // There is progress, we now need to figure out the highest volume or chapter and return that.
-        var prevChapter = (await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId, userId))!;
+        var prevChapter = (await unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId, userId, ct))!;
 
-        var volumeWithProgress = (await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId))!;
+        var volumeWithProgress = (await unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId, ct))!;
         // We only encode for single-file volumes
         if (!volumeWithProgress.IsLooseLeaf() && volumeWithProgress.Chapters.Count == 1)
         {
@@ -103,7 +87,7 @@ public class TachiyomiService : ITachiyomiService
         }
 
         // Progress is just on a chapter, return as is
-        return _mapper.Map<TachiyomiChapterDto>(prevChapter);
+        return mapper.Map<TachiyomiChapterDto>(prevChapter);
     }
 
     private static TachiyomiChapterDto CreateTachiyomiChapterDto(float number)
@@ -116,16 +100,10 @@ public class TachiyomiService : ITachiyomiService
         };
     }
 
-    /// <summary>
-    /// Marks every chapter and volume that is sorted below the passed number as Read. This will not mark any specials as read.
-    /// Passed number will also be marked as read
-    /// </summary>
-    /// <param name="userWithProgress"></param>
-    /// <param name="seriesId"></param>
-    /// <param name="chapterNumber">Can also be a Tachiyomi encoded volume number</param>
-    public async Task<bool> MarkChaptersUntilAsRead(AppUser userWithProgress, int seriesId, float chapterNumber)
+    public async Task<bool> MarkChaptersUntilAsRead(AppUser userWithProgress, int seriesId, float chapterNumber,
+        CancellationToken ct = default)
     {
-        userWithProgress.Progresses ??= new List<AppUserProgress>();
+        userWithProgress.Progresses ??= [];
 
         switch (chapterNumber)
         {
@@ -138,22 +116,22 @@ public class TachiyomiService : ITachiyomiService
             {
                 // This is a hack to track volume number. We need to map it back by x10,000
                 var volumeNumber = int.Parse($"{(int)(chapterNumber * 10_000)}", EnglishCulture);
-                await _readerService.MarkVolumesUntilAsRead(userWithProgress, seriesId, volumeNumber);
+                await readerService.MarkVolumesUntilAsRead(userWithProgress, seriesId, volumeNumber);
                 break;
             }
             default:
-                await _readerService.MarkChaptersUntilAsRead(userWithProgress, seriesId, chapterNumber);
+                await readerService.MarkChaptersUntilAsRead(userWithProgress, seriesId, chapterNumber);
                 break;
         }
 
         try {
-            _unitOfWork.UserRepository.Update(userWithProgress);
+            unitOfWork.UserRepository.Update(userWithProgress);
 
-            if (!_unitOfWork.HasChanges()) return true;
-            if (await _unitOfWork.CommitAsync()) return true;
+            if (!unitOfWork.HasChanges()) return true;
+            if (await unitOfWork.CommitAsync(ct)) return true;
         } catch (Exception ex) {
-            _logger.LogError(ex, "There was an error saving progress from tachiyomi");
-            await _unitOfWork.RollbackAsync();
+            logger.LogError(ex, "There was an error saving progress from tachiyomi");
+            await unitOfWork.RollbackAsync(ct);
         }
         return false;
     }

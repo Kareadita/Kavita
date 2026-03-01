@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Kavita.API.Database;
@@ -66,9 +67,10 @@ public class StatsService : IStatsService
     /// Due to all instances firing this at the same time, we can DDOS our server. This task when fired will schedule the task to be run
     /// randomly over a six-hour spread
     /// </summary>
-    public async Task Send()
+    /// <param name="ct"></param>
+    public async Task Send(CancellationToken ct = default)
     {
-        var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
+        var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).AllowStatCollection;
         if (!allowStatCollection)
         {
             return;
@@ -81,17 +83,17 @@ public class StatsService : IStatsService
     /// This must be public for Hangfire. Do not call this directly.
     /// </summary>
     // ReSharper disable once MemberCanBePrivate.Global
-    public async Task SendData()
+    public async Task SendData(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
         var data = await GetStatV3Payload();
         _logger.LogDebug("Collecting stats took {Time} ms", sw.ElapsedMilliseconds);
         sw.Stop();
-        await SendDataToStatsServer(data);
+        await SendDataToStatsServer(data, ct);
     }
 
 
-    private async Task SendDataToStatsServer(ServerInfoV3Dto data)
+    private async Task SendDataToStatsServer(ServerInfoV3Dto data, CancellationToken ct = default)
     {
         var responseContent = string.Empty;
 
@@ -99,7 +101,7 @@ public class StatsService : IStatsService
         {
             var response = await (_apiUrl + "/api/v3/stats")
                 .WithBasicHeaders(ApiKey)
-                .PostJsonAsync(data);
+                .PostJsonAsync(data, cancellationToken: ct);
 
             if (response.StatusCode != StatusCodes.Status200OK)
             {
@@ -112,7 +114,7 @@ public class StatsService : IStatsService
                  UPDATE ServerSetting
                  SET Value = CAST(CAST(Value AS INTEGER) + 1 AS TEXT)
                  WHERE Key = {ServerSettingKey.StatsApiHits}
-                 """);
+                 """, cancellationToken: ct);
 
         }
         catch (HttpRequestException e)
@@ -132,9 +134,9 @@ public class StatsService : IStatsService
     }
 
 
-    public async Task<ServerInfoSlimDto> GetServerInfoSlim()
+    public async Task<ServerInfoSlimDto> GetServerInfoSlim(CancellationToken ct = default)
     {
-        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         return new ServerInfoSlimDto()
         {
             InstallId = serverSettings.InstallId,
@@ -145,10 +147,10 @@ public class StatsService : IStatsService
         };
     }
 
-    public async Task SendCancellation()
+    public async Task SendCancellation(CancellationToken ct = default)
     {
         _logger.LogInformation("Informing KavitaStats that this instance is no longer sending stats");
-        var installId = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).InstallId;
+        var installId = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct)).InstallId;
 
         var responseContent = string.Empty;
 
@@ -157,7 +159,7 @@ public class StatsService : IStatsService
             var response = await (_apiUrl + "/api/v2/stats/opt-out?installId=" + installId)
                 .WithBasicHeaders(ApiKey)
                 .WithTimeout(TimeSpan.FromSeconds(30))
-                .PostAsync();
+                .PostAsync(cancellationToken: ct);
 
             if (response.StatusCode != StatusCodes.Status200OK)
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -26,27 +27,29 @@ public class StreamService(
     ILogger<StreamService> logger)
     : IStreamService
 {
-    public async Task<IEnumerable<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = true)
+    public async Task<IEnumerable<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = true,
+        CancellationToken ct = default)
     {
-        return await unitOfWork.UserRepository.GetDashboardStreams(userId, visibleOnly);
+        return await unitOfWork.UserRepository.GetDashboardStreams(userId, visibleOnly, ct);
     }
 
-    public async Task<IEnumerable<SideNavStreamDto>> GetSidenavStreams(int userId, bool visibleOnly = true)
+    public async Task<IEnumerable<SideNavStreamDto>> GetSidenavStreams(int userId, bool visibleOnly = true, CancellationToken ct = default)
     {
-        return await unitOfWork.UserRepository.GetSideNavStreams(userId, visibleOnly);
+        return await unitOfWork.UserRepository.GetSideNavStreams(userId, visibleOnly, ct);
     }
 
-    public async Task<IEnumerable<ExternalSourceDto>> GetExternalSources(int userId)
+    public async Task<IEnumerable<ExternalSourceDto>> GetExternalSources(int userId, CancellationToken ct = default)
     {
-        return await unitOfWork.AppUserExternalSourceRepository.GetExternalSources(userId);
+        return await unitOfWork.AppUserExternalSourceRepository.GetExternalSources(userId, ct);
     }
 
-    public async Task<DashboardStreamDto> CreateDashboardStreamFromSmartFilter(int userId, int smartFilterId)
+    public async Task<DashboardStreamDto> CreateDashboardStreamFromSmartFilter(int userId, int smartFilterId,
+        CancellationToken ct = default)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.DashboardStreams);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.DashboardStreams, ct);
         if (user == null) throw new KavitaException(await localizationService.Translate(userId, "no-user"));
 
-        var smartFilter = await unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId);
+        var smartFilter = await unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId, ct);
         if (smartFilter == null) throw new KavitaException(await localizationService.Translate(userId, "smart-filter-doesnt-exist"));
 
         var stream = user.DashboardStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
@@ -65,7 +68,7 @@ public class StreamService(
 
         user.DashboardStreams.Add(createdStream);
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         var ret = new DashboardStreamDto()
         {
@@ -79,27 +82,28 @@ public class StreamService(
         };
 
         await eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(user.Id),
-            userId);
+            userId, ct);
 
         return ret;
     }
 
-    public async Task UpdateDashboardStream(int userId, DashboardStreamDto dto)
+    public async Task UpdateDashboardStream(int userId, DashboardStreamDto dto, CancellationToken ct = default)
     {
-        var stream = await unitOfWork.UserRepository.GetDashboardStream(dto.Id);
+        var stream = await unitOfWork.UserRepository.GetDashboardStream(dto.Id, ct);
         if (stream == null) throw new KavitaException(await localizationService.Translate(userId, "dashboard-stream-doesnt-exist"));
         stream.Visible = dto.Visible;
 
         unitOfWork.UserRepository.Update(stream);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
         await eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(userId),
-            userId);
+            userId, ct);
     }
 
-    public async Task UpdateDashboardStreamPosition(int userId, UpdateStreamPositionDto dto)
+    public async Task UpdateDashboardStreamPosition(int userId, UpdateStreamPositionDto dto,
+        CancellationToken ct = default)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId,
-            AppUserIncludes.DashboardStreams);
+            AppUserIncludes.DashboardStreams, ct);
         var stream = user?.DashboardStreams.FirstOrDefault(d => d.Id == dto.Id);
         if (stream == null)
         {
@@ -113,32 +117,34 @@ public class StreamService(
         user.DashboardStreams = list;
 
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
         if (!stream.Visible) return;
         await eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(user.Id),
-            user.Id);
+            user.Id, ct);
     }
 
-    public async Task UpdateSideNavStreamBulk(int userId, BulkUpdateSideNavStreamVisibilityDto dto)
+    public async Task UpdateSideNavStreamBulk(int userId, BulkUpdateSideNavStreamVisibilityDto dto,
+        CancellationToken ct = default)
     {
-        var streams = await unitOfWork.UserRepository.GetDashboardStreamsByIds(dto.Ids);
+        var streams = await unitOfWork.UserRepository.GetDashboardStreamsByIds(dto.Ids, ct);
         foreach (var stream in streams)
         {
             stream.Visible = dto.Visibility;
             unitOfWork.UserRepository.Update(stream);
         }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
         await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
-            userId);
+            userId, ct);
     }
 
-    public async Task<SideNavStreamDto> CreateSideNavStreamFromSmartFilter(int userId, int smartFilterId)
+    public async Task<SideNavStreamDto> CreateSideNavStreamFromSmartFilter(int userId, int smartFilterId,
+        CancellationToken ct = default)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.SideNavStreams);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.SideNavStreams, ct);
         if (user == null) throw new KavitaException(await localizationService.Translate(userId, "no-user"));
 
-        var smartFilter = await unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId);
+        var smartFilter = await unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId, ct);
         if (smartFilter == null) throw new KavitaException(await localizationService.Translate(userId, "smart-filter-doesnt-exist"));
 
         var stream = user.SideNavStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
@@ -157,7 +163,7 @@ public class StreamService(
 
         user.SideNavStreams.Add(createdStream);
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         var ret = new SideNavStreamDto()
         {
@@ -172,16 +178,17 @@ public class StreamService(
 
 
         await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
-            userId);
+            userId, ct);
         return ret;
     }
 
-    public async Task<SideNavStreamDto> CreateSideNavStreamFromExternalSource(int userId, int externalSourceId)
+    public async Task<SideNavStreamDto> CreateSideNavStreamFromExternalSource(int userId, int externalSourceId,
+        CancellationToken ct = default)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.SideNavStreams);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.SideNavStreams, ct);
         if (user == null) throw new KavitaException(await localizationService.Translate(userId, "no-user"));
 
-        var externalSource = await unitOfWork.AppUserExternalSourceRepository.GetById(externalSourceId);
+        var externalSource = await unitOfWork.AppUserExternalSourceRepository.GetById(externalSourceId, ct);
         if (externalSource == null) throw new KavitaException(await localizationService.Translate(userId, "external-source-doesnt-exist"));
 
         var stream = user?.SideNavStreams.FirstOrDefault(d => d.ExternalSourceId == externalSourceId);
@@ -200,7 +207,7 @@ public class StreamService(
 
         user.SideNavStreams.Add(createdStream);
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         var ret = new SideNavStreamDto()
         {
@@ -220,28 +227,28 @@ public class StreamService(
 
 
         await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
-            userId);
+            userId, ct);
         return ret;
     }
 
-    public async Task UpdateSideNavStream(int userId, SideNavStreamDto dto)
+    public async Task UpdateSideNavStream(int userId, SideNavStreamDto dto, CancellationToken ct = default)
     {
-        var stream = await unitOfWork.UserRepository.GetSideNavStream(dto.Id);
+        var stream = await unitOfWork.UserRepository.GetSideNavStream(dto.Id, ct);
         if (stream == null)
             throw new KavitaException(await localizationService.Translate(userId, "sidenav-stream-doesnt-exist"));
 
         stream.Visible = dto.Visible;
 
         unitOfWork.UserRepository.Update(stream);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
         await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
-            userId);
+            userId, ct);
     }
 
-    public async Task UpdateSideNavStreamPosition(int userId, UpdateStreamPositionDto dto)
+    public async Task UpdateSideNavStreamPosition(int userId, UpdateStreamPositionDto dto, CancellationToken ct = default)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId,
-            AppUserIncludes.SideNavStreams);
+            AppUserIncludes.SideNavStreams, ct);
         var stream = user?.SideNavStreams.FirstOrDefault(d => d.Id == dto.Id);
         if (stream == null) throw new KavitaException(await localizationService.Translate(userId, "sidenav-stream-doesnt-exist"));
 
@@ -263,16 +270,17 @@ public class StreamService(
         user.SideNavStreams = list;
 
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
         if (!stream.Visible) return;
         await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
-            userId);
+            userId, ct);
     }
 
-    public async Task<ExternalSourceDto> CreateExternalSource(int userId, ExternalSourceDto dto)
+    public async Task<ExternalSourceDto> CreateExternalSource(int userId, ExternalSourceDto dto,
+        CancellationToken ct = default)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId,
-            AppUserIncludes.ExternalSources);
+            AppUserIncludes.ExternalSources, ct);
         if (user == null) throw new KavitaException("not-authenticated");
 
         if (user.ExternalSources.Any(s => s.Host == dto.Host))
@@ -294,16 +302,17 @@ public class StreamService(
         user.ExternalSources.Add(newSource);
 
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         dto.Id = newSource.Id;
 
         return dto;
     }
 
-    public async Task<ExternalSourceDto> UpdateExternalSource(int userId, ExternalSourceDto dto)
+    public async Task<ExternalSourceDto> UpdateExternalSource(int userId, ExternalSourceDto dto,
+        CancellationToken ct = default)
     {
-        var source = await unitOfWork.AppUserExternalSourceRepository.GetById(dto.Id);
+        var source = await unitOfWork.AppUserExternalSourceRepository.GetById(dto.Id, ct);
         if (source == null) throw new KavitaException("external-source-doesnt-exist");
         if (source.AppUserId != userId) throw new KavitaException("external-source-doesnt-exist");
 
@@ -315,32 +324,32 @@ public class StreamService(
         source.Name = dto.Name;
 
         unitOfWork.AppUserExternalSourceRepository.Update(source);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         dto.Host = source.Host;
         return dto;
     }
 
-    public async Task DeleteExternalSource(int userId, int externalSourceId)
+    public async Task DeleteExternalSource(int userId, int externalSourceId, CancellationToken ct = default)
     {
-        var source = await unitOfWork.AppUserExternalSourceRepository.GetById(externalSourceId);
+        var source = await unitOfWork.AppUserExternalSourceRepository.GetById(externalSourceId, ct);
         if (source == null) throw new KavitaException("external-source-doesnt-exist");
         if (source.AppUserId != userId) throw new KavitaException("external-source-doesnt-exist");
 
         unitOfWork.AppUserExternalSourceRepository.Delete(source);
 
         // Find all SideNav's with this source and delete them as well
-        var streams2 = await unitOfWork.UserRepository.GetSideNavStreamWithExternalSource(externalSourceId);
+        var streams2 = await unitOfWork.UserRepository.GetSideNavStreamWithExternalSource(externalSourceId, ct);
         unitOfWork.UserRepository.Delete(streams2);
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
-    public async Task DeleteSideNavSmartFilterStream(int userId, int sideNavStreamId)
+    public async Task DeleteSideNavSmartFilterStream(int userId, int sideNavStreamId, CancellationToken ct = default)
     {
         try
         {
-            var stream = await unitOfWork.UserRepository.GetSideNavStream(sideNavStreamId);
+            var stream = await unitOfWork.UserRepository.GetSideNavStream(sideNavStreamId, ct);
             if (stream == null) throw new KavitaException("sidenav-stream-doesnt-exist");
 
             if (stream.AppUserId != userId) throw new KavitaException("sidenav-stream-doesnt-exist");
@@ -353,7 +362,7 @@ public class StreamService(
 
             unitOfWork.UserRepository.Delete(stream);
 
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
         }
         catch (Exception ex)
         {
@@ -362,11 +371,11 @@ public class StreamService(
         }
     }
 
-    public async Task DeleteDashboardSmartFilterStream(int userId, int dashboardStreamId)
+    public async Task DeleteDashboardSmartFilterStream(int userId, int dashboardStreamId, CancellationToken ct = default)
     {
         try
         {
-            var stream = await unitOfWork.UserRepository.GetDashboardStream(dashboardStreamId);
+            var stream = await unitOfWork.UserRepository.GetDashboardStream(dashboardStreamId, ct);
             if (stream == null) throw new KavitaException("dashboard-stream-doesnt-exist");
 
             if (stream.AppUserId != userId) throw new KavitaException("dashboard-stream-doesnt-exist");
@@ -378,7 +387,7 @@ public class StreamService(
 
             unitOfWork.UserRepository.Delete(stream);
 
-            await unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
         } catch (Exception ex)
         {
             logger.LogError(ex, "There was an exception deleting Dashboard Smart Filter Stream: {FilterId}", dashboardStreamId);
@@ -386,10 +395,10 @@ public class StreamService(
         }
     }
 
-    public async Task RenameSmartFilterStreams(AppUserSmartFilter smartFilter)
+    public async Task RenameSmartFilterStreams(AppUserSmartFilter smartFilter, CancellationToken ct = default)
     {
-        var sideNavStreams = await unitOfWork.UserRepository.GetSideNavStreamWithFilter(smartFilter.Id);
-        var dashboardStreams = await unitOfWork.UserRepository.GetDashboardStreamWithFilter(smartFilter.Id);
+        var sideNavStreams = await unitOfWork.UserRepository.GetSideNavStreamWithFilter(smartFilter.Id, ct);
+        var dashboardStreams = await unitOfWork.UserRepository.GetDashboardStreamWithFilter(smartFilter.Id, ct);
 
         foreach (var sideNavStream in sideNavStreams)
         {
@@ -401,6 +410,6 @@ public class StreamService(
             dashboardStream.Name = smartFilter.Name;
         }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 }

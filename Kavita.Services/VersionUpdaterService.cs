@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Kavita.API.Services;
@@ -95,8 +96,9 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     /// <summary>
     /// Fetches the latest (stable) release from GitHub. Does not do any extra nightly release parsing.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns>Latest update</returns>
-    public async Task<UpdateNotificationDto?> CheckForUpdate()
+    public async Task<UpdateNotificationDto?> CheckForUpdate(CancellationToken ct = default)
     {
         // Attempt to fetch from cache
         var cachedRelease = await TryGetCachedLatestRelease();
@@ -142,7 +144,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 
                 var nightlyDto = new UpdateNotificationDto
                 {
-                    // TODO: I should pass Title to the FE so that Nightly Release can be localized
+                    // default: I should pass Title to the FE so that Nightly Release can be localized
                     UpdateTitle = $"Nightly Release {nightly.Version} - {prInfo.Title}",
                     UpdateVersion = nightly.Version,
                     CurrentVersion = dto.CurrentVersion,
@@ -306,7 +308,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         }
     }
 
-    public async Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0)
+    public async Task<IList<UpdateNotificationDto>> GetAllReleases(int count = 0, CancellationToken ct = default)
     {
         // Attempt to fetch from cache
         var cachedReleases = await TryGetCachedReleases();
@@ -475,10 +477,11 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     /// then include nightly releases, otherwise only count Stable releases.
     /// </summary>
     /// <param name="stableOnly">Only count Stable releases </param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<int> GetNumberOfReleasesBehind(bool stableOnly = false)
+    public async Task<int> GetNumberOfReleasesBehind(bool stableOnly = false, CancellationToken ct = default)
     {
-        var updates = await GetAllReleases();
+        var updates = await GetAllReleases(ct: ct);
 
         // If the user is on nightly, then we need to handle releases behind differently
         if (!stableOnly && (updates[0].IsPrerelease || updates[0].IsOnNightlyInRelease))
@@ -494,7 +497,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     /// <summary>
     /// Clears the Github cache
     /// </summary>
-    public void BustGithubCache()
+    /// <param name="ct"></param>
+    public void BustGithubCache(CancellationToken ct = default)
     {
         try
         {
@@ -550,7 +554,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     }
 
 
-    public async Task PushUpdate(UpdateNotificationDto? update)
+    public async Task PushUpdate(UpdateNotificationDto update, CancellationToken ct = default)
     {
         if (update == null) return;
 
@@ -560,7 +564,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         {
             _logger.LogWarning("Server is out of date. Current: {CurrentVersion}. Available: {AvailableUpdate}", BuildInfo.Version, updateVersion);
             await _eventHub.SendMessageAsync(MessageFactory.UpdateAvailable, MessageFactory.UpdateVersionEvent(update),
-                true);
+                true, ct);
         }
     }
 

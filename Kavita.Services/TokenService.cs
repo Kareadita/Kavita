@@ -22,23 +22,18 @@ using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegiste
 namespace Kavita.Services;
 
 
-public class TokenService : ITokenService
+public class TokenService(
+    IOptions<AppSettingsDto> config,
+    UserManager<AppUser> userManager,
+    ILogger<TokenService> logger)
+    : ITokenService
 {
-    private readonly UserManager<AppUser> _userManager;
-    private readonly ILogger<TokenService> _logger;
-    private readonly SymmetricSecurityKey _key;
-    private const string RefreshTokenName = "RefreshToken";
     private static readonly SemaphoreSlim RefreshTokenLock = new(1, 1);
 
-    public TokenService(IOptions<AppSettingsDto> config, UserManager<AppUser> userManager, ILogger<TokenService> logger)
-    {
-        _userManager = userManager;
-        _logger = logger;
+    private const string RefreshTokenName = "RefreshToken";
+    private readonly SymmetricSecurityKey _key = new(Encoding.UTF8.GetBytes(config.Value.TokenKey));
 
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Value.TokenKey));
-    }
-
-    public async Task<string> CreateToken(AppUser user)
+    public async Task<string> CreateToken(AppUser user, CancellationToken ct = default)
     {
         var claims = new List<Claim>
         {
@@ -46,7 +41,7 @@ public class TokenService : ITokenService
             new(NameIdentifier, user.Id.ToString()),
         };
 
-        var roles = await _userManager.GetRolesAsync(user);
+        var roles = await userManager.GetRolesAsync(user);
         claims.AddRange(roles.Select(role => new Claim(Role, role)));
 
         var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
@@ -63,17 +58,17 @@ public class TokenService : ITokenService
         return tokenHandler.WriteToken(token);
     }
 
-    public async Task<string> CreateRefreshToken(AppUser user)
+    public async Task<string> CreateRefreshToken(AppUser user, CancellationToken ct = default)
     {
-        await _userManager.RemoveAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName);
-        var refreshToken = await _userManager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName);
-        await _userManager.SetAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, refreshToken);
+        await userManager.RemoveAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName);
+        var refreshToken = await userManager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName);
+        await userManager.SetAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, refreshToken);
         return refreshToken;
     }
 
-    public async Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request)
+    public async Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request, CancellationToken ct = default)
     {
-        await RefreshTokenLock.WaitAsync();
+        await RefreshTokenLock.WaitAsync(ct);
 
         try
         {
@@ -82,46 +77,46 @@ public class TokenService : ITokenService
             var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.Name)?.Value;
             if (string.IsNullOrEmpty(username))
             {
-                _logger.LogDebug("[RefreshToken] failed to validate due to not finding user in RefreshToken");
+                logger.LogDebug("[RefreshToken] failed to validate due to not finding user in RefreshToken");
                 return null;
             }
 
-            var user = await _userManager.FindByNameAsync(username);
+            var user = await userManager.FindByNameAsync(username);
             if (user == null)
             {
-                _logger.LogDebug("[RefreshToken] failed to validate due to not finding user in DB");
+                logger.LogDebug("[RefreshToken] failed to validate due to not finding user in DB");
                 return null;
             }
 
-            var validated = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider,
+            var validated = await userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider,
                 RefreshTokenName, request.RefreshToken);
             if (!validated && tokenContent.ValidTo <= DateTime.UtcNow.Add(TimeSpan.FromHours(1)))
             {
-                _logger.LogDebug("[RefreshToken] failed to validate due to invalid refresh token");
+                logger.LogDebug("[RefreshToken] failed to validate due to invalid refresh token");
                 return null;
             }
 
             // Remove the old refresh token first
-            await _userManager.RemoveAuthenticationTokenAsync(user,
+            await userManager.RemoveAuthenticationTokenAsync(user,
                 TokenOptions.DefaultProvider,
                 RefreshTokenName);
 
             return new TokenRequestDto()
             {
-                Token = await CreateToken(user),
-                RefreshToken = await CreateRefreshToken(user)
+                Token = await CreateToken(user, ct),
+                RefreshToken = await CreateRefreshToken(user, ct)
             };
         }
         catch (SecurityTokenExpiredException ex)
         {
             // Handle expired token
-            _logger.LogError(ex, "Failed to validate refresh token");
+            logger.LogError(ex, "Failed to validate refresh token");
             return null;
         }
         catch (Exception ex)
         {
             // Handle other exceptions
-            _logger.LogError(ex, "Failed to validate refresh token");
+            logger.LogError(ex, "Failed to validate refresh token");
             return null;
         }
         finally
@@ -130,9 +125,9 @@ public class TokenService : ITokenService
         }
     }
 
-    public async Task<string?> GetJwtFromUser(AppUser user)
+    public async Task<string?> GetJwtFromUser(AppUser user, CancellationToken ct = default)
     {
-        var userClaims = await _userManager.GetClaimsAsync(user);
+        var userClaims = await userManager.GetClaimsAsync(user);
         var jwtClaim = userClaims.FirstOrDefault(claim => claim.Type == "jwt");
         return jwtClaim?.Value;
     }
