@@ -43,16 +43,11 @@ public class FontController(
     /// Returns a font file
     /// </summary>
     /// <param name="fontId"></param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet]
-    [AllowAnonymous]
     [SkipDeviceTracking]
-    public async Task<IActionResult> GetFont(int fontId, string apiKey)
+    public async Task<IActionResult> GetFont(int fontId)
     {
-        var userId = await unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
-
         var font = await unitOfWork.EpubFontRepository.GetFontAsync(fontId);
         if (font == null) return NotFound();
 

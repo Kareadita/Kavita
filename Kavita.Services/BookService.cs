@@ -17,9 +17,11 @@ using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
 using Kavita.Services.Extensions;
@@ -48,7 +50,7 @@ public partial class BookService(
     private readonly StylesheetParser _cssParser = new ();
     private static readonly RecyclableMemoryStreamManager StreamManager = new ();
     private const string CssScopeClass = ".book-content";
-    private const string BookApiUrl = "book-resources?file=";
+    private const string BookApiUrl = "book-resources?apiKey={0}&file=";
     public const string BookReaderBodyScope = "//BODY/APP-ROOT[1]/DIV[1]/DIV[1]/DIV[1]/APP-BOOK-READER[1]/DIV[1]/DIV[2]/DIV[1]/DIV[1]/DIV[1]";
 
     private readonly PdfComicInfoExtractor _pdfComicInfoExtractor = new(logger, mediaErrorService);
@@ -1671,25 +1673,16 @@ public partial class BookService(
         return path.Substring(startIndex);
     }
 
-    /// <summary>
-    /// This returns a single page within the epub book. All html will be rewritten to be scoped within our reader,
-    /// all css is scoped, etc.
-    /// </summary>
-    /// <param name="page">The requested page</param>
-    /// <param name="chapterId">The chapterId</param>
-    /// <param name="cachedEpubPath">The path to the cached epub file</param>
-    /// <param name="baseUrl">The API base for Kavita, to rewrite urls to so we load though our endpoint</param>
-    /// <param name="ptocBookmarks"></param>
-    /// <param name="annotations"></param>
-    /// <param name="ct"></param>
-    /// <returns>Full epub HTML Page, scoped to Kavita's reader</returns>
-    /// <exception cref="KavitaException">All exceptions throw this</exception>
-    public async Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl,
+    public async Task<string> GetBookPage(int userId, int page, int chapterId, string cachedEpubPath, string baseUrl,
         List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations, CancellationToken ct = default)
     {
+        var authKey = (await unitOfWork.UserRepository.GetAuthKeysForUserId(userId, ct))
+            .First(k => k is { Name: AuthKeyHelper.ImageOnlyKeyName, Provider: AuthKeyProvider.System })
+            .Key;
+
         using var book = await EpubReader.OpenBookAsync(cachedEpubPath, LenientBookReaderOptions);
         var mappings = await CreateKeyToPageMappingAsync(book, ct);
-        var apiBase = baseUrl + "book/" + chapterId + "/" + BookApiUrl;
+        var apiBase = baseUrl + "book/" + chapterId + "/" + string.Format(BookApiUrl, authKey);
 
         var counter = 0;
         var doc = new HtmlDocument {OptionFixNestedTags = true};

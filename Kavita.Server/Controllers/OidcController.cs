@@ -17,8 +17,8 @@ namespace Kavita.Server.Controllers;
 [Route("[controller]")]
 public class OidcController(ILogger<OidcController> logger, [FromServices] ConfigurationManager<OpenIdConnectConfiguration>? configurationManager = null): ControllerBase
 {
-    [SkipDeviceTracking]
     [AllowAnonymous]
+    [SkipDeviceTracking]
     [HttpGet("login")]
     public IActionResult Login(string returnUrl = "/")
     {

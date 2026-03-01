@@ -12,8 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 public class LocaleController(
     ILocalizationService localizationService,
     IEasyCachingProviderFactory cachingProviderFactory)
@@ -28,8 +26,8 @@ public class LocaleController(
     /// </summary>
     /// <remarks>This can be cached as it will not change per version.</remarks>
     /// <returns></returns>
-    [AllowAnonymous]
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<KavitaLocale>>> GetAllLocales()
     {
         var result = await _localeCacheProvider.GetAsync<IEnumerable<KavitaLocale>>(CacheKey);

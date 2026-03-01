@@ -35,7 +35,21 @@ public interface IBookService
     /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
     void ExtractPdfImages(string fileFilePath, string targetDirectory);
     Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter, CancellationToken ct = default);
-    Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations, CancellationToken ct = default);
+    /// <summary>
+    /// This returns a single page within the epub book. All html will be rewritten to be scoped within our reader,
+    /// all css is scoped, etc.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="page">The requested page</param>
+    /// <param name="chapterId">The chapterId</param>
+    /// <param name="cachedEpubPath">The path to the cached epub file</param>
+    /// <param name="baseUrl">The API base for Kavita, to rewrite urls to so we load though our endpoint</param>
+    /// <param name="ptocBookmarks"></param>
+    /// <param name="annotations"></param>
+    /// <param name="ct"></param>
+    /// <returns>Full epub HTML Page, scoped to Kavita's reader</returns>
+    /// <exception cref="KavitaException">All exceptions throw this</exception>
+    Task<string> GetBookPage(int userId, int page, int chapterId, string cachedEpubPath, string baseUrl, List<PersonalToCDto> ptocBookmarks, List<AnnotationDto> annotations, CancellationToken ct = default);
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book, CancellationToken ct = default);
     Task<IDictionary<int, int>?> GetWordCountsPerPage(string bookFilePath, CancellationToken ct = default);
     Task<int> GetWordCountBetweenXPaths(string bookFilePath, string startXpath, int startPage, string endXpath, int endPage, CancellationToken ct = default);

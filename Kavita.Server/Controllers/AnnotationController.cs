@@ -227,6 +227,7 @@ public class AnnotationController(
     /// </summary>
     /// <returns></returns>
     [HttpPost("export-filter")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> ExportAnnotationsFilter(BrowseAnnotationFilterDto filter, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
@@ -248,6 +249,7 @@ public class AnnotationController(
     /// <param name="annotations">Export annotations with the given ids</param>
     /// <returns></returns>
     [HttpPost("export")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> ExportAnnotations(IList<int>? annotations = null)
     {
         var json = await annotationService.ExportAnnotations(UserId, annotations);

@@ -9,6 +9,7 @@ using Kavita.Common;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.Entities.Enums;
+using Kavita.Server.Attributes;
 using Kavita.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -106,7 +107,7 @@ public class BookController : BaseApiController
     /// <param name="chapterId"></param>
     /// <param name="file"></param>
     /// <returns></returns>
-    [AllowAnonymous]
+    [ChapterAccess]
     [SkipDeviceTracking]
     [HttpGet("{chapterId}/book-resources")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = ["chapterId", "file"])]
@@ -172,7 +173,7 @@ public class BookController : BaseApiController
                 await _unitOfWork.UserTableOfContentRepository.GetPersonalToCForPage(UserId, chapterId, page);
             var annotations = await _unitOfWork.UserRepository.GetAnnotationsByPage(UserId, chapter.Id, page);
 
-            return Ok(await _bookService.GetBookPage(page, chapterId, path, baseUrl, ptocBookmarks, annotations));
+            return Ok(await _bookService.GetBookPage(UserId, page, chapterId, path, baseUrl, ptocBookmarks, annotations));
         }
         catch (KavitaException ex)
         {

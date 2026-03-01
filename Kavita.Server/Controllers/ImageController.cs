@@ -22,7 +22,6 @@ namespace Kavita.Server.Controllers;
 /// <summary>
 /// Responsible for servicing up images stored in Kavita for entities
 /// </summary>
-[AllowAnonymous]
 [SkipDeviceTracking]
 public class ImageController : BaseApiController
 {

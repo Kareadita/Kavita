@@ -12,7 +12,6 @@ namespace Kavita.Server.Controllers;
 /// <summary>
 /// For the Panels app explicitly
 /// </summary>
-[AllowAnonymous]
 public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWork) : BaseApiController
 {
     /// <summary>
@@ -24,9 +23,7 @@ public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWo
     [HttpPost("save-progress")]
     public async Task<ActionResult> SaveProgress(ProgressDto dto, [FromQuery] string apiKey)
     {
-        if (string.IsNullOrEmpty(apiKey)) return Unauthorized("ApiKey is required");
-        var userId = await unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-        await readerService.SaveReadingProgress(dto, userId);
+        await readerService.SaveReadingProgress(dto, UserId);
         return Ok();
     }
 
@@ -39,10 +36,7 @@ public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWo
     [HttpGet("get-progress")]
     public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId, [FromQuery] string apiKey)
     {
-        if (string.IsNullOrEmpty(apiKey)) return Unauthorized("ApiKey is required");
-        var userId = await unitOfWork.UserRepository.GetUserIdByAuthKeyAsync(apiKey);
-
-        var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, userId);
+        var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, UserId);
         if (progress == null) return Ok(new ProgressDto()
         {
             PageNum = 0,
