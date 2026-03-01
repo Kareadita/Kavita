@@ -46,6 +46,7 @@ import {MetadataService} from "../_services/metadata.service";
 import {ActionResult} from "../_models/actionables/action-result";
 import {KavitaTitleStrategy} from "../_services/kavita-title.strategy";
 import {getWritableResolvedData} from "../../libs/route-util";
+import {JumpbarService} from "../_services/jumpbar.service";
 
 @Component({
     selector: 'app-library-detail',
@@ -71,6 +72,7 @@ export class LibraryDetailComponent implements OnInit {
   public readonly navService = inject(NavService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
   public readonly metadataService = inject(MetadataService);
+  private readonly jumpbarService = inject(JumpbarService);
 
   // From Resolver
   readonly library = getWritableResolvedData(this.route, 'library');
@@ -87,7 +89,7 @@ export class LibraryDetailComponent implements OnInit {
   filterActive: boolean = false;
   filterActiveCheck!: FilterV2<FilterField>;
   refresh: EventEmitter<void> = new EventEmitter();
-  jumpKeys: Array<JumpKey> = [];
+  jumpKeys = signal<JumpKey[]>([]);
   bulkLoader: boolean = false;
 
   tabs: Array<{title: string, fragment: string, icon: string}> = [
@@ -103,11 +105,6 @@ export class LibraryDetailComponent implements OnInit {
   ngOnInit(): void {
 
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-
-    this.libraryService.getJumpBar(this.libraryId()).subscribe(barDetails => {
-      this.jumpKeys = barDetails;
-      this.cdRef.markForCheck();
-    });
 
     this.bulkSelectionService.registerDataSource('series', () => this.series());
     this.bulkSelectionService.registerPostAction((res: ActionResult<Series>) => {
@@ -196,6 +193,7 @@ export class LibraryDetailComponent implements OnInit {
         this.series.set([...series.result]);
         this.pagination = series.pagination;
         this.loadingSeries = false;
+        this.jumpKeys.set(this.jumpbarService.getJumpKeys(series.result, s => s.sortName));
         this.cdRef.markForCheck();
       });
   }

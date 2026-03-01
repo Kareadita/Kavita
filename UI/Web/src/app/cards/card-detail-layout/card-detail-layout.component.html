@@ -54,6 +54,7 @@
       </div>
     </div>
 
+
     @if (jumpBarKeysToRender().length >= 4 && items().length > 0 && scroll.viewPortInfo.maxScrollPosition > 0) {
       <ng-container [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }" />
     }

@@ -1,13 +1,13 @@
 import {DOCUMENT, NgClass, NgTemplateOutlet} from '@angular/common';
 import {
-  afterNextRender,
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
   contentChild,
+  DestroyRef,
   effect,
   EventEmitter,
-  HostListener,
   inject,
   input,
   output,
@@ -58,10 +58,11 @@ const ANIMATION_TIME_MS = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true
 })
-export class CardDetailLayoutComponent<TFilter extends number, TSort extends number> {
+export class CardDetailLayoutComponent<TFilter extends number, TSort extends number> implements AfterViewInit {
   private readonly document = inject<Document>(DOCUMENT);
   private readonly jumpbarService = inject(JumpbarService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
 
   header = input('');
@@ -172,17 +173,19 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
       this.tryResumeScrollPosition(keysToRender);
     });
 
-    afterNextRender(() => {
-      this.measureViewport();
-    });
   }
 
+  ngAfterViewInit() {
+    const container = this.document.querySelector('.viewport-container');
+    if (!container) return;
 
-  @HostListener('window:resize')
-  @HostListener('window:orientationchange')
-  measureViewport() {
-    const h = (this.document.querySelector('.viewport-container')?.getBoundingClientRect().height || 10) - 30;
-    this.viewportHeight.set(h);
+    const observer = new ResizeObserver(entries => {
+      const h = (entries[0]?.contentRect.height || 10) - 30;
+      this.viewportHeight.set(h);
+    });
+
+    observer.observe(container);
+    this.destroyRef.onDestroy(() => observer.disconnect());
   }
 
   performAction(event: ActionItem<void> | ActionResult<void>) {
