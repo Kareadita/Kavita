@@ -9,7 +9,7 @@ import {
   OnInit,
   TrackByFunction
 } from '@angular/core';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {distinctUntilChanged, filter, take} from 'rxjs/operators';
 import {ConfirmService} from 'src/app/shared/confirm.service';
@@ -31,7 +31,6 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {NgTemplateOutlet} from "@angular/common";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {UtilityService} from "../../shared/_services/utility.service";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ActionService} from "../../_services/action.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 import {catchError} from "rxjs";
@@ -48,6 +47,12 @@ import {
   DatatableComponent
 } from "@siemens/ngx-datatable";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../_services/action-factory.service";
+import {Action} from "../../_models/actionables/action";
+import {ActionResult} from "../../_models/actionables/action-result";
+import {ModalResult} from "../../_models/modal/modal-result";
+import {editModal} from "../../_models/modal/modal-options";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
   selector: 'app-manage-library',
@@ -60,7 +65,7 @@ import {BreakpointService} from "../../_services/breakpoint.service";
 export class ManageLibraryComponent implements OnInit {
 
   private readonly libraryService = inject(LibraryService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   private readonly hubService = inject(MessageHubService);
@@ -71,10 +76,8 @@ export class ManageLibraryComponent implements OnInit {
   private readonly actionService = inject(ActionService);
   protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly Action = Action;
-
-  actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-  bulkActions = this.actionFactoryService.getBulkLibraryActions(this.handleBulkAction.bind(this));
+  actions = this.actionFactoryService.getLibraryActions();
+  bulkActions = this.actionFactoryService.getBulkLibraryActions();
   libraries: Library[] = [];
   loading = false;
   /**
@@ -163,21 +166,17 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   editLibrary(library: Library) {
-    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl', fullscreen: 'md' });
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, editModal());
     modalRef.componentInstance.library = library;
-    modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
-      if (refresh) {
-        this.getLibraries();
-      }
+    modalRef.closed.subscribe((result: ModalResult<Library>) => {
+      this.getLibraries();
     });
   }
 
   addLibrary() {
-    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl', fullscreen: 'md' });
-    modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
-      if (refresh) {
-        this.getLibraries();
-      }
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, editModal());
+    modalRef.closed.subscribe((result: ModalResult<Library>) => {
+      this.getLibraries();
     });
   }
 
@@ -269,12 +268,11 @@ export class ManageLibraryComponent implements OnInit {
     }
   }
 
-  async handleBulkAction(action: ActionItem<Library>, _: Library) {
-    //Library is null for bulk actions
-    this.bulkAction = action.action;
+  async handleBulkAction(event: ActionResult<Library>) {
+    this.bulkAction = event.action;
     this.cdRef.markForCheck();
 
-    switch (action.action) {
+    switch (event.action) {
       case(Action.Scan):
       case(Action.RefreshMetadata):
       case(Action.GenerateColorScape):
@@ -286,35 +284,12 @@ export class ManageLibraryComponent implements OnInit {
         // Prompt the user for the library, then wait for them to manually trigger applyBulkAction
         const ref = this.modalService.open(CopySettingsFromLibraryModalComponent, {size: 'lg', fullscreen: 'md'});
         ref.componentInstance.libraries = this.libraries;
-        ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: number | null) => {
-          if (res === null) return;
+        ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: number) => {
           // res will be the library the user chose
           this.bulkMode = true;
           this.sourceCopyToLibrary = this.libraries.filter(l => l.id === res)[0];
           this.cdRef.markForCheck();
         });
-        break;
-    }
-  }
-
-  async handleAction(action: ActionItem<Library>, library: Library) {
-    switch (action.action) {
-      case(Action.Scan):
-        await this.actionService.scanLibrary(library);
-        break;
-      case(Action.RefreshMetadata):
-        await this.actionService.refreshLibraryMetadata(library);
-        break;
-      case(Action.GenerateColorScape):
-        await this.actionService.refreshLibraryMetadata(library, undefined, false, true);
-        break;
-      case(Action.Edit):
-        this.editLibrary(library)
-        break;
-      case (Action.Delete):
-        await this.deleteLibrary(library);
-        break;
-      default:
         break;
     }
   }
@@ -370,4 +345,6 @@ export class ManageLibraryComponent implements OnInit {
     this.selectAll = false;
       this.cdRef.markForCheck();
   }
+
+  protected readonly Action = Action;
 }

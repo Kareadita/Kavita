@@ -1,0 +1,14 @@
+.update-body {
+  width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+
+}
+
+::ng-deep .update-body {
+  img {
+    max-width: 100%;
+  }
+}
+
+

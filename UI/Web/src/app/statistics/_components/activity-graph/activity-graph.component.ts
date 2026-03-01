@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, CUSTOM_ELEMENTS_SCHEMA, inject, input} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {StatisticsService} from "../../../_services/statistics.service";
-import {DatePipe, DecimalPipe} from "@angular/common";
+import {DatePipe, DecimalPipe, NgClass} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MonthLabelPipe} from "../../../_pipes/month-label.pipe";
 import {DayLabelPipe} from "../../../_pipes/day-label.pipe";
@@ -9,6 +9,7 @@ import {DurationPipe} from "../../../_pipes/duration.pipe";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {StatsFilter} from "../../_models/stats-filter";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {DateTime} from "luxon";
 
 
 export interface ActivityGraphData {
@@ -43,7 +44,8 @@ interface WeekRow {
     DatePipe,
     DurationPipe,
     LoadingComponent,
-    CompactNumberPipe
+    CompactNumberPipe,
+    NgClass
   ],
   templateUrl: './activity-graph.component.html',
   styleUrl: './activity-graph.component.scss',
@@ -56,6 +58,7 @@ export class ActivityGraphComponent {
   userId = input.required<number>();
   year = input.required<number>();
   filter = input.required<StatsFilter>();
+
 
   protected readonly readingActivityResource = this.statsService.getReadingActivityResource(
     () => this.filter(),
@@ -87,7 +90,12 @@ export class ActivityGraphComponent {
     if (!filter) return year;
 
     return year;
-  })
+  });
+
+  isToday(date: DayCell | null) {
+    if (date === null) return false;
+    return date.date === DateTime.now().toFormat('yyyy-MM-dd');
+  }
 
   private generateWeeks(): WeekRow[] {
     const year = this.year();

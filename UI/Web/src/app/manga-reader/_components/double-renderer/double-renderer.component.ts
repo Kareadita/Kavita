@@ -1,5 +1,5 @@
 import { DOCUMENT, NgClass, AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit, output } from '@angular/core';
 import { Observable, of, map, tap, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
@@ -35,7 +35,7 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
   @Input({required: true}) showClickOverlay$!: Observable<boolean>;
   @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
   @Input({required: true}) getPage!: (pageNum: number) => HTMLImageElement;
-  @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
+  readonly imageHeight = output<number>();
   private readonly destroyRef = inject(DestroyRef);
 
   debugMode: DEBUG_MODES = DEBUG_MODES.None;

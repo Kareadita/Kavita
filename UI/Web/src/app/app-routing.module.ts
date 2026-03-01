@@ -1,12 +1,17 @@
-import {NgModule} from '@angular/core';
-import {PreloadAllModules, RouterModule, Routes} from '@angular/router';
-import {AuthGuard} from './_guards/auth.guard';
-import {LibraryAccessGuard} from './_guards/library-access.guard';
+import {Routes} from '@angular/router';
+import {authGuard} from './_guards/auth.guard';
+import {libraryAccessGuard} from './_guards/library-access.guard';
+import {libraryResolver} from "./_resolvers/library.resolver";
+import {seriesResolver} from "./_resolvers/series.resolver";
+import {volumeResolver} from "./_resolvers/volume.resolver";
+import {chapterResolver} from "./_resolvers/chapter.resolver";
+import {personResolver} from "./_resolvers/person.resolver";
+import {readingListResolver} from "./_resolvers/reading-list.resolver";
 
 export const routes: Routes = [
   {
     path: '',
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
@@ -16,10 +21,6 @@ export const routes: Routes = [
       {
         path: 'collections',
         loadChildren: () => import('./_routes/collections-routing.module').then(m => m.routes)
-      },
-      {
-        path: 'lists',
-        loadChildren: () => import('./_routes/reading-list-routing.module').then(m => m.routes)
       },
       {
         path: 'announcements',
@@ -46,8 +47,11 @@ export const routes: Routes = [
         loadChildren: () => import('./_routes/dashboard-routing.module').then(m => m.routes)
       },
       {
-        path: 'person',
-        loadChildren: () => import('./_routes/person-detail-routing.module').then(m => m.routes)
+        path: 'person/:name',
+        runGuardsAndResolvers: 'always',
+        canActivate: [authGuard],
+        resolve: { person: personResolver },
+        loadComponent: () => import('./person-detail/person-detail.component').then(m => m.PersonDetailComponent)
       },
       {
         path: 'browse',
@@ -58,45 +62,64 @@ export const routes: Routes = [
         loadChildren: () => import('./_routes/profile-routing.module').then(m => m.routes)
       },
       {
-        path: 'library',
+        path: 'lists',
+        pathMatch: 'full',
+        title: 'title.reading-lists',
+        loadComponent: () => import('./reading-list/_components/reading-lists/reading-lists.component').then(c => c.ReadingListsComponent)
+      },
+      {
+        path: 'lists/:readingListId',
         runGuardsAndResolvers: 'always',
-        canActivate: [AuthGuard, LibraryAccessGuard],
+        canActivate: [authGuard],
+        data: {titleField: 'readingList', titleProp: 'title'},
+        resolve: { readingList: readingListResolver },
+        loadComponent: () => import('./reading-list/_components/reading-list-detail/reading-list-detail.component').then(c => c.ReadingListDetailComponent)
+      },
+      {
+        path: 'library/:libraryId',
+        runGuardsAndResolvers: 'always',
+        canActivate: [libraryAccessGuard],
+        resolve: { library: libraryResolver },
         children: [
           {
-            path: ':libraryId',
+            path: '',
             pathMatch: 'full',
             loadChildren: () => import('./_routes/library-detail-routing.module').then(m => m.routes)
           },
           {
-            path: ':libraryId/series/:seriesId',
+            path: 'series/:seriesId',
             pathMatch: 'full',
-            loadComponent: () => import('../app/series-detail/_components/series-detail/series-detail.component').then(c => c.SeriesDetailComponent)
+            data: {titleField: 'series', titleProp: 'name', titleSuffix: ' Details'},
+            resolve: { series: seriesResolver },
+            loadComponent: () => import('./series-detail/_components/series-detail/series-detail.component').then(c => c.default)
           },
           {
-            path: ':libraryId/series/:seriesId/chapter/:chapterId',
+            path: 'series/:seriesId/volume/:volumeId',
             pathMatch: 'full',
-            loadComponent: () => import('./chapter-detail/chapter-detail.component').then(c => c.ChapterDetailComponent)
-          },
-          {
-            path: ':libraryId/series/:seriesId/volume/:volumeId',
-            pathMatch: 'full',
+            resolve: { series: seriesResolver, volume: volumeResolver },
             loadComponent: () => import('./volume-detail/volume-detail.component').then(c => c.VolumeDetailComponent)
           },
           {
-            path: ':libraryId/series/:seriesId/manga',
+            path: 'series/:seriesId/chapter/:chapterId',
+            pathMatch: 'full',
+            resolve: { series: seriesResolver, chapter: chapterResolver },
+            loadComponent: () => import('./chapter-detail/chapter-detail.component').then(c => c.ChapterDetailComponent)
+          },
+          {
+            path: 'series/:seriesId/manga',
             loadChildren: () => import('./_routes/manga-reader.router.module').then(m => m.routes)
           },
           {
-            path: ':libraryId/series/:seriesId/book',
+            path: 'series/:seriesId/book',
             loadChildren: () => import('./_routes/book-reader.router.module').then(m => m.routes)
           },
           {
-            path: ':libraryId/series/:seriesId/pdf',
+            path: 'series/:seriesId/pdf',
             loadChildren: () => import('./_routes/pdf-reader.router.module').then(m => m.routes)
-          },
+          }
         ]
       },
-      {path: '', pathMatch: 'full', redirectTo: 'home'},
+      { path: '', pathMatch: 'full', redirectTo: 'home' }
     ]
   },
   {
@@ -105,10 +128,8 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    loadChildren: () => import('./_routes/registration.router.module').then(m => m.routes) // TODO: Refactor so we just use /registration/login going forward
+    loadChildren: () => import('./_routes/registration.router.module').then(m => m.routes)
   },
-  {path: 'libraries', pathMatch: 'full', redirectTo: 'home'},
-  {path: '**', pathMatch: 'prefix', redirectTo: 'home'},
-  {path: '**', pathMatch: 'full', redirectTo: 'home'},
-  {path: '', pathMatch: 'full', redirectTo: 'home'},
+  { path: 'libraries', pathMatch: 'full', redirectTo: 'home' },
+  { path: '**', redirectTo: 'home' }
 ];

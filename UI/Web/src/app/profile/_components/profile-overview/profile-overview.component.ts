@@ -5,7 +5,6 @@ import {
   CarouselReelComponent,
   NextPageLoader
 } from "../../../carousel/_components/carousel-reel/carousel-reel.component";
-import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
 import {map, Observable} from "rxjs";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SeriesService} from "../../../_services/series.service";
@@ -16,6 +15,8 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SortField} from "../../../_models/metadata/series-filter";
 import {QueryContext} from "../../../_models/metadata/v2/query-context";
+import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
+import {CardConfigFactory} from "../../../_services/card-config-factory.service";
 
 type OverviewStream = {
   title: string;
@@ -46,8 +47,8 @@ const JustFinishedReadingFilter = {
   imports: [
     AsyncPipe,
     CarouselReelComponent,
-    SeriesCardComponent,
-    TranslocoDirective
+    TranslocoDirective,
+    EntityCardComponent
   ],
   templateUrl: './profile-overview.component.html',
   styleUrl: './profile-overview.component.scss',
@@ -56,6 +57,7 @@ const JustFinishedReadingFilter = {
 export class ProfileOverviewComponent {
 
   private readonly seriesService = inject(SeriesService);
+  private readonly cardConfigFactory = inject(CardConfigFactory);
 
   memberInfo = input.required<MemberInfo>();
 
@@ -89,5 +91,7 @@ export class ProfileOverviewComponent {
       }
     ];
   });
+
+  seriesConfig = computed(() => this.cardConfigFactory.forSeries({overrides: {allowSelection: false}}));
 
 }

@@ -5,7 +5,7 @@ import {
   DestroyRef,
   inject,
   OnInit,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -46,7 +46,7 @@ import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.compone
 })
 export class ManageMetadataSettingsComponent implements OnInit {
 
-  @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent!: ManageMetadataMappingsComponent;
+  readonly manageMetadataMappingsComponent = viewChild.required(ManageMetadataMappingsComponent);
 
   private readonly settingService = inject(SettingsService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -142,7 +142,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
   packData(withFieldMappings: boolean = true) {
     const model = this.settingsForm.value;
 
-    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent.packData()
+    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent().packData()
 
     return {
       ...model,

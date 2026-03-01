@@ -1,13 +1,25 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, inject, input, OnDestroy, Output} from '@angular/core';
-import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  OnDestroy,
+  output
+} from '@angular/core';
+import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
 import {AccountService} from 'src/app/_services/account.service';
-import {ActionableEntity, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionableEntity} from 'src/app/_services/action-factory.service';
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
-import {ActionableModalComponent} from "../actionable-modal/actionable-modal.component";
+import {ActionableModalComponent} from "./_modals/actionable-modal/actionable-modal.component";
 import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {ActionResult} from "../../_models/actionables/action-result";
+import {filterActionTree} from "../../../libs/action-utils";
+import {ModalService} from "../../_services/modal.service";
 
 
 @Component({
@@ -23,7 +35,7 @@ import {BreakpointService} from "../../_services/breakpoint.service";
 export class CardActionablesComponent implements OnDestroy {
 
   private readonly accountService = inject(AccountService);
-  protected readonly modalService = inject(NgbModal);
+  protected readonly modalService = inject(ModalService);
   protected readonly breakpointService = inject(BreakpointService);
 
   iconClass = input<string>('fa-ellipsis-v');
@@ -44,9 +56,18 @@ export class CardActionablesComponent implements OnDestroy {
   /**
    * This will only emit when the action is clicked and the entity is null. Otherwise, the entity callback handler will be invoked.
    */
-  @Output() actionHandler = new EventEmitter<ActionItem<any>>();
+  readonly actionHandler = output<ActionResult<any>>();
 
-  currentUser = this.accountService.currentUserSignal;
+  filteredActions = computed(() => {
+    const entity = this.entity();
+    const user = this.accountService.currentUser();
+    const actions = this.actions();
+    if (!user || !actions.length) return [];
+
+    return filterActionTree(actions, entity, user, this.accountService);
+  });
+
+  currentUser = this.accountService.currentUser;
   submenu: {[key: string]: NgbDropdown} = {};
   private closeTimeout: any = null;
 
@@ -62,13 +83,9 @@ export class CardActionablesComponent implements OnDestroy {
   performAction(event: any, action: ActionItem<ActionableEntity>) {
     this.preventEvent(event);
 
-    if (typeof action.callback === 'function') {
-      if (this.entity() === null) {
-        this.actionHandler.emit(action);
-      } else {
-        action.callback(action, this.entity());
-      }
-    }
+    action.callback(action, this.entity()).subscribe(actionResult => {
+      this.actionHandler.emit(actionResult);
+    });
   }
 
   /**
@@ -77,7 +94,11 @@ export class CardActionablesComponent implements OnDestroy {
    * @param user
    */
   willRenderAction(action: ActionItem<ActionableEntity>, user: User) {
-    return (!action.requiredRoles?.length || this.accountService.hasAnyRole(user, action.requiredRoles)) && action.shouldRender(action, this.entity(), user);
+    const hasValidRole = !action.requiredRoles?.length || this.accountService.hasAnyRole(user, action.requiredRoles);
+    const shouldRenderFuncPasses = action.shouldRender(action, this.entity(), user);
+    //console.log('Action: ', action, 'has valid role: ', hasValidRole, ' and should render func passes: ', shouldRenderFuncPasses);
+
+    return hasValidRole && shouldRenderFuncPasses;
   }
 
   shouldRenderSubMenu(action: ActionItem<any>, dynamicList: null | Array<any>) {
@@ -119,19 +140,6 @@ export class CardActionablesComponent implements OnDestroy {
     }
   }
 
-  hasRenderableChildren(action: ActionItem<ActionableEntity>, user: User): boolean {
-    if (!action.children || action.children.length === 0) return false;
-
-    for (const child of action.children) {
-      const dynamicList = child.dynamicList;
-      if (dynamicList !== undefined) return true; // Dynamic list gets rendered if loaded
-
-      if (this.willRenderAction(child, user)) return true;
-      if (child.children?.length && this.hasRenderableChildren(child, user)) return true;
-    }
-    return false;
-  }
-
   performDynamicClick(event: any, action: ActionItem<ActionableEntity>, dynamicItem: any) {
     action._extra = dynamicItem;
     this.performAction(event, action);
@@ -140,13 +148,13 @@ export class CardActionablesComponent implements OnDestroy {
   openMobileActionableMenu(event: any) {
     this.preventEvent(event);
 
-    const ref = this.modalService.open(ActionableModalComponent, {fullscreen: true, centered: true});
-    ref.componentInstance.entity = this.entity();
-    ref.componentInstance.actions = this.actions();
-    ref.componentInstance.willRenderAction = this.willRenderAction.bind(this);
-    ref.componentInstance.shouldRenderSubMenu = this.shouldRenderSubMenu.bind(this);
-    ref.componentInstance.actionPerformed.subscribe((action: ActionItem<any>) => {
-      this.performAction(event, action);
+    // TODO: See if we can use a drawer instead
+    const ref = this.modalService.open(ActionableModalComponent);
+    ref.setInput('entity', this.entity());
+    ref.setInput('filteredActions', this.filteredActions());
+
+    ref.componentInstance.actionPerformed.subscribe((actionOrResult: any) => {
+      this.actionHandler.emit(actionOrResult);
     });
   }
 }

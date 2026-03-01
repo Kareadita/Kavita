@@ -29,6 +29,7 @@ import {AccountService} from "../../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {modalSaved} from "../../../_models/modal/modal-result";
 
 enum TabID {
   General = 'general-tab',
@@ -116,7 +117,7 @@ export class EditPersonModalComponent implements OnInit {
 
 
   close() {
-    this.modal.close({success: false, coverImageUpdate: false});
+    this.modal.dismiss();
   }
 
   save() {
@@ -144,7 +145,7 @@ export class EditPersonModalComponent implements OnInit {
 
     // Run api calls in sequency to prevent them from overwriting each-other in a race condition
     concat(...apis).subscribe(_ => {
-      this.modal.close({success: true, coverImageUpdate: hasCoverChanges, person: person});
+      this.modal.close(modalSaved(person, hasCoverChanges));
     });
   }
 

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../image/image.component";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
@@ -16,11 +16,9 @@ import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PreviewImageModalComponent {
-  protected readonly modalService = inject(NgbActiveModal);
+  protected readonly modal = inject(NgbActiveModal);
 
-  @Input({required:true}) title: string = '';
-  @Input({required: true}) image: string = '';
-
-
+  title = input.required<string>();
+  image = input.required<string>();
 
 }

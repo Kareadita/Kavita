@@ -1,16 +1,16 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter,
   inject,
-  Input,
+  input,
   OnInit,
-  Output,
+  output,
+  signal,
   TemplateRef
 } from '@angular/core';
 import {NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {NavService} from 'src/app/_services/nav.service';
 import {ToggleService} from 'src/app/_services/toggle.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -23,65 +23,64 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
  * Content inside [main] selector should not have any padding top or bottom, they are included in this component.
  */
 @Component({
-    selector: 'app-side-nav-companion-bar',
-    imports: [NgbTooltip, TranslocoDirective],
-    templateUrl: './side-nav-companion-bar.component.html',
-    styleUrls: ['./side-nav-companion-bar.component.scss']
+  selector: 'app-side-nav-companion-bar',
+  imports: [NgbTooltip, TranslocoDirective],
+  templateUrl: './side-nav-companion-bar.component.html',
+  styleUrls: ['./side-nav-companion-bar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SideNavCompanionBarComponent implements OnInit {
   private readonly navService = inject(NavService);
-  private readonly utilityService = inject(UtilityService);
   protected readonly toggleService = inject(ToggleService);
   private readonly offcanvasService = inject(NgbOffcanvas);
   protected readonly breakpointService = inject(BreakpointService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   /**
    * If the page should show a filter
    */
-  @Input() hasFilter: boolean = false;
+  hasFilter = input<boolean>(false);
   /**
    * If the page should show an extra section button
    */
-  @Input() hasExtras: boolean = false;
+  hasExtras = input<boolean>(false);
 
   /**
    * This implies there is a filter in effect on the underlying page. Will show UI styles to imply this to the user.
    */
-  @Input() filterActive: boolean = false;
+  filterActive = input<boolean>(false);
 
-  @Input() extraDrawer!: TemplateRef<any>;
+  extraDrawer = input<TemplateRef<any> | undefined>(undefined);
+
+  filterOpen = output<boolean>();
+
+  isFilterOpen = signal<boolean>(false);
+  isExtrasOpen = signal<boolean>(false);
 
 
-  @Output() filterOpen: EventEmitter<boolean> = new EventEmitter();
-
-  isFilterOpen = false;
-  isExtrasOpen = false;
-
-  private readonly destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     // If user opens side nav while filter is open on mobile, then collapse filter (as it doesn't render well) TODO: Change this when we have new drawer
     this.navService.sideNavCollapsed$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(sideNavCollapsed => {
-      if (this.isFilterOpen && sideNavCollapsed && this.breakpointService.isMobile()) {
-        this.isFilterOpen = false;
-        this.filterOpen.emit(this.isFilterOpen);
+      if (this.isFilterOpen() && sideNavCollapsed && this.breakpointService.isMobile()) {
+        this.isFilterOpen.set(false);
+        this.filterOpen.emit(false);
       }
     });
 
     this.toggleService.toggleState$.pipe(takeUntilDestroyed(this.destroyRef), tap(isOpen => {
-      this.isFilterOpen = isOpen;
-      this.cdRef.markForCheck();
+      this.isFilterOpen.set(isOpen);
     })).subscribe();
   }
 
   openExtrasDrawer() {
-    if (this.extraDrawer === undefined) return;
+    if (this.extraDrawer() === undefined) return;
 
-    this.isExtrasOpen = true;
-    const drawerRef = this.offcanvasService.open(this.extraDrawer, {position: 'end', scroll: true});
-    drawerRef.closed.subscribe(() => this.isExtrasOpen = false);
-    drawerRef.dismissed.subscribe(() => this.isExtrasOpen = false);
+    this.isExtrasOpen.set(true);
+    const drawerRef = this.offcanvasService.open(this.extraDrawer(), {position: 'end', scroll: true});
+    drawerRef.closed.subscribe(() => this.isExtrasOpen.set(false));
+    drawerRef.dismissed.subscribe(() => this.isExtrasOpen.set(false));
   }
 
 }

@@ -1,16 +1,14 @@
 <ng-container *transloco="let t; prefix:'user-scrobble-history'">
 
-  @let currentUser = accountService.currentUser$ | async;
-
   <div class="position-relative">
-    <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="hasRunScrobbleGen" (click)="generateScrobbleEvents()" [title]="t('generate-scrobble-events')">
+    <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="hasRunScrobbleGen()" (click)="generateScrobbleEvents()" [title]="t('generate-scrobble-events')">
       <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('generate-scrobble-events')}}</span>
     </button>
   </div>
 
-  @if (tokenExpired) {
+  @if (tokenExpired()) {
     <p class="alert alert-warning">{{t('token-expired')}}</p>
-  } @else if (!currentUser!.preferences.aniListScrobblingEnabled) {
+  } @else if (!accountService.currentUser()!.preferences.aniListScrobblingEnabled) {
     <p class="alert alert-warning">{{t('scrobbling-disabled')}}</p>
   }
 
@@ -22,31 +20,31 @@
         <label for="filter">{{t('filter-label')}}</label>
         <div class="input-group">
           <input id="filter" type="text" class="form-control" formControlName="filter" autocomplete="off" [placeholder]="t('filter-label')"/>
-          <button class="btn btn-primary" type="button" [disabled]="!selections.hasAnySelected()" (click)="bulkDelete()">{{t('delete-selected-label')}}</button>
+          <button class="btn btn-primary" type="button" [disabled]="!hasAnySelected()" (click)="bulkDelete()">{{t('delete-selected-label')}}</button>
         </div>
       </div>
     </form>
   </div>
 
-  <app-responsive-table [rows]="events"
+  <app-responsive-table [rows]="events()"
                         [trackByFn]="trackByEvents"
-                        [totalItems]="pageInfo.totalElements"
-                        [pageSize]="pageInfo.size"
-                        [pageIndex]="pageInfo.pageNumber"
+                        [totalItems]="pageInfo().totalElements"
+                        [pageSize]="pageInfo().size"
+                        [pageIndex]="pageInfo().pageNumber"
                         (pageChange)="onPageChange({offset: $event.pageIndex})">
     <ng-template #tableTemplate>
       <ngx-datatable
         class="bootstrap"
-        [rows]="events"
+        [rows]="events()"
         [columnMode]="ColumnMode.force"
         (sort)="updateSort($event)"
         (page)="onPageChange($event)"
         rowHeight="auto"
         [footerHeight]="50"
         [externalPaging]="true"
-        [count]="pageInfo.totalElements"
-        [offset]="pageInfo.pageNumber"
-        [limit]="pageInfo.size"
+        [count]="pageInfo().totalElements"
+        [offset]="pageInfo().pageNumber"
+        [limit]="pageInfo().size"
         [sorts]="[{prop: 'createdUtc', dir: 'desc'}]"
       >
 
@@ -54,13 +52,13 @@
           <ng-template let-column="column" ngx-datatable-header-template>
             <div class="form-check">
               <input id="select-all" type="checkbox" class="form-check-input"
-                     [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="selections.hasSomeSelected()">
+                     [checked]="selectAll()" (change)="toggleAll()" [indeterminate]="selections().hasSomeSelected()">
               <label for="select-all" class="form-check-label d-md-block d-none">{{t('select-all-label')}}</label>
             </div>
           </ng-template>
           <ng-template let-event="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
             <input id="select-event-{{rowIndex}}" type="checkbox" class="form-check-input"
-                   [ngModel]="selections.isSelected(event)" (change)="handleSelection(event, rowIndex)">
+                   [checked]="selections().isSelected(event)" (change)="handleSelection(event, rowIndex)">
           </ng-template>
         </ngx-datatable-column>
 
@@ -87,7 +85,7 @@
             {{t('series-header')}}
           </ng-template>
           <ng-template let-item="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
-            <a href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank" id="scrobble-history--{{rowIndex}}">{{item.seriesName}}</a>
+            <a [routerLink]="['/library/', item.libraryId, '/series/', item.seriesId]" target="_blank" id="scrobble-history--{{rowIndex}}">{{item.seriesName}}</a>
           </ng-template>
         </ngx-datatable-column>
 
@@ -150,7 +148,7 @@
       <div class="card-body py-2">
         <div class="form-check">
           <input id="select-all-cards" type="checkbox" class="form-check-input"
-                 [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="selections.hasSomeSelected()">
+                 [checked]="selectAll()" (change)="toggleAll()" [indeterminate]="selections().hasSomeSelected()">
           <label for="select-all-cards" class="form-check-label">{{t('select-all-label')}}</label>
         </div>
       </div>
@@ -162,7 +160,7 @@
           <!-- Header with checkbox and series name -->
           <div class="d-flex align-items-start mb-3">
             <h5 class="card-title mb-0">
-              <a [href]="baseUrl + 'library/' + event.libraryId + '/series/' + event.seriesId"
+              <a [routerLink]="['/library/', event.libraryId, '/series/', event.seriesId]"
                  target="_blank"
                  [id]="'scrobble-history--' + idx">
                 {{event.seriesName}}

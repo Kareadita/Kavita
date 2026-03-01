@@ -459,14 +459,6 @@
     "announcements": {
         "title": "Noticias"
     },
-    "out-of-date-modal": {
-        "title": "¡No te quedes atrás!",
-        "close": "{{common.close}}",
-        "subtitle": "¡Parece que tu instalación lleva más de {{count}} versiones de retraso!",
-        "description-1": "Considere actualizar para ejecutar la versión más reciente de Kavita.",
-        "description-2": "Eche un vistazo a nuestra <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obtener instrucciones sobre cómo actualizar.",
-        "description-3": "Si hay una razón específica por la que aún no has actualizado, ¡nos encantaría saber qué te mantienes en una versión obsoleta! Deténgase en nuestro discord y háganos saber qué está bloqueando su camino a la actualización."
-    },
     "changelog": {
         "installed": "Instalado",
         "download": "Descarga",
@@ -687,12 +679,6 @@
     "read-more": {
         "read-more": "Leer más",
         "read-less": "Leer menos"
-    },
-    "update-notification-modal": {
-        "title": "Nueva actualización disponible!",
-        "close": "{{common.close}}",
-        "help": "Cómo actualizar",
-        "download": "Descargar"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2257,19 +2243,6 @@
         "feature-requests": "Petición de funciones",
         "known-issues": "Problemas conocidos"
     },
-    "new-version-modal": {
-        "developer": "{{changelog.developer}}",
-        "close": "{{common.close}}",
-        "fixed": "{{changelog.fixed}}",
-        "api": "{{changelog.api}}",
-        "refresh": "Refrescar",
-        "title": "¡Kavita fue actualizado!",
-        "description": "Una nueva versión de Kavita está disponible. Refresca para actualizar.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}"
-    },
     "manage-user-tokens": {
         "mal-header": "MAL",
         "username-header": "Nombre de usuario",
@@ -2361,13 +2334,19 @@
         "reset-success": "Se han eliminado los IDs para todos los usuarios, vuelva a iniciar sesión para vincular",
         "notice": "Aviso",
         "restart-required": "Para cambiar de Proveedor o modificar la configuración avanzada, es necesario reiniciar Kavita manualmente para que los cambios surtan efecto.",
-        "auto-save-required": "Haz realizado cambios importantes, guarda para conservar los cambios",
+        "auto-save-required": "Haz realizado cambios importantes, guarda para conservarlos",
         "other-field-invalid": "{{validation.other-field-invalid}}",
         "tls-required": "El proveedor OIDC debe utilizar TLS (https)",
         "authority-label": "Autoridad",
         "client-id-label": "ID Cliente",
         "secret-label": "Cliente secreto",
-        "secret-tooltip": "La clave secreta generada por su proveedor OIDC no se mostrará después de haberlo configurado"
+        "secret-tooltip": "La clave secreta generada por su proveedor OIDC no se mostrará después de haberlo configurado",
+        "authority-tooltip": "La URL de tu proveedor se OIDC. No incluyas la ruta de configuración de .well-know/openid-configuration",
+        "sync-user-settings-label": "Sincronizar configuración de usuario con roles OIDC",
+        "sync-user-settings-tooltip": "Usuarios creados via OIDC son controlados enteramente por el proveedor de identidad, incluyendo roles, acceso a la biblioteca, y clasificación de edad. Si esta opción está deshabilitada, los usuarios no tendrán acceso a ningún contenido tras la creación de la cuenta. Consulte la documentación para ver más detalles.",
+        "default-roles-label": "{{common.roles}}",
+        "roles-claim-label": "Afirmación de roles",
+        "roles-claim-tooltip": "La afirmación que Kavita usará para extraer los roles. Dejar en blanco para usar el valor por defecto."
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -2401,5 +2380,25 @@
         "pdf-theme-tooltip": "Color del tema para el lector",
         "reading-profile-series-settings-title": "Serie",
         "reading-profile-library-settings-title": "Biblioteca"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "¡No te quedes atrás!",
+            "subtitle": "¡Parece que tu instalación lleva más de {{count}} versiones de retraso!",
+            "description-1": "Considere actualizar para ejecutar la versión más reciente de Kavita.",
+            "description-2": "Eche un vistazo a nuestra <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obtener instrucciones sobre cómo actualizar.",
+            "description-3": "Si hay una razón específica por la que aún no has actualizado, ¡nos encantaría saber qué te mantienes en una versión obsoleta! Deténgase en nuestro discord y háganos saber qué está bloqueando su camino a la actualización."
+        },
+        "new-version": {
+            "title": "¡Kavita fue actualizado!",
+            "description": "Una nueva versión de Kavita está disponible. Refresca para actualizar.",
+            "refresh": "Refrescar"
+        },
+        "update-notification": {
+            "title": "Nueva actualización disponible!",
+            "help": "Cómo actualizar",
+            "download": "Descargar"
+        }
     }
 }

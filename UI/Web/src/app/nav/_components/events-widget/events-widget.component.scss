@@ -20,7 +20,7 @@
 
 .widget-button--indicator {
   position: absolute;
-  top: 24px;
+  top: 1.5rem;
   color: var(--event-widget-activity-bg-color);
 
   &.error {
@@ -37,16 +37,16 @@
 ::ng-deep .nav-events {
 
     .popover-body {
-        min-width: 300px;
-        max-width: 300px;
-        padding: 0px;
-        box-shadow: 0px 0px 12px rgb(0 0 0 / 75%);
-        max-height: calc(100vh - 60px);
+        min-width: 18.75rem;
+        max-width: 18.75rem;
+        padding: 0;
+        box-shadow: 0 0 0.75rem rgb(0 0 0 / 75%);
+        max-height: calc(100vh - 3.75rem);
         overflow-y: auto;
     }
 
     .popover {
-        min-width: 300px;
+        min-width: 18.75rem;
     }
 }
 
@@ -99,9 +99,9 @@
     }
 
     .btn-close {
-      top: 5px;
-      right: 10px;
-      font-size: 11px;
+      top: 0.3125rem;
+      right: 0.625rem;
+      font-size: 0.6875rem;
       position: absolute;
     }
   }
@@ -118,9 +118,9 @@
     }
 
     .btn-close {
-      top: 35px;
-      right: 10px;
-      font-size: 11px;
+      top: 2.1875rem;
+      right: 0.625rem;
+      font-size: 0.6875rem;
       position: absolute;
     }
   }

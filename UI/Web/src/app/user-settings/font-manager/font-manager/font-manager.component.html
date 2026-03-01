@@ -56,7 +56,7 @@
                       <div class="row g-0 mt-3 pb-3">
                         <div class="mx-auto text-center">
                           <div class="mb-3">
-                            <i class="fa fa-file-upload" style="font-size: 24px;" aria-hidden="true"></i>
+                            <i class="fa fa-file-upload" style="font-size: 1.5rem;" aria-hidden="true"></i>
                           </div>
 
                           <div class="d-flex justify-content-center align-items-center gap-2">
@@ -119,7 +119,7 @@
     @if (item !== undefined) {
       @let currentFont = selectedFont();
       <li
-        [@loadNewFontAnimation]="animationState(item)"
+        [animate.enter]="initialLoadComplete() ? 'highlight-new-font' : ''"
         class="list-group-item d-flex justify-content-between align-items-start clickable rounded mt-1"
         [class.active]="currentFont && currentFont?.name === item.name"
         (click)="selectFont(item)"

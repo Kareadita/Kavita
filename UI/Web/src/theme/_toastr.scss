@@ -27,20 +27,20 @@
     width: 100%;
   }
   .toast-top-left {
-    top: 12px;
-    left: 12px;
+    top: 0.75rem;
+    left: 0.75rem;
   }
   .toast-top-right {
-    top: 12px;
-    right: 12px;
+    top: 0.75rem;
+    right: 0.75rem;
   }
   .toast-bottom-right {
-    right: 12px;
-    bottom: 12px;
+    right: 0.75rem;
+    bottom: 0.75rem;
   }
   .toast-bottom-left {
-    bottom: 12px;
-    left: 12px;
+    bottom: 0.75rem;
+    left: 0.75rem;
   }
   
   /* toast styles */
@@ -63,10 +63,10 @@
     right: -0.3em;
     top: -0.3em;
     float: right;
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: bold;
     color: #FFFFFF;
-    text-shadow: 0 1px 0 #ffffff;
+    text-shadow: 0 0.0625rem 0 #ffffff;
     /* opacity: 0.8; */
   }
   .toast-close-button:hover,
@@ -96,18 +96,18 @@
   .toast-container .ngx-toastr {
     position: relative;
     overflow: hidden;
-    margin: 0 0 6px;
-    padding: 15px 15px 15px 50px;
-    width: 300px;
-    border-radius: 3px 3px 3px 3px;
-    background-position: 15px center;
+    margin: 0 0 0.375rem;
+    padding: 0.9375rem 0.9375rem 0.9375rem 3.125rem;
+    width: 18.75rem;
+    border-radius: 0.1875rem 0.1875rem 0.1875rem 0.1875rem;
+    background-position: 0.9375rem center;
     background-repeat: no-repeat;
-    background-size: 24px;
+    background-size: 1.5rem;
     //box-shadow: 0 0 12px #999999;
     color: #FFFFFF;
   }
   .toast-container .ngx-toastr:hover {
-    box-shadow: 0 0 12px #000000;
+    box-shadow: 0 0 0.75rem #000000;
     opacity: 1;
     cursor: pointer;
   }
@@ -133,7 +133,7 @@
   }
   .toast-container.toast-top-center .ngx-toastr,
   .toast-container.toast-bottom-center .ngx-toastr {
-    width: 300px;
+    width: 18.75rem;
     margin-left: auto;
     margin-right: auto;
   }
@@ -150,14 +150,14 @@
     position: absolute;
     left: 0;
     bottom: 0;
-    height: 4px;
+    height: 0.25rem;
     background-color: #000000;
     opacity: 0.4;
   }
   /* Responsive Design */
   @media all and (max-width: 240px) {
     .toast-container .ngx-toastr.div {
-      padding: 8px 8px 8px 50px;
+      padding: 0.5rem 0.5rem 0.5rem 3.125rem;
       width: 11em;
     }
     .toast-container .toast-close-button {
@@ -167,7 +167,7 @@
   }
   @media all and (min-width: 241px) and (max-width: 480px) {
     .toast-container .ngx-toastr.div {
-      padding: 8px 8px 8px 50px;
+      padding: 0.5rem 0.5rem 0.5rem 3.125rem;
       width: 18em;
     }
     .toast-container .toast-close-button {
@@ -177,7 +177,7 @@
   }
   @media all and (min-width: 481px) and (max-width: 768px) {
     .toast-container .ngx-toastr.div {
-      padding: 15px 15px 15px 50px;
+      padding: 0.9375rem 0.9375rem 0.9375rem 3.125rem;
       width: 25em;
     }
   }

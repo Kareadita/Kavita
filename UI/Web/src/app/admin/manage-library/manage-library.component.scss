@@ -1,8 +1,8 @@
 @use "../../../theme/variables" as theme;
 
 .custom-position {
-    right: 15px;
-    top: -60px;
+    right: 0.9375rem;
+    top: -3.75rem;
 }
 
 .member-name {
@@ -29,7 +29,7 @@
             justify-content: center;
         }
         .btn {
-            width: 32px;
+            width: 2rem;
         }
     }
 }

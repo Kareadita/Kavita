@@ -1,15 +1,16 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   inject,
   Input,
   OnInit,
 } from '@angular/core';
 import {AsyncPipe} from "@angular/common";
-import {Observable, shareReplay, tap} from "rxjs";
+import {Observable, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {map} from "rxjs/operators";
 import {AccountService} from "../../../_services/account.service";
 import {DownloadEvent, DownloadService} from "../../../shared/_services/download.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
@@ -41,11 +42,7 @@ export class DownloadButtonComponent implements OnInit {
   @Input({required: true}) entityType: 'series' | 'volume' | 'chapter' = 'series';
 
   isDownloading = false;
-  canDownload$: Observable<boolean> = this.accountService.currentUser$.pipe(
-    takeUntilDestroyed(this.destroyRef),
-    map(u => !!u && (this.accountService.hasAdminRole(u) || this.accountService.hasDownloadRole(u)),
-    shareReplay({bufferSize: 1, refCount: true})
-  ));
+  canDownload = computed(() => this.accountService.hasAdminRole() || this.accountService.hasDownloadRole());
 
   ngOnInit() {
     if (this.download$ != null) {

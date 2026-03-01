@@ -1,4 +1,4 @@
-import {Component, computed, effect, ElementRef, inject, model, ViewChild} from '@angular/core';
+import {Component, computed, effect, ElementRef, inject, model, viewChild} from '@angular/core';
 import {Annotation} from "../../../_models/annotations/annotation";
 import {EpubReaderMenuService} from "../../../../_services/epub-reader-menu.service";
 import {AnnotationService} from "../../../../_services/annotation.service";
@@ -21,7 +21,7 @@ export class EpubHighlightComponent {
 
   annotation = model.required<Annotation | null>();
 
-  @ViewChild('highlightSpan', { static: false }) highlightSpan!: ElementRef;
+  readonly highlightSpan = viewChild.required<ElementRef>('highlightSpan');
 
   private readonly highlightSlotPipe = new SlotColorPipe();
 

@@ -1,6 +1,6 @@
 
 
-<app-tag-badge *transloco="let t; prefix: 'manage-custom-key-binds'" [selectionMode]="tagBadgeCursor()" [ngbTooltip]="t('key-bind-tooltip')">
+<app-tag-badge *transloco="let t; prefix: 'manage-custom-key-binds'" [selectionMode]="tagBadgeCursor()" [ngbTooltip]="t('key-bind-tooltip')" [placement]="tooltipPlacement()">
   <div id="key-bind-{{target()}}-{{index()}}" tabindex="-1" (click)="startListening()" (focus)="startListening()" class="d-flex align-items-center">
 
     @let keybind = selectedKeyBind() | keyBind;

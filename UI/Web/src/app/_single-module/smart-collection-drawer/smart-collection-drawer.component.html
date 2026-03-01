@@ -1,7 +1,7 @@
 <ng-container *transloco="let t">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">
-      {{collection.title}}
+      {{collection().title}}
     </h5>
     <button type="button" class="btn-close text-reset" [attr.aria-label]="t('common.close')" (click)="close()"></button>
   </div>
@@ -12,7 +12,7 @@
       <app-setting-item [title]="t('edit-collection-tags.last-sync-title')" [showEdit]="false" [canEdit]="false"
                         [subtitle]="t('edit-collection-tags.last-sync-tooltip')">
         <ng-template #view>
-          {{collection.lastSyncUtc | utcToLocalTime:'shortDate' | defaultDate}}
+          {{collection().lastSyncUtc | utcToLocalTime:'shortDate' | defaultDate}}
         </ng-template>
       </app-setting-item>
     </div>
@@ -21,14 +21,14 @@
     <div class="mb-3">
       <app-setting-item [title]="t('edit-collection-tags.series-tab')" [showEdit]="false" [canEdit]="false">
         <ng-template #titleExtra>
-          <span class="badge rounded-pill text-bg-primary ms-1" style="font-size: 11px">{{collection.totalSourceCount - series.length}} / {{collection.totalSourceCount | number}}</span>
+          <span class="badge rounded-pill text-bg-primary ms-1" style="font-size: 0.6875rem">{{collection().totalSourceCount - series().length}} / {{collection().totalSourceCount | number}}</span>
         </ng-template>
 
         <ng-template #view>
-          @if(collection.missingSeriesFromSource) {
-            <p [innerHTML]="collection.missingSeriesFromSource | safeHtml"></p>
+          @if(collection().missingSeriesFromSource) {
+            <p [innerHTML]="collection().missingSeriesFromSource ?? '' | safeHtml"></p>
           }
-          @for(s of series; track s.name) {
+          @for(s of series(); track s.name) {
             <div class="row g-0">
               <del><a [routerLink]="['library', s.libraryId, 'series', s.id]" target="_blank" class="strike">{{s.name}}</a></del>
             </div>

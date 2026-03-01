@@ -1,6 +1,8 @@
 {
     "login": {
-        "forgot-password": "Heu oblidat la contrasenya?"
+        "forgot-password": "Heu oblidat la contrasenya?",
+        "title": "Inici de sessió amb el teu compte",
+        "submit": "Accedir"
     },
     "dashboard": {
         "no-libraries": "Encara no s'ha configurat cap biblioteca. Creeu-ne una de nova a",
@@ -61,10 +63,6 @@
         "known-issues": "Problemes coneguts",
         "api": "API",
         "theme": "Tema"
-    },
-    "new-version-modal": {
-        "title": "S'ha actualitzat el Kavita.",
-        "refresh": "Actualitza"
     },
     "change-password": {
         "current-password-label": "Contrasenya actual",
@@ -469,5 +467,12 @@
     },
     "restriction-selector": {
         "no-restriction": "Cap restricció"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "new-version": {
+            "title": "S'ha actualitzat el Kavita.",
+            "refresh": "Actualitza"
+        }
     }
 }

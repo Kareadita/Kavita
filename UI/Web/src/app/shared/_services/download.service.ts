@@ -8,7 +8,7 @@ import {Volume} from 'src/app/_models/volume';
 import {asyncScheduler, BehaviorSubject, filter, finalize, Observable, of, tap,} from 'rxjs';
 import {download, Download} from '../_models/download';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
-import {switchMap, take, takeWhile, throttleTime} from 'rxjs/operators';
+import {switchMap, takeWhile, throttleTime} from 'rxjs/operators';
 import {AccountService} from 'src/app/_services/account.service';
 import {BytesPipe} from 'src/app/_pipes/bytes.pipe';
 import {translate} from "@jsverse/transloco";
@@ -161,33 +161,28 @@ export class DownloadService {
         return;
     }
 
+    const user = this.accountService.currentUser();
+    const sizeCheck$ = (user && user.preferences.promptForDownloadSize)
+      ? sizeCheckCall
+      : of(0);
 
-    this.accountService.currentUser$.pipe(take(1), switchMap(user => {
-      if (user && user.preferences.promptForDownloadSize) {
-        return sizeCheckCall;
-      }
-      return of(0);
-    }), switchMap(async (size) => {
-      return await this.confirmSize(size, entityType);
-    })
-    ).pipe(filter(wantsToDownload => {
-      return wantsToDownload;
-    }),
+    sizeCheck$.pipe(
+      switchMap(async (size) => await this.confirmSize(size, entityType)),
+      filter(wantsToDownload => wantsToDownload),
       filter(_ => downloadCall !== undefined),
       switchMap(() => {
-      return (downloadCall || of(undefined)).pipe(
-        tap((d) => {
-          this.readerService.enableWakeLock();
-          if (callback) callback(d);
-        }),
-        takeWhile((val: Download) => {
-          return val.state != 'DONE';
-        }),
-        finalize(() => {
-          this.readerService.disableWakeLock();
-          if (callback) callback(undefined);
-        }))
-    }), takeUntilDestroyed(this.destroyRef)
+        return (downloadCall || of(undefined)).pipe(
+          tap((d) => {
+            this.readerService.enableWakeLock();
+            if (callback) callback(d);
+          }),
+          takeWhile((val: Download) => val.state != 'DONE'),
+          finalize(() => {
+            this.readerService.disableWakeLock();
+            if (callback) callback(undefined);
+          }))
+      }),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {});
   }
 

@@ -10,8 +10,8 @@
       </div>
     }
     @if (menuOpen) {
-      <div class="fixed-top overlay" [@slideFromTop]="menuOpen">
-        <div style="display: flex; margin-top: 5px;">
+      <div class="fixed-top overlay" animate.enter="slide-in-top" animate.leave="slide-out-top">
+        <div style="display: flex; margin-top: 0.3125rem;">
           <button class="btn btn-icon" style="height: 100%" [title]="t('back')" (click)="closeReader()">
             <i class="fa fa-arrow-left" aria-hidden="true"></i>
             <span class="visually-hidden">{{t('back')}}</span>
@@ -36,7 +36,7 @@
               <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
             </button>
-            @if (!bookmarkMode() && hasBookmarkRights) {
+            @if (!bookmarkMode() && hasBookmarkRights()) {
               <button class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
                       title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
                 <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
@@ -136,7 +136,7 @@
     </div>
 
     @if (menuOpen) {
-      <div class="fixed-bottom overlay"  [@slideFromBottom]="menuOpen">
+      <div class="fixed-bottom overlay"  animate.enter="slide-in-bottom" animate.leave="slide-out-bottom">
         @if (pageOptions !== undefined && pageOptions.ceil !== undefined) {
           <div class="mb-3">
             <span class="visually-hidden" id="slider-info"></span>

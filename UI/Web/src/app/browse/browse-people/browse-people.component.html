@@ -24,8 +24,8 @@
         <app-person-card [entity]="item" [title]="item.name" [imageUrl]="imageService.getPersonImage(item.id)" (clicked)="goToPerson(item)">
           <ng-template #subtitle>
             <div class="tag-meta">
-                <div style="font-size: 12px">{{t('series-count', {num: item.seriesCount | compactNumber})}}</div>
-                <div style="font-size: 12px">{{t('issue-count', {num: item.chapterCount | compactNumber})}}</div>
+                <div style="font-size: 0.75rem">{{t('series-count', {num: item.seriesCount | compactNumber})}}</div>
+                <div style="font-size: 0.75rem">{{t('issue-count', {num: item.chapterCount | compactNumber})}}</div>
             </div>
           </ng-template>
         </app-person-card>

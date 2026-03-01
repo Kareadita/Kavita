@@ -2,17 +2,16 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
+  contentChild,
   DestroyRef,
   ElementRef,
-  EventEmitter,
   HostListener,
   inject,
   Input,
   OnInit,
-  Output,
+  output,
   TemplateRef,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
@@ -73,35 +72,35 @@ export class GroupedTypeaheadComponent implements OnInit {
   /**
    * Emits when the input changes from user interaction
    */
-  @Output() inputChanged: EventEmitter<SearchEvent> = new EventEmitter();
+  readonly inputChanged = output<SearchEvent>();
   /**
    * Emits when something is clicked/selected
    */
-  @Output() selected: EventEmitter<any> = new EventEmitter();
+  readonly selected = output<any>();
   /**
    * Emits an event when the field is cleared
    */
-  @Output() clearField: EventEmitter<void> = new EventEmitter();
+  readonly clearField = output<void>();
   /**
    * Emits when a change in the search field looses/gains focus
    */
-  @Output() focusChanged: EventEmitter<boolean> = new EventEmitter();
+  readonly focusChanged = output<boolean>();
 
-  @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
-  @ContentChild('itemTemplate') itemTemplate!: TemplateRef<any>;
-  @ContentChild('seriesTemplate') seriesTemplate: TemplateRef<any> | undefined;
-  @ContentChild('collectionTemplate') collectionTemplate: TemplateRef<any> | undefined;
-  @ContentChild('tagTemplate') tagTemplate: TemplateRef<any> | undefined;
-  @ContentChild('personTemplate') personTemplate: TemplateRef<any> | undefined;
-  @ContentChild('genreTemplate') genreTemplate!: TemplateRef<any>;
-  @ContentChild('noResultsTemplate') noResultsTemplate!: TemplateRef<any>;
-  @ContentChild('extraTemplate') extraTemplate!: TemplateRef<any>;
-  @ContentChild('libraryTemplate') libraryTemplate!: TemplateRef<any>;
-  @ContentChild('readingListTemplate') readingListTemplate!: TemplateRef<any>;
-  @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
-  @ContentChild('chapterTemplate') chapterTemplate!: TemplateRef<any>;
-  @ContentChild('bookmarkTemplate') bookmarkTemplate!: TemplateRef<any>;
-  @ContentChild('annotationTemplate') annotationTemplate!: TemplateRef<any>;
+  readonly inputElem = viewChild.required<ElementRef<HTMLInputElement>>('input');
+  readonly itemTemplate = contentChild.required<TemplateRef<any>>('itemTemplate');
+  readonly seriesTemplate = contentChild<TemplateRef<any>>('seriesTemplate');
+  readonly collectionTemplate = contentChild<TemplateRef<any>>('collectionTemplate');
+  readonly tagTemplate = contentChild<TemplateRef<any>>('tagTemplate');
+  readonly personTemplate = contentChild<TemplateRef<any>>('personTemplate');
+  readonly genreTemplate = contentChild<TemplateRef<any>>('genreTemplate');
+  readonly noResultsTemplate = contentChild<TemplateRef<any>>('noResultsTemplate');
+  readonly libraryTemplate = contentChild<TemplateRef<any>>('libraryTemplate');
+  readonly readingListTemplate = contentChild<TemplateRef<any>>('readingListTemplate');
+  readonly fileTemplate = contentChild<TemplateRef<any>>('fileTemplate');
+  readonly chapterTemplate = contentChild<TemplateRef<any>>('chapterTemplate');
+  readonly bookmarkTemplate = contentChild<TemplateRef<any>>('bookmarkTemplate');
+  readonly annotationTemplate = contentChild<TemplateRef<any>>('annotationTemplate');
+  readonly extraTemplate = contentChild<TemplateRef<any>>('extraTemplate');
 
 
   hasFocus: boolean = false;
@@ -142,10 +141,11 @@ export class GroupedTypeaheadComponent implements OnInit {
   }
 
   private focusElement(e: KeyBindEvent) {
-    if (this.inputElem.nativeElement) {
+    const inputElem = this.inputElem();
+    if (inputElem.nativeElement) {
       e.triggered = true;
-      this.inputElem.nativeElement.focus();
-      this.inputElem.nativeElement.click();
+      inputElem.nativeElement.focus();
+      inputElem.nativeElement.click();
     }
   }
 
@@ -223,8 +223,9 @@ export class GroupedTypeaheadComponent implements OnInit {
 
     if (!firstRun) {
       this.hasFocus = true;
-      if (this.inputElem && this.inputElem.nativeElement) {
-        this.inputElem.nativeElement.focus();
+      const inputElem = this.inputElem();
+      if (inputElem && inputElem.nativeElement) {
+        inputElem.nativeElement.focus();
       }
 
       this.openDropdown();
@@ -237,7 +238,7 @@ export class GroupedTypeaheadComponent implements OnInit {
   resetField() {
     this.prevSearchTerm = '';
     this.typeaheadForm.get('typeahead')?.setValue(this.initialValue);
-    this.clearField.emit();
+    this.clearField.emit(undefined);
     this.cdRef.markForCheck();
   }
 

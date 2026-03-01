@@ -18,7 +18,15 @@
         "account-detail-title": "Kontodetaljer",
         "saving": "Sparar…",
         "update": "Uppdatera",
-        "invalid-email-warning": "En ogiltig e-post kommer blockera vissa funktioner i Kavita"
+        "invalid-email-warning": "En ogiltig e-post kommer blockera vissa funktioner i Kavita",
+        "warning-read-only": "Konton med läsbehörighet har begränsade behörigheter",
+        "notice": "Varning!",
+        "out-of-sync": "Den här användaren skapades via OIDC. Om inställningen SyncUsers är aktiverad kan ändringar som görs i det här kontot skrivas över.",
+        "oidc-managed": "Den här användaren hanteras via OIDC. Kontakta din OIDC-administratör för att begära eventuella ändringar.",
+        "identity-provider": "Identitetsleverantör",
+        "identity-provider-tooltip": "Kavita-användare synkroniseras aldrig med OIDC-konton.",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "user-scrobble-history": {
         "filter-label": "{{common.filter}}",
@@ -42,7 +50,9 @@
         "is-processed-header": "Är processad",
         "scrobbling-disabled": "Scrobbling är inaktiverat i dina Kontoinställningar.",
         "token-expired": "Din AniList-token är Utgången! Scrobbling kommer inte processeras förrän du har förnyat det under Konto.",
-        "generate-scrobble-events": "Backfill Events"
+        "generate-scrobble-events": "Backfill Events",
+        "select-all-label": "Markera alla",
+        "delete-selected-label": "Ta bort markerade"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -70,7 +80,7 @@
         "prompt-on-download-tooltip": "Fråga när nedladdning överstiger {{size}}MB i storlek",
         "disable-animations-label": "Inaktivera animationer",
         "title": "Användarsida",
-        "pref-description": "Detta är globala inställningar knutet till ditt konto.",
+        "pref-description": "Det här är globala inställningar som är knutna till ditt konto. Läsarinställningar finns i Läsprofiler.",
         "success-toast": "Användarinställnignar uppdaterade",
         "global-settings-title": "Global inställningar",
         "page-layout-mode-label": "Sidlayout-läge",
@@ -80,19 +90,46 @@
         "blur-unread-summaries-label": "Censurera olästa sammanfattningar",
         "blur-unread-summaries-tooltip": "Cencurera handlingen på volymer eller kapitel som inte har någon läsprogress (för att undvika spoilers)",
         "disable-animations-tooltip": "Inaktivera animationer på sidan. Användbart på e-ink-läsare.",
-        "share-series-reviews-tooltip": "Ska Kavita inkludera dina recensioner av Serier för andra användare",
+        "share-series-reviews-tooltip": "Tillåt att dina recensioner är synliga för andra användare på den här servern",
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList Scrobbling",
         "anilist-scrobbling-tooltip": "Tillåt Kavita att Scrobbla (envägssynk) läsförlopp och betygsättningar till AniList",
         "want-to-read-sync-label": "Vill Läsa Synk",
-        "want-to-read-sync-tooltip": "Tillåt Kavita att lägga till artiklar till din Vill Läsa-lista baserat på AniList- och MAL-serier i Väntande läslista",
+        "want-to-read-sync-tooltip": "Tillåt Kavita att lägga till objekt i din Vill läsa-lista baserat på AniList och MAL-serier i väntande läslista",
         "collapse-series-relationships-label": "Dölj Serierelationer",
         "collapse-series-relationships-tooltip": "Ska Kavita visa Serier som saknar relation eller är förälder/uppföljare",
         "share-series-reviews-label": "Dela Serierecensioner",
         "clients-opds-url-label": "OPDS-länk",
         "clients-opds-url-tooltip": "Se en lista av kompatibla OPDS klienter. ",
-        "clients-opds-description": "Alla tredje partens klienter kommer använda antingen API-nyckeln eller Anslutnings-länken nedan. Dessa är som lösenord, håll dem hemliga.",
-        "clients-opds-alert": "OPDS är inte aktiverat på denna server. Detta kommer inte påverka Tachiyomi användare."
+        "clients-opds-description": "Alla tredjepartsklienter använder antingen OPDS-autentiseringsnyckeln eller anslutnings-URL:en nedan. Dessa fungerar som lösenord, håll dem privata.",
+        "clients-opds-alert": "OPDS är inte aktiverat på den här servern. Detta påverkar inte Mihon-användare.",
+        "font-tab": "Typsnitt",
+        "social-settings-title": "Sociala Inställningar",
+        "opds-settings-title": "OPDS Inställningar",
+        "highlight-bar-label": "Annoteringar markeringsfärger",
+        "highlight-bar-tooltip": "Dessa färger delas mellan alla böcker",
+        "colorscape-label": "Använd ColorScape",
+        "colorscape-tooltip": "Global växlingsknapp för att aktivera/avaktivera den dynamiska gradientfunktionen. Åsidosätter temainställningarna",
+        "data-saver-label": "Datasparning",
+        "data-saver-tooltip": "Minimerar dataanvändningen genom att förhindra automatisk förhämtning (t.ex. PDF-läsare)",
+        "prompt-for-rereads-after-label": "Prompt för omläsning",
+        "prompt-for-rereads-after-tooltip": "Visa omläsningsprompten om inga framsteg har gjorts sedan X dagar tillbaka. 0 inaktiverar prompten helt.",
+        "share-annotations-label": "Dela Anteckningar",
+        "share-annotations-tooltip": "Tillåt dina anteckningar att vara synliga för andra användare på denna server",
+        "view-other-annotations-label": "Visa Delade Anteckningar",
+        "view-other-annotations-tooltip": "Visa andra användares anteckningar medan du läser",
+        "social-libraries-label": "Sociala Bibliotek",
+        "social-libraries-tooltip": "Bibliotek där sociala funktioner ska aktiveras. Inget val aktiverar sociala funktioner överallt. Inaktivera specifika funktioner om du inte vill använda dem någonstans.",
+        "social-max-age-rating-label": "Maximal åldersgräns",
+        "social-max-age-rating-tooltip": "Maximal åldersklassificering för innehåll där sociala funktioner är aktiva",
+        "social-include-unknowns-label": "Inkludera okända",
+        "social-include-unknowns-tooltip": "Aktivera sociala funktioner för serier och kapitel med okänd åldersgräns",
+        "social-share-profile-label": "Dela Profil",
+        "social-share-profile-tooltip": "Aktivera delning av information om din läsaktivitet med andra servermedlemmar",
+        "embed-progress-indicator-label": "Bädda in förloppsindikator",
+        "embed-progress-indicator-tooltip": "Bädda in förloppsindikatorn i titeln",
+        "include-continue-from-label": "Inkludera Fortsätt Från Post",
+        "include-continue-from-tooltip": "Infoga en \"Fortsätt från X\"-post i OPDS-fälten för att undvika att hitta din senaste läspunkt (emulerar Kavitas Fortsätt-knapp)"
     },
     "user-holds": {
         "no-data": "{{typeahead.no-data}}",
@@ -116,7 +153,7 @@
         "active-theme": "Aktiv",
         "preview-default-admin": "Välj ett tema först eller ladda upp ett manuellt",
         "preview-default": "Välj ett tema först",
-        "description": "Kavita kommer i mina färger, hitta ett färgschema som passar dina behov eller skapa ett eget och dela det. Teman kan tillämpas på ditt konto eller på alla konton.",
+        "description": "Kavita finns i många färger, hitta ett färgschema som uppfyller dina behov eller bygg ett själv och dela det. Teman kan tillämpas för ditt konto eller tillämpas på alla konton.",
         "upload-continued": "en css-fil",
         "preview-title": "Förhandsgranska",
         "applied": "Tillämpat",
@@ -143,10 +180,13 @@
         "actions-header": "{{manage-users.actions-header}}",
         "title": "Enhetshanterare",
         "platform-label": "Plattform",
-        "email-setup-alert": "Vill du skicka filer till dina enheter? Be din administratör att först konfigurera e-postinställningarna!",
-        "description": "Detta avsnitt är till för att du ska kunna konfigurera enheter som inte kan ansluta till Kavita via en webbläsare och istället har en e-postadress som tar emot filer.",
+        "email-setup-alert": "Vill du skicka filer till din epost? Be din administratör att först konfigurera e-postinställningarna!",
+        "description": "Det här avsnittet är till för att du ska konfigurera e-postenheter som inte kan ansluta till Kavita och istället har en e-postadress som accepterar filer.",
         "name-label": "Namn",
-        "email-label": "Email"
+        "email-label": "Email",
+        "warning": "Varning",
+        "client-devices-header": "Klientenheter",
+        "sendto-device-header": "Epostbaserade Enheter"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -156,9 +196,9 @@
         "cancel": "{{common.cancel}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
-        "title": "Ändra Enhet",
+        "title": "Ändra Epostenhet",
         "email-tooltip": "Denna e-postadress kommer att användas för att ta emot filen via \"Skicka till\"",
-        "device-platform-label": "Enhetsplattform"
+        "device-platform-label": "{{manage-devices.platform-label}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -237,7 +277,7 @@
     "role-selector": {
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}",
-        "title": "Roller"
+        "title": "{{common.roles}}"
     },
     "directory-picker": {
         "close": "{{common.close}}",
@@ -302,14 +342,6 @@
         "create": "{{common.create}}",
         "title": "Alla smarta-filter"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "description-3": "Om det finns en specifik anledning till att du ännu inte har uppdaterat, vill vi gärna veta vad som håller dig kvar på en äldre version! Titta gärna in på vår Discord och berätta vad som hindrar dig från att uppgradera.",
-        "description-2": "Ta en titt på våran <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> för instruktioner om hur du uppdaterar.",
-        "title": "Hamna inte efter!",
-        "subtitle": "Det verkar som att din installation är mer än {{count}} versioner efter!",
-        "description-1": "Överväg att uppgradera så att du kör den senaste versionen av Kavita."
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -325,12 +357,14 @@
         "invite": "Bjud in",
         "setup-user-title": "Användare inbjuden",
         "inviting": "Bjuder in…",
-        "setup-user-account-tooltip": "Kopiera detta och klistra in det i en ny flik. Du kan behöva logga ut."
+        "setup-user-account-tooltip": "Kopiera detta och klistra in det i en ny flik. Du kan behöva logga ut.",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "library-selector": {
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
-        "title": "Bibliotek",
+        "title": "{{common.libraries}}",
         "no-data": "Det finns inga bibliotek konfigurerade ännu."
     },
     "license": {
@@ -382,7 +416,13 @@
         "kavita+-desc-part-3": "idag!",
         "kavita+-requirement": "Kavita+ är utformat för att fungera endast med de senaste tre versionerna. Allt utanför detta kan riskera att inte fungera.",
         "no-license-key": "Ingen licens-nyckel",
-        "k+-already-registered-header": "Licens redan registrerad"
+        "k+-already-registered-header": "Licens redan registrerad",
+        "kavita+-warning": "Kavita+ är separat från Kavita. Om du avinstallerar utan att först säga upp din prenumeration fortsätter faktureringscykeln.",
+        "cancel-label": "Avsluta Prenumeration",
+        "cancel-tooltip": "Avsluta din prenumeration och ta bort licensen i Kavita.",
+        "resend-license-email": "Skicka Licens till epost",
+        "resend-license-email-tooltip": "Skicka Kavita+ licensen igen till e-post. Licensen måste vara bunden till den här servern för att fungera.",
+        "supportId-label": "Support Id"
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
@@ -390,7 +430,8 @@
         "save": "{{common.save}}",
         "bookmark-label": "Bokmärkesnamn",
         "copy": "Kopiera",
-        "bookmark": "Bokmärk"
+        "bookmark": "Bokmärk",
+        "annotate": "Kommentera"
     },
     "book-reader": {
         "go-back": "Gå tillbaka",
@@ -399,10 +440,15 @@
         "next": "Nästa",
         "go-to-page": "Gå till sida",
         "page-label": "Sida",
-        "go-to-page-prompt": "Det finns {{totalPages}} sidor. Vilken sida vill du gå till?",
+        "go-to-page-prompt": "Det finns {{totalPages}} sidor. Vilken sida vill du gå till? Sidan börjar på 1.",
         "skip-header": "Skippa till huvudinnehållet",
         "incognito-mode-alt": "Inkognitoläge är aktiverat. Växla för att stänga av det.",
-        "loading-book": "Laddar bok…"
+        "loading-book": "Laddar bok…",
+        "close-reader-alt": "Stäng Läsare",
+        "page-num-label": "Sida {{page}}",
+        "completion-label": "{{percent}} klart",
+        "force-selected-one-column": "Layoutläget har bytts till en kolumn på grund av otillräckligt utrymme för att rendera två kolumner",
+        "forced-vertical-switch": "Layoutläge har ändrats eftersom layout med två kolumner inte fungerar med vertikal skrivstil"
     },
     "confirm-email": {
         "username-label": "{{common.username}}",
@@ -476,7 +522,10 @@
         "pages-count": "{{num}} Sidor",
         "page-settings-title": "Sidinställningar",
         "no-chapters": "Det finns inga kapitel i denna volym. Kan inte läsa.",
-        "words-count": "{{num}} Ord"
+        "words-count": "{{num}} Ord",
+        "annotations-tab": "{{tabs.annotations-tab}}",
+        "loading": "{{common.loading}}",
+        "read-count-tooltip": "Totalt antal läsningar"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -504,13 +553,8 @@
         "close": "{{common.close}}",
         "kavita-tooltip": "Ditt betyg + Sammanlagt",
         "kavita-rating-title": "Ditt betyg",
-        "entry-label": "Se detaljer"
-    },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "title": "Ny Uppdatering Tillgänglig!",
-        "help": "Hur du uppdaterar",
-        "download": "Ladda ner"
+        "entry-label": "Se detaljer",
+        "critic": "{{review-card.critic}}"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -533,7 +577,8 @@
         "home": "Hem",
         "all-series": "Alla Serier",
         "want-to-read": "Vill läsa",
-        "donate": "Donera"
+        "donate": "Donera",
+        "browse-people": "Bläddra bland personer"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -551,7 +596,7 @@
         "name-label": "Namn",
         "last-scanned-label": "Senast Skannad:",
         "type-tooltip": "Bibliotekstypen avgör hur filnamn tolkas och om användargränssnittet visar Kapitlar (Manga) eller Nummer (Serier). Kolla wiki-sidan för mer information om skillnaderna mellan bibliotekstyperna.",
-        "naming-conventions-part-3": "Kolla denna länk för att säkerställa att du följer rätt riktlinjer, annars kanske inte filer visas vid genomsökning.",
+        "naming-conventions-part-3": "Kontrollera den här länken för att se till att du följer instruktionerna, annars kanske filerna inte visas i skanningen.",
         "manage-reading-list-tooltip": "Ska Kavita skapa läslistor från StoryArc/StoryArcNumber och AlternativeSeries/AlternativeCount-taggar som finns i ComicInfo.xml/opf-filer?",
         "force-scan-tooltip": "Detta kommer att tvinga en genomsökning av biblioteket, som om det vore en ny skanning",
         "type-label": "Typ",
@@ -570,7 +615,7 @@
         "naming-conventions-part-2": "mapp-krav.",
         "manage-collection-tooltip": "Ska Kavita skapa samlingar från SeriesGroup-taggar som finns i ComicInfo.xml/opf-filer?",
         "library-name-unique": "Biblioteksnamn måste vara unika",
-        "kavitaplus-eligible-tooltip": "Stöder Kavita+ metadatafunktioner eller Scrobbling",
+        "kavitaplus-eligible-tooltip": "Stöder Kavita+ metadatafunktioner och/eller scrobbling",
         "allow-scrobbling-label": "Tillåt Scrobbling",
         "cover-description": "Anpassade biblioteksbilder och ikoner är valfria",
         "cover-description-extra": "Biblioteksbilden bör inte vara för stor. Sikta på en liten fil, 32x32 pixlar i storlek. Kavita utför ingen validering av storleken.",
@@ -586,17 +631,26 @@
         "folder-watching-label": "Mapp-bevakning",
         "include-in-dashboard-label": "Inkludera i instrumentpanelen",
         "force-scan": "Tvinga Skanning",
-        "help-us-part-3": "för att namnge och organisera din media."
+        "help-us-part-3": "för att namnge och organisera din media.",
+        "enable-metadata-label": "Aktivera metadata (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "Tillåt Kavita att läsa metadatafiler som åsidosätter filnamnsparsning.",
+        "remove-prefix-for-sortname-label": "Ta bort vanliga prefix för sorteringsnamn",
+        "remove-prefix-for-sortname-tooltip": "Kavita tar bort vanliga prefix som 'The', 'A', 'An' från titlar för sorteringsnamn. Åsidosätter inte inställda metadata.",
+        "inherit-web-links-label": "Ärv webblänkar från första kapitlet",
+        "inherit-web-links-tooltip": "Borde serier ärva webblänkar från sitt första kapitel",
+        "default-language-label": "Standardspråk",
+        "default-language-tooltip": "Språk att tilldela serien, om inget av kapitlen har något språk angivet i sina metadata",
+        "files-at-root-warning": "En eller flera mappar innehåller filer i roten. Kavita stöder inte detta."
     },
     "reader-settings": {
-        "font-family-label": "{{user-preferences.font-family-label}}",
-        "font-size-label": "{{user-preferences.font-size-book-label}}",
-        "line-spacing-label": "{{user-preferences.line-height-book-label}}",
-        "margin-label": "{{user-preferences.margin-book-label}}",
-        "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
-        "writing-style-label": "{{user-preferences.writing-style-label}}",
-        "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
-        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "font-family-label": "{{manage-reading-profiles.font-family-label}}",
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
+        "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
+        "margin-label": "{{manage-reading-profiles.margin-book-label}}",
+        "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
+        "immersive-mode-label": "{{manage-reading-profiles.immersive-mode-label}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "tap-to-paginate-label": "Peka Sidorisering",
         "enter": "Enter",
         "horizontal": "Horisontellt",
@@ -622,7 +676,15 @@
         "layout-mode-option-scroll": "Rulla",
         "reset-to-defaults": "Återställ till standardinställningar",
         "fullscreen-tooltip": "Sätt läsaren i helskärmsläge",
-        "layout-mode-option-1col": "1 Kolumn"
+        "layout-mode-option-1col": "1 Kolumn",
+        "update-parent": "Spara till {{name}}",
+        "loading": "laddar",
+        "create-new": "Ny profil från implicit",
+        "create-new-tooltip": "Skapa en ny hanterbar profil från din nuvarande implicita profil",
+        "reading-profile-updated": "Läsprofil uppdaterad",
+        "reading-profile-promoted": "Läsprofil upphöjd",
+        "line-spacing-min-label": "1x",
+        "line-spacing-max-label": "2.5x"
     },
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
@@ -663,7 +725,9 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "format-title": "{{metadata-filter.format-label}}",
-        "language-title": "{{edit-chapter-modal.language-label}}"
+        "language-title": "{{edit-chapter-modal.language-label}}",
+        "folder-path-title": "Mappsökväg",
+        "file-path-title": "Filer"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -777,7 +841,7 @@
         "shared-folders-title": "Mappar",
         "add-library": "Lägg till bibliotek",
         "scan-library": "Skanna Bibliotek",
-        "title": "Bibliotek",
+        "title": "{{common.libraries}}",
         "no-data": "Det finns inga bibliotek. Prova lägg till en.",
         "type-title": "Typ",
         "edit-library": "Ändra"
@@ -806,7 +870,9 @@
         "encode-as-description-part-2": "Kan jag använda WebP?",
         "media-issue-title": "Medieproblem",
         "scrobble-issue-title": "Scrobble Nummer",
-        "cover-image-size-label": "Omslagsbildsstorlek"
+        "cover-image-size-label": "Omslagsbildsstorlek",
+        "pdf-render-resolution-label": "PDF-renderingsupplösning",
+        "pdf-render-resolution-tooltip": "Upplösning som PDF-filer kommer att renderas med. Högre upplösningar tar längre tid att rendera och förbrukar mer minne. Om du upplever problem med PDF-rendering kan du försöka sänka detta."
     },
     "manage-scrobble-errors": {
         "filter-label": "{{common.filter}}",
@@ -932,7 +998,7 @@
         "too-many-libraries": "Många",
         "sharing-header": "Delning",
         "pending-tooltip": "Denna användare har inte validerat sin e-postadress",
-        "roles-header": "Roller",
+        "roles-header": "{{common.roles}}",
         "name-header": "Namn",
         "invite": "Bjud in",
         "change-password-alt": "Ändra Lösenord {{user}}",
@@ -947,7 +1013,10 @@
         "no-data": "Det finns inga andra användare.",
         "pending-title": "Väntande",
         "delete-user-tooltip": "Ta bort Användare",
-        "setup-user-alt": "Konfigurera Användare {{user}}"
+        "setup-user-alt": "Konfigurera Användare {{user}}",
+        "identity-provider-oidc-tooltip": "OIDC",
+        "identity-provider-native-tooltip": "Inbyggd",
+        "profile-link-alt": "Profil"
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",
@@ -992,13 +1061,13 @@
         "admin-system": "System",
         "mal-stack-import": "MAL Stack",
         "preferences": "Preferenser",
-        "clients": "API-Nyckel / OPDS",
+        "clients": "Aut.nycklar / OPDS",
         "scrobbling": "Scrobbling",
         "customize": "Anpassa",
         "theme": "Tema",
         "admin-general": "Generella",
         "admin-statistics": "Statistik",
-        "admin-libraries": "Bibliotek",
+        "admin-libraries": "{{common.libraries}}",
         "admin-users": "Användare",
         "admin-kavitaplus": "Licens",
         "admin-email": "E-post",
@@ -1012,7 +1081,16 @@
         "cbl-import": "CBL Läslista",
         "import-section-title": "Importera",
         "admin-media": "Media",
-        "admin-media-issues": "Medieproblem"
+        "admin-media-issues": "Medieproblem",
+        "insights-section-title": "Insikter",
+        "admin-activity": "Aktivitet",
+        "admin-device": "Enheter",
+        "admin-oidc": "OpenID Connect",
+        "admin-mappings-import": "Metadata Inställningar",
+        "custom-key-binds": "Kortkommandon",
+        "reading-profiles": "Läsprofiler",
+        "font": "Epub teckensnitt",
+        "admin-public-metadata": "Hantera Metadata"
     },
     "collection-detail": {
         "item-count": "{{common.item-count}}",
@@ -1072,7 +1150,8 @@
         "page-settings-title": "Sidinställningar",
         "continue": "Fortsätt",
         "no-data": "Inget tillagt",
-        "incognito-alt": "(Inkognito)"
+        "incognito-alt": "(Inkognito)",
+        "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
         "close": "{{common.close}}",
@@ -1085,7 +1164,8 @@
         "more-info": "Klicka för mer information",
         "download-in-queue": "{{num}} nedladdningar i Kö",
         "no-data": "Här händer inte mycket",
-        "left-to-process": "Kvar att processera: {{leftToProcess}}"
+        "left-to-process": "Återstår att bearbeta: {{leftToProcess}} / {{totalToProcess}}",
+        "reading-now": "{{num}} läser nu"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",
@@ -1096,7 +1176,8 @@
         "bookmark": "Bokmärk nuvarande sida",
         "close-reader": "Stäng läsare",
         "toggle-menu": "Växla meny",
-        "title": "Tangentbordsgenvägar"
+        "title": "Tangentbordsgenvägar",
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
     "grouped-typeahead": {
         "genres": "{{metadata-fields.genres-title}}",
@@ -1106,11 +1187,12 @@
         "chapters": "Kapitel",
         "files": "Filer",
         "include-extras": "Inkludera Kapitel & Filer",
-        "libraries": "Bibliotek",
+        "libraries": "{{common.libraries}}",
         "reading-lists": "Läslistor",
         "collections": "Samlingar",
         "people": "Personer",
-        "tags": "Taggar"
+        "tags": "Taggar",
+        "annotations": "{{tabs.annotations-tab}}"
     },
     "nav-header": {
         "help": "{{common.help}}",
@@ -1125,7 +1207,12 @@
         "settings": "Inställningar",
         "all-filters": "Smarta Filter",
         "scroll-to-top-alt": "Skrolla till Toppen",
-        "logout": "Logga ut"
+        "logout": "Logga ut",
+        "person-aka-status": "Matchar ett alias",
+        "browse-genres": "Bläddra bland Genrer",
+        "browse-tags": "Bläddra bland Taggar",
+        "all-annotations": "Bläddra bland anteckningar",
+        "my-profile": "Min Profil"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1188,8 +1275,8 @@
         "cbl-repo": "Du hittar många läslistor i communityn <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repository</a>."
     },
     "manga-reader": {
-        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
+        "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
         "image-splitting-label": "Bilduppdelning",
         "prev-page-tooltip": "Föregående Sida",
         "next-page-tooltip": "Nästa Sida",
@@ -1221,9 +1308,17 @@
         "swipe-enabled-label": "Svep Aktiverat",
         "bookmark-page-tooltip": "Bokmärk Sida",
         "reading-mode-tooltip": "Läsläge",
-        "off": "Av",
+        "off": "{{reader-settings.off}}",
         "first-time-reading-manga": "Tryck på bilden när som helst för att öppna menyn. Du kan konfigurera olika inställningar eller gå till en sida genom att klicka på progressbaren. Tryck på sidorna av bilden för att gå till nästa eller föregående sida.",
-        "layout-mode-switched": "Layoutläget har bytts till Enkelsida på grund av otillräckligt utrymme för att visa dubbelsidig layout"
+        "layout-mode-switched": "Layoutläget har bytts till Enkelsida på grund av otillräckligt utrymme för att visa dubbelsidig layout",
+        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
+        "reading-profile-updated": "Läsprofil uppdaterad",
+        "reading-profile-promoted": "Läsprofilen har gjorts till standard",
+        "page-offset-label": "Sidförskjutning",
+        "offset-only-double": "Sidförskjutning kan bara användas med dubbellayout",
+        "update-parent": "{{reader-settings.update-parent}}",
+        "loading": "{{reader-settings.loading}}",
+        "create-new": "{{reader-settings.create-new}}"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -1252,7 +1347,7 @@
         "limit-label": "Gräns",
         "format-label": "Format",
         "inker-label": "Inker",
-        "libraries-label": "Bibliotek",
+        "libraries-label": "{{common.libraries}}",
         "rating-label": "Betyg",
         "writer-label": "Författare",
         "collections-label": "Samlingar",
@@ -1269,7 +1364,10 @@
         "unit-average-rating": "Kavita+ externt betyg, procent",
         "unit-read-last": "Dagar från IDAG",
         "unit-reading-date": "Datum",
-        "unit-reading-progress": "Procent"
+        "unit-reading-progress": "Procent",
+        "disclaimer-highlight-slots": "När du använder det här fältet visas bara dina egna anteckningar",
+        "unit-file-size": "GB, MB, KB, B",
+        "disclaimer-file-size": "Filstorleken måste innehålla en enhet"
     },
     "edit-series-modal": {
         "general-tab": "{{tabs.general-tab}}",
@@ -1340,7 +1438,8 @@
         "format-title": "Format",
         "folder-path-title": "Mappsökväg",
         "folder-path-tooltip": "Högsta sökväg från bibliotekets rot som innehåller alla serie filer",
-        "info-title": "Information"
+        "info-title": "Information",
+        "no-data": "{{common.no-data}}"
     },
     "edit-chapter-modal": {
         "close": "{{common.close}}",
@@ -1377,7 +1476,7 @@
         "size-label": "{{edit-series-modal.size-title}}",
         "links-label": "{{metadata-fields.links-title}}",
         "last-read-label": "{{sort-field-pipe.read-progress}}",
-        "pages-count": "{{num}} Sidor",
+        "pages-count": "{{series-detail.pages-count}}",
         "isbn-label": "ISBN",
         "title-label": "Titel",
         "pages-label": "Sidor",
@@ -1385,7 +1484,7 @@
         "range-hours": "{{value}} {{hourWord}}",
         "read-time-label": "Lästid",
         "id-label": "ID",
-        "words-count": "{{num}} Ord",
+        "words-count": "{{series-detail.words-count}}",
         "reading-time-label": "Lästid",
         "date-added-label": "Datum Tillagd",
         "title": "Ändra",
@@ -1399,8 +1498,8 @@
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
-        "pages-label": "{{edit-chapter-modal.pages-count}}",
-        "words-label": "{{edit-chapter-modal.length-title}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{edit-chapter-modal.pages-count}}",
         "words-count": "{{edit-chapter-modal.words-count}}",
         "date-added-label": "{{edit-chapter-modal.date-added-label}}",
@@ -1423,7 +1522,8 @@
         "all-users": "Alla Användare",
         "x-axis-label": "Tid",
         "no-data": "Inga Läsframsteg",
-        "y-axis-label": "Timmar Lästa"
+        "y-axis-label": "Timmar Lästa",
+        "select-user-alt": "Välj användare att filtrera på"
     },
     "series-preview-drawer": {
         "tags-label": "{{filter-field-pipe.tags}}",
@@ -1464,7 +1564,17 @@
         "total-files-tooltip": "Totalt antal Filer: {{count}}",
         "popular-series-title": "Populära Serier",
         "series": "serier",
-        "total-read-time-tooltip": "Total Lästid: {{count}}"
+        "total-read-time-tooltip": "Total Lästid: {{count}}",
+        "stats-title": "Utforska",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "management-tab": "{{tabs.management-tab}}",
+        "users": "användare",
+        "readers": "läsare",
+        "popular-decades-title": "Populära decennier",
+        "popular-reading-lists-title": "Mest Lästa Läslistor",
+        "popular-genres-title": "Populära Genrer",
+        "popular-tags-title": "Populära Taggar",
+        "popular-person-title": "Populära {{role}}"
     },
     "customize-dashboard-modal": {
         "sidenav": "Sido Nav",
@@ -1539,7 +1649,7 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse-authors}}"
+        "browse-authors": "{{side-nav.browse-people}}"
     },
     "filter-field-pipe": {
         "age-rating": "{{metadata-fields.age-rating-title}}",
@@ -1550,7 +1660,7 @@
         "tags": "{{metadata-fields.tags-title}}",
         "writers": "{{metadata-fields.writers-title}}",
         "read-time": "Läs tid",
-        "libraries": "Bibliotek",
+        "libraries": "{{common.libraries}}",
         "team": "Team",
         "collection-tags": "Samlingstaggar",
         "inker": "Inker",
@@ -1574,7 +1684,8 @@
         "summary": "Handling",
         "read-date": "Läsdatum",
         "want-to-read": "Vill Läsa",
-        "publication-status": "Publikationsstatus"
+        "publication-status": "Publikationsstatus",
+        "file-size": "Filstorlek"
     },
     "actionable": {
         "clear": "{{common.clear}}",
@@ -1644,7 +1755,18 @@
         "delete-tooltip": "Det finns inget sätt att ångra detta beslut",
         "back-to": "Tillbaka till {{action}}",
         "rename": "Byt namn",
-        "rename-tooltip": "Byt namn på Smart Filter"
+        "rename-tooltip": "Byt namn på Smart Filter",
+        "reading-profiles": "Läsprofiler",
+        "set-reading-profile": "Ställ in läsprofil",
+        "set-reading-profile-tooltip": "Koppla en läsprofil till det här biblioteket",
+        "clear-reading-profile": "Rensa läsprofil",
+        "clear-reading-profile-tooltip": "Rensa läsprofil för detta bibliotek",
+        "cleared-profile": "Läsprofil Rensad",
+        "merge": "Slå ihop",
+        "export": "Exportera",
+        "like": "Gilla",
+        "unlike": "Ta bort gilla-markeringar",
+        "edit-device-name": "Redigera Namn"
     },
     "dashboard": {
         "recently-added-title": "Nyligen tillagda serier",
@@ -1669,21 +1791,8 @@
         "your-review": "Detta är din recension",
         "external-review": "Extern recension",
         "local-review": "Lokal recension",
-        "rating-percentage": "Betyg {{r}}%"
-    },
-    "new-version-modal": {
-        "changed": "{{changelog.changed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "title": "Kavita blev uppdaterad!",
-        "refresh": "Uppdatera",
-        "fixed": "{{changelog.fixed}}",
-        "description": "En ny version av Kavita finns tillgänglig. Uppdatera för att applicera.",
-        "added": "{{changelog.added}}",
-        "removed": "{{changelog.removed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}"
+        "rating-percentage": "Betyg {{r}}%",
+        "critic": "kritiker"
     },
     "manage-metadata-settings": {
         "enabled-tooltip": "Tillåt Kavita att ladda ner metadata och skriva till sin databas.",
@@ -1696,11 +1805,11 @@
         "blacklist-tooltip": "Allt som finns i denna lista kommer att tas bort från både genre- och taggbehandling. Detta är en plats för att lägga till genrer/taggar som du <b>inte</b> vill ha skrivna. Se till att de är kommaseparerade.",
         "add-field-mapping-label": "Lägg till Fält Mappning",
         "first-last-name-tooltip": "Se till att personers namn skrivs med Förnamn först och Efternamn sist",
-        "person-roles-label": "Roller",
+        "person-roles-label": "{{common.roles}}",
         "enable-start-date-label": "Startdatum",
         "first-last-name-label": "Första Sista Namning",
         "whitelist-tooltip": "Tillåt endast en sträng i denna lista att skrivas för <b>taggar</b>. Se till att de är kommaseparerade.",
-        "age-rating-mapping-description": "Eventuella strängar på vänster sida som finns i antingen Genre eller Taggar kommer att ställa in åldersbetyget på serien.",
+        "age-rating-mapping-description": "Alla strängar till vänster, om de finns i antingen Genre eller Taggar, kommer att ställa in åldersgränsen för serien. Matchningen är normaliserad och skiftlägeskänslig, den högsta åldersgränsen används.",
         "remove-source-tag-label": "Ta bort käll-tagg",
         "overrides-description": "Tillåt Kavita att skriva över låsta fält.",
         "whitelist-label": "Vitlista taggar",
@@ -1718,7 +1827,7 @@
         "genre": "Genre",
         "localized-name-label": "Lokaliserad Serie-namn",
         "localized-name-tooltip": "Tillåt Lokaliserat-namn att bli skrivet när fältet är upplåst. Kavita kommer att försöka gissa sig fram.",
-        "field-mapping-description": "Ställ in regler för vissa strängar som finns i fälten Genre/Tag och mappa dem till en ny sträng i Genre/Tag och ta eventuellt bort dem från källistan. Gäller endast när Genre/Tag kan skrivas.",
+        "field-mapping-description": "Konfigurera regler för vissa strängar som finns i fältet Genre/Tagg och mappa dem till en ny sträng i Genre/Tagg och ta eventuellt bort den från källistan. Matchningen är normaliserad och skiftlägeskänslig, det första matchande värdet används. Gäller endast när skrivning till Genre/Tagg är aktiverad.",
         "overrides-label": "Åsidosätter",
         "enabled-label": "Aktivera Metadata-nedladdning",
         "enable-tags-label": "Taggar",
@@ -1735,21 +1844,39 @@
         "enable-chapter-release-date-tooltip": "Tillåt Släppdatum för Kapitel/Nummer att skrivas",
         "enable-chapter-publisher-tooltip": "Tillåt Utgivare för Kapitel/Nummer att skrivas",
         "enable-chapter-publisher-label": "Utgivare",
-        "chapter-header": "Kapitelfält"
+        "chapter-header": "Kapitelfält",
+        "k+-warning": "Inställningarna nedan delas med de som finns på K+ sidan. Du kan ändra dem på båda platserna",
+        "export-settings": "Exportera",
+        "export-tooltip": "Exportera din svartlista och vitlista, åldersgräns och fältmappningar",
+        "export-file-name": "Kavita Metadata Inställningar Export.json",
+        "import-settings": "Importera",
+        "import-tooltip": "Importera dina eller någon annans inställningar",
+        "enable-extended-metadata-processing-label": "Utökad metadatabehandling",
+        "enable-extended-metadata-processing-tooltip": "Bör genrer och taggar som kommer från ComicInfo eller tillagt via användargränssnittet bearbetas med hjälp av svartlista, vitlista, åldersgränsmappningar och fältmappningar.",
+        "remove-age-rating-mapping-label": "Ta bort kartläggning av åldersgränser",
+        "remove-field-mapping-label": "Ta bort fältmappning",
+        "series-header": "Seriefält",
+        "people-header": "Personer",
+        "tags-header": "Taggar",
+        "source-genre-tags-placeholder": "Källgenre/tagg",
+        "dest-genre-tags-placeholder": "Destinationsgenre/tagg"
     },
     "match-series-result-item": {
         "releasing": "Släpper",
         "chapter-count": "{{common.chapter-count}}",
         "details": "Visa sida",
         "volume-count": "{{server-stats.volume-count}}",
-        "updating-metadata-status": "Uppdaterar Metadata"
+        "updating-metadata-status": "Uppdaterar Metadata",
+        "issue-count": "{{common.issue-count}}"
     },
     "person-detail": {
         "individual-role-title": "Som {{role}}",
         "browse-person-title": "Alla titlar av {{name}}",
         "known-for-title": "Känd för",
-        "all-roles": "Roller",
-        "browse-person-by-role-title": "Alla titlar av {{name}} som {{role}}"
+        "all-roles": "{{common.roles}}",
+        "browse-person-by-role-title": "Alla titlar av {{name}} som {{role}}",
+        "aka-title": "Även känd som ",
+        "no-info": "Ingen information om denna person"
     },
     "manage-matched-metadata": {
         "dont-match-status-label": "{{dont-match-label}}",
@@ -1766,7 +1893,9 @@
         "library-name-header": "Bibliotek",
         "actions-header": "Åtgärder",
         "match-alt": "Matcha {{seriesName}}",
-        "status-header": "Status"
+        "status-header": "Status",
+        "library-type": "Bibliotekstyp",
+        "matched-state-label": "Matchningsstatus"
     },
     "manage-user-tokens": {
         "mal-header": "MAL",
@@ -1779,7 +1908,7 @@
     },
     "match-series-modal": {
         "close": "{{common.close}}",
-        "query-tooltip": "Skriv seriens namn, AniList/MyAnimeList URL. URL:er kommer att använda en direkt uppslagning.",
+        "query-tooltip": "Ange serienamn, AniList/MyAnimeList/ComicBookRoundup-url. Url:erna kommer att använda en direkt sökning.",
         "description": "Välj en matchning för att omkoppla Kavita+ metadata och regenerera scrobble-händelser. 'Matcha Inte' kan användas för att förhindra att Kavita matchar metadata och scrobblar.",
         "save": "{{common.save}}",
         "dont-match-label": "Matcha Inte",
@@ -1932,7 +2061,7 @@
     "library-type-pipe": {
         "comicVine": "Serier",
         "book": "Bok",
-        "comic": "Serie (Legacy)",
+        "comic": "Serie (Flexibel)",
         "manga": "Manga",
         "image": "Bild",
         "lightNovel": "Lättroman"
@@ -1950,7 +2079,7 @@
         "default": "Standard (320x455)"
     },
     "api-key": {
-        "copy": "Kopiera"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "changelog": {
         "available": "Tillgänglig",
@@ -1963,7 +2092,11 @@
     },
     "personal-table-of-contents": {
         "delete": "Ta bort {{bookmarkName}}",
-        "no-data": "Inget bokmärkt ännu"
+        "no-data": "Inget bokmärkt ännu",
+        "page-title": "Sida {{page}}",
+        "chapter-and-page-title": "Kapitel {{chapterTitle}}, Sida {{page}}",
+        "no-match": "Inget filter för bokmärken som matchar",
+        "filter-label": "{{common.filter}}"
     },
     "theme": {
         "theme-dark": "Mörk",
@@ -2046,7 +2179,11 @@
         "smart-filters-tab": "Smarta Filter",
         "storyline-tab": "Handlingsförlopp",
         "specials-tab": "Specialer",
-        "general-tab": "Generellt"
+        "general-tab": "Generellt",
+        "annotations-tab": "Anteckningar",
+        "overview-tab": "Översikt",
+        "management-tab": "Hantering",
+        "activity-tab": "Aktivitet"
     },
     "common": {
         "delete": "Radera",
@@ -2088,7 +2225,13 @@
         "no-data": "Ingen Data",
         "submit": "Skicka",
         "item-count": "{{num}} Objekt",
-        "filter": "Filter"
+        "filter": "Filter",
+        "unknown": "Okänd",
+        "issue-count": "{{num}} Nummer",
+        "confirm": "Bekräfta",
+        "selected": "Markerad",
+        "roles": "Roller",
+        "libraries": "Bibliotek"
     },
     "carousel-reel": {
         "next-items": "Nästa objekt",
@@ -2106,7 +2249,8 @@
         "format-title": "Format",
         "extension-header": "Tillägg",
         "format-tooltip": "Inte Klassificerad betyder att Kavita inte har skannat vissa filer. Detta händer med gamla filer som fanns innan version v0.7. Du kan behöva köra en tvingad skanning via bibliotekets inställningsfönster.",
-        "download-file-for-extension-alt": "Ladda ner filrapport för {{extension}}"
+        "download-file-for-extension-alt": "Ladda ner filrapport för {{extension}}",
+        "no-data": "{{common.no-data}}"
     },
     "errors": {
         "theme-already-in-use": "Temat finns redan med det namnet",
@@ -2123,7 +2267,29 @@
         "rejected-cover-upload": "Bilden kunde inte hämtas via URL'en. Vänligen ladda ned och ladda upp från fil istället.",
         "invalid-password-reset-url": "Ogiltig lösenordåterställnings url",
         "error-code": "{{num}} Error",
-        "theme-manual-upload": "Det uppstod ett fel vid skapande av Tema från manuell uppladdning"
+        "theme-manual-upload": "Det uppstod ett fel vid skapande av Tema från manuell uppladdning",
+        "delete-font-in-use": "Typsnittet används av minst en användare och kan inte tas bort",
+        "font-manual-upload": "Ett fel uppstod när typsnittet skulle skapas från manuell uppladdning",
+        "font-already-in-use": "Ett typsnitt med det namnet finns redan",
+        "upload-too-large": "Filen är för stor för uppladdning, välj en mindre bild och försök igen.",
+        "invalid-form": "Formuläret du försöker skicka innehåller fel",
+        "import-fields": {
+            "non-unique-age-ratings": "Nycklarna för åldersklassificeringsmappningen är inte unika. Rätta till importfilen",
+            "non-unique-fields": "Fältmappningarna saknar unika ID:n. Rätta till importfilen"
+        },
+        "oidc": {
+            "missing-external-id": "OIDC returnerade inte en giltig identifierare",
+            "missing-email": "OIDC returnerade inte en giltig epost",
+            "email-not-verified": "Din epost måste verifieras för att tillåtas inloggning via OIDC",
+            "no-account": "Inget matchande konto funnet",
+            "disabled-account": "Detta konto är avstängt, vänligen kontakta din administratör",
+            "creating-user": "Misslyckades att skapa en ny användare, vänligen kontakta din administratör",
+            "role-not-assigned": "Du saknar de roller som krävs för att få åtkomst till den här applikationen",
+            "failed-to-update-email": "Misslyckades att uppdatera epost",
+            "failed-to-update-username": "Misslyckades att uppdatera användarnamn",
+            "email-in-use": "Eposten används redan av ett annat konto",
+            "syncing-user": "Misslyckades att synka ditt konto från OIDC, vänligen kontakta din administratör"
+        }
     },
     "toasts": {
         "scan-queued": "Skanning köad för {{name}}",
@@ -2205,7 +2371,7 @@
         "confirm-library-type-change": "Att ändra bibliotekstypen kommer att trigga en ny skanning med olika parseregler och kan leda till att serier återskapas, vilket kan resultera i att du förlorar framsteg och bokmärken. Du bör göra en säkerhetskopia innan du gör detta. Är du säker på att du vill fortsätta?",
         "confirm-regen-covers": "Uppdatera omslag kommer tvinga alla omslagsbilder att bli omkalkylerade. Detta är en krävande operation. Är du säker att du vill inte utföra en skanning istället?",
         "confirm-download-size-ios": "iOS har problem med nedladdningar av filer som är större än 200MB, denna nedladdning kanske inte slutförs.",
-        "confirm-delete-theme": "Att ta bort detta tema kommer att radera det från disken. Du kan hämta det från temp-mappen innan borttagningen",
+        "confirm-delete-theme": "Borttagning av detta tema kommer att radera det från disken. Du kan hämta det från temp-mappen innan borttagningen.",
         "smart-filter-deleted": "Smart Filter raderat",
         "force-kavita+-refresh-success": "Kavita+ extern metadata har blivit ogiltigt",
         "mal-token-required": "MAL Token krävs, ställ in under aAnvändarinställningar",
@@ -2232,7 +2398,19 @@
         "device-updated": "Enhet uppdaterad",
         "device-created": "Enhet skapad",
         "delete-device": "Är du säker att du vill radera denna enhet?",
-        "pdf-book-mode-screen-size": "Skärmen är för liten för Bokläge"
+        "pdf-book-mode-screen-size": "Skärmen är för liten för Bokläge",
+        "series-added-want-to-read": "Serier som lagts till från listan Vill Läsa",
+        "confirm-delete-auth-key": "Är du säker att du vill ta bort denna aut.nyckel?",
+        "series-bound-to-reading-profile": "Serier bunda till {{amount}} Läsprofiler",
+        "library-bound-to-reading-profile": "Bibliotek bunda till {{amount}} Läsprofiler",
+        "external-match-rate-error": "Kavita har nått sin gräns för uppslagningar för {{seriesName}}. Försök igen om 5 minuter.",
+        "confirm-delete-bookmark": "Är du säker att du vill ta bort detta Bokmärke?",
+        "confirm-delete-annotation": "Är du säker att du vill ta bort denna anteckning?",
+        "confirm-delete-font": "Borttagning av detta typsnitt kommer att radera det från disken. Du kan hämta det från temp-mappen innan borttagningen.",
+        "confirm-force-delete-font": "Detta typsnitt används för närvarande. Vill du tvinga bort det? Detta kommer att tvinga användare tillbaka till standardtypsnittet.",
+        "font-in-use": "Kan inte radera eftersom typsnittet används av en eller flera användare.",
+        "k+-resend-welcome-email-success": "Ett e-postmeddelande skickades till din Kavita+-e-postadress",
+        "profile-unauthorized": "Den här användaren delar inte sin profil"
     },
     "pdf-layout-mode-pipe": {
         "book": "Bokläge",
@@ -2243,7 +2421,9 @@
     "read-time-pipe": {
         "hours": "Timmar",
         "hour": "Timme",
-        "less-than-hour": "<1 Timme"
+        "less-than-hour": "<1 Timme",
+        "hour-left": "Timme kvar",
+        "hours-left": "Timmar kvar"
     },
     "role-localized-pipe": {
         "admin": "Admin",
@@ -2270,7 +2450,14 @@
         "sort-name": "Sortera Namn",
         "created": "Skapad",
         "last-modified": "Senast Ändrad",
-        "average-rating": "Genomsnittligt Betyg"
+        "average-rating": "Genomsnittligt Betyg",
+        "user-rating": "Mitt betyg",
+        "person-name": "Namn",
+        "person-series-count": "Serieantal",
+        "person-chapter-count": "Kapitelantal",
+        "annotation-owner": "Ägare",
+        "annotation-series": "Serienamn",
+        "annotation-color": "Färg"
     },
     "edit-person-modal": {
         "general-tab": "{{edit-series-modal.general-tab}}",
@@ -2280,7 +2467,7 @@
         "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "description-label": "Beskrivning",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "download-coversdb": "Ladda ner från CoversDB",
         "mal-id-label": "MAL Id",
         "anilist-id-label": "AniList Id",
@@ -2291,7 +2478,14 @@
         "save": "{{common.save}}",
         "asin-label": "ASIN",
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
-        "title": "{{personName}} Detaljer"
+        "title": "{{personName}} Detaljer",
+        "aliases-tab": "Alias",
+        "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
+        "invalid-amazon-code": "ASIN måste börja med B0 eller BT",
+        "aliases-label": "Ändra alias",
+        "alias-overlap": "Aliaset pekar redan på en annan person eller är personens namn. Överväg att slå ihop dem.",
+        "aliases-tooltip": "När en serie taggas med ett alias för en person kopplas serien till den personen i stället för att en ny person skapas. Om du tar bort ett alias måste du skanna om serien för att ändringen ska upptäckas."
     },
     "day-breakdown": {
         "title": "Dagsuppdelning",
@@ -2335,13 +2529,18 @@
         "data-table-label": "Datatabell",
         "visualisation-label": "Visualisering",
         "count-header": "Antal",
-        "title": "Publikationsstatus"
+        "title": "Publikationsstatus",
+        "status-header": "{{manage-matched-metadata.status-header}}",
+        "no-data": "{{common.no-data}}"
     },
     "validation": {
         "required-field": "Detta fält krävs",
         "valid-email": "Detta måste vara en giltig e-postadress",
         "year-validation": "Detta måste vara ett giltigt år högre än 1000 och 4 tecken långt",
-        "password-validation": "Lösenord måste innehålla mellan 6 och 256 tecken"
+        "password-validation": "Lösenord måste innehålla mellan 6 och 256 tecken",
+        "other-field-required": "{{name}} krävs när {{other}} är inställt",
+        "other-field-invalid": "Kan inte kontrollera giltighet, {{other}} är ogiltig",
+        "invalid-uri": "Den angivna URI:n är ogiltig"
     },
     "pdf-spread-mode-pipe": {
         "odd": "Udda Spridningar",
@@ -2378,7 +2577,8 @@
         "ok": "Ok",
         "info": "Info",
         "confirm": "Bekräfta",
-        "alert": "Varningsmeddelande"
+        "alert": "Varningsmeddelande",
+        "prompt": "Fråga"
     },
     "pdf-scroll-mode-pipe": {
         "horizontal": "Horisontell",
@@ -2434,9 +2634,774 @@
     "oidc": {
         "login": "Tillbaka till inloggningsskärmen",
         "title": "OICD Callback",
-        "error-loading-info": "Ett fel uppstod när OIDC info laddades in, kontakta din administratör"
+        "error-loading-info": "Ett fel uppstod när OIDC info laddades in, kontakta din administratör",
+        "timeout": "OIDC-identifieringen fick timeout eller ett fel inträffade"
     },
     "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "reset-label": "Återställ ids",
+        "reset-tooltip": "Nollställ externa ID:n för alla användare. Detta rensar kopplingen mellan användare i Kavita och din identitetsleverantör",
+        "reset-confirm": "Är du säker att du vill återställa externa ids från alla användare?",
+        "reset-success": "Externa ID:n är nollställda för alla användare. Autentisera igen för att länka kontona på nytt",
+        "save-success": "Framgångsrikt uppdaterat dina OIDC inställningar",
+        "notice": "Meddelande",
+        "restart-required": "Att ändra leverantörs- eller avancerade inställningar kräver en manuell omstart av Kavita för att det ska träda i kraft.",
+        "auto-save-required": "Du har ändrat viktiga inställningar, spara dem automatiskt för att behålla dem",
+        "provider-title": "Leverantör",
+        "provider-tooltip": "Leverantörsinställningar kräver att du manuellt klickar på Spara. Kavita måste konfigureras som en konfidentiell klient och behöver en omdirigerings-URL. Se <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wikin</a> för mer information.",
+        "behavior-title": "Beteende",
+        "other-field-required": "{{validation.other-field-required}}",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "tls-required": "OIDC-leverantören måste använda tls (https)",
+        "manual-save-label": "Ändring av leverantörsinställningar kräver manuell sparning",
+        "authority-label": "Befogenhet",
+        "authority-tooltip": "URL:en till din OIDC-leverantör, inkludera inte sökvägen .well-known/openid-configuration",
+        "client-id-label": "Klient ID",
+        "client-id-tooltip": "KlientID:t som är inställt i din OIDC-leverantör kan vara vad som helst",
+        "secret-label": "Klienthemlighet",
+        "secret-tooltip": "Hemligheten som genereras av din OIDC-leverantör kommer inte att visas efter att den har ställts in",
+        "provision-accounts-tooltip": "Skapa automatiskt ett nytt konto vid inloggning via OIDC om det inte kan matchas med ett befintligt konto",
+        "require-verified-email-label": "Kräv verifierade e-postadresser",
+        "require-verified-email-tooltip": "Kräver e-postverifiering vid skapande av ett nytt konto eller matchning med ett befintligt. Om ett nyskapat konto har en verifierad e-postadress kommer den automatiskt att verifieras på Kavitas sida.",
+        "sync-user-settings-label": "Synkronisera användarinställningar med OIDC-roller",
+        "sync-user-settings-tooltip": "Användare som skapas via OIDC kommer att hanteras helt av identitetsleverantören, inklusive roller, biblioteksåtkomst och åldersgräns. Om det här alternativet är inaktiverat kommer användarna inte att ha åtkomst till något innehåll efter att kontot har skapats. Se dokumentationen för mer information.",
+        "auto-login-label": "Automatisk inloggning",
+        "auto-login-tooltip": "Automatisk omdirigering till OIDC-leverantören när inloggningsskärmen öppnas",
+        "disable-password-authentication-label": "Inaktivera lösenordsautentisering",
+        "disable-password-authentication-tooltip": "Användare med administratörsrollen kan kringgå denna begränsning",
+        "provider-name-label": "Leverantörens namn",
+        "provider-name-tooltip": "Namn som visas på inloggningsskärmen",
+        "defaults-title": "Standardvärden",
+        "defaults-requirement": "Följande inställningar används när en användare registreras via OIDC medan Synkronisera användarinställningar är avstängt",
+        "default-include-unknowns-label": "Inkludera okända",
+        "default-include-unknowns-tooltip": "Inkludera okända åldersgränser",
+        "default-age-restriction-label": "Åldersgräns",
+        "default-age-restriction-tooltip": "Maximal åldersgräns som visas för nya användare",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "default-roles-label": "{{common.roles}}",
+        "default-libraries-label": "{{common.libraries}}",
+        "advanced-title": "Avancerade inställningar",
+        "advanced-tooltip": "Ändra bara dessa alternativ om du förstår deras inverkan.",
+        "roles-prefix-label": "Roller prefix",
+        "roles-prefix-tooltip": "Kavita kommer endast att beakta roller som börjar med detta prefix.",
+        "roles-claim-label": "Rollanspråk",
+        "roles-claim-tooltip": "Anspråket som Kavita kommer att använda för att extrahera roller. Lämna tomt om du vill använda standardvärdet.",
+        "custom-scopes-label": "Anpassade omfattningar",
+        "custom-scopes-tooltip": "Ytterligare omfång att begära från din OIDC-leverantör vid inloggning. Separera flera omfång med kommatecken. Felaktiga värden kan förhindra inloggning.",
+        "provision-accounts-label": "Provisionera konton"
+    },
+    "manage-auth-keys": {
+        "auth-keys-title": "Hantera auktoriseringsnycklar",
+        "name-label": "Namn",
+        "key-label": "Nyckel",
+        "expires-label": "Utgång",
+        "last-accessed-label": "Senast åtkomna",
+        "actions-label": "Åtgärder",
+        "delete": "{{common.delete}}",
+        "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
+        "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
+        "clients-opds-description": "{{user-preferences.clients-opds-description}}",
+        "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
+        "opds": "OPDS",
+        "image-only": "Bilder",
+        "add-auth-key": "Ny",
+        "description": "En autentiseringsnyckel är som ett lösenord. Om du roterar den blir alla befintliga klienter ogiltiga.",
+        "copy-key": "{{common.copy}}",
+        "rotate": "Rotera"
+    },
+    "create-auth-key": {
+        "create-title": "Skapa autentiseringsnyckel",
+        "rotate-title": "Rotera autentiseringsnyckel",
+        "name-label": "Namn",
+        "key-length-label": "Nyckellängd",
+        "expiration-label": "Upphör att gälla",
+        "required-field": "{{validations.required-field}}",
+        "total-key-length": "Total nyckellängd: {{length}}",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "never": "Aldrig"
+    },
+    "identity-provider-pipe": {
+        "kavita": "Kavita",
+        "oidc": "OpenID Connect"
+    },
+    "reviews": {
+        "user-reviews-local": "Lokala recensioner",
+        "user-reviews-plus": "Externa recensioner"
+    },
+    "review-modal": {
+        "title": "Redigera recension",
+        "review-label": "Recension",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
+        "min-length": "En recension måste innehålla minst {{count}} tecken",
+        "required": "{{validation.required-field}}"
+    },
+    "review-list-item": {
+        "by-label": "Av",
+        "created-alt": "Skapad"
+    },
+    "reread-modal": {
+        "title": "Läs igen",
+        "description-full-read": "Du har redan läst ut {{name}}! Vill du börja om?",
+        "description-time-passed": "Det har gått {{days}} dagar sedan du senast läste {{name}}, behöver du en repetition?",
+        "continue": "Fortsätt där du slutade",
+        "reread": "Börja Om",
+        "cancel": "{{common.cancel}}",
+        "read-incognito": "Läs inkognito"
+    },
+    "multi-check-box-form": {
+        "select-all": "Markera alla",
+        "deselect-all": "Avmarkera alla",
+        "no-data": "{{typeahead.no-data}}"
+    },
+    "font-manager": {
+        "description": "Kavitas epub-läsare har några inbyggda teckensnitt, lägg till dina egna teckensnitt här. Ladda upp en fil eller använd en Google Fonts-URL. Se <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wikin</a> för mer information.",
+        "enter-an-url-pre-title": "Ange en {{url}}",
+        "url": "url",
+        "add": "{{common.add}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "en typsnittsfil",
+        "preview-default": "Ladda upp ditt eget typsnitt via fil eller Google Font-url",
+        "delete": "{{common.delete}}",
+        "url-label": "Url",
+        "back": "Bakåt",
+        "load": "Ladda",
+        "no-preview": "Det går inte att förhandsgranska det här teckensnittet. Standardstilen från boken används.",
+        "brown-fox": "Den snabba bruna räven hoppar över den lata hunden",
+        "filter-system-fonts-label": "Filtrera Systemteckensnitt"
+    },
+    "server-devices": {
+        "client-devices-header": "{{manage-devices.client-devices-header}}",
+        "client-devices-this-month-header": "Klientenheter denna Månad",
+        "client-devices-mobile-vs-pc-header": "Mobil vs PC denna Månad",
+        "no-data": "{{common.no-data}}"
+    },
+    "client-device-card": {
+        "auth-type-label": "Autentiseringstyp",
+        "browser-label": "Webbläsare",
+        "platform-label": "{{manage-devices.platform-label}}",
+        "screen-label": "Skärm",
+        "version-label": "App Version",
+        "first-seen-label": "Sågs Först",
+        "last-seen-label": "Sågs Senast",
+        "active": "Aktiv",
+        "save": "{{common.save}}",
+        "local": "Lokal"
+    },
+    "most-active-users": {
+        "title": "Mest Aktiva Läsare",
+        "no-data": "Ingen läsaktivitet för tidsperioden"
+    },
+    "active-user-card": {
+        "total-hours": "{{duration}} totalt",
+        "comics-count": "{{count}} serier",
+        "books-count": "{{count}} böcker"
+    },
+    "time-frame-label": {
+        "overall": "Total",
+        "week": "Denna vecka",
+        "month": "Denna månad",
+        "year": "Detta år"
+    },
+    "duration-pipe": {
+        "seconds": "{{num}} sekunder",
+        "minutes": "{{num}} minuter",
+        "hours": "{{num}} timmar",
+        "combo": "{{hour}}t {{min}}m"
+    },
+    "library-type-subtitle-pipe": {
+        "book": "Allmänt bokbibliotek.",
+        "comic": "Serietidningsbibliotek med stöd för volymgruppering och pocketböcker inom en och samma serie. Stöder inte flera omgångar i samma serie.",
+        "manga": "Japanska serier med stöd för volymgruppering. Hanterar även vissa lösa bildkonfigurationer.",
+        "comicVine": "Strikt serieimplementering baserad på Comic Vine-metadata med integration för specialiserade verktyg.",
+        "image": "Lösa bildfiler med begränsat stöd. Måste i stort sett följa wikidokumentationen.",
+        "lightNovel": "Bokbibliotek med specialhantering optimerad för lätta romaner"
+    },
+    "annotation-card": {
+        "page-num": "{{book-reader.page-num-label}}",
+        "contains-spoilers-label": "Spoilers",
+        "view-in-reader-label": "Visa i Läsaren",
+        "location-tooltip": "{{library}} - {{series}}",
+        "liked": "Gillat av {{amount}} person/-er, inklusive dig",
+        "not-liked": "Gillat av {{amount}} person/-er, du gillade den inte"
+    },
+    "view-annotations-drawer": {
+        "title": "{{tabs.annotations-tab}}",
+        "close": "{{common.close}}",
+        "filter-label": "Filtrera Kommentarer",
+        "no-data": "{{common.no-data}}"
+    },
+    "view-edit-annotation-drawer": {
+        "view-title": "Visa Kommentar",
+        "edit-title": "Redigera Kommentar",
+        "create-title": "Skapa Kommentar",
+        "create": "Skapa",
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
+        "edit": "Redigera",
+        "delete": "Ta bort"
+    },
+    "quill-wrapper": {
+        "clean-tooltip": "Ta bort alla stiler"
+    },
+    "view-bookmark-drawer": {
+        "title": "Bokmärken",
+        "close": "{{common.close}}",
+        "no-data": "{{common.no-data}}",
+        "page-num-label": "{{book-reader.page-num-label}}",
+        "load-bookmark": "Ladda",
+        "image-header": "Bild",
+        "text-header": "Text"
+    },
+    "page-chapter-label-pipe": {
+        "page-only": "— Sida {{pageNumber}}",
+        "full": "— Sida {{pageNumber}}, Kapitel \"{{chapterTitle}}\""
+    },
+    "view-toc-drawer": {
+        "title": "Innehållsförteckning",
+        "close": "{{common.close}}",
+        "toc-header": "Bok",
+        "personal-header": "Personlig"
+    },
+    "epub-setting-drawer": {
+        "title": "Bokinställningar",
+        "close": "{{common.close}}"
+    },
+    "highlight-bar": {
+        "add-new-color-alt": "Lägg till anpassad färg",
+        "slot-label": "Markera plats {{slot}}",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}"
+    },
+    "reading-progress-status-pipe": {
+        "no-progress": "Läst",
+        "no-progress-incognito": "Läs inkognito",
+        "progress": "Fortsätt",
+        "progress-incognito": "Fortsätt inkognito",
+        "full-read": "Läs Igen",
+        "full-read-incognito": "Läs om inkognito"
+    },
+    "browse-people": {
+        "title": "Bläddra bland personer",
+        "author-count": "{{num}} Personer",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}",
+        "roles-label": "{{common.roles}}",
+        "sort-label": "Sortera",
+        "name-label": "Namn",
+        "issue-count-label": "Antal Nummer",
+        "series-count-label": "Antal Serier"
+    },
+    "browse-genres": {
+        "title": "Bläddra bland Genrer",
+        "genre-count": "{{num}} Genrer",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "browse-tags": {
+        "title": "Bläddra bland Taggar",
+        "genre-count": "{{num}} Taggar",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "all-annotations": {
+        "title": "Alla annoteringar",
+        "annotations-count": "{{num}} Annoteringar",
+        "export": "Exportera"
+    },
+    "bulk-set-reading-profile-modal": {
+        "title": "Ställ in läsprofil",
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "no-data": "Inga samlingar skapade ännu",
+        "loading": "{{common.loading}}",
+        "bound": "Bunden",
+        "warning-duplicate": "Ditt val innehåller överlappande enheter, detta är inte tillåtet",
+        "hidden": "{{amount}} profil(er) dold(a) på grund av ogiltigt tillstånd"
+    },
+    "pdf-render-resolution": {
+        "default": "Standard (1080x1920)",
+        "high": "Hög (1920x2560)",
+        "ultra": "Ultra (2160x3840)"
+    },
+    "manage-custom-key-binds": {
+        "description": "Ibland går det alldeles för långsamt att klicka och dra med musen. Använd dina föredragna tangentbindningar för att snabba upp arbetet. Varje alternativ tillåter upp till {{max}} olika tangentbindningar. <b> Tryck länge på en tangentbindning för att ta bort den.</b>",
+        "key-bind-error-reserved-key-bind": "Detta kortkommando är reserverad och kan inte användas",
+        "key-bind-error-need-at-least-one-key": "Ditt kortkommando måste innehålla minst en tangent",
+        "key-bind-error-overlap-in-target": "En eller fler kortkommandon är desamma",
+        "add": "Lägg till alternativ tangent",
+        "reset": "Återställ {{target}}",
+        "errors-array": "Kortkommando för {{target}} innehåller fel",
+        "errors-control": "Kortkommando {{index}} för {{target}} innehåller fel",
+        "warning-duplicated-control": "Kortkommando {{index}} för {{target}} har även använts för ett annat mål",
+        "warning-duplicate-key-bind": "Detta kortkommando har även använts på andra ställen",
+        "key-bind-tooltip": "Tryck länge på en kortkommando för att ta bort den.",
+        "global-header": "Global",
+        "readers-header": "Läsare"
+    },
+    "keybind-setting-description-pipe": {
+        "key-bind-title-navigate-to-settings": "Öppna inställningar",
+        "key-bind-tooltip-navigate-to-settings": "Öppna inställningar när du inte är i en läsare",
+        "key-bind-title-open-search": "Öppna sök",
+        "key-bind-tooltip-open-search": "Öppna den övre sökfältet",
+        "key-bind-title-navigate-to-scrobbling": "Öppna Scrobbling",
+        "key-bind-tooltip-navigate-to-scrobbling": "Öppna inställningssidan på fliken Scrobbling",
+        "key-bind-title-escape": "Escape",
+        "key-bind-tooltip-escape": "Stäng det för närvarande öppna sammanhanget",
+        "key-bind-title-toggle-fullscreen": "Växla helskärm",
+        "key-bind-tooltip-toggle-fullscreen": "Alternativ till F11",
+        "key-bind-title-bookmark-page": "Bokmärk aktuell sida",
+        "key-bind-tooltip-bookmark-page": "Sparar den aktuella bilden som ett bokmärke",
+        "key-bind-title-open-help": "Öppna hjälpmeny",
+        "key-bind-tooltip-open-help": "Öppnar en hjälpmodal med alla relevanta kortkommandon",
+        "key-bind-title-go-to": "Gå till sida",
+        "key-bind-tooltip-go-to": "Öppna en dialog för att byta sida",
+        "key-bind-title-toggle-menu": "Visa/dölj meny",
+        "key-bind-tooltip-toggle-menu": "Visar/döljer läsarmenyn",
+        "key-bind-title-page-left": "Sida åt vänster",
+        "key-bind-tooltip-page-left": "Flytta en sida åt vänster",
+        "key-bind-title-page-right": "Sida åt höger",
+        "key-bind-tooltip-page-right": "Flytta en sida åt höger",
+        "key-bind-title-page-up": "Sida upp",
+        "key-bind-tooltip-page-up": "Flytta en sida uppåt",
+        "key-bind-title-page-down": "Sida ner",
+        "key-bind-tooltip-page-down": "Flytta en sida nedåt",
+        "key-bind-title-offset-double-page": "Förskjut dubbelsida",
+        "key-bind-tooltip-offset-double-page": "Förskjut sidor för att justera dubbelsidesuppslag"
+    },
+    "client-device-auth-type-pipe": {
+        "unknown": "Okänd",
+        "oidc": "OIDC",
+        "jwt": "JWT",
+        "auth-key": "Aut.nyckel"
+    },
+    "merge-person-modal": {
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "src": "Slå ihop person",
+        "merge-warning": "Om du fortsätter kommer den valda personen att tas bort. Den valda personens namn läggs till som ett alias och alla deras roller överförs.",
+        "alias-title": "Nytt alias",
+        "known-for-title": "Känd för"
+    },
+    "files-over-time": {
+        "title": "Filer tillagda över tid",
+        "no-data": "{{common.no-data}}",
+        "most-files": "Den {{date}} lades {{count}} filer till"
+    },
+    "server-activity": {
+        "no-data": "Inget att se här"
+    },
+    "activity-card": {
+        "total-pages-label": "Totalt antal sidor",
+        "total-words-label": "Totalt antal ord",
+        "total-chapters-label": "Kapitel",
+        "started-label": "Påbörjad",
+        "view-label": "Visa"
+    },
+    "profile": {
+        "title": "{{username}}'s Profil",
+        "joined-label": "Medlem sedan:",
+        "last-read-label": "Senast Läst:",
+        "time-reading-label": "Total Lästid:",
+        "avg-reading-per-week-label": "Snitt per vecka:",
+        "stats-title": "En titt på {{username}}s resa genom {{libraryName}}",
+        "overview-tab": "{{tabs.overview-tab}}",
+        "stats-tab": "{{tabs.stats-tab}}",
+        "reviews-tab": "{{tabs.reviews-tab}}",
+        "activity-tab": "{{tabs.activity-tab}}",
+        "no-reviews": "Inga recensioner ännu",
+        "total-reads-badge": "{{reads}} Lästa",
+        "k+-badge": "K+ Prenumerant"
+    },
+    "profile-review-list": {
+        "no-data": "Inga recensioner eller inga delade recensioner",
+        "filter-label": "Filtrera på Serier",
+        "clear-rating-alt": "Rensa Betygsfilter"
+    },
+    "profile-stat-bar": {
+        "books-read-label": "Böcker Lästa",
+        "books-read-tooltip": "Lästa Böcker: {{count}}",
+        "comics-read-label": "Serier Lästa",
+        "comics-read-tooltip": "Lästa Serier: {{count}}",
+        "pages-read-label": "Sidor Lästa",
+        "pages-read-tooltip": "Lästa Sidor: {{count}}",
+        "words-read-label": "Lästa Ord",
+        "words-read-tooltip": "Ord Lästa: {{count}}",
+        "authors-read-label": "Lästa Författare",
+        "authors-read-tooltip": "Författare Lästa: {{count}}",
+        "reviews-label": "Recensioner",
+        "reviews-tooltip": "Recensioner: {{count}}",
+        "ratings-label": "Betyg",
+        "ratings-tooltip": "Betyg: {{count}}"
+    },
+    "profile-image": {
+        "edit-image-alt": "Ändra Bild",
+        "reset-image-alt": "Återställ Bild"
+    },
+    "profile-activity": {
+        "time-filter-title": "{{username}}s aktivitet genom",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "no-data": "{{common.no-data}}",
+        "duration": "Varaktighet",
+        "pages-read": "{{reading-pace.pages-read}}",
+        "words-read": "{{reading-pace.words-read}}",
+        "time": "Tid",
+        "info-alt": "Mer Info",
+        "today": "Idag",
+        "yesterday": "Igår",
+        "pagination-label": "Sidindelning för aktivitet",
+        "page-info": "Sida {{current}} av {{total}} ({{items}} poster totalt)"
+    },
+    "user-stats-info-cards": {
+        "pages-read-by-year-title": "Sidor lästa per år",
+        "pages-count": "{{num}} sidor",
+        "words-read-by-year-title": "Ord lästa per år",
+        "words-count": "{{num}} ord"
+    },
+    "preferred-format": {
+        "title": "Föredraget format",
+        "sub-title": "{{name}} föredrar att läsa {{format}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "favorite-authors": {
+        "title": "Mest Lästa Författare",
+        "sub-title": "Den mest lästa författaren för {{name}} är {{author}}, med {{count}} läsningar totalt",
+        "no-data": "{{common.no-data}}"
+    },
+    "page-spread": {
+        "title": "Kapitel efter sidantal",
+        "sub-title": "{{username}} läser kapitel mellan {{highestBucket}} sidor",
+        "data-type": "{{data}} kapitel",
+        "data-of": "{{percentage}}% av dina kapitel",
+        "range": "Sidintervall: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "word-spread": {
+        "title": "Kapitel efter ordantal",
+        "sub-title": "{{username}} läser kapitel mellan {{highestBucket}} ord",
+        "data-type": "{{data}} kapitel",
+        "data-of": "{{percentage}}% av dina kapitel",
+        "range": "Ordintervall: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "tag-breakdown": {
+        "title": "Mest lästa taggar",
+        "sub-title": "{{name}}s mest lästa tagg är {{mostUsed}}",
+        "missing": "{{amount}} serier saknar taggar",
+        "no-data": "{{common.no-data}}"
+    },
+    "genre-breakdown": {
+        "title": "Mest lästa genrer",
+        "sub-title": "{{name}}s mest lästa genre är {{mostUsed}}",
+        "missing": "Saknar genrer för {{amount}} serier",
+        "no-data": "{{common.no-data}}"
+    },
+    "reads-by-month": {
+        "title": "Totala läsningar per månad",
+        "sub-title": "{{username}} läste som mest i {{month}} {{year}}, med {{reads}} lästa kapitel",
+        "no-data": "{{common.no-data}}"
+    },
+    "avg-time-reading-by-hour": {
+        "title": "Genomsnittlig lästid per timme",
+        "most-time-spend-reading": "{{name}} spenderar mest tid på att läsa mellan {{startHour}} och {{endHour}}, i genomsnitt {{amount}} minuter",
+        "data-since": "Inkluderar endast läsningar sedan {{date}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "profile-overview": {
+        "currently-reading": "Läser Nu",
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "just-finished-reading": "Läste Just Klart"
+    },
+    "activity-graph": {
+        "title": "Läsaktivitet",
+        "day-of-week-alt": "Veckodag",
+        "less": "Mindre",
+        "more": "Mer",
+        "reading-time": "Lästid",
+        "pages": "Sidor",
+        "words": "Ord",
+        "chapters": "Färdiga Kapitel",
+        "no-activity-alt": "Ingen Aktivitet",
+        "no-activity-tooltip": "Ingen läsaktivitet för {{date}}.",
+        "all-time": "{{time-periods.all-time}}",
+        "low-activity-alt": "Låg Aktivitet",
+        "moderate-activity-alt": "Måttlig aktivitet",
+        "good-activity-alt": "Bra Aktivitet",
+        "high-activity-alt": "Hög Aktivitet",
+        "aggregated-count": "Du läste {{totalPages}} sidor och {{totalWords}} ord under {{year}}"
+    },
+    "reading-pace": {
+        "title-books": "Läshastighet: Böcker",
+        "title-comics": "Läshastighet: Serier",
+        "sub-title-books": "{{username}} läser en bok var {{count}} dag",
+        "sub-title-comics": "{{username}} läser en serie var {{count}} dag",
+        "hours-read": "Timmar Lästa",
+        "pages-read": "Sidor Lästa",
+        "words-read": "Ord Lästa",
+        "comics-read": "Serier Lästa",
+        "books-read": "Böcker Lästa",
+        "per-year": "Per År",
+        "per-month": "Per Månad",
+        "per-day": "Per Dag",
+        "no-data": "{{common.no-data}}",
+        "disclaimer-books": "Gäller för EPUB/PDF",
+        "disclaimer-comics": "Gäller för Bilder/Arkiv"
+    },
+    "smart-time-picker": {
+        "forever": "För Alltid",
+        "select-year": "Välj År",
+        "custom-range": "Anpassat intervall",
+        "during-entire-life-profile": "under hela deras liv",
+        "during-entire-life-server": "sen början",
+        "during-year": "under {{year}}",
+        "during-from-to": "från {{startYear}} till {{endYear}}",
+        "during-select": "Välj ett tidsintervall",
+        "close": "{{common.close}}"
+    },
+    "client-device-type-pipe": {
+        "mobile": "Mobil",
+        "tablet": "Platta",
+        "desktop": "Desktop",
+        "Unknown": "{{common.unknown}}"
+    },
+    "month-label-pipe": {
+        "january": "Januari",
+        "january-short": "Jan",
+        "february": "Februari",
+        "february-short": "Feb",
+        "march": "Mars",
+        "march-short": "Mar",
+        "april": "April",
+        "april-short": "Apr",
+        "may": "Maj",
+        "may-short": "Maj",
+        "june": "Juni",
+        "june-short": "Jun",
+        "july": "Juli",
+        "july-short": "Jul",
+        "august": "Augusti",
+        "august-short": "Aug",
+        "september": "September",
+        "september-short": "Sep",
+        "october": "Oktober",
+        "october-short": "Okt",
+        "november": "November",
+        "november-short": "Nov",
+        "december": "December",
+        "december-short": "Dec"
+    },
+    "day-label-pipe": {
+        "sunday": "Söndag",
+        "sunday-short": "Sön",
+        "monday": "Måndag",
+        "monday-short": "Mån",
+        "tuesday": "Tisdag",
+        "tuesday-short": "Tis",
+        "wednesday": "Onsdag",
+        "wednesday-short": "Ons",
+        "thursday": "Torsdag",
+        "thursday-short": "Tors",
+        "friday": "Fredag",
+        "friday-short": "Fre",
+        "saturday": "Lördag",
+        "saturday-short": "Lör"
+    },
+    "browse-title-pipe": {
+        "publication-status": "{{value}} fungerar",
+        "age-rating": "Klassificering: {{value}}",
+        "user-rating": "{{value}} stjärnor",
+        "tag": "Har Tagg {{value}}",
+        "translator": "Översatt av {{value}}",
+        "character": "Har karaktär {{value}}",
+        "publisher": "Utgiven av {{value}}",
+        "editor": "Redigerad av {{value}}",
+        "artist": "Illustrerad av {{value}}",
+        "letterer": "Textad av {{value}}",
+        "colorist": "Färglagd av {{value}}",
+        "inker": "Tuschat av {{value}}",
+        "penciller": "Blyertstecknad av {{value}}",
+        "writer": "Skriven av {{value}}",
+        "genre": "Har Genre {{value}}",
+        "library": "Inuti {{value}} bibliotek",
+        "format": "Format av {{value}}",
+        "release-year": "Utgiven {{value}}",
+        "imprint": "Underförlag {{value}}",
+        "team": "Team {{value}}",
+        "location": "På platsen {{value}}"
+    },
+    "generic-filter-field-pipe": {
+        "person-role": "Roll",
+        "person-name": "Namn",
+        "person-series-count": "Antal Serier",
+        "person-chapter-count": "Antal Kapitel",
+        "average-rating": "Medelbetyg",
+        "annotation-owner": "Ägare",
+        "annotation-series": "Serienamn",
+        "annotation-spoiler": "Spoiler",
+        "annotation-highlights": "Markeringsfärg",
+        "annotation-comment": "Anteckningstext",
+        "annotation-selection": "Markerad text",
+        "annotation-likes": "Gillningar",
+        "annotation-liked-by": "Gillat av",
+        "series": "{{tabs.series-tab}}"
+    },
+    "client-device-platform-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}"
+    },
+    "client-device-client-type-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}",
+        "web-browser": "Webbläsare",
+        "web-app": "Webb App",
+        "panels": "Paneler",
+        "librera": "Librera",
+        "opds-client": "OPDS Klient",
+        "koreader": "KOReader"
+    },
+    "import-mappings": {
+        "import-step": "Importera",
+        "configure-step": "Konfigurera",
+        "conflicts-step": "Hantera konflikter",
+        "finalize-step": "Slutför",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "save": "{{common.save}}",
+        "import-description": "Ladda upp en fil som du, eller någon annan, har exporterat för att ersätta eller slå ihop med dina nuvarande inställningar.",
+        "select-files-warning": "Du måste ladda upp en json fil för att fortsätta",
+        "invalid-file": "Det gick inte att läsa in din fil, kontrollera din inmatning",
+        "file-no-valid-content": "Din import innehöll ingen meningsfull data att fortsätta med",
+        "fields-to-import": "Inställningar",
+        "fields-to-import-tooltip": "Inaktivera för att hoppa över en inställning",
+        "whitelist-label": "Taggar vitlista",
+        "blacklist-label": "Taggar svartlista",
+        "age-ratings-label": "Mappningar för åldersklassificering",
+        "field-mappings-label": "Fältmappningar",
+        "age-ratings-conflicts-tooltip": "Bestäm vilken åldersklassificering som ska användas",
+        "field-mappings-conflicts-tooltip": "Bestäm vilket destinationsresultat som ska användas",
+        "import-mode-label": "Importläge",
+        "import-mode-tooltip": "Ersätt ignorerar dina nuvarande inställningar, slå ihop kommer att försöka lösa konflikter på det sätt du har konfigurerat",
+        "merge": "Slå ihop",
+        "replace": "Byt ut",
+        "resolution-label": "Konfliktlösning",
+        "resolution-tooltip": "Bestäm hur Kavita ska hantera konflikter",
+        "manual": "Manuell",
+        "keep": "Behåll",
+        "to-pick": "Välj lösning",
+        "finalize-title": "Förhandsgranskning av dina inställningar, tryck på spara för att slutföra din import"
+    },
+    "breakpoint-pipe": {
+        "never": "Aldrig",
+        "mobile": "Mobil",
+        "tablet": "Platta",
+        "desktop": "Desktop"
+    },
+    "manage-reading-profiles": {
+        "description": "Alla dina serier kanske inte läses på samma sätt, konfigurera separata läsprofiler per bibliotek/serie/enhet för att göra det så smidigt som möjligt att komma tillbaka till dina serier.",
+        "extra-tip": "Tilldela läsprofiler via åtgärdsmenyn på serier och bibliotek, eller i bulk. När du ändrar inställningar i en läsare skapas en dold profil som kommer ihåg dina val för den serien (inte för PDF:er). Den här profilen tas bort när du tilldelar en av dina egna läsprofiler till serien. Mer information finns på",
+        "wiki-title": "wiki",
+        "profiles-title": "Dina läsprofiler",
+        "default-profile": "Standard",
+        "add": "{{common.add}}",
+        "add-tooltip": "Din nya profil kommer att sparas efter att du har gjort en ändring i den",
+        "make-default": "Ange som standard",
+        "no-selected": "Ingen profil markerad",
+        "confirm": "Är du säker på att du vill radera läsprofilen {{name}}?",
+        "selection-tip": "Välj en profil från listan, eller skapa en ny uppe till höger",
+        "set-devices": "Ange Enheter",
+        "select-devices-for": "Ange enheter för {{name}}",
+        "image-reader-settings-title": "Bildläsare",
+        "reading-direction-label": "Läsriktning",
+        "reading-direction-tooltip": "Riktning att klicka i för att gå till nästa sida. Höger till vänster innebär att du klickar på vänster sida av skärmen för att gå till nästa sida.",
+        "scaling-option-label": "Skalningsalternativ",
+        "scaling-option-tooltip": "Hur bilden ska skalas till din skärm.",
+        "page-splitting-label": "Siddelning",
+        "page-splitting-tooltip": "Hur en bild i full bredd ska delas upp (dvs både vänster och höger bild är kombinerade)",
+        "reading-mode-label": "Läsläge",
+        "reading-mode-tooltip": "Ändra läsaren till att paginera vertikalt, horisontellt, eller ha oändlig rullning",
+        "layout-mode-label": "Layoutläge",
+        "layout-mode-tooltip": "Rendera en bild på skärmen eller två bilder sida vid sida",
+        "background-color-label": "Bakgrundsfärg",
+        "background-color-tooltip": "Bakgrundsfärg för Bildläsare",
+        "auto-close-menu-label": "Stäng menyn automatiskt",
+        "auto-close-menu-tooltip": "Bör menyn stängas automatiskt",
+        "show-screen-hints-label": "Visa Skärm Tips",
+        "show-screen-hints-tooltip": "Visa en guide för att hjälpa till att förstå pagineringsområde och riktning",
+        "emulate-comic-book-label": "Emulera serietidning",
+        "emulate-comic-book-tooltip": "Lägger till en skuggeffekt för att efterlikna läsning från en bok",
+        "swipe-to-paginate-label": "Svep för att paginera",
+        "swipe-to-paginate-tooltip": "Ska svep på skärmen utlösa nästa eller föregående sida",
+        "allow-auto-webtoon-reader-label": "Automatiskt webtoon-läsarläge",
+        "allow-auto-webtoon-reader-tooltip": "Växla till webtoon-läsarläge om sidorna ser ut som en webtoon. Vissa falska positiva kan förekomma.",
+        "width-override-label": "{{manga-reader.width-override-label}}",
+        "width-override-tooltip": "Åsidosätt bildbredden i läsaren",
+        "disable-width-override-label": "Inaktivera breddåsidosättning",
+        "disable-width-override-tooltip": "Förhindra att breddåsidosättningen får effekt när din skärm är minst den konfigurerade brytpunkten eller mindre",
+        "reset": "{{common.reset}}",
+        "book-reader-settings-title": "Bokläsare",
+        "tap-to-paginate-label": "Tryck för att paginera",
+        "tap-to-paginate-tooltip": "Ska sidorna av bokläsarskärmen tillåta att du trycker på dem för att gå till föregående/nästa sida",
+        "immersive-mode-label": "Immersivt läge",
+        "immersive-mode-tooltip": "Detta kommer att dölja menyn bakom ett klick på läsardokumentet och slå på tryck för att paginera",
+        "reading-direction-book-label": "Läsriktning",
+        "reading-direction-book-tooltip": "Riktning att klicka i för att gå till nästa sida. Höger till vänster innebär att du klickar på vänster sida av skärmen för att gå till nästa sida.",
+        "font-family-label": "Typsnittsfamilj",
+        "font-family-tooltip": "Typsnittsfamilj att ladda. Standard kommer att ladda bokens standardtypsnitt",
+        "writing-style-label": "Skrivstil",
+        "writing-style-tooltip": "Ändrar textens riktning. Horisontell är vänster till höger, vertikal är uppifrån och ner.",
+        "layout-mode-book-label": "Layoutläge",
+        "layout-mode-book-tooltip": "Hur innehållet ska läggas ut. Rullning är som boken paketerar det. 1 eller 2 kolumner anpassar till enhetens höjd och passar in 1 eller 2 textkolumner per sida",
+        "color-theme-book-label": "Färgtema",
+        "color-theme-book-tooltip": "Vilket färgtema som ska tillämpas på bokläsarens innehåll och meny",
+        "font-size-book-label": "Teckenstorlek",
+        "font-size-book-tooltip": "Procent av skalning som ska tillämpas på teckensnittet i boken",
+        "line-height-book-label": "Radavstånd",
+        "line-height-book-tooltip": "Hur stort avståndet ska vara mellan raderna i boken",
+        "margin-book-label": "Marginal",
+        "margin-book-tooltip": "Hur stort utrymme på varje sida av skärmen. Detta kommer att åsidosättas till 0 på mobila enheter oavsett denna inställning.",
+        "pdf-reader-settings-title": "PDF Läsare",
+        "pdf-scroll-mode-label": "Rullningsläge",
+        "pdf-scroll-mode-tooltip": "Hur du rullar genom sidor. Vertikalt/horisontellt och Tryck för att paginera (ingen rullning)",
+        "pdf-spread-mode-label": "Uppslagsläge",
+        "pdf-spread-mode-tooltip": "Hur sidor ska läggas ut. Enkel eller dubbel (udda/jämn)",
+        "pdf-theme-label": "Tema",
+        "pdf-theme-tooltip": "Färgtema för läsare",
+        "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
+        "reading-profile-series-settings-title": "Serier",
+        "reading-profile-library-settings-title": "Bibliotek",
+        "delete": "{{common.delete}}",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
+    },
+    "list-select-modal": {
+        "hidden": "{{amount}} objekt dolda på grund av ogiltigt tillstånd"
         "save": "{{common.save}}"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Hamna inte efter!",
+            "subtitle": "Det verkar som att din installation är mer än {{count}} versioner efter!",
+            "description-1": "Överväg att uppgradera så att du kör den senaste versionen av Kavita.",
+            "description-2": "Ta en titt på våran <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> för instruktioner om hur du uppdaterar.",
+            "description-3": "Om det finns en specifik anledning till att du ännu inte har uppdaterat, vill vi gärna veta vad som håller dig kvar på en äldre version! Titta gärna in på vår Discord och berätta vad som hindrar dig från att uppgradera."
+        },
+        "new-version": {
+            "title": "Kavita blev uppdaterad!",
+            "description": "En ny version av Kavita finns tillgänglig. Uppdatera för att applicera.",
+            "refresh": "Uppdatera"
+        },
+        "update-notification": {
+            "title": "Ny Uppdatering Tillgänglig!",
+            "help": "Hur du uppdaterar",
+            "download": "Ladda ner"
+        }
     }
 }

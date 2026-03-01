@@ -8,7 +8,7 @@ import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {
   GenericListModalComponent
 } from "../../../statistics/_components/_modals/generic-list-modal/generic-list-modal.component";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {ModalService} from "../../../_services/modal.service";
 
 export interface ProfileStatBar {
   booksRead: number;
@@ -33,7 +33,7 @@ export interface ProfileStatBar {
 })
 export class ProfileStatBarComponent {
   private readonly statsService = inject(StatisticsService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
 
   userId = input.required<number>();
   year = input.required<number>();
@@ -44,7 +44,7 @@ export class ProfileStatBarComponent {
   openPageByYearList() {
     const numberPipe = new CompactNumberPipe();
     this.statsService.getPagesPerYear(this.userId()).subscribe(yearCounts => {
-      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
+      const ref = this.modalService.open(GenericListModalComponent);
       ref.componentInstance.items = yearCounts.map(t => {
         const countStr = translate('user-stats-info-cards.pages-count', {num: numberPipe.transform(t.value)});
         return `${t.name}: ${countStr}`;
@@ -56,7 +56,7 @@ export class ProfileStatBarComponent {
   openWordByYearList() {
     const numberPipe = new CompactNumberPipe();
     this.statsService.getWordsPerYear(this.userId()).subscribe(yearCounts => {
-      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
+      const ref = this.modalService.open(GenericListModalComponent);
       ref.componentInstance.items = yearCounts.map(t => {
         const countStr = translate('user-stats-info-cards.words-count', {num: numberPipe.transform(t.value)});
         return `${t.name}: ${countStr}`;

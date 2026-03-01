@@ -6,7 +6,7 @@
       <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid" #scrollingBlock>
         <div class="row mb-0 mb-xl-3 info-container">
           <div class="image-container series col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mb-3 position-relative">
-            <app-image [styles]="{'max-height': '400px', 'max-width': '300px'}" [imageUrl]="imageService.getReadingListCoverImage(rl.id)" (click)="read()" />
+            <app-image [styles]="{'max-height': '400px', 'max-width': '300px'}" [imageUrl]="imageUrl()" (click)="read()" />
           </div>
 
           <div class="col-xl-10 col-lg-7 col-md-12 col-sm-12 col-xs-12">
@@ -14,7 +14,7 @@
             <span>
               <app-promoted-icon [promoted]="rl.promoted" />
               <span class="ms-2">{{rl.title}}</span>
-              @if(isLoading) {
+              @if(isLoading()) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
                   <span class="visually-hidden">{{t('loading-alt')}}</span>
                 </div>
@@ -64,7 +64,7 @@
                 </div>
 
 
-                @if (isOwnedReadingList) {
+                @if (isOwnedReadingList()) {
                   <div class="col-auto ms-2">
                     <button class="btn btn-actions" (click)="editReadingList(rl)" [ngbTooltip]="t('edit-alt')">
                       <span><i class="fa fa-pen" aria-hidden="true"></i></span>
@@ -75,11 +75,13 @@
 
                 <div class="col-auto ms-2">
                   <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
-                    <app-card-actionables [entity]="rl" [actions]="actions" [labelBy]="rl.title" iconClass="fa-ellipsis-h" btnClass="btn" />
+                    <app-card-actionables [entity]="rl" [actions]="actions()" [labelBy]="rl.title"
+                                          iconClass="fa-ellipsis-h" btnClass="btn"
+                                          (actionHandler)="handleReadingListActionCallback($event)" />
                   </div>
                 </div>
 
-                @if (isOwnedReadingList) {
+                @if (isOwnedReadingList()) {
                   <div class="col-auto ms-2 d-none d-md-block btn-actions">
                     <button [class]="formGroup.get('edit')?.value ? 'btn btn-primary' : 'btn btn-icon'" (click)="toggleReorder()" [ngbTooltip]="t('reorder-alt')">
                       <i class="fa-solid fa-list-ol" aria-hidden="true"></i>
@@ -98,37 +100,13 @@
                 <div class="col-6 pe-5">
                   <span class="fw-bold">{{t('date-range-title')}}</span>
                   <div>
-                    @if (rl.startingYear !== 0) {
-                      @if (rl.startingMonth > 0) {
-                        {{(rl.startingMonth +'/01/2020')| date:'MMM'}}
-                      }
-                      @if (rl.startingMonth > 0 && rl.startingYear > 0) {
-                        ,
-                      }
-                      @if (rl.startingYear > 0) {
-                        {{rl.startingYear}}
-                      }
-                      —
-                      @if (rl.endingYear > 0) {
-                        @if (rl.endingMonth > 0) {
-                          {{(rl.endingMonth +'/01/2020')| date:'MMM'}}
-                        }
-                        @if (rl.endingMonth > 0 && rl.endingYear > 0) {
-                          ,
-                        }
-                        @if (rl.endingYear > 0) {
-                          {{rl.endingYear}}
-                        }
-                      }
-                    } @else {
-                      {{null | defaultValue}}
-                    }
+                    {{dateRangeLabel() ?? (null | defaultValue)}}
                   </div>
                 </div>
                 <div class="col-6">
                   <span class="fw-bold">{{t('items-title')}}</span>
                   <div>
-                    {{t('item-count', {num: items.length | number})}}
+                    {{t('item-count', {num: items().length | number})}}
                   </div>
                 </div>
               </div>
@@ -140,10 +118,10 @@
                   <span class="fw-bold">{{t('writers-title')}}</span>
                   <div class="row mb-2">
                     <div class="row">
-                      <app-badge-expander [items]="castInfo.writers"
+                      <app-badge-expander [items]="castInfo().writers"
                                           [itemsTillExpander]="3"
                                           [allowToggle]="false"
-                                          (toggle)="switchTabsToDetail()">
+                                          (toggled)="switchTabsToDetail()">
                         <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                           <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                         </ng-template>
@@ -156,10 +134,10 @@
                   <span class="fw-bold">{{t('cover-artists-title')}}</span>
                   <div class="row mb-2">
                     <div class="row">
-                      <app-badge-expander [items]="castInfo.coverArtists"
+                      <app-badge-expander [items]="castInfo().coverArtists"
                                           [itemsTillExpander]="3"
                                           [allowToggle]="false"
-                                          (toggle)="switchTabsToDetail()">
+                                          (toggled)="switchTabsToDetail()">
                         <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
                           <a routerLink="/person/{{encodeURIComponent(item.name)}}/" class="dark-exempt btn-icon">{{item.name}}</a>
                         </ng-template>
@@ -175,7 +153,7 @@
               <div class="row g-0">
 
                 @if (formGroup.get('edit')?.value) {
-                  @if (!rl.promoted && this.isOwnedReadingList) {
+                  @if (!rl.promoted && this.isOwnedReadingList()) {
                     <div class="col-auto">
                       <button class="btn btn-sm btn-danger" (click)="removeRead()">
                         <i class="fa fa-check me-1" aria-hidden="true"></i>
@@ -199,35 +177,35 @@
         <div class="carousel-tabs-container mb-2">
           <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
-            @if (showStorylineTab) {
               <li [ngbNavItem]="TabID.Storyline">
                 <a ngbNavLink>{{t(TabID.Storyline)}}</a>
                 <ng-template ngbNavContent>
                   @defer (when activeTabId === TabID.Storyline; prefetch on idle) {
                     <div class="row mb-1 scroll-container" #scrollingBlock>
-                      @if (items.length === 0 && !isLoading) {
-                        <div class="mx-auto" style="width: 200px;">
+                      @if (items().length === 0 && !isLoading()) {
+                        <div class="mx-auto" style="width: 12.5rem;">
                           {{t('no-data')}}
                         </div>
-                      } @else if(isLoading) {
-                        <app-loading [loading]="isLoading" />
+                      } @else if(isLoading()) {
+                        <app-loading [loading]="isLoading()" />
                       }
 
-                      @if(formGroup.get('edit')?.value && (items.length > 100 || breakpointService.isMobile())) {
+                      @if(formGroup.get('edit')?.value && (items().length > 100 || breakpointService.isMobile())) {
                         <div class="alert alert-secondary mt-2" role="alert">
                           {{t('dnd-warning')}}
                         </div>
                       }
 
-                      <app-draggable-ordered-list [items]="items" [accessibilityMode]="accessibilityMode"
+                      <app-draggable-ordered-list [items]="items()" [accessibilityMode]="accessibilityMode()"
                                                   [disabled]="!(formGroup.get('edit')?.value || false)"
                                                   (orderUpdated)="orderUpdated($event)"
                                                   (itemRemove)="removeItem($event)"
-                                                  [showRemoveButton]="formGroup.get('edit')?.value || false">
+                                                  [showRemoveButton]="formGroup.get('edit')?.value || false"
+                                                  [trackByIdentity]="trackByIdentity">
 
                         <ng-template #draggableItem let-item let-position="idx">
-                          <app-reading-list-item [ngClass]="{'content-container': items.length < 100, 'non-virtualized-container': items.length >= 100}" [item]="item"
-                                                 [position]="position" [libraryTypes]="libraryTypes"
+                          <app-reading-list-item [ngClass]="{'content-container': items().length < 100, 'non-virtualized-container': items().length >= 100}" [item]="item"
+                                                 [position]="position" [libraryTypes]="libraryTypes()"
                                                  [promoted]="item.promoted" (read)="readChapter($event)"
                                                  (remove)="removeItem($event)"
                                                  [showRemove]="false"/>
@@ -237,15 +215,14 @@
                   }
                 </ng-template>
               </li>
-            }
 
 
-            @if (rlInfo && castInfo) {
+            @if (rlInfo() && castInfo()) {
               <li [ngbNavItem]="TabID.Details" id="details-tab">
                 <a ngbNavLink>{{t(TabID.Details)}}</a>
                 <ng-template ngbNavContent>
                   @defer (when activeTabId === TabID.Details; prefetch on idle) {
-                    <app-details-tab [metadata]="castInfo"
+                    <app-details-tab [metadata]="castInfo()"
                                      [suppressEmptyGenres]="true"
                                      [suppressEmptyTags]="true"
                     />
@@ -256,7 +233,7 @@
 
           </ul>
         </div>
-        <div [ngbNavOutlet]="nav" style="min-height: 300px"></div>
+        <div [ngbNavOutlet]="nav" style="min-height: 18.75rem"></div>
       </div>
     }
     </form>

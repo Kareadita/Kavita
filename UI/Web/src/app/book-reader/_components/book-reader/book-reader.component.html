@@ -7,7 +7,7 @@
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-header')}}</a>
       <ng-container [ngTemplateOutlet]="topActionBar"  [ngTemplateOutletContext]="{isTop: true}" />
       @if (page() !== undefined) {
-        <app-book-line-overlay [parent]="bookContainerElemRef"
+        <app-book-line-overlay [parent]="bookContainerElemRef()"
                                [libraryId]="libraryId"
                                [volumeId]="volumeId"
                                [chapterId]="chapterId"
@@ -32,7 +32,7 @@
     }
     <div #readingSection class="reading-section {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
          [ngStyle]="{'width': pageWidthForPagination()}"
-         [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible()}" [@isLoading]="isLoading()" (click)="handleReaderClick($event)">
+         [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible(), 'is-loading': isLoading()}" (click)="handleReaderClick($event)">
 
 
       <div #bookContainer class="book-container {{writingStyle() | writingStyleClass}}"

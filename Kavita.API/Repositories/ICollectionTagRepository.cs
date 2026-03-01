@@ -31,6 +31,7 @@ public interface ICollectionTagRepository
     Task<string?> GetCoverImageAsync(int collectionTagId, CancellationToken ct = default);
     Task<AppUserCollection?> GetCollectionAsync(int tagId, CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
     Task<int> RemoveCollectionsWithoutSeries(CancellationToken ct = default);
+    Task<AppUserCollectionDto?> GetCollectionDtoAsync(int collectionId, int userId, CancellationToken ct = default);
 
     Task<IEnumerable<AppUserCollection>> GetAllCollectionsAsync(CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
 

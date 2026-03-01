@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit, signal} from '@angular/core';
 import {Series} from "../../_models/series";
 import {SeriesService} from "../../_services/series.service";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
@@ -10,8 +10,8 @@ import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-m
 import {ToastrService} from "ngx-toastr";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
-import { ThemeService } from 'src/app/_services/theme.service';
-import { AsyncPipe } from '@angular/common';
+import {ThemeService} from 'src/app/_services/theme.service';
+import {AsyncPipe} from '@angular/common';
 import {catchError, of, tap} from "rxjs";
 
 @Component({
@@ -36,59 +36,56 @@ export class MatchSeriesModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   protected readonly themeService = inject(ThemeService);
 
-  @Input({required: true}) series!: Series;
+  series = input.required<Series>();
 
   formGroup = new FormGroup({});
-  matches: Array<ExternalSeriesMatch> = [];
-  isLoading = true;
+  matches = signal<ExternalSeriesMatch[]>([]);
+  isLoading = signal<boolean>(true);
 
   ngOnInit() {
     this.formGroup.addControl('query', new FormControl('', []));
-    this.formGroup.addControl('dontMatch', new FormControl(this.series?.dontMatch || false, []));
+    this.formGroup.addControl('dontMatch', new FormControl(this.series().dontMatch || false, []));
 
     this.search();
   }
 
   search() {
-    this.isLoading = true;
-    this.cdRef.markForCheck();
+    this.isLoading.set(true);
 
     const model: any = this.formGroup.value;
-    model.seriesId = this.series.id;
+    model.seriesId = this.series().id;
 
     if (model.dontMatch) {
-      this.isLoading = false;
+      this.isLoading.set(false);
       return;
     }
 
     this.seriesService.matchSeries(model).pipe(
       tap(results => {
-        this.isLoading = false;
-        this.matches = results;
-        this.cdRef.markForCheck();
+        this.isLoading.set(false);
+        this.matches.set(results);
       }),
       catchError(() => {
-        this.isLoading = false;
-        this.cdRef.markForCheck();
+        this.isLoading.set(false);
         return of([]);
       })
     ).subscribe();
   }
 
   close() {
-    this.modalService.close(false);
+    this.modalService.dismiss();
   }
 
   save() {
 
     const model: any = this.formGroup.value;
-    model.seriesId = this.series.id;
+    model.seriesId = this.series().id;
 
-    const dontMatchChanged = this.series.dontMatch !== model.dontMatch;
+    const dontMatchChanged = this.series().dontMatch !== model.dontMatch;
 
     // We need to update the dontMatch status
     if (dontMatchChanged) {
-      this.seriesService.updateDontMatch(this.series.id, model.dontMatch).subscribe(_ => {
+      this.seriesService.updateDontMatch(this.series().id, model.dontMatch).subscribe(_ => {
         this.modalService.close(true);
       });
     } else {
@@ -102,7 +99,7 @@ export class MatchSeriesModalComponent implements OnInit {
     data.tags = data.tags || [];
     data.genres = data.genres || [];
 
-    this.seriesService.updateMatch(this.series.id, item.series).subscribe(_ => {
+    this.seriesService.updateMatch(this.series().id, item.series).subscribe(_ => {
       this.save();
     });
   }

@@ -5,7 +5,7 @@ import {
   DestroyRef,
   inject,
   OnInit,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {SettingsService} from "../settings.service";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
@@ -41,7 +41,7 @@ import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.compone
 })
 export class ManagePublicMetadataSettingsComponent implements OnInit {
 
-  @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent!: ManageMetadataMappingsComponent;
+  readonly manageMetadataMappingsComponent = viewChild.required(ManageMetadataMappingsComponent);
 
   private readonly settingService = inject(SettingsService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -71,7 +71,7 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
     const model = Object.assign({}, this.settings);
     const formValue = this.settingsForm.value;
 
-    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent.packData()
+    const exp: MetadataMappingsExport = this.manageMetadataMappingsComponent().packData()
 
     model.enableExtendedMetadataProcessing = formValue.enableExtendedMetadataProcessing;
     model.ageRatingMappings = exp.ageRatingMappings;

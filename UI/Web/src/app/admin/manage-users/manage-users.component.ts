@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, TrackByFunction} from '@angular/core';
-import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {take} from 'rxjs/operators';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {MemberService} from 'src/app/_services/member.service';
 import {Member} from 'src/app/_models/auth/member';
 import {AccountService, Role} from 'src/app/_services/account.service';
@@ -20,7 +19,6 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
-import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
 import {SettingsService} from "../settings.service";
@@ -34,6 +32,7 @@ import {
   DataTableColumnHeaderDirective,
   DatatableComponent
 } from "@siemens/ngx-datatable";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
   selector: 'app-manage-users',
@@ -51,33 +50,24 @@ export class ManageUsersComponent implements OnInit {
   private readonly translocoService = inject(TranslocoService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly memberService = inject(MemberService);
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
   private readonly settingsService = inject(SettingsService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
-  public readonly messageHub = inject(MessageHubService);
+  protected readonly messageHub = inject(MessageHubService);
   private readonly router = inject(Router);
 
   members: Member[] = [];
   settings: ServerSettings | undefined = undefined;
   oidcSyncEnabled: boolean = false;
-  loggedInUsername = '';
+  loggedInUsername = this.accountService.username;
   loadingMembers = false;
   libraryCount: number = 0;
 
   trackByMember: TrackByFunction<Member> = (_, m) =>
     `${m.username}_${m.lastActiveUtc}_${m.roles.length}`;
 
-
-  constructor() {
-    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
-      if (user) {
-        this.loggedInUsername = user.username;
-        this.cdRef.markForCheck();
-      }
-    });
-  }
 
   ngOnInit(): void {
     this.loadMembers();
@@ -96,11 +86,12 @@ export class ManageUsersComponent implements OnInit {
       this.members = members;
       // Show logged-in user at the top of the list
       this.members.sort((a: Member, b: Member) => {
-        if (a.username === this.loggedInUsername) return 1;
-        if (b.username === this.loggedInUsername) return 1;
+        if (a.username === this.loggedInUsername()) return -1;
+        if (b.username === this.loggedInUsername()) return 1;
 
         const nameA = a.username.toUpperCase();
         const nameB = b.username.toUpperCase();
+
         if (nameA < nameB) return -1;
         if (nameA > nameB) return 1;
         return 0;
@@ -114,14 +105,14 @@ export class ManageUsersComponent implements OnInit {
     });
   }
 
-  canEditMember(member: Member): boolean {
-    return this.loggedInUsername !== member.username;
+  isMemberYou(member: Member): boolean {
+    return this.loggedInUsername() === member.username;
   }
 
   openEditUser(member: Member) {
     if (!this.settings) return;
 
-    const modalRef = this.modalService.open(EditUserComponent, DefaultModalOptions);
+    const modalRef = this.modalService.open(EditUserComponent);
     modalRef.componentInstance.member.set(member);
     modalRef.componentInstance.settings.set(this.settings);
     modalRef.closed.subscribe(() => {
@@ -142,7 +133,7 @@ export class ManageUsersComponent implements OnInit {
   }
 
   inviteUser() {
-    const modalRef = this.modalService.open(InviteUserComponent, DefaultModalOptions);
+    const modalRef = this.modalService.open(InviteUserComponent);
     modalRef.closed.subscribe((successful: boolean) => {
       this.loadMembers();
     });
@@ -168,8 +159,8 @@ export class ManageUsersComponent implements OnInit {
   }
 
   updatePassword(member: Member) {
-    const modalRef = this.modalService.open(ResetPasswordModalComponent, DefaultModalOptions);
-    modalRef.componentInstance.member = member;
+    const modalRef = this.modalService.open(ResetPasswordModalComponent);
+    modalRef.setInput('member', member);
   }
 
   hasAdminRole(member: Member) {

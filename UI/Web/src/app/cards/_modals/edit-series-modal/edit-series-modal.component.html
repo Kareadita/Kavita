@@ -9,7 +9,7 @@
       <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
         <form [formGroup]="editSeriesForm">
           <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" [destroyOnHide]="false"
-              orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+              orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
             <li [ngbNavItem]="tabs[TabID.General]">
               <a ngbNavLink>{{t(tabs[TabID.General])}}</a>
@@ -693,7 +693,7 @@
                   <ul class="list-unstyled">
                     @for (volume of seriesVolumes; track volume.id) {
                       <li class="d-flex my-4">
-                        <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)" />
+                        <app-image class="me-3" style="width: 4.625rem;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)" />
                         <div class="flex-grow-1">
                           <h5 class="mt-0 mb-1">{{formatVolumeName(volume)}}</h5>
                           <div>
@@ -708,7 +708,7 @@
                             <div class="row">
                               <div class="col">
                                 <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
-                                        [attr.aria-expanded]="!volumeCollapsed[volume.name]" [disabled]="!isAdmin">
+                                        [attr.aria-expanded]="!volumeCollapsed[volume.name]" [disabled]="!accountService.hasAdminRole()">
                                   {{t('view-files')}}
                                 </button>
                               </div>
@@ -749,15 +749,13 @@
             <li [ngbNavItem]="tabs[TabID.Tasks]">
               <a ngbNavLink>{{t(tabs[TabID.Tasks])}}</a>
               <ng-template ngbNavContent>
-                @if (accountService.currentUser$ | async; as user) {
-                  @for(task of tasks; track task.action) {
-                    @if (accountService.canInvokeAction(user, task.action)) {
-                      <div class="mt-3 mb-3">
-                        <app-setting-button [subtitle]="task.description">
-                          <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
-                        </app-setting-button>
-                      </div>
-                    }
+                @for(task of tasks; track task.action) {
+                  @if (accountService.canCurrentUserInvokeAction(task.action)) {
+                    <div class="mt-3 mb-3">
+                      <app-setting-button [subtitle]="task.description">
+                        <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
+                      </app-setting-button>
+                    </div>
                   }
                 }
               </ng-template>

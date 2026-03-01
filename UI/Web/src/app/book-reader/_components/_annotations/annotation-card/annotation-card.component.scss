@@ -19,7 +19,7 @@
 }
 
 .spoilers {
-  filter: blur(3px);
+  filter: blur(0.1875rem);
 }
 
 :host ::ng-deep quill-view {

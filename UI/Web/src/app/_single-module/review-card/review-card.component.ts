@@ -1,7 +1,6 @@
-import {ChangeDetectionStrategy, Component, computed, EventEmitter, inject, input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 import {UserReview} from "../../_models/user-review";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.component";
 import {AccountService} from "../../_services/account.service";
 import {ReviewModalCloseEvent, ReviewModalComponent} from "../review-modal/review-modal.component";
@@ -13,6 +12,7 @@ import {RatingAuthority} from "../../_models/rating";
 import {ProfileIconComponent} from "../profile-icon/profile-icon.component";
 import {RouterLink} from "@angular/router";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {ModalService} from "../../_services/modal.service";
 
 @Component({
   selector: 'app-review-card',
@@ -22,27 +22,25 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewCardComponent {
-  private readonly modalService = inject(NgbModal);
-
+  private readonly modalService = inject(ModalService);
   private readonly accountService = inject(AccountService);
-  protected readonly ScrobbleProvider = ScrobbleProvider;
+
 
   review = input.required<UserReview>();
-  @Output() refresh = new EventEmitter<ReviewModalCloseEvent>();
+  readonly refresh = output<ReviewModalCloseEvent>();
 
   isMyReview = computed(() =>
-    this.review().username === this.accountService.currentUserSignal()?.username && !this.review().isExternal);
+    this.review().username === this.accountService.currentUser()?.username && !this.review().isExternal);
 
   showModal() {
-    let component;
+    let ref;
     if (this.isMyReview()) {
-      component = ReviewModalComponent;
+      ref = this.modalService.open(ReviewModalComponent);
     } else {
-      component = ReviewCardModalComponent;
+      ref = this.modalService.open(ReviewCardModalComponent);
     }
-    const ref = this.modalService.open(component, {size: 'lg', fullscreen: 'md'});
 
-    ref.componentInstance.review = this.review();
+    ref.setInput('review', this.review());
     ref.closed.subscribe((res: ReviewModalCloseEvent | undefined) => {
       if (res) {
         this.refresh.emit(res);
@@ -51,4 +49,5 @@ export class ReviewCardComponent {
   }
 
   protected readonly RatingAuthority = RatingAuthority;
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 }
