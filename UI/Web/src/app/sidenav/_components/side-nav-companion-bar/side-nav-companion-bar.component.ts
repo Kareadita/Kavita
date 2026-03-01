@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   DestroyRef,
   inject,
@@ -34,7 +33,6 @@ export class SideNavCompanionBarComponent implements OnInit {
   protected readonly toggleService = inject(ToggleService);
   private readonly offcanvasService = inject(NgbOffcanvas);
   protected readonly breakpointService = inject(BreakpointService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
   /**

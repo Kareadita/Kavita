@@ -8,10 +8,10 @@ import {
   OnInit,
   signal,
   Signal,
-  ViewContainerRef,
-  viewChild
+  viewChild,
+  ViewContainerRef
 } from '@angular/core';
-import {NgbActiveOffcanvas, NgbOffcanvas} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {AnnotationService} from "../../../../_services/annotation.service";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {Annotation} from "../../../_models/annotations/annotation";
@@ -41,6 +41,7 @@ import {AnnotationLikesComponent} from "../../_annotations/annotation-likes/anno
 import {ProfileIconComponent} from "../../../../_single-module/profile-icon/profile-icon.component";
 import {RouterLink} from "@angular/router";
 import {BreakpointService} from "../../../../_services/breakpoint.service";
+import {DrawerService} from "../../../../_services/drawer.service";
 
 export enum AnnotationMode {
   View = 0,
@@ -86,7 +87,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   protected readonly utilityService = inject(UtilityService);
   protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
-  private readonly offcanvasService = inject(NgbOffcanvas);
+  private readonly drawerService = inject(DrawerService);
   protected readonly breakpointService = inject(BreakpointService);
 
   readonly renderTarget = viewChild.required('renderTarget', { read: ViewContainerRef });
@@ -361,7 +362,7 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     if (!await this.confirmService.confirm(translate('toasts.confirm-delete-annotation'))) return;
 
     this.annotationService.deleteAnnotation(annotation).subscribe(_ => {
-      this.offcanvasService.dismiss();
+      this.drawerService.dismiss();
     });
   }
 
