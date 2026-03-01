@@ -680,14 +680,14 @@ export class ReaderService {
 
     const ref = this.modalService.open<ListSelectModalComponent<T>>(ListSelectModalComponent);
 
-    ref.componentInstance.showFooter.set(false);
-    ref.componentInstance.title.set(translate('reread-modal.title'));
+    ref.setInput('showFooter', false);
+    ref.setInput('title', translate('reread-modal.title'));
 
     if (prompt.timePrompt) {
-      ref.componentInstance.description.set(translate('reread-modal.description-time-passed',
-        { days: prompt.daysSinceLastRead, name: prompt.chapterOnReread.label }));
+      ref.setInput('description', translate('reread-modal.description-time-passed',
+        { days: prompt.daysSinceLastRead, name: prompt.chapterOnReread.label }))
     } else {
-      ref.componentInstance.description.set(translate('reread-modal.description-full-read', { name: prompt.chapterOnReread.label }));
+      ref.setInput('description', translate('reread-modal.description-full-read', { name: prompt.chapterOnReread.label }))
     }
 
     const options = [

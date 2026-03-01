@@ -351,11 +351,11 @@ export class ManageReadingProfilesComponent implements OnInit {
 
     const ref = this.modalService.open(ListSelectModalComponent);
     const profileName = this.readingProfileForm?.get('name')?.value || this.selectedProfile.name;
-    ref.componentInstance.title.set(translate('manage-reading-profiles.select-devices-for', {name: profileName}));
-    ref.componentInstance.multiSelect.set(true);
-    ref.componentInstance.requireConfirmation.set(true);
-    ref.componentInstance.preSelectedItems.set(this.selectedProfile.deviceIds ?? []);
-    ref.componentInstance.inputItems.set(this.devices.map(d => ({
+    ref.setInput('title', translate('manage-reading-profiles.select-devices-for', {name: profileName}));
+    ref.setInput('multiSelect', true);
+    ref.setInput('requireConfirmation', true);
+    ref.setInput('preSelectedItems', this.selectedProfile.deviceIds ?? []);
+    ref.setInput('inputItems', this.devices.map(d => ({
       label: d.friendlyName,
       value: d.id
     })));

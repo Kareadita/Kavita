@@ -70,7 +70,6 @@ import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
 import {ActionService} from "../_services/action.service";
 import {VolumeRemovedEvent} from "../_models/events/volume-removed-event";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
-import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
 import {CoverImageComponent} from "../_single-module/cover-image/cover-image.component";
 import {UserReview} from "../_models/user-review";
@@ -479,19 +478,6 @@ export class VolumeDetailComponent implements OnInit {
     });
   }
 
-  openEditChapterModal(chapter: Chapter) {
-    const ref = this.modalService.open(EditChapterModalComponent);
-    ref.componentInstance.chapter = chapter;
-    ref.componentInstance.libraryType = this.libraryType();
-    ref.componentInstance.libraryId = this.libraryId();
-    ref.componentInstance.seriesId = this.seriesId();
-
-    ref.closed.subscribe((res: ModalResult<Volume>) => {
-      if (res.success && res.data) {
-        this.volume.set({...res.data});
-      }
-    });
-  }
 
   onNavChange(event: NgbNavChangeEvent) {
     this.bulkSelectionService.deselectAll();

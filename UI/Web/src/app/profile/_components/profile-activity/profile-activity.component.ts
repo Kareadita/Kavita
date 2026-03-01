@@ -168,11 +168,11 @@ export class ProfileActivityComponent {
       centered: true
     });
 
-    ref.componentInstance.title.set(item.seriesName);
-    ref.componentInstance.showConfirm.set(false);
-    ref.componentInstance.inputItems.set(item.chapters.map(c => ({ value: {entry: item, chapter: c}, label: `${c.label}` })));
-    ref.componentInstance.itemTemplate.set(this.chapterInfoRow());
-    ref.componentInstance.itemsBeforeVirtual.set(5);
+    ref.setInput('title', item.seriesName);
+    ref.setInput('showConfirm', false);
+    ref.setInput('inputItems', item.chapters.map(c => ({ value: {entry: item, chapter: c}, label: `${c.label}` })));
+    ref.setInput('itemTemplate', this.chapterInfoRow());
+    ref.setInput('itemsBeforeVirtual', 5);
   }
 
   updateFilter(event: StatsFilter): void {

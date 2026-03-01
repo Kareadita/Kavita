@@ -1448,12 +1448,12 @@ export class ActionService {
 
   matchSeries(series: Series, callback?: BooleanActionCallback) {
    const ref = this.modalService.open(MatchSeriesModalComponent);
-    ref.setInput('series', series);
-   ref.closed.subscribe(saved => {
-     if (callback) {
-       callback(saved);
-     }
-   });
+     ref.setInput('series', series);
+     ref.closed.subscribe(saved => {
+       if (callback) {
+         callback(saved);
+       }
+     });
   }
 
   /**

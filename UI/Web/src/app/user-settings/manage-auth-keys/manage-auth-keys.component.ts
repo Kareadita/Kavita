@@ -77,7 +77,7 @@ export class ManageAuthKeysComponent implements OnInit {
 
   rotate(authKey: AuthKey) {
     const ref = this.modalService.open(CreateAuthKeyComponent);
-    ref.componentInstance.authKey.set(authKey);
+    ref.setInput('authKey', authKey);
 
     ref.closed.subscribe((result: AuthKey | null) => {
       if (result === null) return;
