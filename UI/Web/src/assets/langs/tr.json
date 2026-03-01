@@ -2184,26 +2184,14 @@
     },
     "version-update-modal": {
         "close": "{{common.close}}",
-        "refresh": "Tazele",
-        "title": "Kavita güncellendi!",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
-        "out-of-date": {},
         "new-version": {
             "title": "Kavita güncellendi!",
             "refresh": "Tazele"
         },
         "update-notification": {
-          "close": "{{common.close}}",
-          "download": "İndir",
-          "title": "Yeni Güncelleme Mevcut!",
-          "help": "Nasıl Güncellenir"
+            "download": "İndir",
+            "title": "Yeni Güncelleme Mevcut!",
+            "help": "Nasıl Güncellenir"
         }
     }
 }
