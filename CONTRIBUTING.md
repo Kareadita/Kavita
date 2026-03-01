@@ -34,6 +34,9 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 ### Debugging on Device ###
 - Update `IP` constant in `Web/UI/src/environments/environment.ts` to your dev machine's ip instead of `localhost`.
 
+### Windows Users ###
+You need to run `git config --system core.longpaths true` in cmd as Admin to allow checking out
+
 
 ### Contributing Code ###
 - If you're adding a new, already requested feature, please comment on [Github Issues](https://github.com/Kareadita/Kavita/issues "Github Issues") so work is not duplicated (If you want to add something not already on there, please talk to us first)
