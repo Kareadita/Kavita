@@ -131,13 +131,13 @@ function bootstrapUser() {
   const transloco = inject(TranslocoService);
 
   return firstValueFrom(accountService.isOidcAuthenticated().pipe(
-    switchMap((isOidc)=> isOidc ? accountService.getAccount() : of(null)),
-    catchError(() => of(null)),
-    tap(user => {
-      if (!user) {
+    tap(isOidc => {
+      if (!isOidc) {
         accountService.setCurrentUser(accountService.getUserFromLocalStorage());
       }
     }),
+    switchMap(()=> accountService.getAccount()),
+    catchError(() => of(null)),
     switchMap(() => loadUserLocale(transloco, accountService)),
   ));
 }
