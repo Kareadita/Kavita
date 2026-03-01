@@ -51,10 +51,10 @@ export class SideNavCompanionBarComponent implements OnInit {
 
   extraDrawer = input<TemplateRef<any> | undefined>(undefined);
 
-  filterOpen = output<boolean>();
-
   isFilterOpen = signal<boolean>(false);
   isExtrasOpen = signal<boolean>(false);
+
+  filterOpen = output<boolean>();
 
 
 
