@@ -36,7 +36,7 @@
       <ngx-datatable
         class="bootstrap"
         [rows]="events()"
-        [columnMode]="ColumnMode.force"
+        [columnMode]="'force'"
         (sort)="updateSort($event)"
         (page)="onPageChange($event)"
         rowHeight="auto"
