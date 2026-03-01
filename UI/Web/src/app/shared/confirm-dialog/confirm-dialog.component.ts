@@ -1,4 +1,4 @@
-import {Component, inject, Input, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ConfirmButton} from './_models/confirm-button';
 import {ConfirmConfig} from './_models/confirm-config';
@@ -17,7 +17,7 @@ export class ConfirmDialogComponent implements OnInit {
 
   protected readonly modal = inject(NgbActiveModal);
 
-  @Input({required: true}) config!: ConfirmConfig;
+  config!: ConfirmConfig;
   formGroup = new FormGroup({
     'prompt': new FormControl('', []),
   })
