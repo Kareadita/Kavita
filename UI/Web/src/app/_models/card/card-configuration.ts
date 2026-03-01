@@ -69,7 +69,7 @@ export interface BaseCardConfiguration<T> {
   metaTitleTemplate?: TemplateRef<{ $implicit: CardEntity }>;
 
   /** Callback when the read button is clicked */
-  readFunc: (entity: T) => void;
+  readFunc: ((entity: T) => void) | null;
 
   /** Callback when the card body is clicked (navigation or preview) */
   clickFunc?: (entity: T, wrapper: CardEntity) => void;

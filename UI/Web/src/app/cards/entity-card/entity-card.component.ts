@@ -8,8 +8,8 @@ import {
   inject,
   input,
   OnInit,
-  Signal,
-  output
+  output,
+  Signal
 } from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DownloadEvent} from "../../shared/_services/download.service";
@@ -198,6 +198,10 @@ export class EntityCardComponent<T> implements OnInit {
   protected readonly ariaLabel: Signal<string> = computed(() =>
     this.config().ariaLabelFunc?.(this.data()) ?? this.title()
   );
+
+  protected readonly hasReadFunc = computed(() => {
+    return this.config().readFunc != null;
+  })
 
   protected readonly cardWidth = computed(() => {
     return this.themeService.getCssVariable('--card-image-width');
@@ -401,6 +405,6 @@ export class EntityCardComponent<T> implements OnInit {
     // Don't trigger read if in bulk selection mode
     if (this.bulkSelectionService.hasSelections()) return;
 
-    this.config().readFunc(this.data());
+    this.config().readFunc?.(this.data());
   }
 }

@@ -347,7 +347,7 @@ export class CardConfigFactory {
       ariaLabelFunc: (c) => c.title,
 
       actionableFunc: (c) => this.actionFactory.getCollectionTagActions(params?.shouldRenderAction),
-      readFunc: () => {},
+      readFunc: null,
       clickFunc: (c) => this.router.navigate(['collections', c.id]),
     };
 
@@ -379,7 +379,8 @@ export class CardConfigFactory {
       ariaLabelFunc: (r) => r.title,
 
       actionableFunc: (r) => this.actionFactory.getReadingListActions(params?.shouldRenderAction),
-      readFunc: () => {},
+      readFunc: null,
+      clickFunc: (r) => this.router.navigate(['lists', r.id]),
     };
 
     return this.mergeConfig(defaults, params?.overrides);
@@ -410,7 +411,7 @@ export class CardConfigFactory {
       showErrorFunc: (s) => false,
       ariaLabelFunc: (s) => s.seriesName,
 
-      readFunc: (s) => null,
+      readFunc: null,
       clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.seriesId]),
     };
 
