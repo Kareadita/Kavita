@@ -305,7 +305,7 @@
                 </div>
 
 
-                <div class="col-md-6 col-sm-12">
+                <div class="d-flex flex-column flex-sm-row gap-2">
                   <button class="btn btn-primary"
                           [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit || !parentReadingProfile"
                           (click)="updateParentPref()">
