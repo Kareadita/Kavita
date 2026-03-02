@@ -436,7 +436,6 @@ public class OpdsService : IOpdsService
             feed.Entries.Add(CreateSeries(seriesDto, metadata, apiKey, prefix, baseUrl));
         }
         // Recently updated is hardcoded to 30 items
-        // include the prefix so pagination links are built with the full OPDS path
         AddPagination(feed, request.PageNumber, 30, PageSize, $"{prefix}{apiKey}/recently-updated");
 
         return feed;
