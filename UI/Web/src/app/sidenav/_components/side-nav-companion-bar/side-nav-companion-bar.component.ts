@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   DestroyRef,
   inject,
@@ -34,7 +33,6 @@ export class SideNavCompanionBarComponent implements OnInit {
   protected readonly toggleService = inject(ToggleService);
   private readonly offcanvasService = inject(NgbOffcanvas);
   protected readonly breakpointService = inject(BreakpointService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
 
   /**
@@ -53,10 +51,10 @@ export class SideNavCompanionBarComponent implements OnInit {
 
   extraDrawer = input<TemplateRef<any> | undefined>(undefined);
 
-  filterOpen = output<boolean>();
-
   isFilterOpen = signal<boolean>(false);
   isExtrasOpen = signal<boolean>(false);
+
+  filterOpen = output<boolean>();
 
 
 

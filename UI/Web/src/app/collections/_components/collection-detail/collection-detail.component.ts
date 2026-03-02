@@ -14,7 +14,7 @@ import {
   viewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {debounceTime} from 'rxjs/operators';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
@@ -64,6 +64,7 @@ import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {getWritableResolvedData} from "../../../../libs/route-util";
 import {User} from "../../../_models/user/user";
+import {DrawerService} from "../../../_services/drawer.service";
 
 @Component({
   selector: 'app-collection-detail',
@@ -84,7 +85,7 @@ export class CollectionDetailComponent implements AfterContentChecked {
   private readonly seriesService = inject(SeriesService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly accountService = inject(AccountService);
-  private readonly offcanvasService = inject(NgbOffcanvas);
+  private readonly drawerService = inject(DrawerService);
   private readonly jumpbarService = inject(JumpbarService);
   private readonly messageHub = inject(MessageHubService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
@@ -245,9 +246,9 @@ export class CollectionDetailComponent implements AfterContentChecked {
   }
 
   openSyncDetailDrawer() {
-    const ref = this.offcanvasService.open(SmartCollectionDrawerComponent, {position: 'end', panelClass: ''});
-    ref.componentInstance.collection = this.collectionTag();
-    ref.componentInstance.series = this.series();
+    const ref = this.drawerService.open(SmartCollectionDrawerComponent, {position: 'end', panelClass: ''});
+    ref.setInput('collection', this.collectionTag());
+    ref.setInput('series', this.series());
   }
 
   protected readonly Breakpoint = Breakpoint;

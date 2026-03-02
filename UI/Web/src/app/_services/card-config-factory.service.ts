@@ -7,6 +7,7 @@ import {Router} from "@angular/router";
 import {RelationshipPipe} from "../_pipes/relationship.pipe";
 import {Series} from "../_models/series";
 import {CardEntity, ChapterCardEntity, RelatedSeriesCardEntity, SeriesCardEntity} from "../_models/card/card-entity";
+import {EntityTitleService} from "./entity-title.service";
 import {
   ActionableCardConfiguration,
   BaseCardConfiguration,
@@ -68,6 +69,7 @@ export class CardConfigFactory {
   private readonly downloadService = inject(DownloadService);
   private readonly router = inject(Router);
   private readonly relationshipPipe = new RelationshipPipe();
+  private readonly entityTitleService = inject(EntityTitleService);
 
   /**
    * Creates configuration for Series cards
@@ -207,7 +209,7 @@ export class CardConfigFactory {
       suppressArchiveWarning: false,
 
       coverFunc: (c) => this.imageService.getChapterCoverImage(c.id),
-      titleFunc: (c) => c.titleName || c.title || c.range,
+      titleFunc: (c) => this.entityTitleService.computeTitle(c, params.libraryType, { prioritizeTitleName: false }),
       titleRouteFunc: (c) => `/library/${params.libraryId}/series/${params.seriesId}/chapter/${c.id}`,
       metaTitleFunc: (c, wrapper) => {
         if (c.isSpecial) {
@@ -347,7 +349,7 @@ export class CardConfigFactory {
       ariaLabelFunc: (c) => c.title,
 
       actionableFunc: (c) => this.actionFactory.getCollectionTagActions(params?.shouldRenderAction),
-      readFunc: () => {},
+      readFunc: null,
       clickFunc: (c) => this.router.navigate(['collections', c.id]),
     };
 
@@ -379,7 +381,8 @@ export class CardConfigFactory {
       ariaLabelFunc: (r) => r.title,
 
       actionableFunc: (r) => this.actionFactory.getReadingListActions(params?.shouldRenderAction),
-      readFunc: () => {},
+      readFunc: null,
+      clickFunc: (r) => this.router.navigate(['lists', r.id]),
     };
 
     return this.mergeConfig(defaults, params?.overrides);
@@ -410,7 +413,7 @@ export class CardConfigFactory {
       showErrorFunc: (s) => false,
       ariaLabelFunc: (s) => s.seriesName,
 
-      readFunc: (s) => null,
+      readFunc: null,
       clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.seriesId]),
     };
 

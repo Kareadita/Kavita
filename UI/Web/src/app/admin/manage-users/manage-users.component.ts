@@ -113,8 +113,8 @@ export class ManageUsersComponent implements OnInit {
     if (!this.settings) return;
 
     const modalRef = this.modalService.open(EditUserComponent);
-    modalRef.componentInstance.member.set(member);
-    modalRef.componentInstance.settings.set(this.settings);
+    modalRef.setInput('member', member);
+    modalRef.setInput('settings', this.settings);
     modalRef.closed.subscribe(() => {
       this.loadMembers();
     });

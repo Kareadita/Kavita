@@ -12,10 +12,10 @@
     </app-side-nav-companion-bar>
 
     <app-card-detail-layout
-      [isLoading]="loadingLists"
+      [isLoading]="isLoadingLists()"
       [items]="listEntities()"
       [pagination]="pagination"
-      [jumpBarKeys]="jumpbarKeys"
+      [jumpBarKeys]="jumpbarKeys()"
       [filteringDisabled]="true"
       [trackByIdentity]="trackByIdentity"
     >

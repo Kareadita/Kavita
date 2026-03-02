@@ -176,7 +176,7 @@ export class ThemeManagerComponent {
     if (imgUrl === '') return;
 
     const ref = this.modalService.open(PreviewImageModalComponent);
-    ref.componentInstance.title = this.selectedTheme!.name;
-    ref.componentInstance.image = imgUrl;
+    ref.setInput('title', this.selectedTheme!.name);
+    ref.setInput('image', imgUrl);
   }
 }

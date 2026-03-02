@@ -15,7 +15,6 @@ import {CoverImageSizePipe} from "../../_pipes/cover-image-size.pipe";
 import {PdfRenderResolutionPipe} from "../../_pipes/pdf-render-resolution.pipe"
 import {ConfirmService} from "../../shared/confirm.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {pageLayoutModes} from "../../_models/preferences/reading-profiles";
 import {ModalService} from "../../_services/modal.service";
 
 @Component({
@@ -124,8 +123,8 @@ export class ManageMediaSettingsComponent implements OnInit {
 
   openDirectoryChooser(existingDirectory: string, formControl: string) {
     const modalRef = this.modalService.open(DirectoryPickerComponent);
-    modalRef.componentInstance.startingFolder = existingDirectory || '';
-    modalRef.componentInstance.helpUrl = '';
+    modalRef.setInput('startingFolder', existingDirectory || '');
+    modalRef.setInput('helpUrl', '');
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
       if (closeResult.success && closeResult.folderPath !== '') {
         this.settingsForm.get(formControl)?.setValue(closeResult.folderPath);
@@ -134,6 +133,4 @@ export class ManageMediaSettingsComponent implements OnInit {
       }
     });
   }
-
-  protected readonly pageLayoutModes = pageLayoutModes;
 }
