@@ -5,8 +5,8 @@ import {
   DestroyRef,
   effect,
   inject,
+  model,
   OnInit,
-  signal,
   Signal,
   viewChild,
   ViewContainerRef
@@ -21,7 +21,6 @@ import {debounceTime, switchMap} from "rxjs/operators";
 import {of} from "rxjs";
 import {HighlightBarComponent} from "../../_annotations/highlight-bar/highlight-bar.component";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
-import {User} from "../../../../_models/user/user";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
 import {DatePipe, DOCUMENT, NgStyle} from "@angular/common";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
@@ -92,9 +91,8 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
 
   readonly renderTarget = viewChild.required('renderTarget', { read: ViewContainerRef });
 
-  annotation = signal<Annotation | null>(null);
-  mode = signal<AnnotationMode>(AnnotationMode.View);
-  user = signal<User | null>(null);
+  annotation = model<Annotation | null>(null);
+  mode = model<AnnotationMode>(AnnotationMode.View);
   isEditMode: Signal<boolean>
   isEditOrCreateMode: Signal<boolean>
   titleColor: Signal<string>;
