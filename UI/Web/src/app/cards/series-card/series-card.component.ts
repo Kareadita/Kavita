@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, output, signal} from '@angular/core';
 import {Router} from '@angular/router';
-import {NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
 import {FormsModule} from "@angular/forms";
 import {EntityCardComponent} from "../entity-card/entity-card.component";
 import {CardConfigFactory} from "../../_services/card-config-factory.service";
@@ -9,6 +8,7 @@ import {RelationKind} from "../../_models/series-detail/relation-kind";
 import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {ProgressUpdateResult} from "../../_models/card/card-configuration";
+import {DrawerService} from "../../_services/drawer.service";
 
 @Component({
   selector: 'app-series-card',
@@ -20,7 +20,7 @@ import {ProgressUpdateResult} from "../../_models/card/card-configuration";
 export class SeriesCardComponent {
 
   private readonly router = inject(Router);
-  private readonly offcanvasService = inject(NgbOffcanvas);
+  private readonly drawerService = inject(DrawerService);
   private readonly configFactory = inject(CardConfigFactory);
 
   series = input.required<Series>();
@@ -78,14 +78,15 @@ export class SeriesCardComponent {
 
   private async handleClick(series: Series) {
     if (this.previewOnClick()) {
-      const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {
+      const ref = this.drawerService.open(SeriesPreviewDrawerComponent, {
         position: 'end',
         panelClass: ''
       });
-      ref.componentInstance.isExternalSeries = false;
-      ref.componentInstance.seriesId = series.id;
-      ref.componentInstance.libraryId = series.libraryId;
-      ref.componentInstance.name = series.name;
+      ref.setInput('isExternalSeries', false);
+      ref.setInput('seriesId', series.id);
+      ref.setInput('libraryId', series.libraryId);
+      ref.setInput('name', series.name);
+
       return;
     }
 

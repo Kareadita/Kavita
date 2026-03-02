@@ -2626,6 +2626,7 @@
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
 
         "pages-label": "{{edit-chapter-modal.pages-label}}",
         "words-label": "{{edit-chapter-modal.words-label}}",

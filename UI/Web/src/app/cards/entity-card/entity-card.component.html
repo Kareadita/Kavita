@@ -88,7 +88,7 @@
       </div>
 
       <!-- Read Button (visible on hover) -->
-      @if (!bulkSelectionService.hasSelections()) {
+      @if (!bulkSelectionService.hasSelections() && hasReadFunc()) {
         <div class="overlay-information">
           <div class="overlay-information--centered">
             <span
@@ -131,7 +131,8 @@
       @if (formatBadge()) {
         <app-series-format [format]="formatBadge()!" />
       } @else {
-        <span class="card-format"></span>
+        <!--I am testing the waters with un-even card titles to show more info-->
+        <!--<span class="card-format"></span>-->
       }
 
       <!-- Title Link -->

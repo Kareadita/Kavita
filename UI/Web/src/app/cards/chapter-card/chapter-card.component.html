@@ -1,12 +1,3 @@
-
-<ng-template #title let-chapter>
-  @if (chapter.data.isSpecial) {
-    {{chapter.data.title || chapter.data.range}}
-  } @else {
-    <app-entity-title [entity]="chapter.data" [prioritizeTitleName]="false" [libraryType]="libraryType()" />
-  }
-</ng-template>
-
 <app-entity-card
   [entity]="cardEntity()"
   [config]="config()"

@@ -1,0 +1,27 @@
+name: Build UI
+
+on:
+  pull_request:
+    branches: [ '**' ]
+
+jobs:
+  build:
+    name: Build UI
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: NodeJS to Compile WebUI
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: |
+          cd UI/Web || exit
+          echo 'Installing web dependencies'
+          npm ci
+
+          echo 'Building UI'
+          npm run prod

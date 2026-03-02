@@ -106,6 +106,8 @@ export class PersonDetailComponent {
 
       this.router.navigate(['person', event.dstName]);
     });
+
+    this.setPerson(this.person());
   }
 
   private setPerson(person: Person) {

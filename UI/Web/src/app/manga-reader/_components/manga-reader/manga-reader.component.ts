@@ -33,7 +33,7 @@ import {
 } from 'rxjs';
 import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {NgbModalRef, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import {Stack} from 'src/app/shared/data-structures/stack';
@@ -81,7 +81,7 @@ import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {mediumModal} from "../../../_models/modal/modal-options";
-import {ModalService} from "../../../_services/modal.service";
+import {ModalService, TypedModalRef} from "../../../_services/modal.service";
 
 
 const PREFETCH_PAGES = 10;
@@ -1867,7 +1867,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   shortCutModalOpen = signal(false);
-  shortCutModalRef: NgbModalRef | undefined;
+  shortCutModalRef: TypedModalRef<ShortcutsModalComponent> | undefined;
 
   private closeShortCutModal() {
     if (this.shortCutModalRef) {
@@ -1882,7 +1882,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.shortCutModalOpen.set(true);
     this.shortCutModalRef = this.modalService.open(ShortcutsModalComponent, mediumModal());
-    this.shortCutModalRef.componentInstance.shortcuts = [
+    this.shortCutModalRef.setInput('shortcuts', [
       {keyBindTarget: KeyBindTarget.PageLeft, description: 'prev-page'},
       {keyBindTarget: KeyBindTarget.PageRight, description: 'next-page'},
       {keyBindTarget: KeyBindTarget.GoTo, description: 'go-to'},
@@ -1892,7 +1892,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       {keyBindTarget: KeyBindTarget.BookmarkPage, description: 'bookmark'},
       {keyBindTarget: KeyBindTarget.OffsetDoublePage, description: 'offset-double-page'},
       {key: translate('shortcuts-modal.double-click'), description: 'bookmark'},
-    ];
+    ]);
 
     merge(this.shortCutModalRef.closed, this.shortCutModalRef.dismissed).subscribe(() => this.shortCutModalOpen.set(false));
   }

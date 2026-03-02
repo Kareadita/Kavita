@@ -78,7 +78,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
   };
   hasRunScrobbleGen = signal(false);
 
-  selections = signal(new SelectionModel<ScrobbleEvent>());
+  selections = signal(new SelectionModel<ScrobbleEvent>(), { equal: () => false });
   selectAll = signal(false);
   isShiftDown = false;
   lastSelectedIndex: number | null = null;
@@ -190,23 +190,29 @@ export class UserScrobbleHistoryComponent implements OnInit {
   toggleAll() {
     const newSelectAll = !this.selectAll();
     this.selectAll.set(newSelectAll);
-    this.events().forEach(e => this.selections().toggle(e, newSelectAll));
+    this.selections.update(s => {
+      this.events().forEach(e => s.toggle(e, newSelectAll));
+      return s;
+    });
   }
 
   handleSelection(item: ScrobbleEvent, index: number) {
-    if (this.isShiftDown && this.lastSelectedIndex !== null) {
-      const start = Math.min(this.lastSelectedIndex, index);
-      const end = Math.max(this.lastSelectedIndex, index);
+    this.selections.update(s => {
+      if (this.isShiftDown && this.lastSelectedIndex !== null) {
+        const start = Math.min(this.lastSelectedIndex, index);
+        const end = Math.max(this.lastSelectedIndex, index);
 
-      for (let i = start; i <= end; i++) {
-        const event = this.events()[i];
-        if (!this.selections().isSelected(event, (e1, e2) => e1.id == e2.id)) {
-          this.selections().toggle(event, true);
+        for (let i = start; i <= end; i++) {
+          const event = this.events()[i];
+          if (!s.isSelected(event, (e1, e2) => e1.id == e2.id)) {
+            s.toggle(event, true);
+          }
         }
+      } else {
+        s.toggle(item);
       }
-    } else {
-      this.selections().toggle(item);
-    }
+      return s;
+    });
 
     this.lastSelectedIndex = index;
 

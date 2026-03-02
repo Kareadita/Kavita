@@ -65,9 +65,9 @@ export class ReadingListsComponent implements OnInit {
   readingListConfig = computed(() => {
     return this.cardConfigFactory.forReadingList({titleRef: this.titleTemplateRef(), shouldRenderAction: this.shouldRenderReadingListAction.bind(this)});
   });
-  loadingLists = false;
+  isLoadingLists = signal<boolean>(false);
   pagination!: Pagination;
-  jumpbarKeys: Array<JumpKey> = [];
+  jumpbarKeys = signal<JumpKey[]>([]);
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
   globalActions: Array<ActionItem<any>> = []; // TODO: Why is this empty?
   trackByIdentity = (index: number, item: ReadingListCardEntity) => `${item.data.id}_${item.data.title}_${item.data.promoted}`;
@@ -105,14 +105,14 @@ export class ReadingListsComponent implements OnInit {
     if (page != null) {
       this.pagination.currentPage = parseInt(page, 10);
     }
-    this.loadingLists = true;
+    this.isLoadingLists.set(true);
     this.cdRef.markForCheck();
 
     this.readingListService.getReadingLists(true, false).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
       this.lists.set(readingLists.result);
       this.pagination = readingLists.pagination;
-      this.jumpbarKeys = this.jumpbarService.getJumpKeys(readingLists.result, (rl: ReadingList) => rl.title);
-      this.loadingLists = false;
+      this.jumpbarKeys.set(this.jumpbarService.getJumpKeys(readingLists.result, (rl: ReadingList) => rl.title));
+      this.isLoadingLists.set(false);
       this.cdRef.markForCheck();
     });
   }
