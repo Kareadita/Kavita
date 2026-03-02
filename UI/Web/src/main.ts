@@ -15,7 +15,7 @@ import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/ht
 import {provideTransloco, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
 import {AccountService} from "./app/_services/account.service";
-import {firstValueFrom, of, switchMap} from "rxjs";
+import {catchError, firstValueFrom, of, switchMap} from "rxjs";
 import {provideTranslocoLocale} from "@jsverse/transloco-locale";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
@@ -138,11 +138,12 @@ function bootstrapUser() {
 
   return firstValueFrom(accountService.isOidcAuthenticated().pipe(
     switchMap(isOidc => {
-      if (!isOidc) {
-        return accountService.refreshAccount();
+      if (isOidc) {
+        return accountService.getAccount();
       }
-      return of(null); // Changed from EMPTY so loadUserLocale fires for OIDC users too
+      return accountService.refreshAccount();
     }),
+    catchError(() => of(null)),
     switchMap(() => loadUserLocale(transloco, accountService)),
   ));
 }
