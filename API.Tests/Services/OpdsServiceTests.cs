@@ -690,8 +690,9 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         ValidatePaginationLinks(feed, OpdsService.FirstPageNumber, expectNext: true, expectPrev: false);
 
         var self = feed.Links.Single(l => l.Rel == FeedLinkRelation.Self);
+
         Assert.StartsWith(OpdsService.DefaultApiPrefix, self.Href);
-		
+
         var next = feed.Links.SingleOrDefault(l => l.Rel == FeedLinkRelation.Next);
         if (next != null)
         {
