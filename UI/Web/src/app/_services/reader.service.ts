@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, effect, inject, Injectable} from '@angular/core';
+import {effect, inject, Injectable} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import {Router} from '@angular/router';
 import {environment} from 'src/environments/environment';
@@ -18,7 +18,6 @@ import {PersonalToC} from "../_models/readers/personal-toc";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import NoSleep from 'nosleep.js';
 import {Volume} from "../_models/volume";
-import {UtilityService} from "../shared/_services/utility.service";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {FilterField} from "../_models/metadata/v2/filter-field";
@@ -48,8 +47,6 @@ const MS_IN_DAY = 1000 * 60 * 60 * 24;
 })
 export class ReaderService {
 
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly utilityService = inject(UtilityService);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly accountService = inject(AccountService);

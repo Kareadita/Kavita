@@ -735,8 +735,8 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
       const seen = new Map<number, PageBookmark>();
       for (const bookmark of bookmarks) {
-        if (!seen.has(bookmark.chapterId)) {
-          seen.set(bookmark.chapterId, bookmark);
+        if (!seen.has(bookmark.seriesId)) {
+          seen.set(bookmark.seriesId, bookmark);
         }
       }
 
