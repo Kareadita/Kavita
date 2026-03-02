@@ -134,8 +134,7 @@ export class NavService {
 
     // To avoid flashing, let's check if we are authenticated before we show
     effect(() => {
-      const user = this.accountService.currentUser();
-      if (user) {
+      if (this.accountService.isLoggedIn()) {
         this.showNavBar();
       }
     })
