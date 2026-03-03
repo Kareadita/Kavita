@@ -1316,5 +1316,71 @@ public class EntityNamingServiceTests
 
     #endregion
 
+    #region Label Validation Tests
+
+    [Fact]
+    public void FormatChapterTitle_ChapterLabelWithoutPlaceholder_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            _sut.FormatChapterTitle(LibraryType.Manga, isSpecial: false, "1", null, chapterLabel: "Chapter"));
+    }
+
+    [Fact]
+    public void FormatChapterTitle_IssueLabelWithoutPlaceholder_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            _sut.FormatChapterTitle(LibraryType.Comic, isSpecial: false, "1", null, issueLabel: "Issue"));
+    }
+
+    [Fact]
+    public void FormatChapterTitle_BookLabelWithoutPlaceholder_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            _sut.FormatChapterTitle(LibraryType.Book, isSpecial: false, "1", "Title", bookLabel: "Book"));
+    }
+
+    [Fact]
+    public void FormatVolumeName_VolumeLabelWithoutPlaceholder_ThrowsArgumentException()
+    {
+        var volume = new VolumeDto
+        {
+            Number = 1,
+            Name = "1",
+            MinNumber = 1,
+            MaxNumber = 1,
+            Chapters = [],
+        };
+
+        Assert.Throws<ArgumentException>(() =>
+            _sut.FormatVolumeName(LibraryType.Manga, volume, volumeLabel: "Band"));
+    }
+
+    [Fact]
+    public void BuildChapterTitle_VolumeLabelWithoutPlaceholder_ThrowsArgumentException()
+    {
+        var chapter = new ChapterDto { Number = "1", Range = "1", MinNumber = 1, MaxNumber = 1 };
+        var volume = new VolumeDto
+        {
+            Number = 1,
+            Name = "1",
+            MinNumber = 1,
+            MaxNumber = 1,
+            Chapters = [chapter],
+        };
+
+        Assert.Throws<ArgumentException>(() =>
+            _sut.BuildChapterTitle(LibraryType.Manga, volume, chapter, volumeLabel: "Band"));
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_VolumeLabelWithoutPlaceholder_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            _sut.FormatReadingListItemTitle(LibraryType.Manga, MangaFormat.Archive, "1", "1", null, false,
+                volumeLabel: "Band"));
+    }
+
+    #endregion
+
 
 }

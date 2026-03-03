@@ -63,6 +63,22 @@ public partial class EntityNamingService : IEntityNamingService
     [GeneratedRegex(@"^\d+(\.\d+)?$", RegexOptions.Compiled)]
     private static partial Regex JustNumbersRegex();
 
+    [GeneratedRegex(@"\{\d+\}")]
+    private static partial Regex FormatPlaceholderRegex();
+
+    /// <summary>
+    /// Validates that a label string contains at least one format placeholder (e.g., {0}).
+    /// Throws <see cref="ArgumentException"/> if the placeholder is missing.
+    /// This prevents silent data loss when callers pass plain strings to format-string parameters.
+    /// </summary>
+    private static void ValidateFormatLabel(string label, string paramName)
+    {
+        if (!FormatPlaceholderRegex().IsMatch(label))
+        {
+            throw new ArgumentException($"Label must contain at least one format placeholder (e.g., {{0}}).", paramName);
+        }
+    }
+
     public string FormatChapterTitle(LibraryType libraryType, ChapterDto chapter,
         string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)
     {
@@ -81,6 +97,10 @@ public partial class EntityNamingService : IEntityNamingService
         chapterLabel ??= DefaultChapterLabel;
         issueLabel ??= DefaultIssueLabel;
         bookLabel ??= DefaultBookLabel;
+        ValidateFormatLabel(chapterLabel, nameof(chapterLabel));
+        ValidateFormatLabel(issueLabel, nameof(issueLabel));
+        ValidateFormatLabel(bookLabel, nameof(bookLabel));
+
         var hashMark = withHash ? DefaultHashMark : string.Empty;
 
         var baseTitle = libraryType switch
@@ -109,6 +129,7 @@ public partial class EntityNamingService : IEntityNamingService
         }
 
         volumeLabel ??= DefaultVolumeLabel;
+        ValidateFormatLabel(volumeLabel, nameof(volumeLabel));
 
         if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
@@ -123,6 +144,7 @@ public partial class EntityNamingService : IEntityNamingService
     {
         var seriesName = series.Name!;
         volumeLabel ??= DefaultVolumeLabel;
+        ValidateFormatLabel(volumeLabel, nameof(volumeLabel));
 
         // No volume context
         if (volume == null)
@@ -142,6 +164,7 @@ public partial class EntityNamingService : IEntityNamingService
         string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)
     {
         volumeLabel ??= DefaultVolumeLabel;
+        ValidateFormatLabel(volumeLabel, nameof(volumeLabel));
 
         // Special volume - just use chapter title
         if (volume.IsSpecial())
@@ -200,6 +223,10 @@ public partial class EntityNamingService : IEntityNamingService
         chapterLabel ??= DefaultChapterLabel;
         issueLabel ??= DefaultIssueLabel;
         bookLabel ??= DefaultBookLabel;
+        ValidateFormatLabel(volumeLabel, nameof(volumeLabel));
+        ValidateFormatLabel(chapterLabel, nameof(chapterLabel));
+        ValidateFormatLabel(issueLabel, nameof(issueLabel));
+        ValidateFormatLabel(bookLabel, nameof(bookLabel));
 
         // Handle epub format with special logic
         if (format == MangaFormat.Epub)
