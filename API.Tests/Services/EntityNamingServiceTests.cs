@@ -109,7 +109,7 @@ public class EntityNamingServiceTests
             isSpecial: false,
             range: "5",
             title: null,
-            chapterLabel: "Kapitel");
+            chapterLabel: "Kapitel {0}");
 
         Assert.Equal("Kapitel 5", result);
     }
@@ -190,7 +190,7 @@ public class EntityNamingServiceTests
     {
         var volume = CreateVolumeDto(name: "1", minNumber: 1);
 
-        var result = _sut.FormatVolumeName(LibraryType.Manga, volume, volumeLabel: "Band");
+        var result = _sut.FormatVolumeName(LibraryType.Manga, volume, volumeLabel: "Band {0}");
 
         Assert.Equal("Band 1", result);
     }
@@ -359,7 +359,7 @@ public class EntityNamingServiceTests
             series,
             volume: null,
             chapter,
-            chapterLabel: "Kapitel");
+            chapterLabel: "Kapitel {0}");
 
         Assert.Equal("Manga Series - Kapitel 5", result);
     }
@@ -631,8 +631,8 @@ public class EntityNamingServiceTests
 
         var result = _sut.BuildChapterTitle(
             LibraryType.Manga, volume, chapter1,
-            volumeLabel: "Band",
-            chapterLabel: "Kapitel");
+            volumeLabel: "Band {0}",
+            chapterLabel: "Kapitel {0}");
 
         Assert.Equal("Band 2 - Kapitel 5", result);
     }
@@ -866,7 +866,7 @@ public class EntityNamingServiceTests
             volumeNumber: "1",
             chapterTitleName: null,
             isSpecial: false,
-            chapterLabel: "Kapitel");
+            chapterLabel: "Kapitel {0}");
 
         Assert.Equal("Kapitel 5", result);
     }
@@ -881,7 +881,7 @@ public class EntityNamingServiceTests
             volumeNumber: "3",
             chapterTitleName: null,
             isSpecial: false,
-            volumeLabel: "Band");
+            volumeLabel: "Band {0}");
 
         Assert.Equal("Band 3", result);
     }
@@ -1080,6 +1080,109 @@ public class EntityNamingServiceTests
         Assert.NotNull(result);
         Assert.DoesNotContain(" - ", result.Replace("Chapter ", ""));
     }
+
+    #region Korean Locale Tests
+
+    // Korean locale format strings:
+    //   "volume-num":  "{0} 권"
+    //   "chapter-num": "{0} 화"
+    //   "issue-num":   "{0}{1} 이슈"
+    //   "book-num":    "{0} 권"
+    private const string KoVolumeLabel  = "{0} 권";
+    private const string KoChapterLabel = "{0} 화";
+    private const string KoIssueLabel   = "{0}{1} 이슈";
+    private const string KoBookLabel    = "{0} 권";
+
+    [Fact]
+    public void FormatVolumeName_Korean_ReturnsSuffixFormat()
+    {
+        var volume = CreateVolumeDto(name: "1", minNumber: 1);
+
+        var result = _sut.FormatVolumeName(LibraryType.Manga, volume, volumeLabel: KoVolumeLabel);
+
+        Assert.Equal("1 권", result);
+    }
+
+    [Fact]
+    public void FormatChapterTitle_Korean_Manga_ReturnsSuffixFormat()
+    {
+        var result = _sut.FormatChapterTitle(
+            LibraryType.Manga, isSpecial: false, range: "5", title: null,
+            chapterLabel: KoChapterLabel);
+
+        Assert.Equal("5 화", result);
+    }
+
+    [Fact]
+    public void FormatChapterTitle_Korean_Comic_ReturnsSuffixFormat()
+    {
+        var result = _sut.FormatChapterTitle(
+            LibraryType.Comic, isSpecial: false, range: "3", title: null,
+            issueLabel: KoIssueLabel);
+
+        Assert.Equal("#3 이슈", result);
+    }
+
+    [Fact]
+    public void FormatChapterTitle_Korean_LightNovel_ReturnsSuffixFormat()
+    {
+        // LightNovel uses range with bookLabel, so "{0} 권" with range="2" -> "2 권"
+        var result = _sut.FormatChapterTitle(
+            LibraryType.LightNovel, isSpecial: false, range: "2", title: null,
+            bookLabel: KoBookLabel);
+
+        Assert.Equal("2 권", result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_Korean_VolumeOnly_ReturnsSuffixFormat()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga,
+            MangaFormat.Archive,
+            chapterNumber: Parser.DefaultChapter,
+            volumeNumber: "2",
+            chapterTitleName: null,
+            isSpecial: false,
+            volumeLabel: KoVolumeLabel);
+
+        Assert.Equal("2 권", result);
+    }
+
+    [Fact]
+    public void FormatReadingListItemTitle_Korean_Chapter_ReturnsSuffixFormat()
+    {
+        var result = _sut.FormatReadingListItemTitle(
+            LibraryType.Manga,
+            MangaFormat.Archive,
+            chapterNumber: "10",
+            volumeNumber: "1",
+            chapterTitleName: null,
+            isSpecial: false,
+            chapterLabel: KoChapterLabel);
+
+        Assert.Equal("10 화", result);
+    }
+
+    [Fact]
+    public void BuildFullTitle_Korean_MultipleChapterVolume_ReturnsSuffixFormat()
+    {
+        var series = CreateSeriesDto("My Series");
+        var chapter1 = CreateChapterDto(range: "5");
+        var chapter2 = CreateChapterDto(range: "6");
+        var volume = CreateVolumeDto(name: "1", minNumber: 1, chapters: [chapter1, chapter2]);
+
+        var result = _sut.BuildFullTitle(
+            LibraryType.Manga, series, volume, chapter1,
+            volumeLabel: KoVolumeLabel,
+            chapterLabel: KoChapterLabel,
+            issueLabel: KoIssueLabel,
+            bookLabel: KoBookLabel);
+
+        Assert.Equal("My Series - 1 권 - 5 화", result);
+    }
+
+    #endregion
 
     #region Extra Tests
 
