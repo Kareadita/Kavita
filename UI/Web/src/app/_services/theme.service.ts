@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ToastrService} from 'ngx-toastr';
-import {map, ReplaySubject, take, tap} from 'rxjs';
+import {EMPTY, map, of, ReplaySubject, take, tap} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../shared/confirm.service';
 import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
@@ -149,6 +149,8 @@ export class ThemeService {
   }
 
   getThemes() {
+    if (!this.accountService.isLoggedIn()) return EMPTY;
+
     return this.httpClient.get<SiteTheme[]>(this.baseUrl + 'theme').pipe(map(themes => {
       this.themeCache = themes;
       this.themesSource.next(themes);
