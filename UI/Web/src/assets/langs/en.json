@@ -2150,7 +2150,25 @@
         "no-data": "Not much going on here",
         "left-to-process": "Left to Process: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} downloads in Queue",
-        "reading-now": "{{num}} reading now"
+        "reading-now": "{{num}} reading now",
+        "downloads-active": "{{count}} download(s) in progress"
+    },
+
+    "download-queue": {
+        "title": "Download Queue",
+        "preparing": "Preparing",
+        "downloading": "Downloading",
+        "queued": "Queued",
+        "failed": "Failed",
+        "completed": "Completed",
+        "cancel": "Cancel",
+        "cancel-all": "Cancel All",
+        "retry": "Retry",
+        "retry-all": "Retry All",
+        "remove": "Remove",
+        "clear": "Clear",
+        "empty": "No downloads",
+        "close": "Close"
     },
 
     "shortcuts-modal": {
@@ -2200,7 +2218,8 @@
         "browse-genres": "Browse Genres",
         "browse-tags": "Browse Tags",
         "all-annotations": "Browse Annotations",
-        "my-profile": "My Profile"
+        "my-profile": "My Profile",
+        "download-queue": "Download Queue"
     },
 
     "client-device-auth-type-pipe": {

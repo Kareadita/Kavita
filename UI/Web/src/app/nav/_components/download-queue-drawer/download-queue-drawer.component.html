@@ -1,0 +1,74 @@
+<ng-container *transloco="let t; prefix: 'download-queue'">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">{{ t('title') }}</h5>
+    <button type="button" class="btn-unstyled ms-auto" [attr.aria-label]="t('close')" (click)="close()">
+      <i class="fa fa-times" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="offcanvas-body">
+    @if (downloadService.queue().length === 0) {
+      <div class="text-muted text-center py-4">{{ t('empty') }}</div>
+    } @else {
+
+      <!-- Active / Preparing -->
+      @if (downloadService.activeItem(); as active) {
+        <div class="section-label mb-1">{{ t('downloading') }}</div>
+        <app-queue-item
+          [item]="active"
+          (cancel)="downloadService.cancelDownload($event)"
+          (retry)="downloadService.retryDownload($event)"
+          (remove)="downloadService.removeItem($event)"
+        />
+      }
+
+      <!-- Queued -->
+      @if (downloadService.queuedItems().length > 0) {
+        <div class="d-flex align-items-center justify-content-between mt-3 mb-1">
+          <span class="section-label">{{ t('queued') }} ({{ downloadService.queuedItems().length }})</span>
+          <button class="btn btn-sm btn-link p-0" (click)="downloadService.cancelAllQueued()">{{ t('cancel-all') }}</button>
+        </div>
+        @for (item of downloadService.queuedItems(); track item.id) {
+          <app-queue-item
+            [item]="item"
+            (cancel)="downloadService.cancelDownload($event)"
+            (retry)="downloadService.retryDownload($event)"
+            (remove)="downloadService.removeItem($event)"
+          />
+        }
+      }
+
+      <!-- Failed -->
+      @if (downloadService.failedItems().length > 0) {
+        <div class="d-flex align-items-center justify-content-between mt-3 mb-1">
+          <span class="section-label text-danger">{{ t('failed') }} ({{ downloadService.failedItems().length }})</span>
+          <button class="btn btn-sm btn-link p-0" (click)="downloadService.retryAllFailed()">{{ t('retry-all') }}</button>
+        </div>
+        @for (item of downloadService.failedItems(); track item.id) {
+          <app-queue-item
+            [item]="item"
+            (cancel)="downloadService.cancelDownload($event)"
+            (retry)="downloadService.retryDownload($event)"
+            (remove)="downloadService.removeItem($event)"
+          />
+        }
+      }
+
+      <!-- Completed -->
+      @if (downloadService.completedItems().length > 0) {
+        <div class="d-flex align-items-center justify-content-between mt-3 mb-1">
+          <span class="section-label text-success">{{ t('completed') }} ({{ downloadService.completedItems().length }})</span>
+          <button class="btn btn-sm btn-link p-0" (click)="downloadService.clearCompleted()">{{ t('clear') }}</button>
+        </div>
+        @for (item of downloadService.completedItems(); track item.id) {
+          <app-queue-item
+            [item]="item"
+            (cancel)="downloadService.cancelDownload($event)"
+            (retry)="downloadService.retryDownload($event)"
+            (remove)="downloadService.removeItem($event)"
+          />
+        }
+      }
+    }
+  </div>
+</ng-container>

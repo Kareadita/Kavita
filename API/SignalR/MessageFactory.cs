@@ -60,7 +60,7 @@ public static class MessageFactory
     /// <summary>
     /// Event sent out during downloading of files
     /// </summary>
-    private const string DownloadProgress = "DownloadProgress";
+    public const string DownloadProgress = "DownloadProgress";
     /// <summary>
     /// A cover was updated
     /// </summary>

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, output, signal} from '@angular/core';
 import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
 import {ConfirmConfig} from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import {ConfirmService} from 'src/app/shared/confirm.service';
@@ -10,7 +10,7 @@ import {UpdateVersionEvent} from 'src/app/_models/events/update-version-event';
 import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {NgClass, NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -34,6 +34,7 @@ export class EventsWidgetComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly user = input.required<User>();
+  readonly openQueue = output<void>();
 
   /** Progress events (Event Type: 'started', 'ended', 'updated' that have progress property) */
   readonly progressEvents = signal<NotificationProgressEvent[]>([]);
@@ -54,7 +55,6 @@ export class EventsWidgetComponent implements OnInit {
 
   /** Intercepts from Single Updates to show an extra indicator to the user */
   readonly updateAvailable = signal(false);
-  readonly activeDownloads = toSignal(this.downloadService.activeDownloads$, { initialValue: [] });
 
 
   ngOnInit(): void {

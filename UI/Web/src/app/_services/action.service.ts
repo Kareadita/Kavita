@@ -1023,6 +1023,10 @@ export class ActionService {
         });
       }
 
+      case Action.Download:
+        for (const s of series) { this.downloadService.download('series', s); }
+        return of(this.fromAction(action, series, 'none'));
+
       default:
         return of(this.fromAction(action, series, 'none'));
     }
@@ -1146,6 +1150,11 @@ export class ActionService {
           map(() => this.fromAction(action, entities, 'remove'))
         );
       }
+
+      case Action.Download:
+        for (const v of volumes) { this.downloadService.download('volume', v); }
+        for (const c of chapters) { this.downloadService.download('chapter', c); }
+        return of(this.fromAction(action, [...volumes, ...chapters], 'none'));
 
       default:
         return of(this.fromAction(action, [...volumes, ...chapters], 'none'));

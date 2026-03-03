@@ -1,0 +1,57 @@
+<ng-container *transloco="let t; prefix: 'download-queue'">
+  <div class="queue-item d-flex align-items-center gap-2 py-2">
+    <div class="status-icon">
+      @switch (item().status) {
+        @case ('preparing') {
+          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        }
+        @case ('downloading') {
+          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        }
+        @case ('completed') {
+          <i class="fa fa-check text-success" aria-hidden="true"></i>
+        }
+        @case ('failed') {
+          <i class="fa fa-times text-danger" aria-hidden="true"></i>
+        }
+        @default {
+          <i class="fa fa-clock text-muted" aria-hidden="true"></i>
+        }
+      }
+    </div>
+
+    <div class="queue-item__info flex-grow-1 overflow-hidden">
+      <div class="text-truncate fw-semibold" [title]="item().label">{{ item().label }}</div>
+      <div class="text-muted small">{{ t(item().status) }}</div>
+      @if (item().status === 'preparing' || item().status === 'downloading') {
+        <div class="progress mt-1" style="height: 4px;" role="progressbar" [attr.aria-valuenow]="item().progress" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar" [style.width.%]="item().progress"></div>
+        </div>
+      }
+      @if (item().estimatedSize > 0) {
+        <div class="text-muted small">{{ item().estimatedSize | bytes }}</div>
+      }
+      @if (item().status === 'failed' && item().errorMessage) {
+        <div class="text-danger small text-truncate" [title]="item().errorMessage">{{ item().errorMessage }}</div>
+      }
+    </div>
+
+    <div class="queue-item__actions d-flex gap-1 flex-shrink-0">
+      @if (item().status === 'queued') {
+        <button class="btn btn-sm btn-outline-secondary" [title]="t('cancel')" (click)="cancel.emit(item().id)">
+          <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+      }
+      @if (item().status === 'failed' && item().retryCount < 3) {
+        <button class="btn btn-sm btn-outline-warning" [title]="t('retry')" (click)="retry.emit(item().id)">
+          <i class="fa fa-redo" aria-hidden="true"></i>
+        </button>
+      }
+      @if (item().status === 'completed' || item().status === 'failed') {
+        <button class="btn btn-sm btn-outline-secondary" [title]="t('remove')" (click)="remove.emit(item().id)">
+          <i class="fa fa-trash" aria-hidden="true"></i>
+        </button>
+      }
+    </div>
+  </div>
+</ng-container>

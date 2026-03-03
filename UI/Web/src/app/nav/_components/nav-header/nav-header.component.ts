@@ -9,6 +9,9 @@ import {
   signal,
   viewChild
 } from '@angular/core';
+import {DownloadService} from '../../../shared/_services/download.service';
+import {DownloadQueueDrawerComponent} from '../download-queue-drawer/download-queue-drawer.component';
+import {DrawerService} from "../../../_services/drawer.service";
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {Chapter} from 'src/app/_models/chapter';
 import {UserCollection} from 'src/app/_models/collection-tag';
@@ -73,6 +76,12 @@ export class NavHeaderComponent {
   protected readonly metadataService = inject(MetadataService);
   private readonly annotationService = inject(AnnotationService);
   private readonly document = inject(DOCUMENT);
+  public readonly downloadService = inject(DownloadService);
+  private readonly drawerService = inject(DrawerService);
+
+  openDownloadQueue() {
+    this.drawerService.open(DownloadQueueDrawerComponent, { position: 'end' });
+  }
 
 
   readonly searchViewRef = viewChild.required<any>('search');

@@ -47,6 +47,9 @@ if (disableAnimations) {
   document.documentElement.classList.add('no-animations');
 }
 
+// Register download service worker for Background Fetch API support
+navigator.serviceWorker?.register('/download-sw.js').catch(() => {/* silently ignore registration failures */});
+
 registerSwiperElements();
 registerECharts();
 

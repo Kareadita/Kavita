@@ -38,8 +38,8 @@ export enum EVENTS {
    */
   CleanupProgress = 'CleanupProgress',
   /**
-   * A subtype of NotificationProgress that represnts a user downloading a file or group of files.
-   * Note: In v0.5.5, this is being replaced by an inbrowser experience. The message is changed and this will be moved to dashboard view once built
+   * A subtype of NotificationProgress that represents a user downloading a file or group of files.
+   * Note: In v0.5.5, this is being replaced by an in-browser experience. The message is changed and this will be moved to dashboard view once built
    */
   DownloadProgress = 'DownloadProgress',
   /**
@@ -297,6 +297,13 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.NotificationProgress, (resp: NotificationProgressEvent) => {
       this.messagesSource.next({
         event: EVENTS.NotificationProgress,
+        payload: resp
+      });
+    });
+
+    this.hubConnection.on(EVENTS.DownloadProgress, (resp: NotificationProgressEvent) => {
+      this.messagesSource.next({
+        event: EVENTS.DownloadProgress,
         payload: resp
       });
     });

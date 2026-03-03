@@ -40,6 +40,7 @@
             "assets": [
               "src/assets",
               "src/site.webmanifest",
+              "src/download-sw.js",
               {
                 "glob": "**/*",
                 "input": "node_modules/ngx-extended-pdf-viewer/assets/",

@@ -155,13 +155,13 @@ public class DownloadController : BaseApiController
         var filename = Path.GetFileNameWithoutExtension(downloadName);
         try
         {
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
                 MessageFactory.DownloadProgressEvent(username,
                     filename, $"Downloading {filename}", 0F, "started"));
 
             if (files.Count == 1 && files.First().Format != MangaFormat.Image)
             {
-                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
                     MessageFactory.DownloadProgressEvent(username,
                         filename, $"Downloading {filename}",1F, "ended"));
                 return GetFirstFileDownload(files);
@@ -169,7 +169,7 @@ public class DownloadController : BaseApiController
 
             var filePath = _archiveService.CreateZipFromFoldersForDownload(files.Select(c => c.FilePath).ToList(), tempFolder, ProgressCallback);
 
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
                 MessageFactory.DownloadProgressEvent(username,
                     filename, "Download Complete", 1F, "ended"));
 
@@ -177,7 +177,7 @@ public class DownloadController : BaseApiController
 
             async Task ProgressCallback(Tuple<string, float> progressInfo)
             {
-                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
                     MessageFactory.DownloadProgressEvent(username, filename, $"Processing {Path.GetFileNameWithoutExtension(progressInfo.Item1)}",
                         Math.Clamp(progressInfo.Item2, 0F, 1F)));
             }
@@ -185,7 +185,7 @@ public class DownloadController : BaseApiController
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an exception when trying to download files");
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
                 MessageFactory.DownloadProgressEvent(Username!,
                     filename, "Download Complete", 1F, "ended"));
             throw;
@@ -230,12 +230,12 @@ public class DownloadController : BaseApiController
         var files = await _bookmarkService.GetBookmarkFilesById(downloadBookmarkDto.Bookmarks.Select(b => b.Id));
 
         var filename = $"{series!.Name} - Bookmarks.zip";
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+        await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
             MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), $"Downloading {filename}",0F));
         var seriesIds = string.Join("_", downloadBookmarkDto.Bookmarks.Select(b => b.SeriesId).Distinct());
         var filePath =  _archiveService.CreateZipForDownload(files,
             $"download_{userId}_{seriesIds}_bookmarks");
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+        await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
             MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), $"Downloading {filename}", 1F));
 
 

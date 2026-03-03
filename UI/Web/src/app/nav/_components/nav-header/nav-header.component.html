@@ -189,9 +189,20 @@
         </ul>
 
         @if (user) {
+          @if (downloadService.hasActiveDownloads() || downloadService.completedItems().length > 0 || downloadService.failedItems().length > 0) {
+            <div class="nav-item me-2">
+              <button class="btn btn-icon position-relative" (click)="openDownloadQueue()" [title]="t('download-queue')">
+                <i class="fa fa-download nav" [class.colored]="downloadService.hasActiveDownloads()" aria-hidden="true"></i>
+                @if (downloadService.totalActiveCount() > 0) {
+                  <span class="badge bg-primary position-absolute top-0 start-100 translate-middle badge rounded-pill" style="font-size:0.55rem;transform:translate(-60%,0)">{{ downloadService.totalActiveCount() }}</span>
+                }
+              </button>
+            </div>
+          }
+
           @if (accountService.hasAdminRole()) {
             <div class="nav-item me-2">
-              <app-nav-events-toggle [user]="user" />
+              <app-nav-events-toggle [user]="user" (openQueue)="openDownloadQueue()" />
             </div>
           }
 
