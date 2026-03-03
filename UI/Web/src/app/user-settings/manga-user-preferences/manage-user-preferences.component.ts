@@ -158,62 +158,62 @@ export class ManageUserPreferencesComponent implements OnInit {
 
       this.setupLibraryTypeAheadSettings();
 
-       this.settingsForm = this.fb.group({
-         theme: this.fb.control<SiteTheme>(pref.theme),
-         globalPageLayoutMode: this.fb.control<PageLayoutMode>(pref.globalPageLayoutMode),
-         blurUnreadSummaries: this.fb.control<boolean>(pref.blurUnreadSummaries),
-         promptForDownloadSize: this.fb.control<boolean>(pref.promptForDownloadSize),
-         noTransitions: this.fb.control<boolean>(pref.noTransitions),
-         collapseSeriesRelationships: this.fb.control<boolean>(pref.collapseSeriesRelationships),
-         locale: this.fb.control<string>(pref.locale || 'en'),
-         bookReaderHighlightSlots: this.fb.array(pref.bookReaderHighlightSlots.map(s => this.fb.control(s))),
-         colorScapeEnabled: this.fb.control<boolean>(pref.colorScapeEnabled),
-         dataSaver: this.fb.control<boolean>(pref.dataSaver),
-         promptForRereadsAfter: this.fb.control<number>(pref.promptForRereadsAfter, [Validators.required]), // Required allows 0, but not null
+      this.settingsForm = this.fb.group({
+        theme: this.fb.control<SiteTheme>(pref.theme),
+        globalPageLayoutMode: this.fb.control<PageLayoutMode>(pref.globalPageLayoutMode),
+        blurUnreadSummaries: this.fb.control<boolean>(pref.blurUnreadSummaries),
+        promptForDownloadSize: this.fb.control<boolean>(pref.promptForDownloadSize),
+        noTransitions: this.fb.control<boolean>(pref.noTransitions),
+        collapseSeriesRelationships: this.fb.control<boolean>(pref.collapseSeriesRelationships),
+        locale: this.fb.control<string>(pref.locale || 'en'),
+        bookReaderHighlightSlots: this.fb.array(pref.bookReaderHighlightSlots.map(s => this.fb.control(s))),
+        colorScapeEnabled: this.fb.control<boolean>(pref.colorScapeEnabled),
+        dataSaver: this.fb.control<boolean>(pref.dataSaver),
+        promptForRereadsAfter: this.fb.control<number>(pref.promptForRereadsAfter, [Validators.required]), // Required allows 0, but not null
 
-         aniListScrobblingEnabled: this.fb.control<boolean>(pref.aniListScrobblingEnabled),
-         wantToReadSync: this.fb.control<boolean>(pref.wantToReadSync),
+        aniListScrobblingEnabled: this.fb.control<boolean>(pref.aniListScrobblingEnabled),
+        wantToReadSync: this.fb.control<boolean>(pref.wantToReadSync),
 
-         socialPreferences: this.fb.group({
-           shareReviews: this.fb.control<boolean>(pref.socialPreferences.shareReviews),
-           shareAnnotations: this.fb.control<boolean>(pref.socialPreferences.shareAnnotations),
-           viewOtherAnnotations: this.fb.control<boolean>(pref.socialPreferences.viewOtherAnnotations),
-           socialLibraries: this.fb.control<number[]>(pref.socialPreferences.socialLibraries),
-           socialMaxAgeRating: this.fb.control<AgeRating>(pref.socialPreferences.socialMaxAgeRating),
-           socialIncludeUnknowns: this.fb.control<boolean>(pref.socialPreferences.socialIncludeUnknowns),
-           shareProfile: this.fb.control<boolean>(pref.socialPreferences.shareProfile),
-         }),
+        socialPreferences: this.fb.group({
+          shareReviews: this.fb.control<boolean>(pref.socialPreferences.shareReviews),
+          shareAnnotations: this.fb.control<boolean>(pref.socialPreferences.shareAnnotations),
+          viewOtherAnnotations: this.fb.control<boolean>(pref.socialPreferences.viewOtherAnnotations),
+          socialLibraries: this.fb.control<number[]>(pref.socialPreferences.socialLibraries),
+          socialMaxAgeRating: this.fb.control<AgeRating>(pref.socialPreferences.socialMaxAgeRating),
+          socialIncludeUnknowns: this.fb.control<boolean>(pref.socialPreferences.socialIncludeUnknowns),
+          shareProfile: this.fb.control<boolean>(pref.socialPreferences.shareProfile),
+        }),
 
-         opdsPreferences: this.fb.group({
-           embedProgressIndicator: this.fb.control<boolean>(pref.opdsPreferences.embedProgressIndicator),
-           includeContinueFrom: this.fb.control<boolean>(pref.opdsPreferences.includeContinueFrom),
-         })
-       });
+        opdsPreferences: this.fb.group({
+          embedProgressIndicator: this.fb.control<boolean>(pref.opdsPreferences.embedProgressIndicator),
+          includeContinueFrom: this.fb.control<boolean>(pref.opdsPreferences.includeContinueFrom),
+        })
+      });
 
-        if (this.accountService.isReadOnly()) {
-          this.settingsForm.disable({ emitEvent: false });
+      if (this.accountService.isReadOnly()) {
+        this.settingsForm.disable({ emitEvent: false });
         }
-
-        this.settingsForm.markAsPristine();
-
-       this.settingsForm.valueChanges.pipe(
-         distinctUntilChanged(),
-         debounceTime(100),
-         filter(() => this.settingsForm.valid && this.settingsForm.dirty),
-         takeUntilDestroyed(this.destroyRef),
-         switchMap(_ => {
-           var data = this.packSettings();
-
-           return this.accountService.updatePreferences(data);
-         }),
-         tap(prefs => {
-           if (this.user) {
-             this.user.preferences = {...prefs};
-             this.cdRef.markForCheck();
-              this.settingsForm.markAsPristine();
-           }
-         })
-       ).subscribe();
+        
+      this.settingsForm.markAsPristine();
+        
+      // Automatically save settings as we edit them
+      this.settingsForm.valueChanges.pipe(
+        distinctUntilChanged(),
+        debounceTime(100),
+        filter(_ => this.settingsForm.valid && this.settingsForm.dirty),
+        takeUntilDestroyed(this.destroyRef),
+        switchMap(_ => {
+          const data = this.packSettings();
+          return this.accountService.updatePreferences(data);
+        }),
+        tap(prefs => {
+          if (this.user) {
+            this.user.preferences = {...prefs};
+            this.cdRef.markForCheck();
+            this.settingsForm.markAsPristine();
+          }
+        })
+      ).subscribe();
 
       this.cdRef.markForCheck();
     });
