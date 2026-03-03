@@ -156,10 +156,15 @@ export class ActionFactoryService {
   }
 
   getSideNavHomeActions(shouldRenderFunc: ActionShouldRenderFunc<{}> = this.basicReadRender) {
+    // If the caller doesn't pass a render function, assume that readonly users cannot perform actions
+    const renderFunc = shouldRenderFunc === this.basicReadRender
+      ? (action: ActionItem<any>, entity: any, user: User) => !this.accountService.hasReadOnlyRole()
+      : shouldRenderFunc;
+
     return this.applyCallbackToList(
       this.sideNavHomeActions,
       (action, entity) => this.actionService.handleSideNavHomeStream(action, entity),
-      shouldRenderFunc
+      renderFunc
     );
   }
 
