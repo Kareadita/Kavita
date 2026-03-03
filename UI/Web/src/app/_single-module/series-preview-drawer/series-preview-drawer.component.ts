@@ -33,7 +33,8 @@ export class SeriesPreviewDrawerComponent implements OnInit {
   protected readonly FilterField = FilterField;
 
   name = input.required<string>();
-  seriesId = input.required<number>();
+  /** Required for non-external series */
+  seriesId = input<number>(0);
   libraryId = input.required<number>();
   aniListId = input<number | undefined>(undefined);
   malId = input<number | undefined>(undefined);
