@@ -368,7 +368,6 @@ public partial class EntityNamingService : IEntityNamingService
 
     /// <summary>
     /// Checks if the volume name already starts with a volume-like prefix.
-    /// Handles common English label variations and the provided localized label format.
     /// </summary>
     private static bool HasVolumePrefix(string volumeName, string? volumeLabel = null)
     {
