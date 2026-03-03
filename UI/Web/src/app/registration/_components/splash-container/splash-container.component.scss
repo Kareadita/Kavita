@@ -7,8 +7,8 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    height: calc(var(--vh, 1vh) * 100 - 57px);
-    min-height: 289px;
+    height: calc(var(--vh, 1vh) * 100 - 3.5625rem);
+    min-height: 18.0625rem;
     position: relative;
     width: 100vw;
     max-width: 100vw;
@@ -32,7 +32,7 @@
         margin-bottom: 0;
         font-weight: bold;
         display: inline-block;
-        margin-left: 5px;
+        margin-left: 0.3125rem;
         vertical-align: middle;
     }
 
@@ -56,13 +56,13 @@
     .card {
         background-color: var(--login-card-bg-color);
         color: #fff;
-        max-width: 300px;
+        max-width: 18.75rem;
         border-width: var(--login-card-border-width);
         border-style: var(--login-card-border-style);
         border-color: var(--login-card-border-color);
 
         &:focus {
-            border: 2px solid white;
+            border: 0.125rem solid white;
 
         }
 

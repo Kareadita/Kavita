@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'theme-manager'">
 
   <div class="position-relative">
-    @if (accountService.isAdmin()) {
+    @if (accountService.hasAdminRole()) {
       <button class="btn btn-outline-primary position-absolute custom-position" (click)="selectTheme(undefined)" [title]="t('add')">
         <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
       </button>
@@ -16,7 +16,7 @@
       <div class="pe-2">
         <ul style="height: 100%" class="list-group list-group-flush">
 
-          <li class="list-group-item d-flex justify-content-between align-items-start" style="height: 40px" aria-hidden="true">
+          <li class="list-group-item d-flex justify-content-between align-items-start" style="height: 2.5rem" aria-hidden="true">
             <div class="fw-bold section-header">{{t('downloaded')}}</div>
           </li>
 
@@ -24,7 +24,7 @@
             <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: theme, downloaded: true}" />
           }
 
-          <li class="list-group-item d-flex justify-content-between align-items-start" style="height: 40px" aria-hidden="true">
+          <li class="list-group-item d-flex justify-content-between align-items-start" style="height: 2.5rem" aria-hidden="true">
             <div class="fw-bold section-header">{{t('downloadable')}}</div>
           </li>
 
@@ -43,7 +43,7 @@
             <div class="mx-auto">
               <div class="d-flex justify-content-center">
                 <div class="d-flex justify-content-evenly">
-                  @if (accountService.isAdmin()) {
+                  @if (accountService.hasAdminRole()) {
                     {{t('preview-default-admin')}}
                   } @else {
                     {{t('preview-default')}}
@@ -56,7 +56,7 @@
 
           @if (files && files.length > 0) {
             <app-loading [loading]="isUploadingTheme" />
-          } @else if (accountService.isAdmin()) {
+          } @else if (accountService.hasAdminRole()) {
             <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
                           dropZoneClassName="file-upload" contentClassName="file-upload-zone">
 
@@ -64,7 +64,7 @@
                 <div class="row g-0 mt-3 pb-3">
                   <div class="mx-auto">
                     <div class="row g-0 mb-3">
-                      <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
+                      <i class="fa fa-file-upload mx-auto" style="font-size: 1.5rem; width: 1.25rem;" aria-hidden="true"></i>
                     </div>
 
                     <div class="d-flex justify-content-center">
@@ -90,7 +90,7 @@
                 @if (selectedTheme.name !== 'Dark' && canUseThemes()) {
                   <button class="btn btn-danger me-1" (click)="deleteTheme(selectedTheme.site!)">{{t('delete')}}</button>
                 }
-                @if (accountService.isAdmin()) {
+                @if (accountService.hasAdminRole()) {
                   <button class="btn btn-secondary me-1" [disabled]="selectedTheme.site?.isDefault" (click)="updateDefault(selectedTheme.site!)">{{t('set-default')}}</button>
                 }
                 <button class="btn btn-primary me-1" [disabled]="currentTheme && selectedTheme.name === currentTheme.name" (click)="applyTheme(selectedTheme.site!)">{{t('apply')}}</button>

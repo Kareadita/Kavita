@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  inject,
-  Input,
-  OnInit,
-  ViewEncapsulation
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, signal, ViewEncapsulation} from '@angular/core';
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 
@@ -18,25 +10,12 @@ import {TranslocoDirective} from "@jsverse/transloco";
     changeDetection: ChangeDetectionStrategy.OnPush,
     encapsulation: ViewEncapsulation.None
 })
-export class SpoilerComponent implements OnInit{
+export class SpoilerComponent {
 
-  @Input({required: true}) html!: string;
-  isCollapsed: boolean = true;
-  public readonly cdRef = inject(ChangeDetectorRef);
-
-  constructor() {
-    this.isCollapsed = true;
-    this.cdRef.markForCheck();
-  }
-
-  ngOnInit() {
-    this.isCollapsed = true;
-    this.cdRef.markForCheck();
-  }
-
+  html = input.required<string>();
+  isCollapsed = signal<boolean>(true);
 
   toggle() {
-    this.isCollapsed = !this.isCollapsed;
-    this.cdRef.markForCheck();
+    this.isCollapsed.update(x => !x);
   }
 }

@@ -1,8 +1,9 @@
-@if (format !== MangaFormat.UNKNOWN) {
-  @if (useTitle) {
-    <i class="{{format | mangaFormatIcon}}" aria-hidden="true" title="{{format | mangaFormat}}"></i>
+@let formatValue = format();
+@if (formatValue !== MangaFormat.UNKNOWN) {
+  @if (useTitle()) {
+    <i class="{{formatValue | mangaFormatIcon}}" aria-hidden="true" title="{{formatValue | mangaFormat}}"></i>
   } @else {
-    <i class="{{format | mangaFormatIcon}}" aria-hidden="true" ngbTooltip="{{format | mangaFormat}}"></i>
+    <i class="{{formatValue | mangaFormatIcon}}" aria-hidden="true" ngbTooltip="{{formatValue | mangaFormat}}"></i>
   }
   <ng-content />
 }

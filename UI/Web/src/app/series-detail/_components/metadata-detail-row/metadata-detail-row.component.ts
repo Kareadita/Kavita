@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {AgeRatingImageComponent} from "../../../_single-module/age-rating-image/age-rating-image.component";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {ReadTimeLeftPipe} from "../../../_pipes/read-time-left.pipe";
@@ -54,10 +54,7 @@ export class MetadataDetailRowComponent {
   totalBytes = input<number | undefined>(undefined);
   totalReads = input(0);
 
-  hasDownloadRole = computed(() => {
-    const user = this.accountService.currentUserSignal();
-    return user && this.accountService.hasDownloadRole(user);
-  });
+  hasDownloadRole = this.accountService.hasDownloadRole;
 
   openGeneric(queryParamName: FilterField, filter: string | number) {
     if (queryParamName === FilterField.None) return;

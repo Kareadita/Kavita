@@ -13,15 +13,15 @@
 .image-container {
   position: relative;
   align-self: flex-start;
-  max-height: 400px;
-  max-width: 280px;
+  max-height: 25rem;
+  max-width: 17.5rem;
 }
 
 .person-badge {
   background: var(--card-bg-color);
-  max-height: 200px;
-  height: 200px;
-  width: 200px;
+  max-height: 12.5rem;
+  height: 12.5rem;
+  width: 12.5rem;
   border-radius: 50%;
   overflow: hidden;
   position: relative;
@@ -31,8 +31,8 @@
     width: 100%;
 
     i {
-      max-height: 128px;
-      height: 128px;
+      max-height: 8rem;
+      height: 8rem;
       font-size: 8rem;
       color: var(--bs-gray-500);
     }
@@ -43,12 +43,12 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
   background-color: var(--error-color);
   color: white;
-  border: 2px solid var(--elevation-layer7-dark);
+  border: 0.125rem solid var(--elevation-layer7-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,19 +58,19 @@
 
   &:hover:not(:disabled) {
     background-color: var(--error-accent-color);
-    border: 2px solid var(--elevation-layer3-dark);
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 2px 4px var(--elevation-layer7-dark);
+    border: 0.125rem solid var(--elevation-layer3-dark);
+    transform: translateY(-0.125rem) scale(1.05);
+    box-shadow: 0 0.125rem 0.25rem var(--elevation-layer7-dark);
   }
 
   &:active:not(:disabled) {
     transform: translateY(0) scale(1.02);
-    box-shadow: 0 2px 6px rgba(234, 13, 2, 0.4);
+    box-shadow: 0 0.125rem 0.375rem rgba(234, 13, 2, 0.4);
   }
 
   &:focus {
-    outline: 2px solid var(--error-accent-color);
-    outline-offset: 2px;
+    outline: 0.125rem solid var(--error-accent-color);
+    outline-offset: 0.125rem;
   }
 
   &:disabled {
@@ -87,11 +87,11 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
   background-color: var(--primary-color-darker-shade);
-  border: 2px solid var(--elevation-layer7-dark);
+  border: 0.125rem solid var(--elevation-layer7-dark);
   color: white;
   display: flex;
   align-items: center;
@@ -102,19 +102,19 @@
 
   &:hover:not(:disabled) {
     background-color: var(--primary-color);
-    border: 2px solid var(--elevation-layer7-dark);
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 2px 4px var(--elevation-layer7-dark);
+    border: 0.125rem solid var(--elevation-layer7-dark);
+    transform: translateY(-0.125rem) scale(1.05);
+    box-shadow: 0 0.125rem 0.25rem var(--elevation-layer7-dark);
   }
 
   &:active:not(:disabled) {
     transform: translateY(0) scale(1.02);
-    box-shadow: 0 2px 6px rgba(74, 198, 148, 0.4);
+    box-shadow: 0 0.125rem 0.375rem rgba(74, 198, 148, 0.4);
   }
 
   &:focus {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
+    outline: 0.125rem solid var(--primary-color);
+    outline-offset: 0.125rem;
   }
 
   &:disabled {
@@ -129,10 +129,10 @@
 
 @media (max-width: 576px) {
   .edit-button {
-    width: 35px;
-    height: 35px;
-    bottom: 5px;
-    right: 5px;
+    width: 2.1875rem;
+    height: 2.1875rem;
+    bottom: 0.3125rem;
+    right: 0.3125rem;
 
     i {
       font-size: 0.875rem;
@@ -144,7 +144,7 @@
 .profile-image-wrapper .reset-button,
 .profile-image-wrapper .edit-button {
   opacity: 0 !important;
-  transform: translateY(6px) scale(0.9) !important;
+  transform: translateY(0.375rem) scale(0.9) !important;
   pointer-events: none !important;
   transition-property: opacity, transform !important;
   transition-duration: 180ms !important;

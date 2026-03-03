@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, inject, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, inject, viewChild} from '@angular/core';
 import {CblConflictReasonPipe} from "../../../_pipes/cbl-conflict-reason.pipe";
 import {CblImportResultPipe} from "../../../_pipes/cbl-import-result.pipe";
 import {FileUploadComponent, FileUploadValidators} from "@iplab/ngx-file-upload";
@@ -72,7 +72,7 @@ export class ImportCblComponent {
   protected readonly Step = Step;
   protected readonly WikiLink = WikiLink;
 
-  @ViewChild('fileUpload') fileUpload!: ElementRef<HTMLInputElement>;
+  readonly fileUpload = viewChild.required<ElementRef<HTMLInputElement>>('fileUpload');
 
 
   fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [

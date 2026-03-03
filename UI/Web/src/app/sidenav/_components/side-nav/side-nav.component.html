@@ -3,9 +3,9 @@
   @let sideNavVisible = navService.sideNavVisibilitySignal();
   @let sideNavCollapsed = navService.sideNavCollapsedSignal();
 
-  @if (accountService.currentUser$ | async; as user) {
+  @if (accountService.currentUser()) {
     <div class="side-nav-container" [ngClass]="{'closed' : sideNavCollapsed,
-    'hidden': sideNavVisible === false,
+    'hidden': !sideNavVisible,
     'no-donate': (licenseService.hasValidLicense$ | async) === true}">
       <div class="side-nav" cdkDropList (cdkDropListDropped)="reorderDrop($event)">
 
@@ -20,12 +20,12 @@
           @if (showAll) {
             <app-side-nav-item cdkDrag cdkDragDisabled icon="fa fa-chevron-left"
                                [title]="t(editMode ? 'cancel-edit' : 'back')" (click)="showLess()" />
-            @if (!isReadOnly) {
+            @if (!isReadOnly()) {
               <app-side-nav-item cdkDrag cdkDragDisabled icon="fa-cogs"
                                  [title]="t('customize')" link="/settings"
                                  [fragment]="SettingsTabId.Customize" />
             }
-            @if (streams.length > ItemLimit && sideNavCollapsed === false && !editMode) {
+            @if (streams.length > ItemLimit && !sideNavCollapsed && !editMode) {
               <div cdkDrag cdkDragDisabled class="mb-2 mt-3 ms-2 me-2">
                 <label for="filter" class="form-label visually-hidden">{{t('filter-label')}}</label>
                 <div class="form-group position-relative">
@@ -111,7 +111,7 @@
   }
 
   <div class="sidenav-bottom" [ngClass]="{'closed' : sideNavCollapsed,
-      'hidden': sideNavVisible === false || (licenseService.hasValidLicense$ | async) === true}">
+      'hidden': !sideNavVisible || (licenseService.hasValidLicense$ | async) === true}">
     @if ((licenseService.hasValidLicense$ | async) === false) {
       <app-side-nav-item [ngClass]="'donate'" icon="fa-heart"
                         [ngbTooltip]="t('donate-tooltip')"

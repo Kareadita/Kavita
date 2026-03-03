@@ -436,7 +436,7 @@ public class OpdsService : IOpdsService
             feed.Entries.Add(CreateSeries(seriesDto, metadata, apiKey, prefix, baseUrl));
         }
         // Recently updated is hardcoded to 30 items
-        AddPagination(feed, request.PageNumber, 30, PageSize, $"{apiKey}/recently-updated");
+        AddPagination(feed, request.PageNumber, 30, PageSize, $"{prefix}{apiKey}/recently-updated");
 
         return feed;
     }

@@ -1,6 +1,6 @@
 .custom-col {
-    padding-left: 0px;
-    padding-right: 0px;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .badge {
@@ -8,26 +8,26 @@
 }
 
 .sm-popover {
-  width: 150px;
+  width: 9.375rem;
 
   > .popover-body {
-    padding-top: 10px;
+    padding-top: 0.625rem;
   }
 }
 
 .md-popover {
-  width: 214px;
+  width: 13.375rem;
 
   > .popover-body {
-    padding-top: 10px;
+    padding-top: 0.625rem;
   }
 }
 
 .lg-popover {
-  width: 320px;
+  width: 20rem;
 
   > .popover-body {
-    padding-top: 10px;
+    padding-top: 0.625rem;
   }
 }
 

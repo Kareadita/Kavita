@@ -2,7 +2,7 @@
   <div>
     <div class="modal-header">
       <h4 class="modal-title" id="modal-basic-title">
-        {{t('title', {seriesName: series.name})}}
+        {{t('title', {seriesName: series().name})}}
       </h4>
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
@@ -48,11 +48,11 @@
       <div class="setting-section-break"></div>
 
       @if (!formGroup.get('dontMatch')?.value) {
-        <app-loading [loading]="isLoading" />
-        @for(item of matches; track item.series.name) {
+        <app-loading [loading]="isLoading()" />
+        @for(item of matches(); track item.series.name) {
           <app-match-series-result-item [item]="item" [isDarkMode]="(themeService.isDarkMode$ | async)!" (selected)="selectMatch($event)" />
         } @empty {
-          @if (!isLoading) {
+          @if (!isLoading()) {
             <p>{{t('no-results')}}</p>
           }
         }

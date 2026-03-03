@@ -1,11 +1,12 @@
 <div class="main-container container-fluid">
   <ng-container *transloco="let t; prefix: 'person-detail'">
-    @if (person$ | async; as person) {
+    @if (person(); as person) {
     <div #companionBar>
       <app-side-nav-companion-bar>
         <ng-container title>
           <h2 class="title text-break">
-            <app-card-actionables [entity]="person" [actions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v" />
+            <app-card-actionables [entity]="person" [actions]="personActions" [labelBy]="person.name" iconClass="fa-ellipsis-v"
+                                  (actionHandler)="handleActionCallback($event)"/>
             <span>{{person.name}}</span>
 
             @for (webLink of (person.webLinks ?? []); track webLink) {
@@ -21,7 +22,7 @@
 
     <div class="main-container container-fluid pt-2 mb-5">
       <div class="row mb-0 mb-xl-3 info-container">
-        @if (HasCoverImage) {
+        @if (hasCoverImage()) {
           <div class="image-container col-5 col-sm-6 col-md-5 col-lg-5 col-xl-2 col-xxl-2 col-xxxl-2 d-none d-sm-block mt-2">
             <div class="person-badge">
               <app-image objectFit="cover"
@@ -58,44 +59,28 @@
             }
 
 
-            @if (person$ | async; as person) {
-              @if (person.roles && person.roles.length > 0) {
-                <span class="fw-bold mt-2">{{t('all-roles')}}</span>
-                <div>
-                  <app-badge-expander [items]="person.roles"
-                                      [itemsTillExpander]="6">
-                    <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-                      <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="loadFilterByRole(item)">{{item | personRole}}</a>
-                    </ng-template>
-                  </app-badge-expander>
-                </div>
-              }
-
-
-<!--              -->
-<!--              <div class="mt-1">-->
-<!--                <h5>{{t('all-roles')}}</h5>-->
-<!--                @for(role of roles; track role) {-->
-<!--                  <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable" (click)="loadFilterByRole(role)">{{role | personRole}}</app-tag-badge>-->
-<!--                }-->
-<!--              </div>-->
+            @if (person.roles && person.roles.length > 0) {
+              <span class="fw-bold mt-2">{{t('all-roles')}}</span>
+              <div>
+                <app-badge-expander [items]="person.roles"
+                                    [itemsTillExpander]="6">
+                  <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                    <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="loadFilterByRole(item)">{{item | personRole}}</a>
+                  </ng-template>
+                </app-badge-expander>
+              </div>
             }
-
           </div>
         </div>
       </div>
     </div>
 
-    @if (works$ | async; as works) {
+    @if (works().length > 0) {
       <div class="row mt-2">
         <!-- TODO: If the person is JUST a character, then switch this title to: 'A character in` -->
-        <app-carousel-reel [items]="works" [title]="t('known-for-title')" (sectionClick)="loadFilterByPerson()">
+        <app-carousel-reel [items]="works()" [title]="t('known-for-title')" (sectionClick)="loadFilterByPerson()">
           <ng-template #carouselItem let-item>
-            <app-card-item [entity]="item"
-                           [imageUrl]="imageService.getSeriesCoverImage(item.id)"
-                           [title]="item.name"
-                           [suppressArchiveWarning]="true"
-                           (clicked)="navigateToSeries(item)" />
+            <app-series-card [series]="item" />
           </ng-template>
         </app-carousel-reel>
       </div>
@@ -103,19 +88,15 @@
 
 
    <!-- Individual Works Carousel -->
-   @if (person$ | async; as person) {
-     @for(role of (person.roles || []); track role) {
-       <div class="row mt-2">
-         <app-carousel-reel [items]="(chaptersByRole[role] | async)!" [title]="t('individual-role-title', {role: (role | personRole)})" (sectionClick)="loadFilterByRole(role)">
-           <ng-template #carouselItem let-item>
-             <app-chapter-card [chapter]="item" [libraryId]="item.libraryId" [libraryType]="item.libraryType" [seriesId]="item.seriesId" />
-           </ng-template>
-         </app-carousel-reel>
-       </div>
-     }
+   @for(role of (person.roles || []); track role) {
+     <div class="row mt-2">
+       <app-carousel-reel [items]="(chaptersByRole()[role] | async) ?? []" [title]="t('individual-role-title', {role: (role | personRole)})" (sectionClick)="loadFilterByRole(role)">
+         <ng-template #carouselItem let-item>
+           <app-chapter-card [chapter]="item" [libraryId]="item.libraryId" [libraryType]="item.libraryType" [seriesId]="item.seriesId" />
+         </ng-template>
+       </app-carousel-reel>
+     </div>
    }
-
-
 
 
 

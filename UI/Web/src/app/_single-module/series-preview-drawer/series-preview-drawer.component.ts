@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, model, OnInit, signal} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveOffcanvas, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ExternalSeriesDetail, SeriesStaff} from "../../_models/series-detail/external-series-detail";
 import {SeriesService} from "../../_services/series.service";
@@ -29,84 +29,83 @@ export class SeriesPreviewDrawerComponent implements OnInit {
   private readonly seriesService = inject(SeriesService);
   private readonly imageService = inject(ImageService);
   private readonly actionService = inject(ActionService);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
   protected readonly FilterField = FilterField;
 
-  @Input({required: true}) name!: string;
-  @Input() aniListId?: number;
-  @Input() malId?: number;
-  @Input() seriesId?: number;
-  @Input() libraryId: number = 0;
-  @Input({required: true}) isExternalSeries: boolean = true;
-
-  isLoading: boolean = true;
-  localStaff: Array<SeriesStaff> = [];
-  externalSeries: ExternalSeriesDetail | undefined;
-  localSeries: SeriesMetadata | undefined;
-  url: string = '';
-  wantToRead: boolean = false;
+  name = input.required<string>();
+  seriesId = input.required<number>();
+  libraryId = input.required<number>();
+  aniListId = input<number | undefined>(undefined);
+  malId = input<number | undefined>(undefined);
+  isExternalSeries = model<boolean>(true);
 
 
+  isLoading = signal<boolean>(true);
+  localStaff = signal<SeriesStaff[]>([]);
+  externalSeries = signal<ExternalSeriesDetail | undefined>(undefined);
+  localSeries = signal<SeriesMetadata | undefined>(undefined);
+  viewSeriesUrl = computed(() => {
+    const externalSeriesUrl = this.externalSeries()?.siteUrl;
+    const libraryId = this.libraryId();
+    const seriesId = this.seriesId();
 
-  get CoverUrl() {
-    if (this.isExternalSeries) {
-      if (this.externalSeries) return this.externalSeries.coverUrl;
+    return externalSeriesUrl ?? 'library/' + libraryId + '/series/' + seriesId;
+  });
+  wantToRead = signal<boolean>(false);
+
+  coverUrl = computed(() => {
+    const isExternal = this.isExternalSeries();
+    const seriesId = this.seriesId();
+    const externalSeries = this.externalSeries();
+
+    if (isExternal) {
+      if (externalSeries) return externalSeries.coverUrl;
       return this.imageService.placeholderImage;
     }
-    return this.imageService.getSeriesCoverImage(this.seriesId!);
-  }
+
+    return this.imageService.getSeriesCoverImage(seriesId!);
+  });
 
 
   ngOnInit() {
-    if (this.isExternalSeries) {
-      this.seriesService.getExternalSeriesDetails(this.aniListId, this.malId).subscribe(externalSeries => {
-        this.externalSeries = externalSeries;
-        this.isLoading = false;
-        if (this.externalSeries.siteUrl) {
-          this.url = this.externalSeries.siteUrl;
-        }
-
-        this.cdRef.markForCheck();
+    if (this.isExternalSeries()) {
+      this.seriesService.getExternalSeriesDetails(this.aniListId(), this.malId()).subscribe(externalSeries => {
+        this.externalSeries.set(externalSeries);
+        this.isLoading.set(false);
       });
     } else {
-      this.seriesService.getMetadata(this.seriesId!).subscribe(data => {
-        this.localSeries = data;
+      this.seriesService.getMetadata(this.seriesId()).subscribe(data => {
+        this.localSeries.set(data);
 
         // Consider the localSeries has no metadata, try to merge the external Series metadata
-        if (this.localSeries.summary === '' && this.localSeries.genres.length === 0) {
-          this.seriesService.getExternalSeriesDetails(0, 0, this.seriesId).subscribe(externalSeriesData => {
-            this.isExternalSeries = true;
-            this.externalSeries = externalSeriesData;
-            this.cdRef.markForCheck();
+        if (this.localSeries()!.summary === '' && this.localSeries()!.genres.length === 0) {
+          this.seriesService.getExternalSeriesDetails(0, 0, this.seriesId()).subscribe(externalSeriesData => {
+            this.isExternalSeries.set(true);
+            this.externalSeries.set(externalSeriesData);
           })
         }
 
-        this.seriesService.isWantToRead(this.seriesId!).subscribe(wantToRead => {
-          this.wantToRead = wantToRead;
-          this.cdRef.markForCheck();
+        this.seriesService.isWantToRead(this.seriesId()).subscribe(wantToRead => {
+          this.wantToRead.set(wantToRead);
         });
 
-        this.isLoading = false;
-        this.url = 'library/' + this.libraryId + '/series/' + this.seriesId;
-        this.localStaff = data.writers.map(p => {
-          return {name: p.name, role: 'Story & Art'} as SeriesStaff;
-        });
-        this.cdRef.markForCheck();
+        this.isLoading.set(false);
+
+        this.localStaff.set(data.writers.map(p => {
+          return {name: p.name, role: translate('series-preview-drawer.story-and-art-label')} as SeriesStaff;
+        }));
       });
     }
-
   }
 
   toggleWantToRead() {
-    if (this.wantToRead) {
-      this.actionService.removeMultipleSeriesFromWantToReadList([this.seriesId!]);
+    if (this.wantToRead()) {
+      this.actionService.removeMultipleSeriesFromWantToReadList([this.seriesId()]);
     } else {
-      this.actionService.addMultipleSeriesToWantToReadList([this.seriesId!]);
+      this.actionService.addMultipleSeriesToWantToReadList([this.seriesId()]);
     }
 
-    this.wantToRead = !this.wantToRead;
-    this.cdRef.markForCheck();
+    this.wantToRead.update(x => !x);
   }
 
   close() {

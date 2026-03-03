@@ -1,12 +1,12 @@
 <!-- Updated highlight-bar template -->
 <ng-container *transloco="let t; prefix:'highlight-bar'">
-  <div class="d-flex align-items-center" style="max-height: 47px; height: 47px;">
+  <div class="d-flex align-items-center" style="max-height: 2.9375rem; height: 2.9375rem;">
     @let collapsed = isCollapsed();
 
     @if (desktopLayout() && canCollapse()) {
       <button
         type="button"
-        style="max-height: 47px"
+        style="max-height: 2.9375rem"
         class="btn btn-outline-primary highlight-bar-toggle {{!collapsed ? 'open': 'collapsed'}}"
         (click)="collapse.toggle()"
         [attr.aria-expanded]="!collapsed"
@@ -18,8 +18,8 @@
     }
 
     <div #collapse="ngbCollapse" [ngbCollapse]="collapsed" (ngbCollapseChange)="updateCollapse($event)"
-         [horizontal]="true" style="max-width: 500px" id="highlight-bar">
-      <div class="highlight-bar" style="max-height: 47px">
+         [horizontal]="true" style="max-width: 31.25rem" id="highlight-bar">
+      <div class="highlight-bar" style="max-height: 2.9375rem">
         @let activeSlot = selectedSlot();
         @if (activeSlot) {
           <div class="color-picker-container">

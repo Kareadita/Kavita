@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 import {NgClass} from "@angular/common";
 
 /**
@@ -33,10 +33,8 @@ export enum TagBadgeCursor {
 })
 export class TagBadgeComponent {
 
-  @Input() selectionMode: TagBadgeCursor = TagBadgeCursor.Selectable;
-  @Input() fillStyle: 'filled' | 'outline' = 'outline';
+  selectionMode = input<TagBadgeCursor>(TagBadgeCursor.Selectable);
+  fillStyle = input<'filled' | 'outline'>('outline');
 
-  get TagBadgeCursor() {
-    return TagBadgeCursor;
-  }
+  protected readonly TagBadgeCursor = TagBadgeCursor;
 }

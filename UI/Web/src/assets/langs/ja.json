@@ -494,14 +494,6 @@
     "announcements": {
         "title": "お知らせ"
     },
-    "out-of-date-modal": {
-        "title": "遅れをとらないでください！",
-        "close": "{{common.close}}",
-        "subtitle": "インストールが {{count}} バージョン以上古いようです!",
-        "description-1": "Kavita の最新バージョンを実行できるようにアップグレードすることを検討してください。",
-        "description-2": "更新方法については、<a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> をご覧ください。",
-        "description-3": "まだアップデートされていない具体的な理由がある場合は、ぜひ古いバージョンを使い続けている理由を教えて下さい! Discord で、アップグレードの妨げになっている要因をお聞かせください。"
-    },
     "changelog": {
         "installed": "インストール済",
         "download": "ダウンロード",
@@ -742,12 +734,6 @@
     "read-more": {
         "read-more": "もっと読む",
         "read-less": "折りたたむ"
-    },
-    "update-notification-modal": {
-        "title": "新しいアップデートが利用可能になりました!",
-        "close": "{{common.close}}",
-        "help": "更新方法",
-        "download": "ダウンロード"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2401,20 +2387,6 @@
         "management-tab": "管理",
         "activity-tab": "アクティビティ"
     },
-    "new-version-modal": {
-        "title": "Kavita が更新されました!",
-        "description": "Kavita の新しいバージョンが利用可能です。更新してアップデートしてください。",
-        "known-issues": "{{changelog.known-issues}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "added": "{{changelog.added}}",
-        "developer": "{{changelog.developer}}",
-        "close": "{{common.close}}",
-        "refresh": "更新",
-        "fixed": "{{changelog.fixed}}",
-        "changed": "{{changelog.changed}}"
-    },
     "changelog-update-item": {
         "known-issues": "既知の問題",
         "fixed": "修正",
@@ -3410,5 +3382,25 @@
     "profile-image": {
         "edit-image-alt": "画像を編集",
         "reset-image-alt": "画像をリセット"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "遅れをとらないでください！",
+            "subtitle": "インストールが {{count}} バージョン以上古いようです!",
+            "description-1": "Kavita の最新バージョンを実行できるようにアップグレードすることを検討してください。",
+            "description-2": "更新方法については、<a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> をご覧ください。",
+            "description-3": "まだアップデートされていない具体的な理由がある場合は、ぜひ古いバージョンを使い続けている理由を教えて下さい! Discord で、アップグレードの妨げになっている要因をお聞かせください。"
+        },
+        "new-version": {
+            "title": "Kavita が更新されました!",
+            "description": "Kavita の新しいバージョンが利用可能です。更新してアップデートしてください。",
+            "refresh": "更新"
+        },
+        "update-notification": {
+            "title": "新しいアップデートが利用可能になりました!",
+            "help": "更新方法",
+            "download": "ダウンロード"
+        }
     }
 }

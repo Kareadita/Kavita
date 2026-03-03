@@ -5,7 +5,7 @@
 
     .bulk-select {
         background-color: var(--bulk-selection-bg-color);
-        border-bottom: 2px solid var(--primary-color);
+        border-bottom: 0.125rem solid var(--primary-color);
         color: var(--bulk-selection-text-color) !important;
 
         .btn-icon {

@@ -494,14 +494,6 @@
     "announcements": {
         "title": "Oznámení"
     },
-    "out-of-date-modal": {
-        "title": "Nezůstaňte pozadu!",
-        "close": "{{common.close}}",
-        "subtitle": "Zdá se, že vaše instalace je více než {{počet}} verzí pozadu!",
-        "description-1": "Zvažte prosím aktualizaci, abyste používali nejnovější verzi systému Kavita.",
-        "description-2": "Podívejte se na naši <a href='https://wiki.kavitareader.com/guides/updating' target='_blank' rel='noreferrer noopener'>wiki</a>, kde najdete pokyny k aktualizaci.",
-        "description-3": "Pokud máte nějaký konkrétní důvod, proč jste ještě neaktualizovali, rádi bychom věděli, co vás drží na zastaralé verzi! Zastavte se na našem discordu a dejte nám vědět, co vám brání v aktualizaci."
-    },
     "changelog": {
         "installed": "Instalováno",
         "download": "Stáhnout",
@@ -742,12 +734,6 @@
     "read-more": {
         "read-more": "Číst více",
         "read-less": "Číst méně"
-    },
-    "update-notification-modal": {
-        "title": "K dispozici je nová aktualizace!",
-        "close": "{{common.close}}",
-        "help": "Jak provést aktualizaci",
-        "download": "Stáhnout"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -1975,20 +1961,6 @@
         "feature-requests": "Požadavky na funkce",
         "known-issues": "Známé problémy"
     },
-    "new-version-modal": {
-        "title": "Kavita byla aktualizována!",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "description": "K dispozici je nová verze aplikace Kavita. Pro aktualizaci proveďte obnovení.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "refresh": "Obnovit",
-        "known-issues": "{{changelog.known-issues}}"
-    },
     "person-detail": {
         "all-roles": "{{common.roles}}",
         "browse-person-by-role-title": "Všechny práce {{name}} jako {{role}}",
@@ -2892,7 +2864,7 @@
         "default-libraries-label": "{{common.libraries}}",
         "tls-required": "Poskytovatel OIDC musí používat tls (https)",
         "other-field-invalid": "{{validation.other-field-invalid}}",
-        "reset-label": "Resetovat ID",
+        "reset-label": "Obnovit identifikátory",
         "reset-tooltip": "Obnovte externí identifikátory všech uživatelů. Tuto funkci použijte k obnovení propojení mezi uživateli v Kavita a vaším poskytovatelem identit",
         "reset-confirm": "Opravdu chcete resetovat externí ID všech uživatelů?",
         "reset-success": "Externí ID všech uživatelů byla resetována, proveďte opětovné ověření pro propojení",
@@ -3410,5 +3382,25 @@
         "pages-count": "{{num}} stran",
         "words-read-by-year-title": "Slova přečtená za rok",
         "words-count": "{{num}} slov"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Nezůstaňte pozadu!",
+            "subtitle": "Zdá se, že vaše instalace je více než {{počet}} verzí pozadu!",
+            "description-1": "Zvažte prosím aktualizaci, abyste používali nejnovější verzi systému Kavita.",
+            "description-2": "Podívejte se na naši <a href='https://wiki.kavitareader.com/guides/updating' target='_blank' rel='noreferrer noopener'>wiki</a>, kde najdete pokyny k aktualizaci.",
+            "description-3": "Pokud máte nějaký konkrétní důvod, proč jste ještě neaktualizovali, rádi bychom věděli, co vás drží na zastaralé verzi! Zastavte se na našem discordu a dejte nám vědět, co vám brání v aktualizaci."
+        },
+        "new-version": {
+            "title": "Kavita byla aktualizována!",
+            "description": "K dispozici je nová verze aplikace Kavita. Pro aktualizaci proveďte obnovení.",
+            "refresh": "Obnovit"
+        },
+        "update-notification": {
+            "title": "K dispozici je nová aktualizace!",
+            "help": "Jak provést aktualizaci",
+            "download": "Stáhnout"
+        }
     }
 }

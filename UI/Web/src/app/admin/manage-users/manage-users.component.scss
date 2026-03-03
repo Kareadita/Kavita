@@ -1,17 +1,17 @@
 @use '../../../theme/variables' as theme;
 
 .custom-position {
-  right: 15px;
-  top: -42px;
+  right: 0.9375rem;
+  top: -2.625rem;
 }
 
 .presence {
-    font-size: 12px;
+    font-size: 0.75rem;
     color: var(--primary-color);
 }
 
 .user-info > div {
-    margin-top: 3px;
+    margin-top: 0.1875rem;
 }
 
 .highlight {
@@ -19,7 +19,7 @@
 }
 
 .pending-badge {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 
@@ -30,7 +30,7 @@
 }
 
 .actions {
-  min-width: 152px;
+  min-width: 9.5rem;
 }
 
 .list-group-item:nth-child(even) {

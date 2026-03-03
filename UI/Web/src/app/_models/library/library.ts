@@ -16,11 +16,17 @@ export const allLibraryTypes = [LibraryType.Manga, LibraryType.ComicVine, Librar
 export const allKavitaPlusMetadataApplicableTypes = [LibraryType.Manga, LibraryType.LightNovel, LibraryType.ComicVine, LibraryType.Comic];
 export const allKavitaPlusScrobbleEligibleTypes = [LibraryType.Manga, LibraryType.LightNovel];
 
-export interface Library {
+export interface LiteLibrary {
+  id: number;
+  name: string;
+  type: LibraryType;
+}
+
+export interface Library extends LiteLibrary{
     id: number;
     name: string;
-    lastScanned: string;
     type: LibraryType;
+    lastScanned: string;
     folders: string[];
     coverImage?: string | null;
     folderWatching: boolean;

@@ -54,7 +54,7 @@ export class ServerStatsStatsTabComponent {
   private readonly cachePrefix = 'kavita-cache--encode-decade-';
 
 
-  userId = computed(() => this.accountService.currentUserSignal()?.id);
+  userId = computed(() => this.accountService.currentUser()?.id);
   readonly filter = signal<StatsFilter | undefined>(undefined);
   readonly year = signal<number>(new Date().getFullYear());
 

@@ -494,14 +494,6 @@
     "announcements": {
         "title": "公告"
     },
-    "out-of-date-modal": {
-        "title": "不要落后！",
-        "close": "{{common.close}}",
-        "subtitle": "您的安装似乎落后了超过 {{count}} 个版本！",
-        "description-1": "请考虑升级，以便运行最新版本的 Kavita。",
-        "description-2": "请查看我们的 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>，了解有关如何更新的说明。",
-        "description-3": "如果您有特定原因尚未更新，我们很想知道是什么让您一直使用过时的版本！停止我们的 discord，让我们知道是什么阻碍了您的升级之路。"
-    },
     "changelog": {
         "installed": "已安装",
         "download": "下载",
@@ -746,12 +738,6 @@
     "read-more": {
         "read-more": "查看全文",
         "read-less": "收起"
-    },
-    "update-notification-modal": {
-        "title": "发现新版本！",
-        "close": "{{common.close}}",
-        "help": "如何更新",
-        "download": "下载"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2518,20 +2504,6 @@
         "feature-requests": "功能请求",
         "known-issues": "已知问题"
     },
-    "new-version-modal": {
-        "title": "Kavita 已更新！",
-        "description": "Kavita 有新版本可用。刷新即可更新。",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "refresh": "刷新",
-        "known-issues": "{{changelog.known-issues}}"
-    },
     "manage-user-tokens": {
         "description": "拥有 scrobbling 令牌的用户有时可能需要更新。如果设置了电子邮件并且他们有有效的电子邮件，Kavita 将自动向他们发送电子邮件。",
         "username-header": "用户名",
@@ -3410,5 +3382,25 @@
         "pages-count": "{{num}} 页",
         "words-read-by-year-title": "年度阅读字数",
         "words-count": "{{num}} 字"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "不要落后！",
+            "subtitle": "您的安装似乎落后了超过 {{count}} 个版本！",
+            "description-1": "请考虑升级，以便运行最新版本的 Kavita。",
+            "description-2": "请查看我们的 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>，了解有关如何更新的说明。",
+            "description-3": "如果您有特定原因尚未更新，我们很想知道是什么让您一直使用过时的版本！停止我们的 discord，让我们知道是什么阻碍了您的升级之路。"
+        },
+        "new-version": {
+            "title": "Kavita 已更新！",
+            "description": "Kavita 有新版本可用。刷新即可更新。",
+            "refresh": "刷新"
+        },
+        "update-notification": {
+            "title": "发现新版本！",
+            "help": "如何更新",
+            "download": "下载"
+        }
     }
 }

@@ -23,11 +23,11 @@
       </div>
     }
 
-    <div class="col-auto" style="padding-top: 8px">
+    <div class="col-auto" style="padding-top: 0.5rem">
       <app-loading [loading]="isLoading" size="spinner-border-sm" />
     </div>
 
-    <div class="col-auto ms-2"  style="padding-top: 4px">
+    <div class="col-auto ms-2"  style="padding-top: 0.25rem">
       @for(link of webLinks; track link) {
         <a class="me-1" [href]="link | safeHtml"  target="_blank" rel="noopener noreferrer" [title]="link">
           <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"

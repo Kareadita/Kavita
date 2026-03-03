@@ -50,6 +50,11 @@ public interface ICollectionTagRepository
     /// <param name="includePromoted"></param>
     /// <returns></returns>
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosAsync(int userId, bool includePromoted = false);
+    /// <summary>
+    /// Returns the collection if the user owns it or the collection is promoted
+    /// </summary>
+    /// <returns></returns>
+    Task<AppUserCollectionDto?> GetCollectionDtoAsync(int collectionId, int userId);
     Task<PagedList<AppUserCollectionDto>> GetCollectionDtosPagedAsync(int userId, UserParams userParams, bool includePromoted = false);
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosBySeriesAsync(int userId, int seriesId, bool includePromoted = false);
 
@@ -106,6 +111,17 @@ public class CollectionTagRepository : ICollectionTagRepository
             .OrderBy(c => c.NormalizedTitle)
             .Includes(includes)
             .ToListAsync();
+    }
+
+    public async Task<AppUserCollectionDto?> GetCollectionDtoAsync(int collectionId, int userId)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        return await _context.AppUserCollection
+            .Where(uc => (uc.AppUserId == userId || uc.Promoted) && uc.Id == collectionId)
+            .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
+            .OrderBy(uc => uc.Title)
+            .ProjectTo<AppUserCollectionDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosAsync(int userId, bool includePromoted = false)

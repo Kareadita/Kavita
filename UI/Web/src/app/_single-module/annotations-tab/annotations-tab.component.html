@@ -2,7 +2,7 @@
   <virtual-scroller #scroll [items]="annotations()"  [parentScroll]="scrollingBlock()" [childHeight]="1">
     <div class="card-container row g-0" #container>
       @for(item of scroll.viewPortItems; let idx = $index; track item.id) {
-        <div style="min-width: 200px" class="col-auto m-2">
+        <div style="min-width: 12.5rem" class="col-auto m-2">
           <app-annotation-card
             [annotation]="item"
             [allowEdit]="false"

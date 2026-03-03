@@ -6,17 +6,18 @@ import {
   DestroyRef,
   effect,
   inject,
+  Signal,
   untracked
 } from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {AsyncPipe, DOCUMENT, NgClass} from "@angular/common";
+import {DOCUMENT, NgClass} from "@angular/common";
 import {NavService} from "../../_services/nav.service";
 import {AccountService, Role} from "../../_services/account.service";
 import {SideNavItemComponent} from "../_components/side-nav-item/side-nav-item.component";
 import {ActivatedRoute, NavigationEnd, Router} from "@angular/router";
-import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable, toSignal} from "@angular/core/rxjs-interop";
 import {SettingFragmentPipe} from "../../_pipes/setting-fragment.pipe";
-import {map, Observable, of, shareReplay, switchMap, take} from "rxjs";
+import {map, of, shareReplay, switchMap, take} from "rxjs";
 import {ServerService} from "../../_services/server.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {User} from "../../_models/user/user";
@@ -91,14 +92,14 @@ class SideNavItem {
    * If you have any of these, the item will be restricted
    */
   restrictRoles: Array<Role> = [];
-  badgeCount$?: Observable<number> | undefined;
+  badgeCount?: Signal<number> | undefined;
   kPlusOnly: boolean;
 
-  constructor(fragment: SettingsTabId, roles: Array<Role> = [], badgeCount$: Observable<number> | undefined = undefined, restrictRoles: Array<Role> = [], kPlusOnly: boolean = false) {
+  constructor(fragment: SettingsTabId, roles: Array<Role> = [], badgeCount: Signal<number> | undefined = undefined, restrictRoles: Array<Role> = [], kPlusOnly: boolean = false) {
     this.fragment = fragment;
     this.roles = roles;
     this.restrictRoles = restrictRoles;
-    this.badgeCount$ = badgeCount$;
+    this.badgeCount = badgeCount;
     this.kPlusOnly = kPlusOnly;
   }
 
@@ -106,11 +107,11 @@ class SideNavItem {
    * Create a new SideNavItem with kPlusOnly set to true
    * @param fragment
    * @param roles
-   * @param badgeCount$
+   * @param badgeCount
    * @param restrictRoles
    */
-  static kPlusOnly(fragment: SettingsTabId, roles: Array<Role> = [], badgeCount$: Observable<number> | undefined = undefined, restrictRoles: Array<Role> = []) {
-    return new SideNavItem(fragment, roles, badgeCount$, restrictRoles, true);
+  static kPlusOnly(fragment: SettingsTabId, roles: Array<Role> = [], badgeCount: Signal<number> | undefined = undefined, restrictRoles: Array<Role> = []) {
+    return new SideNavItem(fragment, roles, badgeCount, restrictRoles, true);
   }
 
 }
@@ -120,7 +121,6 @@ class SideNavItem {
     imports: [
         TranslocoDirective,
         NgClass,
-        AsyncPipe,
         SideNavItemComponent,
         SettingFragmentPipe
     ],
@@ -157,13 +157,11 @@ export class PreferenceNavComponent implements AfterViewInit {
   sections: Array<PrefSection> = [];
 
 
-  private readonly matchedMetadataBadgeCount$ = this.accountService.currentUser$.pipe(
-    take(1),
-    switchMap(user => {
-      if (!user || !this.accountService.hasAdminRole(user)) {
-        // If no user or user does not have the admin role, return an observable of -1
-        return of(-1);
-      } else {
+  private readonly matchedMetadataBadgeCount = toSignal(
+    toObservable(this.accountService.hasAdminRole).pipe(
+      take(1),
+      switchMap(isAdmin => {
+        if (!isAdmin) return of(-1);
         return this.manageService.getAllKavitaPlusSeries({
           matchStateOption: MatchStateOption.Error,
           libraryType: -1,
@@ -173,40 +171,39 @@ export class PreferenceNavComponent implements AfterViewInit {
           map(d => d.pagination.totalItems),
           shareReplay({bufferSize: 1, refCount: true})
         );
-      }
-    })
+      })
+    ),
+    { initialValue: -1 }
   );
 
-  private readonly scrobblingErrorBadgeCount$ = this.accountService.currentUser$.pipe(
-    take(1),
-    switchMap(user => {
-      if (!user || !this.accountService.hasAdminRole(user)) {
-        // If no user or user does not have the admin role, return an observable of -1
-        return of(-1);
-      } else {
+  private readonly scrobblingErrorBadgeCount = toSignal(
+    toObservable(this.accountService.hasAdminRole).pipe(
+      take(1),
+      switchMap(isAdmin => {
+        if (!isAdmin) return of(-1);
         return this.scrobbleService.getScrobbleErrors().pipe(
           takeUntilDestroyed(this.destroyRef),
           map(d => d.length),
           shareReplay({bufferSize: 1, refCount: true})
         );
-      }
-    })
+      })
+    ),
+    { initialValue: -1 }
   );
 
-  private readonly mediaIssuesBadgeCount$ = this.accountService.currentUser$.pipe(
-    take(1),
-    switchMap(user => {
-      if (!user || !this.accountService.hasAdminRole(user)) {
-        // If no user or user does not have the admin role, return an observable of -1
-        return of(-1);
-      }
-
-      return this.serverService.getMediaErrors().pipe(
-        takeUntilDestroyed(this.destroyRef),
-        map(d => d.length),
-        shareReplay({ bufferSize: 1, refCount: true })
-      );
-    })
+  private readonly mediaIssuesBadgeCount = toSignal(
+    toObservable(this.accountService.hasAdminRole).pipe(
+      take(1),
+      switchMap(isAdmin => {
+        if (!isAdmin) return of(-1);
+        return this.serverService.getMediaErrors().pipe(
+          takeUntilDestroyed(this.destroyRef),
+          map(d => d.length),
+          shareReplay({ bufferSize: 1, refCount: true })
+        );
+      })
+    ),
+    { initialValue: -1 }
   );
 
   constructor() {
@@ -218,7 +215,7 @@ export class PreferenceNavComponent implements AfterViewInit {
 
       const isCollapsed = untracked(() => this.navService.sideNavCollapsedSignal());
       if (isCollapsed) return;
-      
+
       this.navService.collapseSideNav(true);
     });
 
@@ -275,7 +272,7 @@ export class PreferenceNavComponent implements AfterViewInit {
         title: SettingSectionId.InfoSection,
         children: [
           new SideNavItem(SettingsTabId.System, [Role.Admin]),
-          new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin], this.mediaIssuesBadgeCount$),
+          new SideNavItem(SettingsTabId.MediaIssues, [Role.Admin], this.mediaIssuesBadgeCount),
           new SideNavItem(SettingsTabId.EmailHistory, [Role.Admin]),
         ]
       },
@@ -285,9 +282,9 @@ export class PreferenceNavComponent implements AfterViewInit {
           new SideNavItem(SettingsTabId.KavitaPlusLicense, [Role.Admin]),
           SideNavItem.kPlusOnly(SettingsTabId.ManageUserTokens, [Role.Admin]),
           SideNavItem.kPlusOnly(SettingsTabId.Metadata, [Role.Admin]),
-          SideNavItem.kPlusOnly(SettingsTabId.MatchedMetadata, [Role.Admin], this.matchedMetadataBadgeCount$),
+          SideNavItem.kPlusOnly(SettingsTabId.MatchedMetadata, [Role.Admin], this.matchedMetadataBadgeCount),
           SideNavItem.kPlusOnly(SettingsTabId.ScrobblingHolds),
-          SideNavItem.kPlusOnly(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount$),
+          SideNavItem.kPlusOnly(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount),
         ]
       }
     ];

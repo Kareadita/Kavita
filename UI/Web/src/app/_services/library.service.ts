@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import { DestroyRef, Injectable, inject } from '@angular/core';
+import {DestroyRef, inject, Injectable} from '@angular/core';
 import {of} from 'rxjs';
 import {filter, map, tap} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
@@ -85,6 +85,10 @@ export class LibraryService {
     return this.httpClient.get<JumpKey[]>(this.baseUrl + 'library/jump-bar?libraryId=' + libraryId);
   }
 
+  /**
+   * Admin-only
+   * @param libraryId
+   */
   getLibrary(libraryId: number) {
     return this.httpClient.get<Library>(this.baseUrl + 'library?libraryId=' + libraryId);
   }
@@ -122,7 +126,7 @@ export class LibraryService {
   }
 
   create(model: {name: string, type: number, folders: string[]}) {
-    return this.httpClient.post(this.baseUrl + 'library/create', model);
+    return this.httpClient.post<Library>(this.baseUrl + 'library/create', model);
   }
 
   delete(libraryId: number) {
@@ -137,7 +141,7 @@ export class LibraryService {
   }
 
   update(model: {name: string, folders: string[], id: number}) {
-    return this.httpClient.post(this.baseUrl + 'library/update', model);
+    return this.httpClient.post<Library>(this.baseUrl + 'library/update', model);
   }
 
   getLibraryType(libraryId: number) {

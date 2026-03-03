@@ -363,14 +363,6 @@
         "create": "{{common.create}}",
         "title": "Minden intelligens szűrő"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "title": "Ne maradj le!",
-        "subtitle": "Úgy tűnik, a telepítésed több mint {{count}} verzióval van lemaradva!",
-        "description-1": "Kérjük, fontold meg a frissítést, hogy a Kavita legújabb verzióját használd.",
-        "description-2": "A frissítéssel kapcsolatos utasításokért tekintse meg a <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wikinket</a>.",
-        "description-3": "Ha van valami konkrét oka annak, hogy még nem frissítettél, szeretnénk tudni, hogy mi tart vissza egy elavult verziónál! Látogass el a Discord oldalunkra, és tudasd velünk, mi akadályozza a frissítési folyamatot."
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -549,12 +541,6 @@
         "kavita-tooltip": "Az Ön értékelése + Összességében",
         "kavita-rating-title": "Az Ön értékelése",
         "critic": "{{review-card.critic}}"
-    },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "title": "Új frissítés elérhető!",
-        "help": "Frissítés módja",
-        "download": "Letöltés"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -1485,20 +1471,6 @@
         "feature-requests": "Funkciókérés",
         "known-issues": "Ismert hibák"
     },
-    "new-version-modal": {
-        "title": "Kavita frissült!",
-        "description": "Elérhető a Kavita új verziója. Frissítse az oldalt a frissítéshez.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "refresh": "Frissítés"
-    },
     "manage-matched-metadata": {
         "title": "Egyező metaadatok",
         "description": "Minden olyan vonatkozó sorozat, amelyhez külső metaadatokkal lehet párosítani, itt található. A Kavita előre lekéri vagy frissíti a sorozat metaadatait, napi 50 sorozatot 24 óránként.",
@@ -1968,5 +1940,25 @@
         "delete": "Törölje a(z) {{bookmarkName}} könyvjelzőt",
         "no-match": "Nincsenek könyvjelzők, amelyek megfelelnek a szűrőnek",
         "filter-label": "{{common.filter}}"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Ne maradj le!",
+            "subtitle": "Úgy tűnik, a telepítésed több mint {{count}} verzióval van lemaradva!",
+            "description-1": "Kérjük, fontold meg a frissítést, hogy a Kavita legújabb verzióját használd.",
+            "description-2": "A frissítéssel kapcsolatos utasításokért tekintse meg a <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wikinket</a>.",
+            "description-3": "Ha van valami konkrét oka annak, hogy még nem frissítettél, szeretnénk tudni, hogy mi tart vissza egy elavult verziónál! Látogass el a Discord oldalunkra, és tudasd velünk, mi akadályozza a frissítési folyamatot."
+        },
+        "new-version": {
+            "title": "Kavita frissült!",
+            "description": "Elérhető a Kavita új verziója. Frissítse az oldalt a frissítéshez.",
+            "refresh": "Frissítés"
+        },
+        "update-notification": {
+            "title": "Új frissítés elérhető!",
+            "help": "Frissítés módja",
+            "download": "Letöltés"
+        }
     }
 }

@@ -1,15 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, inject } from '@angular/core';
-import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { ThemeService } from 'src/app/_services/theme.service';
-import { AccountService } from 'src/app/_services/account.service';
-import { NavService } from 'src/app/_services/nav.service';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { NgTemplateOutlet } from '@angular/common';
-import { SplashContainerComponent } from '../splash-container/splash-container.component';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ToastrService} from 'ngx-toastr';
+import {ThemeService} from 'src/app/_services/theme.service';
+import {AccountService} from 'src/app/_services/account.service';
+import {NavService} from 'src/app/_services/nav.service';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgTemplateOutlet} from '@angular/common';
+import {SplashContainerComponent} from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {take} from "rxjs/operators";
 
 @Component({
     selector: 'app-confirm-email',
@@ -62,11 +61,9 @@ export class ConfirmEmailComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.navService.showSideNav();
-      }
-    });
+    if (this.accountService.isLoggedIn()) {
+      this.navService.showSideNav();
+    }
   }
 
   isNullOrEmpty(v: string | null | undefined) {

@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {Rating, RatingAuthority} from "../../../_models/rating";
 import {ProviderImagePipe} from "../../../_pipes/provider-image.pipe";
-import {NgbModal, NgbPopover} from "@ng-bootstrap/ng-bootstrap";
+import {NgbPopover} from "@ng-bootstrap/ng-bootstrap";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {LibraryType} from "../../../_models/library/library";
 import {NgxStarsModule} from "ngx-stars";
@@ -24,6 +24,7 @@ import {RatingModalComponent} from "../rating-modal/rating-modal.component";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 import {ReviewService} from "../../../_services/review.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {ModalService} from "../../../_services/modal.service";
 
 @Component({
   selector: 'app-external-rating',
@@ -41,7 +42,7 @@ export class ExternalRatingComponent implements OnInit {
   private readonly themeService = inject(ThemeService);
   protected readonly destroyRef = inject(DestroyRef);
   protected readonly imageService = inject(ImageService);
-  protected readonly modalService = inject(NgbModal);
+  protected readonly modalService = inject(ModalService);
   protected readonly breakpointService = inject(BreakpointService);
 
 
@@ -73,7 +74,7 @@ export class ExternalRatingComponent implements OnInit {
   }
 
   openRatingModal() {
-    const modalRef = this.modalService.open(RatingModalComponent, {size: 'xl'});
+    const modalRef = this.modalService.open(RatingModalComponent);
     modalRef.componentInstance.userRating = this.userRating;
     modalRef.componentInstance.seriesId = this.seriesId;
     modalRef.componentInstance.hasUserRated = this.hasUserRated;

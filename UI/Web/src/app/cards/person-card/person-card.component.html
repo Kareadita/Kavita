@@ -37,9 +37,10 @@
           }
         </div>
 
-        @if (subtitleTemplate) {
+        @let subtitle = subtitleTemplate();
+        @if (subtitle) {
           <div style="text-align: center">
-            <ng-container [ngTemplateOutlet]="subtitleTemplate" [ngTemplateOutletContext]="{ $implicit: entity }" />
+            <ng-container [ngTemplateOutlet]="subtitle" [ngTemplateOutletContext]="{ $implicit: entity }" />
           </div>
         }
       </div>

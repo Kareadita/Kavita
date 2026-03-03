@@ -3,8 +3,8 @@
 // Host is like root but scoped only to the component
 :host {
   --activity-graph-cell-size: 1.2rem;
-  --activity-graph-cell-gap: 4px;
-  --activity-graph-cell-radius: 2px;
+  --activity-graph-cell-gap: 0.25rem;
+  --activity-graph-cell-radius: 0.125rem;
 
   --activity-graph-cell-level-0: #161b22;
   --activity-graph-cell-level-1: #0e4429;
@@ -17,8 +17,10 @@
   --activity-graph-cell-focus-outline-color: var(--bs-primary);
   --activity-graph-cell-outline-color: rgba(240, 246, 252, 0.1);
 
+  --activity-graph-cell-today-outline-color: #c7c7c7;
+
   --activity-graph-text-color: var(--bs-secondary);
-  --activity-graph-font-size: 12px;
+  --activity-graph-font-size: 0.75rem;
 }
 
 .activity-graph-container {
@@ -45,11 +47,11 @@
 }
 
 .day-label-column {
-  width: 28px;
+  width: 1.75rem;
 }
 
 .day-label {
-  width: 28px;
+  width: 1.75rem;
   font-size: var(--activity-graph-font-size);
   color: var(--activity-graph-text-color);
   position: relative;
@@ -57,12 +59,12 @@
 
 // Month labels
 .month-label {
-  padding: 0 4px;
+  padding: 0 0.25rem;
   font-size: var(--activity-graph-font-size);
   color: var(--activity-graph-text-color);
   text-align: left;
   position: relative;
-  height: 15px;
+  height: 0.9375rem;
   vertical-align: bottom;
 }
 
@@ -78,12 +80,12 @@
 
   &:hover {
     outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-hover-outline-color);
-    outline-offset: 1px;
+    outline-offset: 0.0625rem;
   }
 
   &:focus {
     outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-focus-outline-color);
-    outline-offset: 1px;
+    outline-offset: 0.0625rem;
   }
 }
 
@@ -95,6 +97,10 @@
   background: transparent;
 }
 
+.today {
+  outline: 1px solid var(--activity-graph-cell-today-outline-color);
+}
+
 .activity-cell {
   cursor: pointer;
   transition: all 0.2s;
@@ -102,12 +108,12 @@
 
   &:hover {
     outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-hover-outline-color);
-    outline-offset: 1px;
+    outline-offset: 0.0625rem;
   }
 
   &:focus {
     outline: var(--activity-graph-cell-radius) solid var(--activity-graph-cell-focus-outline-color);
-    outline-offset: 1px;
+    outline-offset: 0.0625rem;
   }
 }
 
@@ -145,24 +151,24 @@
 
 .legend-cells {
   display: flex;
-  gap: 3px;
+  gap: 0.1875rem;
 }
 
 .legend-cell {
   width: var(--activity-graph-cell-size);
   height: var(--activity-graph-cell-size);
-  border-radius: 2px;
+  border-radius: 0.125rem;
 }
 
 .legend-label {
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--activity-graph-text-color);
 }
 
 .activity-tooltip {
   z-index: 1070;
   font-size: var(--activity-graph-font-size);
-  max-width: 250px;
+  max-width: 15.625rem;
   background: var(--bs-dark);
 
   .tooltip-header {
@@ -183,7 +189,7 @@
     gap: 0.5rem;
 
     i {
-      width: 14px;
+      width: 0.875rem;
       opacity: 0.8;
     }
   }
@@ -192,21 +198,21 @@
 // TODO: This needs major polish
 @media(max-width: theme.$grid-breakpoints-md) {
   :host {
-    --activity-graph-cell-size: 11px;
-    --activity-graph-font-size: 10px;
+    --activity-graph-cell-size: 0.6875rem;
+    --activity-graph-font-size: 0.625rem;
   }
 }
 @media(max-width: theme.$grid-breakpoints-sm) {
   :host {
     --activity-graph-cell-size: 0.8rem;
-    --activity-graph-cell-gap: 2px;
-    --activity-graph-font-size: 10px;
+    --activity-graph-cell-gap: 0.125rem;
+    --activity-graph-font-size: 0.625rem;
   }
 }
 @media(max-width: theme.$grid-breakpoints-xs) {
   :host {
-    --activity-graph-cell-size: 9px;
-    --activity-graph-font-size: 10px;
+    --activity-graph-cell-size: 0.5625rem;
+    --activity-graph-font-size: 0.625rem;
   }
 }
 

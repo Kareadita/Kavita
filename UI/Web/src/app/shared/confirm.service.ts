@@ -1,15 +1,16 @@
-import { Injectable, inject } from '@angular/core';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {inject, Injectable} from '@angular/core';
 import {take} from 'rxjs/operators';
 import {ConfirmDialogComponent} from './confirm-dialog/confirm-dialog.component';
 import {ConfirmConfig} from './confirm-dialog/_models/confirm-config';
+import {confirmModal} from "../_models/modal/modal-options";
+import {ModalService} from "../_services/modal.service";
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConfirmService {
-  private modalService = inject(NgbModal);
+  private modalService = inject(ModalService);
 
 
   defaultConfirm = new ConfirmConfig();
@@ -88,7 +89,7 @@ export class ConfirmService {
         }
       }
 
-      const modalRef = this.modalService.open(ConfirmDialogComponent, {size: "lg", fullscreen: "md"});
+      const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
       modalRef.componentInstance.config = config;
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
@@ -112,7 +113,7 @@ export class ConfirmService {
         config.content = content;
       }
 
-      const modalRef = this.modalService.open(ConfirmDialogComponent, {size: "lg", fullscreen: "md"});
+      const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
       modalRef.componentInstance.config = config;
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);

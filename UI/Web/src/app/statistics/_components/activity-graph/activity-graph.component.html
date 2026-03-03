@@ -49,6 +49,7 @@
                   @if (day && day.totalTimeReadingSeconds > 0) {
                     <td class="activity-cell"
                         [class]="getLevelClass(day.level)"
+                        [ngClass]="{'today': isToday(day)}"
                         [attr.aria-describedby]="'activity-level-' + day.level"
                         [ngbTooltip]="tooltip"
                         container="body"
@@ -59,13 +60,14 @@
                     </td>
                   } @else if (day !== null) {
                     <td class="empty-cell"
+                        [ngClass]="{'today': isToday(day)}"
                         [ngbTooltip]="noActivityTooltip"
                         container="body"
                         [tooltipContext]="{'item': day}"
                         [tooltipClass]="'activity-tooltip'"
                     ></td>
                   } @else {
-                    <td class="empty-cell out-of-year-cell"></td>
+                    <td class="empty-cell out-of-year-cell" [ngClass]="{'today': isToday(day)}"></td>
                   }
                 }
               </tr>

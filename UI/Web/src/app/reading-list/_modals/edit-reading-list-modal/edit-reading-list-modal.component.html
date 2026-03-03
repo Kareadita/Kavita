@@ -6,7 +6,7 @@
   </div>
   <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
     <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
-      orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+      orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
       <li [ngbNavItem]="TabID.General">
         <a ngbNavLink>{{t(TabID.General)}}</a>
         <ng-template ngbNavContent>
@@ -30,21 +30,19 @@
                   </div>
                 }
               </div>
-              @if ((accountService.currentUser$ | async); as user) {
-                @if (accountService.hasAdminRole(user)) {
-                  <div class="col-md-3 col-sm-12 ms-2">
-                    <div class="form-check form-switch">
-                      <input type="checkbox" id="tag-promoted" role="switch" formControlName="promoted" class="form-check-input" switch
-                        aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
-                        <label class="form-check-label me-1" for="tag-promoted">{{t('promote-label')}}</label>
-                        <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
-                        <ng-template #promotedTooltip>{{t('promote-tooltip')}}</ng-template>
-                        <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip" /></span>
-                      </div>
-                    </div>
-                  }
-                }
-              </div>
+              @if (accountService.hasAdminRole()) {
+                <div class="col-md-3 col-sm-12 ms-2">
+                  <div class="form-check form-switch">
+                    <input type="checkbox" id="tag-promoted" role="switch" formControlName="promoted" class="form-check-input" switch
+                           aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
+                    <label class="form-check-label me-1" for="tag-promoted">{{t('promote-label')}}</label>
+                    <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
+                    <ng-template #promotedTooltip>{{t('promote-tooltip')}}</ng-template>
+                    <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip" /></span>
+                  </div>
+                </div>
+              }
+            </div>
 
               <div class="row g-0 mb-3">
                 <div class="col-md-6 col-sm-12">

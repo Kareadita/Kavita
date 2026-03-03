@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {NgbActiveModal, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
@@ -33,5 +33,5 @@ export class ShortcutsModalComponent {
   protected readonly keyBindService = inject(KeyBindService);
   protected readonly modal = inject(NgbActiveModal);
 
-  @Input() shortcuts: Array<KeyboardShortcut> = [];
+  shortcuts = input<KeyboardShortcut[]>([]);
 }

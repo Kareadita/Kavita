@@ -2,13 +2,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
-  EventEmitter,
   inject,
-  Input,
+  input,
   OnInit,
-  Output,
+  output,
   signal,
 } from '@angular/core';
 import {fromEvent, merge, of} from "rxjs";
@@ -38,25 +38,6 @@ enum BookLineOverlayMode {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BookLineOverlayComponent implements OnInit {
-  @Input({required: true}) libraryId!: number;
-  @Input({required: true}) seriesId!: number;
-  @Input({required: true}) volumeId!: number;
-  @Input({required: true}) chapterId!: number;
-  @Input({required: true}) pageNumber: number = 0;
-  @Input({required: true}) parent: ElementRef | undefined;
-  @Output() refreshToC: EventEmitter<void> = new EventEmitter();
-  @Output() isOpen: EventEmitter<boolean> = new EventEmitter(false);
-
-  startXPath: string = '';
-  endXPath: string = '';
-  allTextFromSelection: string = '';
-  selectedText: string = '';
-  mode: BookLineOverlayMode = BookLineOverlayMode.None;
-  bookmarkForm: FormGroup = new FormGroup({
-    name: new FormControl('', [Validators.required]),
-  });
-  hasSelectedAnnotation = signal<boolean>(false);
-
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -65,6 +46,29 @@ export class BookLineOverlayComponent implements OnInit {
   private readonly elementRef = inject(ElementRef);
   private readonly epubMenuService = inject(EpubReaderMenuService);
   private readonly keyBindService = inject(KeyBindService);
+
+  libraryId = input.required<number>();
+  seriesId = input.required<number>();
+  volumeId = input.required<number>();
+  chapterId = input.required<number>();
+  pageNumber = input.required<number>();
+  parent = input.required<ElementRef | undefined>();
+
+  refreshToC = output();
+  isOpen = output<boolean>();
+
+
+  startXPath: string = '';
+  endXPath: string = '';
+  allTextFromSelection: string = '';
+  selectedText = signal<string>('');
+  mode = signal<BookLineOverlayMode>(BookLineOverlayMode.None);
+  bookmarkForm: FormGroup = new FormGroup({
+    name: new FormControl('', [Validators.required]),
+  });
+  hasSelectedAnnotation = signal<boolean>(false);
+  showOverlay = computed(() => this.selectedText().length > 0 || this.mode() !== BookLineOverlayMode.None);
+
 
 
   ngOnInit() {
@@ -88,9 +92,10 @@ export class BookLineOverlayComponent implements OnInit {
   }
 
   private setupPointerEventListener(): void {
-    if (!this.parent) return;
+    const parent = this.parent();
+    if (!parent) return;
 
-    fromEvent<PointerEvent>(this.parent.nativeElement, 'pointerup')
+    fromEvent<PointerEvent>(parent.nativeElement, 'pointerup')
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         debounceTime(20),
@@ -99,15 +104,16 @@ export class BookLineOverlayComponent implements OnInit {
   }
 
   private setupLegacyEventListeners(): void {
-    if (!this.parent) return;
+    const parent = this.parent();
+    if (!parent) return;
 
-    const mouseUp$ = fromEvent<MouseEvent>(this.parent.nativeElement, 'mouseup');
-    const touchEnd$ = fromEvent<TouchEvent>(this.parent.nativeElement, 'touchend');
+    const mouseUp$ = fromEvent<MouseEvent>(parent.nativeElement, 'mouseup');
+    const touchEnd$ = fromEvent<TouchEvent>(parent.nativeElement, 'touchend');
 
     // Additional events for mobile Chromium workaround
     const additionalEvents$ = isMobileChromium() ? [
-      fromEvent<TouchEvent>(this.parent.nativeElement, 'touchcancel'),
-      fromEvent<PointerEvent>(this.parent.nativeElement, 'pointerup')
+      fromEvent<TouchEvent>(parent.nativeElement, 'touchcancel'),
+      fromEvent<PointerEvent>(parent.nativeElement, 'pointerup')
     ] : [];
 
     merge(mouseUp$, touchEnd$, ...additionalEvents$)
@@ -146,7 +152,7 @@ export class BookLineOverlayComponent implements OnInit {
     this.hasSelectedAnnotation.set((event.target as HTMLElement).classList.contains('epub-highlight'));
 
     if (this.shouldSkipSelection(selection, isRightClick)) {
-      if (this.selectedText !== '') {
+      if (this.selectedText() !== '') {
         event.preventDefault();
         event.stopPropagation();
       }
@@ -158,9 +164,9 @@ export class BookLineOverlayComponent implements OnInit {
     }
 
     // Process valid selection
-    this.selectedText = selection ? selection.toString().trim() : '';
+    this.selectedText.set(selection ? selection.toString().trim() : '');
 
-    if (this.selectedText.length > 0 && this.mode === BookLineOverlayMode.None && selection !== null) {
+    if (this.selectedText().length > 0 && this.mode() === BookLineOverlayMode.None && selection !== null) {
       this.captureSelectionContext(selection, event.target as Element);
 
       this.isOpen.emit(true);
@@ -175,7 +181,7 @@ export class BookLineOverlayComponent implements OnInit {
     return (selection === null ||
         selection === undefined ||
         selection.toString().trim() === '' ||
-        selection.toString().trim() === this.selectedText) ||
+        selection.toString().trim() === this.selectedText()) ||
       this.hasSelectedAnnotation();
   }
 
@@ -203,19 +209,19 @@ export class BookLineOverlayComponent implements OnInit {
 
 
   switchMode(mode: BookLineOverlayMode) {
-    this.mode = mode;
-    this.cdRef.markForCheck();
-    if (this.mode === BookLineOverlayMode.Bookmark) {
-      this.bookmarkForm.get('name')?.setValue(this.selectedText);
+    this.mode.set(mode);
+
+    if (mode === BookLineOverlayMode.Bookmark) {
+      this.bookmarkForm.get('name')?.setValue(this.selectedText());
       this.focusOnBookmarkInput();
       return;
     }
 
     // On mobile, first selection might not match as users can select after the fact. Recalculate
     const windowText = window.getSelection();
-    const selectedText = windowText?.toString() === '' ? this.selectedText : windowText?.toString() ?? this.selectedText;
+    const selectedText = windowText?.toString() === '' ? this.selectedText() : windowText?.toString() ?? this.selectedText();
 
-    if (this.mode === BookLineOverlayMode.Annotate) {
+    if (mode === BookLineOverlayMode.Annotate) {
 
       const createAnnotation = {
         id: 0,
@@ -224,7 +230,7 @@ export class BookLineOverlayComponent implements OnInit {
         selectedText: selectedText,
         comment: '',
         containsSpoiler: false,
-        pageNumber: this.pageNumber,
+        pageNumber: this.pageNumber(),
         selectedSlotIndex: 0,
         chapterTitle: '',
         highlightCount: selectedText.length,
@@ -233,10 +239,10 @@ export class BookLineOverlayComponent implements OnInit {
         createdUtc: '',
         lastModifiedUtc: '',
         context: this.allTextFromSelection,
-        chapterId: this.chapterId,
-        libraryId: this.libraryId,
-        volumeId: this.volumeId,
-        seriesId: this.seriesId,
+        chapterId: this.chapterId(),
+        libraryId: this.libraryId(),
+        volumeId: this.volumeId(),
+        seriesId: this.seriesId(),
       } as Annotation;
 
       this.epubMenuService.openCreateAnnotationDrawer(createAnnotation, () => {
@@ -248,29 +254,29 @@ export class BookLineOverlayComponent implements OnInit {
   createPTOC() {
     const xpath = this.readerService.descopeBookReaderXpath(this.startXPath);
 
-    this.readerService.createPersonalToC(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNumber,
-      this.bookmarkForm.get('name')?.value, xpath, this.selectedText).pipe(catchError(err => {
+    this.readerService.createPersonalToC(this.libraryId(), this.seriesId(), this.volumeId(), this.chapterId(), this.pageNumber(),
+      this.bookmarkForm.get('name')?.value, xpath, this.selectedText()).pipe(catchError(err => {
         this.focusOnBookmarkInput();
         return of();
     })).subscribe(() => {
       this.reset();
-      this.refreshToC.emit();
+      this.refreshToC.emit(undefined);
       this.cdRef.markForCheck();
     });
   }
 
   focusOnBookmarkInput() {
-    if (this.mode !== BookLineOverlayMode.Bookmark) return;
+    if (this.mode() !== BookLineOverlayMode.Bookmark) return;
     setTimeout(() => this.elementRef.nativeElement.querySelector('#bookmark-name')?.focus(), 10);
   }
 
   reset() {
     this.bookmarkForm.reset();
-    this.mode = BookLineOverlayMode.None;
+    this.mode.set(BookLineOverlayMode.None);
     this.startXPath = '';
     this.endXPath = '';
 
-    this.selectedText = '';
+    this.selectedText.set('');
     this.allTextFromSelection = '';
     const selection = window.getSelection();
     if (selection) {

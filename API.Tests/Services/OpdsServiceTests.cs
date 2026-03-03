@@ -685,6 +685,19 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         });
 
         Assert.NotEmpty(feed.Entries);
+
+        // pagination links should include the OPDS prefix
+        ValidatePaginationLinks(feed, OpdsService.FirstPageNumber, expectNext: true, expectPrev: false);
+
+        var self = feed.Links.Single(l => l.Rel == FeedLinkRelation.Self);
+
+        Assert.StartsWith(OpdsService.DefaultApiPrefix, self.Href);
+
+        var next = feed.Links.SingleOrDefault(l => l.Rel == FeedLinkRelation.Next);
+        if (next != null)
+        {
+            Assert.StartsWith(OpdsService.DefaultApiPrefix, next.Href);
+        }
     }
 
     [Fact]

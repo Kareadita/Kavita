@@ -8,18 +8,17 @@ import {
   DestroyRef,
   effect,
   ElementRef,
-  EventEmitter,
   inject,
   Injector,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
-  Output,
+  output,
   Renderer2,
   Signal,
   SimpleChanges,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
@@ -116,15 +115,15 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   @Input({required: true}) urlProvider!: (page: number) => string;
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
   @Input({required: true}) readingProfile!: ReadingProfile;
-  @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
-  @Output() loadNextChapter: EventEmitter<void> = new EventEmitter<void>();
-  @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();
+  readonly pageNumberChange = output<number>();
+  readonly loadNextChapter = output<void>();
+  readonly loadPrevChapter = output<void>();
 
   @Input() goToPage: BehaviorSubject<number> | undefined;
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
   @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
 
-  @ViewChild('bottomSpacer', {static: false}) bottomSpacer!: ElementRef;
+  readonly bottomSpacer = viewChild.required<ElementRef>('bottomSpacer');
   bottomSpacerIntersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleBottomIntersection(entries),
     { threshold: 1.0 });
 
@@ -364,7 +363,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   ngAfterViewInit() {
-    this.bottomSpacerIntersectionObserver.observe(this.bottomSpacer.nativeElement);
+    this.bottomSpacerIntersectionObserver.observe(this.bottomSpacer().nativeElement);
   }
 
   recalculateImageWidth() {
@@ -500,7 +499,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
         requestAnimationFrame(() => this.scrollService.scrollTo((SPACER_SCROLL_INTO_PX / 2), reader));
       } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
         // If already at top, then we are moving on
-        this.loadPrevChapter.emit();
+        this.loadPrevChapter.emit(undefined);
         this.cdRef.markForCheck();
       }
     }
@@ -681,7 +680,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     if (!this.allImagesLoaded) return;
 
     this.setPageNum(this.totalPages);
-    this.loadNextChapter.emit();
+    this.loadNextChapter.emit(undefined);
   }
 
   /**

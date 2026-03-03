@@ -4,7 +4,7 @@
   @let filePathsValue = filePaths();
   @let filesValue = files();
 
-  @if (accountService.isAdmin() && (filePathsValue.length > 0 || filesValue.length > 0)) {
+  @if (accountService.hasAdminRole() && (filePathsValue.length > 0 || filesValue.length > 0)) {
     <div class="mb-3 ms-1">
       <h4 class="header">{{t(filesValue.length > 0 ? 'file-path-title' : 'folder-path-title')}}</h4>
       <div class="ms-3 d-flex flex-column">
@@ -24,8 +24,7 @@
     </div>
   }
 
-  @if (!suppressEmptyGenres || genres().length > 0) {
-
+  @if (showGenres()) {
     <div class="mb-3 ms-1">
       <h4 class="header">{{t('genres-title')}}</h4>
       <div class="ms-3">
@@ -38,7 +37,7 @@
     </div>
   }
 
-  @if (!suppressEmptyTags || tags().length > 0) {
+  @if (showTags()) {
     <div class="mb-3 ms-1">
       <h4 class="header">{{t('tags-title')}}</h4>
       <div class="ms-3">
@@ -68,7 +67,7 @@
 
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.writers" [title]="t('writers-title')">
+    <app-carousel-reel [items]="metadata().writers" [title]="t('writers-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -76,7 +75,7 @@
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.colorists" [title]="t('colorists-title')">
+    <app-carousel-reel [items]="metadata().colorists" [title]="t('colorists-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -84,7 +83,7 @@
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.editors" [title]="t('editors-title')">
+    <app-carousel-reel [items]="metadata().editors" [title]="t('editors-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -93,7 +92,7 @@
 
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.coverArtists" [title]="t('cover-artists-title')">
+    <app-carousel-reel [items]="metadata().coverArtists" [title]="t('cover-artists-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -101,7 +100,7 @@
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.inkers" [title]="t('inkers-title')">
+    <app-carousel-reel [items]="metadata().inkers" [title]="t('inkers-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -109,7 +108,7 @@
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.letterers" [title]="t('letterers-title')">
+    <app-carousel-reel [items]="metadata().letterers" [title]="t('letterers-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -117,7 +116,7 @@
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.pencillers" [title]="t('pencillers-title')">
+    <app-carousel-reel [items]="metadata().pencillers" [title]="t('pencillers-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -125,7 +124,7 @@
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.translators" [title]="t('translators-title')">
+    <app-carousel-reel [items]="metadata().translators" [title]="t('translators-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -133,7 +132,7 @@
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.characters" [title]="t('characters-title')">
+    <app-carousel-reel [items]="metadata().characters" [title]="t('characters-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -141,7 +140,7 @@
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.locations" [title]="t('locations-title')">
+    <app-carousel-reel [items]="metadata().locations" [title]="t('locations-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -149,7 +148,7 @@
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.teams" [title]="t('teams-title')">
+    <app-carousel-reel [items]="metadata().teams" [title]="t('teams-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>
@@ -157,7 +156,7 @@
   </div>
 
   <div class="mb-3">
-    <app-carousel-reel [items]="metadata.imprints" [title]="t('imprints-title')">
+    <app-carousel-reel [items]="metadata().imprints" [title]="t('imprints-title')">
       <ng-template #carouselItem let-item>
         <app-person-badge [person]="item" />
       </ng-template>

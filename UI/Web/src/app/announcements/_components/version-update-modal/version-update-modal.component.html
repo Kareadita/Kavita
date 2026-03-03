@@ -1,0 +1,38 @@
+<ng-container *transloco="let t; prefix: 'version-update-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title">{{t(title())}}</h4>
+    @if (mode() !== 'refresh') {
+      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+    }
+  </div>
+
+  <div class="modal-body">
+    @if (mode() === 'out-of-date') {
+      <p><strong>{{t('out-of-date.subtitle', {count: versionsOutOfDate()})}}</strong></p>
+      <p>{{t('out-of-date.description-1')}}</p>
+      <p [innerHTML]="t('out-of-date.description-2') | safeHtml"></p>
+      <p>{{t('out-of-date.description-3')}}</p>
+    } @else if (update()) {
+      <app-changelog-update-item [update]="update()" [showExtras]="false" />
+    }
+  </div>
+
+  <div class="modal-footer">
+    @switch (mode()) {
+      @case ('refresh') {
+        <button type="button" class="btn btn-primary" (click)="refresh()">{{t('new-version.refresh')}}</button>
+      }
+      @case ('update-available') {
+        <a class="btn btn-icon me-1" [href]="helpUrl()" target="_blank" rel="noopener noreferrer">{{t('update-notification.help')}}</a>
+        <button type="button" class="btn {{isDocker() ? 'btn-primary' : 'btn-secondary'}}" (click)="close()">{{t('close')}}</button>
+        @if (!isDocker()) {
+          <a [href]="update()?.updateUrl" class="btn btn-primary" target="_blank" rel="noopener noreferrer" (click)="close()">{{t('update-notification.download')}}</a>
+        }
+      }
+      @case ('out-of-date') {
+        <a class="btn btn-link me-1" href="https://discord.gg/b52wT37kt7" target="_blank" rel="noreferrer noopener">Discord</a>
+        <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>
+      }
+    }
+  </div>
+</ng-container>

@@ -1,10 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
-import {NgbModal, NgbModalRef, NgbPopover} from '@ng-bootstrap/ng-bootstrap';
+import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
 import {ConfirmConfig} from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import {ConfirmService} from 'src/app/shared/confirm.service';
-import {
-  UpdateNotificationModalComponent
-} from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {ErrorEvent} from 'src/app/_models/events/error-event';
 import {InfoEvent} from 'src/app/_models/events/info-event';
@@ -17,9 +14,9 @@ import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {NgClass, NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {DefaultModalOptions} from "../../../_models/default-modal-options";
 import {RouterLink} from "@angular/router";
 import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
+import {VersionService} from "../../../_services/version.service";
 
 @Component({
   selector: 'app-nav-events-toggle',
@@ -31,7 +28,7 @@ import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session
 export class EventsWidgetComponent implements OnInit {
   public readonly downloadService = inject(DownloadService);
   public readonly messageHub = inject(MessageHubService);
-  private readonly modalService = inject(NgbModal);
+  private readonly versionService = inject(VersionService);
   protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
@@ -45,8 +42,6 @@ export class EventsWidgetComponent implements OnInit {
   readonly infos = signal<InfoEvent[]>([]);
   readonly activeReadingSessions = signal<Set<number>>(new Set());
 
-  private updateNotificationModalRef: NgbModalRef | null = null;
-
   /**
    * Does not include active reading sessions
    */
@@ -59,9 +54,7 @@ export class EventsWidgetComponent implements OnInit {
 
   /** Intercepts from Single Updates to show an extra indicator to the user */
   readonly updateAvailable = signal(false);
-
   readonly activeDownloads = toSignal(this.downloadService.activeDownloads$, { initialValue: [] });
-  readonly onlineUsers = toSignal(this.messageHub.onlineUsers$, { initialValue: [] });
 
 
   ngOnInit(): void {
@@ -122,20 +115,10 @@ export class EventsWidgetComponent implements OnInit {
 
 
   handleUpdateAvailableClick(message: NotificationProgressEvent | UpdateVersionEvent) {
-    if (this.updateNotificationModalRef != null) { return; }
-    this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent, DefaultModalOptions);
-    if (message.hasOwnProperty('body')) {
-      this.updateNotificationModalRef.componentInstance.updateData = (message as NotificationProgressEvent).body as UpdateVersionEvent;
-    } else {
-      this.updateNotificationModalRef.componentInstance.updateData = message as UpdateVersionEvent;
-    }
-
-    this.updateNotificationModalRef.closed.subscribe(() => {
-      this.updateNotificationModalRef = null;
-    });
-    this.updateNotificationModalRef.dismissed.subscribe(() => {
-      this.updateNotificationModalRef = null;
-    });
+    const update = 'body' in message
+      ? (message as NotificationProgressEvent).body as UpdateVersionEvent
+      : message as UpdateVersionEvent;
+    this.versionService.showUpdateModal('update-available', { update }, true);
   }
 
   async seeMore(event: ErrorEvent | InfoEvent) {

@@ -1,0 +1,362 @@
+// =============================================================================
+// BASE CARD STYLES
+// =============================================================================
+
+.card {
+  background-color: var(--card-bg-color);
+  color: var(--card-text-color);
+  border: var(--card-border);
+  border-color: var(--card-border-color);
+  border-radius: var(--card-border-radius);
+  position: relative;
+
+  &:hover .card-actions {
+    visibility: visible;
+  }
+
+  .card-overlay {
+    background-color: var(--card-overlay-bg-color);
+
+    &:hover {
+      background-color: var(--card-overlay-hover-bg-color);
+      cursor: pointer;
+    }
+  }
+}
+
+.card-title {
+  --bs-card-title-color: var(--card-title-text-color);
+}
+
+// =============================================================================
+// CARD ITEM CONTAINER
+// =============================================================================
+
+.card-item-container {
+  width: var(--card-image-width);
+
+  .card {
+    max-width: var(--card-image-width);
+    padding-left: 0;
+    padding-right: 0;
+    border: 1px var(--card-border-color);
+    box-sizing: border-box;
+    position: relative;
+    color: var(--card-text-color);
+    cursor: pointer;
+  }
+
+  .card-title {
+    display: block;
+    width: 100%;
+    max-width: 8.125rem;
+    margin: 0 auto;
+    padding: 0.625rem;
+    font-size: 0.85rem;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .card-body {
+    position: absolute;
+    bottom: 2.4375rem;
+    z-index: 115;
+    width: 100%;
+    max-height: 3.625rem;
+    padding: 0 0.3125rem !important;
+    background-color: var(--card-body-bg-color);
+    border-width: var(--card-border-width);
+    border-style: var(--card-border-style);
+    border-color: var(--card-border-color);
+    font-size: 0.8rem;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+
+    > div:nth-child(2) {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      height: 2.5rem;
+      overflow: hidden;
+      font-size: 0.8rem;
+    }
+  }
+
+  .card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    height: var(--card-image-height);
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    transition: all 0.2s;
+  }
+
+  .overlay {
+    z-index: 10;
+    height: var(--card-image-height);
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+
+    .card-title,
+    & + .card-body {
+      color: var(--card-overlay-text-color);
+    }
+  }
+}
+
+// =============================================================================
+// CARD TITLE CONTAINER & ACTIONS
+// =============================================================================
+
+.card-title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 0.3125rem;
+
+  .card-title {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
+    font-size: 0.8rem;
+    text-align: center;
+
+    a {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+.card-format {
+  min-width: 1.375rem;
+  flex-shrink: 0;
+}
+
+.card-actions {
+  z-index: 115;
+  min-width: 0.9888rem;
+  flex-shrink: 0;
+
+  &:empty {
+    min-width: 0;
+    display: none;
+  }
+}
+
+::ng-deep app-card-actionables .dropdown .dropdown-toggle {
+  padding: 0 0.3125rem;
+}
+
+// =============================================================================
+// OVERLAY & HOVER STATES
+// =============================================================================
+
+.overlay {
+  position: relative;
+
+  .count {
+    position: absolute;
+    top: 0.3125rem;
+    right: 0.625rem;
+  }
+
+  &:hover {
+    .bulk-mode {
+      visibility: visible;
+      z-index: 110;
+    }
+
+    .overlay-information {
+      visibility: visible;
+      display: block;
+    }
+
+    & + .meta-title {
+      display: -webkit-box;
+      visibility: visible;
+      pointer-events: none;
+    }
+  }
+
+  .overlay-information {
+    visibility: hidden;
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--card-image-height);
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    transition: all 0.2s;
+
+    .card-title {
+      padding: 0.625rem;
+    }
+
+    &:hover {
+      background-color: var(--card-overlay-hover-bg-color);
+      cursor: pointer;
+    }
+
+    &--centered {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 115;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 3.125rem;
+
+      &:hover {
+        background-color: var(--primary-color) !important;
+        cursor: pointer;
+      }
+
+      span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+
+        i {
+          font-size: 1.4rem;
+          line-height: 2rem;
+          color: white;
+        }
+      }
+    }
+  }
+}
+
+// =============================================================================
+// META TITLE (Hidden by default, shown on hover)
+// =============================================================================
+
+.meta-title {
+  display: none;
+  visibility: hidden;
+  pointer-events: none;
+  border-width: 0;
+
+  .card-title {
+    max-width: unset;
+  }
+}
+
+// =============================================================================
+// BADGES & INDICATORS
+// =============================================================================
+
+.badge-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: var(--card-image-width);
+  height: var(--card-image-height);
+  overflow: hidden;
+  border-radius: 0.25rem;
+  pointer-events: none;
+}
+
+.not-read-badge {
+  position: absolute;
+  top: calc(-1 * (var(--card-progress-triangle-size) / 2));
+  right: -0.875rem;
+  z-index: 1000;
+  width: var(--card-progress-triangle-size);
+  height: var(--card-progress-triangle-size);
+  background-color: var(--primary-color);
+  transform: rotate(45deg);
+}
+
+.error-banner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--card-image-width);
+  height: 1.125rem;
+  background-color: var(--toast-error-bg-color);
+  color: white;
+  font-size: 0.75rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+// =============================================================================
+// CENTER INDICATORS
+// =============================================================================
+
+.progress-banner {
+  z-index: 10;
+  width: var(--card-image-width);
+  height: var(--card-progress-height);
+
+  .progress {
+    color: var(--card-progress-bar-color);
+    background-color: transparent;
+  }
+}
+
+.download {
+  position: absolute;
+  top: 25%;
+  right: 25%;
+  width: 5rem;
+  height: 5rem;
+}
+
+.read-btn {
+  margin-top: 0;
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
+
+// =============================================================================
+// SELECTION & BULK MODE
+// =============================================================================
+
+.selected-highlight {
+  outline: 0.125rem solid var(--primary-color);
+}
+
+.bulk-mode {
+  position: absolute;
+  top: 0.3125rem;
+  left: 0.3125rem;
+  visibility: hidden;
+
+  &.always-show {
+    visibility: visible !important;
+    width: var(--card-image-width);
+    height: var(--card-image-height);
+  }
+
+  input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--checkbox-bg-color);
+  }
+}
+

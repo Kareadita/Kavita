@@ -3,11 +3,10 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter,
   inject,
   OnInit,
-  Output,
-  signal
+  signal,
+  output
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
@@ -44,7 +43,7 @@ export class ManageScrobbleErrorsComponent implements OnInit {
   private readonly seriesService = inject(SeriesService);
   private readonly actionService = inject(ActionService);
 
-  @Output() scrobbleCount = new EventEmitter<number>();
+  readonly scrobbleCount = output<number>();
 
 
   messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef),

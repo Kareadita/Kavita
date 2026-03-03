@@ -231,7 +231,7 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.LibraryName,
                 opt => opt.MapFrom(src => src.Library.Name));
 
-
+        CreateMap<Library, LiteLibraryDto>();
         CreateMap<Library, LibraryDto>()
             .ForMember(dest => dest.Folders,
                 opt =>

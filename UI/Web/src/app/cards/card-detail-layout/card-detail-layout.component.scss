@@ -2,8 +2,8 @@
     display: flex;
     flex-direction: row;
     width: 100%;
-    height: calc((var(--vh) *100) - 157px);
-    margin-bottom: 10px;
+    height: calc((var(--vh) *100) - 9.8125rem);
+    margin-bottom: 0.625rem;
 
     &.empty {
         height: auto;
@@ -15,7 +15,7 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
 }
 
 .card-container {
@@ -25,7 +25,7 @@
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 160px);
+    grid-template-columns: repeat(auto-fill, 10rem);
     grid-gap: 0.5rem;
     justify-content: space-between;
     width: 100%;
@@ -46,22 +46,22 @@
     display: flex;
     flex-flow: column;
     flex-shrink: 0;
-    font-size: 13px;
+    font-size: 0.8125rem;
     overflow: hidden;
-    padding: 0 5px;
+    padding: 0 0.3125rem;
     align-items: center;
     justify-content: space-around;
 
     @media (max-width: 576px) {
-        padding: 0 5px 0 5px;
+        padding: 0 0.3125rem 0 0.3125rem;
     }
 
     .btn {
       text-decoration: none;
       color: hsla(0,0%,100%,.7);
-      height: 25px;
+      height: 1.5625rem;
       text-align: center;
-      padding: 0px 5px;
+      padding: 0 0.3125rem;
       -webkit-tap-highlight-color: transparent;
       background: none;
       border: 0;
@@ -94,7 +94,7 @@
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  height: calc(var(--vh) * 100 - 155px);
+  height: calc(var(--vh) * 100 - 9.6875rem);
   mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 97%, transparent 100%);
   overflow: auto;
@@ -133,8 +133,8 @@ h2 {
   cursor: pointer;
   padding: 0;
   margin: 0;
-  width: 25px;
-  height: 25px;
+  width: 1.5625rem;
+  height: 1.5625rem;
   position: relative;
   overflow: hidden;
 }
@@ -163,8 +163,8 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  border-radius: 4px;
+  font-size: 1.125rem;
+  border-radius: 0.25rem;
   transform-style: preserve-3d;
 }
 

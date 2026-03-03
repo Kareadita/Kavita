@@ -2,15 +2,14 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  EventEmitter,
   HostListener,
   inject,
   input,
   model,
   OnInit,
-  Output,
+  output,
   signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {NgClass, NgStyle} from '@angular/common';
 import {SlotColorPipe} from "../../../_pipes/slot-color.pipe";
@@ -36,7 +35,7 @@ export class SettingColorPickerComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly breakpointService = inject(BreakpointService);
 
-  @ViewChild('colorPopup') colorPopup?: ElementRef;
+  readonly colorPopup = viewChild<ElementRef>('colorPopup');
 
   id = input.required<string>();
   label = input.required<string>();
@@ -59,11 +58,11 @@ export class SettingColorPickerComponent implements OnInit {
 
   showPicker = signal(false);
 
-  @Output() selectPicker = new EventEmitter<void>();
+  selectPicker = output();
   /**
    * Emits the raw color from the color picker rather than our RgbaColor
    */
-  @Output() rawColorChange = new EventEmitter<Color>();
+  rawColorChange = output<Color>();
 
   chromeControl!: ColorPickerControl;
 
@@ -71,17 +70,18 @@ export class SettingColorPickerComponent implements OnInit {
   onDocumentClick(event: Event) {
     if (!this.showPicker()) return;
 
-    if (!this.colorPopup) return;
+    const colorPopup = this.colorPopup();
+    if (!colorPopup) return;
 
     const clickedElement = event.target as Node;
 
-    if (!this.elementRef.nativeElement.contains(clickedElement) && !this.colorPopup.nativeElement.contains(clickedElement)) {
+    if (!this.elementRef.nativeElement.contains(clickedElement) && !colorPopup.nativeElement.contains(clickedElement)) {
       this.showPicker.set(false);
     }
   }
 
   onSelect() {
-    this.selectPicker.emit();
+    this.selectPicker.emit(undefined);
   }
 
   longClick() {

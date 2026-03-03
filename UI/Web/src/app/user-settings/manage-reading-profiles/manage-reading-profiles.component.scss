@@ -5,13 +5,13 @@
 
   &:hover {
     background-color: var(--card-bg-color);
-    border-radius: 5px;
+    border-radius: 0.3125rem;
     cursor: pointer;
   }
 
   &:active, &.active {
     background-color: var(--card-bg-color);
-    border-radius: 5px;
+    border-radius: 0.3125rem;
   }
 }
 
@@ -27,8 +27,8 @@
 }
 
 .custom-position {
-  right: 15px;
-  top: -42px;
+  right: 0.9375rem;
+  top: -2.625rem;
 }
 
 a:hover {

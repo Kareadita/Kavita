@@ -1,16 +1,16 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   DestroyRef,
   EventEmitter,
   inject,
-  Input,
+  input,
   OnInit,
-  Output
+  output,
+  signal
 } from '@angular/core';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import {firstValueFrom, map, Observable, of, ReplaySubject} from 'rxjs';
+import {map} from 'rxjs';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
 import {SearchResult} from 'src/app/_models/search/search-result';
@@ -48,33 +48,26 @@ interface RelationControl {
 export class EditSeriesRelationComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly seriesService = inject(SeriesService);
   private readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
   private readonly searchService = inject(SearchService);
   public readonly imageService = inject(ImageService);
-  protected readonly RelationKind = RelationKind;
-  protected readonly WikiLink = WikiLink;
 
-  @Input({required: true}) series!: Series;
-  /**
-   * This will tell the component to save based on its internal state
-   */
-  @Input() save: EventEmitter<void> = new EventEmitter();
-
-  @Output() saveApi = new ReplaySubject(1);
+  readonly series = input.required<Series>();
+  readonly save = input<EventEmitter<void>>(new EventEmitter());
+  readonly saveApi = output();
 
   relationOptions = RelationKinds;
-  relations: Array<RelationControl> = [];
-  libraryNames: {[key:number]: string} = {};
+  relations = signal<RelationControl[]>([]);
+  libraryNames = signal<Record<number, string>>({});
 
   focusTypeahead = new EventEmitter();
 
   idCount = 0;
 
   ngOnInit(): void {
-    this.seriesService.getRelatedForSeries(this.series.id).subscribe( relations => {
+    this.seriesService.getRelatedForSeries(this.series().id).subscribe(relations => {
         this.setupRelationRows(relations.prequels, RelationKind.Prequel);
         this.setupRelationRows(relations.sequels, RelationKind.Sequel);
         this.setupRelationRows(relations.sideStories, RelationKind.SideStory);
@@ -89,15 +82,13 @@ export class EditSeriesRelationComponent implements OnInit {
         this.setupRelationRows(relations.parent, RelationKind.Parent);
         this.setupRelationRows(relations.editions, RelationKind.Edition);
         this.setupRelationRows(relations.annuals, RelationKind.Annual);
-        this.cdRef.detectChanges();
     });
 
     this.libraryService.getLibraryNames().subscribe(names => {
-      this.libraryNames = names;
-      this.cdRef.markForCheck();
+      this.libraryNames.set(names);
     });
 
-    this.save.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.saveState());
+    this.save().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.saveState());
   }
 
   setupRelationRows(relations: Array<Series>, kind: RelationKind) {
@@ -110,41 +101,38 @@ export class EditSeriesRelationComponent implements OnInit {
       }
 
       const relation = {series: item, typeaheadSettings: settings, formControl: form, id: this.idCount++};
-      this.relations.push(relation);
+      this.relations.set([...this.relations(), relation]);
     }
 
-    this.cdRef.markForCheck();
   }
 
   async addNewRelation() {
-    this.relations.push({
+    this.relations.set([...this.relations(), {
       series: undefined,
       formControl: new FormControl(RelationKind.Adaptation, []),
-      typeaheadSettings: this.createSeriesTypeahead(undefined, RelationKind.Adaptation, this.relations.length),
+      typeaheadSettings: this.createSeriesTypeahead(undefined, RelationKind.Adaptation, this.relations().length),
       id: this.idCount++,
-    });
-    this.cdRef.markForCheck();
+    }]);
 
     // Focus on the new typeahead
     setTimeout(() => {
-      this.focusTypeahead.emit(`relation--${this.relations.length - 1}`);
+      this.focusTypeahead.emit(`relation--${this.relations().length - 1}`);
     }, 10);
   }
 
   removeRelation(index: number) {
-    this.relations.splice(index, 1);
-    this.cdRef.markForCheck();
+    const relations = this.relations();
+    relations.splice(index, 1);
+    this.relations.set([...relations]);
   }
 
 
   updateSeries(event: Array<SearchResult | undefined>, relation: RelationControl) {
     if (event[0] === undefined) {
       relation.series = undefined;
-      this.cdRef.markForCheck();
       return;
     }
     relation.series = {id: event[0].seriesId, name: event[0].name};
-    this.cdRef.markForCheck();
   }
 
   createSeriesTypeahead(series: Series | undefined, relationship: RelationKind, index: number): TypeaheadSettings<SearchResult> {
@@ -157,7 +145,7 @@ export class EditSeriesRelationComponent implements OnInit {
     seriesSettings.fetchFn = (searchFilter: string) => this.searchService.search(searchFilter).pipe(
       map(group => group.series),
       map(items => seriesSettings.compareFn(items, searchFilter)),
-      map(series => series.filter(s => s.seriesId !== this.series.id)),
+      map(series => series.filter(s => s.seriesId !== this.series().id)),
     );
     seriesSettings.trackByIdentityFn = (idx, item) => item.seriesId + '';
 
@@ -188,22 +176,30 @@ export class EditSeriesRelationComponent implements OnInit {
   }
 
   saveState() {
-    const adaptations = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Adaptation && item.series !== undefined).map(item => item.series!.id);
-    const characters = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Character && item.series !== undefined).map(item => item.series!.id);
-    const contains = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Contains && item.series !== undefined).map(item => item.series!.id);
-    const others = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Other && item.series !== undefined).map(item => item.series!.id);
-    const prequels = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Prequel && item.series !== undefined).map(item => item.series!.id);
-    const sequels = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Sequel && item.series !== undefined).map(item => item.series!.id);
-    const sideStories = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.SideStory && item.series !== undefined).map(item => item.series!.id);
-    const spinOffs = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.SpinOff && item.series !== undefined).map(item => item.series!.id);
-    const alternativeSettings = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeSetting && item.series !== undefined).map(item => item.series!.id);
-    const alternativeVersions = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeVersion && item.series !== undefined).map(item => item.series!.id);
-    const doujinshis = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Doujinshi && item.series !== undefined).map(item => item.series!.id);
-    const editions = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Edition && item.series !== undefined).map(item => item.series!.id);
-    const annuals = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Annual && item.series !== undefined).map(item => item.series!.id);
+    const g = (kind: RelationKind) => this.getSeriesIdsForRelation(kind);
 
-    // NOTE: We can actually emit this onto an observable and in main parent, use mergeMap into the forkJoin
-    this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis, editions, annuals).subscribe(() => {});
-
+    this.seriesService.updateRelationships(
+      this.series().id,
+      g(RelationKind.Adaptation),
+      g(RelationKind.Character),
+      g(RelationKind.Contains),
+      g(RelationKind.Other),
+      g(RelationKind.Prequel),
+      g(RelationKind.Sequel),
+      g(RelationKind.SideStory),
+      g(RelationKind.SpinOff),
+      g(RelationKind.AlternativeSetting),
+      g(RelationKind.AlternativeVersion),
+      g(RelationKind.Doujinshi),
+      g(RelationKind.Edition),
+      g(RelationKind.Annual)
+    ).subscribe(() => {}); // NOTE: We can actually emit this onto an observable and in main parent, use mergeMap into the forkJoin
   }
+
+  private getSeriesIdsForRelation(relation: RelationKind) {
+    return this.relations().filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === relation && item.series !== undefined).map(item => item.series!.id)
+  }
+
+  protected readonly RelationKind = RelationKind;
+  protected readonly WikiLink = WikiLink;
 }

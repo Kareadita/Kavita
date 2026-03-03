@@ -31,7 +31,7 @@ export class NavLinkModalComponent {
   private readonly accountService = inject(AccountService);
 
   profileLink = computed(() => {
-    return ['/profile', this.accountService.currentUserSignal()?.id ?? ''];
+    return ['/profile', this.accountService.currentUser()?.id ?? ''];
   });
 
   close() {

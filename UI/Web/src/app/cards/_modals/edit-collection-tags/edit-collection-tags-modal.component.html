@@ -1,0 +1,152 @@
+<ng-container *transloco="let t; prefix: 'edit-collection-tags'">
+
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title', {collectionName: tag().title})}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
+        orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
+      <li [ngbNavItem]="TabID.General">
+        <a ngbNavLink>{{t(TabID.General)}}</a>
+        <ng-template ngbNavContent>
+          <form [formGroup]="collectionTagForm">
+            <div class="row g-0 mb-3">
+              <div class="col-md-8 col-sm-12">
+                <label for="library-name" class="form-label">{{t('name-label')}}</label>
+                <input id="library-name" class="form-control" formControlName="title" type="text"
+                       [class.is-invalid]="collectionTagForm.get('title')?.invalid && collectionTagForm.get('title')?.touched">
+                @if (collectionTagForm.dirty || !collectionTagForm.untouched) {
+                  <div id="inviteForm-validations" class="invalid-feedback">
+                    @if (collectionTagForm.get('title')?.errors?.required) {
+                      <div>{{t('required-field')}}</div>
+                    }
+                    @if (collectionTagForm.get('title')?.errors?.duplicateName) {
+                      <div>{{t('name-validation')}}</div>
+                    }
+                  </div>
+                }
+              </div>
+              <div class="col-md-3 col-sm-12 ms-2">
+                <div class="form-check form-switch">
+                  <input type="checkbox" id="tag-promoted" role="switch" formControlName="promoted" class="form-check-input" switch
+                         aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
+                  <label class="form-check-label me-1" for="tag-promoted">{{t('promote-label')}}</label>
+                  <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
+                  <ng-template #promotedTooltip>{{t('promote-tooltip')}}</ng-template>
+                  <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip" /></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-0 mb-3">
+              <label for="summary" class="form-label">{{t('summary-label')}}</label>
+              <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>
+            </div>
+
+          </form>
+        </ng-template>
+      </li>
+
+      @if (tag().source === ScrobbleProvider.Kavita) {
+        <li [ngbNavItem]="TabID.Series">
+          <a ngbNavLink>{{t(TabID.Series)}}</a>
+          <ng-template ngbNavContent>
+            @if (!isLoading) {
+              <div class="list-group">
+                <form [formGroup]="formGroup">
+                  <div class="row g-0 mb-3">
+                    <div class="col-md-12">
+                      <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
+                      <div class="input-group">
+                        <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter" />
+                      </div>
+                    </div>
+                  </div>
+                </form>
+                <div class="form-check">
+                  <input id="select-all" type="checkbox" class="form-check-input" [disabled]="tag().source !== ScrobbleProvider.Kavita"
+                         [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+                  <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
+                </div>
+                <ul>
+                  @for (item of series | filter: filterList; let i = $index; track item.id) {
+                    <li class="list-group-item">
+                      <div class="form-check">
+                        <input id="series-{{i}}" type="checkbox" class="form-check-input" [disabled]="tag().source !== ScrobbleProvider.Kavita"
+                               [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
+                        <label for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
+                      </div>
+                    </li>
+                  }
+                </ul>
+                @if (pagination && series.length !== 0 && pagination.totalPages > 1) {
+                  <div class="d-flex justify-content-center">
+                    <ngb-pagination [(page)]="pagination.currentPage"
+                      [pageSize]="pagination.itemsPerPage"
+                      (pageChange)="onPageChange($event)"
+                      [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
+                      [collectionSize]="pagination.totalItems" />
+                  </div>
+                }
+              </div>
+            }
+          </ng-template>
+        </li>
+      }
+
+      <li [ngbNavItem]="TabID.CoverImage">
+        <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+        <ng-template ngbNavContent>
+          <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)"
+                                   (selectedBase64Url)="updateSelectedImage($event)" [showReset]="tag().coverImageLocked"
+                                   (resetClicked)="handleReset()" />
+        </ng-template>
+      </li>
+
+      @if (tag().source !== ScrobbleProvider.Kavita) {
+        <li [ngbNavItem]="TabID.Info">
+          <a ngbNavLink>{{t(TabID.Info)}}</a>
+          <ng-template ngbNavContent>
+            <div class="row g-0 mb-2">
+              <div class="col-md-6">
+                <div>{{t('last-sync-title')}}</div>
+                <div>{{tag().lastSyncUtc | utcToLocalTime:'shortDate' | defaultDate}}</div>
+              </div>
+              <div class="col-md-6">
+                <div>{{t('source-url-title')}}</div>
+                <a [href]="tag().sourceUrl | safeUrl" rel="noopener noreferrer" target="_blank">{{tag().sourceUrl}}</a>
+              </div>
+            </div>
+            <div class="row g-0 mb-2">
+              <div class="col-md-6">
+                <div>{{t('total-series-title')}}</div>
+                <div>{{tag().totalSourceCount | number}}</div>
+              </div>
+              <div class="col-md-6">
+                <div>{{t('missing-series-title')}}</div>
+                <div>{{tag().totalSourceCount - series.length}}</div>
+              </div>
+            </div>
+
+            @let missingSeriesFromSource = tag().missingSeriesFromSource;
+            @if (missingSeriesFromSource !== null && (tag().totalSourceCount - series.length) > 0) {
+              <h6>{{t('missing-series-title')}}</h6>
+              <div class="row g-0">
+                <p [innerHTML]="missingSeriesFromSource | safeHtml"></p>
+              </div>
+            }
+          </ng-template>
+        </li>
+      }
+
+    </ul>
+
+    <div [ngbNavOutlet]="nav" class="tab-content {{breakpointService.isMobile() ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
+    <button type="button" class="btn btn-primary" [disabled]="collectionTagForm.invalid" (click)="save()">{{t('save')}}</button>
+  </div>
+
+</ng-container>

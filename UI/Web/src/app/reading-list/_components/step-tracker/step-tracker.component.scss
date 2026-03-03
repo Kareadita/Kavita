@@ -2,13 +2,13 @@
 .bs4-order-tracking {
     overflow: hidden;
     color: #878788;
-    padding-left: 0px;
-    margin-top: 30px
+    padding-left: 0;
+    margin-top: 1.875rem
   }
   
   .bs4-order-tracking li {
     list-style-type: none;
-    font-size: 17px;
+    font-size: 1.0625rem;
     width: 25%;
     float: left;
     position: relative;
@@ -18,24 +18,24 @@
   }
   
   .bs4-order-tracking li:first-child:before {
-    margin-left: 15px !important;
-    padding-left: 11px !important;
+    margin-left: 0.9375rem !important;
+    padding-left: 0.6875rem !important;
     text-align: left !important
   }
   
   .bs4-order-tracking li:last-child:before {
-    margin-right: 5px !important;
-    padding-right: 11px !important;
+    margin-right: 0.3125rem !important;
+    padding-right: 0.6875rem !important;
     text-align: right !important
   }
   
   .bs4-order-tracking li>div {
     color: #fff;
-    width: 50px;
+    width: 3.125rem;
     text-align: center;
-    line-height: 50px;
+    line-height: 3.125rem;
     display: block;
-    font-size: 20px;
+    font-size: 1.25rem;
     background: #878788;
     border-radius: 50%;
     margin: auto
@@ -44,12 +44,12 @@
   .bs4-order-tracking li:after {
     content: '';
     width: 150%;
-    height: 2px;
+    height: 0.125rem;
     background: #878788;
     position: absolute;
     left: 0%;
     right: 0%;
-    top: 25px;
+    top: 1.5625rem;
     z-index: -1
   }
   

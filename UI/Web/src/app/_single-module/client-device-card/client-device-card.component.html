@@ -30,7 +30,7 @@
             </div>
           </div>
           <div class="text-end">
-            <app-card-actionables [actions]="actions()" [entity]="clientDevice()" [disabled]="clientDevice().ownerUserId != currentUserId()" />
+            <app-card-actionables [actions]="actions()" [entity]="clientDevice()" [disabled]="clientDevice().ownerUserId !== currentUserId()" (actionHandler)="handleActionCallback($event)" />
           </div>
         </div>
 

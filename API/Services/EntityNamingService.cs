@@ -54,14 +54,30 @@ public interface IEntityNamingService
 
 public partial class EntityNamingService : IEntityNamingService
 {
-    private const string DefaultVolumeLabel = "Volume";
-    private const string DefaultChapterLabel = "Chapter";
-    private const string DefaultIssueLabel = "Issue";
-    private const string DefaultBookLabel = "Book";
+    private const string DefaultVolumeLabel = "Volume {0}";
+    private const string DefaultChapterLabel = "Chapter {0}";
+    private const string DefaultIssueLabel = "Issue {0}{1}";
+    private const string DefaultBookLabel = "Book {0}";
     private const string DefaultHashMark = "#";
 
     [GeneratedRegex(@"^\d+(\.\d+)?$", RegexOptions.Compiled)]
     private static partial Regex JustNumbersRegex();
+
+    [GeneratedRegex(@"\{\d+\}")]
+    private static partial Regex FormatPlaceholderRegex();
+
+    /// <summary>
+    /// Validates that a label string contains at least one format placeholder (e.g., {0}).
+    /// Throws <see cref="ArgumentException"/> if the placeholder is missing.
+    /// This prevents silent data loss when callers pass plain strings to format-string parameters.
+    /// </summary>
+    private static void ValidateFormatLabel(string label, string paramName)
+    {
+        if (!FormatPlaceholderRegex().IsMatch(label))
+        {
+            throw new ArgumentException($"Label must contain at least one format placeholder (e.g., {{0}}).", paramName);
+        }
+    }
 
     public string FormatChapterTitle(LibraryType libraryType, ChapterDto chapter,
         string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)
@@ -81,15 +97,19 @@ public partial class EntityNamingService : IEntityNamingService
         chapterLabel ??= DefaultChapterLabel;
         issueLabel ??= DefaultIssueLabel;
         bookLabel ??= DefaultBookLabel;
+        ValidateFormatLabel(chapterLabel, nameof(chapterLabel));
+        ValidateFormatLabel(issueLabel, nameof(issueLabel));
+        ValidateFormatLabel(bookLabel, nameof(bookLabel));
+
         var hashMark = withHash ? DefaultHashMark : string.Empty;
 
         var baseTitle = libraryType switch
         {
-            LibraryType.Book => $"{bookLabel} {title}".Trim(),
-            LibraryType.LightNovel => $"{bookLabel} {range}".Trim(),
-            LibraryType.Comic or LibraryType.ComicVine => $"{issueLabel} {hashMark}{range}".Trim(),
-            LibraryType.Manga or LibraryType.Image => $"{chapterLabel} {range}".Trim(),
-            _ => $"{chapterLabel} {range}".Trim()
+            LibraryType.Book => string.Format(bookLabel, title).Trim(),
+            LibraryType.LightNovel => string.Format(bookLabel, range).Trim(),
+            LibraryType.Comic or LibraryType.ComicVine => string.Format(issueLabel, hashMark, range).Trim(),
+            LibraryType.Manga or LibraryType.Image => string.Format(chapterLabel, range).Trim(),
+            _ => string.Format(chapterLabel, range).Trim()
         };
 
         // Append title only if it adds new information
@@ -109,6 +129,7 @@ public partial class EntityNamingService : IEntityNamingService
         }
 
         volumeLabel ??= DefaultVolumeLabel;
+        ValidateFormatLabel(volumeLabel, nameof(volumeLabel));
 
         if (libraryType is LibraryType.Book or LibraryType.LightNovel)
         {
@@ -123,6 +144,7 @@ public partial class EntityNamingService : IEntityNamingService
     {
         var seriesName = series.Name!;
         volumeLabel ??= DefaultVolumeLabel;
+        ValidateFormatLabel(volumeLabel, nameof(volumeLabel));
 
         // No volume context
         if (volume == null)
@@ -142,6 +164,7 @@ public partial class EntityNamingService : IEntityNamingService
         string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)
     {
         volumeLabel ??= DefaultVolumeLabel;
+        ValidateFormatLabel(volumeLabel, nameof(volumeLabel));
 
         // Special volume - just use chapter title
         if (volume.IsSpecial())
@@ -192,22 +215,18 @@ public partial class EntityNamingService : IEntityNamingService
             bookLabel);
     }
 
-    public string FormatReadingListItemTitle(
-        LibraryType libraryType,
-        MangaFormat format,
-        string? chapterNumber,
-        string? volumeNumber,
-        string? chapterTitleName,
-        bool isSpecial,
-        string? volumeLabel = null,
-        string? chapterLabel = null,
-        string? issueLabel = null,
-        string? bookLabel = null)
+    public string FormatReadingListItemTitle( LibraryType libraryType, MangaFormat format, string? chapterNumber,
+        string? volumeNumber, string? chapterTitleName, bool isSpecial, string? volumeLabel = null,
+        string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)
     {
         volumeLabel ??= DefaultVolumeLabel;
         chapterLabel ??= DefaultChapterLabel;
         issueLabel ??= DefaultIssueLabel;
         bookLabel ??= DefaultBookLabel;
+        ValidateFormatLabel(volumeLabel, nameof(volumeLabel));
+        ValidateFormatLabel(chapterLabel, nameof(chapterLabel));
+        ValidateFormatLabel(issueLabel, nameof(issueLabel));
+        ValidateFormatLabel(bookLabel, nameof(bookLabel));
 
         // Handle epub format with special logic
         if (format == MangaFormat.Epub)
@@ -218,7 +237,7 @@ public partial class EntityNamingService : IEntityNamingService
         // Try volume-only title first (when chapter is default but volume is real)
         if (Parser.IsDefaultChapter(chapterNumber) && !Parser.IsLooseLeafVolume(volumeNumber))
         {
-            return $"{volumeLabel} {volumeNumber}";
+            return string.Format(volumeLabel, volumeNumber);
         }
 
         // Clean chapter number for display
@@ -239,8 +258,14 @@ public partial class EntityNamingService : IEntityNamingService
         }
 
         // Standard chapter formatting based on library type
-        var chapterPrefix = GetChapterPrefix(libraryType, chapterLabel, issueLabel, bookLabel);
-        return $"{chapterPrefix}{displayChapterNumber}";
+        return libraryType switch
+        {
+            LibraryType.Comic or LibraryType.ComicVine =>
+                string.Format(issueLabel, DefaultHashMark, displayChapterNumber),
+            LibraryType.Book or LibraryType.LightNovel =>
+                string.Format(bookLabel, displayChapterNumber),
+            _ => string.Format(chapterLabel, displayChapterNumber)
+        };
     }
 
     #region Reading List Helpers
@@ -267,7 +292,7 @@ public partial class EntityNamingService : IEntityNamingService
 
             // Fall back to volume
             var cleanedVolume = Parser.CleanSpecialTitle(volumeNumber);
-            return $"{volumeLabel} {cleanedVolume}";
+            return string.Format(volumeLabel, cleanedVolume);
         }
 
         // Special volume marker - just use cleaned chapter
@@ -277,7 +302,7 @@ public partial class EntityNamingService : IEntityNamingService
         }
 
         // Regular epub with chapter number
-        return $"{volumeLabel} {cleanedChapterNumber}";
+        return string.Format(volumeLabel, cleanedChapterNumber);
     }
 
     /// <summary>
@@ -298,24 +323,6 @@ public partial class EntityNamingService : IEntityNamingService
 
         // Otherwise clean special title formatting
         return Parser.CleanSpecialTitle(chapterNumber);
-    }
-
-    /// <summary>
-    /// Gets the chapter prefix string based on library type.
-    /// Maps to ReaderService.FormatChapterName logic.
-    /// </summary>
-    private static string GetChapterPrefix(
-        LibraryType libraryType,
-        string chapterLabel,
-        string issueLabel,
-        string bookLabel)
-    {
-        return libraryType switch
-        {
-            LibraryType.Comic or LibraryType.ComicVine => $"{issueLabel} #",
-            LibraryType.Book or LibraryType.LightNovel => $"{bookLabel} ",
-            _ => $"{chapterLabel} "
-        };
     }
 
     #endregion
@@ -383,27 +390,19 @@ public partial class EntityNamingService : IEntityNamingService
             return volumeName;
         }
 
-        return $"{volumeLabel} {volumeName}".Trim();
+        return string.Format(volumeLabel, volumeName).Trim();
     }
 
     /// <summary>
     /// Checks if the volume name already starts with a volume-like prefix.
-    /// Handles localized labels and common variations.
     /// </summary>
-    private static bool HasVolumePrefix(string volumeName, string volumeLabel)
+    private static bool HasVolumePrefix(string volumeName, string? volumeLabel = null)
     {
         if (string.IsNullOrEmpty(volumeName))
         {
             return false;
         }
 
-        // Check for the provided label
-        if (volumeName.StartsWith(volumeLabel, StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
-        // Check for common variations that might exist in data
         var commonPrefixes = new[] { "Volume", "Vol.", "Vol ", "V." };
         foreach (var prefix in commonPrefixes)
         {
@@ -411,6 +410,25 @@ public partial class EntityNamingService : IEntityNamingService
             {
                 return true;
             }
+        }
+
+        if (string.IsNullOrEmpty(volumeLabel)) return false;
+
+        const int placeholderLength = 3; // "{0}".Length
+        var placeholderIndex = volumeLabel.IndexOf("{0}", StringComparison.Ordinal);
+        if (placeholderIndex < 0) return false;
+
+        var labelPrefix = volumeLabel[..placeholderIndex].Trim();
+        var labelSuffix = volumeLabel[(placeholderIndex + placeholderLength)..].Trim();
+
+        if (!string.IsNullOrEmpty(labelPrefix) && volumeName.StartsWith(labelPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrEmpty(labelSuffix) && volumeName.EndsWith(labelSuffix, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
         }
 
         return false;

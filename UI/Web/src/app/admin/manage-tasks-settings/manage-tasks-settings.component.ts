@@ -18,10 +18,6 @@ import {
 } from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
-import {
-  UpdateNotificationModalComponent
-} from 'src/app/announcements/_components/update-notification/update-notification-modal.component';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {DownloadService} from 'src/app/shared/_services/download.service';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
 import {AsyncPipe, TitleCasePipe} from '@angular/common';
@@ -32,9 +28,9 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
-import {DefaultModalOptions} from "../../_models/default-modal-options";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {VersionService} from "../../_services/version.service";
 
 interface AdhocTask {
   name: string;
@@ -60,7 +56,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
   private readonly serverService = inject(ServerService);
-  private readonly modalService = inject(NgbModal);
+  private readonly versionService = inject(VersionService);
   private readonly downloadService = inject(DownloadService);
 
   serverSettings!: ServerSettings;
@@ -135,8 +131,7 @@ export class ManageTasksSettingsComponent implements OnInit {
           this.toastr.info(translate('toasts.no-updates'));
           return;
         }
-        const modalRef = this.modalService.open(UpdateNotificationModalComponent, DefaultModalOptions);
-        modalRef.componentInstance.updateData = update;
+        this.versionService.showUpdateModal('update-available', { update }, true);
       }
     },
   ];

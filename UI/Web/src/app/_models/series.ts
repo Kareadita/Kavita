@@ -32,6 +32,7 @@ export interface Series extends IHasCover, IHasReadingTime, IHasProgress {
   userRating: number;
   hasUserRated: boolean;
   libraryId: number;
+  libraryName: string;
   /**
    * DateTime the entity was created
    */

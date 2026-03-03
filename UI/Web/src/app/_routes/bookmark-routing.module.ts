@@ -4,6 +4,7 @@ import {UrlFilterResolver} from "../_resolvers/url-filter.resolver";
 
 export const routes: Routes = [
   {path: '', component: BookmarksComponent, pathMatch: 'full',
+    title: 'title.bookmarks',
     resolve: {
       filter: UrlFilterResolver
     },

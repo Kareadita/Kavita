@@ -1,15 +1,16 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   DestroyRef,
-  ElementRef, EventEmitter,
+  effect,
+  ElementRef,
   inject,
-  Input,
-  OnChanges, Output,
+  input,
+  model,
+  output,
   Renderer2,
   RendererStyleFlags2,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {CoverUpdateEvent} from 'src/app/_models/events/cover-update-event';
 import {ImageService} from 'src/app/_services/image.service';
@@ -27,63 +28,63 @@ import {LazyLoadImageModule, StateChange} from "ng-lazyload-image";
     styleUrls: ['./image.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ImageComponent implements OnChanges {
+export class ImageComponent {
 
   private readonly destroyRef = inject(DestroyRef);
   protected readonly imageService = inject(ImageService);
   private readonly renderer = inject(Renderer2);
   private readonly hubService = inject(MessageHubService);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
   /**
    * Source url to load image
    */
-  @Input({required: true}) imageUrl!: string;
+  readonly imageUrl = model.required<string>();
   /**
    * Width of the image. If not defined, will not be applied
    */
-  @Input() width: string = '';
+  readonly width = input('');
   /**
    * Height of the image. If not defined, will not be applied
    */
-  @Input() height: string = '';
-   /**
-    * If the image component should respond to cover updates
-    */
-   @Input() processEvents: boolean = true;
+  readonly height = input('');
+  /**
+   * If the image component should respond to cover updates
+   */
+  readonly processEvents = input(true);
   /**
    * Note: Parent component must use ViewEncapsulation.None
    */
-  @Input() classes: string = '';
+  readonly classes = input('');
   /**
    * A collection of styles to apply. This is useful if the parent component doesn't want to use no view encapsulation
    */
-  @Input() styles: {[key: string]: string} = {};
-  @Input() errorImage: string = this.imageService.errorImage;
+  readonly styles = input<{[key: string]: string}>({});
+  readonly errorImage = input(this.imageService.errorImage);
   /**
    * If the image load fails, instead of showing an error image, hide the image (visibility)
    */
-  @Input() hideOnError: boolean = false;
+  readonly hideOnError = input(false);
   /**
    * Sets the object-fit property of the image. Default is 'fill'.
    */
-  @Input() objectFit: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down' = 'fill';
+  readonly objectFit = input<'fill' | 'contain' | 'cover' | 'none' | 'scale-down'>('fill');
 
-  @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
+  readonly imgElem = viewChild.required<ElementRef<HTMLImageElement>>('img');
   /**
    * Outputs when the image failed to load
    */
-  @Output() errorLoad = new EventEmitter<string>();
+  readonly errorLoad = output<string>();
 
   constructor() {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
-      if (!this.processEvents) return;
+      if (!this.processEvents()) return;
       if (res.event === EVENTS.CoverUpdate) {
         const updateEvent = res.payload as CoverUpdateEvent;
-        if (this.imageUrl === undefined || this.imageUrl === null || this.imageUrl === '') return;
-        const entityType = this.imageService.getEntityTypeFromUrl(this.imageUrl);
+        const url = this.imageUrl();
+        if (url === undefined || url === null || url === '') return;
+        const entityType = this.imageService.getEntityTypeFromUrl(url);
         if (entityType === updateEvent.entityType) {
-          const tokens = this.imageUrl.split('?')[1].split('&');
+          const tokens = url.split('?')[1].split('&');
 
           //...seriesId=123&random=
           let id = tokens[0].replace(entityType + 'Id=', '');
@@ -91,40 +92,44 @@ export class ImageComponent implements OnChanges {
             id = id.split('&')[0];
           }
           if (id === (updateEvent.id + '')) {
-            this.imageUrl = this.imageService.randomize(this.imageUrl);
-            this.cdRef.markForCheck();
+            this.imageUrl.set(this.imageService.randomize(url));
           }
         }
       }
     });
-  }
 
-  ngOnChanges(): void {
-    if (this.width !== '') {
-      this.renderer.setStyle(this.imgElem.nativeElement, 'width', this.width);
-    }
+    effect(() => {
+      const elem = this.imgElem().nativeElement;
+      const width = this.width();
+      const height = this.height();
+      const styles = this.styles();
+      const classes = this.classes();
 
-    if (this.height !== '') {
-      this.renderer.setStyle(this.imgElem.nativeElement, 'height', this.height);
-    }
+      if (width !== '') {
+        this.renderer.setStyle(elem, 'width', width);
+      }
 
-    const styleKeys = Object.keys(this.styles);
-    if (styleKeys.length !== 0) {
-      styleKeys.forEach(key => {
-        this.renderer.setStyle(this.imgElem.nativeElement, key, this.styles[key], RendererStyleFlags2.Important);
-      });
-    }
+      if (height !== '') {
+        this.renderer.setStyle(elem, 'height', height);
+      }
 
-    if (this.classes != '') {
-      const classTokens = this.classes.split(' ');
-      classTokens.forEach(cls => this.renderer.addClass(this.imgElem.nativeElement, cls));
-    }
-    this.cdRef.markForCheck();
+      const styleKeys = Object.keys(styles);
+      if (styleKeys.length !== 0) {
+        styleKeys.forEach(key => {
+          this.renderer.setStyle(elem, key, styles[key], RendererStyleFlags2.Important);
+        });
+      }
+
+      if (classes !== '') {
+        const classTokens = classes.split(' ');
+        classTokens.forEach(cls => this.renderer.addClass(elem, cls));
+      }
+    });
   }
 
 
   myCallbackFunction(event: StateChange) {
-    const image = this.imgElem.nativeElement;
+    const image = this.imgElem().nativeElement;
     switch (event.reason) {
       case 'setup':
         // The lib has been instantiated but we have not done anything yet.
@@ -148,11 +153,11 @@ export class ImageComponent implements OnChanges {
         // The image could not be loaded for some reason.
         // `event.data` is the error in this case
         this.renderer.removeClass(image, 'fade-in');
-        if (this.hideOnError) {
+        if (this.hideOnError()) {
           this.renderer.addClass(image, 'd-none');
         }
-        this.errorLoad.emit(this.imageUrl);
-        this.cdRef.markForCheck();
+        this.errorLoad.emit(this.imageUrl());
+
         break;
       case 'finally':
         // The last event before cleaning up

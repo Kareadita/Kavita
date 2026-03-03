@@ -1,7 +1,7 @@
 @use '../../../card-item-common';
 
 :host ::ng-deep .extreme-blur {
-  filter: brightness(50%) blur(4px);
+  filter: brightness(50%) blur(0.25rem);
 }
 
 .card-title-container {
