@@ -385,25 +385,23 @@ public partial class EntityNamingService : IEntityNamingService
             }
         }
 
-        if (!string.IsNullOrEmpty(volumeLabel))
+        if (string.IsNullOrEmpty(volumeLabel)) return false;
+
+        const int placeholderLength = 3; // "{0}".Length
+        var placeholderIndex = volumeLabel.IndexOf("{0}", StringComparison.Ordinal);
+        if (placeholderIndex < 0) return false;
+
+        var labelPrefix = volumeLabel[..placeholderIndex].Trim();
+        var labelSuffix = volumeLabel[(placeholderIndex + placeholderLength)..].Trim();
+
+        if (!string.IsNullOrEmpty(labelPrefix) && volumeName.StartsWith(labelPrefix, StringComparison.OrdinalIgnoreCase))
         {
-            const int placeholderLength = 3; // "{0}".Length
-            var placeholderIndex = volumeLabel.IndexOf("{0}", StringComparison.Ordinal);
-            if (placeholderIndex >= 0)
-            {
-                var labelPrefix = volumeLabel[..placeholderIndex].Trim();
-                var labelSuffix = volumeLabel[(placeholderIndex + placeholderLength)..].Trim();
+            return true;
+        }
 
-                if (!string.IsNullOrEmpty(labelPrefix) && volumeName.StartsWith(labelPrefix, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-
-                if (!string.IsNullOrEmpty(labelSuffix) && volumeName.EndsWith(labelSuffix, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
+        if (!string.IsNullOrEmpty(labelSuffix) && volumeName.EndsWith(labelSuffix, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
         }
 
         return false;
