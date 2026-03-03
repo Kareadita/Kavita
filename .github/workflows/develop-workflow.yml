@@ -8,6 +8,9 @@ on:
 jobs:
   check-source:
     runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
+      contents: read
     outputs:
       head_ref: ${{ steps.findPr.outputs.head_ref }}
       pr_title: ${{ steps.findPr.outputs.title }}
