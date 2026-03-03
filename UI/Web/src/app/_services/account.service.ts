@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
-import {of} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
 import {Preferences} from '../_models/preferences/preferences';
@@ -444,8 +444,8 @@ export class AccountService {
   }
 
 
-  refreshAccount() {
-    if (!this._currentUser()) return of();
+  refreshAccount(): Observable<null | User> {
+    if (!this._currentUser()) return of(null);
     return this.httpClient.get<User>(this.baseUrl + 'account/refresh-account').pipe(map((user: User) => {
       if (user) this.setCurrentUser({ ...user });
       return user;
