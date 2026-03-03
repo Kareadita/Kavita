@@ -35,7 +35,8 @@ export class SeriesPreviewDrawerComponent implements OnInit {
   name = input.required<string>();
   /** Required for non-external series */
   seriesId = input<number>(0);
-  libraryId = input.required<number>();
+  /** Required for non-external series */
+  libraryId = input<number>(0);
   aniListId = input<number | undefined>(undefined);
   malId = input<number | undefined>(undefined);
   isExternalSeries = model<boolean>(true);
