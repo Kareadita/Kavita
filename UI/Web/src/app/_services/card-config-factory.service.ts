@@ -294,6 +294,7 @@ export class CardConfigFactory {
       readFunc: (v) => {
         this.readerService.readVolume(params.libraryId, params.seriesId, v, false);
       },
+      clickFunc: (v) => this.router.navigate(['library', params.libraryId, 'series', params.seriesId, 'volume', v.id]),
 
       downloadObservableFunc: (v) => this.downloadService.activeDownloads$.pipe(
         map(events => this.downloadService.mapToEntityType(events, v))
