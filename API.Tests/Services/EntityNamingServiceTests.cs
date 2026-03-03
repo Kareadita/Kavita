@@ -195,6 +195,18 @@ public class EntityNamingServiceTests
         Assert.Equal("Band 1", result);
     }
 
+    [Theory]
+    [InlineData("Band 1", "Band {0}")]
+    [InlineData("1 권", "{0} 권")]
+    public void FormatVolumeName_WithLocalizedLabelAlreadyPresent_DoesNotDuplicate(string volumeName, string volumeLabel)
+    {
+        var volume = CreateVolumeDto(name: volumeName, minNumber: 1);
+
+        var result = _sut.FormatVolumeName(LibraryType.Manga, volume, volumeLabel: volumeLabel);
+
+        Assert.Equal(volumeName, result);
+    }
+
     [Fact]
     public void FormatVolumeName_BookLibrary_WithTitleName_ReturnsTitleName()
     {

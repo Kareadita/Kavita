@@ -358,7 +358,7 @@ public partial class EntityNamingService : IEntityNamingService
         }
 
         // Already has the label - return as-is
-        if (HasVolumePrefix(volumeName))
+        if (HasVolumePrefix(volumeName, volumeLabel))
         {
             return volumeName;
         }
@@ -368,9 +368,9 @@ public partial class EntityNamingService : IEntityNamingService
 
     /// <summary>
     /// Checks if the volume name already starts with a volume-like prefix.
-    /// Handles common English label variations.
+    /// Handles common English label variations and the provided localized label format.
     /// </summary>
-    private static bool HasVolumePrefix(string volumeName)
+    private static bool HasVolumePrefix(string volumeName, string? volumeLabel = null)
     {
         if (string.IsNullOrEmpty(volumeName))
         {
@@ -383,6 +383,27 @@ public partial class EntityNamingService : IEntityNamingService
             if (volumeName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(volumeLabel))
+        {
+            const int placeholderLength = 3; // "{0}".Length
+            var placeholderIndex = volumeLabel.IndexOf("{0}", StringComparison.Ordinal);
+            if (placeholderIndex >= 0)
+            {
+                var labelPrefix = volumeLabel[..placeholderIndex].Trim();
+                var labelSuffix = volumeLabel[(placeholderIndex + placeholderLength)..].Trim();
+
+                if (!string.IsNullOrEmpty(labelPrefix) && volumeName.StartsWith(labelPrefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                if (!string.IsNullOrEmpty(labelSuffix) && volumeName.EndsWith(labelSuffix, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
             }
         }
 
