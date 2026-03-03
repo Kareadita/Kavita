@@ -259,6 +259,7 @@ export class ThemeService {
     if (themeColor) {
       this.document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor);
       this.document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.setAttribute('content', this.isDarkTheme() ? 'black' : 'default');
+      this.document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', this.isDarkTheme() ? 'dark' : 'light');
     }
 
     const tileColor = this.getTileColor();
