@@ -235,28 +235,12 @@ export class ThemeService {
             return;
           }
           this.injectStyleNode(theme, content);
-
-          // Check if the theme has --theme-color and apply it to meta tag
-          const themeColor = this.getThemeColor();
-          if (themeColor) {
-            this.document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor);
-            this.document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.setAttribute('content', themeColor);
-          }
-
-          const tileColor = this.getTileColor();
-          if (tileColor) {
-            this.document.querySelector('meta[name="msapplication-TileColor"]')?.setAttribute('content', themeColor);
-          }
-
-          const colorScheme = this.getColorScheme();
-          if (colorScheme) {
-            this.document.querySelector('body')?.setAttribute('theme', colorScheme);
-          }
-
+          this.updateMetaTags();
           this.currentThemeSource.next(theme);
           this.darkModeSource.next(this.isDarkTheme());
         });
       } else {
+        this.updateMetaTags();
         this.currentThemeSource.next(theme);
         this.darkModeSource.next(this.isDarkTheme());
       }
@@ -265,6 +249,24 @@ export class ThemeService {
       this.getThemes().subscribe(themes => {
         this.setTheme(themeName);
       });
+    }
+  }
+
+  private updateMetaTags() {
+    const themeColor = this.getThemeColor();
+    if (themeColor) {
+      this.document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor);
+      this.document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.setAttribute('content', this.isDarkTheme() ? 'black' : 'default');
+    }
+
+    const tileColor = this.getTileColor();
+    if (tileColor) {
+      this.document.querySelector('meta[name="msapplication-TileColor"]')?.setAttribute('content', tileColor);
+    }
+
+    const colorScheme = this.getColorScheme();
+    if (colorScheme) {
+      this.document.querySelector('body')?.setAttribute('theme', colorScheme);
     }
   }
 

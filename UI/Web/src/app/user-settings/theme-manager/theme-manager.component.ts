@@ -52,8 +52,8 @@ export class ThemeManagerComponent {
   currentTheme: SiteTheme | undefined;
   user: User | undefined;
   selectedTheme: ThemeContainer | undefined;
-  downloadableThemes: Array<DownloadableSiteTheme> = [];
-  downloadedThemes: Array<SiteTheme> = [];
+  downloadableThemes: DownloadableSiteTheme[] = [];
+  downloadedThemes: SiteTheme[] = [];
 
   canUseThemes = computed(() => !this.accountService.hasReadOnlyRole());
 
@@ -156,20 +156,22 @@ export class ThemeManagerComponent {
 
   public dropped(files: NgxFileDropEntry[]) {
     this.files = files;
-    for (const droppedFile of files) {
-      // Is it a file?
-      if (droppedFile.fileEntry.isFile) {
-        const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
-        fileEntry.file((file: File) => {
-          this.themeService.uploadTheme(file, droppedFile).subscribe(t => {
-            this.isUploadingTheme = false;
-            this.cdRef.markForCheck();
-          });
-        });
-      }
-    }
     this.isUploadingTheme = true;
     this.cdRef.markForCheck();
+
+    for (const droppedFile of files) {
+      if (!droppedFile.fileEntry.isFile) continue;
+      const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
+
+      fileEntry.file((file: File) => {
+        this.themeService.uploadTheme(file, droppedFile).subscribe(t => {
+          this.isUploadingTheme = false;
+          this.downloadedThemes.push(t);
+          this.selectTheme(t);
+          this.cdRef.markForCheck();
+        });
+      });
+    }
   }
 
   previewImage(imgUrl: string) {
