@@ -293,7 +293,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
             .Distinct()
             .OrderByDescending(s => s.ExternalSeriesMetadata.AverageExternalRating)
             .Take(20)
-            .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(mapper.ConfigurationProvider, userId)
             .ToListAsync(ct);
     }
 
