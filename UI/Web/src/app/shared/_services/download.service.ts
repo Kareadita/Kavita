@@ -107,6 +107,8 @@ export class DownloadService {
    * Backward-compatible observable for existing consumers (card-config-factory, detail pages).
    * Emits active (preparing/downloading) items mapped to DownloadEvent shape.
    */
+  private readonly queue$ = toObservable(this.queue);
+
   readonly activeDownloads$: Observable<DownloadEvent[]> = toObservable(this.queue).pipe(
     map(items =>
       items
@@ -294,16 +296,32 @@ export class DownloadService {
   getItemForEntity(entity: Series | Volume | Chapter | PageBookmark[]): DownloadQueueItem | null {
     const q = this.queue();
     if (this.utilityService.isVolume(entity)) {
-      return q.find(i => i.entityType === 'volume' && i.entityId === (entity as Volume).id) ?? null;
+      return q.find(i => i.entityType === 'volume' && i.entityId === (entity as Volume).id
+        && (i.status === 'queued' || i.status === 'preparing' || i.status === 'downloading')) ?? null;
     }
     if (this.utilityService.isChapter(entity)) {
-      return q.find(i => i.entityType === 'chapter' && i.entityId === (entity as Chapter).id) ?? null;
+      return q.find(i => i.entityType === 'chapter' && i.entityId === (entity as Chapter).id
+        && (i.status === 'queued' || i.status === 'preparing' || i.status === 'downloading')) ?? null;
     }
     if (this.utilityService.isSeries(entity)) {
-      return q.find(i => i.seriesName === (entity as Series).name
-        && (i.status === 'preparing' || i.status === 'downloading')) ?? null;
+      const name = (entity as Series).name;
+      return q.find(i => i.seriesName === name && i.status === 'downloading')
+        ?? q.find(i => i.seriesName === name && i.status === 'preparing')
+        ?? q.find(i => i.seriesName === name && i.status === 'queued')
+        ?? null;
     }
     return null;
+  }
+
+  /**
+   * Returns an observable of the queue item for the given entity, or null if none.
+   * Emits on every queue change. Use this for card download indicators.
+   */
+  getEntityDownload$(entity: Series | Volume | Chapter | PageBookmark[]): Observable<DownloadQueueItem | null> {
+    if (!entity.hasOwnProperty('id')) return of(null);
+    return this.queue$.pipe(
+      map(() => this.getItemForEntity(entity))
+    );
   }
 
   /**

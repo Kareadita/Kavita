@@ -36,7 +36,7 @@
       <!-- Active / Preparing -->
       @if (downloadService.activeItem(); as active) {
         <div class="section-label mb-1">{{ t('downloading') }}</div>
-        <app-queue-item
+        <app-download-queue-item
           [item]="active"
           (cancel)="downloadService.cancelDownload($event)"
           (retry)="downloadService.retryDownload($event)"
@@ -51,7 +51,7 @@
           <button class="btn btn-sm btn-link p-0" (click)="downloadService.cancelAllQueued()">{{ t('cancel-all') }}</button>
         </div>
         @for (item of downloadService.queuedItems(); track item.id) {
-          <app-queue-item
+          <app-download-queue-item
             [item]="item"
             (cancel)="downloadService.cancelDownload($event)"
             (retry)="downloadService.retryDownload($event)"
@@ -70,8 +70,7 @@
           </div>
         </div>
         @for (item of downloadService.failedItems(); track item.id) {
-          <app-queue-item
-            [item]="item"
+          <app-download-queue-item [item]="item"
             (cancel)="downloadService.cancelDownload($event)"
             (retry)="downloadService.retryDownload($event)"
             (remove)="downloadService.removeItem($event)"
@@ -86,7 +85,7 @@
           <button class="btn btn-sm btn-link p-0" (click)="downloadService.clearCompleted()">{{ t('clear-all') }}</button>
         </div>
         @for (item of downloadService.completedItems(); track item.id) {
-          <app-queue-item
+          <app-download-queue-item
             [item]="item"
             (cancel)="downloadService.cancelDownload($event)"
             (retry)="downloadService.retryDownload($event)"

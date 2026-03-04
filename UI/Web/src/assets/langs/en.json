@@ -2161,14 +2161,13 @@
         "queued": "Queued",
         "failed": "Failed",
         "completed": "Completed",
-        "cancel": "Cancel",
+        "cancel": "{{common.cancel}}",
         "cancel-all": "Cancel All",
         "retry": "Retry",
         "retry-all": "Retry All",
-        "remove": "Remove",
         "clear": "Clear",
         "empty": "No downloads",
-        "close": "Close",
+        "close": "{{common.close}}",
         "paused-after-refresh": "{{ count }} item(s) paused — ready to resume",
         "resume": "Resume",
         "pause": "Pause",
@@ -2176,6 +2175,12 @@
         "clear-all": "Clear All",
         "failed-from-auth": "Not Authenticated, refresh browser",
         "failed-interrupted": "Interrupted by page refresh"
+    },
+
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "Remove"
     },
 
     "download-queue-widget": {

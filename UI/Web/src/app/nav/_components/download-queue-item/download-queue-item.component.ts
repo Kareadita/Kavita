@@ -6,13 +6,13 @@ import {ImageComponent} from '../../../shared/image/image.component';
 import {ImageService} from '../../../_services/image.service';
 
 @Component({
-  selector: 'app-queue-item',
-  templateUrl: './queue-item.component.html',
-  styleUrls: ['./queue-item.component.scss'],
+  selector: 'app-download-queue-item',
+  templateUrl: './download-queue-item.component.html',
+  styleUrls: ['./download-queue-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [BytesPipe, TranslocoDirective, ImageComponent]
 })
-export class QueueItemComponent {
+export class DownloadQueueItemComponent {
   private readonly imageService = inject(ImageService);
 
   readonly item = input.required<DownloadQueueItem>();

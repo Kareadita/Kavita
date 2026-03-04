@@ -1,5 +1,4 @@
-import {DownloadEvent} from "../../shared/_services/download.service";
-import {Observable} from "rxjs";
+import {DownloadQueueItem} from "../../shared/_models/download-queue-item";
 import {BulkSelectionEntityDataSource} from "../../cards/bulk-selection.service";
 import {CardEntity} from "./card-entity";
 import {MangaFormat} from "../manga-format";
@@ -75,10 +74,10 @@ export interface BaseCardConfiguration<T> {
   clickFunc?: (entity: T, wrapper: CardEntity) => void;
 
   /**
-   * Returns an observable of download events for this entity.
+   * Returns the current download queue item for this entity, or null if not downloading.
    * Used to show download progress indicator.
    */
-  downloadObservableFunc?: (entity: T) => Observable<DownloadEvent | null>;
+  downloadItemFunc?: (entity: T) => DownloadQueueItem | null;
   /**
    * Returns key/values for route params (bookmark mode)
    */

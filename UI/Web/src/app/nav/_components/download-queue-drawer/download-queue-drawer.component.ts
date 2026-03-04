@@ -1,19 +1,19 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {DownloadService} from '../../../shared/_services/download.service';
-import {QueueItemComponent} from '../queue-item/queue-item.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {
   OffCanvasResizeComponent,
   ResizeMode
 } from "../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
+import {DownloadQueueItemComponent} from "../download-queue-item/download-queue-item.component";
 
 @Component({
   selector: 'app-download-queue-drawer',
   templateUrl: './download-queue-drawer.component.html',
   styleUrls: ['./download-queue-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [QueueItemComponent, TranslocoDirective, OffCanvasResizeComponent]
+  imports: [TranslocoDirective, OffCanvasResizeComponent, DownloadQueueItemComponent]
 })
 export class DownloadQueueDrawerComponent {
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
