@@ -11,7 +11,5 @@ import {TranslocoDirective} from "@jsverse/transloco";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DownloadIndicatorComponent {
-
-  download$ = input.required<DownloadQueueItem | null>();
-
+  download = input.required<DownloadQueueItem | null>();
 }

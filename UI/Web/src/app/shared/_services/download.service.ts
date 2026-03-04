@@ -294,21 +294,16 @@ export class DownloadService {
    * Use this for card download indicators.
    */
   getItemForEntity(entity: Series | Volume | Chapter | PageBookmark[]): DownloadQueueItem | null {
-    const q = this.queue();
+    const q = this.queue().filter(i => i.status === 'queued' || i.status === 'preparing' || i.status === 'downloading');
     if (this.utilityService.isVolume(entity)) {
-      return q.find(i => i.entityType === 'volume' && i.entityId === (entity as Volume).id
-        && (i.status === 'queued' || i.status === 'preparing' || i.status === 'downloading')) ?? null;
+      return q.find(i => i.entityType === 'volume' && i.entityId === (entity as Volume).id) ?? null;
     }
     if (this.utilityService.isChapter(entity)) {
-      return q.find(i => i.entityType === 'chapter' && i.entityId === (entity as Chapter).id
-        && (i.status === 'queued' || i.status === 'preparing' || i.status === 'downloading')) ?? null;
+      return q.find(i => i.entityType === 'chapter' && i.entityId === (entity as Chapter).id) ?? null;
     }
     if (this.utilityService.isSeries(entity)) {
       const name = (entity as Series).name;
-      return q.find(i => i.seriesName === name && i.status === 'downloading')
-        ?? q.find(i => i.seriesName === name && i.status === 'preparing')
-        ?? q.find(i => i.seriesName === name && i.status === 'queued')
-        ?? null;
+      return q.find(i => i.seriesName === name) ?? null;
     }
     return null;
   }

@@ -4,20 +4,21 @@ import {BytesPipe} from '../../../_pipes/bytes.pipe';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from '../../../shared/image/image.component';
 import {ImageService} from '../../../_services/image.service';
+import {DownloadQueueStatusPipe} from "../../../_pipes/download-queue-status.pipe";
 
 @Component({
   selector: 'app-download-queue-item',
   templateUrl: './download-queue-item.component.html',
   styleUrls: ['./download-queue-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BytesPipe, TranslocoDirective, ImageComponent]
+  imports: [BytesPipe, TranslocoDirective, ImageComponent, DownloadQueueStatusPipe]
 })
 export class DownloadQueueItemComponent {
   private readonly imageService = inject(ImageService);
 
   readonly item = input.required<DownloadQueueItem>();
 
-  readonly cancel = output<number>();
+  readonly cancelled = output<number>();
   readonly retry = output<number>();
   readonly remove = output<number>();
 

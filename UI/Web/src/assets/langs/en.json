@@ -2156,11 +2156,7 @@
 
     "download-queue-drawer": {
         "title": "Download Queue",
-        "preparing": "Preparing",
-        "downloading": "Downloading",
-        "queued": "Queued",
-        "failed": "Failed",
-        "completed": "Completed",
+
         "cancel": "{{common.cancel}}",
         "cancel-all": "Cancel All",
         "retry": "Retry",
@@ -2181,6 +2177,16 @@
         "retry": "{{download-queue-drawer.retry}}",
         "cancel": "{{common.cancel}}",
         "remove": "Remove"
+
+    },
+
+    "download-queue-status-pipe": {
+        "queued": "Queued",
+        "preparing": "Preparing",
+        "downloading": "Downloading",
+        "completed": "Completed",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
     },
 
     "download-queue-widget": {

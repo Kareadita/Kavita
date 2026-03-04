@@ -27,7 +27,7 @@
 
     <div class="queue-item-info flex-grow-1 overflow-hidden">
       <div class="text-truncate fw-semibold" [title]="item().label">{{ item().label }}</div>
-      <div class="text-muted small">{{ t(item().status) }}</div>
+      <div class="text-muted small">{{item().status | downloadQueueStatus }}</div>
       @if (item().status === 'preparing' || item().status === 'downloading') {
         <div class="progress mt-1" style="height: 4px;" role="progressbar" [attr.aria-valuenow]="item().progress" aria-valuemin="0" aria-valuemax="100">
           <div class="progress-bar" [style.width.%]="item().progress"></div>
@@ -46,7 +46,7 @@
 
     <div class="queue-item-actions d-flex gap-1 flex-shrink-0">
       @if (item().status === 'queued') {
-        <button class="btn btn-sm btn-outline-secondary" [title]="t('cancel')" (click)="cancel.emit(item().id)">
+        <button class="btn btn-sm btn-outline-secondary" [title]="t('cancel')" (click)="cancelled.emit(item().id)">
           <i class="fa fa-times" aria-hidden="true"></i>
         </button>
       }

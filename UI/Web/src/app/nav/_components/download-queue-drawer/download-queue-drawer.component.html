@@ -38,7 +38,7 @@
         <div class="section-label mb-1">{{ t('downloading') }}</div>
         <app-download-queue-item
           [item]="active"
-          (cancel)="downloadService.cancelDownload($event)"
+          (cancelled)="downloadService.cancelDownload($event)"
           (retry)="downloadService.retryDownload($event)"
           (remove)="downloadService.removeItem($event)"
         />
@@ -53,7 +53,7 @@
         @for (item of downloadService.queuedItems(); track item.id) {
           <app-download-queue-item
             [item]="item"
-            (cancel)="downloadService.cancelDownload($event)"
+            (cancelled)="downloadService.cancelDownload($event)"
             (retry)="downloadService.retryDownload($event)"
             (remove)="downloadService.removeItem($event)"
           />
@@ -71,7 +71,7 @@
         </div>
         @for (item of downloadService.failedItems(); track item.id) {
           <app-download-queue-item [item]="item"
-            (cancel)="downloadService.cancelDownload($event)"
+            (cancelled)="downloadService.cancelDownload($event)"
             (retry)="downloadService.retryDownload($event)"
             (remove)="downloadService.removeItem($event)"
           />
@@ -87,7 +87,7 @@
         @for (item of downloadService.completedItems(); track item.id) {
           <app-download-queue-item
             [item]="item"
-            (cancel)="downloadService.cancelDownload($event)"
+            (cancelled)="downloadService.cancelDownload($event)"
             (retry)="downloadService.retryDownload($event)"
             (remove)="downloadService.removeItem($event)"
           />
