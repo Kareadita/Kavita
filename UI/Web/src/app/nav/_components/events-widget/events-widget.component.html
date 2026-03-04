@@ -94,14 +94,6 @@
         }
       }
 
-      <!-- Active Downloads — summary link to open queue drawer -->
-      @if (downloadService.hasActiveDownloads()) {
-        <li class="list-group-item dark-menu-item clickable" (click)="openQueue.emit()">
-          <i class="fa fa-download me-2" aria-hidden="true"></i>
-          {{ t('downloads-active', {count: downloadService.totalActiveCount()}) }}
-        </li>
-      }
-
       <!-- Errors -->
       @for (error of errors(); track error) {
         <li class="list-group-item dark-menu-item error" role="alert" (click)="seeMore(error)">

@@ -83,7 +83,7 @@
       @if (downloadService.completedItems().length > 0) {
         <div class="d-flex align-items-center justify-content-between mt-3 mb-1">
           <span class="section-label text-success">{{ t('completed') }} ({{ downloadService.completedItems().length }})</span>
-          <button class="btn btn-sm btn-link p-0" (click)="downloadService.clearCompleted()">{{ t('clear') }}</button>
+          <button class="btn btn-sm btn-link p-0" (click)="downloadService.clearCompleted()">{{ t('clear-all') }}</button>
         </div>
         @for (item of downloadService.completedItems(); track item.id) {
           <app-queue-item

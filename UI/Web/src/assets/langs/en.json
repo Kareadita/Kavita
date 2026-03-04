@@ -2223,8 +2223,11 @@
         "browse-genres": "Browse Genres",
         "browse-tags": "Browse Tags",
         "all-annotations": "Browse Annotations",
-        "my-profile": "My Profile",
-        "download-queue": "Download Queue"
+        "my-profile": "My Profile"
+    },
+
+    "download-queue-widget": {
+        "title": "Download Queue"
     },
 
     "client-device-auth-type-pipe": {

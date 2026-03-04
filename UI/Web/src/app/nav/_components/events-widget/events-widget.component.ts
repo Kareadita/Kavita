@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
 import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
 import {ConfirmConfig} from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import {ConfirmService} from 'src/app/shared/confirm.service';
@@ -11,7 +11,6 @@ import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {NgClass, NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {RouterLink} from "@angular/router";
@@ -23,7 +22,7 @@ import {VersionService} from "../../../_services/version.service";
   templateUrl: './events-widget.component.html',
   styleUrls: ['./events-widget.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, NgbPopover, NgStyle, SentenceCasePipe, TranslocoDirective, RouterLink]
+  imports: [NgClass, NgbPopover, NgStyle, TranslocoDirective, RouterLink]
 })
 export class EventsWidgetComponent implements OnInit {
   public readonly downloadService = inject(DownloadService);
@@ -34,7 +33,6 @@ export class EventsWidgetComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly user = input.required<User>();
-  readonly openQueue = output<void>();
 
   /** Progress events (Event Type: 'started', 'ended', 'updated' that have progress property) */
   readonly progressEvents = signal<NotificationProgressEvent[]>([]);

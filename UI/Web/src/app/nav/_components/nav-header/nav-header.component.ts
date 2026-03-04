@@ -9,9 +9,7 @@ import {
   signal,
   viewChild
 } from '@angular/core';
-import {DownloadService} from '../../../shared/_services/download.service';
-import {DownloadQueueDrawerComponent} from '../download-queue-drawer/download-queue-drawer.component';
-import {DrawerService} from "../../../_services/drawer.service";
+import {DownloadQueueWidgetComponent} from '../download-queue-widget/download-queue-widget.component';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {Chapter} from 'src/app/_models/chapter';
 import {UserCollection} from 'src/app/_models/collection-tag';
@@ -59,7 +57,7 @@ import {ModalService} from "../../../_services/modal.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, GroupedTypeaheadComponent, ImageComponent,
     SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileIconComponent]
+    SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileIconComponent, DownloadQueueWidgetComponent]
 })
 export class NavHeaderComponent {
 
@@ -76,12 +74,6 @@ export class NavHeaderComponent {
   protected readonly metadataService = inject(MetadataService);
   private readonly annotationService = inject(AnnotationService);
   private readonly document = inject(DOCUMENT);
-  public readonly downloadService = inject(DownloadService);
-  private readonly drawerService = inject(DrawerService);
-
-  openDownloadQueue() {
-    this.drawerService.open(DownloadQueueDrawerComponent, { position: 'end' });
-  }
 
 
   readonly searchViewRef = viewChild.required<any>('search');
