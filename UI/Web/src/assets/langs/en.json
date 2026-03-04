@@ -2154,7 +2154,7 @@
         "downloads-active": "{{count}} download(s) in progress"
     },
 
-    "download-queue": {
+    "download-queue-drawer": {
         "title": "Download Queue",
         "preparing": "Preparing",
         "downloading": "Downloading",
@@ -2173,7 +2173,13 @@
         "resume": "Resume",
         "pause": "Pause",
         "paused": "Paused",
-        "clear-all": "Clear All"
+        "clear-all": "Clear All",
+        "failed-from-auth": "Not Authenticated, refresh browser",
+        "failed-interrupted": "Interrupted by page refresh"
+    },
+
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
     },
 
     "shortcuts-modal": {
@@ -2224,10 +2230,6 @@
         "browse-tags": "Browse Tags",
         "all-annotations": "Browse Annotations",
         "my-profile": "My Profile"
-    },
-
-    "download-queue-widget": {
-        "title": "Download Queue"
     },
 
     "client-device-auth-type-pipe": {

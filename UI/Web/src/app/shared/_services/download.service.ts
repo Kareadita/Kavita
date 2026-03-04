@@ -11,7 +11,7 @@ import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {finalize, map, switchMap, throttleTime} from 'rxjs/operators';
 import {AccountService} from 'src/app/_services/account.service';
 import {BytesPipe} from 'src/app/_pipes/bytes.pipe';
-import {translate} from "@jsverse/transloco";
+import {translate, TranslocoService} from "@jsverse/transloco";
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {SAVER} from "../../_providers/saver.provider";
 import {UtilityService} from "./utility.service";
@@ -58,6 +58,16 @@ export class DownloadService {
 
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly libraryService = inject(LibraryService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly accountService = inject(AccountService);
+  private readonly httpClient = inject(HttpClient);
+  private readonly utilityService = inject(UtilityService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly seriesService = inject(SeriesService);
+  private readonly storage = inject(DownloadStorageService);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly save = inject(SAVER);
 
   private baseUrl = environment.apiUrl;
   /**
@@ -112,16 +122,6 @@ export class DownloadService {
 
   /** Tracks last progress snapshot per item id for speed calculation */
   private _lastProgressSnapshot = new Map<number, { progress: number; time: number }>();
-
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly confirmService = inject(ConfirmService);
-  private readonly accountService = inject(AccountService);
-  private readonly httpClient = inject(HttpClient);
-  private readonly utilityService = inject(UtilityService);
-  private readonly messageHub = inject(MessageHubService);
-  private readonly seriesService = inject(SeriesService);
-  private readonly save = inject(SAVER);
-  private readonly storage = inject(DownloadStorageService);
 
   constructor() {
     // Dedicated SignalR channel for download progress
@@ -179,7 +179,7 @@ export class DownloadService {
     this.storage.open().then(items => {
       const restored = items.map(i =>
         (i.status === 'preparing' || i.status === 'downloading')
-          ? { ...i, status: 'failed' as DownloadQueueStatus, errorMessage: 'Interrupted by page refresh' }
+          ? { ...i, status: 'failed' as DownloadQueueStatus, errorMessage: this.translocoService.translate('download-queue-drawer.failed-interrupted') }
           : i
       );
       this.queue.set(restored);
@@ -479,7 +479,7 @@ export class DownloadService {
     const apiKey = this.accountService.currentUserGenericApiKey();
     if (!apiKey) {
       this.debugLog(`triggerDownload() — no API key, falling back to blob for id=${item.id}`);
-      this.setStatus(item.id, 'failed', { errorMessage: 'Not Authenticated, refresh browser' });
+      this.setStatus(item.id, 'failed', { errorMessage: this.translocoService.translate('download-queue-drawer.failed-from-auth') });
       return;
     }
 
