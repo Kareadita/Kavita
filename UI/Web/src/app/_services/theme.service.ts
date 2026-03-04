@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ToastrService} from 'ngx-toastr';
-import {map, ReplaySubject, take, tap} from 'rxjs';
+import {EMPTY, map, of, ReplaySubject, take, tap} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../shared/confirm.service';
 import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
@@ -149,6 +149,8 @@ export class ThemeService {
   }
 
   getThemes() {
+    if (!this.accountService.isLoggedIn()) return EMPTY;
+
     return this.httpClient.get<SiteTheme[]>(this.baseUrl + 'theme').pipe(map(themes => {
       this.themeCache = themes;
       this.themesSource.next(themes);
@@ -257,6 +259,7 @@ export class ThemeService {
     if (themeColor) {
       this.document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor);
       this.document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.setAttribute('content', this.isDarkTheme() ? 'black' : 'default');
+      this.document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', this.isDarkTheme() ? 'dark' : 'light');
     }
 
     const tileColor = this.getTileColor();

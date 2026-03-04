@@ -15,7 +15,7 @@ import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/ht
 import {provideTransloco, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
 import {AccountService} from "./app/_services/account.service";
-import {catchError, firstValueFrom, of, switchMap} from "rxjs";
+import {catchError, firstValueFrom, map, of, switchMap, tap} from "rxjs";
 import {provideTranslocoLocale} from "@jsverse/transloco-locale";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
@@ -40,6 +40,7 @@ import {registerECharts} from "./echarts";
 import {NgbModalConfig, NgbRatingConfig} from "@ng-bootstrap/ng-bootstrap";
 import {DefaultModalOptions} from "./app/_models/modal/modal-options";
 import {ToastNoAnimationModule} from "ngx-toastr";
+import {MessageHubService} from "src/app/_services/message-hub.service";
 
 const disableAnimations = !('animate' in document.documentElement);
 if (disableAnimations) {
@@ -128,6 +129,7 @@ function loadUserLocale(transloco: TranslocoService, accountService: AccountServ
  */
 function bootstrapUser() {
   const accountService = inject(AccountService);
+  const messageHubService = inject(MessageHubService);
   const transloco = inject(TranslocoService);
 
   // Load user from localStorage so refreshAccount() and locale loading can proceed
@@ -145,6 +147,12 @@ function bootstrapUser() {
     }),
     catchError(() => of(null)),
     switchMap(() => loadUserLocale(transloco, accountService)),
+    map(() => accountService.currentUser()),
+    tap(user => {
+      if (user) {
+        messageHubService.createHubConnection(user)
+      }
+    }),
   ));
 }
 

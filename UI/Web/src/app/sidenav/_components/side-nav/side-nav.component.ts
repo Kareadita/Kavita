@@ -208,7 +208,7 @@ export class SideNavComponent {
   async reorderDrop($event: CdkDragDrop<any, any, SideNavStream>) {
     // Don't allow dropping on non SideNav items
     const fixedSideNavItems = 3;
-    if ($event.currentIndex < fixedSideNavItems) {
+    if ($event.currentIndex < fixedSideNavItems || this.accountService.hasReadOnlyRole()) {
       return;
     }
 

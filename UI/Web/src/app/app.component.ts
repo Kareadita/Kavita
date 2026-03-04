@@ -94,12 +94,9 @@ export class AppComponent implements OnInit {
     const user = this.accountService.currentUser();
     if (!user) return;
 
-    // Refresh the user data
-    this.accountService.refreshAccount().subscribe(account => {
-      if (this.accountService.hasAdminRole()) {
-        this.licenseService.licenseInfo().subscribe();
-      }
-    });
+    if (this.accountService.hasAdminRole()) {
+      this.licenseService.licenseInfo().subscribe();
+    }
 
     // Bootstrap anything that's needed
     this.themeService.getThemes().subscribe();

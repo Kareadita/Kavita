@@ -171,7 +171,8 @@ export class CardConfigFactory {
 
       coverFunc: (s) => this.imageService.getSeriesCoverImage(s.series!.id),
       titleFunc: (s) => s.series!.name,
-      titleRouteFunc: (s) => `/library/${s.series!.libraryId}/series/${s.seriesId}}`,
+      titleRouteFunc: (s) => `/library/${s.series!.libraryId}/series/${s.seriesId}`,
+      titleRouteParamsFunc: (s) => {return { bookmarkMode: true }},
       metaTitleFunc: (s, wrapper) => s.series!.name,
       tooltipFunc: (s) => s.series!.name,
       progressFunc: (s) => ({ pages: s.series!.pages, pagesRead: s.series!.pagesRead }),
@@ -183,7 +184,7 @@ export class CardConfigFactory {
       countFunc: () => 0,
       showErrorFunc: (s) => false,
       ariaLabelFunc: (s) => s.series!.name,
-      titleRouteParamsFunc: (s) => {return { bookmarkMode: true }},
+
 
       actionableFunc: (s) => this.actionFactory.getBookmarkActions(() => ({seriesId: s.series!.id, libraryId: s.series!.libraryId, seriesName: s.series!.name}), params?.shouldRenderAction),
 
@@ -294,6 +295,7 @@ export class CardConfigFactory {
       readFunc: (v) => {
         this.readerService.readVolume(params.libraryId, params.seriesId, v, false);
       },
+      clickFunc: (v) => this.router.navigate(['library', params.libraryId, 'series', params.seriesId, 'volume', v.id]),
 
       downloadObservableFunc: (v) => this.downloadService.activeDownloads$.pipe(
         map(events => this.downloadService.mapToEntityType(events, v))
