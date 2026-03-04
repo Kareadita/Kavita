@@ -455,7 +455,7 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage DownloadProgressEvent(string username, string downloadName, string subtitle, float progress, string eventType = "updated")
+    public static SignalRMessage DownloadProgressEvent(string username, string downloadName, string subtitle, float progress, string eventType = "updated", string? correlationId = null)
     {
         return new SignalRMessage()
         {
@@ -468,7 +468,8 @@ public static class MessageFactory
             {
                 UserName = username,
                 DownloadName = downloadName,
-                Progress = progress
+                Progress = progress,
+                CorrelationId = correlationId
             }
         };
     }

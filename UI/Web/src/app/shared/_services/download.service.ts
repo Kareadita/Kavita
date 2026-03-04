@@ -23,6 +23,7 @@ import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
 import {SeriesService} from "../../_services/series.service";
 import {DownloadQueueItem, DownloadQueueStatus} from '../_models/download-queue-item';
+import {DownloadStorageService} from './download-storage.service';
 
 export const DEBOUNCE_TIME = 100;
 
@@ -85,6 +86,7 @@ export class DownloadService {
   readonly hasActiveDownloads = computed(() =>
     this.activeItem() !== null || this.queuedItems().length > 0
   );
+  readonly isPaused = signal(false);
 
   /**
    * Backward-compatible observable for existing consumers (card-config-factory, detail pages).
@@ -103,6 +105,9 @@ export class DownloadService {
     )
   );
 
+  /** Tracks last progress snapshot per item id for speed calculation */
+  private _lastProgressSnapshot = new Map<number, { progress: number; time: number }>();
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly accountService = inject(AccountService);
@@ -111,6 +116,7 @@ export class DownloadService {
   private readonly messageHub = inject(MessageHubService);
   private readonly seriesService = inject(SeriesService);
   private readonly save = inject(SAVER);
+  private readonly storage = inject(DownloadStorageService);
 
   constructor() {
     // Dedicated SignalR channel for download progress
@@ -118,55 +124,65 @@ export class DownloadService {
       filter(evt => evt.event === EVENTS.DownloadProgress),
       map(evt => evt.payload as NotificationProgressEvent),
       tap(evt => {
-        this.debugLog(`DownloadProgress event: type="${evt.eventType}" body=`, evt.body);
+        this.debugLog(`DownloadProgress type="${evt.eventType}" body=`, evt.body);
+
+        const correlationId: string | undefined = evt.body?.correlationId ?? evt.body?.CorrelationId;
+        const downloadName: string | undefined = evt.body?.DownloadName ?? evt.body?.downloadName;
+        const progressValue = Math.round((evt.body?.Progress ?? evt.body?.progress ?? 0) * 100);
+
+        const active = this.activeItem();
+        if (!active) return;
+
+        // Match by correlationId (preferred) or downloadName (legacy fallback)
+        const isMatch = (correlationId && String(active.id) === correlationId)
+                     || (!correlationId && downloadName === active.downloadName);
+        if (!isMatch) return;
 
         if (evt.eventType === 'ended') {
-          // We only ever have one active download at a time, so mark it complete.
-          const active = this.activeItem();
-          if (active) {
-            this.debugLog(`DownloadProgress ended — marking id=${active.id} complete in 3s`);
+          this.debugLog(`DownloadProgress ended for id=${active.id}`);
+          this.queue.update(q => q.map(i =>
+            i.id === active.id ? { ...i, progress: 100 } : i
+          ));
+          setTimeout(() => this.markCompleted(active.id), 1000);
+        } else if (evt.eventType === 'updated') {
+          const now = Date.now();
+          const prev = this._lastProgressSnapshot.get(active.id);
+          if (prev && active.estimatedSize > 0) {
+            const bytesDelta = (progressValue - prev.progress) / 100 * active.estimatedSize;
+            const timeDelta = (now - prev.time) / 1000;
+            const speedBps = timeDelta > 0 ? bytesDelta / timeDelta : 0;
             this.queue.update(q => q.map(i =>
-              i.id === active.id ? { ...i, status: 'downloading' as DownloadQueueStatus, progress: 100 } : i
+              i.id === active.id ? { ...i, progress: progressValue, speedBps } : i
             ));
-            // Single file items (usually pdf/epubs) don't send DownloadEvent, thus we need a timeout (hack)
-            setTimeout(() => this.markCompleted(active.id), 3000);
-          }
-          return;
-        }
-
-        // For started/updated events, attempt name-based matching for progress.
-        // Field names vary by backend version — try both casing conventions.
-        const downloadName: string = evt.body?.DownloadName ?? evt.body?.downloadName ?? '';
-        const progressValue = Math.round((evt.body?.Progress ?? evt.body?.progress ?? 0) * 100);
-        if (downloadName) {
-          this.queue.update(q => q.map(item => {
-            if (item.downloadName !== downloadName) return item;
-            return { ...item, progress: progressValue };
-          }));
-        } else {
-          // No name in body — update progress on the active item directly
-          const active = this.activeItem();
-          if (active && progressValue > 0) {
+          } else {
             this.queue.update(q => q.map(i =>
               i.id === active.id ? { ...i, progress: progressValue } : i
             ));
           }
+          this._lastProgressSnapshot.set(active.id, { progress: progressValue, time: now });
         }
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
+  }
 
-    // Background Fetch completions from the service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        const data = event.data;
-        if (data?.type === 'download-complete') {
-          this.markCompleted(Number(data.id));
-        } else if (data?.type === 'download-failed') {
-          this.markFailed(Number(data.id), data.error ?? 'Download failed');
-        }
-      });
-    }
+  /**
+   * Restores the queue from IndexedDB. Call this after the user is authenticated.
+   * Items that were in-progress when the page refreshed are marked as failed.
+   */
+  restoreQueue() {
+    this.storage.open().then(items => {
+      const restored = items.map(i =>
+        (i.status === 'preparing' || i.status === 'downloading')
+          ? { ...i, status: 'failed' as DownloadQueueStatus, errorMessage: 'Interrupted by page refresh' }
+          : i
+      );
+      this.queue.set(restored);
+      restored.filter(i => i.status === 'failed').forEach(i => this.storage.save(i));
+      if (restored.some(i => i.status === 'queued')) {
+        this.isPaused.set(true);   // wait for user to hit Resume
+      }
+    });
   }
 
   /**
@@ -212,30 +228,32 @@ export class DownloadService {
 
   cancelDownload(itemId: number) {
     this.queue.update(q => q.filter(i => i.id !== itemId));
+    this.storage.delete(itemId);
     setTimeout(() => this.processQueue(), 100);
   }
 
-  removeItem(itemId: number) {
-    this.queue.update(q => q.filter(i => i.id !== itemId));
+  removeItem(id: number) {
+    this.queue.update(q => q.filter(i => i.id !== id));
+    this.storage.delete(id);
   }
 
   clearCompleted() {
+    const ids = this.queue().filter(i => i.status === 'completed').map(i => i.id);
     this.queue.update(q => q.filter(i => i.status !== 'completed'));
+    ids.forEach(id => this.storage.delete(id));
   }
 
   retryDownload(itemId: number) {
     const item = this.queue().find(i => i.id === itemId);
     if (!item || item.retryCount >= 3) return;
-    this.queue.update(q => q.map(i =>
-      i.id === itemId
-        ? { ...i, status: 'queued' as DownloadQueueStatus, errorMessage: '', retryCount: i.retryCount + 1 }
-        : i
-    ));
+    this.setStatus(itemId, 'queued', { errorMessage: '', retryCount: item.retryCount + 1 });
     this.processQueue();
   }
 
   cancelAllQueued() {
+    const ids = this.queue().filter(i => i.status === 'queued').map(i => i.id);
     this.queue.update(q => q.filter(i => i.status !== 'queued'));
+    ids.forEach(id => this.storage.delete(id));
   }
 
   retryAllFailed() {
@@ -244,6 +262,8 @@ export class DownloadService {
         ? { ...i, status: 'queued' as DownloadQueueStatus, errorMessage: '', retryCount: i.retryCount + 1 }
         : i
     ));
+    // Persist all newly-queued items
+    this.queue().filter(i => i.status === 'queued').forEach(i => this.storage.save(i));
     this.processQueue();
   }
 
@@ -407,9 +427,16 @@ export class DownloadService {
     };
 
     this.queue.update(q => [...q, item]);
+    this.storage.save(item);
+  }
+
+  resumeQueue() {
+    this.isPaused.set(false);
+    this.processQueue();
   }
 
   private processQueue() {
+    if (this.isPaused()) return;
     if (this.activeItem()) {
       this.debugLog('processQueue() — already active, skipping');
       return;
@@ -422,50 +449,52 @@ export class DownloadService {
     }
 
     this.debugLog(`processQueue() — starting item id=${nextItem.id} "${nextItem.label}"`);
-    this.queue.update(q =>
-      q.map(i => i.id === nextItem.id ? { ...i, status: 'preparing' as DownloadQueueStatus } : i)
-    );
+    this.setStatus(nextItem.id, 'preparing');
+    this.triggerDownload(nextItem);
+  }
 
+  private triggerDownload(item: DownloadQueueItem) {
     const apiKey = this.accountService.currentUserGenericApiKey();
     if (!apiKey) {
-      this.debugLog(`processQueue() — no API key, falling back to blob download for id=${nextItem.id}`);
-      this.downloadItemAsBlob(nextItem);
+      this.debugLog(`triggerDownload() — no API key, falling back to blob for id=${item.id}`);
+      this.setStatus(item.id, 'downloading');
+      this.downloadItemAsBlob(item);
       return;
     }
 
-    const idKey = nextItem.entityType === 'volume' ? 'volumeId' : 'chapterId';
-    const url = `${this.baseUrl}download/${nextItem.entityType}?${idKey}=${nextItem.entityId}&apiKey=${encodeURIComponent(apiKey)}`;
-    this.debugLog(`processQueue() — built URL for id=${nextItem.id}:`, url);
+    const idKey = item.entityType === 'volume' ? 'volumeId' : 'chapterId';
+    const url = `${this.baseUrl}download/${item.entityType}` +
+                `?${idKey}=${item.entityId}` +
+                `&correlationId=${item.id}` +
+                `&_t=${Date.now()}` +
+                `&apiKey=${encodeURIComponent(apiKey)}`;
 
-    // Use anchor-based download directly. <a download> to same-origin works without user
-    // activation so this is safe from async contexts (subscribe callbacks, etc.).
-    // NOTE: navigator.serviceWorker.ready must NOT be awaited here — it hangs indefinitely
-    // when the service worker fails to activate (common in dev or after SW errors).
-    this.downloadItemViaAnchor(nextItem, url);
+    this.setStatus(item.id, 'downloading');
+    this.debugLog(`triggerDownload() id=${item.id} url=${url}`);
+
+    const isFirefoxAndroid = /Firefox/.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
+    if (isFirefoxAndroid) {
+      window.open(url, '_blank', 'noopener');
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = item.downloadName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   }
 
-  private downloadItemViaAnchor(item: DownloadQueueItem, url: string) {
-    this.debugLog(`downloadItemViaAnchor() id=${item.id} "${item.label}"`);
-    this.queue.update(q =>
-      q.map(i => i.id === item.id ? { ...i, status: 'downloading' as DownloadQueueStatus } : i)
-    );
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = item.downloadName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    // SignalR 'ended' event marks complete; if SignalR is unavailable, markCompleted won't fire
-    // automatically — that's acceptable, the item stays as 'downloading' until user dismisses.
+  /** Updates queue signal and persists to IDB on status changes. */
+  private setStatus(id: number, status: DownloadQueueStatus, extra?: Partial<DownloadQueueItem>) {
+    this.queue.update(q => q.map(i => i.id === id ? { ...i, status, ...extra } : i));
+    const item = this.queue().find(i => i.id === id);
+    if (item) this.storage.save(item);
   }
 
   private downloadItemAsBlob(item: DownloadQueueItem) {
     const idKey = item.entityType === 'volume' ? 'volumeId' : 'chapterId';
     const url = `${this.baseUrl}download/${item.entityType}?${idKey}=${item.entityId}`;
-
-    this.queue.update(q =>
-      q.map(i => i.id === item.id ? { ...i, status: 'downloading' as DownloadQueueStatus } : i)
-    );
 
     this.httpClient.get(url, { observe: 'events', responseType: 'blob', reportProgress: true }).pipe(
       throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
@@ -486,20 +515,16 @@ export class DownloadService {
 
   private markCompleted(itemId: number) {
     this.debugLog(`markCompleted() id=${itemId}`);
-    this.queue.update(q =>
-      q.map(i => i.id === itemId ? { ...i, status: 'completed' as DownloadQueueStatus, progress: 100 } : i)
-    );
-    // Auto-clear after 5 minutes
+    this._lastProgressSnapshot.delete(itemId);
+    this.setStatus(itemId, 'completed', { progress: 100 });
     setTimeout(() => this.removeItem(itemId), 5 * 60 * 1000);
-    // Process next queued item
     setTimeout(() => this.processQueue(), 100);
   }
 
   private markFailed(itemId: number, error: string) {
     this.debugLog(`markFailed() id=${itemId} error="${error}"`);
-    this.queue.update(q =>
-      q.map(i => i.id === itemId ? { ...i, status: 'failed' as DownloadQueueStatus, errorMessage: error } : i)
-    );
+    this._lastProgressSnapshot.delete(itemId);
+    this.setStatus(itemId, 'failed', { errorMessage: error });
     setTimeout(() => this.processQueue(), 100);
   }
 

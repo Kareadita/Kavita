@@ -7,6 +7,14 @@
   </div>
 
   <div class="offcanvas-body">
+    @if (downloadService.isPaused() && downloadService.queuedItems().length > 0) {
+      <div class="d-flex align-items-center justify-content-between alert alert-info py-2 px-3 mb-3">
+        <span class="small">{{ t('paused-after-refresh', { count: downloadService.queuedItems().length }) }}</span>
+        <button class="btn btn-sm btn-primary ms-2" (click)="downloadService.resumeQueue()">
+          <i class="fa fa-play me-1" aria-hidden="true"></i>{{ t('resume') }}
+        </button>
+      </div>
+    }
     @if (downloadService.queue().length === 0) {
       <div class="text-muted text-center py-4">{{ t('empty') }}</div>
     } @else {

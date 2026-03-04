@@ -2168,7 +2168,9 @@
         "remove": "Remove",
         "clear": "Clear",
         "empty": "No downloads",
-        "close": "Close"
+        "close": "Close",
+        "paused-after-refresh": "{{ count }} item(s) paused — ready to resume",
+        "resume": "Resume"
     },
 
     "shortcuts-modal": {

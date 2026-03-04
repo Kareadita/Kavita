@@ -1,5 +1,15 @@
 <ng-container *transloco="let t; prefix: 'download-queue'">
   <div class="queue-item d-flex align-items-center gap-2 py-2">
+    <app-image
+      class="queue-item-cover flex-shrink-0"
+      [imageUrl]="item().entityType === 'volume'
+        ? imageService.getVolumeCoverImage(item().entityId)
+        : imageService.getChapterCoverImage(item().entityId)"
+      width="40px"
+      height="56px"
+      [processEvents]="false"
+    />
+
     <div class="status-icon">
       @switch (item().status) {
         @case ('preparing') {
@@ -27,6 +37,9 @@
         <div class="progress mt-1" style="height: 4px;" role="progressbar" [attr.aria-valuenow]="item().progress" aria-valuemin="0" aria-valuemax="100">
           <div class="progress-bar" [style.width.%]="item().progress"></div>
         </div>
+        @if (item().speedBps && item().speedBps! > 0) {
+          <div class="text-muted small">{{ item().speedBps! | bytes }}/s</div>
+        }
       }
       @if (item().estimatedSize > 0) {
         <div class="text-muted small">{{ item().estimatedSize | bytes }}</div>

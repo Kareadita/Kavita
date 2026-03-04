@@ -41,14 +41,12 @@ import {NgbModalConfig, NgbRatingConfig} from "@ng-bootstrap/ng-bootstrap";
 import {DefaultModalOptions} from "./app/_models/modal/modal-options";
 import {ToastNoAnimationModule} from "ngx-toastr";
 import {MessageHubService} from "src/app/_services/message-hub.service";
+import {DownloadService} from "./app/shared/_services/download.service";
 
 const disableAnimations = !('animate' in document.documentElement);
 if (disableAnimations) {
   document.documentElement.classList.add('no-animations');
 }
-
-// Register download service worker for Background Fetch API support
-navigator.serviceWorker?.register('/download-sw.js').catch(() => {/* silently ignore registration failures */});
 
 registerSwiperElements();
 registerECharts();
@@ -133,6 +131,7 @@ function loadUserLocale(transloco: TranslocoService, accountService: AccountServ
 function bootstrapUser() {
   const accountService = inject(AccountService);
   const messageHubService = inject(MessageHubService);
+  const downloadService = inject(DownloadService);
   const transloco = inject(TranslocoService);
 
   // Load user from localStorage so refreshAccount() and locale loading can proceed
@@ -153,7 +152,8 @@ function bootstrapUser() {
     map(() => accountService.currentUser()),
     tap(user => {
       if (user) {
-        messageHubService.createHubConnection(user)
+        messageHubService.createHubConnection(user);
+        downloadService.restoreQueue();
       }
     }),
   ));
