@@ -184,6 +184,10 @@ export class DownloadService {
       );
       this.queue.set(restored);
       restored.filter(i => i.status === 'failed').forEach(i => this.storage.save(i));
+      // Advance _nextId past all restored IDs to prevent ID collisions with new items
+      if (restored.length > 0) {
+        this._nextId = Math.max(...restored.map(i => i.id)) + 1;
+      }
       if (restored.some(i => i.status === 'queued')) {
         this.isPaused.set(true);   // wait for user to hit Resume
       }
@@ -259,6 +263,17 @@ export class DownloadService {
     const ids = this.queue().filter(i => i.status === 'queued').map(i => i.id);
     this.queue.update(q => q.filter(i => i.status !== 'queued'));
     ids.forEach(id => this.storage.delete(id));
+    this.isPaused.set(false);  // don't block fresh downloads after cancelling all queued
+  }
+
+  clearAllFailed() {
+    const ids = this.queue().filter(i => i.status === 'failed').map(i => i.id);
+    this.queue.update(q => q.filter(i => i.status !== 'failed'));
+    ids.forEach(id => this.storage.delete(id));
+  }
+
+  pauseQueue() {
+    this.isPaused.set(true);
   }
 
   retryAllFailed() {
@@ -464,8 +479,7 @@ export class DownloadService {
     const apiKey = this.accountService.currentUserGenericApiKey();
     if (!apiKey) {
       this.debugLog(`triggerDownload() — no API key, falling back to blob for id=${item.id}`);
-      this.setStatus(item.id, 'downloading');
-      this.downloadItemAsBlob(item);
+      this.setStatus(item.id, 'failed', { errorMessage: 'Not Authenticated, refresh browser' });
       return;
     }
 
@@ -479,13 +493,16 @@ export class DownloadService {
     this.setStatus(item.id, 'downloading');
     this.debugLog(`triggerDownload() id=${item.id} url=${url}`);
 
+    // Firefox Android has explicit prompts per-item unless about:config browser.download.alwaysOpenPanel = false is set (Firefox 97+)
     const isFirefoxAndroid = /Firefox/.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
     if (isFirefoxAndroid) {
       window.open(url, '_blank', 'noopener');
     } else {
       const a = document.createElement('a');
       a.href = url;
-      a.download = item.downloadName;
+      // Do NOT set a.download — let browser use Content-Disposition from server.
+      // The server exposes Content-Disposition via CORS and sends unencoded filenames,
+      // so the browser gets the correct full filename (with extension, no %20).
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

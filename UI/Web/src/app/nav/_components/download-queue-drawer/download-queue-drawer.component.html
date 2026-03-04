@@ -1,4 +1,12 @@
 <ng-container *transloco="let t; prefix: 'download-queue'">
+
+  <app-off-canvas-resize
+    [resizeMode]="ResizeMode.Width"
+    canvasPosition="end"
+    [minWidth]="200"
+    [maxWidth]="window.innerWidth*0.5"
+  />
+
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">{{ t('title') }}</h5>
     <button type="button" class="btn-unstyled ms-auto" [attr.aria-label]="t('close')" (click)="close()">
@@ -7,12 +15,18 @@
   </div>
 
   <div class="offcanvas-body">
-    @if (downloadService.isPaused() && downloadService.queuedItems().length > 0) {
-      <div class="d-flex align-items-center justify-content-between alert alert-info py-2 px-3 mb-3">
-        <span class="small">{{ t('paused-after-refresh', { count: downloadService.queuedItems().length }) }}</span>
-        <button class="btn btn-sm btn-primary ms-2" (click)="downloadService.resumeQueue()">
-          <i class="fa fa-play me-1" aria-hidden="true"></i>{{ t('resume') }}
-        </button>
+    @if (downloadService.activeItem() || downloadService.queuedItems().length > 0) {
+      <div class="d-flex align-items-center justify-content-end gap-2 mb-3">
+        @if (downloadService.isPaused()) {
+          <span class="text-muted small me-auto">{{ t('paused') }}</span>
+          <button class="btn btn-sm btn-primary" (click)="downloadService.resumeQueue()">
+            <i class="fa fa-play me-1" aria-hidden="true"></i>{{ t('resume') }}
+          </button>
+        } @else {
+          <button class="btn btn-sm btn-outline-secondary" (click)="downloadService.pauseQueue()">
+            <i class="fa fa-pause me-1" aria-hidden="true"></i>{{ t('pause') }}
+          </button>
+        }
       </div>
     }
     @if (downloadService.queue().length === 0) {
@@ -50,7 +64,10 @@
       @if (downloadService.failedItems().length > 0) {
         <div class="d-flex align-items-center justify-content-between mt-3 mb-1">
           <span class="section-label text-danger">{{ t('failed') }} ({{ downloadService.failedItems().length }})</span>
-          <button class="btn btn-sm btn-link p-0" (click)="downloadService.retryAllFailed()">{{ t('retry-all') }}</button>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-link p-0" (click)="downloadService.retryAllFailed()">{{ t('retry-all') }}</button>
+            <button class="btn btn-sm btn-link p-0 text-danger" (click)="downloadService.clearAllFailed()">{{ t('clear-all') }}</button>
+          </div>
         </div>
         @for (item of downloadService.failedItems(); track item.id) {
           <app-queue-item

@@ -2170,7 +2170,10 @@
         "empty": "No downloads",
         "close": "Close",
         "paused-after-refresh": "{{ count }} item(s) paused — ready to resume",
-        "resume": "Resume"
+        "resume": "Resume",
+        "pause": "Pause",
+        "paused": "Paused",
+        "clear-all": "Clear All"
     },
 
     "shortcuts-modal": {

@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  Input,
-  input,
-  OnInit,
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal,} from '@angular/core';
 import {AsyncPipe} from "@angular/common";
 import {Observable, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -35,34 +25,32 @@ export class DownloadButtonComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly accountService = inject(AccountService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly downloadService = inject(DownloadService);
 
-  @Input({required: true}) download$: Observable<DownloadEvent | null> | null = null;
-  @Input({required: true}) entity!: Series | Volume | Chapter;
-  @Input({required: true}) entityType: 'series' | 'volume' | 'chapter' = 'series';
+  download$ = input.required<Observable<DownloadEvent | null> | null>();
+  entity = input.required<Series | Volume | Chapter>();
+  entityType = input<'series' | 'volume' | 'chapter'>('series');
   readonly libraryId = input<number>(0);
 
-  isDownloading = false;
+  isDownloading = signal<boolean>(false);
   canDownload = computed(() => this.accountService.hasAdminRole() || this.accountService.hasDownloadRole());
 
   ngOnInit() {
-    if (this.download$ != null) {
-      this.download$.pipe(takeUntilDestroyed(this.destroyRef), tap(d => {
+    const downloadObservable = this.download$();
+    if (downloadObservable != null) {
+      downloadObservable.pipe(takeUntilDestroyed(this.destroyRef), tap(d => {
         if (d && d.progress >= 100) {
-          this.isDownloading = false;
-          this.cdRef.markForCheck();
+          this.isDownloading.set(false);
         }
       })).subscribe();
     }
   }
 
   downloadClicked() {
-    if (this.isDownloading) return;
+    if (this.isDownloading()) return;
 
-    this.downloadService.download(this.entityType, this.entity, d => {
-      this.isDownloading = !!d;
-      this.cdRef.markForCheck();
+    this.downloadService.download(this.entityType(), this.entity(), d => {
+      this.isDownloading.set(!!d);
     }, this.libraryId());
   }
 

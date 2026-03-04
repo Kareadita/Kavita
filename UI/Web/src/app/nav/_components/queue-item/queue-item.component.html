@@ -1,7 +1,5 @@
 <ng-container *transloco="let t; prefix: 'download-queue'">
   <div class="queue-item d-flex align-items-center gap-2 py-2">
-    <app-image class="queue-item-cover flex-shrink-0"
-      [imageUrl]="imageUrl()" width="40px" height="56px" [processEvents]="false" />
 
     <div class="status-icon">
       @switch (item().status) {
@@ -22,6 +20,10 @@
         }
       }
     </div>
+
+
+    <app-image class="queue-item-cover flex-shrink-0"
+      [imageUrl]="imageUrl()" width="40px" height="56px" [processEvents]="false" />
 
     <div class="queue-item-info flex-grow-1 overflow-hidden">
       <div class="text-truncate fw-semibold" [title]="item().label">{{ item().label }}</div>

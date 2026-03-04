@@ -10,3 +10,9 @@
   letter-spacing: 0.05em;
   color: var(--text-muted-color);
 }
+
+:host {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
