@@ -964,7 +964,7 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Length":
                     if (value.Type != PdfLexer.TokenType.Int)
                     {
-                        throw new PdfMetadataExtractorException("Expected integer after /Length");
+                        throw new PdfMetadataExtractorException($"Expected integer after /Length, but got {value.Type}");
                     }
 
                     length = (long)value.Value;
@@ -1366,7 +1366,7 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor
                 case "Metadata":
                     if (value.Type != PdfLexer.TokenType.ObjectRef)
                     {
-                        throw new PdfMetadataExtractorException("Expected object number after /Metadata");
+                        throw new PdfMetadataExtractorException($"Expected object number after /Metadata, but got {value.Type}");
                     }
 
                     meta = (long)value.Value;
@@ -1419,6 +1419,29 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor
         _metadata[key] = value;
     }
 
+    private PdfLexer.Token ResolveObjectRef(long position)
+    {
+        long originalPosition = _stream.Position;
+
+        try
+        {
+            _stream.Seek(position, SeekOrigin.Begin);
+            PdfLexer tmpLexer = new PdfLexer(_stream);
+
+            var token = tmpLexer.NextToken();
+            if (token.Type != PdfLexer.TokenType.ObjectStart) {
+                throw new PdfMetadataExtractorException($"[ResolveObjectRef] Expected object here but got {token.Type}");
+            }
+
+            return tmpLexer.NextToken();
+        }
+        finally
+        {
+            // Always restore the original position
+            _stream.Seek(originalPosition, SeekOrigin.Begin);
+        }
+    }
+
     private void ReadMetadataFromXml(long meta)
     {
         if (!HasObject(meta)) return;
@@ -1458,19 +1481,28 @@ internal class PdfMetadataExtractor : IPdfMetadataExtractor
                     return true;
 
                 case "Length":
-                    if (value.Type != PdfLexer.TokenType.Int)
-                    {
-                        throw new PdfMetadataExtractorException("Expected integer after /Length");
+                    if (value.Type == PdfLexer.TokenType.ObjectRef) {
+                        value = ResolveObjectRef(_objectOffsets[(long)value.Value]);
                     }
-
-                    length = (long)value.Value;
+                    if (value.Type == PdfLexer.TokenType.Double)
+                    {
+                        length = Convert.ToInt64(value.Value);
+                    }
+                    else if (value.Type == PdfLexer.TokenType.Int)
+                    {
+                        length = (long)value.Value;
+                    }
+                    else
+                    {
+                        throw new PdfMetadataExtractorException($"Expected integer after /Length, but got {value.Type}");
+                    }
 
                     return true;
 
                 case "Filter":
                     if (value.Type != PdfLexer.TokenType.Name)
                     {
-                        throw new PdfMetadataExtractorException("Expected name after /Filter");
+                        throw new PdfMetadataExtractorException($"Expected name after /Filter, but got {value.Type}");
                     }
 
                     if ((string)value.Value != "FlateDecode")
