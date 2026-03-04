@@ -17,31 +17,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 /// <summary>
 /// Responsible for servicing up images stored in Kavita for entities
 /// </summary>
+/// <inheritdoc />
 [SkipDeviceTracking]
-public class ImageController : BaseApiController
+public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService,
+    ILocalizationService localizationService, IReadingListService readingListService,
+    ICoverDbService coverDbService, ICollectionTagService collectionTagService) : BaseApiController
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IDirectoryService _directoryService;
-    private readonly ILocalizationService _localizationService;
-    private readonly IReadingListService _readingListService;
-    private readonly ICoverDbService _coverDbService;
-
-    /// <inheritdoc />
-    public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService,
-        ILocalizationService localizationService, IReadingListService readingListService,
-        ICoverDbService coverDbService)
-    {
-        _unitOfWork = unitOfWork;
-        _directoryService = directoryService;
-        _localizationService = localizationService;
-        _readingListService = readingListService;
-        _coverDbService = coverDbService;
-    }
 
     /// <summary>
     /// Returns cover image for Chapter
@@ -53,7 +37,7 @@ public class ImageController : BaseApiController
     [HttpGet("chapter-cover")]
     public async Task<ActionResult> GetChapterCoverImage(int chapterId, string apiKey)
     {
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
+        var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
         return PhysicalFile(path);
     }
 
@@ -67,7 +51,7 @@ public class ImageController : BaseApiController
     [HttpGet("library-cover")]
     public async Task<ActionResult> GetLibraryCoverImage(int libraryId, string apiKey)
     {
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId));
+        var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId));
         return PhysicalFile(path);
     }
 
@@ -81,7 +65,7 @@ public class ImageController : BaseApiController
     [HttpGet("volume-cover")]
     public async Task<ActionResult> GetVolumeCoverImage(int volumeId, string apiKey)
     {
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
+        var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
         return PhysicalFile(path);
     }
 
@@ -95,7 +79,7 @@ public class ImageController : BaseApiController
     [HttpGet("series-cover")]
     public async Task<ActionResult> GetSeriesCoverImage(int seriesId, string apiKey)
     {
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
+        var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
         return PhysicalFile(path);
     }
 
@@ -108,12 +92,13 @@ public class ImageController : BaseApiController
     [HttpGet("collection-cover")]
     public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId, string apiKey)
     {
-        // TODO: Check acess to cover image
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
+        var collectionTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(collectionTagId, ct: HttpContext.RequestAborted);
+        if (collectionTag == null || (collectionTag.AppUserId != UserId && !collectionTag.Promoted)) return NotFound();
+
+        var path = Path.Join(directoryService.CoverImageDirectory, collectionTag.CoverImage);
+        if (string.IsNullOrEmpty(path) || !directoryService.FileSystem.File.Exists(path))
         {
-            // TODO: Streamline this like ReadingList does
-            path = await GenerateCollectionCoverImage(collectionTagId);
+            path = await collectionTagService.GenerateCollectionCoverImage(collectionTagId);
         }
 
         return PhysicalFile(path);
@@ -128,31 +113,16 @@ public class ImageController : BaseApiController
     [HttpGet("readinglist-cover")]
     public async Task<ActionResult> GetReadingListCoverImage(int readingListId, string apiKey)
     {
-        // TODO: Check acess to cover image
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ReadingListRepository.GetCoverImageAsync(readingListId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
+        var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId, ct: HttpContext.RequestAborted);
+        if (readingList == null || (readingList.AppUserId != UserId && !readingList.Promoted)) return NotFound();
+
+        var path = Path.Join(directoryService.CoverImageDirectory, readingList.CoverImage);
+        if (string.IsNullOrEmpty(path) || !directoryService.FileSystem.File.Exists(path))
         {
-            path = await _readingListService.GenerateReadingListCoverImage(readingListId);
+            path = await readingListService.GenerateReadingListCoverImage(readingListId);
         }
 
         return PhysicalFile(path);
-    }
-
-    private async Task<string> GenerateCollectionCoverImage(int collectionId)
-    {
-        var covers = await _unitOfWork.CollectionTagRepository.GetRandomCoverImagesAsync(collectionId);
-        var destFile = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory,
-            ImageService.GetCollectionTagFormat(collectionId));
-        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        destFile += settings.EncodeMediaAs.GetExtension();
-
-        if (_directoryService.FileSystem.File.Exists(destFile)) return destFile;
-        ImageService.CreateMergedImage(
-            covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
-            settings.CoverImageSize,
-            destFile);
-        // TODO: Refactor this so that collections have a dedicated cover image so we can calculate primary/secondary colors
-        return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
     }
 
     /// <summary>
@@ -168,11 +138,11 @@ public class ImageController : BaseApiController
     [HttpGet("bookmark")]
     public async Task<ActionResult> GetBookmarkImage(int chapterId, int pageNum, string apiKey, int imageOffset = 0)
     {
-        var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, imageOffset, UserId);
-        if (bookmark == null) return BadRequest(await _localizationService.Translate(UserId, "bookmark-doesnt-exist"));
+        var bookmark = await unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, imageOffset, UserId);
+        if (bookmark == null) return BadRequest(await localizationService.Translate(UserId, "bookmark-doesnt-exist"));
 
         var bookmarkDirectory =
-            (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
         var path = Path.Join(bookmarkDirectory, bookmark.FileName);
 
         return PhysicalFile(path);
@@ -187,23 +157,23 @@ public class ImageController : BaseApiController
     [HttpGet("web-link")]
     public async Task<ActionResult> GetWebLinkImage(string url, string apiKey)
     {
-        if (string.IsNullOrEmpty(url)) return BadRequest(await _localizationService.Translate(UserId, "must-be-defined", "Url"));
+        if (string.IsNullOrEmpty(url)) return BadRequest(await localizationService.Translate(UserId, "must-be-defined", "Url"));
 
-        var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+        var encodeFormat = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
         // Check if the domain exists
-        var domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.FaviconDirectory, ImageService.GetWebLinkFormat(url, encodeFormat));
-        if (!_directoryService.FileSystem.File.Exists(domainFilePath))
+        var domainFilePath = directoryService.FileSystem.Path.Join(directoryService.FaviconDirectory, ImageService.GetWebLinkFormat(url, encodeFormat));
+        if (!directoryService.FileSystem.File.Exists(domainFilePath))
         {
             // We need to request the favicon and save it
             try
             {
-                domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.FaviconDirectory,
-                    await _coverDbService.DownloadFaviconAsync(url, encodeFormat));
+                domainFilePath = directoryService.FileSystem.Path.Join(directoryService.FaviconDirectory,
+                    await coverDbService.DownloadFaviconAsync(url, encodeFormat));
             }
             catch (Exception)
             {
-                return BadRequest(await _localizationService.Translate(UserId, "generic-favicon"));
+                return BadRequest(await localizationService.Translate(UserId, "generic-favicon"));
             }
         }
 
@@ -220,24 +190,24 @@ public class ImageController : BaseApiController
     [HttpGet("publisher")]
     public async Task<ActionResult> GetPublisherImage(string publisherName, string apiKey)
     {
-        if (string.IsNullOrEmpty(publisherName)) return BadRequest(await _localizationService.Translate(UserId, "must-be-defined", "publisherName"));
+        if (string.IsNullOrEmpty(publisherName)) return BadRequest(await localizationService.Translate(UserId, "must-be-defined", "publisherName"));
         if (publisherName.Contains("..")) return BadRequest();
 
-        var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+        var encodeFormat = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
         // Check if the domain exists
-        var domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.PublisherDirectory, ImageService.GetPublisherFormat(publisherName, encodeFormat));
-        if (!_directoryService.FileSystem.File.Exists(domainFilePath))
+        var domainFilePath = directoryService.FileSystem.Path.Join(directoryService.PublisherDirectory, ImageService.GetPublisherFormat(publisherName, encodeFormat));
+        if (!directoryService.FileSystem.File.Exists(domainFilePath))
         {
             // We need to request the favicon and save it
             try
             {
-                domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.PublisherDirectory,
-                    await _coverDbService.DownloadPublisherImageAsync(publisherName, encodeFormat));
+                domainFilePath = directoryService.FileSystem.Path.Join(directoryService.PublisherDirectory,
+                    await coverDbService.DownloadPublisherImageAsync(publisherName, encodeFormat));
             }
             catch (Exception)
             {
-                return BadRequest(await _localizationService.Translate(UserId, "generic-favicon"));
+                return BadRequest(await localizationService.Translate(UserId, "generic-favicon"));
             }
         }
 
@@ -254,7 +224,7 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetPersonCoverImage(int personId, string apiKey)
     {
         // TODO: Check access to cover image
-        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.UserRepository.GetPersonCoverImageAsync(personId));
+        var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.UserRepository.GetPersonCoverImageAsync(personId));
         return PhysicalFile(path);
     }
 
@@ -269,8 +239,8 @@ public class ImageController : BaseApiController
     {
         // TODO: Does this need any checks? Can we use profile privacy?
         //    I don't think so, you could share annotations but not profile. So how would this work?
-        var filename = await _unitOfWork.UserRepository.GetCoverImageAsync(userId, UserId);
-        var path = Path.Join(_directoryService.CoverImageDirectory, filename);
+        var filename = await unitOfWork.UserRepository.GetCoverImageAsync(userId, UserId);
+        var path = Path.Join(directoryService.CoverImageDirectory, filename);
         return CachedFile(path);
     }
 
@@ -285,15 +255,15 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
         if (!UserContext.IsAuthenticated) return Unauthorized();
-        if (filename.Contains("..")) return BadRequest(await _localizationService.Translate(UserId, "invalid-filename"));
+        if (filename.Contains("..")) return BadRequest(await localizationService.Translate(UserId, "invalid-filename"));
 
-        var roles = await _unitOfWork.UserRepository.GetRolesByAuthKey(apiKey);
+        var roles = await unitOfWork.UserRepository.GetRolesByAuthKey(apiKey);
         if (!roles.Contains(PolicyConstants.AdminRole))
         {
             return Forbid();
         }
 
-        var path = Path.Join(_directoryService.TempDirectory, filename);
+        var path = Path.Join(directoryService.TempDirectory, filename);
         return PhysicalFile(path);
     }
 }

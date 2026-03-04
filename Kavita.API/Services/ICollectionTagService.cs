@@ -18,4 +18,6 @@ public interface ICollectionTagService
     /// <param name="ct"></param>
     /// <returns></returns>
     Task<bool> RemoveTagFromSeries(AppUserCollection? tag, IEnumerable<int> seriesIds, CancellationToken ct = default);
+
+    Task<string> GenerateCollectionCoverImage(int collectionId);
 }
