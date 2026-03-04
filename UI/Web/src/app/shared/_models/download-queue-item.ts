@@ -8,6 +8,7 @@ export interface DownloadQueueItem {
   /** Atomic unit of download — series/reading-list/collection always decompose to these */
   entityType: 'volume' | 'chapter';
   entityId: number;
+  libraryId: number;
   /** Human-readable label, e.g. "My Series - Vol. 3" */
   label: string;
   /** Volume or chapter number string */

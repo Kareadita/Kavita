@@ -6,6 +6,7 @@ import {
   DestroyRef,
   inject,
   Input,
+  input,
   OnInit,
 } from '@angular/core';
 import {AsyncPipe} from "@angular/common";
@@ -40,6 +41,7 @@ export class DownloadButtonComponent implements OnInit {
   @Input({required: true}) download$: Observable<DownloadEvent | null> | null = null;
   @Input({required: true}) entity!: Series | Volume | Chapter;
   @Input({required: true}) entityType: 'series' | 'volume' | 'chapter' = 'series';
+  readonly libraryId = input<number>(0);
 
   isDownloading = false;
   canDownload = computed(() => this.accountService.hasAdminRole() || this.accountService.hasDownloadRole());
@@ -61,7 +63,7 @@ export class DownloadButtonComponent implements OnInit {
     this.downloadService.download(this.entityType, this.entity, d => {
       this.isDownloading = !!d;
       this.cdRef.markForCheck();
-    });
+    }, this.libraryId());
   }
 
 }

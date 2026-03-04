@@ -42,6 +42,7 @@ import {DefaultModalOptions} from "./app/_models/modal/modal-options";
 import {ToastNoAnimationModule} from "ngx-toastr";
 import {MessageHubService} from "src/app/_services/message-hub.service";
 import {DownloadService} from "./app/shared/_services/download.service";
+import {LibraryService} from "./app/_services/library.service";
 
 const disableAnimations = !('animate' in document.documentElement);
 if (disableAnimations) {
@@ -132,6 +133,7 @@ function bootstrapUser() {
   const accountService = inject(AccountService);
   const messageHubService = inject(MessageHubService);
   const downloadService = inject(DownloadService);
+  const libraryService = inject(LibraryService);
   const transloco = inject(TranslocoService);
 
   // Load user from localStorage so refreshAccount() and locale loading can proceed
@@ -153,7 +155,9 @@ function bootstrapUser() {
     tap(user => {
       if (user) {
         messageHubService.createHubConnection(user);
-        downloadService.restoreQueue();
+        libraryService.cacheLibraryInfo().subscribe(() => {
+          downloadService.restoreQueue();
+        });
       }
     }),
   ));

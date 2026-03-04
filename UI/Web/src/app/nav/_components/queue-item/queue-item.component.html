@@ -1,14 +1,7 @@
 <ng-container *transloco="let t; prefix: 'download-queue'">
   <div class="queue-item d-flex align-items-center gap-2 py-2">
-    <app-image
-      class="queue-item-cover flex-shrink-0"
-      [imageUrl]="item().entityType === 'volume'
-        ? imageService.getVolumeCoverImage(item().entityId)
-        : imageService.getChapterCoverImage(item().entityId)"
-      width="40px"
-      height="56px"
-      [processEvents]="false"
-    />
+    <app-image class="queue-item-cover flex-shrink-0"
+      [imageUrl]="imageUrl()" width="40px" height="56px" [processEvents]="false" />
 
     <div class="status-icon">
       @switch (item().status) {
@@ -30,7 +23,7 @@
       }
     </div>
 
-    <div class="queue-item__info flex-grow-1 overflow-hidden">
+    <div class="queue-item-info flex-grow-1 overflow-hidden">
       <div class="text-truncate fw-semibold" [title]="item().label">{{ item().label }}</div>
       <div class="text-muted small">{{ t(item().status) }}</div>
       @if (item().status === 'preparing' || item().status === 'downloading') {
@@ -49,7 +42,7 @@
       }
     </div>
 
-    <div class="queue-item__actions d-flex gap-1 flex-shrink-0">
+    <div class="queue-item-actions d-flex gap-1 flex-shrink-0">
       @if (item().status === 'queued') {
         <button class="btn btn-sm btn-outline-secondary" [title]="t('cancel')" (click)="cancel.emit(item().id)">
           <i class="fa fa-times" aria-hidden="true"></i>

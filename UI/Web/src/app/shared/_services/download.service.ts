@@ -24,6 +24,8 @@ import {NotificationProgressEvent} from "../../_models/events/notification-progr
 import {SeriesService} from "../../_services/series.service";
 import {DownloadQueueItem, DownloadQueueStatus} from '../_models/download-queue-item';
 import {DownloadStorageService} from './download-storage.service';
+import {EntityTitleService} from "../../_services/entity-title.service";
+import {LibraryService} from "../../_services/library.service";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -53,6 +55,9 @@ export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | undefi
   providedIn: 'root'
 })
 export class DownloadService {
+
+  private readonly entityTitleService = inject(EntityTitleService);
+  private readonly libraryService = inject(LibraryService);
 
   private baseUrl = environment.apiUrl;
   /**
@@ -205,16 +210,16 @@ export class DownloadService {
    * - volume/chapter → size-checked then queued
    * - bookmark/logs → immediate blob download (bypasses queue)
    */
-  download(entityType: DownloadEntityType, entity: DownloadEntity, callback?: (d: Download | undefined) => void) {
+  download(entityType: DownloadEntityType, entity: DownloadEntity, callback?: (d: Download | undefined) => void, libraryId = 0) {
     switch (entityType) {
       case 'series':
         this.downloadSeries(entity as Series);
         break;
       case 'volume':
-        this.enqueueSingle(entity as Volume, 'volume', '');
+        this.enqueueSingle(entity as Volume, 'volume', '', libraryId);
         break;
       case 'chapter':
-        this.enqueueSingle(entity as Chapter, 'chapter', '');
+        this.enqueueSingle(entity as Chapter, 'chapter', '', libraryId);
         break;
       case 'bookmark':
         this.downloadBookmarksBlob(entity as PageBookmark[]);
@@ -355,22 +360,22 @@ export class DownloadService {
           switchMap(async size => this.confirmSize(size, 'series')),
           filter(confirmed => confirmed),
           takeUntilDestroyed(this.destroyRef)
-        ).subscribe(() => this.enqueueItems(items, series.name));
+        ).subscribe(() => this.enqueueItems(items, series.name, series.libraryId));
       } else {
-        this.enqueueItems(items, series.name);
+        this.enqueueItems(items, series.name, series.libraryId);
       }
     });
   }
 
-  private enqueueItems(items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }>, seriesName: string) {
+  private enqueueItems(items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }>, seriesName: string, libraryId: number) {
     this.debugLog(`enqueueItems() adding ${items.length} items for series "${seriesName}"`);
     for (const item of items) {
-      this.addToQueue(item.entity, item.entityType, seriesName);
+      this.addToQueue(item.entity, item.entityType, seriesName, libraryId);
     }
     this.processQueue();
   }
 
-  private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string) {
+  private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number) {
     const user = this.accountService.currentUser();
     const sizeCheckCall = entityType === 'volume'
       ? this.downloadVolumeSize((entity as Volume).id)
@@ -383,28 +388,29 @@ export class DownloadService {
       filter(wantsToDownload => wantsToDownload),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
-      this.addToQueue(entity, entityType, seriesName);
+      this.addToQueue(entity, entityType, seriesName, libraryId);
       this.processQueue();
     });
   }
 
-  private addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string) {
+  private addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number) {
     const id = this._nextId++;
     const entityId = entity.id;
     this.debugLog(`addToQueue() id=${id} type=${entityType} entityId=${entityId} series="${seriesName}"`);
 
-    let label: string;
+    const libraryType = this.libraryService.getLibraryTypeSync(libraryId) ?? 0;
+    const entityTitle = this.entityTitleService.computeTitle(entity, libraryType, { prioritizeTitleName: true });
+    const label = seriesName ? `${seriesName} - ${entityTitle}` : entityTitle;
+
     let subLabel: string;
     let downloadName: string;
 
     if (entityType === 'volume') {
       const vol = entity as Volume;
-      label = seriesName ? `${seriesName} - Vol. ${vol.name}` : `Vol. ${vol.name}`;
       subLabel = vol.minNumber + '';
       downloadName = seriesName ? `${seriesName} - Volume ${vol.name}` : `Volume ${vol.name}`;
     } else {
       const ch = entity as Chapter;
-      label = seriesName ? `${seriesName} - Ch. ${ch.minNumber}` : `Ch. ${ch.minNumber}`;
       subLabel = ch.minNumber + '';
       downloadName = seriesName ? `${seriesName} - Chapter ${ch.minNumber}` : `Chapter ${ch.minNumber}`;
     }
@@ -413,6 +419,7 @@ export class DownloadService {
       id,
       entityType,
       entityId,
+      libraryId,
       label,
       subLabel,
       seriesName,

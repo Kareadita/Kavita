@@ -259,7 +259,7 @@ export class BulkSelectionService {
           chapters = this.resolveEntities<Chapter>('chapter');
         }
 
-        return this.actionService.handleBulkVolumeChapterAction(action, volumes, chapters, ctx.seriesId);
+        return this.actionService.handleBulkVolumeChapterAction(action, volumes, chapters, ctx.seriesId, ctx.libraryId);
       });
     }
   }
