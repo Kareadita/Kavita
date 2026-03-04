@@ -311,7 +311,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
             .OrderBy(ch => ch.Volume.MinNumber) // Group/Sort volumes as well
             .ThenBy(ch => ch.SortOrder)
             .Take(20)
-            .ProjectTo<StandaloneChapterDto>(mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Chapter, StandaloneChapterDto>(mapper.ConfigurationProvider, userId)
             .ToListAsync(ct);
     }
 

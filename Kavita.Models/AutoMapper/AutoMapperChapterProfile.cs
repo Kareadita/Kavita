@@ -14,10 +14,26 @@ public class AutoMapperChapterProfile : Profile
 {
     public AutoMapperChapterProfile()
     {
-        int userId = 0; // Placeholder, will be replaced at runtime
+        int userId = 0; // Placeholder will be replaced at runtime
 
         CreateMap<Chapter, ChapterDto>()
-            // Progress fields (previously in AddChapterModifiers)
+            .MapChapterBase(userId);
+
+        CreateMap<Chapter, StandaloneChapterDto>()
+            .MapChapterBase(userId)
+            .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.Volume.SeriesId))
+            .ForMember(dest => dest.VolumeTitle, opt => opt.MapFrom(src => src.Volume.Name))
+            .ForMember(dest => dest.LibraryId, opt => opt.MapFrom(src => src.Volume.Series.LibraryId))
+            .ForMember(dest => dest.LibraryType, opt => opt.MapFrom(src => src.Volume.Series.Library.Type));
+    }
+}
+
+internal static class AutoMapperChapterProfileBaseExtensions
+{
+    public static IMappingExpression<Chapter, TDest> MapChapterBase<TDest>(this IMappingExpression<Chapter, TDest> mapping, int userId)
+        where TDest: ChapterDto
+    {
+        return mapping
             .ForMember(dest => dest.PagesRead,
                 opt => opt.MapFrom(src =>
                     src.UserProgress
