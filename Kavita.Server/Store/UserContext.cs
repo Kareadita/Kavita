@@ -18,8 +18,7 @@ public class UserContext : IUserContext
 
     public int GetUserIdOrThrow()
     {
-        // TODO: Refactor this to use ProblemDetails and handle appropriately
-        return _userId ?? throw new KavitaException("User is not authenticated");
+        return _userId ?? throw new UnauthorizedAccessException();
     }
 
     public string? GetUsername() => _username;
