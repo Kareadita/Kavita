@@ -5,13 +5,15 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from '../../../shared/image/image.component';
 import {ImageService} from '../../../_services/image.service';
 import {DownloadQueueStatusPipe} from "../../../_pipes/download-queue-status.pipe";
+import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
+import {CompactEtaPipe} from "../../../_pipes/compact-eta.pipe";
 
 @Component({
   selector: 'app-download-queue-item',
   templateUrl: './download-queue-item.component.html',
   styleUrls: ['./download-queue-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BytesPipe, TranslocoDirective, ImageComponent, DownloadQueueStatusPipe]
+  imports: [BytesPipe, TranslocoDirective, ImageComponent, DownloadQueueStatusPipe, TimeAgoPipe, CompactEtaPipe]
 })
 export class DownloadQueueItemComponent {
   private readonly imageService = inject(ImageService);

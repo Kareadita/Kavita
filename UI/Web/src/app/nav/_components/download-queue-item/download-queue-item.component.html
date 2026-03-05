@@ -27,17 +27,32 @@
 
     <div class="queue-item-info flex-grow-1 overflow-hidden">
       <div class="text-truncate fw-semibold" [title]="item().label">{{ item().label }}</div>
-      <div class="text-muted small">{{item().status | downloadQueueStatus }}</div>
+      <div class="text-muted small">
+        {{item().status | downloadQueueStatus }}
+        <span class="ms-1">&middot;</span>
+        @if (item().completedAt && (item().status === 'completed' || item().status === 'failed')) {
+          <span class="ms-1">{{ item().completedAt! | timeAgo }}</span>
+        } @else {
+          <span class="ms-1">{{ item().queuedAt | timeAgo }}</span>
+        }
+      </div>
+      @if (item().estimatedSize > 0) {
+        <div class="text-muted small">
+          <span>{{ item().estimatedSize | bytes }}</span>
+          @if ((item().status === 'preparing' || item().status === 'downloading') && item().speedBps && item().speedBps! > 0) {
+            <span class="ms-1">&middot;</span>
+            <span class="ms-1">{{ item().speedBps! | bytes }}/s</span>
+            @if (item().etaSeconds && item().etaSeconds! > 0) {
+              <span class="ms-1">&middot;</span>
+              <span class="ms-1">{{ item().etaSeconds | compactEta }}</span>
+            }
+          }
+        </div>
+      }
       @if (item().status === 'preparing' || item().status === 'downloading') {
         <div class="progress mt-1" style="height: 4px;" role="progressbar" [attr.aria-valuenow]="item().progress" aria-valuemin="0" aria-valuemax="100">
           <div class="progress-bar" [style.width.%]="item().progress"></div>
         </div>
-        @if (item().speedBps && item().speedBps! > 0) {
-          <div class="text-muted small">{{ item().speedBps! | bytes }}/s</div>
-        }
-      }
-      @if (item().estimatedSize > 0) {
-        <div class="text-muted small">{{ item().estimatedSize | bytes }}</div>
       }
       @if (item().status === 'failed' && item().errorMessage) {
         <div class="text-danger small text-truncate" [title]="item().errorMessage">{{ item().errorMessage }}</div>

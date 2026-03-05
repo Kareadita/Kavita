@@ -26,6 +26,10 @@ export interface DownloadQueueItem {
   entity: Volume | Chapter;
   /** Predicted backend filename used to match SignalR progress events */
   downloadName: string;
-  /** bytes/sec, in-memory only — not persisted to IndexedDB */
+  /** Smoothed bytes/sec, in-memory only — not persisted to IndexedDB */
   speedBps?: number;
+  /** Estimated seconds remaining, in-memory only */
+  etaSeconds?: number;
+  /** Date.now() timestamp when completed or failed */
+  completedAt?: number;
 }

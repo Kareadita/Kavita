@@ -5,10 +5,10 @@ import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../confirm.service';
 import {Chapter} from 'src/app/_models/chapter';
 import {Volume} from 'src/app/_models/volume';
-import {asyncScheduler, filter, Observable, of, tap} from 'rxjs';
+import {asyncScheduler, filter, forkJoin, Observable, of, tap} from 'rxjs';
 import {download, Download} from '../_models/download';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
-import {finalize, map, switchMap, throttleTime} from 'rxjs/operators';
+import {map, switchMap, throttleTime} from 'rxjs/operators';
 import {AccountService} from 'src/app/_services/account.service';
 import {BytesPipe} from 'src/app/_pipes/bytes.pipe';
 import {translate, TranslocoService} from "@jsverse/transloco";
@@ -122,11 +122,16 @@ export class DownloadService {
     )
   );
 
-  /** Tracks last progress snapshot per item id for speed calculation */
-  private _lastProgressSnapshot = new Map<number, { progress: number; time: number }>();
+  /**
+   * Sliding window of recent byte snapshots for smoothed speed calculation.
+   * Keeps the last ~5 seconds of samples per item.
+   */
+  private _speedSamples = new Map<number, Array<{ bytes: number; time: number }>>();
+  private readonly SPEED_WINDOW_MS = 5000;
 
   constructor() {
-    // Dedicated SignalR channel for download progress
+    // SignalR handler — only used as a safety net.
+    // Real progress comes from fetch + ReadableStream in streamDownload/blobDownload.
     this.messageHub.messages$.pipe(
       filter(evt => evt.event === EVENTS.DownloadProgress),
       map(evt => evt.payload as NotificationProgressEvent),
@@ -135,42 +140,26 @@ export class DownloadService {
 
         const correlationId: string | undefined = evt.body?.correlationId ?? evt.body?.CorrelationId;
         const downloadName: string | undefined = evt.body?.DownloadName ?? evt.body?.downloadName;
-        const progressValue = Math.round((evt.body?.Progress ?? evt.body?.progress ?? 0) * 100);
 
         const active = this.activeItem();
         if (!active) return;
 
-        // Match by correlationId (preferred) or downloadName (legacy fallback)
         const isMatch = (correlationId && String(active.id) === correlationId)
                      || (!correlationId && downloadName === active.downloadName);
         if (!isMatch) return;
 
-        if (evt.eventType === 'ended') {
-          this.debugLog(`DownloadProgress ended for id=${active.id}`);
-          this.queue.update(q => q.map(i =>
-            i.id === active.id ? { ...i, progress: 100 } : i
-          ));
-          setTimeout(() => this.markCompleted(active.id), 1000);
-        } else if (evt.eventType === 'updated') {
-          const now = Date.now();
-          const prev = this._lastProgressSnapshot.get(active.id);
-          if (prev && active.estimatedSize > 0) {
-            const bytesDelta = (progressValue - prev.progress) / 100 * active.estimatedSize;
-            const timeDelta = (now - prev.time) / 1000;
-            const speedBps = timeDelta > 0 ? bytesDelta / timeDelta : 0;
-            this.queue.update(q => q.map(i =>
-              i.id === active.id ? { ...i, progress: progressValue, speedBps } : i
-            ));
-          } else {
-            this.queue.update(q => q.map(i =>
-              i.id === active.id ? { ...i, progress: progressValue } : i
-            ));
+        if (evt.eventType === 'started') {
+          this.debugLog(`DownloadProgress started for id=${active.id}`);
+        } else if (evt.eventType === 'ended') {
+          // Safety net: if the stream somehow missed completion, mark it done
+          if (active.status !== 'completed') {
+            this.debugLog(`DownloadProgress ended (fallback) for id=${active.id}`);
           }
-          this._lastProgressSnapshot.set(active.id, { progress: progressValue, time: now });
         }
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
+
   }
 
   /**
@@ -238,6 +227,11 @@ export class DownloadService {
 
 
   cancelDownload(itemId: number) {
+    const controller = this.activeAbortControllers.get(itemId);
+    if (controller) {
+      controller.abort();
+      this.activeAbortControllers.delete(itemId);
+    }
     this.queue.update(q => q.filter(i => i.id !== itemId));
     this.storage.delete(itemId);
     setTimeout(() => this.processQueue(), 100);
@@ -302,8 +296,7 @@ export class DownloadService {
       return q.find(i => i.entityType === 'chapter' && i.entityId === (entity as Chapter).id) ?? null;
     }
     if (this.utilityService.isSeries(entity)) {
-      const name = (entity as Series).name;
-      return q.find(i => i.seriesName === name) ?? null;
+      return this.getSeriesDownloadProgress((entity as Series).name);
     }
     return null;
   }
@@ -397,31 +390,46 @@ export class DownloadService {
 
   private enqueueItems(items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }>, seriesName: string, libraryId: number) {
     this.debugLog(`enqueueItems() adding ${items.length} items for series "${seriesName}"`);
-    for (const item of items) {
-      this.addToQueue(item.entity, item.entityType, seriesName, libraryId);
-    }
-    this.processQueue();
-  }
 
-  private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number) {
-    const user = this.accountService.currentUser();
-    const sizeCheckCall = entityType === 'volume'
-      ? this.downloadVolumeSize((entity as Volume).id)
-      : this.downloadChapterSize((entity as Chapter).id);
+    // Fetch individual sizes in parallel, then enqueue with sizes
+    const sizeRequests = items.map(item =>
+      item.entityType === 'volume'
+        ? this.downloadVolumeSize((item.entity as Volume).id)
+        : this.downloadChapterSize((item.entity as Chapter).id)
+    );
 
-    const sizeCheck$ = (user && user.preferences.promptForDownloadSize) ? sizeCheckCall : of(0);
-
-    sizeCheck$.pipe(
-      switchMap(async size => this.confirmSize(size, entityType)),
-      filter(wantsToDownload => wantsToDownload),
+    forkJoin(sizeRequests).pipe(
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe(() => {
-      this.addToQueue(entity, entityType, seriesName, libraryId);
+    ).subscribe(sizes => {
+      for (let i = 0; i < items.length; i++) {
+        this.addToQueue(items[i].entity, items[i].entityType, seriesName, libraryId, sizes[i]);
+      }
       this.processQueue();
     });
   }
 
-  private addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number) {
+  private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number) {
+    const user = this.accountService.currentUser();
+    const sizeCall = entityType === 'volume'
+      ? this.downloadVolumeSize((entity as Volume).id)
+      : this.downloadChapterSize((entity as Chapter).id);
+
+    // Always fetch size to populate estimatedSize; only prompt if user preference is set
+    sizeCall.pipe(
+      switchMap(async size => {
+        const promptForSize = user && user.preferences.promptForDownloadSize;
+        const confirmed = promptForSize ? await this.confirmSize(size, entityType) : true;
+        return { size, confirmed };
+      }),
+      filter(result => result.confirmed),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(({ size }) => {
+      this.addToQueue(entity, entityType, seriesName, libraryId, size);
+      this.processQueue();
+    });
+  }
+
+  private addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, estimatedSize = 0) {
     const id = this._nextId++;
     const entityId = entity.id;
     this.debugLog(`addToQueue() id=${id} type=${entityType} entityId=${entityId} series="${seriesName}"`);
@@ -451,7 +459,7 @@ export class DownloadService {
       label,
       subLabel,
       seriesName,
-      estimatedSize: 0,
+      estimatedSize,
       status: 'queued',
       progress: 0,
       errorMessage: '',
@@ -488,10 +496,13 @@ export class DownloadService {
     this.triggerDownload(nextItem);
   }
 
+  /** Active AbortControllers keyed by item id, for cancellation support */
+  private activeAbortControllers = new Map<number, AbortController>();
+
   private triggerDownload(item: DownloadQueueItem) {
     const apiKey = this.accountService.currentUserGenericApiKey();
     if (!apiKey) {
-      this.debugLog(`triggerDownload() — no API key, falling back to blob for id=${item.id}`);
+      this.debugLog(`triggerDownload() — no API key for id=${item.id}`);
       this.setStatus(item.id, 'failed', { errorMessage: this.translocoService.translate('download-queue-drawer.failed-from-auth') });
       return;
     }
@@ -503,23 +514,107 @@ export class DownloadService {
                 `&_t=${Date.now()}` +
                 `&apiKey=${encodeURIComponent(apiKey)}`;
 
-    this.setStatus(item.id, 'downloading');
     this.debugLog(`triggerDownload() id=${item.id} url=${url}`);
+    this.fetchDownload(item, url);
+  }
 
-    // Firefox Android has explicit prompts per-item unless about:config browser.download.alwaysOpenPanel = false is set (Firefox 97+)
-    const isFirefoxAndroid = /Firefox/.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
-    if (isFirefoxAndroid) {
-      window.open(url, '_blank', 'noopener');
-    } else {
-      const a = document.createElement('a');
-      a.href = url;
-      // Do NOT set a.download — let browser use Content-Disposition from server.
-      // The server exposes Content-Disposition via CORS and sends unencoded filenames,
-      // so the browser gets the correct full filename (with extension, no %20).
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+  /**
+   * Download using fetch + ReadableStream for real byte-level progress, then saveAs via blob.
+   */
+  private async fetchDownload(item: DownloadQueueItem, url: string) {
+    const abortController = new AbortController();
+    this.activeAbortControllers.set(item.id, abortController);
+
+    try {
+      const response = await fetch(url, { signal: abortController.signal });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.body) throw new Error('No response body');
+
+      const contentLength = +(response.headers.get('Content-Length') || 0);
+      const filename = this.parseContentDisposition(
+        response.headers.get('Content-Disposition') || '', item.downloadName
+      );
+
+      this.setStatus(item.id, 'downloading');
+
+      const reader = response.body.getReader();
+      const chunks: BlobPart[] = [];
+      let received = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.length;
+
+        if (contentLength > 0) {
+          const now = Date.now();
+          const progress = Math.round((received / contentLength) * 100);
+
+          // Sliding-window speed: keep samples from the last SPEED_WINDOW_MS
+          let samples = this._speedSamples.get(item.id);
+          if (!samples) {
+            samples = [];
+            this._speedSamples.set(item.id, samples);
+          }
+          samples.push({ bytes: received, time: now });
+          const cutoff = now - this.SPEED_WINDOW_MS;
+          while (samples.length > 1 && samples[0].time < cutoff) {
+            samples.shift();
+          }
+
+          let speedBps: number | undefined;
+          let etaSeconds: number | undefined;
+          if (samples.length >= 2) {
+            const oldest = samples[0];
+            const timeDelta = (now - oldest.time) / 1000;
+            const bytesDelta = received - oldest.bytes;
+            if (timeDelta > 0) {
+              speedBps = bytesDelta / timeDelta;
+              const remaining = contentLength - received;
+              etaSeconds = speedBps > 0 ? Math.round(remaining / speedBps) : undefined;
+            }
+          }
+
+          this.queue.update(q => q.map(i =>
+            i.id === item.id
+              ? { ...i, progress,
+                  ...(speedBps !== undefined ? { speedBps } : {}),
+                  ...(etaSeconds !== undefined ? { etaSeconds } : {}) }
+              : i
+          ));
+        }
+      }
+
+      const blob = new Blob(chunks);
+      chunks.length = 0; // release chunk references before saveAs to halve peak memory
+      this.save(blob, filename);
+      this.activeAbortControllers.delete(item.id);
+      this.markCompleted(item.id);
+    } catch (err: any) {
+      this.activeAbortControllers.delete(item.id);
+      if (err.name === 'AbortError') {
+        this.debugLog(`blobDownload() cancelled for id=${item.id}`);
+      } else {
+        this.markFailed(item.id, err.message || 'Download failed');
+      }
     }
+  }
+
+  /**
+   * Parse Content-Disposition header to extract filename, with fallback.
+   */
+  private parseContentDisposition(header: string, fallbackName: string): string {
+    if (!header) return fallbackName || 'download';
+    const tokens = header.split(';');
+    if (tokens.length < 2) return fallbackName || 'download';
+    let filename = tokens[1].replace('filename=', '').replace(/"/ig, '').trim();
+    if (filename.startsWith('download_') || filename.startsWith('kavita_download_')) {
+      const ext = filename.substring(filename.lastIndexOf('.'), filename.length);
+      if (fallbackName) return fallbackName + ext;
+      return filename.replace('kavita_', '').replace('download_', '');
+    }
+    return decodeURIComponent(filename) || fallbackName || 'download';
   }
 
   /** Updates queue signal and persists to IDB on status changes. */
@@ -529,40 +624,50 @@ export class DownloadService {
     if (item) this.storage.save(item);
   }
 
-  private downloadItemAsBlob(item: DownloadQueueItem) {
-    const idKey = item.entityType === 'volume' ? 'volumeId' : 'chapterId';
-    const url = `${this.baseUrl}download/${item.entityType}?${idKey}=${item.entityId}`;
+  /**
+   * Computes aggregate download progress for all items belonging to a series.
+   * Returns a synthetic DownloadQueueItem with averaged progress, or null if no active items.
+   */
+  private getSeriesDownloadProgress(seriesName: string): DownloadQueueItem | null {
+    const allItems = this.queue().filter(i =>
+      i.seriesName === seriesName &&
+      i.status !== 'cancelled' && i.status !== 'failed'
+    );
+    if (allItems.length === 0) return null;
 
-    this.httpClient.get(url, { observe: 'events', responseType: 'blob', reportProgress: true }).pipe(
-      throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
-      download((blob, filename) => {
-        this.save(blob, decodeURIComponent(filename));
-      }),
-      tap(d => {
-        if (d.state === 'IN_PROGRESS') {
-          this.queue.update(q =>
-            q.map(i => i.id === item.id ? { ...i, progress: d.progress } : i)
-          );
-        }
-      }),
-      finalize(() => this.markCompleted(item.id)),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
+    const hasActive = allItems.some(i =>
+      i.status === 'queued' || i.status === 'preparing' || i.status === 'downloading'
+    );
+    if (!hasActive) return null;
+
+    const totalProgress = allItems.reduce((sum, i) => {
+      if (i.status === 'completed') return sum + 100;
+      if (i.status === 'downloading' || i.status === 'preparing') return sum + i.progress;
+      return sum; // queued = 0
+    }, 0);
+
+    const representative = allItems.find(i => i.status === 'downloading')
+      ?? allItems.find(i => i.status === 'preparing')
+      ?? allItems.find(i => i.status === 'queued')!;
+
+    return { ...representative, progress: Math.round(totalProgress / allItems.length) };
   }
 
   private markCompleted(itemId: number) {
     this.debugLog(`markCompleted() id=${itemId}`);
-    this._lastProgressSnapshot.delete(itemId);
-    this.setStatus(itemId, 'completed', { progress: 100 });
+    this._speedSamples.delete(itemId);
+    this.setStatus(itemId, 'completed', { progress: 100, completedAt: Date.now() });
     setTimeout(() => this.removeItem(itemId), 5 * 60 * 1000);
-    setTimeout(() => this.processQueue(), 100);
+    // Give GC time to reclaim the previous download's blob before starting the next one
+    setTimeout(() => this.processQueue(), 1500);
   }
 
   private markFailed(itemId: number, error: string) {
     this.debugLog(`markFailed() id=${itemId} error="${error}"`);
-    this._lastProgressSnapshot.delete(itemId);
-    this.setStatus(itemId, 'failed', { errorMessage: error });
-    setTimeout(() => this.processQueue(), 100);
+    this._speedSamples.delete(itemId);
+    this.setStatus(itemId, 'failed', { errorMessage: error, completedAt: Date.now() });
+    // Give GC time to reclaim memory before starting next download
+    setTimeout(() => this.processQueue(), 1500);
   }
 
   // --- Blob-based downloads (bookmarks, logs) ---

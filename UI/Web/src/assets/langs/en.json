@@ -2170,7 +2170,14 @@
         "paused": "Paused",
         "clear-all": "Clear All",
         "failed-from-auth": "Not Authenticated, refresh browser",
-        "failed-interrupted": "Interrupted by page refresh"
+        "failed-interrupted": "Interrupted by page refresh",
+
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
     },
 
     "download-queue-item": {
