@@ -22,7 +22,7 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         {
             await next(context); // downstream middlewares or http call
         }
-        catch (KavitaUnauthenticatedUserException)
+        catch (Exception ex) when (ex is KavitaUnauthenticatedUserException or UnauthorizedAccessException)
         {
             context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
             await context.Response.CompleteAsync();
