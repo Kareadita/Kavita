@@ -220,10 +220,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// <param name="personId"></param>
     /// <param name="apiKey"></param>
     /// <returns></returns>
+    [PersonAccess]
     [HttpGet("person-cover")]
     public async Task<ActionResult> GetPersonCoverImage(int personId, string apiKey)
     {
-        // TODO: Check access to cover image
         var path = Path.Join(directoryService.CoverImageDirectory, await unitOfWork.UserRepository.GetPersonCoverImageAsync(personId));
         return PhysicalFile(path);
     }
@@ -252,16 +252,10 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("cover-upload")]
+    [Authorize(PolicyConstants.AdminRole)]
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
-        if (!UserContext.IsAuthenticated) return Unauthorized();
         if (filename.Contains("..")) return BadRequest(await localizationService.Translate(UserId, "invalid-filename"));
-
-        var roles = await unitOfWork.UserRepository.GetRolesByAuthKey(apiKey);
-        if (!roles.Contains(PolicyConstants.AdminRole))
-        {
-            return Forbid();
-        }
 
         var path = Path.Join(directoryService.TempDirectory, filename);
         return PhysicalFile(path);

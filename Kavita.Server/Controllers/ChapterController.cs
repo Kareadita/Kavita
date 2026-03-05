@@ -106,8 +106,8 @@ public class ChapterController(
     /// <param name="seriesId">The ID of the series</param>
     /// <param name="dto">The IDs of the chapters to be deleted</param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("delete-multiple")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<bool>> DeleteMultipleChapters([FromQuery] int seriesId, DeleteChaptersDto dto)
     {
         try
@@ -182,14 +182,16 @@ public class ChapterController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("update")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> UpdateChapterMetadata(UpdateChapterDto dto)
     {
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.Id,
-            ChapterIncludes.People | ChapterIncludes.Genres | ChapterIncludes.Tags);
+            ChapterIncludes.People | ChapterIncludes.Genres | ChapterIncludes.Tags, HttpContext.RequestAborted);
         if (chapter == null)
             return BadRequest(localizationService.Translate(UserId, "chapter-doesnt-exist"));
+
+        var seriesId = await unitOfWork.ChapterRepository.GetSeriesIdForChapter(chapter.Id, HttpContext.RequestAborted);
 
         if (chapter.AgeRating != dto.AgeRating)
         {
@@ -323,15 +325,16 @@ public class ChapterController(
             unitOfWork
         );
 
-        // TODO: Only remove field if changes were made
-        chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterPublisher);
         // Update publishers
-        await PersonHelper.UpdateChapterPeopleAsync(
+        var updatedPublishers = await PersonHelper.UpdateChapterPeopleAsync(
             chapter,
             dto.Publishers.Select(p => p.Name).ToList(),
             PersonRole.Publisher,
             unitOfWork
         );
+
+        if (updatedPublishers)
+            chapter.KPlusOverrides.Remove(MetadataSettingField.ChapterPublisher);
 
         // Update translators
         await PersonHelper.UpdateChapterPeopleAsync(
@@ -397,10 +400,14 @@ public class ChapterController(
             return Ok();
         }
 
-        // TODO: Emit a ChapterMetadataUpdate out
+        if (seriesId.HasValue)
+        {
+            await eventHub.SendMessageAsync(MessageFactory.ChapterUpdated,
+                MessageFactory.ChapterUpdatedEvent(chapter.Id, seriesId.Value),
+                false, HttpContext.RequestAborted);
+        }
 
         await unitOfWork.CommitAsync();
-
 
         return Ok();
     }

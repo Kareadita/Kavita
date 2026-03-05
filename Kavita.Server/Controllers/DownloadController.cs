@@ -20,8 +20,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 /// <summary>
 /// All APIs related to downloading entities from the system. Requires Download Role or Admin Role.
 /// </summary>
@@ -34,7 +32,6 @@ public class DownloadController(
     IEventHub eventHub,
     ILogger<DownloadController> logger,
     IBookmarkService bookmarkService,
-    IAccountService accountService,
     ILocalizationService localizationService)
     : BaseApiController
 {
@@ -209,22 +206,28 @@ public class DownloadController(
     [Authorize(PolicyGroups.DownloadPolicy)]
     public async Task<ActionResult> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
     {
-        // TODO: Check series access
+        if (downloadBookmarkDto.Bookmarks.DistinctBy(b => b.SeriesId).Count() > 1)
+            return BadRequest();
+
+        var seriesId = downloadBookmarkDto.Bookmarks.First().SeriesId;
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, seriesId, HttpContext.RequestAborted))
+            return Forbid();
+
         if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest(await localizationService.Translate(UserId, "bookmarks-empty"));
 
-        // We know that all bookmarks will be for one single seriesId
         var userId = UserId;
         var username = Username!;
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
 
         var files = await bookmarkService.GetBookmarkFilesById(downloadBookmarkDto.Bookmarks.Select(b => b.Id));
 
         var filename = $"{series!.Name} - Bookmarks.zip";
+
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), $"Downloading {filename}",0F));
-        var seriesIds = string.Join("_", downloadBookmarkDto.Bookmarks.Select(b => b.SeriesId).Distinct());
-        var filePath =  archiveService.CreateZipForDownload(files,
-            $"download_{userId}_{seriesIds}_bookmarks");
+
+        var filePath =  archiveService.CreateZipForDownload(files,$"download_{userId}_{seriesId}_bookmarks");
+
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), $"Downloading {filename}", 1F));
 

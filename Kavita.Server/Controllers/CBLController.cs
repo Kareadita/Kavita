@@ -15,8 +15,6 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 /// <summary>
 /// Responsible for the CBL import flow
 /// </summary>
@@ -47,32 +45,32 @@ public class CblController(
         }
         catch (ArgumentNullException)
         {
-            return Ok(new CblImportSummaryDto()
+            return Ok(new CblImportSummaryDto
             {
                 FileName = cbl.FileName,
                 Success = CblImportResult.Fail,
-                Results = new List<CblBookResult>()
-                {
-                    new CblBookResult()
+                Results =
+                [
+                    new CblBookResult
                     {
                         Reason = CblImportReason.InvalidFile
                     }
-                }
+                ]
             });
         }
         catch (InvalidOperationException)
         {
-            return Ok(new CblImportSummaryDto()
+            return Ok(new CblImportSummaryDto
             {
                 FileName = cbl.FileName,
                 Success = CblImportResult.Fail,
-                Results = new List<CblBookResult>()
-                {
-                    new CblBookResult()
+                Results =
+                [
+                    new CblBookResult
                     {
                         Reason = CblImportReason.InvalidFile
                     }
-                }
+                ]
             });
         }
     }
@@ -100,32 +98,32 @@ public class CblController(
             return Ok(importSummary);
         } catch (ArgumentNullException)
         {
-            return Ok(new CblImportSummaryDto()
+            return Ok(new CblImportSummaryDto
             {
                 FileName = cbl.FileName,
                 Success = CblImportResult.Fail,
-                Results = new List<CblBookResult>()
-                {
-                    new CblBookResult()
+                Results =
+                [
+                    new CblBookResult
                     {
                         Reason = CblImportReason.InvalidFile
                     }
-                }
+                ]
             });
         }
         catch (InvalidOperationException)
         {
-            return Ok(new CblImportSummaryDto()
+            return Ok(new CblImportSummaryDto
             {
                 FileName = cbl.FileName,
                 Success = CblImportResult.Fail,
-                Results = new List<CblBookResult>()
-                {
-                    new CblBookResult()
+                Results =
+                [
+                    new CblBookResult
                     {
                         Reason = CblImportReason.InvalidFile
                     }
-                }
+                ]
             });
         }
 

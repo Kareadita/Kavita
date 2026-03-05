@@ -7,8 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 /// <summary>
 /// All APIs are for Tachiyomi extension and app. They have hacks for our implementation and should not be used for any
 /// other purposes.

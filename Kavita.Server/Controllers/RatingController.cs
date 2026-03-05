@@ -5,11 +5,10 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities.Enums;
+using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
-
-#nullable enable
 
 /// <summary>
 /// Responsible for providing external ratings for Series
@@ -32,6 +31,9 @@ public class RatingController(
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
         if (user == null) throw new UnauthorizedAccessException();
 
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, updateRating.SeriesId))
+            return Forbid();
+
         if (await ratingService.UpdateSeriesRating(user, updateRating))
         {
             return Ok();
@@ -52,6 +54,9 @@ public class RatingController(
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings | AppUserIncludes.ChapterRatings);
         if (user == null) throw new UnauthorizedAccessException();
 
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, updateRating.SeriesId))
+            return Forbid();
+
         if (await ratingService.UpdateChapterRating(user, updateRating))
         {
             return Ok();
@@ -65,6 +70,7 @@ public class RatingController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("overall-series")]
     public async Task<ActionResult<RatingDto>> GetOverallSeriesRating(int seriesId)
     {
@@ -81,6 +87,7 @@ public class RatingController(
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("overall-chapter")]
     public async Task<ActionResult<RatingDto>> GetOverallChapterRating(int chapterId)
     {

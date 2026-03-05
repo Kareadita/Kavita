@@ -147,6 +147,10 @@ public static class MessageFactory
     /// </summary>
     public const string ChapterRemoved = "ChapterRemoved";
     /// <summary>
+    /// Chapter is updated
+    /// </summary>
+    public const string ChapterUpdated = "ChapterUpdated";
+    /// <summary>
     /// Volume is removed from server
     /// </summary>
     public const string VolumeRemoved = "VolumeRemoved";
@@ -260,6 +264,19 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ChapterRemoved,
+            Body = new
+            {
+                SeriesId = seriesId,
+                ChapterId = chapterId
+            }
+        };
+    }
+
+    public static SignalRMessage ChapterUpdatedEvent(int chapterId, int seriesId)
+    {
+        return new SignalRMessage
+        {
+            Name = ChapterUpdated,
             Body = new
             {
                 SeriesId = seriesId,

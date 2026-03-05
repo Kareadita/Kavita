@@ -129,7 +129,7 @@ public class SeriesController(
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    [ChapterAccess]
+    [VolumeAccess]
     [HttpGet("volume")]
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
@@ -138,6 +138,11 @@ public class SeriesController(
         return Ok(vol);
     }
 
+    /// <summary>
+    /// Returns a single Chapter with progress information
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
     [ChapterAccess]
     [HttpGet("chapter")]
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
@@ -154,6 +159,7 @@ public class SeriesController(
     /// <param name="updateSeries"></param>
     /// <returns>Updated Series</returns>
     [HttpPost("update")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<SeriesDto>> UpdateSeries(UpdateSeriesDto updateSeries)
     {
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
@@ -484,15 +490,11 @@ public class SeriesController(
         return BadRequest(await localizationService.Translate(UserId, "generic-relationship"));
     }
 
+    [KPlus]
     [HttpGet("external-series-detail")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? seriesId)
     {
-        if (!await licenseService.HasActiveLicense(ct: HttpContext.RequestAborted))
-        {
-            return BadRequest();
-        }
-
         var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{seriesId ?? 0}";
         var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDto>(cacheKey);
         if (results.HasValue)
@@ -532,7 +534,8 @@ public class SeriesController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [HttpPost("match")] // TODO: Need admin policy?
+    [HttpPost("match")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
     {
         var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}";
@@ -554,7 +557,8 @@ public class SeriesController(
     /// <param name="match"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpPost("update-match")] // TODO: Need admin policy?
+    [HttpPost("update-match")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int? aniListId, [FromQuery] long? malId, [FromQuery] int? cbrId)
     {
         BackgroundJob.Enqueue(() => externalMetadataService.FixSeriesMatch(seriesId, aniListId, malId, cbrId));
@@ -568,7 +572,8 @@ public class SeriesController(
     /// <param name="seriesId"></param>
     /// <param name="dontMatch"></param>
     /// <returns></returns>
-    [HttpPost("dont-match")] // TODO: Need admin policy?
+    [HttpPost("dont-match")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> UpdateDontMatch([FromQuery] int seriesId, [FromQuery] bool dontMatch)
     {
         await externalMetadataService.UpdateSeriesDontMatch(seriesId, dontMatch);

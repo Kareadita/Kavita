@@ -212,12 +212,11 @@ public class UsersController(
     /// </summary>
     /// <remarks>Kavita+ only</remarks>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [KPlus]
     [HttpGet("tokens")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IEnumerable<UserTokenInfo>>> GetUserTokens()
     {
-        if (!await licenseService.HasActiveLicense(ct: HttpContext.RequestAborted)) return BadRequest(localizationService.Translate(UserId, "kavitaplus-restricted"));
-
-        return Ok((await unitOfWork.UserRepository.GetUserTokenInfo()));
+        return Ok(await unitOfWork.UserRepository.GetUserTokenInfo());
     }
 }

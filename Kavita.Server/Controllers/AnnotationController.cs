@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +6,6 @@ using System.Threading.Tasks;
 using Kavita.API.Attributes;
 using Kavita.API.Database;
 using Kavita.API.Services;
-using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
@@ -16,15 +14,12 @@ using Kavita.Models.DTOs.Reader;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
 
 public class AnnotationController(
     IUnitOfWork unitOfWork,
-    ILogger<AnnotationController> logger,
     ILocalizationService localizationService,
-    IEventHub eventHub,
     IAnnotationService annotationService)
     : BaseApiController
 {

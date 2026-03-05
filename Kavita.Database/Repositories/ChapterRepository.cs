@@ -413,4 +413,12 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .ProjectToWithProgress<Chapter, ChapterDto>(mapper, userId)
             .ToListAsync(ct);
     }
+
+    public async Task<int?> GetSeriesIdForChapter(int chapterId, CancellationToken ct = default)
+    {
+        return await context.Chapter
+            .Where(chp => chp.Id == chapterId)
+            .Select(chp => chp.Volume.SeriesId)
+            .FirstOrDefaultAsync(ct);
+    }
 }

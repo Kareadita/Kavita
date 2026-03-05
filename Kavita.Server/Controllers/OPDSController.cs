@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Mvc;
 using MimeTypes;
 
 namespace Kavita.Server.Controllers;
-#nullable enable
 
 [Authorize]
 public class OpdsController(
@@ -77,8 +76,8 @@ public class OpdsController(
     /// Get the User's Smart Filter series - Supports Pagination
     /// </summary>
     /// <returns></returns>
-    [HttpGet("{apiKey}/smart-filters/{filterId}")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/smart-filters/{filterId}")]
     public async Task<IActionResult> GetSmartFilter(string apiKey, int filterId, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         var userId = UserId;
@@ -105,8 +104,8 @@ public class OpdsController(
     /// <param name="apiKey"></param>
     /// <param name="pageNumber"></param>
     /// <returns></returns>
-    [HttpGet("{apiKey}/smart-filters")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/smart-filters")]
     public async Task<IActionResult> GetSmartFilters(string apiKey, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         try
@@ -170,8 +169,8 @@ public class OpdsController(
     /// <param name="apiKey"></param>
     /// <param name="pageNumber"></param>
     /// <returns></returns>
-    [HttpGet("{apiKey}/want-to-read")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/want-to-read")]
     public async Task<IActionResult> GetWantToRead(string apiKey, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         try
@@ -202,8 +201,8 @@ public class OpdsController(
     /// <param name="apiKey"></param>
     /// <param name="pageNumber"></param>
     /// <returns></returns>
-    [HttpGet("{apiKey}/collections")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/collections")]
     public async Task<IActionResult> GetCollections(string apiKey, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         try
@@ -235,8 +234,8 @@ public class OpdsController(
     /// <param name="apiKey"></param>
     /// <param name="pageNumber"></param>
     /// <returns></returns>
-    [HttpGet("{apiKey}/collections/{collectionId}")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/collections/{collectionId}")]
     public async Task<IActionResult> GetCollection(int collectionId, string apiKey, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         try
@@ -268,8 +267,8 @@ public class OpdsController(
     /// <param name="apiKey"></param>
     /// <param name="pageNumber"></param>
     /// <returns></returns>
-    [HttpGet("{apiKey}/reading-list")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/reading-list")]
     public async Task<IActionResult> GetReadingLists(string apiKey, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         try
@@ -301,8 +300,8 @@ public class OpdsController(
     /// <param name="apiKey"></param>
     /// <param name="pageNumber"></param>
     /// <returns></returns>
-    [HttpGet("{apiKey}/reading-list/{readingListId}")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/reading-list/{readingListId}")]
     public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         try
@@ -336,8 +335,8 @@ public class OpdsController(
     /// <param name="apiKey"></param>
     /// <param name="pageNumber"></param>
     /// <returns></returns>
-    [HttpGet("{apiKey}/libraries/{libraryId}")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/libraries/{libraryId}")]
     public async Task<IActionResult> GetSeriesForLibrary(int libraryId, string apiKey, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         try
@@ -369,8 +368,8 @@ public class OpdsController(
     /// <param name="apiKey"></param>
     /// <param name="pageNumber"></param>
     /// <returns></returns>
-    [HttpGet("{apiKey}/recently-added")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/recently-added")]
     public async Task<IActionResult> GetRecentlyAdded(string apiKey, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         try
@@ -401,8 +400,8 @@ public class OpdsController(
     /// <param name="genreId"></param>
     /// <param name="pageNumber"></param>
     /// <returns></returns>
-    [HttpGet("{apiKey}/more-in-genre")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/more-in-genre")]
     public async Task<IActionResult> GetMoreInGenre(string apiKey, [FromQuery] int genreId, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         try
@@ -433,8 +432,8 @@ public class OpdsController(
     /// <param name="apiKey"></param>
     /// <param name="pageNumber"></param>
     /// <returns></returns>
-    [HttpGet("{apiKey}/recently-updated")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/recently-updated")]
     public async Task<IActionResult> GetRecentlyUpdated(string apiKey, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
     {
         try
@@ -585,8 +584,8 @@ public class OpdsController(
     /// <param name="volumeId"></param>
     /// <returns></returns>
     [VolumeAccess]
-    [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}")]
     public async Task<IActionResult> GetVolume(string apiKey, int seriesId, int volumeId)
     {
         try
@@ -621,8 +620,8 @@ public class OpdsController(
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [ChapterAccess]
-    [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}")]
     [Produces("application/xml")]
+    [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}")]
     public async Task<IActionResult> GetChapter(string apiKey, int seriesId, int volumeId, int chapterId)
     {
         try

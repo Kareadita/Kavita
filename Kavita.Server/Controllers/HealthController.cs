@@ -4,10 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
-[SkipDeviceTracking]
 [AllowAnonymous]
+[SkipDeviceTracking]
 public class HealthController : BaseApiController
 {
     /// <summary>

@@ -57,4 +57,5 @@ public interface IChapterRepository
     Task<ChapterDto?> GetFirstChapterForSeriesAsync(int seriesId, int userId, CancellationToken ct = default);
     Task<ChapterDto?> GetFirstChapterForVolumeAsync(int volumeId, int userId, CancellationToken ct = default);
     Task<IList<ChapterDto>> GetChapterDtosAsync(IEnumerable<int> chapterIds, int userId, CancellationToken ct = default);
+    Task<int?> GetSeriesIdForChapter(int chapterId, CancellationToken ct = default);
 }

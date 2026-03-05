@@ -26,30 +26,12 @@ namespace Kavita.Server.Controllers;
 /// <summary>
 /// APIs for Collections
 /// </summary>
-public class CollectionController : BaseApiController
+/// <inheritdoc />
+public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
+    ILocalizationService localizationService, IExternalMetadataService externalMetadataService,
+    ISmartCollectionSyncService collectionSyncService, ILogger<CollectionController> logger,
+    IEventHub eventHub) : BaseApiController
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ICollectionTagService _collectionService;
-    private readonly ILocalizationService _localizationService;
-    private readonly IExternalMetadataService _externalMetadataService;
-    private readonly ISmartCollectionSyncService _collectionSyncService;
-    private readonly ILogger<CollectionController> _logger;
-    private readonly IEventHub _eventHub;
-
-    /// <inheritdoc />
-    public CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
-        ILocalizationService localizationService, IExternalMetadataService externalMetadataService,
-        ISmartCollectionSyncService collectionSyncService, ILogger<CollectionController> logger,
-        IEventHub eventHub)
-    {
-        _unitOfWork = unitOfWork;
-        _collectionService = collectionService;
-        _localizationService = localizationService;
-        _externalMetadataService = externalMetadataService;
-        _collectionSyncService = collectionSyncService;
-        _logger = logger;
-        _eventHub = eventHub;
-    }
 
     /// <summary>
     /// Returns all Collection tags for a given User
@@ -58,7 +40,7 @@ public class CollectionController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetAllTags(bool ownedOnly = false)
     {
-        return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(UserId, !ownedOnly));
+        return Ok(await unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(UserId, !ownedOnly));
     }
 
     /// <summary>
@@ -69,7 +51,7 @@ public class CollectionController : BaseApiController
     [HttpGet("single")]
     public async Task<ActionResult<AppUserCollectionDto>> GetTag(int collectionId)
     {
-        var result = await _unitOfWork.CollectionTagRepository.GetCollectionDtoAsync(collectionId, UserId);
+        var result = await unitOfWork.CollectionTagRepository.GetCollectionDtoAsync(collectionId, UserId);
         if (result == null) return NotFound(); // TODO: Figure out how to best handle restrictions/not found across the codebase
 
         return Ok(result);
@@ -84,7 +66,7 @@ public class CollectionController : BaseApiController
     [HttpGet("all-series")]
     public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetCollectionsBySeries(int seriesId, bool ownedOnly = false)
     {
-        return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtosBySeriesAsync(UserId, seriesId, !ownedOnly));
+        return Ok(await unitOfWork.CollectionTagRepository.GetCollectionDtosBySeriesAsync(UserId, seriesId, !ownedOnly));
     }
 
 
@@ -96,7 +78,7 @@ public class CollectionController : BaseApiController
     [HttpGet("name-exists")]
     public async Task<ActionResult<bool>> DoesNameExists(string name)
     {
-        return Ok(await _unitOfWork.CollectionTagRepository.CollectionExists(name, UserId));
+        return Ok(await unitOfWork.CollectionTagRepository.CollectionExists(name, UserId));
     }
 
     /// <summary>
@@ -111,19 +93,19 @@ public class CollectionController : BaseApiController
     {
         try
         {
-            if (await _collectionService.UpdateTag(updatedTag, UserId))
+            if (await collectionService.UpdateTag(updatedTag, UserId))
             {
-                await _eventHub.SendMessageAsync(MessageFactory.CollectionUpdated,
+                await eventHub.SendMessageAsync(MessageFactory.CollectionUpdated,
                     MessageFactory.CollectionUpdatedEvent(updatedTag.Id), false);
-                return Ok(await _unitOfWork.CollectionTagRepository.GetCollectionDtoAsync(updatedTag.Id, UserId));
+                return Ok(await unitOfWork.CollectionTagRepository.GetCollectionDtoAsync(updatedTag.Id, UserId));
             }
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(UserId, ex.Message));
+            return BadRequest(await localizationService.Translate(UserId, ex.Message));
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
+        return BadRequest(await localizationService.Translate(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -136,23 +118,23 @@ public class CollectionController : BaseApiController
     public async Task<ActionResult> PromoteMultipleCollections(PromoteCollectionsDto dto)
     {
         // This needs to take into account owner as I can select other users cards
-        var collections = await _unitOfWork.CollectionTagRepository.GetCollectionsByIds(dto.CollectionIds);
+        var collections = await unitOfWork.CollectionTagRepository.GetCollectionsByIds(dto.CollectionIds);
         var userId = UserId;
 
         if (!User.IsInRole(PolicyConstants.PromoteRole) && !User.IsInRole(PolicyConstants.AdminRole))
         {
-            return BadRequest(await _localizationService.Translate(userId, "permission-denied"));
+            return BadRequest(await localizationService.Translate(userId, "permission-denied"));
         }
 
         foreach (var collection in collections)
         {
             if (collection.AppUserId != userId) continue;
             collection.Promoted = dto.Promoted;
-            _unitOfWork.CollectionTagRepository.Update(collection);
+            unitOfWork.CollectionTagRepository.Update(collection);
         }
 
-        if (!_unitOfWork.HasChanges()) return Ok();
-        await _unitOfWork.CommitAsync();
+        if (!unitOfWork.HasChanges()) return Ok();
+        await unitOfWork.CommitAsync();
 
         return Ok();
     }
@@ -168,14 +150,15 @@ public class CollectionController : BaseApiController
     public async Task<ActionResult> DeleteMultipleCollections(DeleteCollectionsDto dto)
     {
         // This needs to take into account owner as I can select other users cards
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
         if (user == null) return Unauthorized();
+
         user.Collections = user.Collections.Where(uc => !dto.CollectionIds.Contains(uc.Id)).ToList();
-        _unitOfWork.UserRepository.Update(user);
+        unitOfWork.UserRepository.Update(user);
 
 
-        if (!_unitOfWork.HasChanges()) return Ok();
-        await _unitOfWork.CommitAsync();
+        if (!unitOfWork.HasChanges()) return Ok();
+        await unitOfWork.CommitAsync();
 
         return Ok();
     }
@@ -190,7 +173,7 @@ public class CollectionController : BaseApiController
     public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
     {
         // Create a new tag and save
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
         if (user == null) return Unauthorized();
 
         AppUserCollection? tag;
@@ -207,19 +190,19 @@ public class CollectionController : BaseApiController
 
         if (tag == null)
         {
-            return BadRequest(_localizationService.Translate(UserId, "collection-doesnt-exists"));
+            return BadRequest(localizationService.Translate(UserId, "collection-doesnt-exists"));
         }
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false);
         foreach (var s in series)
         {
             if (tag.Items.Contains(s)) continue;
             tag.Items.Add(s);
         }
-        _unitOfWork.UserRepository.Update(user);
-        if (await _unitOfWork.CommitAsync()) return Ok();
+        unitOfWork.UserRepository.Update(user);
+        if (await unitOfWork.CommitAsync()) return Ok();
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
+        return BadRequest(await localizationService.Translate(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -233,18 +216,18 @@ public class CollectionController : BaseApiController
     {
         try
         {
-            var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(updateSeriesForTagDto.Tag.Id, CollectionIncludes.Series);
-            if (tag == null) return BadRequest(await _localizationService.Translate(UserId, "collection-doesnt-exist"));
+            var tag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(updateSeriesForTagDto.Tag.Id, CollectionIncludes.Series);
+            if (tag == null) return BadRequest(await localizationService.Translate(UserId, "collection-doesnt-exist"));
 
-            if (await _collectionService.RemoveTagFromSeries(tag, updateSeriesForTagDto.SeriesIdsToRemove))
-                return Ok(await _localizationService.Translate(UserId, "collection-updated"));
+            if (await collectionService.RemoveTagFromSeries(tag, updateSeriesForTagDto.SeriesIdsToRemove))
+                return Ok(await localizationService.Translate(UserId, "collection-updated"));
         }
         catch (Exception)
         {
-            await _unitOfWork.RollbackAsync();
+            await unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
+        return BadRequest(await localizationService.Translate(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -258,23 +241,24 @@ public class CollectionController : BaseApiController
     {
         try
         {
-            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
+            var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
             if (user == null) return Unauthorized();
-            if (user.Collections.All(c => c.Id != tagId))
-                return BadRequest(await _localizationService.Translate(user.Id, "access-denied"));
 
-            if (await _collectionService.DeleteTag(tagId, user))
+            if (user.Collections.All(c => c.Id != tagId))
+                return BadRequest(await localizationService.Translate(user.Id, "access-denied"));
+
+            if (await collectionService.DeleteTag(tagId, user))
             {
-                return Ok(await _localizationService.Translate(UserId, "collection-deleted"));
+                return Ok(await localizationService.Translate(UserId, "collection-deleted"));
             }
         }
         catch (Exception ex)
         {
 
-            await _unitOfWork.RollbackAsync();
+            await unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-error"));
+        return BadRequest(await localizationService.Translate(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -286,7 +270,7 @@ public class CollectionController : BaseApiController
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<IList<MalStackDto>>> GetMalStacksForUser()
     {
-        return Ok(await _externalMetadataService.GetStacksForUser(UserId));
+        return Ok(await externalMetadataService.GetStacksForUser(UserId));
     }
 
     /// <summary>
@@ -298,13 +282,13 @@ public class CollectionController : BaseApiController
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> ImportMalStack(MalStackDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections);
         if (user == null) return Unauthorized();
 
         // Validation check to ensure stack doesn't exist already
-        if (await _unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, user.Id))
+        if (await unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, user.Id))
         {
-            return BadRequest(_localizationService.Translate(user.Id, "collection-already-exists"));
+            return BadRequest(localizationService.Translate(user.Id, "collection-already-exists"));
         }
 
         try
@@ -316,18 +300,18 @@ public class CollectionController : BaseApiController
                 .Build();
             user.Collections.Add(newCollection);
 
-            _unitOfWork.UserRepository.Update(user);
-            await _unitOfWork.CommitAsync();
+            unitOfWork.UserRepository.Update(user);
+            await unitOfWork.CommitAsync();
 
             // Trigger Stack Refresh for just one stack (not all)
-            BackgroundJob.Enqueue(() => _collectionSyncService.Sync(newCollection.Id));
+            BackgroundJob.Enqueue(() => collectionSyncService.Sync(newCollection.Id));
             return Ok();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an issue importing MAL Stack");
+            logger.LogError(ex, "There was an issue importing MAL Stack");
         }
 
-        return BadRequest(_localizationService.Translate(user.Id, "error-import-stack"));
+        return BadRequest(localizationService.Translate(user.Id, "error-import-stack"));
     }
 }

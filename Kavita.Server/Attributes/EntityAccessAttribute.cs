@@ -12,6 +12,36 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Kavita.Server.Attributes;
 
 /// <summary>
+/// An attribute restricting access to entities based on the user's access to the reading list.
+/// Returns 403 Forbidden on failure
+/// </summary>
+/// <param name="failOnMissing"></param>
+/// <param name="readingListIdKey"></param>
+public class ReadingListAccessAttribute(bool failOnMissing = true, string readingListIdKey = "readingListId")
+    : AccessAttribute(readingListIdKey, failOnMissing)
+{
+    protected override Task<bool> CheckAccess(IUnitOfWork unitOfWork, int userId, int entityId, CancellationToken ct)
+    {
+        return unitOfWork.UserRepository.HasAccessToReadingList(userId, entityId, ct);
+    }
+}
+
+/// <summary>
+/// An attribute restricting access to entities based on the user's access to the person.
+/// Returns 403 Forbidden on failure
+/// </summary>
+/// <param name="failOnMissing"></param>
+/// <param name="personIdKey"></param>
+public class PersonAccessAttribute(bool failOnMissing = true, string personIdKey = "personId")
+    : AccessAttribute(personIdKey, failOnMissing)
+{
+    protected override Task<bool> CheckAccess(IUnitOfWork unitOfWork, int userId, int entityId, CancellationToken ct)
+    {
+        return unitOfWork.UserRepository.HasAccessToPerson(userId, entityId, ct);
+    }
+}
+
+/// <summary>
 /// An attribute restricting access to entities based on the user's access to the library.
 /// Returns 403 Forbidden on failure
 /// </summary>

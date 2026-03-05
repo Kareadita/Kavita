@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
-#nullable enable
 
 public class FilterController(
     IUnitOfWork unitOfWork,

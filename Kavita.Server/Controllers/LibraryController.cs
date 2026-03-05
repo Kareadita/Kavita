@@ -56,8 +56,8 @@ public class LibraryController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns>Created Library</returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("create")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<LibraryDto?>> AddLibrary(UpdateLibraryDto dto)
     {
         if (await unitOfWork.LibraryRepository.LibraryExists(dto.Name))
@@ -261,11 +261,8 @@ public class LibraryController(
     /// <returns></returns>
     [LibraryAccess]
     [HttpGet("jump-bar")]
-    public async Task<ActionResult<IEnumerable<JumpKeyDto>>> GetJumpBar(int libraryId)
+    public ActionResult<IEnumerable<JumpKeyDto>> GetJumpBar(int libraryId)
     {
-        if (!await unitOfWork.UserRepository.HasAccessToLibrary(libraryId, UserId))
-            return BadRequest(await localizationService.Translate(UserId, "no-library-access"));
-
         return Ok(unitOfWork.LibraryRepository.GetJumpBarAsync(libraryId));
     }
 

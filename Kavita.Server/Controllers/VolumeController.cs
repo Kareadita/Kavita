@@ -6,11 +6,11 @@ using Kavita.API.Services.SignalR;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
-#nullable enable
 
 public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub)
     : BaseApiController
@@ -20,14 +20,15 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
+    [VolumeAccess]
     [HttpGet]
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
         return Ok(await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId));
     }
 
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpDelete]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<bool>> DeleteVolume(int volumeId)
     {
         var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId,
@@ -46,8 +47,8 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
         return Ok(false);
     }
 
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("multiple")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<bool>> DeleteMultipleVolumes(int[] volumesIds)
     {
         var volumes = await unitOfWork.VolumeRepository.GetVolumesById(volumesIds);

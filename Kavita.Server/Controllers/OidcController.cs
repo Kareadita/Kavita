@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Kavita.API.Attributes;
 using Kavita.Common;
 using Kavita.Server.Extensions;
@@ -8,21 +7,20 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Kavita.Server.Controllers;
 
 [Route("[controller]")]
-public class OidcController(ILogger<OidcController> logger, [FromServices] ConfigurationManager<OpenIdConnectConfiguration>? configurationManager = null): ControllerBase
+public class OidcController([FromServices] ConfigurationManager<OpenIdConnectConfiguration>? configurationManager = null): ControllerBase
 {
     [AllowAnonymous]
     [SkipDeviceTracking]
     [HttpGet("login")]
     public IActionResult Login(string returnUrl = "/")
     {
-        if (returnUrl == "/")
+        if (returnUrl == "/" || !Url.IsLocalUrl(returnUrl))
         {
             returnUrl = Configuration.BaseUrl;
         }

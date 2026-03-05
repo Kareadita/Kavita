@@ -22,8 +22,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 [SkipDeviceTracking]
 public class UploadController : BaseApiController
 {

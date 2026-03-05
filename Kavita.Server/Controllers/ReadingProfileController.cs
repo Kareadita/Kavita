@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -6,7 +5,9 @@ using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.Common;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
+using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -38,6 +39,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="skipImplicit"></param>
     /// <param name="deviceId">Defaults to currently active device</param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("{libraryId:int}/{seriesId:int}")]
     public async Task<ActionResult<UserReadingProfileDto>> GetProfileForSeries(int libraryId, int seriesId, [FromQuery] bool skipImplicit, [FromQuery] int? deviceId = null)
     {
@@ -51,6 +53,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("series")]
     public async Task<ActionResult<List<UserReadingProfileDto>>> GetProfilesForSeries(int seriesId)
     {
@@ -62,6 +65,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// </summary>
     /// <param name="libraryId"></param>
     /// <returns></returns>
+    [LibraryAccess]
     [HttpGet("library")]
     public async Task<ActionResult<List<UserReadingProfileDto>>> GetProfilesForLibrary(int libraryId)
     {
@@ -74,6 +78,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("create")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReadingProfileDto>> CreateReadingProfile([FromBody] UserReadingProfileDto dto)
     {
         return Ok(await readingProfileService.CreateReadingProfile(UserId, dto));
@@ -83,9 +88,10 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// Promotes the implicit profile to a user profile. Removes the series from other profiles
     /// </summary>
     /// <param name="profileId"></param>
-    /// <param name="deviceId">Defaults to currently active device</param>
+    /// <param name="deviceId">Defaults to the currently active device</param>
     /// <returns></returns>
     [HttpPost("promote")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReadingProfileDto>> PromoteImplicitReadingProfile([FromQuery] int profileId, [FromQuery] int? deviceId = null)
     {
         deviceId ??= clientInfoAccessor.CurrentDeviceId;
@@ -100,9 +106,11 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="dto"></param>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
-    /// <param name="deviceId">Defaults to currently active device</param>
+    /// <param name="deviceId">Defaults to the currently active device</param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpPost("series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfileForSeries(
         [FromBody] UserReadingProfileDto dto, [FromQuery] int libraryId, [FromQuery] int seriesId, [FromQuery] int? deviceId = null)
     {
@@ -121,6 +129,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="deviceId">Defaults to currently active device</param>
     /// <returns></returns>
     [HttpPost("update-parent")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReadingProfileDto>> UpdateParentProfileForSeries(
         [FromBody] UserReadingProfileDto dto, [FromQuery] int libraryId, [FromQuery] int seriesId, [FromQuery] int? deviceId = null)
     {
@@ -139,6 +148,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// This does not update connected series and libraries.
     /// </remarks>
     [HttpPost]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReadingProfileDto>> UpdateReadingProfile(UserReadingProfileDto dto)
     {
         return Ok(await readingProfileService.UpdateReadingProfile(UserId, dto));
@@ -152,6 +162,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <exception cref="KavitaException"></exception>
     /// <exception cref="UnauthorizedAccessException"></exception>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> DeleteReadingProfile([FromQuery] int profileId)
     {
         await readingProfileService.DeleteReadingProfile(UserId, profileId);
@@ -164,7 +175,9 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="seriesId"></param>
     /// <param name="profileIds"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpPost("series/{seriesId:int}")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> SetSeriesProfiles(int seriesId, List<int> profileIds)
     {
         await readingProfileService.SetSeriesProfiles(UserId, profileIds, seriesId);
@@ -176,7 +189,9 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpDelete("series/{seriesId:int}")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> ClearSeriesProfile(int seriesId)
     {
         await readingProfileService.ClearSeriesProfile(UserId, seriesId);
@@ -189,7 +204,9 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="libraryId"></param>
     /// <param name="profileIds"></param>
     /// <returns></returns>
+    [LibraryAccess]
     [HttpPost("library/{libraryId:int}")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> SetLibraryProfiles(int libraryId, List<int> profileIds)
     {
         await readingProfileService.SetLibraryProfiles(UserId, profileIds, libraryId);
@@ -201,7 +218,9 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// </summary>
     /// <param name="libraryId"></param>
     /// <returns></returns>
+    [LibraryAccess]
     [HttpDelete("library/{libraryId:int}")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> ClearLibraryProfile(int libraryId)
     {
         await readingProfileService.ClearLibraryProfile(UserId, libraryId);
@@ -214,6 +233,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="body"></param>
     /// <returns></returns>
     [HttpPost("bulk")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> BulkAddReadingProfile(BulkSetSeriesProfiles body)
     {
         await readingProfileService.BulkSetSeriesProfiles(UserId, body.ProfileIds, body.SeriesIds);
@@ -227,6 +247,7 @@ public class ReadingProfileController(ILogger<ReadingProfileController> logger, 
     /// <param name="deviceIds"></param>
     /// <returns></returns>
     [HttpPost("set-devices")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<IActionResult> SetProfileDevices([FromQuery] int profileId, [FromBody] List<int> deviceIds)
     {
         await readingProfileService.SetProfileDevices(UserId, profileId, deviceIds);

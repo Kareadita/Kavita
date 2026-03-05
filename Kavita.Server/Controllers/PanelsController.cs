@@ -7,8 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 /// <summary>
 /// For the Panels app explicitly
 /// </summary>

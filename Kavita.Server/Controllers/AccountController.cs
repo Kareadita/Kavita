@@ -40,8 +40,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 /// <summary>
 /// All Account matters
 /// </summary>
@@ -149,7 +147,7 @@ public class AccountController(UserManager<AppUser> userManager,
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> RegisterFirstUser(RegisterDto registerDto)
     {
-        var admins = await userManager.GetUsersInRoleAsync("Admin");
+        var admins = await userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
         if (admins.Count > 0) return BadRequest(await localizationService.Get("en", "denied"));
 
         try
@@ -261,7 +259,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
             if (!result.Succeeded)
             {
-                string errorStr = result.IsNotAllowed
+                var errorStr = result.IsNotAllowed
                                 ? await localizationService.Translate(user.Id, "confirm-email")
                                 : BadCredentialsMessage;
                 logger.LogWarning("{UserName} failed to log in at {Time}: {Issue}", user.UserName, user.LastActive, errorStr);
@@ -289,7 +287,7 @@ public class AccountController(UserManager<AppUser> userManager,
         }
 
         dto.Roles = roles;
-        dto.KavitaVersion = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value; // Why are we getting this from the DB?
+        dto.KavitaVersion = BuildInfo.Version.ToString();
 
         var pref = await unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!);
         if (pref == null) return dto;

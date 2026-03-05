@@ -14,6 +14,7 @@ using Kavita.Models.DTOs.KavitaPlus.Account;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Scrobble;
+using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -22,8 +23,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
-
-#nullable enable
 
 public class ScrobblingController(
     IUnitOfWork unitOfWork,
@@ -68,6 +67,7 @@ public class ScrobblingController(
     /// <param name="dto"></param>
     /// <returns>True if the token was new or not</returns>
     [HttpPost("update-anilist-token")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<bool>> UpdateAniListToken(AniListUpdateDto dto)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
@@ -87,6 +87,7 @@ public class ScrobblingController(
     /// <param name="dto"></param>
     /// <returns>True if the token was new or not</returns>
     [HttpPost("update-mal-token")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<bool>> UpdateMalToken(MalUserInfoDto dto)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!);
@@ -107,6 +108,7 @@ public class ScrobblingController(
     /// </summary>
     /// <returns></returns>
     [HttpPost("generate-scrobble-events")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public ActionResult GenerateScrobbleEvents()
     {
         BackgroundJob.Enqueue(() => scrobblingService.CreateEventsFromExistingHistory(UserId));
@@ -130,8 +132,8 @@ public class ScrobblingController(
     /// </summary>
     /// <remarks>Requires admin</remarks>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("scrobble-errors")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IEnumerable<ScrobbleErrorDto>>> GetScrobbleErrors()
     {
         return Ok(await unitOfWork.ScrobbleRepository.GetScrobbleErrors());
@@ -141,8 +143,8 @@ public class ScrobblingController(
     /// Clears the scrobbling errors table
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("clear-errors")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> ClearScrobbleErrors()
     {
         await unitOfWork.ScrobbleRepository.ClearScrobbleErrors();
@@ -202,6 +204,7 @@ public class ScrobblingController(
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpPost("add-hold")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> AddHold(int seriesId)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ScrobbleHolds);
@@ -251,6 +254,7 @@ public class ScrobblingController(
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpDelete("remove-hold")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> RemoveHold(int seriesId)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ScrobbleHolds);
@@ -280,6 +284,7 @@ public class ScrobblingController(
     /// <param name="eventIds"></param>
     /// <returns></returns>
     [HttpPost("bulk-remove-events")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> BulkRemoveScrobbleEvents(IList<long> eventIds)
     {
         var events = await unitOfWork.ScrobbleRepository.GetUserEvents(UserId, eventIds);

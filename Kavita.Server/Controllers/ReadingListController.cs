@@ -452,6 +452,7 @@ public class ReadingListController(
     /// <param name="readingListId"></param>
     /// <param name="role">PersonRole</param>
     /// <returns></returns>
+    [ReadingListAccess]
     [HttpGet("people")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute, VaryByQueryKeys = ["readingListId", "role"])]
     public ActionResult<IEnumerable<PersonDto>> GetPeopleByRoleForList(int readingListId, PersonRole role)
@@ -464,6 +465,7 @@ public class ReadingListController(
     /// </summary>
     /// <param name="readingListId"></param>
     /// <returns></returns>
+    [ReadingListAccess]
     [HttpGet("all-people")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute, VaryByQueryKeys = ["readingListId"])]
     public async Task<ActionResult<IEnumerable<PersonDto>>> GetAllPeopleForList(int readingListId)
@@ -477,12 +479,15 @@ public class ReadingListController(
     /// <param name="currentChapterId"></param>
     /// <param name="readingListId"></param>
     /// <returns>Chapter ID for next item, -1 if nothing exists</returns>
+    [ReadingListAccess]
     [HttpGet("next-chapter")]
     public async Task<ActionResult<int>> GetNextChapter(int currentChapterId, int readingListId)
     {
         var items = (await unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(readingListId)).ToList();
+
         var readingListItem = items.SingleOrDefault(rl => rl.ChapterId == currentChapterId);
         if (readingListItem == null) return BadRequest(await localizationService.Translate(UserId, "chapter-doesnt-exist"));
+
         var index = items.IndexOf(readingListItem) + 1;
         if (items.Count > index)
         {
@@ -498,12 +503,15 @@ public class ReadingListController(
     /// <param name="currentChapterId"></param>
     /// <param name="readingListId"></param>
     /// <returns>ChapterId for next item, -1 if nothing exists</returns>
+    [ReadingListAccess]
     [HttpGet("prev-chapter")]
     public async Task<ActionResult<int>> GetPrevChapter(int currentChapterId, int readingListId)
     {
         var items = (await unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(readingListId)).ToList();
+
         var readingListItem = items.SingleOrDefault(rl => rl.ChapterId == currentChapterId);
         if (readingListItem == null) return BadRequest(await localizationService.Translate(UserId, "chapter-doesnt-exist"));
+
         var index = items.IndexOf(readingListItem) - 1;
         if (0 <= index)
         {
@@ -518,8 +526,8 @@ public class ReadingListController(
     /// </summary>
     /// <param name="name">If empty or null, will return true as that is invalid</param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("name-exists")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<bool>> DoesNameExists(string name)
     {
         if (string.IsNullOrEmpty(name)) return true;

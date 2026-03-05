@@ -5,12 +5,11 @@ using Kavita.API.Services;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Search;
+using Kavita.Server.Attributes;
 using Kavita.Services.Scanner;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
-
-#nullable enable
 
 /// <summary>
 /// Responsible for the Search interface from the UI
@@ -27,7 +26,13 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
     [HttpGet("series-for-mangafile")]
     public async Task<ActionResult<SeriesDto>> GetSeriesForMangaFile(int mangaFileId)
     {
-        return Ok(await unitOfWork.SeriesRepository.GetSeriesForMangaFile(mangaFileId, UserId));
+        var series = await unitOfWork.SeriesRepository.GetSeriesForMangaFile(mangaFileId, UserId);
+        if (series == null) return NotFound();
+
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, series.Id))
+            return Forbid();
+
+        return Ok(series);
     }
 
     /// <summary>
@@ -36,6 +41,7 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("series-for-chapter")]
     public async Task<ActionResult<SeriesDto>> GetSeriesForChapter(int chapterId)
     {

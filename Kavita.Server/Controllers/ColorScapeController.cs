@@ -2,6 +2,7 @@
 using Kavita.API.Database;
 using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities.Interfaces;
+using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +16,7 @@ public class ColorScapeController(IUnitOfWork unitOfWork) : BaseApiController
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("series")]
     public async Task<ActionResult<ColorScapeDto>> GetColorScapeForSeries(int id)
     {
@@ -27,6 +29,7 @@ public class ColorScapeController(IUnitOfWork unitOfWork) : BaseApiController
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
+    [VolumeAccess]
     [HttpGet("volume")]
     public async Task<ActionResult<ColorScapeDto>> GetColorScapeForVolume(int id)
     {
@@ -39,6 +42,7 @@ public class ColorScapeController(IUnitOfWork unitOfWork) : BaseApiController
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("chapter")]
     public async Task<ActionResult<ColorScapeDto>> GetColorScapeForChapter(int id)
     {
@@ -47,7 +51,7 @@ public class ColorScapeController(IUnitOfWork unitOfWork) : BaseApiController
     }
 
 
-    private ActionResult<ColorScapeDto> GetColorSpaceDto(IHasCoverImage entity)
+    private ActionResult<ColorScapeDto> GetColorSpaceDto(IHasCoverImage? entity)
     {
         if (entity == null) return Ok(ColorScapeDto.Empty);
         return Ok(new ColorScapeDto(entity.PrimaryColor, entity.SecondaryColor));

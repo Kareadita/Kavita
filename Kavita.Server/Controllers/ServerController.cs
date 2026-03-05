@@ -26,8 +26,6 @@ using TaskScheduler = Kavita.Services.TaskScheduler;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 [Authorize(PolicyGroups.AdminPolicy)]
 public class ServerController(
     ILogger<ServerController> logger,

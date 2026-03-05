@@ -1,9 +1,10 @@
-﻿#nullable enable
+﻿using System;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus.Manage;
+using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,12 +21,11 @@ public class ManageController(IUnitOfWork unitOfWork) : BaseApiController
     /// Returns a list of all Series that is Kavita+ applicable to metadata match and the status of it
     /// </summary>
     /// <returns></returns>
+    [KPlus]
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("series-metadata")]
     public async Task<ActionResult<PagedList<ManageMatchSeriesDto>>> SeriesMetadata(ManageMatchFilterDto filter, [FromQuery] UserParams? userParams)
     {
-        //if (!await _licenseService.HasActiveLicense()) return Ok(Array.Empty<SeriesDto>());
-
         userParams ??= UserParams.Default;
 
         var res = await unitOfWork.ExternalSeriesMetadataRepository.GetAllSeries(filter, userParams);

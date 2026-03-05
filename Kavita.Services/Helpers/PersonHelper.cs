@@ -221,7 +221,7 @@ public static class PersonHelper
     }
 
 
-    public static async Task UpdateChapterPeopleAsync(Chapter chapter, IList<string> people, PersonRole role, IUnitOfWork unitOfWork)
+    public static async Task<bool> UpdateChapterPeopleAsync(Chapter chapter, IList<string> people, PersonRole role, IUnitOfWork unitOfWork)
     {
         var modification = false;
 
@@ -301,6 +301,8 @@ public static class PersonHelper
         {
             await unitOfWork.CommitAsync();
         }
+
+        return modification;
     }
 
 

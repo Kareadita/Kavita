@@ -12,12 +12,11 @@ using Kavita.Models.DTOs.Device.ClientDevice;
 using Kavita.Models.DTOs.Device.EmailDevice;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
-
-#nullable enable
 
 /// <summary>
 /// Responsible for interacting and creating Devices
@@ -37,6 +36,7 @@ public class DeviceController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("create")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<EmailDeviceDto>> CreateOrUpdateDevice(CreateEmailDeviceDto dto)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Devices);
@@ -61,12 +61,13 @@ public class DeviceController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<EmailDeviceDto>> UpdateDevice(UpdateEmailDeviceDto dto)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
-        var device = await deviceService.Update(dto, user);
 
+        var device = await deviceService.Update(dto, user);
         if (device == null) return BadRequest(await localizationService.Translate(UserId, "generic-device-update"));
 
         return Ok(mapper.Map<EmailDeviceDto>(device));
@@ -78,11 +79,14 @@ public class DeviceController(
     /// <param name="deviceId"></param>
     /// <returns></returns>
     [HttpDelete]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteDevice(int deviceId)
     {
         if (deviceId <= 0) return BadRequest(await localizationService.Translate(UserId, "device-doesnt-exist"));
+
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
+
         if (await deviceService.Delete(user, deviceId)) return Ok();
 
         return BadRequest(await localizationService.Translate(UserId, "generic-device-delete"));
@@ -100,6 +104,7 @@ public class DeviceController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("send-to")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> SendToDevice(SendToEmailDeviceDto dto)
     {
         var userId = UserId;
@@ -143,6 +148,7 @@ public class DeviceController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("send-series-to")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> SendSeriesToDevice(SendSeriesToEmailDeviceDto dto)
     {
         var userId = UserId;
@@ -198,8 +204,8 @@ public class DeviceController(
     /// </summary>
     /// <param name="includeInactive"></param>
     /// <returns></returns>
-    [HttpGet("client/all-devices")]
     [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("client/all-devices")]
     public async Task<ActionResult<List<ClientDeviceDto>>> GetAllClientDevices(bool includeInactive = false)
     {
         return Ok(await unitOfWork.ClientDeviceRepository.GetAllUserDeviceDtos(includeInactive));
@@ -212,6 +218,7 @@ public class DeviceController(
     /// <param name="clientDeviceId"></param>
     /// <returns></returns>
     [HttpDelete("client/device")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<bool>> DeleteClientDevice(int clientDeviceId)
     {
         return Ok(await clientDeviceService.DeleteDeviceAsync(UserId, clientDeviceId));
@@ -223,6 +230,7 @@ public class DeviceController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("client/update-name")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> UpdateClientDeviceName(UpdateClientDeviceNameDto dto)
     {
         await clientDeviceService.UpdateFriendlyNameAsync(UserId, dto);

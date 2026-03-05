@@ -15,8 +15,6 @@ using TaskScheduler = Kavita.Services.TaskScheduler;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 public class LicenseController(
     IUnitOfWork unitOfWork,
     ILogger<LicenseController> logger,
@@ -51,8 +49,8 @@ public class LicenseController(
     /// Has any license registered with the instance. Does not validate against Kavita+ API
     /// </summary>
     /// <returns></returns>
-    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("has-license")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<bool>> HasLicense()
     {
         return Ok(!string.IsNullOrEmpty(
@@ -64,8 +62,8 @@ public class LicenseController(
     /// </summary>
     /// <param name="forceCheck">Force checking the API and skip the 8-hour cache</param>
     /// <returns></returns>
-    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("info")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<LicenseInfoDto?>> GetLicenseInfo(bool forceCheck = false)
     {
         try
@@ -82,8 +80,8 @@ public class LicenseController(
     /// Remove the Kavita+ License on the Server
     /// </summary>
     /// <returns></returns>
-    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpDelete]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> RemoveLicense()
     {
         logger.LogInformation("Removing license on file for Server");
@@ -98,8 +96,8 @@ public class LicenseController(
     }
 
 
-    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("reset")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> ResetLicense(UpdateLicenseDto dto)
     {
         logger.LogInformation("Resetting license on file for Server");
@@ -127,8 +125,8 @@ public class LicenseController(
     /// </summary>
     /// <remarks>Caches the result</remarks>
     /// <returns></returns>
-    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> UpdateLicense(UpdateLicenseDto dto)
     {
         try

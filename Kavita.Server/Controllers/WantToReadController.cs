@@ -16,9 +16,6 @@ using Kavita.Server.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
-
-#nullable enable
-
 /// <summary>
 /// Responsible for all things Want To Read
 /// </summary>
@@ -54,6 +51,7 @@ public class WantToReadController(
     }
 
     [HttpGet]
+    [SeriesAccess]
     public async Task<ActionResult<bool>> IsSeriesInWantToRead([FromQuery] int seriesId)
     {
         return Ok(await unitOfWork.SeriesRepository.IsSeriesInWantToRead(UserId, seriesId));

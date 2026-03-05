@@ -24,8 +24,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 public class SettingsController(
     ILogger<SettingsController> logger,
     IUnitOfWork unitOfWork,
@@ -52,8 +50,8 @@ public class SettingsController(
     /// Returns the server settings
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<ServerSettingDto>> GetSettings()
     {
         var settingsDto = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -63,8 +61,8 @@ public class SettingsController(
         return Ok(settingsDto);
     }
 
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("reset")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<ServerSettingDto>> ResetSettings()
     {
         logger.LogInformation("{UserName} is resetting Server Settings", Username!);
@@ -76,8 +74,8 @@ public class SettingsController(
     /// Resets the IP Addresses
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("reset-ip-addresses")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<ServerSettingDto>> ResetIpAddressesSettings()
     {
         logger.LogInformation("{UserName} is resetting IP Addresses Setting", Username!);
@@ -97,8 +95,8 @@ public class SettingsController(
     /// Resets the Base url
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("reset-base-url")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<ServerSettingDto>> ResetBaseUrlSettings()
     {
         logger.LogInformation("{UserName} is resetting Base Url Setting", Username!);
@@ -132,8 +130,8 @@ public class SettingsController(
     /// </summary>
     /// <param name="updateSettingsDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
     {
         logger.LogInformation("{UserName} is updating Server Settings", Username!);
@@ -158,22 +156,22 @@ public class SettingsController(
     /// All values allowed for Task Scheduling APIs. A custom cron job is not included. Disabled is not applicable for Cleanup.
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("task-frequencies")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public ActionResult<IEnumerable<string>> GetTaskFrequencies()
     {
         return Ok(CronConverter.Options);
     }
 
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("library-types")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public ActionResult<IEnumerable<string>> GetLibraryTypes()
     {
         return Ok(Enum.GetValues<LibraryType>().Select(t => t.ToDescription()));
     }
 
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("log-levels")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public ActionResult<IEnumerable<string>> GetLogLevels()
     {
         return Ok(new[] {"Trace", "Debug", "Information", "Warning", "Critical"});
@@ -202,8 +200,8 @@ public class SettingsController(
     /// Sends a test email to see if email settings are hooked up correctly
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("test-email-url")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl()
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
@@ -215,8 +213,8 @@ public class SettingsController(
     /// Get the metadata settings for Kavita+ users.
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("metadata-settings")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<MetadataSettingsDto>> GetMetadataSettings()
     {
         return Ok(await unitOfWork.SettingsRepository.GetMetadataSettingDto());
@@ -228,8 +226,8 @@ public class SettingsController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("metadata-settings")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<MetadataSettingsDto>> UpdateMetadataSettings(MetadataSettingsDto dto)
     {
         try
@@ -247,8 +245,8 @@ public class SettingsController(
     /// Import field mappings
     /// </summary>
     /// <returns></returns>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("import-field-mappings")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<FieldMappingsImportResultDto>> ImportFieldMappings([FromBody] ImportFieldMappingsDto dto)
     {
         try

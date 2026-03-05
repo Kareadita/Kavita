@@ -27,8 +27,6 @@ using MimeTypes;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 public class StatsController(
     IStatisticService statService,
     IUnitOfWork unitOfWork,
@@ -306,13 +304,13 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetReadingPaceForUser(filter, userId, year, booksOnly, UserId));
+        return Ok(await statService.GetReadingPaceForUser(filter, userId, year, booksOnly, UserId, HttpContext.RequestAborted));
     }
 
 
 
     /// <summary>
-    /// Returns top 10 genres that user likes reading
+    /// Returns the top 10 genres that the user likes reading
     /// </summary>
     /// <param name="filter"></param>
     /// <param name="userId"></param>
@@ -324,7 +322,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetGenreBreakdownForUser(filter, userId, UserId));
+        return Ok(await statService.GetGenreBreakdownForUser(filter, userId, UserId, HttpContext.RequestAborted));
     }
 
     /// <summary>
@@ -340,7 +338,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetTagBreakdownForUser(filter, userId, UserId));
+        return Ok(await statService.GetTagBreakdownForUser(filter, userId, UserId, HttpContext.RequestAborted));
     }
 
 
@@ -351,7 +349,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetPageSpreadForUser(filter, userId, UserId));
+        return Ok(await statService.GetPageSpreadForUser(filter, userId, UserId, HttpContext.RequestAborted));
     }
 
     [ProfilePrivacy]
@@ -361,7 +359,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetWordSpreadForUser(filter, userId, UserId));
+        return Ok(await statService.GetWordSpreadForUser(filter, userId, UserId, HttpContext.RequestAborted));
     }
 
     [ProfilePrivacy]
@@ -371,7 +369,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetMostReadAuthors(filter, userId, UserId));
+        return Ok(await statService.GetMostReadAuthors(filter, userId, UserId, HttpContext.RequestAborted));
     }
 
     /// <summary>
@@ -387,7 +385,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        var dto = await statService.GetTimeReadingByHour(filter, userId, UserId);
+        var dto = await statService.GetTimeReadingByHour(filter, userId, UserId, HttpContext.RequestAborted);
         if (dto == null) return BadRequest();
 
         return Ok(dto);
@@ -406,7 +404,7 @@ public class StatsController(
     {
         await CleanStatsFilter(filter, UserId);
 
-        return Ok(await statService.GetReadsPerMonth(filter, userId, UserId));
+        return Ok(await statService.GetReadsPerMonth(filter, userId, UserId, HttpContext.RequestAborted));
     }
 
     /// <summary>
@@ -419,7 +417,7 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
     public async Task<ActionResult<int>> GetTotalReads(int userId)
     {
-        return Ok(await statService.GetTotalReads(userId, UserId));
+        return Ok(await statService.GetTotalReads(userId, UserId, HttpContext.RequestAborted));
     }
 
     [ProfilePrivacy]
@@ -427,7 +425,7 @@ public class StatsController(
     public async Task<ActionResult<ProfileStatBarDto>> GetStatsForUserBar([FromQuery] StatsFilterDto filter, int userId)
     {
         await CleanStatsFilter(filter, userId);
-        return Ok(await statService.GetUserStatBar(filter, userId, UserId));
+        return Ok(await statService.GetUserStatBar(filter, userId, UserId, HttpContext.RequestAborted));
     }
 
     [ProfilePrivacy]
@@ -435,7 +433,7 @@ public class StatsController(
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
     public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
     {
-        return Ok(await statService.GetUserReadStatistics(userId, []));
+        return Ok(await statService.GetUserReadStatistics(userId, [], HttpContext.RequestAborted));
     }
 
 
@@ -449,7 +447,7 @@ public class StatsController(
     [HttpGet("reading-history")]
     public async Task<ActionResult<PagedList<ReadingHistoryItemDto>>> GetReadingHistoryItems([FromQuery] StatsFilterDto filter, [FromQuery] UserParams userParams)
     {
-        var result = await statService.GetReadingHistoryItems(filter, userParams, UserId, UserId);
+        var result = await statService.GetReadingHistoryItems(filter, userParams, UserId, UserId, HttpContext.RequestAborted);
 
         Response.AddPaginationHeader(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
 

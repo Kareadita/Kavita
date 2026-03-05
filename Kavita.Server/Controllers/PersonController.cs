@@ -16,6 +16,7 @@ using Kavita.Models.DTOs.Metadata.Browse.Requests;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
+using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Plus;
 using Kavita.Services.Scanner;
@@ -23,8 +24,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
-#nullable enable
-
 public class PersonController(
     IUnitOfWork unitOfWork,
     ILocalizationService localizationService,
@@ -105,6 +104,7 @@ public class PersonController(
     /// <summary>
     /// Returns a list of authors and artists for browsing
     /// </summary>
+    /// <param name="filter"></param>
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpPost("all")]
@@ -123,8 +123,8 @@ public class PersonController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("update")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<PersonDto>> UpdatePerson(UpdatePersonDto dto)
     {
         // This needs to get all people and update them equally
@@ -182,6 +182,7 @@ public class PersonController(
     /// </summary>
     /// <param name="personId"></param>
     /// <returns></returns>
+    [PersonAccess]
     [HttpPost("fetch-cover")]
     public async Task<ActionResult<string>> DownloadCoverImage([FromQuery] int personId)
     {
@@ -200,6 +201,7 @@ public class PersonController(
         person.CoverImage = personImage;
         imageService.UpdateColorScape(person);
         unitOfWork.PersonRepository.Update(person);
+
         await unitOfWork.CommitAsync();
         await eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(person.Id, "person"), false);
 
@@ -211,6 +213,7 @@ public class PersonController(
     /// </summary>
     /// <param name="personId"></param>
     /// <returns></returns>
+    [PersonAccess]
     [HttpGet("series-known-for")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetKnownSeries(int personId)
     {
@@ -223,6 +226,7 @@ public class PersonController(
     /// <param name="personId"></param>
     /// <param name="role"></param>
     /// <returns></returns>
+    [PersonAccess]
     [HttpGet("chapters-by-role")]
     public async Task<ActionResult<IEnumerable<StandaloneChapterDto>>> GetChaptersByRole(int personId, PersonRole role)
     {

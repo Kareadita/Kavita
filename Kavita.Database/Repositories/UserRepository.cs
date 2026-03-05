@@ -275,6 +275,21 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .AnyAsync(c => c.Id == chapterId, ct);
     }
 
+    public async Task<bool> HasAccessToPerson(int userId, int personId, CancellationToken ct = default)
+    {
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        return await context.Person
+            .RestrictAgainstAgeRestriction(userRating)
+            .AnyAsync(p => p.Id == personId, ct);
+    }
+
+    public Task<bool> HasAccessToReadingList(int userId, int readingListId, CancellationToken ct = default)
+    {
+        return context.ReadingList
+            .Where(rl => rl.AppUserId == userId || rl.Promoted)
+            .AnyAsync(rl => rl.Id == readingListId, ct);
+    }
+
     public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true, CancellationToken ct = default)
     {
         var query = context.AppUser.Includes(includeFlags);

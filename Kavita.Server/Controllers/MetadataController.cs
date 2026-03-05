@@ -20,7 +20,6 @@ using Kavita.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
-#nullable enable
 
 public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService metadataService) : BaseApiController
 {
@@ -126,8 +125,8 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
     /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = ["libraryIds"])]
     [HttpGet("age-ratings")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = ["libraryIds"])]
     public async Task<ActionResult<IList<AgeRatingDto>>> GetAllAgeRatings(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
@@ -149,8 +148,8 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
     /// <param name="libraryIds">String separated libraryIds or null for all publication status</param>
     /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = ["libraryIds"])]
     [HttpGet("publication-status")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = ["libraryIds"])]
     public ActionResult<IList<AgeRatingDto>> GetAllPublicationStatus(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();

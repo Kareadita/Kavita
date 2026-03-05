@@ -7,12 +7,12 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services.Plus;
 using Kavita.Models.Builders;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.SeriesDetail;
+using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
-
-#nullable enable
 
 public class ReviewController(
     IUnitOfWork unitOfWork,
@@ -26,10 +26,14 @@ public class ReviewController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReviewDto>> UpdateSeriesReview(UpdateUserReviewDto dto)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings);
         if (user == null) return Unauthorized();
+
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId))
+            return Forbid();
 
         var ratingBuilder = new RatingBuilder(await unitOfWork.UserRepository.GetUserRatingAsync(dto.SeriesId, user.Id));
 
@@ -58,6 +62,7 @@ public class ReviewController(
     /// <param name="dto">chapterId must be set</param>
     /// <returns></returns>
     [HttpPost("chapter")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<UserReviewDto>> UpdateChapterReview(UpdateUserReviewDto dto)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ChapterRatings);
@@ -65,7 +70,10 @@ public class ReviewController(
 
         if (dto.ChapterId == null) return BadRequest();
 
-        int chapterId = dto.ChapterId.Value;
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId))
+            return Forbid();
+
+        var chapterId = dto.ChapterId.Value;
 
         var ratingBuilder = new ChapterRatingBuilder(await unitOfWork.UserRepository.GetUserChapterRatingAsync(user.Id, chapterId));
 
@@ -93,6 +101,7 @@ public class ReviewController(
     /// </summary>
     /// <returns></returns>
     [HttpDelete("series")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteSeriesReview([FromQuery] int seriesId)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Ratings);
@@ -112,6 +121,7 @@ public class ReviewController(
     /// </summary>
     /// <returns></returns>
     [HttpDelete("chapter")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteChapterReview([FromQuery] int chapterId)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ChapterRatings);

@@ -10,9 +10,6 @@ using Kavita.Server.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
-
-#nullable enable
-
 /// <summary>
 /// Responsible for anything that deals with Streams (SmartFilters, ExternalSource, DashboardStream, SideNavStream)
 /// </summary>

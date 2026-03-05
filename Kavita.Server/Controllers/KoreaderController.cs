@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.Controllers;
-#nullable enable
 
 /// <summary>
 /// The endpoint to interface with Koreader's Progress Sync plugin.
