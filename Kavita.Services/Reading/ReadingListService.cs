@@ -145,7 +145,7 @@ public class ReadingListService(
         dto.Title = dto.Title.Trim();
         if (string.IsNullOrEmpty(dto.Title)) throw new KavitaException("reading-list-title-required");
 
-        if (!dto.Title.Equals(readingList.Title) && await unitOfWork.ReadingListRepository.ReadingListExists(dto.Title))
+        if (!dto.Title.Equals(readingList.Title) && await unitOfWork.ReadingListRepository.ReadingListExists(dto.Title, readingList.Id))
             throw new KavitaException("reading-list-name-exists");
 
         readingList.Summary = dto.Summary;

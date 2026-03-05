@@ -67,10 +67,12 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
     }
 
 
-    public async Task<bool> ReadingListExists(string name, CancellationToken ct = default)
+    public async Task<bool> ReadingListExists(string name, int? readingListId = null,  CancellationToken ct = default)
     {
         var normalized = name.ToNormalized();
+
         return await context.ReadingList
+            .WhereIf(readingListId != null, x => x.Id != readingListId)
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized), ct);
     }
 
