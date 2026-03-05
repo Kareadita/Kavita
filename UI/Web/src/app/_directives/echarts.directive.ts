@@ -10,19 +10,22 @@ import {
   OnInit,
   untracked
 } from '@angular/core';
-import {EChartsInitOpts, init, EChartsType, ComposeOption, registerTheme} from "echarts/core";
-import { BarSeriesOption, LineSeriesOption, PieSeriesOption } from 'echarts/charts';
+import {ComposeOption, EChartsInitOpts, EChartsType, init, registerTheme} from "echarts/core";
+import {BarSeriesOption, LineSeriesOption, PieSeriesOption} from 'echarts/charts';
 import {
-  TitleComponentOption,
-  TooltipComponentOption,
   DatasetComponentOption,
   LegendComponentOption,
+  TitleComponentOption,
   ToolboxComponentOption,
+  TooltipComponentOption,
 } from 'echarts/components';
 import {ThemeService} from "../_services/theme.service";
-import {asyncScheduler, Subject, Subscription, tap} from "rxjs";
+import {asyncScheduler, Subject, tap} from "rxjs";
 import {throttleTime} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {registerECharts} from "../../echarts";
+
+registerECharts();
 
 export type ECOption = ComposeOption<
   | BarSeriesOption

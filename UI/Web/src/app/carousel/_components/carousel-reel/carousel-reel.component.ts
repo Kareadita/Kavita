@@ -3,14 +3,14 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
+  contentChild,
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
   input,
   Input,
-  signal,
-  TemplateRef,
   output,
-  contentChild
+  signal,
+  TemplateRef
 } from '@angular/core';
 import {Swiper} from 'swiper/types';
 import {register} from 'swiper/element/bundle';
