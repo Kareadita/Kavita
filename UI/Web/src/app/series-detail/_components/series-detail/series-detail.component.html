@@ -208,7 +208,7 @@
                   <virtual-scroller #scroll [items]="storylineItems()" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
 
                     <div class="card-container row g-0" #container>
-                      @for(item of scroll.viewPortItems; let idx = $index; track item) {
+                      @for(item of scroll.viewPortItems; let idx = $index; track trackStoryLineIdentity(idx, item)) {
                         @if (item.isChapter) {
                           <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item.chapter, scroll: scroll, idx: idx, totalLength: storylineChapters().length}" />
                         } @else {
@@ -235,7 +235,7 @@
                 @defer (when activeTabId === TabID.Volumes; prefetch on idle) {
                   <virtual-scroller #scroll [items]="volumeEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for (item of scroll.viewPortItems; let idx = $index; track item.data.id + '_' + item.data.pagesRead +  + '_volumes') {
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.data.id + '_volumes') {
                         <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumeEntities().length}" />
                       }
                       <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}" />
@@ -256,7 +256,7 @@
                 @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
                   <virtual-scroller #scroll [items]="chapterEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for (item of scroll.viewPortItems; let idx = $index; track item.data.id + '_' + item.data.pagesRead + '_chapters') {
+                      @for (item of scroll.viewPortItems; let idx = $index; track item.data.id + '_chapters') {
                         <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapterEntities().length}" />
                       }
                       <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}" />
@@ -277,7 +277,7 @@
                 @defer (when activeTabId === TabID.Specials; prefetch on idle) {
                   <virtual-scroller #scroll [items]="specialEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
-                      @for(item of scroll.viewPortItems; let idx = $index; track item.data.id + '_' + item.data.pagesRead + '_specials') {
+                      @for(item of scroll.viewPortItems; let idx = $index; track item.data.id + '_specials') {
                         <ng-container [ngTemplateOutlet]="specialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: specialEntities().length}" />
                       }
                     </div>

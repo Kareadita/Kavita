@@ -112,9 +112,13 @@ export class EntityCardComponent<T> implements OnInit {
   protected readonly data: Signal<T> = computed(() => this.entity().data as T);
 
   /** Cover image URL */
-  protected readonly coverUrl: Signal<string> = computed(() =>
-    this.config().coverFunc(this.data())
-  );
+  protected readonly coverUrl: Signal<string> = computed(() => {
+    const showError = this.showError();
+    const config = this.config();
+    const data = this.data();
+
+    return showError ? this.imageService.errorImage : config.coverFunc(data);
+  });
 
   /** Primary title text */
   protected readonly title: Signal<string> = computed(() =>
@@ -300,11 +304,6 @@ export class EntityCardComponent<T> implements OnInit {
 
     // Emit for parent to handle
     this.progressUpdated.emit(result);
-
-    // Also emit dataChanged for backward compatibility if we have an updated entity
-    if (updated) {
-      this.dataChanged.emit(updated); // TODO: Probably want to remove this as it can cause double firing
-    }
   }
 
   private setupDownloadTracking() {
@@ -385,13 +384,16 @@ export class EntityCardComponent<T> implements OnInit {
   }
 
   onActionResult(event: ActionResult<any>) {
+
     const result = event as ActionResult<any>;
     switch (result.effect) {
       case 'update':
+        console.log('handle actionable result - update')
         this.dataChanged.emit(result.entity);
         break;
       case 'remove':
       case 'reload':
+        console.log('handle actionable result - reload')
         this.reload.emit(result.entity?.id ?? 0);
         break;
       case 'none':

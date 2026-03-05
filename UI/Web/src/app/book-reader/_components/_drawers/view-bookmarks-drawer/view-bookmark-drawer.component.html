@@ -24,7 +24,7 @@
           @let items = bookmarks();
 
           <div class="px-2 py-1">
-            @for(item of items; track item) {
+            @for(item of items; track item.id) {
               <div class="bookmark-item mb-2" role="listitem" tabindex="0">
                 <div class="thumb-wrapper">
                   <app-image
