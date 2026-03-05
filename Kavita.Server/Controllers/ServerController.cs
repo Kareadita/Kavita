@@ -40,6 +40,7 @@ public class ServerController(
     ITaskScheduler taskScheduler,
     IUnitOfWork unitOfWork,
     IEasyCachingProviderFactory cachingProviderFactory,
+    IThemeService themeService,
     ILocalizationService localizationService)
     : BaseApiController
 {
@@ -268,7 +269,7 @@ public class ServerController(
     [HttpPost("sync-themes")]
     public async Task<ActionResult> SyncThemes()
     {
-        await taskScheduler.SyncThemes();
+        await themeService.SyncThemes();
         return Ok();
     }
 

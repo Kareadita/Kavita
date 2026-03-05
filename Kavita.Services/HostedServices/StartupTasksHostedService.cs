@@ -17,7 +17,7 @@ public class StartupTasksHostedService(IServiceProvider serviceProvider) : IHost
         using var scope = serviceProvider.CreateScope();
 
         var taskScheduler = scope.ServiceProvider.GetRequiredService<ITaskScheduler>();
-        await taskScheduler.ScheduleTasks();
+        await taskScheduler.ScheduleTasks(cancellationToken);
         taskScheduler.ScheduleUpdaterTasks();
 
 
@@ -25,7 +25,7 @@ public class StartupTasksHostedService(IServiceProvider serviceProvider) : IHost
         {
             // These methods will automatically check if stat collection is disabled to prevent sending any data regardless
             // of when setting was changed
-            await taskScheduler.ScheduleStatsTasks();
+            await taskScheduler.ScheduleStatsTasks(cancellationToken);
             await taskScheduler.RunStatCollection();
         }
         catch (Exception)
@@ -36,7 +36,7 @@ public class StartupTasksHostedService(IServiceProvider serviceProvider) : IHost
         try
         {
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            if ((await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableFolderWatching)
+            if ((await unitOfWork.SettingsRepository.GetSettingsDtoAsync(cancellationToken)).EnableFolderWatching)
             {
                 var libraryWatcher = scope.ServiceProvider.GetRequiredService<ILibraryWatcher>();
                 // Push this off for a bit for people with massive libraries, as it can take up to 45 mins and blocks the thread

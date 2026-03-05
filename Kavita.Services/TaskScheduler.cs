@@ -41,7 +41,6 @@ public class TaskScheduler : ITaskScheduler
 
     private readonly IStatsService _statsService;
     private readonly IVersionUpdaterService _versionUpdaterService;
-    private readonly IThemeService _themeService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly IStatisticService _statisticService;
     private readonly IMediaConversionService _mediaConversionService;
@@ -113,7 +112,6 @@ public class TaskScheduler : ITaskScheduler
         _cleanupService = cleanupService;
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
-        _themeService = themeService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _statisticService = statisticService;
         _mediaConversionService = mediaConversionService;
@@ -145,12 +143,12 @@ public class TaskScheduler : ITaskScheduler
             );
     }
 
-    public async Task ScheduleTasks()
+    public async Task ScheduleTasks(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Scheduling reoccurring tasks");
 
 
-        var setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Value;
+        var setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan, cancellationToken)).Value;
         if (IsInvalidCronSetting(setting))
         {
             _logger.LogError("Scan Task has invalid cron, defaulting to Daily");
@@ -166,11 +164,11 @@ public class TaskScheduler : ITaskScheduler
         }
 
 
-        setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Value;
+        setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup, cancellationToken)).Value;
         if (IsInvalidCronSetting(setting))
         {
             _logger.LogError("Backup Task has invalid cron, defaulting to Weekly");
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(),
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(CancellationToken.None),
                 Cron.Weekly, RecurringJobOptions);
         }
         else
@@ -182,44 +180,48 @@ public class TaskScheduler : ITaskScheduler
                 // Override daily and make 2am so that everything on system has cleaned up and no blocking
                 schedule = Cron.Daily(2);
             }
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(),
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(CancellationToken.None),
                 () => schedule, RecurringJobOptions);
         }
 
-        setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskCleanup)).Value;
+        setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskCleanup, cancellationToken)).Value;
         if (IsInvalidCronSetting(setting))
         {
             _logger.LogError("Cleanup Task has invalid cron, defaulting to Daily");
-            RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(),
+            RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(CancellationToken.None),
                 Cron.Daily, RecurringJobOptions);
         }
         else
         {
             _logger.LogDebug("Scheduling Cleanup Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(),
+            RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(CancellationToken.None),
                 CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
         }
 
 
-        RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(),
+        RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId,
+            () => _cleanupService.CleanupWantToRead(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
-        RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(),
+        RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId,
+            () => _statisticService.UpdateServerStatistics(CancellationToken.None),
             Cron.Monthly, RecurringJobOptions);
 
-        RecurringJob.AddOrUpdate(SyncThemesTaskId, () => SyncThemes(),
+        RecurringJob.AddOrUpdate<IThemeService>(SyncThemesTaskId,
+            themeService => themeService.SyncThemes(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
 
-        RecurringJob.AddOrUpdate(AuthKeyExpirationId, () => CheckExpiredOrExpiringAuthKeys(),
+        RecurringJob.AddOrUpdate(AuthKeyExpirationId, () => CheckExpiredOrExpiringAuthKeys(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
 
-        RecurringJob.AddOrUpdate(EnsureSideNavId, () => EnsureSideNav(), Cron.Daily(1), RecurringJobOptions);
+        RecurringJob.AddOrUpdate(EnsureSideNavId, () => EnsureSideNav(CancellationToken.None),
+            Cron.Daily(1), RecurringJobOptions);
 
 
         RecurringJob.AddOrUpdate<IReadingHistoryService>(ReadingHistoryAggregationId,
             service => service.AggregateYesterdaysActivity(CancellationToken.None),
             "5 0 * * *", RecurringJobOptions); // 12:05 AM daily
 
-        await ScheduleKavitaPlusTasks();
+        await ScheduleKavitaPlusTasks(cancellationToken);
     }
 
     private static bool IsInvalidCronSetting(string setting)
@@ -227,11 +229,11 @@ public class TaskScheduler : ITaskScheduler
         return setting == null || (!NonCronOptions.Contains(setting) && !CronHelper.IsValidCron(setting));
     }
 
-    public async Task ScheduleKavitaPlusTasks()
+    public async Task ScheduleKavitaPlusTasks(CancellationToken cancellationToken = default)
     {
         // KavitaPlus based (needs license check)
-        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-        if (string.IsNullOrEmpty(license) || !await _licenseService.HasActiveSubscription(license)) // TODO: Need to convert this to a non-blocking request
+        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, cancellationToken)).Value;
+        if (string.IsNullOrEmpty(license) || !await _licenseService.HasActiveSubscription(license, cancellationToken)) // TODO: Need to convert this to a non-blocking request
         {
             return;
         }
@@ -243,8 +245,8 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens(CancellationToken.None));
 
         // Get the License Info (and cache it) on first load. This will internally cache the Github releases for the Version Service
-        BackgroundJob.Enqueue(() => _licenseService.GetLicenseInfo(true));  // Kick this off first to cache it then let it refresh every 9 hours (8 hour cache)
-        RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(false),
+        BackgroundJob.Enqueue(() => _licenseService.GetLicenseInfo(true, cancellationToken));  // Kick this off first to cache it then let it refresh every 9 hours (8 hour cache)
+        RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(false, cancellationToken),
             LicenseService.Cron, RecurringJobOptions);
 
         // KavitaPlus Scrobbling (every hour) - randomise minutes to spread requests out for K+
@@ -291,9 +293,9 @@ public class TaskScheduler : ITaskScheduler
     #region StatsTasks
 
 
-    public async Task ScheduleStatsTasks()
+    public async Task ScheduleStatsTasks(CancellationToken cancellationToken = default)
     {
-        var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
+        var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync(cancellationToken)).AllowStatCollection;
         if (!allowStatCollection)
         {
             _logger.LogDebug("User has opted out of stat collection, not registering tasks");
@@ -304,7 +306,7 @@ public class TaskScheduler : ITaskScheduler
         var hour = Rnd.Next(0, 22);
         _logger.LogDebug("Scheduling stat collection daily at {Hour}:00", hour);
 
-        RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(hour), RecurringJobOptions);
+        RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(CancellationToken.None), Cron.Daily(hour), RecurringJobOptions);
     }
 
 
@@ -352,8 +354,8 @@ public class TaskScheduler : ITaskScheduler
     public void ScheduleUpdaterTasks()
     {
         _logger.LogInformation("Scheduling Auto-Update tasks");
-        RecurringJob.AddOrUpdate(CheckForUpdateId, () => CheckForUpdate(), $"0 */{Rnd.Next(4, 6)} * * *", RecurringJobOptions);
-        BackgroundJob.Enqueue(() => CheckForUpdate());
+        RecurringJob.AddOrUpdate(CheckForUpdateId, () => CheckForUpdate(CancellationToken.None), $"0 */{Rnd.Next(4, 6)} * * *", RecurringJobOptions);
+        BackgroundJob.Enqueue(() => CheckForUpdate(CancellationToken.None));
     }
 
     /// <summary>
@@ -528,30 +530,25 @@ public class TaskScheduler : ITaskScheduler
     /// Not an external call. Only public so that we can call this for a Task
     /// </summary>
     // ReSharper disable once MemberCanBePrivate.Global
-    public async Task CheckForUpdate()
+    public async Task CheckForUpdate(CancellationToken cancellationToken = default)
     {
         await _defaultRetryPolicy.ExecuteAsync(async () =>
         {
-            var update = await _versionUpdaterService.CheckForUpdate();
+            var update = await _versionUpdaterService.CheckForUpdate(cancellationToken);
             if (update == null) return;
 
-            await _versionUpdaterService.PushUpdate(update);
+            await _versionUpdaterService.PushUpdate(update, cancellationToken);
         });
-    }
-
-    public async Task SyncThemes()
-    {
-        await _themeService.SyncThemes();
     }
 
     /// <summary>
     /// Checks for any user that does not have a Library Side nav, when they should
     /// </summary>
     /// <remarks>2 users reported this issue, I cannot reproduce, this is a precaution</remarks>
-    public async Task EnsureSideNav()
+    public async Task EnsureSideNav(CancellationToken ct = default)
     {
-        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams);
-        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.AppUser)).ToList();
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams, ct: ct);
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.AppUser, ct: ct)).ToList();
         var libraryLookup = libraries.ToDictionary(l => l.Id);
 
         // Build a lookup: userId -> set of library IDs they have access to
@@ -583,7 +580,7 @@ public class TaskScheduler : ITaskScheduler
             var existingLibraryIds = user.SideNavStreams?
                 .Where(s => s.LibraryId.HasValue)
                 .Select(s => s.LibraryId!.Value)
-                .ToHashSet();
+                .ToHashSet() ?? [];
 
             var missingLibIds = accessibleLibraryIds.Except(existingLibraryIds).ToList();
 
@@ -604,20 +601,20 @@ public class TaskScheduler : ITaskScheduler
 
         if (hasChanges)
         {
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(ct);
         }
     }
 
     /// <summary>
     /// Checks for soon to be expired and expired Auth keys and attempts to email the users
     /// </summary>
-    public async Task CheckExpiredOrExpiringAuthKeys()
+    public async Task CheckExpiredOrExpiringAuthKeys(CancellationToken ct = default)
     {
-        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         if (!settings.IsEmailSetup()) return;
 
         _logger.LogInformation("Checking for Expired or Expiring Auth Keys");
-        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.AuthKeys);
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.AuthKeys, ct: ct);
         foreach (var user in users)
         {
             // Implies only the default keys
@@ -652,7 +649,7 @@ public class TaskScheduler : ITaskScheduler
 
                 foreach (var expiredKey in expiredKeys)
                 {
-                    await _authKeyService.InvalidateAsync(expiredKey.Key);
+                    await _authKeyService.InvalidateAsync(expiredKey.Key, ct);
                 }
             }
         }

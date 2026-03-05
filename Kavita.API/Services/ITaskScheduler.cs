@@ -1,14 +1,15 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kavita.API.Services;
 
 public interface ITaskScheduler
 {
-    Task ScheduleTasks();
-    Task ScheduleStatsTasks();
+    Task ScheduleTasks(CancellationToken cancellationToken = default);
+    Task ScheduleStatsTasks(CancellationToken cancellationToken = default);
     void ScheduleUpdaterTasks();
-    Task ScheduleKavitaPlusTasks();
+    Task ScheduleKavitaPlusTasks(CancellationToken cancellationToken = default);
     void ScanFolder(string folderPath, string originalPath, TimeSpan delay);
     void ScanFolder(string folderPath, bool abortOnNoSeriesMatch = false);
     Task ScanLibrary(int libraryId, bool force = false);
@@ -22,6 +23,5 @@ public interface ITaskScheduler
     Task RunStatCollection();
     void CovertAllCoversToEncoding();
     Task CleanupDbEntries();
-    Task CheckForUpdate();
-    Task SyncThemes();
+    Task CheckForUpdate(CancellationToken cancellationToken = default);
 }
