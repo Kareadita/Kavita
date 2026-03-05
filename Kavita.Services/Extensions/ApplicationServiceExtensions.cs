@@ -7,6 +7,7 @@ using Kavita.API.Services.Reading;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Services.Helpers;
+using Kavita.Services.HostedServices;
 using Kavita.Services.Metadata;
 using Kavita.Services.Plus;
 using Kavita.Services.Reading;
@@ -92,6 +93,8 @@ public static class ApplicationServiceExtensions
 
         services.AddSingleton<IReadingSessionService, ReadingSessionService>();
         services.AddSingleton<IEntityNamingService, EntityNamingService>();
+
+        services.AddHostedService<StartupTasksHostedService>();
     }
 
 }
