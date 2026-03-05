@@ -13,6 +13,7 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NextExpectedCardComponent {
+  private readonly utcPipe = new UtcToLocalTimePipe();
   /**
    * Card item url. Will internally handle error and missing covers
    */
@@ -24,8 +25,7 @@ export class NextExpectedCardComponent {
   title = computed(() => {
     const expectedDate = this.entity()?.expectedDate;
     if (expectedDate) {
-      const utcPipe = new UtcToLocalTimePipe();
-      translate('next-expected-card.title', {date: utcPipe.transform(expectedDate, 'shortDate')})
+      return translate('next-expected-card.title', {date: this.utcPipe.transform(expectedDate, 'shortDate')})
     }
     return '';
   });

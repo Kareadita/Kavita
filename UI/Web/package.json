@@ -49,7 +49,6 @@
     "bootstrap": "^5.3.8",
     "charts.css": "^1.2.0",
     "echarts": "^6.0.0",
-    "eslist": "^1.0.0-beta.1",
     "file-saver": "^2.0.5",
     "luxon": "^3.7.2",
     "ng-circle-progress": "^1.7.1",
