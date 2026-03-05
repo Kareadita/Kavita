@@ -18,7 +18,7 @@ namespace Kavita.Server.Attributes;
 /// <param name="failOnMissing"></param>
 /// <param name="readingListIdKey"></param>
 public class ReadingListAccessAttribute(bool failOnMissing = true, string readingListIdKey = "readingListId")
-    : AccessAttribute(readingListIdKey, failOnMissing)
+    : AccessAttribute(readingListIdKey, failOnMissing, false)
 {
     protected override Task<bool> CheckAccess(IUnitOfWork unitOfWork, int userId, int entityId, CancellationToken ct)
     {
@@ -106,13 +106,13 @@ public class ChapterAccessAttribute(bool failOnMissing = true, string chapterIdK
 }
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public abstract class AccessAttribute(string idKey, bool failOnMissing = true) : Attribute, IAsyncAuthorizationFilter
+public abstract class AccessAttribute(string idKey, bool failOnMissing = true, bool alwaysAllowAdmin = true) : Attribute, IAsyncAuthorizationFilter
 {
 
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         var user = context.HttpContext.User;
-        if (user.IsInRole(PolicyConstants.AdminRole)) return;
+        if (alwaysAllowAdmin && user.IsInRole(PolicyConstants.AdminRole)) return;
 
         var userId = user.GetUserId();
 
