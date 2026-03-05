@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.Collection;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
@@ -15,11 +16,11 @@ namespace Kavita.API.Services.Plus;
 /// </summary>
 public interface IKavitaPlusApiService
 {
-    Task<bool> HasTokenExpired(string license, string token, ScrobbleProvider provider);
-    Task<int> GetRateLimit(string license, string token);
-    Task<ScrobbleResponseDto> PostScrobbleUpdate(ScrobbleDto data, string license);
-    Task<IList<MalStackDto>> GetMalStacks(string malUsername, string license);
-    Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesRequestDto request);
-    Task<SeriesDetailPlusApiDto> GetSeriesDetail(PlusSeriesRequestDto request);
-    Task<ExternalSeriesDetailDto> GetSeriesDetailById(ExternalMetadataIdsDto request);
+    Task<bool> HasTokenExpired(string license, string token, ScrobbleProvider provider, CancellationToken ct = default);
+    Task<int> GetRateLimit(string license, string token, CancellationToken ct = default);
+    Task<ScrobbleResponseDto> PostScrobbleUpdate(ScrobbleDto data, string license, CancellationToken ct = default);
+    Task<IList<MalStackDto>> GetMalStacks(string malUsername, string license, CancellationToken ct = default);
+    Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesRequestDto request, CancellationToken ct = default);
+    Task<SeriesDetailPlusApiDto> GetSeriesDetail(PlusSeriesRequestDto request, CancellationToken ct = default);
+    Task<ExternalSeriesDetailDto> GetSeriesDetailById(ExternalMetadataIdsDto request, CancellationToken ct = default);
 }

@@ -488,7 +488,7 @@ public class SeriesController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? seriesId)
     {
-        if (!await licenseService.HasActiveLicense())
+        if (!await licenseService.HasActiveLicense(ct: HttpContext.RequestAborted))
         {
             return BadRequest();
         }

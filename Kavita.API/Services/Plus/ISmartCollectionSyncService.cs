@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Kavita.API.Services.Plus;
@@ -10,12 +11,15 @@ public interface ISmartCollectionSyncService
     /// <summary>
     /// Synchronize all collections
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task Sync();
+    Task Sync(CancellationToken ct = default);
+
     /// <summary>
     /// Synchronize a collection
     /// </summary>
     /// <param name="collectionId"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    Task Sync(int collectionId);
+    Task Sync(int collectionId, CancellationToken ct = default);
 }

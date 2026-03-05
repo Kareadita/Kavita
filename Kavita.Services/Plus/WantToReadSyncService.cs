@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Hangfire;
@@ -26,13 +27,13 @@ public class WantToReadSyncService(
     ILicenseService licenseService)
     : IWantToReadSyncService
 {
-    public async Task Sync()
+    public async Task Sync(CancellationToken ct = default)
     {
-        if (!await licenseService.HasActiveLicense()) return;
+        if (!await licenseService.HasActiveLicense(ct: ct)) return;
 
-        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
 
-        var users = await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead | AppUserIncludes.UserPreferences);
+        var users = await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead | AppUserIncludes.UserPreferences, ct: ct);
         foreach (var user in users.Where(u => u.UserPreferences.WantToReadSync))
         {
             if (string.IsNullOrEmpty(user.MalUserName) && string.IsNullOrEmpty(user.AniListAccessToken)) continue;
@@ -46,12 +47,12 @@ public class WantToReadSyncService(
                         .WithKavitaPlusHeaders(license)
                         .WithTimeout(
                             TimeSpan.FromSeconds(120)) // Give extra time as MAL + AniList can result in a lot of data
-                        .GetJsonAsync<List<ExternalSeriesDetailDto>>();
+                        .GetJsonAsync<List<ExternalSeriesDetailDto>>(cancellationToken: ct);
 
                 // Match the series (note: There may be duplicates in the final result)
                 foreach (var unmatchedSeries in wantToReadSeries)
                 {
-                    var match = await unitOfWork.SeriesRepository.MatchSeries(unmatchedSeries);
+                    var match = await unitOfWork.SeriesRepository.MatchSeries(unmatchedSeries, ct);
                     if (match == null)
                     {
                         continue;
@@ -72,7 +73,7 @@ public class WantToReadSyncService(
 
                 // Save the left over entities
                 unitOfWork.UserRepository.Update(user);
-                await unitOfWork.CommitAsync();
+                await unitOfWork.CommitAsync(ct);
 
                 // Trigger CleanupService to cleanup any series in WantToRead that don't belong
                 RecurringJob.TriggerJob(TaskScheduler.RemoveFromWantToReadTaskId);

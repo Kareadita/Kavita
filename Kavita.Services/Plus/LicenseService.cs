@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyCaching.Core;
 using Flurl.Http;
@@ -108,20 +109,21 @@ public class LicenseService(
     /// Checks licenses and updates cache
     /// </summary>
     /// <param name="forceCheck">Skip what's in cache</param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<bool> HasActiveLicense(bool forceCheck = false)
+    public async Task<bool> HasActiveLicense(bool forceCheck = false, CancellationToken ct = default)
     {
         var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
         if (!forceCheck)
         {
-            var cacheValue = await provider.GetAsync<bool>(CacheKey);
+            var cacheValue = await provider.GetAsync<bool>(CacheKey, ct);
             if (cacheValue.HasValue) return cacheValue.Value;
         }
 
         var result = false;
         try
         {
-            var serverSetting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+            var serverSetting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
             result = await IsLicenseValid(serverSetting.Value);
         }
         catch (Exception ex)
@@ -130,8 +132,8 @@ public class LicenseService(
         }
         finally
         {
-            await provider.FlushAsync();
-            await provider.SetAsync(CacheKey, result, _licenseCacheTimeout);
+            await provider.FlushAsync(ct);
+            await provider.SetAsync(CacheKey, result, _licenseCacheTimeout, ct);
         }
 
         return result;
@@ -141,8 +143,9 @@ public class LicenseService(
     /// Checks if the sub is active and caches the result. This should not be used too much over cache as it will skip backend caching.
     /// </summary>
     /// <param name="license"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<bool> HasActiveSubscription(string? license)
+    public async Task<bool> HasActiveSubscription(string? license, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(license)) return false;
         try
@@ -153,14 +156,14 @@ public class LicenseService(
                 {
                     License = license,
                     InstallId = HashUtil.ServerToken()
-                })
+                }, cancellationToken: ct)
                 .ReceiveString();
 
             var result =  bool.Parse(response);
 
             var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-            await provider.FlushAsync();
-            await provider.SetAsync(CacheKey, result, _licenseCacheTimeout);
+            await provider.FlushAsync(ct);
+            await provider.SetAsync(CacheKey, result, _licenseCacheTimeout, ct);
 
             return result;
         }
@@ -171,37 +174,37 @@ public class LicenseService(
         }
     }
 
-    public async Task RemoveLicense()
+    public async Task RemoveLicense(CancellationToken ct = default)
     {
-        var serverSetting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        var serverSetting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
         serverSetting.Value = string.Empty;
         unitOfWork.SettingsRepository.Update(serverSetting);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-        await provider.RemoveAsync(CacheKey);
+        await provider.RemoveAsync(CacheKey, ct);
 
 
     }
 
-    public async Task AddLicense(string license, string email, string? discordId)
+    public async Task AddLicense(string license, string email, string? discordId, CancellationToken ct = default)
     {
-        var serverSetting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        var serverSetting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
         var lic = await RegisterLicense(license, email, discordId);
         if (string.IsNullOrWhiteSpace(lic))
             throw new KavitaException("unable-to-register-k+");
         serverSetting.Value = lic;
         unitOfWork.SettingsRepository.Update(serverSetting);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
     }
 
 
 
-    public async Task<bool> ResetLicense(string license, string email)
+    public async Task<bool> ResetLicense(string license, string email, CancellationToken ct = default)
     {
         try
         {
-            var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+            var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/reset")
                 .WithKavitaPlusHeaders(encryptedLicense.Value)
                 .PostJsonAsync(new ResetLicenseDto()
@@ -209,13 +212,13 @@ public class LicenseService(
                     License = license.Trim(),
                     InstallId = HashUtil.ServerToken(),
                     EmailId = email
-                })
+                }, cancellationToken: ct)
                 .ReceiveString();
 
             if (string.IsNullOrEmpty(response))
             {
                 var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-                await provider.RemoveAsync(CacheKey);
+                await provider.RemoveAsync(CacheKey, ct);
                 return true;
             }
 
@@ -234,12 +237,13 @@ public class LicenseService(
     /// Fetches information about the license from Kavita+. If there is no license or an exception, will return null and can be assumed it is not active
     /// </summary>
     /// <param name="forceCheck"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<LicenseInfoDto?> GetLicenseInfo(bool forceCheck = false)
+    public async Task<LicenseInfoDto?> GetLicenseInfo(bool forceCheck = false, CancellationToken ct = default)
     {
         // Check if there is a license
         var hasLicense =
-            !string.IsNullOrEmpty((await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey))
+            !string.IsNullOrEmpty((await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct))
                 .Value);
 
         if (!hasLicense) return null;
@@ -248,22 +252,22 @@ public class LicenseService(
         var licenseInfoProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.LicenseInfo);
         if (!forceCheck)
         {
-            var cacheValue = await licenseInfoProvider.GetAsync<LicenseInfoDto>(LicenseInfoCacheKey);
+            var cacheValue = await licenseInfoProvider.GetAsync<LicenseInfoDto>(LicenseInfoCacheKey, ct);
             if (cacheValue.HasValue) return cacheValue.Value;
         }
 
         try
         {
-            var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+            var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/info")
                 .WithKavitaPlusHeaders(encryptedLicense.Value)
-                .GetJsonAsync<LicenseInfoDto>();
+                .GetJsonAsync<LicenseInfoDto>(cancellationToken: ct);
 
             // This indicates a mismatch on installId or no active subscription
             if (response == null) return null;
 
             // Ensure that current version is within the 3 version limit. Don't count Nightly releases or Hotfixes
-            var releases = await versionUpdaterService.GetAllReleases();
+            var releases = await versionUpdaterService.GetAllReleases(ct: ct);
             response.IsValidVersion = releases
                 .Where(r => !r.UpdateTitle.Contains("Hotfix")) // We don't care about Hotfix releases
                 .Where(r => !r.IsPrerelease) // Ensure we don't take current nightlies within the current/last stable
@@ -275,9 +279,9 @@ public class LicenseService(
 
             // Cache if the license is valid here as well
             var licenseProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-            await licenseProvider.SetAsync(CacheKey, response.IsActive, _licenseCacheTimeout);
+            await licenseProvider.SetAsync(CacheKey, response.IsActive, _licenseCacheTimeout, ct);
 
-            // TODO: If info.IsCancelled && notActive, let's remove the license so we aren't constantly checking
+            // default: If info.IsCancelled && notActive, let's remove the license so we aren't constantly checking
             if (response is {IsCancelled: true, IsActive: false})
             {
                 //logger.LogWarning("Kavita+ License is no longer active, removing Server registration");
@@ -286,7 +290,7 @@ public class LicenseService(
             // Cache the license info if IsActive and ExpirationDate > DateTime.UtcNow + 2
             if (response.IsActive && response.ExpirationDate > DateTime.UtcNow.AddDays(2))
             {
-                await licenseInfoProvider.SetAsync(LicenseInfoCacheKey, response, _licenseCacheTimeout);
+                await licenseInfoProvider.SetAsync(LicenseInfoCacheKey, response, _licenseCacheTimeout, ct);
             }
 
 
@@ -303,17 +307,18 @@ public class LicenseService(
     /// <summary>
     /// Attempts to resend a welcome email to the registered user. The sub does not need to be active.
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<bool> ResendWelcomeEmail()
+    public async Task<bool> ResendWelcomeEmail(CancellationToken ct = default)
     {
         try
         {
-            var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+            var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
             if (string.IsNullOrEmpty(encryptedLicense.Value)) return false;
 
             var httpResponse = await (Configuration.KavitaPlusApiUrl + "/api/license/resend-welcome-email")
                 .WithKavitaPlusHeaders(encryptedLicense.Value)
-                .PostAsync();
+                .PostAsync(cancellationToken: ct);
 
             var response = await httpResponse.GetStringAsync();
 

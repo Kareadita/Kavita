@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Hangfire;
@@ -129,12 +130,13 @@ public class ScrobblingService : IScrobblingService
     /// <summary>
     /// An automated job that will run against all user's tokens and validate if they are still active
     /// </summary>
+    /// <param name="ct"></param>
     /// <remarks>This service can validate without license check as the task which calls will be guarded</remarks>
     /// <returns></returns>
-    public async Task CheckExternalAccessTokens()
+    public async Task CheckExternalAccessTokens(CancellationToken ct = default)
     {
         // Validate AniList
-        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
         foreach (var user in users)
         {
             if (string.IsNullOrEmpty(user.AniListAccessToken)) continue;
@@ -164,7 +166,7 @@ public class ScrobblingService : IScrobblingService
             await _eventHub.SendMessageToAsync(
                 MessageFactory.ScrobblingKeyExpired,
                 MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList),
-                user.Id);
+                user.Id, ct);
 
         }
     }
@@ -201,7 +203,7 @@ public class ScrobblingService : IScrobblingService
         return !hasAlreadySentExpirationEmail;
     }
 
-    public async Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider)
+    public async Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider, CancellationToken ct = default)
     {
         var token = await GetTokenForProvider(userId, provider);
 
@@ -209,7 +211,7 @@ public class ScrobblingService : IScrobblingService
         {
             // NOTE: Should this side effect be here?
             await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
-                MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), userId);
+                MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), userId, ct);
             return true;
         }
 
@@ -255,27 +257,28 @@ public class ScrobblingService : IScrobblingService
 
     #region Scrobble ingest
 
-    public Task ScrobbleReviewUpdate(int userId, int seriesId, string? reviewTitle, string reviewBody)
+    public Task ScrobbleReviewUpdate(int userId, int seriesId, string? reviewTitle, string reviewBody,
+        CancellationToken ct = default)
     {
         // Currently disabled until at least hardcover is implemented
         return Task.CompletedTask;
     }
 
-    public async Task ScrobbleRatingUpdate(int userId, int seriesId, float rating)
+    public async Task ScrobbleRatingUpdate(int userId, int seriesId, float rating, CancellationToken ct = default)
     {
-        if (!await _licenseService.HasActiveLicense()) return;
+        if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
         if (user == null || !user.UserPreferences.AniListScrobblingEnabled) return;
 
         _logger.LogInformation("Processing Scrobbling rating event for {AppUserId} on {SeriesName}", userId, series.Name);
         if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
-            ScrobbleEventType.ScoreUpdated, true);
+            ScrobbleEventType.ScoreUpdated, true, ct);
         if (existingEvt is {IsProcessed: false})
         {
             // We need to just update Volume/Chapter number
@@ -283,7 +286,7 @@ public class ScrobblingService : IScrobblingService
                 existingEvt.Series.Name, existingEvt.Rating, rating);
             existingEvt.Rating = rating;
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(ct);
             return;
         }
 
@@ -299,38 +302,38 @@ public class ScrobblingService : IScrobblingService
             Rating = rating
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
-        await _unitOfWork.CommitAsync();
+        await _unitOfWork.CommitAsync(ct);
         _logger.LogDebug("Added Scrobbling Rating update on {SeriesName} with Userid {AppUserId}", series.Name, userId);
     }
 
-    public async Task ScrobbleReadingUpdate(int userId, int seriesId)
+    public async Task ScrobbleReadingUpdate(int userId, int seriesId, CancellationToken ct = default)
     {
-        if (!await _licenseService.HasActiveLicense()) return;
+        if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
         if (user == null || !user.UserPreferences.AniListScrobblingEnabled) return;
 
         _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, series.Name);
         if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
 
-        var isAnyProgressOnSeries = await _unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(seriesId, userId);
+        var isAnyProgressOnSeries = await _unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(seriesId, userId, ct);
 
-        var volumeNumber = (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
-        var chapterNumber = await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId);
+        var volumeNumber = (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId, ct);
+        var chapterNumber = await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId, ct);
 
         // Check if there is an existing not yet processed event, if so update it
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
-            ScrobbleEventType.ChapterRead, true);
+            ScrobbleEventType.ChapterRead, true, ct);
 
         if (existingEvt is {IsProcessed: false})
         {
             if (!isAnyProgressOnSeries)
             {
                 _unitOfWork.ScrobbleRepository.Remove(existingEvt);
-                await _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync(ct);
                 _logger.LogDebug("Removed scrobble event for {Series} as there is no reading progress", series.Name);
                 return;
             }
@@ -343,7 +346,7 @@ public class ScrobblingService : IScrobblingService
             existingEvt.ChapterNumber = chapterNumber;
 
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(ct);
 
             _logger.LogDebug("Overriding scrobble event for {Series} from vol {PrevVol} ch {PrevChap} -> vol {UpdatedVol} ch {UpdatedChap}",
                 existingEvt.Series.Name, prevVol, prevChapter, existingEvt.VolumeNumber, existingEvt.ChapterNumber);
@@ -378,7 +381,7 @@ public class ScrobblingService : IScrobblingService
             }
 
             _unitOfWork.ScrobbleRepository.Attach(evt);
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(ct);
             _logger.LogDebug("Added Scrobbling Read update on {SeriesName} - Volume: {VolumeNumber} Chapter: {ChapterNumber} for User: {AppUserId}", series.Name, evt.VolumeNumber, evt.ChapterNumber, userId);
         }
         catch (Exception ex)
@@ -387,23 +390,23 @@ public class ScrobblingService : IScrobblingService
         }
     }
 
-    public async Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead)
+    public async Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead, CancellationToken ct = default)
     {
-        if (!await _licenseService.HasActiveLicense()) return;
+        if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
 
         if (!series.Library.AllowScrobbling) return;
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
         if (user == null || !user.UserPreferences.AniListScrobblingEnabled) return;
 
         if (await CheckIfCannotScrobble(userId, seriesId, series)) return;
         _logger.LogInformation("Processing Scrobbling want-to-read event for {AppUserId} on {SeriesName}", userId, series.Name);
 
         // Get existing events for this series/user
-        var existingEvents = (await _unitOfWork.ScrobbleRepository.GetUserEventsForSeries(userId, seriesId))
+        var existingEvents = (await _unitOfWork.ScrobbleRepository.GetUserEventsForSeries(userId, seriesId, ct))
             .Where(e => new[] { ScrobbleEventType.AddWantToRead, ScrobbleEventType.RemoveWantToRead }.Contains(e.ScrobbleEventType));
 
         // Remove all existing want-to-read events for this series/user
@@ -422,7 +425,7 @@ public class ScrobblingService : IScrobblingService
         };
 
         _unitOfWork.ScrobbleRepository.Attach(evt);
-        await _unitOfWork.CommitAsync();
+        await _unitOfWork.CommitAsync(ct);
         _logger.LogDebug("Added Scrobbling WantToRead update on {SeriesName} with Userid {AppUserId} ", series.Name, userId);
     }
 
@@ -569,9 +572,10 @@ public class ScrobblingService : IScrobblingService
     /// This is a task that is run on a fixed schedule (every few hours or every day) that clears out the scrobble event table
     /// and offloads the data to the API server which performs the syncing to the providers.
     /// </summary>
+    /// <param name="ct"></param>
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public async Task ProcessUpdatesSinceLastSync()
+    public async Task ProcessUpdatesSinceLastSync(CancellationToken ct = default)
     {
         var ctx = await PrepareScrobbleContext();
         if (ctx.TotalCount == 0) return;
@@ -1018,18 +1022,18 @@ public class ScrobblingService : IScrobblingService
 
     #region BackFill
 
-
     /// <summary>
     /// This will backfill events from existing progress history, ratings, and want to read for users that have a valid license
     /// </summary>
     /// <param name="userId">Defaults to 0 meaning all users. Allows a userId to be set if a scrobble key is added to a user</param>
-    public async Task CreateEventsFromExistingHistory(int userId = 0)
+    /// <param name="ct"></param>
+    public async Task CreateEventsFromExistingHistory(int userId = 0, CancellationToken ct = default)
     {
-        if (!await _licenseService.HasActiveLicense()) return;
+        if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
         if (userId != 0)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
             if (user == null || string.IsNullOrEmpty(user.AniListAccessToken)) return;
             if (user.HasRunScrobbleEventGeneration)
             {
@@ -1038,10 +1042,10 @@ public class ScrobblingService : IScrobblingService
             }
         }
 
-        var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
+        var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync(ct: ct))
             .ToDictionary(lib => lib.Id, lib => lib.AllowScrobbling);
 
-        var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync())
+        var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct))
             .Where(l => userId == 0 || userId == l.Id)
             .Where(u => !u.HasRunScrobbleEventGeneration)
             .Select(u => u.Id);
@@ -1107,42 +1111,42 @@ public class ScrobblingService : IScrobblingService
         }
     }
 
-    public async Task CreateEventsFromExistingHistoryForSeries(int seriesId)
+    public async Task CreateEventsFromExistingHistoryForSeries(int seriesId, CancellationToken ct = default)
     {
-        if (!await _licenseService.HasActiveLicense()) return;
+        if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
         if (series == null || !series.Library.AllowScrobbling) return;
 
         _logger.LogInformation("Creating Scrobbling events for Series {SeriesName}", series.Name);
 
-        var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(u => u.Id);
+        var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync(ct: ct)).Select(u => u.Id);
 
         foreach (var uId in userIds)
         {
             // Handle "Want to Read" updates specific to the series
-            var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(uId);
+            var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(uId, ct);
             foreach (var wtr in wantToRead.Where(wtr => wtr.Id == seriesId))
             {
-                await ScrobbleWantToReadUpdate(uId, wtr.Id, true);
+                await ScrobbleWantToReadUpdate(uId, wtr.Id, true, ct);
             }
 
             // Handle ratings specific to the series
-            var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(uId);
+            var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(uId, ct);
             foreach (var rating in ratings.Where(rating => rating.SeriesId == seriesId))
             {
-                await ScrobbleRatingUpdate(uId, rating.SeriesId, rating.Rating);
+                await ScrobbleRatingUpdate(uId, rating.SeriesId, rating.Rating, ct);
             }
 
             // Handle review specific to the series
-            var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(uId);
+            var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(uId, ct);
             foreach (var review in reviews.Where(r => r.SeriesId == seriesId && !string.IsNullOrEmpty(r.Review)))
             {
-                await ScrobbleReviewUpdate(uId, review.SeriesId, string.Empty, review.Review!);
+                await ScrobbleReviewUpdate(uId, review.SeriesId, string.Empty, review.Review!, ct);
             }
 
             // Handle progress updates for the specific series
-            await ScrobbleReadingUpdate(uId, seriesId);
+            await ScrobbleReadingUpdate(uId, seriesId, ct);
         }
     }
 
@@ -1153,27 +1157,29 @@ public class ScrobblingService : IScrobblingService
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
-    public async Task ClearEventsForSeries(int userId, int seriesId)
+    /// <param name="ct"></param>
+    public async Task ClearEventsForSeries(int userId, int seriesId, CancellationToken ct = default)
     {
         _logger.LogInformation("Clearing Pre-existing Scrobble events for Series {SeriesId} by User {AppUserId} as Series is now on hold list", seriesId, userId);
 
-        var events = await _unitOfWork.ScrobbleRepository.GetUserEventsForSeries(userId, seriesId);
+        var events = await _unitOfWork.ScrobbleRepository.GetUserEventsForSeries(userId, seriesId, ct);
         _unitOfWork.ScrobbleRepository.Remove(events);
-        await _unitOfWork.CommitAsync();
+        await _unitOfWork.CommitAsync(ct);
     }
 
     /// <summary>
     /// Removes all events that have been processed that are 7 days old
     /// </summary>
+    /// <param name="ct"></param>
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public async Task ClearProcessedEvents()
+    public async Task ClearProcessedEvents(CancellationToken ct = default)
     {
         const int daysAgo = 7;
-        var events = await _unitOfWork.ScrobbleRepository.GetProcessedEvents(daysAgo);
+        var events = await _unitOfWork.ScrobbleRepository.GetProcessedEvents(daysAgo, ct);
         _unitOfWork.ScrobbleRepository.Remove(events);
         _logger.LogInformation("Removing {Count} scrobble events that have been processed {DaysAgo}+ days ago", events.Count, daysAgo);
-        await _unitOfWork.CommitAsync();
+        await _unitOfWork.CommitAsync(ct);
     }
 
     private static bool CanProcessScrobbleEvent(ScrobbleEvent readEvent)

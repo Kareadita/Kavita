@@ -306,7 +306,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             Arg.Is<ScrobbleDto>(data =>
                 data.ChapterNumber == (int)chapter.MaxNumber &&
                 data.VolumeNumber == (int)volume.MaxNumber
-                ),
+            ),
             Arg.Any<string>());
     }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Database;
@@ -214,7 +215,8 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(EnsureSideNavId, () => EnsureSideNav(), Cron.Daily(1), RecurringJobOptions);
 
 
-        RecurringJob.AddOrUpdate<IReadingHistoryService>(ReadingHistoryAggregationId, service => service.AggregateYesterdaysActivity(),
+        RecurringJob.AddOrUpdate<IReadingHistoryService>(ReadingHistoryAggregationId,
+            service => service.AggregateYesterdaysActivity(CancellationToken.None),
             "5 0 * * *", RecurringJobOptions); // 12:05 AM daily
 
         await ScheduleKavitaPlusTasks();
@@ -234,9 +236,11 @@ public class TaskScheduler : ITaskScheduler
             return;
         }
 
-        RecurringJob.AddOrUpdate(CheckScrobblingTokensId, () => _scrobblingService.CheckExternalAccessTokens(),
+        RecurringJob.AddOrUpdate(CheckScrobblingTokensId,
+            () => _scrobblingService.CheckExternalAccessTokens(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
-        BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
+        // We also kick off an immediate check on startup
+        BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens(CancellationToken.None));
 
         // Get the License Info (and cache it) on first load. This will internally cache the Github releases for the Version Service
         BackgroundJob.Enqueue(() => _licenseService.GetLicenseInfo(true));  // Kick this off first to cache it then let it refresh every 9 hours (8 hour cache)
@@ -245,26 +249,28 @@ public class TaskScheduler : ITaskScheduler
 
         // KavitaPlus Scrobbling (every hour) - randomise minutes to spread requests out for K+
         var randomMinute = Rnd.Next(0, 60);
-        RecurringJob.AddOrUpdate(ProcessScrobblingEventsId, () => _scrobblingService.ProcessUpdatesSinceLastSync(),
+        RecurringJob.AddOrUpdate(ProcessScrobblingEventsId,
+            () => _scrobblingService.ProcessUpdatesSinceLastSync(CancellationToken.None),
             Cron.Hourly(randomMinute), RecurringJobOptions);
-        RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEventsId, () => _scrobblingService.ClearProcessedEvents(),
+        RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEventsId,
+            () => _scrobblingService.ClearProcessedEvents(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
 
         // Backfilling/Freshening Reviews/Rating/Recommendations
         var randomKPlusBackfill = Rnd.Next(1, 5);
         RecurringJob.AddOrUpdate(KavitaPlusDataRefreshId,
-            () => _externalMetadataService.FetchExternalDataTask(), Cron.Daily(randomKPlusBackfill),
-            RecurringJobOptions);
+            () => _externalMetadataService.FetchExternalDataTask(CancellationToken.None),
+            Cron.Daily(randomKPlusBackfill), RecurringJobOptions);
 
         // This shouldn't be so close to fetching data due to Rate limit concerns
         var randomKPlusStackSync = Rnd.Next(6, 10);
         RecurringJob.AddOrUpdate(KavitaPlusStackSyncId,
-            () => _smartCollectionSyncService.Sync(), Cron.Daily(randomKPlusStackSync),
-            RecurringJobOptions);
+            () => _smartCollectionSyncService.Sync(CancellationToken.None),
+            Cron.Daily(randomKPlusStackSync), RecurringJobOptions);
 
         RecurringJob.AddOrUpdate(KavitaPlusWantToReadSyncId,
-            () => _wantToReadSyncService.Sync(), Cron.Weekly(DayOfWeekHelper.Random()),
-            RecurringJobOptions);
+            () => _wantToReadSyncService.Sync(CancellationToken.None),
+            Cron.Weekly(DayOfWeekHelper.Random()), RecurringJobOptions);
     }
 
 

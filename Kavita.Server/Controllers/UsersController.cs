@@ -155,7 +155,7 @@ public class UsersController(
 
         existingPreferences.OpdsPreferences = preferencesDto.OpdsPreferences;
 
-        if (await licenseService.HasActiveLicense())
+        if (await licenseService.HasActiveLicense(ct: HttpContext.RequestAborted))
         {
             existingPreferences.AniListScrobblingEnabled = preferencesDto.AniListScrobblingEnabled;
             existingPreferences.WantToReadSync = preferencesDto.WantToReadSync;
@@ -216,7 +216,7 @@ public class UsersController(
     [HttpGet("tokens")]
     public async Task<ActionResult<IEnumerable<UserTokenInfo>>> GetUserTokens()
     {
-        if (!await licenseService.HasActiveLicense()) return BadRequest(localizationService.Translate(UserId, "kavitaplus-restricted"));
+        if (!await licenseService.HasActiveLicense(ct: HttpContext.RequestAborted)) return BadRequest(localizationService.Translate(UserId, "kavitaplus-restricted"));
 
         return Ok((await unitOfWork.UserRepository.GetUserTokenInfo()));
     }

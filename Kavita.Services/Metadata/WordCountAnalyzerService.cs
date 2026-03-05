@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using HtmlAgilityPack;
@@ -22,60 +23,50 @@ namespace Kavita.Services.Metadata;
 /// <summary>
 /// This service is a metadata task that generates information around time to read
 /// </summary>
-public class WordCountAnalyzerService : IWordCountAnalyzerService
+public class WordCountAnalyzerService(
+    ILogger<WordCountAnalyzerService> logger,
+    IUnitOfWork unitOfWork,
+    IEventHub eventHub,
+    ICacheHelper cacheHelper,
+    IMediaErrorService mediaErrorService)
+    : IWordCountAnalyzerService
 {
-    private readonly ILogger<WordCountAnalyzerService> _logger;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IEventHub _eventHub;
-    private readonly ICacheHelper _cacheHelper;
-    private readonly IMediaErrorService _mediaErrorService;
-
     public const int AverageCharactersPerWord = 5;
-
-    public WordCountAnalyzerService(ILogger<WordCountAnalyzerService> logger, IUnitOfWork unitOfWork, IEventHub eventHub,
-        ICacheHelper cacheHelper, IMediaErrorService mediaErrorService)
-    {
-        _logger = logger;
-        _unitOfWork = unitOfWork;
-        _eventHub = eventHub;
-        _cacheHelper = cacheHelper;
-        _mediaErrorService = mediaErrorService;
-    }
 
 
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
     [AutomaticRetry(Attempts = 2, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
+    public async Task ScanLibrary(int libraryId, bool forceUpdate = false, CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+        var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, ct: ct);
         if (library == null) return;
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 0F, ProgressEventType.Started, string.Empty));
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 0F, ProgressEventType.Started, string.Empty), ct: ct);
 
-        var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
+        var chunkInfo = await unitOfWork.SeriesRepository.GetChunkInfo(library.Id, ct);
         var stopwatch = Stopwatch.StartNew();
-        _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
+        logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.WordCountAnalyzerProgressEvent(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}"));
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.WordCountAnalyzerProgressEvent(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}"), ct: ct);
 
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
         {
             if (chunkInfo.TotalChunks == 0) continue;
             stopwatch.Restart();
 
-            _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
+            logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
                 chunk, chunkInfo.TotalChunks, chunkInfo.ChunkSize, chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize);
 
-            var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
+            var nonLibrarySeries = await unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
                 new UserParams()
                 {
                     PageNumber = chunk,
                     PageSize = chunkInfo.ChunkSize
-                });
-            _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
+                }, ct);
+            logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
 
             var seriesIndex = 0;
             foreach (var series in nonLibrarySeries)
@@ -83,8 +74,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 var index = chunk * seriesIndex;
                 var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
 
-                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                    MessageFactory.WordCountAnalyzerProgressEvent(library.Id, progress, ProgressEventType.Updated, series.Name));
+                await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                    MessageFactory.WordCountAnalyzerProgressEvent(library.Id, progress, ProgressEventType.Updated, series.Name), ct: ct);
 
                 try
                 {
@@ -92,53 +83,53 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[MetadataService] There was an exception during metadata refresh for {SeriesName}", series.Name);
+                    logger.LogError(ex, "[MetadataService] There was an exception during metadata refresh for {SeriesName}", series.Name);
                 }
                 seriesIndex++;
             }
 
-            if (_unitOfWork.HasChanges())
+            if (unitOfWork.HasChanges())
             {
-                await _unitOfWork.CommitAsync();
+                await unitOfWork.CommitAsync(ct);
             }
 
-            _logger.LogInformation(
+            logger.LogInformation(
                 "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                 chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
         }
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.WordCountAnalyzerProgressEvent(library.Id, 1F, ProgressEventType.Ended, $"Complete"));
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.WordCountAnalyzerProgressEvent(library.Id, 1F, ProgressEventType.Ended, $"Complete"), ct: ct);
 
 
-        _logger.LogInformation("[WordCountAnalyzerService] Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds", library.Name, sw.ElapsedMilliseconds);
+        logger.LogInformation("[WordCountAnalyzerService] Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds", library.Name, sw.ElapsedMilliseconds);
 
     }
 
-    public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = true)
+    public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = true, CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
-        var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
+        var series = await unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId, ct);
         if (series == null)
         {
-            _logger.LogError("[WordCountAnalyzerService] Series {SeriesId} was not found on Library {LibraryId}", seriesId, libraryId);
+            logger.LogError("[WordCountAnalyzerService] Series {SeriesId} was not found on Library {LibraryId}", seriesId, libraryId);
             return;
         }
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 0F, ProgressEventType.Started, series.Name));
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 0F, ProgressEventType.Started, series.Name), ct: ct);
 
         await ProcessSeries(series, forceUpdate);
 
-        if (_unitOfWork.HasChanges())
+        if (unitOfWork.HasChanges())
         {
-            await _unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
         }
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 1F, ProgressEventType.Ended, series.Name));
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 1F, ProgressEventType.Ended, series.Name), ct: ct);
 
-        _logger.LogInformation("[WordCountAnalyzerService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
+        logger.LogInformation("[WordCountAnalyzerService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
     }
 
 
@@ -154,7 +145,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
             {
                 // This compares if it's changed since a file scan only
                 var firstFile = chapter.Files.FirstOrDefault();
-                if (firstFile == null || !_cacheHelper.HasFileChangedSinceLastScan(firstFile.LastFileAnalysis,
+                if (firstFile == null || !cacheHelper.HasFileChangedSinceLastScan(firstFile.LastFileAnalysis,
                         forceUpdate,
                         firstFile))
                 {
@@ -173,7 +164,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                         var pageCounter = 1;
                         try
                         {
-                            // TODO: Replace with BookService method, we will loose progress but these tasks are usually fast
+                            // default: Replace with BookService method, we will loose progress but these tasks are usually fast
                             using var book = await EpubReader.OpenBookAsync(filePath, BookService.LenientBookReaderOptions);
 
                             var totalPages = book.Content.Html.Local;
@@ -182,7 +173,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                                 var progress = Math.Max(0F,
                                     Math.Min(1F, (fileCounter * pageCounter) * 1F / (chapter.Files.Count * totalPages.Count)));
 
-                                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                                await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                                     MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress,
                                         ProgressEventType.Updated, useFileName ? filePath : series.Name));
                                 sum += await GetWordCountFromHtml(bookPage, filePath);
@@ -193,8 +184,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "There was an error reading an epub file for word count, series skipped");
-                            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                            logger.LogError(ex, "There was an error reading an epub file for word count, series skipped");
+                            await eventHub.SendMessageAsync(MessageFactory.Error,
                                 MessageFactory.ErrorEvent("There was an issue counting words on an epub",
                                     $"{series.Name} - {file.FilePath}"));
                             return;
@@ -217,14 +208,14 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 {
                     UpdateFileAnalysis(file);
                 }
-                _unitOfWork.ChapterRepository.Update(chapter);
+                unitOfWork.ChapterRepository.Update(chapter);
             }
 
             var volumeEst = ReaderService.GetTimeEstimate(volume.WordCount, volume.Pages, isEpub);
             volume.MinHoursToRead = volumeEst.MinHours;
             volume.MaxHoursToRead = volumeEst.MaxHours;
             volume.AvgHoursToRead = volumeEst.AvgHours;
-            _unitOfWork.VolumeRepository.Update(volume);
+            unitOfWork.VolumeRepository.Update(volume);
 
         }
 
@@ -233,13 +224,13 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         series.MinHoursToRead = seriesEstimate.MinHours;
         series.MaxHoursToRead = seriesEstimate.MaxHours;
         series.AvgHoursToRead = seriesEstimate.AvgHours;
-        _unitOfWork.SeriesRepository.Update(series);
+        unitOfWork.SeriesRepository.Update(series);
     }
 
     private void UpdateFileAnalysis(MangaFile file)
     {
         file.UpdateLastFileAnalysis();
-        _unitOfWork.MangaFileRepository.Update(file);
+        unitOfWork.MangaFileRepository.Update(file);
     }
 
     private async Task<int> GetWordCountFromHtml(EpubLocalTextContentFileRef bookFile, string filePath)
@@ -255,8 +246,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         }
         catch (EpubContentException ex)
         {
-            _logger.LogError(ex, "Error when counting words in epub {EpubPath}", filePath);
-            await _mediaErrorService.ReportMediaIssueAsync(filePath, MediaErrorProducer.BookService,
+            logger.LogError(ex, "Error when counting words in epub {EpubPath}", filePath);
+            await mediaErrorService.ReportMediaIssueAsync(filePath, MediaErrorProducer.BookService,
                 $"Invalid Epub Metadata, {bookFile.FilePath} does not exist", ex.Message);
             return 0;
         }

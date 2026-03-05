@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.Reading;
@@ -19,47 +20,47 @@ public class ReadingHistoryService(IDataContext context, ILogger<ReadingHistoryS
     private sealed record ChapterMetadata(int Id, string? Range, float VolumeNumber, string SeriesName, string? LocalizedSeriesName, string LibraryName, LibraryType LibraryType);
     private sealed record SeriesMetadata(int Id, string Name, string? LocalizedName, string LibraryName, LibraryType LibraryType);
 
-    public async Task AggregateYesterdaysActivity()
+    public async Task AggregateYesterdaysActivity(CancellationToken ct = default)
     {
         var yesterdayUtc = DateTime.UtcNow.Date.AddDays(-1);
         var startUtc = yesterdayUtc;
         var endUtc = yesterdayUtc.AddDays(1).AddTicks(-1);
 
-        var usersToProcess = await GetUsersPendingAggregation(startUtc, endUtc, yesterdayUtc);
+        var usersToProcess = await GetUsersPendingAggregation(startUtc, endUtc, yesterdayUtc, ct);
 
         foreach (var userId in usersToProcess)
         {
-            await AggregateUserActivity(userId, startUtc, endUtc, yesterdayUtc);
+            await AggregateUserActivity(userId, startUtc, endUtc, yesterdayUtc, ct);
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(ct);
     }
 
-    private async Task<List<int>> GetUsersPendingAggregation(DateTime start, DateTime end, DateTime reportDate)
+    private async Task<List<int>> GetUsersPendingAggregation(DateTime start, DateTime end, DateTime reportDate, CancellationToken ct = default)
     {
         var needAggregationUserIds = await context.AppUserReadingSession
             .Where(s => s.StartTime >= start && s.StartTime <= end)
             .Where(s => !s.IsActive && s.EndTime != null)
             .Select(s => s.AppUserId)
             .Distinct()
-            .ToListAsync();
+            .ToListAsync(ct);
 
         var alreadyHasHistoryUserIds = await context.AppUserReadingHistory
             .Where(h => h.DateUtc == reportDate)
             .Select(h => h.AppUserId)
-            .ToListAsync();
+            .ToListAsync(ct);
 
         return needAggregationUserIds.Except(alreadyHasHistoryUserIds).ToList();
     }
 
-    private async Task AggregateUserActivity(int userId, DateTime start, DateTime end, DateTime reportDate)
+    private async Task AggregateUserActivity(int userId, DateTime start, DateTime end, DateTime reportDate, CancellationToken ct = default)
     {
         var sessions = await context.AppUserReadingSession
             .Include(s => s.ActivityData)
             .Where(s => s.AppUserId == userId &&
                         s.StartTime >= start && s.StartTime <= end &&
                         !s.IsActive && s.EndTime != null)
-            .ToListAsync();
+            .ToListAsync(ct);
 
         if (sessions.Count == 0) return;
 

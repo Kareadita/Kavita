@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Kavita.API.Database;
@@ -33,45 +34,38 @@ internal sealed class SeriesCollection
     public int TotalItems { get; set; }
 }
 
-public class SmartCollectionSyncService : ISmartCollectionSyncService
+public class SmartCollectionSyncService(
+    IUnitOfWork unitOfWork,
+    ILogger<SmartCollectionSyncService> logger,
+    IEventHub eventHub,
+    ILicenseService licenseService)
+    : ISmartCollectionSyncService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<SmartCollectionSyncService> _logger;
-    private readonly IEventHub _eventHub;
-    private readonly ILicenseService _licenseService;
-
     private const int SyncDelta = -2;
     // Allow 50 requests per 24 hours
     private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
 
 
-    public SmartCollectionSyncService(IUnitOfWork unitOfWork, ILogger<SmartCollectionSyncService> logger,
-        IEventHub eventHub, ILicenseService licenseService)
-    {
-        _unitOfWork = unitOfWork;
-        _logger = logger;
-        _eventHub = eventHub;
-        _licenseService = licenseService;
-    }
-
     /// <summary>
     /// For every Sync-eligible collection, synchronize with upstream
     /// </summary>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task Sync()
+    public async Task Sync(CancellationToken ct = default)
     {
-        if (!await _licenseService.HasActiveLicense()) return;
+        if (!await licenseService.HasActiveLicense(ct: ct)) return;
+
         var expirationTime = DateTime.UtcNow.AddDays(SyncDelta).Truncate(TimeSpan.TicksPerHour);
-        var collections = (await _unitOfWork.CollectionTagRepository.GetAllCollectionsForSyncing(expirationTime))
+        var collections = (await unitOfWork.CollectionTagRepository.GetAllCollectionsForSyncing(expirationTime, ct))
             .Where(CanSync)
             .ToList();
 
-        _logger.LogInformation("Found {Count} collections to synchronize", collections.Count);
+        logger.LogInformation("Found {Count} collections to synchronize", collections.Count);
         foreach (var collection in collections)
         {
             try
             {
-                await SyncCollection(collection);
+                await SyncCollection(collection, ct);
             }
             catch (RateLimitException)
             {
@@ -79,22 +73,23 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
             }
         }
 
-        _logger.LogInformation("Synchronization complete");
+        logger.LogInformation("Synchronization complete");
     }
 
-    public async Task Sync(int collectionId)
+    public async Task Sync(int collectionId, CancellationToken ct = default)
     {
-        if (!await _licenseService.HasActiveLicense()) return;
-        var collection = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(collectionId, CollectionIncludes.Series);
+        if (!await licenseService.HasActiveLicense(ct: ct)) return;
+
+        var collection = await unitOfWork.CollectionTagRepository.GetCollectionAsync(collectionId, CollectionIncludes.Series, ct);
         if (!CanSync(collection))
         {
-            _logger.LogInformation("Requested to sync {CollectionName} but not applicable to sync", collection!.Title);
+            logger.LogInformation("Requested to sync {CollectionName} but not applicable to sync", collection!.Title);
             return;
         }
 
         try
         {
-            await SyncCollection(collection!);
+            await SyncCollection(collection!, ct);
         } catch (RateLimitException) {/* Swallow */}
     }
 
@@ -106,28 +101,28 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         return true;
     }
 
-    private async Task SyncCollection(AppUserCollection collection)
+    private async Task SyncCollection(AppUserCollection collection, CancellationToken ct = default)
     {
         if (!RateLimiter.TryAcquire(string.Empty))
         {
             // Request not allowed due to rate limit
-            _logger.LogDebug("Rate Limit hit for Smart Collection Sync");
+            logger.LogDebug("Rate Limit hit for Smart Collection Sync");
             throw new RateLimitException();
         }
 
         var info = await GetStackInfo(GetStackId(collection.SourceUrl!));
         if (info == null)
         {
-            _logger.LogInformation("Unable to find collection through Kavita+");
+            logger.LogInformation("Unable to find collection through Kavita+");
             return;
         }
 
         // Check each series in the collection against what's in the target
         // For everything that's not there, link it up for this user.
-        _logger.LogInformation("Starting Sync on {CollectionName} with {SeriesCount} Series", info.Title, info.TotalItems);
+        logger.LogInformation("Starting Sync on {CollectionName} with {SeriesCount} Series", info.Title, info.TotalItems);
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.SmartCollectionProgressEvent(info.Title, string.Empty, 0, info.TotalItems, ProgressEventType.Started));
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.SmartCollectionProgressEvent(info.Title, string.Empty, 0, info.TotalItems, ProgressEventType.Started), ct: ct);
 
         var missingCount = 0;
         var missingSeries = new StringBuilder();
@@ -153,20 +148,20 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
                      s.NormalizedLocalizedName == normalizedSeriesName)
                     && formats.Contains(s.Format));
 
-                _logger.LogDebug("Trying to find {SeriesName} with formats ({Formats}) within Kavita for linking. Found: {ExistingSeriesName} ({ExistingSeriesId})",
+                logger.LogDebug("Trying to find {SeriesName} with formats ({Formats}) within Kavita for linking. Found: {ExistingSeriesName} ({ExistingSeriesId})",
                     seriesInfo.SeriesName, formats, existingSeries?.Name, existingSeries?.Id);
 
                 if (existingSeries != null)
                 {
-                    await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                        MessageFactory.SmartCollectionProgressEvent(info.Title, seriesInfo.SeriesName, counter, info.TotalItems, ProgressEventType.Updated));
+                    await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                        MessageFactory.SmartCollectionProgressEvent(info.Title, seriesInfo.SeriesName, counter, info.TotalItems, ProgressEventType.Updated), ct: ct);
                     continue;
                 }
 
                 // Series not found in the collection, try to find it in the server
-                var newSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(seriesInfo.SeriesName,
+                var newSeries = await unitOfWork.SeriesRepository.GetSeriesByAnyName(seriesInfo.SeriesName,
                     seriesInfo.LocalizedSeriesName,
-                    formats, collection.AppUserId);
+                    formats, collection.AppUserId, ct: ct);
 
                 collection.Items ??= new List<Series>();
                 if (newSeries != null)
@@ -177,7 +172,7 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
                 }
                 else
                 {
-                    _logger.LogDebug("{Series} not found in the server", seriesInfo.SeriesName);
+                    logger.LogDebug("{Series} not found in the server", seriesInfo.SeriesName);
                     missingCount++;
                     missingSeries.Append(
                         $"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
@@ -186,15 +181,15 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An exception occured when linking up a series to the collection. Skipping");
+                logger.LogError(ex, "An exception occured when linking up a series to the collection. Skipping");
                 missingCount++;
                 missingSeries.Append(
                     $"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
                 missingSeries.Append("<br/>");
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.SmartCollectionProgressEvent(info.Title, seriesInfo.SeriesName, counter, info.TotalItems, ProgressEventType.Updated));
+            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.SmartCollectionProgressEvent(info.Title, seriesInfo.SeriesName, counter, info.TotalItems, ProgressEventType.Updated), ct: ct);
         }
 
         // At this point, all series in the info have been checked and added if necessary
@@ -203,26 +198,26 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
         collection.Summary = info.Summary;
         collection.MissingSeriesFromSource = missingSeries.ToString();
 
-        _unitOfWork.CollectionTagRepository.Update(collection);
+        unitOfWork.CollectionTagRepository.Update(collection);
 
         try
         {
-            await _unitOfWork.CommitAsync();
+            await unitOfWork.CommitAsync(ct);
 
-            await _unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(collection);
+            await unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(collection, ct);
 
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.SmartCollectionProgressEvent(info.Title, string.Empty, info.TotalItems, info.TotalItems, ProgressEventType.Ended));
+            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.SmartCollectionProgressEvent(info.Title, string.Empty, info.TotalItems, info.TotalItems, ProgressEventType.Ended), ct: ct);
 
-            await _eventHub.SendMessageAsync(MessageFactory.CollectionUpdated,
-                MessageFactory.CollectionUpdatedEvent(collection.Id), false);
+            await eventHub.SendMessageAsync(MessageFactory.CollectionUpdated,
+                MessageFactory.CollectionUpdatedEvent(collection.Id), false, ct);
 
-            _logger.LogInformation("Finished Syncing Collection {CollectionName} - Missing {MissingCount} series",
+            logger.LogInformation("Finished Syncing Collection {CollectionName} - Missing {MissingCount} series",
                 collection.Title, missingCount);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an error during saving the collection");
+            logger.LogError(ex, "There was an error during saving the collection");
         }
     }
 
@@ -236,9 +231,9 @@ public class SmartCollectionSyncService : ISmartCollectionSyncService
 
     private async Task<SeriesCollection?> GetStackInfo(long stackId)
     {
-        _logger.LogDebug("Fetching Kavita+ for MAL Stack");
+        logger.LogDebug("Fetching Kavita+ for MAL Stack");
 
-        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
+        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
 
         var seriesForStack = await ($"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/stack?stackId=" + stackId)
             .WithKavitaPlusHeaders(license)
