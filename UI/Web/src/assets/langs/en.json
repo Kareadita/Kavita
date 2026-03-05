@@ -2155,7 +2155,7 @@
     },
 
     "download-queue-drawer": {
-        "title": "Download Queue",
+        "title": "Downloads",
 
         "cancel": "{{common.cancel}}",
         "cancel-all": "Cancel All",
@@ -2171,6 +2171,11 @@
         "clear-all": "Clear All",
         "failed-from-auth": "Not Authenticated, refresh browser",
         "failed-interrupted": "Interrupted by page refresh",
+
+        "tab-downloading": "Downloading",
+        "tab-completed": "Completed",
+        "today": "Today",
+        "older": "Older",
 
         "queued": "{{download-queue-status-pipe.queued}}",
         "preparing": "{{download-queue-status-pipe.preparing}}",

@@ -93,7 +93,10 @@ export class DownloadService {
     this.queue().find(i => i.status === 'preparing' || i.status === 'downloading') ?? null
   );
   readonly queuedItems = computed(() => this.queue().filter(i => i.status === 'queued'));
-  readonly completedItems = computed(() => this.queue().filter(i => i.status === 'completed'));
+  readonly completedItems = computed(() =>
+    this.queue().filter(i => i.status === 'completed')
+      .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0))
+  );
   readonly failedItems = computed(() => this.queue().filter(i => i.status === 'failed'));
   readonly totalActiveCount = computed(() =>
     (this.activeItem() ? 1 : 0) + this.queuedItems().length
@@ -124,10 +127,13 @@ export class DownloadService {
 
   /**
    * Sliding window of recent byte snapshots for smoothed speed calculation.
-   * Keeps the last ~5 seconds of samples per item.
+   * Keeps the last ~8 seconds of samples per item.
    */
   private _speedSamples = new Map<number, Array<{ bytes: number; time: number }>>();
-  private readonly SPEED_WINDOW_MS = 5000;
+  private readonly SPEED_WINDOW_MS = 8000;
+  /** EMA-smoothed speed per item, to dampen rapid fluctuations */
+  private _smoothedSpeed = new Map<number, number>();
+  private readonly EMA_ALPHA = 0.15;
 
   constructor() {
     // SignalR handler — only used as a safety net.
@@ -205,16 +211,16 @@ export class DownloadService {
    * - volume/chapter → size-checked then queued
    * - bookmark/logs → immediate blob download (bypasses queue)
    */
-  download(entityType: DownloadEntityType, entity: DownloadEntity, callback?: (d: Download | undefined) => void, libraryId = 0) {
+  download(entityType: DownloadEntityType, entity: DownloadEntity, callback?: (d: Download | undefined) => void, libraryId = 0, seriesId = 0) {
     switch (entityType) {
       case 'series':
         this.downloadSeries(entity as Series);
         break;
       case 'volume':
-        this.enqueueSingle(entity as Volume, 'volume', '', libraryId);
+        this.enqueueSingle(entity as Volume, 'volume', '', libraryId, seriesId);
         break;
       case 'chapter':
-        this.enqueueSingle(entity as Chapter, 'chapter', '', libraryId);
+        this.enqueueSingle(entity as Chapter, 'chapter', '', libraryId, seriesId);
         break;
       case 'bookmark':
         this.downloadBookmarksBlob(entity as PageBookmark[]);
@@ -248,10 +254,24 @@ export class DownloadService {
     ids.forEach(id => this.storage.delete(id));
   }
 
+  clearCompletedByIds(ids: number[]) {
+    const idSet = new Set(ids);
+    this.queue.update(q => q.filter(i => !idSet.has(i.id)));
+    ids.forEach(id => this.storage.delete(id));
+  }
+
   retryDownload(itemId: number) {
     const item = this.queue().find(i => i.id === itemId);
     if (!item || item.retryCount >= 3) return;
-    this.setStatus(itemId, 'queued', { errorMessage: '', retryCount: item.retryCount + 1 });
+    const retried = { ...item, status: 'queued' as DownloadQueueStatus, errorMessage: '', retryCount: item.retryCount + 1 };
+    // Place retried item at the front of the queue (after any active item)
+    this.queue.update(q => {
+      const without = q.filter(i => i.id !== itemId);
+      const activeIdx = without.findIndex(i => i.status === 'preparing' || i.status === 'downloading');
+      const insertAt = activeIdx >= 0 ? activeIdx + 1 : 0;
+      return [...without.slice(0, insertAt), retried, ...without.slice(insertAt)];
+    });
+    this.storage.save(retried);
     this.processQueue();
   }
 
@@ -273,12 +293,15 @@ export class DownloadService {
   }
 
   retryAllFailed() {
-    this.queue.update(q => q.map(i =>
-      i.status === 'failed'
-        ? { ...i, status: 'queued' as DownloadQueueStatus, errorMessage: '', retryCount: i.retryCount + 1 }
-        : i
-    ));
-    // Persist all newly-queued items
+    this.queue.update(q => {
+      const active = q.filter(i => i.status === 'preparing' || i.status === 'downloading');
+      const retried = q.filter(i => i.status === 'failed')
+        .map(i => ({ ...i, status: 'queued' as DownloadQueueStatus, errorMessage: '', retryCount: i.retryCount + 1 }));
+      const existingQueued = q.filter(i => i.status === 'queued');
+      const rest = q.filter(i => i.status === 'completed' || i.status === 'cancelled');
+      // Retried items go to the front of the queue, before existing queued items
+      return [...active, ...retried, ...existingQueued, ...rest];
+    });
     this.queue().filter(i => i.status === 'queued').forEach(i => this.storage.save(i));
     this.processQueue();
   }
@@ -381,14 +404,14 @@ export class DownloadService {
           switchMap(async size => this.confirmSize(size, 'series')),
           filter(confirmed => confirmed),
           takeUntilDestroyed(this.destroyRef)
-        ).subscribe(() => this.enqueueItems(items, series.name, series.libraryId));
+        ).subscribe(() => this.enqueueItems(items, series.name, series.libraryId, series.id));
       } else {
-        this.enqueueItems(items, series.name, series.libraryId);
+        this.enqueueItems(items, series.name, series.libraryId, series.id);
       }
     });
   }
 
-  private enqueueItems(items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }>, seriesName: string, libraryId: number) {
+  private enqueueItems(items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }>, seriesName: string, libraryId: number, seriesId = 0) {
     this.debugLog(`enqueueItems() adding ${items.length} items for series "${seriesName}"`);
 
     // Fetch individual sizes in parallel, then enqueue with sizes
@@ -402,13 +425,13 @@ export class DownloadService {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(sizes => {
       for (let i = 0; i < items.length; i++) {
-        this.addToQueue(items[i].entity, items[i].entityType, seriesName, libraryId, sizes[i]);
+        this.addToQueue(items[i].entity, items[i].entityType, seriesName, libraryId, sizes[i], seriesId);
       }
       this.processQueue();
     });
   }
 
-  private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number) {
+  private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, seriesId = 0) {
     const user = this.accountService.currentUser();
     const sizeCall = entityType === 'volume'
       ? this.downloadVolumeSize((entity as Volume).id)
@@ -424,12 +447,12 @@ export class DownloadService {
       filter(result => result.confirmed),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(({ size }) => {
-      this.addToQueue(entity, entityType, seriesName, libraryId, size);
+      this.addToQueue(entity, entityType, seriesName, libraryId, size, seriesId);
       this.processQueue();
     });
   }
 
-  private addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, estimatedSize = 0) {
+  private addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0) {
     const id = this._nextId++;
     const entityId = entity.id;
     this.debugLog(`addToQueue() id=${id} type=${entityType} entityId=${entityId} series="${seriesName}"`);
@@ -456,6 +479,7 @@ export class DownloadService {
       entityType,
       entityId,
       libraryId,
+      seriesId,
       label,
       subLabel,
       seriesName,
@@ -570,7 +594,12 @@ export class DownloadService {
             const timeDelta = (now - oldest.time) / 1000;
             const bytesDelta = received - oldest.bytes;
             if (timeDelta > 0) {
-              speedBps = bytesDelta / timeDelta;
+              const rawSpeed = bytesDelta / timeDelta;
+              const prev = this._smoothedSpeed.get(item.id);
+              speedBps = prev !== undefined
+                ? this.EMA_ALPHA * rawSpeed + (1 - this.EMA_ALPHA) * prev
+                : rawSpeed;
+              this._smoothedSpeed.set(item.id, speedBps);
               const remaining = contentLength - received;
               etaSeconds = speedBps > 0 ? Math.round(remaining / speedBps) : undefined;
             }
@@ -656,6 +685,7 @@ export class DownloadService {
   private markCompleted(itemId: number) {
     this.debugLog(`markCompleted() id=${itemId}`);
     this._speedSamples.delete(itemId);
+    this._smoothedSpeed.delete(itemId);
     this.setStatus(itemId, 'completed', { progress: 100, completedAt: Date.now() });
     setTimeout(() => this.removeItem(itemId), 5 * 60 * 1000);
     // Give GC time to reclaim the previous download's blob before starting the next one
@@ -665,6 +695,7 @@ export class DownloadService {
   private markFailed(itemId: number, error: string) {
     this.debugLog(`markFailed() id=${itemId} error="${error}"`);
     this._speedSamples.delete(itemId);
+    this._smoothedSpeed.delete(itemId);
     this.setStatus(itemId, 'failed', { errorMessage: error, completedAt: Date.now() });
     // Give GC time to reclaim memory before starting next download
     setTimeout(() => this.processQueue(), 1500);

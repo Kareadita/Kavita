@@ -40,14 +40,49 @@
     }
 }
 
+.sm {
+    font-size: 0.7rem;
+    padding: 0.0625rem 0.4rem;
+    margin: 0;
+}
+
 .filled {
     border: 1px solid var(--tagbadge-filled-border-color);
     color: var(--tagbadge-filled-text-color);
     background-color: var(--tagbadge-filled-bg-color);
+
+    &.color-primary {
+        --tagbadge-filled-bg-color: var(--primary-color);
+        --tagbadge-filled-text-color: #fff;
+        --tagbadge-filled-border-color: var(--primary-color);
+    }
+    &.color-secondary {
+        --tagbadge-filled-bg-color: var(--text-muted-color);
+        --tagbadge-filled-text-color: #fff;
+        --tagbadge-filled-border-color: var(--text-muted-color);
+    }
+    &.color-error {
+        --tagbadge-filled-bg-color: var(--error-color);
+        --tagbadge-filled-text-color: #fff;
+        --tagbadge-filled-border-color: var(--error-color);
+    }
 }
 
 .outline {
     border: 1px solid var(--tagbadge-border-color);
     color: var(--tagbadge-text-color);
     background-color: var(--tagbadge-bg-color);
+
+    &.color-primary {
+        --tagbadge-border-color: var(--primary-color);
+        --tagbadge-text-color: var(--primary-color);
+    }
+    &.color-secondary {
+        --tagbadge-border-color: var(--text-muted-color);
+        --tagbadge-text-color: var(--text-muted-color);
+    }
+    &.color-error {
+        --tagbadge-border-color: var(--error-color);
+        --tagbadge-text-color: var(--error-color);
+    }
 }

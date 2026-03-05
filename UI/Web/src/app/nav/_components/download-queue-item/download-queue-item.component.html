@@ -1,55 +1,33 @@
 <ng-container *transloco="let t; prefix: 'download-queue-item'">
   <div class="queue-item d-flex align-items-center gap-2 py-2">
 
-    <div class="status-icon">
-      @switch (item().status) {
-        @case ('preparing') {
-          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-        }
-        @case ('downloading') {
-          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-        }
-        @case ('completed') {
-          <i class="fa fa-check text-success" aria-hidden="true"></i>
-        }
-        @case ('failed') {
-          <i class="fa fa-times text-danger" aria-hidden="true"></i>
-        }
-        @default {
-          <i class="fa fa-clock text-muted" aria-hidden="true"></i>
-        }
-      }
-    </div>
-
-
     <app-image class="queue-item-cover flex-shrink-0"
       [imageUrl]="imageUrl()" width="40px" height="56px" [processEvents]="false" />
 
     <div class="queue-item-info flex-grow-1 overflow-hidden">
-      <div class="text-truncate fw-semibold" [title]="item().label">{{ item().label }}</div>
-      <div class="text-muted small">
-        {{item().status | downloadQueueStatus }}
-        <span class="ms-1">&middot;</span>
-        @if (item().completedAt && (item().status === 'completed' || item().status === 'failed')) {
-          <span class="ms-1">{{ item().completedAt! | timeAgo }}</span>
-        } @else {
-          <span class="ms-1">{{ item().queuedAt | timeAgo }}</span>
-        }
+      <a href="javascript:void(0)" class="item-title text-truncate fw-semibold" [title]="item().label" (click)="navigate.emit(item())">{{ item().label }}</a>
+      <div class="text-muted small d-flex align-items-center flex-wrap">
+        <app-tag-badge [selectionMode]="TagBadgeCursor.Selectable" [fillStyle]="'outline'" [color]="statusBadgeColor()" [size]="'sm'">
+          {{ item().status | downloadQueueStatus }}
+        </app-tag-badge>
+        <span class="ps-1 pe-1">&bull;</span>
+        <span>{{ timeDisplay() | timeAgo }}</span>
       </div>
-      @if (item().estimatedSize > 0) {
-        <div class="text-muted small">
+      @if (showSize()) {
+        <div class="text-muted small dl-info-row">
           <span>{{ item().estimatedSize | bytes }}</span>
-          @if ((item().status === 'preparing' || item().status === 'downloading') && item().speedBps && item().speedBps! > 0) {
-            <span class="ms-1">&middot;</span>
-            <span class="ms-1">{{ item().speedBps! | bytes }}/s</span>
-            @if (item().etaSeconds && item().etaSeconds! > 0) {
-              <span class="ms-1">&middot;</span>
-              <span class="ms-1">{{ item().etaSeconds | compactEta }}</span>
-            }
+          @if (showSpeedInfo()) {
+            <span class="dl-speed">
+              <span>{{ item().speedBps! | bytes:true:1:true }}/s</span>
+              @if (item().etaSeconds && item().etaSeconds! > 0) {
+                <span class="ps-1 pe-1">&bull;</span>
+                <span>{{ item().etaSeconds | compactEta }}</span>
+              }
+            </span>
           }
         </div>
       }
-      @if (item().status === 'preparing' || item().status === 'downloading') {
+      @if (isActive()) {
         <div class="progress mt-1" style="height: 4px;" role="progressbar" [attr.aria-valuenow]="item().progress" aria-valuemin="0" aria-valuemax="100">
           <div class="progress-bar" [style.width.%]="item().progress"></div>
         </div>
@@ -66,7 +44,7 @@
         </button>
       }
       @if (item().status === 'failed' && item().retryCount < 3) {
-        <button class="btn btn-sm btn-outline-warning" [title]="t('retry')" (click)="retry.emit(item().id)">
+        <button class="btn btn-sm btn-outline-primary" [title]="t('retry')" (click)="retry.emit(item().id)">
           <i class="fa fa-redo" aria-hidden="true"></i>
         </button>
       }

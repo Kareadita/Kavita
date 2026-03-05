@@ -1,10 +1,4 @@
 .queue-item {
-  border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.1));
-
-  &:last-child {
-    border-bottom: none;
-  }
-
   &-info {
     min-width: 0;
   }
@@ -15,8 +9,22 @@
   }
 }
 
-.status-icon {
-  width: 1.25rem;
-  text-align: center;
-  flex-shrink: 0;
+.item-title {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.dl-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+}
+
+.dl-speed {
+  text-align: right;
 }

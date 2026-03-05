@@ -18,7 +18,7 @@ export class BytesPipe implements PipeTransform {
    *
    * Credit: https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string
    */
-  transform(bytes: number, si=true, dp=1): string {
+  transform(bytes: number, si=true, dp=1, alwaysShowDp=false): string {
     const thresh = si ? 1000 : 1024;
 
     if (Math.abs(bytes) < thresh) {
@@ -37,7 +37,7 @@ export class BytesPipe implements PipeTransform {
     } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
 
     const fixed = bytes.toFixed(dp);
-    if ((fixed + '').endsWith('.0')) {
+    if (!alwaysShowDp && (fixed + '').endsWith('.0')) {
       return bytes.toFixed(0) + ' ' + units[u];
     }
 

@@ -484,7 +484,7 @@ export class ActionService {
       }
 
       case Action.Download:
-        this.downloadService.download('volume', volume, undefined, libraryId);
+        this.downloadService.download('volume', volume, undefined, libraryId, seriesId);
         return of(this.fromAction(action, volume, 'none'));
 
       default:
@@ -533,7 +533,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        this.downloadService.download('chapter', chapter, undefined, libraryId);
+        this.downloadService.download('chapter', chapter, undefined, libraryId, seriesId);
         return of(this.fromAction(action, chapter, 'none'));
 
       case Action.Edit:
@@ -1152,8 +1152,8 @@ export class ActionService {
       }
 
       case Action.Download:
-        for (const v of volumes) { this.downloadService.download('volume', v, undefined, libraryId); }
-        for (const c of chapters) { this.downloadService.download('chapter', c, undefined, libraryId); }
+        for (const v of volumes) { this.downloadService.download('volume', v, undefined, libraryId, seriesId); }
+        for (const c of chapters) { this.downloadService.download('chapter', c, undefined, libraryId, seriesId); }
         return of(this.fromAction(action, [...volumes, ...chapters], 'none'));
 
       default:

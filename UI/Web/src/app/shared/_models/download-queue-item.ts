@@ -9,6 +9,7 @@ export interface DownloadQueueItem {
   entityType: 'volume' | 'chapter';
   entityId: number;
   libraryId: number;
+  seriesId: number;
   /** Human-readable label, e.g. "My Series - Vol. 3" */
   label: string;
   /** Volume or chapter number string */
