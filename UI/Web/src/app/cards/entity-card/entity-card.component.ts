@@ -302,14 +302,8 @@ export class EntityCardComponent<T> implements OnInit {
       requiresRefetch: updated === null
     };
 
-    console.log('Updating progress event: ', result);
     // Emit for parent to handle
     this.progressUpdated.emit(result);
-
-    // Also emit dataChanged for backward compatibility if we have an updated entity
-    // if (updated) {
-    //   this.dataChanged.emit(updated); // TODO: Probably want to remove this as it can cause double firing
-    // }
   }
 
   private setupDownloadTracking() {
