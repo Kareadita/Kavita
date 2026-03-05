@@ -11,23 +11,12 @@
     <div class="overlay" (click)="handleClick($event)">
 
       <!-- Cover Image -->
-      @if (!showError()) {
-        <app-image
-          [height]="cardHeight()"
-          [width]="cardWidth()"
-          [styles]="{'border-radius': '.25rem .25rem 0 0'}"
-          [imageUrl]="coverUrl()"
-        />
-      } @else {
-        <app-image
-          [height]="cardHeight()"
-          [width]="cardWidth()"
-          [styles]="{'border-radius': '.25rem .25rem 0 0'}"
-          [imageUrl]="imageService.errorImage"
-        />
-      }
-
-
+      <app-image
+        [height]="cardHeight()"
+        [width]="cardWidth()"
+        [styles]="{'border-radius': '.25rem .25rem 0 0'}"
+        [imageUrl]="coverUrl()"
+      />
 
       @if (showError()) {
         <div class="error-banner">

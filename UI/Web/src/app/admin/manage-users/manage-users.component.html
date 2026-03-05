@@ -150,7 +150,7 @@
       } @else if (member.libraries.length > 5) {
         {{t('too-many-libraries')}}
       } @else {
-        @for(lib of member.libraries; track lib.name) {
+        @for(lib of member.libraries; track lib.id) {
           <app-tag-badge class="col-auto">{{lib.name}}</app-tag-badge>
         }
       }

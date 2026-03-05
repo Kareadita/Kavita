@@ -414,11 +414,12 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   /**
    * Track by function for Volume to tell when to refresh card data
    */
-  trackByVolumeIdentity = (index: number, item: Volume) => `${item.name}_${item.pagesRead}`;
+  trackByVolumeIdentity = (index: number, item: Volume) => `${item.id}_volume`;
   /**
    * Track by function for Chapter to tell when to refresh card data
    */
-  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.minNumber}_${item.maxNumber}_${item.volumeId}_${item.pagesRead}`;
+  trackByChapterIdentity = (index: number, item: Chapter) => `${item.id}_chapter`;
+  trackStoryLineIdentity = (index: number, item: StoryLineItem) => item.isChapter ? `${item.chapter!.data.id}_ch_storyline` : `${item.volume!.data.id}_vol_storyline`;
 
 
   /**
@@ -922,6 +923,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   updateVolume(c: Volume) {
     patchEntitySignal(this.volumes, c);
   }
+
 
   protected readonly LibraryType = LibraryType;
   protected readonly TabID = TabID;
