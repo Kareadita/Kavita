@@ -1152,8 +1152,7 @@ export class ActionService {
       }
 
       case Action.Download:
-        for (const v of volumes) { this.downloadService.download('volume', v, undefined, libraryId, seriesId); }
-        for (const c of chapters) { this.downloadService.download('chapter', c, undefined, libraryId, seriesId); }
+        this.downloadService.downloadBulk(volumes, chapters, libraryId, seriesId);
         return of(this.fromAction(action, [...volumes, ...chapters], 'none'));
 
       default:

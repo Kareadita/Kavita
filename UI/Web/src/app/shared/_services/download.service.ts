@@ -68,7 +68,7 @@ export class DownloadService {
   private IOS_SIZE_WARNING = 209_715_200;
 
   /** Set to true to enable verbose download queue logging in the browser console. */
-  private readonly debug = true;
+  private readonly debug = false;
 
   private debugLog(...args: any[]) {
     if (this.debug) console.log('[DownloadService]', ...args);
@@ -254,6 +254,18 @@ export class DownloadService {
     }
   }
 
+
+  /**
+   * Downloads multiple volumes and chapters in bulk, using only 2 HTTP size calls total.
+   */
+  downloadBulk(volumes: Volume[], chapters: Chapter[], libraryId = 0, seriesId = 0) {
+    const items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }> = [
+      ...volumes.map(v => ({ entity: v as Volume, entityType: 'volume' as const })),
+      ...chapters.map(c => ({ entity: c as Chapter, entityType: 'chapter' as const })),
+    ];
+    if (items.length === 0) return;
+    this.enqueueItems(items, '', libraryId, seriesId);
+  }
 
   cancelDownload(itemId: number) {
     const controller = this.activeAbortControllers.get(itemId);
@@ -456,12 +468,16 @@ export class DownloadService {
     return this.httpClient.get<number>(this.baseUrl + 'download/series-size?seriesId=' + seriesId);
   }
 
-  private downloadVolumeSize(volumeId: number) {
-    return this.httpClient.get<number>(this.baseUrl + 'download/volume-size?volumeId=' + volumeId);
+  private downloadBulkVolumeSizes(volumeIds: number[]) {
+    return this.httpClient.post<Record<number, number>>(this.baseUrl + 'download/bulk-volume-size', volumeIds);
   }
 
-  private downloadChapterSize(chapterId: number) {
-    return this.httpClient.get<number>(this.baseUrl + 'download/chapter-size?chapterId=' + chapterId);
+  private downloadBulkChapterSizes(chapterIds: number[]) {
+    return this.httpClient.post<Record<number, number>>(this.baseUrl + 'download/bulk-chapter-size', chapterIds);
+  }
+
+  private downloadBulkSeriesSize(seriesIds: number[]) {
+    return this.httpClient.post<Record<number, number>>(this.baseUrl + 'download/bulk-series-size', seriesIds);
   }
 
   private downloadSeries(series: Series) {
@@ -493,18 +509,24 @@ export class DownloadService {
   private enqueueItems(items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }>, seriesName: string, libraryId: number, seriesId = 0) {
     this.debugLog(`enqueueItems() adding ${items.length} items for series "${seriesName}"`);
 
-    // Fetch individual sizes in parallel, then enqueue with sizes
-    const sizeRequests = items.map(item =>
-      item.entityType === 'volume'
-        ? this.downloadVolumeSize((item.entity as Volume).id)
-        : this.downloadChapterSize((item.entity as Chapter).id)
-    );
+    const volumeItems = items.filter(i => i.entityType === 'volume');
+    const chapterItems = items.filter(i => i.entityType === 'chapter');
 
-    forkJoin(sizeRequests).pipe(
+    const volSizes$ = volumeItems.length > 0
+      ? this.downloadBulkVolumeSizes(volumeItems.map(i => i.entity.id))
+      : of({} as Record<number, number>);
+    const chSizes$ = chapterItems.length > 0
+      ? this.downloadBulkChapterSizes(chapterItems.map(i => i.entity.id))
+      : of({} as Record<number, number>);
+
+    forkJoin([volSizes$, chSizes$]).pipe(
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe(async sizes => {
-      for (let i = 0; i < items.length; i++) {
-        await this.addToQueue(items[i].entity, items[i].entityType, seriesName, libraryId, sizes[i], seriesId);
+    ).subscribe(async ([volMap, chMap]) => {
+      for (const item of items) {
+        const size = item.entityType === 'volume'
+          ? (volMap[item.entity.id] ?? 0)
+          : (chMap[item.entity.id] ?? 0);
+        await this.addToQueue(item.entity, item.entityType, seriesName, libraryId, size, seriesId, true);
       }
       this.processQueue();
     });
@@ -512,12 +534,12 @@ export class DownloadService {
 
   private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, seriesId = 0) {
     const user = this.accountService.currentUser();
-    const sizeCall = entityType === 'volume'
-      ? this.downloadVolumeSize((entity as Volume).id)
-      : this.downloadChapterSize((entity as Chapter).id);
+    const sizeCall$ = entityType === 'volume'
+      ? this.downloadBulkVolumeSizes([entity.id]).pipe(map(m => m[entity.id] ?? 0))
+      : this.downloadBulkChapterSizes([entity.id]).pipe(map(m => m[entity.id] ?? 0));
 
     // Always fetch size to populate estimatedSize; only prompt if user preference is set
-    sizeCall.pipe(
+    sizeCall$.pipe(
       switchMap(async size => {
         const promptForSize = user && user.preferences.promptForDownloadSize;
         const confirmed = promptForSize ? await this.confirmSize(size, entityType) : true;
@@ -531,7 +553,7 @@ export class DownloadService {
     });
   }
 
-  private async addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0) {
+  private async addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, skipRedownloadPrompt = false) {
     const entityId = entity.id;
     const key = this._indexKey(entityType, entityId);
 
@@ -541,8 +563,13 @@ export class DownloadService {
       return;
     }
 
-    // 2. Previously completed → prompt for re-download
+    // 2. Previously completed → skip silently in bulk, prompt for single downloads
     if (this._completedEntityIds.has(key)) {
+      if (skipRedownloadPrompt) {
+        this.debugLog(`addToQueue() already completed, skipping in bulk — ${key}`);
+        return;
+      }
+
       const todayMatch = this.completedToday().find(i => i.entityType === entityType && i.entityId === entityId);
       const olderMatch = !todayMatch ? this._olderItems().find(i => i.entityType === entityType && i.entityId === entityId) : undefined;
       const match = todayMatch ?? olderMatch;

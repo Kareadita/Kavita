@@ -198,7 +198,7 @@ export class CardConfigFactory {
    */
   forChapter(params: ConfigCardFactoryChapterVolumeParameters<Chapter>): ActionableCardConfiguration<Chapter> {
     const defaults: ActionableCardConfiguration<Chapter> = {
-      allowSelection: false,
+      allowSelection: true,
       selectionType: 'chapter',
       suppressArchiveWarning: false,
 
