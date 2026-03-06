@@ -211,7 +211,7 @@ public class DownloadController(
 
         var seriesId = downloadBookmarkDto.Bookmarks.First().SeriesId;
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, seriesId, HttpContext.RequestAborted))
-            return Forbid();
+            return NotFound();
 
         if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest(await localizationService.Translate(UserId, "bookmarks-empty"));
 

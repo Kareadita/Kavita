@@ -13,7 +13,7 @@ namespace Kavita.Server.Attributes;
 
 /// <summary>
 /// An attribute restricting access to entities based on the user's access to the reading list.
-/// Returns 403 Forbidden on failure
+/// Returns 404 Not Found on failure
 /// </summary>
 /// <param name="failOnMissing"></param>
 /// <param name="readingListIdKey"></param>
@@ -28,7 +28,7 @@ public class ReadingListAccessAttribute(bool failOnMissing = true, string readin
 
 /// <summary>
 /// An attribute restricting access to entities based on the user's access to the person.
-/// Returns 403 Forbidden on failure
+/// Returns 404 Not Found on failure
 /// </summary>
 /// <param name="failOnMissing"></param>
 /// <param name="personIdKey"></param>
@@ -43,7 +43,7 @@ public class PersonAccessAttribute(bool failOnMissing = true, string personIdKey
 
 /// <summary>
 /// An attribute restricting access to entities based on the user's access to the library.
-/// Returns 403 Forbidden on failure
+/// Returns 404 Not Found on failure
 /// </summary>
 /// <param name="failOnMissing"></param>
 /// <param name="libraryIdKey"></param>
@@ -59,7 +59,7 @@ public class LibraryAccessAttribute(bool failOnMissing = true, string libraryIdK
 
 /// <summary>
 /// An attribute restricting access to entities based on the user's access to the series.
-/// Returns 403 Forbidden on failure
+/// Returns 404 Not Found on failure
 /// </summary>
 /// <param name="failOnMissing"></param>
 /// <param name="seriesIdKey"></param>
@@ -75,7 +75,7 @@ public class SeriesAccessAttribute(bool failOnMissing = true, string seriesIdKey
 
 /// <summary>
 /// An attribute restricting access to entities based on the user's access to the volume.
-/// Returns 403 Forbidden on failure
+/// Returns 404 Not Found on failure
 /// </summary>
 /// <param name="failOnMissing"></param>
 /// <param name="volumeIdKey"></param>
@@ -91,7 +91,7 @@ public class VolumeAccessAttribute(bool failOnMissing = true, string volumeIdKey
 
 /// <summary>
 /// An attribute restricting access to entities based on the user's access to the chapter.
-/// Returns 403 Forbidden on failure
+/// Returns 404 Not Found on failure
 /// </summary>
 /// <param name="failOnMissing"></param>
 /// <param name="chapterIdKey"></param>
@@ -122,7 +122,7 @@ public abstract class AccessAttribute(string idKey, bool failOnMissing = true, b
         {
             if (failOnMissing)
             {
-                context.Result = new ForbidResult();
+                context.Result = new NotFoundResult();
             }
             return;
         }
@@ -132,7 +132,7 @@ public abstract class AccessAttribute(string idKey, bool failOnMissing = true, b
         var hasAccess = await CheckAccess(unitOfWork, userId, entityId.Value, context.HttpContext.RequestAborted);
         if (!hasAccess)
         {
-            context.Result = new ForbidResult();
+            context.Result = new NotFoundResult();
         }
     }
 

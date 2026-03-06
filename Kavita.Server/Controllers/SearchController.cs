@@ -30,7 +30,7 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
         if (series == null) return NotFound();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, series.Id))
-            return Forbid();
+            return NotFound();
 
         return Ok(series);
     }

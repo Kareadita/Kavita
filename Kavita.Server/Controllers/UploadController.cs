@@ -490,7 +490,7 @@ public class UploadController : BaseApiController
     {
         try
         {
-            if (uploadFileDto.Id != UserId) return Forbid();
+            if (uploadFileDto.Id != UserId) return NotFound();
 
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(uploadFileDto.Id);
             if (user == null) return BadRequest(await _localizationService.Translate(UserId, "user-doesnt-exist"));

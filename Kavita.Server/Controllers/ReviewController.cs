@@ -33,7 +33,7 @@ public class ReviewController(
         if (user == null) return Unauthorized();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId))
-            return Forbid();
+            return NotFound();
 
         var ratingBuilder = new RatingBuilder(await unitOfWork.UserRepository.GetUserRatingAsync(dto.SeriesId, user.Id));
 
@@ -71,7 +71,7 @@ public class ReviewController(
         if (dto.ChapterId == null) return BadRequest();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, dto.SeriesId))
-            return Forbid();
+            return NotFound();
 
         var chapterId = dto.ChapterId.Value;
 

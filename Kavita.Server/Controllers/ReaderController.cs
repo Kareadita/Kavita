@@ -940,7 +940,7 @@ public class ReaderController(ICacheService cacheService,
         var userId = UserId;
         if (string.IsNullOrWhiteSpace(dto.Title)) return BadRequest(await localizationService.Translate(userId, "name-required"));
 
-        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, dto.ChapterId)) return Forbid();
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, dto.ChapterId)) return NotFound();
 
         if (dto.PageNumber < 0) return BadRequest(await localizationService.Translate(userId, "valid-number"));
         if (await unitOfWork.UserTableOfContentRepository.IsUnique(userId, dto.ChapterId, dto.PageNumber,

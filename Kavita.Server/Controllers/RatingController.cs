@@ -32,7 +32,7 @@ public class RatingController(
         if (user == null) throw new UnauthorizedAccessException();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, updateRating.SeriesId))
-            return Forbid();
+            return NotFound();
 
         if (await ratingService.UpdateSeriesRating(user, updateRating))
         {
@@ -55,7 +55,7 @@ public class RatingController(
         if (user == null) throw new UnauthorizedAccessException();
 
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, updateRating.SeriesId))
-            return Forbid();
+            return NotFound();
 
         if (await ratingService.UpdateChapterRating(user, updateRating))
         {
