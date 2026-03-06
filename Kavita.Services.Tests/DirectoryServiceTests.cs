@@ -399,6 +399,7 @@ public class DirectoryServiceTests: AbstractFsTest
         fileSystem.AddFile($"{testDirectory}data-0.txt", new MockFileData("abc"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
+        // Windows GA runners mount on D drive, so we use E to ensure this test passes
         Assert.False(ds.IsDriveMounted("e:/manga/"));
     }
 
