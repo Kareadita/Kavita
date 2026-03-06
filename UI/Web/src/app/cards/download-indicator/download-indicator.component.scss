@@ -2,23 +2,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: var(--card-download-indicator-size);
+  height: var(--card-download-indicator-size);
   border-radius: 50%;
   pointer-events: none;
+  box-shadow: var(--card-download-indicator-box-shadow);
 
   &.active {
     background: conic-gradient(
-      var(--primary-color) calc(var(--progress) * 3.6deg),
-      rgba(0, 0, 0, 0.6) calc(var(--progress) * 3.6deg)
+      var(--card-download-indicator-active-color) calc(var(--progress) * 3.6deg),
+      var(--card-download-indicator-active-track-color) calc(var(--progress) * 3.6deg)
     );
-    border: 2px solid var(--primary-color);
+    border: 2px solid var(--card-download-indicator-active-color);
+
+    i {
+      font-size: var(--card-download-indicator-icon-size);
+      color: var(--card-download-indicator-icon-color);
+    }
   }
 
   &.completed {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--card-download-indicator-completed-color);
 
-    i { font-size: 0.7rem; line-height: 1; }
+    i {
+      font-size: var(--card-download-indicator-icon-size);
+      color: var(--card-download-indicator-icon-color);
+      line-height: 1;
+    }
+  }
+
+  &.queued {
+    background-color: var(--card-download-indicator-queued-color);
+
+    i {
+      font-size: var(--card-download-indicator-icon-size);
+      color: var(--card-download-indicator-icon-color);
+      line-height: 1;
+    }
   }
 }

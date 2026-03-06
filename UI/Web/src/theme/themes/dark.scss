@@ -478,6 +478,16 @@
   --tooltip-caret-color: var(--tooltip-outline-color);
 
 
+  /** Card Download Indicator **/
+  --card-download-indicator-size: 1.5rem;
+  --card-download-indicator-icon-size: 1rem;
+  --card-download-indicator-icon-color: white;
+  --card-download-indicator-box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --card-download-indicator-active-color: var(--primary-color);
+  --card-download-indicator-active-track-color: rgba(0, 0, 0, 0.6);
+  --card-download-indicator-completed-color: var(--primary-color);
+  --card-download-indicator-queued-color: var(--primary-color-dark-shade);
+
   /** Misc **/
   --offwhite-text-color: #8b95a5;
 

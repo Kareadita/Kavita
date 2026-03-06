@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 import {DownloadQueueItem} from 'src/app/shared/_models/download-queue-item';
 import {TranslocoDirective} from "@jsverse/transloco";
 
@@ -11,4 +11,8 @@ import {TranslocoDirective} from "@jsverse/transloco";
 })
 export class DownloadIndicatorComponent {
   download = input.required<DownloadQueueItem | null>();
+
+  isCompleted = computed(() => this.download()?.status === 'completed');
+  isQueued = computed(() => this.download()?.status === 'queued');
+  isActive = computed(() => !this.isCompleted() && !this.isQueued() && this.download() != null);
 }
