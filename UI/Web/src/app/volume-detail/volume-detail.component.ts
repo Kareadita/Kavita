@@ -18,7 +18,6 @@ import {ImageService} from "../_services/image.service";
 import {SeriesService} from "../_services/series.service";
 import {LibraryService} from "../_services/library.service";
 import {ThemeService} from "../_services/theme.service";
-import {DownloadEvent, DownloadService} from "../shared/_services/download.service";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
 import {ReaderService} from "../_services/reader.service";
 import {AccountService} from "../_services/account.service";
@@ -38,7 +37,7 @@ import {
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
 import {LibraryType} from "../_models/library/library";
-import {map, Observable, tap} from "rxjs";
+import {tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
@@ -182,7 +181,6 @@ export class VolumeDetailComponent implements OnInit {
   private readonly seriesService = inject(SeriesService);
   private readonly libraryService = inject(LibraryService);
   private readonly themeService = inject(ThemeService);
-  private readonly downloadService = inject(DownloadService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
@@ -262,11 +260,6 @@ export class VolumeDetailComponent implements OnInit {
 
   chapters = computed(() => this.volume()?.chapters || []);
 
-
-  /**
-   * This is the download we get from download service.
-   */
-  download$: Observable<DownloadEvent | null> | null = null;
 
   currentlyReadingChapter = computed(() => {
     const chaptersWithProgress = this.volume().chapters.filter(c => c.pagesRead < c.pages);
@@ -413,11 +406,6 @@ export class VolumeDetailComponent implements OnInit {
     }
 
     this.themeService.setColorScape(this.volume()!.primaryColor, this.volume()!.secondaryColor);
-
-    // Set up the download in progress
-    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
-      return this.downloadService.mapToEntityType(events, this.volume()!);
-    }));
 
     this.route.fragment.pipe(tap(frag => {
       if (frag !== null && this.activeTabId !== (frag as TabID)) {

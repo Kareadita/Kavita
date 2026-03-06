@@ -30,11 +30,9 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {catchError, debounceTime, Observable, of, ReplaySubject, tap} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {catchError, debounceTime, of, ReplaySubject, tap} from 'rxjs';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
-import {DownloadEvent, DownloadService} from 'src/app/shared/_services/download.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
@@ -163,7 +161,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly downloadService = inject(DownloadService);
   private readonly actionService = inject(ActionService);
   private readonly messageHub = inject(MessageHubService);
   private readonly readingListService = inject(ReadingListService);
@@ -434,11 +431,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   showChapterTab = computed(() => this.chapters().length > 0);
   annotations = signal<Annotation[]>([]);
 
-  /**
-   * This is the download we get from download service.
-   */
-  download$: Observable<DownloadEvent | null> | null = null;
-
   totalRelatedCount = computed(() => this.relations().length + this.readingLists().length + this.collections().length + (this.bookmarks().length > 0 ? 1 : 0));
   /** Are there any related series */
   hasRelations = computed(() => this.relations().length > 0);
@@ -501,11 +493,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // Set up the download in progress
-    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
-      return this.downloadService.mapToEntityType(events, this.series()!);
-    }));
-
     this.loadPage$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(300), tap(val => this.loadSeries(this.seriesId(), val))).subscribe();
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {

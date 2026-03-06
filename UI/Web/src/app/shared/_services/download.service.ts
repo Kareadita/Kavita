@@ -15,10 +15,6 @@ import {translate, TranslocoService} from "@jsverse/transloco";
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {SAVER} from "../../_providers/saver.provider";
 import {UtilityService} from "./utility.service";
-import {UserCollection} from "../../_models/collection-tag";
-import {RecentlyAddedItem} from "../../_models/recently-added-item";
-import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
-import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
 import {SeriesService} from "../../_services/series.service";
@@ -30,17 +26,6 @@ import {LibraryService} from "../../_services/library.service";
 export const DEBOUNCE_TIME = 100;
 
 const bytesPipe = new BytesPipe();
-
-export interface DownloadEvent {
-  /** Type of entity being downloaded */
-  entityType: DownloadEntityType;
-  /** What to show user. For example, for Series, we might show series name. */
-  subTitle: string;
-  /** Progress of the download itself */
-  progress: number;
-  /** Entity id. For entities without id like logs or bookmarks, uses 0 instead */
-  id: number;
-}
 
 /**
  * Valid entity types for downloading
@@ -106,24 +91,7 @@ export class DownloadService {
   );
   readonly isPaused = signal(false);
 
-  /**
-   * Backward-compatible observable for existing consumers (card-config-factory, detail pages).
-   * Emits active (preparing/downloading) items mapped to DownloadEvent shape.
-   */
   private readonly queue$ = toObservable(this.queue);
-
-  readonly activeDownloads$: Observable<DownloadEvent[]> = toObservable(this.queue).pipe(
-    map(items =>
-      items
-        .filter(i => i.status === 'preparing' || i.status === 'downloading')
-        .map(i => ({
-          entityType: i.entityType as DownloadEntityType,
-          subTitle: i.subLabel,
-          progress: i.progress,
-          id: i.entityId
-        }))
-    )
-  );
 
   /**
    * Sliding window of recent byte snapshots for smoothed speed calculation.
@@ -373,30 +341,6 @@ export class DownloadService {
     return this.queue$.pipe(
       map(() => this.getItemForEntity(entity))
     );
-  }
-
-  /**
-   * Maps a list of DownloadEvents to the one matching `entity`, for backward compatibility.
-   */
-  mapToEntityType(events: DownloadEvent[], entity: Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter | BrowsePerson) {
-    if (this.utilityService.isSeries(entity)) {
-      return events.find(e => e.entityType === 'series' && e.id == entity.id
-        && e.subTitle === this.downloadSubtitle('series', (entity as Series))) || null;
-    }
-    if (this.utilityService.isVolume(entity)) {
-      return events.find(e => e.entityType === 'volume' && e.id == entity.id
-        && e.subTitle === this.downloadSubtitle('volume', (entity as Volume))) || null;
-    }
-    if (this.utilityService.isChapter(entity)) {
-      return events.find(e => e.entityType === 'chapter' && e.id == entity.id
-        && e.subTitle === this.downloadSubtitle('chapter', (entity as Chapter))) || null;
-    }
-    // PageBookmark[]
-    if (entity.hasOwnProperty('length')) {
-      return events.find(e => e.entityType === 'bookmark'
-        && e.subTitle === this.downloadSubtitle('bookmark', [(entity as PageBookmark)])) || null;
-    }
-    return null;
   }
 
   /**
