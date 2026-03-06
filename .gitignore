@@ -498,7 +498,7 @@ _temp/
 _output/
 Kavita.Server/stats/
 UI/Web/dist/
-/API.Tests/Extensions/Test Data/modified on run.txt
+/Kavita.Services.Tests/Extensions/Test Data/modified on run.txt
 
 # All config files/folders in config except appsettings.json
 /Kavita.Server/config-bak/
@@ -531,21 +531,21 @@ Kavita.Server/config/stats/app_stats.json
 Kavita.Server/config/pre-metadata/
 Kavita.Server/config/post-metadata/
 Kavita.Server/config/*.csv
-API.Tests/TestResults/
+Kavita.Services.Tests/TestResults/
 UI/Web/.vscode/settings.json
-/API.Tests/Services/Test Data/ArchiveService/CoverImages/output/*
+/Kavita.Services.Tests/Test Data/ArchiveService/CoverImages/output/*
 UI/Web/.angular/
 BenchmarkDotNet.Artifacts
 .claude/
 Kavita.Server/config/*backup.zip
 
 
-API.Tests/Services/Test Data/ImageService/**/*_output*
-API.Tests/Services/Test Data/ImageService/**/*_baseline*
-API.Tests/Services/Test Data/ImageService/**/*.html
+Kavita.Services.Tests/Test Data/ImageService/**/*_output*
+Kavita.Services.Tests/Test Data/ImageService/**/*_baseline*
+Kavita.Services.Tests/Test Data/ImageService/**/*.html
 
 
-API.Tests/Services/Test Data/ScannerService/ScanTests/**/*
+Kavita.Services.Tests/Test Data/ScannerService/ScanTests/**/*
 
 
 # Temp
