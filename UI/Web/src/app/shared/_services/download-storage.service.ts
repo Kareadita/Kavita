@@ -56,6 +56,21 @@ export class DownloadStorageService {
     });
   }
 
+  /** Returns all completed items with completedAt before the given timestamp. */
+  async getCompletedBefore(timestampMs: number): Promise<DownloadQueueItem[]> {
+    if (!this.db) return [];
+    return new Promise((resolve, reject) => {
+      const tx = this.db!.transaction(this.STORE, 'readonly');
+      const store = tx.objectStore(this.STORE);
+      const getAllReq = store.getAll();
+      getAllReq.onsuccess = () => {
+        const all = getAllReq.result as DownloadQueueItem[];
+        resolve(all.filter(i => i.status === 'completed' && (i.completedAt ?? 0) < timestampMs));
+      };
+      getAllReq.onerror = () => reject(getAllReq.error);
+    });
+  }
+
   /** Remove all items. */
   async clear(): Promise<void> {
     if (!this.db) return;

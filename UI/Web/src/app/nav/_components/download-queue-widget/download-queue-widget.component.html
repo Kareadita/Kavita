@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix:'download-queue-widget'">
-  @if (downloadService.hasActiveDownloads() || downloadService.completedItems().length > 0 || downloadService.failedItems().length > 0) {
+  @if (downloadService.hasActiveDownloads() || downloadService.completedTodayCount() > 0 || downloadService.olderCompletedCount() > 0 || downloadService.failedItems().length > 0) {
     <div class="nav-item me-2">
       <button class="btn btn-icon position-relative" (click)="openDownloadQueue()" [title]="t('title')">
         <i class="fa fa-download nav"

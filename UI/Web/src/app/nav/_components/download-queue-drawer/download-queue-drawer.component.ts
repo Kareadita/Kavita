@@ -29,19 +29,13 @@ export class DownloadQueueDrawerComponent {
     (this.downloadService.activeItem() ? 1 : 0) + this.downloadService.queuedItems().length + this.downloadService.failedItems().length
   );
 
-  readonly completedTabCount = computed(() => this.downloadService.completedItems().length);
+  readonly completedTabCount = computed(() =>
+    this.downloadService.completedTodayCount() + this.downloadService.olderCompletedCount()
+  );
 
-  readonly completedToday = computed(() => {
-    const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    return this.downloadService.completedItems().filter(i => (i.completedAt ?? 0) >= startOfDay);
-  });
-
-  readonly completedOlder = computed(() => {
-    const now = new Date();
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    return this.downloadService.completedItems().filter(i => (i.completedAt ?? 0) < startOfDay);
-  });
+  readonly completedToday = this.downloadService.completedItems;
+  readonly olderItems = this.downloadService.olderCompletedItems;
+  readonly olderCount = this.downloadService.olderCompletedCount;
 
   close() {
     this.activeOffcanvas.close();
@@ -58,8 +52,14 @@ export class DownloadQueueDrawerComponent {
   }
 
   clearCompletedOlder() {
-    const ids = this.completedOlder().map(i => i.id);
-    this.downloadService.clearCompletedByIds(ids);
+    this.downloadService.clearOlderCompleted();
+  }
+
+  expandOlder() {
+    this.olderCollapsed = !this.olderCollapsed;
+    if (!this.olderCollapsed) {
+      this.downloadService.loadOlderCompleted();
+    }
   }
 
   protected readonly ResizeMode = ResizeMode;

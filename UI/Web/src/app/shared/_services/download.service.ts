@@ -71,18 +71,38 @@ export class DownloadService {
     if (this.debug) console.log('[DownloadService]', ...args);
   }
 
-  // --- Signal-based queue ---
+  // --- Signal-based queue (split: active vs completed) ---
   private _nextId = 0;
-  readonly queue = signal<DownloadQueueItem[]>([]);
+  /** Items that are queued/preparing/downloading/failed — mutated frequently during downloads */
+  readonly activeQueue = signal<DownloadQueueItem[]>([]);
+  /** Completed items from today's session — mutated only when a download finishes */
+  readonly completedToday = signal<DownloadQueueItem[]>([]);
+
+  // O(1) lookup for active items by entityType:entityId
+  private _activeIndex = new Map<string, DownloadQueueItem>();
+  // O(1) lookup: has this entity EVER been downloaded (completed, possibly older)?
+  private _completedEntityIds = new Set<string>();
+
+  private _indexKey(entityType: string, entityId: number): string {
+    return `${entityType}:${entityId}`;
+  }
+
+  private _rebuildActiveIndex() {
+    this._activeIndex.clear();
+    for (const item of this.activeQueue()) {
+      this._activeIndex.set(this._indexKey(item.entityType, item.entityId), item);
+    }
+  }
+
   readonly activeItem = computed(() =>
-    this.queue().find(i => i.status === 'preparing' || i.status === 'downloading') ?? null
+    this.activeQueue().find(i => i.status === 'preparing' || i.status === 'downloading') ?? null
   );
-  readonly queuedItems = computed(() => this.queue().filter(i => i.status === 'queued'));
+  readonly queuedItems = computed(() => this.activeQueue().filter(i => i.status === 'queued'));
   readonly completedItems = computed(() =>
-    this.queue().filter(i => i.status === 'completed')
-      .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0))
+    this.completedToday().sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0))
   );
-  readonly failedItems = computed(() => this.queue().filter(i => i.status === 'failed'));
+  readonly completedTodayCount = computed(() => this.completedToday().length);
+  readonly failedItems = computed(() => this.activeQueue().filter(i => i.status === 'failed'));
   readonly totalActiveCount = computed(() =>
     (this.activeItem() ? 1 : 0) + this.queuedItems().length
   );
@@ -91,7 +111,14 @@ export class DownloadService {
   );
   readonly isPaused = signal(false);
 
-  private readonly queue$ = toObservable(this.queue);
+  // Older completed items (lazy-loaded from IDB)
+  readonly _olderCompletedCount = signal(0);
+  readonly olderCompletedCount = this._olderCompletedCount.asReadonly();
+  private _olderItems = signal<DownloadQueueItem[]>([]);
+  readonly olderCompletedItems = this._olderItems.asReadonly();
+  private _olderLoaded = false;
+
+  private readonly activeQueue$ = toObservable(this.activeQueue);
 
   /**
    * Sliding window of recent byte snapshots for smoothed speed calculation.
@@ -142,18 +169,45 @@ export class DownloadService {
    */
   restoreQueue() {
     this.storage.open().then(items => {
-      const restored = items.map(i =>
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const startOfDayMs = startOfDay.getTime();
+
+      // Mark interrupted items as failed
+      const processed = items.map(i =>
         (i.status === 'preparing' || i.status === 'downloading')
           ? { ...i, status: 'failed' as DownloadQueueStatus, errorMessage: this.translocoService.translate('download-queue-drawer.failed-interrupted') }
           : i
       );
-      this.queue.set(restored);
-      restored.filter(i => i.status === 'failed').forEach(i => this.storage.save(i));
-      // Advance _nextId past all restored IDs to prevent ID collisions with new items
-      if (restored.length > 0) {
-        this._nextId = Math.max(...restored.map(i => i.id)) + 1;
+
+      // Split: active (non-completed) + today's completed → signals
+      const active = processed.filter(i => i.status !== 'completed');
+      const todayCompleted = processed.filter(i =>
+        i.status === 'completed' && (i.completedAt ?? 0) >= startOfDayMs
+      );
+      const olderCompleted = processed.filter(i =>
+        i.status === 'completed' && (i.completedAt ?? 0) < startOfDayMs
+      );
+
+      this.activeQueue.set(active);
+      this.completedToday.set(todayCompleted);
+      this._rebuildActiveIndex();
+
+      // Populate the completed-entity-ID set (today + older)
+      for (const item of [...todayCompleted, ...olderCompleted]) {
+        this._completedEntityIds.add(this._indexKey(item.entityType, item.entityId));
       }
-      if (restored.some(i => i.status === 'queued')) {
+
+      this._olderCompletedCount.set(olderCompleted.length);
+
+      // Persist failed items
+      active.filter(i => i.status === 'failed').forEach(i => this.storage.save(i));
+
+      // Advance _nextId past all restored IDs to prevent ID collisions with new items
+      if (processed.length > 0) {
+        this._nextId = Math.max(...processed.map(i => i.id)) + 1;
+      }
+      if (active.some(i => i.status === 'queued')) {
         this.isPaused.set(true);   // wait for user to hit Resume
       }
     });
@@ -206,53 +260,89 @@ export class DownloadService {
       controller.abort();
       this.activeAbortControllers.delete(itemId);
     }
-    this.queue.update(q => q.filter(i => i.id !== itemId));
+    this.activeQueue.update(q => q.filter(i => i.id !== itemId));
+    this._rebuildActiveIndex();
     this.storage.delete(itemId);
     setTimeout(() => this.processQueue(), 100);
   }
 
   removeItem(id: number) {
-    this.queue.update(q => q.filter(i => i.id !== id));
+    // Check activeQueue first, then completedToday
+    if (this.activeQueue().some(i => i.id === id)) {
+      this.activeQueue.update(q => q.filter(i => i.id !== id));
+      this._rebuildActiveIndex();
+    } else {
+      this.completedToday.update(q => q.filter(i => i.id !== id));
+    }
     this.storage.delete(id);
   }
 
   clearCompleted() {
-    const ids = this.queue().filter(i => i.status === 'completed').map(i => i.id);
-    this.queue.update(q => q.filter(i => i.status !== 'completed'));
+    const ids = this.completedToday().map(i => i.id);
+    this.completedToday.set([]);
     ids.forEach(id => this.storage.delete(id));
   }
 
   clearCompletedByIds(ids: number[]) {
     const idSet = new Set(ids);
-    this.queue.update(q => q.filter(i => !idSet.has(i.id)));
+    // Remove matching IDs from completedToday and update entity ID set
+    const removed = this.completedToday().filter(i => idSet.has(i.id));
+    this.completedToday.update(q => q.filter(i => !idSet.has(i.id)));
+    for (const item of removed) {
+      this._completedEntityIds.delete(this._indexKey(item.entityType, item.entityId));
+    }
     ids.forEach(id => this.storage.delete(id));
   }
 
+  loadOlderCompleted() {
+    if (this._olderLoaded) return;
+    this._olderLoaded = true;
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    this.storage.getCompletedBefore(startOfDay.getTime()).then(items => {
+      this._olderItems.set(items.sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0)));
+    });
+  }
+
+  clearOlderCompleted() {
+    const items = this._olderItems();
+    this._olderItems.set([]);
+    this._olderCompletedCount.set(0);
+    this._olderLoaded = false;
+    for (const item of items) {
+      this.storage.delete(item.id);
+      this._completedEntityIds.delete(this._indexKey(item.entityType, item.entityId));
+    }
+  }
+
   retryDownload(itemId: number) {
-    const item = this.queue().find(i => i.id === itemId);
+    const item = this.activeQueue().find(i => i.id === itemId);
     if (!item || item.retryCount >= 3) return;
     const retried = { ...item, status: 'queued' as DownloadQueueStatus, errorMessage: '', retryCount: item.retryCount + 1 };
     // Place retried item at the front of the queue (after any active item)
-    this.queue.update(q => {
+    this.activeQueue.update(q => {
       const without = q.filter(i => i.id !== itemId);
       const activeIdx = without.findIndex(i => i.status === 'preparing' || i.status === 'downloading');
       const insertAt = activeIdx >= 0 ? activeIdx + 1 : 0;
       return [...without.slice(0, insertAt), retried, ...without.slice(insertAt)];
     });
+    this._rebuildActiveIndex();
     this.storage.save(retried);
     this.processQueue();
   }
 
   cancelAllQueued() {
-    const ids = this.queue().filter(i => i.status === 'queued').map(i => i.id);
-    this.queue.update(q => q.filter(i => i.status !== 'queued'));
+    const ids = this.activeQueue().filter(i => i.status === 'queued').map(i => i.id);
+    this.activeQueue.update(q => q.filter(i => i.status !== 'queued'));
+    this._rebuildActiveIndex();
     ids.forEach(id => this.storage.delete(id));
     this.isPaused.set(false);  // don't block fresh downloads after cancelling all queued
   }
 
   clearAllFailed() {
-    const ids = this.queue().filter(i => i.status === 'failed').map(i => i.id);
-    this.queue.update(q => q.filter(i => i.status !== 'failed'));
+    const ids = this.activeQueue().filter(i => i.status === 'failed').map(i => i.id);
+    this.activeQueue.update(q => q.filter(i => i.status !== 'failed'));
+    this._rebuildActiveIndex();
     ids.forEach(id => this.storage.delete(id));
   }
 
@@ -261,16 +351,16 @@ export class DownloadService {
   }
 
   retryAllFailed() {
-    this.queue.update(q => {
+    this.activeQueue.update(q => {
       const active = q.filter(i => i.status === 'preparing' || i.status === 'downloading');
       const retried = q.filter(i => i.status === 'failed')
         .map(i => ({ ...i, status: 'queued' as DownloadQueueStatus, errorMessage: '', retryCount: i.retryCount + 1 }));
       const existingQueued = q.filter(i => i.status === 'queued');
-      const rest = q.filter(i => i.status === 'completed' || i.status === 'cancelled');
       // Retried items go to the front of the queue, before existing queued items
-      return [...active, ...retried, ...existingQueued, ...rest];
+      return [...active, ...retried, ...existingQueued];
     });
-    this.queue().filter(i => i.status === 'queued').forEach(i => this.storage.save(i));
+    this._rebuildActiveIndex();
+    this.activeQueue().filter(i => i.status === 'queued').forEach(i => this.storage.save(i));
     this.processQueue();
   }
 
@@ -279,33 +369,38 @@ export class DownloadService {
    * Use this for card download indicators.
    */
   getItemForEntity(entity: Series | Volume | Chapter | PageBookmark[], includeCompleted = false): DownloadQueueItem | null {
-    const q = this.queue();
+    // Read both signals up front so Angular computed/effect tracks them as dependencies,
+    // even for code paths that use the plain Map/Set for O(1) lookup.
+    const aq = this.activeQueue();
+    const ct = this.completedToday();
 
     // Series: aggregate across all active + completed items together so progress doesn't drop
     if (this.utilityService.isSeries(entity)) {
-      const statuses: DownloadQueueStatus[] = ['queued', 'preparing', 'downloading'];
-      if (includeCompleted) statuses.push('completed');
-      const items = q.filter(i => statuses.includes(i.status) && i.seriesName === (entity as Series).name);
+      const seriesName = (entity as Series).name;
+      const items = aq.filter(i =>
+        ['queued', 'preparing', 'downloading'].includes(i.status) && i.seriesName === seriesName
+      );
+      if (includeCompleted) {
+        items.push(...ct.filter(i => i.seriesName === seriesName));
+      }
       return this._aggregateSeriesItems(items);
     }
 
-    // Volume/Chapter: check active first, then completed
-    const activeItems = q.filter(i => i.status === 'queued' || i.status === 'preparing' || i.status === 'downloading');
-    const active = this._findEntityInList(activeItems, entity);
-    if (active) return active;
+    // Volume/Chapter: O(1) Map lookup for active
+    const entityType = this.utilityService.isVolume(entity) ? 'volume' : 'chapter';
+    const key = this._indexKey(entityType, (entity as Volume | Chapter).id);
+    const active = this._activeIndex.get(key);
+    if (active && ['queued', 'preparing', 'downloading'].includes(active.status)) return active;
 
+    // Check today's completed (small array)
     if (includeCompleted) {
-      return this._findEntityInList(q.filter(i => i.status === 'completed'), entity);
-    }
-    return null;
-  }
-
-  private _findEntityInList(items: DownloadQueueItem[], entity: Series | Volume | Chapter | PageBookmark[]): DownloadQueueItem | null {
-    if (this.utilityService.isVolume(entity)) {
-      return items.find(i => i.entityType === 'volume' && i.entityId === (entity as Volume).id) ?? null;
-    }
-    if (this.utilityService.isChapter(entity)) {
-      return items.find(i => i.entityType === 'chapter' && i.entityId === (entity as Chapter).id) ?? null;
+      const todayMatch = ct.find(i =>
+        i.entityType === entityType && i.entityId === (entity as Volume | Chapter).id);
+      if (todayMatch) return todayMatch;
+      // Check if entity was ever downloaded (older, in IDB) — return a minimal sentinel
+      if (this._completedEntityIds.has(key)) {
+        return { status: 'completed', entityType, entityId: (entity as Volume | Chapter).id } as DownloadQueueItem;
+      }
     }
     return null;
   }
@@ -338,7 +433,7 @@ export class DownloadService {
    */
   getEntityDownload$(entity: Series | Volume | Chapter | PageBookmark[]): Observable<DownloadQueueItem | null> {
     if (!entity.hasOwnProperty('id')) return of(null);
-    return this.queue$.pipe(
+    return this.activeQueue$.pipe(
       map(() => this.getItemForEntity(entity))
     );
   }
@@ -477,7 +572,8 @@ export class DownloadService {
       downloadName,
     };
 
-    this.queue.update(q => [...q, item]);
+    this.activeQueue.update(q => [...q, item]);
+    this._rebuildActiveIndex();
     this.storage.save(item);
   }
 
@@ -493,7 +589,7 @@ export class DownloadService {
       return;
     }
 
-    const nextItem = this.queue().find(i => i.status === 'queued');
+    const nextItem = this.activeQueue().find(i => i.status === 'queued');
     if (!nextItem) {
       this.debugLog('processQueue() — queue empty, nothing to do');
       return;
@@ -548,6 +644,7 @@ export class DownloadService {
       const reader = response.body.getReader();
       const chunks: BlobPart[] = [];
       let received = 0;
+      let lastProgressUpdate = 0;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -557,6 +654,11 @@ export class DownloadService {
 
         if (contentLength > 0) {
           const now = Date.now();
+
+          // Throttle signal updates to ~4/sec max (250ms)
+          if ((now - lastProgressUpdate) < 250) continue;
+          lastProgressUpdate = now;
+
           const progress = Math.round((received / contentLength) * 100);
 
           // Sliding-window speed: keep samples from the last SPEED_WINDOW_MS
@@ -589,13 +691,14 @@ export class DownloadService {
             }
           }
 
-          this.queue.update(q => q.map(i =>
+          this.activeQueue.update(q => q.map(i =>
             i.id === item.id
               ? { ...i, progress,
                   ...(speedBps !== undefined ? { speedBps } : {}),
                   ...(etaSeconds !== undefined ? { etaSeconds } : {}) }
               : i
           ));
+          this._rebuildActiveIndex();
         }
       }
 
@@ -630,10 +733,11 @@ export class DownloadService {
     return decodeURIComponent(filename) || fallbackName || 'download';
   }
 
-  /** Updates queue signal and persists to IDB on status changes. */
+  /** Updates activeQueue signal and persists to IDB on status changes. */
   private setStatus(id: number, status: DownloadQueueStatus, extra?: Partial<DownloadQueueItem>) {
-    this.queue.update(q => q.map(i => i.id === id ? { ...i, status, ...extra } : i));
-    const item = this.queue().find(i => i.id === id);
+    this.activeQueue.update(q => q.map(i => i.id === id ? { ...i, status, ...extra } : i));
+    this._rebuildActiveIndex();
+    const item = this.activeQueue().find(i => i.id === id);
     if (item) this.storage.save(item);
   }
 
@@ -642,10 +746,12 @@ export class DownloadService {
    * Returns a synthetic DownloadQueueItem with averaged progress, or null if no active items.
    */
   private getSeriesDownloadProgress(seriesName: string): DownloadQueueItem | null {
-    const allItems = this.queue().filter(i =>
+    const activeItems = this.activeQueue().filter(i =>
       i.seriesName === seriesName &&
       i.status !== 'cancelled' && i.status !== 'failed'
     );
+    const completedItems = this.completedToday().filter(i => i.seriesName === seriesName);
+    const allItems = [...activeItems, ...completedItems];
     if (allItems.length === 0) return null;
 
     const hasActive = allItems.some(i =>
@@ -670,8 +776,18 @@ export class DownloadService {
     this.debugLog(`markCompleted() id=${itemId}`);
     this._speedSamples.delete(itemId);
     this._smoothedSpeed.delete(itemId);
-    this.setStatus(itemId, 'completed', { progress: 100, completedAt: Date.now() });
-    setTimeout(() => this.removeItem(itemId), 5 * 60 * 1000);
+
+    // Find the item in activeQueue, move it to completedToday
+    const item = this.activeQueue().find(i => i.id === itemId);
+    if (item) {
+      const completed = { ...item, status: 'completed' as DownloadQueueStatus, progress: 100, completedAt: Date.now() };
+      this.activeQueue.update(q => q.filter(i => i.id !== itemId));
+      this._rebuildActiveIndex();
+      this.completedToday.update(q => [...q, completed]);
+      this._completedEntityIds.add(this._indexKey(completed.entityType, completed.entityId));
+      this.storage.save(completed);
+    }
+
     // Give GC time to reclaim the previous download's blob before starting the next one
     setTimeout(() => this.processQueue(), 1500);
   }
@@ -680,7 +796,13 @@ export class DownloadService {
     this.debugLog(`markFailed() id=${itemId} error="${error}"`);
     this._speedSamples.delete(itemId);
     this._smoothedSpeed.delete(itemId);
-    this.setStatus(itemId, 'failed', { errorMessage: error, completedAt: Date.now() });
+    this.activeQueue.update(q => q.map(i => i.id === itemId
+      ? { ...i, status: 'failed' as DownloadQueueStatus, errorMessage: error, completedAt: Date.now() }
+      : i
+    ));
+    this._rebuildActiveIndex();
+    const item = this.activeQueue().find(i => i.id === itemId);
+    if (item) this.storage.save(item);
     // Give GC time to reclaim memory before starting next download
     setTimeout(() => this.processQueue(), 1500);
   }
