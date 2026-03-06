@@ -399,7 +399,7 @@ public class DirectoryServiceTests: AbstractFsTest
         fileSystem.AddFile($"{testDirectory}data-0.txt", new MockFileData("abc"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
-        Assert.False(ds.IsDriveMounted("d:/manga/"));
+        Assert.False(ds.IsDriveMounted("e:/manga/"));
     }
 
     [Fact]
