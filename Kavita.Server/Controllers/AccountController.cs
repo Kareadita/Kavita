@@ -134,7 +134,7 @@ public class AccountController(UserManager<AppUser> userManager,
             return BadRequest(errors);
         }
 
-        logger.LogInformation("{UserId}'s Password has been reset", user.Id);
+        logger.LogInformation("{User}'s Password has been reset", user.UserName);
         return Ok();
     }
 
