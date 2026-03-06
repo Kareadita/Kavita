@@ -31,8 +31,8 @@ public class ScannerHelper
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/ScanTests");
-    private readonly string _testcasesDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/TestCases");
+    private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService");
+    private readonly string _testcasesDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/TestCases");
     private readonly string _imagePath = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/1x1.png");
     private static readonly string[] ComicInfoExtensions = [".cbz", ".cbr", ".zip", ".rar"];
     private static readonly string[] EpubExtensions = [".epub"];
