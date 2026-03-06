@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {DownloadQueueItem} from '../_models/download-queue-item';
+import {normalizeTimestamp} from './download-timestamp';
 
 @Injectable({ providedIn: 'root' })
 export class DownloadStorageService {
@@ -56,8 +57,8 @@ export class DownloadStorageService {
     });
   }
 
-  /** Returns all completed items with completedAt before the given timestamp. */
-  async getCompletedBefore(timestampMs: number): Promise<DownloadQueueItem[]> {
+  /** Returns all completed items with completedAt before the given ISO string (or numeric timestamp for legacy data). */
+  async getCompletedBefore(cutoff: string): Promise<DownloadQueueItem[]> {
     if (!this.db) return [];
     return new Promise((resolve, reject) => {
       const tx = this.db!.transaction(this.STORE, 'readonly');
@@ -65,7 +66,7 @@ export class DownloadStorageService {
       const getAllReq = store.getAll();
       getAllReq.onsuccess = () => {
         const all = getAllReq.result as DownloadQueueItem[];
-        resolve(all.filter(i => i.status === 'completed' && (i.completedAt ?? 0) < timestampMs));
+        resolve(all.filter(i => i.status === 'completed' && normalizeTimestamp(i.completedAt) < cutoff));
       };
       getAllReq.onerror = () => reject(getAllReq.error);
     });

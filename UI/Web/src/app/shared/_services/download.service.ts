@@ -15,6 +15,9 @@ import {translate, TranslocoService} from "@jsverse/transloco";
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {SAVER} from "../../_providers/saver.provider";
 import {UtilityService} from "./utility.service";
+import {DateTime} from 'luxon';
+import {normalizeTimestamp} from './download-timestamp';
+import {UtcToLocalDatePipe} from '../../_pipes/utc-to-locale-date.pipe';
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
 import {SeriesService} from "../../_services/series.service";
@@ -99,7 +102,7 @@ export class DownloadService {
   );
   readonly queuedItems = computed(() => this.activeQueue().filter(i => i.status === 'queued'));
   readonly completedItems = computed(() =>
-    this.completedToday().sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0))
+    this.completedToday().sort((a, b) => normalizeTimestamp(b.completedAt).localeCompare(normalizeTimestamp(a.completedAt)))
   );
   readonly completedTodayCount = computed(() => this.completedToday().length);
   readonly failedItems = computed(() => this.activeQueue().filter(i => i.status === 'failed'));
@@ -169,9 +172,7 @@ export class DownloadService {
    */
   restoreQueue() {
     this.storage.open().then(items => {
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const startOfDayMs = startOfDay.getTime();
+      const startOfDayIso = DateTime.utc().startOf('day').toISO()!;
 
       // Mark interrupted items as failed
       const processed = items.map(i =>
@@ -183,10 +184,10 @@ export class DownloadService {
       // Split: active (non-completed) + today's completed → signals
       const active = processed.filter(i => i.status !== 'completed');
       const todayCompleted = processed.filter(i =>
-        i.status === 'completed' && (i.completedAt ?? 0) >= startOfDayMs
+        i.status === 'completed' && normalizeTimestamp(i.completedAt) >= startOfDayIso
       );
       const olderCompleted = processed.filter(i =>
-        i.status === 'completed' && (i.completedAt ?? 0) < startOfDayMs
+        i.status === 'completed' && normalizeTimestamp(i.completedAt) < startOfDayIso
       );
 
       this.activeQueue.set(active);
@@ -297,10 +298,9 @@ export class DownloadService {
   loadOlderCompleted() {
     if (this._olderLoaded) return;
     this._olderLoaded = true;
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    this.storage.getCompletedBefore(startOfDay.getTime()).then(items => {
-      this._olderItems.set(items.sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0)));
+    const startOfDayIso = DateTime.utc().startOf('day').toISO()!;
+    this.storage.getCompletedBefore(startOfDayIso).then(items => {
+      this._olderItems.set(items.sort((a, b) => normalizeTimestamp(b.completedAt).localeCompare(normalizeTimestamp(a.completedAt))));
     });
   }
 
@@ -502,9 +502,9 @@ export class DownloadService {
 
     forkJoin(sizeRequests).pipe(
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe(sizes => {
+    ).subscribe(async sizes => {
       for (let i = 0; i < items.length; i++) {
-        this.addToQueue(items[i].entity, items[i].entityType, seriesName, libraryId, sizes[i], seriesId);
+        await this.addToQueue(items[i].entity, items[i].entityType, seriesName, libraryId, sizes[i], seriesId);
       }
       this.processQueue();
     });
@@ -525,15 +525,43 @@ export class DownloadService {
       }),
       filter(result => result.confirmed),
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe(({ size }) => {
-      this.addToQueue(entity, entityType, seriesName, libraryId, size, seriesId);
+    ).subscribe(async ({ size }) => {
+      await this.addToQueue(entity, entityType, seriesName, libraryId, size, seriesId);
       this.processQueue();
     });
   }
 
-  private addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0) {
-    const id = this._nextId++;
+  private async addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0) {
     const entityId = entity.id;
+    const key = this._indexKey(entityType, entityId);
+
+    // 1. Already queued/active → silently drop
+    if (this._activeIndex.has(key)) {
+      this.debugLog(`addToQueue() duplicate active — silently dropping ${key}`);
+      return;
+    }
+
+    // 2. Previously completed → prompt for re-download
+    if (this._completedEntityIds.has(key)) {
+      const todayMatch = this.completedToday().find(i => i.entityType === entityType && i.entityId === entityId);
+      const olderMatch = !todayMatch ? this._olderItems().find(i => i.entityType === entityType && i.entityId === entityId) : undefined;
+      const match = todayMatch ?? olderMatch;
+
+      const utcPipe = new UtcToLocalDatePipe();
+      const localDate = match?.completedAt ? utcPipe.transform(normalizeTimestamp(match.completedAt)) : null;
+      const dateStr = localDate?.toLocaleDateString() ?? '';
+      const titleLabel = match?.label ?? `${entityType} ${entityId}`;
+
+      const confirmed = await this.confirmService.confirm(
+        translate('toasts.redownload-confirm', { title: titleLabel, date: dateStr })
+      );
+      if (!confirmed) {
+        this.debugLog(`addToQueue() re-download declined for ${key}`);
+        return;
+      }
+    }
+
+    const id = this._nextId++;
     this.debugLog(`addToQueue() id=${id} type=${entityType} entityId=${entityId} series="${seriesName}"`);
 
     const libraryType = this.libraryService.getLibraryTypeSync(libraryId) ?? 0;
@@ -567,7 +595,7 @@ export class DownloadService {
       progress: 0,
       errorMessage: '',
       retryCount: 0,
-      queuedAt: Date.now(),
+      queuedAt: DateTime.utc().toISO()!,
       entity,
       downloadName,
     };
@@ -780,7 +808,7 @@ export class DownloadService {
     // Find the item in activeQueue, move it to completedToday
     const item = this.activeQueue().find(i => i.id === itemId);
     if (item) {
-      const completed = { ...item, status: 'completed' as DownloadQueueStatus, progress: 100, completedAt: Date.now() };
+      const completed = { ...item, status: 'completed' as DownloadQueueStatus, progress: 100, completedAt: DateTime.utc().toISO()! };
       this.activeQueue.update(q => q.filter(i => i.id !== itemId));
       this._rebuildActiveIndex();
       this.completedToday.update(q => [...q, completed]);
@@ -797,7 +825,7 @@ export class DownloadService {
     this._speedSamples.delete(itemId);
     this._smoothedSpeed.delete(itemId);
     this.activeQueue.update(q => q.map(i => i.id === itemId
-      ? { ...i, status: 'failed' as DownloadQueueStatus, errorMessage: error, completedAt: Date.now() }
+      ? { ...i, status: 'failed' as DownloadQueueStatus, errorMessage: error, completedAt: DateTime.utc().toISO()! }
       : i
     ));
     this._rebuildActiveIndex();

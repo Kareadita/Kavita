@@ -22,8 +22,8 @@ export interface DownloadQueueItem {
   progress: number;
   errorMessage: string;
   retryCount: number;
-  /** Date.now() timestamp when the item was queued */
-  queuedAt: number;
+  /** UTC ISO string when the item was queued */
+  queuedAt: string | number;
   entity: Volume | Chapter;
   /** Predicted backend filename used to match SignalR progress events */
   downloadName: string;
@@ -31,6 +31,6 @@ export interface DownloadQueueItem {
   speedBps?: number;
   /** Estimated seconds remaining, in-memory only */
   etaSeconds?: number;
-  /** Date.now() timestamp when completed or failed */
-  completedAt?: number;
+  /** UTC ISO string when completed or failed */
+  completedAt?: string | number;
 }

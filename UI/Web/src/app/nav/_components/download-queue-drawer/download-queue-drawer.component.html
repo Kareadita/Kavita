@@ -52,8 +52,8 @@
               <div class="d-flex align-items-center justify-content-between mb-1">
                 <span class="section-label text-danger">{{ t('failed') }} ({{ downloadService.failedItems().length }})</span>
                 <div class="d-flex gap-2">
-                  <button class="btn btn-sm btn-link p-0" (click)="downloadService.retryAllFailed()">{{ t('retry-all') }}</button>
                   <button class="btn btn-sm btn-link p-0 text-danger" (click)="downloadService.clearAllFailed()">{{ t('clear-all') }}</button>
+                  <button class="btn btn-sm btn-link p-0" (click)="downloadService.retryAllFailed()">{{ t('retry-all') }}</button>
                 </div>
               </div>
               @for (item of downloadService.failedItems(); track item.id; let last = $last) {
