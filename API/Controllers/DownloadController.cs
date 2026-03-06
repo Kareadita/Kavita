@@ -59,8 +59,18 @@ public class DownloadController : BaseApiController
     [HttpGet("volume-size")]
     public async Task<ActionResult<long>> GetVolumeSize(int volumeId)
     {
-        var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
-        return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
+        return Ok(await _unitOfWork.VolumeRepository.GetFilesizeForVolumeAsync(volumeId));
+    }
+
+    /// <summary>
+    /// For a set of volumes, return the size in bytes
+    /// </summary>
+    /// <param name="volumeIds"></param>
+    /// <returns></returns>
+    [HttpPost("bulk-volume-size")]
+    public async Task<ActionResult<Dictionary<int, long>>> GetBulkVolumeSize([FromBody] IList<int> volumeIds)
+    {
+        return Ok(await _unitOfWork.VolumeRepository.GetFilesizeForVolumesAsync(volumeIds));
     }
 
     /// <summary>
@@ -71,8 +81,19 @@ public class DownloadController : BaseApiController
     [HttpGet("chapter-size")]
     public async Task<ActionResult<long>> GetChapterSize(int chapterId)
     {
-        var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
-        return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
+        return Ok(await _unitOfWork.ChapterRepository.GetFilesizeForChapterAsync(chapterId));
+    }
+
+    /// <summary>
+    /// For a set of chapters, return the size in bytes
+    /// </summary>
+    /// <param name="chapterIds"></param>
+    /// <returns></returns>
+    [HttpPost("bulk-chapter-size")]
+    public async Task<ActionResult<Dictionary<int, long>>> GetChapterSizeInBulk([FromBody] IList<int> chapterIds)
+    {
+        // If there are more than 50 chapterIds, we need to break up into multiple calls
+        return Ok(await _unitOfWork.ChapterRepository.GetFilesizeForChaptersAsync(chapterIds));
     }
 
     /// <summary>
@@ -83,8 +104,18 @@ public class DownloadController : BaseApiController
     [HttpGet("series-size")]
     public async Task<ActionResult<long>> GetSeriesSize(int seriesId)
     {
-        var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
-        return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
+        return Ok(await _unitOfWork.SeriesRepository.GetFilesizeForSeriesAsync(seriesId));
+    }
+
+    /// <summary>
+    /// For a set of series, return the size in bytes
+    /// </summary>
+    /// <param name="seriesIds"></param>
+    /// <returns></returns>
+    [HttpPost("bulk-series-size")]
+    public async Task<ActionResult<Dictionary<int, long>>> GetBulkSeriesSize([FromBody] IList<int> seriesIds)
+    {
+        return Ok(await _unitOfWork.SeriesRepository.GetFilesizeForMultipleSeriesAsync(seriesIds));
     }
 
 

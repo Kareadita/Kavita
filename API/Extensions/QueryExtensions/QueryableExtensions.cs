@@ -402,4 +402,32 @@ public static class QueryableExtensions
             .ThenBy(a => a.ChapterId)
             .ThenBy(a => a.PageNumber);
     }
+
+    /// <summary>
+    /// Splits up a query into batches
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="batchSize"></param>
+    /// <param name="batchQuery"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
+    /// <returns></returns>
+    public static async Task<Dictionary<TKey, TValue>> BatchToDictionaryAsync<T, TKey, TValue>(
+        this IList<T> source,
+        int batchSize,
+        Func<IList<T>, Task<Dictionary<TKey, TValue>>> batchQuery)
+        where TKey : notnull
+    {
+        var result = new Dictionary<TKey, TValue>();
+
+        foreach (var batch in source.Chunk(batchSize))
+        {
+            var batchResult = await batchQuery(batch.ToList());
+            foreach (var kvp in batchResult)
+                result[kvp.Key] = kvp.Value;
+        }
+
+        return result;
+    }
 }

@@ -32,6 +32,8 @@ public interface IVolumeRepository
     void Update(Volume volume);
     void Remove(Volume volume);
     void Remove(IList<Volume> volumes);
+    Task<long> GetFilesizeForVolumeAsync(int volumeId);
+    Task<Dictionary<int, long>> GetFilesizeForVolumesAsync(IList<int> volumeIds);
     Task<IList<MangaFile>> GetFilesForVolume(int volumeId);
     Task<string?> GetVolumeCoverImageAsync(int volumeId);
     Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds);
@@ -72,6 +74,29 @@ public class VolumeRepository : IVolumeRepository
     public void Remove(IList<Volume> volumes)
     {
         _context.Volume.RemoveRange(volumes);
+    }
+
+    public async Task<long> GetFilesizeForVolumeAsync(int volumeId)
+    {
+        return await _context.Chapter
+            .Where(c => volumeId == c.VolumeId)
+            .Include(c => c.Files)
+            .SelectMany(c => c.Files)
+            .SumAsync(f => f.Bytes);
+    }
+
+    public async Task<Dictionary<int, long>> GetFilesizeForVolumesAsync(IList<int> volumeIds)
+    {
+        return await volumeIds.BatchToDictionaryAsync(50, batch =>
+            _context.Chapter
+                .Where(c => batch.Contains(c.VolumeId))
+                .GroupBy(c => c.VolumeId)
+                .Select(g => new
+                {
+                    VolumeId = g.Key,
+                    TotalBytes = g.SelectMany(c => c.Files).Sum(f => f.Bytes)
+                })
+                .ToDictionaryAsync(x => x.VolumeId, x => x.TotalBytes));
     }
 
     /// <summary>
