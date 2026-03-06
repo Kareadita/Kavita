@@ -237,9 +237,9 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     [HttpGet("user-cover")]
     public async Task<ActionResult> GetUserCoverImage(int userId, string apiKey)
     {
-        // TODO: Does this need any checks? Can we use profile privacy?
-        //    I don't think so, you could share annotations but not profile. So how would this work?
-        var filename = await unitOfWork.UserRepository.GetCoverImageAsync(userId, UserId);
+        var filename = await unitOfWork.UserRepository.GetCoverImageAsync(userId);
+        if (filename == null) return NotFound();
+
         var path = Path.Join(directoryService.CoverImageDirectory, filename);
         return CachedFile(path);
     }

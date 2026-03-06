@@ -12,6 +12,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
+using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.ReadingLists;
@@ -119,8 +120,8 @@ public class ReadingListService(
     public async Task<ReadingList> CreateReadingListForUser(AppUser userWithReadingList, string title)
     {
         // When creating, we need to make sure Title is unique
-        // TODO: Perform normalization
-        var hasExisting = userWithReadingList.ReadingLists.Any(l => l.Title.Equals(title));
+        var normalizedTitle = title.ToNormalized();
+        var hasExisting = userWithReadingList.ReadingLists.Any(l => l.NormalizedTitle == normalizedTitle);
         if (hasExisting)
         {
             throw new KavitaException("reading-list-name-exists");
@@ -489,8 +490,8 @@ public class ReadingListService(
 
                 await unitOfWork.CommitAsync(); // TODO: See if we can avoid this extra commit by reworking bottom logic
 
-                await CalculateStartAndEndDates(await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1,
-                    user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
+                await CalculateStartAndEndDates((await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(
+                    arcPair.Item1, user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter))!);
                 await unitOfWork.CommitAsync();
             }
         }

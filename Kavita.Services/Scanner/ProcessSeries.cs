@@ -872,11 +872,11 @@ public class ProcessSeries(
 
         if (!string.IsNullOrEmpty(comicInfo.Web))
         {
-            chapter.WebLinks = string.Join(",", comicInfo.Web
-                .Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            );
+            chapter.WebLinks = string.Join(",", comicInfo.Web.SplitBy(','));
 
             // TODO: For each weblink, try to parse out some MetadataIds and store in the Chapter directly for matching (CBL)
+            // var aniListId = ScrobblingHelper.GetAniListId(chapter.WebLinks);
+            // var malId = ScrobblingHelper.GetMalId(chapter.WebLinks);
         }
 
         if (!chapter.ISBNLocked && !string.IsNullOrEmpty(comicInfo.Isbn))
@@ -910,8 +910,8 @@ public class ProcessSeries(
 
         if (!chapter.GenresLocked || !chapter.TagsLocked)
         {
-            var genres = TagHelper.GetTagValues(comicInfo.Genre);
-            var tags = TagHelper.GetTagValues(comicInfo.Tags);
+            var genres = comicInfo.Genre.SplitBy(',');
+            var tags = comicInfo.Tags.SplitBy(',');
 
             ExternalMetadataService.GenerateExternalGenreAndTagsList(genres, tags, args.Settings,
                 out var finalTags, out var finalGenres);

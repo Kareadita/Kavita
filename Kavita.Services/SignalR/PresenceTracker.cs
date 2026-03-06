@@ -89,6 +89,20 @@ public class PresenceTracker(IUnitOfWork unitOfWork) : IPresenceTracker
         return Task.FromResult(onlineUsers);
     }
 
+    public Task<int[]> GetOnlineUserIds()
+    {
+        int[] onlineUsers;
+        lock (OnlineUsers)
+        {
+            onlineUsers = OnlineUsers.Where(pair => !pair.Value.IsAdmin)
+                .Select(k => k.Key)
+                .Order()
+                .ToArray();
+        }
+
+        return Task.FromResult(onlineUsers);
+    }
+
     public Task<List<string>> GetConnectionsForUser(int userId)
     {
         List<string>? connectionIds;

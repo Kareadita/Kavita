@@ -131,10 +131,20 @@ public static class ScrobblingHelper
         return malId ?? series.ExternalSeriesMetadata?.MalId;
     }
 
+    public static long? GetMalId(string weblinks)
+    {
+        return ExtractId<long?>(weblinks, MalWeblinkWebsite);
+    }
+
     public static int? GetAniListId(Series seriesWithExternalMetadata)
     {
         var aniListId = ExtractId<int?>(seriesWithExternalMetadata.Metadata.WebLinks, AniListWeblinkWebsite);
         return aniListId ?? seriesWithExternalMetadata.ExternalSeriesMetadata?.AniListId;
+    }
+
+    public static int? GetAniListId(string weblinks)
+    {
+        return ExtractId<int?>(weblinks, AniListWeblinkWebsite);
     }
 
     /// <summary>

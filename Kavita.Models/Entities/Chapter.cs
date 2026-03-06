@@ -183,66 +183,6 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
 
     public ICollection<ExternalReview> ExternalReviews { get; set; } = [];
     public ICollection<ExternalRating> ExternalRatings { get; set; } = null!;
-/** TODO: Move into extensions
-    public void UpdateFrom(ParserInfo info)
-    {
-        Files ??= new List<MangaFile>();
-        IsSpecial = info.IsSpecialInfo();
-        if (IsSpecial)
-        {
-            Number = Parser.DefaultChapter;
-            MinNumber = Parser.DefaultChapterNumber;
-            MaxNumber = Parser.DefaultChapterNumber;
-        }
-        Title = (IsSpecial && info.Format is MangaFormat.Epub or MangaFormat.Pdf)
-            ? info.Title
-            : Parser.RemoveExtensionIfSupported(Range);
-
-        var specialTreatment = info.IsSpecialInfo();
-        Range = specialTreatment ? info.Filename : info.Chapters;
-    }
-
-    /// <summary>
-    /// Returns the Chapter Number. If the chapter is a range, returns that, formatted.
-    /// </summary>
-    /// <returns></returns>
-    public string GetNumberTitle()
-    {
-        try
-        {
-            if (MinNumber.Is(MaxNumber))
-            {
-                if (MinNumber.Is(Parser.DefaultChapterNumber) && IsSpecial)
-                {
-                    return Parser.RemoveExtensionIfSupported(Title);
-                }
-
-                if (MinNumber.Is(0f) && !float.TryParse(Range, CultureInfo.InvariantCulture, out _))
-                {
-                    return $"{Range.ToString(CultureInfo.InvariantCulture)}";
-                }
-
-                return $"{MinNumber.ToString(CultureInfo.InvariantCulture)}";
-
-            }
-
-            return $"{MinNumber.ToString(CultureInfo.InvariantCulture)}-{MaxNumber.ToString(CultureInfo.InvariantCulture)}";
-        }
-        catch (Exception)
-        {
-            return MinNumber.ToString(CultureInfo.InvariantCulture);
-        }
-    }
-
-    /// <summary>
-    /// Is the Chapter representing a single Volume (volume 1.cbz). If so, Min/Max will be Default and will not be special
-    /// </summary>
-    /// <returns></returns>
-    public bool IsSingleVolumeChapter()
-    {
-        return MinNumber.Is(Parser.DefaultChapterNumber) && !IsSpecial;
-    }
-**/
     public void ResetColorScape()
     {
         PrimaryColor = string.Empty;

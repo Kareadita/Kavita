@@ -32,8 +32,7 @@ public static class FlurlExtensions
             return null;
         }
 
-        // TODO: Move to new Headers class after merge with progress branch
-        var contentTypeHeader = headResponse.Headers.FirstOrDefault("Content-Type");
+        var contentTypeHeader = headResponse.Headers.FirstOrDefault(HeaderNames.ContentType);
         if (string.IsNullOrEmpty(contentTypeHeader))
         {
             return null;

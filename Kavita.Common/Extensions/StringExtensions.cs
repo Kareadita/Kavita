@@ -118,9 +118,25 @@ public static partial class StringExtensions
         }
     }
 
-    /// <param name="value">The input string like "1.43 GB", "4.2 KB", "512 B"</param>
     extension(string value)
     {
+        /// <summary>
+        /// Splits the string by the given separator. While cleaning out entries and removing duplicates
+        /// </summary>
+        /// <param name="separator"></param>
+        /// <returns></returns>
+        public IList<string> SplitBy(char separator)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return ImmutableList<string>.Empty;
+            }
+
+            return value.Split(separator, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .DistinctBy(s => s.ToNormalized())
+                .ToList();
+        }
+
         public IList<int> ParseIntArray()
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -137,6 +153,7 @@ public static partial class StringExtensions
         /// Parses a human-readable file size string (e.g. "1.43 GB") into bytes.
         /// </summary>
         /// <returns>Byte count as long</returns>
+        /// <param name="value">The input string like "1.43 GB", "4.2 KB", "512 B"</param>
         public long ParseHumanReadableBytes()
         {
             if (string.IsNullOrWhiteSpace(value))

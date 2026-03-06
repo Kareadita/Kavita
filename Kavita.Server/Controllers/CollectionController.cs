@@ -52,7 +52,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
     public async Task<ActionResult<AppUserCollectionDto>> GetTag(int collectionId)
     {
         var result = await unitOfWork.CollectionTagRepository.GetCollectionDtoAsync(collectionId, UserId);
-        if (result == null) return NotFound(); // TODO: Figure out how to best handle restrictions/not found across the codebase
+        if (result == null) return NotFound();
 
         return Ok(result);
     }

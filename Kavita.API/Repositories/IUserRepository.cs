@@ -148,7 +148,7 @@ public interface IUserRepository
     #endregion
 
     #region Images & Media
-    Task<string?> GetCoverImageAsync(int userId, int requestingUserId, CancellationToken ct = default);
+    Task<string?> GetCoverImageAsync(int userId, CancellationToken ct = default);
     Task<string?> GetPersonCoverImageAsync(int personId, CancellationToken ct = default);
     #endregion
 

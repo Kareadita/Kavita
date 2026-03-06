@@ -1038,17 +1038,16 @@ public class AccountController(UserManager<AppUser> userManager,
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("resend-confirmation-email")]
     [EnableRateLimiting("Authentication")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<InviteUserResponse>> ResendConfirmationSendEmail([FromQuery] int userId)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return BadRequest(await localizationService.Get("en", "no-user"));
 
         if (string.IsNullOrEmpty(user.Email))
-            return BadRequest(
-                await localizationService.Translate(user.Id, "user-migration-needed"));
-        if (user.EmailConfirmed) return BadRequest(await localizationService.Translate(user.Id, "user-already-confirmed"));
+            return BadRequest(await localizationService.Translate(user.Id, "user-migration-needed"));
 
-        // TODO: If the target user is read only, we might want to just forgo this
+        if (user.EmailConfirmed) return BadRequest(await localizationService.Translate(user.Id, "user-already-confirmed"));
 
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
         user.ConfirmationToken = token;

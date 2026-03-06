@@ -251,9 +251,6 @@ public static class RestrictByAgeExtensions
         }
     }
 
-    // TODO: After updating to .net 10, leverage new Complex Data type queries to inline all db operations here
-
-    // TODO: After updating to .net 10, leverage new Complex Data type queries to inline all db operations here
     /// <summary>
     /// Filter user reviews social preferences of users
     /// </summary>
@@ -301,7 +298,6 @@ public static class RestrictByAgeExtensions
             }, userId);
     }
 
-    // TODO: After updating to .net 10, leverage new Complex Data type queries to inline all db operations here
     /// <summary>
     /// Filter user chapter reviews social preferences of users
     /// </summary>

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Kavita.Common.Helpers;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Progress;
@@ -163,8 +164,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
             throw new ArgumentNullException("AuthKeys not loaded");
         }
 
-        // TODO: Remove magic string
-        return AuthKeys.Where(k => k.Name == "opds").Select(k => k.Key).First();
+        return AuthKeys.Where(k => k.Name == AuthKeyHelper.OpdsKeyName).Select(k => k.Key).First();
     }
 
 }

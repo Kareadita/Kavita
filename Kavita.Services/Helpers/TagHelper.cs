@@ -85,24 +85,6 @@ public static class TagHelper
         }
     }
 
-    /// <summary>
-    /// Returns a list of strings separated by ',', distinct by normalized names, already trimmed and empty entries removed.
-    /// </summary>
-    /// <param name="comicInfoTagSeparatedByComma"></param>
-    /// <returns></returns>
-    public static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
-    {
-        // TODO: Refactor this into an Extension
-        if (string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
-        {
-            return ImmutableList<string>.Empty;
-        }
-
-        return comicInfoTagSeparatedByComma.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-            .DistinctBy(Scanner.Parser.Normalize)
-            .ToList();
-    }
-
 
     public static void UpdateTagList(ICollection<TagDto>? existingDbTags, Series series, IReadOnlyCollection<Tag> newTags, Action<Tag> handleAdd, Action onModified)
     {

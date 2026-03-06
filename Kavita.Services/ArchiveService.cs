@@ -225,7 +225,7 @@ public class ArchiveService(
         {
             logger.LogWarning(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
             mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
-                "This archive cannot be read or not supported", ex); // TODO: Localize this
+                "This archive cannot be read or not supported", ex); // TODO: Localize this. Which user?
         }
 
         return string.Empty;

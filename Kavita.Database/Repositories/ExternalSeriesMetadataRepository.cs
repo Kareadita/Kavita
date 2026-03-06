@@ -81,7 +81,6 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
 
     public async Task<bool> NeedsDataRefresh(int seriesId, CancellationToken ct = default)
     {
-        // TODO: Add unit test
         return await context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
             .Select(s => s.ValidUntilUtc)
@@ -91,7 +90,6 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
 
     public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlusDto(int seriesId, CancellationToken ct = default)
     {
-        // TODO: Add unit test
         var seriesDetailDto = await context.ExternalSeriesMetadata
             .Where(m => m.SeriesId == seriesId)
             .Include(m => m.ExternalRatings)

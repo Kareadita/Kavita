@@ -977,27 +977,12 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .ToListAsync(ct);
     }
 
-    public async Task<string?> GetCoverImageAsync(int userId, int requestingUserId, CancellationToken ct = default)
+    public Task<string?> GetCoverImageAsync(int userId, CancellationToken ct = default)
     {
-        // TODO: .NET JSON Support
-        // return await _context.AppUser
-        //     .Include(c => c.UserPreferences)
-        //     .Where(c => c.Id == userId && c.UserPreferences.SocialPreferences.ShareProfile)
-        //     .Select(c => c.CoverImage)
-        //     .FirstOrDefaultAsync(ct);
-
-        var user = await context.AppUser
-            .Include(c => c.UserPreferences)
-            .Where(c => c.Id == userId)
-            .Select(c => new { c.CoverImage, c.UserPreferences })
+        return context.AppUser
+            .Where(u => u.Id == userId)
+            .Select(u => u.CoverImage)
             .FirstOrDefaultAsync(ct);
-
-        if (user != null && (user.UserPreferences?.SocialPreferences?.ShareProfile == true || userId == requestingUserId))
-        {
-            return user.CoverImage;
-        }
-
-        return null;
     }
 
     public async Task<string?> GetPersonCoverImageAsync(int personId, CancellationToken ct = default)
