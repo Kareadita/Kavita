@@ -310,18 +310,58 @@ export class DownloadService {
    * Returns the active queue item for the given entity, or null if none.
    * Use this for card download indicators.
    */
-  getItemForEntity(entity: Series | Volume | Chapter | PageBookmark[]): DownloadQueueItem | null {
-    const q = this.queue().filter(i => i.status === 'queued' || i.status === 'preparing' || i.status === 'downloading');
-    if (this.utilityService.isVolume(entity)) {
-      return q.find(i => i.entityType === 'volume' && i.entityId === (entity as Volume).id) ?? null;
-    }
-    if (this.utilityService.isChapter(entity)) {
-      return q.find(i => i.entityType === 'chapter' && i.entityId === (entity as Chapter).id) ?? null;
-    }
+  getItemForEntity(entity: Series | Volume | Chapter | PageBookmark[], includeCompleted = false): DownloadQueueItem | null {
+    const q = this.queue();
+
+    // Series: aggregate across all active + completed items together so progress doesn't drop
     if (this.utilityService.isSeries(entity)) {
-      return this.getSeriesDownloadProgress((entity as Series).name);
+      const statuses: DownloadQueueStatus[] = ['queued', 'preparing', 'downloading'];
+      if (includeCompleted) statuses.push('completed');
+      const items = q.filter(i => statuses.includes(i.status) && i.seriesName === (entity as Series).name);
+      return this._aggregateSeriesItems(items);
+    }
+
+    // Volume/Chapter: check active first, then completed
+    const activeItems = q.filter(i => i.status === 'queued' || i.status === 'preparing' || i.status === 'downloading');
+    const active = this._findEntityInList(activeItems, entity);
+    if (active) return active;
+
+    if (includeCompleted) {
+      return this._findEntityInList(q.filter(i => i.status === 'completed'), entity);
     }
     return null;
+  }
+
+  private _findEntityInList(items: DownloadQueueItem[], entity: Series | Volume | Chapter | PageBookmark[]): DownloadQueueItem | null {
+    if (this.utilityService.isVolume(entity)) {
+      return items.find(i => i.entityType === 'volume' && i.entityId === (entity as Volume).id) ?? null;
+    }
+    if (this.utilityService.isChapter(entity)) {
+      return items.find(i => i.entityType === 'chapter' && i.entityId === (entity as Chapter).id) ?? null;
+    }
+    return null;
+  }
+
+  private _aggregateSeriesItems(items: DownloadQueueItem[]): DownloadQueueItem | null {
+    if (items.length === 0) return null;
+
+    const totalProgress = items.reduce((sum, i) => {
+      if (i.status === 'completed') return sum + 100;
+      if (i.status === 'downloading' || i.status === 'preparing') return sum + i.progress;
+      return sum;
+    }, 0);
+
+    const allCompleted = items.every(i => i.status === 'completed');
+    const representative = items.find(i => i.status === 'downloading')
+      ?? items.find(i => i.status === 'preparing')
+      ?? items.find(i => i.status === 'queued')
+      ?? items[0];
+
+    return {
+      ...representative,
+      progress: Math.round(totalProgress / items.length),
+      status: allCompleted ? 'completed' : representative.status,
+    };
   }
 
   /**

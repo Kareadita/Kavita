@@ -320,10 +320,11 @@
 
 .download {
   position: absolute;
-  top: 25%;
-  right: 25%;
-  width: 5rem;
-  height: 5rem;
+  bottom: calc(var(--card-progress-height, 5px) + 0.35rem);
+  left: 0.35rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  z-index: 10;
 }
 
 .read-btn {
@@ -332,10 +333,6 @@
   text-decoration: none;
 }
 
-
-// =============================================================================
-// SELECTION & BULK MODE
-// =============================================================================
 
 .selected-highlight {
   outline: 0.125rem solid var(--primary-color);

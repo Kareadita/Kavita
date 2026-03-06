@@ -1554,7 +1554,8 @@
     },
 
     "download-indicator": {
-        "progress": "{{percentage}}% downloaded"
+        "progress": "{{percentage}}% downloaded",
+        "completed": "Download complete"
     },
 
     "edit-series-relation": {

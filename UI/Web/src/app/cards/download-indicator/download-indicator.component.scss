@@ -1,4 +1,24 @@
-.download {
-    width: 5rem;
-    height: 5rem;
+.indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  pointer-events: none;
+
+  &.active {
+    background: conic-gradient(
+      var(--primary-color) calc(var(--progress) * 3.6deg),
+      rgba(0, 0, 0, 0.6) calc(var(--progress) * 3.6deg)
+    );
+    border: 2px solid var(--primary-color);
+  }
+
+  &.completed {
+    background-color: var(--primary-color);
+    color: white;
+
+    i { font-size: 0.7rem; line-height: 1; }
+  }
 }
