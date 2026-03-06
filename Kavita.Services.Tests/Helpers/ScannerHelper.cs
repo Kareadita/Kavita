@@ -31,8 +31,8 @@ public class ScannerHelper
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ITestOutputHelper _testOutputHelper;
-    public readonly string TestDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService");
-    public readonly string TestcasesDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/TestCases");
+    private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService");
+    private readonly string _testcasesDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/TestCases");
     private readonly string _imagePath = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/1x1.png");
     private static readonly string[] ComicInfoExtensions = [".cbz", ".cbr", ".zip", ".rar"];
     private static readonly string[] EpubExtensions = [".epub"];
@@ -45,7 +45,7 @@ public class ScannerHelper
 
     public async Task<Library> GenerateScannerData(string testcase, Dictionary<string, ComicInfo>? comicInfos = null)
     {
-        var testDirectoryPath = await GenerateTestDirectory(Path.Join(TestcasesDirectory, testcase), comicInfos);
+        var testDirectoryPath = await GenerateTestDirectory(Path.Join(_testcasesDirectory, testcase), comicInfos);
 
         var (publisher, type) = SplitPublisherAndLibraryType(Path.GetFileNameWithoutExtension(testcase));
 
@@ -134,7 +134,7 @@ public class ScannerHelper
         var filePaths = JsonSerializer.Deserialize<List<string>>(mapContent);
 
         // Create a test directory
-        var testDirectory = Path.Combine(TestDirectory, Path.GetFileNameWithoutExtension(mapPath));
+        var testDirectory = Path.Combine(_testDirectory, Path.GetFileNameWithoutExtension(mapPath));
         if (Directory.Exists(testDirectory))
         {
             Directory.Delete(testDirectory, true);

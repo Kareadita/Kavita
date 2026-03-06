@@ -15,6 +15,7 @@ namespace Kavita.Services.Tests;
 public class ScannerServiceTests: AbstractDbTest
 {
     private readonly ITestOutputHelper _testOutputHelper;
+    private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/ScanTests");
 
     public ScannerServiceTests(ITestOutputHelper testOutputHelper): base(testOutputHelper)
     {
@@ -443,7 +444,7 @@ public class ScannerServiceTests: AbstractDbTest
         Assert.Equal(3, series.Volumes.Count);
 
         // Bootstrap a new file in the nested "Sono Bisque Doll wa Koi wo Suru" directory and perform a series scan
-        var testDirectory = Path.Combine(scannerHelper.TestDirectory, Path.GetFileNameWithoutExtension(testcase));
+        var testDirectory = Path.Combine(_testDirectory, Path.GetFileNameWithoutExtension(testcase));
         await scannerHelper.Scaffold(testDirectory, ["My Dress-Up Darling/Sono Bisque Doll wa Koi wo Suru ch 11.cbz"]);
 
         // Now that a new file exists in the subdirectory, scan again
@@ -582,7 +583,9 @@ public class ScannerServiceTests: AbstractDbTest
         var library = await scannerHelper.GenerateScannerData(testcase, infos);
 
         var testDirectoryPath =
-            Path.Join(scannerHelper.TestDirectory, testcase.Replace(".json", string.Empty));
+            Path.Join(
+                Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/ScanTests"),
+                testcase.Replace(".json", string.Empty));
         library.Folders =
         [
             new FolderPath() {Path = Path.Join(testDirectoryPath, "Root 1")},
@@ -635,7 +638,10 @@ public class ScannerServiceTests: AbstractDbTest
         var infos = new Dictionary<string, ComicInfo>();
         var library = await scannerHelper.GenerateScannerData(testcase, infos);
 
-        var testDirectoryPath = Path.Join(scannerHelper.TestDirectory, testcase.Replace(".json", string.Empty));
+        var testDirectoryPath =
+            Path.Join(
+                Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ScannerService/ScanTests"),
+                testcase.Replace(".json", string.Empty));
         library.Folders =
         [
             new FolderPath() {Path = Path.Join(testDirectoryPath, "Root 1")},
@@ -689,7 +695,9 @@ public class ScannerServiceTests: AbstractDbTest
         var infos = new Dictionary<string, ComicInfo>();
         var library = await scannerHelper.GenerateScannerData(testcase, infos);
 
-        var testDirectoryPath = Path.Combine(scannerHelper.TestDirectory, testcase.Replace(".json", string.Empty));
+        var testDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(),
+            "../../../Test Data/ScannerService/ScanTests",
+            testcase.Replace(".json", string.Empty));
 
         library.Folders =
         [
@@ -777,7 +785,9 @@ public class ScannerServiceTests: AbstractDbTest
         var infos = new Dictionary<string, ComicInfo>();
         var library = await scannerHelper.GenerateScannerData(testcase, infos);
 
-        var testDirectoryPath = Path.Combine(scannerHelper.TestDirectory, testcase.Replace(".json", string.Empty));
+        var testDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(),
+            "../../../Test Data/ScannerService/ScanTests",
+            testcase.Replace(".json", string.Empty));
 
         library.Folders =
         [
