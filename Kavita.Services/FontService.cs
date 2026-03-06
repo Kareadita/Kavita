@@ -165,7 +165,7 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
         var fontExt = Path.GetExtension(googleFontRef.filename);
         var fileName = $"{fontFamily}{fontExt}";
 
-        logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fileName, googleFontRef.url);
+        logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fileName.Sanitize(), googleFontRef.url);
         var path = await googleFontRef.url.DownloadFileAsync(directoryService.TempDirectory, fileName, cancellationToken: ct);
 
         return await CreateFontFromFileAsync(path, ct);
@@ -227,7 +227,7 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
                 .GetStringAsync();
         } catch (Exception ex)
         {
-            logger.LogError(ex, "Unable to get metadata for {FontName} from {Url}", fontName.Sanitize(), url);
+            logger.LogError(ex, "Unable to get metadata for {FontName} from {Url}", fontName.Sanitize(), url.Sanitize());
             return null;
         }
 

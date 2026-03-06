@@ -134,7 +134,7 @@ public class AccountController(UserManager<AppUser> userManager,
             return BadRequest(errors);
         }
 
-        logger.LogInformation("{User}'s Password has been reset", resetPasswordDto.UserName);
+        logger.LogInformation("{UserId}'s Password has been reset", user.Id);
         return Ok();
     }
 
@@ -228,11 +228,11 @@ public class AccountController(UserManager<AppUser> userManager,
                 .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpperInvariant());
         }
 
-        logger.LogInformation("{UserName} attempting to login from {IpAddress}", loginDto.Username, HttpContext.Connection.RemoteIpAddress?.ToString());
+        logger.LogInformation("{UserName} attempting to login from {IpAddress}", loginDto.Username.Sanitize(), HttpContext.Connection.RemoteIpAddress?.ToString());
 
         if (user == null)
         {
-            logger.LogWarning("Attempted login by {UserName} failed due to unable to find account", loginDto.Username);
+            logger.LogWarning("Attempted login by {UserName} failed due to unable to find account", loginDto.Username.Sanitize());
             return Unauthorized(BadCredentialsMessage);
         }
         var roles = await userManager.GetRolesAsync(user);
@@ -590,8 +590,8 @@ public class AccountController(UserManager<AppUser> userManager,
         List<Library> libraries;
         if (hasAdminRole)
         {
-            logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries",
-                user.UserName);
+            logger.LogInformation("{UserId} is being registered as admin. Granting access to all libraries",
+                user.Id);
             libraries = allLibraries;
         }
         else
@@ -685,6 +685,7 @@ public class AccountController(UserManager<AppUser> userManager,
         var user = new AppUserBuilder(dto.Email, dto.Email,
             await unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
         unitOfWork.UserRepository.Add(user);
+
         try
         {
             var result = await userManager.CreateAsync(user, AccountService.DefaultPassword);
@@ -718,7 +719,7 @@ public class AccountController(UserManager<AppUser> userManager,
             if (hasAdminRole)
             {
                 logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries",
-                    user.UserName);
+                    user.UserName?.Sanitize());
                 libraries = (await unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.AppUser)).ToList();
             }
             else
@@ -758,7 +759,7 @@ public class AccountController(UserManager<AppUser> userManager,
         try
         {
             var emailLink = await emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
-            logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+            logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName?.Sanitize(), emailLink);
 
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             if (!emailService.IsValidEmail(dto.Email) || !settings.IsEmailSetup())
@@ -828,7 +829,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         if (!await ConfirmEmailToken(dto.Token, user))
         {
-            logger.LogInformation("confirm-email failed from invalid token: {Token}", dto.Token);
+            logger.LogInformation("confirm-email failed from invalid token: {Token}", dto.Token.Sanitize());
             return BadRequest(await localizationService.Translate(user.Id, "invalid-email-confirmation"));
         }
 
@@ -871,17 +872,17 @@ public class AccountController(UserManager<AppUser> userManager,
         var user = await unitOfWork.UserRepository.GetUserByConfirmationToken(dto.Token);
         if (user == null)
         {
-            logger.LogInformation("confirm-email failed from invalid registered email: {Email}", dto.Email);
+            logger.LogInformation("confirm-email failed from invalid registered email: {Email}", dto.Email.Sanitize());
             return BadRequest(await localizationService.Get("en", "invalid-email-confirmation"));
         }
 
         if (!await ConfirmEmailToken(dto.Token, user))
         {
-            logger.LogInformation("confirm-email failed from invalid token: {Token}", dto.Token);
+            logger.LogInformation("confirm-email failed from invalid token: {Token}", dto.Token.Sanitize());
             return BadRequest(await localizationService.Translate(user.Id, "invalid-email-confirmation"));
         }
 
-        logger.LogInformation("User is updating email from {OldEmail} to {NewEmail}", user.Email, dto.Email);
+        logger.LogInformation("User is updating email from {OldEmail} to {NewEmail}", user.Email, dto.Email.Sanitize());
         var result = await userManager.SetEmailAsync(user, dto.Email);
         if (!result.Succeeded)
         {
@@ -916,7 +917,7 @@ public class AccountController(UserManager<AppUser> userManager,
                 "ResetPassword", dto.Token);
             if (!result)
             {
-                logger.LogInformation("Unable to reset password, your email token is not correct: {@Dto}", dto);
+                logger.LogInformation("Unable to reset password, your email token is not correct: {Token}", dto.Token.Sanitize());
                 return BadRequest(BadCredentialsMessage);
             }
 
@@ -945,7 +946,7 @@ public class AccountController(UserManager<AppUser> userManager,
         var user = await unitOfWork.UserRepository.GetUserByEmailAsync(email);
         if (user == null)
         {
-            logger.LogError("There are no users with email: {Email} but user is requesting password reset", email);
+            logger.LogError("There are no users with email: {Email} but user is requesting password reset", email.Sanitize().Censor());
             return Ok(await localizationService.Get("en", "forgot-password-generic"));
         }
 

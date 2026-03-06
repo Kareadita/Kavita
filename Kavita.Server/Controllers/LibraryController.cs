@@ -12,6 +12,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
+using Kavita.Common.Extensions;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
@@ -91,7 +92,7 @@ public class LibraryController(
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
         if (library.Type == LibraryType.Comic)
         {
-            logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name);
+            logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name.Sanitize());
             library.AllowScrobbling = false;
         }
 
@@ -105,7 +106,8 @@ public class LibraryController(
         }
 
         if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.Translate(UserId, "generic-library"));
-        logger.LogInformation("Created a new library: {LibraryName}", library.Name);
+
+        logger.LogInformation("Created a new library: {LibraryName}", library.Name.Sanitize());
 
         // Restart Folder watching if on
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -168,6 +170,8 @@ public class LibraryController(
                 FullPath = d
             }));
         }
+
+        if (path.Contains("..")) return BadRequest();
 
         if (!Directory.Exists(path)) return Ok(directoryService.ListDirectory(Path.GetDirectoryName(path)!));
 
@@ -279,17 +283,18 @@ public class LibraryController(
         if (user == null) return BadRequest(await localizationService.Translate(UserId, "user-doesnt-exist"));
 
         var libraryString = string.Join(',', updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
-        logger.LogInformation("Granting user {UserName} access to: {Libraries}", updateLibraryForUserDto.Username, libraryString);
+        logger.LogInformation("Granting user {UserId} access to: {Libraries}", user.Id, libraryString.Sanitize());
 
         var allLibraries = await unitOfWork.LibraryRepository.GetLibrariesAsync();
         foreach (var library in allLibraries)
         {
-            library.AppUsers ??= new List<AppUser>();
+            library.AppUsers ??= [];
+
             var libraryContainsUser = library.AppUsers.Any(u => u.UserName == user.UserName);
             var libraryIsSelected = updateLibraryForUserDto.SelectedLibraries.Any(l => l.Id == library.Id);
+
             if (libraryContainsUser && !libraryIsSelected)
             {
-                // Remove
                 library.AppUsers.Remove(user);
                 user.RemoveSideNavFromLibrary(library);
             }
@@ -308,7 +313,7 @@ public class LibraryController(
 
         if (await unitOfWork.CommitAsync())
         {
-            logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
+            logger.LogInformation("Added: {SelectedLibraries} to {UserId}", libraryString.Sanitize(), user.Id);
             // Bust cache
             await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
 
@@ -502,9 +507,13 @@ public class LibraryController(
     public async Task<ActionResult<bool>> DeleteMultipleLibraries([FromQuery] List<int> libraryIds)
     {
         var username = Username!;
-        logger.LogInformation("Libraries {LibraryIds} are being deleted by {UserName}", libraryIds, username);
 
-        foreach (var libraryId in libraryIds)
+        var allLibraries = await unitOfWork.LibraryRepository.GetLibrariesAsync();
+        var toDelete = allLibraries.Where(l => libraryIds.Contains(l.Id)).Select(l => l.Id).ToList();
+
+        logger.LogInformation("Libraries {LibraryIds} are being deleted by {UserName}", toDelete, username);
+
+        foreach (var libraryId in toDelete)
         {
             try
             {
