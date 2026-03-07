@@ -700,9 +700,7 @@ export class DownloadService {
       if (!response.body) throw new Error('No response body');
 
       const contentLength = +(response.headers.get('Content-Length') || 0);
-      const filename = this.parseContentDisposition(
-        response.headers.get('Content-Disposition') || '', item.downloadName
-      );
+      const filename = this.parseContentDisposition(response.headers.get('Content-Disposition') || '', item.downloadName);
 
       this.setStatus(item.id, 'downloading');
 
@@ -766,6 +764,7 @@ export class DownloadService {
 
       const blob = new Blob(chunks);
       chunks.length = 0; // release chunk references before saveAs to halve peak memory
+
       this.save(blob, filename);
       this.activeAbortControllers.delete(item.id);
       this.markCompleted(item.id);
@@ -785,14 +784,23 @@ export class DownloadService {
   private parseContentDisposition(header: string, fallbackName: string): string {
     if (!header) return fallbackName || 'download';
     const tokens = header.split(';');
+
     if (tokens.length < 2) return fallbackName || 'download';
+
     let filename = tokens[1].replace('filename=', '').replace(/"/ig, '').trim();
+
     if (filename.startsWith('download_') || filename.startsWith('kavita_download_')) {
       const ext = filename.substring(filename.lastIndexOf('.'), filename.length);
       if (fallbackName) return fallbackName + ext;
+
       return filename.replace('kavita_', '').replace('download_', '');
     }
-    return decodeURIComponent(filename) || fallbackName || 'download';
+
+    try {
+      return decodeURIComponent(filename) || fallbackName || 'download';
+    } catch {
+      return filename || fallbackName || 'download';
+    }
   }
 
   /** Updates activeQueue signal and persists to IDB on status changes. */
