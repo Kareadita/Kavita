@@ -198,7 +198,6 @@ export class ChapterDetailComponent implements OnInit {
   mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
 
   activeTabId = TabID.Details;
-  downloadInProgress: boolean = false;
 
   chapterActions = computed(() => this.actionFactoryService.getChapterActions(this.seriesId(), this.libraryId(), this.libraryType()));
   totalReviewCount = computed(() => this.userReviews().length + this.plusReviews().length);

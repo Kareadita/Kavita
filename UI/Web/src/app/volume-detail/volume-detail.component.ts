@@ -15,8 +15,6 @@ import {
 import {DOCUMENT, Location, NgClass, NgStyle} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
-import {SeriesService} from "../_services/series.service";
-import {LibraryService} from "../_services/library.service";
 import {ThemeService} from "../_services/theme.service";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
 import {ReaderService} from "../_services/reader.service";
@@ -53,7 +51,6 @@ import {IHasCast} from "../_models/common/i-has-cast";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UtilityService} from "../shared/_services/utility.service";
-import {CardConfigFactory} from "../_services/card-config-factory.service";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {RelatedTabChangeEvent, RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
 import {ReadingList} from "../_models/reading-list";
@@ -66,7 +63,6 @@ import {DownloadButtonComponent} from "../series-detail/_components/download-but
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
 import {CoverUpdateEvent} from "../_models/events/cover-update-event";
 import {ChapterRemovedEvent} from "../_models/events/chapter-removed-event";
-import {ActionService} from "../_services/action.service";
 import {VolumeRemovedEvent} from "../_models/events/volume-removed-event";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
@@ -178,8 +174,6 @@ export class VolumeDetailComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly imageService = inject(ImageService);
   private readonly volumeService = inject(VolumeService);
-  private readonly seriesService = inject(SeriesService);
-  private readonly libraryService = inject(LibraryService);
   private readonly themeService = inject(ThemeService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly readerService = inject(ReaderService);
@@ -188,8 +182,6 @@ export class VolumeDetailComponent implements OnInit {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly actionService = inject(ActionService);
-  private readonly cardConfigFactory = inject(CardConfigFactory);
   protected readonly utilityService = inject(UtilityService);
   private readonly readingListService = inject(ReadingListService);
   private readonly messageHub = inject(MessageHubService);
@@ -198,13 +190,7 @@ export class VolumeDetailComponent implements OnInit {
   private readonly annotationService = inject(AnnotationService);
   protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly AgeRating = AgeRating;
-  protected readonly TabID = TabID;
-  protected readonly FilterField = FilterField;
-  protected readonly encodeURIComponent = encodeURIComponent;
-
   readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
-  readonly companionBar = viewChild<ElementRef<HTMLDivElement>>('companionBar');
 
 
   seriesId = input(0, {transform: numberAttribute });
@@ -348,9 +334,8 @@ export class VolumeDetailComponent implements OnInit {
     const navbar = this.document.querySelector('.navbar') as HTMLElement;
     if (navbar === null) return 'calc(var(--vh)*100)';
 
-    const companionHeight = this.companionBar()?.nativeElement.offsetHeight || 0;
     const navbarHeight = navbar.offsetHeight;
-    const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
+    const totalHeight = navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
@@ -485,7 +470,7 @@ export class VolumeDetailComponent implements OnInit {
     }
   }
 
-  shouldRenderVolumeAction(action: ActionItem<Volume>, entity: Volume, user: User) {
+  shouldRenderVolumeAction(action: ActionItem<Volume>, entity: Volume, _: User) {
     switch (action.action) {
       case(Action.MarkAsRead):
         return entity.pagesRead < entity.pages;
@@ -529,4 +514,8 @@ export class VolumeDetailComponent implements OnInit {
   }
 
   protected readonly Breakpoint = Breakpoint;
+  protected readonly AgeRating = AgeRating;
+  protected readonly TabID = TabID;
+  protected readonly FilterField = FilterField;
+  protected readonly encodeURIComponent = encodeURIComponent;
 }
