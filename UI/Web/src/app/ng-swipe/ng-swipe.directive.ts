@@ -1,4 +1,4 @@
-import {Directive, ElementRef, inject, Input, NgZone, OnDestroy, OnInit, output} from '@angular/core';
+import {Directive, ElementRef, inject, input, NgZone, OnDestroy, OnInit, output} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {createSwipeSubscription, SwipeDirection, SwipeEvent} from './ag-swipe.core';
 
@@ -7,18 +7,18 @@ import {createSwipeSubscription, SwipeDirection, SwipeEvent} from './ag-swipe.co
     standalone: true
 })
 export class SwipeDirective implements OnInit, OnDestroy {
-  private elementRef = inject(ElementRef);
-  private zone = inject(NgZone);
+  private readonly elementRef = inject(ElementRef);
+  private readonly zone = inject(NgZone);
 
-  private swipeSubscription: Subscription | undefined;
-
-  @Input() restrictSwipeToLeftSide: boolean = false;
+  restrictSwipeToLeftSide = input<boolean>(false);
   readonly swipeMove = output<SwipeEvent>();
   readonly swipeEnd = output<SwipeEvent>();
   readonly swipeLeft = output<void>();
   readonly swipeRight = output<void>();
   readonly swipeUp = output<void>();
   readonly swipeDown = output<void>();
+
+  private swipeSubscription: Subscription | undefined;
 
   ngOnInit() {
     this.zone.runOutsideAngular(() => {
@@ -36,7 +36,7 @@ export class SwipeDirective implements OnInit, OnDestroy {
   }
 
   private isSwipeWithinRestrictedArea(swipeEvent: SwipeEvent): boolean {
-    if (!this.restrictSwipeToLeftSide) return true; // If restriction is disabled, allow all swipes
+    if (!this.restrictSwipeToLeftSide()) return true; // If restriction is disabled, allow all swipes
 
     const elementRect = this.elementRef.nativeElement.getBoundingClientRect();
     const touchAreaWidth = elementRect.width * 0.3; // Define the left area (30% of the element's width)

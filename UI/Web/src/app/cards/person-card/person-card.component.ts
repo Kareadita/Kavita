@@ -3,7 +3,6 @@ import {
   ChangeDetectorRef,
   Component,
   contentChild,
-  DestroyRef,
   HostListener,
   inject,
   Input,
@@ -12,7 +11,6 @@ import {
 } from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
-import {MessageHubService} from "../../_services/message-hub.service";
 import {ScrollService} from "../../_services/scroll.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
@@ -41,10 +39,8 @@ import {ActionItem} from "../../_models/actionables/action-item";
 })
 export class PersonCardComponent {
 
-  private readonly destroyRef = inject(DestroyRef);
   public readonly imageService = inject(ImageService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
-  private readonly messageHub = inject(MessageHubService);
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
 

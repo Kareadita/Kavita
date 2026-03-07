@@ -22,8 +22,6 @@ import {getSaver, SAVER} from "./app/_providers/saver.provider";
 import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
 import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
 import {HttpLoader} from "./httpLoader";
-import {register as registerSwiperElements} from 'swiper/element/bundle';
-import {ColorPickerModule} from "@iplab/ngx-color-picker";
 import {clientInfoInterceptor} from "./app/_interceptors/client-info.interceptor";
 import {
   PreloadAllModules,
@@ -36,7 +34,6 @@ import {
 } from "@angular/router";
 import {KavitaTitleStrategy} from "./app/_services/kavita-title.strategy";
 import {routingErrorHandler} from "./app/_interceptors/routing-error.handler";
-import {registerECharts} from "./echarts";
 import {NgbModalConfig, NgbRatingConfig} from "@ng-bootstrap/ng-bootstrap";
 import {DefaultModalOptions} from "./app/_models/modal/modal-options";
 import {ToastNoAnimationModule} from "ngx-toastr";
@@ -49,8 +46,6 @@ if (disableAnimations) {
   document.documentElement.classList.add('no-animations');
 }
 
-registerSwiperElements();
-registerECharts();
 
 function transformLanguageCodes(arr: Array<string>) {
     const transformedArray: Array<string> = [];
@@ -176,8 +171,7 @@ bootstrapApplication(AppComponent, {
             countDuplicates: true,
             autoDismiss: true
           }),
-          NgCircleProgressModule.forRoot(),
-          ColorPickerModule,
+          NgCircleProgressModule.forRoot()
         ),
         provideRouter(routes,
           withComponentInputBinding(),
