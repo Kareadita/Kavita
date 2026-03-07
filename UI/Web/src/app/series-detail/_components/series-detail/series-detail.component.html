@@ -120,7 +120,7 @@
               </div>
 
               <div class="col-auto ms-2 d-none d-md-block btn-actions">
-                <app-download-button [download$]="download$" [entity]="seriesValue" entityType="series" />
+                <app-download-button [entity]="seriesValue" entityType="series" [libraryId]="libraryId()" [seriesId]="seriesValue.id" />
               </div>
 
             </div>

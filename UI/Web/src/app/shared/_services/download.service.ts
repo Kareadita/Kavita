@@ -1,48 +1,32 @@
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, inject, Injectable} from '@angular/core';
+import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {Series} from 'src/app/_models/series';
 import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../confirm.service';
 import {Chapter} from 'src/app/_models/chapter';
 import {Volume} from 'src/app/_models/volume';
-import {asyncScheduler, BehaviorSubject, filter, finalize, Observable, of, tap,} from 'rxjs';
-import {download, Download} from '../_models/download';
+import {asyncScheduler, filter, firstValueFrom, forkJoin, Observable, of, tap} from 'rxjs';
+import {download} from '../_models/download';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
-import {switchMap, takeWhile, throttleTime} from 'rxjs/operators';
+import {map, switchMap, throttleTime} from 'rxjs/operators';
 import {AccountService} from 'src/app/_services/account.service';
 import {BytesPipe} from 'src/app/_pipes/bytes.pipe';
-import {translate} from "@jsverse/transloco";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {translate, TranslocoService} from "@jsverse/transloco";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {SAVER} from "../../_providers/saver.provider";
 import {UtilityService} from "./utility.service";
-import {UserCollection} from "../../_models/collection-tag";
-import {RecentlyAddedItem} from "../../_models/recently-added-item";
-import {NextExpectedChapter} from "../../_models/series-detail/next-expected-chapter";
-import {BrowsePerson} from "../../_models/metadata/browse/browse-person";
-import {ReaderService} from "../../_services/reader.service";
+import {DateTime} from 'luxon';
+import {UtcToLocalDatePipe} from '../../_pipes/utc-to-locale-date.pipe';
+import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
+import {SeriesService} from "../../_services/series.service";
+import {DownloadQueueItem, DownloadQueueStatus} from '../_models/download-queue-item';
+import {DownloadStorageService} from './download-storage.service';
+import {normalizeTimestamp} from "../../../libs/download-timestamp";
 
 export const DEBOUNCE_TIME = 100;
 
 const bytesPipe = new BytesPipe();
-
-export interface DownloadEvent {
-  /**
-   * Type of entity being downloaded
-   */
-  entityType: DownloadEntityType;
-  /**
-   * What to show user. For example, for Series, we might show series name.
-   */
-  subTitle: string;
-  /**
-   * Progress of the download itself
-   */
-  progress: number;
-  /**
-   * Entity id. For entities without id like logs or bookmarks, uses 0 instead
-   */
-  id: number;
-}
 
 /**
  * Valid entity types for downloading
@@ -53,12 +37,24 @@ export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 
  */
 export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | undefined;
 
-export type QueueableDownloadType = Chapter | Volume;
-
 @Injectable({
   providedIn: 'root'
 })
 export class DownloadService {
+
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmService = inject(ConfirmService);
+  private readonly accountService = inject(AccountService);
+  private readonly httpClient = inject(HttpClient);
+  private readonly utilityService = inject(UtilityService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly seriesService = inject(SeriesService);
+  private readonly storage = inject(DownloadStorageService);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly save = inject(SAVER);
+
+  private readonly SERIES_NAME_CACHE_MAX = 50;
+  private _seriesNameCache = new Map<number, string>();
 
   private baseUrl = environment.apiUrl;
   /**
@@ -66,332 +62,869 @@ export class DownloadService {
    */
   public SIZE_WARNING = 104_857_600;
   /**
-   * Sie in bytes in which to inform the user that anything above may fail on iOS due to device limits. (200MB)
+   * Size in bytes in which to inform the user that anything above may fail on iOS due to device limits. (200MB)
    */
   private IOS_SIZE_WARNING = 209_715_200;
 
-  private downloadsSource: BehaviorSubject<DownloadEvent[]> = new BehaviorSubject<DownloadEvent[]>([]);
-  /**
-   * Active Downloads
-   */
-  public activeDownloads$ = this.downloadsSource.asObservable();
+  /** Set to true to enable verbose download queue logging in the browser console. */
+  private readonly debug = false;
 
-  private downloadQueue: BehaviorSubject<QueueableDownloadType[]> = new BehaviorSubject<QueueableDownloadType[]>([]);
-  /**
-   * Queued Downloads
-   */
-  public queuedDownloads$ = this.downloadQueue.asObservable();
+  private debugLog(...args: any[]) {
+    if (this.debug) console.log('[DownloadService]', ...args);
+  }
 
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly confirmService = inject(ConfirmService);
-  private readonly accountService = inject(AccountService);
-  private readonly httpClient = inject(HttpClient);
-  private readonly utilityService = inject(UtilityService);
-  private readonly readerService = inject(ReaderService);
-  private readonly save = inject(SAVER);
+  // --- Signal-based queue (split: active vs completed) ---
+  private _nextId = 0;
+  /** Items that are queued/preparing/downloading/failed, mutated frequently during downloads */
+  readonly activeQueue = signal<DownloadQueueItem[]>([]);
+  /** Completed items from today's session, mutated only when a download finishes */
+  readonly completedToday = signal<DownloadQueueItem[]>([]);
+
+  // O(1) lookup for active items by entityType:entityId
+  private _activeIndex = new Map<string, DownloadQueueItem>();
+  // O(1) lookup: has this entity EVER been downloaded (completed, possibly older)?
+  private _completedEntityIds = new Set<string>();
+
+  private _indexKey(entityType: string, entityId: number): string {
+    return `${entityType}:${entityId}`;
+  }
+
+  private _rebuildActiveIndex() {
+    this._activeIndex.clear();
+    for (const item of this.activeQueue()) {
+      this._activeIndex.set(this._indexKey(item.entityType, item.entityId), item);
+    }
+  }
+
+  /** Targeted single-item update: produces new signal array but patches the index incrementally. */
+  private _updateItem(id: number, patch: Partial<DownloadQueueItem>) {
+    const target = this.activeQueue().find(i => i.id === id);
+    if (!target) return;
+
+    const updated = { ...target, ...patch };
+    this.activeQueue.update(q => q.map(i => i.id === id ? updated : i));
+    this._activeIndex.set(this._indexKey(updated.entityType, updated.entityId), updated);
+  }
+
+  readonly activeItem = computed(() =>
+    this.activeQueue().find(i => i.status === 'preparing' || i.status === 'downloading') ?? null
+  );
+  readonly queuedItems = computed(() => this.activeQueue().filter(i => i.status === 'queued'));
+  readonly completedItems = computed(() =>
+    [...this.completedToday()].sort((a, b) => normalizeTimestamp(b.completedAt).localeCompare(normalizeTimestamp(a.completedAt)))
+  );
+  readonly completedTodayCount = computed(() => this.completedToday().length);
+  readonly failedItems = computed(() => this.activeQueue().filter(i => i.status === 'failed'));
+  readonly totalActiveCount = computed(() =>
+    (this.activeItem() ? 1 : 0) + this.queuedItems().length
+  );
+  readonly hasActiveDownloads = computed(() =>
+    this.activeItem() !== null || this.queuedItems().length > 0
+  );
+  readonly isPaused = signal(false);
+
+  // Older completed items (lazy-loaded from IDB)
+  readonly _olderCompletedCount = signal(0);
+  readonly olderCompletedCount = this._olderCompletedCount.asReadonly();
+  private _olderItems = signal<DownloadQueueItem[]>([]);
+  readonly olderCompletedItems = this._olderItems.asReadonly();
+  private _olderLoaded = false;
+
+  private readonly activeQueue$ = toObservable(this.activeQueue);
+
+  /**
+   * Sliding window of recent byte snapshots for smoothed speed calculation.
+   * Keeps the last ~8 seconds of samples per item.
+   */
+  private _speedSamples = new Map<number, Array<{ bytes: number; time: number }>>();
+  private readonly SPEED_WINDOW_MS = 8000;
+  /** EMA-smoothed speed per item, to dampen rapid fluctuations */
+  private _smoothedSpeed = new Map<number, number>();
+  private readonly EMA_ALPHA = 0.15;
 
   constructor() {
-    this.downloadQueue.subscribe((queue) => {
-      if (queue.length > 0) {
-        const entity = queue.shift();
-        console.log('Download Queue shifting entity: ', entity);
-        if (entity === undefined) return;
-        this.processDownload(entity);
+    // SignalR handler, only used as a safety net
+    // Real progress comes from fetch + ReadableStream in streamDownload/blobDownload.
+    this.messageHub.messages$.pipe(
+      filter(evt => evt.event === EVENTS.DownloadProgress),
+      map(evt => evt.payload as NotificationProgressEvent),
+      tap(evt => {
+        this.debugLog(`DownloadProgress type="${evt.eventType}" body=`, evt.body);
+
+        const correlationId: string | undefined = evt.body?.correlationId ?? evt.body?.CorrelationId;
+        const downloadName: string | undefined = evt.body?.DownloadName ?? evt.body?.downloadName;
+
+        const active = this.activeItem();
+        if (!active) return;
+
+        const isMatch = (correlationId && String(active.id) === correlationId)
+                     || (!correlationId && downloadName === active.downloadName);
+        if (!isMatch) return;
+
+        if (evt.eventType === 'started') {
+          this.debugLog(`DownloadProgress started for id=${active.id}`);
+        } else if (evt.eventType === 'ended') {
+          // Safety net: if the stream somehow missed completion, mark it done
+          if (active.status !== 'completed') {
+            this.debugLog(`DownloadProgress ended (fallback) for id=${active.id}`);
+          }
+        }
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+
+  }
+
+  /**
+   * Restores the queue from IndexedDB. Call this after the user is authenticated.
+   * Items that were in-progress when the page refreshed are marked as failed.
+   */
+  restoreQueue() {
+    this.storage.open().then(items => {
+      const startOfDayIso = DateTime.utc().startOf('day').toISO()!;
+
+      // Mark interrupted items as failed
+      const processed = items.map(i =>
+        (i.status === 'preparing' || i.status === 'downloading')
+          ? { ...i, status: 'failed' as DownloadQueueStatus, errorMessage: this.translocoService.translate('download-queue-drawer.failed-interrupted') }
+          : i
+      );
+
+      // Split: active (non-completed) + today's completed → signals
+      const active = processed.filter(i => i.status !== 'completed');
+      const todayCompleted = processed.filter(i =>
+        i.status === 'completed' && normalizeTimestamp(i.completedAt) >= startOfDayIso
+      );
+      const olderCompleted = processed.filter(i =>
+        i.status === 'completed' && normalizeTimestamp(i.completedAt) < startOfDayIso
+      );
+
+      this.activeQueue.set(active);
+      this.completedToday.set(todayCompleted);
+      this._rebuildActiveIndex();
+
+      // Populate the completed-entity-ID set (today + older)
+      for (const item of [...todayCompleted, ...olderCompleted]) {
+        this._completedEntityIds.add(this._indexKey(item.entityType, item.entityId));
+      }
+
+      this._olderCompletedCount.set(olderCompleted.length);
+
+      // Persist failed items
+      active.filter(i => i.status === 'failed').forEach(i => this.storage.save(i));
+
+      // Advance _nextId past all restored IDs to prevent ID collisions with new items
+      if (processed.length > 0) {
+        this._nextId = Math.max(...processed.map(i => i.id)) + 1;
+      }
+      if (active.some(i => i.status === 'queued')) {
+        this.isPaused.set(true);   // wait for user to hit Resume
       }
     });
   }
 
-
   /**
    * Returns the entity subtitle (for the event widget) for a given entity
-   * @param downloadEntityType
-   * @param downloadEntity
-   * @returns
    */
-   downloadSubtitle(downloadEntityType: DownloadEntityType | undefined, downloadEntity: DownloadEntity | undefined) {
+  downloadSubtitle(downloadEntityType: DownloadEntityType | undefined, downloadEntity: DownloadEntity | undefined) {
     switch (downloadEntityType) {
-      case 'series':
-        return (downloadEntity as Series).name;
-      case 'volume':
-        return (downloadEntity as Volume).minNumber + '';
-      case 'chapter':
-        return (downloadEntity as Chapter).minNumber + '';
-      case 'bookmark':
-        return '';
-      case 'logs':
-        return '';
+      case 'series':   return (downloadEntity as Series).name;
+      case 'volume':   return (downloadEntity as Volume).minNumber + '';
+      case 'chapter':  return (downloadEntity as Chapter).minNumber + '';
+      case 'bookmark': return '';
+      case 'logs':     return '';
     }
     return '';
   }
 
   /**
-   * Downloads the entity to the user's system. This handles everything around downloads. This will prompt the user based on size checks and UserPreferences.PromptForDownload.
-   * This will perform the download at a global level, if you need a handle to the download in question, use downloadService.activeDownloads$ and perform a filter on it.
-   * @param entityType
-   * @param entity
-   * @param callback Optional callback. Returns the download or undefined (if the download is complete).
+   * Downloads the entity to the user's system.
+   * - series → decomposes into volumes/chapters, each queued individually
+   * - volume/chapter → size-checked then queued
+   * - bookmark/logs → immediate blob download (bypasses queue)
    */
-  download(entityType: DownloadEntityType, entity: DownloadEntity, callback?: (d: Download | undefined) => void) {
-    let sizeCheckCall: Observable<number>;
-    let downloadCall: Observable<Download>;
+  download(entityType: DownloadEntityType, entity: DownloadEntity, libraryId: number, seriesId: number) {
     switch (entityType) {
       case 'series':
-        sizeCheckCall = this.downloadSeriesSize((entity as Series).id);
-        downloadCall = this.downloadSeries(entity as Series);
+        this.downloadSeries(entity as Series);
         break;
       case 'volume':
-        sizeCheckCall = this.downloadVolumeSize((entity as Volume).id);
-        downloadCall = this.downloadVolume(entity as Volume);
-        //this.enqueueDownload(entity as Volume);
+        this.enqueueSingle(entity as Volume, 'volume', '', libraryId, seriesId);
         break;
       case 'chapter':
-        sizeCheckCall = this.downloadChapterSize((entity as Chapter).id);
-        downloadCall = this.downloadChapter(entity as Chapter);
-        //this.enqueueDownload(entity as Chapter);
+        this.enqueueSingle(entity as Chapter, 'chapter', '', libraryId, seriesId);
         break;
       case 'bookmark':
-        sizeCheckCall = of(0);
-        downloadCall = this.downloadBookmarks(entity as PageBookmark[]);
+        this.downloadBookmarksBlob(entity as PageBookmark[]);
         break;
       case 'logs':
-        sizeCheckCall = of(0);
-        downloadCall = this.downloadLogs();
+        this.downloadLogsBlob();
         break;
-      default:
-        return;
+    }
+  }
+
+
+  /**
+   * Downloads multiple volumes and chapters in bulk, using only 2 HTTP size calls total.
+   */
+  downloadBulk(volumes: Volume[], chapters: Chapter[], libraryId = 0, seriesId = 0) {
+    const items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }> = [
+      ...volumes.map(v => ({ entity: v as Volume, entityType: 'volume' as const })),
+      ...chapters.map(c => ({ entity: c as Chapter, entityType: 'chapter' as const })),
+    ];
+    if (items.length === 0) return;
+    this.enqueueItems(items, '', libraryId, seriesId);
+  }
+
+  cancelDownload(itemId: number) {
+    const controller = this.activeAbortControllers.get(itemId);
+    if (controller) {
+      controller.abort();
+      this.activeAbortControllers.delete(itemId);
+    }
+    this.activeQueue.update(q => q.filter(i => i.id !== itemId));
+    this._rebuildActiveIndex();
+    this.storage.delete(itemId);
+    setTimeout(() => this.processQueue(), 100);
+  }
+
+  removeItem(id: number) {
+    // Check activeQueue first, then completedToday
+    if (this.activeQueue().some(i => i.id === id)) {
+      this.activeQueue.update(q => q.filter(i => i.id !== id));
+      this._rebuildActiveIndex();
+    } else {
+      this.completedToday.update(q => q.filter(i => i.id !== id));
+    }
+    this.storage.delete(id);
+  }
+
+  clearCompleted() {
+    const ids = this.completedToday().map(i => i.id);
+    this.completedToday.set([]);
+    ids.forEach(id => this.storage.delete(id));
+  }
+
+  clearCompletedByIds(ids: number[]) {
+    const idSet = new Set(ids);
+    // Remove matching IDs from completedToday and update entity ID set
+    const removed = this.completedToday().filter(i => idSet.has(i.id));
+    this.completedToday.update(q => q.filter(i => !idSet.has(i.id)));
+    for (const item of removed) {
+      this._completedEntityIds.delete(this._indexKey(item.entityType, item.entityId));
+    }
+    ids.forEach(id => this.storage.delete(id));
+  }
+
+  loadOlderCompleted() {
+    if (this._olderLoaded) return;
+    this._olderLoaded = true;
+    const startOfDayIso = DateTime.utc().startOf('day').toISO()!;
+    this.storage.getCompletedBefore(startOfDayIso).then(items => {
+      this._olderItems.set(items.sort((a, b) => normalizeTimestamp(b.completedAt).localeCompare(normalizeTimestamp(a.completedAt))));
+    });
+  }
+
+  clearOlderCompleted() {
+    const items = this._olderItems();
+    this._olderItems.set([]);
+    this._olderCompletedCount.set(0);
+    this._olderLoaded = false;
+    for (const item of items) {
+      this.storage.delete(item.id);
+      this._completedEntityIds.delete(this._indexKey(item.entityType, item.entityId));
+    }
+  }
+
+  retryDownload(itemId: number) {
+    const item = this.activeQueue().find(i => i.id === itemId);
+    if (!item || item.retryCount >= 3) return;
+    const retried = { ...item, status: 'queued' as DownloadQueueStatus, errorMessage: '', retryCount: item.retryCount + 1 };
+    // Place retried item at the front of the queue (after any active item)
+    this.activeQueue.update(q => {
+      const without = q.filter(i => i.id !== itemId);
+      const activeIdx = without.findIndex(i => i.status === 'preparing' || i.status === 'downloading');
+      const insertAt = activeIdx >= 0 ? activeIdx + 1 : 0;
+      return [...without.slice(0, insertAt), retried, ...without.slice(insertAt)];
+    });
+    this._rebuildActiveIndex();
+    this.storage.save(retried);
+    this.processQueue();
+  }
+
+  cancelAllQueued() {
+    const ids = this.activeQueue().filter(i => i.status === 'queued').map(i => i.id);
+    this.activeQueue.update(q => q.filter(i => i.status !== 'queued'));
+    this._rebuildActiveIndex();
+    ids.forEach(id => this.storage.delete(id));
+    this.isPaused.set(false);  // don't block fresh downloads after cancelling all queued
+  }
+
+  clearAllFailed() {
+    const ids = this.activeQueue().filter(i => i.status === 'failed').map(i => i.id);
+    this.activeQueue.update(q => q.filter(i => i.status !== 'failed'));
+    this._rebuildActiveIndex();
+    ids.forEach(id => this.storage.delete(id));
+  }
+
+  pauseQueue() {
+    this.isPaused.set(true);
+  }
+
+  retryAllFailed() {
+    this.activeQueue.update(q => {
+      const active = q.filter(i => i.status === 'preparing' || i.status === 'downloading');
+      const retried = q.filter(i => i.status === 'failed' && i.retryCount < 3)
+        .map(i => ({ ...i, status: 'queued' as DownloadQueueStatus, errorMessage: '', retryCount: i.retryCount + 1 }));
+      const remainingFailed = q.filter(i => i.status === 'failed' && i.retryCount >= 3);
+      const existingQueued = q.filter(i => i.status === 'queued');
+      // Retried items go to the front of the queue, before existing queued items
+      return [...active, ...retried, ...existingQueued, ...remainingFailed];
+    });
+    this._rebuildActiveIndex();
+    this.activeQueue().filter(i => i.status === 'queued').forEach(i => this.storage.save(i));
+    this.processQueue();
+  }
+
+  /**
+   * Returns the active queue item for the given entity, or null if none.
+   * Use this for card download indicators.
+   */
+  getItemForEntity(entity: Series | Volume | Chapter | PageBookmark[], includeCompleted = false): DownloadQueueItem | null {
+    // Read both signals up front so Angular computed/effect tracks them as dependencies,
+    // even for code paths that use the plain Map/Set for O(1) lookup.
+    const aq = this.activeQueue();
+    const ct = this.completedToday();
+
+    // Series: aggregate across all active + completed items together so progress doesn't drop
+    if (this.utilityService.isSeries(entity)) {
+      const sId = (entity as Series).id;
+      const items = aq.filter(i => ['queued', 'preparing', 'downloading'].includes(i.status) && i.seriesId === sId);
+
+      if (includeCompleted) {
+        items.push(...ct.filter(i => i.seriesId === sId));
+      }
+      return this._aggregateSeriesItems(items);
     }
 
-    const user = this.accountService.currentUser();
-    const sizeCheck$ = (user && user.preferences.promptForDownloadSize)
-      ? sizeCheckCall
-      : of(0);
+    // Volume/Chapter: O(1) Map lookup for active
+    const entityType = this.utilityService.isVolume(entity) ? 'volume' : 'chapter';
+    const key = this._indexKey(entityType, (entity as Volume | Chapter).id);
+    const active = this._activeIndex.get(key);
+    if (active && ['queued', 'preparing', 'downloading'].includes(active.status)) return active;
 
-    sizeCheck$.pipe(
-      switchMap(async (size) => await this.confirmSize(size, entityType)),
-      filter(wantsToDownload => wantsToDownload),
-      filter(_ => downloadCall !== undefined),
-      switchMap(() => {
-        return (downloadCall || of(undefined)).pipe(
-          tap((d) => {
-            this.readerService.enableWakeLock();
-            if (callback) callback(d);
-          }),
-          takeWhile((val: Download) => val.state != 'DONE'),
-          finalize(() => {
-            this.readerService.disableWakeLock();
-            if (callback) callback(undefined);
-          }))
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(() => {});
+    // Check today's completed (small array)
+    if (includeCompleted) {
+      const todayMatch = ct.find(i => i.entityType === entityType && i.entityId === (entity as Volume | Chapter).id);
+      if (todayMatch) return todayMatch;
+
+      // Check if entity was ever downloaded (older, in IDB)
+      if (this._completedEntityIds.has(key)) {
+        return { status: 'completed', entityType, entityId: (entity as Volume | Chapter).id } as DownloadQueueItem;
+      }
+    }
+    return null;
+  }
+
+  private _aggregateSeriesItems(items: DownloadQueueItem[]): DownloadQueueItem | null {
+    if (items.length === 0) return null;
+
+    const totalProgress = items.reduce((sum, i) => {
+      if (i.status === 'completed') return sum + 100;
+      if (i.status === 'downloading' || i.status === 'preparing') return sum + i.progress;
+      return sum;
+    }, 0);
+
+    const allCompleted = items.every(i => i.status === 'completed');
+    const representative = items.find(i => i.status === 'downloading')
+      ?? items.find(i => i.status === 'preparing')
+      ?? items.find(i => i.status === 'queued')
+      ?? items[0];
+
+    return {
+      ...representative,
+      progress: Math.round(totalProgress / items.length),
+      status: allCompleted ? 'completed' : representative.status,
+    };
+  }
+
+  /**
+   * Returns an observable of the queue item for the given entity, or null if none.
+   * Emits on every queue change. Use this for card download indicators.
+   */
+  getEntityDownload$(entity: Series | Volume | Chapter | PageBookmark[]): Observable<DownloadQueueItem | null> {
+    if (!entity.hasOwnProperty('id')) return of(null);
+    return this.activeQueue$.pipe(
+      map(() => this.getItemForEntity(entity))
+    );
+  }
+
+  /**
+   * Download the given data as a JSON file
+   */
+  downloadObjectAsJson(data: any, title: string) {
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = title.endsWith('.json') ? title : title + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   private downloadSeriesSize(seriesId: number) {
     return this.httpClient.get<number>(this.baseUrl + 'download/series-size?seriesId=' + seriesId);
   }
 
-  private downloadVolumeSize(volumeId: number) {
-    return this.httpClient.get<number>(this.baseUrl + 'download/volume-size?volumeId=' + volumeId);
+  private downloadBulkVolumeSizes(volumeIds: number[]) {
+    return this.httpClient.post<Record<number, number>>(this.baseUrl + 'download/bulk-volume-size', volumeIds);
   }
 
-  private downloadChapterSize(chapterId: number) {
-    return this.httpClient.get<number>(this.baseUrl + 'download/chapter-size?chapterId=' + chapterId);
+  private downloadBulkChapterSizes(chapterIds: number[]) {
+    return this.httpClient.post<Record<number, number>>(this.baseUrl + 'download/bulk-chapter-size', chapterIds);
   }
 
-  private downloadLogs() {
-    const downloadType = 'logs';
-    const subtitle = this.downloadSubtitle(downloadType, undefined);
-    return this.httpClient.get(this.baseUrl + 'server/logs',
-      {observe: 'events', responseType: 'blob', reportProgress: true}
+  private downloadBulkSeriesSize(seriesIds: number[]) {
+    return this.httpClient.post<Record<number, number>>(this.baseUrl + 'download/bulk-series-size', seriesIds);
+  }
+
+  private downloadSeries(series: Series) {
+    this.debugLog('downloadSeries()', series.name);
+    this.seriesService.getSeriesDetail(series.id).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(detail => {
+      const items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }> = [
+        ...detail.volumes.map(v => ({ entity: v as Volume, entityType: 'volume' as const })),
+        ...detail.chapters.map(c => ({ entity: c as Chapter, entityType: 'chapter' as const })),
+        ...detail.specials.map(c => ({ entity: c as Chapter, entityType: 'chapter' as const })),
+      ];
+      this.debugLog(`downloadSeries() decomposed into ${items.length} items (${detail.volumes.length} vols, ${detail.chapters.length + detail.specials.length} chapters)`);
+
+      const userPrefs = this.accountService.userPreferences();
+      if (userPrefs?.promptForDownloadSize && items.length > 0) {
+        // Single size call for the whole series, single confirm dialog
+        this.downloadSeriesSize(series.id).pipe(
+          switchMap(async size => this.confirmSize(size, 'series')),
+          filter(confirmed => confirmed),
+          takeUntilDestroyed(this.destroyRef)
+        ).subscribe(() => this.enqueueItems(items, series.name, series.libraryId, series.id));
+      } else {
+        this.enqueueItems(items, series.name, series.libraryId, series.id);
+      }
+    });
+  }
+
+  private enqueueItems(items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }>, seriesName: string, libraryId: number, seriesId = 0) {
+    this.debugLog(`enqueueItems() adding ${items.length} items for series "${seriesName}"`);
+
+    const volumeItems = items.filter(i => i.entityType === 'volume');
+    const chapterItems = items.filter(i => i.entityType === 'chapter');
+
+    const volSizes$ = volumeItems.length > 0
+      ? this.downloadBulkVolumeSizes(volumeItems.map(i => i.entity.id))
+      : of({} as Record<number, number>);
+    const chSizes$ = chapterItems.length > 0
+      ? this.downloadBulkChapterSizes(chapterItems.map(i => i.entity.id))
+      : of({} as Record<number, number>);
+
+    forkJoin([volSizes$, chSizes$]).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(async ([volMap, chMap]) => {
+      for (const item of items) {
+        const size = item.entityType === 'volume'
+          ? (volMap[item.entity.id] ?? 0)
+          : (chMap[item.entity.id] ?? 0);
+        await this.addToQueue(item.entity, item.entityType, seriesName, libraryId, size, seriesId, true);
+      }
+      this.processQueue();
+    });
+  }
+
+  private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, seriesId = 0) {
+    const user = this.accountService.currentUser();
+    const sizeCall$ = entityType === 'volume'
+      ? this.downloadBulkVolumeSizes([entity.id]).pipe(map(m => m[entity.id] ?? 0))
+      : this.downloadBulkChapterSizes([entity.id]).pipe(map(m => m[entity.id] ?? 0));
+
+    // Always fetch size to populate estimatedSize; only prompt if user preference is set
+    sizeCall$.pipe(
+      switchMap(async size => {
+        const promptForSize = user && user.preferences.promptForDownloadSize;
+        const confirmed = promptForSize ? await this.confirmSize(size, entityType) : true;
+        return { size, confirmed };
+      }),
+      filter(result => result.confirmed),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(async ({ size }) => {
+      await this.addToQueue(entity, entityType, seriesName, libraryId, size, seriesId);
+      this.processQueue();
+    });
+  }
+
+  private async resolveSeriesName(seriesName: string, seriesId: number): Promise<string> {
+    if (seriesName) return seriesName;
+    if (seriesId <= 0) return '';
+    const cached = this._seriesNameCache.get(seriesId);
+    if (cached !== undefined) {
+      // Move to end (most-recently-used)
+      this._seriesNameCache.delete(seriesId);
+      this._seriesNameCache.set(seriesId, cached);
+      return cached;
+    }
+    try {
+      const series = await firstValueFrom(this.seriesService.getSeries(seriesId));
+      // Evict oldest if at capacity
+      if (this._seriesNameCache.size >= this.SERIES_NAME_CACHE_MAX) {
+        const oldest = this._seriesNameCache.keys().next().value!;
+        this._seriesNameCache.delete(oldest);
+      }
+      this._seriesNameCache.set(seriesId, series.name);
+      return series.name;
+    } catch {
+      return '';
+    }
+  }
+
+  private async addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, skipRedownloadPrompt = false) {
+    seriesName = await this.resolveSeriesName(seriesName, seriesId);
+    const entityId = entity.id;
+    const key = this._indexKey(entityType, entityId);
+
+    // 1. Already queued/active → silently drop
+    if (this._activeIndex.has(key)) {
+      this.debugLog(`addToQueue() duplicate active - silently dropping ${key}`);
+      return;
+    }
+
+    // 2. Previously completed → skip silently in bulk, prompt for single downloads
+    if (this._completedEntityIds.has(key)) {
+      if (skipRedownloadPrompt) {
+        this.debugLog(`addToQueue() already completed, skipping in bulk - ${key}`);
+        return;
+      }
+
+      const todayMatch = this.completedToday().find(i => i.entityType === entityType && i.entityId === entityId);
+      const olderMatch = !todayMatch ? this._olderItems().find(i => i.entityType === entityType && i.entityId === entityId) : undefined;
+      const match = todayMatch ?? olderMatch;
+
+      const utcPipe = new UtcToLocalDatePipe();
+      const localDate = match?.completedAt ? utcPipe.transform(normalizeTimestamp(match.completedAt)) : null;
+      const dateStr = localDate?.toLocaleDateString() ?? '';
+      const titleLabel = match?.label ?? `${entityType} ${entityId}`;
+
+      const confirmed = await this.confirmService.confirm(
+        translate('toasts.redownload-confirm', { title: titleLabel, date: dateStr })
+      );
+      if (!confirmed) {
+        this.debugLog(`addToQueue() re-download declined for ${key}`);
+        return;
+      }
+    }
+
+    const id = this._nextId++;
+    this.debugLog(`addToQueue() id=${id} type=${entityType} entityId=${entityId} series="${seriesName}"`);
+
+    let subLabel: string;
+    let downloadName: string;
+
+    if (entityType === 'volume') {
+      const vol = entity as Volume;
+      subLabel = vol.minNumber + '';
+      downloadName = seriesName ? `${seriesName} - Volume ${vol.name}` : `Volume ${vol.name}`;
+    } else {
+      const ch = entity as Chapter;
+      subLabel = ch.minNumber + '';
+      downloadName = seriesName ? `${seriesName} - Chapter ${ch.minNumber}` : `Chapter ${ch.minNumber}`;
+    }
+
+    const label = downloadName;
+
+    const item: DownloadQueueItem = {
+      id,
+      entityType,
+      entityId,
+      libraryId,
+      seriesId,
+      label,
+      subLabel,
+      seriesName,
+      estimatedSize,
+      status: 'queued',
+      progress: 0,
+      errorMessage: '',
+      retryCount: 0,
+      queuedAt: DateTime.utc().toISO()!,
+      entity,
+      downloadName,
+    };
+
+    this.activeQueue.update(q => [...q, item]);
+    this._rebuildActiveIndex();
+    this.storage.save(item);
+  }
+
+  resumeQueue() {
+    this.isPaused.set(false);
+    this.processQueue();
+  }
+
+  private processQueue() {
+    if (this.isPaused()) return;
+    if (this.activeItem()) {
+      this.debugLog('processQueue() - already active, skipping');
+      return;
+    }
+
+    const nextItem = this.activeQueue().find(i => i.status === 'queued');
+    if (!nextItem) {
+      this.debugLog('processQueue() - queue empty, nothing to do');
+      return;
+    }
+
+    this.debugLog(`processQueue() - starting item id=${nextItem.id} "${nextItem.label}"`);
+    this.setStatus(nextItem.id, 'preparing');
+    this.triggerDownload(nextItem);
+  }
+
+  /** Active AbortControllers keyed by item id, for cancellation support */
+  private activeAbortControllers = new Map<number, AbortController>();
+
+  private triggerDownload(item: DownloadQueueItem) {
+    const apiKey = this.accountService.currentUserGenericApiKey();
+    if (!apiKey) {
+      this.debugLog(`triggerDownload() - no API key for id=${item.id}`);
+      this.markFailed(item.id, this.translocoService.translate('download-queue-drawer.failed-from-auth'));
+      return;
+    }
+
+    const idKey = item.entityType === 'volume' ? 'volumeId' : 'chapterId';
+    const url = `${this.baseUrl}download/${item.entityType}` +
+                `?${idKey}=${item.entityId}` +
+                `&correlationId=${item.id}` +
+                `&_t=${Date.now()}` +
+                `&apiKey=${encodeURIComponent(apiKey)}`;
+
+    this.debugLog(`triggerDownload() id=${item.id} url=${url}`);
+    this.fetchDownload(item, url);
+  }
+
+  /**
+   * Download using fetch + ReadableStream for real byte-level progress, then saveAs via blob.
+   */
+  private async fetchDownload(item: DownloadQueueItem, url: string) {
+    const abortController = new AbortController();
+    this.activeAbortControllers.set(item.id, abortController);
+
+    try {
+      const response = await fetch(url, { signal: abortController.signal });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.body) throw new Error('No response body');
+
+      const contentLength = +(response.headers.get('Content-Length') || 0);
+      const filename = this.parseContentDisposition(response.headers.get('Content-Disposition') || '', item.downloadName);
+
+      this.setStatus(item.id, 'downloading');
+
+      const reader = response.body.getReader();
+      const chunks: BlobPart[] = [];
+      let received = 0;
+      let lastProgressUpdate = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.length;
+
+        if (contentLength > 0) {
+          const now = Date.now();
+
+          // Throttle signal updates to ~4/sec max (250ms)
+          if ((now - lastProgressUpdate) < 250) continue;
+          lastProgressUpdate = now;
+
+          const progress = Math.round((received / contentLength) * 100);
+
+          // Sliding-window speed: keep samples from the last SPEED_WINDOW_MS
+          let samples = this._speedSamples.get(item.id);
+          if (!samples) {
+            samples = [];
+            this._speedSamples.set(item.id, samples);
+          }
+          samples.push({ bytes: received, time: now });
+          const cutoff = now - this.SPEED_WINDOW_MS;
+          while (samples.length > 1 && samples[0].time < cutoff) {
+            samples.shift();
+          }
+
+          let speedBps: number | undefined;
+          let etaSeconds: number | undefined;
+          if (samples.length >= 2) {
+            const oldest = samples[0];
+            const timeDelta = (now - oldest.time) / 1000;
+            const bytesDelta = received - oldest.bytes;
+            if (timeDelta > 0) {
+              const rawSpeed = bytesDelta / timeDelta;
+              const prev = this._smoothedSpeed.get(item.id);
+              speedBps = prev !== undefined
+                ? this.EMA_ALPHA * rawSpeed + (1 - this.EMA_ALPHA) * prev
+                : rawSpeed;
+              this._smoothedSpeed.set(item.id, speedBps);
+              const remaining = contentLength - received;
+              etaSeconds = speedBps > 0 ? Math.round(remaining / speedBps) : undefined;
+            }
+          }
+
+          this._updateItem(item.id, {
+            progress,
+            ...(speedBps !== undefined ? { speedBps } : {}),
+            ...(etaSeconds !== undefined ? { etaSeconds } : {}),
+          });
+        }
+      }
+
+      const blob = new Blob(chunks);
+      chunks.length = 0; // release chunk references before saveAs to halve peak memory
+
+      this.save(blob, filename);
+      this.activeAbortControllers.delete(item.id);
+      this.markCompleted(item.id);
+    } catch (err: any) {
+      this.activeAbortControllers.delete(item.id);
+      if (err.name === 'AbortError') {
+        this.debugLog(`blobDownload() cancelled for id=${item.id}`);
+      } else {
+        this.markFailed(item.id, err.message || 'Download failed');
+      }
+    }
+  }
+
+  /**
+   * Parse Content-Disposition header to extract filename, with fallback.
+   */
+  private parseContentDisposition(header: string, fallbackName: string): string {
+    if (!header) return fallbackName || 'download';
+    const tokens = header.split(';');
+
+    if (tokens.length < 2) return fallbackName || 'download';
+
+    let filename = tokens[1].replace('filename=', '').replace(/"/ig, '').trim();
+
+    if (filename.startsWith('download_') || filename.startsWith('kavita_download_')) {
+      const ext = filename.substring(filename.lastIndexOf('.'), filename.length);
+      if (fallbackName) return fallbackName + ext;
+
+      return filename.replace('kavita_', '').replace('download_', '');
+    }
+
+    try {
+      return decodeURIComponent(filename) || fallbackName || 'download';
+    } catch {
+      return filename || fallbackName || 'download';
+    }
+  }
+
+  /** Updates activeQueue signal and persists to IDB on status changes. */
+  private setStatus(id: number, status: DownloadQueueStatus, extra?: Partial<DownloadQueueItem>) {
+    this._updateItem(id, { status, ...extra });
+    const item = this.activeQueue().find(i => i.id === id);
+    if (item) this.storage.save(item);
+  }
+
+  /**
+   * Computes aggregate download progress for all items belonging to a series.
+   * Returns a synthetic DownloadQueueItem with averaged progress, or null if no active items.
+   */
+  private getSeriesDownloadProgress(seriesName: string): DownloadQueueItem | null {
+    const activeItems = this.activeQueue().filter(i =>
+      i.seriesName === seriesName &&
+      i.status !== 'cancelled' && i.status !== 'failed'
+    );
+    const completedItems = this.completedToday().filter(i => i.seriesName === seriesName);
+    const allItems = [...activeItems, ...completedItems];
+    if (allItems.length === 0) return null;
+
+    const hasActive = allItems.some(i =>
+      i.status === 'queued' || i.status === 'preparing' || i.status === 'downloading'
+    );
+    if (!hasActive) return null;
+
+    const totalProgress = allItems.reduce((sum, i) => {
+      if (i.status === 'completed') return sum + 100;
+      if (i.status === 'downloading' || i.status === 'preparing') return sum + i.progress;
+      return sum; // queued = 0
+    }, 0);
+
+    const representative = allItems.find(i => i.status === 'downloading')
+      ?? allItems.find(i => i.status === 'preparing')
+      ?? allItems.find(i => i.status === 'queued')!;
+
+    return { ...representative, progress: Math.round(totalProgress / allItems.length) };
+  }
+
+  private markCompleted(itemId: number) {
+    this.debugLog(`markCompleted() id=${itemId}`);
+    this._speedSamples.delete(itemId);
+    this._smoothedSpeed.delete(itemId);
+
+    // Find the item in activeQueue, move it to completedToday
+    const item = this.activeQueue().find(i => i.id === itemId);
+    if (item) {
+      const completed = { ...item, status: 'completed' as DownloadQueueStatus, progress: 100, completedAt: DateTime.utc().toISO()! };
+      this.activeQueue.update(q => q.filter(i => i.id !== itemId));
+      this._rebuildActiveIndex();
+      this.completedToday.update(q => [...q, completed]);
+      this._completedEntityIds.add(this._indexKey(completed.entityType, completed.entityId));
+      this.storage.save(completed);
+    }
+
+    // Give GC time to reclaim the previous download's blob before starting the next one
+    setTimeout(() => this.processQueue(), 1500);
+  }
+
+  private markFailed(itemId: number, error: string) {
+    this.debugLog(`markFailed() id=${itemId} error="${error}"`);
+    this._speedSamples.delete(itemId);
+    this._smoothedSpeed.delete(itemId);
+    this._updateItem(itemId, { status: 'failed' as DownloadQueueStatus, errorMessage: error, completedAt: DateTime.utc().toISO()! });
+    const item = this.activeQueue().find(i => i.id === itemId);
+    if (item) this.storage.save(item);
+    // Give GC time to reclaim memory before starting next download
+    setTimeout(() => this.processQueue(), 1500);
+  }
+
+  // --- Blob-based downloads (bookmarks, logs) ---
+
+  private downloadBookmarksBlob(bookmarks: PageBookmark[]) {
+    this.httpClient.post(this.baseUrl + 'download/bookmarks', { bookmarks },
+      { observe: 'events', responseType: 'blob', reportProgress: true }
     ).pipe(
       throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
       download((blob, filename) => {
         this.save(blob, decodeURIComponent(filename));
       }),
-      tap((d) => this.updateDownloadState(d, downloadType, subtitle, 0)),
-      finalize(() => this.finalizeDownloadState(downloadType, subtitle))
-    );
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
-
-  private getIdKey(entity: Chapter | Volume) {
-    if (this.utilityService.isVolume(entity)) return 'volumeId';
-    if (this.utilityService.isChapter(entity)) return 'chapterId';
-    if (this.utilityService.isSeries(entity)) return 'seriesId';
-    return 'id';
-  }
-
-  private getDownloadEntityType(entity: Chapter | Volume): DownloadEntityType {
-    if (this.utilityService.isVolume(entity)) return 'volume';
-    if (this.utilityService.isChapter(entity)) return 'chapter';
-    if (this.utilityService.isSeries(entity)) return 'series';
-    return 'logs'; // This is a hack but it will never occur
-  }
-
-  private downloadEntity<T>(entity: Chapter | Volume): Observable<any> {
-    const downloadEntityType = this.getDownloadEntityType(entity);
-    const subtitle = this.downloadSubtitle(downloadEntityType, entity);
-    const idKey = this.getIdKey(entity);
-    const url = `${this.baseUrl}download/${downloadEntityType}?${idKey}=${entity.id}`;
-
-    return this.httpClient.get(url, { observe: 'events', responseType: 'blob', reportProgress: true }).pipe(
+  private downloadLogsBlob() {
+    this.httpClient.get(this.baseUrl + 'server/logs',
+      { observe: 'events', responseType: 'blob', reportProgress: true }
+    ).pipe(
       throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
       download((blob, filename) => {
         this.save(blob, decodeURIComponent(filename));
       }),
-      tap((d) => this.updateDownloadState(d, downloadEntityType, subtitle, entity.id)),
-      finalize(() => this.finalizeDownloadState(downloadEntityType, subtitle))
-    );
-  }
-
-  private downloadSeries(series: Series) {
-
-    // TODO: Call backend for all the volumes and loose leaf chapters then enqueque them all
-
-    const downloadType = 'series';
-    const subtitle = this.downloadSubtitle(downloadType, series);
-    return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + series.id,
-                      {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(
-              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
-              download((blob, filename) => {
-                this.save(blob, decodeURIComponent(filename));
-              }),
-              tap((d) => this.updateDownloadState(d, downloadType, subtitle, series.id)),
-              finalize(() => this.finalizeDownloadState(downloadType, subtitle))
-            );
-  }
-
-  private finalizeDownloadState(entityType: DownloadEntityType, entitySubtitle: string) {
-    let values = this.downloadsSource.getValue();
-    values = values.filter(v => !(v.entityType === entityType && v.subTitle === entitySubtitle));
-    this.downloadsSource.next(values);
-  }
-
-  private updateDownloadState(d: Download, entityType: DownloadEntityType, entitySubtitle: string, id: number) {
-    let values = this.downloadsSource.getValue();
-    if (d.state === 'PENDING') {
-      const index = values.findIndex(v => v.entityType === entityType && v.subTitle === entitySubtitle);
-      if (index >= 0) return; // Don't let us duplicate add
-      values.push({entityType: entityType, subTitle: entitySubtitle, progress: 0, id});
-    } else if (d.state === 'IN_PROGRESS') {
-      const index = values.findIndex(v => v.entityType === entityType && v.subTitle === entitySubtitle);
-      if (index >= 0) {
-        values[index].progress = d.progress;
-      }
-    } else if (d.state === 'DONE') {
-      values = values.filter(v => !(v.entityType === entityType && v.subTitle === entitySubtitle));
-    }
-    this.downloadsSource.next(values);
-
-  }
-
-  private downloadChapter(chapter: Chapter) {
-    return this.downloadEntity(chapter);
-  }
-
-  private downloadVolume(volume: Volume) {
-    return this.downloadEntity(volume);
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
   }
 
   private async confirmSize(size: number, entityType: DownloadEntityType) {
     const showIosWarning = size > this.IOS_SIZE_WARNING && /iPad|iPhone|iPod/.test(navigator.userAgent);
     return (size < this.SIZE_WARNING ||
       await this.confirmService.confirm(translate('toasts.confirm-download-size',
-        {entityType: translate('entity-type.' + entityType), size: bytesPipe.transform(size)})
-      + (!showIosWarning ? '' : '<br/><br/>' + translate('toasts.confirm-download-size-ios'))));
-  }
-
-  private downloadBookmarks(bookmarks: PageBookmark[]) {
-    const downloadType = 'bookmark';
-    const subtitle = this.downloadSubtitle(downloadType, bookmarks);
-
-    return this.httpClient.post(this.baseUrl + 'download/bookmarks', {bookmarks},
-                      {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(
-              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
-              download((blob, filename) => {
-                this.save(blob, decodeURIComponent(filename));
-              }),
-              tap((d) => this.updateDownloadState(d, downloadType, subtitle, 0)),
-              finalize(() => this.finalizeDownloadState(downloadType, subtitle))
-            );
-  }
-
-
-
-  private processDownload(entity: QueueableDownloadType): void {
-    const downloadObservable = this.downloadEntity(entity);
-    console.log('Process Download called for entity: ', entity);
-
-    // When we consume one, we need to take it off the queue
-
-    downloadObservable.subscribe((downloadEvent) => {
-      // Download completed, process the next item in the queue
-      if (downloadEvent.state === 'DONE') {
-        this.processNextDownload();
-      }
-    });
-  }
-
-  private processNextDownload(): void {
-    const currentQueue = this.downloadQueue.value;
-    if (currentQueue.length > 0) {
-      const nextEntity = currentQueue[0];
-      this.processDownload(nextEntity);
-    }
-  }
-
-  private enqueueDownload(entity: QueueableDownloadType): void {
-    const currentQueue = this.downloadQueue.value;
-    const newQueue = [...currentQueue, entity];
-    this.downloadQueue.next(newQueue);
-
-    // If the queue was empty, start processing the download
-    if (currentQueue.length === 0) {
-      this.processNextDownload();
-    }
-  }
-
-  mapToEntityType(events: DownloadEvent[], entity: Series | Volume | Chapter | UserCollection | PageBookmark | RecentlyAddedItem | NextExpectedChapter | BrowsePerson) {
-    if(this.utilityService.isSeries(entity)) {
-      return events.find(e => e.entityType === 'series' && e.id == entity.id
-        && e.subTitle === this.downloadSubtitle('series', (entity as Series))) || null;
-    }
-
-    if(this.utilityService.isVolume(entity)) {
-      return events.find(e => e.entityType === 'volume' && e.id == entity.id
-        && e.subTitle === this.downloadSubtitle('volume', (entity as Volume))) || null;
-    }
-
-    if(this.utilityService.isChapter(entity)) {
-      return events.find(e => e.entityType === 'chapter'  && e.id == entity.id
-        && e.subTitle === this.downloadSubtitle('chapter', (entity as Chapter))) || null;
-    }
-
-    // Is PageBookmark[]
-    if(entity.hasOwnProperty('length')) {
-      return events.find(e => e.entityType === 'bookmark'
-        && e.subTitle === this.downloadSubtitle('bookmark', [(entity as PageBookmark)])) || null;
-    }
-
-    return null;
-  }
-
-  /**
-   * Download the given data as a json file
-   * @param data
-   * @param title may include the json file extension
-   */
-  downloadObjectAsJson(data: any, title: string) {
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = title.endsWith('.json') ? title : title + '.json';
-    a.click();
-    URL.revokeObjectURL(url);
+        { entityType: translate('entity-type.' + entityType), size: bytesPipe.transform(size) })
+        + (!showIosWarning ? '' : '<br/><br/>' + translate('toasts.confirm-download-size-ios'))));
   }
 }

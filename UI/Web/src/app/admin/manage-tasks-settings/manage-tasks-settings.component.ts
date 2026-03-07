@@ -112,7 +112,7 @@ export class ManageTasksSettingsComponent implements OnInit {
     {
       name: 'download-logs-task',
       description: 'download-logs-task-desc',
-      api: defer(() => of(this.downloadService.download('logs', undefined))),
+      api: defer(() => of(this.downloadService.download('logs', undefined, 0, 0))),
       successMessage: ''
     },
     {

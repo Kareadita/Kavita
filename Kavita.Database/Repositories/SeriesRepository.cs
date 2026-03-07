@@ -541,6 +541,29 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return seriesChapters;
     }
 
+    public async Task<long> GetFilesizeForSeriesAsync(int seriesId, CancellationToken ct = default)
+    {
+        return await context.Volume
+            .Where(v => v.SeriesId == seriesId)
+            .SumAsync(v => v.Chapters.Sum(c => c.Files.Sum(f => f.Bytes)), cancellationToken: ct);
+    }
+
+    public async Task<Dictionary<int, long>> GetFilesizeForMultipleSeriesAsync(IList<int> seriesIds, CancellationToken ct = default)
+    {
+        return await seriesIds.BatchToDictionaryAsync(50, batch =>
+            context.Volume
+                .Where(v => batch.Contains(v.SeriesId))
+                .GroupBy(v => v.SeriesId)
+                .Select(g => new
+                {
+                    SeriesId = g.Key,
+                    TotalBytes = g.SelectMany(v => v.Chapters)
+                        .SelectMany(c => c.Files)
+                        .Sum(f => f.Bytes)
+                })
+                .ToDictionaryAsync(x => x.SeriesId, x => x.TotalBytes, cancellationToken: ct));
+    }
+
     public async Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds,
         CancellationToken ct = default)
     {

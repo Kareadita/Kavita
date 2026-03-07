@@ -24,7 +24,7 @@ export function addToModal(): Partial<NgbModalOptions> {
   return {...DefaultModalOptions, size: 'md', fullscreen: 'sm'};
 }
 
-/** Non-dismissible — for refresh-required modals only */
+/** Non-dismissible - for refresh-required modals only */
 export function versionRefreshModal(): Partial<NgbModalOptions> {
   return {
     ...DefaultModalOptions,
@@ -35,7 +35,7 @@ export function versionRefreshModal(): Partial<NgbModalOptions> {
   };
 }
 
-/** Dismissible — for update-available and out-of-date modals */
+/** Dismissible - for update-available and out-of-date modals */
 export function versionNotifyModal(): Partial<NgbModalOptions> {
   return {
     ...DefaultModalOptions,

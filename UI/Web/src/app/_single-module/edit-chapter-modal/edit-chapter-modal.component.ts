@@ -296,7 +296,7 @@ export class EditChapterModalComponent implements OnInit {
         });
         break;
       case Action.Download:
-        this.downloadService.download('chapter', this.chapter);
+        this.downloadService.download('chapter', this.chapter, this.libraryId, this.seriesId);
         break;
     }
   }

@@ -214,4 +214,27 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
             .Where(t => !string.IsNullOrEmpty(t))
             .ToListAsync(ct))!;
     }
+
+    public async Task<long> GetFilesizeForVolumeAsync(int volumeId, CancellationToken ct = default)
+    {
+        return await context.Chapter
+            .Where(c => volumeId == c.VolumeId)
+            .Include(c => c.Files)
+            .SelectMany(c => c.Files)
+            .SumAsync(f => f.Bytes, cancellationToken: ct);
+    }
+
+    public async Task<Dictionary<int, long>> GetFilesizeForVolumesAsync(IList<int> volumeIds, CancellationToken ct = default)
+    {
+        return await volumeIds.BatchToDictionaryAsync(50, batch =>
+            context.Chapter
+                .Where(c => batch.Contains(c.VolumeId))
+                .GroupBy(c => c.VolumeId)
+                .Select(g => new
+                {
+                    VolumeId = g.Key,
+                    TotalBytes = g.SelectMany(c => c.Files).Sum(f => f.Bytes)
+                })
+                .ToDictionaryAsync(x => x.VolumeId, x => x.TotalBytes, cancellationToken: ct));
+    }
 }

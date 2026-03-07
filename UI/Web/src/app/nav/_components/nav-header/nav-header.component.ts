@@ -9,6 +9,7 @@ import {
   signal,
   viewChild
 } from '@angular/core';
+import {DownloadQueueWidgetComponent} from '../download-queue-widget/download-queue-widget.component';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {Chapter} from 'src/app/_models/chapter';
 import {UserCollection} from 'src/app/_models/collection-tag';
@@ -56,7 +57,7 @@ import {ModalService} from "../../../_services/modal.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, GroupedTypeaheadComponent, ImageComponent,
     SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileIconComponent]
+    SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileIconComponent, DownloadQueueWidgetComponent]
 })
 export class NavHeaderComponent {
 

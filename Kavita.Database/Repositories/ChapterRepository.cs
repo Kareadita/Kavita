@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
-using Kavita.Common.Constants;
 using Kavita.Database.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
@@ -209,6 +208,7 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .ToListAsync(ct);
     }
 
+
     /// <summary>
     /// Returns the cover image for a chapter id.
     /// </summary>
@@ -266,6 +266,21 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .Where(c => chapterIds.Contains(c.ChapterId))
             .AsNoTracking()
             .ToListAsync(ct);
+    }
+
+    public async Task<long> GetFilesizeForChapterAsync(int chapterId, CancellationToken ct = default)
+    {
+        return await context.MangaFile
+            .Where(c => c.ChapterId == chapterId)
+            .SumAsync(c => c.Bytes, cancellationToken: ct);
+    }
+
+    public async Task<Dictionary<int, long>> GetFilesizeForChaptersAsync(IList<int> chapterIds, CancellationToken ct = default)
+    {
+        return await chapterIds.BatchToDictionaryAsync(50, batch =>
+            context.MangaFile
+                .Where(f => batch.Contains(f.ChapterId))
+                .ToDictionaryAsync(f => f.ChapterId, f => f.Bytes, cancellationToken: ct));
     }
 
     /// <summary>

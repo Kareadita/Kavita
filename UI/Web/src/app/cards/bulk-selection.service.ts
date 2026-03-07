@@ -185,7 +185,7 @@ export class BulkSelectionService {
    */
   getActions(): ActionItem<any>[] {
     const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection,
-      Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList, Action.SetReadingProfile];
+      Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList, Action.SetReadingProfile, Action.Download];
     const shouldRender = this.registeredShouldRender ?? this.actionFactory.dummyShouldRender;
 
     if (this.hasDataSource('series')) {
@@ -245,7 +245,7 @@ export class BulkSelectionService {
         throw new Error("ContextGetter must be set for volume/chapter/special");
       }
       const ctx = this.contextGetter();
-      const actions = this.applyFilterToList(this.actionFactory.getVolumeActions(ctx.seriesId, ctx.libraryId, ctx.libraryType!, shouldRender), [...allowedActions, Action.SendTo]);
+      const actions = this.applyFilterToList(this.actionFactory.getVolumeActions(ctx.seriesId, ctx.libraryId, ctx.libraryType!, shouldRender), [...allowedActions, Action.SendTo, Action.Download]);
       return this.wireBulkCallback(actions, (action) => {
         let volumes: Volume[];
         let chapters: Chapter[];
@@ -259,7 +259,7 @@ export class BulkSelectionService {
           chapters = this.resolveEntities<Chapter>('chapter');
         }
 
-        return this.actionService.handleBulkVolumeChapterAction(action, volumes, chapters, ctx.seriesId);
+        return this.actionService.handleBulkVolumeChapterAction(action, volumes, chapters, ctx.seriesId, ctx.libraryId);
       });
     }
   }

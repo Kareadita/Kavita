@@ -1,4 +1,43 @@
-.download {
-    width: 5rem;
-    height: 5rem;
+.indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--card-download-indicator-size);
+  height: var(--card-download-indicator-size);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: var(--card-download-indicator-box-shadow);
+
+  &.active {
+    background: conic-gradient(
+      var(--card-download-indicator-active-color) calc(var(--progress) * 3.6deg),
+      var(--card-download-indicator-active-track-color) calc(var(--progress) * 3.6deg)
+    );
+    border: 2px solid var(--card-download-indicator-active-color);
+
+    i {
+      font-size: var(--card-download-indicator-icon-size);
+      color: var(--card-download-indicator-icon-color);
+    }
+  }
+
+  &.completed {
+    background-color: var(--card-download-indicator-completed-color);
+
+    i {
+      font-size: var(--card-download-indicator-icon-size);
+      color: var(--card-download-indicator-icon-color);
+      line-height: 1;
+    }
+  }
+
+  &.queued {
+    background-color: var(--card-download-indicator-queued-color);
+
+    i {
+      font-size: var(--card-download-indicator-icon-size);
+      color: var(--card-download-indicator-icon-color);
+      line-height: 1;
+    }
+  }
 }

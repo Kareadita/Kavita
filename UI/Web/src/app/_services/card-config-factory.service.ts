@@ -15,7 +15,7 @@ import {
   CardConfigurationOverrides
 } from "../_models/card/card-configuration";
 import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
-import {map} from "rxjs/operators";
+
 import {Volume} from "../_models/volume";
 import {UserCollection} from "../_models/collection-tag";
 import {ReadingList} from "../_models/reading-list";
@@ -106,9 +106,7 @@ export class CardConfigFactory {
       readFunc: (s) => this.readerService.readSeries(s, false),
       clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.id]),
 
-      downloadObservableFunc: (s) => this.downloadService.activeDownloads$.pipe(
-        map(events => this.downloadService.mapToEntityType(events, s))
-      ),
+      downloadItemFunc: (s) => this.downloadService.getItemForEntity(s, true),
 
       progressUpdateStrategy: {
         getMatchCriteria: (s) => ({ seriesId: s.id }),
@@ -153,9 +151,7 @@ export class CardConfigFactory {
       readFunc: (s) => this.readerService.readSeries(s.series, false),
       clickFunc: (s) => this.router.navigate(['library', s.series.libraryId, 'series', s.series.id]),
 
-      downloadObservableFunc: (s) => this.downloadService.activeDownloads$.pipe(
-        map(events => this.downloadService.mapToEntityType(events, s.series))
-      )
+      downloadItemFunc: (s) => this.downloadService.getItemForEntity(s.series, true)
     };
 
     return this.mergeConfig(defaults, params?.overrides);
@@ -191,9 +187,7 @@ export class CardConfigFactory {
       readFunc: (s) => this.router.navigate(['library', s.series!.libraryId, 'series', s.seriesId, 'manga', s.chapterId], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
       clickFunc: (s) => this.router.navigate(['library', s.series!.libraryId, 'series', s.seriesId, 'manga', s.chapterId], {queryParams: {incognitoMode: false, bookmarkMode: true}}),
 
-      downloadObservableFunc: (s) => this.downloadService.activeDownloads$.pipe(
-        map(events => this.downloadService.mapToEntityType(events, s))
-      )
+      downloadItemFunc: () => null
     };
 
     return this.mergeConfig(defaults, params?.overrides);
@@ -235,9 +229,7 @@ export class CardConfigFactory {
       readFunc: (c) => this.readerService.readChapter(params.libraryId, params.seriesId, c, false),
       clickFunc: (c) => this.router.navigate(['library', params.libraryId, 'series', params.seriesId, 'chapter', c.id]),
 
-      downloadObservableFunc: (c) => this.downloadService.activeDownloads$.pipe(
-        map(events => this.downloadService.mapToEntityType(events, c))
-      ),
+      downloadItemFunc: (c) => this.downloadService.getItemForEntity(c, true),
 
       progressUpdateStrategy: {
         getMatchCriteria: (c) => ({ chapterId: c.id }),
@@ -297,9 +289,7 @@ export class CardConfigFactory {
       },
       clickFunc: (v) => this.router.navigate(['library', params.libraryId, 'series', params.seriesId, 'volume', v.id]),
 
-      downloadObservableFunc: (v) => this.downloadService.activeDownloads$.pipe(
-        map(events => this.downloadService.mapToEntityType(events, v))
-      ),
+      downloadItemFunc: (v) => this.downloadService.getItemForEntity(v, true),
 
       progressUpdateStrategy: {
         getMatchCriteria: (v) => ({volumeId: v.id}),

@@ -29,7 +29,7 @@ export class VersionUpdateModalComponent {
   versionsOutOfDate = input<number>(0);
 
   isDocker = computed(() => this.update()?.isDocker ?? false);
-  /** Wiki help link — Docker or native install guide */
+  /** Wiki help link - Docker or native install guide */
   helpUrl = computed(() => {
     return this.isDocker() ? WikiLink.UpdateDocker : WikiLink.UpdateNative;
   });

@@ -189,8 +189,11 @@
         </ul>
 
         @if (user) {
+
+          <app-download-queue-widget />
+
           @if (accountService.hasAdminRole()) {
-            <div class="nav-item me-2">
+            <div class="nav-item">
               <app-nav-events-toggle [user]="user" />
             </div>
           }

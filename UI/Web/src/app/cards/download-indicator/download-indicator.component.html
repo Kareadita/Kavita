@@ -1,10 +1,17 @@
 <ng-container *transloco="let t; prefix: 'download-indicator'">
-  @if (download$() | async; as download) {
-    <span class="download">
-      <app-circular-loader [currentValue]="download.progress" />
-      <span class="visually-hidden" role="status">
-        {{t('progress',{percentage: download.progress})}}
-      </span>
+  @if (download(); as dl) {
+    <span class="indicator"
+          [class.active]="isActive()"
+          [class.completed]="isCompleted()"
+          [class.queued]="isQueued()"
+          [style.--progress]="dl.progress"
+          [attr.aria-label]="isCompleted() ? t('completed') : t('progress', {percentage: dl.progress})"
+          role="status">
+      @if (isCompleted()) {
+        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      } @else if (isQueued()) {
+        <i class="fa-solid fa-clock" aria-hidden="true"></i>
+      }
     </span>
   }
 </ng-container>
