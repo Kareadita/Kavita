@@ -61,7 +61,7 @@ export class ConfirmService {
         config!.content = content;
       }
 
-      const modalRef = this.modalService.open(ConfirmDialogComponent);
+      const modalRef = this.modalService.open(ConfirmDialogComponent, confirmModal());
       modalRef.componentInstance.config = config;
       modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);

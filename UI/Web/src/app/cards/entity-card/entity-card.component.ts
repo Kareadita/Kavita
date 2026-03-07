@@ -12,8 +12,7 @@ import {
   Signal
 } from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {DownloadEvent} from "../../shared/_services/download.service";
-import {filter, Observable} from "rxjs";
+import {filter} from "rxjs";
 import {MangaFormat} from "../../_models/manga-format";
 import {
   ActionableCardConfiguration,
@@ -245,14 +244,16 @@ export class EntityCardComponent<T> implements OnInit {
     return data.id ?? 0;
   });
 
-  protected download$: Observable<DownloadEvent | null> | null = null;
+  protected readonly downloadItem = computed(() => {
+    const downloadFunc = this.config().downloadItemFunc;
+    return downloadFunc ? downloadFunc(this.data()) : null;
+  });
 
   private prevTouchTime = 0;
   private prevOffset = 0;
   private selectionInProgress = false;
 
   ngOnInit() {
-    this.setupDownloadTracking();
     this.setupProgressTracking();
   }
 
@@ -304,15 +305,6 @@ export class EntityCardComponent<T> implements OnInit {
 
     // Emit for parent to handle
     this.progressUpdated.emit(result);
-  }
-
-  private setupDownloadTracking() {
-    const downloadFunc = this.config().downloadObservableFunc;
-    if (downloadFunc) {
-      this.download$ = downloadFunc(this.data()).pipe(
-        takeUntilDestroyed(this.destroyRef)
-      );
-    }
   }
 
   @HostListener('touchmove')

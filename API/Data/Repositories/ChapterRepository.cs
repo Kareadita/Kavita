@@ -45,6 +45,8 @@ public interface IChapterRepository
     Task<IList<ChapterDto>> GetChapterDtoByIdsAsync(IEnumerable<int> chapterIds, int userId);
     Task<ChapterMetadataDto?> GetChapterMetadataDtoAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files);
     Task<IList<MangaFile>> GetFilesForChapterAsync(int chapterId);
+    Task<long> GetFilesizeForChapterAsync(int chapterId);
+    Task<Dictionary<int, long>> GetFilesizeForChaptersAsync(IList<int> chapterIds);
     Task<IList<Chapter>> GetChaptersAsync(int volumeId, ChapterIncludes includes = ChapterIncludes.None);
     Task<IList<ChapterDto>> GetChapterDtosAsync(int volumeId, int userId);
     Task<IList<MangaFile>> GetFilesForChaptersAsync(IReadOnlyList<int> chapterIds);
@@ -205,6 +207,21 @@ public class ChapterRepository : IChapterRepository
             .Where(c => chapterId == c.ChapterId)
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<long> GetFilesizeForChapterAsync(int chapterId)
+    {
+        return await _context.MangaFile
+            .Where(c => c.ChapterId == chapterId)
+            .SumAsync(c => c.Bytes);
+    }
+
+    public async Task<Dictionary<int, long>> GetFilesizeForChaptersAsync(IList<int> chapterIds)
+    {
+        return await chapterIds.BatchToDictionaryAsync(50, batch =>
+            _context.MangaFile
+                .Where(f => batch.Contains(f.ChapterId))
+                .ToDictionaryAsync(f => f.ChapterId, f => f.Bytes));
     }
 
     /// <summary>

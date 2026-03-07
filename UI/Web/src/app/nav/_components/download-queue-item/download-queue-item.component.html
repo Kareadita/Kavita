@@ -1,0 +1,58 @@
+<ng-container *transloco="let t; prefix: 'download-queue-item'">
+  <div class="queue-item d-flex align-items-center gap-2 py-2">
+
+    <app-image class="queue-item-cover flex-shrink-0"
+      [imageUrl]="imageUrl()" width="40px" height="56px" [processEvents]="false" />
+
+    <div class="queue-item-info flex-grow-1 overflow-hidden">
+      <a href="javascript:void(0)" class="item-title text-truncate fw-semibold" [title]="item().label" (click)="navigate.emit(item())">{{ item().label }}</a>
+      <div class="text-muted small d-flex align-items-center flex-wrap">
+        <app-tag-badge [selectionMode]="TagBadgeCursor.Selectable" [fillStyle]="'outline'" [color]="statusBadgeColor()" [size]="'sm'">
+          {{ item().status | downloadQueueStatus }}
+        </app-tag-badge>
+        <span class="ps-1 pe-1">&bull;</span>
+        <span>{{ timeDisplay() | timeAgo }}</span>
+      </div>
+      @if (showSize()) {
+        <div class="text-muted small dl-info-row">
+          <span>{{ item().estimatedSize | bytes }}</span>
+          @if (showSpeedInfo()) {
+            <span class="dl-speed">
+              <span>{{ item().speedBps! | bytes:true:1:true }}/s</span>
+              @if (item().etaSeconds && item().etaSeconds! > 0) {
+                <span class="ps-1 pe-1">&bull;</span>
+                <span>{{ item().etaSeconds | compactEta }}</span>
+              }
+            </span>
+          }
+        </div>
+      }
+      @if (isActive()) {
+        <div class="progress mt-1" style="height: 4px;" role="progressbar" [attr.aria-valuenow]="item().progress" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar" [style.width.%]="item().progress"></div>
+        </div>
+      }
+      @if (item().status === 'failed' && item().errorMessage) {
+        <div class="text-danger small text-truncate" [title]="item().errorMessage">{{ item().errorMessage }}</div>
+      }
+    </div>
+
+    <div class="queue-item-actions d-flex gap-1 flex-shrink-0">
+      @if (item().status === 'queued') {
+        <button class="btn btn-sm btn-outline-secondary" [title]="t('cancel')" (click)="cancelled.emit(item().id)">
+          <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+      }
+      @if (item().status === 'failed' && item().retryCount < 3) {
+        <button class="btn btn-sm btn-outline-primary" [title]="t('retry')" (click)="retry.emit(item().id)">
+          <i class="fa fa-redo" aria-hidden="true"></i>
+        </button>
+      }
+      @if (item().status === 'completed' || item().status === 'failed') {
+        <button class="btn btn-sm btn-outline-secondary" [title]="t('remove')" (click)="remove.emit(item().id)">
+          <i class="fa fa-trash" aria-hidden="true"></i>
+        </button>
+      }
+    </div>
+  </div>
+</ng-container>

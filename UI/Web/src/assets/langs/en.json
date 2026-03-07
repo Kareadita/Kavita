@@ -1554,7 +1554,8 @@
     },
 
     "download-indicator": {
-        "progress": "{{percentage}}% downloaded"
+        "progress": "{{percentage}}% downloaded",
+        "completed": "Download complete"
     },
 
     "edit-series-relation": {
@@ -2150,7 +2151,59 @@
         "no-data": "Not much going on here",
         "left-to-process": "Left to Process: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} downloads in Queue",
-        "reading-now": "{{num}} reading now"
+        "reading-now": "{{num}} reading now",
+        "downloads-active": "{{count}} download(s) in progress"
+    },
+
+    "download-queue-drawer": {
+        "title": "Downloads",
+
+        "cancel": "{{common.cancel}}",
+        "cancel-all": "Cancel All",
+        "retry": "Retry",
+        "retry-all": "Retry All",
+        "clear": "Clear",
+        "empty": "No downloads",
+        "close": "{{common.close}}",
+        "paused-after-refresh": "{{ count }} item(s) paused — ready to resume",
+        "resume": "Resume",
+        "pause": "Pause",
+        "paused": "Paused",
+        "clear-all": "Clear All",
+        "failed-from-auth": "Not Authenticated, refresh browser",
+        "failed-interrupted": "Interrupted by page refresh",
+
+        "tab-downloading": "Downloading",
+        "tab-completed": "Completed",
+        "today": "Today",
+        "older": "Older",
+
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+    },
+
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "Remove"
+
+    },
+
+    "download-queue-status-pipe": {
+        "queued": "Queued",
+        "preparing": "Preparing",
+        "downloading": "Downloading",
+        "completed": "Completed",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+    },
+
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
     },
 
     "shortcuts-modal": {
@@ -3359,6 +3412,7 @@
         "confirm-library-type-change": "Changing library type will trigger a new scan with different parsing rules and may lead to series being re-created and hence you may lose progress and bookmarks. You should backup before you do this. Are you sure you want to continue?",
         "confirm-download-size": "The {{entityType}} is {{size}}. Are you sure you want to continue?",
         "confirm-download-size-ios": "iOS has issues downloading files that are larger than 200MB, this download might not complete.",
+        "redownload-confirm": "You've previously downloaded {{title}} on {{date}}. Do you want to redownload?",
         "list-doesnt-exist": "This list doesn't exist",
         "confirm-delete-smart-filter": "Are you sure you want to delete this Smart Filter?",
         "smart-filter-deleted": "Smart Filter Deleted",

@@ -117,6 +117,8 @@ public interface ISeriesRepository
     Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
     Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
+    Task<long> GetFilesizeForSeriesAsync(int seriesId);
+    Task<Dictionary<int, long>> GetFilesizeForMultipleSeriesAsync(IList<int> seriesIds);
     Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IEnumerable<string>> GetLockedCoverImagesAsync();
@@ -1316,6 +1318,29 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<long> GetFilesizeForSeriesAsync(int seriesId)
+    {
+        return await _context.Volume
+            .Where(v => v.SeriesId == seriesId)
+            .SumAsync(v => v.Chapters.Sum(c => c.Files.Sum(f => f.Bytes)));
+    }
+
+    public async Task<Dictionary<int, long>> GetFilesizeForMultipleSeriesAsync(IList<int> seriesIds)
+    {
+        return await seriesIds.BatchToDictionaryAsync(50, batch =>
+            _context.Volume
+                .Where(v => batch.Contains(v.SeriesId))
+                .GroupBy(v => v.SeriesId)
+                .Select(g => new
+                {
+                    SeriesId = g.Key,
+                    TotalBytes = g.SelectMany(v => v.Chapters)
+                        .SelectMany(c => c.Files)
+                        .Sum(f => f.Bytes)
+                })
+                .ToDictionaryAsync(x => x.SeriesId, x => x.TotalBytes));
     }
 
     public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId)

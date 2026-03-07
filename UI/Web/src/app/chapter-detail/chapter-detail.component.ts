@@ -32,11 +32,10 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ImageService} from "../_services/image.service";
 import {ChapterService} from "../_services/chapter.service";
-import {map, Observable, tap} from "rxjs";
+import {tap} from "rxjs";
 import {AgeRating} from "../_models/metadata/age-rating";
 import {LibraryType} from "../_models/library/library";
 import {ThemeService} from "../_services/theme.service";
-import {DownloadEvent, DownloadService} from "../shared/_services/download.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {BulkSelectionService} from "../cards/bulk-selection.service";
 import {ReaderService} from "../_services/reader.service";
@@ -137,7 +136,6 @@ export class ChapterDetailComponent implements OnInit {
   protected readonly imageService = inject(ImageService);
   private readonly chapterService = inject(ChapterService);
   private readonly themeService = inject(ThemeService);
-  private readonly downloadService = inject(DownloadService);
   private readonly bulkSelectionService = inject(BulkSelectionService);
   private readonly readerService = inject(ReaderService);
   protected readonly accountService = inject(AccountService);
@@ -200,11 +198,6 @@ export class ChapterDetailComponent implements OnInit {
   mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
 
   activeTabId = TabID.Details;
-  /**
-   * This is the download we get from download service.
-   */
-  download$: Observable<DownloadEvent | null> | null = null;
-  downloadInProgress: boolean = false;
 
   chapterActions = computed(() => this.actionFactoryService.getChapterActions(this.seriesId(), this.libraryId(), this.libraryType()));
   totalReviewCount = computed(() => this.userReviews().length + this.plusReviews().length);
@@ -253,11 +246,6 @@ export class ChapterDetailComponent implements OnInit {
 
 
     this.themeService.setColorScape(this.chapter().primaryColor, this.chapter().secondaryColor);
-
-    // Set up the download in progress
-    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
-      return this.downloadService.mapToEntityType(events, this.chapter()!);
-    }));
 
     this.loadReadingListsForChapter(this.chapterId());
 

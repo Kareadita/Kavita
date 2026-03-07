@@ -1,0 +1,150 @@
+<ng-container *transloco="let t; prefix: 'download-queue-drawer'">
+
+  <app-off-canvas-resize
+    [resizeMode]="ResizeMode.Width"
+    canvasPosition="end"
+    [minWidth]="300"
+    [maxWidth]="window.innerWidth*0.5"
+  />
+
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">{{ t('title') }}</h5>
+    @if (downloadService.isPaused()) {
+      <i class="fa-solid fa-circle-pause text-warning ms-2"></i>
+    }
+    <button type="button" class="btn-unstyled ms-auto" [attr.aria-label]="t('close')" (click)="close()">
+      <i class="fa fa-times" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="offcanvas-body">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav-tabs">
+      <li [ngbNavItem]="'downloading'">
+        <a ngbNavLink>{{ t('tab-downloading') }} <span class="badge bg-secondary ms-1">{{ downloadingTabCount() }}</span></a>
+        <ng-template ngbNavContent>
+          <div class="tab-body mt-3">
+            @if (downloadService.activeItem() || downloadService.queuedItems().length > 0) {
+              <div class="d-flex align-items-center justify-content-end gap-2 mb-2">
+                @if (downloadService.isPaused()) {
+                  <button class="btn btn-sm btn-primary" (click)="downloadService.resumeQueue()">
+                    <i class="fa fa-play me-1" aria-hidden="true"></i>{{ t('resume') }}
+                  </button>
+                } @else {
+                  <button class="btn btn-sm btn-outline-secondary" (click)="downloadService.pauseQueue()">
+                    <i class="fa-solid fa-circle-pause me-1" aria-hidden="true"></i>{{ t('pause') }}
+                  </button>
+                }
+              </div>
+            }
+
+            @if (downloadService.activeItem(); as active) {
+              <app-download-queue-item
+                [item]="active"
+                (cancelled)="downloadService.cancelDownload($event)"
+                (retry)="downloadService.retryDownload($event)"
+                (remove)="downloadService.removeItem($event)"
+                (navigate)="navigateToItem($event)"
+              />
+              <div class="section-break-lg"></div>
+            }
+
+            @if (downloadService.failedItems().length > 0) {
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <span class="section-label text-danger">{{ t('failed') }} ({{ downloadService.failedItems().length }})</span>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-link p-0 text-danger" (click)="downloadService.clearAllFailed()">{{ t('clear-all') }}</button>
+                  <button class="btn btn-sm btn-link p-0" (click)="downloadService.retryAllFailed()">{{ t('retry-all') }}</button>
+                </div>
+              </div>
+              @for (item of downloadService.failedItems(); track item.id; let last = $last) {
+                <app-download-queue-item [item]="item"
+                  (cancelled)="downloadService.cancelDownload($event)"
+                  (retry)="downloadService.retryDownload($event)"
+                  (remove)="downloadService.removeItem($event)"
+                  (navigate)="navigateToItem($event)"
+                />
+                @if (!last) { <div class="setting-section-break"></div> }
+              }
+              <div class="setting-section-break"></div>
+            }
+
+            @if (downloadService.queuedItems().length > 0) {
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <span class="section-label">{{ t('queued') }} ({{ downloadService.queuedItems().length }})</span>
+                <button class="btn btn-sm btn-link p-0" (click)="downloadService.cancelAllQueued()">{{ t('cancel-all') }}</button>
+              </div>
+              @for (item of downloadService.queuedItems(); track item.id; let last = $last) {
+                <app-download-queue-item
+                  [item]="item"
+                  (cancelled)="downloadService.cancelDownload($event)"
+                  (retry)="downloadService.retryDownload($event)"
+                  (remove)="downloadService.removeItem($event)"
+                  (navigate)="navigateToItem($event)"
+                />
+                @if (!last) { <div class="setting-section-break"></div> }
+              }
+            }
+
+            @if (!downloadService.activeItem() && downloadService.queuedItems().length === 0 && downloadService.failedItems().length === 0) {
+              <div class="text-muted text-center py-4">{{ t('empty') }}</div>
+            }
+          </div>
+        </ng-template>
+      </li>
+      <li [ngbNavItem]="'completed'">
+        <a ngbNavLink>{{ t('tab-completed') }} <span class="badge bg-secondary ms-1">{{ completedTabCount() }}</span></a>
+        <ng-template ngbNavContent>
+          <div class="tab-body mt-3">
+            @if (completedToday().length > 0 || olderCount() > 0) {
+              @if (completedToday().length > 0) {
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <span class="section-label">{{ t('today') }}</span>
+                  <button class="btn btn-sm btn-link p-0" (click)="clearCompletedToday()">{{ t('clear-all') }}</button>
+                </div>
+                @for (item of completedToday(); track item.id; let last = $last) {
+                  <app-download-queue-item
+                    [item]="item"
+                    (cancelled)="downloadService.cancelDownload($event)"
+                    (retry)="downloadService.retryDownload($event)"
+                    (remove)="downloadService.removeItem($event)"
+                    (navigate)="navigateToItem($event)"
+                  />
+                  @if (!last) { <div class="setting-section-break"></div> }
+                }
+              }
+
+              @if (olderCount() > 0) {
+                @if (completedToday().length > 0) {
+                  <div class="setting-section-break"></div>
+                }
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <button type="button" class="btn-unstyled section-label d-flex align-items-center gap-1"
+                        (click)="expandOlder()">
+                    <i class="fa fa-chevron-right collapse-chevron" [class.expanded]="!olderCollapsed" aria-hidden="true"></i>
+                    {{ t('older') }} ({{ olderCount() }})
+                  </button>
+                  <button class="btn btn-sm btn-link p-0" (click)="clearCompletedOlder()">{{ t('clear-all') }}</button>
+                </div>
+                <div [ngbCollapse]="olderCollapsed">
+                  @for (item of olderItems(); track item.id; let last = $last) {
+                    <app-download-queue-item
+                      [item]="item"
+                      (cancelled)="downloadService.cancelDownload($event)"
+                      (retry)="downloadService.retryDownload($event)"
+                      (remove)="downloadService.removeItem($event)"
+                      (navigate)="navigateToItem($event)"
+                    />
+                    @if (!last) { <div class="setting-section-break"></div> }
+                  }
+                </div>
+              }
+            } @else {
+              <div class="text-muted text-center py-4">{{ t('empty') }}</div>
+            }
+          </div>
+        </ng-template>
+      </li>
+    </ul>
+    <div [ngbNavOutlet]="nav"></div>
+  </div>
+</ng-container>

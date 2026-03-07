@@ -4,7 +4,6 @@ import {AccountService} from "../app/_services/account.service";
 
 /**
  * Determines if a single action should render for the given user.
- * Pure function — no side effects.
  */
 export function willRenderAction<T>(
   action: ActionItem<T>,

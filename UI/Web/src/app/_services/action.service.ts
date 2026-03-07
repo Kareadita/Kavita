@@ -328,7 +328,7 @@ export class ActionService {
       }
 
       case Action.Download:
-        this.downloadService.download('series', series);
+        this.downloadService.download('series', series, series.libraryId, series.id);
         return of(this.fromAction(action, series, 'none'));
 
       case Action.AddToWantToReadList:
@@ -484,7 +484,7 @@ export class ActionService {
       }
 
       case Action.Download:
-        this.downloadService.download('volume', volume);
+        this.downloadService.download('volume', volume, libraryId, seriesId);
         return of(this.fromAction(action, volume, 'none'));
 
       default:
@@ -533,7 +533,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        this.downloadService.download('chapter', chapter);
+        this.downloadService.download('chapter', chapter, libraryId, seriesId);
         return of(this.fromAction(action, chapter, 'none'));
 
       case Action.Edit:
@@ -624,7 +624,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        this.downloadService.download('bookmark', [bookmark]);
+        this.downloadService.download('bookmark', [bookmark], 0, 0);
         return of(this.fromAction(action, bookmark, 'none'));
 
       case Action.ViewSeries:
@@ -1023,12 +1023,16 @@ export class ActionService {
         });
       }
 
+      case Action.Download:
+        for (const s of series) { this.downloadService.download('series', s, s.libraryId, s.id); }
+        return of(this.fromAction(action, series, 'none'));
+
       default:
         return of(this.fromAction(action, series, 'none'));
     }
   }
 
-  handleBulkVolumeChapterAction(action: ActionItem<any>, volumes: Volume[], chapters: Chapter[], seriesId: number): Observable<ActionResult<any[]>> {
+  handleBulkVolumeChapterAction(action: ActionItem<any>, volumes: Volume[], chapters: Chapter[], seriesId: number, libraryId = 0): Observable<ActionResult<any[]>> {
     switch (action.action) {
       case Action.MarkAsRead:
         return this.readerService.markMultipleRead(seriesId, volumes.map(v => v.id), chapters.map(c => c.id)).pipe(
@@ -1147,6 +1151,10 @@ export class ActionService {
         );
       }
 
+      case Action.Download:
+        this.downloadService.downloadBulk(volumes, chapters, libraryId, seriesId);
+        return of(this.fromAction(action, [...volumes, ...chapters], 'none'));
+
       default:
         return of(this.fromAction(action, [...volumes, ...chapters], 'none'));
     }
@@ -1155,7 +1163,7 @@ export class ActionService {
   handleBulkBookmarkAction(action: ActionItem<any>, bookmarks: PageBookmark[], seriesIds: number[]): Observable<ActionResult<PageBookmark[]>> {
     switch (action.action) {
       case Action.Download:
-        this.downloadService.download('bookmark', bookmarks);
+        this.downloadService.download('bookmark', bookmarks, 0, 0);
         return of(this.fromAction(action, bookmarks, 'none'));
 
       case Action.Delete:

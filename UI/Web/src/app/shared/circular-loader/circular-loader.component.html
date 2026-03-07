@@ -1,11 +1,11 @@
-@if (currentValue() > 0) {
-  <div [style.width.px]="width()" [style.height.px]="height()">
-    @if (showIcon()) {
-      <div [class.number]="center()"  class="indicator d-flex justify-content-center">
-        <i class="fa fa-angle-double-down" [style.font-size.px]="fontSize()" aria-hidden="true"></i>
-      </div>
-    }
+<div [style.width.px]="width()" [style.height.px]="height()">
+  @if (showIcon()) {
+    <div [class.number]="center()"  class="indicator d-flex justify-content-center">
+      <i class="fa fa-angle-double-down" [style.font-size.px]="fontSize()" aria-hidden="true"></i>
+    </div>
+  }
 
+  @if (currentValue() > 0) {
     <circle-progress [percent]="currentValue()"
                      [radius]="100"
                      [outerStrokeWidth]="15"
@@ -25,5 +25,5 @@
                      [backgroundOpacity]="0.5"
                      [backgroundColor]="backgroundColor()"
       />
-  </div>
-}
+  }
+</div>

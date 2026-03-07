@@ -59,8 +59,18 @@ public class DownloadController : BaseApiController
     [HttpGet("volume-size")]
     public async Task<ActionResult<long>> GetVolumeSize(int volumeId)
     {
-        var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
-        return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
+        return Ok(await _unitOfWork.VolumeRepository.GetFilesizeForVolumeAsync(volumeId));
+    }
+
+    /// <summary>
+    /// For a set of volumes, return the size in bytes
+    /// </summary>
+    /// <param name="volumeIds"></param>
+    /// <returns></returns>
+    [HttpPost("bulk-volume-size")]
+    public async Task<ActionResult<Dictionary<int, long>>> GetBulkVolumeSize([FromBody] IList<int> volumeIds)
+    {
+        return Ok(await _unitOfWork.VolumeRepository.GetFilesizeForVolumesAsync(volumeIds));
     }
 
     /// <summary>
@@ -71,8 +81,19 @@ public class DownloadController : BaseApiController
     [HttpGet("chapter-size")]
     public async Task<ActionResult<long>> GetChapterSize(int chapterId)
     {
-        var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
-        return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
+        return Ok(await _unitOfWork.ChapterRepository.GetFilesizeForChapterAsync(chapterId));
+    }
+
+    /// <summary>
+    /// For a set of chapters, return the size in bytes
+    /// </summary>
+    /// <param name="chapterIds"></param>
+    /// <returns></returns>
+    [HttpPost("bulk-chapter-size")]
+    public async Task<ActionResult<Dictionary<int, long>>> GetChapterSizeInBulk([FromBody] IList<int> chapterIds)
+    {
+        // If there are more than 50 chapterIds, we need to break up into multiple calls
+        return Ok(await _unitOfWork.ChapterRepository.GetFilesizeForChaptersAsync(chapterIds));
     }
 
     /// <summary>
@@ -83,8 +104,18 @@ public class DownloadController : BaseApiController
     [HttpGet("series-size")]
     public async Task<ActionResult<long>> GetSeriesSize(int seriesId)
     {
-        var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
-        return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
+        return Ok(await _unitOfWork.SeriesRepository.GetFilesizeForSeriesAsync(seriesId));
+    }
+
+    /// <summary>
+    /// For a set of series, return the size in bytes
+    /// </summary>
+    /// <param name="seriesIds"></param>
+    /// <returns></returns>
+    [HttpPost("bulk-series-size")]
+    public async Task<ActionResult<Dictionary<int, long>>> GetBulkSeriesSize([FromBody] IList<int> seriesIds)
+    {
+        return Ok(await _unitOfWork.SeriesRepository.GetFilesizeForMultipleSeriesAsync(seriesIds));
     }
 
 
@@ -95,7 +126,7 @@ public class DownloadController : BaseApiController
     /// <returns></returns>
     [Authorize(PolicyGroups.DownloadPolicy)]
     [HttpGet("volume")]
-    public async Task<ActionResult> DownloadVolume(int volumeId)
+    public async Task<ActionResult> DownloadVolume(int volumeId, [FromQuery] string? correlationId = null)
     {
         if (!await HasDownloadPermission()) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId);
@@ -104,7 +135,7 @@ public class DownloadController : BaseApiController
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
         try
         {
-            return await DownloadFiles(files, $"download_{Username!}_v{volumeId}", $"{series!.Name} - Volume {volume.Name}.zip");
+            return await DownloadFiles(files, $"download_{Username!}_v{volumeId}", $"{series!.Name} - Volume {volume.Name}.zip", correlationId);
         }
         catch (KavitaException ex)
         {
@@ -122,7 +153,7 @@ public class DownloadController : BaseApiController
     private PhysicalFileResult GetFirstFileDownload(IEnumerable<MangaFile> files)
     {
         var (zipFile, contentType, fileDownloadName) = _downloadService.GetFirstFileDownload(files);
-        return PhysicalFile(zipFile, contentType, Uri.EscapeDataString(fileDownloadName), true);
+        return PhysicalFile(zipFile, contentType, fileDownloadName, true);
     }
 
     /// <summary>
@@ -131,7 +162,7 @@ public class DownloadController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("chapter")]
-    public async Task<ActionResult> DownloadChapter(int chapterId)
+    public async Task<ActionResult> DownloadChapter(int chapterId, [FromQuery] string? correlationId = null)
     {
         if (!await HasDownloadPermission()) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
@@ -141,7 +172,7 @@ public class DownloadController : BaseApiController
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume!.SeriesId);
         try
         {
-            return await DownloadFiles(files, $"download_{Username!}_c{chapterId}", $"{series!.Name} - Chapter {chapter.GetNumberTitle()}.zip");
+            return await DownloadFiles(files, $"download_{Username!}_c{chapterId}", $"{series!.Name} - Chapter {chapter.GetNumberTitle()}.zip", correlationId);
         }
         catch (KavitaException ex)
         {
@@ -149,51 +180,55 @@ public class DownloadController : BaseApiController
         }
     }
 
-    private async Task<ActionResult> DownloadFiles(ICollection<MangaFile> files, string tempFolder, string downloadName)
+    private async Task<ActionResult> DownloadFiles(ICollection<MangaFile> files, string tempFolder, string downloadName, string? correlationId = null)
     {
         var username = Username!;
         var filename = Path.GetFileNameWithoutExtension(downloadName);
         try
         {
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
                 MessageFactory.DownloadProgressEvent(username,
-                    filename, $"Downloading {filename}", 0F, "started"));
+                    filename, $"Downloading {filename}", 0F, "started", correlationId));
 
             if (files.Count == 1 && files.First().Format != MangaFormat.Image)
             {
-                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                    MessageFactory.DownloadProgressEvent(username,
-                        filename, $"Downloading {filename}",1F, "ended"));
+                // Emit "ended" after the response is fully sent to the client
+                HttpContext.Response.OnCompleted(async () =>
+                {
+                    await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
+                        MessageFactory.DownloadProgressEvent(username,
+                            filename, "Download Complete", 1F, "ended", correlationId));
+                });
                 return GetFirstFileDownload(files);
             }
 
             var filePath = _archiveService.CreateZipFromFoldersForDownload(files.Select(c => c.FilePath).ToList(), tempFolder, ProgressCallback);
 
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
                 MessageFactory.DownloadProgressEvent(username,
-                    filename, "Download Complete", 1F, "ended"));
+                    filename, "Download Complete", 1F, "ended", correlationId));
 
-            return PhysicalFile(filePath, DefaultContentType, Uri.EscapeDataString(downloadName), true);
+            return PhysicalFile(filePath, DefaultContentType, downloadName, true);
 
             async Task ProgressCallback(Tuple<string, float> progressInfo)
             {
-                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
                     MessageFactory.DownloadProgressEvent(username, filename, $"Processing {Path.GetFileNameWithoutExtension(progressInfo.Item1)}",
-                        Math.Clamp(progressInfo.Item2, 0F, 1F)));
+                        Math.Clamp(progressInfo.Item2, 0F, 1F), "updated", correlationId));
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an exception when trying to download files");
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
                 MessageFactory.DownloadProgressEvent(Username!,
-                    filename, "Download Complete", 1F, "ended"));
+                    filename, "Download Complete", 1F, "ended", correlationId));
             throw;
         }
     }
 
     [HttpGet("series")]
-    public async Task<ActionResult> DownloadSeries(int seriesId)
+    public async Task<ActionResult> DownloadSeries(int seriesId, [FromQuery] string? correlationId = null)
     {
         if (!await HasDownloadPermission()) return BadRequest(await _localizationService.Translate(UserId, "permission-denied"));
 
@@ -203,7 +238,7 @@ public class DownloadController : BaseApiController
         var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
         try
         {
-            return await DownloadFiles(files, $"download_{Username!}_s{seriesId}", $"{series.Name}.zip");
+            return await DownloadFiles(files, $"download_{Username!}_s{seriesId}", $"{series.Name}.zip", correlationId);
         }
         catch (KavitaException ex)
         {
@@ -230,12 +265,12 @@ public class DownloadController : BaseApiController
         var files = await _bookmarkService.GetBookmarkFilesById(downloadBookmarkDto.Bookmarks.Select(b => b.Id));
 
         var filename = $"{series!.Name} - Bookmarks.zip";
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+        await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
             MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), $"Downloading {filename}",0F));
         var seriesIds = string.Join("_", downloadBookmarkDto.Bookmarks.Select(b => b.SeriesId).Distinct());
         var filePath =  _archiveService.CreateZipForDownload(files,
             $"download_{userId}_{seriesIds}_bookmarks");
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+        await _eventHub.SendMessageAsync(MessageFactory.DownloadProgress,
             MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), $"Downloading {filename}", 1F));
 
 

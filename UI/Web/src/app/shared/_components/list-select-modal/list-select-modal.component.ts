@@ -260,7 +260,7 @@ export class ListSelectModalComponent<T> {
   /**
    * Handles the Create button click.
    * If interceptCreate is set, subscribes to the returned Observable and closes on complete.
-   * Otherwise closes immediately with modalSaved(name) so the caller can handle the API call.
+   * Otherwise, closes immediately with modalSaved(name) so the caller can handle the API call.
    */
   create() {
     const name = this.createControl.value;

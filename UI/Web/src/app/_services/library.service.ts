@@ -40,13 +40,25 @@ export class LibraryService {
 
     return this.httpClient.get<Library[]>(this.baseUrl + 'library/libraries').pipe(map(libraries => {
       this.libraryNames = {};
+      this.libraryTypes = {};
       libraries.forEach(lib => {
-        if (this.libraryNames !== undefined) {
-          this.libraryNames[lib.id] = lib.name;
-        }
+        this.libraryNames![lib.id] = lib.name;
+        this.libraryTypes![lib.id] = lib.type;
       });
       return this.libraryNames;
     }));
+  }
+
+  /** Call once after user auth to warm the library name + type cache. */
+  cacheLibraryInfo() {
+    return this.getLibraryNames();
+  }
+
+  getCachedLibrary(libraryId: number): {id: number; name: string; type: LibraryType} | undefined {
+    if (!this.libraryNames?.hasOwnProperty(libraryId) || !this.libraryTypes?.hasOwnProperty(libraryId)) {
+      return undefined;
+    }
+    return { id: libraryId, name: this.libraryNames[libraryId], type: this.libraryTypes[libraryId] };
   }
 
   getLibraryName(libraryId: number) {
@@ -142,6 +154,10 @@ export class LibraryService {
 
   update(model: {name: string, folders: string[], id: number}) {
     return this.httpClient.post<Library>(this.baseUrl + 'library/update', model);
+  }
+
+  getLibraryTypeSync(libraryId: number): LibraryType | undefined {
+    return this.getCachedLibrary(libraryId)?.type;
   }
 
   getLibraryType(libraryId: number) {

@@ -41,10 +41,6 @@ export class UtilityService {
   mangaFormatKeys: string[] = [];
 
 
-  sortChapters = (a: Chapter, b: Chapter) => {
-    return a.minNumber - b.minNumber;
-  }
-
   mangaFormatToText(format: MangaFormat): string {
     if (this.mangaFormatKeys === undefined || this.mangaFormatKeys.length === 0) {
       this.mangaFormatKeys = Object.keys(MangaFormat);

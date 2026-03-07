@@ -60,7 +60,7 @@ public static class MessageFactory
     /// <summary>
     /// Event sent out during downloading of files
     /// </summary>
-    private const string DownloadProgress = "DownloadProgress";
+    public const string DownloadProgress = "DownloadProgress";
     /// <summary>
     /// A cover was updated
     /// </summary>
@@ -455,7 +455,7 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage DownloadProgressEvent(string username, string downloadName, string subtitle, float progress, string eventType = "updated")
+    public static SignalRMessage DownloadProgressEvent(string username, string downloadName, string subtitle, float progress, string eventType = "updated", string? correlationId = null)
     {
         return new SignalRMessage()
         {
@@ -468,7 +468,8 @@ public static class MessageFactory
             {
                 UserName = username,
                 DownloadName = downloadName,
-                Progress = progress
+                Progress = progress,
+                CorrelationId = correlationId
             }
         };
     }
