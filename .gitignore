@@ -543,13 +543,6 @@ Kavita.Server/config/*backup.zip
 Kavita.Services.Tests/Test Data/ImageService/**/*_output*.*
 Kavita.Services.Tests/Test Data/ImageService/**/*_baseline*
 Kavita.Services.Tests/Test Data/ImageService/**/*.html
-
-
 Kavita.Services.Tests/Test Data/ScannerService/ScanTests/**/*
-
-
-# Temp
-API/config
-API/wwwroot
 
 Kavita.Server/config/appsettings.*.json

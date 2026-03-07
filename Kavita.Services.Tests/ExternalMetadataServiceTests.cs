@@ -100,6 +100,9 @@ public class ExternalMetadataServiceTests: AbstractDbTest
            Substitute.For<IEventHub>(), Substitute.For<ICoverDbService>(),
            Substitute.For<IKavitaPlusApiService>());
 
+       // Clear tracker so test body starts with a clean slate
+       context.ChangeTracker.Clear();
+
        return (externalMetadataService, genreLookup, tagLookup, personLookup);
     }
 
