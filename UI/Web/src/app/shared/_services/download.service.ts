@@ -375,11 +375,12 @@ export class DownloadService {
   retryAllFailed() {
     this.activeQueue.update(q => {
       const active = q.filter(i => i.status === 'preparing' || i.status === 'downloading');
-      const retried = q.filter(i => i.status === 'failed')
+      const retried = q.filter(i => i.status === 'failed' && i.retryCount < 3)
         .map(i => ({ ...i, status: 'queued' as DownloadQueueStatus, errorMessage: '', retryCount: i.retryCount + 1 }));
+      const remainingFailed = q.filter(i => i.status === 'failed' && i.retryCount >= 3);
       const existingQueued = q.filter(i => i.status === 'queued');
       // Retried items go to the front of the queue, before existing queued items
-      return [...active, ...retried, ...existingQueued];
+      return [...active, ...retried, ...existingQueued, ...remainingFailed];
     });
     this._rebuildActiveIndex();
     this.activeQueue().filter(i => i.status === 'queued').forEach(i => this.storage.save(i));
