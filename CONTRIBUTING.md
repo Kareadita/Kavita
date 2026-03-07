@@ -26,17 +26,17 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
     - `npm install -g @angular/cli`
 5. Start the frontend 
     - `npm run start`
-6. Build the project in Visual Studio/Rider, Setting startup project to `API`
+6. Build the project in Visual Studio/Rider, Setting startup project to `Kavita.Server (Server)`
 7. Debug the project in Visual Studio/Rider
 8. Open http://localhost:4200
 9. (Deployment only) Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
 
 ### Debugging on Device ###
-- Update `IP` constant in `Web/UI/src/environments/environment.ts` to your dev machine's ip instead of `localhost`.
+- Run `npm run start-proxy` instead to have the Angular application proxy the requests to the backend.
 
-### Windows Users ###
-You need to run `git config --system core.longpaths true` in cmd as Admin to allow checking out
+### Apple users
 
+The backend may fail to start due to port 5000 already being in use. To fix this, temporally turn off AirPlay Receiver in System Settings. You can re-enable it later, it will bind to a different port. You may need to do this again after an update or reboot.
 
 ### Contributing Code ###
 - If you're adding a new, already requested feature, please comment on [Github Issues](https://github.com/Kareadita/Kavita/issues "Github Issues") so work is not duplicated (If you want to add something not already on there, please talk to us first)
@@ -64,7 +64,7 @@ You need to run `git config --system core.longpaths true` in cmd as Admin to all
 
 ### Swagger API ###
 If you just want to play with Swagger, you can just
-- cd Kavita/API
+- cd Kavita/Kavita.Server
 - dotnet run -c Debug
 - Go to http://localhost:5000/swagger/index.html
 
