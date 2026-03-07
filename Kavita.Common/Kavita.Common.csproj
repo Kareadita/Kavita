@@ -16,16 +16,16 @@
       <PackageReference Include="Hangfire.Core" Version="1.8.23" />
       <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
       <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.9" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.2" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
-      <PackageReference Include="Microsoft.Net.Http.Headers" Version="2.3.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.3" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+      <PackageReference Include="Microsoft.Net.Http.Headers" Version="10.0.3" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
       <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="10.18.0.131500">
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="10.20.0.135146">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
       <PackageReference Include="xunit.assert" Version="2.9.3" />
     </ItemGroup>
 </Project>

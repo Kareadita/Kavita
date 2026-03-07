@@ -55,7 +55,7 @@ public class ArchiveService(
         {
             try
             {
-                using var a1 = ArchiveFactory.Open(archivePath);
+                using var a1 = ArchiveFactory.OpenArchive(archivePath);
                 return ArchiveLibrary.SharpCompress;
             }
             catch (Exception)
@@ -85,7 +85,7 @@ public class ArchiveService(
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
-                    using var archive = ArchiveFactory.Open(archivePath);
+                    using var archive = ArchiveFactory.OpenArchive(archivePath);
                     return archive.Entries.Count(entry => !entry.IsDirectory &&
                                                           !Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
                                                           && Parser.IsImage(entry.Key));
@@ -203,7 +203,7 @@ public class ArchiveService(
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
-                    using var archive = ArchiveFactory.Open(archivePath);
+                    using var archive = ArchiveFactory.OpenArchive(archivePath);
                     var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
 
                     var entryName = FindCoverImageFilename(archivePath, entryNames);
@@ -421,7 +421,7 @@ public class ArchiveService(
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
-                    using var archive = ArchiveFactory.Open(archivePath);
+                    using var archive = ArchiveFactory.OpenArchive(archivePath);
                     var entry = archive.Entries.FirstOrDefault(entry => entry.Key == ComicInfoFilename) ??
                         archive.Entries.FirstOrDefault(entry =>
                         IsComicInfoArchiveEntry(Path.GetDirectoryName(entry.Key), entry.Key));
@@ -541,7 +541,7 @@ public class ArchiveService(
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
-                    using var archive = ArchiveFactory.Open(archivePath);
+                    using var archive = ArchiveFactory.OpenArchive(archivePath);
                     ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory
                                                                           && !Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
                                                                           && Parser.IsImage(entry.Key)), extractPath);

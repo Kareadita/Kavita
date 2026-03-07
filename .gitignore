@@ -540,7 +540,7 @@ BenchmarkDotNet.Artifacts
 Kavita.Server/config/*backup.zip
 
 
-Kavita.Services.Tests/Test Data/ImageService/**/*_output*
+Kavita.Services.Tests/Test Data/ImageService/**/*_output*.*
 Kavita.Services.Tests/Test Data/ImageService/**/*_baseline*
 Kavita.Services.Tests/Test Data/ImageService/**/*.html
 

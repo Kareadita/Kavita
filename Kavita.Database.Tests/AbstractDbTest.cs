@@ -96,6 +96,7 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
         catch (Exception ex)
         {
             testOutputHelper.WriteLine($"[SeedDb] Error: {ex.Message} \n{ex.StackTrace}");
+            throw;
         }
     }
 
