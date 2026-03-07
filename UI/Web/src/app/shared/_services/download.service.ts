@@ -111,7 +111,7 @@ export class DownloadService {
   );
   readonly queuedItems = computed(() => this.activeQueue().filter(i => i.status === 'queued'));
   readonly completedItems = computed(() =>
-    this.completedToday().sort((a, b) => normalizeTimestamp(b.completedAt).localeCompare(normalizeTimestamp(a.completedAt)))
+    [...this.completedToday()].sort((a, b) => normalizeTimestamp(b.completedAt).localeCompare(normalizeTimestamp(a.completedAt)))
   );
   readonly completedTodayCount = computed(() => this.completedToday().length);
   readonly failedItems = computed(() => this.activeQueue().filter(i => i.status === 'failed'));
