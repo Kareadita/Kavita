@@ -15,7 +15,7 @@
       </form>
     }
 
-    @for(bookmark of bookmarks | filter: filterList; track bookmark.pageNumber + bookmark.title) {
+    @for(bookmark of bookmarks | filter: filterList; track bookmark.id) {
       <div class="mb-2">
         <app-text-bookmark-item [bookmark]="bookmark"
                                 (loadBookmark)="loadChapterPage($event.pageNumber, $event.bookScrollId)"

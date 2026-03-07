@@ -29,7 +29,7 @@
         </div>
       }
 
-      @for(annotation of annotations() | filter: filterList; track annotation.comment + annotation.highlightColor + annotation.containsSpolier) {
+      @for(annotation of annotations() | filter: filterList; track annotation.id) {
         <app-annotation-card
           [annotation]="annotation"
           [allowEdit]="annotation.ownerUserId === accountService.currentUser()!.id"

@@ -25,7 +25,7 @@
 
   <h3 class="my-3">{{t('client-devices-header')}}</h3>
   <div class="row">
-    @for(clientDevice of clientDevices(); track clientDevice) {
+    @for(clientDevice of clientDevices(); track clientDevice.id) {
       <div class="col-md-6 col-sm-12 mb-4">
         <app-client-device-card [clientDevice]="clientDevice" (deviceDeleted)="deviceDeleted($event)" (refresh)="loadDevices()" />
       </div>

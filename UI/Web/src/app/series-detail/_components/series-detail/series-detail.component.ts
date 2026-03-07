@@ -408,6 +408,8 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     return webLinks.split(',');
   });
 
+  trackStoryLineIdentity = (index: number, item: StoryLineItem) => item.isChapter ? `${item.chapter!.data.id}_ch_storyline` : `${item.volume!.data.id}_vol_storyline`;
+  
   /**
    * Related Series. Sorted by backend
    */

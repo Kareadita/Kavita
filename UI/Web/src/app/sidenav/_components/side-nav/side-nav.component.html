@@ -7,7 +7,7 @@
     <div class="side-nav-container" [ngClass]="{'closed' : sideNavCollapsed,
     'hidden': !sideNavVisible,
     'no-donate': (licenseService.hasValidLicense$ | async) === true}">
-      <div class="side-nav" cdkDropList (cdkDropListDropped)="reorderDrop($event)">
+      <div class="side-nav" cdkDropList (cdkDropListDropped)="reorderDrop($event)" [cdkDropListDisabled]="accountService.hasReadOnlyRole()">
 
 
         <app-side-nav-item cdkDrag cdkDragDisabled icon="fa-home" [title]="t('home')" link="/home/">
