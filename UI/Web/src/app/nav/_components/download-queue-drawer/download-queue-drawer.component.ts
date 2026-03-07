@@ -42,7 +42,13 @@ export class DownloadQueueDrawerComponent {
   }
 
   navigateToItem(item: DownloadQueueItem) {
-    this.router.navigate(['/library', item.libraryId, 'series', item.seriesId]);
+    if (item.entityType === 'volume') {
+      this.router.navigate(['/library', item.libraryId, 'series', item.seriesId, 'volume', item.entityId]);
+    } else if (item.entityType === 'chapter') {
+      this.router.navigate(['/library', item.libraryId, 'series', item.seriesId, 'chapter', item.entityId]);
+    } else {
+      this.router.navigate(['/library', item.libraryId, 'series', item.seriesId]);
+    }
     this.close();
   }
 

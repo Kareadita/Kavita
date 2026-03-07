@@ -328,7 +328,7 @@ export class ActionService {
       }
 
       case Action.Download:
-        this.downloadService.download('series', series);
+        this.downloadService.download('series', series, series.libraryId, series.id);
         return of(this.fromAction(action, series, 'none'));
 
       case Action.AddToWantToReadList:
@@ -624,7 +624,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        this.downloadService.download('bookmark', [bookmark]);
+        this.downloadService.download('bookmark', [bookmark], 0, 0);
         return of(this.fromAction(action, bookmark, 'none'));
 
       case Action.ViewSeries:
@@ -1024,7 +1024,7 @@ export class ActionService {
       }
 
       case Action.Download:
-        for (const s of series) { this.downloadService.download('series', s); }
+        for (const s of series) { this.downloadService.download('series', s, s.libraryId, s.id); }
         return of(this.fromAction(action, series, 'none'));
 
       default:
@@ -1163,7 +1163,7 @@ export class ActionService {
   handleBulkBookmarkAction(action: ActionItem<any>, bookmarks: PageBookmark[], seriesIds: number[]): Observable<ActionResult<PageBookmark[]>> {
     switch (action.action) {
       case Action.Download:
-        this.downloadService.download('bookmark', bookmarks);
+        this.downloadService.download('bookmark', bookmarks, 0, 0);
         return of(this.fromAction(action, bookmarks, 'none'));
 
       case Action.Delete:

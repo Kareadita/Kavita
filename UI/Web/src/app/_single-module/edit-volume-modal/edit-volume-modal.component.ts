@@ -91,7 +91,7 @@ export class EditVolumeModalComponent implements OnInit {
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
-  
+
   tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType), this.blacklist);
   /**
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
@@ -165,7 +165,7 @@ export class EditVolumeModalComponent implements OnInit {
         });
         break;
       case Action.Download:
-        this.downloadService.download('volume', this.volume);
+        this.downloadService.download('volume', this.volume, this.libraryId, this.seriesId);
         break;
     }
   }

@@ -5,7 +5,7 @@ import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../confirm.service';
 import {Chapter} from 'src/app/_models/chapter';
 import {Volume} from 'src/app/_models/volume';
-import {asyncScheduler, filter, forkJoin, Observable, of, tap} from 'rxjs';
+import {asyncScheduler, filter, firstValueFrom, forkJoin, Observable, of, tap} from 'rxjs';
 import {download} from '../_models/download';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {map, switchMap, throttleTime} from 'rxjs/operators';
@@ -22,8 +22,6 @@ import {NotificationProgressEvent} from "../../_models/events/notification-progr
 import {SeriesService} from "../../_services/series.service";
 import {DownloadQueueItem, DownloadQueueStatus} from '../_models/download-queue-item';
 import {DownloadStorageService} from './download-storage.service';
-import {EntityTitleService} from "../../_services/entity-title.service";
-import {LibraryService} from "../../_services/library.service";
 import {normalizeTimestamp} from "../../../libs/download-timestamp";
 
 export const DEBOUNCE_TIME = 100;
@@ -44,8 +42,6 @@ export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | undefi
 })
 export class DownloadService {
 
-  private readonly entityTitleService = inject(EntityTitleService);
-  private readonly libraryService = inject(LibraryService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly accountService = inject(AccountService);
@@ -56,6 +52,9 @@ export class DownloadService {
   private readonly storage = inject(DownloadStorageService);
   private readonly translocoService = inject(TranslocoService);
   private readonly save = inject(SAVER);
+
+  private readonly SERIES_NAME_CACHE_MAX = 50;
+  private _seriesNameCache = new Map<number, string>();
 
   private baseUrl = environment.apiUrl;
   /**
@@ -244,7 +243,7 @@ export class DownloadService {
    * - volume/chapter → size-checked then queued
    * - bookmark/logs → immediate blob download (bypasses queue)
    */
-  download(entityType: DownloadEntityType, entity: DownloadEntity, libraryId = 0, seriesId = 0) {
+  download(entityType: DownloadEntityType, entity: DownloadEntity, libraryId: number, seriesId: number) {
     switch (entityType) {
       case 'series':
         this.downloadSeries(entity as Series);
@@ -564,7 +563,32 @@ export class DownloadService {
     });
   }
 
+  private async resolveSeriesName(seriesName: string, seriesId: number): Promise<string> {
+    if (seriesName) return seriesName;
+    if (seriesId <= 0) return '';
+    const cached = this._seriesNameCache.get(seriesId);
+    if (cached !== undefined) {
+      // Move to end (most-recently-used)
+      this._seriesNameCache.delete(seriesId);
+      this._seriesNameCache.set(seriesId, cached);
+      return cached;
+    }
+    try {
+      const series = await firstValueFrom(this.seriesService.getSeries(seriesId));
+      // Evict oldest if at capacity
+      if (this._seriesNameCache.size >= this.SERIES_NAME_CACHE_MAX) {
+        const oldest = this._seriesNameCache.keys().next().value!;
+        this._seriesNameCache.delete(oldest);
+      }
+      this._seriesNameCache.set(seriesId, series.name);
+      return series.name;
+    } catch {
+      return '';
+    }
+  }
+
   private async addToQueue(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, skipRedownloadPrompt = false) {
+    seriesName = await this.resolveSeriesName(seriesName, seriesId);
     const entityId = entity.id;
     const key = this._indexKey(entityType, entityId);
 
@@ -602,10 +626,6 @@ export class DownloadService {
     const id = this._nextId++;
     this.debugLog(`addToQueue() id=${id} type=${entityType} entityId=${entityId} series="${seriesName}"`);
 
-    const libraryType = this.libraryService.getLibraryTypeSync(libraryId) ?? 0;
-    const entityTitle = this.entityTitleService.computeTitle(entity, libraryType, { prioritizeTitleName: true });
-    const label = seriesName ? `${seriesName} - ${entityTitle}` : entityTitle;
-
     let subLabel: string;
     let downloadName: string;
 
@@ -618,6 +638,8 @@ export class DownloadService {
       subLabel = ch.minNumber + '';
       downloadName = seriesName ? `${seriesName} - Chapter ${ch.minNumber}` : `Chapter ${ch.minNumber}`;
     }
+
+    const label = downloadName;
 
     const item: DownloadQueueItem = {
       id,
