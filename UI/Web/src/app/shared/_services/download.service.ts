@@ -97,6 +97,16 @@ export class DownloadService {
     }
   }
 
+  /** Targeted single-item update: produces new signal array but patches the index incrementally. */
+  private _updateItem(id: number, patch: Partial<DownloadQueueItem>) {
+    const target = this.activeQueue().find(i => i.id === id);
+    if (!target) return;
+
+    const updated = { ...target, ...patch };
+    this.activeQueue.update(q => q.map(i => i.id === id ? updated : i));
+    this._activeIndex.set(this._indexKey(updated.entityType, updated.entityId), updated);
+  }
+
   readonly activeItem = computed(() =>
     this.activeQueue().find(i => i.status === 'preparing' || i.status === 'downloading') ?? null
   );
@@ -746,14 +756,11 @@ export class DownloadService {
             }
           }
 
-          this.activeQueue.update(q => q.map(i =>
-            i.id === item.id
-              ? { ...i, progress,
-                  ...(speedBps !== undefined ? { speedBps } : {}),
-                  ...(etaSeconds !== undefined ? { etaSeconds } : {}) }
-              : i
-          ));
-          this._rebuildActiveIndex();
+          this._updateItem(item.id, {
+            progress,
+            ...(speedBps !== undefined ? { speedBps } : {}),
+            ...(etaSeconds !== undefined ? { etaSeconds } : {}),
+          });
         }
       }
 
@@ -790,8 +797,7 @@ export class DownloadService {
 
   /** Updates activeQueue signal and persists to IDB on status changes. */
   private setStatus(id: number, status: DownloadQueueStatus, extra?: Partial<DownloadQueueItem>) {
-    this.activeQueue.update(q => q.map(i => i.id === id ? { ...i, status, ...extra } : i));
-    this._rebuildActiveIndex();
+    this._updateItem(id, { status, ...extra });
     const item = this.activeQueue().find(i => i.id === id);
     if (item) this.storage.save(item);
   }
@@ -851,11 +857,7 @@ export class DownloadService {
     this.debugLog(`markFailed() id=${itemId} error="${error}"`);
     this._speedSamples.delete(itemId);
     this._smoothedSpeed.delete(itemId);
-    this.activeQueue.update(q => q.map(i => i.id === itemId
-      ? { ...i, status: 'failed' as DownloadQueueStatus, errorMessage: error, completedAt: DateTime.utc().toISO()! }
-      : i
-    ));
-    this._rebuildActiveIndex();
+    this._updateItem(itemId, { status: 'failed' as DownloadQueueStatus, errorMessage: error, completedAt: DateTime.utc().toISO()! });
     const item = this.activeQueue().find(i => i.id === itemId);
     if (item) this.storage.save(item);
     // Give GC time to reclaim memory before starting next download
