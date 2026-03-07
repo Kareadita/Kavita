@@ -694,7 +694,7 @@ export class DownloadService {
     const apiKey = this.accountService.currentUserGenericApiKey();
     if (!apiKey) {
       this.debugLog(`triggerDownload() - no API key for id=${item.id}`);
-      this.setStatus(item.id, 'failed', { errorMessage: this.translocoService.translate('download-queue-drawer.failed-from-auth') });
+      this.markFailed(item.id, this.translocoService.translate('download-queue-drawer.failed-from-auth'));
       return;
     }
 
