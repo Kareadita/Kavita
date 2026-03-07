@@ -484,7 +484,7 @@ export class ActionService {
       }
 
       case Action.Download:
-        this.downloadService.download('volume', volume, undefined, libraryId, seriesId);
+        this.downloadService.download('volume', volume, libraryId, seriesId);
         return of(this.fromAction(action, volume, 'none'));
 
       default:
@@ -533,7 +533,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        this.downloadService.download('chapter', chapter, undefined, libraryId, seriesId);
+        this.downloadService.download('chapter', chapter, libraryId, seriesId);
         return of(this.fromAction(action, chapter, 'none'));
 
       case Action.Edit:

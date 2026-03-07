@@ -23,8 +23,9 @@ export class DownloadButtonComponent {
   private readonly downloadService = inject(DownloadService);
 
   entity = input.required<Series | Volume | Chapter>();
+  seriesId = input.required<number>();
+  libraryId = input.required<number>();
   entityType = input<'series' | 'volume' | 'chapter'>('series');
-  readonly libraryId = input<number>(0);
 
   isDownloading = computed(() => {
     const item = this.downloadService.getItemForEntity(this.entity());
@@ -35,7 +36,7 @@ export class DownloadButtonComponent {
   downloadClicked() {
     if (this.isDownloading()) return;
 
-    this.downloadService.download(this.entityType(), this.entity(), undefined, this.libraryId());
+    this.downloadService.download(this.entityType(), this.entity(), this.libraryId(), this.seriesId());
   }
 
 }

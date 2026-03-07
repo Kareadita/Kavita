@@ -6,7 +6,7 @@ import {ConfirmService} from '../confirm.service';
 import {Chapter} from 'src/app/_models/chapter';
 import {Volume} from 'src/app/_models/volume';
 import {asyncScheduler, filter, forkJoin, Observable, of, tap} from 'rxjs';
-import {download, Download} from '../_models/download';
+import {download} from '../_models/download';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {map, switchMap, throttleTime} from 'rxjs/operators';
 import {AccountService} from 'src/app/_services/account.service';
@@ -16,7 +16,6 @@ import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {SAVER} from "../../_providers/saver.provider";
 import {UtilityService} from "./utility.service";
 import {DateTime} from 'luxon';
-import {normalizeTimestamp} from './download-timestamp';
 import {UtcToLocalDatePipe} from '../../_pipes/utc-to-locale-date.pipe';
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
@@ -25,6 +24,7 @@ import {DownloadQueueItem, DownloadQueueStatus} from '../_models/download-queue-
 import {DownloadStorageService} from './download-storage.service';
 import {EntityTitleService} from "../../_services/entity-title.service";
 import {LibraryService} from "../../_services/library.service";
+import {normalizeTimestamp} from "../../../libs/download-timestamp";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -234,7 +234,7 @@ export class DownloadService {
    * - volume/chapter → size-checked then queued
    * - bookmark/logs → immediate blob download (bypasses queue)
    */
-  download(entityType: DownloadEntityType, entity: DownloadEntity, callback?: (d: Download | undefined) => void, libraryId = 0, seriesId = 0) {
+  download(entityType: DownloadEntityType, entity: DownloadEntity, libraryId = 0, seriesId = 0) {
     switch (entityType) {
       case 'series':
         this.downloadSeries(entity as Series);

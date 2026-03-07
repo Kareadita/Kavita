@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {DownloadQueueItem} from '../_models/download-queue-item';
-import {normalizeTimestamp} from './download-timestamp';
+import {normalizeTimestamp} from "../../../libs/download-timestamp";
 
 @Injectable({ providedIn: 'root' })
 export class DownloadStorageService {

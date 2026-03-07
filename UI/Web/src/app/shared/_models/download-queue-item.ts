@@ -18,7 +18,7 @@ export interface DownloadQueueItem {
   /** Bytes, 0 if unknown */
   estimatedSize: number;
   status: DownloadQueueStatus;
-  /** 0-100, driven by SignalR DownloadProgress events */
+  /** 0-100 */
   progress: number;
   errorMessage: string;
   retryCount: number;

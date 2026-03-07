@@ -409,16 +409,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   });
 
   /**
-   * Track by function for Volume to tell when to refresh card data
-   */
-  trackByVolumeIdentity = (index: number, item: Volume) => `${item.name}_${item.pagesRead}`;
-  /**
-   * Track by function for Chapter to tell when to refresh card data
-   */
-  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.minNumber}_${item.maxNumber}_${item.volumeId}_${item.pagesRead}`;
-
-
-  /**
    * Related Series. Sorted by backend
    */
   relations = signal<RelatedSeriesPair[]>([]);
@@ -631,7 +621,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
 
 
-    this.seriesService.getSeriesDetail(this.seriesId()).pipe(catchError(err => {
+    this.seriesService.getSeriesDetail(this.seriesId()).pipe(catchError(_ => {
       this.router.navigateByUrl('/home');
       return of(null);
     })).subscribe(detail => {
