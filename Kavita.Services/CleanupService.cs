@@ -89,6 +89,7 @@ public class CleanupService(
         await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters(ct);
         await unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated(ct);
         await unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated(ct: ct);
+        await unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated(ct);
         await unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries(ct);
         await unitOfWork.ReadingListRepository.RemoveReadingListsWithoutSeries(ct);
     }
