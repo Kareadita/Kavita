@@ -24,7 +24,8 @@ export interface DownloadQueueItem {
   retryCount: number;
   /** UTC ISO string when the item was queued */
   queuedAt: string | number;
-  entity: Volume | Chapter;
+  /** Present only for in-memory items; stripped before IndexedDB persistence and absent on restored items. */
+  entity?: Volume | Chapter;
   /** Predicted backend filename used to match SignalR progress events */
   downloadName: string;
   /** Smoothed bytes/sec, in-memory only */

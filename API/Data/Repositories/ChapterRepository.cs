@@ -221,7 +221,7 @@ public class ChapterRepository : IChapterRepository
         return await chapterIds.BatchToDictionaryAsync(50, batch =>
             _context.MangaFile
                 .Where(f => batch.Contains(f.ChapterId))
-                .ToDictionaryAsync(f => f.Id, f => f.Bytes));
+                .ToDictionaryAsync(f => f.ChapterId, f => f.Bytes));
     }
 
     /// <summary>
