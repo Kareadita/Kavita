@@ -15,7 +15,7 @@ import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/ht
 import {provideTransloco, TranslocoConfig, TranslocoService} from "@jsverse/transloco";
 import {environment} from "./environments/environment";
 import {AccountService} from "./app/_services/account.service";
-import {catchError, firstValueFrom, map, of, switchMap, tap} from "rxjs";
+import {catchError, firstValueFrom, of, switchMap, tap} from "rxjs";
 import {provideTranslocoLocale} from "@jsverse/transloco-locale";
 import {LazyLoadImageModule} from "ng-lazyload-image";
 import {getSaver, SAVER} from "./app/_providers/saver.provider";
@@ -151,14 +151,15 @@ function bootstrapUser() {
     }),
     catchError(() => of(null)),
     switchMap(() => loadUserLocale(transloco, accountService)),
-    map(() => accountService.currentUser()),
-    tap(user => {
+    switchMap(() => {
+      const user = accountService.currentUser();
       if (user) {
         messageHubService.createHubConnection(user);
-        libraryService.cacheLibraryInfo().subscribe(() => {
-          downloadService.restoreQueue();
-        });
+        return libraryService.cacheLibraryInfo().pipe(
+          tap(() => downloadService.restoreQueue())
+        );
       }
+      return of(null);
     }),
   ));
 }

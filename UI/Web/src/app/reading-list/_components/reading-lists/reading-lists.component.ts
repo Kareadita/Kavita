@@ -83,7 +83,7 @@ export class ReadingListsComponent implements OnInit {
   }
 
   performGlobalAction(event: ActionItem<void> | ActionResult<void>) {
-    // Skip ActionResults — they've already been handled
+    // Skip ActionResults - they've already been handled
     if ('effect' in event) return;
   }
 

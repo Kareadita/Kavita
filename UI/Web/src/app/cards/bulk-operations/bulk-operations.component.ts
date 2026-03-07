@@ -59,7 +59,7 @@ export class BulkOperationsComponent<T> {
   }
 
   performAction(event: ActionItem<any> | ActionResult<any>) {
-    // Skip ActionResults — they've already been handled
+    // Skip ActionResults - they've already been handled
     if ('effect' in event) return;
 
     event.callback(event, null).subscribe();

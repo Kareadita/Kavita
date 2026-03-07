@@ -38,7 +38,7 @@ export class DownloadStorageService {
     if (!this.db) return;
     return new Promise((resolve, reject) => {
       // Strip non-serializable fields before persisting
-      const { entity, speedBps, ...persistable } = item as any;
+      const { entity, speedBps, etaSeconds, ...persistable } = item as any;
       const tx = this.db!.transaction(this.STORE, 'readwrite');
       const req = tx.objectStore(this.STORE).put(persistable);
       req.onsuccess = () => resolve();

@@ -5,7 +5,7 @@ export type DownloadQueueStatus = 'queued' | 'preparing' | 'downloading' | 'comp
 
 export interface DownloadQueueItem {
   id: number;
-  /** Atomic unit of download — series/reading-list/collection always decompose to these */
+  /** Atomic unit of download, series/reading-list/collection always decompose to these */
   entityType: 'volume' | 'chapter';
   entityId: number;
   libraryId: number;
@@ -27,7 +27,7 @@ export interface DownloadQueueItem {
   entity: Volume | Chapter;
   /** Predicted backend filename used to match SignalR progress events */
   downloadName: string;
-  /** Smoothed bytes/sec, in-memory only — not persisted to IndexedDB */
+  /** Smoothed bytes/sec, in-memory only */
   speedBps?: number;
   /** Estimated seconds remaining, in-memory only */
   etaSeconds?: number;

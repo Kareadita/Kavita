@@ -76,9 +76,9 @@ export class DownloadService {
 
   // --- Signal-based queue (split: active vs completed) ---
   private _nextId = 0;
-  /** Items that are queued/preparing/downloading/failed — mutated frequently during downloads */
+  /** Items that are queued/preparing/downloading/failed, mutated frequently during downloads */
   readonly activeQueue = signal<DownloadQueueItem[]>([]);
-  /** Completed items from today's session — mutated only when a download finishes */
+  /** Completed items from today's session, mutated only when a download finishes */
   readonly completedToday = signal<DownloadQueueItem[]>([]);
 
   // O(1) lookup for active items by entityType:entityId
@@ -134,7 +134,7 @@ export class DownloadService {
   private readonly EMA_ALPHA = 0.15;
 
   constructor() {
-    // SignalR handler — only used as a safety net.
+    // SignalR handler, only used as a safety net
     // Real progress comes from fetch + ReadableStream in streamDownload/blobDownload.
     this.messageHub.messages$.pipe(
       filter(evt => evt.event === EVENTS.DownloadProgress),
@@ -409,7 +409,7 @@ export class DownloadService {
       const todayMatch = ct.find(i =>
         i.entityType === entityType && i.entityId === (entity as Volume | Chapter).id);
       if (todayMatch) return todayMatch;
-      // Check if entity was ever downloaded (older, in IDB) — return a minimal sentinel
+      // Check if entity was ever downloaded (older, in IDB)
       if (this._completedEntityIds.has(key)) {
         return { status: 'completed', entityType, entityId: (entity as Volume | Chapter).id } as DownloadQueueItem;
       }
@@ -559,14 +559,14 @@ export class DownloadService {
 
     // 1. Already queued/active → silently drop
     if (this._activeIndex.has(key)) {
-      this.debugLog(`addToQueue() duplicate active — silently dropping ${key}`);
+      this.debugLog(`addToQueue() duplicate active - silently dropping ${key}`);
       return;
     }
 
     // 2. Previously completed → skip silently in bulk, prompt for single downloads
     if (this._completedEntityIds.has(key)) {
       if (skipRedownloadPrompt) {
-        this.debugLog(`addToQueue() already completed, skipping in bulk — ${key}`);
+        this.debugLog(`addToQueue() already completed, skipping in bulk - ${key}`);
         return;
       }
 
@@ -640,17 +640,17 @@ export class DownloadService {
   private processQueue() {
     if (this.isPaused()) return;
     if (this.activeItem()) {
-      this.debugLog('processQueue() — already active, skipping');
+      this.debugLog('processQueue() - already active, skipping');
       return;
     }
 
     const nextItem = this.activeQueue().find(i => i.status === 'queued');
     if (!nextItem) {
-      this.debugLog('processQueue() — queue empty, nothing to do');
+      this.debugLog('processQueue() - queue empty, nothing to do');
       return;
     }
 
-    this.debugLog(`processQueue() — starting item id=${nextItem.id} "${nextItem.label}"`);
+    this.debugLog(`processQueue() - starting item id=${nextItem.id} "${nextItem.label}"`);
     this.setStatus(nextItem.id, 'preparing');
     this.triggerDownload(nextItem);
   }
@@ -661,7 +661,7 @@ export class DownloadService {
   private triggerDownload(item: DownloadQueueItem) {
     const apiKey = this.accountService.currentUserGenericApiKey();
     if (!apiKey) {
-      this.debugLog(`triggerDownload() — no API key for id=${item.id}`);
+      this.debugLog(`triggerDownload() - no API key for id=${item.id}`);
       this.setStatus(item.id, 'failed', { errorMessage: this.translocoService.translate('download-queue-drawer.failed-from-auth') });
       return;
     }

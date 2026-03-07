@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  effect,
-  inject,
-  input,
-  output,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, inject, input, output, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
 import {Member} from 'src/app/_models/auth/member';
@@ -47,7 +38,6 @@ export class RestrictionSelectorComponent {
       'ageRestrictionIncludeUnknowns': new FormControl(false, []),
     });
 
-    // React to member changes — patch form values
     effect(() => {
       const m = this.member();
       if (!m) return;
@@ -55,7 +45,6 @@ export class RestrictionSelectorComponent {
       this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.setValue(m.ageRestriction.includeUnknowns);
     });
 
-    // React to resetValue changes
     effect(() => {
       const r = this.resetValue();
       if (r == null) return;
@@ -63,14 +52,13 @@ export class RestrictionSelectorComponent {
       this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.setValue(r.includeUnknowns);
     });
 
-    // React to isAdmin changes — enable/disable form controls
     effect(() => {
       if (this.isAdmin()) {
         this.restrictionForm.get('ageRating')!.disable();
         this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.disable();
       } else {
         this.restrictionForm.get('ageRating')!.enable();
-        // Re-check if includeUnknowns should stay disabled based on current rating
+
         const currentRating = parseInt(this.restrictionForm.get('ageRating')!.value, 10);
         if (currentRating === AgeRating.NotApplicable) {
           this.restrictionForm.get('ageRestrictionIncludeUnknowns')!.disable();

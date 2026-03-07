@@ -53,7 +53,7 @@ export class VersionService {
 
   private versionCheckSubscription?: Subscription;
   private modalOpen = false;
-  /** Version fetched on initial page load — used to detect mid-session server updates */
+  /** Version fetched on initial page load - used to detect mid-session server updates */
   private loadedVersion: string | null = null;
   /** Tracks which version the currently-open modal is for, so we can record dismissal on close */
   private activeModalVersion: string | null = null;
@@ -113,7 +113,7 @@ export class VersionService {
     const isNewServerVersion = this.loadedVersion !== null && this.loadedVersion !== serverVersion;
 
     if (isNewServerVersion) {
-      // Server was updated mid-session — don't update loadedVersion so the
+      // Server was updated mid-session - don't update loadedVersion so the
       // refresh prompt persists until the user actually refreshes.
       localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
       this.serverService.getChangelog(1).subscribe(changelog => {
@@ -162,7 +162,7 @@ export class VersionService {
 
   /**
    * Single entry point for opening version update modals.
-   * Prevents stacking — only one modal can be open at a time.
+   * Prevents stacking, only one modal can be open at a time.
    * For non-refresh modes, applies per-version backoff before opening.
    */
   showUpdateModal(mode: 'refresh' | 'update-available' | 'out-of-date', data: { update?: UpdateVersionEvent | null, versionsOutOfDate?: number } = {}, force: boolean = false): void {
