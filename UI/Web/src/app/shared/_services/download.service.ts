@@ -398,12 +398,11 @@ export class DownloadService {
 
     // Series: aggregate across all active + completed items together so progress doesn't drop
     if (this.utilityService.isSeries(entity)) {
-      const seriesName = (entity as Series).name;
-      const items = aq.filter(i =>
-        ['queued', 'preparing', 'downloading'].includes(i.status) && i.seriesName === seriesName
-      );
+      const sId = (entity as Series).id;
+      const items = aq.filter(i => ['queued', 'preparing', 'downloading'].includes(i.status) && i.seriesId === sId);
+
       if (includeCompleted) {
-        items.push(...ct.filter(i => i.seriesName === seriesName));
+        items.push(...ct.filter(i => i.seriesId === sId));
       }
       return this._aggregateSeriesItems(items);
     }
@@ -416,9 +415,9 @@ export class DownloadService {
 
     // Check today's completed (small array)
     if (includeCompleted) {
-      const todayMatch = ct.find(i =>
-        i.entityType === entityType && i.entityId === (entity as Volume | Chapter).id);
+      const todayMatch = ct.find(i => i.entityType === entityType && i.entityId === (entity as Volume | Chapter).id);
       if (todayMatch) return todayMatch;
+
       // Check if entity was ever downloaded (older, in IDB)
       if (this._completedEntityIds.has(key)) {
         return { status: 'completed', entityType, entityId: (entity as Volume | Chapter).id } as DownloadQueueItem;
