@@ -11,14 +11,14 @@ namespace Kavita.API.Repositories;
 [Flags]
 public enum VolumeIncludes
 {
-    None = 1,
-    Chapters = 2,
-    People = 4,
-    Tags = 8,
+    None = 1 << 0,
+    Chapters = 1 << 1,
+    People = 1 << 2,
+    Tags = 1 << 3,
     /// <summary>
     /// This will include Chapters by default
     /// </summary>
-    Files = 16
+    Files = 1 << 4
 }
 
 public interface IVolumeRepository

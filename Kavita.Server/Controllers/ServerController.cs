@@ -135,7 +135,7 @@ public class ServerController(
             return BadRequest(await localizationService.Translate(UserId, "encode-as-warning"));
         }
 
-        taskScheduler.CovertAllCoversToEncoding();
+        taskScheduler.ConvertAllCoversToEncoding();
 
         return Ok();
     }

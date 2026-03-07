@@ -13,9 +13,9 @@ namespace Kavita.API.Repositories;
 [Flags]
 public enum ReadingListIncludes
 {
-    None = 1,
-    Items = 2,
-    ItemChapter = 4,
+    None = 1 << 0,
+    Items = 1 << 1,
+    ItemChapter = 1 << 2,
 }
 
 public interface IReadingListRepository

@@ -14,12 +14,12 @@ namespace Kavita.API.Repositories;
 [Flags]
 public enum LibraryIncludes
 {
-    None = 1,
-    Series = 2,
-    AppUser = 4,
-    Folders = 8,
-    FileTypes = 16,
-    ExcludePatterns = 32
+    None = 1 << 0,
+    Series = 1 << 1,
+    AppUser = 1 << 2,
+    Folders = 1 << 3,
+    FileTypes = 1 << 4,
+    ExcludePatterns = 1 << 5
 }
 
 public interface ILibraryRepository

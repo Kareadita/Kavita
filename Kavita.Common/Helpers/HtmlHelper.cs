@@ -4,11 +4,13 @@ using HtmlAgilityPack;
 
 namespace Kavita.Common.Helpers;
 
+#nullable enable
+
 public static class HtmlHelper
 {
     private const int BodyTextLimit = 175;
 
-    public static string GetCharacters(string body)
+    public static string? GetCharacters(string? body)
     {
         if (string.IsNullOrEmpty(body)) return body;
 

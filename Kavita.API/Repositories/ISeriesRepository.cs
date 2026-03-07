@@ -23,19 +23,19 @@ namespace Kavita.API.Repositories;
 [Flags]
 public enum SeriesIncludes
 {
-    None = 1,
-    Volumes = 2,
+    None = 1 << 0,
+    Volumes = 1 << 1,
     /// <summary>
     /// This will include all necessary includes
     /// </summary>
-    Metadata = 4,
-    Related = 8,
-    Library = 16,
-    Chapters = 32,
-    ExternalReviews = 64,
-    ExternalRatings = 128,
-    ExternalRecommendations = 256,
-    ExternalMetadata = 512,
+    Metadata = 1 << 2,
+    Related = 1 << 3,
+    Library = 1 << 4,
+    Chapters = 1 << 5,
+    ExternalReviews = 1 << 6,
+    ExternalRatings = 1 << 7,
+    ExternalRecommendations = 1 << 8,
+    ExternalMetadata = 1 << 9,
 
     ExternalData = ExternalMetadata | ExternalReviews | ExternalRatings | ExternalRecommendations,
 }

@@ -12,16 +12,16 @@ namespace Kavita.API.Repositories;
 [Flags]
 public enum CollectionTagIncludes
 {
-    None = 1,
-    SeriesMetadata = 2,
-    SeriesMetadataWithSeries = 4
+    None = 1 << 0,
+    SeriesMetadata = 1 << 1,
+    SeriesMetadataWithSeries = 1 << 2
 }
 
 [Flags]
 public enum CollectionIncludes
 {
-    None = 1,
-    Series = 2,
+    None = 1 << 0,
+    Series = 1 << 1,
 }
 
 public interface ICollectionTagRepository

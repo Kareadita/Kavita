@@ -13,7 +13,6 @@ public interface IAuthKeyService
     /// </summary>
     /// <param name="keyValue">The actual key value (not the ID)</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <param name="ct"></param>
     Task InvalidateAsync(string keyValue, CancellationToken cancellationToken = default);
 
     string CreateCacheKey(string keyValue);

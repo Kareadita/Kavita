@@ -16,12 +16,12 @@ namespace Kavita.API.Repositories;
 [Flags]
 public enum ChapterIncludes
 {
-    None = 1,
-    Volumes = 2,
-    Files = 4,
-    People = 8,
-    Genres = 16,
-    Tags = 32,
+    None = 1 << 0,
+    Volumes = 1 << 1,
+    Files = 1 << 2,
+    People = 1 << 3,
+    Genres = 1 << 4,
+    Tags = 1 << 5,
     ExternalReviews = 1 << 6,
     ExternalRatings = 1 << 7
 }

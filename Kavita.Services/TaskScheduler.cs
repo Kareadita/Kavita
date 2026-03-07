@@ -335,7 +335,7 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Schedule(() => _statsService.Send(), DateTimeOffset.Now.AddDays(1));
     }
 
-    public void CovertAllCoversToEncoding()
+    public void ConvertAllCoversToEncoding()
     {
         var defaultParams = Array.Empty<object>();
         if (MediaConversionService.ConversionMethods.Any(method =>
