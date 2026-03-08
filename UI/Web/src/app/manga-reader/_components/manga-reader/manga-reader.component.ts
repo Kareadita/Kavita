@@ -1087,9 +1087,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.continuousChapterInfos[ChapterInfoPosition.Current] = results.chapterInfo;
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
+
+      // A completed chapter is stored as maxPaged, this is must be strictly greater to trigger this condition
       let page = results.progress.pageNum;
-      if (page >= this.maxPages) {
-        page = !firstLoad ? 0 : this.maxPages - 1;
+      if (page > this.maxPages) {
+        page = !firstLoad ? 0 : this.maxPages;
       }
 
       page = this.adjustPagesForDoubleRenderer(page);
