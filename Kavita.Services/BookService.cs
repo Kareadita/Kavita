@@ -997,9 +997,17 @@ public partial class BookService(
         try
         {
             using var book = await EpubReader.OpenBookAsync(bookFilePath, LenientBookReaderOptions);
+            if (book == null) return 0;
+
             var doc = new HtmlDocument { OptionFixNestedTags = true };
             var bookPages = await book.GetReadingOrderAsync();
             var pageList = bookPages.ToList();
+
+            // Off-by-one fix for completed books
+            if (endPage == pageList.Count)
+            {
+                endPage--;
+            }
 
             // Validate page bounds
             if (startPage < 0 || endPage >= pageList.Count) return 0;
