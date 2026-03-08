@@ -47,6 +47,8 @@
             }
           </swiper-container>
         </div>
+      } @else if (noDataTemplate(); as noData) {
+        <ng-container [ngTemplateOutlet]="noData" />
       }
     </div>
   }

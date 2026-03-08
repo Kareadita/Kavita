@@ -16,6 +16,11 @@
 
       @if (isErrored(stream)) {
         <li class="list-group-item d-block mb-3">
+          <app-card-actionables
+            [entity]="stream"
+            [actions]="actions()"
+            (actionHandler)="handleActionCallback($event)"
+          />
           <i class="fa-solid fa-triangle-exclamation red me-2">
             <span class="visually-hidden">{{t('errored')}}</span>
           </i>
@@ -24,9 +29,14 @@
       } @else {
         @if(filterApiMap[stream.name] | async; as data) {
           <app-carousel-reel [items]="data" [title]="stream.name" [titleLink]="baseUrl + 'all-series?' + stream.filter"
-                             [actionables]="actions()" [actionableEntity]="stream" (actionHandler)="handleActionCallback($event)">
+                             [actionables]="actions()" [actionableEntity]="stream" (actionHandler)="handleActionCallback($event)"
+                             [alwaysShow]="true"
+          >
             <ng-template #carouselItem let-item>
               <app-series-card [series]="item" />
+            </ng-template>
+            <ng-template #noData>
+              {{t('no-content')}}
             </ng-template>
           </app-carousel-reel>
         }

@@ -24,10 +24,11 @@ import {map, shareReplay} from "rxjs/operators";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {CardActionablesComponent} from "src/app/_single-module/card-actionables/card-actionables.component";
 
 @Component({
   selector: 'app-manage-smart-filters',
-  imports: [ReactiveFormsModule, TranslocoDirective, FilterPipe, CarouselReelComponent, SeriesCardComponent, AsyncPipe],
+  imports: [ReactiveFormsModule, TranslocoDirective, FilterPipe, CarouselReelComponent, SeriesCardComponent, AsyncPipe, CardActionablesComponent],
   templateUrl: './manage-smart-filters.component.html',
   styleUrls: ['./manage-smart-filters.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

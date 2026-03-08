@@ -42,6 +42,7 @@ export class CarouselReelComponent {
 
   readonly carouselItemTemplate = contentChild.required<TemplateRef<any>>('carouselItem');
   readonly promptToAddTemplate = contentChild.required<TemplateRef<any>>('promptToAdd');
+  readonly noDataTemplate = contentChild<TemplateRef<any>>('noData');
   @Input() items: any[] = [];
   @Input() title = '';
   /**

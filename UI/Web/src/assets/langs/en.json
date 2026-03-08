@@ -3186,7 +3186,8 @@
         "edit-smart-filter": "Edit {{name}}",
         "name-label": "Name",
         "required-field": "Smart Filters need a name",
-        "filter-name-unique": "Smart Filter names must be unique"
+        "filter-name-unique": "Smart Filter names must be unique",
+        "no-content": "This smart filter has no results on the dashboard"
     },
 
     "edit-external-source-item": {
