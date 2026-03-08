@@ -900,7 +900,9 @@
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
-        "cannot-read": "无法阅读"
+        "cannot-read": "无法阅读",
+        "select": "选择",
+        "read": "阅读"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -1800,7 +1802,8 @@
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
     },
     "day-breakdown": {
         "title": "全天分布",
@@ -1853,7 +1856,8 @@
         "vols-and-chapters": "{{volCount}}卷/{{chpCount}}章节",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "由...提供"
+        "provided-by-label": "由...提供",
+        "story-and-art-label": "故事与艺术"
     },
     "next-expected-card": {
         "title": "~{{date}}",
@@ -2194,7 +2198,10 @@
         "font-in-use": "无法删除，因为该字体正在被一个或多个用户使用。",
         "k+-resend-welcome-email-success": "一封电子邮件已发送至您的 Kavita+ 电子邮箱",
         "confirm-delete-auth-key": "您确定要删除此授权密钥吗？",
-        "profile-unauthorized": "此用户未分享其个人配置文件"
+        "profile-unauthorized": "此用户未分享其个人配置文件",
+        "confirm-delete-collection": "您确定要删除此收藏吗？此操作无法撤销。",
+        "confirm-delete-annotations": "您确定要删除这些注释吗？此操作无法撤销。",
+        "annotations-deleted": "注释已删除"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -3402,5 +3409,18 @@
             "help": "如何更新",
             "download": "下载"
         }
+    },
+    "title": {
+        "reading-list": "阅读列表",
+        "home": "主页",
+        "bookmarks": "书签",
+        "collections": "收藏",
+        "browse-genres": "浏览类型",
+        "browse-tags": "浏览标签",
+        "want-to-read": "想读",
+        "reading-lists": "阅读列表",
+        "settings": "设置",
+        "all-series": "所有系列",
+        "profile": "{{username}}'的配置文件"
     }
 }

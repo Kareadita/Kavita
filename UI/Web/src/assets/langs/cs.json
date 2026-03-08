@@ -1686,7 +1686,8 @@
         "id-label": "{{edit-chapter-modal.id-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "title": "Upravit"
+        "title": "Upravit",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
     },
     "reading-activity": {
         "this-week": "{{time-periods.this-week}}",
@@ -1712,7 +1713,8 @@
         "view-series": "Zobrazit série",
         "vols-and-chapters": "{{volCount}} Svazků / {{chpCount}} Kapitol",
         "provided-by-label": "Poskytl",
-        "staff-label": "Zaměstnanci"
+        "staff-label": "Zaměstnanci",
+        "story-and-art-label": "Příběh a ilustrace"
     },
     "server-stats": {
         "tags": "{{metadata-fields.tags-title}}",
@@ -2253,7 +2255,9 @@
         "activity-tab": "Aktivita"
     },
     "card-item": {
-        "cannot-read": "Nelze přečíst"
+        "cannot-read": "Nelze přečíst",
+        "select": "Vybrat",
+        "read": "číst"
     },
     "collection-owner": {
         "collection-created-label": "Vytvořil: {{owner}}",
@@ -2397,7 +2401,10 @@
         "font-in-use": "Nelze smazat, protože písmo je používáno jedním nebo více uživateli.",
         "k+-resend-welcome-email-success": "Na vaši e-mailovou adresu Kavita+ byl odeslán e-mail",
         "confirm-delete-auth-key": "Opravdu chcete tento autentizační klíč smazat?",
-        "profile-unauthorized": "Tento uživatel nesdílí svůj profil"
+        "profile-unauthorized": "Tento uživatel nesdílí svůj profil",
+        "confirm-delete-collection": "Opravdu chcete sbírku smazat? Tento úkon nelze vrátit zpět.",
+        "confirm-delete-annotations": "Opravdu chcete odstranit poznámky? Tento úkon nelze vrátit zpět.",
+        "annotations-deleted": "Anotace smazána"
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
@@ -3402,5 +3409,18 @@
             "help": "Jak provést aktualizaci",
             "download": "Stáhnout"
         }
+    },
+    "title": {
+        "reading-list": "Seznamy četby",
+        "home": "Domů",
+        "bookmarks": "Záložky",
+        "collections": "Sbírky",
+        "browse-genres": "Procházet žánry",
+        "browse-tags": "Procházet štítky",
+        "want-to-read": "Chci číst",
+        "reading-lists": "Seznamy četby",
+        "settings": "Nastavení",
+        "all-series": "Všechny série",
+        "profile": "Profil uživatele {{username}}"
     }
 }

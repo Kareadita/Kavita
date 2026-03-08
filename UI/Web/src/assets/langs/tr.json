@@ -489,7 +489,7 @@
         "customize": "{{settings.customize}}",
         "back": "Geri",
         "home": "Ana Sayfa",
-        "collections": "Koleksiyonlar",
+        "collections": "Derlemler",
         "reading-lists": "Okuma Listeleri",
         "edit": "{{common.edit}}",
         "all-series": "Tüm Seriler",
@@ -793,7 +793,7 @@
     },
     "all-collections": {
         "item-count": "{{common.item-count}}",
-        "title": "Koleksiyonlar",
+        "title": "Derlemler",
         "create-one-part-2": "bir"
     },
     "reading-lists": {
@@ -855,7 +855,7 @@
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "tags": "Etiketler",
-        "collections": "Koleksiyonlar",
+        "collections": "Derlemler",
         "chapters": "Bölümler",
         "annotations": "{{tabs.annotations-tab}}",
         "files": "Dosyalar",
@@ -923,7 +923,8 @@
         "off": "{{reader-settings.off}}",
         "left-to-right-alt": "Soldan Sağa",
         "right-to-left-alt": "Sağdan Sola",
-        "fullscreen": "Tam Ekran"
+        "fullscreen": "Tam Ekran",
+        "bookmarks-title": "Yer imleri"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -935,7 +936,7 @@
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "language-label": "{{metadata-fields.language-title}}",
         "character-label": "Karakter",
-        "collections-label": "Koleksiyonlar",
+        "collections-label": "Derlemler",
         "ascending-alt": "Artan",
         "descending-alt": "Azalan",
         "read": "Oku",
@@ -1203,7 +1204,7 @@
         "libraries": "{{common.libraries}}",
         "penciller": "Çizer",
         "inker": "Mürekkepçi",
-        "want-to-read": "Okumak İstiyorum",
+        "want-to-read": "Okuyacaklarım",
         "user-rating": "Kullanıcı Puanı",
         "read-date": "Okuma Tarihi",
         "read-progress": "Okunma İlerlemesi",
@@ -1705,7 +1706,9 @@
         "page-num-label": "{{book-reader.page-num-label}}",
         "text-header": "Metin",
         "no-data": "{{common.no-data}}",
-        "image-header": "Resim"
+        "image-header": "Resim",
+        "title": "Yer imleri",
+        "close": "{{common.close}}"
     },
     "pdf-scroll-mode-pipe": {
         "vertical": "Dikey",
@@ -2193,5 +2196,17 @@
             "title": "Yeni Güncelleme Mevcut!",
             "help": "Nasıl Güncellenir"
         }
+    },
+    "title": {
+        "collections": "Derlemler",
+        "reading-list": "Okuma Listeleri",
+        "reading-lists": "Okuma Listeleri",
+        "settings": "Ayarlar",
+        "all-series": "Tüm Seriler",
+        "profile": "{{username}}'in profili",
+        "home": "Ana sayfa",
+        "bookmarks": "Yer imleri",
+        "browse-tags": "Etiketlere gözat",
+        "want-to-read": "Okuyacaklarım"
     }
 }

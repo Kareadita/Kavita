@@ -2972,8 +2972,7 @@
     },
     "review-list-item": {
         "by-label": "Ku",
-        "created-alt": "Vytvorené",
-        "expires-label": "Expirácia"
+        "created-alt": "Vytvorené"
     },
     "version-update-modal": {
         "close": "{{common.close}}",

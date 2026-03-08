@@ -900,7 +900,9 @@
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
-        "cannot-read": "Ní féidir léamh"
+        "cannot-read": "Ní féidir léamh",
+        "select": "Roghnaigh",
+        "read": "léigh"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -1800,7 +1802,8 @@
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
     },
     "day-breakdown": {
         "title": "Miondealú Lae",
@@ -1853,7 +1856,8 @@
         "vols-and-chapters": "{{volCount}} Imleabhair / {{chpCount}} Caibidlí",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "Curtha ar fáil ag"
+        "provided-by-label": "Curtha ar fáil ag",
+        "story-and-art-label": "Scéal & Ealaín"
     },
     "next-expected-card": {
         "title": "~{{date}}",
@@ -2194,7 +2198,10 @@
         "font-in-use": "Ní féidir é a scriosadh mar go bhfuil an cló in úsáid ag úsáideoir amháin nó níos mó.",
         "k+-resend-welcome-email-success": "Seoladh ríomhphost chuig do sheoladh ríomhphoist Kavita+",
         "confirm-delete-auth-key": "An bhfuil tú cinnte gur mian leat an Eochair Údaraithe seo a scriosadh?",
-        "profile-unauthorized": "Níl an t-úsáideoir seo ag roinnt a phróifíl"
+        "profile-unauthorized": "Níl an t-úsáideoir seo ag roinnt a phróifíl",
+        "confirm-delete-collection": "An bhfuil tú cinnte gur mian leat an bailiúchán a scriosadh? Ní féidir é seo a chealú.",
+        "confirm-delete-annotations": "An bhfuil tú cinnte gur mian leat na nótaí a scriosadh? Ní féidir é seo a chealú.",
+        "annotations-deleted": "Scriosadh an nóta"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Uair",
@@ -3402,5 +3409,18 @@
             "help": "Conas nuashonrú a dhéanamh",
             "download": "Íoslódáil"
         }
+    },
+    "title": {
+        "reading-list": "Liostaí Léitheoireachta",
+        "home": "Baile",
+        "bookmarks": "Leabharmharcanna",
+        "collections": "Bailiúcháin",
+        "browse-genres": "Brabhsáil Seánraí",
+        "browse-tags": "Brabhsáil Clibeanna",
+        "want-to-read": "Ar mhaith leat léamh",
+        "reading-lists": "Liostaí Léitheoireachta",
+        "settings": "Socruithe",
+        "all-series": "Gach Sraith",
+        "profile": "Próifíl {{username}}"
     }
 }

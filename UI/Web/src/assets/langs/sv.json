@@ -3381,8 +3381,7 @@
         "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
     },
     "list-select-modal": {
-        "hidden": "{{amount}} objekt dolda på grund av ogiltigt tillstånd",
-        "save": "{{common.save}}"
+        "hidden": "{{amount}} objekt dolda på grund av ogiltigt tillstånd"
     },
     "version-update-modal": {
         "close": "{{common.close}}",

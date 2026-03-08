@@ -900,7 +900,9 @@
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
-        "cannot-read": "읽을 수 없음"
+        "cannot-read": "읽을 수 없음",
+        "select": "선택",
+        "read": "읽음"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -1800,7 +1802,8 @@
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
     },
     "day-breakdown": {
         "title": "요일별 요약",
@@ -1853,7 +1856,8 @@
         "vols-and-chapters": "{{volCount}} 권 / {{chpCount}} 화",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "제공자"
+        "provided-by-label": "제공자",
+        "story-and-art-label": "스토리 & 아트"
     },
     "next-expected-card": {
         "title": "~{{date}}",
@@ -2194,7 +2198,10 @@
         "font-in-use": "한 명 이상의 사용자가 이 폰트를 사용하고 있어 삭제할 수 없습니다.",
         "k+-resend-welcome-email-success": "당신의 Kavita+ 이메일로 메일이 전송되었습니다",
         "confirm-delete-auth-key": "이 인증 키를 삭제하시겠습니까?",
-        "profile-unauthorized": "이 사용자는 프로필을 공유하지 않습니다"
+        "profile-unauthorized": "이 사용자는 프로필을 공유하지 않습니다",
+        "confirm-delete-collection": "이 컬렉션을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        "confirm-delete-annotations": "주석을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        "annotations-deleted": "주석 삭제됨"
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -3389,7 +3396,7 @@
             "title": "뒤처지지 마세요!",
             "subtitle": "귀하의 설치 버전이 {{count}}개 이상 뒤처진 것 같습니다!",
             "description-1": "최신 버전의 Kavita를 실행할 수 있도록 업그레이드하는 것을 고려해 보세요.",
-            "description-2": "업데이트 방법에 대한 지침은 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a>를 살펴보세요.",
+            "description-2": "업데이트 방법에 대한 지침은 <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>위키</a>를 살펴보세요.",
             "description-3": "아직 업데이트하지 않은 특별한 이유가 있는 경우 오래된 버전을 유지하는 이유가 무엇인지 알고 싶습니다! 우리의 불일치에 들러 업그레이드 경로를 방해하는 것이 무엇인지 알려주십시오."
         },
         "new-version": {
@@ -3402,5 +3409,18 @@
             "help": "업데이트 방법",
             "download": "다운로드"
         }
+    },
+    "title": {
+        "reading-list": "독서 목록",
+        "home": "홈",
+        "bookmarks": "북마크",
+        "collections": "컬렉션",
+        "browse-genres": "장르 탐색",
+        "browse-tags": "태그 탐색",
+        "want-to-read": "읽고 싶은 책",
+        "reading-lists": "독서 목록",
+        "settings": "설정",
+        "all-series": "모든 시리즈",
+        "profile": "{{username}}의 프로필"
     }
 }

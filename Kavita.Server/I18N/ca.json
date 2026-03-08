@@ -65,5 +65,6 @@
     "locked-out": "S'ha bloquejat l'accés degut a masses intents d'autentificació. Si us plau, espera 10 minuts.",
     "disabled-account": "El seu compte s'ha deshabilitat. Contacti amb l'administrador.",
     "register-user": "Hi ha hagut un error al registrar-se",
-    "validate-email": "Hi ha hagut un error al validar l'e-mail: {0}"
+    "validate-email": "Hi ha hagut un error al validar l'e-mail: {0}",
+    "password-authentication-disabled": "L'autentificació per mitjà de la paraula clau ha sigut deshabilitada, identifiquis per mitjà d'OpenID Connect"
 }
