@@ -11,6 +11,7 @@ import {
   ResizeMode
 } from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 import {AccountService} from "../../../../_services/account.service";
+import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 
 @Component({
   selector: 'app-view-annotations-drawer',
@@ -19,7 +20,8 @@ import {AccountService} from "../../../../_services/account.service";
     AnnotationCardComponent,
     FilterPipe,
     ReactiveFormsModule,
-    OffCanvasResizeComponent
+    OffCanvasResizeComponent,
+    VirtualScrollerModule
   ],
   templateUrl: './view-annotations-drawer.component.html',
   styleUrl: './view-annotations-drawer.component.scss',
