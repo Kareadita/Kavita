@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Kavita.Services.ReadingLists;
 
@@ -9,7 +10,7 @@ public class CblParserService
 {
     Task ParseV1(string filePath)
     {
-        return Task.CompletedTask;
+        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -20,6 +21,6 @@ public class CblParserService
     /// <returns></returns>
     Task ParseV2(string filePath)
     {
-        return Task.CompletedTask;
+        throw new NotImplementedException();
     }
 }
